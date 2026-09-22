@@ -38,6 +38,20 @@ const autourHref = "/rapport/autour";
  * Vérifier une disponibilité avant de s'engager n'a de sens que pour qui s'engage. Quelqu'un qui habite
  * déjà là n'a pas la même question, et un professionnel qui prépare un dossier pour son client
  * encore moins.
+ *
+ * ── UN GESTE SE COMPREND SEUL (22/09/2026) ──────────────────────────────────────────────────
+ * Il s'écrivait « Vérifiez la disponibilité avant de vous engager ». Sous la carte, le sujet
+ * précède et la phrase se comprend ; mais le geste est AUSSI repris en tête de dossier, dans
+ * « À contrôler en priorité », où il se lit SANS la carte qui le porte. Le lecteur y trouvait la
+ * disponibilité de rien.
+ *
+ * Le produit appliquait déjà cette règle sans l'avoir écrite : ses vingt-quatre autres gestes
+ * nomment tous leur objet (« Demandez l'historique des fissures », « Consultez le règlement de la
+ * zone en mairie »). Elle vaut pour tout geste cloné sur ce patron : un libellé d'action nomme ce
+ * sur quoi il porte, parce qu'il voyagera hors de son contexte.
+ *
+ * « Professionnels de santé » plutôt que « médecins » : la catégorie recouvre aussi les
+ * pharmacies, et le geste ne sait pas lequel des deux a été trouvé.
  */
 // JAMAIS LE MOT « CABINET » (21/09/2026). La BPE recense un LIEU et le nombre d'établissements qui
 // s'y trouvent. Cinq médecins à la même adresse peuvent être une maison de santé comme cinq
@@ -45,22 +59,22 @@ const autourHref = "/rapport/autour";
 // source ne tranche pas. On parle donc du lieu, ou des professionnels qui y sont recensés.
 const GESTE_SOINS: Record<Bucket, { label: string; detail: string }> = {
   achat: {
-    label: "Vérifiez la disponibilité avant de vous engager",
+    label: "Vérifiez la disponibilité des professionnels de santé avant de vous engager",
     detail:
       "La saturation locale ne se lit dans aucune base : un lieu recensé peut être fermé aux nouveaux patients depuis des années.",
   },
   location: {
-    label: "Vérifiez qu'un médecin vous accepte avant de signer",
+    label: "Vérifiez la disponibilité des professionnels de santé avant de signer",
     detail:
       "La présence d'un lieu de santé ne dit rien de sa disponibilité. Un appel suffit à le savoir.",
   },
   reside: {
-    label: "Vérifiez que les professionnels recensés prennent de nouveaux patients",
+    label: "Vérifiez que les professionnels de santé proches prennent de nouveaux patients",
     detail:
       "Utile avant d'en avoir besoin : la disponibilité change, et elle ne se lit dans aucune base.",
   },
   neutre: {
-    label: "Renseignez-vous sur les disponibilités des professionnels recensés",
+    label: "Renseignez-vous sur la disponibilité des professionnels de santé",
     detail:
       "La BPE recense les lieux, jamais leurs délais de rendez-vous ni leur ouverture aux nouveaux patients.",
   },

@@ -107,6 +107,7 @@ test("l'action dépend de la situation, elle n'est pas gravée dans la règle", 
   const achat = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")).facts[0]!;
   const habite = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, null, "habitant")).facts[0]!;
   assert.match(achat.action!.label, /avant de vous engager/i);
+  assert.match(achat.action!.label, /professionnels de santé/i, "le geste nomme son objet");
   assert.notEqual(habite.action!.label, achat.action!.label);
   // Quelqu'un qui habite déjà là ne « s'engage » pas : lui dire de vérifier avant de s'engager
   // serait le même défaut que la posture « habitant » inscrite d'office.
@@ -172,6 +173,31 @@ test("le choix se dit quand plusieurs lieux sont à portée de pas", () => {
   const f = regle.evaluate(faits(snap), projet(SOINS_3)).facts[0]!;
   assert.match(f.statement, /Cinq lieux/, "les nombres se disent en lettres, comme ailleurs dans le dossier");
   assert.match(f.statement, /500 m/, "le rayon du comptage est nommé, sinon le nombre ne veut rien dire");
+});
+
+test("un geste se comprend seul, hors de la carte qui le porte", () => {
+  // Il s'écrivait « Vérifiez la disponibilité avant de vous engager ». Sous la carte, le sujet
+  // précède. Mais le geste est AUSSI repris en tête de dossier, dans « À contrôler en priorité »,
+  // où il se lit sans elle : le lecteur y trouvait la disponibilité de rien.
+  //
+  // Vaut pour tout geste cloné sur ce patron, donc le test parcourt TOUTES les situations et les
+  // deux branches de la règle, y compris l'absence.
+  const cas = [
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")),
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "location")),
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, null, "habitant")),
+    regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3)),
+    regle.evaluate(faits(snapshot(null)), projet(SOINS_3)),
+  ];
+  for (const r of cas) {
+    for (const f of r.facts) {
+      const label = f.action!.label;
+      assert.match(
+        label, /santé|soins|médecin/i,
+        `ce geste ne dit pas sur quoi il porte : « ${label} »`,
+      );
+    }
+  }
 });
 
 test("aucun texte affiché ne parle « du cabinet »", () => {
