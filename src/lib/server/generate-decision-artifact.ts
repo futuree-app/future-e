@@ -12,7 +12,7 @@ import { PRODUCT_CONVENTIONS_VERSION } from "@/lib/hard-constraints";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
-import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
+import type { Face3Snapshot } from "@/lib/logement-autour-types";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, À LA DÉLIVRANCE.
@@ -64,18 +64,26 @@ export type GenerationOutcome =
  * laisse le dossier s'afficher comme avant.
  */
 /**
- * Le registre tel qu'il a été gelé dans le snapshot du dossier, ou `null` s'il n'y en a pas encore
- * (dossier tout juste acheté, page « Autour » jamais ouverte) ou si la lecture échoue.
+ * LE VOISINAGE GELÉ DU DOSSIER, ENTIER.
+ *
+ * Cette fonction ne rendait que `permis`, et c'était un piège de conception : le jour où une
+ * seconde pièce du snapshot est entrée dans le moteur (l'accès aux soins, le 21/09/2026), l'écran
+ * assemblé la montrait et l'artefact figé la perdait. Le rechargement suivant, servi par
+ * l'artefact, faisait disparaître le constat. Rendre le snapshot entier fait que la prochaine
+ * pièce n'aura rien à rebrancher ici.
+ *
+ * `null` quand il n'y en a pas encore (dossier tout juste acheté, page « Autour » jamais ouverte)
+ * ou quand la lecture échoue. Les règles se taisent alors, plutôt que d'affirmer une absence.
  */
-async function lirePermisGele(
+async function lireSnapshotGele(
   sb: SupabaseClient, dossierId: string,
-): Promise<PermisSnapshot | null> {
+): Promise<Face3Snapshot | null> {
   const { data } = await sb
     .from("address_dossiers")
     .select("snapshot")
     .eq("id", dossierId)
     .maybeSingle();
-  return (data?.snapshot as Face3Snapshot | null)?.permis ?? null;
+  return (data?.snapshot as Face3Snapshot | null) ?? null;
 }
 
 /**
@@ -142,7 +150,7 @@ export async function generateDecisionArtifact(
     // Le lire en base plutôt que le recevoir en paramètre évite qu'un appelant futur l'oublie. Une
     // lecture qui échoue vaut « non consulté » : la règle rend `uncertain`, jamais une absence
     // d'autorisation qu'on n'a pas établie.
-    const permis = await lirePermisGele(sb, cible.dossierId);
+    const snapshotAutour = await lireSnapshotGele(sb, cible.dossierId);
 
     const vue = await assembleAddressDossier({
       project,
@@ -152,7 +160,11 @@ export async function generateDecisionArtifact(
       communeDossier: commune.dossier,
       hard: commune.hard,
       scopeKey,
-      permis,
+      permis: snapshotAutour?.permis ?? null,
+      // LE VOISINAGE AUSSI, et pas seulement les permis. Sans cette ligne, la page assemblée
+      // montrait l'équipement de santé recensé à l'adresse et l'artefact figé dans la foulée ne
+      // le contenait pas : le lecteur voyait le constat une fois, puis plus jamais.
+      snapshotAutour,
     });
 
     // ON N'ENREGISTRE JAMAIS UN REPLI COMME LA VERSION VENDUE.
