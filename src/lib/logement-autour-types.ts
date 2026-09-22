@@ -111,6 +111,50 @@ export const TYPEQU_LABEL: Record<string, string> = {
   A206: "Bureau de poste",
 };
 
+// LE GENRE DE CHAQUE LIBELLÉ, parce qu'une phrase française a besoin d'un article.
+//
+// Le dossier de décision écrivait « Autour de cette adresse, médecin généraliste est recensé » :
+// le libellé était repris tel quel, sans article, et la phrase boitait. Le genre ne se devine pas
+// d'une terminaison (« primeur » est masculin, « boulangerie » féminine, « halte » féminine) et il
+// n'est nulle part dans la BPE, qui ne livre qu'un code.
+//
+// LA CLÉ EST LE LIBELLÉ, ET NON LE CODE : c'est le libellé que le snapshot fige et que les faits
+// transportent, le code ne voyage pas jusque-là. Deux codes rendent « Gare », une seule entrée
+// suffit donc à les servir.
+//
+// La table vit ICI, collée aux libellés : un libellé ajouté sans son genre est une omission que
+// le test refuse, plutôt qu'une faute de langue découverte à l'écran.
+const GENRE_PAR_LIBELLE: Record<string, "m" | "f"> = {
+  "Médecin généraliste": "m",
+  "Pharmacie": "f",
+  "Supermarché": "m",
+  "Supérette": "f",
+  "Épicerie": "f",
+  "Boucherie-charcuterie": "f",
+  "Boulangerie": "f",
+  "Primeur": "m",
+  "École maternelle": "f",
+  "École primaire": "f",
+  "École élémentaire": "f",
+  "Gare": "f",
+  "Halte ferroviaire": "f",
+  "Banque": "f",
+  "Bureau de poste": "m",
+};
+
+/** Les libellés dont le genre est déclaré. Sert au test qui garde la table alignée. */
+export const LIBELLES_AVEC_GENRE = GENRE_PAR_LIBELLE;
+
+/**
+ * « un médecin généraliste », « une pharmacie ».
+ *
+ * Repli masculin sur un libellé inconnu : la phrase reste lisible, et le test empêche qu'un
+ * libellé du produit y tombe.
+ */
+export function avecArticle(libelle: string): string {
+  return `${GENRE_PAR_LIBELLE[libelle] === "f" ? "une" : "un"} ${libelle.toLowerCase()}`;
+}
+
 // Nature de l'espace vert cartographié (tag OSM conservé pour préciser « parc / bois / … »
 // plutôt qu'un « espace vert » générique). Optionnel : les snapshots antérieurs ne l'ont pas.
 // `recreation_ground` N'EST PLUS COLLECTÉ depuis le 20/09/2026 : un terrain de loisirs peut être

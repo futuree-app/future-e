@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { libelleBpeLisible, preuveEquipement, sourceBpe, LIMITE_BPE } from "./logement-bpe-lisible.ts";
 import { nearestByCategory } from "./logement-bpe.ts";
 import type { BpePoint } from "./logement-autour-types.ts";
+import { TYPEQU_LABEL, LIBELLES_AVEC_GENRE, avecArticle } from "./logement-autour-types.ts";
 
 // ── LE CAS RÉEL : les deux boulangeries du 6 Grande Rue à Ciré-d'Aunis ────────────────────────
 // La BPE 2024 ET la BPE 2025 recensent DEUX établissements au même point, à la même adresse :
@@ -135,4 +136,29 @@ test("les capitales de la BPE deviennent lisibles sans rien inventer", () => {
   assert.equal(libelleBpeLisible("CHU DE NANTES"), "CHU de Nantes");
   // Aucun accent n'est restauré : la source ne les porte pas, les deviner serait inventer.
   assert.equal(libelleBpeLisible("ECOLE ELEMENTAIRE"), "Ecole Elementaire");
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// CHAQUE LIBELLÉ A SON ARTICLE (22/09/2026).
+//
+// Vu à l'écran : « Autour de cette adresse, médecin généraliste est recensé à environ 550 m ».
+// Le libellé de la BPE était repris tel quel. Le genre n'est nulle part dans la source, et il ne
+// se devine pas d'une terminaison : « primeur » est masculin, « halte ferroviaire » féminine.
+//
+// Ce test existe pour l'ajout SUIVANT. Un code ajouté à TYPEQU_LABEL sans son genre tomberait sur
+// le repli masculin et produirait « un pharmacie » à l'écran, sans que rien ne le signale.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("tout libellé d'équipement sait quel article prendre", () => {
+  const sansGenre = [...new Set(Object.values(TYPEQU_LABEL))]
+    .filter((libelle) => !(libelle in LIBELLES_AVEC_GENRE));
+  assert.deepEqual(sansGenre, [], `Libellés sans genre déclaré : ${sansGenre.join(", ")}`);
+});
+
+test("l'article s'accorde, et un libellé inconnu ne casse pas la phrase", () => {
+  assert.equal(avecArticle("Médecin généraliste"), "un médecin généraliste");
+  assert.equal(avecArticle("Pharmacie"), "une pharmacie");
+  assert.equal(avecArticle("Halte ferroviaire"), "une halte ferroviaire");
+  assert.equal(avecArticle("Primeur"), "un primeur");
+  // Repli : lisible, jamais vide.
+  assert.equal(avecArticle("Chose inconnue"), "un chose inconnue");
 });

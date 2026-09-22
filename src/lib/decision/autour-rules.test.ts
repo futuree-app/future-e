@@ -122,6 +122,30 @@ test("un dossier sans voisinage analysé laisse la règle muette", () => {
   assert.equal(regle.evaluate(faits(null), projet(SOINS_3)).outcome, "not_applicable");
 });
 
+test("le libellé de la source reçoit son article", () => {
+  // « Autour de cette adresse, médecin généraliste est recensé » : le libellé était repris tel
+  // quel. Le genre ne se devine pas d'une terminaison, il vient d'une table tenue à la main.
+  const f = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3)).facts[0]!;
+  assert.match(f.statement, /^Un médecin généraliste /);
+  const pharma = { distanceMeters: 261, typeLabel: "Pharmacie" };
+  const g = regle.evaluate(faits(snapshot(pharma)), projet(SOINS_3)).facts[0]!;
+  assert.match(g.statement, /^Une pharmacie /);
+});
+
+test("« recensé » ne se répète pas dans le même bloc", () => {
+  // Vu à l'écran : le statut disait « Recensé à proximité », la phrase « est recensé », et la
+  // suivante « sont recensés ». Le mot reste là où il porte une précaution utile, sur le
+  // dénombrement, et disparaît du reste.
+  const cas = [snapshot(MEDECIN), snapshot({ ...MEDECIN, exploitants: 5 }), snapshot(null)];
+  cas[2]!.bpe.categories = [];
+  for (const snap of cas) {
+    for (const f of regle.evaluate(faits(snap), projet(SOINS_3)).facts) {
+      const n = (`${f.status} ${f.statement}`.match(/recens/gi) ?? []).length;
+      assert.ok(n <= 1, `« recensé » apparaît ${n} fois : ${f.status} / ${f.statement}`);
+    }
+  }
+});
+
 test("le fait cite le nom du lieu quand un seul exploitant est recensé", () => {
   const avecNom = { distanceMeters: 261, typeLabel: "Pharmacie", nom: "Pharmacie du Port" };
   const f = regle.evaluate(faits(snapshot(avecNom)), projet(SOINS_3)).facts[0]!;
@@ -132,7 +156,7 @@ test("le choix se dit quand plusieurs lieux sont à portée de pas", () => {
   const snap = snapshot(MEDECIN);
   snap.bpe.categories[0]!.withinWalkCount = 5;
   const f = regle.evaluate(faits(snap), projet(SOINS_3)).facts[0]!;
-  assert.match(f.statement, /5 lieux/);
+  assert.match(f.statement, /Cinq lieux/, "les nombres se disent en lettres, comme ailleurs dans le dossier");
   assert.match(f.statement, /500 m/, "le rayon du comptage est nommé, sinon le nombre ne veut rien dire");
 });
 
@@ -162,6 +186,6 @@ test("plusieurs praticiens au même point se disent, sans les confondre avec un 
   // à portée de pas, c'est avoir le choix. Deux informations différentes, jamais mélangées.
   const snap = snapshot({ ...MEDECIN, exploitants: 5 });
   const f = regle.evaluate(faits(snap), projet(SOINS_3)).facts[0]!;
-  assert.match(f.statement, /5 professionnels y sont recensés/);
+  assert.match(f.statement, /Cinq professionnels y sont recensés/);
   assert.doesNotMatch(f.statement, /lieux de santé/);
 });

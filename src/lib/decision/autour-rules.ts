@@ -27,6 +27,7 @@ import type { DecisionRule, EvidenceRef, RuleEvaluation, VerificationFact } from
 import { preferenceWeight } from "./project-view.ts";
 import { bucketDuProjet, type Bucket } from "./logement-gestes.ts";
 import type { EquipementProche } from "./autour-facts.ts";
+import { avecArticle } from "../logement-autour-types.ts";
 
 const RULE_SANTE = "autour.acces-soins";
 const autourHref = "/rapport/autour";
@@ -72,26 +73,44 @@ function distanceArrondie(m: number): string {
   return `${(m / 1000).toFixed(1).replace(".", ",")} km`;
 }
 
+/** Les nombres se disent en lettres jusqu'à dix, comme partout ailleurs dans le dossier. */
+const EN_LETTRES = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
+function nombre(n: number): string {
+  return EN_LETTRES[n] ?? String(n);
+}
+
 /**
  * CE QUE LE LECTEUR LIT, et rien de plus que ce que la source établit.
  *
  * Le type précis est préféré à la catégorie (« un médecin généraliste » plutôt que « un
  * équipement de santé »), et le nom prend la place du type quand un seul exploitant est recensé.
+ *
+ * ── DEUX CORRECTIONS DE LANGUE (22/09/2026), VUES À L'ÉCRAN ─────────────────────────────────
+ * Le libellé de la BPE était repris tel quel, sans article : « médecin généraliste est recensé ».
+ * L'article vient maintenant de `avecArticle`, qui connaît le genre de chaque libellé.
+ *
+ * Et « recensé » revenait trois fois en deux lignes, statut compris. Le mot reste là où il porte
+ * une précaution utile, sur le DÉNOMBREMENT, qui est ce que la base établit vraiment. La première
+ * phrase, elle, constate simplement une présence.
  */
 function constatSante(e: EquipementProche): string {
-  const quoi = e.typeLabel ? e.typeLabel.toLowerCase() : "un équipement de santé";
-  const ou = `à environ ${distanceArrondie(e.distanceMeters)}`;
+  const quoi = e.typeLabel ? avecArticle(e.typeLabel) : "un équipement de santé";
+  const ou = `à environ ${distanceArrondie(e.distanceMeters)} de cette adresse`;
   const nomme = e.nom ? ` (${e.nom})` : "";
   // CE QUI S'AJOUTE, DANS L'ORDRE DE CE QUE ÇA APPREND. Plusieurs praticiens au même point disent
   // qu'on n'y dépend pas d'une seule personne ; plusieurs LIEUX à portée de pas disent qu'on a le
   // choix. Les deux ne se valent pas, et les dire ensemble alourdirait pour rien.
   const suite =
     e.exploitants && e.exploitants > 1
-      ? ` ${e.exploitants} professionnels y sont recensés.`
+      ? ` ${capitale(nombre(e.exploitants))} professionnels y sont recensés.`
       : e.lieuxAPortee > 1
-        ? ` ${e.lieuxAPortee} lieux de santé sont recensés à moins de ${e.rayonPasMeters} m.`
+        ? ` ${capitale(nombre(e.lieuxAPortee))} lieux de santé sont recensés à moins de ${e.rayonPasMeters} m.`
         : "";
-  return `Autour de cette adresse, ${quoi}${nomme} est recensé ${ou}.${suite}`;
+  return `${capitale(quoi)}${nomme} se trouve ${ou}.${suite}`;
+}
+
+function capitale(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 const accesSoinsRule: DecisionRule = {
@@ -181,7 +200,7 @@ const accesSoinsRule: DecisionRule = {
       materialityTier: "secondary",
       topic: "les soins autour de cette adresse",
       statement: constatSante(e),
-      status: "Recensé à proximité",
+      status: "À proximité",
       limitation:
         "Cette présence ne dit ni la disponibilité du praticien, ni ses délais de rendez-vous, ni s'il accepte de nouveaux patients. La distance est à vol d'oiseau.",
       evidence: [evidence],

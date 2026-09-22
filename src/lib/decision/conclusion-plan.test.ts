@@ -1570,3 +1570,57 @@ test("le héros compte les contrôles MONTRÉS, et dit ceux qui restent plus bas
   assert.equal(plan.controles.enPlus, 6 - montres);
   assert.match(plan.verdict.detail, /constats? figurent? plus bas\.$|constat figure plus bas\.$/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE COMPTE NE PEUT PAS ÊTRE INFÉRIEUR À CE QU'ON NOMME (22/09/2026).
+//
+// Vu à l'écran, sur un dossier réel : « Châtelaillon-Plage répond à zéro de vos priorités, dont
+// l'accès aux soins. » Le lecteur n'avait déclaré qu'une priorité, l'accès aux soins, et elle
+// était affichée juste en dessous comme correspondant à son projet.
+//
+// La mécanique : `favorableCount` compte les critères dont l'issue est FAVORABLE, et une réserve
+// dégrade cette issue. Un critère à la fois aligné (rang communal) et porteur d'une vérification
+// (un équipement recensé à l'adresse, dont la disponibilité reste à confirmer) sortait du compte
+// tout en restant affiché. Le héros nommait alors un sujet que son propre compte ignorait.
+//
+// Le cas est né le jour où le voisinage est entré dans le moteur, et il se reproduira à chaque
+// bloc d'Autour : une présence s'accompagne toujours d'une vérification.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+test("un alignment nommé avec favorableCount à zéro : le héros compte au moins ce qu'il nomme", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", coverage: "partial", hasFavorable: false, favorableCount: 0,
+    reservesShown: 1, majorReserveCount: 0,
+    shownFacts: [alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins")],
+  }));
+  assert.match(p.verdict.headline.text, /^Toulouse répond à l'une de vos priorités : l'accès aux soins\.$/);
+  // Et surtout : plus jamais un compte nul dans une phrase qui nomme un sujet.
+  assert.doesNotMatch(p.verdict.headline.text, /zéro/);
+});
+
+test("deux alignments nommés avec un compte nul : pluriel juste, et deux-points plutôt que « dont »", () => {
+  const p = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", coverage: "partial", hasFavorable: false, favorableCount: 0,
+    reservesShown: 2, majorReserveCount: 0,
+    shownFacts: [
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+      alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
+    ],
+  }));
+  // « dont » suppose qu'il en reste d'autres à nommer : ici le héros les nomme toutes.
+  assert.match(p.verdict.headline.text, /^Toulouse répond à deux de vos priorités : l'accès aux soins et la vie locale\.$/);
+});
+
+test("un compte supérieur aux sujets nommés n'est jamais rabaissé", () => {
+  // L'invariant borne le compte par le bas, il ne le remplace pas : trois critères favorables
+  // dont deux nommables gardent leur « dont ».
+  const p = buildConclusionPlan(baseInput({
+    orientation: "favorable", coverage: "high", hasFavorable: true, favorableCount: 3,
+    reservesShown: 0, majorReserveCount: 0,
+    shownFacts: [
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+      alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
+    ],
+  }));
+  assert.match(p.verdict.headline.text, /^Toulouse répond à trois de vos priorités, dont l'accès aux soins et la vie locale\.$/);
+});

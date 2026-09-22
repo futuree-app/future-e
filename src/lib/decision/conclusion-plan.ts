@@ -479,7 +479,23 @@ function herosPositif(input: ConclusionPlanInput, nom: string): VerdictHeadline 
   const structurants = alignmentCandidates(input.shownFacts).filter((c) => c.materialityTier === "structuring");
   if (structurants.length === 0) return null;
   const nommes = structurants.slice(0, HEADLINE_MAX_ISSUES);
-  const compte = input.favorableCount;
+  // LE COMPTE NE PEUT PAS ÊTRE INFÉRIEUR À CE QU'ON NOMME (22/09/2026).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // À l'écran : « Châtelaillon-Plage répond à zéro de vos priorités, dont l'accès aux soins. »
+  //
+  // `favorableCount` compte les critères dont l'issue est FAVORABLE, et une réserve dégrade cette
+  // issue (cf. `worse` dans criteria-registry). Un critère à la fois aligné et porteur d'une
+  // vérification cesse donc d'être compté, tout en restant affiché comme alignment structurant :
+  // le héros nommait un sujet que son propre compte ignorait. Sur un lecteur qui n'a déclaré
+  // qu'une priorité, le compte tombait à zéro et la phrase se contredisait en six mots.
+  //
+  // Ce cas n'existait pas avant que le voisinage n'entre dans le moteur : il fallait un critère
+  // porteur des deux à la fois. Il se reproduira à chaque nouveau bloc d'Autour, où la présence
+  // d'un équipement s'accompagne toujours d'une vérification.
+  //
+  // L'invariant est celui-ci : ON NE NOMME JAMAIS PLUS DE SUJETS QU'ON N'EN COMPTE. Il ne gonfle
+  // aucun chiffre, puisque chaque sujet nommé est un alignment structurant réellement affiché.
+  const compte = Math.max(input.favorableCount, nommes.length);
   const sujets = joinFr(nommes.map((c) => c.subject));
   // « l'une de vos priorités » et non « votre priorité » : le lecteur peut en avoir déclaré plusieurs,
   // même si une seule est nommable (décision D2 du porteur).
