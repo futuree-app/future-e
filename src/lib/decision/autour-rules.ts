@@ -67,7 +67,10 @@ const autourHref = "/rapport/autour";
 // source ne tranche pas. On parle donc du lieu, ou des professionnels qui y sont recensés.
 const GESTE_MEDECIN: Record<Bucket, { label: string; detail: string }> = {
   achat: {
-    label: "Vérifiez qu'un médecin accepte de nouveaux patients avant de vous engager",
+    // 70 CARACTÈRES AU PLUS, sans point final : c'est un repère d'une ligne, et le moteur refuse
+    // tout le dossier au-delà (`assertFactValid`). « … avant de vous engager » en faisait 73, et
+    // la mise à jour du dossier échouait en production sans que les tests l'aient vu.
+    label: "Vérifiez qu'un médecin prend de nouveaux patients avant l'achat",
     detail:
       "La saturation locale ne se lit dans aucune base : un lieu recensé peut être fermé aux nouveaux patients depuis des années.",
   },

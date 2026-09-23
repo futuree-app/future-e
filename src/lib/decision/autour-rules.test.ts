@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildAutourFacts } from "./autour-facts.ts";
 import { AUTOUR_RULES } from "./autour-rules.ts";
+import { assertFactValid } from "./materiality-rules.ts";
 import type { ModuleFacts } from "./decision-fact.ts";
 import type { Face3Snapshot } from "../logement-autour-types.ts";
 import type { UserProject } from "../user-project.ts";
@@ -121,7 +122,7 @@ test("la source et son millésime descendent dans « Données et limites »", ()
 test("l'action dépend de la situation, elle n'est pas gravée dans la règle", () => {
   const achat = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, "achat")).facts[0]!;
   const habite = regle.evaluate(faits(snapshot(MEDECIN)), projet(SOINS_3, null, "habitant")).facts[0]!;
-  assert.match(achat.action!.label, /avant de vous engager/i);
+  assert.match(achat.action!.label, /avant l'achat/i);
   assert.match(achat.action!.label, /médecin/i, "le geste nomme son objet");
   assert.notEqual(habite.action!.label, achat.action!.label);
   // Quelqu'un qui habite déjà là ne « s'engage » pas : lui dire de vérifier avant de s'engager
@@ -300,4 +301,45 @@ test("un dossier NON ventilé sur un médecin garde le texte du praticien", () =
   assert.match(f.limitation!, /nouveaux patients/);
   assert.match(f.action!.label, /médecin/i);
   assert.doesNotMatch(f.statement, /pharmacie/i);
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// CHAQUE FAIT PASSE LE CONTRÔLE DU MOTEUR, DANS CHAQUE SITUATION (23/09/2026).
+//
+// Ces tests appelaient la règle DIRECTEMENT, sans passer par `assertFactValid`, le contrôle que
+// le moteur applique en production à tout fait avant de l'accepter. Un geste de 73 caractères
+// (le plafond est 70) a donc passé toute la suite, puis fait échouer la mise à jour du dossier
+// en production : le moteur refuse le fait, et avec lui le dossier entier.
+//
+// Le test parcourt le produit cartésien des situations (quatre postures) et des lieux (médecin,
+// pharmacie, les deux, rien, ventilé ou non) : un geste trop long n'apparaît que dans UNE
+// combinaison, et c'est celle-là qu'on oublie.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("tout fait produit est accepté par le moteur, quelle que soit la situation", () => {
+  const lieux: [string, Face3Snapshot][] = [
+    ["médecin, non ventilé", snapshot(MEDECIN)],
+    ["pharmacie, non ventilé", snapshot(PHARMACIE)],
+    ["médecin seul, ventilé", snapshotVentile({ D265: MEDECIN })],
+    ["pharmacie seule, ventilé", snapshotVentile({ D307: PHARMACIE })],
+    ["les deux, ventilé", snapshotVentile({ D265: MEDECIN, D307: PHARMACIE })],
+    ["médecin avec plusieurs praticiens", snapshot({ ...MEDECIN, exploitants: 5 })],
+    ["rien dans le périmètre", snapshot(null)],
+  ];
+  const situations: [string, UserProject][] = [
+    ["achat", projet(SOINS_3, "achat")],
+    ["location", projet(SOINS_3, "location")],
+    ["habitant", projet(SOINS_3, null, "habitant")],
+    ["neutre", projet(SOINS_3)],
+  ];
+  let verifies = 0;
+  for (const [lieu, snap] of lieux) {
+    for (const [situation, p] of situations) {
+      for (const f of regle.evaluate(faits(snap), p).facts) {
+        assert.doesNotThrow(() => assertFactValid(f, p), `${lieu} × ${situation} : refusé par le moteur`);
+        verifies++;
+      }
+    }
+  }
+  // Un parcours qui ne vérifie rien passerait vert : on s'assure qu'il a bien couvert chaque case.
+  assert.equal(verifies, lieux.length * situations.length);
 });
