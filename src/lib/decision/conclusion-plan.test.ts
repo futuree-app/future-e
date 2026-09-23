@@ -1723,3 +1723,54 @@ test("sans aucune priorité déclarée, la gravité mène seule", () => {
   // Le comportement d'avant le 22/09, intact pour qui n'a rien déclaré.
   assert.equal(gestes([SOINS, ARGILE], [])[0], ARGILE.action!.label);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE COMPTE ANNONCÉ EST CELUI DE L'ÉCRAN (23/09/2026).
+//
+// Vu sur Châtelaillon : « Quatre constats restent néanmoins à contrôler » au-dessus de trois cartes.
+// Le quatrième (les indemnisations de la commune, secondaire et non demandé) était rangé dans la
+// liste complète plus bas. La branche des correspondances favorables annonçait le TOTAL, alors que la
+// règle des deux nombres existait depuis le 01/08 : « n'annoncer que le total contredit l'écran ».
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("correspondance favorable : le détail compte les cartes visibles, et renvoie au reste", () => {
+  // Les identifiants de règles du dossier réel (v14, 23/09/2026) : contrôles visibles 3, en plus 1.
+  const bati = verificationFact("logement:exposition-bati", "logement.exposition-bati", "structuring", "Demandez l'historique des fissures");
+  const sinistres = verificationFact("logement:sinistralite", "logement.sinistralite", "secondary", "Demandez l'état des risques");
+  const soins = verificationFact("17094:autour-acces-soins", "autour.acces-soins", "secondary", "Vérifiez qu'un médecin prend de nouveaux patients");
+  const gare = verificationFact("17094:autour-gare", "autour.gare", "secondary", "Vérifiez les horaires de la gare");
+  const plan = buildConclusionPlan(baseInput({
+    scope: "commune+adresse" as never,
+    orientation: "minor_reserves", coverage: "partial", favorableCount: 1, hasFavorable: true,
+    reservesShown: 4, majorReserveCount: 1,
+    shownFacts: [alignmentFact("17094:alignment-acces_soins", "structuring", "acces_soins", "l'accès aux soins"), bati, sinistres, soins, gare],
+    reglesDeclarees: ["territoire.alignment-acces_soins", "autour.acces-soins", "autour.gare"],
+  }));
+  const { visibles, enPlus } = plan.controles;
+  // Aucun constat ne disparaît du compte : il se répartit entre l'écran et la liste plus bas.
+  assert.equal(visibles + enPlus, 4);
+  const phrase = (n: number, un: string, plusieurs: string) => (n === 1 ? un : plusieurs);
+  const attendu =
+    `${phrase(visibles, "Un constat reste", `${["", "", "Deux", "Trois", "Quatre"][visibles]} constats restent`)} néanmoins à contrôler avant de vous engager.` +
+    (enPlus === 0 ? "" : ` ${phrase(enPlus, "Un autre constat figure", `${["", "", "Deux", "Trois"][enPlus]} autres constats figurent`)} plus bas.`);
+  assert.equal(plan.verdict.detail, attendu);
+  assert.doesNotMatch(plan.verdict.detail, /^Quatre/, "le total ne s'annonce plus comme visible");
+});
+
+test("couverture élevée sans héros positif : même règle, le compte de l'écran puis le reste", () => {
+  // Pas d'alignment structurant affiché : le héros tombe en posture, et le détail porte le compte.
+  const bati = verificationFact("bati", "logement.exposition-bati", "structuring", "Demandez l'historique des fissures");
+  const sinistres = verificationFact("sin", "logement.sinistralite", "secondary", "Demandez l'état des risques");
+  const soins = verificationFact("soins2", "autour.acces-soins", "secondary", "Vérifiez qu'un médecin prend de nouveaux patients");
+  const plan = buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", coverage: "high", favorableCount: 1, hasFavorable: true,
+    reservesShown: 3, majorReserveCount: 1,
+    shownFacts: [bati, sinistres, soins],
+    reglesDeclarees: ["autour.acces-soins"],
+  }));
+  const { visibles, enPlus } = plan.controles;
+  assert.equal(visibles + enPlus, 3);
+  if (enPlus > 0) {
+    assert.match(plan.verdict.detail, /plus bas\.$/, plan.verdict.detail);
+    assert.doesNotMatch(plan.verdict.detail, /^Trois constats/, "le total ne s'annonce plus comme visible");
+  }
+});

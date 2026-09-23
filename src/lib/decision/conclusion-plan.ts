@@ -963,13 +963,19 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
   if (input.orientation === "minor_reserves") {
     const named = herosPositif(input, nom);
     if (named) {
-      const r = input.reservesShown;
+      // LE COMPTE DE L'ÉCRAN, PAS CELUI DU DOSSIER (23/09/2026). Cette branche annonçait le TOTAL
+      // des contrôles, `reservesShown` : « Quatre constats restent néanmoins à contrôler » au-dessus
+      // de trois cartes, le quatrième rangé dans la liste complète plus bas. Le lecteur comptait et ne
+      // trouvait pas. La règle existait depuis le 01/08 (`PerimetreControles` : deux nombres, jamais
+      // un seul) ; cette branche, écrite à part, ne s'en servait pas.
+      const r = controles.visibles;
       const engage = input.posture === "habitant" ? "à surveiller" : "à contrôler avant de vous engager";
-      const detail = r > 1
+      const ici = r > 1
         ? `${capitalize(enLettres(r))} constats restent néanmoins ${engage}.`
         : r === 1
           ? `Un constat reste néanmoins ${engage}.`
           : `${voc.criteresExamines} vont dans ce sens.`;
+      const detail = `${ici}${controlesPlusBas(controles)}`;
       return { label: "Correspondance favorable", tone: "positive", headline: named, detail };
     }
   }
@@ -1009,11 +1015,15 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
         // détail n'a plus qu'à dire ce qui reste, avec le but du contrôle (« avant de conclure »).
         detail: nommee
           ? `${input.hasFavorable ? `${voc.sembleRepondre(nom)}.` : `Rien ne permet encore de dire que ${voc.repond(nom)}.`}${resteAControler(r, true)}`
-          : r > 1
-            ? `${capitalize(enLettres(r))} constats restent à contrôler avant de conclure.`
-            : r === 1
+          // Le compte de l'ÉCRAN, puis le reste (23/09/2026) : même défaut que la branche favorable
+          // ci-dessus, le total annoncé au-dessus de moins de cartes. « Ce point fait partie de N
+          // constats », plus haut, reste sur le total : il situe un point dans le dossier, il ne
+          // prétend pas les montrer.
+          : `${controles.visibles > 1
+            ? `${capitalize(enLettres(controles.visibles))} constats restent à contrôler avant de conclure.`
+            : controles.visibles === 1
               ? "Un constat reste à contrôler avant de conclure."
-              : `${voc.criteresExamines} vont dans ce sens.`,
+              : `${voc.criteresExamines} vont dans ce sens.`}${controlesPlusBas(controles)}`,
       };
     }
     // Le détail recopiait le héros mot pour mot (« 2 points structurants empêchent … de conclure
