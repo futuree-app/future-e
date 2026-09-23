@@ -106,6 +106,20 @@ d'Autour : le médecin le plus proche n'est pas celui qui prend des patients, la
 la plus proche n'est pas celle qui mène quelque part, l'école la plus proche n'est pas celle du
 secteur de carte scolaire. À instruire bloc par bloc, sans supposer que la réponse sera la même.
 
+**Avancée du 22-23/09 : le rail Autour → dossier de décision.** Deux blocs livrés, santé et gare.
+La tranche santé a révélé trois défauts du patron avant qu'il ne soit cloné : une catégorie
+mélange des types qui ne répondent pas au même besoin (une pharmacie masquait le médecin, d'où la
+ventilation par type dans le snapshot) ; un geste doit se comprendre seul hors de sa carte, et tenir
+en 70 caractères ; un fait se teste à travers le contrôle du moteur, pas en appelant la règle seule.
+Correction au passage : « Halte ferroviaire » était faux, l'INSEE classe les trois codes en gares de
+voyageurs (intérêt national, régional, local) sans mesurer la desserte. Tout s'affiche « Gare ».
+
+**Écoles : silence décisionnel, volontaire.** La priorité `acces_ecoles` désigne les collèges et
+lycées ; le voisinage ne recense que maternelles et élémentaires. Raconter une maternelle à qui
+cherche un lycée serait vrai et hors sujet. **À faire** : étendre les shards BPE aux collèges
+(C201) et lycées (C301, C302…), puis écrire la règle. Ne pas créer de priorité « école primaire »
+en attendant : cela rouvrirait la sémantique du projet pendant son unification.
+
 ## Ce qui attend dans le registre
 
 PFAS, LCZ, DRIAS-Eau, SISPEA, BatEnR, LiDAR, EGMS, Copernicus, éclairage nocturne, cours d'eau,

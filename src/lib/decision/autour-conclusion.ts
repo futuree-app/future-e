@@ -23,6 +23,7 @@
 
 import {
   BPE_WALK_RADIUS_M,
+  avecArticle,
   type Face3Cat,
   type Face3Snapshot,
   type PermisSnapshot,
@@ -60,19 +61,11 @@ const FAMILLE: Record<Face3Cat, { article: string; nom: string; genre: "m" | "f"
   services: { article: "un", nom: "service du quotidien", genre: "m" },
 };
 
-/** L'article de chaque type précis de la nomenclature BPE. Fini, connu, donc écrit. */
-const ARTICLE_TYPE: Record<string, string> = {
-  "Médecin généraliste": "un", "Pharmacie": "une",
-  "Supermarché": "un", "Supérette": "une", "Épicerie": "une",
-  "Boucherie-charcuterie": "une", "Boulangerie": "une", "Primeur": "un",
-  "École maternelle": "une", "École primaire": "une", "École élémentaire": "une",
-  "Gare": "une", "Halte ferroviaire": "une",
-  "Banque": "une", "Bureau de poste": "un",
-};
-
+// L'ARTICLE VIENT DE `avecArticle`, la table unique tenue à côté des libellés. Ce fichier avait
+// la sienne, écrite avant : deux tables à maintenir pour une même nomenclature, et la correction
+// d'un libellé (« Halte ferroviaire » devenu « Gare » le 23/09/2026) n'en aurait touché qu'une.
 function nomme(cat: Face3Cat, typeLabel: string | null): string {
-  if (typeLabel && ARTICLE_TYPE[typeLabel]) return `${ARTICLE_TYPE[typeLabel]} ${typeLabel.toLowerCase()}`;
-  if (typeLabel) return `un ${typeLabel.toLowerCase()}`;
+  if (typeLabel) return avecArticle(typeLabel);
   const f = FAMILLE[cat];
   return `${f.article} ${f.nom}`;
 }

@@ -28,7 +28,7 @@
 // Les deux premiers se taisent, le troisième se dit.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 import type { Face3Cat, Face3Snapshot } from "../logement-autour-types.ts";
-import { BPE_WALK_RADIUS_M, TYPEQU_LABEL } from "../logement-autour-types.ts";
+import { BPE_WALK_RADIUS_M, TYPEQU_LABEL, libelleCourant } from "../logement-autour-types.ts";
 
 /**
  * LES CODES QU'UNE RÈGLE PEUT DEMANDER NOMMÉMENT.
@@ -119,7 +119,7 @@ export function buildAutourFacts(snapshot: Face3Snapshot | null | undefined): Au
     equipements[bloc.category] = {
       category: bloc.category,
       distanceMeters: bloc.nearest.distanceMeters,
-      typeLabel: bloc.nearest.typeLabel,
+      typeLabel: libelleCourant(bloc.nearest.typeLabel),
       ...(bloc.nearest.nom ? { nom: bloc.nearest.nom } : {}),
       ...(bloc.nearest.adresse ? { adresse: bloc.nearest.adresse } : {}),
       ...(bloc.nearest.exploitants && bloc.nearest.exploitants > 1
@@ -143,7 +143,8 @@ export function buildAutourFacts(snapshot: Face3Snapshot | null | undefined): Au
       parType[code] = {
         category: bloc.category,
         distanceMeters: plusProche.distanceMeters,
-        typeLabel: plusProche.typeLabel ?? TYPEQU_LABEL[code] ?? null,
+        // Le CODE fait foi quand on l'a : il suit les corrections de la table, le libellé figé non.
+        typeLabel: TYPEQU_LABEL[code] ?? libelleCourant(plusProche.typeLabel),
         ...(plusProche.nom ? { nom: plusProche.nom } : {}),
         ...(plusProche.adresse ? { adresse: plusProche.adresse } : {}),
         ...(plusProche.exploitants && plusProche.exploitants > 1

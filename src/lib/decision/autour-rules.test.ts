@@ -367,3 +367,75 @@ test("à des distances arrondies différentes, la pharmacie reste un complément
   assert.match(f.statement, /^Un médecin généraliste se trouve à environ 550 m/);
   assert.match(f.statement, /La pharmacie la plus proche est à environ 250 m\.$/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA GARE LA PLUS PROCHE (23/09/2026), deuxième bloc du rail.
+//
+// Écrit avec les leçons de la santé déjà appliquées : un geste qui se comprend seul et tient en
+// 70 caractères, une limite qui dit ce que la présence n'établit pas, une pastille qui porte la
+// mesure, et chaque fait passé au contrôle du moteur dans chaque situation.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+const gare = AUTOUR_RULES.find((r) => r.id === "autour.gare")!;
+const TRAIN_3 = [{ key: "acces_transports", weight: 3 }];
+
+function snapshotGare(nearest: unknown, statut: "complete" | "failed" = "complete"): Face3Snapshot {
+  const snap = snapshot(undefined, statut);
+  snap.bpe.categories = [{ category: "transports", nearest, searchCapMeters: 5000, withinWalkCount: 0 } as never];
+  return snap;
+}
+const GARE_LOCALE = { distanceMeters: 593, typeLabel: "Gare" };
+
+test("gare : le constat remonte quand le train est une priorité déclarée", () => {
+  const f = gare.evaluate(faits(snapshotGare(GARE_LOCALE)), projet(TRAIN_3, "achat")).facts[0]!;
+  assert.equal(f.statement, "Une gare se trouve à environ 600 m de cette adresse.");
+  assert.equal(f.role, "verification");
+  assert.equal(f.materialityTier, "secondary");
+  assert.equal(f.evidence[0]!.observedValue, "600 m");
+});
+
+test("gare : rien ne remonte sans priorité déclarée", () => {
+  assert.equal(gare.evaluate(faits(snapshotGare(GARE_LOCALE)), projet(SOINS_3)).outcome, "not_applicable");
+});
+
+test("gare : aucune classe administrative ni « halte » dans le texte", () => {
+  // La BPE distingue intérêt national, régional et local, sans mesurer la desserte. Reprendre la
+  // classe, ou l'ancienne « halte », suggérerait une fréquence que la source ignore.
+  for (const typeLabel of ["Gare", "Halte ferroviaire"]) {
+    const f = gare.evaluate(faits(snapshotGare({ ...GARE_LOCALE, typeLabel })), projet(TRAIN_3)).facts[0]!;
+    const texte = [f.statement, f.limitation, f.action!.label, f.action!.detail].join(" ");
+    assert.doesNotMatch(texte, /halte|intérêt (local|régional|national)/i, texte);
+  }
+});
+
+test("gare : la limite dit ce que la présence n'établit pas", () => {
+  const f = gare.evaluate(faits(snapshotGare(GARE_LOCALE)), projet(TRAIN_3)).facts[0]!;
+  assert.match(f.limitation!, /fréquence des trains/);
+  assert.match(f.limitation!, /destinations/);
+  assert.match(f.limitation!, /horaires/);
+  assert.doesNotMatch(f.statement, /bien desservi|bonne desserte|facile/i);
+});
+
+test("gare : aucune gare dans le périmètre se dit, une source en échec se tait", () => {
+  const absente = gare.evaluate(faits(snapshotGare(null)), projet(TRAIN_3)).facts[0]!;
+  assert.match(absente.statement, /Aucune gare de voyageurs/);
+  assert.match(absente.limitation!, /périmètre/);
+  assert.equal(gare.evaluate(faits(snapshotGare(GARE_LOCALE, "failed")), projet(TRAIN_3)).outcome, "not_applicable");
+});
+
+test("gare : tout fait passe le contrôle du moteur, geste compris seul", () => {
+  const situations: UserProject[] = [
+    projet(TRAIN_3, "achat"), projet(TRAIN_3, "location"), projet(TRAIN_3, null, "habitant"), projet(TRAIN_3),
+  ];
+  let n = 0;
+  for (const snap of [snapshotGare(GARE_LOCALE), snapshotGare(null)]) {
+    for (const p of situations) {
+      for (const f of gare.evaluate(faits(snap), p).facts) {
+        assert.doesNotThrow(() => assertFactValid(f, p), f.action!.label);
+        assert.match(f.action!.label, /gare/i, "le geste nomme son objet");
+        n++;
+      }
+    }
+  }
+  assert.equal(n, 8);
+});

@@ -350,4 +350,135 @@ const accesSoinsRule: DecisionRule = {
   },
 };
 
-export const AUTOUR_RULES: DecisionRule[] = [accesSoinsRule];
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA GARE LA PLUS PROCHE (23/09/2026), deuxième bloc du rail.
+//
+// ── CE QUE LA SOURCE DIT, ET RIEN DE PLUS ────────────────────────────────────────────────────
+// La BPE recense trois classes de gares de voyageurs (intérêt national, régional, local). Aucune
+// ne mesure la desserte : une gare « locale » peut avoir des trains toutes les demi-heures, une
+// gare « régionale » quelques-uns par jour. La règle ne crée donc AUCUNE hiérarchie entre elles
+// et raconte la plus proche, quelle que soit sa classe. La ventilation par type existe dans le
+// snapshot : elle permettra un jour de nommer deux gares si cela apprend quelque chose, jamais de
+// décider que l'une « mène ».
+//
+// ── CE QUI RESTE HORS DE CETTE RÈGLE ─────────────────────────────────────────────────────────
+// Les bus, trams et métros : c'est un autre critère (`mobilite_quotidienne`), et la BPE ne les
+// connaît pas. Les écoles : la priorité `acces_ecoles` parle de collèges et de lycées, et le
+// voisinage ne recense aujourd'hui que les maternelles et les élémentaires. Raconter une
+// maternelle à qui cherche un lycée serait vrai et hors sujet ; la règle attend que les shards
+// portent les collèges (C201) et les lycées (C301, C302…).
+// ════════════════════════════════════════════════════════════════════════════════════════════
+const RULE_GARE = "autour.gare";
+
+// UN SEUL GESTE, QUELLE QUE SOIT LA SITUATION. Contrairement au médecin, la question ne change pas
+// selon qu'on achète, loue ou habite déjà : les horaires et les destinations se vérifient de la
+// même façon. Il nomme son objet, puisqu'il remonte seul dans « À contrôler en priorité ».
+const GESTE_GARE = {
+  label: "Vérifiez les horaires et destinations de la gare la plus proche",
+  detail:
+    "La base recense les gares de voyageurs, jamais la fréquence des trains ni les lignes qui y passent.",
+};
+const LIMITE_GARE =
+  "La présence d'une gare ne dit ni la fréquence des trains, ni les destinations desservies, ni les horaires. La distance est à vol d'oiseau.";
+
+/** La source et son millésime, sans valeur mesurée : elle descend sous « Données et limites ». */
+function sourceBpeDe(f: { autour?: { bpeMillesime?: string } }, factId: string): EvidenceRef | null {
+  return f.autour?.bpeMillesime
+    ? {
+        factId,
+        module: "logement",
+        label: `Base permanente des équipements (INSEE), millésime ${f.autour.bpeMillesime}`,
+        grain: "adresse",
+        relation: "proximite",
+      }
+    : null;
+}
+
+const gareRule: DecisionRule = {
+  id: RULE_GARE,
+  module: "logement",
+  evaluate: (f, p): RuleEvaluation => {
+    const ret = (
+      outcome: RuleEvaluation["outcome"],
+      facts: VerificationFact[],
+      reason: string,
+    ): RuleEvaluation => ({ ruleId: RULE_GARE, projectKeys: ["acces_transports"], outcome, facts, reason });
+
+    if (preferenceWeight(p, "acces_transports") < 2) {
+      return ret("not_applicable", [], "priorité non déclarée");
+    }
+    const equipements = f.autour?.equipements;
+    if (!equipements || equipements.transports === undefined) {
+      return ret("not_applicable", [], "voisinage non analysé");
+    }
+
+    // LA SOURCE A RÉPONDU, ET IL N'Y A PAS DE GARE DANS LE PÉRIMÈTRE. C'est une information pour
+    // qui a déclaré le train en priorité, bornée au rayon cherché.
+    if (equipements.transports === null) {
+      const source = sourceBpeDe(f, "autour.gare.source");
+      const fact: VerificationFact = {
+        id: `${f.insee}:autour-gare-absente`,
+        ruleId: RULE_GARE,
+        sourceFactIds: ["autour.transports"],
+        module: "logement",
+        role: "verification",
+        materialityTier: "secondary",
+        topic: "le train autour de cette adresse",
+        statement: "Aucune gare de voyageurs n'apparaît dans le périmètre cherché autour de cette adresse.",
+        status: "Aucune dans le périmètre",
+        limitation:
+          "Le périmètre de recherche est borné : une gare située au-delà n'apparaît pas ici, et la commune peut rester bien desservie.",
+        evidence: [
+          {
+            factId: "autour.transports",
+            module: "logement",
+            label: "Gares · autour de l'adresse",
+            observedValue: "aucune dans le périmètre cherché",
+            grain: "adresse",
+            relation: "proximite",
+            href: autourHref,
+          },
+          ...(source ? [source] : []),
+        ],
+        action: {
+          type: "verifier_sur_place",
+          label: "Repérez la gare la plus proche et ses destinations",
+          detail: "La recherche s'arrête à un rayon : au-delà, la distance se mesure sur une carte.",
+        },
+      };
+      return ret("verification", [fact], "aucune gare dans le périmètre");
+    }
+
+    const e = equipements.transports;
+    const source = sourceBpeDe(f, "autour.gare.source");
+    const fact: VerificationFact = {
+      id: `${f.insee}:autour-gare`,
+      ruleId: RULE_GARE,
+      sourceFactIds: ["autour.transports"],
+      module: "logement",
+      role: "verification",
+      // JAMAIS `structuring` : une gare recensée ne dit pas qu'on peut se passer de voiture.
+      materialityTier: "secondary",
+      topic: "le train autour de cette adresse",
+      statement: `Une gare se trouve à environ ${distanceArrondie(e.distanceMeters)} de cette adresse.`,
+      status: "À proximité",
+      limitation: LIMITE_GARE,
+      evidence: [
+        {
+          factId: "autour.transports",
+          module: "logement",
+          label: "Gares · autour de l'adresse",
+          observedValue: distanceArrondie(e.distanceMeters),
+          grain: "adresse",
+          relation: "proximite",
+          href: autourHref,
+        },
+        ...(source ? [source] : []),
+      ],
+      action: { type: "verifier_sur_place", label: GESTE_GARE.label, detail: GESTE_GARE.detail },
+    };
+    return ret("verification", [fact], "gare recensée à proximité");
+  },
+};
+
+export const AUTOUR_RULES: DecisionRule[] = [accesSoinsRule, gareRule];

@@ -1,5 +1,5 @@
 import React from "react";
-import { BPE_WALK_RADIUS_M, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, libelleCourant, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
@@ -196,7 +196,7 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                   <span style={FACE3_FAMILY}>{FACE3_CAT_LABEL[c.category]}</span>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
                     <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-1)" : "var(--fg-4)", fontWeight: 500 }}>
-                      {c.nearest ? (c.nearest.typeLabel ?? FACE3_CAT_LABEL[c.category]) : "Aucun recensé"}
+                      {c.nearest ? (libelleCourant(c.nearest.typeLabel) ?? FACE3_CAT_LABEL[c.category]) : "Aucun recensé"}
                     </span>
                     <span style={{ fontSize: 15, color: c.nearest ? "var(--fg-hi)" : "var(--fg-4)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                       {c.nearest ? `env. ${fmtDist(c.nearest.distanceMeters)}` : `dans les ${c.searchCapMeters / 1000} km analysés`}

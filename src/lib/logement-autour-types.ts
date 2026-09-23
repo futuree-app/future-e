@@ -119,10 +119,15 @@ export const TYPEQU_LABEL: Record<string, string> = {
   C107: "École maternelle",
   C108: "École primaire",
   C109: "École élémentaire",
-  // Transports
+  // Transports. LES TROIS CODES SONT DES GARES DE VOYAGEURS (corrigé le 23/09/2026).
+  // L'INSEE les nomme « gares d'intérêt national (E107), d'intérêt régional (E108) et d'intérêt
+  // local (E109) » et les regroupe sous « gares ». E109 était affiché « Halte ferroviaire », une
+  // distinction que la source ne fait pas, et qui suggérait une desserte faible qu'elle ne mesure
+  // pas. La classe elle-même n'est pas reprise : « gare d'intérêt local » est un vocabulaire
+  // d'administration, et elle ne dit ni la fréquence des trains ni leurs destinations.
   E107: "Gare",
   E108: "Gare",
-  E109: "Halte ferroviaire",
+  E109: "Gare",
   // Services essentiels
   A203: "Banque",
   A206: "Bureau de poste",
@@ -154,10 +159,27 @@ const GENRE_PAR_LIBELLE: Record<string, "m" | "f"> = {
   "École primaire": "f",
   "École élémentaire": "f",
   "Gare": "f",
-  "Halte ferroviaire": "f",
   "Banque": "f",
   "Bureau de poste": "m",
 };
+
+/**
+ * LES LIBELLÉS RETIRÉS, et ce qu'ils deviennent à la lecture.
+ *
+ * Un snapshot fige le LIBELLÉ, pas le code : corriger la table ci-dessus ne corrige pas un dossier
+ * déjà ouvert. Sans cette correspondance, un voisinage calculé avant le 23/09/2026 continuerait
+ * d'afficher « Halte ferroviaire » à côté d'un dossier récent qui dit « Gare ».
+ */
+const LIBELLES_RETIRES: Record<string, string> = {
+  "Halte ferroviaire": "Gare",
+};
+
+/** Le libellé tel qu'on l'affiche aujourd'hui, quel que soit le jour où il a été figé. */
+export function libelleCourant(libelle: string): string;
+export function libelleCourant(libelle: string | null): string | null;
+export function libelleCourant(libelle: string | null): string | null {
+  return libelle === null ? null : (LIBELLES_RETIRES[libelle] ?? libelle);
+}
 
 /** Les libellés dont le genre est déclaré. Sert au test qui garde la table alignée. */
 export const LIBELLES_AVEC_GENRE = GENRE_PAR_LIBELLE;
@@ -169,7 +191,8 @@ export const LIBELLES_AVEC_GENRE = GENRE_PAR_LIBELLE;
  * libellé du produit y tombe.
  */
 export function avecArticle(libelle: string): string {
-  return `${GENRE_PAR_LIBELLE[libelle] === "f" ? "une" : "un"} ${libelle.toLowerCase()}`;
+  const l = libelleCourant(libelle);
+  return `${GENRE_PAR_LIBELLE[l] === "f" ? "une" : "un"} ${l.toLowerCase()}`;
 }
 
 // Nature de l'espace vert cartographié (tag OSM conservé pour préciser « parc / bois / … »

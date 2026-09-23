@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { libelleBpeLisible, preuveEquipement, sourceBpe, LIMITE_BPE } from "./logement-bpe-lisible.ts";
 import { nearestByCategory } from "./logement-bpe.ts";
 import type { BpePoint } from "./logement-autour-types.ts";
-import { TYPEQU_LABEL, LIBELLES_AVEC_GENRE, avecArticle } from "./logement-autour-types.ts";
+import { TYPEQU_LABEL, LIBELLES_AVEC_GENRE, avecArticle, libelleCourant } from "./logement-autour-types.ts";
 
 // ── LE CAS RÉEL : les deux boulangeries du 6 Grande Rue à Ciré-d'Aunis ────────────────────────
 // La BPE 2024 ET la BPE 2025 recensent DEUX établissements au même point, à la même adresse :
@@ -157,8 +157,36 @@ test("tout libellé d'équipement sait quel article prendre", () => {
 test("l'article s'accorde, et un libellé inconnu ne casse pas la phrase", () => {
   assert.equal(avecArticle("Médecin généraliste"), "un médecin généraliste");
   assert.equal(avecArticle("Pharmacie"), "une pharmacie");
-  assert.equal(avecArticle("Halte ferroviaire"), "une halte ferroviaire");
+  assert.equal(avecArticle("Gare"), "une gare");
   assert.equal(avecArticle("Primeur"), "un primeur");
   // Repli : lisible, jamais vide.
   assert.equal(avecArticle("Chose inconnue"), "un chose inconnue");
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// E109 EST UNE GARE (23/09/2026).
+//
+// Le produit l'affichait « Halte ferroviaire ». L'INSEE nomme les trois codes « gares d'intérêt
+// national (E107), d'intérêt régional (E108) et d'intérêt local (E109) », et les regroupe sous
+// « gares ». La distinction inventée suggérait une desserte faible que la source ne mesure pas.
+// Le genre d'erreur qui survit des mois en produisant des phrases parfaitement plausibles.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("les trois codes de gare se lisent « Gare », sans classe administrative", () => {
+  assert.equal(TYPEQU_LABEL.E107, "Gare");
+  assert.equal(TYPEQU_LABEL.E108, "Gare");
+  assert.equal(TYPEQU_LABEL.E109, "Gare");
+  // « d'intérêt local » est un vocabulaire d'administration : il ne dit ni la fréquence des
+  // trains ni leurs destinations, et le lecteur n'en ferait rien.
+  for (const code of ["E107", "E108", "E109"]) {
+    assert.doesNotMatch(TYPEQU_LABEL[code]!, /halte|intérêt/i);
+  }
+});
+
+test("un voisinage figé avant la correction ne dit plus « Halte ferroviaire »", () => {
+  // Le snapshot fige le LIBELLÉ, pas le code : corriger la table ne corrige pas un dossier ouvert.
+  assert.equal(libelleCourant("Halte ferroviaire"), "Gare");
+  assert.equal(avecArticle("Halte ferroviaire"), "une gare");
+  // Et un libellé courant traverse sans changer.
+  assert.equal(libelleCourant("Pharmacie"), "Pharmacie");
+  assert.equal(libelleCourant(null), null);
 });
