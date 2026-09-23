@@ -270,38 +270,72 @@ function candidateActions(
 function priorityControlFrom(
   lead: LeadSelection, shownFacts: DecisionFact[], shownCompositions: FactComposition[],
   reglesDeclarees: string[] = [],
+  dejaNommes: string[] = [],
 ): PriorityControl | null {
   const leadIds = lead.kind === "single" ? [lead.factId]
     : lead.kind === "tied" ? lead.facts.map((f) => f.factId)
     : [];
 
-  // UNE PRIORITÉ DÉCLARÉE PASSE DEVANT (22/09/2026, arbitrage du porteur).
+  // DEUX PLACES, DEUX RÔLES (23/09/2026, arbitrage du porteur).
   // ══════════════════════════════════════════════════════════════════════════════════════════
-  // Le vivier était le LEAD seul, donc le classement par gravité seul. Vu à l'écran sur un dossier
-  // qui ne demandait que l'accès aux soins : la ligne « À contrôler en priorité » ne proposait que
-  // de demander l'historique des fissures, un constat que le lecteur n'avait pas demandé, pendant
-  // que le geste rattaché à sa seule priorité n'apparaissait nulle part en tête.
+  // Le haut de page reflète le projet sans laisser des vérifications secondaires masquer un
+  // constat matériel majeur.
   //
-  // La gravité garde sa place, elle ne la garde plus toute seule : le bloc s'intitule « au regard
-  // de votre projet », et ce qui répond à une priorité déclarée s'y lit en premier. Le plafond de
-  // deux démarches est inchangé, donc un constat grave hors priorités reste atteignable en
-  // seconde ligne.
+  // ── HISTOIRE ────────────────────────────────────────────────────────────────────────────────
+  // Jusqu'au 22/09, le vivier était le LEAD seul, donc la gravité seule : sur un dossier qui ne
+  // demandait que l'accès aux soins, la ligne ne proposait que l'historique des fissures. Le 22/09,
+  // toute priorité déclarée est passée devant. Ce commentaire promettait alors qu'un constat grave
+  // hors priorités « restait atteignable en seconde ligne » : c'était faux dès DEUX priorités
+  // porteuses d'action. Soins et gare, toutes deux secondaires, chassaient l'argile structurante.
   //
-  // CE QUI COMPTE EST LA RÈGLE, PAS LE RÔLE. Une verification ne porte pas de `projectKey` ; c'est
-  // `reglesDeclarees` (les règles qui ont examiné un critère du lecteur) qui la rattache, comme
-  // pour le marquage « Au-delà de vos priorités » des cartes.
+  // ── LA RÈGLE ────────────────────────────────────────────────────────────────────────────────
+  //   0. Un constat `decision_critical` passe avant tout. Le produit ne le cache pas parce que le
+  //      lecteur a parlé d'autre chose.
+  //   1. La première place garantit la PERSONNALISATION : la première démarche rattachée à une
+  //      priorité déclarée.
+  //   2. La seconde garantit la MATÉRIALITÉ : un constat `structuring` (ou critique) porteur d'une
+  //      démarche, pas encore représenté. Sinon, une autre priorité déclarée ; sinon, le lead.
   //
-  // L'ORDRE ENTRE DEUX PRIORITAIRES est celui du moteur, déterministe et stable. Les faits avant
-  // les compositions : une composition regroupe des constats déjà lisibles un par un, et le cas de
-  // deux prioritaires porteurs d'actions distinctes est rare.
+  // Sans aucun constat majeur, rien n'empêche donc deux priorités de remonter. Et « au regard de
+  // votre projet » ne veut pas dire « exclusivement ce que vous avez pensé à demander » : faire
+  // émerger ce que le lecteur n'avait pas regardé fait partie de la valeur du dossier.
+  //
+  // PAS DE NOUVEAU SCORE DE GRAVITÉ : les tiers du moteur (`decision_critical`, `structuring`,
+  // `secondary`) disent déjà qu'un médecin recensé et un sol argileux ne pèsent pas pareil.
+  //
+  // CE QUI RATTACHE UNE CARTE À UNE PRIORITÉ est la RÈGLE (`reglesDeclarees`), jamais le rôle : une
+  // verification ne porte pas de `projectKey`. Même mécanisme que le marquage « Au-delà de vos
+  // priorités » des cartes.
+  //
+  // L'ORDRE DANS CHAQUE GROUPE est celui du moteur, déterministe et stable. Les faits avant les
+  // compositions : une composition regroupe des constats déjà lisibles un par un.
   const declarees = new Set(reglesDeclarees);
-  const prioritaires = [
-    ...shownFacts.filter((f) => declarees.has(f.ruleId) && factActionLabel(f)).map((f) => f.id),
+  // CE QUE LA PHRASE DE TÊTE A DÉJÀ NOMMÉ NE REVIENT PAS. `selectResidualLead` l'écartait déjà du
+  // lead ; le vivier élargi doit l'écarter aussi, sinon le lecteur lirait le même sujet deux fois
+  // à deux lignes d'écart.
+  const nommes = new Set(dejaNommes);
+  type Candidat = { id: string; tier: MaterialityTier; declare: boolean };
+  const candidats: Candidat[] = [
+    ...shownFacts
+      .filter((f) => !nommes.has(f.id) && factActionLabel(f))
+      .map((f) => ({ id: f.id, tier: f.materialityTier, declare: declarees.has(f.ruleId) })),
     ...shownCompositions
-      .filter((c) => c.referencedRuleIds.some((r) => declarees.has(r)))
-      .map((c) => c.id),
+      .filter((c) => !nommes.has(c.id) && candidateActions(c.id, shownFacts, shownCompositions))
+      .map((c) => ({
+        id: c.id, tier: c.materialityTier, declare: c.referencedRuleIds.some((r) => declarees.has(r)),
+      })),
   ];
-  const topIds = [...prioritaires, ...leadIds.filter((id) => !prioritaires.includes(id))];
+  const critiques = candidats.filter((c) => c.tier === "decision_critical").map((c) => c.id);
+  const prioritaires = candidats.filter((c) => c.declare).map((c) => c.id);
+  const majeurs = candidats.filter((c) => c.tier !== "secondary").map((c) => c.id);
+  const ordre = [
+    ...critiques,
+    ...prioritaires.slice(0, 1),
+    ...majeurs,
+    ...prioritaires.slice(1),
+    ...leadIds,
+  ];
+  const topIds = ordre.filter((id, i) => ordre.indexOf(id) === i);
 
   const sourceIds: string[] = [];
   const actions: { label: string; anchorId: string }[] = [];
@@ -1189,7 +1223,9 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // pas porter une ACTION (elle doit être exacte). C'est désormais `priorityControl`, DÉTERMINISTE, dérivé
   // de l'action déjà écrite sur le fait/composition de tête (que `selectResidualLead` a choisi). L'ordre et
   // la nature vivent dans l'étiquette de l'UI (« À contrôler en priorité / ensuite », depuis consumedFrom).
-  const priorityControl = priorityControlFrom(lead, input.shownFacts, input.shownCompositions, input.reglesDeclarees ?? []);
+  const priorityControl = priorityControlFrom(
+    lead, input.shownFacts, input.shownCompositions, input.reglesDeclarees ?? [], v.headline.consumedFactIds,
+  );
 
   // LES MISMATCHS NE SONT PLUS UN REGISTRE. Leur matière (les priorités moins bien servies) est
   // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et

@@ -1674,3 +1674,52 @@ test("sans priorité déclarée rattachée, la gravité mène comme avant", () =
   }));
   assert.equal(p.priorityControl?.actions[0]?.label, "Demandez l'historique des fissures");
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// DEUX PLACES, DEUX RÔLES (23/09/2026).
+//
+// La règle du 22/09 faisait passer TOUTE priorité déclarée devant, et promettait qu'un constat
+// grave hors priorités « restait atteignable en seconde ligne ». Faux dès deux priorités : soins et
+// gare, toutes deux secondaires, chassaient l'argile structurante du haut de page.
+//
+// La première place garantit la personnalisation, la seconde la matérialité.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+const SOINS = verificationFact("soins", "autour.acces-soins", "secondary", "Vérifiez qu'un médecin prend de nouveaux patients");
+const GARE = verificationFact("gare", "autour.gare", "secondary", "Vérifiez les horaires de la gare");
+const ARGILE = verificationFact("rga", "logement.argile", "structuring", "Demandez l'historique des fissures");
+const deuxPriorites = ["autour.acces-soins", "autour.gare"];
+
+function gestes(shownFacts: DecisionFact[], reglesDeclarees: string[]): string[] {
+  return buildConclusionPlan(baseInput({
+    orientation: "minor_reserves", favorableCount: 1, reservesShown: shownFacts.length,
+    shownFacts, reglesDeclarees,
+  })).priorityControl?.actions.map((a) => a.label) ?? [];
+}
+
+test("deux priorités secondaires et un constat structurant : une priorité, puis le constat", () => {
+  // Le cas qui a motivé la règle. La gare reste dans sa carte ; elle ne chasse plus l'argile.
+  assert.deepEqual(gestes([ARGILE, SOINS, GARE], deuxPriorites), [SOINS.action!.label, ARGILE.action!.label]);
+});
+
+test("deux priorités secondaires sans constat majeur : les deux remontent", () => {
+  // Rien ne justifie alors de réserver une place : la seconde revient à la seconde priorité.
+  assert.deepEqual(gestes([SOINS, GARE], deuxPriorites), [SOINS.action!.label, GARE.action!.label]);
+});
+
+test("un constat decision_critical passe avant tout, même hors priorités", () => {
+  const critique = verificationFact("crit", "logement.critique", "decision_critical", "Faites expertiser le bâti");
+  assert.deepEqual(gestes([SOINS, GARE, critique], deuxPriorites), [critique.action!.label, SOINS.action!.label]);
+});
+
+test("une priorité structurante et un autre constat structurant : les deux s'affichent", () => {
+  // La règle au pied de la lettre : la seconde place va à un constat majeur NON ENCORE représenté.
+  // Rien de grave ne disparaît du haut de page.
+  const prioStruct = verificationFact("prio", "autour.acces-soins", "structuring", "Vérifiez qu'un médecin prend de nouveaux patients");
+  assert.deepEqual(gestes([prioStruct, ARGILE, GARE], deuxPriorites), [prioStruct.action!.label, ARGILE.action!.label]);
+});
+
+test("sans aucune priorité déclarée, la gravité mène seule", () => {
+  // Le comportement d'avant le 22/09, intact pour qui n'a rien déclaré.
+  assert.equal(gestes([SOINS, ARGILE], [])[0], ARGILE.action!.label);
+});
