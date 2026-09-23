@@ -343,3 +343,27 @@ test("tout fait produit est accepté par le moteur, quelle que soit la situation
   // Un parcours qui ne vérifie rien passerait vert : on s'assure qu'il a bien couvert chaque case.
   assert.equal(verifies, lieux.length * situations.length);
 });
+
+test("un médecin et une pharmacie à la même distance se disent en une phrase", () => {
+  // Proposition du porteur, vue sur Châtelaillon : les deux au 7 avenue de Strasbourg, et le texte
+  // redisait « à environ 550 m » dans deux phrases.
+  const snap = snapshotVentile({
+    D265: { ...MEDECIN, exploitants: 5 },
+    D307: { distanceMeters: 553, typeLabel: "Pharmacie" },
+  });
+  const f = regle.evaluate(faits(snap), projet(SOINS_3, "achat")).facts[0]!;
+  assert.equal(
+    f.statement,
+    "Un médecin généraliste et une pharmacie se trouvent à environ 550 m de cette adresse. Cinq médecins y sont recensés.",
+  );
+  // « professionnels » laisserait croire que la pharmacie est comptée parmi les cinq.
+  assert.doesNotMatch(f.statement, /professionnels/);
+});
+
+test("à des distances arrondies différentes, la pharmacie reste un complément", () => {
+  // La fusion n'a lieu que si « à environ X m » est vrai pour les deux.
+  const snap = snapshotVentile({ D265: MEDECIN, D307: PHARMACIE });
+  const f = regle.evaluate(faits(snap), projet(SOINS_3, "achat")).facts[0]!;
+  assert.match(f.statement, /^Un médecin généraliste se trouve à environ 550 m/);
+  assert.match(f.statement, /La pharmacie la plus proche est à environ 250 m\.$/);
+});

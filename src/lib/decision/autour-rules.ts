@@ -158,6 +158,27 @@ function constatSante(
   const quoi = e.typeLabel ? avecArticle(e.typeLabel) : "un équipement de santé";
   const ou = `à environ ${distanceArrondie(e.distanceMeters)} de cette adresse`;
   const nomme = e.nom ? ` (${e.nom})` : "";
+
+  // MÊME DISTANCE, UNE SEULE PHRASE (23/09/2026, proposition du porteur).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // Sur l'adresse de Châtelaillon, le médecin et la pharmacie sont au même endroit, et le texte
+  // disait « Un médecin généraliste se trouve à environ 550 m […] La pharmacie la plus proche est
+  // à environ 550 m. » : deux fois la même distance, dans deux phrases.
+  //
+  // Le critère est la distance ARRONDIE, celle que la phrase affiche : c'est le seul qui rend
+  // « à environ 550 m » vrai pour les deux à la fois.
+  //
+  // Dans la phrase commune, les praticiens se comptent comme « médecins » et plus comme
+  // « professionnels » : à côté d'une pharmacie, « professionnels » laisserait croire qu'elle est
+  // comptée dedans. Les shards rangent chaque lieu par TYPE, donc les exploitants d'un lieu de
+  // généralistes sont des généralistes.
+  const pharmacie = contexte.pharmacieEnPlus;
+  if (pharmacie && distanceArrondie(pharmacie.distanceMeters) === distanceArrondie(e.distanceMeters)) {
+    const praticiens = e.exploitants && e.exploitants > 1
+      ? ` ${capitale(nombre(e.exploitants))} médecins y sont recensés.`
+      : "";
+    return `${capitale(quoi)}${nomme} et une pharmacie se trouvent ${ou}.${praticiens}`;
+  }
   // CE QUI S'AJOUTE, DANS L'ORDRE DE CE QUE ÇA APPREND. Plusieurs praticiens au même point disent
   // qu'on n'y dépend pas d'une seule personne ; plusieurs LIEUX à portée de pas disent qu'on a le
   // choix. Les deux ne se valent pas, et les dire ensemble alourdirait pour rien.
