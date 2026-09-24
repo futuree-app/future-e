@@ -1,11 +1,12 @@
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import {
   evaluateDepartements, evaluateZones, evaluateExcludeZones,
   evaluateMontagne, evaluateReliefProche, montagnosite,
   evaluateNearSea, evaluateExcludeSea, evaluateCommuneSize,
   evaluateNearPlace, evaluateExcludePlace, evaluateSizeRelativeTo,
-  assessHardConstraints, HARD_CONSTRAINT_KEYS, HARD_CONSTRAINT_EVALUATORS, PRODUCT_CONVENTIONS_VERSION,
+  assessHardConstraints, HARD_CONSTRAINT_KEYS, HARD_CONSTRAINT_EVALUATORS, PRODUCT_CONVENTIONS_VERSION, PRODUCT_CONVENTIONS,
   type CommuneAttributes, type EvaluationContext, type NormalizedHardConstraints,
   type EvaluationPoint, type PlaceMode, type ReachabilityState, type TravelTimeEstimate,
 } from "./hard-constraints.ts";
@@ -207,6 +208,56 @@ test("reliefProche : relief ABSENT -> unexamined(missing_data). C'est le bug du 
 
 test("reliefProche : massif à portée -> satisfied", () => {
   assert.equal(evaluateReliefProche(ctx({ reliefProche: true }), commune({ reliefProximite: 69 })).status, "satisfied");
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE RELIEF SE DIT EN MÈTRES, JAMAIS EN NOTE (24/09/2026).
+//
+// Vu à Châtelaillon : « le relief reste sous le seuil retenu pour considérer qu'un massif est à
+// portée (0/100, seuil 50) », et « Preuve · 0/100 » dessous. Une note interne qu'aucun lecteur ne
+// sait lire, là où la mesure qu'elle résume (une altitude) parle à tout le monde.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("reliefProche : la phrase donne l'altitude mesurée et le seuil en mètres", () => {
+  const a = evaluateReliefProche(
+    ctx({ reliefProche: true }),
+    commune({ nom: "Châtelaillon-Plage", reliefProximite: 0, reliefAltitudeMaxM: 57 }),
+  );
+  assert.ok(a.status === "incompatible");
+  assert.equal(
+    a.statement,
+    "Dans un rayon de 35 km autour de Châtelaillon-Plage, aucune commune n'a une altitude de référence supérieure à 57 m. Un relief montagneux est considéré à portée à partir d'environ 1\u202f250 m.",
+  );
+  assert.equal(a.observedLabel, "57 m");
+  assert.doesNotMatch(`${a.statement} ${a.observedLabel} ${a.expectedLabel}`, /\/100/);
+  // « Sommet » serait faux : l'index porte l'altitude du POINT DE RÉFÉRENCE de chaque commune.
+  assert.doesNotMatch(a.statement, /sommet/i);
+});
+
+test("reliefProche : sans la mesure, une phrase sans chiffre, jamais la note", () => {
+  const a = evaluateReliefProche(ctx({ reliefProche: true }), commune({ reliefProximite: 12, reliefAltitudeMaxM: null }));
+  assert.ok(a.status === "incompatible");
+  assert.doesNotMatch(`${a.statement} ${a.observedLabel}`, /\/100|\b12\b/);
+});
+
+test("reliefProche : « environ 1 250 m » reste la traduction exacte du seuil de la note", () => {
+  // Ce n'est PAS un second seuil : le verdict se décide sur la note. Mais si la note ou la courbe
+  // du script changent, la phrase annoncerait une altitude qui n'est plus celle du verdict. On relit
+  // donc la courbe dans le script lui-même, et on l'inverse.
+  const src = readFileSync("scripts/add-relief-proximite.mjs", "utf8");
+  const bloc = src.slice(src.indexOf("const CURVE = ["), src.indexOf("];", src.indexOf("const CURVE = [")));
+  const courbe = [...bloc.matchAll(/\[(\d+),\s*(\d+)\]/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
+  assert.ok(courbe.length >= 3, "courbe introuvable dans le script");
+  const note = PRODUCT_CONVENTIONS.reliefProcheMinScore;
+  let altitude: number | null = null;
+  for (let i = 1; i < courbe.length; i++) {
+    const [x0, y0] = courbe[i - 1]!, [x1, y1] = courbe[i]!;
+    if (note >= y0 && note <= y1) altitude = x0 + ((note - y0) * (x1 - x0)) / (y1 - y0);
+  }
+  assert.ok(altitude != null);
+  assert.ok(
+    Math.abs(PRODUCT_CONVENTIONS.reliefProcheSeuilAltitudeM - altitude!) <= 50,
+    `la note ${note} correspond à ${Math.round(altitude!)} m, la phrase dit ${PRODUCT_CONVENTIONS.reliefProcheSeuilAltitudeM} m`,
+  );
 });
 
 // ── nearSea / excludeSea ─────────────────────────────────────────────────────

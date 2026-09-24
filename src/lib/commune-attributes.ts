@@ -15,6 +15,7 @@ export type IndexCommuneLike = {
   uu?: string | null;
   altitude?: number | null;
   relief_proximite?: number | null;
+  relief_altitude_max_m?: number | null;
   distance_cote_km: number;
 };
 
@@ -58,6 +59,7 @@ export function communeAttributesFrom(c: IndexCommuneLike, tailleVille: number |
     uu: c.uu ?? null,
     altitude: c.altitude ?? null,
     reliefProximite: c.relief_proximite ?? null,
+    reliefAltitudeMaxM: c.relief_altitude_max_m ?? null,
     distanceCoteKm: c.distance_cote_km,
   };
 }

@@ -937,6 +937,21 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       );
     }
   }
+  // ── NI PAR SA FORME (24/09/2026) ───────────────────────────────────────────────────────────────
+  // La garde ci-dessus reconnaissait un indice à sa SOURCE (`scores.`). La proximité du relief venait
+  // d'une source nommée autrement (`commune.reliefProximite`) : le dossier affichait « 0/100, seuil
+  // 50 » dans son verdict et « Preuve · 0/100 » dessous, à Châtelaillon. On regarde donc aussi ce que
+  // le lecteur VOIT : une note sur 100, où qu'elle vienne, est une tuyauterie interne.
+  const NOTE_SUR_100 = /\b\d{1,3}\s*\/\s*100\b/;
+  const affiches = [
+    fact.statement, ...("limitation" in fact && fact.limitation ? [fact.limitation] : []),
+    ...toutesLesPreuves(fact).map((r) => r.observedValue ?? ""),
+  ];
+  for (const texte of affiches) {
+    if (NOTE_SUR_100.test(texte)) {
+      throw new Error(`[decision] ${fact.ruleId}: une note interne sur 100 ne s'affiche pas (« ${texte} »)`);
+    }
+  }
 
   switch (fact.role) {
     case "incompatibility":

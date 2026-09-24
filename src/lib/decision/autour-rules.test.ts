@@ -439,3 +439,17 @@ test("gare : tout fait passe le contrôle du moteur, geste compris seul", () => 
   }
   assert.equal(n, 8);
 });
+
+test("le moteur refuse une note sur 100 affichée, quelle que soit sa source", () => {
+  // La garde reconnaissait un indice à sa source (`scores.`). La note du relief venait d'ailleurs et
+  // s'est affichée « 0/100 » à Châtelaillon. On regarde désormais ce que le lecteur voit.
+  const p = projet(SOINS_3, "achat");
+  const f = regle.evaluate(faits(snapshot(MEDECIN)), p).facts[0]!;
+  assert.throws(() => assertFactValid({ ...f, statement: "Le relief reste sous le seuil (0/100, seuil 50)." }, p), /note interne sur 100/);
+  assert.throws(
+    () => assertFactValid({ ...f, evidence: [{ ...f.evidence[0]!, observedValue: "12 / 100" }] }, p),
+    /note interne sur 100/,
+  );
+  // Une distance ou un pourcentage ne sont pas des notes.
+  assert.doesNotThrow(() => assertFactValid({ ...f, statement: "Une gare se trouve à environ 100 m de cette adresse." }, p));
+});

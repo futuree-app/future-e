@@ -418,6 +418,9 @@ export type IndexCommune = {
   // d'une montagne » (Grenoble 95, Pau 69) de la plaine (Toulouse 0), là où
   // l'altitude propre échoue (Grenoble est à 214 m). cf. scripts/add-relief-proximite.mjs.
   relief_proximite?: number | null;
+  // La mesure que la note résume : l'altitude de référence la plus haute parmi les communes du
+  // rayon, la sienne comprise. Ajoutée le 24/09/2026 pour que le dossier parle en mètres.
+  relief_altitude_max_m?: number | null;
   // Ensoleillement réel : rayonnement solaire reçu au sol (ERA5-Land, indice
   // J/m²/j) et son percentile national (0–100, haut = plus ensoleillé). Remplace
   // l'ancien proxy faux (été chaud + peu de pluie). cf. scripts/populate-rayonnement-*.

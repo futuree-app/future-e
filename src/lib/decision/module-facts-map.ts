@@ -29,6 +29,7 @@ export function mapCommuneToModuleFacts(
     tailleVille: opts.tailleVille,
     tailleVilleSource: opts.tailleVilleSource,
     reliefProximite: entry.relief_proximite ?? null,
+    reliefAltitudeMaxM: entry.relief_altitude_max_m ?? null,
     distanceCoteKm: entry.distance_cote_km,
     population: entry.population ?? null,
     altitude: entry.altitude ?? null,
@@ -89,6 +90,7 @@ export function toCommuneAttributes(f: ModuleFacts): CommuneAttributes {
     uu: f.uu,
     altitude: f.altitude,
     reliefProximite: f.reliefProximite,
+    reliefAltitudeMaxM: f.reliefAltitudeMaxM ?? null,
     distanceCoteKm: f.distanceCoteKm,
   };
 }

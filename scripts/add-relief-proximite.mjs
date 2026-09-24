@@ -93,6 +93,7 @@ async function main() {
   for (const c of communes) {
     if (c.lat == null || c.lon == null || c.altitude == null) {
       c.relief_proximite = null;
+      c.relief_altitude_max_m = null;
       continue;
     }
     const lc = Math.floor(c.lat / CELL);
@@ -109,6 +110,10 @@ async function main() {
       }
     }
     c.relief_proximite = Math.round(lerp(CURVE, maxAlt));
+    // LA MESURE ELLE-MÊME, gardée à côté de sa note (24/09/2026). Le dossier affichait « 0/100,
+    // seuil 50 », une note interne qu'aucun lecteur ne sait lire. Ce qu'elle résume se dit en
+    // mètres : l'altitude de référence la plus haute parmi les communes du rayon, la sienne comprise.
+    c.relief_altitude_max_m = Math.round(maxAlt);
     if (c.relief_proximite >= 40) withRelief++;
   }
 

@@ -40,6 +40,12 @@ export const PRODUCT_CONVENTIONS = {
   excludeSeaMinKm: 15, // « pas le littoral » = au moins 15 km de la côte
   montagneMinScore: 50, // « à la montagne » = montagnosité >= 50, soit environ 600 m
   reliefProcheMinScore: 50, // « proche d'une montagne » = un massif à portée
+  // LA MÊME CONVENTION, DITE EN MÈTRES (24/09/2026). Ce n'est PAS un second seuil : c'est la
+  // traduction de `reliefProcheMinScore` par la courbe de scripts/add-relief-proximite.mjs, où 50
+  // tombe à 1 233 m (entre 900 m → 25 et 1 300 m → 55), arrondi pour être lu. Le verdict se décide
+  // toujours sur la note ; ce chiffre ne sert qu'à la phrase. Un test vérifie que les deux restent
+  // accordés : si la note ou la courbe change, il échoue.
+  reliefProcheSeuilAltitudeM: 1250,
   // La géométrie d'une isochrone est SIMPLIFIÉE : sur le polygone des 30 minutes en voiture depuis la gare
   // Matabiau, ses sommets sont espacés de 267 m en médiane, 539 m au 9e décile. Sous cette bande, un verdict
   // serait décidé par la simplification plutôt que par le territoire.
@@ -116,6 +122,12 @@ export type CommuneAttributes = {
   uu: string | null;
   altitude: number | null;
   reliefProximite: number | null;
+  /**
+   * L'altitude de référence la plus haute parmi les communes à moins de 35 km, la sienne comprise.
+   * C'est la mesure que `reliefProximite` résume en note. Optionnelle : un appelant ancien, ou une
+   * fixture, peut ne pas la porter, et la phrase retombe alors sur une formulation sans chiffre.
+   */
+  reliefAltitudeMaxM?: number | null;
   distanceCoteKm: number | null;
 };
 
@@ -441,6 +453,11 @@ export function evaluateMontagne(
   };
 }
 
+/** « 1 250 », « 57 » : une espace insécable fine pour les milliers, comme on l'écrit en français. */
+function metres(m: number): string {
+  return Math.round(m).toLocaleString("fr-FR");
+}
+
 export function evaluateReliefProche(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -453,8 +470,13 @@ export function evaluateReliefProche(
 
   const observedValue: ConstraintValue = { kind: "score", value: c.reliefProximite };
   const expectedValue: ConstraintValue = { kind: "score", value: PRODUCT_CONVENTIONS.reliefProcheMinScore };
-  const observedLabel = `${Math.round(c.reliefProximite)}/100`;
-  const expectedLabel = `au moins ${PRODUCT_CONVENTIONS.reliefProcheMinScore}/100`;
+  // LA NOTE NE S'AFFICHE PLUS (24/09/2026). « 0/100, seuil 50 » était une tuyauterie interne posée
+  // devant le lecteur. Ce qui s'affiche est la mesure que la note résume, en mètres, et le seuil
+  // traduit dans la même unité. La note reste la valeur STRUCTURÉE (`observedValue`), celle qui décide.
+  const altitudeMax = c.reliefAltitudeMaxM ?? null;
+  const seuilM = PRODUCT_CONVENTIONS.reliefProcheSeuilAltitudeM;
+  const observedLabel = altitudeMax != null ? `${metres(altitudeMax)} m` : "sous le seuil retenu";
+  const expectedLabel = `environ ${metres(seuilM)} m`;
   const evidenceKeys = ["commune.reliefProximite", "project.hardConstraints.reliefProche"];
 
   if (c.reliefProximite >= PRODUCT_CONVENTIONS.reliefProcheMinScore) {
@@ -465,7 +487,12 @@ export function evaluateReliefProche(
     topic: topicFit(`le relief autour ${deCommune(c.nom)}`, "le relief autour de cette commune"),
     // « Aucun massif n'est à portée » est plus catégorique que la donnée : à 49/100, c'est faux. On dit
     // ce qu'on mesure, et le seuil retenu. Moins séduisant, opposable.
-    statement: `Autour de cette commune, le relief reste sous le seuil retenu pour considérer qu'un massif est à portée (${Math.round(c.reliefProximite)}/100, seuil ${PRODUCT_CONVENTIONS.reliefProcheMinScore}).`,
+    //
+    // « ALTITUDE DE RÉFÉRENCE », jamais « sommet » : l'index porte l'altitude du point de référence de
+    // chaque commune, et une commune peut contenir un sommet bien plus haut que ce point.
+    statement: altitudeMax != null
+      ? `Dans un rayon de 35 km autour ${deCommune(c.nom)}, aucune commune n'a une altitude de référence supérieure à ${metres(altitudeMax)} m. Un relief montagneux est considéré à portée à partir d'environ ${metres(seuilM)} m.`
+      : `Dans un rayon de 35 km autour ${deCommune(c.nom)}, les altitudes de référence des communes restent sous le seuil retenu pour considérer un relief montagneux à portée, environ ${metres(seuilM)} m.`,
   };
 }
 
