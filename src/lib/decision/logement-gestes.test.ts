@@ -96,11 +96,12 @@ test("CAVITÉ · location : on cherche des signes, et on demande ce qui a été 
   assert.doesNotMatch(`${label} ${detail}`, /Signalez|par écrit/i);
 });
 
-test("SINISTRALITÉ · location : l'état des risques se demande AVANT de s'engager", () => {
+test("SINISTRALITÉ · location : l'état des risques se demande dès la première visite", () => {
   const { label, detail } = GESTES.sinistralite.location;
   assert.match(label, /état des risques/i);
-  // Le moment est nommé, et c'est celui où l'on peut encore renoncer.
-  assert.match(detail, /avant de vous engager|avant de signer/i);
+  // Le moment est nommé, et c'est celui où l'on peut encore renoncer. Il était « avant de signer »
+  // jusqu'au 25/09/2026 : trop tard, l'état des risques se remet dès la première visite.
+  assert.match(detail, /première visite/i);
   // Le détail mélangeait un document « remis à la signature » et un sinistre « survenu pendant le
   // bail » : deux moments incompatibles dans le même geste, dont le second est déjà passé.
   assert.doesNotMatch(detail, /pendant le bail|survenu pendant/i);
@@ -112,7 +113,22 @@ test("RÉGLEMENTAIRE · location : le document est demandé, pas annoncé comme 
   // obligation juridique que le produit ne source pas (précaution 1 de la table).
   const { detail } = GESTES.reglementaire.location;
   assert.doesNotMatch(detail, /remis à la signature/i);
-  assert.match(detail, /avant de signer|avant de vous engager/i);
+  assert.match(detail, /première visite/i);
+});
+
+test("ÉTAT DES RISQUES : un conseil pratique, jamais une obligation énoncée", () => {
+  // Vérifié sur Légifrance le 25/09/2026 (L125-5, R125-25), mais rien n'est ÉNONCÉ comme un droit :
+  // tant qu'un texte ne peut pas porter une source structurée, un article glissé dans une phrase se
+  // lirait comme une source que le produit ne sait ni dater ni vérifier (précaution 1).
+  const textes = [
+    GESTES.sinistralite.achat, GESTES.sinistralite.location, GESTES.sinistralite.neutre,
+    GESTES.reglementaire.location,
+  ].map((g) => `${g.label} ${g.detail}`);
+  for (const t of textes) {
+    assert.doesNotMatch(t, /\bdoit\b|\bdoivent\b|obligatoire|obligation|article|\bloi\b|six mois|L\.? ?125/i, t);
+  }
+  // Le document porte sur un BIEN, jamais sur une commune.
+  assert.doesNotMatch(GESTES.sinistralite.neutre.label, /commune/i);
 });
 
 // ── Les précautions de la table, sur la seule colonne `location` ──────────────────────────────

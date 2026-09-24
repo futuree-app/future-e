@@ -95,7 +95,9 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
   },
   reglementaire: {
     achat: { label: "Consultez le règlement de la zone en mairie", detail: "Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant." },
-    location: { label: "Demandez au bailleur les prescriptions qui s'appliquent", detail: "L'état des risques, demandé avant de signer, indique le zonage et ce qu'il impose au logement." },
+    // « DEMANDÉ AVANT DE SIGNER » ÉTAIT TROP TARD (25/09/2026) : l'état des risques se remet dès la
+    // première visite. Dit en CONSEIL PRATIQUE, jamais en obligation : cf. la précaution 1 de la table.
+    location: { label: "Demandez au bailleur les prescriptions qui s'appliquent", detail: "Demandez l'état des risques dès la première visite : il permet de repérer le zonage applicable, et le règlement précise ce qu'il impose au logement." },
     reside: { label: "Lisez le règlement avant une extension", detail: "Une rénovation lourde peut être conditionnée par le zonage." },
     neutre: { label: "Lisez le règlement de la zone en mairie", detail: "Il dit ce que le zonage autorise, interdit ou impose à cette adresse." },
   },
@@ -125,11 +127,24 @@ export const GESTES: Record<GesteKey, Record<Bucket, ActionCopy>> = {
     reside: { label: "Faites mesurer le radon pendant la saison de chauffe", detail: "Un dosimètre posé plusieurs semaines dans les pièces de vie donne la concentration réelle." },
     neutre: { label: "Renseignez-vous sur la mesure du radon dans ce logement", detail: "C'est la seule façon de savoir : le classement du sol ne dit rien d'un bâtiment en particulier." },
   },
+  // L'ÉTAT DES RISQUES, DIT EN PRATIQUE ET NON EN DROIT (25/09/2026).
+  //
+  // Vérifié sur Légifrance le 25/09 : remis dès la première visite si elle a lieu et si le bien est
+  // concerné (art. L125-5), établi depuis moins de six mois (art. R125-25), sinistres indemnisés
+  // pendant la propriété du vendeur OU dont il a été informé. Rien de cela n'est ÉNONCÉ comme une
+  // obligation : la précaution 1 de la table l'interdit tant qu'un texte ne peut pas porter une
+  // source structurée (article, date de vérification). Un numéro d'article glissé dans une phrase se
+  // lirait comme une source que le produit ne sait ni dater ni vérifier. Le jour où existera un objet
+  // « fondement juridique » sourcé, ces obligations pourront se dire.
+  //
+  // Ce qui est gardé, en conseil : LE MOMENT (dès la première visite, l'ancien « avant de signer »
+  // arrivait trop tard) et L'OBJET (les sinistres indemnisés, que seul le propriétaire connaît).
   sinistralite: {
-    achat: { label: "Demandez l'état des risques et les sinistres indemnisés", detail: "Le vendeur indique les sinistres indemnisés au titre d'une catastrophe naturelle pendant qu'il occupait le bien." },
-    location: { label: "Demandez au bailleur l'état des risques", detail: "Demandez-le avant de vous engager, avec ce que le bailleur sait des sinistres déjà survenus dans le logement." },
+    achat: { label: "Demandez l'état des risques et les sinistres indemnisés", detail: "Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement." },
+    location: { label: "Demandez au bailleur l'état des risques", detail: "Demandez-le dès la première visite, et demandez au bailleur ce qu'il sait des sinistres indemnisés déjà survenus dans le logement." },
     reside: { label: "Renseignez-vous sur les indemnisations déjà versées", detail: "Les arrêtés de catastrophe naturelle pris sur la commune disent quels épisodes ont donné lieu à indemnisation." },
-    neutre: { label: "Consultez l'état des risques de la commune", detail: "Il récapitule les arrêtés de catastrophe naturelle et les zonages qui s'appliquent." },
+    // « DE LA COMMUNE » ÉTAIT FAUX : l'état des risques porte sur un bien, par son adresse ou sa parcelle.
+    neutre: { label: "Consultez l'état des risques officiel de cette adresse", detail: "Le service ERRIAL de Géorisques permet de préparer gratuitement cet état à partir d'une adresse ou d'une parcelle. Cette version préparée reste à vérifier et à compléter pour le bien concerné." },
   },
 };
 

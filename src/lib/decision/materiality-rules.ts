@@ -195,7 +195,10 @@ const ruleInondation: DecisionRule = {
       evidence,
       action: habitant
         ? { type: "demander_confirmation", label: "Consultez l'état des risques applicable à votre adresse" }
-        : { type: "obtenir_document", label: "Consultez l'état des risques (Géorisques)" },
+        : {
+            type: "obtenir_document", label: "Consultez l'état des risques (Géorisques)",
+            detail: "Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.",
+          },
     };
     return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "verification", facts: [fact], reason: "exposition inondation notable" };
   },
