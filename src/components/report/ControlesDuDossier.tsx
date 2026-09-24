@@ -29,6 +29,7 @@ import styles from "./ControlesDuDossier.module.css";
 // La couleur des contrôles, la même que leur section dans la minute : une même nature de constat se
 // peint pareil d'un bout à l'autre de la page.
 const COULEUR = "var(--info)";
+const COULEUR_NON_SU = "var(--reg-non-su)";
 
 function sujetDeCarte(card: DossierCard): string {
   if (card.kind === "fact") return card.fact.topic;
@@ -64,9 +65,20 @@ export function ControlesDuDossier(
   }: { dossier: Dossier; provenance?: string },
 ) {
   const groupes = controlesParEchelle(dossier);
-  // Aucun contrôle établi : rien ne s'affiche, et le verdict n'en parle pas non plus. Un bloc vide
-  // annonçant « aucun point à contrôler » promettrait une vérification exhaustive du lieu.
-  if (groupes.length === 0) return null;
+  // CE QUE NOS SOURCES N'ONT PAS PU LIRE A ENFIN UNE SURFACE (24/09/2026).
+  //
+  // La section `unknowns` n'était rendue que par la minute, plafonnée à quatre cartes. Une inconnue
+  // qui n'y entrait pas n'apparaissait NULLE PART : vu à Châtelaillon, Géorisques muet sur l'argile,
+  // les plans de prévention et les cavités, et l'écran ne disait pas que ces vérifications
+  // n'avaient pas eu lieu. Le lecteur pouvait croire qu'elles avaient été faites et n'avaient rien
+  // trouvé. C'est le défaut exact que ce composant a été créé pour corriger, pour les contrôles.
+  //
+  // Une rubrique À PART, et non un groupe de plus parmi les contrôles : un contrôle est établi, une
+  // inconnue ne l'est pas, et les mêler ferait lire l'une comme l'autre.
+  const inconnues = dossier.sections.find((s) => s.key === "unknowns")?.cards ?? [];
+  // Aucun contrôle établi ni inconnue : rien ne s'affiche, et le verdict n'en parle pas non plus. Un
+  // bloc vide annonçant « aucun point à contrôler » promettrait une vérification exhaustive du lieu.
+  if (groupes.length === 0 && inconnues.length === 0) return null;
 
   const absorbedOf = (c: DossierCard) =>
     c.kind === "composition"
@@ -156,6 +168,48 @@ export function ControlesDuDossier(
             </div>
           </details>
         ))}
+        {inconnues.length > 0 ? (
+          <details className={`${styles.disclosure} glass rounded-xl overflow-hidden`}>
+            <summary className={`${styles.summary} cursor-pointer select-none px-5 py-4 sm:px-6 sm:py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-info`}>
+              <span className="flex items-center justify-between gap-4">
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="text-[15px] font-medium text-label">Ce que nos sources n&apos;ont pas pu lire</span>
+                  <span className="text-[12px] leading-[1.45] text-muted">
+                    {bindOrphans(sujetsDuGroupe(inconnues))}
+                  </span>
+                  <span className="font-mono text-[10px] tracking-[0.05em] text-ghost">
+                    {inconnues.length === 1 ? "1 point non vérifié" : `${inconnues.length} points non vérifiés`}
+                  </span>
+                </span>
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className={`${styles.chevron} h-5 w-5 shrink-0 text-muted`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m7 9.5 5 5 5-5" />
+                </svg>
+              </span>
+            </summary>
+            <div className="border-t border-[var(--border-1)] px-5 py-5 sm:px-6 sm:py-6">
+              <ul className="flex flex-col gap-6 [&>li:not(:first-child)]:border-t [&>li:not(:first-child)]:border-[var(--border-1)] [&>li:not(:first-child)]:pt-6">
+                {inconnues.map((card) => card.kind === "fact" ? (
+                  <li key={card.fact.id}>
+                    {/* LE GRIS DU NON SU, jamais la couleur des contrôles : une donnée qu'on n'a pas pu
+                        lire ne reçoit aucune valence (doctrine design, amendement des registres). */}
+                    <FactBody fact={card.fact} color={COULEUR_NON_SU} />
+                    <EvidenceRow fact={card.fact} color={COULEUR_NON_SU} provenance={provenance} />
+                    <MethodDetails conventions={factSources(card.fact)} checks={factChecks(card.fact)} />
+                  </li>
+                ) : null)}
+              </ul>
+            </div>
+          </details>
+        ) : null}
       </div>
     </section>
   );
