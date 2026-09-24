@@ -9,7 +9,14 @@ import type { DpeRecord } from "./dpe-attribution.ts";
 //       atteint aucun dossier existant : le snapshot figé aurait continué d'annoncer « Espace
 //       vert · Pelouse · env. 19 m » sur une pelouse de 400 m², puisque `needsRecompute` ne
 //       compare que cette version.
-export const SOURCES_VERSION = "face3-2026-07-08e";
+//       … ET AVEC LE BUMP, ELLE N'EN A ATTEINT AUCUN NON PLUS : la page Autour affichait le
+//       snapshot du dossier sans jamais appeler la route qui compare la version. Corrigé le 24/09.
+//   f : le plus proche de chaque TYPE (`nearestByType`, 22/09/2026), sans lequel une pharmacie
+//       masquait le médecin. Premier bump suivi d'un vrai rafraîchissement : un voisinage d'une
+//       version antérieure est servi tel quel et recalculé en arrière-plan, depuis la page Autour
+//       comme depuis celle du dossier (`calcul-voisinage.ts`), sans jamais dégrader une partie
+//       déjà obtenue (`fusionnerRafraichissement`).
+export const SOURCES_VERSION = "face3-2026-07-08f";
 
 // Projection persistée de l'état runtime du choix DPE (cf. spec §6). `pending` tant que rien
 // de définitif ; les deux statuts « confirmés » figent un DPE daté.

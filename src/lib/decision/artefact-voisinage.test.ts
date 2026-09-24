@@ -71,3 +71,40 @@ test("l'assemblage recense les vérifications muettes sur le chemin qui aboutit"
   const src = readFileSync("src/lib/server/assemble-address-dossier.ts", "utf8");
   assert.match(src, /verificationsIndisponibles: verificationsMateriellesIndisponibles\(logement\)/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE VOISINAGE SE RAFRAÎCHIT VRAIMENT (24/09/2026).
+//
+// Le 20/09, la version des sources avait été relevée pour corriger les espaces verts, et la
+// correction n'avait atteint AUCUN dossier : la page Autour affichait le snapshot sans jamais
+// appeler la route qui compare la version. Un rafraîchissement qui existe mais que rien n'appelle
+// est un rafraîchissement qui n'existe pas. Ces tests vérifient les trois points d'entrée.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("la page Autour demande le rafraîchissement d'un voisinage d'une version antérieure", () => {
+  const src = readFileSync("src/components/report/AutourModule.tsx", "utf8");
+  assert.match(src, /dossier\.snapshot\.sourcesVersion !== SOURCES_VERSION\) void requestAutour\(address, true\)/);
+});
+
+test("la route sert l'ancien voisinage et recalcule APRÈS avoir répondu", () => {
+  const src = readFileSync("src/app/api/logement-autour/route.ts", "utf8");
+  const garde = src.indexOf("voisinagePerime(existing.snapshot)");
+  const calculImmediat = src.indexOf("await calculerVoisinage(center, existing.insee)");
+  assert.ok(garde >= 0 && calculImmediat >= 0);
+  assert.ok(garde < calculImmediat, "un voisinage périmé ne doit pas être recalculé pendant que le lecteur attend");
+  const bloc = src.slice(garde, calculImmediat);
+  assert.match(bloc, /after\(async \(\) => \{ await rafraichirVoisinageSiPerime\(/);
+  assert.match(bloc, /snapshot: existing\.snapshot/);
+});
+
+test("la page du dossier rafraîchit aussi, pour qui n'ouvre jamais Autour", () => {
+  const src = readFileSync("src/app/(account)/rapport/page.tsx", "utf8");
+  assert.match(src, /after\(async \(\) => \{ await rafraichirVoisinageSiPerime\(user\.id, aRafraichir\); \}\)/);
+});
+
+test("le rafraîchissement passe par la fusion, jamais par un remplacement brut", () => {
+  const src = readFileSync("src/lib/server/calcul-voisinage.ts", "utf8");
+  const fonction = src.slice(src.indexOf("export async function rafraichirVoisinageSiPerime"));
+  assert.match(fonction, /fusionnerRafraichissement\(ancien, nouveau\)/);
+  assert.match(fonction, /if \(!retenu\) return;/);
+  assert.match(fonction, /snapshot: retenu/);
+});

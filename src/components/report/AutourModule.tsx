@@ -22,7 +22,7 @@ import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
-import type { AddressDossierRow } from "@/lib/address-dossier-store";
+import { SOURCES_VERSION, type AddressDossierRow } from "@/lib/address-dossier-store";
 import type { CarOwnership } from "@/lib/iris-logement";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Face3Block } from "@/components/report/logement/AutourSection";
@@ -161,6 +161,10 @@ export default function AutourModule({
         // silence, par-dessus un écran déjà complet. Le champ une fois écrit est gelé, donc cet
         // appel n'a lieu qu'une seule fois par dossier.
         if (dossier.snapshot.permis === undefined) void requestAutour(address, true);
+        // LE VOISINAGE D'UNE VERSION ANTÉRIEURE (24/09/2026). Même demande silencieuse : la route
+        // rend aussitôt le voisinage affiché et le recalcule après avoir répondu. Le nouveau sert à
+        // la visite suivante, l'écran ne change pas sous les yeux du lecteur.
+        else if (dossier.snapshot.sourcesVersion !== SOURCES_VERSION) void requestAutour(address, true);
         return;
       }
       return requestAutour(address);

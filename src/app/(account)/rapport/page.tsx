@@ -29,6 +29,7 @@ import {
 } from "@/lib/decision/decision-artifact";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
+import { rafraichirVoisinageSiPerime } from "@/lib/server/calcul-voisinage";
 import { communeParent } from "@/lib/plm";
 import { choisirDossierActif } from "@/lib/dossier-actif";
 import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
@@ -140,6 +141,13 @@ export default async function RapportPage() {
     ? choisirDossierActif(dossiers, inseeCode, (profile as { active_dossier_id?: string | null } | null)?.active_dossier_id ?? null)
     : { dossier: null, raison: "aucun" as const, autres: [] };
   const logementForCommune = choixDossier.dossier;
+  // LE VOISINAGE SE RAFRAÎCHIT AUSSI D'ICI (24/09/2026), pas seulement depuis la page Autour : un
+  // lecteur qui n'ouvre jamais Autour ne verrait sinon jamais les améliorations du voisinage dans
+  // son dossier. Après la réponse, jamais pendant : la page s'affiche avec ce qu'elle a.
+  if (logementForCommune) {
+    const aRafraichir = logementForCommune;
+    after(async () => { await rafraichirVoisinageSiPerime(user.id, aRafraichir); });
+  }
   // Les biens qui ouvrent une AUTRE commune que celle lue : c'est exactement ce que le lecteur
   // cherche quand l'écran lui sert un rapport partiel. Une entrée par commune, pas par bien : deux
   // appartements du même immeuble mènent au même territoire.

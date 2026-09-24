@@ -1,11 +1,7 @@
 import { after } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { requireCurrentUser } from "@/lib/user-account";
-import { loadBpePointsAround, nearestByCategory } from "@/lib/logement-bpe";
-import { getTileGeoms, computeOsmProximity, OSM_BBOX_RADIUS_M } from "@/lib/logement-osm";
-import { assembleSnapshot } from "@/lib/logement-autour";
-import { getIcuSignal } from "@/lib/icu";
 import { fetchPermisAutour } from "@/lib/server/sitadel-permis";
+import { calculerVoisinage, rafraichirVoisinageSiPerime, voisinagePerime } from "@/lib/server/calcul-voisinage";
 import { buildAutourResponse } from "@/lib/server/autour-response";
 import { getDossier, needsRecompute, SOURCES_VERSION } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
@@ -13,12 +9,6 @@ import type { Posture } from "@/lib/logement-autour-types";
 
 export const dynamic = "force-dynamic";
 
-// Client service-role pour le cache de tuile partagé (bypasse la RLS, écrit une donnée
-// mutualisée entre utilisateurs). Jamais exposé au client.
-const admin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
 
 // L'identité de l'adresse ne vient PLUS du corps de requête : elle vit dans le dossier, écrite
 // par le seul webhook (ou l'outil d'administration). Le client dit quel dossier il regarde, le
@@ -98,45 +88,19 @@ export async function POST(req: Request) {
     );
   }
 
-  // ICU (îlot de chaleur du quartier) : appel WFS IGN, lancé en concurrence avec OSM (silencieux
-  // si non couvert / panne -> pas de bloc). Awaité au moment d'assembler.
-  const icuPromise = getIcuSignal(center.lat, center.lon);
-
-  // Les permis : deux appels réseau (cadastre + registre), lancés ici pour qu'ils courent pendant
-  // la BPE et la tuile OSM. Ne lèvent jamais ; `null` laisse le champ absent, donc pas de bloc.
-  const permisPromise = fetchPermisAutour(center.lat, center.lon, existing.insee);
-
-  // BPE : local, immédiat. Le millésime voyage avec les points : il vient des shards, jamais d'une
-  // constante du code (cf. `loadBpePointsAround`).
-  const { points: bpePoints, millesime: bpeMillesime } = await loadBpePointsAround(center);
-  const bpe = nearestByCategory(center, bpePoints);
-
-  // OSM : cache de cellule (service-role) ; si froid, tentative inline sous timeout court.
-  let osm = null;
-  let osmStatus: "complete" | "pending" | "failed" = "pending";
-  try {
-    const tile = await Promise.race([
-      getTileGeoms(admin, center),
-      new Promise<{ geoms: never[]; status: "pending" }>((res) =>
-        setTimeout(() => res({ geoms: [], status: "pending" }), 3500),
-      ),
-    ]);
-    if (tile.status === "complete") {
-      osm = computeOsmProximity(center, tile.geoms, OSM_BBOX_RADIUS_M);
-      osmStatus = "complete";
-    } else if (tile.status === "failed") {
-      osmStatus = "failed";
-    } else {
-      // Timeout : poursuivre le remplissage du cache après réponse (tuile chaude au retry).
-      after(async () => {
-        await getTileGeoms(admin, center).catch(() => {});
-      });
-    }
-  } catch {
-    osmStatus = "failed";
+  // UN VOISINAGE D'UNE VERSION ANTÉRIEURE SE SERT TEL QUEL, ET SE RAFRAÎCHIT DERRIÈRE (24/09/2026).
+  // Le lecteur voit son voisinage tout de suite, sans « Analyse en cours… » au-dessus d'un écran
+  // qui était complet ; le recalcul se fait après la réponse, et le nouveau voisinage sert à la
+  // visite suivante. La page ne se transforme pas sous ses yeux (arbitrage du porteur).
+  if (existing.snapshot && voisinagePerime(existing.snapshot)) {
+    const aRafraichir = existing;
+    after(async () => { await rafraichirVoisinageSiPerime(user.id, aRafraichir); });
+    return Response.json(
+      await buildAutourResponse({ snapshot: existing.snapshot, lat: center.lat, lon: center.lon, insee: existing.insee }),
+    );
   }
 
-  const snapshot = assembleSnapshot(center, bpe, osm, osmStatus, await icuPromise, await permisPromise, bpeMillesime);
+  const snapshot = await calculerVoisinage(center, existing.insee);
 
   // Le patch ne porte QUE ce que ce module produit. L'identité de l'adresse et la parcelle ne
   // sont plus dans la portée d'écriture : la question « ne jamais dégrader la parcelle », qui
