@@ -409,3 +409,25 @@ export function artefactPerimeParLeDpe(
   if (Number.isNaN(fige) || Number.isNaN(change)) return false;
   return change > fige;
 }
+
+/**
+ * LE VOISINAGE EST-IL PLUS RÉCENT QUE LA VERSION SERVIE ? (24/09/2026)
+ *
+ * Les voisinages se rafraîchissent désormais en arrière-plan, mais la version figée d'un dossier ne
+ * bouge pas, et c'est voulu : elle est ce sur quoi le lecteur a décidé. Sans ce signal, un voisinage
+ * rafraîchi n'atteignait jamais sa décision : le bouton de mise à jour n'apparaissait que si le
+ * PROJET avait changé. Le lecteur restait sur une lecture ancienne sans le savoir.
+ *
+ * `false` dès qu'une date manque ou ne se lit pas : on ne propose pas une mise à jour sur une
+ * comparaison qu'on ne sait pas faire.
+ */
+export function voisinagePlusRecentQueLaVersion(
+  versionGenereeLe: string | null | undefined,
+  voisinageCalculeLe: string | null | undefined,
+): boolean {
+  if (!versionGenereeLe || !voisinageCalculeLe) return false;
+  const version = Date.parse(versionGenereeLe);
+  const voisinage = Date.parse(voisinageCalculeLe);
+  if (Number.isNaN(version) || Number.isNaN(voisinage)) return false;
+  return voisinage > version;
+}

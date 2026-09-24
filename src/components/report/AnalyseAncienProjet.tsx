@@ -20,7 +20,13 @@ import { useRouter } from "next/navigation";
 // Une version n+1. La précédente reste en base et lisible : c'est ce sur quoi il a décidé.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-export function AnalyseAncienProjet({ insee, scopeKey }: { insee: string; scopeKey: string }) {
+// ── DEUX RAISONS, UN SEUL GESTE (24/09/2026) ─────────────────────────────────────────────────
+// Le voisinage se rafraîchit désormais en arrière-plan. Quand il est plus récent que la version
+// servie, la même mise à jour est proposée, pour une autre raison : ce n'est pas le lecteur qui a
+// changé, c'est ce que futur•e sait de son adresse. La version figée ne bouge pas pour autant.
+export function AnalyseAncienProjet(
+  { insee, scopeKey, raison = "projet" }: { insee: string; scopeKey: string; raison?: "projet" | "voisinage" },
+) {
   const [etat, setEtat] = useState<"repos" | "encours" | "ailleurs" | "echec">("repos");
   const router = useRouter();
 
@@ -57,8 +63,9 @@ export function AnalyseAncienProjet({ insee, scopeKey }: { insee: string; scopeK
       style={{ borderLeft: "2px solid var(--reg-non-su)" }}
     >
       <p className="text-[13px] text-muted flex-1 min-w-[260px]">
-        Votre projet a changé depuis cette analyse. Ce que vous lisez répond au projet que vous aviez
-        au moment de l&apos;achat.
+        {raison === "projet"
+          ? <>Votre projet a changé depuis cette analyse. Ce que vous lisez répond au projet que vous aviez au moment de l&apos;achat.</>
+          : <>Une version plus récente de futur•e est disponible pour ce dossier. Ce que vous lisez reste l&apos;analyse telle qu&apos;elle a été établie.</>}
       </p>
       <button
         onClick={mettreAJour}

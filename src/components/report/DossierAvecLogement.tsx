@@ -8,7 +8,7 @@
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import {
-  dossierAServir, artefactPerimeParLeDpe, prochaineVersionAutomatique,
+  dossierAServir, artefactPerimeParLeDpe, prochaineVersionAutomatique, voisinagePlusRecentQueLaVersion,
 } from "@/lib/decision/decision-artifact";
 import { projetAChangeMateriellement } from "@/lib/decision/projet-materiel";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
@@ -155,6 +155,11 @@ export async function DossierAvecLogement({
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement} titre={titre}
         supportingPane={supportingPane}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
+        // UN VOISINAGE RAFRAÎCHI APRÈS LA VERSION SERVIE : la décision peut être mise à jour, jamais
+        // réécrite seule. Seulement quand on sert une version FIGÉE : un assemblage vivant utilise
+        // déjà le voisinage courant.
+        voisinageAChange={servi.source === "artefact"
+          && voisinagePlusRecentQueLaVersion(servi.generatedAt, snapshotAutour?.computedAt)}
         // LA PROVENANCE N'EXISTE QUE S'IL Y A UNE VERSION FIGÉE. Sur un dossier assemblé à
         // l'instant, un lien qui désignerait un artefact enverrait la surface d'arrivée chercher
         // une preuve qui n'a jamais été vendue.

@@ -108,3 +108,29 @@ test("le rafraîchissement passe par la fusion, jamais par un remplacement brut"
   assert.match(fonction, /if \(!retenu\) return;/);
   assert.match(fonction, /snapshot: retenu/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UN VOISINAGE RAFRAÎCHI PROPOSE LA MISE À JOUR, SANS JAMAIS RÉÉCRIRE LA VERSION (24/09/2026).
+// Sans ce signal, le bouton n'apparaissait que si le PROJET avait changé : un voisinage rafraîchi
+// n'atteignait jamais la décision, et le lecteur restait sur une lecture ancienne sans le savoir.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+import { voisinagePlusRecentQueLaVersion } from "./decision-artifact.ts";
+
+test("le voisinage plus récent que la version se signale", () => {
+  assert.equal(voisinagePlusRecentQueLaVersion("2026-09-22T10:00:00Z", "2026-09-24T18:00:00Z"), true);
+  assert.equal(voisinagePlusRecentQueLaVersion("2026-09-24T18:00:00Z", "2026-09-22T10:00:00Z"), false);
+});
+
+test("une date absente ou illisible ne propose rien", () => {
+  // On ne propose pas une mise à jour sur une comparaison qu'on ne sait pas faire.
+  assert.equal(voisinagePlusRecentQueLaVersion(null, "2026-09-24T18:00:00Z"), false);
+  assert.equal(voisinagePlusRecentQueLaVersion("2026-09-22T10:00:00Z", undefined), false);
+  assert.equal(voisinagePlusRecentQueLaVersion("pas une date", "2026-09-24T18:00:00Z"), false);
+});
+
+test("le signal ne vaut que pour une version FIGÉE, et le projet prime", () => {
+  const avec = readFileSync("src/components/report/DossierAvecLogement.tsx", "utf8");
+  assert.match(avec, /voisinageAChange=\{servi\.source === "artefact"\s*&& voisinagePlusRecentQueLaVersion\(servi\.generatedAt, snapshotAutour\?\.computedAt\)\}/);
+  const section = readFileSync("src/components/report/DossierDecisionSection.tsx", "utf8");
+  assert.match(section, /raison=\{projetAChange \? "projet" : "voisinage"\}/);
+});

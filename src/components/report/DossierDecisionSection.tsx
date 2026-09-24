@@ -91,6 +91,7 @@ export function DossierDecisionSection({
   scopeKey,
   provenance,
   projetAChange,
+  voisinageAChange,
   generatedAt,
   espacement = "mt-14",
   titre,
@@ -125,6 +126,8 @@ export function DossierDecisionSection({
    * jamais seul, l'analyse achetée répondant à une autre question.
    */
   projetAChange?: boolean;
+  /** Le voisinage a été rafraîchi après la version servie (cf. `voisinagePlusRecentQueLaVersion`). */
+  voisinageAChange?: boolean;
   /**
    * L'air AU-DESSUS de la section. `mt-14` quand elle suit d'autres blocs (comportement
    * historique), resserré quand elle est la suite immédiate de l'en-tête du dossier : le lecteur
@@ -207,8 +210,10 @@ export function DossierDecisionSection({
           {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
               suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
               réponse d'alors. */}
-          {projetAChange && insee ? (
-            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} />
+          {/* LE PROJET PRIME : s'il a changé, c'est la raison que le lecteur doit lire, et la mise à
+              jour prendra de toute façon le voisinage courant. */}
+          {(projetAChange || voisinageAChange) && insee ? (
+            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison={projetAChange ? "projet" : "voisinage"} />
           ) : null}
 
           {logementStatus === "pending" ? (
