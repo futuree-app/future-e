@@ -79,7 +79,16 @@ const na = (id: string): RuleEvaluation => ({ ruleId: `logement.${id}`, projectK
 //
 // Un registre rempli par `coverageRule` plutôt qu'une liste recopiée : une règle ajoutée demain y
 // entre d'elle-même, avec le tier qu'elle déclare.
-const POTENTIEL_DES_COUVERTURES = new Map<string, { tier: MaterialityTier; coverage: (l: LogementFacts) => SourceCoverage }>();
+const POTENTIEL_DES_COUVERTURES = new Map<string, { tier: MaterialityTier; coverage: (l: LogementFacts) => SourceCoverage; nom: string }>();
+
+/**
+ * Le nom d'une vérification tel qu'il se lit dans une énumération (« les plans de prévention »),
+ * ou `null` si la règle n'en est pas une. Le `topic` ne convient pas : il nomme le sujet d'un
+ * CONSTAT (« un plan de prévention des risques »), pas la vérification qui n'a pas eu lieu.
+ */
+export function nomDeVerification(ruleId: string): string | null {
+  return POTENTIEL_DES_COUVERTURES.get(ruleId)?.nom ?? null;
+}
 
 /**
  * Les vérifications POTENTIELLEMENT structurantes (ou critiques) dont la source n'a pas répondu.
@@ -125,9 +134,11 @@ function coverageRule(cfg: {
   // evidence-targets.ts), il ne promet pas une démonstration qui n'existe pas.
   targetKey?: EvidenceTargetKey;
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
+  /** Le nom de la vérification dans une énumération, quand la source ne répond pas. */
+  nomVerification: string;
 }): DecisionRule {
   const grain = cfg.grain ?? "adresse";
-  POTENTIEL_DES_COUVERTURES.set(`logement.${cfg.id}`, { tier: cfg.tier, coverage: cfg.coverage });
+  POTENTIEL_DES_COUVERTURES.set(`logement.${cfg.id}`, { tier: cfg.tier, coverage: cfg.coverage, nom: cfg.nomVerification });
   return {
     id: `logement.${cfg.id}`, module: "logement",
     evaluate: (f, p): RuleEvaluation => {
@@ -230,20 +241,20 @@ export const LOGEMENT_RULES: DecisionRule[] = [
     // recopier ici en parenthèse la disait deux fois à un centimètre d'écart.
     statement: () => "À cette adresse, le sol est exposé au retrait-gonflement des argiles.",
     limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", actionType: "verifier_sur_place", action: GESTES.bati,
-    unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse." }),
+    unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse.", nomVerification: "le retrait-gonflement des argiles" }),
   coverageRule({ id: "zone-reglementee", tier: "structuring", source: SOURCES.georisquesGaspar, targetKey: "housing.regulated_zone", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,
     statement: (l) => l.pprnLabel ? `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}.` : "À cette adresse, au moins un plan de prévention des risques s'applique.",
     actionType: "obtenir_document", action: GESTES.reglementaire,
-    unavailableStatement: "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse." }),
+    unavailableStatement: "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse.", nomVerification: "les plans de prévention" }),
   coverageRule({ id: "cavite", tier: "structuring", source: SOURCES.georisquesBrgm, topic: () => "les cavités souterraines proches", status: "Recensée à moins de 500 m", coverage: (l) => l.cavites, flag: (l) => l.caviteProche,
     statement: () => "À cette adresse, une ou plusieurs cavités souterraines sont recensées à moins de 500 m.",
     limitation: "Recensement d'ouvrages/événements proches, pas une preuve sous ce logement.", actionType: "verifier_sur_place", action: GESTES.cavite,
-    unavailableStatement: "Les cavités souterraines n'ont pas pu être vérifiées à cette adresse." }),
+    unavailableStatement: "Les cavités souterraines n'ont pas pu être vérifiées à cette adresse.", nomVerification: "les cavités souterraines" }),
   coverageRule({ id: "patrimoine", tier: "secondary", source: SOURCES.gpu, buckets: ["neutre", "achat", "reside"], topic: () => "le périmètre patrimonial protégé", status: "Périmètre protégé", coverage: (l) => l.patrimoine, flag: (l) => l.perimetrePatrimonial,
     statement: () => "À cette adresse, le bien est dans un périmètre patrimonial protégé.", actionType: "obtenir_document", action: GESTES.patrimoine,
-    unavailableStatement: "Les protections patrimoniales n'ont pas pu être vérifiées à cette adresse." }),
+    unavailableStatement: "Les protections patrimoniales n'ont pas pu être vérifiées à cette adresse.", nomVerification: "le périmètre patrimonial" }),
   coverageRule({ id: "sinistralite", tier: "secondary", source: SOURCES.onrn, sourceMode: "persisted_snapshot", grain: "commune", topic: () => "les indemnisations recensées", status: "Indemnisations recensées", coverage: (l) => l.sinistralite, flag: (l) => l.sinistraliteActive,
     statement: () => "À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées.",
     limitation: "Ces données ne permettent pas d'établir l'historique de ce logement.", actionType: "obtenir_document", action: GESTES.sinistralite,
-    unavailableStatement: "La sinistralité de la commune n'a pas pu être établie." }),
+    unavailableStatement: "La sinistralité de la commune n'a pas pu être établie.", nomVerification: "les indemnisations de la commune" }),
 ];

@@ -8,6 +8,7 @@ import type { Dossier, DossierSection, DossierCard, DecisionFact, Incompatibilit
 import { estDansLaMinute } from "./minute-selection.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import { echelleDuFait, echelleDeLaComposition, NOM_ECHELLE, ORDRE_ECHELLES, type Echelle } from "./echelles.ts";
+import { nomDeVerification } from "./logement-rules.ts";
 
 // LA CONDITION QUE LE BLOC DE TÊTE PORTE DÉJÀ ENTIÈREMENT.
 //
@@ -241,4 +242,50 @@ export function controlesParEchelle(dossier: Dossier): GroupeDeControles[] {
   // Un groupe vide tombe : l'ordre des échelles est une convention de lecture, pas une grille à
   // remplir. Un dossier de commune seule n'affiche que « Territoire ».
   return groupes.filter((g) => g.cards.length > 0);
+}
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// CE QUE NOS SOURCES N'ONT PAS PU LIRE, EN UNE LIGNE (24/09/2026).
+//
+// La section `unknowns` n'avait de surface que dans la minute, plafonnée à quatre cartes : une
+// vérification sans réponse qui n'y entrait pas n'apparaissait nulle part, et le lecteur pouvait
+// croire qu'elle avait eu lieu. Une première correction l'a rendue en rubrique repliée, au même
+// rang que « Territoire », « Autour » et « Logement » : elle se lisait comme une quatrième échelle,
+// et il fallait cliquer pour apprendre qu'il manquait quelque chose. Retirée le jour même, à la
+// demande du porteur.
+//
+// C'est une précaution sur la LECTURE, pas un lieu à explorer : une phrase, visible sans clic, qui
+// dit ce qui manque et pourquoi. Les inconnues ne viennent aujourd'hui que des vérifications du
+// logement dont la source n'a pas répondu (`logementScopedUnknown`) ; une autre origine, demain,
+// ne serait pas nommée par cette phrase et le test le signalerait.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+const NOMBRES = ["", "Une", "Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit", "Neuf", "Dix"];
+
+/** « BRGM, via Géorisques » → « Géorisques » ; sans « via », le libellé entier. */
+function sourceDe(label: string): string {
+  const i = label.lastIndexOf("via ");
+  return (i >= 0 ? label.slice(i + 4) : label).trim();
+}
+
+function joinFrVerif(items: string[]): string {
+  return items.length <= 1 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+export function phraseVerificationsNonRealisees(dossier: Dossier): string | null {
+  const faits = (dossier.sections.find((s) => s.key === "unknowns")?.cards ?? [])
+    .flatMap((c) => (c.kind === "fact" && c.fact.role === "unknown" ? [c.fact] : []));
+  if (faits.length === 0) return null;
+
+  const noms = faits.map((f) => nomDeVerification(f.ruleId) ?? f.topic);
+  const sources = [...new Set(faits.flatMap((f) => f.evidence.map((e) => sourceDe(e.label))))];
+  const n = faits.length;
+  const tete = n === 1
+    ? "Une vérification n'a pas pu être réalisée"
+    : `${NOMBRES[n] ?? String(n)} vérifications n'ont pas pu être réalisées`;
+  // LA SOURCE EST NOMMÉE quand elle est unique : « Géorisques ne répondait pas » dit à la fois ce
+  // qui manque et que ce n'est pas le lieu qui est en cause. Plusieurs sources : on ne choisit pas.
+  const cause = sources.length === 1
+    ? `${sources[0]} ne répondait pas au moment de l'analyse.`
+    : "Leurs sources ne répondaient pas au moment de l'analyse.";
+  return `${tete} : ${joinFrVerif(noms)}. ${cause}`;
 }
