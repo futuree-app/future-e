@@ -6,6 +6,7 @@ import { buildLogementFacts } from "@/lib/decision/logement-facts";
 import { buildSecteurFacts } from "@/lib/decision/secteur-facts";
 import { getCarOwnershipAtPoint } from "@/lib/server/iris-logement-store";
 import { runRules } from "@/lib/decision/materiality-rules";
+import { verificationsMateriellesIndisponibles } from "@/lib/decision/logement-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
 import { composeFacts } from "@/lib/decision/fact-compositions";
 import { withEvaluationPoint } from "@/lib/decision/territory-facts";
@@ -34,6 +35,12 @@ export type AddressDossierResult = {
   /** `unavailable` : la lecture Logement n'a pas abouti, le dossier communal fait office. */
   status: "done" | "unavailable";
   scope: string;
+  /**
+   * Les vérifications potentiellement structurantes dont la source n'a pas répondu, alors que la
+   * lecture Logement a par ailleurs abouti. Vide sur un dossier complet. L'écran s'en accommode (il
+   * affiche ce qu'il a) ; le générateur d'artefact, lui, refuse de figer une version qui en porte.
+   */
+  verificationsIndisponibles: string[];
 };
 
 export async function assembleAddressDossier(input: {
@@ -94,6 +101,7 @@ export async function assembleAddressDossier(input: {
       dossier: assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project)),
       status: "done",
       scope: scopeKey,
+      verificationsIndisponibles: verificationsMateriellesIndisponibles(logement),
     };
   } catch (error) {
     if (!(error instanceof LogementDataUnavailableError)) {
@@ -104,6 +112,6 @@ export async function assembleAddressDossier(input: {
     // CE REPLI NE DOIT JAMAIS DEVENIR UN ARTEFACT. À l'écran il vaut mieux qu'une page en erreur ;
     // figé comme la version vendue d'un dossier d'ADRESSE, il priverait définitivement l'acheteur
     // de ce qu'il a payé. Le générateur lit `status` pour cette raison.
-    return { dossier: communeDossier, status: "unavailable", scope: "commune" };
+    return { dossier: communeDossier, status: "unavailable", scope: "commune", verificationsIndisponibles: [] };
   }
 }

@@ -181,6 +181,26 @@ export async function generateDecisionArtifact(
       return { status: "failed", reason: "lecture Logement indisponible, repli communal non figé" };
     }
 
+    // NI UNE PANNE PARTIELLE (24/09/2026).
+    // ══════════════════════════════════════════════════════════════════════════════════════════
+    // La règle ci-dessus ne voyait que la panne TOTALE. Quand Géorisques se tait sur une partie des
+    // couches, chaque famille muette devient une inconnue, l'assemblage « réussit », et la version
+    // se fige. Vu à Châtelaillon : une mise à jour a figé un dossier où l'argile, établie la veille
+    // (aléa moyen ou fort), était devenue « n'a pas pu être vérifiée », et l'écran ne le disait pas.
+    //
+    // Une mise à jour ne peut pas dégrader une connaissance déjà établie à cause d'une indisponibilité
+    // temporaire de source. Le critère est l'IMPORTANCE POSSIBLE de la vérification (son tier quand
+    // elle répond), pas la liste des API : une source secondaire en panne ne bloque rien. La version
+    // précédente reste servie, l'écran le dit déjà (« la mise à jour n'a pas abouti »), et la
+    // génération se rejoue au prochain essai.
+    if (vue.verificationsIndisponibles.length > 0) {
+      await failArtifact(sb, userId, insee, scopeKey, version);
+      return {
+        status: "failed",
+        reason: `vérifications structurantes sans réponse de leur source : ${vue.verificationsIndisponibles.join(", ")}`,
+      };
+    }
+
     const artefact = buildDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
     );

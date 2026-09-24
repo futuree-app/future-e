@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runRules } from "./materiality-rules.ts";
-import { SOURCES } from "./logement-rules.ts";
+import { SOURCES, verificationsMateriellesIndisponibles } from "./logement-rules.ts";
 import { GESTES } from "./logement-gestes.ts";
 import type { ModuleFacts, LogementFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -301,4 +301,29 @@ test("aucun libellé de source ne se dit « producteur »", () => {
   for (const source of Object.values(SOURCES)) {
     assert.equal(source.includes("producteur"), false);
   }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UNE PANNE PARTIELLE NE FIGE PAS UNE VERSION DÉGRADÉE (24/09/2026).
+//
+// Vu à Châtelaillon : Géorisques muet sur l'argile, les plans de prévention et les cavités, et une
+// mise à jour a figé un dossier où l'argile établie la veille était devenue « n'a pas pu être
+// vérifiée ». Le recensement ci-dessous dit au générateur ce qu'une panne risque de taire ; le
+// critère est l'importance POSSIBLE de la vérification, pas la liste des API.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("les vérifications structurantes muettes sont recensées, les secondaires non", () => {
+  assert.deepEqual(
+    verificationsMateriellesIndisponibles(lf({ rga: "unavailable", pprn: "unavailable", cavites: "unavailable" })).sort(),
+    ["logement.cavite", "logement.exposition-bati", "logement.zone-reglementee"],
+  );
+  // Une source annexe en panne ne doit pas immobiliser les mises à jour.
+  assert.deepEqual(verificationsMateriellesIndisponibles(lf({ patrimoine: "unavailable", sinistralite: "unavailable" })), []);
+  // Un dossier complet, ou sans lecture du logement, ne bloque rien.
+  assert.deepEqual(verificationsMateriellesIndisponibles(lf()), []);
+  assert.deepEqual(verificationsMateriellesIndisponibles(undefined), []);
+});
+
+test("« rien trouvé » n'est pas une panne", () => {
+  // `none` veut dire que la source a répondu et n'a rien à signaler : c'est une lecture complète.
+  assert.deepEqual(verificationsMateriellesIndisponibles(lf({ rga: "none", pprn: "none", cavites: "none" })), []);
 });

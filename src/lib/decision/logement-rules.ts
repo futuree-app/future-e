@@ -66,6 +66,33 @@ const out = (id: string, fact: VerificationFact | UnknownFact): RuleEvaluation =
 const na = (id: string): RuleEvaluation => ({ ruleId: `logement.${id}`, projectKeys: [], outcome: "not_applicable", facts: [], reason: "rien à signaler" });
 
 // Règle statut-aware générique pour les cinq familles réglementaires.
+// L'IMPORTANCE POSSIBLE DE CHAQUE VÉRIFICATION QUI DÉPEND D'UNE SOURCE VIVANTE (24/09/2026).
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+// Chaque règle de couverture déclare déjà son tier : c'est la matérialité du constat QUAND la source
+// répond et signale quelque chose. Ce registre la garde sous la main pour une autre question :
+// quand la source ne répond PAS, qu'est-ce qu'on risque de taire ?
+//
+// Il sert au générateur d'artefact, qui refuse de figer une version où une vérification
+// potentiellement structurante n'a pas pu avoir lieu. Vu le 24/09 à Châtelaillon : Géorisques muet
+// sur l'argile, les plans de prévention et les cavités, et une mise à jour a figé un dossier où
+// l'argile, jusque-là établie, était devenue « n'a pas pu être vérifiée », sans que l'écran le dise.
+//
+// Un registre rempli par `coverageRule` plutôt qu'une liste recopiée : une règle ajoutée demain y
+// entre d'elle-même, avec le tier qu'elle déclare.
+const POTENTIEL_DES_COUVERTURES = new Map<string, { tier: MaterialityTier; coverage: (l: LogementFacts) => SourceCoverage }>();
+
+/**
+ * Les vérifications POTENTIELLEMENT structurantes (ou critiques) dont la source n'a pas répondu.
+ * Vide quand tout ce qui peut peser a été lu. Les familles secondaires (patrimoine, indemnisations)
+ * n'y entrent pas : une source annexe en panne ne doit pas immobiliser les mises à jour.
+ */
+export function verificationsMateriellesIndisponibles(l: LogementFacts | undefined): string[] {
+  if (!l) return [];
+  return [...POTENTIEL_DES_COUVERTURES.entries()]
+    .filter(([, c]) => c.tier !== "secondary" && c.coverage(l) === "unavailable")
+    .map(([ruleId]) => ruleId);
+}
+
 function coverageRule(cfg: {
   id: string; tier: MaterialityTier; buckets?: Bucket[]; grain?: "adresse" | "commune";
   /** La provenance de la donnée de CETTE famille, telle que SOURCES la nomme (en tête de fichier). */
@@ -100,6 +127,7 @@ function coverageRule(cfg: {
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
 }): DecisionRule {
   const grain = cfg.grain ?? "adresse";
+  POTENTIEL_DES_COUVERTURES.set(`logement.${cfg.id}`, { tier: cfg.tier, coverage: cfg.coverage });
   return {
     id: `logement.${cfg.id}`, module: "logement",
     evaluate: (f, p): RuleEvaluation => {

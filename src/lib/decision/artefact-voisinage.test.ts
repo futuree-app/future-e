@@ -47,3 +47,27 @@ test("le générateur lit le snapshot ENTIER, jamais une seule de ses pièces", 
   );
   assert.match(src, /async function lireSnapshotGele/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LE GÉNÉRATEUR REFUSE UNE PANNE PARTIELLE, AVANT DE FIGER (24/09/2026).
+//
+// La règle ne voyait que la panne totale (`status !== "done"`). Une panne partielle de Géorisques
+// laissait figer une version où un constat établi devenait « n'a pas pu être vérifié ». Test de
+// source : le générateur porte `server-only` et parle à Supabase.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+test("le générateur consulte les vérifications muettes, et avant d'écrire la version", () => {
+  const src = readFileSync("src/lib/server/generate-decision-artifact.ts", "utf8");
+  const garde = src.indexOf("vue.verificationsIndisponibles.length > 0");
+  const ecriture = src.lastIndexOf("await completeArtifact(sb, userId, insee, scopeKey, artefact, version);");
+  assert.ok(garde >= 0, "le générateur ne vérifie plus les pannes partielles");
+  assert.ok(garde < ecriture, "la garde doit précéder l'écriture de la version");
+  // Et elle refuse vraiment : elle marque l'échec au lieu de seulement le journaliser.
+  const bloc = src.slice(garde, src.indexOf("}", src.indexOf("return {", garde)) + 1);
+  assert.match(bloc, /failArtifact\(/);
+  assert.match(bloc, /status: "failed"/);
+});
+
+test("l'assemblage recense les vérifications muettes sur le chemin qui aboutit", () => {
+  const src = readFileSync("src/lib/server/assemble-address-dossier.ts", "utf8");
+  assert.match(src, /verificationsIndisponibles: verificationsMateriellesIndisponibles\(logement\)/);
+});
