@@ -8,7 +8,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { hydrateHardConstraints } from "./hard-constraints-hydrate.ts";
 import {
-  evaluateZones, evaluateDepartements, type CommuneAttributes, type EvaluationContext,
+  evaluateZones, evaluateDepartements, perimetreGeographiqueImpossible,
+  type CommuneAttributes, type EvaluationContext,
 } from "./hard-constraints.ts";
 import type { HardConstraints } from "./hard-constraint-schema.ts";
 import type { PlaceDirectory } from "./hard-constraints-resolve.ts";
@@ -107,4 +108,48 @@ test("« au moins une » : une ancre SOUPLE ne s'ajoute jamais au périmètre", 
     zonesMatch: "any",
   };
   assert.equal(statut(hc, "14"), "dehors");
+});
+
+// ── Revue de la PR #20 : le périmètre impossible ne se limite pas à zone × zone ──
+
+test("« en Bretagne ET en Loire-Atlantique » (zone + département, en ET) -> aucune commune conforme", () => {
+  const hc: HardConstraints = { ...BRETAGNE, departements: ["44"] };
+  for (const d of ["35", "29", "44", "49", "75"]) assert.equal(statut(hc, d), "dehors", d);
+});
+
+test("périmètre impossible zone × département : les DEUX composantes sont nommées", () => {
+  const n = hydrateHardConstraints({ ...BRETAGNE, departements: ["44"] }, dir);
+  assert.deepEqual(perimetreGeographiqueImpossible(n), ["la Bretagne", "le département 44"]);
+});
+
+test("périmètre impossible zone × zone : chaque zone est nommée", () => {
+  const n = hydrateHardConstraints(
+    { zones: [{ zone: "bretagne", strength: "hard" }, { zone: "pays_de_la_loire", strength: "hard" }] },
+    dir,
+  );
+  assert.deepEqual(perimetreGeographiqueImpossible(n), ["la Bretagne", "les Pays de la Loire"]);
+});
+
+test("périmètre impossible zone × zone × département : tout ce qui a été posé est nommé", () => {
+  const n = hydrateHardConstraints(
+    {
+      zones: [{ zone: "bretagne", strength: "hard" }, { zone: "atlantique", strength: "hard" }],
+      departements: ["31", "33"],
+    },
+    dir,
+  );
+  assert.deepEqual(perimetreGeographiqueImpossible(n), ["la Bretagne", "la façade atlantique", "les départements 31, 33"]);
+});
+
+test("un périmètre qui se recoupe n'est PAS impossible", () => {
+  for (const hc of [
+    BRETAGNE,
+    { departements: ["44"] },
+    { ...BRETAGNE, departements: ["35"] }, // la Bretagne ET l'Ille-et-Vilaine : le 35
+    { zones: [{ zone: "sud_ouest", strength: "hard" }, { zone: "pyrenees", strength: "hard" }] },
+    { ...BRETAGNE, departements: ["44"], zonesMatch: "any" }, // l'union n'est jamais vide
+    {},
+  ] as HardConstraints[]) {
+    assert.equal(perimetreGeographiqueImpossible(hydrateHardConstraints(hc, dir)), null, JSON.stringify(hc));
+  }
 });

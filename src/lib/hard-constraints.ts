@@ -426,6 +426,39 @@ function majuscule(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function libelleDepartements(depts: string[]): string {
+  return depts.length === 1 ? `le département ${depts[0]}` : `les départements ${depts.join(", ")}`;
+}
+
+/**
+ * LE PÉRIMÈTRE GÉOGRAPHIQUE DUR EST-IL IMPOSSIBLE ? (FUT-5, revue de la PR #20)
+ *
+ * Deux familles d'inclusion se CUMULENT : les zones dures, et la liste `departements`. Leur conjonction
+ * peut être vide sans qu'aucune des deux ne le soit : « la Bretagne ET la Loire-Atlantique ». Chaque
+ * commune échoue alors à l'une ou à l'autre, et le vivier est vide, ce qui est juste ; mais le lecteur
+ * doit apprendre que c'est son PÉRIMÈTRE qui est impossible, pas que la Bretagne manque de communes
+ * calmes. La première version ne regardait que zone × zone.
+ *
+ * Rend les composantes à nommer (chaque zone d'une intersection, puis les départements), ou `null` quand
+ * le périmètre se recoupe ou n'existe pas. Une union (`match: "any"`) n'est jamais vide : elle compte pour
+ * une seule composante. Les exclusions ne sont pas des périmètres et restent hors de ce calcul.
+ */
+export function perimetreGeographiqueImpossible(c: NormalizedHardConstraints): string[] | null {
+  const composantes: string[] = [];
+  let perimetre: Set<string> | null = null;
+  const z = c.zones;
+  if (z && z.labels.length > 0) {
+    composantes.push(...(z.match === "any" ? [joinFr(z.labels, "ou")] : z.labels));
+    perimetre = z.hardDepartements;
+  }
+  if (c.departements && c.departements.length > 0) {
+    composantes.push(libelleDepartements(c.departements));
+    const voulus = new Set(c.departements);
+    perimetre = perimetre === null ? voulus : new Set([...perimetre].filter((d) => voulus.has(d)));
+  }
+  return perimetre !== null && perimetre.size === 0 && composantes.length > 1 ? composantes : null;
+}
+
 // Zones d'EXCLUSION : une UNION. Une exclusion non reconnue ne peut qu'AJOUTER des départements exclus.
 //   - la commune est DANS une exclusion résolue -> incompatible, et c'est SÛR ;
 //   - elle est dehors, mais une exclusion manque -> unexamined (celle qui manque pourrait la viser).

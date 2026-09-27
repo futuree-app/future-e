@@ -21,6 +21,7 @@ import {
   assessHardConstraints,
   haversineKm as haversineCanonical,
   PRODUCT_CONVENTIONS_VERSION,
+  perimetreGeographiqueImpossible,
   type CommuneAttributes,
   type EvaluationContext,
   type NormalizedHardConstraints,
@@ -3000,17 +3001,24 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const perimetreZones = zonesDures && zonesDures.labels.length > 0
     ? listFr(zonesDures.labels, zonesDures.match === "any" ? "ou" : "et")
     : null;
+  // Les départements posés à côté des zones (en ET) bornent aussi la recherche : ils se nomment avec elles.
+  const departementsDurs = constraints.departements;
   const perimetreDur = [
     ...(perimetreZones ? [perimetreZones] : []),
+    ...(departementsDurs?.length
+      ? [departementsDurs.length === 1 ? `le département ${departementsDurs[0]}` : `les départements ${departementsDurs.join(", ")}`]
+      : []),
     ...montagneApplied.filter((z) => z.strength === "hard").map((z) => z.label),
   ];
   const anchorLabels = [...perimetreDur, ...exclusion.applied.map((z) => z.label)];
   // UN PÉRIMÈTRE IMPOSSIBLE N'EST PAS UN PÉRIMÈTRE TROP ÉTROIT (FUT-5). « La Bretagne et les Pays de la
-  // Loire » n'ont aucun département en commun : élargir un autre critère n'y changerait rien, et le
-  // lecteur a très probablement voulu dire « ou ». On le lui dit, sans rien relâcher à sa place.
-  const perimetreImpossible = zonesDures != null && zonesDures.labels.length > 1 && zonesDures.hardDepartements.size === 0;
-  const emptyMessage = perimetreImpossible
-    ? `${majusculeInitiale(listFr(zonesDures.labels))} n'ont aucun département en commun : aucune commune ne peut se trouver dans les deux à la fois. Si l'un ou l'autre vous convient, dites-le ainsi : « ${listFr(zonesDures.labels, "ou")} ».`
+  // Loire », ou « la Bretagne et le département 44 », ne se recoupent pas : élargir un autre critère n'y
+  // changerait rien, et le lecteur a très probablement voulu dire « ou ». On le lui dit, en nommant chaque
+  // composante, sans rien relâcher à sa place. La détection est celle du noyau (zone × zone ET
+  // zone × département), testée à part.
+  const impossible = perimetreGeographiqueImpossible(constraints);
+  const emptyMessage = impossible
+    ? `${majusculeInitiale(listFr(impossible))} ne se recoupent pas : aucune commune ne peut remplir ces conditions à la fois. Si l'un ou l'autre vous convient, dites-le ainsi : « ${listFr(impossible, "ou")} ».`
     : anchorLabels.length > 0
       ? `Aucun territoire ne réunit l'ensemble de vos critères dans ${listFr(anchorLabels)}. Essayez d'élargir le périmètre ou un autre critère.`
       : "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère.";
