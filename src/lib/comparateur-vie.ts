@@ -27,6 +27,7 @@ import {
   type SearchExplorationHint,
 } from "@/lib/hard-constraints";
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
+import { etalerResultats } from "@/lib/comparateur-etalement";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
 import { travelThresholdLabel, ROUTABLE_MODES } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
@@ -333,6 +334,10 @@ export type MatchOutcome = {
   // Ancres réellement appliquées (libellé + convention assumée), pour un affichage
   // honnête du périmètre côté UI (« recherche limitée au Sud, au sens… »).
   appliedZones?: AppliedZone[];
+  // LE PÉRIMÈTRE DUR, NOMMÉ COMME LE MOTEUR L'A APPLIQUÉ (FUT-5) : « la Bretagne ou le département 44 »,
+  // puis « la montagne ». `appliedZones` ne sait pas dire « ou », ni les départements qui ont rejoint les
+  // zones : la synthèse, qui affirme « tous les territoires y sont », doit recevoir celui-ci.
+  perimetreDur?: string[];
   appliedExclusions?: AppliedZone[];
   // Contraintes ville/taille résolues (« exclusion de l'agglomération de Lyon »,
   // « communes plus petites que Bordeaux »), pour l'affichage honnête du périmètre.
@@ -1165,9 +1170,13 @@ const CITY_LABEL: Record<string, string> = { PARIS: "Paris", LYON: "Lyon", MARSE
 function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
 
 // Énumération française : ["a"] → "a" ; ["a","b"] → "a et b" ; ["a","b","c"] → "a, b et c".
-function listFr(items: string[]): string {
+function listFr(items: string[], conj: "et" | "ou" = "et"): string {
   if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+  return `${items.slice(0, -1).join(", ")} ${conj} ${items[items.length - 1]}`;
+}
+
+function majusculeInitiale(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // Gradient de force d'ancre : bonus additif de score pour les ancres souples
@@ -2592,7 +2601,7 @@ export async function resolveCommuneByName(label: string): Promise<IndexCommune 
 export async function perimeterAllowsCoast(hc: HardConstraints): Promise<boolean> {
   if (hc.excludeSea) return false;
   if (hc.nearSea?.active) return true;
-  const zone = resolveZoneAnchors(hc.zones);
+  const zone = resolveZoneAnchors(hc.zones, hc.zonesMatch === "any" ? "any" : "all");
   const hardDepts = new Set<string>([
     ...(hc.departements ?? []),
     ...(zone.hardDepartements ?? []),
@@ -2778,7 +2787,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   // Ancres géographiques : résolution jeton → départements avec gradient de force.
   // hard → périmètre dur (intersection) ; preferred / inspiration → bonus de score.
   // Le moteur détient la table ; le parse n'a fourni que des jetons et leur force.
-  const zone = resolveZoneAnchors(hc.zones);
+  const zone = resolveZoneAnchors(hc.zones, hc.zonesMatch === "any" ? "any" : "all");
   const exclusion = resolveExclusions(hc.excludeZones);
   const montagne = hc.montagne ?? null;
   const reliefProche = hc.reliefProche ?? null;
@@ -2962,59 +2971,9 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     return true;
   });
 
-  const seenRegion = new Set<string>();
-  const seenDept = new Set<string>();
-  const deduped: MatchResult[] = [];
-  const pushPick = (r: MatchResult) => {
-    seenRegion.add(r.region ?? r.dept);
-    seenDept.add(r.dept);
-    deduped.push(r);
-  };
-
-  if (anyPreferred) {
-    // Étalement ÉCHELONNÉ (ancre préférée : zone OU montagne) : la zone préférée
-    // domine, avec UNE seule ouverture hors zone, au dernier rang affiché pour
-    // rester visible sans la noyer. Distingue preferred (2 in-zone + 1 ouverture sur
-    // 3 cartes) de hard (3 in-zone) et d'inspiration (diversité). cf. ANCRES.
-    const zSeen = new Set<string>();
-    const zonePicks: MatchResult[] = [];
-    for (const s of unique) {
-      if (!s.pref || zSeen.has(s.result.dept)) continue;
-      zSeen.add(s.result.dept);
-      zonePicks.push(s.result);
-    }
-    const alt = unique.find((s) => !s.pref && !zSeen.has(s.result.dept))?.result ?? null;
-    for (const r of zonePicks.slice(0, DISPLAY - 1)) pushPick(r);
-    if (alt) pushPick(alt);
-    for (const r of zonePicks) {
-      if (deduped.length >= TARGET) break;
-      if (!deduped.includes(r)) pushPick(r);
-    }
-    for (const s of unique) {
-      if (deduped.length >= TARGET) break;
-      if (!deduped.includes(s.result)) pushPick(s.result);
-    }
-  } else {
-    // Étalement géographique standard (dégel diversité, 2026-05-31) : meilleure par
-    // région, puis départements encore absents, puis sans contrainte. Le n°1 reste le
-    // meilleur score (bonus inspiration inclus) ; les suivants favorisent des
-    // territoires réellement différents (cf. OU_VIVRE_ROADMAP.md).
-    for (const s of unique) {
-      if (deduped.length >= TARGET) break;
-      if (seenRegion.has(s.result.region ?? s.result.dept)) continue;
-      pushPick(s.result);
-    }
-    for (const s of unique) {
-      if (deduped.length >= TARGET) break;
-      if (deduped.includes(s.result) || seenDept.has(s.result.dept)) continue;
-      pushPick(s.result);
-    }
-    for (const s of unique) {
-      if (deduped.length >= TARGET) break;
-      if (deduped.includes(s.result)) continue;
-      pushPick(s.result);
-    }
-  }
+  // `unique` ne contient que des communes ÉLIGIBLES (candidates -> scored -> unique). L'étalement ordonne
+  // et plafonne ce vivier, il n'y ajoute rien : 3 est un maximum, jamais un quota (FUT-5).
+  const deduped = etalerResultats(unique, { anyPreferred, target: TARGET, display: DISPLAY });
 
   const best = deduped[0]?.compatibility ?? 0;
   const perfect = candidates.length > 0 && best >= PERFECT_THRESHOLD;
@@ -3034,13 +2993,25 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
   const appliedZones = [...zone.applied, ...montagneApplied];
 
   // Seules les ancres DURES (et les exclusions) peuvent vider le vivier : ce sont
-  // elles qu'on nomme. Les ancres souples ne filtrent pas.
-  const anchorLabels = [
-    ...appliedZones.filter((z) => z.strength === "hard"),
-    ...exclusion.applied,
-  ].map((z) => z.label);
-  const emptyMessage =
-    anchorLabels.length > 0
+  // elles qu'on nomme. Les ancres souples ne filtrent pas. Le périmètre des zones est
+  // nommé tel que le moteur l'a appliqué (FUT-5) : avec « ou » quand le lecteur l'a dit,
+  // et avec les départements qui l'ont rejoint.
+  const zonesDures = constraints.zones;
+  const perimetreZones = zonesDures && zonesDures.labels.length > 0
+    ? listFr(zonesDures.labels, zonesDures.match === "any" ? "ou" : "et")
+    : null;
+  const perimetreDur = [
+    ...(perimetreZones ? [perimetreZones] : []),
+    ...montagneApplied.filter((z) => z.strength === "hard").map((z) => z.label),
+  ];
+  const anchorLabels = [...perimetreDur, ...exclusion.applied.map((z) => z.label)];
+  // UN PÉRIMÈTRE IMPOSSIBLE N'EST PAS UN PÉRIMÈTRE TROP ÉTROIT (FUT-5). « La Bretagne et les Pays de la
+  // Loire » n'ont aucun département en commun : élargir un autre critère n'y changerait rien, et le
+  // lecteur a très probablement voulu dire « ou ». On le lui dit, sans rien relâcher à sa place.
+  const perimetreImpossible = zonesDures != null && zonesDures.labels.length > 1 && zonesDures.hardDepartements.size === 0;
+  const emptyMessage = perimetreImpossible
+    ? `${majusculeInitiale(listFr(zonesDures.labels))} n'ont aucun département en commun : aucune commune ne peut se trouver dans les deux à la fois. Si l'un ou l'autre vous convient, dites-le ainsi : « ${listFr(zonesDures.labels, "ou")} ».`
+    : anchorLabels.length > 0
       ? `Aucun territoire ne réunit l'ensemble de vos critères dans ${listFr(anchorLabels)}. Essayez d'élargir le périmètre ou un autre critère.`
       : "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère.";
   const message =
@@ -3133,6 +3104,7 @@ export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome
     comparaisonComplete,
     pistes: pistesPicks,
     appliedZones,
+    perimetreDur: perimetreDur.length ? perimetreDur : undefined,
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
     unappliedConstraints: unapplied.length ? unapplied : undefined,

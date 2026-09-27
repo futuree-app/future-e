@@ -227,6 +227,11 @@ export const EXCLUSION_ZONE_TOKENS = [...Object.keys(ZONE_TABLE), ...Object.keys
 //   inspiration = bonus faible + signal éditorial.
 export type ZoneStrength = "hard" | "preferred" | "inspiration";
 export type ZoneAnchor = { zone: string; strength: ZoneStrength };
+// Comment les ancres DURES se composent (FUT-5). « all » = intersection, le défaut historique :
+// « le Sud-Ouest, près des Pyrénées ». « any » = union : « la Bretagne ou la Loire-Atlantique ».
+// Un seul opérateur pour tout le périmètre : « (le Sud-Ouest près des Pyrénées) ou la Bretagne » ne
+// s'exprime pas, et c'est assumé tant que personne ne l'a écrit.
+export type ZoneMatch = "all" | "any";
 export type AppliedZone = { label: string; convention: string; strength: ZoneStrength };
 
 // Libellés + force des ancres (côté UI, avant le match : on n'a alors que les
@@ -248,14 +253,22 @@ export function exclusionsToLabels(tokens: string[] | undefined | null): string[
 }
 
 // ── Résolution des ancres avec force ──────────────────────────────────────────
-// Les ancres DURES s'intersectent et définissent le périmètre (« le Sud-Ouest près
-// des Pyrénées »). Les ancres SOUPLES (preferred / inspiration) ne filtrent pas :
-// elles renvoient des ensembles de départements à bonifier au scoring. Les jetons
-// inconnus sont ignorés et signalés (robustesse face à un LLM qui dérive).
+// Les ancres DURES définissent le périmètre : intersectées par défaut (« le Sud-Ouest
+// près des Pyrénées »), réunies quand le lecteur a dit « ou » (match = "any"). Les
+// ancres SOUPLES (preferred / inspiration) ne filtrent pas : elles renvoient des
+// ensembles de départements à bonifier au scoring. Les jetons inconnus sont ignorés
+// et signalés (robustesse face à un LLM qui dérive).
+//
+// UNE INTERSECTION PEUT ÊTRE VIDE (« la Bretagne et les Pays de la Loire »). Le Set
+// vide est alors rendu tel quel : il veut dire « aucun département », jamais « toute la
+// France ». Seul `null` veut dire « aucune ancre dure résolue ».
 export type SoftZone = { departements: Set<string>; strength: ZoneStrength; label: string };
 
-export function resolveZoneAnchors(anchors: ZoneAnchor[] | undefined | null): {
-  hardDepartements: Set<string> | null; // intersection des ancres dures, null si aucune
+export function resolveZoneAnchors(
+  anchors: ZoneAnchor[] | undefined | null,
+  match: ZoneMatch = "all",
+): {
+  hardDepartements: Set<string> | null; // intersection (ou union) des ancres dures, null si aucune
   soft: SoftZone[];
   applied: AppliedZone[];
   unknown: string[];
@@ -276,6 +289,8 @@ export function resolveZoneAnchors(anchors: ZoneAnchor[] | undefined | null): {
     if (a.strength === "hard") {
       if (hard === null) {
         hard = set;
+      } else if (match === "any") {
+        hard = new Set<string>([...hard, ...set]);
       } else {
         const prev = hard;
         const next = new Set<string>();

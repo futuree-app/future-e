@@ -605,7 +605,7 @@ export function OuVivreClient() {
     void streamSynthesis(seq, subText, proj, top, {
       perfectMatch: matchOutcome.perfectMatch,
       message: matchOutcome.message,
-      perimetre: matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
+      perimetre: matchOutcome.perimetreDur ?? matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
       orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
     });
   }, [parsed, submittedText, streamSynthesis]);
@@ -788,7 +788,7 @@ export function OuVivreClient() {
           context: {
             reformulation: parsed.reformulation,
             criteres: preferencesToLabels(parsed.preferences),
-            perimetre: outcome?.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label) ?? [],
+            perimetre: outcome?.perimetreDur ?? outcome?.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label) ?? [],
             orientation: outcome?.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label) ?? [],
             synthese: synthesis,
             aucun_territoire_parfait: outcome?.perfectMatch === false,
@@ -1267,7 +1267,7 @@ export function OuVivreClient() {
           {outcome?.appliedZones?.some((z) => z.strength === "hard") && (
             <p className="mt-3 text-[12px] leading-[1.6] text-ghost">
               Recherche limitée à{" "}
-              {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.label).join(", ")} :{" "}
+              {(outcome.perimetreDur ?? outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.label)).join(", ")} :{" "}
               {outcome.appliedZones.filter((z) => z.strength === "hard").map((z) => z.convention).join(" ; ")}.
             </p>
           )}

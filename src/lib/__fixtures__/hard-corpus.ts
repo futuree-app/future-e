@@ -45,6 +45,15 @@ export const DIRECTORY: PlaceDirectory = {
 export const PROJETS: { nom: string; hc: HardConstraints }[] = [
   { nom: "département", hc: { departements: ["31"] } },
   { nom: "zone dure", hc: { zones: [{ zone: "bretagne", strength: "hard" }] } },
+  // FUT-5 : un périmètre IMPOSSIBLE (intersection vide) et un périmètre en « ou » (union zone + département).
+  {
+    nom: "deux zones sans département commun",
+    hc: { zones: [{ zone: "bretagne", strength: "hard" }, { zone: "pays_de_la_loire", strength: "hard" }] },
+  },
+  {
+    nom: "la Bretagne ou la Haute-Garonne",
+    hc: { zones: [{ zone: "bretagne", strength: "hard" }], departements: ["31"], zonesMatch: "any" },
+  },
   { nom: "zone exclue", hc: { excludeZones: ["idf"] } },
   { nom: "montagne", hc: { montagne: { strength: "hard" } } },
   { nom: "relief proche", hc: { reliefProche: { strength: "hard" } } },

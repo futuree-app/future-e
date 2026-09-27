@@ -98,8 +98,10 @@ test("departements : dept absent -> unexamined(missing_data), JAMAIS incompatibl
 
 // ── zones / excludeZones (contraintes COMPOSITES) ────────────────────────────
 
-const zone = (depts: string[], labels: string[], unresolvedLabels: string[] = []) => ({
-  hardDepartements: new Set(depts), labels, unresolvedLabels,
+const zone = (
+  depts: string[], labels: string[], unresolvedLabels: string[] = [], match: "all" | "any" = "all",
+) => ({
+  hardDepartements: new Set(depts), labels, unresolvedLabels, match,
 });
 const exZone = (depts: string[], labels: string[], unresolvedLabels: string[] = []) => ({
   departements: new Set(depts), labels, unresolvedLabels,
@@ -145,6 +147,65 @@ test("zones : AUCUNE ancre dure reconnue -> unexamined, jamais not_declared", ()
   const a = evaluateZones(ctx({ zones: zone([], [], ["zone_inconnue"]) }), commune());
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "unresolved_reference");
+});
+
+// FUT-5. Deux ancres reconnues SANS département commun : le périmètre est VIDE, et un périmètre vide
+// n'a jamais voulu dire « toute la France ». Le code testait `size > 0` avant de conclure à
+// l'incompatibilité, et laissait donc passer n'importe quelle commune comme conforme.
+test("zones : intersection VIDE de deux ancres reconnues -> incompatible, jamais satisfied", () => {
+  for (const dept of ["35", "44", "31", "75"]) {
+    const a = evaluateZones(
+      ctx({ zones: zone([], ["la Bretagne", "les Pays de la Loire"]) }),
+      commune({ dept, nom: `Commune ${dept}` }),
+    );
+    assert.equal(a.status, "incompatible", `département ${dept}`);
+  }
+});
+
+test("zones : intersection vide -> la phrase dit que le périmètre est IMPOSSIBLE, et nomme ses zones", () => {
+  const a = evaluateZones(ctx({ zones: zone([], ["la Bretagne", "les Pays de la Loire"]) }), commune());
+  assert.ok(a.status === "incompatible");
+  assert.match(a.statement, /aucun département en commun/);
+  assert.match(a.statement, /^La Bretagne et les Pays de la Loire n'ont/);
+  assert.equal(a.expectedLabel, "la Bretagne et les Pays de la Loire");
+  // Pas de « Cette commune est hors de… » : la commune n'y est pour rien, c'est le périmètre qui est vide.
+  assert.doesNotMatch(a.statement, /Cette commune est hors/);
+});
+
+test("zones : intersection vide ET une ancre non reconnue -> incompatible quand même (rétrécir ne remplit pas)", () => {
+  const a = evaluateZones(
+    ctx({ zones: zone([], ["la Bretagne", "la côte basque"], ["zone_inconnue"]) }),
+    commune(),
+  );
+  assert.equal(a.status, "incompatible");
+});
+
+// FUT-5. « la Bretagne OU la Loire-Atlantique » : une UNION. Le périmètre est la réunion des ancres.
+test("zones (au moins une) : DANS l'une des ancres -> satisfied", () => {
+  const z = zone(["22", "29", "35", "56", "44"], ["la Bretagne", "le département 44"], [], "any");
+  assert.equal(evaluateZones(ctx({ zones: z }), commune({ dept: "44" })).status, "satisfied");
+  assert.equal(evaluateZones(ctx({ zones: z }), commune({ dept: "29" })).status, "satisfied");
+});
+
+test("zones (au moins une) : hors de TOUTES -> incompatible, périmètre nommé avec « ou »", () => {
+  const z = zone(["22", "29", "35", "56", "44"], ["la Bretagne", "le département 44"], [], "any");
+  const a = evaluateZones(ctx({ zones: z }), commune({ dept: "49" }));
+  assert.ok(a.status === "incompatible");
+  assert.equal(a.expectedLabel, "la Bretagne ou le département 44");
+  assert.match(a.statement, /la Bretagne ou le département 44/);
+});
+
+test("zones (au moins une) : hors du périmètre résolu, une ancre inconnue -> unexamined (elle pourrait l'inclure)", () => {
+  // L'inverse exact de l'intersection : une ancre de plus dans une UNION ne peut qu'ÉLARGIR le périmètre.
+  const z = zone(["22", "29", "35", "56"], ["la Bretagne"], ["zone_inconnue"], "any");
+  const a = evaluateZones(ctx({ zones: z }), commune({ dept: "49" }));
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "unresolved_reference");
+});
+
+test("zones (au moins une) : DANS le périmètre résolu, une ancre inconnue -> satisfied (élargir ne fait pas sortir)", () => {
+  const z = zone(["22", "29", "35", "56"], ["la Bretagne"], ["zone_inconnue"], "any");
+  assert.equal(evaluateZones(ctx({ zones: z }), commune({ dept: "35" })).status, "satisfied");
 });
 
 test("excludeZones : le département est exclu -> incompatible", () => {

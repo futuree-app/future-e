@@ -12,7 +12,7 @@ import {
 import type {
   NormalizedHardConstraints, PlaceMode, PlaceThreshold, SearchExplorationHint,
 } from "./hard-constraints.ts";
-import type { HardConstraints, ZoneAnchor } from "./hard-constraint-schema.ts";
+import { departementsDansLesZones, type HardConstraints, type ZoneAnchor } from "./hard-constraint-schema.ts";
 // TYPE SEULEMENT : hard-constraints-external.ts fait du réseau. L'importer en VALEUR rendrait
 // l'hydratation non testable sous node --test, et ferait entrer un fetch dans une lib pure.
 import type { ExternalResolutions } from "./hard-constraints-external.ts";
@@ -93,8 +93,12 @@ export function hydrateHardConstraints(
   ext?: ExternalResolutions,
 ): NormalizedHardConstraints {
   const c = hc ?? {};
-  const zone = resolveZoneAnchors(c.zones);
+  const match = c.zonesMatch === "any" ? "any" : "all";
+  const zone = resolveZoneAnchors(c.zones, match);
   const excl = resolveExclusions(c.excludeZones);
+  // « La Bretagne OU la Loire-Atlantique » : un seul périmètre, qui réunit l'ancre et le département.
+  const fusion = departementsDansLesZones(c);
+  const departementsFusionnes = fusion ? c.departements ?? [] : [];
   // Le contexte de résolution entre dans l'inputHash : deux « Saint-Jean » dans deux départements
   // différents ne sont pas le même lieu.
   const input = { context: (c.departements ?? []).join(",") };
@@ -107,13 +111,17 @@ export function hydrateHardConstraints(
   const unresolvedHardZones = hardZoneAnchors.filter((z) => !ZONE_TABLE[z.zone]).map((z) => z.zone);
 
   return {
-    departements: c.departements?.length ? c.departements : null,
+    departements: c.departements?.length && !fusion ? c.departements : null,
     zones:
       hardZoneAnchors.length > 0
         ? {
-            hardDepartements: zone.hardDepartements ?? new Set<string>(),
-            labels: zone.applied.filter((a) => a.strength === "hard").map((a) => a.label),
+            hardDepartements: new Set<string>([...(zone.hardDepartements ?? []), ...departementsFusionnes]),
+            labels: [
+              ...zone.applied.filter((a) => a.strength === "hard").map((a) => a.label),
+              ...departementsFusionnes.map((d) => `le département ${d}`),
+            ],
             unresolvedLabels: unresolvedHardZones,
+            match,
           }
         : null,
     excludeZones:

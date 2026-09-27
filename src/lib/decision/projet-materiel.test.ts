@@ -234,3 +234,28 @@ test("sans point de comparaison, on n'affirme RIEN", () => {
   assert.equal(projetAChangeMateriellement(projet(), null), false);
   assert.equal(projetAChangeMateriellement(undefined, undefined), false);
 });
+
+// FUT-5. « ET » et « OU » portent les mêmes ancres et ne désignent pas le même territoire.
+test("passer de « la Bretagne ET les Pays de la Loire » à « OU » périme l'analyse", () => {
+  const avec = (hc: Record<string, unknown>) =>
+    projet({ parsed: { ...projet().parsed, hardConstraints: hc } });
+  const ancres = [{ zone: "bretagne", strength: "hard" }, { zone: "pays_de_la_loire", strength: "hard" }];
+  assert.equal(projetAChangeMateriellement(avec({ zones: ancres }), avec({ zones: ancres, zonesMatch: "any" })), true);
+});
+
+test("un projet enregistré avant FUT-5 garde sa signature : zonesMatch absent = « all » explicite", () => {
+  const avec = (hc: Record<string, unknown>) =>
+    projet({ parsed: { ...projet().parsed, hardConstraints: hc } });
+  const ancres = [{ zone: "bretagne", strength: "hard" }];
+  assert.equal(signatureDecisionnelle(avec({ zones: ancres })), signatureDecisionnelle(avec({ zones: ancres, zonesMatch: "all" })));
+});
+
+test("en « OU », un département qui change dans le périmètre périme l'analyse", () => {
+  const avec = (hc: Record<string, unknown>) =>
+    projet({ parsed: { ...projet().parsed, hardConstraints: hc } });
+  const base = { zones: [{ zone: "bretagne", strength: "hard" }], zonesMatch: "any" };
+  assert.equal(
+    projetAChangeMateriellement(avec({ ...base, departements: ["44"] }), avec({ ...base, departements: ["49"] })),
+    true,
+  );
+});

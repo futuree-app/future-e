@@ -50,7 +50,13 @@ const TOOL_INPUT_SCHEMA = {
             required: ["zone", "strength"],
           },
           description:
-            "Ancres géographiques avec FORCE. Chaque ancre = { zone, strength }. Jetons (liste fermée) : régions administratives (bretagne, normandie, pays_de_la_loire, nouvelle_aquitaine, occitanie, provence_alpes_cote_d_azur, auvergne_rhone_alpes, bourgogne_franche_comte, grand_est, hauts_de_france, centre_val_de_loire, ile_de_france), macro-zones (sud, sud_ouest, sud_est, nord, est, grand_ouest, centre), façades (atlantique, manche, mediterranee, cote_basque), massifs (alpes, pyrenees, massif_central, vosges, jura, corse). Le moteur détient la table jeton → départements. FORCE : 'hard' = filtre (nécessité ou mention nue : 'je veux vivre en Bretagne', 'dans le Sud') ; 'preferred' = forte préférence sans exclusion ('j'aimerais bien la Bretagne', 'idéalement le Sud-Ouest') ; 'inspiration' = ouverture légère ('pourquoi pas la Bretagne', 'je suis ouvert au Sud-Ouest'). Jeton LE PLUS SPÉCIFIQUE : 'le Sud-Ouest' → sud_ouest seul (jamais sud aussi). Plusieurs ancres dures = intersection.",
+            "Ancres géographiques avec FORCE. Chaque ancre = { zone, strength }. Jetons (liste fermée) : régions administratives (bretagne, normandie, pays_de_la_loire, nouvelle_aquitaine, occitanie, provence_alpes_cote_d_azur, auvergne_rhone_alpes, bourgogne_franche_comte, grand_est, hauts_de_france, centre_val_de_loire, ile_de_france), macro-zones (sud, sud_ouest, sud_est, nord, est, grand_ouest, centre), façades (atlantique, manche, mediterranee, cote_basque), massifs (alpes, pyrenees, massif_central, vosges, jura, corse). Le moteur détient la table jeton → départements. FORCE : 'hard' = filtre (nécessité ou mention nue : 'je veux vivre en Bretagne', 'dans le Sud') ; 'preferred' = forte préférence sans exclusion ('j'aimerais bien la Bretagne', 'idéalement le Sud-Ouest') ; 'inspiration' = ouverture légère ('pourquoi pas la Bretagne', 'je suis ouvert au Sud-Ouest'). Jeton LE PLUS SPÉCIFIQUE : 'le Sud-Ouest' → sud_ouest seul (jamais sud aussi). Plusieurs ancres dures = intersection, SAUF si zonesMatch vaut 'any'.",
+        },
+        zonesMatch: {
+          type: "string",
+          enum: ["all", "any"],
+          description:
+            "Comment se combinent les lieux DURS (ancres zones 'hard' ET departements). 'any' = l'utilisateur accepte l'UN OU L'AUTRE : 'en Bretagne ou en Loire-Atlantique', 'la Normandie ou la Bretagne', 'dans le 35 ou le 44'. 'all' (défaut) = ils se cumulent : 'le Sud-Ouest, près des Pyrénées', 'sur la côte atlantique en Bretagne'. N'utilisez 'any' que si le « ou » (ou « l'un ou l'autre », « soit… soit… ») est DIT.",
         },
         excludeZones: {
           type: "array",
@@ -220,6 +226,7 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
+- « OU » ENTRE DEUX LIEUX DURS → zonesMatch:"any". Deux lieux durs se CUMULENT par défaut (« le Sud-Ouest, près des Pyrénées » = les deux à la fois). Quand l'utilisateur accepte l'un OU l'autre, posez zonesMatch:"any", sinon le moteur cherchera une commune qui soit dans les deux, et n'en trouvera aucune. Exemples : "en Bretagne ou en Loire-Atlantique" → zones:[{zone:"bretagne",strength:"hard"}] + departements:["44"] + zonesMatch:"any" ; "la Normandie ou la Bretagne" → deux ancres hard + zonesMatch:"any". Ne posez jamais "any" sans « ou » exprimé.
 
 PROXIMITÉ D'UN LIEU (nearPlace) : le lieu n'est pas forcément une ville
 - « près de Brest », « à 20 km de la gare Matabiau », « à 30 minutes de l'hôpital de Purpan », « pas loin du campus de Jussieu » → nearPlace. Le label est le lieu TEL QUE NOMMÉ (« la gare Matabiau »), jamais la ville qui le contient : le moteur sait identifier une gare, un hôpital, une université, une adresse.

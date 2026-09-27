@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   preferenceWeight, declaredPreferenceKeys, nearSeaLimitKm, communeSizeBounds,
-  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys,
+  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys, hardConstraintLabel,
 } from "./project-view.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -45,4 +45,30 @@ test("nearSeaLimitKm + hasAnyHardConstraint", () => {
   assert.equal(nearSeaLimitKm(project(HC)), 5);
   assert.equal(hasAnyHardConstraint(project(HC)), true);
   assert.equal(hasAnyHardConstraint(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), false);
+});
+
+// FUT-5. En « au moins une », les départements sont évalués DANS le périmètre des zones : le dossier
+// ne doit pas attendre une contrainte « départements » que le moteur n'évalue plus à part.
+test("declaredHardConstraintKeys : « la Bretagne OU le 44 » est UNE contrainte de zones", () => {
+  const p = project({
+    reformulation: "x", preferences: [],
+    hardConstraints: { zones: [{ zone: "bretagne", strength: "hard" }], departements: ["44"], zonesMatch: "any" },
+  });
+  assert.deepEqual(declaredHardConstraintKeys(p), ["zones"]);
+});
+
+test("declaredHardConstraintKeys : sans « ou », zones et départements restent deux contraintes", () => {
+  const p = project({
+    reformulation: "x", preferences: [],
+    hardConstraints: { zones: [{ zone: "bretagne", strength: "hard" }], departements: ["35"] },
+  });
+  assert.deepEqual([...declaredHardConstraintKeys(p)].sort(), ["departements", "zones"]);
+});
+
+test("hardConstraintLabel : le périmètre en « ou » se NOMME avec « ou », départements compris", () => {
+  const p = project({
+    reformulation: "x", preferences: [],
+    hardConstraints: { zones: [{ zone: "bretagne", strength: "hard" }], departements: ["44"], zonesMatch: "any" },
+  });
+  assert.equal(hardConstraintLabel(p, "zones"), "la Bretagne ou le département 44");
 });

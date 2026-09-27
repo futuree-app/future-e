@@ -3,7 +3,7 @@ import { declaredHardConstraintKeys } from "./project-view.ts";
 import {
   hardZoneAnchorsDe, excludePlaceDeclares, nearPlaceThreshold, thresholdFrom,
 } from "../hard-constraints-hydrate.ts";
-import type { HardConstraints } from "../hard-constraint-schema.ts";
+import { departementsDansLesZones, type HardConstraints } from "../hard-constraint-schema.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE PROJET A-T-IL CHANGÉ *POUR LA DÉCISION* ?
@@ -131,7 +131,16 @@ function canonique(v: unknown): string {
 function valeurDecisionnelle(cle: string, hc: HardConstraints): unknown {
   switch (cle) {
     case "zones":
-      return hardZoneAnchorsDe(hc.zones);
+      // FUT-5 : « la Bretagne ET les Pays de la Loire » et « la Bretagne OU les Pays de la Loire » portent
+      // les mêmes ancres et ne désignent pas le même territoire. L'opérateur n'entre dans la signature
+      // qu'en « au moins une » : un projet enregistré avant lui garde exactement sa signature.
+      return hc.zonesMatch === "any"
+        ? {
+            ancres: hardZoneAnchorsDe(hc.zones),
+            match: "any",
+            departements: departementsDansLesZones(hc) ? hc.departements ?? [] : [],
+          }
+        : hardZoneAnchorsDe(hc.zones);
     case "excludePlace":
       return excludePlaceDeclares(hc.excludePlace);
     case "nearPlace":

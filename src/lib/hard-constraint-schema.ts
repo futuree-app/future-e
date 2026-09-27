@@ -4,8 +4,8 @@
 // pas dépendre, fût-ce en type, du module server-only de 3 000 lignes qu'il remplace : la direction
 // serait mauvaise (noyau -> moteur), et le noyau en deviendrait l'otage. comparateur-vie le RÉEXPORTE,
 // pour qu'aucun appelant existant ne change.
-import type { ZoneAnchor, ZoneStrength } from "./geo-zones.ts";
-export type { ZoneAnchor, ZoneStrength };
+import type { ZoneAnchor, ZoneMatch, ZoneStrength } from "./geo-zones.ts";
+export type { ZoneAnchor, ZoneMatch, ZoneStrength };
 
 export type HardConstraints = {
   departements?: string[];
@@ -16,6 +16,12 @@ export type HardConstraints = {
   // region séparé). excludeZones = ancres négatives, dures en V1. Le parse n'émet
   // que des jetons d'une liste fermée ; le moteur détient la table jeton → départements.
   zones?: ZoneAnchor[];
+  // FUT-5. Comment se composent le périmètre dur : les ancres `hard` de `zones` ET la liste
+  // `departements`. Absent ou "all" = INTERSECTION, le comportement historique (« le Sud-Ouest, près des
+  // Pyrénées » ; « la Bretagne » + « le 35 »). "any" = UNION, quand le lecteur a dit « ou » (« la
+  // Bretagne ou la Loire-Atlantique »). Sans ce champ, deux ancres dures d'un « ou » devenaient une
+  // intersection vide.
+  zonesMatch?: ZoneMatch | null;
   excludeZones?: string[];
   // Montagne générique = critère d'ALTITUDE propre à la commune (distinct des
   // massifs nommés, qui sont des zones). Même gradient de force : hard = filtre
@@ -46,3 +52,23 @@ export type HardConstraints = {
   // référence (cf. chantier C : la taille se lit sur l'unité urbaine).
   sizeRelativeTo?: { label: string; direction: "smaller" | "larger" } | null;
 };
+
+/**
+ * LES DÉPARTEMENTS REJOIGNENT-ILS LE PÉRIMÈTRE DES ZONES ? (FUT-5)
+ *
+ * Seulement en « au moins une » (`zonesMatch: "any"`) ET quand une ancre DURE existe à côté : « la
+ * Bretagne ou la Loire-Atlantique » est un seul périmètre, et le tester en deux familles séparées
+ * (zones ET départements) reviendrait à l'intersection que le lecteur n'a pas demandée. Sans ancre dure,
+ * la liste de départements est déjà une union, et reste ce qu'elle était.
+ *
+ * Une seule définition, empruntée par l'hydratation (ce que le moteur teste) et par la vue du projet
+ * (ce que le dossier déclare et nomme) : si les deux divergeaient, le dossier attendrait une contrainte
+ * « départements » que le moteur n'évalue plus.
+ */
+export function departementsDansLesZones(hc: HardConstraints | null | undefined): boolean {
+  return (
+    hc?.zonesMatch === "any" &&
+    (hc.departements?.length ?? 0) > 0 &&
+    (hc.zones ?? []).some((z) => z?.strength === "hard")
+  );
+}

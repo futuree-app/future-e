@@ -10,6 +10,7 @@ import type { HardConstraintKey } from "./decision-fact.ts";
 import { lieuEnPhrase } from "../hard-constraints.ts";
 import { deCommune } from "../typography.ts";
 import { ZONE_TABLE } from "../geo-zones.ts";
+import { departementsDansLesZones } from "../hard-constraint-schema.ts";
 
 export function isStructured(project: UserProject): boolean {
   return project.parsed != null;
@@ -59,9 +60,9 @@ function fmtHab(n: number): string {
 // pas pu appliquer), et ils ne peuvent pas le nommer différemment.
 //
 // « a, b et c » : une énumération française, pas une liste de virgules jusqu'au bout.
-function joinFr(items: string[]): string {
+function joinFr(items: string[], conj: "et" | "ou" = "et"): string {
   if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+  return `${items.slice(0, -1).join(", ")} ${conj} ${items[items.length - 1]}`;
 }
 
 // LE LIBELLÉ INSTANCIÉ : la contrainte telle que LE LECTEUR l'a posée, pas sa catégorie.
@@ -84,11 +85,16 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
     // Le moteur détient la table des jetons : il connaît le mot du lecteur, il n'a aucune raison de lui
     // rendre une catégorie.
     case "zones": {
-      const labels = (hc.zones ?? [])
-        .filter((z) => z?.strength === "hard")
-        .map((z) => ZONE_TABLE[z.zone]?.label)
-        .filter((l): l is string => Boolean(l));
-      return labels.length > 0 ? joinFr(labels) : generic;
+      // FUT-5 : en « au moins une », les départements rejoignent le périmètre et se nomment avec lui, et
+      // le périmètre se dit avec « ou ». Même règle que l'hydratation (departementsDansLesZones).
+      const labels = [
+        ...(hc.zones ?? [])
+          .filter((z) => z?.strength === "hard")
+          .map((z) => ZONE_TABLE[z.zone]?.label)
+          .filter((l): l is string => Boolean(l)),
+        ...(departementsDansLesZones(hc) ? (hc.departements ?? []).map((d) => `le département ${d}`) : []),
+      ];
+      return labels.length > 0 ? joinFr(labels, hc.zonesMatch === "any" ? "ou" : "et") : generic;
     }
     case "excludeZones": {
       const labels = (hc.excludeZones ?? [])
@@ -131,7 +137,8 @@ export function declaredHardConstraintKeys(project: UserProject): HardConstraint
   const hc = project.parsed?.hardConstraints;
   if (!hc) return [];
   const out: HardConstraintKey[] = [];
-  if (hc.departements?.length) out.push("departements");
+  // FUT-5 : en « au moins une », les départements sont évalués DANS le périmètre des zones, jamais à part.
+  if (hc.departements?.length && !departementsDansLesZones(hc)) out.push("departements");
   if (hc.zones?.some((z) => z.strength === "hard")) out.push("zones");
   if (hc.excludeZones?.length) out.push("excludeZones");
   if (hc.montagne?.strength === "hard") out.push("montagne");

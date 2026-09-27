@@ -219,7 +219,11 @@ export type EvaluationPoint = {
 // plus discret de tout ce chantier : rien, à l'écran, ne le trahirait.
 export type NormalizedHardConstraints = {
   departements: string[] | null;
-  zones: { hardDepartements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
+  // `labels` = les ancres dures RÉSOLUES. Un `hardDepartements` vide avec des labels veut dire
+  // « périmètre impossible » (intersection vide), jamais « aucune limite ». `match` : cf. geo-zones.ts.
+  zones: {
+    hardDepartements: Set<string>; labels: string[]; unresolvedLabels: string[]; match: "all" | "any";
+  } | null;
   excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
   montagne: boolean; // seulement strength === "hard"
   reliefProche: boolean; // seulement strength === "hard"
@@ -253,9 +257,9 @@ export type EvaluationContext = {
 // ── Outillage de texte ───────────────────────────────────────────────────────
 
 // « a, b et c » : une énumération française, pas une liste de virgules jusqu'au bout.
-function joinFr(items: string[]): string {
+function joinFr(items: string[], conj: "et" | "ou" = "et"): string {
   if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+  return `${items.slice(0, -1).join(", ")} ${conj} ${items[items.length - 1]}`;
 }
 
 // Formatage déterministe des milliers (espace ASCII, jamais toLocaleString qui varie selon l'hôte).
@@ -354,12 +358,23 @@ export function evaluateDepartements(
 
 // LA DOCTRINE DES CONTRAINTES COMPOSITES, appliquée aux zones d'INCLUSION.
 //
-// Les ancres dures s'INTERSECTENT (« le Sud-Ouest ET la montagne »). Une ancre que la table ne reconnaît
-// pas ne peut que RÉTRÉCIR le périmètre : le périmètre résolu est donc TROP LARGE.
+// En INTERSECTION (« le Sud-Ouest ET la montagne », le défaut), une ancre que la table ne reconnaît pas ne
+// peut que RÉTRÉCIR le périmètre : le périmètre résolu est donc TROP LARGE.
 //   - la commune est DEHORS du périmètre résolu -> incompatible, et c'est SÛR (rétrécir ne la fera pas
 //     rentrer) ;
 //   - la commune est DEDANS, mais une ancre manque -> on ne peut RIEN affirmer : unexamined.
 // Rendre `satisfied` ici serait affirmer une appartenance à un périmètre qu'on n'a pas fini de calculer.
+//
+// En UNION (« la Bretagne OU la Loire-Atlantique », FUT-5), c'est l'inverse exact : une ancre manquante ne
+// peut qu'ÉLARGIR le périmètre, qui est donc TROP ÉTROIT.
+//   - DEDANS -> satisfied, et c'est SÛR ;
+//   - DEHORS, mais une ancre manque -> unexamined (celle qui manque pourrait la contenir).
+//
+// ET UNE INTERSECTION PEUT ÊTRE VIDE (FUT-5). « La Bretagne et les Pays de la Loire » n'ont aucun
+// département en commun : aucune commune ne peut satisfaire la condition, et c'est SÛR. Le code testait
+// `size > 0` avant de conclure, si bien qu'un périmètre vide laissait passer toute la France comme
+// conforme. La phrase dit alors le vrai motif : ce n'est pas la commune qui est hors du périmètre, c'est
+// le périmètre qui est vide.
 export function evaluateZones(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -368,31 +383,47 @@ export function evaluateZones(
   if (z == null) return { key: "zones", status: "not_declared" };
   if (c.dept == null) return { key: "zones", status: "unexamined", reason: "missing_data" };
 
-  const dedans = z.hardDepartements.size > 0 && z.hardDepartements.has(c.dept);
-  if (!dedans && z.hardDepartements.size > 0) {
-    const perimetre = joinFr(z.labels);
+  const union = z.match === "any";
+  const perimetre = joinFr(z.labels, union ? "ou" : "et");
+  const observedValue: ConstraintValue = { kind: "department", value: c.dept };
+  const expectedValue: ConstraintValue = { kind: "departments", value: [...z.hardDepartements] };
+  const observedLabel = `département ${c.dept}`;
+  const evidenceKeys = ["commune.dept", "project.hardConstraints.zones"];
+  const topic = topicFit(`la situation géographique ${deCommune(c.nom)}`, "la situation géographique");
+
+  // Aucune ancre dure résolue : rien n'a été calculé, rien ne s'affirme.
+  if (z.labels.length === 0) {
+    return { key: "zones", status: "unexamined", reason: "unresolved_reference", detail: z.unresolvedLabels.join(", ") };
+  }
+
+  if (z.hardDepartements.size === 0) {
     return {
-      key: "zones", status: "incompatible",
-      observedValue: { kind: "department", value: c.dept },
-      expectedValue: { kind: "departments", value: [...z.hardDepartements] },
-      observedLabel: `département ${c.dept}`,
-      expectedLabel: perimetre,
-      evidenceKeys: ["commune.dept", "project.hardConstraints.zones"],
-      topic: topicFit(`la situation géographique ${deCommune(c.nom)}`, "la situation géographique"),
+      key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
+      expectedLabel: perimetre, evidenceKeys, topic,
+      statement: `${majuscule(perimetre)} n'ont aucun département en commun : aucune commune ne peut remplir cette condition telle qu'elle est posée.`,
+    };
+  }
+
+  const dedans = z.hardDepartements.has(c.dept);
+  const incomplet = z.unresolvedLabels.length > 0;
+  if (!dedans && !(union && incomplet)) {
+    return {
+      key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
+      expectedLabel: perimetre, evidenceKeys, topic,
       statement: `Cette commune est hors ${deCommune(perimetre)}, le périmètre que vous avez posé comme condition.`,
     };
   }
-  if (z.unresolvedLabels.length > 0) {
+  if (incomplet && !(union && dedans)) {
     return { key: "zones", status: "unexamined", reason: "unresolved_reference", detail: z.unresolvedLabels.join(", ") };
   }
   return {
-    key: "zones", status: "satisfied",
-    observedValue: { kind: "department", value: c.dept },
-    expectedValue: { kind: "departments", value: [...z.hardDepartements] },
-    observedLabel: `département ${c.dept}`,
-    expectedLabel: joinFr(z.labels),
-    evidenceKeys: ["commune.dept", "project.hardConstraints.zones"],
+    key: "zones", status: "satisfied", observedValue, expectedValue, observedLabel,
+    expectedLabel: perimetre, evidenceKeys,
   };
+}
+
+function majuscule(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // Zones d'EXCLUSION : une UNION. Une exclusion non reconnue ne peut qu'AJOUTER des départements exclus.
