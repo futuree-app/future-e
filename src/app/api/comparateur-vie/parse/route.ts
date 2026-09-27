@@ -56,7 +56,7 @@ const TOOL_INPUT_SCHEMA = {
           type: "string",
           enum: ["all", "any"],
           description:
-            "Comment se combinent les lieux DURS (ancres zones 'hard' ET departements). 'any' = l'utilisateur accepte l'UN OU L'AUTRE : 'en Bretagne ou en Loire-Atlantique', 'la Normandie ou la Bretagne', 'dans le 35 ou le 44'. 'all' (défaut) = ils se cumulent : 'le Sud-Ouest, près des Pyrénées', 'sur la côte atlantique en Bretagne'. N'utilisez 'any' que si le « ou » (ou « l'un ou l'autre », « soit… soit… ») est DIT.",
+            "Comment se combinent les lieux DURS (ancres zones 'hard' ET departements). 'any' = des DESTINATIONS possibles, l'une ou l'autre : deux lieux de même nature (régions, départements) qui ne se recoupent pas, qu'ils soient reliés par « ou » OU par « et » ('en Bretagne et en Loire-Atlantique', 'la Bretagne et la Normandie', 'le 35 et le 44'). 'all' (défaut) = des PROPRIÉTÉS qui se combinent sur un même lieu ('en Bretagne sur la côte atlantique', 'le Sud-Ouest, près des Pyrénées').",
         },
         excludeZones: {
           type: "array",
@@ -226,7 +226,10 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
 - Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
-- « OU » ENTRE DEUX LIEUX DURS → zonesMatch:"any". Deux lieux durs se CUMULENT par défaut (« le Sud-Ouest, près des Pyrénées » = les deux à la fois). Quand l'utilisateur accepte l'un OU l'autre, posez zonesMatch:"any", sinon le moteur cherchera une commune qui soit dans les deux, et n'en trouvera aucune. Exemples : "en Bretagne ou en Loire-Atlantique" → zones:[{zone:"bretagne",strength:"hard"}] + departements:["44"] + zonesMatch:"any" ; "la Normandie ou la Bretagne" → deux ancres hard + zonesMatch:"any". Ne posez jamais "any" sans « ou » exprimé.
+- DESTINATIONS OU PROPRIÉTÉS : zonesMatch. Ne suivez PAS la conjonction grammaticale, suivez ce que la personne décrit. Personne ne cherche une commune qui serait à la fois en Bretagne et en Loire-Atlantique : « je veux vivre en Bretagne et en Loire-Atlantique » énumère deux DESTINATIONS acceptables.
+  • DESTINATIONS → zonesMatch:"any" : plusieurs lieux de même nature (régions, départements, macro-zones) qui ne se recoupent pas, énumérés comme des endroits où vivre, avec « ou » comme avec « et ». "en Bretagne et en Loire-Atlantique" → zones:[{zone:"bretagne",strength:"hard"}] + departements:["44"] + zonesMatch:"any" ; "la Bretagne et la Normandie" → deux ancres hard + zonesMatch:"any" ; "en Bretagne ou en Normandie" → idem ; "le 35 et le 44" → departements:["35","44"] + zonesMatch:"any".
+  • PROPRIÉTÉS → zonesMatch:"all" (ou absent) : des lieux de nature différente qui qualifient ENSEMBLE le même endroit, ou qui se recoupent. "en Bretagne sur la côte atlantique" → zones:[bretagne hard, atlantique hard], zonesMatch:"all" ; "le Sud-Ouest, près des Pyrénées" → sud_ouest (zones) + la proximité du relief, zonesMatch:"all".
+  • Dans le doute, "all" : le moteur signale alors au lecteur un périmètre impossible, sans rien relâcher.
 
 PROXIMITÉ D'UN LIEU (nearPlace) : le lieu n'est pas forcément une ville
 - « près de Brest », « à 20 km de la gare Matabiau », « à 30 minutes de l'hôpital de Purpan », « pas loin du campus de Jussieu » → nearPlace. Le label est le lieu TEL QUE NOMMÉ (« la gare Matabiau »), jamais la ville qui le contient : le moteur sait identifier une gare, un hôpital, une université, une adresse.

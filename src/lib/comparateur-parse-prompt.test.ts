@@ -129,3 +129,39 @@ test("prompt: l'accès aux écoles reste la seule déduction d'un projet familia
   assert.ok(ligneEcoles, "la déduction d'accès aux écoles a disparu");
   assert.match(ligneEcoles!, /votre lecture/, "la déduction ne se présente plus comme notre lecture");
 });
+
+// ── FUT-5 : destinations (« ou ») ou propriétés (« et ») ─────────────────────────────────────────
+// Garde sur le TEXTE : la règle et ses exemples sont écrits. Le comportement se mesure avec la sonde
+// `scripts/sonde-parse-perimetre.mjs`, qui appelle le vrai parseur.
+
+const regleZonesMatch = src.slice(src.indexOf("DESTINATIONS OU PROPRIÉTÉS"));
+
+test("prompt (FUT-5) : la règle destinations / propriétés existe", () => {
+  assert.ok(src.includes("DESTINATIONS OU PROPRIÉTÉS"), "règle zonesMatch introuvable");
+});
+
+test("prompt (FUT-5) : la conjonction grammaticale ne décide PAS", () => {
+  assert.match(regleZonesMatch, /Ne suivez PAS la conjonction grammaticale/);
+});
+
+test("prompt (FUT-5) : « Bretagne et Loire-Atlantique », « Bretagne et Normandie », « 35 et 44 » sont des destinations (any)", () => {
+  const destinations = regleZonesMatch.slice(0, regleZonesMatch.indexOf("PROPRIÉTÉS → "));
+  for (const exemple of ["en Bretagne et en Loire-Atlantique", "la Bretagne et la Normandie", "le 35 et le 44"]) {
+    assert.ok(destinations.includes(exemple), `exemple de destination manquant : ${exemple}`);
+  }
+  assert.match(destinations, /zonesMatch:"any"/);
+});
+
+test("prompt (FUT-5) : « Bretagne sur la côte atlantique » et « Sud-Ouest près des Pyrénées » restent des propriétés (all)", () => {
+  const proprietes = regleZonesMatch.slice(regleZonesMatch.indexOf("PROPRIÉTÉS → "));
+  for (const exemple of ["en Bretagne sur la côte atlantique", "le Sud-Ouest, près des Pyrénées"]) {
+    assert.ok(proprietes.includes(exemple), `exemple de propriété manquant : ${exemple}`);
+  }
+  assert.match(proprietes, /zonesMatch:"all"/);
+});
+
+test("prompt (FUT-5) : l'ancienne interdiction « jamais any sans « ou » exprimé » a disparu", () => {
+  // Elle contredisait la règle : « en Bretagne et en Loire-Atlantique » serait devenu une intersection vide.
+  assert.ok(!src.includes('Ne posez jamais "any" sans « ou » exprimé'));
+  assert.ok(!src.includes("N'utilisez 'any' que si le « ou »"));
+});
