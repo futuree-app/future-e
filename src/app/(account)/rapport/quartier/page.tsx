@@ -1,32 +1,33 @@
 import "server-only";
 export const dynamic = "force-dynamic";
+// Le préchauffage de la lecture enrichie tourne dans `after()`, pour la durée de la route : une
+// génération (deux au plus) prend 15 à 25 s chacune. Le rendu, lui, n'attend jamais.
+export const maxDuration = 120;
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { getCurrentUserAccount, requireCurrentUser } from "@/lib/user-account";
-import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
+import { requireCurrentUser } from "@/lib/user-account";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { QuartierAside } from "@/components/report/QuartierClimatData";
 import { EvidenceArrival } from "@/components/report/EvidenceArrival";
-import QuartierSynthesis, {
-  type WorkbookQuartier,
-} from "@/components/report/QuartierSynthesis";
+import QuartierSynthesis from "@/components/report/QuartierSynthesis";
 import { ModuleTracker } from "@/components/ModuleTracker";
-import { deriveQuartierSources, buildFallbackSummary } from "@/lib/quartier-signals";
 import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
-import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
 import { readLatestDataSnapshot } from "@/lib/server/decision-artifact-store";
-import { getTerritoryContext } from "@/lib/comparateur-vie";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
 import { TerritoryIdentityCard } from "@/components/report/TerritoryIdentityCard";
-import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
-import { getEra5Trend } from "@/lib/era5-trend";
-import { getReportContext, resolveRelation, synthesisRelation, parseDiscoveryWorkbook } from "@/lib/report-context";
-import { ReportRelationBanner } from "@/components/report/ReportRelationBanner";
+import { valueOf } from "@/lib/facts/contract";
+import { screenFromSnapshot, sourcesFromSnapshot } from "@/lib/territoire/screen";
+import { HORIZONS, projectForSynthesis, type HorizonKey } from "@/lib/territoire/synthesis-contract";
+import { deterministicSynthesis } from "@/lib/territoire/synthesis-deterministe";
+import { synthesisCacheKey } from "@/lib/territoire/synthesis-cache";
+import { loadTerritoireSnapshot, prechaufferSyntheseTerritoire, DEFAULT_HORIZON } from "@/lib/server/territoire-snapshot";
+import { territoireStore } from "@/lib/server/territoire-facts-store";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { normalizeUserProject } from "@/lib/user-project";
 import { listDossiers } from "@/lib/address-dossier-store";
@@ -42,13 +43,12 @@ export default async function RapportQuartierPage(
   // FIGÉ, et absent partout ailleurs : la commune seule n'est pas une identité de preuve.
   const preuveDe = (await searchParams).preuve;
   const scopeDemande = typeof preuveDe === "string" ? preuveDe : null;
-  const account = await getCurrentUserAccount();
 
   const { supabase, user } = await requireCurrentUser();
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select(`${TERRITORY_SELECT}, workbook_quartier, user_project`)
+    .select(`${TERRITORY_SELECT}, user_project`)
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -69,35 +69,32 @@ export default async function RapportQuartierPage(
   if (!fullReport) {
     redirect("/rapport");
   }
-  const initialWorkbook = normalizeWorkbook(profile?.workbook_quartier);
-
-  // Contexte de lecture : relation effective (corrigée par l'utilisateur si posée,
-  // sinon inférée résidence/découverte). Pilote la posture de la synthèse, le
-  // garde-fou workbook, et le bandeau corrigeable.
-  const reportCtx = inseeCode ? await getReportContext(supabase, user.id, inseeCode) : null;
-  const { relation: effectiveRelation } = resolveRelation(territory.isResidence, reportCtx);
-  const initialDiscovery = parseDiscoveryWorkbook(reportCtx?.discovery_workbook ?? null);
-
-  // Socle commun : Géorisques + GASPAR inclus dans l'enrichissement.
-  const enrichment = inseeCode ? await gatherCommuneEnrichment(inseeCode) : null;
-  const georisques = enrichment?.georisques ?? null;
-  const catnat = enrichment?.catnat ?? null;
-  const littoral = enrichment?.littoral ?? null;
-
-  const scenarios = enrichment?.drias?.commune.s ?? null;
-  const territoire = enrichment?.ademe?.commune.territoire ?? null;
-  const logementVacancePct = enrichment?.ademe?.commune.logements.vacants_pct ?? null;
-  const eloignementServicesPct = enrichment?.ademe?.commune.sante.eloignement_services_pct ?? null;
-  const vigieau = enrichment?.vigieau ?? null;
-  const drought = enrichment?.eau?.drought ?? null;
+  // ── LA PHOTO DES DONNÉES DE L'ÉCRAN, PRISE UNE FOIS (FUT-6, D10) ─────────────────────────────
+  // Les cartes, la carte d'identité, la synthèse déterministe et la lecture enrichie partent de ce
+  // seul snapshot. La route de synthèse le relit par son empreinte : elle ne recontacte aucune source.
+  //
+  // CE QUI N'EN FAIT PAS PARTIE, VOLONTAIREMENT : le compte d'arrêtés figé dans le dossier ACHETÉ
+  // du lecteur (`snapshotFige`, plus bas). C'est une preuve du dossier de décision, propre à un
+  // compte ; le snapshot Territoire, lui, est le même pour tous les lecteurs de la commune.
   const displayName = communeName ?? "votre commune";
+  const snapshot = inseeCode ? await loadTerritoireSnapshot(inseeCode, displayName) : null;
+  const store = territoireStore();
+  // PANNE DE PERSISTANCE = PAS DE LECTURE ENRICHIE, JAMAIS UN ÉCRAN CASSÉ : la synthèse
+  // déterministe, calculée ici depuis le même snapshot, reste affichée.
+  const persisted = snapshot && store ? await store.persistSnapshot(snapshot).catch(() => false) : false;
+  const screen = snapshot ? screenFromSnapshot(snapshot) : null;
+
+  const georisques = screen?.georisques ?? null;
+  const catnat = screen?.catnat ?? null;
+  const littoral = screen?.littoral ?? null;
+  const scenarios = screen?.scenarios ?? null;
+  const territoire = screen?.territoire ?? null;
+  const logementVacancePct = screen?.logementVacancePct ?? null;
+  const vigieau = screen?.vigieau ?? null;
+  const drought = screen?.drought ?? null;
 
   // Identité visuelle du territoire (déterministe, sans appel réseau).
-  const territoryMood = deriveTerritoryMood({ communeName, inseeCode, territoire });
-
-  // Contexte territorial (index comparateur, lecture seule) : carte d'identité +
-  // trait distinctif. Absent (commune hors index, PLM) => on n'affiche pas la carte.
-  const territoryContext = inseeCode ? await getTerritoryContext(inseeCode) : null;
+  const territoryMood = deriveTerritoryMood({ communeName, inseeCode, territoire: null });
 
   // LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, et il vient de l'ARTEFACT quand il existe.
   //
@@ -107,13 +104,13 @@ export default async function RapportQuartierPage(
   // vendue annonçait 6, la carte affichait 7, chacune fidèle à sa source et personne pour le dire.
   // Le snapshot de données de l'artefact porte l'objet TEL QU'IL A ÉTÉ VENDU.
   //
-  // L'index reste le repli, pour les dossiers d'avant ce lot et pour un lecteur qui n'a pas encore
-  // d'artefact sur cette commune. Il sert aussi à détecter une MISE À JOUR : quand les deux
-  // existent et diffèrent, la carte le dit plutôt que de choisir en silence.
+  // L'index (lu dans le snapshot Territoire) reste le repli, pour les dossiers d'avant ce lot et pour
+  // un lecteur qui n'a pas encore d'artefact sur cette commune. Il sert aussi à détecter une MISE À
+  // JOUR : quand les deux existent et diffèrent, la carte le dit plutôt que de choisir en silence.
   const snapshotFige = inseeCode
     ? await readLatestDataSnapshot(supabase, user.id, inseeCode, scopeDemande).catch(() => null)
     : null;
-  const catnatIndexCourant = catnatInondationDepuisIndex(territoryContext?.entry);
+  const catnatIndexCourant = screen?.catnatInondationIndex ?? null;
   const catnatInondation = snapshotFige?.catnatInondation ?? catnatIndexCourant;
   // L'écart ne s'affiche que s'il CHANGE le compte : un index régénéré à l'identique n'a rien à
   // raconter au lecteur. On ne prétend pas dire QUAND il a changé : l'index ne porte aucune date de
@@ -123,18 +120,35 @@ export default async function RapportQuartierPage(
       && catnatIndexCourant.count !== snapshotFige.catnatInondation.count
       ? catnatIndexCourant
       : null;
-  const saisonnalitePct = inseeCode ? await getResidencesSecondairesPct(inseeCode) : null;
+  const saisonnalitePct = screen?.saisonnalitePct ?? null;
   // Tendance observée ERA5-Land (Copernicus) : preuve « le passé valide la
   // projection » dans le drawer Températures. La face avant reste sur le futur DRIAS.
-  const era5 = inseeCode ? await getEra5Trend(inseeCode).catch(() => null) : null;
-  const territoryIdentity = territoryContext
-    ? buildTerritoryIdentity({
-        communeName: displayName,
-        typeLabel: territoryMood.typeLabel,
-        context: territoryContext,
-      })
-    : null;
-  const territoryCards = territoryContext ? buildTerritoryCards(territoryContext.entry) : null;
+  const era5 = screen?.era5 ?? null;
+  // La carte d'identité n'apparaît que si la commune est dans l'index (rôle connu), comme avant.
+  const territoryIdentity = snapshot && valueOf(snapshot, "place.urban_role") ? buildTerritoryIdentity(snapshot) : null;
+  const territoryCards = snapshot ? buildTerritoryCards(snapshot) : null;
+
+  // ── LA SYNTHÈSE, EN DEUX NIVEAUX (FUT-6, D9) ─────────────────────────────────────────────────
+  // La déterministe, par horizon, tout de suite ; la lecture enrichie déjà en cache, s'il y en a.
+  const deterministic = Object.fromEntries(
+    HORIZONS.map((h) => [h, snapshot ? deterministicSynthesis(projectForSynthesis(snapshot, h), h) : ""]),
+  ) as Record<HorizonKey, string>;
+  const cachedByKey = persisted && snapshot && store
+    ? await store.readSyntheses(HORIZONS.map((h) => synthesisCacheKey(snapshot.hash, h))).catch(() => new Map<string, { text: string }>())
+    : new Map<string, { text: string }>();
+  const initialEnriched: Partial<Record<HorizonKey, string>> = {};
+  if (snapshot) {
+    for (const h of HORIZONS) {
+      const hit = cachedByKey.get(synthesisCacheKey(snapshot.hash, h));
+      if (hit) initialEnriched[h] = hit.text;
+    }
+  }
+  // PRÉCHAUFFAGE : si l'horizon par défaut n'est pas prêt, on le prépare APRÈS la réponse. Le hub
+  // l'a souvent déjà fait (même commune, même snapshot) ; sinon c'est ici, au plus tôt.
+  if (persisted && snapshot && inseeCode && !initialEnriched[DEFAULT_HORIZON]) {
+    const s = snapshot;
+    after(async () => { await prechaufferSyntheseTerritoire(inseeCode, displayName, s); });
+  }
 
   // LA RELATION DE CHAQUE CARTE AU PROJET DU LECTEUR, pour le filet coloré de la grille.
   //
@@ -158,19 +172,11 @@ export default async function RapportQuartierPage(
     : null;
   const registres = registersByTarget(communeDossier?.dossier ?? null);
 
-  // Sources mobilisées par horizon : pré-calculées côté serveur, le composant
-  // client choisit via useHorizon. Ligne discrète sous la synthèse (pas de bloc
-  // à chips) : la synthèse porte des affirmations chiffrées, elle doit garder
-  // un renvoi de provenance sur son propre écran. hasTerritoryContext : le
-  // prompt de synthèse mobilise aussi le contexte territoire (rôle/agglomération,
-  // démographie, saisonnalité), qui vient de l'index comparateur + la base
-  // logement INSEE, pas des 6 sources détectées par défaut.
-  const hasTerritoryContext = territoryContext != null || saisonnalitePct != null;
-  const sourcesByHorizon = {
-    gwl15: deriveQuartierSources(enrichment, georisques, catnat, "gwl15", hasTerritoryContext),
-    gwl20: deriveQuartierSources(enrichment, georisques, catnat, "gwl20", hasTerritoryContext),
-    gwl30: deriveQuartierSources(enrichment, georisques, catnat, "gwl30", hasTerritoryContext),
-  };
+  // Sources mobilisées par horizon, lues dans le MÊME snapshot que le texte. Ligne discrète sous la
+  // synthèse : elle porte des affirmations chiffrées, elle garde un renvoi de provenance.
+  const sourcesByHorizon = Object.fromEntries(
+    HORIZONS.map((h) => [h, snapshot ? sourcesFromSnapshot(snapshot, h) : []]),
+  ) as Record<HorizonKey, ReturnType<typeof sourcesFromSnapshot>>;
 
   return (
     <div
@@ -251,27 +257,19 @@ export default async function RapportQuartierPage(
           </div>
         )}
 
-        {/* Synthèse pleine largeur, précédée de son réglage : la relation à la
-            commune (inférée, corrigeable) règle la posture du texte, elle vit
-            donc collée à la synthèse. Jamais un gate. */}
+        {/* Synthèse pleine largeur. GÉNÉRIQUE depuis FUT-6 : elle ne dépend plus de la relation du
+            lecteur à la commune, donc le bandeau « Cette lecture s'adresse à quelqu'un qui… » (qui
+            réglait sa posture) n'a plus rien de vrai à dire ici. Le composant ReportRelationBanner
+            et la relation stockée (report_context) sont conservés pour la future « Lecture pour
+            votre projet ». */}
         <section className="pt-10">
-          {inseeCode && (
-            <div className="mb-4">
-              <ReportRelationBanner
-                relation={effectiveRelation}
-                communeName={displayName}
-              />
-            </div>
-          )}
           <QuartierSynthesis
             communeName={communeName}
             inseeCode={inseeCode}
-            userKey={account.userId}
+            snapshotHash={persisted && snapshot ? snapshot.hash : null}
+            deterministic={deterministic}
+            initialEnriched={initialEnriched}
             sourcesByHorizon={sourcesByHorizon}
-            initialWorkbook={initialWorkbook}
-            relation={synthesisRelation(effectiveRelation)}
-            initialDiscovery={initialDiscovery}
-            fallbackSummary={buildFallbackSummary(communeName, "votre horizon")}
           />
         </section>
 
@@ -297,7 +295,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={eloignementServicesPct} era5={era5} climatType={territoryMood.type} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :
@@ -334,18 +332,4 @@ export default async function RapportQuartierPage(
       </div>
     </div>
   );
-}
-
-function normalizeWorkbook(raw: unknown): WorkbookQuartier | null {
-  if (!raw || typeof raw !== "object") return null;
-  const r = raw as Record<string, unknown>;
-  const wb: WorkbookQuartier = {
-    heat: typeof r.heat === "string" ? r.heat : "",
-    water: typeof r.water === "string" ? r.water : "",
-    shelter: typeof r.shelter === "string" ? r.shelter : "",
-    change: typeof r.change === "string" ? r.change : "",
-    note: typeof r.note === "string" ? r.note : "",
-  };
-  const filled = [wb.heat, wb.water, wb.shelter, wb.change, wb.note.trim()].filter(Boolean).length;
-  return filled > 0 ? wb : null;
 }

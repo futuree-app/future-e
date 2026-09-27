@@ -1,5 +1,6 @@
-// Dérive les sources mobilisées pour la synthèse Quartier (chips footer)
-// et fournit un fallback statique quand l'IA échoue.
+// Dérive les sources mobilisées (chips footer) pour l'aperçu avant paiement (quartier-preview).
+// La page Territoire lit les siennes dans son FactsSnapshot (src/lib/territoire/screen.ts), et son
+// texte de secours est désormais une vraie synthèse déterministe (FUT-6).
 //
 // La voix éditoriale et les chiffres incarnés vivent dans le prompt système
 // + les cartes QuartierAside affichées plus bas dans la page. On ne duplique
@@ -42,14 +43,4 @@ export function deriveQuartierSources(
   if (hasTerritoryContext) sources.add("INSEE");
 
   return Array.from(sources);
-}
-
-/**
- * Résumé statique court utilisé quand la synthèse IA échoue.
- * Générique à dessein : pas d'ambition éditoriale, juste éviter le curseur
- * figé sur "Lecture en cours…".
- */
-export function buildFallbackSummary(communeName: string | null, horizonYear: string): string {
-  const name = communeName ?? "Votre commune";
-  return `${name} évolue avec le climat. Les indicateurs sourcés ci-dessous montrent les transformations attendues à l'horizon ${horizonYear} : chaleur, sécheresse des sols, exposition aux risques et tensions sur l'eau. La lecture éditoriale détaillée n'a pas pu être générée, mais les chiffres restent valables.`;
 }

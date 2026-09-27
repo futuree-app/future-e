@@ -1,0 +1,439 @@
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LES CONTRÔLES DÉTERMINISTES DE LA SYNTHÈSE TERRITOIRE (FUT-6, D8, conventions validées le 27/09).
+//
+// Deux familles, et aucun appel IA :
+//   1. ASSERTIONS : une affirmation incompatible avec une catégorie déterministe de la projection
+//      (couvert, densité, démographie, saisonnalité, risques recensés), ou interdite faute de fait
+//      dédié (attractivité, marché, imperméabilisation, classement national, « rural », « station
+//      balnéaire »).
+//   2. NOMBRES : tout nombre écrit en chiffres doit venir de la projection, tel quel ou après une
+//      transformation admise.
+//
+// UNE ASSERTION, PAS UN MOT. « Aucun périmètre de submersion n'est recensé » est permis quand la
+// submersion n'est pas recensée ; « le territoire est exposé à la submersion » ne l'est pas. Chaque
+// règle dit donc sa POLARITÉ : `affirmative` (une négation dans la proposition l'annule) ou `any`
+// (la règle vise justement une formulation négative, ou une notion interdite quelle que soit la
+// tournure).
+//
+// Limite V1, assumée : les nombres écrits en LETTRES (« quatorze ») ne sont pas contrôlés.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+export type Violation = { rule: string; excerpt: string };
+
+type Projection = Record<string, unknown>;
+
+type Rule = {
+  id: string;
+  /** La règle ne s'applique que si la projection porte le fait qui la fonde. */
+  when: (p: Projection) => boolean;
+  patterns: RegExp[];
+  polarity: "affirmative" | "any";
+};
+
+// ── Lecture de la projection ─────────────────────────────────────────────────────────────────
+
+function at(p: Projection, path: string): unknown {
+  let cur: unknown = p;
+  for (const k of path.split(".")) {
+    if (cur == null || typeof cur !== "object") return undefined;
+    cur = (cur as Record<string, unknown>)[k];
+  }
+  return cur;
+}
+
+const catIs = (path: string, ...labels: string[]) => (p: Projection) => labels.includes(String(at(p, path)));
+const riskIs = (which: "inondation" | "submersion_marine", v: "recensé" | "non recensé") => (p: Projection) =>
+  at(p, `risques_recenses_echelle_communale.${which}`) === v;
+const always = () => true;
+
+// Libellés des catégories, tels que le registre les produit (src/lib/territoire/facts.ts).
+const LAND = "occupation_des_sols.categorie";
+const DENSITY = "commune.densite.categorie";
+const DEMO = "demographie.categorie";
+const SEASON = "residences_secondaires.categorie";
+
+// Accords : e?s? couvre masculin/féminin/pluriel.
+const A = "e?s?";
+
+const RULES: Rule[] = [
+  // ── Couvert (D4) ──
+  {
+    id: "couvert:territoire-tres-bati",
+    when: catIs(LAND, "Occupation mixte", "Forte présence naturelle", "À dominante agricole"),
+    polarity: "affirmative",
+    patterns: [
+      new RegExp(`\\b(presque|quasi(ment)?|entièrement|totalement|essentiellement|largement) (bâti${A}|urbanisé${A}|construit${A}|minéral${A}|minérale${A})\\b`),
+      new RegExp(`\\btrès (urbanisé${A}|bâti${A}|minéral${A}|minérale${A}|construit${A})\\b`),
+      new RegExp(`\\bmajoritairement (bâti${A}|urbanisé${A})\\b`),
+      /\b(l'essentiel|la majeure partie|la majorité) (du territoire|de la commune) (est |reste )?(bâti|urbanisé|construit|couvert)/,
+      /\b(très|si|trop) peu d(e |')(espaces? (verts?|naturels?|ouverts?)|végétation|verdure|nature|couvert végétal)/,
+      /\b(presque|quasi(ment)?) (pas|plus|aucun) d?(e |')?(nature|verdure|végétation|espaces? verts?|terre)/,
+      /\ble bâti (domine|l'emporte|prédomine)/,
+      new RegExp(`\\bdensément (bâti${A}|construit${A})`),
+    ],
+  },
+  {
+    id: "couvert:territoire-tres-naturel",
+    when: catIs(LAND, "Majoritairement urbanisé", "Faible présence d'espaces naturels"),
+    polarity: "affirmative",
+    patterns: [
+      /\bforte présence (naturelle|d'espaces naturels)/,
+      new RegExp(`\\b(largement|majoritairement|très) (naturel${A}|naturelle${A}|verte${A}|boisé${A})\\b`),
+      /\ble naturel (domine|l'emporte)/,
+    ],
+  },
+  // ── Densité (D3) ──
+  {
+    id: "densite:requalifiee-dense",
+    when: catIs(DENSITY, "Densité intermédiaire", "Commune peu dense"),
+    polarity: "affirmative",
+    patterns: [
+      /\btrès denses?\b/,
+      new RegExp(`\\bdensément (bâti${A}|peuplé${A}|construit${A})`),
+      /\b(commune|ville|territoire|agglomération)s? (très )?denses?\b/,
+    ],
+  },
+  {
+    id: "densite:requalifiee-peu-dense",
+    when: catIs(DENSITY, "Densité intermédiaire", "Commune dense"),
+    polarity: "affirmative",
+    patterns: [new RegExp(`\\b(peu|faiblement) (denses?|peuplé${A})\\b`)],
+  },
+  // ── Démographie (D7) ──
+  {
+    id: "demographie:declin-contredit",
+    when: catIs(DEMO, "Croissance récente", "Population stable"),
+    polarity: "affirmative",
+    patterns: [
+      /\bperd (des|de ses) habitants/,
+      /\b(en )?déclin démographique/,
+      /\bse dépeuple/,
+      /\b(sa |la )?population (diminue|baisse|recule|décline)/,
+    ],
+  },
+  {
+    id: "demographie:croissance-contredite",
+    when: catIs(DEMO, "Population en recul", "Population stable"),
+    polarity: "affirmative",
+    patterns: [
+      /\bgagne (des|de nouveaux) habitants/,
+      /\b(sa |la )?population (augmente|croît|progresse|grandit)/,
+      /\bcroissance démographique/,
+    ],
+  },
+  // ── Saisonnalité ──
+  {
+    id: "saisonnalite:surestimee",
+    when: catIs(SEASON, "Faible", "Modérée"),
+    polarity: "affirmative",
+    patterns: [
+      /\btrès touristiques?\b/,
+      /\b(forte|très marquée|importante) saisonnalité/,
+      /\b(fréquentation touristique|tourisme) (massi(f|ve)|très (important|forte?))/,
+    ],
+  },
+  {
+    id: "saisonnalite:sous-estimee",
+    when: catIs(SEASON, "Forte", "Marquée"),
+    polarity: "any",
+    patterns: [/\bpeu touristiques?\b/, /\b(peu|pas) marquée? par le tourisme/],
+  },
+  // ── Risques recensés : l'ASSERTION et sa polarité ──
+  {
+    id: "inondation:exposition-non-recensee",
+    when: riskIs("inondation", "non recensé"),
+    polarity: "affirmative",
+    patterns: [
+      /\b(zones?|territoires?|communes?|secteurs?|quartiers?) inondables?\b/,
+      new RegExp(`\\bexposé${A} aux (crues|inondations)`),
+      /\brisque d'inondation (est )?(classé|recensé|identifié|avéré)/,
+      /\bune partie (du territoire|de la commune) (est |peut être )?(concernée|touchée|atteinte) par (les |une |des )?(crues?|inondations?)/,
+    ],
+  },
+  {
+    id: "inondation:exposition-niee",
+    when: riskIs("inondation", "recensé"),
+    polarity: "any",
+    patterns: [
+      /\b(aucun|pas de|sans) (risque|périmètre|zone) (d'inondation|inondable|de crue)/,
+      new RegExp(`\\bépargné${A} par les (crues|inondations)`),
+    ],
+  },
+  {
+    id: "submersion:exposition-non-recensee",
+    when: riskIs("submersion_marine", "non recensé"),
+    polarity: "affirmative",
+    patterns: [
+      new RegExp(`\\b(exposé${A}|soumis${A}|soumise${A}|menacé${A}|vulnérables?) à la submersion`),
+      /\brisque de submersion( marine)? (est )?(classé|recensé|identifié|avéré)/,
+      /\bsubmersion marine (menace|touche|concerne|guette)/,
+      /\bla mer (peut|pourrait) (envahir|submerger|atteindre)/,
+    ],
+  },
+  {
+    id: "submersion:exposition-niee",
+    when: riskIs("submersion_marine", "recensé"),
+    polarity: "any",
+    patterns: [
+      /\b(aucun|pas de|sans) (risque|périmètre) de submersion/,
+      new RegExp(`\\bépargné${A} par la (mer|submersion)`),
+    ],
+  },
+  // ── Interdits faute de fait dédié ──
+  {
+    id: "interdit:attractivite",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\battir(e|ent|ait|aient|er|ant)\b/,
+      new RegExp(`\\battiré${A}\\b`),
+      /\battracti(f|fs|ve|ves|vité)\b/,
+      new RegExp(`\\brecherché${A}\\b`),
+      new RegExp(`\\bprisé${A}\\b`),
+      new RegExp(`\\bconvoité${A}\\b`),
+    ],
+  },
+  {
+    id: "interdit:marche-logement",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\btension (sur |du |de )?(le |l'|la )?(logement|marché|parc)/,
+      /\bmarché (immobilier |du logement )?tendu/,
+      /\bpeu de (biens|logements) disponibles/,
+      /\bperte d'attractivité/,
+    ],
+  },
+  {
+    id: "interdit:impermeabilisation",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /\bimperméabilis/,
+      /\babsorb(e|ent|er|ant)\b[^.]{0,25}\bmal\b/,
+      /\bpeu absorbants?\b/,
+      /\b(peine|peinent) à absorber/,
+      /\bbéton et (le |du )?bitume/,
+      /\bruissel/,
+      /\bs'infiltr(e|ent|er) mal/,
+    ],
+  },
+  {
+    id: "interdit:classement-national",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /\bparmi les (communes|villes|territoires) (les )?(plus|moins)/,
+      /\bl'une? des (communes|villes|territoires) (les )?(plus|moins)/,
+      /\b(record|première|premier|dernière|dernier) de france/,
+    ],
+  },
+  {
+    id: "interdit:rural",
+    when: always,
+    polarity: "affirmative",
+    patterns: [/\brur(al|ale|aux|ales)\b/],
+  },
+  {
+    id: "interdit:station-balneaire",
+    when: always,
+    polarity: "any",
+    patterns: [/\bstations? balnéaires?\b/],
+  },
+];
+
+// ── Négation dans la proposition ─────────────────────────────────────────────────────────────
+
+// Négation au sens large : les tournures de CONTRASTE (« ce qui la distingue d'un territoire
+// entièrement bâti », « loin d'être très dense ») écartent l'assertion au lieu de l'affirmer.
+// Vu en réel le 28/09 : la première formule faisait refuser une phrase juste, au prix d'un second appel.
+const NEGATION = /(\bn'|\bne\b|\baucune?\b|\bpas\b|\bjamais\b|\bni\b|\bsans\b|\bnon\b|\brien\b|\bdistingu\w*|\bloin d'|\bplutôt que\b|\bcontrairement\b|\bà la différence\b)/;
+const CLAUSE_BREAK = /[,;:()]/g;
+
+/** La proposition qui contient la correspondance est-elle niée ? (début de proposition → fin de phrase) */
+function isNegated(sentence: string, index: number): boolean {
+  let start = 0;
+  CLAUSE_BREAK.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = CLAUSE_BREAK.exec(sentence)) && m.index < index) start = m.index + 1;
+  const breakAfter = sentence.slice(index).search(/[,;:()]/);
+  const end = breakAfter === -1 ? sentence.length : index + breakAfter;
+  return NEGATION.test(sentence.slice(start, end));
+}
+
+export function normalizeText(t: string): string {
+  return t
+    .toLowerCase()
+    .replace(/[’ʼ]/g, "'")
+    .replace(/[  ]/g, " ");
+}
+
+function sentencesOf(text: string): string[] {
+  return normalizeText(text)
+    .split(/\n+|(?<=[.!?])\s+/)
+    .map((s) => s.replace(/^#+\s*/, "").trim())
+    .filter(Boolean);
+}
+
+export function checkAssertions(text: string, projection: Projection): Violation[] {
+  const out: Violation[] = [];
+  const sentences = sentencesOf(text);
+  for (const rule of RULES) {
+    if (!rule.when(projection)) continue;
+    for (const s of sentences) {
+      for (const re of rule.patterns) {
+        const m = re.exec(s);
+        if (!m) continue;
+        if (rule.polarity === "affirmative" && isNegated(s, m.index)) continue;
+        out.push({ rule: rule.id, excerpt: s });
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+// ── Nombres ──────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * L'UNITÉ D'UNE VALEUR, déduite du nom de son champ. Sans elle, un « 2 % » inventé retrouvait un
+ * « 2 » quelconque (deux arrêtés « chocs liés aux vagues ») et passait. Trois familles suffisent :
+ * pourcentage, température, et le reste (jours, nuits, habitants, années), laissé ouvert.
+ */
+export type NumberUnit = "%" | "°C" | "jours" | "nuits" | "habitants" | "mm" | "other";
+
+function unitOfPath(path: string): NumberUnit {
+  if (/pct|part_/.test(path)) return "%";
+  if (/_C\b|_C$|_C\.|rechauffement|temperature|scenario/.test(path)) return "°C";
+  if (/nuits/.test(path)) return "nuits";
+  if (/jours/.test(path)) return "jours";
+  if (/habitants|population/.test(path)) return "habitants";
+  if (/_mm/.test(path)) return "mm";
+  return "other";
+}
+
+/** L'unité ÉCRITE juste après un nombre. « other » = aucune unité reconnue. */
+function unitAfter(after: string): NumberUnit | "forbidden" {
+  if (FORBIDDEN_UNIT.test(after)) return "forbidden";
+  if (/^\s*%/.test(after)) return "%";
+  if (/^\s*°/.test(after)) return "°C";
+  if (/^\s*nuits?\b/.test(after)) return "nuits";
+  if (/^\s*jours?\b/.test(after)) return "jours";
+  if (/^\s*habitants?\b/.test(after)) return "habitants";
+  if (/^\s*(mm|millimètres?)\b/.test(after)) return "mm";
+  return "other";
+}
+
+/** Toutes les valeurs numériques de la projection, avec leur unité, y compris dans les chaînes (« 2015-2021 ») et les noms de champ. */
+export function allowedNumbers(p: Projection): { value: number; unit: NumberUnit }[] {
+  const out: { value: number; unit: NumberUnit }[] = [];
+  const walk = (v: unknown, path: string) => {
+    const unit = unitOfPath(path);
+    // La valeur ET sa valeur absolue : « la population a reculé de 0,4 % » cite -0,4 sans son signe.
+    if (typeof v === "number" && Number.isFinite(v)) out.push({ value: v, unit }, { value: Math.abs(v), unit });
+    else if (typeof v === "string") for (const n of numbersIn(v)) out.push({ value: Math.abs(n.value), unit });
+    else if (Array.isArray(v)) v.forEach((x) => walk(x, path));
+    else if (v && typeof v === "object") {
+      // Les NOMS de champ font partie de ce que le modèle lit : « jours_au_dessus_de_30C » fonde le
+      // « 30 °C » d'une phrase, « ecart_par_rapport_a_1976_2005 » la période de référence.
+      for (const [k, x] of Object.entries(v)) {
+        for (const m of k.matchAll(/(\d+)(C?)/g)) out.push({ value: Number(m[1]), unit: m[2] ? "°C" : "other" });
+        walk(x, path ? `${path}.${k}` : k);
+      }
+    }
+  };
+  walk(p, "");
+  return out;
+}
+
+type WrittenNumber = { value: number; raw: string; index: number; qualifier: string | null; unit: NumberUnit | "forbidden" };
+
+const NUMBER = /(?<![\d.,])([+\-\u2212]?)(\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:[.,](\d+))?/g;
+const QUALIFIER = /(environ|près de|presque|plus de|moins de|autour de|quelque)\s*$/;
+// Des unités qu'aucun fait ne porte : les écrire, c'est avoir calculé (jours → mois, ratio).
+// « reconnue 14 fois » est un compte ; « 4 fois plus » est un ratio.
+const FORBIDDEN_UNIT = /^\s*(mois|semaines?|fois (plus|moins))\b/;
+
+function numbersIn(text: string): WrittenNumber[] {
+  const out: WrittenNumber[] = [];
+  NUMBER.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = NUMBER.exec(text))) {
+    const sign = m[1] === "-" || m[1] === "\u2212" ? -1 : 1;
+    // Un tiret entre deux nombres est une période (« 2015-2021 »), pas un signe.
+    const signIsRange = m[1] && m.index > 0 && /\d/.test(text[m.index - 1] ?? "");
+    const intPart = m[2].replace(/[ \u00a0\u202f]/g, "");
+    const value = Number(`${intPart}${m[3] ? `.${m[3]}` : ""}`) * (signIsRange ? 1 : sign);
+    const before = normalizeText(text.slice(Math.max(0, m.index - 16), m.index));
+    const after = normalizeText(text.slice(m.index + m[0].length, m.index + m[0].length + 12));
+    const q = QUALIFIER.exec(before);
+    const unit = unitAfter(after);
+    out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit });
+  }
+  return out;
+}
+
+const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+const round = (v: number, d: number) => Math.round(v * 10 ** d) / 10 ** d;
+
+/**
+ * Transformations admises (conventions validées le 27/09) : la valeur exacte ; l'arrondi à l'entier
+ * ou à une décimale ; avec « environ / près de / autour de », un écart de 10 % au plus ; avec « plus
+ * de » / « moins de », une borne STRICTEMENT vraie, à 20 % près. L'unité écrite doit être celle de la
+ * valeur (un pourcentage n'est pas un nombre de jours). Aucune autre transformation (ratio, différence,
+ * conversion en mois) : son résultat n'existe pas dans la projection, il est refusé.
+ */
+function matches(w: WrittenNumber, allowed: { value: number; unit: NumberUnit }[]): boolean {
+  if (w.unit === "forbidden") return false;
+  const x = w.value;
+  // UN NOMBRE SANS UNITÉ ÉCRITE n'a droit qu'à la valeur exacte ou à l'arrondi, jamais à une marge :
+  // avec une marge, « moins de 6 » retrouvait n'importe quel 5 de la projection.
+  const tolerant = w.unit !== "other";
+  for (const { value: v, unit } of allowed) {
+    if (w.unit !== "other" && unit !== w.unit) continue;
+    if (close(x, v) || close(x, round(v, 0)) || close(x, round(v, 1))) {
+      if (w.qualifier !== "plus de" && w.qualifier !== "moins de") return true;
+    }
+    if (!tolerant) {
+      // Sans unité, une borne n'est admise que si c'est l'entier le plus proche : 5,6 → « moins de 6 »
+      // (vrai), mais un 5 pris ailleurs ne fonde pas « moins de 6 ».
+      if (w.qualifier === "moins de" && x > v && close(x, Math.ceil(v))) return true;
+      if (w.qualifier === "plus de" && x < v && close(x, Math.floor(v))) return true;
+      continue;
+    }
+    if (w.qualifier === "plus de") { if (x < v && x >= v * 0.8) return true; continue; }
+    if (w.qualifier === "moins de") { if (x > v && x <= v * 1.2) return true; continue; }
+    if (w.qualifier && v !== 0 && Math.abs(x - v) / Math.abs(v) <= 0.1) return true;
+  }
+  return false;
+}
+
+export function checkNumbers(text: string, projection: Projection): Violation[] {
+  const allowed = allowedNumbers(projection);
+  const out: Violation[] = [];
+  for (const s of text.split(/\n+|(?<=[.!?])\s+/)) {
+    for (const w of numbersIn(s)) {
+      if (!matches(w, allowed)) {
+        const rule = w.unit === "forbidden" ? "nombre:transformation-non-admise" : "nombre:absent-des-donnees";
+        out.push({ rule, excerpt: `« ${w.raw.trim()} » dans : ${s.replace(/^#+\s*/, "").trim()}` });
+      }
+    }
+  }
+  return out;
+}
+
+// ── Forme ────────────────────────────────────────────────────────────────────────────────────
+
+export function checkFormat(text: string): Violation[] {
+  const blocks = text.split(/\n##\s+/).slice(1);
+  return blocks.length === 3 ? [] : [{ rule: "format:trois-blocs", excerpt: `${blocks.length} bloc(s) au lieu de 3` }];
+}
+
+export function checkSynthesis(text: string, projection: Projection): Violation[] {
+  return [...checkFormat(text), ...checkAssertions(text, projection), ...checkNumbers(text, projection)];
+}
+
+/** Les violations, dites au modèle pour sa seconde tentative. */
+export function describeViolations(v: Violation[]): string[] {
+  return v.map((x) => `${x.rule} : ${x.excerpt.length > 180 ? `${x.excerpt.slice(0, 177)}…` : x.excerpt}`);
+}

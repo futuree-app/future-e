@@ -580,15 +580,10 @@ function buildFactors(
             eyebrow: "L'occupation des sols",
             title: "Espaces naturels",
             headline: `${couvertNaturel.brutPct} % d'espaces naturels`,
-            subhead: `${
-              couvertNaturel.brutPct >= 75
-                ? `À ${communeName}, le naturel l'emporte largement : le bâti tient peu de place.`
-                : couvertNaturel.brutPct >= 50
-                  ? `À ${communeName}, le naturel domine le paysage, le bâti reste minoritaire.`
-                  : couvertNaturel.brutPct >= 25
-                    ? `À ${communeName}, espaces bâtis et espaces ouverts s'équilibrent.`
-                    : `À ${communeName}, les espaces naturels sont rares : la commune est très urbanisée.`
-            }${
+            // D4 (FUT-6) : le volet ne qualifie plus. Sa grille 75 / 50 / 25 était une TROISIÈME
+            // lecture du même chiffre (après la face et la carte d'identité), et pouvait les
+            // contredire. Il montre la mesure et sa définition ; la catégorie est celle de la face.
+            subhead: `Forêts, prairies, landes et pelouses, roche et dunes, eau : ils couvrent ${couvertNaturel.brutPct} % de la commune. Les cultures n'en font pas partie.${
               couvertNaturel.radiusPct != null
                 ? ` Dans un rayon de 15 km autour de la commune : ${couvertNaturel.radiusPct} %.`
                 : ""
@@ -794,22 +789,18 @@ function buildFactors(
         : undefined,
   });
 
-  // ── Cartes territoire P0 : le système humain (ADEME, échelle commune) ─────────
-  // Face avant qualitative (« vacance » ≈ « vacances » et « 0 % » = effet bug) ;
-  // Face avant = le chiffre ET son interprétation (head sur la ligne valeur,
-  // précision en dessous) ; le tooltip se limite à la définition.
+  // ── Carte « Logements inoccupés » (ADEME, échelle commune) ─────────────────────
+  // D5 (FUT-6) : LE CHIFFRE, SANS CONCLUSION DE MARCHÉ. La face disait « Tension sur le logement ·
+  // Peu de biens disponibles » sous 8 % et « Perte d'attractivité » au-delà de 13 % : deux inférences
+  // tirées d'un seul indicateur, sur des seuils jamais documentés. Une lecture du marché reviendra
+  // quand elle reposera sur des indicateurs dédiés (futur DerivedFact) ; en attendant, la carte dit
+  // ce qui est mesuré.
   if (logementVacancePct != null) {
     const vac = Math.round(logementVacancePct);
-    const [vacHead, vacSub] =
-      vac >= 13
-        ? ["Perte d'attractivité", "Des logements qui peinent à trouver preneur"]
-        : vac < 8
-          ? ["Tension sur le logement", "Peu de biens disponibles"]
-          : ["Marché équilibré", "Vacance dans la moyenne"];
     factors.push({
       label: "Logements inoccupés",
-      val: `${vac} % · ${vacHead}`,
-      sub: vacSub,
+      val: `${vac} % du parc`,
+      sub: "Logements sans occupant au recensement 2022",
       col: "var(--green)",
       src: "INSEE / ADEME · échelle communale",
       missing: false,

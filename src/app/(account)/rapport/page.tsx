@@ -29,6 +29,7 @@ import {
 } from "@/lib/decision/decision-artifact";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { after } from "next/server";
+import { prechaufferSyntheseTerritoire } from "@/lib/server/territoire-snapshot";
 import { rafraichirVoisinageSiPerime } from "@/lib/server/calcul-voisinage";
 import { communeParent } from "@/lib/plm";
 import { choisirDossierActif } from "@/lib/dossier-actif";
@@ -116,6 +117,16 @@ export default async function RapportPage() {
   // `canAccessTerritory` refaisait sa propre requête pour la seule première question.
   const claims = inseeCode ? await loadTerritoryClaims(supabase, user.id) : [];
   const fullReport = Boolean(inseeCode) && decideTerritoryAccess(claims, inseeCode!);
+
+  // LA LECTURE ENRICHIE DU TERRITOIRE SE PRÉPARE DÈS LE HUB (FUT-6). C'est le moment le plus tôt où la
+  // commune et le droit sont connus ; la page Territoire vient ensuite. Après la réponse, jamais
+  // pendant : le hub s'affiche sans attendre. La synthèse étant générique (même snapshot, même
+  // horizon = même texte pour tous), une commune déjà préparée ne coûte qu'une lecture de cache.
+  if (fullReport && inseeCode && communeName) {
+    const insee = inseeCode;
+    const nom = communeName;
+    after(async () => { await prechaufferSyntheseTerritoire(insee, nom); });
+  }
 
   // Première lecture du compte gratuit : réponses du wizard persistées (point 2).
   const serverWizardAnswers = (profile?.wizard_answers ?? null) as WizardAnswers | null;

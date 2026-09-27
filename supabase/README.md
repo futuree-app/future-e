@@ -21,6 +21,7 @@ Ordre recommandé :
 `10_add_workbook_quartier.sql` ajoute la colonne `user_profiles.workbook_quartier` (repères de terrain, écriture compat).
 `11_terrain_observations.sql` crée la table dédiée `terrain_observations` (base propre des repères de terrain, RLS par utilisateur, préparation de l'agrégation territoriale future). À lancer après `10`.
 `14_add_wizard_answers.sql` ajoute la colonne `user_profiles.wizard_answers` (réponses du questionnaire persistées pour ré-afficher la « première lecture » du compte gratuit ; écriture via `/api/profile`).
+`34_territoire_facts.sql` (FUT-6) crée `territory_facts_snapshot` (la photo des données d'un écran Territoire, sous son empreinte) et `territory_synthesis` (la synthèse Territoire générique en cache, clé = empreinte + horizon + version du contrat). Service role uniquement, aucune donnée personnelle. Retour arrière : `34_territoire_facts_down.sql`. Sans ces tables, la page affiche la synthèse déterministe.
 
 Import DRIAS recommandé :
 
