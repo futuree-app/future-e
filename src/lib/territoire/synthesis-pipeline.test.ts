@@ -45,7 +45,7 @@ function fakeModel(...answers: (string | Error)[]) {
 
 test("valide du premier coup : 1 appel, origine « model »", async () => {
   const m = fakeModel(BONNE);
-  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate });
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: async () => true });
   assert.equal(r.origin, "model");
   assert.equal(m.calls.length, 1);
   assert.equal(r.text, BONNE);
@@ -53,7 +53,7 @@ test("valide du premier coup : 1 appel, origine « model »", async () => {
 
 test("refusée puis valide : 2 appels, et la seconde consigne CITE les erreurs", async () => {
   const m = fakeModel(MAUVAISE, BONNE);
-  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate });
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: async () => true });
   assert.equal(r.origin, "model_retry");
   assert.equal(m.calls.length, 2);
   assert.match(m.calls[1], /VOTRE VERSION PRÉCÉDENTE A ÉTÉ REFUSÉE/);
@@ -63,7 +63,7 @@ test("refusée puis valide : 2 appels, et la seconde consigne CITE les erreurs",
 
 test("refusée deux fois : synthèse déterministe, jamais un 3e appel, motifs journalisés", async () => {
   const m = fakeModel(MAUVAISE, MAUVAISE, BONNE);
-  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate });
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: async () => true });
   assert.equal(r.origin, "deterministic");
   assert.equal(m.calls.length, 2);
   assert.equal(r.rejections.length, 2);
@@ -73,7 +73,7 @@ test("refusée deux fois : synthèse déterministe, jamais un 3e appel, motifs j
 
 test("modèle indisponible : déterministe, NON mis en cache (une visite suivante retentera)", async () => {
   const m = fakeModel(new Error("529 overloaded"));
-  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate });
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: async () => true });
   assert.equal(r.origin, "deterministic");
   assert.equal(r.cacheable, false);
 });
@@ -202,4 +202,86 @@ test("les données existantes restent intactes : aucune migration FUT-6 ne touch
   // Et les chemins d'écriture restent en place, pour AskFuture et la future Lecture pour votre projet.
   assert.match(readFileSync("src/app/api/terrain-observations/route.ts", "utf8"), /terrain_observations/);
   assert.match(readFileSync("src/app/api/ask/route.ts", "utf8"), /workbook_quartier/);
+});
+
+// ── Budget : une réservation avant CHAQUE appel payant (correction du 28/09) ────────────────
+
+function budget(...answers: boolean[]) {
+  let n = 0;
+  return { reserve: async () => answers[n++] ?? true, count: () => n };
+}
+
+test("budget : validé au premier coup → 1 réservation, 1 appel", async () => {
+  const m = fakeModel(BONNE);
+  const b = budget(true, true);
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: b.reserve });
+  assert.equal(r.origin, "model");
+  assert.equal(b.count(), 1);
+  assert.equal(m.calls.length, 1);
+});
+
+test("budget : refusé puis validé → 2 réservations, 2 appels", async () => {
+  const m = fakeModel(MAUVAISE, BONNE);
+  const b = budget(true, true);
+  await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: b.reserve });
+  assert.equal(b.count(), 2);
+  assert.equal(m.calls.length, 2);
+});
+
+test("budget : seconde réservation refusée → 1 appel, puis déterministe non figé", async () => {
+  const m = fakeModel(MAUVAISE, BONNE);
+  const b = budget(true, false);
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: b.reserve });
+  assert.equal(m.calls.length, 1);
+  assert.equal(r.origin, "deterministic");
+  assert.equal(r.cacheable, false);
+  assert.equal(r.budgetRefused, true);
+});
+
+test("budget : première réservation refusée → aucun appel", async () => {
+  const m = fakeModel(BONNE);
+  const r = await produceSynthesis({ projection: P, horizon: "gwl20", generate: m.generate, reserveBudget: budget(false).reserve });
+  assert.equal(m.calls.length, 0);
+  assert.equal(r.modelCalls, 0);
+});
+
+test("budget : cache touché → 0 réservation, 0 appel", async () => {
+  const { store } = memoryStore();
+  let reservations = 0;
+  let calls = 0;
+  const d: EnsureDeps = {
+    store,
+    reserveBudget: async () => { reservations++; return true; },
+    generate: async () => { calls++; return BONNE; },
+  };
+  await ensureTerritoireSynthesis(SNAP, "gwl20", d);
+  const before = { reservations, calls };
+  const hit = await ensureTerritoireSynthesis(SNAP, "gwl20", d);
+  assert.equal(hit.status === "ready" && hit.cached, true);
+  assert.deepEqual({ reservations, calls }, before);
+});
+
+
+// ── Limite par adresse : jamais sur un cache (correction du 28/09) ───────────────────────────
+
+test("route : le GET de lecture n'applique pas la limite par adresse", () => {
+  const src = lire("src/app/api/synthesize-quartier/route.ts");
+  const get = src.slice(src.indexOf("export async function GET"), src.indexOf("export async function POST"));
+  assert.doesNotMatch(get, /limiteParAdresse\(/);
+});
+
+test("route : le POST lit le cache AVANT d'appliquer la limite, qui précède la génération", () => {
+  const src = lire("src/app/api/synthesize-quartier/route.ts");
+  const post = src.slice(src.indexOf("export async function POST"));
+  const cache = post.indexOf("readSynthesis(");
+  const limite = post.indexOf("limiteParAdresse(");
+  const generation = post.indexOf("ensureTerritoireSynthesis(");
+  assert.ok(cache >= 0 && limite > cache && generation > limite, "ordre attendu : cache, limite, génération");
+  assert.match(post.slice(cache, limite), /status === "ready"[\s\S]*status === "pending"/);
+});
+
+test("client : toute réponse d'erreur est terminale, sans relances", () => {
+  const src = lire("src/components/report/QuartierSynthesis.tsx");
+  assert.equal((src.match(/if \(!res\.ok\)/g) ?? []).length, 2, "POST et GET doivent tous deux traiter les erreurs");
+  assert.match(src, /enrichedUnavailable/);
 });

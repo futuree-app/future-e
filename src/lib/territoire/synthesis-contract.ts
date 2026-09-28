@@ -150,10 +150,19 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
       ? {
           categorie: demoCat.label,
           observation: DEMOGRAPHY_PHRASE[demoCat.value],
-          evolution_annuelle_pct: trend.annualPct,
-          part_arrivants_recents_pct: trend.newcomersPct,
-          periode: "2015-2021",
-          limite: "Les arrivants récents habitaient ailleurs un an avant le recensement. Aucune mesure d'attractivité.",
+          // DEUX MESURES, DEUX TEMPORALITÉS (correction du 28/09). Vu en réel : « près de 10 %
+          // d'arrivants récents entre 2015 et 2021 ». La période 2015-2021 est celle de l'évolution ;
+          // la part d'arrivants se mesure par rapport à l'année précédant le recensement, elle ne se
+          // cumule pas sur plusieurs années.
+          evolution_de_la_population: {
+            pct_par_an: trend.annualPct,
+            periode: "2015-2021",
+          },
+          arrivants_recents: {
+            part_des_habitants_pct: trend.newcomersPct,
+            definition: "Part des habitants qui vivaient dans une autre commune un an avant le recensement de 2021. Une situation mesurée sur une seule année, jamais un cumul sur plusieurs années.",
+          },
+          limite: "Aucune mesure d'attractivité.",
         }
       : null,
     residences_secondaires: secondary != null
@@ -232,7 +241,8 @@ LES FAITS FOURNIS SONT LES SEULS FAITS
 - Chaque affirmation doit se rattacher à un champ du payload. Ne comblez jamais un manque par une connaissance générale de la commune.
 - Les champs "categorie" sont des qualifications DÉTERMINISTES, affichées telles quelles à l'écran. Réutilisez-les. Ne les requalifiez jamais avec vos propres adjectifs : si la densité est "Densité intermédiaire", n'écrivez ni "dense", ni "très dense", ni "peu dense". Si l'occupation des sols est "Occupation mixte", n'écrivez pas que le territoire est "très urbanisé", "très bâti" ou qu'il a "peu d'espaces verts".
 - Occupation des sols : appuyez-vous sur la catégorie et la composition fournies. N'inventez aucune couverture d'arbres, d'ombre ou de végétation des rues.
-- Démographie : décrivez ce qui est mesuré (évolution, part d'arrivants récents). N'écrivez jamais que la commune "attire", est "attractive", "recherchée" ou "prisée" : aucune donnée ne mesure l'attractivité.
+- Démographie : décrivez ce qui est mesuré. L'évolution de la population porte sur 2015-2021. La part d'arrivants récents est une situation sur UNE année ("X % des habitants vivaient ailleurs un an plus tôt") : ne l'associez jamais à la période 2015-2021 ni à plusieurs années. N'écrivez jamais que la commune "attire", est "attractive", "recherchée" ou "prisée" : aucune donnée ne mesure l'attractivité.
+- Catastrophes naturelles : la "sécheresse des sols" reconnue en catastrophe naturelle (dommages aux bâtiments, argiles) n'est pas le même objet que les "jours de sols secs" projetés (un indicateur climatique). Citez-les séparément si besoin, sans jamais présenter l'un comme le prolongement ou l'annonce de l'autre.
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.

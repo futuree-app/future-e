@@ -15,3 +15,8 @@ export function chatelaillonInputs(): TerritoireInputs {
 export function auditSyntheses(): string[] {
   return JSON.parse(readFileSync(new URL("chatelaillon-2050-syntheses-audit.json", dir), "utf8")) as string[];
 }
+
+/** Trois synthèses RÉELLES du 28/09, validées à tort par la première version des contrôles. */
+export function fautivesDu28(): Record<string, { defaut: string; texte: string }> {
+  return JSON.parse(readFileSync(new URL("chatelaillon-2050-fautives-28-09.json", dir), "utf8"));
+}

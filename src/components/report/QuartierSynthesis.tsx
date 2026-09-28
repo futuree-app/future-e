@@ -124,6 +124,10 @@ export default function QuartierSynthesis({
       }
       try {
         const res = await fetch(`/api/synthesize-quartier?snapshot=${encodeURIComponent(snapshotHash)}&horizon=${h}`);
+        if (cancelled) return;
+        // Une réponse d'erreur est TERMINALE : on ne relance pas pendant des minutes une lecture qui
+        // n'arrivera pas. La synthèse déterministe reste affichée.
+        if (!res.ok) { dispatch({ horizon: h, event: { type: "enrichedUnavailable" } }); return; }
         const a = (await res.json()) as ApiAnswer;
         if (cancelled || settle(a)) return;
       } catch {
@@ -140,6 +144,14 @@ export default function QuartierSynthesis({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ snapshotHash, horizon: h }),
         });
+        if (cancelled) return;
+        // 401, 403, 404, 429, 503 (et toute autre erreur) sont TERMINALES : un 429 n'est pas une
+        // génération en cours, et ne doit pas déclencher trois minutes de relances.
+        if (!res.ok) {
+          dispatch({ horizon: h, event: { type: "enrichedUnavailable" } });
+          posthog?.capture("quartier_ai_summary_unavailable", { commune: communeName, insee_code: inseeCode, horizon: h, http_status: res.status });
+          return;
+        }
         const a = (await res.json().catch(() => ({ status: "unavailable" }))) as ApiAnswer;
         if (cancelled || settle(a)) return;
       } catch {

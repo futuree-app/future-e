@@ -27,6 +27,8 @@ export type SynthesisResult = {
    */
   cacheable: boolean;
   modelError?: string;
+  /** Le budget du jour a refusé une génération : un état passager, jamais figé en cache. */
+  budgetRefused?: boolean;
 };
 
 export const MAX_MODEL_CALLS = 2;
@@ -35,13 +37,28 @@ export async function produceSynthesis(opts: {
   projection: Record<string, unknown>;
   horizon: HorizonKey;
   generate: (userMessage: string) => Promise<string>;
+  /**
+   * LE BUDGET SE RÉSERVE AVANT CHAQUE APPEL PAYANT, et jamais par avance (correction du 28/09). Une
+   * réservation unique pour deux appels sous-comptait les régénérations.
+   */
+  reserveBudget: () => Promise<boolean>;
 }): Promise<SynthesisResult> {
-  const { projection, horizon, generate } = opts;
+  const { projection, horizon, generate, reserveBudget } = opts;
   const rejections: SynthesisResult["rejections"] = [];
   let calls = 0;
   let previous: Violation[] | null = null;
 
   for (let attempt = 1; attempt <= MAX_MODEL_CALLS; attempt++) {
+    if (!(await reserveBudget())) {
+      return {
+        text: deterministicSynthesis(projection, horizon),
+        origin: "deterministic",
+        rejections,
+        modelCalls: calls,
+        cacheable: false,
+        budgetRefused: true,
+      };
+    }
     let text: string;
     try {
       calls++;

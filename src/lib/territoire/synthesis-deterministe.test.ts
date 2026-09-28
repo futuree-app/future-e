@@ -16,15 +16,15 @@ const CHATELAILLON_2050 = `Châtelaillon-Plage à l'horizon 2050
 
 ## Le territoire aujourd'hui
 
-Châtelaillon-Plage compte 6 227 habitants, dans l'agglomération de La Rochelle. Sa densité, de 976 habitants au km², correspond à une densité intermédiaire, et ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49 % d'espaces urbanisés, 21 % de prairies et 14 % de terres agricoles. Entre 2015 et 2021, sa population a progressé de 0,62 % par an, et 9,8 % de ses habitants vivaient ailleurs un an plus tôt. Les résidences secondaires représentent 38 % des logements, une part marquée.
+Châtelaillon-Plage, 6\u202f227 habitants dans l'agglomération de La Rochelle, a une densité intermédiaire (976 habitants au km²). Ses sols mêlent espaces urbanisés, espaces naturels et cultures : 49 % d'espaces urbanisés et 37 % d'espaces naturels. Sa population a progressé de 0,62 % par an entre 2015 et 2021.
 
 ## Ce qui évolue d'ici 2050
 
-Dans le scénario France +2,7 °C, les projections pour 2050 décrivent, parmi les évolutions visibles, 19 jours au-dessus de 30 °C par an (+12 par rapport à 1976-2005), 25 nuits au-dessus de 20 °C (+19 par rapport à 1976-2005), un été moyen à 21,7 °C (+2 °C), 136 jours de sols secs par an, 5 jours de pluie intense par an et 5 jours de conditions météo favorables au feu. Ces jours sont répartis dans l'année : ils ne forment pas une saison continue. Le réchauffement a déjà commencé : +1,7 °C observés depuis 1961-1990, jusqu'en 2025. Aujourd'hui, des restrictions d'eau de niveau « crise » s'appliquent sur le territoire de gestion « Bassin de Charente-aval ».
+Parmi les évolutions projetées pour 2050 (scénario France +2,7 °C) : 19 jours au-dessus de 30 °C par an (+12 par rapport à 1976-2005), 25 nuits au-dessus de 20 °C (+19) et 136 jours de sols secs par an. Ces indicateurs comptent des jours sur l'année, sans dire s'ils forment une période continue.
 
 ## Ce que la commune a déjà connu
 
-Châtelaillon-Plage a été reconnue 14 fois en état de catastrophe naturelle depuis 1982, surtout au titre de : sécheresse des sols, inondations et chocs liés aux vagues. La sécheresse des sols, déjà reconnue 5 fois, fait aussi partie des évolutions projetées. À l'échelle de la commune, des périmètres d'inondation et de submersion marine sont recensés. Le littoral est largement aménagé : l'érosion n'y est que partiellement mesurable, et classée « faible » là où elle l'est (observations 1937-2010). Elle est inscrite sur la liste nationale des communes concernées par le recul du trait de côte (loi Climat et Résilience). L'effet concret de ces évolutions dépend du quartier et du logement, qu'examinent les modules Autour de l'adresse et Logement.`;
+Châtelaillon-Plage a été reconnue 14 fois en état de catastrophe naturelle depuis 1982, surtout au titre de : sécheresse des sols, inondations et chocs liés aux vagues. Des périmètres d'inondation et de submersion marine y sont recensés. L'effet concret de ces évolutions dépend du quartier et du logement, qu'examinent les modules Autour de l'adresse et Logement.`;
 
 test("Châtelaillon 2050 : le texte déterministe de référence", () => {
   assert.equal(deterministicSynthesis(projection(), "gwl20"), CHATELAILLON_2050);
@@ -44,7 +44,7 @@ test("il passe ses propres contrôles, à chaque horizon", () => {
 test("il ne déclare aucun phénomène dominant (pas de classement par percentile)", () => {
   const t = deterministicSynthesis(projection(), "gwl20");
   assert.doesNotMatch(t, /domine|pèse le plus|principal enjeu|avant tout|surtout la|le plus marquant/i);
-  assert.match(t, /parmi les évolutions visibles/);
+  assert.match(t, /Parmi les évolutions projetées/);
 });
 
 test("il ne convertit jamais des jours en mois", () => {
@@ -64,3 +64,34 @@ test("données minimales : un texte digne, qui passe les contrôles", () => {
   assert.equal(t.split(/\n## /).length - 1, 3);
   assert.deepEqual(checkSynthesis(t, p), []);
 });
+
+// ── Corrections du 28/09 ────────────────────────────────────────────────────────────────────
+
+test("pas d'affirmation sur la répartition des jours dans l'année", () => {
+  const t = deterministicSynthesis(projection(), "gwl20");
+  assert.doesNotMatch(t, /répartis dans l'année|ne forment pas une saison/);
+  assert.match(t, /sans dire s'ils forment une période continue/);
+});
+
+test("aucun raccord entre la sécheresse reconnue en CatNat et les jours de sols secs projetés", () => {
+  const t = deterministicSynthesis(projection(), "gwl20");
+  for (const sentence of t.split(/(?<=\.)\s+/)) {
+    assert.ok(!(/sécheresse/i.test(sentence) && /sols secs|projet|évolution/i.test(sentence) && /reconnue|catastrophe/i.test(sentence)), sentence);
+  }
+  assert.doesNotMatch(t, /fait aussi partie des évolutions projetées/);
+});
+
+test("la part d'arrivants récents n'est jamais associée à la période 2015-2021", () => {
+  assert.doesNotMatch(deterministicSynthesis(projection(), "gwl20"), /arrivants?[^.]*2015|2015[^.]*vivaient ailleurs/);
+});
+
+test("plus courte : 3 informations, 3 évolutions au plus, 2 faits puis le passage", () => {
+  const t = deterministicSynthesis(projection(), "gwl20");
+  const [, b1, b2, b3] = t.split(/\n## [^\n]+\n\n/);
+  const sentences = (b: string) => b.trim().split(/(?<=\.)\s+/).length;
+  assert.ok(sentences(b1) <= 3, "bloc 1");
+  assert.ok((b2.match(/ par an| au-dessus de 20 °C/g) ?? []).length <= 4, "bloc 2");
+  assert.ok(sentences(b3) <= 3, "bloc 3");
+  assert.ok(t.split(/\s+/).length < 230, `${t.split(/\s+/).length} mots`);
+});
+

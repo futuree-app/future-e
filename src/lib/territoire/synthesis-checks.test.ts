@@ -170,3 +170,70 @@ test("nombres : l'unité compte (des nuits ne se valident pas sur des jours de p
   assert.ok(numberErrors("On compterait 5 nuits de plus.") > 0); // 5 n'existe qu'en jours (pluie, feu)
 });
 
+
+// ── Corrections du 28/09 : le sens du nombre, la temporalité, le raccord CatNat ──────────────
+
+import { fautivesDu28 } from "./__fixtures__/chatelaillon.ts";
+
+test("réel du 28/09 : « 19 jours supplémentaires » (valeur présentée comme un écart) est rejeté", () => {
+  const f = fautivesDu28().valeur_presentee_comme_ecart;
+  assert.ok(checkSynthesis(f.texte, P).some((v) => v.rule === "nombre:sens-incoherent" && /19/.test(v.excerpt)), f.defaut);
+});
+
+test("réel du 28/09 : « 10 % d'arrivants récents entre 2015 et 2021 » est rejeté", () => {
+  const f = fautivesDu28().periode_arrivants;
+  assert.ok(checkSynthesis(f.texte, P).some((v) => v.rule === "demographie:periode-arrivants"), f.defaut);
+});
+
+test("réel du 28/09 : le raccord CatNat sécheresse ↔ évolution projetée est rejeté", () => {
+  const f = fautivesDu28().catnat_secheresse_prolongee;
+  assert.ok(checkSynthesis(f.texte, P).some((v) => v.rule === "catnat:secheresse-prolongee"), f.defaut);
+});
+
+test("valeur ou écart : les formulations d'écart ne se valident que sur l'écart", () => {
+  // jours > 30 °C : valeur 18,8 ; écart +11,6. Nuits > 20 °C : valeur 25,1 ; écart +19,4.
+  for (const faux of [
+    "19 jours supplémentaires au-dessus de 30 °C.",
+    "+19 jours au-dessus de 30 °C.",
+    "19 jours de plus au-dessus de 30 °C.",
+    "Une hausse de 19 jours au-dessus de 30 °C.",
+    "Les jours au-dessus de 30 °C augmentent de 19 jours.",
+    "25 nuits supplémentaires au-dessus de 20 °C.",
+  ]) assert.ok(numberErrors(faux) > 0, faux);
+  for (const juste of [
+    "19 jours au-dessus de 30 °C par an.",
+    "12 jours supplémentaires au-dessus de 30 °C.",
+    "+12 jours par rapport à 1976-2005.",
+    "Une hausse de 19,4 nuits au-dessus de 20 °C.",
+    "25 nuits au-dessus de 20 °C, soit 19 de plus qu'en 1976-2005.",
+    "Les jours au-dessus de 30 °C passent de 7 à 19.",
+  ]) assert.equal(numberErrors(juste), 0, juste);
+});
+
+test("valeur ou écart : une valeur absolue ne se valide pas sur un écart", () => {
+  assert.ok(numberErrors("19 nuits au-dessus de 20 °C par an.") > 0); // 19 est l'écart, la valeur est 25
+});
+
+test("arrivants récents : la formulation sur une année est admise", () => {
+  assert.deepEqual(rules("9,8 % des habitants vivaient ailleurs un an plus tôt."), []);
+  assert.deepEqual(rules("La population a progressé de 0,62 % par an entre 2015 et 2021."), []);
+  assert.ok(rules("Près de 10 % d'arrivants récents sur la période 2015-2021.").includes("demographie:periode-arrivants"));
+});
+
+test("CatNat : citer séparément les reconnaissances et les jours de sols secs reste permis", () => {
+  assert.deepEqual(rules("La commune a été reconnue 5 fois pour sécheresse des sols."), []);
+  assert.deepEqual(rules("Les projections comptent 136 jours de sols secs par an."), []);
+});
+
+test("faux rejets réels du 28/09 : ces phrases justes sont acceptées", () => {
+  for (const ok of [
+    "La commune a par ailleurs connu 1,7 °C de réchauffement observé depuis la période 1961-1990.",
+    "Depuis 1961-1990, la commune a déjà enregistré 1,7 °C de hausse observée.",
+    "La population a progressé de 0,62 % par an entre 2015 et 2021, et 9,8 % des habitants recensés en 2021 vivaient ailleurs un an plus tôt.",
+    "Près de 36 % du territoire restent en espaces naturels, ce qui donne à la commune une composition moins entièrement urbanisée que sa densité intermédiaire pourrait le laisser croire.",
+    "Là où la période 1976-2005 comptait environ 5 nuits au-dessus de 20 °C, la projection en donne 25 pour 2050.",
+  ]) {
+    assert.deepEqual(checkSynthesis(`T\n\n## A\n\n${ok}\n\n## B\n\nx.\n\n## C\n\ny.`, P), [], ok);
+  }
+});
+

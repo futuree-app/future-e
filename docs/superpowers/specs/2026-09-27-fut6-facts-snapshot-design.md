@@ -32,6 +32,22 @@ distinctif partagé du comparateur), FUT-35 (rôle du vieillissement), les autre
 > - **D11** : la projection porte aussi les **valeurs de référence 1976-2005**, que le volet des cartes affiche
 >   déjà (« ≈ 7 → 19 jours »). Le modèle les cite ; il ne les recalcule plus.
 > - Migration : `supabase/34_territoire_facts.sql` et son retour arrière `34_territoire_facts_down.sql`.
+>
+> **Corrections du 28/09 (après générations réelles et revue).**
+> - **Sens du nombre** : chaque valeur de la projection porte sa nature (`valeur`, `ecart`, `reference`).
+>   Un nombre présenté comme un écart (« +12 », « 12 de plus », « une hausse de 12 », « 1,7 °C de
+>   réchauffement ») ne se valide que sur un écart ; une valeur jamais sur un écart. « 19 jours
+>   supplémentaires » (écart réel +12) est refusé. Les taux en % ne sont pas concernés.
+> - **Arrivants récents** : la projection sépare l'évolution (2015-2021) et la part d'arrivants (une année,
+>   définition explicite). Une règle refuse toute association de cette part à une période pluriannuelle,
+>   sauf si la phrase précise « un an plus tôt ».
+> - **CatNat « sécheresse » ≠ jours de sols secs** : raccord retiré du déterministe, interdit à l'IA
+>   (règle + consigne).
+> - **Budget** : réservé avant CHAQUE appel au modèle ; cache touché = 0 réservation.
+> - **Limite par adresse** : après la lecture du cache ; jamais sur un GET ni sur un cache touché. Côté
+>   client, toute réponse d'erreur (401, 403, 404, 429, 503) est terminale.
+> - **Déterministe raccourci** : 3 informations, 3 évolutions dans un ordre éditorial fixe, 2 faits puis le
+>   passage vers Autour et Logement. Plus d'affirmation sur la répartition des jours dans l'année.
 
 ---
 

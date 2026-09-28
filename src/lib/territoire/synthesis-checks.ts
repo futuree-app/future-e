@@ -28,6 +28,8 @@ type Rule = {
   when: (p: Projection) => boolean;
   patterns: RegExp[];
   polarity: "affirmative" | "any";
+  /** Une phrase qui porte cette précision échappe à la règle. */
+  unless?: RegExp;
 };
 
 // ── Lecture de la projection ─────────────────────────────────────────────────────────────────
@@ -179,6 +181,38 @@ const RULES: Rule[] = [
       new RegExp(`\\bépargné${A} par la (mer|submersion)`),
     ],
   },
+  // ── Temporalité des arrivants récents (correction du 28/09) ──
+  {
+    id: "demographie:periode-arrivants",
+    when: (p) => at(p, "demographie.arrivants_recents") != null,
+    polarity: "any",
+    patterns: [
+      /(arrivants?|arrivés?|nouveaux habitants|installés?|vivaient ailleurs|habitaient ailleurs)[^.]*(entre 2015 et 2021|2015-2021|2015 et 2021|depuis 2015|sur la période|en six ans|ces dernières années|au fil des années)/,
+      /(entre 2015 et 2021|2015-2021|depuis 2015|sur la période)[^.]*(arrivants?|arrivés?|nouveaux habitants|vivaient ailleurs|habitaient ailleurs)/,
+    ],
+    // Une phrase qui DIT l'année de référence des arrivants est juste, même si elle cite aussi la
+    // période de l'évolution : « progressé de 0,62 % par an entre 2015 et 2021, et 9,8 % des habitants
+    // vivaient ailleurs un an plus tôt » (vue en réel le 28/09, refusée à tort).
+    unless: /\bun an (plus tôt|avant|auparavant)|l'année (précédente|d'avant|précédant)/,
+  },
+  // ── CatNat « sécheresse » ≠ jours de sols secs projetés (correction du 28/09) ──
+  // La reconnaissance CatNat « sécheresse des sols » vise surtout des dommages liés aux argiles ; les
+  // jours de sols secs sont un indicateur climatique DRIAS. Les présenter comme un même phénomène qui
+  // se prolonge est un raccord que les données n'établissent pas.
+  {
+    id: "catnat:secheresse-prolongee",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)[^.]*(sols secs|projet|horizon|2030|2050|2100|futur|s'intensifi|s'accentu|prolong|annonc|amplifi|à venir|devrai)/,
+      /(sols secs|projet|horizon|2030|2050|2100)[^.]*sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
+      /(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)[^.]*sécheresse[^.]*(sols secs|s'intensifi|s'accentu|prolong|annonc|amplifi|à venir|devrai)/,
+      /sécheresse[^.]*(sols secs|futur|projet|horizon|2030|2050|2100|s'intensifi|s'accentu|à venir)[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
+      // L'anaphore : « Cette sécheresse des sols […] catastrophe naturelle », juste après une phrase sur
+      // les jours de sols secs projetés (vu en réel le 28/09).
+      /\bcette sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
+    ],
+  },
   // ── Interdits faute de fait dédié ──
   {
     id: "interdit:attractivite",
@@ -247,7 +281,7 @@ const RULES: Rule[] = [
 // Négation au sens large : les tournures de CONTRASTE (« ce qui la distingue d'un territoire
 // entièrement bâti », « loin d'être très dense ») écartent l'assertion au lieu de l'affirmer.
 // Vu en réel le 28/09 : la première formule faisait refuser une phrase juste, au prix d'un second appel.
-const NEGATION = /(\bn'|\bne\b|\baucune?\b|\bpas\b|\bjamais\b|\bni\b|\bsans\b|\bnon\b|\brien\b|\bdistingu\w*|\bloin d'|\bplutôt que\b|\bcontrairement\b|\bà la différence\b)/;
+const NEGATION = /(\bn'|\bne\b|\baucune?\b|\bpas\b|\bjamais\b|\bni\b|\bsans\b|\bnon\b|\brien\b|\bdistingu\w*|\bloin d'|\bplutôt que\b|\bcontrairement\b|\bà la différence\b|\bmoins\b)/;
 const CLAUSE_BREAK = /[,;:()]/g;
 
 /** La proposition qui contient la correspondance est-elle niée ? (début de proposition → fin de phrase) */
@@ -281,6 +315,7 @@ export function checkAssertions(text: string, projection: Projection): Violation
   for (const rule of RULES) {
     if (!rule.when(projection)) continue;
     for (const s of sentences) {
+      if (rule.unless?.test(s)) continue;
       for (const re of rule.patterns) {
         const m = re.exec(s);
         if (!m) continue;
@@ -324,20 +359,40 @@ function unitAfter(after: string): NumberUnit | "forbidden" {
   return "other";
 }
 
-/** Toutes les valeurs numériques de la projection, avec leur unité, y compris dans les chaînes (« 2015-2021 ») et les noms de champ. */
-export function allowedNumbers(p: Projection): { value: number; unit: NumberUnit }[] {
-  const out: { value: number; unit: NumberUnit }[] = [];
+/**
+ * CE QUE DÉSIGNE UNE VALEUR (FUT-6, correction du 28/09). « 19 jours au-dessus de 30 °C » et « 19 jours
+ * supplémentaires » citent le même nombre et ne disent pas la même chose. Vu en réel : la valeur
+ * absolue (18,8 jours) présentée comme un écart, alors que l'écart vaut +11,6. Chaque valeur de la
+ * projection porte donc sa NATURE, déduite de son champ :
+ *   - `ecart` : un écart à la période de référence (« ecart_par_rapport_a_1976_2005 »), un
+ *     réchauffement (le scénario « +2,7 °C », la tendance observée) ;
+ *   - `reference` : la valeur de la période 1976-2005 ;
+ *   - `valeur` : tout le reste (valeurs absolues, comptes, années, parts).
+ */
+export type NumberKind = "valeur" | "ecart" | "reference";
+export type AllowedNumber = { value: number; unit: NumberUnit; kind: NumberKind };
+
+function kindOfPath(path: string): NumberKind {
+  if (/ecart_par_rapport|scenario_france|rechauffement_observe/.test(path)) return "ecart";
+  if (/valeur_de_reference/.test(path)) return "reference";
+  return "valeur";
+}
+
+/** Toutes les valeurs numériques de la projection, avec leur unité et leur nature, y compris dans les chaînes (« 2015-2021 ») et les noms de champ. */
+export function allowedNumbers(p: Projection): AllowedNumber[] {
+  const out: AllowedNumber[] = [];
   const walk = (v: unknown, path: string) => {
     const unit = unitOfPath(path);
+    const kind = kindOfPath(path);
     // La valeur ET sa valeur absolue : « la population a reculé de 0,4 % » cite -0,4 sans son signe.
-    if (typeof v === "number" && Number.isFinite(v)) out.push({ value: v, unit }, { value: Math.abs(v), unit });
-    else if (typeof v === "string") for (const n of numbersIn(v)) out.push({ value: Math.abs(n.value), unit });
+    if (typeof v === "number" && Number.isFinite(v)) out.push({ value: v, unit, kind }, { value: Math.abs(v), unit, kind });
+    else if (typeof v === "string") for (const n of numbersIn(v)) out.push({ value: Math.abs(n.value), unit, kind });
     else if (Array.isArray(v)) v.forEach((x) => walk(x, path));
     else if (v && typeof v === "object") {
       // Les NOMS de champ font partie de ce que le modèle lit : « jours_au_dessus_de_30C » fonde le
       // « 30 °C » d'une phrase, « ecart_par_rapport_a_1976_2005 » la période de référence.
       for (const [k, x] of Object.entries(v)) {
-        for (const m of k.matchAll(/(\d+)(C?)/g)) out.push({ value: Number(m[1]), unit: m[2] ? "°C" : "other" });
+        for (const m of k.matchAll(/(\d+)(C?)/g)) out.push({ value: Number(m[1]), unit: m[2] ? "°C" : "other", kind: "valeur" });
         walk(x, path ? `${path}.${k}` : k);
       }
     }
@@ -346,13 +401,22 @@ export function allowedNumbers(p: Projection): { value: number; unit: NumberUnit
   return out;
 }
 
-type WrittenNumber = { value: number; raw: string; index: number; qualifier: string | null; unit: NumberUnit | "forbidden" };
+type WrittenNumber = {
+  value: number; raw: string; index: number; qualifier: string | null;
+  unit: NumberUnit | "forbidden";
+  /** Ce que la PHRASE dit de ce nombre : un écart (« +12 », « 12 de plus », « une hausse de 12 ») ou une valeur. */
+  sense: "ecart" | "valeur";
+};
 
 const NUMBER = /(?<![\d.,])([+\-\u2212]?)(\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:[.,](\d+))?/g;
 const QUALIFIER = /(environ|près de|presque|plus de|moins de|autour de|quelque)\s*$/;
 // Des unités qu'aucun fait ne porte : les écrire, c'est avoir calculé (jours → mois, ratio).
 // « reconnue 14 fois » est un compte ; « 4 fois plus » est un ratio.
 const FORBIDDEN_UNIT = /^\s*(mois|semaines?|fois (plus|moins))\b/;
+// Les marqueurs d'ÉCART, avant ou après le nombre. « passer de 7 à 19 » n'en est pas un : il cite
+// deux valeurs. Convention ciblée, sans analyse générale de la langue.
+const ECART_BEFORE = /(hausse|augmentation|progression|gain|baisse|recul|diminution|écart|ecart)s? d(e |')\s*$|\b(augment|progress|gagn|grimp|recul|baiss|diminu)\w* de\s*$/;
+const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse)/;
 
 function numbersIn(text: string): WrittenNumber[] {
   const out: WrittenNumber[] = [];
@@ -365,10 +429,13 @@ function numbersIn(text: string): WrittenNumber[] {
     const intPart = m[2].replace(/[ \u00a0\u202f]/g, "");
     const value = Number(`${intPart}${m[3] ? `.${m[3]}` : ""}`) * (signIsRange ? 1 : sign);
     const before = normalizeText(text.slice(Math.max(0, m.index - 16), m.index));
-    const after = normalizeText(text.slice(m.index + m[0].length, m.index + m[0].length + 12));
+    const beforeLong = normalizeText(text.slice(Math.max(0, m.index - 40), m.index));
+    const after = normalizeText(text.slice(m.index + m[0].length, m.index + m[0].length + 30));
     const q = QUALIFIER.exec(before);
     const unit = unitAfter(after);
-    out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit });
+    const signed = (m[1] === "+" || m[1] === "-" || m[1] === "\u2212") && !signIsRange;
+    const sense = signed || ECART_BEFORE.test(beforeLong) || ECART_AFTER.test(after) ? "ecart" : "valeur";
+    out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit, sense });
   }
   return out;
 }
@@ -383,14 +450,21 @@ const round = (v: number, d: number) => Math.round(v * 10 ** d) / 10 ** d;
  * valeur (un pourcentage n'est pas un nombre de jours). Aucune autre transformation (ratio, différence,
  * conversion en mois) : son résultat n'existe pas dans la projection, il est refusé.
  */
-function matches(w: WrittenNumber, allowed: { value: number; unit: NumberUnit }[]): boolean {
+function matches(w: WrittenNumber, allowed: AllowedNumber[]): boolean {
   if (w.unit === "forbidden") return false;
   const x = w.value;
   // UN NOMBRE SANS UNITÉ ÉCRITE n'a droit qu'à la valeur exacte ou à l'arrondi, jamais à une marge :
   // avec une marge, « moins de 6 » retrouvait n'importe quel 5 de la projection.
   const tolerant = w.unit !== "other";
-  for (const { value: v, unit } of allowed) {
+  for (const { value: v, unit, kind } of allowed) {
     if (w.unit !== "other" && unit !== w.unit) continue;
+    // LE SENS DOIT CONCORDER. Un nombre présenté comme un écart ne se valide que sur un écart ; un
+    // nombre présenté comme une valeur, jamais sur un écart. Les taux d'évolution en % (« progresse de
+    // 0,62 % par an ») sont des valeurs de la source : la règle ne s'applique pas aux pourcentages.
+    if (w.unit !== "%") {
+      if (w.sense === "ecart" && kind !== "ecart") continue;
+      if (w.sense === "valeur" && kind === "ecart") continue;
+    }
     if (close(x, v) || close(x, round(v, 0)) || close(x, round(v, 1))) {
       if (w.qualifier !== "plus de" && w.qualifier !== "moins de") return true;
     }
@@ -404,6 +478,8 @@ function matches(w: WrittenNumber, allowed: { value: number; unit: NumberUnit }[
     if (w.qualifier === "plus de") { if (x < v && x >= v * 0.8) return true; continue; }
     if (w.qualifier === "moins de") { if (x > v && x <= v * 1.2) return true; continue; }
     if (w.qualifier && v !== 0 && Math.abs(x - v) / Math.abs(v) <= 0.1) return true;
+    // « environ 5 » pour 5,6 : l'entier inférieur ou supérieur reste un arrondi raisonnable.
+    if (w.qualifier && w.qualifier !== "plus de" && w.qualifier !== "moins de" && (close(x, Math.floor(v)) || close(x, Math.ceil(v)))) return true;
   }
   return false;
 }
@@ -414,7 +490,11 @@ export function checkNumbers(text: string, projection: Projection): Violation[] 
   for (const s of text.split(/\n+|(?<=[.!?])\s+/)) {
     for (const w of numbersIn(s)) {
       if (!matches(w, allowed)) {
-        const rule = w.unit === "forbidden" ? "nombre:transformation-non-admise" : "nombre:absent-des-donnees";
+        const rule = w.unit === "forbidden"
+          ? "nombre:transformation-non-admise"
+          : allowed.some((a) => close(Math.abs(w.value), Math.round(a.value)) || close(Math.abs(w.value), a.value))
+            ? "nombre:sens-incoherent" // le nombre existe, mais pas avec le sens que la phrase lui donne
+            : "nombre:absent-des-donnees";
         out.push({ rule, excerpt: `« ${w.raw.trim()} » dans : ${s.replace(/^#+\s*/, "").trim()}` });
       }
     }

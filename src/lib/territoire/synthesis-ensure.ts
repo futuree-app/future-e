@@ -7,7 +7,7 @@
 //
 //   cache prêt              → rendu tel quel, ZÉRO appel au modèle ;
 //   génération en cours     → « pending » (un autre appel la produit : pas de double facture) ;
-//   clé libre               → on la RÉSERVE, on vérifie le budget, on produit (≤ 2 appels), on stocke.
+//   clé libre               → on la RÉSERVE, on produit (≤ 2 appels, budget réservé avant CHACUN), on stocke.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import type { HashedSnapshot } from "../facts/contract.ts";
@@ -23,7 +23,7 @@ export type EnsureResult =
 
 export type EnsureDeps = {
   store: TerritoireStore;
-  /** `true` si le budget du jour autorise une génération. */
+  /** `true` si le budget du jour autorise UN appel au modèle. Appelée avant chaque appel, jamais par avance. */
   reserveBudget: () => Promise<boolean>;
   /** Appel au modèle : (consigne système, message) → texte complet. Jamais streamé (D8). */
   generate: (system: string, user: string) => Promise<string>;
@@ -57,17 +57,13 @@ export async function ensureTerritoireSynthesis(
     return again?.status === "pending" ? { status: "pending" } : { status: "unavailable", reason: "store" };
   }
 
-  if (!(await deps.reserveBudget())) {
-    await deps.store.release(key);
-    return { status: "unavailable", reason: "budget" };
-  }
-
   const started = clock();
   const projection = projectForSynthesis(snapshot, horizon);
   const result = await produceSynthesis({
     projection,
     horizon,
     generate: (user) => deps.generate(SYNTHESIS_SYSTEM, user),
+    reserveBudget: deps.reserveBudget,
   });
   const generationMs = clock() - started;
 
@@ -79,8 +75,13 @@ export async function ensureTerritoireSynthesis(
   }
 
   if (!result.cacheable) {
-    // Modèle indisponible : on libère la clé (une visite suivante retentera), sans rien figer.
+    // Modèle indisponible ou budget épuisé : on libère la clé (une visite suivante retentera), sans
+    // rien figer. La page garde la synthèse déterministe.
     await deps.store.release(key);
+    if (result.budgetRefused) {
+      console.warn("[synthese-territoire] budget refusé", { insee: snapshot.scope.id, horizon, modelCalls: result.modelCalls });
+      return { status: "unavailable", reason: "budget", text: result.text };
+    }
     console.error("[synthese-territoire] modèle indisponible", { insee: snapshot.scope.id, horizon, error: result.modelError });
     return { status: "unavailable", reason: "model", text: result.text };
   }
