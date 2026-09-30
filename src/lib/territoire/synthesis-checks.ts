@@ -239,6 +239,8 @@ const RULES: Rule[] = [
     polarity: "any",
     patterns: [
       /\bces deux (réalités|lectures|signaux|phénomènes|indicateurs|faits|dynamiques)\b[^.]*(direction commune|même (direction|mouvement|sens)|tension|pression|pointent|convergent)/,
+      // Vu en réel à Nantes : sols secs et pluies intenses « décrivent ensemble un régime hydrique ».
+      /\b(décrivent|dessinent|forment|composent|racontent) ensemble\b/,
       /(direction commune|même direction|même mouvement)[^.]*\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)/,
       /\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)[^.]*(direction commune|même direction|même mouvement)/,
     ],
@@ -252,6 +254,39 @@ const RULES: Rule[] = [
     patterns: [
       /\brarement (pensée?s?|le premier|la première|lue?s?|pris en compte|mise? en avant|évoquée?s?)/,
       /\b(on|les habitants|la ville|les élus) (oublie|oublient|sous-estime|sous-estiment|ignore|ignorent|croit|croient|pense|pensent)\b/,
+      // Vu en réel à Nantes : « que les résidents de villes compactes comptent sur leur environnement ».
+      /\b(on|les (habitants|résidents|gens|ménages|familles)[^.,]{0,40}) (compte|comptent|attend|attendent|recherche|recherchent|espère|espèrent) (sur|de|que)?/,
+      // Vu en réel à Nantes et Aurillac : « ce fait attire moins l'attention », « de façon moins remarquée ».
+      /\b(attire|attirent|retient|retiennent) (moins |plus |peu |davantage )?l'attention\b/,
+      // « moins visible dans la lecture d'ensemble » parle des données, pas des gens : il reste libre.
+      /\bmoins (remarqué|perçu)e?s?\b/,
+    ],
+  },
+  // ── Hiérarchie OBJECTIVE (liberté éditoriale préservée, décision du 30/09) ──
+  // « ressort parmi les évolutions les plus visibles », « un fil conducteur » restent permis : ce sont
+  // des choix de lecture. Refusé : le superlatif qui prétend à une importance calculée.
+  {
+    id: "hierarchie:objective",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\b(le|la) (fait|phénomène|changement|évolution|enjeu|signal|transformation|dynamique) (le |la )?plus (structurant|structurante|important|importante|déterminant|déterminante|décisi\w*|concret|concrète|marquant|marquante|significatif|significative)/,
+      /\b(l'enjeu|le phénomène|le fait|le signal) (principal|dominant|majeur)\b/,
+      /\bce qui pèse le plus\b/,
+    ],
+  },
+  // ── Comparaison sans donnée comparative (benchmark absent) ──
+  {
+    id: "benchmark:absent",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /\bpour une (commune|ville|agglomération) (de cette|de sa|aussi|si) (densité|taille|dense|grande|petite)/,
+      // Vu en réel à Aurillac : « pour une ville de l'intérieur à cette altitude ».
+      /\bpour une (commune|ville|agglomération) (de l'intérieur|littorale|de montagne|du littoral|à cette altitude|de ce type)/,
+      /\bcompte tenu de (sa|la|cette) (densité|taille|population)/,
+      /\b(supérieure?s?|inférieure?s?|plus|moins) (à ce|qu'on) (qu'on )?(attendrait|pourrait attendre)/,
+      /\b(négligeable|remarquable|considérable|exceptionnel\w*) pour (une|un)\b/,
     ],
   },
   // ── Interdits faute de fait dédié ──
@@ -355,9 +390,43 @@ function sentencesOf(text: string): string[] {
     .filter(Boolean);
 }
 
+// ── Composition par FAMILLES (décision du 30/09) ─────────────────────────────────────────────
+// Deux faits ne se relient que s'ils mesurent la même grandeur. Plutôt qu'une regex par phrase
+// fautive, des familles de notions et la liste des paires qu'aucun fait ne relie aujourd'hui :
+// une phrase qui nomme les deux familles d'une paire ET un connecteur de causalité ou de
+// continuité compose ce que les données ne composent pas. Les citer séparément reste permis.
+const FAMILY: Record<string, RegExp> = {
+  chaleur: /\bnuits?\b|chaleur|jours? au-dessus de 30|°\s*c\b|fraîcheur|récupération thermique/,
+  morphologie: /\bdenses?\b|densité|urbanisé|compacte?s?|bâti\b/,
+  pluie: /pluies? intenses?|précipitations? (extrêmes?|intenses?)/,
+  inondation_reconnue: /inondations?[^.]*(reconnu|arrêtés?|catastrophes? naturelles?)|(reconnu|arrêtés?|catastrophes? naturelles?)[^.]*inondations?|enjeu depuis|depuis plusieurs décennies/,
+  arrivants: /arrivants?|nouveaux habitants|vivaient (ailleurs|dans une autre commune)|accueill/,
+  besoins: /besoins?|services|consommation|\beau\b|fraîcheur|logements? supplémentaires/,
+};
+const FORBIDDEN_PAIRS: [string, string][] = [
+  ["morphologie", "chaleur"],
+  ["pluie", "inondation_reconnue"],
+  ["arrivants", "besoins"],
+];
+const CONNECTOR = /\b(pèse\w*|poids particulier|amplifi\w*|aggrav\w*|accentu\w*|renforc\w*|s'inscri\w*|prolong\w*|confirm\w*|annonc\w*|donc|d'où|rend\w* (plus|d'autant)|d'autant plus|dont les besoins|évolu\w* rapidement|conséquence|traduit)\b/;
+
+function checkCompositions(sentences: string[]): Violation[] {
+  const out: Violation[] = [];
+  for (const s of sentences) {
+    if (!CONNECTOR.test(s)) continue;
+    for (const [a, b] of FORBIDDEN_PAIRS) {
+      if (FAMILY[a].test(s) && FAMILY[b].test(s)) {
+        out.push({ rule: `composition:non-autorisee:${a}×${b}`, excerpt: s });
+      }
+    }
+  }
+  return out;
+}
+
 export function checkAssertions(text: string, projection: Projection): Violation[] {
   const out: Violation[] = [];
   const sentences = sentencesOf(text);
+  out.push(...checkCompositions(sentences));
   for (const rule of RULES) {
     if (!rule.when(projection)) continue;
     for (const s of sentences) {
@@ -464,7 +533,9 @@ const FORBIDDEN_UNIT = /^\s*(mois|semaines?|fois (plus|moins))\b/;
 // Les marqueurs d'ÉCART, avant ou après le nombre. « passer de 7 à 19 » n'en est pas un : il cite
 // deux valeurs. Convention ciblée, sans analyse générale de la langue.
 const ECART_BEFORE = /(hausse|augmentation|progression|gain|baisse|recul|diminution|écart|ecart|réchauffement)s?(\s+[^\s]+){0,3}\s+d(e |')\s*$|(hausse|augmentation|écart|réchauffement)s? d(e |')\s*$|\b(augment|progress|gagn|grimp|recul|baiss|diminu)\w* de\s*$|\b(a|ont|aurait|auraient) (déjà )?(gagné|pris|grimpé)\s*$|\b(ajout|rajout)\w*\s*$/;
-const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse)/;
+// « 2,6 °C au-dessus de la référence » est un écart (vu en réel à Aurillac, 30/09) ; « 5 nuits au-dessus
+// de 20 °C » reste un seuil, d'où les degrés exigés avant et la référence exigée après.
+const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse)|^\s*(°\s*c|degrés?)\s+(au-dessus|au-dessous|en dessous|en deçà) d(e|u)\s+(la |cette |sa |leur )?(même |valeur |période |moyenne )?(de )?(référence|1976)/;
 
 function numbersIn(text: string): WrittenNumber[] {
   const out: WrittenNumber[] = [];
@@ -478,7 +549,7 @@ function numbersIn(text: string): WrittenNumber[] {
     const value = Number(`${intPart}${m[3] ? `.${m[3]}` : ""}`) * (signIsRange ? 1 : sign);
     const before = normalizeText(text.slice(Math.max(0, m.index - 16), m.index));
     const beforeLong = normalizeText(text.slice(Math.max(0, m.index - 40), m.index));
-    const after = normalizeText(text.slice(m.index + m[0].length, m.index + m[0].length + 30));
+    const after = normalizeText(text.slice(m.index + m[0].length, m.index + m[0].length + 45));
     const q = QUALIFIER.exec(before);
     const unit = unitAfter(after);
     const signed = (m[1] === "+" || m[1] === "-" || m[1] === "\u2212") && !signIsRange;
@@ -520,6 +591,9 @@ function matches(w: WrittenNumber, allowed: AllowedNumber[]): boolean {
     if (close(x, v) || close(x, round(v, 0)) || close(x, round(v, 1))) {
       if (w.qualifier !== "plus de" && w.qualifier !== "moins de") return true;
     }
+    // « 677 000 habitants » pour 677 080 : au-delà de 10 000 habitants, l'arrondi au millier est une
+    // liberté de rédaction, pas un nombre inventé (refus à tort vu en réel à Nantes, 30/09).
+    if (unit === "habitants" && Math.abs(v) >= 10000 && !w.qualifier && close(x, Math.round(v / 1000) * 1000)) return true;
     if (!tolerant) {
       // Sans unité, une borne n'est admise que si c'est l'entier le plus proche : 5,6 → « moins de 6 »
       // (vrai), mais un 5 pris ailleurs ne fonde pas « moins de 6 ».

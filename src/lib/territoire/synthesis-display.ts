@@ -1,13 +1,13 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// CE QUE LE LECTEUR VOIT DE LA SYNTHÈSE, ET QUAND (FUT-6, décision UX du 28/09). Pur, testable.
+// CE QUE LE LECTEUR VOIT DE LA SYNTHÈSE, ET QUAND (FUT-6). Pur, testable.
 //
-//   1. La synthèse DÉTERMINISTE est visible tout de suite : c'est un premier niveau fiable, jamais un
-//      « chargement ».
+//   1. La lecture IMMÉDIATE (déterministe) est visible tout de suite. C'est une vraie lecture de
+//      premier niveau, jamais un brouillon ni un chargement.
 //   2. Une lecture ENRICHIE déjà en cache s'affiche d'emblée.
-//   3. Sinon, elle se prépare en arrière-plan. Quand elle arrive :
-//        - le lecteur n'a pas commencé à lire → elle remplace la déterministe (transition douce) ;
-//        - il lit ou interagit déjà → on ne change pas le texte sous ses yeux : un signal discret,
-//          « Lecture enrichie prête », lui laisse le choix.
+//   3. Sinon, elle se prépare en arrière-plan ; quand elle est prête, elle est PROPOSÉE (« Lecture
+//      enrichie disponible · l'afficher »), jamais substituée d'office. Décision du 30/09, après le
+//      test réel : la génération prend ~15 s, un lecteur a presque toujours commencé à lire avant,
+//      la substitution automatique était donc une branche quasi inatteignable.
 //   4. Un texte IA non validé n'est JAMAIS montré : seul un texte contrôlé arrive jusqu'ici.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
@@ -17,44 +17,32 @@ export type DisplayState = {
   shown: "deterministic" | "enriched";
   enrichedText: string | null;
   status: EnrichedStatus;
-  /** Le lecteur a commencé à lire ou à interagir avec la synthèse affichée. */
-  engaged: boolean;
 };
 
 export type DisplayEvent =
-  | { type: "engaged" }
   | { type: "enrichedArrived"; text: string }
   | { type: "enrichedUnavailable" }
   | { type: "showEnriched" };
 
 export function initialDisplay(cachedEnriched: string | null): DisplayState {
   return cachedEnriched
-    ? { shown: "enriched", enrichedText: cachedEnriched, status: "ready", engaged: false }
-    : { shown: "deterministic", enrichedText: null, status: "preparing", engaged: false };
+    ? { shown: "enriched", enrichedText: cachedEnriched, status: "ready" }
+    : { shown: "deterministic", enrichedText: null, status: "preparing" };
 }
 
 export function displayReducer(s: DisplayState, e: DisplayEvent): DisplayState {
   switch (e.type) {
-    case "engaged":
-      return s.engaged ? s : { ...s, engaged: true };
     case "enrichedArrived":
-      if (s.shown === "enriched") return s;
-      return {
-        ...s,
-        enrichedText: e.text,
-        status: "ready",
-        // Pas de remplacement sous les yeux d'un lecteur engagé : il décidera (signal discret).
-        shown: s.engaged ? "deterministic" : "enriched",
-      };
+      // PROPOSÉE, jamais substituée : le texte que le lecteur a sous les yeux ne change pas seul.
+      return s.shown === "enriched" ? s : { ...s, enrichedText: e.text, status: "ready" };
     case "enrichedUnavailable":
-      // La déterministe reste affichée ; le signal « en préparation » disparaît, sans alarme.
       return s.shown === "enriched" ? s : { ...s, status: "unavailable" };
     case "showEnriched":
       return s.enrichedText ? { ...s, shown: "enriched" } : s;
   }
 }
 
-/** Le signal « Lecture enrichie prête » : une version validée attend, et le lecteur lit l'autre. */
+/** « Lecture enrichie disponible » : une version validée attend, la lecture immédiate est affichée. */
 export function offersEnriched(s: DisplayState): boolean {
   return s.shown === "deterministic" && s.status === "ready" && s.enrichedText != null;
 }

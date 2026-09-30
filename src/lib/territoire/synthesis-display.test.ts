@@ -1,9 +1,9 @@
-// FUT-6 : ce que le lecteur voit, et quand. Jamais de remplacement sous les yeux d'un lecteur engagé.
+// FUT-6 : ce que le lecteur voit, et quand. La lecture enrichie est proposée, jamais substituée.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { displayReducer, initialDisplay, offersEnriched } from "./synthesis-display.ts";
 
-test("sans cache : la déterministe est affichée tout de suite, une lecture enrichie se prépare", () => {
+test("sans cache : la lecture immédiate est affichée tout de suite, une lecture enrichie se prépare", () => {
   const s = initialDisplay(null);
   assert.equal(s.shown, "deterministic");
   assert.equal(s.status, "preparing");
@@ -12,25 +12,18 @@ test("sans cache : la déterministe est affichée tout de suite, une lecture enr
 test("cache disponible : la lecture enrichie s'affiche d'emblée", () => {
   const s = initialDisplay("texte validé");
   assert.equal(s.shown, "enriched");
-  assert.equal(s.enrichedText, "texte validé");
 });
 
-test("arrivée tardive, lecteur pas encore engagé : transition vers la version enrichie", () => {
+test("arrivée tardive : jamais de remplacement sous les yeux, la version enrichie est proposée", () => {
   const s = displayReducer(initialDisplay(null), { type: "enrichedArrived", text: "enrichi" });
-  assert.equal(s.shown, "enriched");
-});
-
-test("arrivée tardive, lecteur engagé : le texte lu ne change pas, un signal propose la version enrichie", () => {
-  let s = displayReducer(initialDisplay(null), { type: "engaged" });
-  s = displayReducer(s, { type: "enrichedArrived", text: "enrichi" });
   assert.equal(s.shown, "deterministic");
   assert.equal(offersEnriched(s), true);
-  s = displayReducer(s, { type: "showEnriched" });
-  assert.equal(s.shown, "enriched");
-  assert.equal(offersEnriched(s), false);
+  const shown = displayReducer(s, { type: "showEnriched" });
+  assert.equal(shown.shown, "enriched");
+  assert.equal(offersEnriched(shown), false);
 });
 
-test("lecture enrichie indisponible : la déterministe reste, sans signal d'attente", () => {
+test("lecture enrichie indisponible : la lecture immédiate reste, sans signal d'attente", () => {
   const s = displayReducer(initialDisplay(null), { type: "enrichedUnavailable" });
   assert.equal(s.shown, "deterministic");
   assert.equal(s.status, "unavailable");

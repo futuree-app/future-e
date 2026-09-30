@@ -30,8 +30,6 @@ const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] 
 ];
 const HORIZON_KEYS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
 
-/** Le lecteur est « engagé » après ce temps de lecture visible, ou dès qu'il interagit avec le texte. */
-const ENGAGED_AFTER_MS = 4000;
 /** Relance d'une lecture en préparation, et abandon au-delà (la déterministe reste affichée). */
 const POLL_MS = 4000;
 const POLL_GIVE_UP_MS = 210_000;
@@ -167,31 +165,6 @@ export default function QuartierSynthesis({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [horizon, snapshotHash, inseeCode]);
 
-  // ─── Engagement : le lecteur lit (visible un moment) ou interagit ─────────────────────────
-  const textRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = textRef.current;
-    if (!el || state.engaged) return;
-    let t: ReturnType<typeof setTimeout> | null = null;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!t) t = setTimeout(() => dispatch({ horizon, event: { type: "engaged" } }), ENGAGED_AFTER_MS);
-        } else if (t) {
-          clearTimeout(t);
-          t = null;
-        }
-      },
-      { threshold: 0.5 },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      if (t) clearTimeout(t);
-    };
-  }, [horizon, state.engaged]);
-  const markEngaged = () => { if (!state.engaged) dispatch({ horizon, event: { type: "engaged" } }); };
-
   // ─── Pas de commune ────────────────────────────────────────────────────
   if (!inseeCode || !communeName) {
     return (
@@ -244,14 +217,12 @@ export default function QuartierSynthesis({
           </div>
         </div>
 
-        <div
-          ref={textRef}
-          key={`${horizon}:${state.shown}`}
-          className="quartier-synthesis-text"
-          onClick={markEngaged}
-          onMouseUp={markEngaged}
-          onTouchStart={markEngaged}
-        >
+        {/* L'état de la lecture, dit sobrement : la lecture immédiate est une vraie lecture, pas un
+            brouillon ; la version enrichie est proposée, jamais substituée d'office. */}
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-4">
+          {state.shown === "enriched" ? "Lecture enrichie" : "Lecture immédiate"}
+        </p>
+        <div key={`${horizon}:${state.shown}`} className="quartier-synthesis-text">
           {parsed.blocks.map((b, i) => (
             <div key={i} className={i > 0 ? "mt-6" : ""}>
               {b.caption && (
@@ -268,7 +239,7 @@ export default function QuartierSynthesis({
         {state.shown === "deterministic" && state.status === "preparing" && snapshotHash && (
           <p className="mt-6 text-[12px] text-ghost inline-flex items-center gap-2">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-info/70 animate-pulse" />
-            Une lecture enrichie se prépare.
+            Une lecture enrichie se prépare…
           </p>
         )}
         {offersEnriched(state) && (
@@ -281,7 +252,7 @@ export default function QuartierSynthesis({
               }}
               className="quartier-regen-btn"
             >
-              Lecture enrichie prête · l&apos;afficher
+              Lecture enrichie disponible · l&apos;afficher
             </button>
           </div>
         )}

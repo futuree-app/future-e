@@ -280,3 +280,59 @@ test("faux rejets réels du 30/09 acceptés, vrai rejet d'unité conservé", () 
   assert.ok(numberErrors("Elles seraient 25 à l'horizon 2050, soit un écart de 19 jours.") > 0);
 });
 
+
+// ── Test réel Nantes du 30/09 : les inférences qui passaient, et la liberté éditoriale à garder ──
+
+const NANTES_FAUTIVES: [string, string][] = [
+  ["La chaleur estivale est le fait le plus structurant que les données projettent pour Nantes.", "hierarchie:objective"],
+  ["Dans une commune dense, où les espaces urbanisés couvrent près de 72 % du territoire, ces nuits plus chaudes pèsent d'un poids particulier.", "composition:non-autorisee:morphologie×chaleur"],
+  ["Elle touche la récupération thermique nocturne, que les résidents de villes compactes comptent sur leur environnement pour offrir.", "interdit:psychologie-collective"],
+  ["Ce n'est pas négligeable pour une commune de cette densité.", "benchmark:absent"],
+  ["Ce que le climat projette en matière de pluies intenses s'inscrit dans un territoire qui connaît cet enjeu depuis plusieurs décennies.", "composition:non-autorisee:pluie×inondation_reconnue"],
+  ["Une commune dense qui accueille une part importante de nouveaux habitants chaque année est aussi une commune dont les besoins en eau, en fraîcheur et en services évoluent rapidement.", "composition:non-autorisee:arrivants×besoins"],
+];
+
+test("Nantes (réel) : chaque inférence est rejetée pour son motif", () => {
+  for (const [phrase, regle] of NANTES_FAUTIVES) assert.ok(rules(phrase).includes(regle), `${regle} : ${phrase}`);
+});
+
+test("liberté éditoriale : sélection prudente, juxtaposition et composition autorisée restent permises", () => {
+  for (const ok of [
+    "La chaleur estivale ressort parmi les évolutions les plus visibles de la projection.",
+    "La chaleur estivale constitue un fil conducteur de cette projection.",
+    "Les projections indiquent 4,8 jours de pluie intense par an. Par ailleurs, la commune compte 14 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+    "Le réchauffement observé depuis 1961-1990 se prolonge dans les températures projetées.",
+    "8,7 % des habitants vivaient dans une autre commune un an avant le recensement de 2021.",
+    "La commune est dense, et les nuits au-dessus de 20 °C deviennent plus fréquentes.",
+  ]) assert.deepEqual(rules(ok), [], ok);
+  const DENSE = withProjection((p) => { p.commune.densite.categorie = "Commune dense"; });
+  assert.deepEqual(rules("Nantes est une commune dense et 27,4 % de son territoire est classé en espaces naturels.", DENSE), []);
+});
+
+test("réel du 30/09 (Nantes, Aurillac) : les inférences restantes sont rejetées, la sélection éditoriale reste permise", () => {
+  for (const [phrase, regle] of [
+    ["Dans une commune dense, ces étés plus lourds constituent le changement le plus concret pour le quotidien.", "hierarchie:objective"],
+    ["Ce fait attire moins l'attention que les étés.", "interdit:psychologie-collective"],
+    ["Ces deux faits sont distincts, mais ils décrivent ensemble un régime hydrique qui évolue.", "raccord:non-autorise"],
+    ["Pour une ville de l'intérieur à cette altitude, ce déplacement a des effets sur les paysages.", "benchmark:absent"],
+  ] as [string, string][]) assert.ok(rules(phrase).includes(regle), `${regle} : ${phrase}`);
+  assert.deepEqual(rules("Ce déplacement des températures estivales constitue le fil conducteur le plus lisible de cette projection."), []);
+  assert.deepEqual(rules("Les mouvements de terrain constituent un signal moins visible dans la lecture d'ensemble."), []);
+  assert.ok(rules("Ce déplacement se produit de façon moins remarquée.").includes("interdit:psychologie-collective"));
+});
+
+
+test("« 2 °C au-dessus de la référence » se lit comme un écart ; « au-dessus de 20 °C » reste un seuil (Aurillac, 30/09)", () => {
+  assert.equal(numberErrors("L'été atteindrait 21,7 °C, soit 2 °C au-dessus de la référence 1976-2005."), 0);
+  assert.equal(numberErrors("La température estivale, qui était de 19,7 °C, passerait à 21,7 °C, 2 °C au-dessus de cette même référence."), 0);
+  // Sans référence nommée, « 2 °C au-dessus » n'est pas un écart reconnu : 2 n'est pas une valeur.
+  assert.equal(numberErrors("L'été serait à 2 °C au-dessus."), 1);
+  assert.equal(numberErrors("La période 1976-2005 comptait environ 5 nuits au-dessus de 20 °C."), 0);
+});
+
+test("population d'agglomération arrondie au millier : admise au-delà de 10 000 (Nantes, 30/09)", () => {
+  assert.equal(numberErrors("La commune appartient à une agglomération de 138 000 habitants."), 0);
+  assert.equal(numberErrors("La commune appartient à une agglomération de 140 000 habitants."), 1);
+  // En dessous de 10 000, pas d'arrondi au millier : 6 000 ne vaut pas 6 227.
+  assert.equal(numberErrors("La commune compte 6 000 habitants."), 1);
+});

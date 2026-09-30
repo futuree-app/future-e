@@ -25,7 +25,7 @@ export const SYNTHESIS_MODEL = "claude-sonnet-4-6";
  * TOUT ce qui peut changer le texte : projection, consigne, modèle, contrôles, patrons déterministes.
  * La monter invalide le cache de synthèse (clé = empreinte + horizon + cette version).
  */
-export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@1:${SYNTHESIS_MODEL}`;
+export const SYNTHESIS_CONTRACT_VERSION = `territoire-synthese@4:${SYNTHESIS_MODEL}`;
 
 export type HorizonKey = "gwl15" | "gwl20" | "gwl30";
 export const HORIZONS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
@@ -234,7 +234,7 @@ VOIX ÉDITORIALE — RÈGLES ABSOLUES
 - Pas de phrases IA-typiques ("il convient de", "force est de constater") ni de superlatifs vides.
 - Ne citez jamais les sources dans le texte : elles sont affichées séparément.
 - Les chiffres sont des preuves, pas le moteur du texte.
-- Jargon interdit : "régime climatique", "bassin versant", "aléa", "résilience", "stress hydrique", "vulnérabilité", "artificialisation" et ses dérivés, "évapotranspiration", "tissu urbain", "frange littorale", "front de mer" (dites "bord de mer").
+- Jargon interdit : "régime climatique", "bassin versant", "aléa", "résilience", "stress hydrique", "vulnérabilité", "artificialisation" et ses dérivés, "évapotranspiration", "tissu urbain", "frange littorale", "régime hydrique", "front de mer" (dites "bord de mer").
 - Test de lecture : une personne de 60 ans qui ne lit jamais de rapports comprend chaque phrase du premier coup.
 
 LES FAITS FOURNIS SONT LES SEULS FAITS
@@ -246,9 +246,20 @@ LES FAITS FOURNIS SONT LES SEULS FAITS
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.
-- Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent ou ressentent, ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
+- Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent, ressentent, attendent ou recherchent ("les résidents comptent sur…", "on attend…"), ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
+- Pas de comparaison sans donnée comparative : ni "beaucoup pour une commune de cette densité", ni "peu pour une ville de cette taille", ni "remarquable compte tenu de…". Donnez le chiffre, sans le juger par rapport à d'autres communes.
 - Eau : les jours de sols secs, les catastrophes naturelles reconnues et les restrictions d'eau en vigueur sont des faits distincts. Juxtaposez-les si besoin ; n'en tirez aucune conclusion sur une tension, une pression, une rareté ou un accès futur à la ressource en eau : aucune donnée ne la mesure.
-- Raccords : ne présentez deux faits comme allant "dans le même sens", "dans une direction commune" ou "décrivant une même tension" que s'ils mesurent la même grandeur (par exemple le réchauffement observé depuis 1961-1990 et les températures projetées). Deux objets seulement voisins ne se relient pas.
+TROIS NIVEAUX : CE QUI EST LIBRE, CE QUI SE COMPOSE, CE QUI EST INTERDIT
+1. LIBERTÉ ÉDITORIALE (encouragée) : choisir un fil conducteur, sélectionner quelques faits plutôt que tout répéter, reformuler, condenser, faire des transitions, signaler une limite. Une sélection prudente est bienvenue : "la chaleur estivale ressort parmi les évolutions les plus visibles", "constitue un fil conducteur de cette projection". Ce qui est interdit, c'est la hiérarchie OBJECTIVE qu'aucune donnée ne calcule : "le fait le plus structurant", "l'enjeu principal", "le phénomène dominant", "ce qui pèse le plus".
+2. COMPOSITION AUTORISÉE : deux faits peuvent être reliés ("prolonge", "confirme", "va dans le même sens") seulement s'ils mesurent la même grandeur. Aujourd'hui, une seule composition l'est : le réchauffement observé depuis 1961-1990 et les températures projetées.
+3. INFÉRENCE INTERDITE : aucun mécanisme causal, aucune conséquence future, aucune nouvelle grandeur tirés de faits seulement voisins. Vous pouvez les citer dans le même bloc, séparément, jamais les relier. En particulier :
+   - densité ou part urbanisée × chaleur ou nuits chaudes : n'écrivez pas que l'une rend l'autre plus pénible ;
+   - pluies intenses projetées × inondations reconnues en catastrophe naturelle : pas de continuité ("s'inscrit dans", "prolonge un problème connu") ;
+   - jours de sols secs × sécheresse reconnue en catastrophe naturelle : idem ;
+   - arrivants récents × besoins futurs (eau, fraîcheur, services, logements) : la part d'arrivants n'est ni un flux annuel, ni une pression, ni un besoin ;
+   - marché, attractivité, tension sur l'eau : aucune donnée ;
+   - pas de conséquence non mesurée ("a des effets sur les paysages et les usages") et pas de fait absent du payload (l'altitude, par exemple, n'y figure pas) ;
+   - pas de qualité que la donnée ne mesure pas : une photo d'une date n'établit ni la stabilité ("un cadre stable"), ni la constance ("une place constante"), ni des usages ("une diversité d'usages"). Une catégorie fournie ("globalement stable" pour la démographie) reste, elle, citable.
 - Pas de changement d'échelle : une donnée communale ne décrit ni une rue ni un quartier.
 - Risques : "non recensé" autorise à dire qu'aucun périmètre n'est recensé ; jamais d'affirmer une exposition. "recensé" autorise à dire qu'une partie du territoire est concernée ; jamais de le nier.
 - Ne dites pas "rural" ni "station balnéaire" : aucune donnée ne l'établit.
@@ -272,7 +283,7 @@ Strictement :
 
 Les trois blocs, dans cet ordre exact :
 ## Ce qui domine
-La dynamique la plus structurante que les données montrent pour cette commune, incarnée dans le quotidien. Si plusieurs évolutions pèsent sans que les données permettent de les départager, dites-le plutôt que d'en élire une.
+Le fil conducteur que vous choisissez parmi les évolutions visibles, incarné dans le quotidien. Présentez-le comme un choix de lecture ("ressort parmi…", "fil conducteur"), jamais comme le phénomène objectivement dominant.
 
 ## Ce qui tient, ce qui se tend
 Un atout établi par les données, et le compromis qui émerge. Une force réelle, et son prix.
