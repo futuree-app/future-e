@@ -1,102 +1,81 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// LA SYNTHÈSE TERRITOIRE (FUT-6, 28/09/2026).
+//
+// GÉNÉRIQUE : elle répond à « que raconte ce territoire, indépendamment de mon projet ? ». Elle ne
+// dépend que des faits du lieu (le `FactsSnapshot` de la page) et de l'horizon. Les repères de terrain,
+// les attentes de découverte et la relation au lieu ne la modifient plus : ils appartiendront à la
+// future « Lecture pour votre projet ». Leurs données restent en base, intactes.
+//
+// DEUX NIVEAUX, JAMAIS UN TEXTE NON CONTRÔLÉ :
+//   - la synthèse DÉTERMINISTE, calculée côté serveur depuis le snapshot, visible tout de suite ;
+//   - la lecture ENRICHIE (modèle), servie depuis le cache ou préparée en arrière-plan, et affichée
+//     seulement une fois validée par les contrôles. Plus de texte qui s'écrit mot à mot.
+// La logique d'affichage est pure et testée : src/lib/territoire/synthesis-display.ts.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+
+import { useEffect, useReducer, useRef } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
-import type { QuartierSourceKey } from "@/lib/quartier-signals";
-import { QuartierWorkbook } from "@/app/(account)/compte/QuartierWorkbook";
+import type { QuartierSourceKey } from "@/lib/territoire/screen";
+import {
+  displayReducer, initialDisplay, offersEnriched, type DisplayEvent, type DisplayState,
+} from "@/lib/territoire/synthesis-display";
 
 const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] = [
   { key: "gwl15", year: "2030" },
   { key: "gwl20", year: "2050", recommended: true },
   { key: "gwl30", year: "2100" },
 ];
+const HORIZON_KEYS: HorizonKey[] = ["gwl15", "gwl20", "gwl30"];
 
-export type WorkbookQuartier = {
-  heat: string;
-  water: string;
-  shelter: string;
-  change: string;
-  note: string;
-};
-
-const EMPTY_WORKBOOK: WorkbookQuartier = { heat: "", water: "", shelter: "", change: "", note: "" };
+/** Relance d'une lecture en préparation, et abandon au-delà (la déterministe reste affichée). */
+const POLL_MS = 4000;
+const POLL_GIVE_UP_MS = 210_000;
 
 type Props = {
   communeName: string | null;
   inseeCode: string | null;
-  /** Identifiant utilisé pour la clé localStorage du QuartierWorkbook. */
-  userKey: string;
-  /** Liste des sources mobilisées, pré-calculée par horizon côté serveur. */
+  /** L'empreinte du snapshot rendu par la page. `null` = persistance indisponible : pas d'enrichi. */
+  snapshotHash: string | null;
+  /** La synthèse déterministe, par horizon, calculée côté serveur depuis le même snapshot. */
+  deterministic: Record<HorizonKey, string>;
+  /** Les lectures enrichies déjà validées et en cache, par horizon. */
+  initialEnriched: Partial<Record<HorizonKey, string>>;
+  /** Liste des sources mobilisées, lue dans le même snapshot, par horizon. */
   sourcesByHorizon: Record<HorizonKey, QuartierSourceKey[]>;
-  /** Repères de terrain persistés côté Supabase (snapshot serveur). */
-  initialWorkbook: WorkbookQuartier | null;
-  /** Relation EFFECTIVE du lecteur à la commune (stockée si corrigée, sinon
-   *  inférée résidence/découverte). Détermine la posture de la synthèse ET le
-   *  garde-fou : les observations vécues ne sont mobilisées que pour la résidence. */
-  relation: "current_residence" | "considering_living";
-  /** Attentes du lecteur en découverte (priorité / hésitation), persistées par
-   *  commune dans report_context. Ignorées en résidence. */
-  initialDiscovery?: { priority: string; concern: string } | null;
-  /** Texte court à afficher si la génération IA échoue. */
-  fallbackSummary: string;
 };
 
-const WORKBOOK_STORAGE_PREFIX = "futuree:quartier-workbook:";
+type ByHorizon = Record<HorizonKey, DisplayState>;
+type Action = { horizon: HorizonKey; event: DisplayEvent };
 
-function readWorkbookFromStorage(userKey: string): WorkbookQuartier {
-  if (typeof window === "undefined") return EMPTY_WORKBOOK;
-  try {
-    const raw = window.localStorage.getItem(`${WORKBOOK_STORAGE_PREFIX}${userKey}`);
-    if (!raw) return EMPTY_WORKBOOK;
-    const p = JSON.parse(raw) as Partial<WorkbookQuartier>;
-    return {
-      heat: p.heat ?? "",
-      water: p.water ?? "",
-      shelter: p.shelter ?? "",
-      change: p.change ?? "",
-      note: p.note ?? "",
-    };
-  } catch {
-    return EMPTY_WORKBOOK;
-  }
+function reducer(state: ByHorizon, a: Action): ByHorizon {
+  const next = displayReducer(state[a.horizon], a.event);
+  return next === state[a.horizon] ? state : { ...state, [a.horizon]: next };
 }
 
-function countFilled(wb: WorkbookQuartier): number {
-  return [wb.heat, wb.water, wb.shelter, wb.change, wb.note.trim()].filter(Boolean).length;
-}
+type ApiAnswer = { status: "ready"; text: string; origin: string } | { status: "pending" } | { status: "unavailable" } | { status: "absent" };
 
-function workbookKey(wb: WorkbookQuartier): string {
-  return `${wb.heat}|${wb.water}|${wb.shelter}|${wb.change}|${wb.note.trim()}`;
-}
-
-function discoveryKeyOf(d: { priority: string; concern: string }): string {
-  return `${d.priority.trim()}|${d.concern.trim()}`;
-}
-
-// ─── Composant principal ──────────────────────────────────────────────────
-// Panel glass plein largeur :
-//   1. Titre Serif italic
-//   2. 3 blocs de synthèse streamée
-//   3. Bouton Régénérer (uniquement si workbook a changé)
-//   4. Footer "Sources mobilisées"
-//
-// La suite (AskFuture, transition Suivi) est gérée par la page parente.
 export default function QuartierSynthesis({
   communeName,
   inseeCode,
-  userKey,
+  snapshotHash,
+  deterministic,
+  initialEnriched,
   sourcesByHorizon,
-  initialWorkbook,
-  relation,
-  initialDiscovery,
-  fallbackSummary,
 }: Props) {
-  const isResidence = relation === "current_residence";
   const [horizon, setHorizon] = useHorizon();
   const meta = HORIZON_META[horizon];
   const posthog = usePostHog();
   const sources = sourcesByHorizon[horizon];
+
+  const [byHorizon, dispatch] = useReducer(
+    reducer,
+    null,
+    () => Object.fromEntries(HORIZON_KEYS.map((h) => [h, initialDisplay(initialEnriched[h] ?? null)])) as ByHorizon,
+  );
+  const state = byHorizon[horizon];
 
   function switchHorizon(next: HorizonKey) {
     if (next === horizon) return;
@@ -112,143 +91,79 @@ export default function QuartierSynthesis({
     setHorizon(next);
   }
 
-  // ─── Workbook : snapshot serveur + sync localStorage au focus fenêtre ──
-  // Anti-contamination : hors résidence, on ignore tout workbook (snapshot serveur
-  // ET localStorage). Une observation vécue ailleurs ne doit pas colorer cette commune.
-  const seedWorkbook = isResidence ? (initialWorkbook ?? EMPTY_WORKBOOK) : EMPTY_WORKBOOK;
-  const [workbook, setWorkbook] = useState<WorkbookQuartier>(seedWorkbook);
-  const [usedWorkbookKey, setUsedWorkbookKey] = useState<string>(() =>
-    workbookKey(seedWorkbook),
-  );
-
-  // Attentes découverte (hors résidence). Ref pour éviter la closure périmée
-  // dans fetchSynthesis lors de la régénération.
-  const seedDiscovery = !isResidence && initialDiscovery ? initialDiscovery : { priority: "", concern: "" };
-  const [discovery, setDiscovery] = useState(seedDiscovery);
-  const discoveryRef = useRef(discovery);
-  // LA REF SE MET À JOUR APRÈS LE COMMIT, pas pendant le rendu. Écrire une ref en plein rendu la rend
-  // dépendante d'un passage que React peut abandonner ou rejouer. Le comportement est identique ici :
-  // `fetchSynthesis` la lit depuis un gestionnaire d'événement, donc toujours après cet effet.
+  // ─── Lecture enrichie : demandée une fois par horizon, jamais streamée ──────────────────
+  const statusRef = useRef(state.status);
+  useEffect(() => { statusRef.current = state.status; });
   useEffect(() => {
-    discoveryRef.current = discovery;
-  });
-  const [usedDiscoveryKey, setUsedDiscoveryKey] = useState("");
-  const [discoveryOpen, setDiscoveryOpen] = useState(false);
+    if (!snapshotHash || !inseeCode || statusRef.current !== "preparing") return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const startedAt = Date.now();
+    const h = horizon;
 
-  useEffect(() => {
-    if (relation !== "current_residence") return; // pas de workbook hors résidence (anti-contamination)
-    function sync() {
-      const fromLs = readWorkbookFromStorage(userKey);
-      if (countFilled(fromLs) > 0) {
-        setWorkbook((prev) =>
-          workbookKey(prev) === workbookKey(fromLs) ? prev : fromLs,
-        );
+    const settle = (a: ApiAnswer): boolean => {
+      if (a.status === "ready") {
+        dispatch({ horizon: h, event: { type: "enrichedArrived", text: a.text } });
+        posthog?.capture("quartier_ai_summary_completed", { commune: communeName, insee_code: inseeCode, horizon: h, origin: a.origin });
+        return true;
       }
-    }
-    sync();
-    window.addEventListener("focus", sync);
-    return () => window.removeEventListener("focus", sync);
-  }, [userKey, relation]);
+      if (a.status === "unavailable") {
+        dispatch({ horizon: h, event: { type: "enrichedUnavailable" } });
+        return true;
+      }
+      return false;
+    };
 
-  // ─── Synthèse (stream) ─────────────────────────────────────────────────
-  const [synthText, setSynthText] = useState("");
-  const [synthState, setSynthState] = useState<"idle" | "streaming" | "done" | "error">("idle");
-  const synthReqRef = useRef(0);
+    const poll = async () => {
+      if (cancelled) return;
+      if (Date.now() - startedAt > POLL_GIVE_UP_MS) {
+        dispatch({ horizon: h, event: { type: "enrichedUnavailable" } });
+        return;
+      }
+      try {
+        const res = await fetch(`/api/synthesize-quartier?snapshot=${encodeURIComponent(snapshotHash)}&horizon=${h}`);
+        if (cancelled) return;
+        // Une réponse d'erreur est TERMINALE : on ne relance pas pendant des minutes une lecture qui
+        // n'arrivera pas. La synthèse déterministe reste affichée.
+        if (!res.ok) { dispatch({ horizon: h, event: { type: "enrichedUnavailable" } }); return; }
+        const a = (await res.json()) as ApiAnswer;
+        if (cancelled || settle(a)) return;
+      } catch {
+        /* réseau : on retente au prochain tour */
+      }
+      timer = setTimeout(poll, POLL_MS);
+    };
 
-  const fetchSynthesis = useCallback(
-    (wb: WorkbookQuartier, isRegen: boolean) => {
-      if (!inseeCode || !communeName) return;
-      const requestId = ++synthReqRef.current;
-      const controller = new AbortController();
-      const filledCount = countFilled(wb);
-      const wbPayload = filledCount > 0 ? wb : undefined;
-
-      (async () => {
-        setSynthText("");
-        setSynthState("streaming");
-        posthog?.capture(
-          isRegen ? "quartier_ai_summary_regenerated" : "quartier_ai_summary_started",
-          {
-            commune: communeName,
-            insee_code: inseeCode,
-            horizon,
-            relation,
-            workbook_filled_count: filledCount,
-          },
-        );
-
-        try {
-          const res = await fetch("/api/synthesize-quartier", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              inseeCode,
-              communeName,
-              horizon,
-              relation,
-              discovery:
-                relation === "considering_living" &&
-                (discoveryRef.current.priority.trim() || discoveryRef.current.concern.trim())
-                  ? discoveryRef.current
-                  : undefined,
-              workbook: wbPayload,
-            }),
-            signal: controller.signal,
-          });
-          if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
-
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            if (requestId !== synthReqRef.current) break;
-            buffer += decoder.decode(value, { stream: true });
-            setSynthText(buffer);
-          }
-          if (requestId === synthReqRef.current) {
-            setSynthState("done");
-            setUsedWorkbookKey(workbookKey(wb));
-            setUsedDiscoveryKey(discoveryKeyOf(discoveryRef.current));
-            posthog?.capture("quartier_ai_summary_completed", {
-              commune: communeName,
-              insee_code: inseeCode,
-              horizon,
-              char_count: buffer.length,
-              workbook_filled_count: filledCount,
-            });
-          }
-        } catch (err) {
-          if (controller.signal.aborted) return;
-          if (requestId !== synthReqRef.current) return;
-          setSynthState("error");
-          posthog?.capture("quartier_ai_summary_failed", {
-            commune: communeName,
-            insee_code: inseeCode,
-            horizon,
-            error: err instanceof Error ? err.message : "unknown",
-          });
+    (async () => {
+      try {
+        // POST : sert le cache, ou lance la génération si personne ne la prépare déjà.
+        const res = await fetch("/api/synthesize-quartier", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ snapshotHash, horizon: h }),
+        });
+        if (cancelled) return;
+        // 401, 403, 404, 429, 503 (et toute autre erreur) sont TERMINALES : un 429 n'est pas une
+        // génération en cours, et ne doit pas déclencher trois minutes de relances.
+        if (!res.ok) {
+          dispatch({ horizon: h, event: { type: "enrichedUnavailable" } });
+          posthog?.capture("quartier_ai_summary_unavailable", { commune: communeName, insee_code: inseeCode, horizon: h, http_status: res.status });
+          return;
         }
-      })();
+        const a = (await res.json().catch(() => ({ status: "unavailable" }))) as ApiAnswer;
+        if (cancelled || settle(a)) return;
+      } catch {
+        if (cancelled) return;
+      }
+      timer = setTimeout(poll, POLL_MS);
+    })();
 
-      return () => controller.abort();
-    },
-    [inseeCode, communeName, horizon, posthog, relation],
-  );
-
-  useEffect(() => {
-    if (!inseeCode || !communeName) return;
-    // INCONDITIONNEL DEPUIS LE 30/07/2026 : cette synthèse était derrière un flag
-    // `AUTO_SYNTHESIS` absent de la production, donc derrière un bouton « Générer la synthèse »
-    // dans un module payant.
-    const cleanup = fetchSynthesis(workbook, false);
-    return cleanup;
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inseeCode, communeName, horizon]);
-
-  const workbookChangedSinceLastFetch =
-    workbookKey(workbook) !== usedWorkbookKey && countFilled(workbook) > 0;
+  }, [horizon, snapshotHash, inseeCode]);
 
   // ─── Pas de commune ────────────────────────────────────────────────────
   if (!inseeCode || !communeName) {
@@ -258,14 +173,14 @@ export default function QuartierSynthesis({
           Lecture territoriale · horizon {meta.year}
         </p>
         <p className="text-[16px] leading-[1.75] text-muted">
-          Renseignez votre commune dans votre profil pour accéder à la lecture
-          personnalisée de votre territoire.
+          Renseignez votre commune dans votre profil pour accéder à la lecture de votre territoire.
         </p>
       </div>
     );
   }
 
-  const parsed = parseSynthesis(synthText);
+  const text = state.shown === "enriched" && state.enrichedText ? state.enrichedText : deterministic[horizon];
+  const parsed = parseSynthesis(text);
 
   return (
     <div>
@@ -274,13 +189,7 @@ export default function QuartierSynthesis({
           className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.15] tracking-[-0.5px] mb-4"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          {parsed.title ? (
-            <span className="italic text-label">{parsed.title}</span>
-          ) : (
-            <span className={`italic ${synthState === "streaming" ? "text-ghost" : "text-label"}`}>
-              {communeName} à l&apos;horizon {meta.year}
-            </span>
-          )}
+          <span className="italic text-label">{parsed.title ?? `${communeName} à l'horizon ${meta.year}`}</span>
         </h2>
 
         {/* Mini-nav horizons — discrète, sous le titre */}
@@ -296,7 +205,6 @@ export default function QuartierSynthesis({
                   onClick={() => switchHorizon(h.key)}
                   className="quartier-horizon-pill"
                   data-active={active ? "true" : "false"}
-                  disabled={synthState === "streaming"}
                   title={h.recommended ? "Horizon recommandé" : undefined}
                 >
                   {h.year}
@@ -309,164 +217,43 @@ export default function QuartierSynthesis({
           </div>
         </div>
 
-        {synthState === "streaming" && parsed.blocks.length === 0 && !parsed.title && (
-          <div className="font-mono text-[11px] tracking-[0.08em] uppercase text-ghost">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-info mr-2 animate-pulse" />
-            Lecture en cours...
-          </div>
-        )}
-
-        {synthState === "error" && <FallbackPanel text={fallbackSummary} />}
-
-        {synthState !== "error" &&
-          parsed.blocks.map((b, i) => {
-            const isLast = i === parsed.blocks.length - 1;
-            return (
-              <div key={i} className={i > 0 ? "mt-6" : ""}>
-                {b.caption && (
-                  <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-2.5">
-                    {b.caption}
-                  </p>
-                )}
-                <p className="text-[16px] leading-[1.75] text-muted">
-                  {b.text}
-                  {synthState === "streaming" && isLast && <Cursor />}
+        {/* L'état de la lecture, dit sobrement : la lecture immédiate est une vraie lecture, pas un
+            brouillon ; la version enrichie est proposée, jamais substituée d'office. */}
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-4">
+          {state.shown === "enriched" ? "Lecture enrichie" : "Lecture immédiate"}
+        </p>
+        <div key={`${horizon}:${state.shown}`} className="quartier-synthesis-text">
+          {parsed.blocks.map((b, i) => (
+            <div key={i} className={i > 0 ? "mt-6" : ""}>
+              {b.caption && (
+                <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-2.5">
+                  {b.caption}
                 </p>
-              </div>
-            );
-          })}
+              )}
+              <p className="text-[16px] leading-[1.75] text-muted">{b.text}</p>
+            </div>
+          ))}
+        </div>
 
-        {workbookChangedSinceLastFetch && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-[var(--border-1)] flex items-center justify-between gap-4 flex-wrap">
-            <p className="text-[13px] leading-[1.55] text-muted max-w-[620px]">
-              Vos repères ont changé.
-            </p>
+        {/* Un signal discret, jamais un écran d'attente : la lecture affichée se suffit à elle-même. */}
+        {state.shown === "deterministic" && state.status === "preparing" && snapshotHash && (
+          <p className="mt-6 text-[12px] text-ghost inline-flex items-center gap-2">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-info/70 animate-pulse" />
+            Une lecture enrichie se prépare…
+          </p>
+        )}
+        {offersEnriched(state) && (
+          <div className="mt-6">
             <button
               type="button"
-              onClick={() => fetchSynthesis(workbook, true)}
+              onClick={() => {
+                dispatch({ horizon, event: { type: "showEnriched" } });
+                posthog?.capture("quartier_ai_summary_opened", { commune: communeName, insee_code: inseeCode, horizon });
+              }}
               className="quartier-regen-btn"
             >
-              Régénérer avec mes repères
+              Lecture enrichie disponible · l&apos;afficher
             </button>
-          </div>
-        )}
-
-        {/* Repères de terrain — uniquement en résidence (observations vécues,
-            anti-contamination : jamais sur une commune où l'on ne vit pas).
-            Même emplacement que le bloc découverte ci-dessous, pour la symétrie :
-            sous la synthèse, dans le même panneau. Fermé par défaut (comme le
-            reste du parcours), mais le déclencheur est traité en CTA bleu bien
-            visible dans QuartierWorkbook, pas une pastille grise qui se perd. */}
-        {isResidence && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-[var(--border-1)]">
-            <QuartierWorkbook
-              userKey={userKey}
-              commune={communeName}
-              inseeCode={inseeCode}
-              reportId={inseeCode}
-            />
-          </div>
-        )}
-
-        {/* Vos priorités pour cette commune — uniquement en découverte. Deux
-            champs libres, optionnels : ils orientent l'ATTENTION de la
-            synthèse, jamais les faits. Titre aligné sur « Vos repères de
-            terrain » (résidence) : le lecteur en sujet, pas « la lecture ».
-            Fermé par défaut, même geste que le bloc résidence : tout le
-            header est cliquable, le déclencheur est un CTA bleu visible. */}
-        {relation === "considering_living" && synthState !== "streaming" && (
-          <div className="mt-7 pt-5 border-t border-[var(--border-1)]">
-            <button
-              type="button"
-              onClick={() => setDiscoveryOpen((v) => !v)}
-              className="flex items-start justify-between gap-4 w-full text-left"
-            >
-              <div>
-                <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-info/80 mb-1.5">
-                  Vos priorités pour cette commune
-                </p>
-                {!discoveryOpen && (
-                  <p className="text-[13px] leading-[1.55] text-muted">
-                    Dites-nous ce que vous recherchez ou ce qui vous fait hésiter ici.
-                  </p>
-                )}
-              </div>
-              <span
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] whitespace-nowrap shrink-0 ${
-                  discoveryOpen
-                    ? "border border-[var(--border-2)] bg-[var(--bg-elev-2)] text-muted font-normal"
-                    : "border border-info/40 bg-info/[0.14] text-info font-semibold"
-                }`}
-              >
-                {discoveryOpen ? "Réduire" : "Compléter"}
-                <span className="text-[10px]">{discoveryOpen ? "▲" : "▼"}</span>
-              </span>
-            </button>
-
-            {discoveryOpen && (
-              <div className="mt-4">
-                <p className="text-[13px] leading-[1.55] text-muted mb-4">
-                  Vos priorités orientent ce qui suit, sans rien inventer.
-                </p>
-                <label className="block text-[13px] text-label mb-1.5">
-                  Qu&apos;est-ce qui compte le plus pour vous dans cette commune&nbsp;?
-                </label>
-                <textarea
-                  value={discovery.priority}
-                  onChange={(e) => setDiscovery((d) => ({ ...d, priority: e.target.value }))}
-                  maxLength={300}
-                  rows={2}
-                  placeholder="Le calme, les écoles, le budget, l'exposition aux risques : ce qui pèse le plus pour vous."
-                  className="w-full bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
-                />
-                <label className="block text-[13px] text-label mb-1.5">
-                  Qu&apos;est-ce qui pourrait vous faire hésiter&nbsp;?
-                </label>
-                <textarea
-                  value={discovery.concern}
-                  onChange={(e) => setDiscovery((d) => ({ ...d, concern: e.target.value }))}
-                  maxLength={300}
-                  rows={2}
-                  placeholder="Une inquiétude ou un point que vous souhaitez examiner avec attention."
-                  className="w-full bg-[var(--bg-elev)] border border-[var(--border-2)] rounded-md p-2.5 text-[14px] text-label placeholder:text-ghost mb-3 resize-y"
-                />
-                <div className="flex items-center gap-3 flex-wrap">
-                  <button
-                    type="button"
-                    disabled={discoveryKeyOf(discovery) === usedDiscoveryKey}
-                    onClick={async () => {
-                      posthog?.capture("quartier_discovery_applied", {
-                        commune: communeName,
-                        insee_code: inseeCode,
-                        has_priority: !!discovery.priority.trim(),
-                        has_concern: !!discovery.concern.trim(),
-                      });
-                      try {
-                        await fetch("/api/report-context", {
-                          method: "PATCH",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            insee: inseeCode,
-                            discoveryWorkbook: { priority: discovery.priority, concern: discovery.concern },
-                          }),
-                        });
-                      } catch {
-                        /* la régénération reste utile même si la persistance échoue */
-                      }
-                      fetchSynthesis(workbook, true);
-                    }}
-                    className="quartier-regen-btn disabled:opacity-40 disabled:cursor-default"
-                  >
-                    Adapter la lecture
-                  </button>
-                  {usedDiscoveryKey &&
-                    discoveryKeyOf(discovery) === usedDiscoveryKey &&
-                    (discovery.priority.trim() || discovery.concern.trim()) && (
-                      <span className="text-[12px] text-info/80">Vos priorités sont prises en compte.</span>
-                    )}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -478,10 +265,6 @@ export default function QuartierSynthesis({
       </div>
 
       <style>{`
-        @keyframes futuree-cursor {
-          0%, 100% { opacity: 0.7; }
-          50% { opacity: 0; }
-        }
         .quartier-regen-btn {
           padding: 9px 16px;
           background: rgba(96, 165, 250, 0.12);
@@ -498,6 +281,16 @@ export default function QuartierSynthesis({
         .quartier-regen-btn:hover {
           background: rgba(96, 165, 250, 0.2);
           border-color: rgba(96, 165, 250, 0.6);
+        }
+        .quartier-synthesis-text {
+          animation: futuree-fade-in 0.6s ease both;
+        }
+        @keyframes futuree-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .quartier-synthesis-text { animation: none; }
         }
         .quartier-horizon-nav {
           display: flex;
@@ -560,27 +353,7 @@ export default function QuartierSynthesis({
   );
 }
 
-function Cursor() {
-  return (
-    <span
-      className="inline-block w-[7px] h-[16px] -mb-[2px] ml-[2px] bg-info opacity-70 align-baseline"
-      style={{ animation: "futuree-cursor 1.1s steps(2, end) infinite" }}
-    />
-  );
-}
-
-function FallbackPanel({ text }: { text: string }) {
-  return (
-    <div>
-      <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-ghost mb-3">
-        Synthèse éditoriale indisponible
-      </p>
-      <p className="text-[15px] leading-[1.72] text-muted">{text}</p>
-    </div>
-  );
-}
-
-// ─── Parsing de la prose streamée ─────────────────────────────────────────
+// ─── Parsing du texte (titre + blocs « ## ») ─────────────────────────────────────────
 
 type ParsedSynthesis = {
   title: string | null;

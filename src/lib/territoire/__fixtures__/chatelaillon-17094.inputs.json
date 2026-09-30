@@ -1,0 +1,320 @@
+{
+ "insee": "17094",
+ "communeName": "Châtelaillon-Plage",
+ "entry": {
+  "population": 6227,
+  "densite": 975.76,
+  "distance_cote_km": 11,
+  "relief_proximite": 0,
+  "altitude": 2,
+  "nature": {
+   "brut_pct": 36.5,
+   "radius_pct": 27.9,
+   "composition": {
+    "foret": 10.3,
+    "prairies": 20.8,
+    "landes_pelouses": 2.8,
+    "mineral_dunes": 2.4,
+    "eau": 0.2,
+    "agricole": 14.3,
+    "artificialise": 49.2
+   }
+  },
+  "demographie": {
+   "taux_total": 0.62,
+   "part_nouveaux": 9.8,
+   "recit": "gagne_attire"
+  }
+ },
+ "urbanRole": {
+  "role": "agglo",
+  "uuLabel": "La Rochelle",
+  "uuPop": 138236
+ },
+ "typology": {
+  "type": "littoral_atlantique",
+  "label": "Littoral atlantique"
+ },
+ "ademe": {
+  "densite": 975.76,
+  "taux_boisement": 1.5,
+  "population": 6227,
+  "vieillissement_pct": 3.28,
+  "vacants_pct": 2
+ },
+ "scenarios": {
+  "gwl15": {
+   "h": "2050",
+   "v": {
+    "NORTMm_yr": 14.24,
+    "NORTMm_seas_JJA": 21.01,
+    "NORTMm_seas_DJF": 7.78,
+    "NORTXm_seas_JJA": 24.66,
+    "NORTX35D_yr": 1.4,
+    "NORTX30D_yr": 13.8,
+    "NORTR_yr": 14.6,
+    "NORRR_yr": 734.72,
+    "NORRR_seas_JJA": 109.5,
+    "NORRR_seas_DJF": 224.97,
+    "NORRRq99_yr": 21.54,
+    "NORRx1d_yr": 35.78,
+    "NORRRq99refD_yr": 4.7,
+    "NORIFM40_yr": 3.5,
+    "NORSWI04_yr": 130,
+    "ATMm_seas_JJA": 1.32,
+    "ATMm_seas_DJF": 1.17,
+    "ATX35D_yr": 1,
+    "ATX30D_yr": 7.2,
+    "ATR_yr": 9.4,
+    "AIFM40_yr": 2,
+    "ARRx1d_yr": 0.07
+   }
+  },
+  "gwl20": {
+   "h": "2050",
+   "v": {
+    "NORTMm_yr": 14.96,
+    "NORTMm_seas_JJA": 21.66,
+    "NORTMm_seas_DJF": 8.33,
+    "NORTXm_seas_JJA": 25.32,
+    "NORTX35D_yr": 3.1,
+    "NORTX30D_yr": 18.8,
+    "NORTR_yr": 25.1,
+    "NORRR_yr": 756.5,
+    "NORRR_seas_JJA": 106.57,
+    "NORRR_seas_DJF": 241.05,
+    "NORRRq99_yr": 22.29,
+    "NORRx1d_yr": 38.02,
+    "NORRRq99refD_yr": 5.1,
+    "NORIFM40_yr": 5,
+    "NORSWI04_yr": 136,
+    "ATMm_seas_JJA": 1.97,
+    "ATMm_seas_DJF": 1.79,
+    "ATX35D_yr": 2.7,
+    "ATX30D_yr": 11.6,
+    "ATR_yr": 19.4,
+    "AIFM40_yr": 3,
+    "ARRx1d_yr": 0.15
+   }
+  },
+  "gwl30": {
+   "h": "2050",
+   "v": {
+    "NORTMm_yr": 16.07,
+    "NORTMm_seas_JJA": 23.19,
+    "NORTMm_seas_DJF": 9.42,
+    "NORTXm_seas_JJA": 27,
+    "NORTX35D_yr": 7.1,
+    "NORTX30D_yr": 30.7,
+    "NORTR_yr": 43.8,
+    "NORRR_yr": 718.4,
+    "NORRR_seas_JJA": 86.42,
+    "NORRR_seas_DJF": 222.47,
+    "NORRRq99_yr": 22.93,
+    "NORRx1d_yr": 39.39,
+    "NORRRq99refD_yr": 5.2,
+    "NORIFM40_yr": 9.5,
+    "NORSWI04_yr": 147,
+    "ATMm_seas_JJA": 3.48,
+    "ATMm_seas_DJF": 2.72,
+    "ATX35D_yr": 6.9,
+    "ATX30D_yr": 23.7,
+    "ATR_yr": 38.2,
+    "AIFM40_yr": 7.5,
+    "ARRx1d_yr": 0.22
+   }
+  }
+ },
+ "georisques": {
+  "inseeCode": "17094",
+  "communeName": "CHATELAILLON-PLAGE",
+  "riskLabels": [
+   "Inondation",
+   "Par submersion marine",
+   "Mouvement de terrain",
+   "Tassements différentiels",
+   "Séisme",
+   "Phénomène lié à l'atmosphère",
+   "Tempête et grains (vent)",
+   "Transport de marchandises dangereuses"
+  ],
+  "flags": {
+   "flood": true,
+   "marineSubmersion": true,
+   "landslide": true,
+   "clay": true,
+   "storm": true,
+   "seismic": true,
+   "wildfire": false
+  },
+  "seismic": {
+   "code": "3",
+   "label": "3 - MODEREE"
+  }
+ },
+ "catnat": {
+  "total": 14,
+  "firstYear": 1982,
+  "lastYear": 2022,
+  "byRisk": [
+   {
+    "label": "Sécheresse des sols",
+    "count": 5
+   },
+   {
+    "label": "Inondations",
+    "count": 4
+   },
+   {
+    "label": "Chocs liés aux vagues",
+    "count": 2
+   },
+   {
+    "label": "Mouvements de terrain",
+    "count": 2
+   },
+   {
+    "label": "Séisme",
+    "count": 1
+   }
+  ],
+  "byDecade": [
+   {
+    "decade": 1980,
+    "count": 2
+   },
+   {
+    "decade": 1990,
+    "count": 4
+   },
+   {
+    "decade": 2000,
+    "count": 3
+   },
+   {
+    "decade": 2010,
+    "count": 4
+   },
+   {
+    "decade": 2020,
+    "count": 1
+   }
+  ],
+  "years": [
+   {
+    "year": 1982,
+    "family": "inondation"
+   },
+   {
+    "year": 1989,
+    "family": "secheresse"
+   },
+   {
+    "year": 1993,
+    "family": "inondation"
+   },
+   {
+    "year": 1999,
+    "family": "autre"
+   },
+   {
+    "year": 2003,
+    "family": "secheresse"
+   },
+   {
+    "year": 2005,
+    "family": "secheresse"
+   },
+   {
+    "year": 2010,
+    "family": "autre"
+   },
+   {
+    "year": 2016,
+    "family": "autre"
+   },
+   {
+    "year": 2022,
+    "family": "secheresse"
+   }
+  ],
+  "topRisk": "Sécheresse des sols",
+  "summary": "Sécheresse des sols et inondations sont les aléas les plus fréquents."
+ },
+ "catnatInondationIndex": {
+  "count": 4,
+  "depuis": 1982,
+  "origine": "index_local",
+  "insee": "17094",
+  "version": "catnat-1"
+ },
+ "vigieau": {
+  "inseeCode": "17094",
+  "maxLevel": "crise",
+  "topZone": {
+   "label": "Bassin de Charente-aval",
+   "resourceType": "surface",
+   "level": "crise",
+   "startDate": "2026-09-18T00:00:00.000Z",
+   "endDate": "2026-10-31T00:00:00.000Z"
+  },
+  "zones": [
+   {
+    "label": "Zone AEP départementale",
+    "resourceType": "autre",
+    "level": "alerte_renforcee",
+    "startDate": "2026-07-18T00:00:00.000Z",
+    "endDate": "2026-10-31T00:00:00.000Z"
+   },
+   {
+    "label": "Bassin de Charente-aval",
+    "resourceType": "surface",
+    "level": "crise",
+    "startDate": "2026-09-18T00:00:00.000Z",
+    "endDate": "2026-10-31T00:00:00.000Z"
+   },
+   {
+    "label": "Bassin de Charente-aval",
+    "resourceType": "souterrain",
+    "level": "crise",
+    "startDate": "2026-09-18T00:00:00.000Z",
+    "endDate": "2026-10-31T00:00:00.000Z"
+   }
+  ],
+  "status": "ok",
+  "consultedAt": "2026-09-27T22:35:10.158Z"
+ },
+ "drought": null,
+ "littoral": {
+  "insee": "17094",
+  "facade": "atlantique",
+  "traitDeCote": {
+   "concernee": true,
+   "decret": {
+    "numero": "2026_95",
+    "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000053493953",
+    "debut": "2026-02-14"
+   }
+  },
+  "erosion": {
+   "classe": "faible",
+   "amenage": true,
+   "pctRecul": 0,
+   "medianeMpan": 0.32,
+   "reculMaxMpan": 0.32,
+   "nbValid": 1,
+   "periode": [
+    1937,
+    2010
+   ]
+  }
+ },
+ "era5": {
+  "delta_c": 1.67,
+  "baseline_mean_c": 12.4,
+  "recent_mean_c": 14.07,
+  "data_through_year": 2025
+ },
+ "saisonnalitePct": 37.9,
+ "distinctiveTrait": "compte parmi les communes les plus urbanisées de France"
+}
