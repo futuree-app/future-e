@@ -237,3 +237,46 @@ test("faux rejets réels du 28/09 : ces phrases justes sont acceptées", () => {
   }
 });
 
+// ── Décisions du 30/09 : eau, raccords, psychologie collective ─────────────────────────────
+
+test("la projection ne présente plus la répartition des jours comme un fait", () => {
+  const note = String((P as any).climat_projete.note);
+  assert.doesNotMatch(note, /répartis dans l'année|ne forment pas/);
+  assert.match(note, /ne permettent pas, à eux seuls, de déduire la durée ni la continuité/);
+});
+
+test("eau : une tension future sur la ressource est refusée, les faits restent permis", () => {
+  for (const faux of [
+    "Ces deux réalités décrivent une tension sur l'eau qui existe indépendamment du littoral.",
+    "La pression sur la ressource en eau s'exercera sur un territoire mixte.",
+    "L'eau devient plus rare.",
+  ]) assert.ok(rules(faux).includes("interdit:tension-eau"), faux);
+  for (const ok of [
+    "Des restrictions d'eau de niveau crise sont en vigueur sur le bassin de Charente-aval.",
+    "Les projections comptent 136 jours de sols secs par an.",
+  ]) assert.deepEqual(rules(ok), [], ok);
+});
+
+test("raccords : entre objets voisins refusés, entre mêmes grandeurs permis", () => {
+  assert.ok(rules("Ces deux lectures pointent dans une direction commune sans se confondre.").includes("raccord:non-autorise"));
+  assert.ok(rules("Ces deux réalités, restrictions en vigueur et sécheresse reconnue, décrivent une même tension.").includes("raccord:non-autorise"));
+  assert.deepEqual(rules("Le réchauffement observé depuis 1961-1990 et les températures projetées vont dans la même direction."), []);
+});
+
+test("psychologie collective : les tournures réelles du 28/09 sont refusées", () => {
+  assert.ok(rules("Ce déséquilibre est rarement le premier élément qu'on lit sur un territoire de ce type.").includes("interdit:psychologie-collective"));
+  assert.ok(rules("Ce poids est rarement pensé dans sa dimension climatique.").includes("interdit:psychologie-collective"));
+  assert.deepEqual(rules("Les résidences secondaires représentent 38 % des logements."), []);
+});
+
+test("faux rejets réels du 30/09 acceptés, vrai rejet d'unité conservé", () => {
+  const wrap = (x: string) => `T\n\n## A\n\n${x}\n\n## B\n\nx.\n\n## C\n\ny.`;
+  assert.deepEqual(checkSynthesis(wrap("Ce changement s'inscrit dans un réchauffement déjà mesuré de 1,7 °C depuis la période 1961-1990."), P), []);
+  assert.deepEqual(checkSynthesis(wrap("Depuis 1961-1990, le territoire a déjà gagné 1,7 °C."), P), []);
+  assert.deepEqual(checkSynthesis(wrap("Le réchauffement déjà observé depuis 1961-1990 atteint 1,7 °C."), P), []);
+  // L'exception ne vaut que pour la température : des jours restent stricts.
+  assert.ok(numberErrors("Le réchauffement ajoute 19 jours au-dessus de 30 °C.") > 0);
+  // 19 est l'écart des NUITS ; écrit « 19 jours », l'unité est fausse (l'écart des jours vaut 11,6).
+  assert.ok(numberErrors("Elles seraient 25 à l'horizon 2050, soit un écart de 19 jours.") > 0);
+});
+

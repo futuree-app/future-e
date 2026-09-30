@@ -183,7 +183,7 @@ export function projectForSynthesis(snapshot: FactsSnapshot, horizon: HorizonKey
           pluie_journaliere_extreme_mm: metric(v, "NORRRq99_yr"),
           jours_de_conditions_meteo_favorables_au_feu: metric(v, "NORIFM40_yr"),
           periode_de_reference: "1976-2005",
-          note: "Les jours comptés sont répartis dans l'année : ils ne forment pas une période continue.",
+          note: "Ces indicateurs comptent un nombre de jours sur l'année ; ils ne permettent pas, à eux seuls, de déduire la durée ni la continuité d'une période.",
         }
       : null,
     tendance_observee: era5
@@ -246,7 +246,9 @@ LES FAITS FOURNIS SONT LES SEULS FAITS
 - Logements vacants : un chiffre, rien de plus. Ne concluez ni à une tension du marché, ni à une disponibilité des biens, ni à une attractivité.
 - Sols et eau : aucune donnée ne décrit l'imperméabilisation des sols, l'absorption de l'eau ou le ruissellement. N'en parlez pas. Des pluies plus intenses ne prouvent pas de débordement ni un mécanisme précis : restez sur ce que disent les chiffres.
 - Pas de classement national ("parmi les communes les plus…", "l'une des villes les plus…") : aucune donnée comparative n'est fournie.
-- Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent ou ressentent.
+- Pas de psychologie collective : n'affirmez jamais ce que les habitants pensent ou ressentent, ni ce qu'on "voit rarement", "pense rarement" ou "oublie".
+- Eau : les jours de sols secs, les catastrophes naturelles reconnues et les restrictions d'eau en vigueur sont des faits distincts. Juxtaposez-les si besoin ; n'en tirez aucune conclusion sur une tension, une pression, une rareté ou un accès futur à la ressource en eau : aucune donnée ne la mesure.
+- Raccords : ne présentez deux faits comme allant "dans le même sens", "dans une direction commune" ou "décrivant une même tension" que s'ils mesurent la même grandeur (par exemple le réchauffement observé depuis 1961-1990 et les températures projetées). Deux objets seulement voisins ne se relient pas.
 - Pas de changement d'échelle : une donnée communale ne décrit ni une rue ni un quartier.
 - Risques : "non recensé" autorise à dire qu'aucun périmètre n'est recensé ; jamais d'affirmer une exposition. "recensé" autorise à dire qu'une partie du territoire est concernée ; jamais de le nier.
 - Ne dites pas "rural" ni "station balnéaire" : aucune donnée ne l'établit.
@@ -260,7 +262,7 @@ PÉRIMÈTRE : LA COMMUNE, RIEN EN DESSOUS
 CHIFFRES
 - N'écrivez en chiffres que des valeurs présentes dans le payload, éventuellement arrondies ("38 %" pour 37,9), ou précédées de "environ" ou "près de" lorsque c'est exact.
 - Les écarts à la période 1976-2005 ("ecart_par_rapport_a_1976_2005") et les valeurs de cette période ("valeur_de_reference_1976_2005") sont fournis : citez-les tels quels, ne les recalculez pas. Un écart n'est pas une valeur : "19 jours au-dessus de 30 °C" n'est pas "19 jours de plus".
-- Aucun calcul : pas de ratio, pas de "x fois plus", pas de différence entre deux horizons, pas de conversion de jours en semaines ou en mois. Les jours comptés sont répartis dans l'année.
+- Aucun calcul : pas de ratio, pas de "x fois plus", pas de différence entre deux horizons, pas de conversion de jours en semaines ou en mois. Un nombre de jours sur l'année ne dit rien de la durée ni de la continuité d'une période.
 
 FORMAT DE SORTIE
 Strictement :

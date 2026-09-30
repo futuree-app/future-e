@@ -213,6 +213,47 @@ const RULES: Rule[] = [
       /\bcette sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
     ],
   },
+  // ── Eau : aucune conclusion sur la ressource (décision du 30/09) ──
+  // Sols secs, CatNat et restrictions en vigueur ne prouvent pas une tension future sur la ressource
+  // ou l'accès à l'eau (chantier Explore2 / Eau 2050). On juxtapose les faits, on ne fabrique pas la
+  // conclusion. « Des restrictions d'eau sont en vigueur » reste permis : c'est un fait.
+  {
+    id: "interdit:tension-eau",
+    when: always,
+    polarity: "affirmative",
+    patterns: [
+      /\b(tension|pression|stress)s? (sur|de|autour de) (l'|la )?(eau|ressource)/,
+      /\bressource en eau (sous tension|menacée|fragilisée|sous pression)/,
+      /\b(raréfaction|rareté|manque|pénurie) (de l'|d')eau\b/,
+      /\bl'eau (devient|deviendra|devenir|se fait) (plus )?(rare|précieuse)/,
+      /\baccès à l'eau\b/,
+    ],
+  },
+  // ── Raccords implicites non autorisés par le contrat de faits (décision du 30/09) ──
+  // « Ces deux réalités décrivent une tension », « ces deux lectures pointent dans une direction
+  // commune » : un raccord n'est permis qu'entre faits mesurant la même grandeur. Seule exception
+  // outillée ici : le réchauffement OBSERVÉ et les températures PROJETÉES.
+  {
+    id: "raccord:non-autorise",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /\bces deux (réalités|lectures|signaux|phénomènes|indicateurs|faits|dynamiques)\b[^.]*(direction commune|même (direction|mouvement|sens)|tension|pression|pointent|convergent)/,
+      /(direction commune|même direction|même mouvement)[^.]*\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)/,
+      /\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)[^.]*(direction commune|même direction|même mouvement)/,
+    ],
+    unless: /réchauffement|températures?|°c/,
+  },
+  // ── Psychologie collective (interdite par la consigne ; contrôlée sur les tournures vues en réel) ──
+  {
+    id: "interdit:psychologie-collective",
+    when: always,
+    polarity: "any",
+    patterns: [
+      /\brarement (pensée?s?|le premier|la première|lue?s?|pris en compte|mise? en avant|évoquée?s?)/,
+      /\b(on|les habitants|la ville|les élus) (oublie|oublient|sous-estime|sous-estiment|ignore|ignorent|croit|croient|pense|pensent)\b/,
+    ],
+  },
   // ── Interdits faute de fait dédié ──
   {
     id: "interdit:attractivite",
@@ -303,9 +344,14 @@ export function normalizeText(t: string): string {
 }
 
 function sentencesOf(text: string): string[] {
+  // Les INTITULÉS de bloc (« ## Ce qu'on sous-estime ici ») sont imposés par le format : ils ne sont
+  // pas des assertions du texte, et une règle ne doit jamais les refuser.
   return normalizeText(text)
+    .split("\n")
+    .filter((line) => !/^\s*#/.test(line))
+    .join("\n")
     .split(/\n+|(?<=[.!?])\s+/)
-    .map((s) => s.replace(/^#+\s*/, "").trim())
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
@@ -406,6 +452,8 @@ type WrittenNumber = {
   unit: NumberUnit | "forbidden";
   /** Ce que la PHRASE dit de ce nombre : un écart (« +12 », « 12 de plus », « une hausse de 12 ») ou une valeur. */
   sense: "ecart" | "valeur";
+  /** La phrase parle de RÉCHAUFFEMENT : une grandeur qui est, par nature, un écart de température. */
+  warming: boolean;
 };
 
 const NUMBER = /(?<![\d.,])([+\-\u2212]?)(\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:[.,](\d+))?/g;
@@ -415,7 +463,7 @@ const QUALIFIER = /(environ|près de|presque|plus de|moins de|autour de|quelque)
 const FORBIDDEN_UNIT = /^\s*(mois|semaines?|fois (plus|moins))\b/;
 // Les marqueurs d'ÉCART, avant ou après le nombre. « passer de 7 à 19 » n'en est pas un : il cite
 // deux valeurs. Convention ciblée, sans analyse générale de la langue.
-const ECART_BEFORE = /(hausse|augmentation|progression|gain|baisse|recul|diminution|écart|ecart)s? d(e |')\s*$|\b(augment|progress|gagn|grimp|recul|baiss|diminu)\w* de\s*$/;
+const ECART_BEFORE = /(hausse|augmentation|progression|gain|baisse|recul|diminution|écart|ecart|réchauffement)s?(\s+[^\s]+){0,3}\s+d(e |')\s*$|(hausse|augmentation|écart|réchauffement)s? d(e |')\s*$|\b(augment|progress|gagn|grimp|recul|baiss|diminu)\w* de\s*$|\b(a|ont|aurait|auraient) (déjà )?(gagné|pris|grimpé)\s*$|\b(ajout|rajout)\w*\s*$/;
 const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse)/;
 
 function numbersIn(text: string): WrittenNumber[] {
@@ -435,7 +483,7 @@ function numbersIn(text: string): WrittenNumber[] {
     const unit = unitAfter(after);
     const signed = (m[1] === "+" || m[1] === "-" || m[1] === "\u2212") && !signIsRange;
     const sense = signed || ECART_BEFORE.test(beforeLong) || ECART_AFTER.test(after) ? "ecart" : "valeur";
-    out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit, sense });
+    out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit, sense, warming: /réchauff/.test(normalizeText(text)) });
   }
   return out;
 }
@@ -463,7 +511,11 @@ function matches(w: WrittenNumber, allowed: AllowedNumber[]): boolean {
     // 0,62 % par an ») sont des valeurs de la source : la règle ne s'applique pas aux pourcentages.
     if (w.unit !== "%") {
       if (w.sense === "ecart" && kind !== "ecart") continue;
-      if (w.sense === "valeur" && kind === "ecart") continue;
+      // « Le réchauffement observé atteint 1,7 °C » : un réchauffement EST un écart. En °C, et dans une
+      // phrase qui parle de réchauffement, le nombre peut donc se valider sur un écart de température.
+      // Jours et nuits restent stricts : « 19 jours supplémentaires » reste refusé.
+      const warmingException = w.warming && w.unit === "°C" && unit === "°C";
+      if (w.sense === "valeur" && kind === "ecart" && !warmingException) continue;
     }
     if (close(x, v) || close(x, round(v, 0)) || close(x, round(v, 1))) {
       if (w.qualifier !== "plus de" && w.qualifier !== "moins de") return true;
