@@ -94,7 +94,7 @@ const PERIMETRES_PARISIENS: Record<string, { label: string; departements: string
   agglomeration: { label: "l'agglomération parisienne", departements: [], uu: "00851" },
 };
 
-function exclusionsAvecPerimetres(c: HardConstraints) {
+export function exclusionsAvecPerimetres(c: HardConstraints) {
   const perimetres = c.excludeZonesPerimetres ?? {};
   const libres = (c.excludeZones ?? []).filter((t) => !perimetres[t]);
   const excl = resolveExclusions(libres);

@@ -13,7 +13,7 @@ import { normalizeConditions } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { canonique, valeurDecisionnelle } from "./criterion-value.ts";
-import { effectiveProject, valeurParsed, FAMILLES_MULTIPLES } from "./effective-value.ts";
+import { effectiveProject, valeurParsed, FAMILLES_MULTIPLES, instancesDe } from "./effective-value.ts";
 
 export type { CriterionRef, ConditionConfirmation } from "../user-project.ts";
 
@@ -73,9 +73,14 @@ export function isStale(project: UserProject, ref: CriterionRef): boolean {
 }
 
 /** Les critères déclarés ET confirmés, dans l'ordre du projet (géographie, puis préférences). */
+// FUT-8 : une famille multiple compte aussi chacun de ses éléments (« quitter Lyon » confirmé seul).
 export function confirmedCriteria(project: UserProject): CriterionRef[] {
+  const hc = effectiveProject(project).parsed?.hardConstraints ?? {};
   const refs: CriterionRef[] = [
-    ...declaredHardConstraintKeys(project).map((key): CriterionRef => ({ kind: "hard", key })),
+    ...declaredHardConstraintKeys(project).flatMap((key): CriterionRef[] => [
+      { kind: "hard", key },
+      ...(FAMILLES_MULTIPLES.has(key) ? instancesDe(hc, key).map((instance): CriterionRef => ({ kind: "hard", key, instance })) : []),
+    ]),
     ...declaredPreferenceKeys(project).map((key): CriterionRef => ({ kind: "preference", key })),
   ];
   return refs.filter((r) => isConfirmed(project, r));

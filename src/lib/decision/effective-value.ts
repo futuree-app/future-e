@@ -147,3 +147,32 @@ export function effectiveProject(project: UserProject): UserProject {
     parsed: { ...project.parsed, hardConstraints: effectiveHardConstraints(project), preferences: effectivePreferences(project) },
   };
 }
+
+/**
+ * Les critères géographiques restreints à QUELQUES éléments d'une famille multiple (FUT-8) : ce que le
+ * dossier évalue quand « quitter Lyon » est une condition et « éviter Bordeaux » un simple critère. Les
+ * autres familles sont rendues telles quelles.
+ */
+export function hcRestreint(hc: HardConstraints, key: string, instances: string[]): HardConstraints {
+  const garde = new Set(instances);
+  if (key === "excludePlace") {
+    return { ...hc, excludePlace: (hc.excludePlace ?? []).filter((e) => e?.label && garde.has(instanceDeVille(e.label))) };
+  }
+  if (key === "excludeZones") {
+    const perimetres = Object.fromEntries(Object.entries(hc.excludeZonesPerimetres ?? {}).filter(([t]) => garde.has(t)));
+    return {
+      ...hc,
+      excludeZones: (hc.excludeZones ?? []).filter((t) => garde.has(t)),
+      excludeZonesDits: (hc.excludeZonesDits ?? []).filter((d) => garde.has(d.token)),
+      excludeZonesPerimetres: Object.keys(perimetres).length > 0 ? perimetres : undefined,
+    };
+  }
+  return hc;
+}
+
+/** Les éléments déclarés d'une famille multiple, par leur identité. */
+export function instancesDe(hc: HardConstraints, key: string): string[] {
+  if (key === "excludePlace") return [...new Set((hc.excludePlace ?? []).flatMap((e) => (e?.label ? [instanceDeVille(e.label)] : [])))];
+  if (key === "excludeZones") return [...new Set(hc.excludeZones ?? [])];
+  return [];
+}

@@ -88,7 +88,7 @@ export function signatureDecisionnelle(p: UserProject | null | undefined): strin
     // éliminatoire). Seules les confirmations VALIDES comptent : une confirmation périmée ne vaut plus,
     // et sa présence ne change rien à ce que le moteur conclut. Un projet sans condition signe ce segment
     // vide, des deux côtés : les dossiers figés avant FUT-7 ne se déclarent pas périmés pour autant.
-    `conditions=${p ? confirmedCriteria(p).map((r) => `${r.kind}:${r.key}`).sort().join(",") : ""}`,
+    `conditions=${p ? confirmedCriteria(p).map((r) => `${r.kind}:${r.key}${r.instance ? `:${r.instance}` : ""}`).sort().join(",") : ""}`,
   ].join("§");
 }
 

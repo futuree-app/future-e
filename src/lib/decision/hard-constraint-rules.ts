@@ -31,6 +31,11 @@ import type {
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { isConfirmed } from "./conditions.ts";
+import { evaluateExcludePlace, evaluateExcludeZones } from "../hard-constraints.ts";
+import { exclusionsAvecPerimetres } from "../hard-constraints-hydrate.ts";
+import type { HardConstraints } from "../hard-constraint-schema.ts";
+import { FAMILLES_MULTIPLES, hcRestreint, instancesDe, instanceDeVille } from "./effective-value.ts";
+import { toCommuneAttributes } from "./module-facts-map.ts";
 import { criterionCapability, type CapabilityAssessment, type EvaluationGrain } from "./capability.ts";
 import { hardConstraintLabel, HARD_CONSTRAINT_LABELS } from "./project-view.ts";
 import { classifyCoastDistance } from "./coast-facts.ts";
@@ -330,6 +335,47 @@ function mesureSansSeuil(
   return null;
 }
 
+// UNE VUE : la famille entière (cas général), ou quelques éléments d'une famille multiple (FUT-8).
+type Vue = { hard: HardEvaluation; hc: HardConstraints; confirme: boolean; instance: string | null };
+
+// FUT-8 : « JE DOIS QUITTER LYON, ET J'AIMERAIS ÉVITER BORDEAUX ». Quand une ville (ou une zone exclue) est
+// confirmée seule, chaque ville confirmée est évaluée seule, et les autres ensemble, comme avant. Sans
+// confirmation par élément, rien ne change : une seule vue, la famille entière. La Recherche n'est pas
+// concernée (elle évalue toujours la famille entière).
+function vuesParElement(key: HardConstraintKey, f: ModuleFacts, project: UserProject, hard: HardEvaluation): Vue[] | null {
+  if (!FAMILLES_MULTIPLES.has(key)) return null;
+  const hc = project.parsed?.hardConstraints ?? {};
+  const instances = instancesDe(hc, key);
+  const confirmees = instances.filter((i) => isConfirmed(project, { kind: "hard", key, instance: i }));
+  if (confirmees.length === 0) return null;
+  const attrs = toCommuneAttributes(f);
+  const vue = (garde: string[], confirme: boolean, instance: string | null): Vue => {
+    const sous = hcRestreint(hc, key, garde);
+    const constraints = key === "excludePlace"
+      ? { ...hard.context.constraints, excludePlace: hard.context.constraints.excludePlace.filter((e) => garde.includes(instanceDeVille(e.label))) }
+      : { ...hard.context.constraints, excludeZones: exclusionsAvecPerimetres(sous) };
+    const context = { ...hard.context, constraints };
+    const a = key === "excludePlace" ? evaluateExcludePlace(context, attrs) : evaluateExcludeZones(context, attrs);
+    return { hard: { context, byKey: { ...hard.byKey, [key]: a } }, hc: sous, confirme, instance };
+  };
+  const autres = instances.filter((i) => !confirmees.includes(i));
+  return [...confirmees.map((i) => vue([i], true, i)), ...(autres.length > 0 ? [vue(autres, false, null)] : [])];
+}
+
+// L'issue la plus grave l'emporte quand plusieurs vues sont fusionnées.
+const GRAVITE: RuleEvaluation["outcome"][] = ["incompatible", "condition_check", "mismatch", "uncertain", "satisfied", "not_applicable"];
+const gravite = (o: RuleEvaluation["outcome"]) => { const i = GRAVITE.indexOf(o); return i < 0 ? GRAVITE.length : i; };
+
+// Un fait évalué sur UN élément porte cet élément : identifiant distinct, critère précis.
+function marquerElement(fact: RuleEvaluation["facts"][number], instance: string): RuleEvaluation["facts"][number] {
+  const id = `${fact.id}:${instance}`;
+  if (fact.role === "condition_check" || fact.role === "condition_met") {
+    return { ...fact, id, criterion: { ...fact.criterion, instance } } as typeof fact;
+  }
+  if (fact.role === "incompatibility" || fact.role === "mismatch") return { ...fact, id, criterionInstance: instance };
+  return { ...fact, id };
+}
+
 function makeRule(key: HardConstraintKey): DecisionRule {
   const id = `territoire.hard.${key}`;
   return {
@@ -337,6 +383,24 @@ function makeRule(key: HardConstraintKey): DecisionRule {
     module: "territoire",
     hardConstraint: key,
     evaluate: (f, project, hard): RuleEvaluation => {
+      const vues = vuesParElement(key, f, project, hard);
+      if (!vues) {
+        return evaluerVue(f, project, {
+          hard, hc: project.parsed?.hardConstraints ?? {}, confirme: isConfirmed(project, { kind: "hard", key }), instance: null,
+        });
+      }
+      const evs = vues.map((v) => {
+        const ev = evaluerVue(f, project, v);
+        return v.instance ? { ...ev, facts: ev.facts.map((x) => marquerElement(x, v.instance!)) } : ev;
+      });
+      const pire = evs.reduce((p, e) => (gravite(e.outcome) < gravite(p.outcome) ? e : p));
+      return { ...pire, facts: evs.flatMap((e) => e.facts), reason: evs.map((e) => e.reason).join(" ; ") };
+    },
+  };
+
+  function evaluerVue(f: ModuleFacts, project: UserProject, vue: Vue): RuleEvaluation {
+    {
+      const hard = vue.hard;
       // Les 11 évaluations ont été calculées UNE fois, par runRules. Les rappeler ici en ferait 121.
       const a = hard.byKey[key];
       const ret = (outcome: RuleEvaluation["outcome"], facts: RuleEvaluation["facts"], reason: string): RuleEvaluation =>
@@ -344,10 +408,8 @@ function makeRule(key: HardConstraintKey): DecisionRule {
 
       if (a.status === "not_declared") return ret("not_applicable", [], "non déclarée");
 
-      const confirme = isConfirmed(project, { kind: "hard", key });
-      const capacite = criterionCapability(
-        { kind: "hard", key, hc: project.parsed?.hardConstraints ?? {} }, grainDe(hard),
-      );
+      const confirme = vue.confirme;
+      const capacite = criterionCapability({ kind: "hard", key, hc: vue.hc }, grainDe(hard));
 
       if (a.status === "unexamined") {
         // Une condition confirmée qu'on ne sait qu'apprécier, sans seuil mais avec une mesure : la mesure
@@ -426,8 +488,8 @@ function makeRule(key: HardConstraintKey): DecisionRule {
         ...(status ? { status } : {}),
       };
       return ret("mismatch", [ecart], "critère du projet non rempli, non confirmé");
-    },
-  };
+    }
+  }
 }
 
 export const HARD_CONSTRAINT_RULES: DecisionRule[] = HARD_CONSTRAINT_KEYS.map(makeRule);
