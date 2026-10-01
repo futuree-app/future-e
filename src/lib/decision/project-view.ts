@@ -11,6 +11,7 @@ import { lieuEnPhrase } from "../hard-constraints.ts";
 import { deCommune } from "../typography.ts";
 import { ZONE_TABLE } from "../geo-zones.ts";
 import { departementsDansLesZones } from "../hard-constraint-schema.ts";
+import { excludePlaceDeclares } from "../hard-constraints-hydrate.ts";
 
 export function isStructured(project: UserProject): boolean {
   return project.parsed != null;
@@ -133,26 +134,32 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
   }
 }
 
+// LES CRITÈRES GÉOGRAPHIQUES DÉCLARÉS : exactement ceux que l'hydratation retient, ni plus ni moins.
+//
+// Cette liste disait « déclaré » sur la simple présence d'un objet. Le noyau, lui, tenait pour non
+// déclarés une taille sans borne (`{min:null,max:null}`), un lieu sans libellé ou une ville à quitter
+// sans nom. Le registre annonçait alors au lecteur un critère « qu'aucune règle ne sait examiner »,
+// alors qu'il n'existait pas (FUT-7, audit du 30/09, cas R7). Les deux définitions coïncident désormais.
+//
+// « DÉCLARÉ » NE VEUT PLUS DIRE « NON NÉGOCIABLE » (FUT-7). C'est un critère du projet, examiné comme
+// tel. Seule une confirmation du lecteur en fait une condition (cf. conditions.ts).
 export function declaredHardConstraintKeys(project: UserProject): HardConstraintKey[] {
   const hc = project.parsed?.hardConstraints;
   if (!hc) return [];
   const out: HardConstraintKey[] = [];
   // FUT-5 : en « au moins une », les départements sont évalués DANS le périmètre des zones, jamais à part.
   if (hc.departements?.length && !departementsDansLesZones(hc)) out.push("departements");
-  if (hc.zones?.some((z) => z.strength === "hard")) out.push("zones");
+  if (hc.zones?.some((z) => z?.strength === "hard")) out.push("zones");
   if (hc.excludeZones?.length) out.push("excludeZones");
   if (hc.montagne?.strength === "hard") out.push("montagne");
   if (hc.reliefProche?.strength === "hard") out.push("reliefProche");
   if (hc.nearSea?.active) out.push("nearSea");
-  if (hc.excludeSea) out.push("excludeSea");
-  if (hc.nearPlace) out.push("nearPlace");
-  if (hc.communeSize) out.push("communeSize");
-  if (hc.excludePlace?.length) out.push("excludePlace");
-  if (hc.sizeRelativeTo) out.push("sizeRelativeTo");
+  if (hc.excludeSea === true) out.push("excludeSea");
+  if (hc.nearPlace?.label) out.push("nearPlace");
+  if (hc.communeSize && (hc.communeSize.min != null || hc.communeSize.max != null)) out.push("communeSize");
+  if (excludePlaceDeclares(hc.excludePlace).length > 0) out.push("excludePlace");
+  if (hc.sizeRelativeTo?.label) out.push("sizeRelativeTo");
   return out;
-}
-export function hasAnyHardConstraint(project: UserProject): boolean {
-  return declaredHardConstraintKeys(project).length > 0;
 }
 // `uncoveredConstraints` et `uncoveredPreferences` vivent désormais dans criteria-registry.ts : elles
 // se DÉRIVENT du registre (couverture observée), au lieu de se déduire d'une liste parallèle.

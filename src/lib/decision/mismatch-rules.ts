@@ -9,6 +9,7 @@
 import type { DecisionRule, RuleEvaluation, MismatchFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import {
@@ -67,13 +68,16 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
 
       const weight = preferenceWeight(p, key);
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+      // LA VISIBILITÉ N'EST PAS L'IMPORTANCE (FUT-7). Le poids règle le tier ; une condition confirmée se
+      // montre quel que soit son poids (conditions.ts).
+      const visible = preferenceSurfaced(p, key);
 
       const verdict = classifyPosition(relativeFact(f, key));
       if (verdict === "uncertain") return ret("uncertain", [], "rang non calculable");
 
       // satisfied et neutral sont TOUJOURS silencieux. Un mismatch de poids 1 est examiné (l'outcome
       // remonte, la couverture monte) mais ne produit AUCUNE carte : non matériel, pas d'arbitrage.
-      if (verdict !== "mismatch" || weight < 2) {
+      if (verdict !== "mismatch" || !visible) {
         return ret(
           verdict, [],
           verdict === "mismatch" ? "mismatch mineur, silencieux (poids 1)" : `position ${verdict}`,

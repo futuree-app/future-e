@@ -176,7 +176,10 @@ export type HardConstraintAssessment<K extends HardConstraintKey = HardConstrain
       key: K; status: "incompatible";
       observedValue: ConstraintValue; expectedValue: ConstraintValue;
       observedLabel: string; expectedLabel: string; evidenceKeys: string[];
-      statement: string; // LA DOCTRINE de la contrainte, identique dans les deux moteurs
+      // LA DOCTRINE de la contrainte, identique dans les deux moteurs. Elle dit ce que le PROJET indique,
+      // jamais « ce que vous avez posé comme condition » : seule une confirmation du lecteur en fait une
+      // condition (FUT-7), et ce constat sert aussi bien un écart qu'une condition non respectée.
+      statement: string;
       topic: string; // le SUJET, 3 à 6 mots (cf. assertFactValid)
     }
   | { key: K; status: "unexamined"; reason: UnexaminedReason; detail?: string };
@@ -352,7 +355,7 @@ export function evaluateDepartements(
   return {
     key: "departements", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`le département ${deCommune(c.nom)}`, "le département de cette commune"),
-    statement: `Cette commune est dans le département ${c.dept}, hors de ceux que vous avez posés comme condition (${wanted.join(", ")}).`,
+    statement: `Cette commune est dans le département ${c.dept}, hors de ceux qu'indique votre projet (${wanted.join(", ")}).`,
   };
 }
 
@@ -410,7 +413,7 @@ export function evaluateZones(
     return {
       key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: perimetre, evidenceKeys, topic,
-      statement: `Cette commune est hors ${deCommune(perimetre)}, le périmètre que vous avez posé comme condition.`,
+      statement: `Cette commune est hors ${deCommune(perimetre)}, le périmètre qu'indique votre projet.`,
     };
   }
   if (incomplet && !(union && dedans)) {
@@ -481,7 +484,7 @@ export function evaluateExcludeZones(
       key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: `hors ${deCommune(zonesLabel)}`, evidenceKeys,
       topic: topicFit(`la zone où se situe ${c.nom}`, "la zone où se situe cette commune"),
-      statement: `Cette commune se trouve dans ${zonesLabel}, que vous avez écarté de votre recherche.`,
+      statement: `Cette commune se trouve dans ${zonesLabel}, une zone que votre projet écarte.`,
     };
   }
   if (z.unresolvedLabels.length > 0) {
@@ -590,7 +593,7 @@ export function evaluateNearSea(
   return {
     key: "nearSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} au littoral`, "la distance au littoral"),
-    statement: `Cette commune est à ${km} km du littoral, au-delà de la limite de ${max} km que vous avez posée.`,
+    statement: `Cette commune est à ${km} km du littoral, au-delà de la limite de ${max} km qu'indique votre projet.`,
   };
 }
 
@@ -658,8 +661,8 @@ export function evaluateCommuneSize(
   // « en dessous de 100 000 de la taille que vous avez posée » n'est pas une phrase française : le
   // seuil et son complément se télescopaient. Le seuil porte maintenant sa propre subordonnée.
   const seuil = over
-    ? `au-dessus des ${fmt(cs.max!)} que vous avez posés comme limite`
-    : `en dessous des ${fmt(cs.min!)} que vous avez posés comme limite`;
+    ? `au-dessus de la limite de ${fmt(cs.max!)} qu'indique votre projet`
+    : `en dessous du minimum de ${fmt(cs.min!)} qu'indique votre projet`;
   return {
     key: "communeSize", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: c.uu
@@ -740,7 +743,7 @@ function verdictParEstimation(
       `le temps de trajet ${deCommune(c.nom)} à ${ref.canonicalLabel}`,
       `le temps de trajet à ${ref.canonicalLabel}`,
     ),
-    statement: `${sujet} est à environ ${duree} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${maxMinutes} minutes que vous avez posée.`,
+    statement: `${sujet} est à environ ${duree} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${maxMinutes} minutes qu'indique votre projet.`,
   };
 }
 
@@ -857,7 +860,7 @@ export function evaluateNearPlace(
         `le temps de trajet ${deCommune(c.nom)} à ${ref.canonicalLabel}`,
         `le temps de trajet à ${ref.canonicalLabel}`,
       ),
-      statement: `${sujet} se situe hors des ${maxMinutes} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)} que vous avez posées comme limite.`,
+      statement: `${sujet} se situe hors des ${maxMinutes} minutes ${MODE_LABEL[mode]} ${deCommune(ref.canonicalLabel)}, la limite qu'indique votre projet.`,
     };
   }
 
@@ -882,7 +885,7 @@ export function evaluateNearPlace(
   return {
     key: "nearPlace", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
-    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km que vous avez posée.`,
+    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km qu'indique votre projet.`,
   };
 }
 
@@ -918,7 +921,7 @@ export function evaluateExcludePlace(
       // « que vous avez posé comme condition de quitter » laissait un participe non accordé sur un COD
       // féminin, dans une tournure qui faisait de l'agglomération la chose « posée ». C'est le DÉPART
       // qui est la condition. Un présent simple supprime l'accord et dit la même chose.
-      statement: `Cette commune fait partie de l'agglomération ${deCommune(label)}, que vous souhaitez quitter.`,
+      statement: `Cette commune fait partie de l'agglomération ${deCommune(label)}, que votre projet prévoit de quitter.`,
     };
   }
 

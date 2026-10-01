@@ -18,15 +18,20 @@ import { nomDeVerification } from "./logement-rules.ts";
 // grave du dossier. Le blocage est la réponse : il se lit une fois, et sa preuve remonte dans le bloc.
 //
 // Trois conditions, toutes nécessaires :
-//   - une SEULE carte dans la section : à deux ou plus, le bloc n'en nomme qu'une, la section reprend
-//     son rôle et ne répète plus rien ;
+//   - une SEULE incompatibilité dans la section : à deux ou plus, le bloc n'en nomme qu'une, la section
+//     reprend son rôle et ne répète plus rien ;
 //   - un FAIT, pas une composition : une composition porte un résumé propre, distinct du détail ;
 //   - ÉTABLIE : une incompatibilité seulement indicative n'est pas celle que le héros nomme
 //     (`establishedIncompatibility` filtre sur `evidenceStrength === "established"`), donc sa carte
 //     n'est redondante avec rien.
+//
+// DEPUIS FUT-7, la section porte aussi les autres conditions sans compromis (à confirmer, remplies).
+// Elles ne sont pas redondantes avec le bloc : seule la carte de l'incompatibilité s'efface, la section
+// reste pour elles.
 export function conditionPorteeParLeBloc(dossier: Dossier): IncompatibilityFact | null {
   const cards = dossier.sections.find((s) => s.key === "incompatibilities")?.cards ?? [];
-  const seule = cards.length === 1 ? cards[0]! : null;
+  const incompatibilites = cards.filter((c) => c.kind === "composition" || c.fact.role === "incompatibility");
+  const seule = incompatibilites.length === 1 ? incompatibilites[0]! : null;
   if (!seule || seule.kind !== "fact") return null;
   const f = seule.fact;
   return f.role === "incompatibility" && f.evidenceStrength === "established" ? f : null;
@@ -97,8 +102,13 @@ export function sectionsDeLaMinute(dossier: Dossier): DossierSection[] {
 
 // Les sections réellement rendues. `dossier.sections` reste la vérité de ce qui a été assemblé.
 export function sectionsAffichees(dossier: Dossier): DossierSection[] {
-  const base = conditionPorteeParLeBloc(dossier)
-    ? dossier.sections.filter((s) => s.key !== "incompatibilities")
+  const portee = conditionPorteeParLeBloc(dossier);
+  const base = portee
+    ? dossier.sections
+      .map((s) => (s.key === "incompatibilities"
+        ? { ...s, cards: s.cards.filter((c) => !(c.kind === "fact" && c.fact.id === portee.id)) }
+        : s))
+      .filter((s) => s.cards.length > 0)
     : dossier.sections;
   const masqueTaille = tailleEtabliePorteeParLeVerdict(dossier);
   const clesAbsorbees = clesFavorablesDesCompositionsAffichees(dossier);

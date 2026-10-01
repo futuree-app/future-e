@@ -7,6 +7,7 @@
 import type { DecisionRule, RuleEvaluation, MismatchFact, AlignmentFact, DecisionFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { COAST_PROXIMITY_CONVENTION, classifyCoastDistance } from "./coast-facts.ts";
 
@@ -29,6 +30,9 @@ function makeCoastRule(): DecisionRule {
 
       const weight = preferenceWeight(p, "proximite_mer");
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+      // LA VISIBILITÉ N'EST PAS L'IMPORTANCE (FUT-7). Le poids règle le tier ; une condition confirmée se
+      // montre quel que soit son poids (conditions.ts).
+      const visible = preferenceSurfaced(p, "proximite_mer");
 
       const distanceKm = f.distanceCoteKm;
       const verdict = classifyCoastDistance(distanceKm);
@@ -36,7 +40,7 @@ function makeCoastRule(): DecisionRule {
 
       // ALIGNMENT (lot C) : proche du littoral + poids >= 2 -> fait favorable (absolute_measure). Miroir du
       // mismatch d'éloignement, avec la MÊME limitation méthodologique (distance à vol d'oiseau).
-      if (verdict === "satisfied" && weight >= 2 && distanceKm != null && Number.isFinite(distanceKm)) {
+      if (verdict === "satisfied" && visible && distanceKm != null && Number.isFinite(distanceKm)) {
         const km = Math.round(distanceKm);
         const tier = weight >= 3 ? "structuring" : "secondary";
         const face = `Le littoral est à environ ${km} km, dans ce que vous recherchez.`;
@@ -61,7 +65,7 @@ function makeCoastRule(): DecisionRule {
 
       // neutral (intermédiaire) et satisfied (proche, poids 1) silencieux ; mismatch de poids 1 examiné
       // mais silencieux (non matériel).
-      if (verdict !== "mismatch" || weight < 2) {
+      if (verdict !== "mismatch" || !visible) {
         const reason = verdict === "mismatch" ? "éloignement mineur, silencieux (poids 1)"
           : verdict === "satisfied" ? "proche du littoral" : "distance intermédiaire";
         return ret(verdict, [], reason);

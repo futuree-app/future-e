@@ -26,6 +26,7 @@ import type { ModuleFacts, Dossier } from "./decision-fact.ts";
 import type { RadonFacts } from "./radon-facts.ts";
 import type { UserProject } from "../user-project.ts";
 import { deCommune } from "../typography.ts";
+import { projetSansDerivesDAncre } from "./ancres-derivees.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
@@ -189,6 +190,20 @@ export async function withEvaluationPoint(
   return { ...hard, point, travelTime: await estimateTravelTimeAt(hard.constraints, point) };
 }
 
+// LE PROJET TEL QUE LE DOSSIER LE LIT (FUT-7). Les critères qu'une commune-ancre a fabriqués (« une ville
+// comme Brest » -> quitter Brest, une fourchette de taille autour de Brest) sont des réglages de la
+// RECHERCHE : le dossier ne les prête pas au lecteur. Neutralisés à la lecture, seulement quand leur
+// origine est certaine (cf. ancres-derivees.ts) ; le projet enregistré n'est pas modifié, et « Où vivre »
+// continue de s'en servir. Le même annuaire que la dérivation résout les ancres.
+export async function projetDeLecture(project: UserProject): Promise<UserProject> {
+  if (!project.parsed?.communeAncre?.length) return project;
+  const dir = await placeDirectory();
+  return projetSansDerivesDAncre(project, (label) => {
+    const e = dir.byName(label);
+    return e ? { nom: e.nom, tailleVille: e.tailleVille } : null;
+  }).project;
+}
+
 // Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. `hasAddress` reflète la
 // présence d'une analyse logement déjà sauvegardée pour cette commune (l'appelant le détermine) :
 // il coupe la règle « confort sans adresse ». parsed null est géré par l'assembleur.
@@ -205,6 +220,7 @@ export async function buildCommuneDossier(
 ): Promise<{ moduleFacts: ModuleFacts; dossier: Dossier; hard: EvaluationContext } | null> {
   const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false, citycode: opts?.citycode });
   if (!facts) return null;
+  project = await projetDeLecture(project);
   const hard = await buildHardContext(project, facts);
   // moduleFacts retournés pour que l'augmentation Logement reparte du MÊME socle (pas de reload).
   const run = runRules(facts, project, hard);

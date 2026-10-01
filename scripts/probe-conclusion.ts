@@ -56,7 +56,7 @@ const plan = buildConclusionPlan({
     verif("f4", "secondary", "le périmètre patrimonial protégé", "À cette adresse, le bien est dans un périmètre patrimonial protégé."),
   ],
   shownCompositions: [],
-  uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau" }],
+  uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau", cause: "donnee_absente" }],
   uncoveredPriorities: [
     { key: "qualite_air", label: "la qualité de l'air" },
     { key: "agriculture", label: "l'agriculture" },
@@ -330,7 +330,7 @@ const planStrateSuite = buildConclusionPlan({
     verif("s3", "structuring", "le bruit des infrastructures", "Une autoroute passe à 300 mètres de cette adresse."),
   ],
   shownCompositions: [],
-  uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau" }],
+  uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau", cause: "donnee_absente" }],
   uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
   establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 3, reservesShown: 3,

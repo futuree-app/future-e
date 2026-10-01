@@ -1,6 +1,12 @@
 // LA PARITÉ. Le comparateur et le dossier peuvent avoir des politiques différentes face à une donnée
 // manquante. Ils n'ont pas le droit d'être en désaccord sur un CONSTAT.
 //
+// LA MÊME ÉVALUATION, PAS LE MÊME VERDICT (FUT-7, 01/10/2026). Le filtre de la recherche exclut toute
+// commune qui contredit un critère. Le dossier, lui, ne dit « Condition non respectée » que pour une
+// condition CONFIRMÉE par le lecteur et que futur•e sait TRANCHER ; sinon, le même constat devient un
+// écart au projet, ou une condition à confirmer. La parité porte donc sur le CONSTAT : contredit,
+// satisfait, non examiné. Jamais sur le rôle du fait.
+//
 // Le test part d'une ENTRÉE D'INDEX et de CONTRAINTES BRUTES, et suit les DEUX CHAÎNES ENTIÈRES :
 //
 //   IndexCommune ──► communeAttributesFrom ──► assess ──► hardFilter          (comparateur)
@@ -76,13 +82,37 @@ function chaines(
 const outcomeFor = (run: ReturnType<typeof chaines>["run"], key: string) =>
   run.evaluations.find((e) => e.ruleId === `territoire.hard.${key}`)!.outcome;
 
-test("PARITÉ : une contrainte incompatible au filtre est `incompatible` au dossier", () => {
+// LE CONSTAT DU DOSSIER, quel que soit le rôle qui le porte (FUT-7).
+function constat(run: ReturnType<typeof chaines>["run"], key: string): "contredit" | "satisfait" | "non_examine" | "non_applicable" {
+  const e = run.evaluations.find((x) => x.ruleId === `territoire.hard.${key}`)!;
+  if (e.outcome === "incompatible" || e.outcome === "mismatch") return "contredit";
+  if (e.outcome === "satisfied") return "satisfait";
+  if (e.outcome === "condition_check") {
+    const f = e.facts[0];
+    return f?.role === "condition_check" && f.signal === "defavorable" ? "contredit" : "satisfait";
+  }
+  return e.outcome === "not_applicable" ? "non_applicable" : "non_examine";
+}
+
+test("PARITÉ : une contrainte incompatible au filtre est CONTREDITE au dossier", () => {
   for (const c of CORPUS) {
     for (const p of PROJETS) {
       const { filtre, run } = chaines(c, p.hc);
       for (const a of filtre.incompatible) {
-        assert.equal(outcomeFor(run, a.key), "incompatible", `${c.nom} / ${p.nom} / ${a.key}`);
+        assert.equal(constat(run, a.key), "contredit", `${c.nom} / ${p.nom} / ${a.key}`);
       }
+    }
+  }
+});
+
+test("FUT-7 : sans condition confirmée, AUCUNE incompatibilité au dossier, sur tout le corpus", () => {
+  for (const c of CORPUS) {
+    for (const p of PROJETS) {
+      const { run } = chaines(c, p.hc);
+      for (const key of HARD_CONSTRAINT_KEYS) {
+        assert.notEqual(outcomeFor(run, key), "incompatible", `${c.nom} / ${p.nom} / ${key}`);
+      }
+      assert.equal(run.facts.some((f) => f.role === "incompatibility"), false, `${c.nom} / ${p.nom}`);
     }
   }
 });
@@ -105,11 +135,11 @@ test("PARITÉ : la table de correspondance tient sur les 11 clés, dans les deux
       const { assessments, run } = chaines(c, p.hc);
       for (const a of assessments) {
         const attendu =
-          a.status === "satisfied" ? "satisfied"
-          : a.status === "incompatible" ? "incompatible"
-          : a.status === "not_declared" ? "not_applicable"
-          : "uncertain"; // unexamined : divergence de CONDUITE assumée, jamais de constat
-        assert.equal(outcomeFor(run, a.key), attendu, `${c.nom} / ${p.nom} / ${a.key}`);
+          a.status === "satisfied" ? "satisfait"
+          : a.status === "incompatible" ? "contredit"
+          : a.status === "not_declared" ? "non_applicable"
+          : "non_examine"; // unexamined : divergence de CONDUITE assumée, jamais de constat
+        assert.equal(constat(run, a.key), attendu, `${c.nom} / ${p.nom} / ${a.key}`);
       }
     }
   }
@@ -128,7 +158,7 @@ test("PARITÉ : la taille se lit sur l'AGGLOMÉRATION dans les deux chaînes (le
   const villeurbanne = CORPUS.find((c) => c.nom === "Villeurbanne")!;
   const { filtre, run } = chaines(villeurbanne, { communeSize: { max: 25_000 } });
   assert.equal(filtre.eligible, false);
-  assert.equal(outcomeFor(run, "communeSize"), "incompatible");
+  assert.equal(constat(run, "communeSize"), "contredit");
 });
 
 test("PARITÉ : « quitter Lyon ET un inconnu » n'est satisfied NULLE PART", () => {
@@ -202,7 +232,7 @@ test("PARITÉ, ESTIMATION : une durée au-delà du seuil tranche PAREIL dans les
   });
   // L'estimation prime : la commune est hors du seuil, dans les DEUX moteurs.
   assert.equal(filtre.eligible, false);
-  assert.equal(outcomeFor(run, "nearPlace"), "incompatible");
+  assert.equal(constat(run, "nearPlace"), "contredit");
 });
 
 test("PARITÉ, ESTIMATION : une durée SOUS le seuil est satisfaite dans les deux chaînes", () => {
@@ -235,7 +265,7 @@ test("PARITÉ, L'ESTIMATION PRIME SUR LA GÉOMÉTRIE, dans les deux chaînes", (
     travelTime: estimationDepuis(DEDANS, 41.2),
   });
   assert.equal(filtre.eligible, false);
-  assert.equal(outcomeFor(run, "nearPlace"), "incompatible");
+  assert.equal(constat(run, "nearPlace"), "contredit");
 });
 
 test("PARITÉ, LA PANNE : un routage indisponible ne filtre pas, et ne conclut pas", () => {

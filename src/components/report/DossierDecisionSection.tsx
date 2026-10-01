@@ -257,8 +257,12 @@ export function DossierDecisionSection({
               // Le repli est le registre du NON SU, jamais une teinte de constat : une section dont la
               // clé n'est pas connue de cette table est, par définition, quelque chose qu'on ne sait pas
               // qualifier. C'est exactement ce que le gris neutre dit.
-              const col = SECTION_ACCENT[s.key] ?? "var(--reg-non-su)";
-              const ink = SECTION_INK[s.key] ?? "var(--reg-non-su)";
+              // La section des conditions ne prend le rouge de l'incompatibilité que si elle en porte une :
+              // des conditions seulement à confirmer, ou remplies, ne sont pas un blocage (FUT-7).
+              const sansBlocage = s.key === "incompatibilities"
+                && !s.cards.some((c) => c.kind === "fact" && c.fact.role === "incompatibility");
+              const col = sansBlocage ? "var(--reg-controle)" : SECTION_ACCENT[s.key] ?? "var(--reg-non-su)";
+              const ink = sansBlocage ? "var(--reg-controle)" : SECTION_INK[s.key] ?? "var(--reg-non-su)";
 
               // CE QUI CORRESPOND (alignments) : une carte GROUPÉE, courte. Un point fort n'appelle aucune
               // action, donc pas la structure complète d'une carte de problème — deux lignes suffisent :
@@ -372,6 +376,12 @@ export function DossierDecisionSection({
                           ...(f.role === "verification" && f.signalConvention ? [f.signalConvention] : []),
                           ...factSources(f),
                         ];
+                        // UNE TEINTE PAR NATURE DE CONDITION (FUT-7). La section des conditions porte trois natures :
+                        // le rouge de l'incompatibilité ne colore ni une condition à confirmer (rien n'est établi
+                        // contre le lieu), ni une condition remplie.
+                        const teinte = f.role === "condition_check" ? "var(--reg-controle)"
+                          : f.role === "condition_met" ? "var(--reg-alignement)"
+                          : col;
                         return (
                           <Fragment key={f.id}>
                             {grainLi}
@@ -383,8 +393,8 @@ export function DossierDecisionSection({
                                   Au-delà de vos priorités
                                 </p>
                               ) : null}
-                              <FactBody fact={f} color={col} />
-                              <EvidenceRow fact={f} color={col} provenance={provenance} />
+                              <FactBody fact={f} color={teinte} />
+                              <EvidenceRow fact={f} color={teinte} provenance={provenance} />
                               <MethodDetails conventions={conventions} checks={factChecks(f)} />
                             </li>
                           </Fragment>

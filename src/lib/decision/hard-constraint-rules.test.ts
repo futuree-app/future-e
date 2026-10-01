@@ -12,6 +12,8 @@ import {
   type EvaluationContext, type NormalizedHardConstraints,
 } from "../hard-constraints.ts";
 import type { ResolvedPlaceReference, ResolvedSizeReference, ResolvedUrbanAreaReference } from "../hard-constraints-resolve.ts";
+import { buildConfirmation } from "./conditions.ts";
+import type { HardConstraintKey } from "../hard-constraints.ts";
 
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
@@ -26,6 +28,13 @@ function project(hardConstraints: unknown): UserProject {
     parsed: { reformulation: "x", hardConstraints, preferences: [] } as UserProject["parsed"],
     updatedAt: "1970-01-01T00:00:00.000Z",
   };
+}
+
+// FUT-7 : une condition n'est éliminatoire que CONFIRMÉE par le lecteur. Le projet de test se confirme
+// comme le fera le geste de FUT-8 : par l'empreinte de la valeur actuelle.
+function confirme(p: UserProject, ...keys: HardConstraintKey[]): UserProject {
+  const conditions = keys.map((key) => buildConfirmation(p, { kind: "hard", key }, "2026-10-01T00:00:00.000Z")!);
+  return { ...p, conditions };
 }
 
 function normalized(over: Partial<NormalizedHardConstraints> = {}): NormalizedHardConstraints {
@@ -78,8 +87,21 @@ test("satisfied -> satisfied, SILENCIEUX (aucun fait), et la couverture monte", 
   assert.equal(e.facts.length, 0);
 });
 
-test("incompatible -> incompatible + un IncompatibilityFact complet", () => {
+test("FUT-7 : non confirmé, un critère géographique non rempli est un ÉCART, jamais une incompatibilité", () => {
   const e = rule("departements").evaluate(facts(), project({ departements: ["33"] }), hard({ departements: ["33"] }));
+  assert.equal(e.outcome, "mismatch");
+  const f = e.facts[0]!;
+  assert.ok(f.role === "mismatch");
+  assert.equal(f.materialityTier, "structuring");
+  assert.equal(f.headlineSubject, "le département 33");
+  assert.ok(f.basis.kind === "declared_criterion");
+  assert.doesNotMatch(f.statement, /posé|condition/);
+  assertFactValid(f, project({ departements: ["33"] }));
+});
+
+test("incompatible -> incompatible + un IncompatibilityFact complet (condition confirmée, tranchable)", () => {
+  const p = confirme(project({ departements: ["33"] }), "departements");
+  const e = rule("departements").evaluate(facts(), p, hard({ departements: ["33"] }));
   assert.equal(e.outcome, "incompatible");
   const f = e.facts[0]!;
   assert.ok(f.role === "incompatibility");
@@ -101,7 +123,7 @@ test("la provenance n'est PAS amputée : chaque clé d'observation devient une p
     facts(), project({ communeSize: { max: 25_000 } }), hard({ communeSize: { min: null, max: 25_000 } }),
   );
   const f = e.facts[0]!;
-  assert.ok(f.role === "incompatibility");
+  assert.ok(f.role === "mismatch");
   // sourceFactIds porte TOUTE la provenance (observation + déclaration) ; evidence habille les
   // observations. Aucun sourceFactId d'observation ne reste sans preuve.
   assert.ok(f.sourceFactIds.includes("commune.tailleVille"));
@@ -116,11 +138,14 @@ test("le GRAIN suit le point réellement testé : une mesure depuis l'adresse n'
     f,
     "address",
   );
-  const e = rule("nearPlace").evaluate(f, project({ nearPlace: { label: "Brest", maxKm: 50 } }), h);
+  // Des kilomètres sans « à vol d'oiseau » : appréciable seulement. Confirmée, la condition est À CONFIRMER.
+  const e = rule("nearPlace").evaluate(f, confirme(project({ nearPlace: { label: "Brest", maxKm: 50 } }), "nearPlace"), h);
   const fact = e.facts[0]!;
-  assert.ok(fact.role === "incompatibility");
+  assert.ok(fact.role === "condition_check");
+  assert.equal(fact.signal, "defavorable");
   assert.equal(fact.evidence[0]!.grain, "adresse");
   assert.match(fact.statement, /Cette adresse/);
+  assert.match(fact.whyNotDecided, /vol d'oiseau/);
 });
 
 test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de commune très long", () => {
@@ -158,10 +183,20 @@ test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de com
       over: { sizeRelativeTo: { label: "Bordeaux", direction: "larger", reference: bordeaux } }, f: facts({ nom, tailleVille: 500 }) },
   ];
 
+  // FUT-7 : trois lectures du même montage, et chacune passe la validation. Non confirmé : un écart.
+  // Confirmé : une incompatibilité si futur•e sait trancher, une condition à confirmer sinon.
+  // « La Bretagne », « le Grand Est » : des régions administratives, donc tranchables.
+  const TRANCHABLES = new Set(["departements", "zones", "excludeZones"]);
   for (const c of cas) {
-    const e = rule(c.key).evaluate(c.f, project(c.hc), hard(c.over, c.f));
-    assert.equal(e.outcome, "incompatible", `${c.key} devrait être incompatible dans ce montage`);
-    for (const f of e.facts) assertFactValid(f, project(c.hc)); // JETTE si le topic déborde
+    const brut = project(c.hc);
+    const libre = rule(c.key).evaluate(c.f, brut, hard(c.over, c.f));
+    assert.equal(libre.outcome, "mismatch", `${c.key} non confirmé : un écart`);
+    for (const f of libre.facts) assertFactValid(f, brut); // JETTE si le topic déborde
+
+    const p = confirme(brut, c.key as HardConstraintKey);
+    const e = rule(c.key).evaluate(c.f, p, hard(c.over, c.f));
+    assert.equal(e.outcome, TRANCHABLES.has(c.key) ? "incompatible" : "condition_check", `${c.key} confirmé`);
+    for (const f of e.facts) assertFactValid(f, p);
   }
 });
 
@@ -195,17 +230,19 @@ test("DOSSIER, commune DANS l'isochrone : satisfied, la couverture monte, aucune
   assert.equal(e.facts.length, 0); // une contrainte respectée est silencieuse : elle ne fabrique pas de carte
 });
 
-test("DOSSIER, commune HORS de l'isochrone : incompatible, et la phrase ne parle JAMAIS de kilomètres", () => {
-  // Auch est à 1 h 15 de route : dehors, et sans discussion possible.
+test("DOSSIER, commune HORS de l'isochrone : au point de référence, À CONFIRMER, et jamais de kilomètres", () => {
+  // Auch est à 1 h 15 de route : dehors. Mais le temps est estimé depuis le point de référence de la
+  // commune, pas depuis un logement (FUT-7) : la condition confirmée reste à confirmer, jamais tranchée.
   const auch = facts({ insee: "32013", nom: "Auch", lat: 43.6465, lon: 0.5861, uu: null, tailleVille: 21_000 });
-  const e = rule("nearPlace").evaluate(auch, project(PROJET_30MIN), hard(TRENTE_MIN, auch));
-  assert.equal(e.outcome, "incompatible");
+  const p = confirme(project(PROJET_30MIN), "nearPlace");
+  const e = rule("nearPlace").evaluate(auch, p, hard(TRENTE_MIN, auch));
+  assert.equal(e.outcome, "condition_check");
   const f = e.facts[0]!;
-  assert.equal(f.role, "incompatibility");
+  assert.equal(f.role, "condition_check");
   assert.match(f.statement, /30 minutes en voiture/);
   assert.match(f.statement, /Gare Matabiau/);
   assert.doesNotMatch(f.statement, /km/); // un temps ne se convertit jamais en distance
-  assertFactValid(f, project(PROJET_30MIN));
+  assertFactValid(f, p);
 });
 
 test("DOSSIER, LE CHANGEMENT DE GRAIN : le centre communal est dedans, l'ADRESSE est dehors", () => {
@@ -213,13 +250,16 @@ test("DOSSIER, LE CHANGEMENT DE GRAIN : le centre communal est dedans, l'ADRESSE
   // passer avec son centroïde et échouer pour une adresse posée hors de l'isochrone, et le texte doit le
   // porter (« Cette adresse », jamais « le point de référence de »).
   const blagnac = facts({ insee: "31069", nom: "Blagnac", lat: 43.6294, lon: 1.3897, uu: null, tailleVille: 25_000 });
-  const parLeCentre = rule("nearPlace").evaluate(blagnac, project(PROJET_30MIN), hard(TRENTE_MIN, blagnac));
-  assert.equal(parLeCentre.outcome, "satisfied");
+  const p = confirme(project(PROJET_30MIN), "nearPlace");
+  const parLeCentre = rule("nearPlace").evaluate(blagnac, p, hard(TRENTE_MIN, blagnac));
+  assert.equal(parLeCentre.outcome, "condition_check"); // au point de référence, un signal favorable seulement
+  assert.ok(parLeCentre.facts[0]!.role === "condition_check" && parLeCentre.facts[0]!.signal === "favorable");
 
-  // Le lecteur a renseigné une adresse, et elle tombe hors de l'isochrone.
+  // Le lecteur a renseigné une adresse, et elle tombe hors de l'isochrone : là, futur•e tranche.
   const adresse = facts({ ...blagnac, lat: 43.95, lon: 1.05, hasAddress: true });
-  const parLAdresse = rule("nearPlace").evaluate(adresse, project(PROJET_30MIN), hard(TRENTE_MIN, adresse, "address"));
+  const parLAdresse = rule("nearPlace").evaluate(adresse, p, hard(TRENTE_MIN, adresse, "address"));
   assert.equal(parLAdresse.outcome, "incompatible");
+  assertFactValid(parLAdresse.facts[0]!, p);
   assert.match(parLAdresse.facts[0]!.statement, /^Cette adresse/);
   assert.equal(parLAdresse.facts[0]!.evidence[0]!.grain, "adresse");
 });
@@ -271,21 +311,24 @@ test("DOSSIER : une commune estimée SOUS le seuil est satisfied, et la couvertu
   assert.equal(e.facts.length, 0); // une contrainte respectée est silencieuse
 });
 
-test("DOSSIER : une commune estimée AU-DELÀ est incompatible, et la phrase dit la durée", () => {
+test("DOSSIER : une commune estimée AU-DELÀ, au point de référence, reste à confirmer, et la phrase dit la durée", () => {
   const auch = facts({ insee: "32013", nom: "Auch", lat: 43.6465, lon: 0.5861, uu: null, tailleVille: 21_000 });
-  const e = rule("nearPlace").evaluate(auch, project(PROJET_30MIN), hardAvecEstimation(74.5, auch));
-  assert.equal(e.outcome, "incompatible");
+  const p = confirme(project(PROJET_30MIN), "nearPlace");
+  const e = rule("nearPlace").evaluate(auch, p, hardAvecEstimation(74.5, auch));
+  assert.equal(e.outcome, "condition_check"); // au point de référence de la commune : appréciable seulement
   const f = e.facts[0]!;
   assert.match(f.statement, /environ 75 minutes en voiture/);
   assert.match(f.statement, /Gare Matabiau/);
   assert.doesNotMatch(f.statement, /km/);
-  assertFactValid(f, project(PROJET_30MIN));
+  assertFactValid(f, p);
 });
 
 test("DOSSIER, LE GRAIN : une estimation depuis l'ADRESSE parle de « Cette adresse »", () => {
   const f = facts({ insee: "31069", nom: "Blagnac", lat: 43.95, lon: 1.05 }); // une adresse loin au nord-ouest
-  const e = rule("nearPlace").evaluate(f, project(PROJET_30MIN), hardAvecEstimation(46.2, f, "address"));
+  const p = confirme(project(PROJET_30MIN), "nearPlace");
+  const e = rule("nearPlace").evaluate(f, p, hardAvecEstimation(46.2, f, "address"));
   assert.equal(e.outcome, "incompatible");
+  assertFactValid(e.facts[0]!, p);
   assert.match(e.facts[0]!.statement, /^Cette adresse/);
   assert.equal(e.facts[0]!.evidence[0]!.grain, "adresse");
 });

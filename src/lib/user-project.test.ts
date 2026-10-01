@@ -61,8 +61,54 @@ test("input : rawText seul persistable, parsed null", () => {
 
 test("stamp : le serveur pose schemaVersion et updatedAt", () => {
   const out = stampUserProject({ posture: "recherche", intent: null, rawText: "x", parsed: null }, "2026-07-11T10:00:00.000Z");
-  assert.equal(out.schemaVersion, 1);
+  assert.equal(out.schemaVersion, 2);
   assert.equal(out.updatedAt, "2026-07-11T10:00:00.000Z");
+  assert.equal("conditions" in out, false, "aucune confirmation n'est fabriquée");
+});
+
+// ── FUT-7 : LES CONDITIONS SANS COMPROMIS ─────────────────────────────────────
+
+const CONFIRMATION = {
+  criterion: { kind: "hard", key: "zones" }, fingerprint: "hard:zones:x", confirmedAt: "2026-10-01T00:00:00.000Z", source: "user",
+};
+
+test("FUT-7 : un projet legacy est lu en v2, SANS aucune confirmation (la version décrit la forme, rien d'autre)", () => {
+  const out = normalizeUserProject({
+    posture: "recherche", rawText: "impérativement en Bretagne", schemaVersion: 1, updatedAt: "2026-07-11T00:00:00.000Z",
+    parsed: { reformulation: "x", hardConstraints: { zones: [{ zone: "bretagne", strength: "hard" }] }, preferences: [] },
+  });
+  assert.equal(out?.schemaVersion, 2);
+  assert.equal(out?.conditions, undefined);
+});
+
+test("FUT-7 : les confirmations illisibles tombent une à une, jamais le projet", () => {
+  const out = normalizeUserProject({
+    posture: "recherche", rawText: "x", parsed: null, updatedAt: "2026-07-11T00:00:00.000Z",
+    conditions: [
+      CONFIRMATION,
+      { ...CONFIRMATION, source: "parser" },            // autre provenance
+      { ...CONFIRMATION, fingerprint: "" },             // empreinte vide
+      { ...CONFIRMATION, confirmedAt: "hier" },         // date illisible
+      { ...CONFIRMATION, criterion: { kind: "autre", key: "zones" } },
+      "n'importe quoi", null,
+    ],
+  });
+  assert.equal(out?.conditions?.length, 1);
+  assert.deepEqual(out?.conditions?.[0], CONFIRMATION);
+  assert.equal(normalizeUserProject({ posture: "recherche", rawText: "x", parsed: null, conditions: "oui" })?.conditions, undefined);
+});
+
+test("FUT-7 : une écriture du navigateur ne peut pas fabriquer une confirmation", () => {
+  const input = normalizeUserProjectInput({ posture: "recherche", rawText: "x", parsed: null, conditions: [CONFIRMATION] });
+  assert.equal(input && "conditions" in input, false);
+  assert.equal("conditions" in stampUserProject(input!, "2026-10-01T00:00:00.000Z"), false);
+});
+
+test("FUT-7 : le serveur REPORTE les confirmations existantes à chaque écriture du projet", () => {
+  const input = normalizeUserProjectInput({ posture: "recherche", rawText: "corrigé", parsed: null })!;
+  const out = stampUserProject(input, "2026-10-01T00:00:00.000Z", [CONFIRMATION, { bidon: true }]);
+  assert.deepEqual(out.conditions, [CONFIRMATION]);
+  assert.equal(out.rawText, "corrigé");
 });
 
 test("read : updatedAt absent -> null (jamais 1970)", () => {

@@ -14,7 +14,7 @@
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
-import type { CoverageLevel, Orientation } from "./criteria-registry.ts";
+import type { CoverageLevel, Orientation, OpenCondition } from "./criteria-registry.ts";
 import { deCommune, aCommune } from "../typography.ts";
 import { selectionMinute } from "./minute-selection.ts";
 
@@ -181,6 +181,10 @@ export type ConclusionPlanInput = {
   // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
   coverage: CoverageLevel;
   orientation: Orientation;
+  // LES CONDITIONS SANS COMPROMIS (FUT-7) : celles qui restent ouvertes, et celles qui sont remplies.
+  // Optionnelles pour les appelants partiels (fixtures du verdict seul) : absentes = aucune.
+  openConditions?: OpenCondition[];
+  metConditions?: { key: string; label: string }[];
   hasFavorable: boolean;     // au moins un critère examiné rend `favorable`
   favorableCount: number;    // combien : « plusieurs dimensions » exige >= 2, jamais un booléen
   majorReserveCount: number; // réserves AFFICHÉES structurantes/critiques
@@ -717,6 +721,71 @@ function suiteControles(p: PerimetreControles): string {
   return `${ici}${controlesPlusBas(p)}`;
 }
 
+// CE QUE L'ON SAIT D'UNE CONDITION OUVERTE, en une proposition qui se termine sans point. La carte
+// « À confirmer » porte le constat et la limite ; le verdict ne dit que le SENS et la CAUSE, pour que le
+// lecteur sache, avant de descendre, si ce qu'on sait penche pour ou contre.
+function etatDeCondition(c: OpenCondition, cartes: Map<string, Extract<DecisionFact, { role: "condition_check" }>>): string {
+  if (c.cause === "ne_pas_mesurer") return `futur•e ne sait pas encore évaluer ${c.label}`;
+  if (c.cause === "donnee_absente") return `la donnée qui permettrait d'évaluer ${c.label} manque ici`;
+  const carte = cartes.get(c.key);
+  if (carte?.signal === "defavorable") return `ce que l'on sait penche contre ${c.label}`;
+  if (carte?.signal === "favorable") return `ce que l'on sait va dans le sens de ${c.label}, sans pouvoir l'établir`;
+  return `ce que l'on sait ne penche ni pour ni contre ${c.label}`;
+}
+
+function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: string): VerdictBuild {
+  const ouvertes = input.openConditions ?? [];
+  const cartes = new Map(
+    input.shownFacts
+      .filter((f): f is Extract<DecisionFact, { role: "condition_check" }> => f.role === "condition_check")
+      .map((f) => [f.criterion.key as string, f]),
+  );
+  const n = ouvertes.length;
+  const sujets = joinFr(ouvertes.map((c) => c.label));
+  // LE HÉROS NOMME LES CONDITIONS OUVERTES, et consomme leurs cartes : la strate voisine ne les renomme
+  // pas. Au-delà de deux, ou trop long, il retombe en posture et le détail nomme.
+  const candidats: LeadCandidate[] = ouvertes.flatMap((c) => {
+    const carte = cartes.get(c.key);
+    return carte
+      ? [{ factId: carte.id, topic: carte.topic, subject: c.label, statement: carte.statement, materialityTier: carte.materialityTier, role: carte.role }]
+      : [];
+  });
+  const phrase = n === 1
+    ? `Une condition sans compromis reste à confirmer ${a} : ${sujets}.`
+    : `${capitalize(enLettres(n))} conditions sans compromis restent à confirmer ${a} : ${sujets}.`;
+  // Une condition sans carte (non mesurable, donnée absente) se nomme quand même : `nameIssues` exige au
+  // moins un candidat, alors le texte se contrôle ici sur sa seule longueur.
+  const named = candidats.length > 0
+    ? nameIssues(phrase, candidats, "constraint")
+    : phrase.length <= HEADLINE_MAX_CHARS && n <= HEADLINE_MAX_ISSUES
+      ? { kind: "named_issues" as const, text: phrase, consumedFactIds: [], consumedCompositionIds: [], consumedFrom: "constraint" as const }
+      : null;
+
+  // LE DÉTAIL DIT LE SENS, puis ce qui est rempli, puis le reste du dossier. Jamais « toutes vos
+  // conditions sont remplies » : une condition au moins ne l'est pas, par construction de cette branche.
+  const etats = ouvertes.map((c) => etatDeCondition(c, cartes));
+  // « futur•e » s'écrit en minuscules, même en tête de phrase : on ne lui applique pas la majuscule.
+  const enTete = joinFr(etats);
+  const sens = `${enTete.startsWith("futur•e") ? enTete : capitalize(enTete)}.`;
+  const remplies = input.metConditions ?? [];
+  const remplie = remplies.length > 0
+    ? ` ${remplies.length === 1 ? "La condition" : "Les conditions"} ${joinFr(remplies.map((r) => r.label))} ${remplies.length === 1 ? "est remplie" : "sont remplies"}.`
+    : "";
+  const ecarts = input.mismatchTotal > 0
+    ? ` Par ailleurs, ${nom} répond moins bien à ${input.mismatchTotal === 1 ? "une" : enLettres(input.mismatchTotal)} de vos priorités.`
+    : "";
+  return {
+    label: n === 1 ? "Condition à confirmer" : "Conditions à confirmer",
+    tone: "caution",
+    headline: named ?? POSTURE(
+      n === 1
+        ? `Une condition sans compromis reste à confirmer ${a}.`
+        : `${capitalize(enLettres(n))} conditions sans compromis restent à confirmer ${a}.`,
+    ),
+    detail: `${sens}${remplie}${ecarts}`,
+  };
+}
+
 function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
   const nom = input.communeNom;
   const a = aCommune(nom);
@@ -772,6 +841,14 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
       headline: named ?? POSTURE(`${voc.condition} n'est pas remplie ${a}.`),
       detail: inc ? endWithPeriod(inc.statement) : "L'une de vos conditions non négociables n'est pas respectée ici.",
     };
+  }
+
+  // UNE CONDITION SANS COMPROMIS RESTE OUVERTE (FUT-7). Le lecteur a dit qu'il n'envisageait pas ce lieu
+  // sans elle, et futur•e ne peut pas l'établir : c'est la première chose à lire, avant tout arbitrage.
+  // Jamais un blocage (rien n'est établi contre le lieu), jamais noyé parmi les écarts (le lecteur n'en
+  // fait pas un compromis).
+  if (input.orientation === "condition_to_confirm") {
+    return verdictConditionOuverte(input, nom, a);
   }
 
   if (input.coverage === "none") {
@@ -1178,21 +1255,35 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     };
   }
 
-  if (input.uncovered.length > 0) {
+  // Sous un verdict « condition à confirmer », le héros et le détail nomment DÉJÀ chaque condition ouverte
+  // et sa cause : le bloc les redirait trois lignes plus bas.
+  if (input.uncovered.length > 0 && input.orientation !== "condition_to_confirm") {
     // LA CONTRAINTE EST LE SUJET DE LA PHRASE. « Nous n'avons pas encore examiné : la proximité d'un
     // lieu » fait parler futur•e d'elle-même, et nomme une catégorie là où le lecteur a écrit « la gare
     // Matabiau ». Le libellé est instancié depuis SON projet (hardConstraintLabel), et la tournure
     // « reste à vérifier » évite l'accord de participe qu'un passif imposerait sur des libellés de
     // genre inconnu (« le département » / « la proximité »).
-    const labels = input.uncovered.map((u) => u.label);
-    const verbe = labels.length > 1 ? "restent" : "reste";
+    // DEUX CAUSES, DEUX PHRASES (FUT-7). « Reste à vérifier à ce niveau de détail » dit que la donnée
+    // manque ici ; une condition que futur•e ne sait pas encore évaluer, nulle part, se dit comme telle.
+    const absentes = input.uncovered.filter((u) => u.cause !== "ne_pas_mesurer").map((u) => u.label);
+    const nonMesurees = input.uncovered.filter((u) => u.cause === "ne_pas_mesurer").map((u) => u.label);
+    const phrases: string[] = [];
+    if (absentes.length > 0) {
+      phrases.push(`${capitalize(joinFr(absentes))} ${absentes.length > 1 ? "restent" : "reste"} à vérifier à ce niveau de détail.`);
+    }
+    if (nonMesurees.length > 0) {
+      phrases.push(`futur•e ne sait pas encore évaluer ${nonMesurees.length > 1 ? "ces conditions" : "cette condition"} : ${joinFr(nonMesurees)}.`);
+    }
     blocks.push({
       key: "unexamined_hard_constraints",
-      fallbackText: `${capitalize(joinFr(labels))} ${verbe} à vérifier à ce niveau de détail.`,
+      fallbackText: phrases.join(" "),
       sourceIds: input.uncovered.map((u) => u.key),
       // Chaque contrainte doit SURVIVRE à la rédaction : « une condition importante reste à examiner »
       // ferait disparaître la gare, sans qu'aucune autre validation ne s'en aperçoive.
-      requiredPhrases: input.uncovered.map((u) => coreLabel(u.label)),
+      requiredPhrases: [
+        ...input.uncovered.map((u) => coreLabel(u.label)),
+        ...(nonMesurees.length > 0 ? ["évaluer"] : []),
+      ],
       allowedNumbers: numberForms(input.uncovered.length),
       maxChars: 260,
       generable: true,
