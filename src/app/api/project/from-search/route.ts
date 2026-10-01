@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       ...(parsed && recherche ? apercuReprise(parsed, recherche) : { retenus: [], propresALaRecherche: [] }),
       remplace: actuel ? { texte: actuel.rawText ?? actuel.parsed?.reformulation ?? "", updatedAt: actuel.updatedAt ?? null } : null,
       abandonnes: actuel
-        ? { conditions: actuel.conditions?.length ?? 0, precisions: actuel.definitions?.length ?? 0, adoptions: actuel.adoptions?.length ?? 0 }
+        ? { conditions: actuel.conditions?.length ?? 0, precisions: actuel.definitions?.length ?? 0, adoptions: (actuel.adoptions?.length ?? 0) + (actuel.rejets?.length ?? 0) }
         : null,
     });
   }

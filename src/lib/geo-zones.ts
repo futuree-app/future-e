@@ -267,6 +267,9 @@ export type SoftZone = { departements: Set<string>; strength: ZoneStrength; labe
 export function resolveZoneAnchors(
   anchors: ZoneAnchor[] | undefined | null,
   match: ZoneMatch = "all",
+  // FUT-8 : les départements d'une convention ACCEPTÉE par le lecteur (version figée), par jeton. Ils
+  // remplacent ceux de la table courante pour ce jeton. Absent : la table, comme toujours.
+  departementsFiges?: Record<string, readonly string[]>,
 ): {
   hardDepartements: Set<string> | null; // intersection (ou union) des ancres dures, null si aucune
   soft: SoftZone[];
@@ -285,7 +288,7 @@ export function resolveZoneAnchors(
       continue;
     }
     applied.push({ label: def.label, convention: def.convention, strength: a.strength });
-    const set = new Set<string>(def.departements);
+    const set = new Set<string>(departementsFiges?.[a.zone] ?? def.departements);
     if (a.strength === "hard") {
       if (hard === null) {
         hard = set;

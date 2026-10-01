@@ -148,13 +148,13 @@ function hardCapability(key: HardConstraintKey, hc: HardConstraints, grain: Eval
       return grain === "adresse" ? t("temps_de_trajet") : a("point_de_reference");
     }
     // FUT-8 : une taille chiffrée AVEC son unité se tranche. Sans unité (legacy, ou mot qualitatif), non.
-    // La taille relative ne tranche qu'en agglomération : la population communale de la ville de référence
-    // n'est pas encore dans l'annuaire.
     case "communeSize":
       return hc.communeSize?.unit && (hc.communeSize.min != null || hc.communeSize.max != null)
         ? t("seuil_et_unite_du_lecteur") : a("unite_non_enregistree");
+    // FUT-8 : la taille relative se tranche dès que l'unité est dite (agglomérations ou communes ; pour une
+    // référence dont la population communale manque, l'évaluateur rend « non examiné », jamais un verdict).
     case "sizeRelativeTo":
-      return hc.sizeRelativeTo?.unit === "unite_urbaine" ? t("seuil_et_unite_du_lecteur") : a("unite_non_enregistree");
+      return hc.sizeRelativeTo?.unit ? t("seuil_et_unite_du_lecteur") : a("unite_non_enregistree");
     case "excludePlace": {
       // FUT-8 : chaque ville à quitter doit avoir son périmètre (commune ou agglomération).
       const villes = (hc.excludePlace ?? []).filter((e) => e?.label);

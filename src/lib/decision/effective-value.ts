@@ -10,7 +10,7 @@
 // `parsedFingerprint`). Si le reparse la change (« Nantes » devient « Rennes »), elle est PÉRIMÉE : elle
 // reste en base, elle ne s'applique plus. Aucune précision n'est transférée d'un élément à un autre.
 import type { UserProject, CriterionRef, Definition } from "../user-project.ts";
-import { normalizeDefinitions, normalizeAdoptions } from "../user-project.ts";
+import { normalizeDefinitions, normalizeAdoptions, normalizeRejets } from "../user-project.ts";
 import type { HardConstraints } from "../hard-constraint-schema.ts";
 import type { Preference, PreferenceKey } from "../comparateur-vie.ts";
 import { normalizeName } from "../hard-constraints-resolve.ts";
@@ -37,7 +37,10 @@ export function valeurParsed(project: UserProject, ref: CriterionRef): unknown {
   if (ref.key === "excludeZones" && instance != null) {
     if (!(hc.excludeZones ?? []).includes(instance)) return undefined;
     const dit = (hc.excludeZonesDits ?? []).find((d) => d.token === instance)?.said ?? null;
-    return { token: instance, said: dit };
+    // Le périmètre choisi (valeur effective seulement : jamais présent dans `parsed`) fait partie du
+    // sens. Petite couronne → Île-de-France change l'empreinte, et périme la confirmation.
+    const perimetre = hc.excludeZonesPerimetres?.[instance];
+    return perimetre ? { token: instance, said: dit, perimetre } : { token: instance, said: dit };
   }
   return valeurDecisionnelle(ref.key, hc);
 }
@@ -121,17 +124,23 @@ export function effectiveHardConstraints(project: UserProject): HardConstraints 
 }
 
 /**
- * Les préférences effectives : celles de `parsed`, plus celles que le lecteur a ADOPTÉES. Une clé
- * présente des deux côtés n'en fait qu'une : le texte du lecteur prime s'il la porte (`source: "parse"`),
- * sinon le poids de l'adoption. Une adoption survit au retrait de l'ancre qui l'a inspirée.
+ * Les préférences effectives. Ordre de priorité, du plus fort au plus faible :
+ *
+ *   texte du lecteur (`source: "parse"`) > adoption > rejet > suggestion d'ancre brute
+ *
+ * Le texte neutralise un rejet sans l'effacer : si la phrase disparaît plus tard, le rejet vaut de
+ * nouveau. Une adoption survit au retrait de l'ancre qui l'a inspirée. Un rejet survit au changement
+ * d'ancre : il porte sur le critère, pas sur la ville.
  */
 export function effectivePreferences(project: UserProject): Preference[] {
   const parsed = project.parsed?.preferences ?? [];
   const adoptions = normalizeAdoptions(project.adoptions);
-  const out: Preference[] = parsed.map((p) => {
-    if ((p.source ?? "parse") === "parse") return p;
+  const rejetes = new Set(normalizeRejets(project.rejets).map((r) => r.criterion.key));
+  const out: Preference[] = parsed.flatMap((p): Preference[] => {
+    if ((p.source ?? "parse") === "parse") return [p];
     const a = adoptions.find((x) => x.criterion.key === p.key);
-    return a ? { ...p, weight: a.weight } : p;
+    if (a) return [{ ...p, weight: a.weight }];
+    return rejetes.has(p.key) ? [] : [p];
   });
   for (const a of adoptions) {
     if (!out.some((p) => p.key === a.criterion.key)) out.push({ key: a.criterion.key as PreferenceKey, weight: a.weight, source: "ancre" });

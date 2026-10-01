@@ -90,6 +90,17 @@ export type Adoption = {
   source: "user";
 };
 
+// ── LES REJETS (FUT-8) : « ce critère proposé automatiquement ne fait pas partie de mon projet » ─────
+// Le rejet porte sur le CRITÈRE, quelle que soit la ville qui le suggère : remplacer Brest par Lorient ne
+// le fait pas revenir. `origin` raconte d'où venait la suggestion au moment du geste ; il ne décide de
+// rien. Ordre de priorité de la valeur effective : texte du lecteur > adoption > rejet > suggestion.
+export type Rejet = {
+  criterion: { kind: "preference"; key: PreferenceKey; instance?: null };
+  origin: { kind: "ancre"; labels: string[] };
+  rejectedAt: string;
+  source: "user";
+};
+
 export type UserProject = UserProjectInput & {
   // `schemaVersion` DÉCRIT LA FORME DU CONTRAT, rien d'autre. La v2 dit qu'un projet PEUT porter des
   // `conditions`. Elle n'est ni une trace de migration, ni la preuve que le lecteur a vu le nouveau
@@ -103,6 +114,7 @@ export type UserProject = UserProjectInput & {
   // FUT-8. Absents = aucune précision, aucune adoption. Jamais vides en base.
   definitions?: Definition[];
   adoptions?: Adoption[];
+  rejets?: Rejet[];
 };
 
 const POSTURES: ProjectPosture[] = ["recherche", "adresse", "habitant", "recherche_quartier"];
@@ -224,6 +236,23 @@ export function normalizeDefinitions(raw: unknown): Definition[] {
   return out;
 }
 
+export function normalizeRejets(raw: unknown): Rejet[] {
+  if (!Array.isArray(raw)) return [];
+  const out: Rejet[] = [];
+  for (const r of raw) {
+    if (!r || typeof r !== "object") continue;
+    const o = r as Record<string, unknown>;
+    const c = o.criterion as Record<string, unknown> | undefined;
+    const origin = o.origin as Record<string, unknown> | undefined;
+    if (o.source !== "user" || !c || c.kind !== "preference" || typeof c.key !== "string" || !c.key || c.instance != null) continue;
+    if (!origin || origin.kind !== "ancre" || !Array.isArray(origin.labels)) continue;
+    if (typeof o.rejectedAt !== "string" || Number.isNaN(Date.parse(o.rejectedAt))) continue;
+    const labels = origin.labels.filter((l): l is string => typeof l === "string" && l.length > 0);
+    out.push({ criterion: { kind: "preference", key: c.key as PreferenceKey, instance: null }, origin: { kind: "ancre", labels }, rejectedAt: o.rejectedAt, source: "user" });
+  }
+  return out;
+}
+
 export function normalizeAdoptions(raw: unknown): Adoption[] {
   if (!Array.isArray(raw)) return [];
   const out: Adoption[] = [];
@@ -271,15 +300,17 @@ function withConditions<T extends object>(base: T, conditions: ConditionConfirma
 }
 
 // Les trois structures écrites par les GESTES du lecteur, lues ensemble. Une structure vide ne s'écrit pas.
-function withGestes<T extends object>(base: T, raw: { conditions?: unknown; definitions?: unknown; adoptions?: unknown }): T & {
-  conditions?: ConditionConfirmation[]; definitions?: Definition[]; adoptions?: Adoption[];
+function withGestes<T extends object>(base: T, raw: { conditions?: unknown; definitions?: unknown; adoptions?: unknown; rejets?: unknown }): T & {
+  conditions?: ConditionConfirmation[]; definitions?: Definition[]; adoptions?: Adoption[]; rejets?: Rejet[];
 } {
   const definitions = normalizeDefinitions(raw.definitions);
   const adoptions = normalizeAdoptions(raw.adoptions);
+  const rejets = normalizeRejets(raw.rejets);
   return {
     ...withConditions(base, normalizeConditions(raw.conditions)),
     ...(definitions.length > 0 ? { definitions } : {}),
     ...(adoptions.length > 0 ? { adoptions } : {}),
+    ...(rejets.length > 0 ? { rejets } : {}),
   };
 }
 

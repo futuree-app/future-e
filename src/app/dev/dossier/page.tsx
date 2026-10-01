@@ -38,15 +38,16 @@ const DEFAUT_PREFS = "faible_risque_feu:3,vie_locale:2";
 // « cle:poids,cle:poids » -> les préférences du projet. Une clé inconnue est SIGNALÉE plutôt qu'ignorée :
 // une faute de frappe qui produit un dossier silencieusement différent est exactement le genre de piège
 // que cet outil existe pour supprimer.
-function parsePrefs(raw: string): { prefs: { key: string; weight: number }[]; inconnues: string[] } {
-  const prefs: { key: string; weight: number }[] = [];
+// FUT-8 : « vie_locale:2:ancre » = une suggestion de la commune-ancre (Brest), pas un critère écrit.
+function parsePrefs(raw: string): { prefs: { key: string; weight: number; source?: "ancre" }[]; inconnues: string[] } {
+  const prefs: { key: string; weight: number; source?: "ancre" }[] = [];
   const inconnues: string[] = [];
   for (const morceau of raw.split(",").map((x) => x.trim()).filter(Boolean)) {
-    const [key, poids] = morceau.split(":").map((x) => x.trim());
+    const [key, poids, origine] = morceau.split(":").map((x) => x.trim());
     if (!key) continue;
     if (!(key in PREFERENCE_LABELS)) { inconnues.push(key); continue; }
     const weight = Number(poids ?? 3);
-    prefs.push({ key, weight: Number.isFinite(weight) ? weight : 3 });
+    prefs.push({ key, weight: Number.isFinite(weight) ? weight : 3, ...(origine === "ancre" ? { source: "ancre" as const } : {}) });
   }
   return { prefs, inconnues };
 }
@@ -70,7 +71,8 @@ export default async function DevDossierPage({
   // confirmations sont construites comme le fera le geste de FUT-8, et n'existent que dans cette page.
   // FUT-8 : `confirmer` accepte un élément (« excludePlace:lyon ») ; `def` = des précisions du lecteur en
   // JSON ([{"criterion":{"kind":"hard","key":"nearPlace"},"definition":{"kind":"distance_lieu",…}}]).
-  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; hc?: string; confirmer?: string; def?: string }>;
+  // `rejeter` = des suggestions d'ancre écartées par le lecteur (« vie_locale »).
+  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; hc?: string; confirmer?: string; def?: string; rejeter?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
 
@@ -89,7 +91,10 @@ export default async function DevDossierPage({
   }
   const brut = {
     posture: "recherche", intent: null, rawText: null, updatedAt: "1970-01-01T00:00:00.000Z",
-    parsed: { reformulation: "projet de test", hardConstraints: hc, preferences: prefs },
+    parsed: { reformulation: "projet de test", hardConstraints: hc, preferences: prefs, communeAncre: prefs.some((p) => p.source === "ancre") ? [{ label: "Brest" }] : undefined },
+    rejets: (sp.rejeter ?? "").split(",").map((x) => x.trim()).filter(Boolean).map((key) => ({
+      criterion: { kind: "preference", key }, origin: { kind: "ancre", labels: ["Brest"] }, rejectedAt: "2026-10-01T00:00:00.000Z", source: "user",
+    })),
   } as unknown as UserProject;
   let defs: { criterion: CriterionRef; definition: Record<string, unknown> }[] = [];
   try {

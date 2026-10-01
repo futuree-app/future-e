@@ -5,6 +5,7 @@
 // ELLE VIT AU-DESSUS DES DEUX MOTEURS. Ni le comparateur ni le dossier ne résolvent un label : ils
 // reçoivent le même objet résolu. Deux résolutions indépendantes peuvent diverger (un succès ici, un
 // échec là, un géocodeur qui a bougé entre-temps) ; une seule ne le peut pas.
+import { conventionPar } from "./decision/conventions.ts";
 import { resolveZoneAnchors, resolveExclusions, ZONE_TABLE } from "./geo-zones.ts";
 import {
   resolveNearPlace, resolveUrbanArea, resolveSizeReference, type PlaceDirectory,
@@ -116,7 +117,14 @@ export function hydrateHardConstraints(
 ): NormalizedHardConstraints {
   const c = hc ?? {};
   const match = c.zonesMatch === "any" ? "any" : "all";
-  const zone = resolveZoneAnchors(c.zones, match);
+  // FUT-8 : une macro-zone dont le lecteur a accepté le périmètre s'évalue avec la liste FIGÉE de la
+  // version acceptée, jamais avec la table du jour. `zonesConventions` n'existe que dans la valeur
+  // effective du dossier : la Recherche lit toujours la table.
+  const figes = Object.fromEntries((c.zonesConventions ?? []).flatMap((a) => {
+    const conv = conventionPar(a.conventionId, a.conventionVersion);
+    return conv?.definition.kind === "departements" && conv.definition.token === a.token ? [[a.token, conv.definition.departements]] : [];
+  }));
+  const zone = resolveZoneAnchors(c.zones, match, figes);
   // « La Bretagne OU la Loire-Atlantique » : un seul périmètre, qui réunit l'ancre et le département.
   const fusion = departementsDansLesZones(c);
   const departementsFusionnes = fusion ? c.departements ?? [] : [];
@@ -176,6 +184,7 @@ export function hydrateHardConstraints(
         ? {
             label: c.sizeRelativeTo.label,
             direction: c.sizeRelativeTo.direction,
+            unit: c.sizeRelativeTo.unit ?? null,
             reference: resolveSizeReference(c.sizeRelativeTo.label, dir, input),
           }
         : null,

@@ -15,7 +15,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import { ZONE_TABLE } from "../geo-zones.ts";
 import { departmentName } from "../regions-fr.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
-import { conventionPar } from "./conventions.ts";
+import { conventionPar, conventionDeZone } from "./conventions.ts";
 
 export type CriterionPresentation = {
   titre: string;
@@ -73,8 +73,10 @@ export function presenterCritere(project: UserProject, ref: CriterionRef): Crite
         ? `Pour cette analyse, futur•e considère ici ${court} dans ${ancres.length > 1 ? "leurs" : "ses"} limites régionales actuelles.`
         : macro.map((z) => {
             const c = acceptees.find((a) => a.token === z.zone);
-            const conv = c ? conventionPar(c.conventionId, c.conventionVersion) : null;
-            return conv?.explication ?? `Voici le périmètre que futur•e utilise pour ${ZONE_TABLE[z.zone]?.label ?? z.zone} : ${ZONE_TABLE[z.zone]?.convention ?? "à préciser"}.`;
+            // Le périmètre ACCEPTÉ, sinon celui que futur•e proposerait (registre, version courante). Une
+            // façade ou un massif n'a pas de périmètre proposé : on dit seulement qu'il reste apprécié.
+            const conv = (c ? conventionPar(c.conventionId, c.conventionVersion) : null) ?? conventionDeZone(z.zone);
+            return conv?.explication ?? `futur•e apprécie ${ZONE_TABLE[z.zone]?.label ?? z.zone} sans en tracer de limite précise.`;
           }).join(" ");
       return { titre, court, interpretation };
     }
@@ -151,6 +153,7 @@ export function presenterCritere(project: UserProject, ref: CriterionRef): Crite
       return {
         titre: `Une ville ${sens} que ${s.label}`, court: `la taille comparée à ${s.label}`,
         ...(s.unit === "unite_urbaine" ? { interpretation: `Comparée à la taille de l'agglomération ${de(s.label)}.` } : {}),
+        ...(s.unit === "commune" ? { interpretation: `Comparée à la population de la commune ${de(s.label)} elle-même.` } : {}),
         ...(!s.unit ? { question: `${capitale(sens)} que la commune ${de(s.label)}, ou que son agglomération ?` } : {}),
       };
     }

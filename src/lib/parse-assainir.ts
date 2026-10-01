@@ -10,14 +10,18 @@ const UNITES = new Set(["commune", "unite_urbaine"]);
 const unite = (v: unknown) => (UNITES.has(v as string) ? (v as "commune" | "unite_urbaine") : null);
 const texte = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
+// Un nombre RATTACHÉ à une population : « 20 000 habitants », « 20k hab », « moins de 5000 âmes ». Un
+// chiffre ailleurs dans le texte (« 3 chambres », « à 30 minutes ») ne fonde aucune borne de taille.
+export const POPULATION_CHIFFREE = /\d[\d\s\u00a0\u202f.,]*\s*(k|000|mille)?\s*(habitants?|hab\b|hab\.|âmes)/i;
+
 export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedProject {
   const hc = { ...(parsed.hardConstraints ?? {}) };
 
-  // Une taille chiffrée n'existe que si un nombre a été DIT. « Petite ville » n'en est pas un : sans
-  // chiffre dans le texte, des bornes ne peuvent venir que d'une convention que le modèle aurait
-  // appliquée de lui-même. Elles tombent.
+  // Une taille chiffrée n'existe que si le texte chiffre une POPULATION. « Petite ville » n'en chiffre
+  // aucune, « 3 chambres » non plus : des bornes ne peuvent alors venir que d'une convention que le
+  // modèle aurait appliquée de lui-même. Elles tombent.
   if (hc.communeSize) {
-    const dit = /\d/.test(rawText ?? "");
+    const dit = POPULATION_CHIFFREE.test(rawText ?? "");
     hc.communeSize = dit ? { min: hc.communeSize.min ?? null, max: hc.communeSize.max ?? null, unit: unite(hc.communeSize.unit) } : null;
     if (hc.communeSize && hc.communeSize.min == null && hc.communeSize.max == null) hc.communeSize = null;
   }

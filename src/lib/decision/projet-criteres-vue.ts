@@ -6,7 +6,7 @@
 // la phrase d'interprétation à montrer avant « Ça me convient », et ce que futur•e pourra en faire
 // (trancher, seulement à l'adresse, apprécier). Le navigateur ne fait que montrer et renvoyer `seen`.
 import type { UserProject, CriterionRef, DefinitionBody } from "../user-project.ts";
-import { normalizeUserProject, normalizeConditions } from "../user-project.ts";
+import { normalizeUserProject, normalizeConditions, normalizeRejets } from "../user-project.ts";
 import { declaredHardConstraintKeys } from "./project-view.ts";
 import { criterionFingerprint, isConfirmed, isStale, sameCriterion } from "./conditions.ts";
 import {
@@ -34,7 +34,7 @@ export type CritereVue = {
   titre: string;
   // « Comment futur•e l'interprète », replié par défaut : jamais une question.
   interpretation: string | null;
-  etat: "compris" | "inspire" | "condition" | "a_revoir";
+  etat: "compris" | "inspire" | "condition" | "a_revoir" | "rejete";
   // « Inspiré de Brest » : la commune d'où vient la suggestion, tant que le lecteur ne l'a pas gardée.
   ancre: string | null;
   // Un mot fort écrit par le lecteur sur CE critère : la suggestion de condition.
@@ -178,6 +178,22 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
         portee: portee(project, ref),
       },
       revoir: perimee ? messageARevoir(project, ref) : null,
+    });
+  }
+  // Les suggestions d'ancre que le lecteur a écartées, tant qu'une ancre les propose encore : une ligne
+  // discrète, pour pouvoir changer d'avis. Un critère que le texte porte n'est pas « écarté ».
+  for (const r of normalizeRejets(project.rejets)) {
+    const pref = project.parsed.preferences?.find((p) => p.key === r.criterion.key);
+    if (!pref || (pref.source ?? "parse") === "parse") continue;
+    const ref: CriterionRef = { kind: "preference", key: r.criterion.key, instance: null };
+    const pres = presenterCritere(project, ref);
+    if (!pres) continue;
+    vues.push({
+      id: `rejet:${r.criterion.key}`, ref, titre: pres.titre, interpretation: null, etat: "rejete",
+      ancre: project.parsed.communeAncre?.[0]?.label ?? r.origin.labels[0] ?? null, motFort: null,
+      seenParsed: null, seenEffectif: `pref:${r.criterion.key}`,
+      confirmation: { question: null, options: [], saisieSeuil: null, phrase: null, portee: "ne_pas_mesurer" },
+      revoir: null,
     });
   }
   // Les conditions dont l'élément a disparu du projet (« Lyon » devenu « Nantes ») : à revoir, et à

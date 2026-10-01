@@ -249,7 +249,8 @@ export type NormalizedHardConstraints = {
   } | null;
   // `scope` (FUT-8) : « quitter la commune de Lyon » ne vise que la commune ; sinon, l'agglomération.
   excludePlace: { label: string; reference: ResolvedUrbanAreaReference; scope?: "commune" | "unite_urbaine" | null }[];
-  sizeRelativeTo: { label: string; direction: "smaller" | "larger"; reference: ResolvedSizeReference } | null;
+  // `unit` (FUT-8) : « commune » compare les populations communales ; sinon, les agglomérations.
+  sizeRelativeTo: { label: string; direction: "smaller" | "larger"; unit?: "commune" | "unite_urbaine" | null; reference: ResolvedSizeReference } | null;
 };
 
 export type EvaluationContext = {
@@ -983,9 +984,31 @@ export function evaluateSizeRelativeTo(
   if (s.reference.status !== "resolved") {
     return { key: "sizeRelativeTo", status: "unexamined", reason: "unresolved_reference", detail: s.label };
   }
+  // FUT-8 : « PLUS PETITE QUE LA COMMUNE DE BREST » compare deux populations COMMUNALES. Il faut les deux :
+  // celle de la ville de référence (annuaire, arrondissements sommés pour Paris, Lyon, Marseille) et celle
+  // de la commune évaluée, qui ne peut pas être un arrondissement. Sinon : non examiné, jamais un verdict.
+  const ref = s.reference;
+  if (s.unit === "commune") {
+    if (ref.communePopulation == null || c.population == null || estArrondissementPLM(c.insee)) {
+      return { key: "sizeRelativeTo", status: "unexamined", reason: "missing_data" };
+    }
+    const tc = c.population;
+    const refPop = ref.communePopulation;
+    const okc = s.direction === "smaller" ? tc < refPop : tc > refPop;
+    const obs: ConstraintValue = { kind: "population", value: tc, unit: "commune" };
+    const exp: ConstraintValue = { kind: "population", value: refPop, unit: "commune" };
+    const obsLabel = `${fmt(tc)} hab.`;
+    const expLabel = `${s.direction === "smaller" ? "moins" : "plus"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} hab.)`;
+    const keys = ["commune.population", "project.hardConstraints.sizeRelativeTo"];
+    if (okc) return { key: "sizeRelativeTo", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: obsLabel, expectedLabel: expLabel, evidenceKeys: keys };
+    return {
+      key: "sizeRelativeTo", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: obsLabel, expectedLabel: expLabel, evidenceKeys: keys,
+      topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+      statement: `Cette commune compte ${fmt(tc)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    };
+  }
   if (c.tailleVille == null) return { key: "sizeRelativeTo", status: "unexamined", reason: "missing_data" };
 
-  const ref = s.reference;
   const t = c.tailleVille;
   // Bornes STRICTEMENT exclusives, comme dans le comparateur : « plus petit que Lyon » exclut
   // l'agglomération lyonnaise elle-même, pas seulement ce qui la dépasse.

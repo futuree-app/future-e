@@ -4,6 +4,7 @@ import { declaredHardConstraintKeys } from "./project-view.ts";
 // épingle, et elle ne doit jamais diverger de ce qui périme un dossier vendu.
 import { canonique, valeurDecisionnelle } from "./criterion-value.ts";
 import { confirmedCriteria } from "./conditions.ts";
+import { effectiveProject } from "./effective-value.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE PROJET A-T-IL CHANGÉ *POUR LA DÉCISION* ?
@@ -77,7 +78,12 @@ function contraintesComparables(p: UserProject | null | undefined): string {
  * structuré » et le second « aucune contrainte déclarée ». Passer de l'un à l'autre change ce que le
  * lecteur lit, et ne périmait rien.
  */
-export function signatureDecisionnelle(p: UserProject | null | undefined): string {
+export function signatureDecisionnelle(brut: UserProject | null | undefined): string {
+  // FUT-8 : LA SIGNATURE LIT CE QUE LE MOTEUR LIT. Le dossier évalue la valeur effective (précisions,
+  // adoptions, rejets compris) : signer le texte analysé brut laissait un dossier changer sans que
+  // futur•e le déclare dépassé. Un artefact figé avant FUT-8 n'a ni précision ni adoption : sa valeur
+  // effective est son `parsed`, sa signature ne bouge pas.
+  const p = brut ? effectiveProject(brut) : brut;
   return [
     `posture=${p?.posture ?? ""}`,
     `intent=${p?.intent ?? ""}`,
@@ -88,7 +94,7 @@ export function signatureDecisionnelle(p: UserProject | null | undefined): strin
     // éliminatoire). Seules les confirmations VALIDES comptent : une confirmation périmée ne vaut plus,
     // et sa présence ne change rien à ce que le moteur conclut. Un projet sans condition signe ce segment
     // vide, des deux côtés : les dossiers figés avant FUT-7 ne se déclarent pas périmés pour autant.
-    `conditions=${p ? confirmedCriteria(p).map((r) => `${r.kind}:${r.key}${r.instance ? `:${r.instance}` : ""}`).sort().join(",") : ""}`,
+    `conditions=${brut ? confirmedCriteria(brut).map((r) => `${r.kind}:${r.key}${r.instance ? `:${r.instance}` : ""}`).sort().join(",") : ""}`,
   ].join("§");
 }
 

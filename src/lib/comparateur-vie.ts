@@ -16,6 +16,7 @@ import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/w
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
+import { populationCommunalePLM } from "@/lib/plm-population";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -1149,16 +1150,24 @@ async function nameIndex(): Promise<Map<string, IndexCommune>> {
 // le dossier résolvent « Brest » exactement de la même façon : ils appellent le MÊME annuaire.
 export async function placeDirectory(): Promise<PlaceDirectory> {
   const names = await nameIndex(); // nameIndex() appelle loadIndex(), qui construit uuPopCache
+  // FUT-8 : la population COMMUNALE de Paris, Lyon, Marseille, sommée sur leurs arrondissements.
+  const index = await loadIndex();
+  const plmPop = new Map(["paris", "lyon", "marseille"].map((v) => [v, populationCommunalePLM(v, index)] as const));
   return {
     byName: (label) => {
       const hit = names.get(normalizeName(label));
       if (!hit) return null;
       return {
         insee: hit.insee, nom: hit.nom, lat: hit.lat, lon: hit.lon,
-        uu: hit.uu ?? null, tailleVille: tailleVille(hit),
+        uu: hit.uu ?? null, tailleVille: tailleVille(hit), population: hit.population ?? null,
       };
     },
-    plmByName: (label) => PLM_VILLES[normalizeName(label)] ?? null,
+    plmByName: (label) => {
+      const plm = PLM_VILLES[normalizeName(label)];
+      if (!plm) return null;
+      const pop = plmPop.get(normalizeName(label));
+      return { ...plm, communePop: pop ?? null, uuPop: uuPopCache?.get(plm.uu) ?? null };
+    },
   };
 }
 

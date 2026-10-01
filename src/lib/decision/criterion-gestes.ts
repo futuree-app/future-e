@@ -7,7 +7,7 @@
 //
 // Aucun geste ne touche `parsed` (écrit par le parseur seul). Retirer une précision ne supprime pas la
 // condition qui en dépendait : elle devient « à revoir » (périmée), et le lecteur décide.
-import type { UserProject, CriterionRef, DefinitionBody, Definition, Adoption, ConditionConfirmation } from "../user-project.ts";
+import type { UserProject, CriterionRef, DefinitionBody, Definition, Adoption, ConditionConfirmation, Rejet } from "../user-project.ts";
 import { normalizeDefinitions, normalizeUserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { declaredHardConstraintKeys } from "./project-view.ts";
@@ -23,7 +23,9 @@ export type CriterionAction =
   | { action: "confirmer"; criterion: CriterionRef; seen: string; definition?: DefinitionBody; interpretation?: string }
   | { action: "retirer_condition"; criterion: CriterionRef }
   | { action: "adopter"; criterion: PreferenceRef; seen: string }
-  | { action: "retirer_adoption"; criterion: PreferenceRef };
+  | { action: "retirer_adoption"; criterion: PreferenceRef }
+  // « Ça ne compte pas pour moi » : seulement sur une suggestion d'ancre (jamais sur un critère écrit).
+  | { action: "rejeter"; criterion: PreferenceRef; seen: string };
 
 export type ResultatGeste =
   | { ok: true; project: UserProject }
@@ -49,9 +51,9 @@ function ancreNonAdoptee(project: UserProject, key: PreferenceKey): { weight: nu
   return { weight: p.weight, ancre: project.parsed?.communeAncre?.[0]?.label ?? "votre commune de référence" };
 }
 
-function avec(project: UserProject, change: Partial<Pick<UserProject, "definitions" | "adoptions" | "conditions">>): UserProject {
+function avec(project: UserProject, change: Partial<Pick<UserProject, "definitions" | "adoptions" | "conditions" | "rejets">>): UserProject {
   const brut = { ...project, ...change };
-  for (const k of ["definitions", "adoptions", "conditions"] as const) {
+  for (const k of ["definitions", "adoptions", "conditions", "rejets"] as const) {
     if (Array.isArray(brut[k]) && brut[k]!.length === 0) delete brut[k];
   }
   return normalizeUserProject(brut)!;
@@ -132,13 +134,43 @@ export function appliquerGeste(project: UserProject, geste: CriterionAction, now
       if (ref.kind !== "preference") return refus(400, "Seul un critère inspiré d'une commune se garde.");
       const ancre = ancreNonAdoptee(project, ref.key);
       if (!ancre) return refus(404, "Ce critère n'est pas une suggestion inspirée d'une commune.");
-      if (geste.seen !== criterionFingerprint(project, ref)) return refus(409, CHANGE);
+      // L'empreinte d'une préférence est sa clé (le poids n'y entre pas). Elle se compare ici à la
+      // SUGGESTION, présente ou rejetée : reprendre un critère écarté doit rester possible.
+      if (geste.seen !== `pref:${ref.key}`) return refus(409, CHANGE);
       const adoption: Adoption = {
         criterion: { kind: "preference", key: ref.key, instance: null },
         weight: Math.min(3, Math.max(1, Math.round(ancre.weight))) as 1 | 2 | 3,
         origin: { kind: "ancre", label: ancre.ancre }, adoptedAt: now, source: "user",
       };
-      return { ok: true, project: avec(project, { adoptions: [...(project.adoptions ?? []), adoption] }) };
+      // Adopter après un refus : le lecteur a changé d'avis, le rejet tombe.
+      return {
+        ok: true,
+        project: avec(project, {
+          adoptions: [...(project.adoptions ?? []), adoption],
+          rejets: (project.rejets ?? []).filter((r) => r.criterion.key !== ref.key),
+        }),
+      };
+    }
+    case "rejeter": {
+      if (ref.kind !== "preference") return refus(400, "Seul un critère inspiré d'une commune s'écarte.");
+      const pref = project.parsed?.preferences?.find((p) => p.key === ref.key);
+      const adoptee = (project.adoptions ?? []).find((a) => a.criterion.key === ref.key);
+      // Un critère écrit par le lecteur ne se rejette pas : il modifie son texte.
+      if (pref && (pref.source ?? "parse") === "parse") return refus(400, "Ce critère vient de votre texte : modifiez votre texte pour le retirer.");
+      if (!pref && !adoptee) return refus(404, "Ce critère n'est pas une suggestion de votre projet.");
+      if (geste.seen !== criterionFingerprint(project, ref)) return refus(409, CHANGE);
+      const labels = adoptee ? [adoptee.origin.label] : (project.parsed?.communeAncre ?? []).map((a) => a.label).filter(Boolean);
+      const rejet: Rejet = { criterion: { kind: "preference", key: ref.key, instance: null }, origin: { kind: "ancre", labels }, rejectedAt: now, source: "user" };
+      // Rejeter retire l'adoption éventuelle ET toute condition sur ce critère : une condition « à revoir »
+      // sur un critère que le lecteur vient de dire ne pas vouloir n'aurait aucun sens.
+      return {
+        ok: true,
+        project: avec(project, {
+          rejets: [...(project.rejets ?? []).filter((r) => r.criterion.key !== ref.key), rejet],
+          adoptions: (project.adoptions ?? []).filter((a) => a.criterion.key !== ref.key),
+          conditions: (project.conditions ?? []).filter((c) => !sameCriterion(c.criterion, ref)),
+        }),
+      };
     }
     case "retirer_adoption":
       return { ok: true, project: avec(project, { adoptions: (project.adoptions ?? []).filter((a) => a.criterion.key !== ref.key) }) };
@@ -171,6 +203,8 @@ export function lireGeste(raw: unknown): CriterionAction | null {
       return seen && criterion.kind === "preference" ? { action: "adopter", criterion: criterion as PreferenceRef, seen } : null;
     case "retirer_adoption":
       return criterion.kind === "preference" ? { action: "retirer_adoption", criterion: criterion as PreferenceRef } : null;
+    case "rejeter":
+      return seen && criterion.kind === "preference" ? { action: "rejeter", criterion: criterion as PreferenceRef, seen } : null;
     default:
       return null;
   }

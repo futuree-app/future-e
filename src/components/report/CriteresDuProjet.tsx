@@ -99,7 +99,7 @@ function LigneCritere({ c }: { c: CritereVue }) {
   return (
     <li>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <p className="text-[15px] leading-[1.6] text-label">
+        <p className={`text-[15px] leading-[1.6] ${c.etat === "rejete" ? "text-ghost line-through decoration-1" : "text-label"}`}>
           {c.titre}
           {c.etat === "condition" ? <span className="text-accent"> · condition sans compromis</span> : null}
         </p>
@@ -131,6 +131,18 @@ function LigneCritere({ c }: { c: CritereVue }) {
         <div className="flex flex-wrap gap-4 mt-1.5">
           <button type="button" disabled={busy} className={lienAction} onClick={() => envoyer({ action: "adopter", seen: c.seenEffectif })}>
             Garder ce critère
+          </button>
+          <button type="button" disabled={busy} className={lienAction} onClick={() => envoyer({ action: "rejeter", seen: c.seenEffectif })}>
+            Ça ne compte pas pour moi
+          </button>
+        </div>
+      ) : null}
+
+      {c.etat === "rejete" ? (
+        <div className="flex flex-wrap items-baseline gap-4 mt-1">
+          <p className="text-[13.5px] text-ghost">Écarté de votre projet.</p>
+          <button type="button" disabled={busy} className={lienAction} onClick={() => envoyer({ action: "adopter", seen: c.seenEffectif })}>
+            Le reprendre
           </button>
         </div>
       ) : null}
