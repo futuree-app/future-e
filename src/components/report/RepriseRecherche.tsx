@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  SESSION_RECHERCHE_KEY, lireRechercheSession, libelleReprise,
+  type ApercuReprise, type RechercheAReprendre,
+} from "@/lib/reprise-recherche";
 
 // « REPRENDRE CETTE RECHERCHE POUR DÉFINIR MON PROJET » (FUT-8, §5.2).
 //
@@ -13,25 +17,12 @@ import { createClient } from "@/lib/supabase/client";
 //
 // `recherche` absente : la dernière session « Où vivre » de ce navigateur (sur /rapport).
 
-const SESSION_KEY = "futuree:ouvivre:session"; // même clé que OuVivreClient
-const SESSION_VERSION = 3;
-const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
-
-type Recherche = { parsed: unknown; rawText: string };
-type Apercu = {
-  retenus: string[];
-  propresALaRecherche: string[];
-  remplace: { texte: string; updatedAt: string | null } | null;
-  abandonnes: { conditions: number; precisions: number; adoptions: number } | null;
-};
+type Recherche = RechercheAReprendre;
+type Apercu = ApercuReprise;
 
 function derniereRecherche(): Recherche | null {
   try {
-    const raw = window.localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as { v?: number; savedAt?: number; parsed?: unknown; submittedText?: string };
-    if (s.v !== SESSION_VERSION || !s.savedAt || Date.now() - s.savedAt > SESSION_TTL_MS || !s.parsed) return null;
-    return { parsed: s.parsed, rawText: typeof s.submittedText === "string" ? s.submittedText : "" };
+    return lireRechercheSession(window.localStorage.getItem(SESSION_RECHERCHE_KEY), Date.now());
   } catch {
     return null;
   }
@@ -45,9 +36,11 @@ async function demander(recherche: Recherche, corps: Record<string, unknown>) {
   });
 }
 
-export function RepriseRecherche({ recherche: fournie, variante = "lien" }: {
+export function RepriseRecherche({ recherche: fournie, variante = "lien", className = "" }: {
   recherche?: Recherche | null;
   variante?: "lien" | "bouton";
+  // L'espacement vit ICI : quand le geste n'a rien à proposer, il ne laisse pas de marge vide.
+  className?: string;
 }) {
   const router = useRouter();
   const [recherche, setRecherche] = useState<Recherche | null>(fournie ?? null);
@@ -60,6 +53,8 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien" }: {
   // d'emblée : il dit aussi s'il existe déjà un projet (et donc quel libellé montrer).
   useEffect(() => {
     let annule = false;
+    // Une NOUVELLE recherche redevient transférable, même après un transfert réussi : l'appelant donne au
+    // composant une `key` liée à la recherche, ce qui le remonte avec un état vierge.
     const r = fournie ?? derniereRecherche();
     if (!r) return;
     createClient().auth.getSession().then(async ({ data }) => {
@@ -72,9 +67,8 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien" }: {
     return () => { annule = true; };
   }, [fournie]);
 
-  if (!recherche || !apercu || etat === "fait") return null;
-
-  const libelle = apercu.remplace ? "Utiliser cette recherche pour mon projet" : "Reprendre cette recherche pour définir mon projet";
+  const libelle = libelleReprise({ connecte: apercu != null, recherche, apercu, transfertFait: etat === "fait" });
+  if (!libelle || !recherche || !apercu) return null;
   const perdus = apercu.abandonnes
     ? apercu.abandonnes.conditions + apercu.abandonnes.precisions + apercu.abandonnes.adoptions
     : 0;
@@ -100,9 +94,9 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien" }: {
       <button
         type="button"
         onClick={() => setOuvert(true)}
-        className={variante === "bouton"
+        className={`${className} ` + (variante === "bouton"
           ? "inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[14px] text-label bg-[var(--bg-elev-2)] border border-[var(--border-2)] hover:border-white/25 transition-colors"
-          : "text-[14px] text-accent underline underline-offset-4 hover:opacity-80"}
+          : "text-[14px] text-accent underline underline-offset-4 hover:opacity-80")}
       >
         {libelle}
       </button>
@@ -110,7 +104,7 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien" }: {
   }
 
   return (
-    <div className="glass rounded-2xl p-6 mt-4 text-left" role="region" aria-label={libelle}>
+    <div className={`${className} glass rounded-2xl p-6 mt-4 text-left`} role="region" aria-label={libelle}>
       <p className="text-[15px] font-semibold text-label mb-3">Ce que futur•e retiendra dans votre projet</p>
       {apercu.retenus.length > 0 ? (
         <ul className="mb-4 space-y-1.5">

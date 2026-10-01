@@ -315,6 +315,10 @@ export function ProjectSummaryCard({
           Affiner
           <span aria-hidden className="text-[13px] leading-none">→</span>
         </button>
+        {/* FUT-8 : une recherche « Où vivre » récente de ce navigateur peut remplacer le projet, par un
+            geste explicite et après aperçu. Rien ne s'affiche sans recherche valable, hors connexion, ou
+            quand cette recherche est déjà le projet. */}
+        <RepriseRecherche className="mt-3 block" />
         {blocRelation()}
       </div>
     );
@@ -341,6 +345,7 @@ export function ProjectSummaryCard({
           Ajouter mes priorités
           <span aria-hidden className="text-[13px] leading-none">→</span>
         </button>
+        <RepriseRecherche className="mt-3 block" />
         {blocRelation()}
       </div>
     );

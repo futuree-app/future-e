@@ -1119,9 +1119,7 @@ export function OuVivreClient() {
 
           {/* FUT-8 : la recherche n'écrit plus le projet d'elle-même. Un lecteur connecté peut la
               reprendre, après un aperçu de ce qui sera retenu. Invisible pour un visiteur anonyme. */}
-          <div className="mt-4">
-            <RepriseRecherche recherche={rechercheCourante} />
-          </div>
+          <RepriseRecherche key={submittedText} recherche={rechercheCourante} className="mt-4 block" />
           <div className="mt-7 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-6 py-7">
             <p className="text-[16px] leading-[1.7] text-label">
               {outcome?.message ?? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."}
@@ -1149,6 +1147,11 @@ export function OuVivreClient() {
             ambiguities={parsed.ambiguities}
             onRefine={refine}
           />
+
+          {/* FUT-8 : juste sous « ce que nous avons compris », là où le lecteur vient de vérifier la lecture
+              de sa recherche. Un lien discret, jamais plus présent que les territoires qui suivent ;
+              invisible pour un visiteur anonyme, et pour une recherche qui est déjà son projet. */}
+          <RepriseRecherche key={submittedText} recherche={rechercheCourante} className="mt-4 block" />
 
           {/* Cartes territoires — LE CŒUR DE LA RÉPONSE. Kicker + respiration
               franche pour la détacher comme premier événement, sans surface en plus. */}
