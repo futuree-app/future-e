@@ -178,17 +178,23 @@ type Definition = DefinitionBase & (
   | { kind: "quitter_ville"; scope: CityScope }
   // Région parisienne : le périmètre choisi parmi ceux que les données testent.
   | { kind: "perimetre_parisien"; perimetre: "paris" | "petite_couronne" | "agglomeration" | "ile_de_france" }
-  // Une convention de futur•e acceptée comme sens du critère (macro-zones dans FUT-8 ; tailles
-  // qualitatives, climat plus tard).
+  // Le PÉRIMÈTRE GÉOGRAPHIQUE ENTIER (`zones`, instance null) : une convention acceptée par ancre
+  // non administrative. « Le Sud-Ouest ou le Grand Ouest » porte DEUX conventions, composées ensuite
+  // par `zonesMatch`. Les ancres administratives (une région nommée) n'en ont pas besoin.
+  | { kind: "perimetre_zones"; conventions: { token: string; conventionId: string; conventionVersion: number }[] }
+  // Une convention de futur•e acceptée comme sens d'un critère NON géographique (tailles qualitatives,
+  // climat : plus tard, le jour où une convention est validée).
   | { kind: "convention"; conventionId: string; conventionVersion: number }
 );
 
-// « Je reprends ce critère à mon compte » : une préférence proposée par une ancre, adoptée.
+// « Je reprends ce critère à mon compte » : une préférence que futur•e a PROPOSÉE (une ancre) et que le
+// lecteur garde. C'est un choix DURABLE : il survit au changement ou au retrait de l'ancre.
 type Adoption = {
   criterion: Extract<CriterionInstanceRef, { kind: "preference" }>;
-  parsedFingerprint: string;        // la préférence telle que futur•e l'a proposée
+  weight: 1 | 2 | 3;                         // l'importance au moment de l'adoption
+  origin: { kind: "ancre"; label: string };  // d'où vient l'idée (« Brest ») : pour raconter, jamais pour décider
   adoptedAt: string;
-  source: "user";
+  source: "user";                            // qui a décidé de la garder
 };
 
 type UserProject = /* FUT-7 */ & {
@@ -196,6 +202,12 @@ type UserProject = /* FUT-7 */ & {
   adoptions?: Adoption[];       // absent = aucune adoption ; jamais vide en base
 };
 ```
+
+**Les préférences effectives du Projet** = préférences de `parsed` ∪ préférences adoptées. Une clé
+présente des deux côtés n'en fait qu'une : si le texte du lecteur la porte (`source: "parse"`), son
+poids prime (c'est son expression la plus récente) ; sinon, le poids de l'adoption. Une adoption ne
+disparaît que si le lecteur la retire, ou si la clé n'existe plus dans le produit. Remplacer Brest par
+Lorient ne retire pas « une vie locale forte » que le lecteur avait gardée.
 
 **Invariants vérifiés à la lecture** (comme `normalizeConditions`) : `kind` compatible avec la famille
 du critère ; seuils finis et positifs ; `mode` routable ; `conventionId` présent dans le registre et
@@ -213,6 +225,9 @@ valeurEffective(critère) = parsed(critère) ⊕ definition(critère)  si defini
 - `taille` : impose `unit`, `min`, `max`.
 - `quitter_ville` : impose `scope` sur l'instance.
 - `perimetre_parisien` : remplace le jeton `paris` / `idf` par le périmètre choisi.
+- `perimetre_zones` : pour chaque ancre conventionnelle, la liste de départements de la version
+  acceptée, figée par la version, puis composition par `zonesMatch` ; il faut une convention acceptée
+  pour **chaque** ancre non administrative du périmètre, sinon le périmètre reste appréciable.
 - `convention` : attache la définition versionnée (pour une macro-zone : la liste de départements de la
   version acceptée, figée par la version, même si la table évolue).
 
@@ -225,7 +240,7 @@ changent pas), sauf quand le lecteur reprend explicitement son Projet pour cherc
 | Objet | Empreinte | Devient périmé quand… | Effet |
 |---|---|---|---|
 | définition | `parsedFingerprint` = empreinte de la valeur `parsed` du critère (et de l'instance) | le reparse change ce que le lecteur avait sous les yeux (« Nantes » → « Rennes ») | ignorée, gardée en base, proposée à nouveau |
-| adoption | `parsedFingerprint` = empreinte de la préférence proposée | l'ancre ou le trait proposé change au reparse | ignorée, gardée, proposée à nouveau |
+| adoption | aucune : c'est un choix durable du lecteur | jamais par reparse ; seulement si la clé disparaît du produit | retirée seulement par le lecteur |
 | condition (FUT-7) | empreinte de la **valeur effective** de l'élément (`criterion-value.ts` étendu à la définition et à l'instance) | la valeur effective change (nouvelle définition, nouveau seuil, reparse) | ignorée, gardée, proposée à nouveau |
 
 `criterionFingerprint` évolue ainsi : `hard:<clé>:<canonique(valeurDecisionnelle(valeurEffective))>`,
@@ -233,9 +248,10 @@ où la valeur décisionnelle inclut désormais `metric`, `unit`, `scope`, le pé
 `conventionId@version`. **Aucune confirmation n'existe en production** (pas de geste avant FUT-8) :
 changer le format de l'empreinte ne périme rien de réel. Les tests FUT-7 seront mis à jour.
 
-**Reparse** (le lecteur corrige son texte) : `parsed` est remplacé, `definitions` et `conditions` sont
-reportés par le serveur (comme FUT-7), et chacun redevient valide seulement si son empreinte
-correspond encore. Aucune précision n'est transférée d'un critère à un autre.
+**Reparse** (le lecteur corrige son texte) : `parsed` est remplacé ; `definitions`, `adoptions` et
+`conditions` sont reportés par le serveur (comme FUT-7). Les définitions et les conditions redeviennent
+valides seulement si leur empreinte correspond encore ; les adoptions restent, puisqu'elles ne
+dépendent pas de `parsed`. Aucune précision n'est transférée d'un critère à un autre.
 
 ### 3.5 Le registre des conventions
 
@@ -372,8 +388,8 @@ session « Où vivre » existe, il propose aussi « Reprendre votre recherche »
   préférence `source: "ancre"` qui n'est pas **adoptée**. Le geste « Garder ce critère » écrit une
   `adoption` ; il ne touche pas `parsed`, et la provenance reste vraie (« inspiré de Brest », adopté).
   « En faire une condition sans compromis » sur une préférence d'ancre fait les deux d'un coup :
-  adoption et confirmation, atomiquement. Une adoption périme si la préférence proposée change au
-  reparse (nouvelle ancre, trait disparu).
+  adoption et confirmation, atomiquement. L'adoption est durable : elle survit au changement ou au
+  retrait de l'ancre, et l'origine (« inspiré de Brest ») reste racontée.
 
 ---
 
@@ -386,14 +402,14 @@ Le navigateur générique (`PATCH /api/profile` `user_project`) continue d'ignor
 
 ```ts
 type CriterionAction =
-  | { action: "definir"; criterion: CriterionRef; instance?: string; seen: string; definition: DefinitionInput }
-  | { action: "retirer_definition"; criterion: CriterionRef; instance?: string }
-  | { action: "confirmer"; criterion: CriterionRef; seen: string; definition?: DefinitionInput }
-  | { action: "retirer_condition"; criterion: CriterionRef }
+  | { action: "definir"; criterion: CriterionInstanceRef; seen: string; definition: DefinitionInput }
+  | { action: "retirer_definition"; criterion: CriterionInstanceRef }
+  | { action: "confirmer"; criterion: CriterionInstanceRef; seen: string; definition?: DefinitionInput }
+  | { action: "retirer_condition"; criterion: CriterionInstanceRef }
   | { action: "adopter"; criterion: Extract<CriterionInstanceRef, { kind: "preference" }>; seen: string }
   | { action: "retirer_adoption"; criterion: Extract<CriterionInstanceRef, { kind: "preference" }> };
-// Tous les `criterion` sont des CriterionInstanceRef. « confirmer » sur une préférence d'ancre non
-// adoptée écrit l'adoption et la confirmation dans la même écriture.
+// « confirmer » sur une préférence d'ancre non adoptée écrit l'adoption et la confirmation dans la même
+// écriture. « adopter » vérifie, via `seen`, que la préférence est bien celle que futur•e proposait.
 // `seen` = l'empreinte de la valeur que le client affichait (parsed pour « definir », effective pour
 // « confirmer »). `DefinitionInput` = la variante de Definition sans les champs serveur.
 ```
@@ -549,11 +565,11 @@ le geste ; capacité commune / adresse ; condition possible ; résultat après c
 | 13 | Quitter Lyon | `excludePlace [{Lyon, scope null}]` | non | « La commune de Lyon, ou toute l'agglomération ? » | `quitter_ville {scope}` | Ap → T / T | oui | tranchée selon le périmètre choisi |
 | 14 | Quitter la commune de Lyon | `excludePlace [{Lyon, commune}]` | non | aucune | aucune | T / T | oui | Villeurbanne : respectée ; Lyon 3e : non respectée |
 | 15 | Quitter l'agglomération lyonnaise | `excludePlace [{Lyon, unite_urbaine}]` | non | aucune | aucune | T / T | oui | Villeurbanne : non respectée |
-| 16 | Dans le Sud-Ouest | zones `sud_ouest` | non | « Voici le périmètre que futur•e utilise. Ça vous convient ? » | `convention {zone:sud-ouest, v1}` | Ap → T / T | oui | appartenance au périmètre accepté |
+| 16 | Dans le Sud-Ouest | zones `sud_ouest` | non | « Voici le périmètre que futur•e utilise. Ça vous convient ? » | `perimetre_zones [{sud_ouest, zone:sud-ouest, v1}]` | Ap → T / T | oui | appartenance au périmètre accepté |
 | 17 | Sur la côte atlantique | zones `atlantique` | non | aucune (rien qui la rendrait tranchable) | aucune | Ap / Ap | oui | ouverte ; Bordeaux jamais « respectée » |
 | 18 | Dans les Pyrénées | zones `pyrenees` | non | aucune | aucune | Ap / Ap | oui | ouverte ; Toulouse jamais « respectée » |
 | 19 | Vivre à la montagne | `montagne` | non | aucune | aucune | Ap / Ap | oui | ouverte (« selon l'altitude du centre de la commune ») |
-| 20 | Une ville comme Brest | `communeAncre [Brest]`, préférences `source: ancre` ; **ni exclusion ni fourchette dans `parsed`** | non | « Garder ces critères ? » (facultatif) | aucune ; `adoption` après « Garder ce critère » | Ap / Ap | oui, avec adoption (même geste possible) ; `parsed` jamais modifié | la Recherche exclut Brest et applique le gabarit ; le dossier sur Brest ne parle jamais de quitter Brest |
+| 20 | Une ville comme Brest | `communeAncre [Brest]`, préférences `source: ancre` ; **ni exclusion ni fourchette dans `parsed`** | non | « Garder ces critères ? » (facultatif) | aucune ; `adoption` après « Garder ce critère » | Ap / Ap | oui, avec adoption (même geste possible) ; `parsed` jamais modifié ; remplacer Brest par Lorient garde les critères adoptés | la Recherche exclut Brest et applique le gabarit ; le dossier sur Brest ne parle jamais de quitter Brest |
 | 21 | Je dois absolument quitter Lyon, et j'aimerais éviter Bordeaux | `excludePlace [{Lyon}, {Bordeaux}]`, `forceMarkers` sur `{excludePlace, "lyon"}` | oui, pour Lyon seulement | périmètre de Lyon au moment de confirmer | `quitter_ville` sur l'instance `lyon` | T / T (Lyon, une fois le périmètre défini) ; Bordeaux : écart | oui, par ville | à Villeurbanne : « quitter Lyon » tranchée selon le périmètre ; Bordeaux reste un écart ; reparse « Lyon » → « Nantes » : la condition sur `lyon` est périmée, rien ne bouge pour Bordeaux |
 
 Tests supplémentaires : le parseur et les gestes n'écrivent jamais la même structure (aucun geste ne
@@ -580,7 +596,7 @@ l'identique (parité) ; aucun dossier figé ne change.
 6. **Recherche ≠ Projet** : retrait d'`OuVivreProjectSync`, route `from-search`, feuille de reprise.
 7. **Route `criterion`** et ses gestes.
 8. **Libellés humains** et UX de la carte « Votre projet ».
-9. **Vérification visuelle** sur `/dev/dossier` (étendue aux définitions) et sur les 20 cas.
+9. **Vérification visuelle** sur `/dev/dossier` (étendue aux définitions) et sur les 21 cas.
 
 ---
 
@@ -604,7 +620,10 @@ l'identique (parité) ; aucun dossier figé ne change.
 - Statut de convention `perimetre` : une macro-zone devient tranchable une fois son périmètre accepté,
   parce que l'appartenance se mesure exactement.
 - Distance routière en km : reportée (documentée au §11).
-- Une préférence d'ancre devient confirmable seulement adoptée (`adoptions`), jamais en réécrivant `parsed`.
+- Une préférence d'ancre devient confirmable seulement adoptée (`adoptions`), jamais en réécrivant `parsed` ;
+  l'adoption est durable (poids, origine), indépendante de la survie de l'ancre.
+- Un périmètre géographique composite porte une convention acceptée par ancre conventionnelle
+  (`perimetre_zones`), composées par `zonesMatch`.
 - Identité des éléments multiples : `CriterionInstanceRef`, instance = ville normalisée pour
   `excludePlace`, jeton pour `excludeZones`, périmètre entier (`null`) pour `zones` et `departements`.
 - Legacy : aucune provenance déduite des chiffres ; seuls les dérivés d'ancre démontrables sont retirés.
