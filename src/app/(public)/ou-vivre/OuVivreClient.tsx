@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { RepriseRecherche } from "@/components/report/RepriseRecherche";
 import posthog from "posthog-js";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
 import {
@@ -427,6 +428,8 @@ export function OuVivreClient() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [parsed, setParsed] = useState<ParsedProject | null>(null);
+  // Stable d'un rendu à l'autre : RepriseRecherche demande son aperçu quand la recherche change.
+  const rechercheCourante = useMemo(() => (parsed ? { parsed, rawText: submittedText } : null), [parsed, submittedText]);
   const [outcome, setOutcome] = useState<MatchOutcome | null>(null);
 
   const [synthesis, setSynthesis] = useState("");
@@ -1113,6 +1116,12 @@ export function OuVivreClient() {
             ambiguities={parsed.ambiguities}
             onRefine={refine}
           />
+
+          {/* FUT-8 : la recherche n'écrit plus le projet d'elle-même. Un lecteur connecté peut la
+              reprendre, après un aperçu de ce qui sera retenu. Invisible pour un visiteur anonyme. */}
+          <div className="mt-4">
+            <RepriseRecherche recherche={rechercheCourante} />
+          </div>
           <div className="mt-7 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-6 py-7">
             <p className="text-[16px] leading-[1.7] text-label">
               {outcome?.message ?? "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère."}

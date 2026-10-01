@@ -118,6 +118,12 @@ export type DecisionAction = { type: VerificationActionType; label: string; deta
 // porte le grain auquel la capacité a été jugée, pour que la validation puisse la rejuger.
 export type IncompatibilityFact = BaseFact & {
   role: "incompatibility";
+  // FUT-8 : le sens retenu par futur•e pour ce critère (« Pour cette analyse : à vol d'oiseau, depuis
+  // votre logement. »), rendu dans « Données et limites ». Absent : rien de plus à dire.
+  senseRetenu?: string;
+  // FUT-8 : l'élément d'une famille multiple (« lyon » dans « quitter Lyon et Bordeaux »), s'il est
+  // évalué seul. Absent = la famille entière.
+  criterionInstance?: string;
   evidenceStrength: "established" | "indicative";
   hardConstraintKey: HardConstraintKey;
   evaluatedGrain: EvaluationGrain;
@@ -140,6 +146,9 @@ export type ConditionSignal = "favorable" | "defavorable" | "neutre";
 // aucune vérification.
 export type ConditionCheckFact = BaseFact & {
   role: "condition_check";
+  // FUT-8 : le sens retenu par futur•e pour ce critère (« Pour cette analyse : à vol d'oiseau, depuis
+  // votre logement. »), rendu dans « Données et limites ». Absent : rien de plus à dire.
+  senseRetenu?: string;
   criterion: CriterionRef;
   // La condition, nommée comme le lecteur la reconnaît (« la Bretagne », « l'accès aux soins »).
   headlineSubject: string;
@@ -156,6 +165,9 @@ export type ConditionCheckFact = BaseFact & {
 // visible est « respectée / non respectée ».
 export type ConditionMetFact = BaseFact & {
   role: "condition_met";
+  // FUT-8 : le sens retenu par futur•e pour ce critère (« Pour cette analyse : à vol d'oiseau, depuis
+  // votre logement. »), rendu dans « Données et limites ». Absent : rien de plus à dire.
+  senseRetenu?: string;
   criterion: CriterionRef;
   headlineSubject: string;
   status: "Condition respectée";
@@ -277,6 +289,7 @@ export type AlignmentBasis =
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
 export type MismatchFact = BaseFact & {
   role: "mismatch";
+  criterionInstance?: string; // FUT-8, cf. IncompatibilityFact
   // Une préférence, ou (FUT-7) un critère géographique déclaré mais non confirmé.
   projectKey: CriterionKey;
   basis: MismatchBasis;

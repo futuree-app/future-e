@@ -12,7 +12,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { WizardAnswers } from "@/components/wizard/types";
-import { normalizeUserProjectInput, stampUserProject } from "@/lib/user-project";
+import { normalizeUserProject, normalizeUserProjectInput, stampUserProject } from "@/lib/user-project";
+import { ecrireProjetSiInchange } from "@/lib/server/projet-ecriture";
 
 // Normalise un objet réponses-wizard reçu du client vers la forme WizardAnswers
 // stricte (cf. src/components/wizard/types.ts). Tout champ invalide retombe sur
@@ -140,7 +141,7 @@ export async function PATCH(request: NextRequest) {
       const input = normalizeUserProjectInput(body.value);
       if (!input) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
       const now = new Date().toISOString();
-      // LES CONDITIONS CONFIRMÉES SURVIVENT À L'ÉDITION (FUT-7). Le navigateur ne peut pas en écrire
+      // LES GESTES DU LECTEUR SURVIVENT À L'ÉDITION (FUT-7, FUT-8). Le navigateur ne peut pas en écrire
       // (`normalizeUserProjectInput` les ignore) ; le serveur relit celles déjà en base et les reporte.
       // Sans cette relecture, corriger une virgule du texte effacerait toutes les conditions du lecteur.
       const { data: existant, error: lectureError } = await supabase
@@ -152,41 +153,18 @@ export async function PATCH(request: NextRequest) {
         console.error("[profile] PATCH user_project read error:", lectureError);
         return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       }
-      const conditionsExistantes = (existant as { user_project?: { conditions?: unknown } | null } | null)
-        ?.user_project?.conditions;
-      const project = stampUserProject(input, now, conditionsExistantes);
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ user_project: project, updated_at: now })
-        .eq("user_id", user.id);
-      if (error) {
-        console.error("[profile] PATCH user_project error:", error);
-        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      // FUT-8 : conditions, définitions et adoptions, toutes reportées.
+      const projetExistant = (existant as { user_project?: unknown } | null)?.user_project;
+      const project = stampUserProject(input, now, projetExistant);
+      // Écriture gardée (FUT-8) : un geste du lecteur arrivé entre la lecture et l'écriture n'est pas
+      // écrasé ; le client est prié de recharger.
+      const lu = normalizeUserProject(projetExistant ?? null);
+      const ecrit = await ecrireProjetSiInchange(supabase, user.id, project, { existe: projetExistant != null, updatedAt: lu?.updatedAt ?? null });
+      if (ecrit === "conflit") {
+        return NextResponse.json({ error: "Votre projet a changé entre-temps. Rechargez la page." }, { status: 409 });
       }
+      if (ecrit === "erreur") return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       return NextResponse.json({ success: true, project });
-    }
-
-    // Projet de l'utilisateur : amorçage depuis /ou-vivre, n'écrit QUE si aucun projet en base.
-    if (field === "user_project_if_empty") {
-      const input = normalizeUserProjectInput(body.value);
-      if (!input) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
-      const now = new Date().toISOString();
-      const project = stampUserProject(input, now);
-      // Atomique : n'écrit QUE si user_project est null. Deux amorçages concurrents ne peuvent plus
-      // écraser (la garde est SQL, pas espérée par le code). data non-null = ligne effectivement écrite.
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .update({ user_project: project, updated_at: now })
-        .eq("user_id", user.id)
-        .is("user_project", null)
-        .select("user_id")
-        .maybeSingle();
-      if (error) {
-        console.error("[profile] PATCH user_project_if_empty error:", error);
-        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
-      }
-      const written = Boolean(data);
-      return NextResponse.json({ success: true, written, project: written ? project : null });
     }
 
     // Cas spécial : mise à jour de la commune (deux champs atomiques).

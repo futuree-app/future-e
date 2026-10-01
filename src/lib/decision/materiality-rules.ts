@@ -17,6 +17,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import { aCommune } from "../typography.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
+import { hcRestreint } from "./effective-value.ts";
 import { isConfirmed, preferenceSurfaced } from "./conditions.ts";
 import { criterionCapability } from "./capability.ts";
 import { conditionsDePreference } from "./condition-rules.ts";
@@ -993,12 +994,17 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
       // L'INVARIANT DE FUT-7. « Condition non respectée » exige une condition CONFIRMÉE par le lecteur et
       // une capacité à TRANCHER au grain évalué. Une règle qui fabriquerait une incompatibilité sans
       // l'une ou l'autre serait rejetée ici, avant d'atteindre l'écran.
-      const ref = { kind: "hard" as const, key: fact.hardConstraintKey };
+      // FUT-8 : l'incompatibilité d'UN élément (« quitter Lyon ») se juge sur cet élément seul.
+      const instance = fact.criterionInstance ?? null;
+      const ref = { kind: "hard" as const, key: fact.hardConstraintKey, instance };
       if (!isConfirmed(project, ref)) {
         throw new Error(`[decision] ${fact.ruleId}: incompatibilité sans condition confirmée par le lecteur (${fact.hardConstraintKey})`);
       }
       const cap = criterionCapability(
-        { kind: "hard", key: fact.hardConstraintKey, hc: project.parsed?.hardConstraints ?? {} }, fact.evaluatedGrain,
+        {
+          kind: "hard", key: fact.hardConstraintKey,
+          hc: instance ? hcRestreint(project.parsed?.hardConstraints ?? {}, fact.hardConstraintKey, [instance]) : project.parsed?.hardConstraints ?? {},
+        }, fact.evaluatedGrain,
       );
       if (cap.capability !== "trancher") {
         throw new Error(`[decision] ${fact.ruleId}: incompatibilité sur un critère que futur•e ne sait pas trancher (${fact.hardConstraintKey}, ${cap.reason})`);
@@ -1111,7 +1117,7 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
         if (!declaredHardConstraintKeys(project).includes(cle)) {
           throw new Error(`[decision] ${fact.ruleId}: écart sur un critère géographique non déclaré (${fact.projectKey})`);
         }
-        if (isConfirmed(project, { kind: "hard", key: cle })) {
+        if (isConfirmed(project, { kind: "hard", key: cle }) || (fact.criterionInstance && isConfirmed(project, { kind: "hard", key: cle, instance: fact.criterionInstance }))) {
           throw new Error(`[decision] ${fact.ruleId}: une condition confirmée ne se réduit pas à un écart (${fact.projectKey})`);
         }
         if (!basis.observedLabel.trim() || !basis.expectedLabel.trim()) {

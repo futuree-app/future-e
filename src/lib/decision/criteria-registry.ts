@@ -13,6 +13,7 @@ import type { MaterialityTier, RunResult, RuleEvaluation, UncoveredConstraint } 
 import type { UserProject, CriterionRef } from "../user-project.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, hardConstraintLabel } from "./project-view.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
+import { hcRestreint, instancesDe } from "./effective-value.ts";
 import { isConfirmed } from "./conditions.ts";
 import { criterionCapability, type Capability, type CapabilityReason, type EvaluationGrain } from "./capability.ts";
 
@@ -182,8 +183,14 @@ export function buildCriteriaRegistry(
 ): CriteriaSummary {
   const hc = project.parsed?.hardConstraints ?? {};
   const axes = (ref: CriterionRef) => {
-    const c = criterionCapability(ref.kind === "hard" ? { kind: "hard", key: ref.key, hc } : ref, grain);
-    return { confirmed: isConfirmed(project, ref), capability: c.capability, capabilityReason: c.reason };
+    // FUT-8 : une famille multiple dont seuls certains éléments sont confirmés (« quitter Lyon », pas
+    // « éviter Bordeaux ») porte une condition ; sa capacité se juge sur ces éléments-là.
+    const elements = ref.kind === "hard" && !isConfirmed(project, ref)
+      ? instancesDe(hc, ref.key).filter((i) => isConfirmed(project, { kind: "hard", key: ref.key, instance: i }))
+      : [];
+    const hcVue = elements.length > 0 ? hcRestreint(hc, ref.key, elements) : hc;
+    const c = criterionCapability(ref.kind === "hard" ? { kind: "hard", key: ref.key, hc: hcVue } : ref, grain);
+    return { confirmed: isConfirmed(project, ref) || elements.length > 0, capability: c.capability, capabilityReason: c.reason };
   };
   const registry: ProjectCriterionAssessment[] = [
     // Le libellé INSTANCIÉ : « la proximité de la gare Matabiau », pas « la proximité d'un lieu ».

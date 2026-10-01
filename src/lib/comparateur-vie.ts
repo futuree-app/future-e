@@ -15,6 +15,8 @@ import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/li
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
+import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
+import { populationCommunalePLM } from "@/lib/plm-population";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -125,7 +127,10 @@ export const PREFERENCE_KEYS = [
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
-export type Preference = { key: PreferenceKey; weight: number };
+// `source` (FUT-8) : « parse » = lue dans le texte ; « ancre » = dérivée d'une commune-ancre. Écrite par
+// le parseur et la dérivation, jamais par un geste du lecteur (une reprise est une `adoption`).
+// Absente = « parse » (legacy).
+export type Preference = { key: PreferenceKey; weight: number; source?: "parse" | "ancre" };
 
 // Le schéma des contraintes dures vit désormais dans un module NEUTRE (hard-constraint-schema.ts) : le
 // noyau canonique en a besoin, et il ne peut pas dépendre en type de ce module server-only. On le
@@ -154,12 +159,23 @@ export type ParsedProject = {
   // Communes-ANCRES (« une ville comme {commune} »). Le LLM n'extrait que le label ;
   // la dérivation des traits est déterministe, dans la route parse (post-LLM).
   // ANCRAGE, pas similarité : traduit en préférences nommées, jamais en score. cf. Pari #7.
-  communeAncre?: { label: string }[];
+  // `insee` (FUT-8) : posé par l'amorce « Explorer depuis une commune », qui connaît la commune exacte ;
+  // il évite qu'un homonyme soit pris pour l'ancre quand la Recherche recalcule ses dérivés.
+  communeAncre?: { label: string; insee?: string }[];
+  // FUT-8 : le lecteur a retiré la puce « ~ taille de {ancre} ». La Recherche ne recalcule pas la
+  // fourchette de taille de l'ancre. Sans effet sur le Projet (qui ne porte jamais cette fourchette).
+  ancreSansTaille?: boolean;
   // Traits dérivés que l'utilisateur a EXPLICITEMENT retirés (Phase B). On les traite
   // comme « déjà adressés » : le moteur ne les re-surface pas en découverte ni en signal
   // ambiant (sinon « j'ai retiré X » et X réapparaît dans les cartes). N'affecte NI le
   // score NI le filtre. cf. assignDecouverte / assignSignaux (union dans requestedKeys).
   suppressNarrativeKeys?: PreferenceKey[];
+  // FUT-8. « Petite ville », « ville moyenne », « grande ville » : le MOT, jamais des bornes inventées.
+  // Il sert les libellés ; le classement passe par les préférences de taille.
+  sizeWord?: import("./hard-constraint-schema.ts").SizeWord | null;
+  // FUT-8. Les mots forts (« absolument », « rédhibitoire ») : une SUGGESTION de condition, rattachée à
+  // un élément précis, jamais une condition.
+  forceMarkers?: { criterion: import("./user-project.ts").CriterionRef; quote: string }[];
 };
 
 export type MatchResult = {
@@ -1134,16 +1150,24 @@ async function nameIndex(): Promise<Map<string, IndexCommune>> {
 // le dossier résolvent « Brest » exactement de la même façon : ils appellent le MÊME annuaire.
 export async function placeDirectory(): Promise<PlaceDirectory> {
   const names = await nameIndex(); // nameIndex() appelle loadIndex(), qui construit uuPopCache
+  // FUT-8 : la population COMMUNALE de Paris, Lyon, Marseille, sommée sur leurs arrondissements.
+  const index = await loadIndex();
+  const plmPop = new Map(["paris", "lyon", "marseille"].map((v) => [v, populationCommunalePLM(v, index)] as const));
   return {
     byName: (label) => {
       const hit = names.get(normalizeName(label));
       if (!hit) return null;
       return {
         insee: hit.insee, nom: hit.nom, lat: hit.lat, lon: hit.lon,
-        uu: hit.uu ?? null, tailleVille: tailleVille(hit),
+        uu: hit.uu ?? null, tailleVille: tailleVille(hit), population: hit.population ?? null,
       };
     },
-    plmByName: (label) => PLM_VILLES[normalizeName(label)] ?? null,
+    plmByName: (label) => {
+      const plm = PLM_VILLES[normalizeName(label)];
+      if (!plm) return null;
+      const pop = plmPop.get(normalizeName(label));
+      return { ...plm, communePop: pop ?? null, uuPop: uuPopCache?.get(plm.uu) ?? null };
+    },
   };
 }
 
@@ -2740,7 +2764,28 @@ export async function seedComparaison(
   return { trio: picks, comparaison, ignores };
 }
 
-export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
+// LES DÉRIVÉS D'ANCRE, RECALCULÉS POUR LA RECHERCHE SEULEMENT (FUT-8). « Une ville comme Brest » ne doit
+// pas reproposer Brest, et cherche des villes de taille proche (÷/× 2,5 autour de l'agglomération). Ces
+// deux règles servent la recherche : elles ne sont plus écrites dans `parsed` (donc jamais dans le
+// Projet), elles sont reconstruites ici, à chaque recherche, depuis `communeAncre`.
+//
+// L'explicite écrase le dérivé, comme avant : une taille dite (communeSize, sizeRelativeTo) ou une
+// préférence de taille LUE DANS LE TEXTE supprime la fourchette. Idempotent : un `parsed` ancien qui
+// porte déjà l'exclusion ou la fourchette n'est pas doublé.
+export async function avecDerivesDAncre(parsed: ParsedProject): Promise<ParsedProject> {
+  const ancres = (parsed.communeAncre ?? []).filter((a) => a?.label?.trim());
+  if (ancres.length === 0) return parsed;
+  const resolues: IndexCommune[] = [];
+  for (const a of ancres) {
+    const e = a.insee ? await getCommuneEntry(a.insee) : await resolveCommuneByName(a.label);
+    if (e) resolues.push(e);
+  }
+  if (resolues.length === 0) return parsed;
+  return derivesDAncrePourRecherche(parsed, resolues, deriveAnchorPreferences(resolues).communeSize);
+}
+
+export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<MatchOutcome> {
+  const parsed = await avecDerivesDAncre(parsedDuLecteur);
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
 

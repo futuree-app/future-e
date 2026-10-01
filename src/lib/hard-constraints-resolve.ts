@@ -71,6 +71,9 @@ export type ResolvedSizeReference =
       canonicalLabel: string;
       urbanUnitCode: string | null;
       comparisonPopulation: number;
+      // FUT-8 : la population de la COMMUNE de référence, pour « plus petite que la commune de Lyon ».
+      // `null` = inconnue : la comparaison entre communes ne se fait pas (jamais de faux verdict).
+      communePopulation: number | null;
       populationYear: number;
       populationKind: "urban_unit" | "isolated_commune";
       source: "commune_index" | "plm_table";
@@ -87,10 +90,13 @@ export type DirectoryEntry = {
   lon: number;
   uu: string | null;
   tailleVille: number | null; // population d'agglomération (UU), ou communale si hors UU
+  population?: number | null; // FUT-8 : population COMMUNALE (absente d'un annuaire de test ancien)
 };
 export type PlaceDirectory = {
   byName(label: string): DirectoryEntry | null;
-  plmByName(label: string): { uu: string; pop: number } | null; // Paris / Lyon / Marseille
+  // Paris / Lyon / Marseille. FUT-8 : `communePop` = somme des arrondissements de l'index (null si un
+  // arrondissement manque) ; `uuPop` = population de l'unité urbaine parente, quand l'annuaire la connaît.
+  plmByName(label: string): { uu: string; pop: number; communePop?: number | null; uuPop?: number | null } | null;
 };
 
 // resolve-2 : le résolveur ne se contente plus de l'index des communes, il géocode (POI Géoplateforme,
@@ -195,6 +201,17 @@ export function resolveSizeReference(
   const m = meta(label, input, "size");
   const hit = dir.byName(normalizeName(label));
   if (!hit || hit.tailleVille == null) {
+    // Paris / Lyon / Marseille : absentes de l'index des noms (rangées par arrondissement). La table PLM
+    // donne la population communale (somme des arrondissements) et l'unité urbaine parente.
+    const plm = dir.plmByName(normalizeName(label));
+    if (plm && plm.uuPop != null) {
+      return {
+        status: "resolved", originalLabel: label,
+        canonicalLabel: label.trim().charAt(0).toUpperCase() + label.trim().slice(1),
+        urbanUnitCode: plm.uu, comparisonPopulation: plm.uuPop, communePopulation: plm.communePop ?? null,
+        populationYear: INDEX_POPULATION_YEAR, populationKind: "urban_unit", source: "plm_table", meta: m,
+      };
+    }
     return { status: "unresolved", originalLabel: label, reason: "no_result", meta: m };
   }
   return {
@@ -203,6 +220,7 @@ export function resolveSizeReference(
     canonicalLabel: hit.nom,
     urbanUnitCode: hit.uu,
     comparisonPopulation: hit.tailleVille,
+    communePopulation: hit.population ?? null,
     populationYear: INDEX_POPULATION_YEAR,
     populationKind: hit.uu ? "urban_unit" : "isolated_commune",
     source: "commune_index",

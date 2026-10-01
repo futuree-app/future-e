@@ -31,6 +31,13 @@ import type {
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { isConfirmed } from "./conditions.ts";
+import { evaluateExcludePlace, evaluateExcludeZones } from "../hard-constraints.ts";
+import { exclusionsAvecPerimetres } from "../hard-constraints-hydrate.ts";
+import type { HardConstraints } from "../hard-constraint-schema.ts";
+import { FAMILLES_MULTIPLES, hcRestreint, instancesDe, instanceDeVille } from "./effective-value.ts";
+import { toCommuneAttributes } from "./module-facts-map.ts";
+import { presenterCritere } from "./criterion-labels.ts";
+import type { CriterionRef } from "../user-project.ts";
 import { criterionCapability, type CapabilityAssessment, type EvaluationGrain } from "./capability.ts";
 import { hardConstraintLabel, HARD_CONSTRAINT_LABELS } from "./project-view.ts";
 import { classifyCoastDistance } from "./coast-facts.ts";
@@ -144,10 +151,23 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
       return `${ici} est ${a.observedLabel.startsWith("dans ") ? "" : "à "}${a.observedLabel}, pour ${a.expectedLabel} attendu.`;
     case "communeSize":
     case "sizeRelativeTo":
-      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+      return tailleRelativeDite(a, f);
     case "excludePlace":
-      return `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
+      // FUT-8 : l'étiquette porte le périmètre quand une ville est précisée « commune ».
+      return /^hors de (la commune|l'agglomération)/.test(a.observedLabel)
+        ? `${f.nom} se trouve ${a.observedLabel}.`
+        : `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
   }
+}
+
+// LA TAILLE, DITE À L'ÉCHELLE MESURÉE (FUT-8) : la population de la commune quand la comparaison porte sur
+// les communes ; sinon l'agglomération À LAQUELLE la commune appartient (Villeurbanne est dans celle de
+// Lyon : « l'agglomération de Villeurbanne » n'existe pas).
+function tailleRelativeDite(a: HardConstraintAssessment, f: ModuleFacts): string {
+  const habitants = "observedLabel" in a ? a.observedLabel.replace(/ hab\.$/, " habitants") : "";
+  const surLaCommune = "observedValue" in a && a.observedValue?.kind === "population" && a.observedValue.unit === "commune";
+  if (surLaCommune || !f.uu) return `${f.nom} compte ${habitants}.`;
+  return `${f.nom} appartient à une agglomération de ${habitants}.`;
 }
 
 // LE FAIT, QUAND LE LIEU NE REMPLIT PAS LE CRITÈRE ET QUE futur•e NE SAIT QUE L'APPRÉCIER. Une phrase,
@@ -167,9 +187,9 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
       return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
     case "communeSize":
     case "sizeRelativeTo":
-      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+      return tailleRelativeDite(a, f);
     case "excludePlace":
-      return `${f.nom} fait partie de l'${a.observedLabel.replace(/^dans l'/, "")}.`;
+      return `${f.nom} fait partie ${a.observedLabel.replace(/^dans /, "de ")}.`;
     default:
       return "statement" in a ? a.statement : constatSatisfait(key, a, f, { context: { point: null } } as never);
   }
@@ -330,6 +350,61 @@ function mesureSansSeuil(
   return null;
 }
 
+// UNE VUE : la famille entière (cas général), ou quelques éléments d'une famille multiple (FUT-8).
+type Vue = { hard: HardEvaluation; hc: HardConstraints; confirme: boolean; instance: string | null };
+
+// FUT-8 : « JE DOIS QUITTER LYON, ET J'AIMERAIS ÉVITER BORDEAUX ». Quand une ville (ou une zone exclue) est
+// confirmée seule, chaque ville confirmée est évaluée seule, et les autres ensemble, comme avant. Sans
+// confirmation par élément, rien ne change : une seule vue, la famille entière. La Recherche n'est pas
+// concernée (elle évalue toujours la famille entière).
+function vuesParElement(key: HardConstraintKey, f: ModuleFacts, project: UserProject, hard: HardEvaluation): Vue[] | null {
+  if (!FAMILLES_MULTIPLES.has(key)) return null;
+  const hc = project.parsed?.hardConstraints ?? {};
+  const instances = instancesDe(hc, key);
+  const confirmees = instances.filter((i) => isConfirmed(project, { kind: "hard", key, instance: i }));
+  if (confirmees.length === 0) return null;
+  const attrs = toCommuneAttributes(f);
+  const vue = (garde: string[], confirme: boolean, instance: string | null): Vue => {
+    const sous = hcRestreint(hc, key, garde);
+    const constraints = key === "excludePlace"
+      ? { ...hard.context.constraints, excludePlace: hard.context.constraints.excludePlace.filter((e) => garde.includes(instanceDeVille(e.label))) }
+      : { ...hard.context.constraints, excludeZones: exclusionsAvecPerimetres(sous) };
+    const context = { ...hard.context, constraints };
+    const a = key === "excludePlace" ? evaluateExcludePlace(context, attrs) : evaluateExcludeZones(context, attrs);
+    return { hard: { context, byKey: { ...hard.byKey, [key]: a } }, hc: sous, confirme, instance };
+  };
+  const autres = instances.filter((i) => !confirmees.includes(i));
+  return [...confirmees.map((i) => vue([i], true, i)), ...(autres.length > 0 ? [vue(autres, false, null)] : [])];
+}
+
+// FUT-8 : UNE CONDITION DIT LE SENS QUE futur•e LUI A DONNÉ. Le projet lu ici est la valeur effective :
+// une précision du lecteur (« à vol d'oiseau », « la commune seulement ») y est déjà, et le registre des
+// libellés la met en mots. Seules les cartes de condition la portent ; un écart reste un écart.
+function avecSensRetenu(ev: RuleEvaluation, project: UserProject, ref: CriterionRef): RuleEvaluation {
+  const sens = presenterCritere(project, ref)?.interpretation;
+  if (!sens) return ev;
+  const phrase = /^Pour cette analyse/.test(sens) ? sens : `Pour cette analyse : ${sens.charAt(0).toLowerCase()}${sens.slice(1)}`;
+  return {
+    ...ev,
+    facts: ev.facts.map((x) =>
+      x.role === "condition_check" || x.role === "condition_met" || x.role === "incompatibility" ? { ...x, senseRetenu: phrase } : x),
+  };
+}
+
+// L'issue la plus grave l'emporte quand plusieurs vues sont fusionnées.
+const GRAVITE: RuleEvaluation["outcome"][] = ["incompatible", "condition_check", "mismatch", "uncertain", "satisfied", "not_applicable"];
+const gravite = (o: RuleEvaluation["outcome"]) => { const i = GRAVITE.indexOf(o); return i < 0 ? GRAVITE.length : i; };
+
+// Un fait évalué sur UN élément porte cet élément : identifiant distinct, critère précis.
+function marquerElement(fact: RuleEvaluation["facts"][number], instance: string): RuleEvaluation["facts"][number] {
+  const id = `${fact.id}:${instance}`;
+  if (fact.role === "condition_check" || fact.role === "condition_met") {
+    return { ...fact, id, criterion: { ...fact.criterion, instance } } as typeof fact;
+  }
+  if (fact.role === "incompatibility" || fact.role === "mismatch") return { ...fact, id, criterionInstance: instance };
+  return { ...fact, id };
+}
+
 function makeRule(key: HardConstraintKey): DecisionRule {
   const id = `territoire.hard.${key}`;
   return {
@@ -337,6 +412,29 @@ function makeRule(key: HardConstraintKey): DecisionRule {
     module: "territoire",
     hardConstraint: key,
     evaluate: (f, project, hard): RuleEvaluation => {
+      const vues = vuesParElement(key, f, project, hard);
+      if (!vues) {
+        return avecSensRetenu(evaluerVue(f, project, {
+          hard, hc: project.parsed?.hardConstraints ?? {}, confirme: isConfirmed(project, { kind: "hard", key }), instance: null,
+        }), project, { kind: "hard", key, instance: null });
+      }
+      const evs = vues.map((v) => {
+        const ev = avecSensRetenu(evaluerVue(f, project, v), project, { kind: "hard", key, instance: v.instance });
+        return v.instance ? { ...ev, facts: ev.facts.map((x) => marquerElement(x, v.instance!)) } : ev;
+      });
+      const pire = evs.reduce((p, e) => (gravite(e.outcome) < gravite(p.outcome) ? e : p));
+      return { ...pire, facts: evs.flatMap((e) => e.facts), reason: evs.map((e) => e.reason).join(" ; ") };
+    },
+  };
+
+  function evaluerVue(f: ModuleFacts, projetComplet: UserProject, vue: Vue): RuleEvaluation {
+    {
+      const hard = vue.hard;
+      // Les libellés de la vue ne nomment QUE ses éléments : la carte sur « quitter Lyon » ne parle pas de
+      // Bordeaux. La confirmation et la capacité viennent de la vue, pas de ce projet restreint.
+      const project: UserProject = vue.hc !== projetComplet.parsed?.hardConstraints && projetComplet.parsed
+        ? { ...projetComplet, parsed: { ...projetComplet.parsed, hardConstraints: vue.hc } }
+        : projetComplet;
       // Les 11 évaluations ont été calculées UNE fois, par runRules. Les rappeler ici en ferait 121.
       const a = hard.byKey[key];
       const ret = (outcome: RuleEvaluation["outcome"], facts: RuleEvaluation["facts"], reason: string): RuleEvaluation =>
@@ -344,10 +442,8 @@ function makeRule(key: HardConstraintKey): DecisionRule {
 
       if (a.status === "not_declared") return ret("not_applicable", [], "non déclarée");
 
-      const confirme = isConfirmed(project, { kind: "hard", key });
-      const capacite = criterionCapability(
-        { kind: "hard", key, hc: project.parsed?.hardConstraints ?? {} }, grainDe(hard),
-      );
+      const confirme = vue.confirme;
+      const capacite = criterionCapability({ kind: "hard", key, hc: vue.hc }, grainDe(hard));
 
       if (a.status === "unexamined") {
         // Une condition confirmée qu'on ne sait qu'apprécier, sans seuil mais avec une mesure : la mesure
@@ -426,8 +522,8 @@ function makeRule(key: HardConstraintKey): DecisionRule {
         ...(status ? { status } : {}),
       };
       return ret("mismatch", [ecart], "critère du projet non rempli, non confirmé");
-    },
-  };
+    }
+  }
 }
 
 export const HARD_CONSTRAINT_RULES: DecisionRule[] = HARD_CONSTRAINT_KEYS.map(makeRule);

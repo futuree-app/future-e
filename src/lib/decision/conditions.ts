@@ -13,11 +13,13 @@ import { normalizeConditions } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
 import { canonique, valeurDecisionnelle } from "./criterion-value.ts";
+import { effectiveProject, valeurParsed, FAMILLES_MULTIPLES, instancesDe } from "./effective-value.ts";
 
 export type { CriterionRef, ConditionConfirmation } from "../user-project.ts";
 
+// FUT-8 : le même ÉLÉMENT, pas seulement la même famille. `instance` absente et `null` se valent.
 export function sameCriterion(a: CriterionRef, b: CriterionRef): boolean {
-  return a.kind === b.kind && a.key === b.key;
+  return a.kind === b.kind && a.key === b.key && (a.instance ?? null) === (b.instance ?? null);
 }
 
 /**
@@ -33,13 +35,25 @@ export function sameCriterion(a: CriterionRef, b: CriterionRef): boolean {
  * « essentiel » à « important » change son importance, pas le fait que le lecteur n'envisage pas un
  * lieu sans médecin.
  */
+//
+// FUT-8 : l'empreinte porte la VALEUR EFFECTIVE (parsed ⊕ définition valide). Préciser une métrique, une
+// unité, un périmètre change donc l'empreinte, et une confirmation donnée avant la précision ne vaut plus
+// pour le sens précisé. Pour un ÉLÉMENT d'une famille multiple (« quitter Lyon »), la valeur est celle de
+// cet élément seul. Sans instance, le format est celui de FUT-7 : aucune empreinte existante ne bouge.
 export function criterionFingerprint(project: UserProject, ref: CriterionRef): string | null {
+  const eff = effectiveProject(project);
   if (ref.kind === "hard") {
-    const hc = project.parsed?.hardConstraints;
-    if (!hc || !declaredHardConstraintKeys(project).includes(ref.key)) return null;
+    const hc = eff.parsed?.hardConstraints;
+    if (!hc || !declaredHardConstraintKeys(eff).includes(ref.key)) return null;
+    const instance = ref.instance ?? null;
+    if (instance != null) {
+      if (!FAMILLES_MULTIPLES.has(ref.key)) return null;
+      const v = valeurParsed(eff, ref);
+      return v === undefined ? null : `hard:${ref.key}:${instance}:${canonique(v)}`;
+    }
     return `hard:${ref.key}:${canonique(valeurDecisionnelle(ref.key, hc))}`;
   }
-  return preferenceWeight(project, ref.key) > 0 ? `pref:${ref.key}` : null;
+  return preferenceWeight(eff, ref.key) > 0 ? `pref:${ref.key}` : null;
 }
 
 /** Les confirmations lisibles du projet, valides ou périmées. */
@@ -59,9 +73,14 @@ export function isStale(project: UserProject, ref: CriterionRef): boolean {
 }
 
 /** Les critères déclarés ET confirmés, dans l'ordre du projet (géographie, puis préférences). */
+// FUT-8 : une famille multiple compte aussi chacun de ses éléments (« quitter Lyon » confirmé seul).
 export function confirmedCriteria(project: UserProject): CriterionRef[] {
+  const hc = effectiveProject(project).parsed?.hardConstraints ?? {};
   const refs: CriterionRef[] = [
-    ...declaredHardConstraintKeys(project).map((key): CriterionRef => ({ kind: "hard", key })),
+    ...declaredHardConstraintKeys(project).flatMap((key): CriterionRef[] => [
+      { kind: "hard", key },
+      ...(FAMILLES_MULTIPLES.has(key) ? instancesDe(hc, key).map((instance): CriterionRef => ({ kind: "hard", key, instance })) : []),
+    ]),
     ...declaredPreferenceKeys(project).map((key): CriterionRef => ({ kind: "preference", key })),
   ];
   return refs.filter((r) => isConfirmed(project, r));
@@ -82,7 +101,8 @@ export function hasAnyConfirmedCondition(project: UserProject): boolean {
  * Poids 0 = non déclarée : jamais.
  */
 export function preferenceSurfaced(project: UserProject, key: PreferenceKey): boolean {
-  const w = preferenceWeight(project, key);
+  // Le poids EFFECTIF (adoptions comprises) : une préférence adoptée se montre comme une préférence dite.
+  const w = preferenceWeight(effectiveProject(project), key);
   if (w <= 0) return false;
   return w >= 2 || isConfirmed(project, { kind: "preference", key });
 }

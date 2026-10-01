@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { vueCriteres } from "@/lib/decision/projet-criteres-vue";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { MODULE_HREF } from "@/lib/product";
@@ -10,7 +11,6 @@ import { TrackedAddressCta, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
-import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { EnTeteDossier } from "@/components/report/EnTeteDossier";
 import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
@@ -319,7 +319,8 @@ export default async function RapportPage() {
         {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
             page authentifiée, si elles ne sont pas déjà en base. */}
         <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
-        <OuVivreProjectSync hasServerProject={Boolean((profile as { user_project?: unknown } | null)?.user_project)} />
+        {/* FUT-8 : une recherche « Où vivre » n'écrit plus le Projet d'elle-même. Le lecteur la reprend
+            par un geste explicite (ProjectSummaryCard → RepriseRecherche), après un aperçu. */}
 
         {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
         {territory.deniedInsee && (
@@ -594,6 +595,7 @@ export default async function RapportPage() {
         <div id={ANCRE_PROJET} className="scroll-mt-24 mt-12">
           <ProjectSummaryCard
             initial={userProject}
+            criteres={vueCriteres(userProject)}
             // Le hero porte déjà « Décrire mon projet » dans cet état : la carte n'a pas à répéter
             // le même appel, elle reçoit le geste avec son formulaire ouvert.
             ouvertDemblee={heroContenu.kind === "invite"}

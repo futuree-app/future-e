@@ -1,5 +1,6 @@
 // Assembleur PUR : états de conclusion HONNÊTES (périmètre communal, deux vides distincts,
 // project_not_structured), couverture nommée, hiérarchie plafonnée. Aucun LLM.
+import { hcRestreint } from "./effective-value.ts";
 import type {
   DecisionFact, Dossier, DossierSection, DossierCard, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
   IncompatibilityFact,
@@ -208,7 +209,13 @@ export function assembleDossier(
       ? {
           factId: established.id,
           statement: established.statement,
-          constraintLabel: hardConstraintLabel(project, established.hardConstraintKey),
+          // FUT-8 : une condition portée par UNE ville se nomme par cette ville seule.
+          constraintLabel: hardConstraintLabel(
+            established.criterionInstance && project.parsed
+              ? { ...project, parsed: { ...project.parsed, hardConstraints: hcRestreint(project.parsed.hardConstraints ?? {}, established.hardConstraintKey, [established.criterionInstance]) } }
+              : project,
+            established.hardConstraintKey,
+          ),
           constraintKey: established.hardConstraintKey,
         }
       : null,

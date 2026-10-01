@@ -227,22 +227,30 @@ export type NormalizedHardConstraints = {
   zones: {
     hardDepartements: Set<string>; labels: string[]; unresolvedLabels: string[]; match: "all" | "any";
   } | null;
-  excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
+  // `uuExclues` (FUT-8) : « l'agglomération parisienne », choisie par le lecteur, se teste sur l'unité
+  // urbaine, pas sur des départements.
+  excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[]; uuExclues?: string[] } | null;
   montagne: boolean; // seulement strength === "hard"
   reliefProche: boolean; // seulement strength === "hard"
   nearSea: { threshold: PlaceThreshold | null } | null;
   excludeSea: boolean;
-  communeSize: { min: number | null; max: number | null } | null;
+  // `unit` (FUT-8) : « commune de… » se lit sur la population communale ; sinon, l'agglomération.
+  communeSize: { min: number | null; max: number | null; unit?: "commune" | "unite_urbaine" | null } | null;
   nearPlace: {
     label: string;
     threshold: PlaceThreshold | null;
+    // FUT-8 : la métrique DITE ou précisée par le lecteur, pour la phrase seulement. Le moteur mesure
+    // toujours à vol d'oiseau ; le seuil, lui, ne change pas (il entre dans les empreintes vendues).
+    metriqueDite?: "vol_oiseau" | "route" | null;
     reference: ResolvedPlaceReference;
     // L'isochrone, DÉJÀ CALCULÉE par la couche serveur (hard-constraints-external.ts). Le noyau ne fait
     // pas de réseau : il reçoit. `null` = personne n'a même eu à essayer (aucun seuil de temps).
     reachability: ReachabilityState | null;
   } | null;
-  excludePlace: { label: string; reference: ResolvedUrbanAreaReference }[];
-  sizeRelativeTo: { label: string; direction: "smaller" | "larger"; reference: ResolvedSizeReference } | null;
+  // `scope` (FUT-8) : « quitter la commune de Lyon » ne vise que la commune ; sinon, l'agglomération.
+  excludePlace: { label: string; reference: ResolvedUrbanAreaReference; scope?: "commune" | "unite_urbaine" | null }[];
+  // `unit` (FUT-8) : « commune » compare les populations communales ; sinon, les agglomérations.
+  sizeRelativeTo: { label: string; direction: "smaller" | "larger"; unit?: "commune" | "unite_urbaine" | null; reference: ResolvedSizeReference } | null;
 };
 
 export type EvaluationContext = {
@@ -414,7 +422,7 @@ export function evaluateZones(
     return {
       key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: perimetre, evidenceKeys, topic,
-      statement: `${c.nom} se situe hors ${deCommune(perimetre)}.`,
+      statement: `${c.nom} se situe hors ${deLieu(perimetre)}.`,
     };
   }
   if (incomplet && !(union && dedans)) {
@@ -479,7 +487,7 @@ export function evaluateExcludeZones(
   const expectedValue: ConstraintValue = { kind: "departments", value: [...z.departements] };
   const observedLabel = `département ${c.dept}`;
 
-  if (z.departements.has(c.dept)) {
+  if (z.departements.has(c.dept) || (c.uu != null && (z.uuExclues ?? []).includes(c.uu))) {
     const zonesLabel = joinFr(z.labels);
     return {
       key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
@@ -632,10 +640,15 @@ export function evaluateCommuneSize(
   // LA TAILLE SE LIT SUR L'AGGLOMÉRATION (doctrine du chantier C), et le comparateur le faisait déjà.
   // Le dossier lisait la population COMMUNALE : une commune de 8 000 habitants dans l'unité urbaine de
   // Lyon était exclue par l'un et déclarée conforme par l'autre.
-  if (c.tailleVille == null) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
+  // FUT-8 : UNE TAILLE DITE « COMMUNE » SE LIT SUR LA COMMUNE. Paris, Lyon, Marseille sont indexées par
+  // arrondissement : la population d'un arrondissement n'est pas celle de la ville, on ne conclut pas.
+  const surLaCommune = cs.unit === "commune";
+  if (surLaCommune && estArrondissementPLM(c.insee)) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
+  const lue = surLaCommune ? c.population : c.tailleVille;
+  if (lue == null) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
 
-  const t = c.tailleVille;
-  const unit = c.uu ? "urban_unit" : "commune";
+  const t = lue;
+  const unit = surLaCommune || !c.uu ? "commune" : "urban_unit";
   const observedValue: ConstraintValue = { kind: "population", value: t, unit };
   const expectedValue: ConstraintValue = { kind: "population_range", min: cs.min, max: cs.max, unit: "urban_unit" };
   const observedLabel = `${fmt(t)} hab.`;
@@ -658,7 +671,7 @@ export function evaluateCommuneSize(
   // Le SUJET de la phrase suit la donnée réellement lue : l'agglomération quand la commune en a une, la
   // commune quand elle est son propre bassin. Juger sur une donnée et en montrer une autre serait pire
   // que la divergence elle-même.
-  const sujet = c.uu ? `L'agglomération à laquelle appartient ${c.nom} compte` : "Cette commune compte";
+  const sujet = c.uu && !surLaCommune ? `L'agglomération à laquelle appartient ${c.nom} compte` : "Cette commune compte";
   // « en dessous de 100 000 de la taille que vous avez posée » n'est pas une phrase française : le
   // seuil et son complément se télescopaient. Le seuil porte maintenant sa propre subordonnée.
   const seuil = over
@@ -886,7 +899,7 @@ export function evaluateNearPlace(
   return {
     key: "nearPlace", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
-    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km qu'indique votre projet.`,
+    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km${np.metriqueDite ? " à vol d'oiseau" : ""} ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km${np.metriqueDite === "vol_oiseau" ? " à vol d'oiseau" : np.metriqueDite === "route" ? " par la route" : ""} qu'indique votre projet.`,
   };
 }
 
@@ -895,6 +908,19 @@ export function evaluateNearPlace(
 // « Quitter Lyon ET Saint-Jean-de-Machin », dont seul Lyon se résout, sur une commune hors de Lyon :
 // rendre `satisfied` affirmerait une condition dont la MOITIÉ n'a jamais été testée. Une ville résolue
 // qui matche décide (c'est SÛR) ; sinon, une ville non résolue bloque ; sinon seulement, satisfied.
+// LES ARRONDISSEMENTS de Paris (751xx), Lyon (6938x) et Marseille (132xx), par unité urbaine parente.
+const PLM_PREFIXE_PAR_UU: Record<string, string> = { "00851": "751", "00760": "6938", "00759": "132" };
+export function estArrondissementPLM(insee: string): boolean {
+  return /^(751\d\d|6938\d|132\d\d)$/.test(insee);
+}
+
+// « le Sud-Ouest » → « du Sud-Ouest » ; « les Alpes » → « des Alpes » ; sinon comme une commune.
+function deLieu(label: string): string {
+  if (/^le /.test(label)) return `du ${label.slice(3)}`;
+  if (/^les /.test(label)) return `des ${label.slice(4)}`;
+  return deCommune(label);
+}
+
 export function evaluateExcludePlace(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -907,11 +933,30 @@ export function evaluateExcludePlace(
   const expectedValue: ConstraintValue = { kind: "boolean", value: false };
   const tousLabels = joinFr(list.map((e) => e.label));
 
-  const hit = list.find(
-    (e) => e.reference.status === "resolved" && e.reference.normalizedTerritoryCode === territoire,
-  );
+  // FUT-8 : « quitter la commune de Lyon » ne vise que la commune (ses arrondissements, pour Paris, Lyon,
+  // Marseille) ; sans précision, l'agglomération, comme avant.
+  const hit = list.find((e) => {
+    if (e.reference.status !== "resolved") return false;
+    if (e.scope === "commune") {
+      const prefixe = e.reference.urbanUnitCode ? PLM_PREFIXE_PAR_UU[e.reference.urbanUnitCode] : undefined;
+      return prefixe ? c.insee.startsWith(prefixe) : c.insee === e.reference.referenceCommuneInsee;
+    }
+    return e.reference.normalizedTerritoryCode === territoire;
+  });
   if (hit) {
     const label = hit.reference.status === "resolved" ? hit.reference.canonicalLabel : hit.label;
+    // FUT-8 : « quitter la commune de Lyon » se dit avec la commune, jamais avec l'agglomération.
+    if (hit.scope === "commune") {
+      return {
+        key: "excludePlace", status: "incompatible",
+        observedValue: { kind: "boolean", value: true }, expectedValue,
+        observedLabel: `dans la commune ${deCommune(label)}`,
+        expectedLabel: `hors ${deCommune(tousLabels)}`,
+        evidenceKeys,
+        topic: topicFit(`la commune ${deCommune(label)}`, "la commune à quitter"),
+        statement: `${c.nom} fait partie de la commune ${deCommune(label)}, que votre projet prévoit de quitter.`,
+      };
+    }
     return {
       key: "excludePlace", status: "incompatible",
       observedValue: { kind: "boolean", value: true }, expectedValue,
@@ -933,10 +978,17 @@ export function evaluateExcludePlace(
       detail: unresolved.map((e) => e.label).join(", "),
     };
   }
+  // FUT-8 : dès qu'une ville est précisée « commune », chaque ville se nomme avec son périmètre
+  // (« hors de la commune de Lyon et de l'agglomération de Bordeaux ») ; sinon, l'étiquette historique.
+  const avecPerimetre = list.some((e) => e.scope === "commune");
+  const parPerimetre = joinFr(list.map((e) => {
+    const nom = e.reference.status === "resolved" ? e.reference.canonicalLabel : e.label;
+    return e.scope === "commune" ? `de la commune ${deCommune(nom)}` : `de l'agglomération ${deCommune(nom)}`;
+  }));
   return {
     key: "excludePlace", status: "satisfied",
     observedValue: { kind: "boolean", value: false }, expectedValue,
-    observedLabel: `hors ${deCommune(tousLabels)}`,
+    observedLabel: avecPerimetre ? `hors ${parPerimetre}` : `hors ${deCommune(tousLabels)}`,
     expectedLabel: `hors ${deCommune(tousLabels)}`,
     evidenceKeys,
   };
@@ -951,9 +1003,31 @@ export function evaluateSizeRelativeTo(
   if (s.reference.status !== "resolved") {
     return { key: "sizeRelativeTo", status: "unexamined", reason: "unresolved_reference", detail: s.label };
   }
+  // FUT-8 : « PLUS PETITE QUE LA COMMUNE DE BREST » compare deux populations COMMUNALES. Il faut les deux :
+  // celle de la ville de référence (annuaire, arrondissements sommés pour Paris, Lyon, Marseille) et celle
+  // de la commune évaluée, qui ne peut pas être un arrondissement. Sinon : non examiné, jamais un verdict.
+  const ref = s.reference;
+  if (s.unit === "commune") {
+    if (ref.communePopulation == null || c.population == null || estArrondissementPLM(c.insee)) {
+      return { key: "sizeRelativeTo", status: "unexamined", reason: "missing_data" };
+    }
+    const tc = c.population;
+    const refPop = ref.communePopulation;
+    const okc = s.direction === "smaller" ? tc < refPop : tc > refPop;
+    const obs: ConstraintValue = { kind: "population", value: tc, unit: "commune" };
+    const exp: ConstraintValue = { kind: "population", value: refPop, unit: "commune" };
+    const obsLabel = `${fmt(tc)} hab.`;
+    const expLabel = `${s.direction === "smaller" ? "moins" : "plus"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} hab.)`;
+    const keys = ["commune.population", "project.hardConstraints.sizeRelativeTo"];
+    if (okc) return { key: "sizeRelativeTo", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: obsLabel, expectedLabel: expLabel, evidenceKeys: keys };
+    return {
+      key: "sizeRelativeTo", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: obsLabel, expectedLabel: expLabel, evidenceKeys: keys,
+      topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+      statement: `Cette commune compte ${fmt(tc)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    };
+  }
   if (c.tailleVille == null) return { key: "sizeRelativeTo", status: "unexamined", reason: "missing_data" };
 
-  const ref = s.reference;
   const t = c.tailleVille;
   // Bornes STRICTEMENT exclusives, comme dans le comparateur : « plus petit que Lyon » exclut
   // l'agglomération lyonnaise elle-même, pas seulement ce qui la dépasse.
@@ -970,8 +1044,16 @@ export function evaluateSizeRelativeTo(
   if (ok) {
     return { key: "sizeRelativeTo", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
-  // Le SUJET suit la donnée : une commune hors unité urbaine n'est pas « une agglomération ».
-  const sujet = c.uu ? "Cette agglomération compte" : "Cette commune compte";
+  // Le SUJET suit la donnée : une commune hors unité urbaine n'est pas « une agglomération ». Et la commune
+  // évaluée appartient à SON agglomération, qui ne porte pas forcément son nom (Villeurbanne, Lyon).
+  if (ref.urbanUnitCode != null && c.uu === ref.urbanUnitCode) {
+    return {
+      key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
+      topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+      statement: `${c.nom} fait partie de l'agglomération ${deCommune(ref.canonicalLabel)} elle-même (${fmt(t)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    };
+  }
+  const sujet = c.uu ? `${c.nom} appartient à une agglomération de` : "Cette commune compte";
   return {
     key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),

@@ -19,6 +19,7 @@ import {
   type IndexCommune,
 } from "@/lib/comparateur-vie";
 import { ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS } from "@/lib/geo-zones";
+import { assainirParsed } from "@/lib/parse-assainir";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 
 export const runtime = "nodejs";
@@ -96,24 +97,41 @@ const TOOL_INPUT_SCHEMA = {
             maxKm: { type: ["number", "null"] },
             maxMinutes: { type: ["number", "null"] },
             mode: { type: ["string", "null"], enum: ["car", "walk", "bike", null] },
+            metric: { type: ["string", "null"], enum: ["vol_oiseau", "route", null] },
           },
           required: ["label"],
           description:
-            "Proximité d'un lieu nommé. Le lieu N'EST PAS forcément une commune : ce peut être une gare (« la gare Matabiau »), un hôpital, une université, une adresse. Recopiez le lieu TEL QUE l'utilisateur le nomme, sans le remplacer par la ville qui le contient. NE CONVERTISSEZ JAMAIS un temps en distance : « à 30 minutes » va dans maxMinutes (jamais dans maxKm), « à 20 km » va dans maxKm. Le moteur sait calculer un vrai temps de trajet. mode = le moyen de transport SEULEMENT s'il est dit (« en voiture » car, « à pied » walk, « à vélo » bike) ; sinon null. Le moteur géolocalise le lieu : n'inventez pas de coordonnées.",
+            "Proximité d'un lieu nommé. Le lieu N'EST PAS forcément une commune : ce peut être une gare (« la gare Matabiau »), un hôpital, une université, une adresse. Recopiez le lieu TEL QUE l'utilisateur le nomme, sans le remplacer par la ville qui le contient. NE CONVERTISSEZ JAMAIS un temps en distance : « à 30 minutes » va dans maxMinutes (jamais dans maxKm), « à 20 km » va dans maxKm. Le moteur sait calculer un vrai temps de trajet. mode = le moyen de transport SEULEMENT s'il est dit (« en voiture » car, « à pied » walk, « à vélo » bike) ; sinon null. metric = la nature d'une distance en km SEULEMENT si elle est dite (« à vol d'oiseau » vol_oiseau, « par la route » route) ; sinon null. Le moteur géolocalise le lieu : n'inventez pas de coordonnées.",
         },
         communeSize: {
           type: ["object", "null"],
-          properties: { min: { type: ["number", "null"] }, max: { type: ["number", "null"] } },
-          description: "Taille de commune si explicite. petite ville = {min:5000,max:25000} ; ville moyenne = {min:25000,max:100000} ; grande ville = {min:100000,max:null}.",
+          properties: {
+            min: { type: ["number", "null"] },
+            max: { type: ["number", "null"] },
+            unit: { type: ["string", "null"], enum: ["commune", "unite_urbaine", null] },
+          },
+          description: "Taille SEULEMENT si un NOMBRE d'habitants est dit (« moins de 20 000 habitants »). Recopiez les bornes dites, rien d'autre. unit = « commune » si le lecteur parle de la commune (« une commune de moins de 20 000 habitants »), « unite_urbaine » s'il parle de l'agglomération ; null s'il ne le dit pas. « Petite ville », « ville moyenne », « grande ville » ne sont PAS des nombres : jamais de communeSize pour eux (voir sizeWord et les préférences de taille).",
         },
         excludePlace: {
           type: "array",
           description:
-            "Villes que l'utilisateur veut QUITTER ('quitter Lyon', 'fuir Bordeaux', 'ne plus vivre à Lille'). Le moteur exclut l'agglomération de la ville. Donnez le nom de la ville tel quel. EXCEPTION : Paris et la région parisienne vont dans excludeZones (paris / idf), PAS ici.",
+            "Villes que l'utilisateur veut QUITTER ('quitter Lyon', 'fuir Bordeaux', 'ne plus vivre à Lille'). Donnez le nom de la ville tel quel. scope = « commune » s'il parle de la commune elle-même (« quitter la commune de Lyon », « pas dans Lyon même »), « unite_urbaine » s'il parle de l'agglomération (« quitter l'agglomération lyonnaise », « ni Lyon ni sa banlieue ») ; null s'il ne le dit pas. EXCEPTION : Paris et la région parisienne vont dans excludeZones (paris / idf), PAS ici.",
           items: {
             type: "object",
-            properties: { label: { type: "string" } },
+            properties: {
+              label: { type: "string" },
+              scope: { type: ["string", "null"], enum: ["commune", "unite_urbaine", null] },
+            },
             required: ["label"],
+          },
+        },
+        excludeZonesDits: {
+          type: "array",
+          description: "Pour CHAQUE jeton d'excludeZones, les mots exacts du lecteur (« la région parisienne », « l'Île-de-France », « Paris »).",
+          items: {
+            type: "object",
+            properties: { token: { type: "string" }, said: { type: "string" } },
+            required: ["token", "said"],
           },
         },
         sizeRelativeTo: {
@@ -123,9 +141,35 @@ const TOOL_INPUT_SCHEMA = {
           properties: {
             label: { type: "string" },
             direction: { type: "string", enum: ["smaller", "larger"] },
+            unit: { type: ["string", "null"], enum: ["commune", "unite_urbaine", null] },
           },
           required: ["label", "direction"],
         },
+      },
+    },
+    sizeWord: {
+      type: ["string", "null"],
+      enum: ["petite", "moyenne", "grande", null],
+      description: "Le MOT de taille dit par le lecteur : « petite ville » petite, « ville moyenne » moyenne, « grande ville » / « métropole » grande ; null sinon. Il accompagne les préférences de taille, il ne remplace pas un nombre.",
+    },
+    forceMarkers: {
+      type: "array",
+      description: "Les MOTS FORTS posés sur un critère précis (« absolument », « impérativement », « rédhibitoire », « surtout pas », « il faut »). Une entrée par critère marqué : criterion = { kind: 'hard', key, instance } pour un critère géographique (instance = nom de la ville pour excludePlace, jeton pour excludeZones, null sinon), ou { kind: 'preference', key, instance: null } ; quote = les mots exacts. Ce n'est qu'une suggestion : le lecteur confirmera lui-même.",
+      items: {
+        type: "object",
+        properties: {
+          criterion: {
+            type: "object",
+            properties: {
+              kind: { type: "string", enum: ["hard", "preference"] },
+              key: { type: "string" },
+              instance: { type: ["string", "null"] },
+            },
+            required: ["kind", "key"],
+          },
+          quote: { type: "string" },
+        },
+        required: ["criterion", "quote"],
       },
     },
     preferences: {
@@ -223,7 +267,7 @@ ANCRES GÉOGRAPHIQUES (zones / excludeZones) : règles spécifiques
   • PROCHE d'une montagne (champ reliefProche) : "proche d'une montagne", "proche de la montagne", "au pied des montagnes", "pour faire de la randonnée", "près des sommets" → reliefProche, force adéquate. C'est l'accès au relief sans vivre en altitude (une ville au pied d'un massif convient). NE confondez PAS avec montagne.
   • Massif NOMMÉ (zones) : "près des Alpes", "dans les Pyrénées" → zones (alpes/pyrenees…), PAS montagne ni reliefProche.
 - Exclusions de ZONE → excludeZones (jetons fermés). "pas le Nord" → excludeZones:["nord"]. "quitter Paris" / "la région parisienne" → excludeZones:["paris"|"idf"] (cas spécial petite couronne, NE PAS utiliser excludePlace).
-- Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon"}] etc. (le moteur exclut l'agglomération). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
+- Exclusion de VILLE → excludePlace. "quitter Lyon", "fuir Bordeaux", "ne plus vivre à Lille", "partir de Nantes" → excludePlace:[{label:"Lyon", scope:null}] etc. scope seulement s'il est dit (« la commune de Lyon » commune, « l'agglomération lyonnaise » unite_urbaine). Une ville n'est PAS un jeton de zone : ne la mettez jamais dans excludeZones.
 - TAILLE RELATIVE → sizeRelativeTo. "plus petit que Lyon", "pas plus grand que Bordeaux" → {label:"Lyon", direction:"smaller"}. "plus grand que Niort" → {label:"Niort", direction:"larger"}. Donnez le label brut, jamais une population.
 - Vous ne fournissez QUE des jetons et leur force. N'écrivez jamais vous-même de liste de départements.
 - DESTINATIONS OU PROPRIÉTÉS : zonesMatch. Ne suivez PAS la conjonction grammaticale, suivez ce que la personne décrit. Personne ne cherche une commune qui serait à la fois en Bretagne et en Loire-Atlantique : « je veux vivre en Bretagne et en Loire-Atlantique » énumère deux DESTINATIONS acceptables.
@@ -371,7 +415,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Analyse indisponible. Réessayez." }, { status: 502 });
     }
 
-    const parsed = toolBlock.input as ParsedProject;
+    // FUT-8 : seul ce qui a été DIT entre dans `parsed` (métrique, unité, périmètre, mots forts).
+    const parsed = assainirParsed(toolBlock.input as ParsedProject, typeof text === "string" ? text : "");
 
     // ── Ancrage « une ville comme {commune} » ─────────────────────────────────
     // Dérivation DÉTERMINISTE post-LLM : le LLM n'a extrait que le label. On traduit
@@ -404,28 +449,20 @@ export async function POST(request: NextRequest) {
           deriv.traits = deriv.traits.filter((t) => t.key !== "proximite_mer");
         }
 
-        // Fusion préférences : l'EXPLICITE écrase le dérivé (même key -> garder l'explicite).
+        // Fusion préférences : l'EXPLICITE écrase le dérivé (même key -> garder l'explicite). Une
+        // préférence dérivée porte sa provenance (`source: "ancre"`) : « inspiré de Brest ».
         const explicitKeys = new Set(parsed.preferences.map((p) => p.key));
         for (const p of deriv.preferences) {
-          if (!explicitKeys.has(p.key)) parsed.preferences.push(p);
+          if (!explicitKeys.has(p.key)) parsed.preferences.push({ ...p, source: "ancre" });
         }
 
-        // Taille : l'explicite écrase le gabarit dérivé. « Explicite » couvre la contrainte
-        // dure (communeSize / sizeRelativeTo) MAIS AUSSI une préférence de taille nommée
-        // (eviter_grandes_villes / prefere_grande_ville) : sinon le plancher dur dérivé de
-        // l'ancre (« comme Brest » -> min 81 500) contredirait « surtout pas une grande ville ».
-        const explicitSizePref =
-          explicitKeys.has("eviter_grandes_villes") || explicitKeys.has("prefere_grande_ville");
-        if (deriv.communeSize && !hc.communeSize && !hc.sizeRelativeTo && !explicitSizePref) {
-          hc.communeSize = deriv.communeSize;
-        }
-
-        // Ancre exclue du trio : ne pas proposer {ville} en réponse à « comme {ville} ».
-        // Réutilise l'exclusion d'agglomération existante du moteur (excludePlace).
-        hc.excludePlace = [
-          ...(hc.excludePlace ?? []),
-          ...resolved.map((e) => ({ label: e.nom })),
-        ];
+        // FUT-8 : l'exclusion de l'ancre et la fourchette de taille ne sont PLUS écrites ici. Elles
+        // servent la recherche, pas le projet : matchProjects les recalcule (avecDerivesDAncre).
+        // On garde la commune exacte, pour que ce recalcul ne prenne pas un homonyme.
+        parsed.communeAncre = ancres.flatMap((a) => {
+          const e = resolved.find((r) => r.nom.toLowerCase() === a?.label?.trim().toLowerCase());
+          return a?.label ? [{ label: a.label, ...(e ? { insee: e.insee } : {}) }] : [];
+        });
 
         // Transparence : on NOMME exactement les traits dérivés. Jamais « similaire ».
         const suffix = anchorReformulationSuffix(resolved.map((e) => e.nom), deriv.traits.map((t) => t.text));

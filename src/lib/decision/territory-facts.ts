@@ -27,6 +27,7 @@ import type { RadonFacts } from "./radon-facts.ts";
 import type { UserProject } from "../user-project.ts";
 import { deCommune } from "../typography.ts";
 import { projetSansDerivesDAncre } from "./ancres-derivees.ts";
+import { effectiveProject } from "./effective-value.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
@@ -196,12 +197,13 @@ export async function withEvaluationPoint(
 // origine est certaine (cf. ancres-derivees.ts) ; le projet enregistré n'est pas modifié, et « Où vivre »
 // continue de s'en servir. Le même annuaire que la dérivation résout les ancres.
 export async function projetDeLecture(project: UserProject): Promise<UserProject> {
-  if (!project.parsed?.communeAncre?.length) return project;
+  // FUT-8 : le dossier lit la VALEUR EFFECTIVE du projet (parsed ⊕ définitions, préférences adoptées).
+  if (!project.parsed?.communeAncre?.length) return effectiveProject(project);
   const dir = await placeDirectory();
-  return projetSansDerivesDAncre(project, (label) => {
+  return effectiveProject(projetSansDerivesDAncre(project, (label) => {
     const e = dir.byName(label);
     return e ? { nom: e.nom, tailleVille: e.tailleVille } : null;
-  }).project;
+  }).project);
 }
 
 // Orchestrateur du hub : commune -> ModuleFacts -> règles -> assemblage. `hasAddress` reflète la
