@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   preferenceWeight, declaredPreferenceKeys, nearSeaLimitKm, communeSizeBounds,
-  isBuyer, isStructured, hasAnyHardConstraint, declaredHardConstraintKeys, hardConstraintLabel,
+  isBuyer, isStructured, declaredHardConstraintKeys, hardConstraintLabel,
 } from "./project-view.ts";
 import type { UserProject } from "../user-project.ts";
 
@@ -41,10 +41,23 @@ test("declaredPreferenceKeys + preferenceWeight", () => {
   assert.equal(preferenceWeight(project(HC), "nature"), 0);
 });
 
-test("nearSeaLimitKm + hasAnyHardConstraint", () => {
+test("nearSeaLimitKm + critères géographiques déclarés", () => {
   assert.equal(nearSeaLimitKm(project(HC)), 5);
-  assert.equal(hasAnyHardConstraint(project(HC)), true);
-  assert.equal(hasAnyHardConstraint(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), false);
+  assert.deepEqual(declaredHardConstraintKeys(project(HC)), ["nearSea", "communeSize"]);
+  assert.deepEqual(declaredHardConstraintKeys(project({ reformulation: "x", hardConstraints: {}, preferences: [] })), []);
+});
+
+// FUT-7, audit du 30/09 (cas R7) : « déclaré » coïncide avec ce que l'hydratation retient. Une taille
+// sans borne, un lieu sans libellé, une ville à quitter sans nom ne sont pas des critères.
+test("declaredHardConstraintKeys : les familles vides ne sont pas déclarées (alignées sur le noyau)", () => {
+  const p = project({
+    reformulation: "x", preferences: [],
+    hardConstraints: {
+      communeSize: { min: null, max: null }, nearPlace: { label: "" }, excludePlace: [{ label: "" }],
+      sizeRelativeTo: { label: "", direction: "smaller" }, excludeSea: false, nearSea: { active: false },
+    },
+  });
+  assert.deepEqual(declaredHardConstraintKeys(p), []);
 });
 
 // FUT-5. En « au moins une », les départements sont évalués DANS le périmètre des zones : le dossier

@@ -24,7 +24,7 @@
 // action qui dépend de la situation du lecteur. Aucune de ces pièces ne lit la prose du module.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 import type { DecisionRule, EvidenceRef, RuleEvaluation, VerificationFact } from "./decision-fact.ts";
-import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import { bucketDuProjet, type Bucket } from "./logement-gestes.ts";
 import type { EquipementProche } from "./autour-facts.ts";
 import { TYPE_GENERALISTE, TYPE_PHARMACIE } from "./autour-facts.ts";
@@ -219,7 +219,7 @@ const accesSoinsRule: DecisionRule = {
     // L'ACTIVATION VIENT DU PROJET. Sans priorité déclarée, ce constat n'aide personne à décider,
     // et l'ajouter à tous les dossiers ferait du bruit dans la décision de ceux qui n'ont rien
     // demandé. Le module Autour, lui, l'affiche pour tout le monde : c'est sa fonction.
-    if (preferenceWeight(p, "acces_soins") < 2) {
+    if (!preferenceSurfaced(p, "acces_soins")) {
       return ret("not_applicable", [], "priorité non déclarée");
     }
 
@@ -404,7 +404,7 @@ const gareRule: DecisionRule = {
       reason: string,
     ): RuleEvaluation => ({ ruleId: RULE_GARE, projectKeys: ["acces_transports"], outcome, facts, reason });
 
-    if (preferenceWeight(p, "acces_transports") < 2) {
+    if (!preferenceSurfaced(p, "acces_transports")) {
       return ret("not_applicable", [], "priorité non déclarée");
     }
     const equipements = f.autour?.equipements;

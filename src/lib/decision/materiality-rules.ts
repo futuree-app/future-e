@@ -17,6 +17,9 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import { aCommune } from "../typography.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys, preferenceWeight } from "./project-view.ts";
+import { isConfirmed, preferenceSurfaced } from "./conditions.ts";
+import { criterionCapability } from "./capability.ts";
+import { conditionsDePreference } from "./condition-rules.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { SECTEUR_RULES } from "./secteur-rules.ts";
 import { PERMIS_RULES } from "./permis-rules.ts";
@@ -123,12 +126,16 @@ const ruleInondation: DecisionRule = {
   id: RULE_INOND,
   module: "territoire",
   evaluate: (f, p): RuleEvaluation => {
-    if (preferenceWeight(p, "faible_risque_inondation") < 2) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "priorité non déclarée" };
+    // Poids 0 = non déclarée ; poids 1 EXAMINÉ mais tu (FUT-7, cf. les règles de santé).
+    if (preferenceWeight(p, "faible_risque_inondation") === 0) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_applicable", facts: [], reason: "priorité non déclarée" };
     if (f.inondationRisque == null) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "uncertain", facts: [], reason: "exposition inconnue" };
     // Examiné, rien à redire : un point FAVORABLE, silencieux (aucune carte). `not_applicable` disait
     // ici « hors sujet » d'une bonne nouvelle : le registre des critères l'aurait comptée comme un trou
     // de couverture, et n'aurait jamais vu un seul point positif. Cf. spec 2.1 §3.1.
     if (f.inondationRisque < 66) return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "satisfied", facts: [], reason: "exposition non notable" };
+    if (!preferenceSurfaced(p, "faible_risque_inondation")) {
+      return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_surfaced", facts: [], reason: "exposition notable, non matérialisée à ce poids" };
+    }
     const habitant = p.posture === "habitant";
     const catnat = catnatInondationDepuisCompte(f.catnatInondation, f.insee);
     const catnatCtx = catnat ? ` La commune a connu ${phraseConstatCatnatInondation(catnat)} (comptage administratif, pas une probabilité).` : "";
@@ -213,7 +220,8 @@ const ruleInondation: DecisionRule = {
 // qu'il faut aller regarder pour savoir ce que cela change pour vous.
 //
 // LA TABLE DE VÉRITÉ vaut pour LE FEU ET LES PLUIES :
-//   critère non déclaré (poids < 2)              -> not_applicable  (non examiné)
+//   critère non déclaré (poids 0)                -> not_applicable  (non examiné)
+//   poids 1, non confirmé, axe notable           -> not_surfaced    (examiné, tu : FUT-7)
 //   aucune valeur projetée lisible               -> uncertain       (non examiné : une donnée absente
 //                                                                    n'est JAMAIS une exposition faible)
 //   au moins un axe NOTABLE                      -> verification    (carte + chiffre + action)
@@ -338,7 +346,7 @@ const ruleChaleur: DecisionRule = {
     // verdict === "unfavorable" : la priorité déclarée est CONTREDITE. C'est un ÉCART AU PROJET (mismatch),
     // orientation « arbitration », jamais un constat territorial « au-delà de vos priorités » (verification).
     // Poids 1 : examiné, l'écart est réel, mais il ne mérite pas une carte (silencieux, aucun fait).
-    if (weight < 2) return ret("mismatch", [], "exposition défavorable, silencieuse (poids 1)");
+    if (!preferenceSurfaced(p, key)) return ret("mismatch", [], "exposition défavorable, silencieuse (poids 1)");
     // basis est non-null par construction (unfavorable => basis renseigné) ; la garde protège tout appelant.
     if (!basis) throw new Error(`[decision] ${RULE_CHALEUR}: invariant interne, fondement climatique attendu`);
 
@@ -534,7 +542,7 @@ const ruleFeu: DecisionRule = {
     if (verdict === "under_threshold") return ret("satisfied", [], "danger météorologique sous le seuil de signalement");
 
     // Poids 1 : l'écart est réel et compte dans la couverture, mais il ne mérite pas une carte.
-    if (weight < 2) return ret("mismatch", [], "danger d'incendie défavorable, silencieux (poids 1)");
+    if (!preferenceSurfaced(p, key)) return ret("mismatch", [], "danger d'incendie défavorable, silencieux (poids 1)");
     if (!basis) throw new Error(`[decision] ${RULE_FEU}: invariant interne, fondement climatique attendu`);
 
     const axe = c.joursFeu;
@@ -663,11 +671,16 @@ const rulePluies: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_PLUIES, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    // POIDS 0 = non déclarée. Le poids 1 est EXAMINÉ (FUT-7) : il rendait `not_applicable`, que le registre
+    // lisait comme « aucune règle ne sait examiner ce critère ». L'importance décidait de la capacité.
+    if (preferenceWeight(p, key) === 0) return ret("not_applicable", [], "priorité non déclarée");
     const axe = f.climat?.pluieMax24h;
     if (!axe || axe.projete == null) return ret("uncertain", [], "cumul de pluie indisponible");
     if (!axe.notable) return ret("satisfied", [], "intensité sous le seuil de signalement");
 
+    // Examiné, signal établi, mais tu à poids 1 : le lecteur l'a dit secondaire. Une condition confirmée
+    // le montre quel que soit son poids (conditions.ts).
+    if (!preferenceSurfaced(p, key)) return ret("not_surfaced", [], "pluies extrêmes notables, non matérialisées à ce poids");
     const fact: VerificationFact = {
       id: `${f.insee}:climat-pluies`, ruleId: RULE_PLUIES, sourceFactIds: ["climat.pluieMax24h"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
@@ -710,7 +723,9 @@ const ruleAir: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_AIR, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    // POIDS 0 = non déclarée. Le poids 1 est EXAMINÉ (FUT-7) : il rendait `not_applicable`, que le registre
+    // lisait comme « aucune règle ne sait examiner ce critère ». L'importance décidait de la capacité.
+    if (preferenceWeight(p, key) === 0) return ret("not_applicable", [], "priorité non déclarée");
     const air = f.sante?.air;
     if (!air) return ret("uncertain", [], "qualité de l'air indisponible");
 
@@ -748,6 +763,9 @@ const ruleAir: DecisionRule = {
       });
     }
 
+    // Examiné, signal établi, mais tu à poids 1 : le lecteur l'a dit secondaire. Une condition confirmée
+    // le montre quel que soit son poids (conditions.ts).
+    if (!preferenceSurfaced(p, key)) return ret("not_surfaced", [], "seuil sanitaire dépassé, non matérialisé à ce poids");
     const fact: VerificationFact = {
       id: `${f.insee}:sante-air`, ruleId: RULE_AIR, sourceFactIds: ["viv.pm25", "viv.no2"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
@@ -781,7 +799,9 @@ const ruleBruit: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_BRUIT, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    // POIDS 0 = non déclarée. Le poids 1 est EXAMINÉ (FUT-7) : il rendait `not_applicable`, que le registre
+    // lisait comme « aucune règle ne sait examiner ce critère ». L'importance décidait de la capacité.
+    if (preferenceWeight(p, key) === 0) return ret("not_applicable", [], "priorité non déclarée");
     const b = f.sante?.bruit;
     if (!b?.lu) return ret("uncertain", [], "exposition sonore indisponible");
     // Une commune SANS source dominante n'est pas une commune non lue : elle est loin de toute
@@ -805,6 +825,9 @@ const ruleBruit: DecisionRule = {
         : ret("satisfied", [], "aucune infrastructure bruyante à portée");
     }
 
+    // Examiné, signal établi, mais tu à poids 1 : le lecteur l'a dit secondaire. Une condition confirmée
+    // le montre quel que soit son poids (conditions.ts).
+    if (!preferenceSurfaced(p, key)) return ret("not_surfaced", [], "infrastructure bruyante, non matérialisée à ce poids");
     const seuil = BRUIT_MAX_KM[b.source];
     const fact: VerificationFact = {
       id: `${f.insee}:sante-bruit`, ruleId: RULE_BRUIT, sourceFactIds: ["calmeSonore.sourceDominante", "calmeSonore.distanceKm"], module: "territoire",
@@ -836,11 +859,16 @@ const ruleIndustrie: DecisionRule = {
     const ret = (outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
       ({ ruleId: RULE_INDUSTRIE, projectKeys: [key], outcome, facts, reason });
 
-    if (preferenceWeight(p, key) < 2) return ret("not_applicable", [], "priorité non déclarée");
+    // POIDS 0 = non déclarée. Le poids 1 est EXAMINÉ (FUT-7) : il rendait `not_applicable`, que le registre
+    // lisait comme « aucune règle ne sait examiner ce critère ». L'importance décidait de la capacité.
+    if (preferenceWeight(p, key) === 0) return ret("not_applicable", [], "priorité non déclarée");
     const i = f.sante?.industrie;
     if (!i?.lu) return ret("uncertain", [], "exposition industrielle indisponible");
     if (!i.notable || i.classe == null) return ret("satisfied", [], "aucun site industriel à risque à portée");
 
+    // Examiné, signal établi, mais tu à poids 1 : le lecteur l'a dit secondaire. Une condition confirmée
+    // le montre quel que soit son poids (conditions.ts).
+    if (!preferenceSurfaced(p, key)) return ret("not_surfaced", [], "site industriel, non matérialisé à ce poids");
     const fact: VerificationFact = {
       id: `${f.insee}:sante-industrie`, ruleId: RULE_INDUSTRIE, sourceFactIds: ["expoIndustrielle.sourceDominante"], module: "territoire",
       role: "verification", materialityTier: tierFor(p, key),
@@ -957,12 +985,50 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
   }
 
   switch (fact.role) {
-    case "incompatibility":
+    case "incompatibility": {
       if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
       if (!declaredHardConstraintKeys(project).includes(fact.hardConstraintKey)) {
         throw new Error(`[decision] ${fact.ruleId}: incompatibilité sur une contrainte non déclarée (${fact.hardConstraintKey})`);
       }
+      // L'INVARIANT DE FUT-7. « Condition non respectée » exige une condition CONFIRMÉE par le lecteur et
+      // une capacité à TRANCHER au grain évalué. Une règle qui fabriquerait une incompatibilité sans
+      // l'une ou l'autre serait rejetée ici, avant d'atteindre l'écran.
+      const ref = { kind: "hard" as const, key: fact.hardConstraintKey };
+      if (!isConfirmed(project, ref)) {
+        throw new Error(`[decision] ${fact.ruleId}: incompatibilité sans condition confirmée par le lecteur (${fact.hardConstraintKey})`);
+      }
+      const cap = criterionCapability(
+        { kind: "hard", key: fact.hardConstraintKey, hc: project.parsed?.hardConstraints ?? {} }, fact.evaluatedGrain,
+      );
+      if (cap.capability !== "trancher") {
+        throw new Error(`[decision] ${fact.ruleId}: incompatibilité sur un critère que futur•e ne sait pas trancher (${fact.hardConstraintKey}, ${cap.reason})`);
+      }
       break;
+    }
+    case "condition_check":
+    case "condition_met": {
+      if (fact.evidence.length === 0) throw new Error(`[decision] ${fact.ruleId}: preuve manquante`);
+      assertStatus(fact);
+      if (!fact.headlineSubject || fact.headlineSubject.trim().length === 0) {
+        throw new Error(`[decision] ${fact.ruleId}: condition sans libellé`);
+      }
+      // Une carte de condition n'existe que pour une condition CONFIRMÉE. Sans confirmation, le critère
+      // est un critère ordinaire du projet, et il se lit comme tel.
+      if (!isConfirmed(project, fact.criterion)) {
+        throw new Error(`[decision] ${fact.ruleId}: carte de condition sur un critère non confirmé (${fact.criterion.key})`);
+      }
+      if (fact.role === "condition_check") {
+        // « À confirmer » ne se réduit jamais à « nous ne savons pas » : pourquoi futur•e ne tranche pas,
+        // et ce que cela change pour la décision, sont obligatoires.
+        if (!fact.whyNotDecided.trim() || !fact.consequence.trim()) {
+          throw new Error(`[decision] ${fact.ruleId}: condition à confirmer sans raison ou sans conséquence`);
+        }
+        if (fact.action && (fact.action.label.length > 70 || /[.!?]$/.test(fact.action.label))) {
+          throw new Error(`[decision] ${fact.ruleId}: action.label trop long ou ponctué (« ${fact.action.label} »)`);
+        }
+      }
+      break;
+    }
     case "compromise":
       if (fact.sides.length !== 2) throw new Error(`[decision] ${fact.ruleId}: un compromis a exactement deux côtés`);
       for (const s of fact.sides) {
@@ -1038,10 +1104,23 @@ export function assertFactValid(fact: DecisionFact, project: UserProject): void 
         if (basis.source !== "gaspar") {
           throw new Error(`[decision] ${fact.ruleId}: source de risque recensé inconnue (${basis.source})`);
         }
+      } else if (basis.kind === "declared_criterion") {
+        // FUT-7 : un critère GÉOGRAPHIQUE déclaré, non confirmé, que le lieu ne remplit pas. Il doit être un
+        // critère géographique déclaré, et ne jamais être une condition confirmée (elle aurait sa carte).
+        const cle = fact.projectKey as HardConstraintKey;
+        if (!declaredHardConstraintKeys(project).includes(cle)) {
+          throw new Error(`[decision] ${fact.ruleId}: écart sur un critère géographique non déclaré (${fact.projectKey})`);
+        }
+        if (isConfirmed(project, { kind: "hard", key: cle })) {
+          throw new Error(`[decision] ${fact.ruleId}: une condition confirmée ne se réduit pas à un écart (${fact.projectKey})`);
+        }
+        if (!basis.observedLabel.trim() || !basis.expectedLabel.trim()) {
+          throw new Error(`[decision] ${fact.ruleId}: écart géographique sans ses libellés d'évaluation`);
+        }
       } else if (basis.kind !== "relative_position" && basis.kind !== "named_absence") {
         throw new Error(`[decision] ${fact.ruleId}: basis de mismatch inconnu (${(basis as { kind: string }).kind})`);
       }
-      if (!declaredPreferenceKeys(project).includes(fact.projectKey)) {
+      if (basis.kind !== "declared_criterion" && !declaredPreferenceKeys(project).includes(fact.projectKey as PreferenceKey)) {
         throw new Error(`[decision] ${fact.ruleId}: mismatch sur une préférence non déclarée (${fact.projectKey})`);
       }
       break;
@@ -1102,8 +1181,13 @@ export function runRules(facts: ModuleFacts, project: UserProject, context: Eval
       outFacts.push(fact);
     }
   }
+  // LES PRÉFÉRENCES CONFIRMÉES COMME CONDITIONS (FUT-7). Après le registre, parce qu'elles réunissent ce
+  // que les règles ont établi : une carte « À confirmer » par condition, à la place des faits qu'elle
+  // reprend. Les cartes passent par la même validation que tout fait.
+  const conditions = conditionsDePreference(facts, project, evaluations, outFacts);
+  for (const fact of conditions.facts) if (!outFacts.includes(fact)) assertFactValid(fact, project);
   // `coveredHardConstraints` a disparu : il déclarait « couverte » toute contrainte dont l'outcome
   // n'était pas not_applicable, donc un `uncertain` aussi. La couverture se lit dans criteria-registry,
   // qui la DÉDUIT des évaluations exploitables.
-  return { facts: outFacts, evaluations };
+  return { facts: conditions.facts, evaluations: conditions.evaluations };
 }

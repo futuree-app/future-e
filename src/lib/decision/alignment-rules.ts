@@ -7,6 +7,7 @@
 import type { DecisionRule, RuleEvaluation, AlignmentFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { MISMATCH_KEYS } from "./mismatch-rules.ts"; // la MÊME liste de critères classables
 import {
@@ -42,6 +43,9 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
 
       const weight = preferenceWeight(p, key);
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+      // LA VISIBILITÉ N'EST PAS L'IMPORTANCE (FUT-7). Le poids règle le tier ; une condition confirmée se
+      // montre quel que soit son poids (conditions.ts).
+      const visible = preferenceSurfaced(p, key);
 
       const verdict = classifyPosition(relativeFact(f, key));
       if (verdict === "uncertain") return ret("uncertain", [], "rang non calculable");
@@ -49,7 +53,7 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
       // Seul `satisfied` matériel (poids >= 2) produit. `satisfied` poids 1 -> examiné, silencieux.
       // `mismatch` et `neutral` sont laissés à mismatch-rules / au silence : une dimension ne porte
       // jamais à la fois un alignment et un signal défavorable (l'outcome de classifyPosition est exclusif).
-      if (verdict !== "satisfied" || weight < 2) {
+      if (verdict !== "satisfied" || !visible) {
         return ret(
           verdict, [],
           verdict === "satisfied" ? "alignment mineur, silencieux (poids 1)" : `position ${verdict}`,

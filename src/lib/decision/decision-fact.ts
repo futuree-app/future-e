@@ -2,7 +2,8 @@
 // DecisionFact = union discriminée : le TYPE impose la doctrine (un unknown a un impact,
 // un compromise a deux côtés avec preuve, une verification a une action).
 import type { PreferenceKey } from "../comparateur-vie.ts";
-import type { UserProject } from "../user-project.ts";
+import type { UserProject, CriterionRef } from "../user-project.ts";
+import type { CapabilityReason, EvaluationGrain } from "./capability.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import type { SanteFacts } from "./sante-facts.ts";
 import type { RadonFacts } from "./radon-facts.ts";
@@ -28,6 +29,12 @@ export type VerificationActionType =
 // comparateur doivent parler des mêmes contraintes, sous les mêmes noms, ou ils recommenceront à
 // diverger.
 export type { HardConstraintKey } from "../hard-constraints.ts";
+export type { CriterionRef } from "../user-project.ts";
+
+// UN CRITÈRE DU PROJET, quelle que soit sa famille : une préférence pondérée ou un critère
+// géographique. FUT-7 les fait se rejoindre : un critère géographique non confirmé se lit désormais
+// comme un écart au projet, au même titre qu'une préférence.
+export type CriterionKey = PreferenceKey | HardConstraintKey;
 
 export type SourceCoverage = "present" | "none" | "unavailable"; // none = source a répondu, rien trouvé
 
@@ -105,12 +112,54 @@ type BaseFact = {
 // n'affirme ni droit ni délai (invariants 3 et 5) : il décrit la pratique, jamais la règle de droit.
 export type DecisionAction = { type: VerificationActionType; label: string; detail?: string };
 
+// « CONDITION NON RESPECTÉE ». Trois conditions, toutes nécessaires (FUT-7), et `assertFactValid` les
+// vérifie toutes : le lecteur a CONFIRMÉ ce critère comme condition sans compromis, futur•e sait le
+// TRANCHER au grain évalué, et l'évaluation canonique conclut à l'incompatibilité. `evaluatedGrain`
+// porte le grain auquel la capacité a été jugée, pour que la validation puisse la rejuger.
 export type IncompatibilityFact = BaseFact & {
   role: "incompatibility";
   evidenceStrength: "established" | "indicative";
   hardConstraintKey: HardConstraintKey;
+  evaluatedGrain: EvaluationGrain;
   evidence: EvidenceRef[];
   limitation?: string;
+};
+
+// LE SIGNAL D'UNE CONDITION QUE futur•e NE SAIT QU'APPRÉCIER. Jamais un verdict : ce vers quoi penche
+// ce que l'on sait.
+export type ConditionSignal = "favorable" | "defavorable" | "neutre";
+
+// « À CONFIRMER » (FUT-7). Le lecteur a fait de ce critère une condition sans compromis, et futur•e ne
+// dispose que d'éléments d'appréciation. Ce n'est ni un blocage (il n'est pas établi) ni un écart
+// ordinaire (le lecteur a dit qu'il n'en ferait pas un compromis) : il a son propre rôle, sa propre
+// place en tête du dossier, et il ne se réduit jamais à « nous ne savons pas ».
+//
+// D'où ses champs obligatoires : ce que l'on sait (`statement`, `evidence`), vers quoi cela penche
+// (`signal`), pourquoi cela ne suffit pas à trancher (`whyNotDecided`), ce que cela change pour la
+// décision (`consequence`). L'`action` n'existe que lorsque le geste utile est CONNU : on n'invente
+// aucune vérification.
+export type ConditionCheckFact = BaseFact & {
+  role: "condition_check";
+  criterion: CriterionRef;
+  // La condition, nommée comme le lecteur la reconnaît (« la Bretagne », « l'accès aux soins »).
+  headlineSubject: string;
+  signal: ConditionSignal;
+  status: string;            // « À confirmer », éventuellement précisé du signal
+  evidence: EvidenceRef[];
+  whyNotDecided: string;
+  capabilityReason: CapabilityReason;
+  consequence: string;
+  action?: DecisionAction;
+};
+
+// « CONDITION RESPECTÉE ». Confirmée, tranchable, satisfaite : un constat sobre, jamais un bilan. Le couple
+// visible est « respectée / non respectée ».
+export type ConditionMetFact = BaseFact & {
+  role: "condition_met";
+  criterion: CriterionRef;
+  headlineSubject: string;
+  status: "Condition respectée";
+  evidence: EvidenceRef[];
 };
 export type CompromiseSide = { projectKey: PreferenceKey; statement: string; evidence: EvidenceRef[] };
 export type CompromiseFact = BaseFact & { role: "compromise"; sides: [CompromiseSide, CompromiseSide] };
@@ -204,8 +253,17 @@ export type DeclaredHazardBasis = {
   source: "gaspar";
   observedLabel: string;
 };
+// UN CRITÈRE GÉOGRAPHIQUE DU PROJET, NON CONFIRMÉ, QUE LE LIEU NE REMPLIT PAS (FUT-7). Le constat vient
+// de l'évaluation canonique, telle que le filtre de la recherche l'applique ; il devient un écart au
+// projet, jamais une incompatibilité. Les deux libellés sont ceux de l'évaluation, pour qu'il reste
+// auditable.
+export type DeclaredCriterionBasis = {
+  kind: "declared_criterion";
+  observedLabel: string;
+  expectedLabel: string;
+};
 export type MismatchBasis =
-  DeclaredHazardBasis |
+  DeclaredCriterionBasis | DeclaredHazardBasis |
   NamedAbsenceBasis | RelativePositionBasis | AbsoluteMeasureBasis | CategoricalStateBasis | ClimateThresholdBasis;
 
 // LE FONDEMENT D'UN ALIGNMENT : la LISTE BLANCHE, portée par le TYPE. `named_absence` en est EXCLU — une
@@ -219,7 +277,8 @@ export type AlignmentBasis =
 // d'action (rien à vérifier, le constat est établi) ; sa seule limitation possible est le grain.
 export type MismatchFact = BaseFact & {
   role: "mismatch";
-  projectKey: PreferenceKey;
+  // Une préférence, ou (FUT-7) un critère géographique déclaré mais non confirmé.
+  projectKey: CriterionKey;
   basis: MismatchBasis;
   evidence: EvidenceRef[];
   limitation?: string;
@@ -260,7 +319,8 @@ export type AlignmentFact = BaseFact & {
 };
 
 export type DecisionFact =
-  IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact | AlignmentFact;
+  IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact | AlignmentFact
+  | ConditionCheckFact | ConditionMetFact;
 
 export type LogementFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
@@ -407,7 +467,14 @@ export type RuleOutcome =
   // MISMATCH : critère examiné, donnée robuste, résultat nettement DÉFAVORABLE, non éliminatoire. Peut être
   // MATÉRIEL (produit une carte) ou SILENCIEUX (poids 1 : facts vides). NEUTRAL : examiné, aucun signal
   // marqué (fait monter la couverture, aucune carte, aucun effet sur l'orientation).
-  | "mismatch" | "neutral";
+  | "mismatch" | "neutral"
+  // CONDITION_CHECK (FUT-7) : critère CONFIRMÉ, examiné, que futur•e ne sait qu'apprécier. Le critère est
+  // examiné ; il reste une condition OUVERTE.
+  | "condition_check"
+  // NOT_SURFACED (FUT-7) : examiné, mais le signal n'est pas matérialisé à ce poids (poids 1). Il
+  // existait sous la forme d'un `not_applicable`, que le registre lisait comme « aucune règle ne sait
+  // examiner ce critère » : l'importance décidait de la capacité affichée.
+  | "not_surfaced";
 
 export type RuleEvaluation = {
   ruleId: string;
@@ -450,7 +517,10 @@ export type RunResult = {
 export type ConclusionState =
   | "established_incompatibility" | "no_incompatibility_established"
   | "insufficient_evidence" | "no_hard_constraint_declared" | "project_not_structured";
-export type UncoveredConstraint = { key: HardConstraintKey; label: string };
+// UNE CONDITION CONFIRMÉE QUI N'A PAS PU ÊTRE EXAMINÉE ICI (FUT-7). Deux causes, deux phrases : futur•e ne
+// sait pas encore l'évaluer (`ne_pas_mesurer`, une limite du produit), ou la donnée manque ici
+// (`donnee_absente`, une limite de ce lieu).
+export type UncoveredConstraint = { key: string; label: string; cause: "ne_pas_mesurer" | "donnee_absente" };
 // LA CARTE DE PRÉSENTATION : fait simple ou composition, dans UNE liste commune. Une composition
 // compte pour une carte, donc elle vit dans la même liste, sous le même tri et le même cap : elle ne
 // passe jamais devant une carte plus matérielle du seul fait d'être composée.

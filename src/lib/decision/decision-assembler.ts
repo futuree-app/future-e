@@ -7,7 +7,8 @@ import type {
 import type { FactComposition } from "./fact-composition.ts";
 import { assertCompositionsValid } from "./fact-compositions.ts";
 import type { UserProject } from "../user-project.ts";
-import { hasAnyHardConstraint, isStructured, hardConstraintLabel } from "./project-view.ts";
+import { isStructured, hardConstraintLabel } from "./project-view.ts";
+import { hasAnyConfirmedCondition } from "./conditions.ts";
 import { buildCriteriaRegistry, uncoveredConstraints, uncoveredPreferences, inconclusivePreferences } from "./criteria-registry.ts";
 import { buildConclusionPlan } from "./conclusion-plan.ts";
 
@@ -68,22 +69,29 @@ function tierRank(f: DecisionFact): number {
 function cardTier(c: DossierCard): number {
   return c.kind === "fact" ? tierRank(c.fact) : TIER_RANK[c.composition.materialityTier] * 2 - 1;
 }
+// `roles` : les rôles que la section accueille, DANS L'ORDRE où elle les présente. Une seule section en
+// accueille plusieurs : celle des conditions sans compromis (FUT-7), qui montre d'abord ce qui est
+// établi contre le lieu, puis ce qui reste à confirmer, puis ce qui est rempli.
 function sectionCards(
   facts: DecisionFact[], comps: FactComposition[],
-  role: DecisionFact["role"], sectionKey: DossierSection["key"], cap: number,
+  roles: DecisionFact["role"][], sectionKey: DossierSection["key"], cap: number,
 ): DossierCard[] {
+  const rang = (c: DossierCard): number => (c.kind === "fact" ? roles.indexOf(c.fact.role) : 0);
   const cards: DossierCard[] = [
-    ...facts.filter((f) => f.role === role).map((f) => ({ kind: "fact" as const, fact: f })),
+    ...facts.filter((f) => roles.includes(f.role)).map((f) => ({ kind: "fact" as const, fact: f })),
     ...comps.filter((c) => c.displaySection === sectionKey).map((c) => ({ kind: "composition" as const, composition: c })),
   ];
-  return cards.sort((a, b) => cardTier(a) - cardTier(b)).slice(0, cap);
+  return cards.sort((a, b) => rang(a) - rang(b) || cardTier(a) - cardTier(b)).slice(0, cap);
 }
 
 function conclusionState(facts: DecisionFact[], project: UserProject): ConclusionState {
   if (!isStructured(project)) return "project_not_structured";
   if (facts.some((f) => f.role === "incompatibility" && f.evidenceStrength === "established")) return "established_incompatibility";
   if (facts.some((f) => f.role === "unknown" && f.impact === "blocking")) return "insufficient_evidence";
-  if (!hasAnyHardConstraint(project)) return "no_hard_constraint_declared";
+  // « AUCUNE CONDITION DÉCLARÉE » veut dire, depuis FUT-7, aucune condition CONFIRMÉE par le lecteur. Un
+  // critère géographique lu par le parseur n'en est pas une : sans cela, le verdict écrirait « aucune de
+  // vos conditions n'est contredite » à quelqu'un qui n'en a posé aucune.
+  if (!hasAnyConfirmedCondition(project)) return "no_hard_constraint_declared";
   return "no_incompatibility_established";
 }
 
@@ -114,7 +122,7 @@ export function assembleDossier(
   // la main. `run.coveredHardConstraints` n'est plus consulté ici : il marque une contrainte « couverte »
   // dès que l'outcome n'est pas not_applicable, donc un `unknown` (population absente) la déclarait
   // examinée alors que rien ne l'avait été.
-  const criteria = buildCriteriaRegistry(project, run);
+  const criteria = buildCriteriaRegistry(project, run, scope === "commune+adresse" ? "adresse" : "commune");
   const uncovered = uncoveredConstraints(criteria);
   // L'état de conclusion se juge sur les faits ÉMIS : une absorption est de la présentation, jamais un
   // adoucissement de l'état.
@@ -125,18 +133,24 @@ export function assembleDossier(
     // verdict (« Condition non respectée ») et le bloc des non examinées (« Condition à vérifier »)
     // emploient déjà. Ce titre était le dernier endroit de l'écran à dire « contrainte », et il se
     // lisait à trois centimètres d'un héros qui dit « condition ».
-    { key: "incompatibilities", title: "Vos conditions non négociables", cards: sectionCards(facts, compositions, "incompatibility", "incompatibilities", 2) },
+    // LES CONDITIONS SANS COMPROMIS (FUT-7) : celles que le lecteur a confirmées, toutes. Non respectée
+    // (établie), à confirmer (appréciée), remplie (tranchée). Aucun plafond : une condition que le
+    // lecteur a posée ne disparaît jamais derrière une autre.
+    {
+      key: "incompatibilities", title: "Vos conditions sans compromis",
+      cards: sectionCards(facts, compositions, ["incompatibility", "condition_check", "condition_met"], "incompatibilities", Number.POSITIVE_INFINITY),
+    },
     // ALIGNMENT (lot C) : ce que le lieu offre, ÉTABLI, en miroir du mismatch. Le PLACEMENT est porté par
     // l'ORDRE ici : la carte OUVRE les cartes, sauf quand une section incompatibilités existe — auquel cas
     // elle vient juste après (une condition non négociable violée est la seule chose qui compte, rien ne
     // passe devant le motif du blocage). Partout ailleurs, elle ouvre : le détail du verdict affirme déjà
     // « répond à plusieurs dimensions », et cette carte en est la preuve, juste sous le verdict.
-    { key: "alignments", title: "Ce qui correspond à votre projet", cards: sectionCards(facts, compositions, "alignment", "alignments", 3) },
+    { key: "alignments", title: "Ce qui correspond à votre projet", cards: sectionCards(facts, compositions, ["alignment"], "alignments", 3) },
     // MISMATCH : établi, non éliminatoire, à ARBITRER (jamais à vérifier). Sa propre section, entre les
     // incompatibilités et les compromis. Un mismatch n'est pas un compromis (pas de contrepartie).
-    { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, "mismatch", "mismatches", 3) },
-    { key: "compromises", title: "Ce qui départage vraiment", cards: sectionCards(facts, compositions, "compromise", "compromises", 3) },
-    { key: "unknowns", title: "Ce que nous ne savons pas encore", cards: sectionCards(facts, compositions, "unknown", "unknowns", 3) },
+    { key: "mismatches", title: "Ce qui correspond moins bien", cards: sectionCards(facts, compositions, ["mismatch"], "mismatches", 3) },
+    { key: "compromises", title: "Ce qui départage vraiment", cards: sectionCards(facts, compositions, ["compromise"], "compromises", 3) },
+    { key: "unknowns", title: "Ce que nous ne savons pas encore", cards: sectionCards(facts, compositions, ["unknown"], "unknowns", 3) },
     // LES CONTRÔLES NE SONT PLUS PLAFONNÉS (01/08/2026). Les cinq autres sections gardent le leur :
     // elles bornent le dossier interne, qui n'a pas de surface complète.
     //
@@ -145,7 +159,7 @@ export function assembleDossier(
     // pouvait pas savoir qu'il en existait d'autres. La minute, elle, reste plafonnée par son
     // propre plan (`MINUTE_MAX_CARTES`, mesuré au chronomètre) : ce que cette levée change, c'est
     // ce que le DOSSIER contient, pas ce que la minute montre.
-    { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, "verification", "verifications", Number.POSITIVE_INFINITY) },
+    { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, ["verification"], "verifications", Number.POSITIVE_INFINITY) },
   ];
   const sections = candidates.filter((s) => s.cards.length > 0);
   const allCards = sections.flatMap((s) => s.cards);
@@ -195,10 +209,13 @@ export function assembleDossier(
           factId: established.id,
           statement: established.statement,
           constraintLabel: hardConstraintLabel(project, established.hardConstraintKey),
+          constraintKey: established.hardConstraintKey,
         }
       : null,
     coverage: criteria.coverage,
     orientation: criteria.orientation,
+    openConditions: criteria.openConditions,
+    metConditions: criteria.metConditions,
     hasFavorable: criteria.hasFavorable,
     favorableCount: criteria.favorableCount,
     mismatchTotal,

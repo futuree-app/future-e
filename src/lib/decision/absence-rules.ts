@@ -5,6 +5,7 @@
 import type { DecisionRule, RuleEvaluation, MismatchFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import {
   classifyNetworkAbsence, classifyHigherEdAbsence, NETWORK_CONVENTION_ID, HIGHER_ED_CONVENTION_ID,
@@ -81,12 +82,15 @@ function makeAbsenceRule(spec: AbsenceSpec): DecisionRule {
 
       const weight = preferenceWeight(p, spec.key);
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+      // LA VISIBILITÉ N'EST PAS L'IMPORTANCE (FUT-7). Le poids règle le tier ; une condition confirmée se
+      // montre quel que soit son poids (conditions.ts).
+      const visible = preferenceSurfaced(p, spec.key);
 
       const verdict = spec.classify(f);
       if (verdict === "uncertain") return ret("uncertain", [], "absence non attestée (donnée indisponible)");
 
       // neutral (présent) toujours silencieux ; mismatch de poids 1 examiné mais silencieux (non matériel).
-      if (verdict !== "mismatch" || weight < 2) {
+      if (verdict !== "mismatch" || !visible) {
         return ret(verdict, [], verdict === "mismatch" ? "absence mineure, silencieuse (poids 1)" : "élément présent");
       }
 

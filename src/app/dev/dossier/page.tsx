@@ -22,7 +22,9 @@ import { notFound } from "next/navigation";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
-import type { UserProject } from "@/lib/user-project";
+import type { UserProject, CriterionRef } from "@/lib/user-project";
+import { buildConfirmation } from "@/lib/decision/conditions";
+import { HARD_CONSTRAINT_KEYS, type HardConstraintKey } from "@/lib/hard-constraints";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,10 @@ const OUTCOME_COLOR: Record<string, string> = {
 export default async function DevDossierPage({
   searchParams,
 }: {
-  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string }>;
+  // FUT-7 : `hc` = les critères géographiques en JSON ({"zones":[{"zone":"bretagne","strength":"hard"}]}),
+  // `confirmer` = les critères confirmés comme conditions sans compromis (« zones,proximite_mer »). Les
+  // confirmations sont construites comme le fera le geste de FUT-8, et n'existent que dans cette page.
+  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; hc?: string; confirmer?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
 
@@ -69,10 +74,26 @@ export default async function DevDossierPage({
   const hasAddress = sp.adresse === "1";
   const { prefs, inconnues } = parsePrefs(prefsRaw);
 
-  const project = {
+  let hc: unknown = {};
+  let hcErreur: string | null = null;
+  try {
+    hc = sp.hc ? JSON.parse(sp.hc) : {};
+  } catch {
+    hcErreur = "critères géographiques illisibles (JSON attendu)";
+  }
+  const base = {
     posture: "recherche", intent: null, rawText: null, updatedAt: "1970-01-01T00:00:00.000Z",
-    parsed: { reformulation: "projet de test", hardConstraints: {}, preferences: prefs },
+    parsed: { reformulation: "projet de test", hardConstraints: hc, preferences: prefs },
   } as unknown as UserProject;
+  const aConfirmer = (sp.confirmer ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  const conditions = aConfirmer.flatMap((cle) => {
+    const ref: CriterionRef = (HARD_CONSTRAINT_KEYS as string[]).includes(cle)
+      ? { kind: "hard", key: cle as HardConstraintKey }
+      : { kind: "preference", key: cle as never };
+    const c = buildConfirmation(base, ref, "2026-10-01T00:00:00.000Z");
+    return c ? [c] : [];
+  });
+  const project: UserProject = conditions.length > 0 ? { ...base, conditions } : base;
 
   const result = await buildCommuneDossier(insee, project, { hasAddress }).catch((e: unknown) => {
     return { erreur: e instanceof Error ? e.message : String(e) } as const;
@@ -106,6 +127,7 @@ export default async function DevDossierPage({
         </button>
       </form>
 
+      {hcErreur ? <p className="mb-6 text-[13px]" style={{ color: "var(--red)" }}>{hcErreur}</p> : null}
       {inconnues.length > 0 ? (
         <p className="mb-6 text-[13px]" style={{ color: "var(--red)" }}>
           Clés inconnues, ignorées : {inconnues.join(", ")}
@@ -133,6 +155,8 @@ export default async function DevDossierPage({
                     <th className="py-1 pr-4">critère déclaré</th>
                     <th className="py-1 pr-4">outcome</th>
                     <th className="py-1 pr-4">couverture</th>
+                    <th className="py-1 pr-4">confirmé</th>
+                    <th className="py-1 pr-4">capacité</th>
                     <th className="py-1">règles consultées</th>
                   </tr>
                 </thead>
@@ -142,6 +166,8 @@ export default async function DevDossierPage({
                       <td className="py-1 pr-4 text-label">{c.criterionKey}</td>
                       <td className="py-1 pr-4" style={{ color: OUTCOME_COLOR[c.outcome] ?? "var(--ghost)" }}>{c.outcome}</td>
                       <td className="py-1 pr-4">{c.coverage}</td>
+                      <td className="py-1 pr-4">{c.confirmed ? "oui" : "non"}</td>
+                      <td className="py-1 pr-4">{c.capability}</td>
                       <td className="py-1">{c.ruleIds.join(", ") || "—"}</td>
                     </tr>
                   ))}

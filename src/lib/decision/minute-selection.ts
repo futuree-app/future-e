@@ -49,11 +49,15 @@ type Role = DecisionFact["role"] | "composition";
 // vérifié sur un projet à 4 priorités bien servies, où le héros les nomme lui-même. Ce qui domine, c'est
 // ce qui EXPLIQUE l'orientation produite.
 function rangRole(role: Role, orientation: Orientation): number {
+  // Les CONDITIONS SANS COMPROMIS (FUT-7) passent avec l'incompatibilité : le lecteur a dit qu'il ne
+  // transigerait pas sur elles. Une condition remplie se lit avec les correspondances.
   const favorable: Record<string, number> = {
-    incompatibility: 0, alignment: 1, composition: 2, mismatch: 2, verification: 3, compromise: 3, unknown: 4,
+    incompatibility: 0, condition_check: 0, alignment: 1, condition_met: 1, composition: 2, mismatch: 2,
+    verification: 3, compromise: 3, unknown: 4,
   };
   const autre: Record<string, number> = {
-    incompatibility: 0, composition: 1, mismatch: 1, verification: 2, compromise: 2, unknown: 3, alignment: 4,
+    incompatibility: 0, condition_check: 0, composition: 1, mismatch: 1, condition_met: 2, verification: 2,
+    compromise: 2, unknown: 3, alignment: 4,
   };
   return (orientation === "favorable" ? favorable : autre)[role] ?? 9;
 }
@@ -148,7 +152,10 @@ function candidats(e: EntreesSelection): Candidat[] {
     ...e.faits.map((f): Candidat => ({
       cle: f.id, role: f.role, heros: e.nommes.has(f.id), prio: e.reglesDeclarees.has(f.ruleId),
       rangAmbiant: rangAmbiant(f.ruleId),
-      sujet: sujetDe(f.role === "mismatch" || f.role === "alignment" ? f : { topic: f.topic, id: f.id }),
+      sujet: sujetDe(
+        f.role === "mismatch" || f.role === "alignment" || f.role === "condition_check" || f.role === "condition_met"
+          ? f : { topic: f.topic, id: f.id },
+      ),
     })),
     ...e.compositions.map((c): Candidat => ({
       cle: c.id, role: "composition", heros: e.nommes.has(c.id),

@@ -9,7 +9,7 @@ import { runRules } from "@/lib/decision/materiality-rules";
 import { verificationsMateriellesIndisponibles } from "@/lib/decision/logement-rules";
 import { assembleDossier } from "@/lib/decision/decision-assembler";
 import { composeFacts } from "@/lib/decision/fact-compositions";
-import { withEvaluationPoint } from "@/lib/decision/territory-facts";
+import { withEvaluationPoint, projetDeLecture } from "@/lib/decision/territory-facts";
 import type { Dossier, ModuleFacts } from "@/lib/decision/decision-fact";
 import type { EvaluationContext } from "@/lib/hard-constraints";
 import type { DpeRecord } from "@/lib/dpe";
@@ -65,7 +65,9 @@ export async function assembleAddressDossier(input: {
    */
   snapshotAutour?: Face3Snapshot | null;
 }): Promise<AddressDossierResult> {
-  const { project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour } = input;
+  const { address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour } = input;
+  // La même lecture que le dossier communal (FUT-7) : `hard` en vient déjà, le projet doit suivre.
+  const project = await projetDeLecture(input.project);
   try {
     const data = await fetchLogementDecisionDataWithTimeout(address);
     const logement = buildLogementFacts(data, savedDpe, address.label);

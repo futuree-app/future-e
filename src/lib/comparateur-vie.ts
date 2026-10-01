@@ -14,6 +14,7 @@ import { getLittoralIndex, type LittoralSummary } from "@/lib/littoral";
 import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/lib/commune-attributes";
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import { deCommune } from "@/lib/typography";
+import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -2496,7 +2497,6 @@ const SIGNATURE_KEYS: PreferenceKey[] = [
 const SIGNATURE_MIN = 70;      // percentile minimal pour qu'un trait « distingue » la commune
 const SIGNATURE_MAX_KEYS = 4;  // 1 dominant (poids 3) + jusqu'à 3 secondaires (poids 2)
 const ANCRE_COAST_KM = 15;     // au-delà, pas « au bord de la mer » (aligné sur buildSignature)
-const ANCRE_SIZE_BAND = 2.5;   // gabarit : [pop/2.5, pop*2.5] autour de la taille d'agglo
 
 // subScore mais SANS ses valeurs par défaut (donnée absente) : on n'invente pas une
 // signature à partir d'un champ manquant. Dans subScore, calme_sonore/expo défaut=100,
@@ -2548,7 +2548,7 @@ export function communeToPreferences(entry: IndexCommune): AnchorDerivation {
   // 3) Gabarit de taille (taille d'AGGLOMÉRATION), fourchette large autour de l'ancre.
   const pop = tailleVille(entry);
   const communeSize = pop != null
-    ? { min: Math.round(pop / ANCRE_SIZE_BAND), max: Math.round(pop * ANCRE_SIZE_BAND) }
+    ? gabaritTailleAncre(pop)
     : null;
 
   return { preferences, communeSize, traits };

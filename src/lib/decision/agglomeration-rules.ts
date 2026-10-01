@@ -6,6 +6,7 @@
 import type { DecisionRule, RuleEvaluation, MismatchFact, AlignmentFact, DecisionFact, EvidenceRef, ModuleFacts } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import {
   AGGLOMERATION_SIZE_CONVENTION, classifyAgglomerationSize, labelForCategory, categoryStatementFragment,
@@ -83,6 +84,9 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
 
       const weight = preferenceWeight(p, spec.key);
       if (weight === 0) return ret("not_applicable", [], "priorité non déclarée");
+      // LA VISIBILITÉ N'EST PAS L'IMPORTANCE (FUT-7). Le poids règle le tier ; une condition confirmée se
+      // montre quel que soit son poids (conditions.ts).
+      const visible = preferenceSurfaced(p, spec.key);
 
       const cat = classifyAgglomerationSize(f.tailleVille);
       // Provenance EXIGÉE : une catégorie sans source prouvée n'est pas opposable (jamais un repli commune).
@@ -95,7 +99,7 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
       // ALIGNMENT (lot C) : la catégorie observée EST celle recherchée + poids >= 2 -> fait favorable.
       // Miroir exact du mismatch de taille. faceStatement = la face validée (« … appartient à une
       // métropole, ce que vous recherchez »), statement = la même phrase, déjà autonome (elle nomme la commune).
-      if (outcome === "satisfied" && weight >= 2 && spec.favorableFace) {
+      if (outcome === "satisfied" && visible && spec.favorableFace) {
         const tier = weight >= 3 ? "structuring" : "secondary";
         const face = spec.favorableFace(f.nom, labelForCategory(cat, source));
         const ev: EvidenceRef = {
@@ -112,7 +116,7 @@ function makeSizeRule(spec: SizeSpec): DecisionRule {
         };
         return ret("satisfied", [alignment], "catégorie recherchée, matérialisée");
       }
-      if (outcome !== "mismatch" || weight < 2) {
+      if (outcome !== "mismatch" || !visible) {
         const reason = outcome === "mismatch" ? "écart mineur, silencieux (poids 1)"
           : outcome === "satisfied" ? "catégorie recherchée" : "catégorie intermédiaire";
         return ret(outcome, [], reason);

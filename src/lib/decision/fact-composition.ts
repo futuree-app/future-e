@@ -1,7 +1,7 @@
 // LA COMPOSITION : un PLAN DE PRÉSENTATION, jamais un fait. Hors de l'union DecisionFact (invariant 1).
 // Elle référence les objets canoniques (factIds, ruleIds, evidence) et ne recopie jamais leur vérité
 // sous une seconde forme indépendante (invariant 2). Types PURS.
-import type { EvidenceRef, MaterialityTier, DecisionAction } from "./decision-fact.ts";
+import type { EvidenceRef, MaterialityTier, DecisionAction, CriterionKey } from "./decision-fact.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 
 export type CompositionSide = {
@@ -40,7 +40,7 @@ export type TradeoffComposition = {
 };
 
 export type SharedEvidenceConsequence = {
-  projectKey: PreferenceKey;
+  projectKey: CriterionKey;
   statement: string;
   materialityTier: MaterialityTier; // le tier PROPRE de chaque conséquence est conservé (invariant 8)
   factId: string;

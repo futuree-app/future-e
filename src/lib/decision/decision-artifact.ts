@@ -32,7 +32,11 @@ import type { UserProject } from "../user-project.ts";
  * Elle est distincte de `PRODUCT_CONVENTIONS_VERSION` (hard-constraints), qui versionne les
  * conventions des contraintes dures. Les deux voyagent dans l'artefact.
  */
-export const ENGINE_VERSION = "engine-1";
+// engine-2 (FUT-7, 01/10/2026) : « Condition non respectée » exige une condition CONFIRMÉE par le lecteur et
+// une capacité à TRANCHER. Un dossier engine-1 a pu le dire sur un critère que personne n'avait confirmé :
+// il reste tel qu'il a été vendu, et sa version le dit. Le comparatif refuse de rapprocher deux dossiers
+// de moteurs différents (comparaison-candidats.ts).
+export const ENGINE_VERSION = "engine-2";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

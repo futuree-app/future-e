@@ -183,7 +183,9 @@ test("le registre porte les 11 contraintes dures, et le dossier les examine", ()
   const r = run(facts({ distanceCoteKm: 42 }), p);
   const hardEvals = r.evaluations.filter((e) => e.ruleId.startsWith("territoire.hard."));
   assert.equal(hardEvals.length, 11);
-  assert.equal(r.evaluations.find((e) => e.ruleId === "territoire.hard.nearSea")?.outcome, "incompatible");
+  // FUT-7 : non confirmée, la mer à 42 km pour une limite de 5 km est un ÉCART au projet, examiné, jamais
+  // une incompatibilité.
+  assert.equal(r.evaluations.find((e) => e.ruleId === "territoire.hard.nearSea")?.outcome, "mismatch");
   // Les dix autres ne sont pas déclarées : HORS SUJET, pas un trou de couverture.
   assert.equal(hardEvals.filter((e) => e.outcome === "not_applicable").length, 10);
 });

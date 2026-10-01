@@ -846,6 +846,8 @@ test("communeSize : le seuil porte sa propre subordonnée, la phrase se tient", 
   const c = commune({ uu: null, tailleVille: 316, population: 316 });
   const a = evaluateCommuneSize(ctx({ communeSize: { min: 100_000, max: null } }, c), c);
   assert.ok(a.status === "incompatible");
-  assert.equal(a.statement, "Cette commune compte 316 habitants, en dessous des 100 000 que vous avez posés comme limite.");
+  // FUT-7 : le constat dit ce que le PROJET indique, jamais « ce que vous avez posé » (la limite peut venir
+  // de la consigne du parseur, et seule une confirmation en fait une condition).
+  assert.equal(a.statement, "Cette commune compte 316 habitants, en dessous du minimum de 100 000 qu'indique votre projet.");
   assert.equal(a.statement.includes("de la taille que vous avez posée"), false);
 });

@@ -4,6 +4,8 @@ import { assembleDossier } from "./decision-assembler.ts";
 import { sectionsDeLaMinute, controlesParEchelle } from "./dossier-view.ts";
 import type { DecisionFact, RunResult, RuleEvaluation, IncompatibilityFact, AlignmentFact, MismatchFact } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
+import type { HardConstraintKey } from "../hard-constraints.ts";
+import { buildConfirmation } from "./conditions.ts";
 
 function project(parsed: unknown, over: Partial<UserProject> = {}): UserProject {
   return { posture: "recherche", intent: null, rawText: null, parsed: parsed as UserProject["parsed"], updatedAt: "1970-01-01T00:00:00.000Z", ...over };
@@ -26,6 +28,10 @@ function verif(id = "v"): DecisionFact {
   return { id, ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "verification", materialityTier: "structuring", topic: "un point à vérifier", statement: "à vérifier", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], action: { type: "obtenir_document", label: "doc" } };
 }
 const WITH_HC = { reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] };
+// FUT-7 : le même projet, où le lecteur a CONFIRMÉ ses critères comme conditions sans compromis.
+function confirme(p: UserProject, ...keys: HardConstraintKey[]): UserProject {
+  return { ...p, conditions: keys.map((key) => buildConfirmation(p, { kind: "hard", key }, "2026-10-01T00:00:00.000Z")!) };
+}
 const NO_HC = { reformulation: "x", hardConstraints: {}, preferences: [] };
 
 test("parsed null -> project_not_structured", () => {
@@ -43,7 +49,7 @@ test("incompatibilité établie -> established_incompatibility, et le verdict le
   assert.equal(d.criteria.orientation, "incompatible");
   // Le héros NOMME la CONDITION telle que le lecteur l'a posée (hardConstraintLabel, résolu depuis le
   // projet), et non le `topic` du fait : celui-ci porte le nom de la commune, que le héros nomme déjà.
-  assert.match(d.narrativePlan.verdict.headline.text, /Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer \(moins de 5 km\)\./);
+  assert.match(d.narrativePlan.verdict.headline.text, /Votre condition sur la proximité de la mer \(moins de 5 km\) n'est pas respectée à Toulouse\./);
   assert.equal(d.narrativePlan.verdict.headline.text.includes(incompat().topic), false);
   assert.match(d.conclusion, /trop loin/);
 });
@@ -51,17 +57,29 @@ test("incompatibilité établie -> established_incompatibility, et le verdict le
 test("no_hard_constraint_declared distinct de no_incompatibility_established", () => {
   const sansHC = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse");
   assert.equal(sansHC.conclusionState, "no_hard_constraint_declared");
-  const avecHC = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
-  assert.equal(avecHC.conclusionState, "no_incompatibility_established");
+  // FUT-7 : un critère lu par le parseur n'est pas une condition. Sans confirmation, aucune condition
+  // n'est déclarée, et le verdict ne parlera jamais de « vos conditions ».
+  const nonConfirme = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
+  assert.equal(nonConfirme.conclusionState, "no_hard_constraint_declared");
+  const avecCondition = assembleDossier(run([verif()], ["nearSea"]), confirme(project(WITH_HC), "nearSea"), "commune", "Toulouse");
+  assert.equal(avecCondition.conclusionState, "no_incompatibility_established");
 });
 
-test("contrainte déclarée non couverte -> nommée dans uncovered + conclusion", () => {
-  const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 }, communeSize: { min: null, max: 20000 } }, preferences: [] });
+test("condition confirmée non couverte -> nommée dans uncovered, et le verdict la dit ouverte", () => {
+  const brut = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 }, communeSize: { min: null, max: 20000 } }, preferences: [] });
+  const p = confirme(brut, "communeSize");
   // nearSea EXAMINÉE (satisfaite, silencieuse) ; communeSize touchée par personne.
   const d = assembleDossier(run([], ["nearSea"], [ev("r", ["nearSea"], "satisfied")]), p, "commune", "Toulouse");
   assert.deepEqual(d.uncovered.map((u) => u.key), ["communeSize"]);
-  // La contrainte est le SUJET de la phrase, nommée comme le lecteur l'a posée.
-  assert.match(d.conclusion, /Une commune de moins de 20 000 habitants reste à vérifier/);
+  assert.equal(d.criteria.orientation, "condition_to_confirm");
+  // La condition est nommée comme le lecteur l'a posée, avec sa cause.
+  assert.match(d.narrativePlan.verdict.headline.text, /Une condition sans compromis reste ouverte à Toulouse : une commune de moins de 20 000 habitants\./);
+  assert.match(d.conclusion, /La donnée qui permettrait d'évaluer une commune de moins de 20 000 habitants manque ici\./);
+
+  // Non confirmée, la même taille n'est qu'une priorité restée sans réponse : jamais une condition.
+  const libre = assembleDossier(run([], ["nearSea"], [ev("r", ["nearSea"], "satisfied")]), brut, "commune", "Toulouse");
+  assert.deepEqual(libre.uncovered, []);
+  assert.doesNotMatch(libre.conclusion, /condition/i);
 });
 
 test("la couverture ne se décrète pas : un `unknown` ne rend PAS une contrainte examinée", () => {
@@ -70,7 +88,7 @@ test("la couverture ne se décrète pas : un `unknown` ne rend PAS une contraint
   const unknownFact: DecisionFact = { id: "u", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "unknown", impact: "scoped", materialityTier: "secondary", topic: "une donnée manquante", statement: "?", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }] };
   const d = assembleDossier(
     run([unknownFact], ["nearSea"], [ev("r", ["nearSea"], "unknown", [unknownFact])]),
-    project(WITH_HC), "commune",
+    confirme(project(WITH_HC), "nearSea"), "commune",
   );
   assert.deepEqual(d.uncovered.map((u) => u.key), ["nearSea"]);
   assert.equal(d.criteria.coverage, "none");
@@ -80,14 +98,17 @@ test("inconnue bloquante -> insufficient_evidence ; scopée -> non", () => {
   const blocking: DecisionFact = { id: "u", ruleId: "r", sourceFactIds: ["s"], module: "territoire", role: "unknown", impact: "blocking", materialityTier: "secondary", topic: "une donnée manquante", statement: "?", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }] };
   assert.equal(assembleDossier(run([blocking], ["nearSea"]), project(WITH_HC), "commune", "Toulouse").conclusionState, "insufficient_evidence");
   const scoped = { ...blocking, impact: "scoped" as const };
-  assert.equal(assembleDossier(run([scoped], ["nearSea"]), project(WITH_HC), "commune", "Toulouse").conclusionState, "no_incompatibility_established");
+  assert.equal(assembleDossier(run([scoped], ["nearSea"]), confirme(project(WITH_HC), "nearSea"), "commune", "Toulouse").conclusionState, "no_incompatibility_established");
 });
 
-test("caps : au plus 2 incompatibilités affichées", () => {
+// FUT-7 : la section des conditions n'a plus de plafond. Une condition que le lecteur a posée ne disparaît
+// jamais derrière une autre ; la MINUTE, elle, garde son plafond global.
+test("conditions : aucune n'est retirée de sa section, la minute reste plafonnée", () => {
   const many = [incompat({ id: "a" }), incompat({ id: "b" }), incompat({ id: "c" })];
   const d = assembleDossier(run(many, ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
   const sec = d.sections.find((s) => s.key === "incompatibilities");
-  assert.equal(sec!.cards.length, 2);
+  assert.equal(sec!.cards.length, 3);
+  assert.ok(d.narrativePlan.minute.length <= 4);
 });
 
 test("titre vérifications adapté à la posture habitant", () => {
@@ -422,7 +443,7 @@ test("le vocabulaire de l'écran ne mélange pas « condition » et « contraint
     run([incompat()], ["nearSea"], [ev("r", ["nearSea"], "incompatible", [incompat()])]),
     project(WITH_HC), "commune", "Toulouse",
   );
-  assert.equal(d.sections.find((s) => s.key === "incompatibilities")!.title, "Vos conditions non négociables");
+  assert.equal(d.sections.find((s) => s.key === "incompatibilities")!.title, "Vos conditions sans compromis");
   for (const s of d.sections) {
     assert.doesNotMatch(s.title, /contrainte/i, `le titre « ${s.title} » emploie « contrainte »`);
   }

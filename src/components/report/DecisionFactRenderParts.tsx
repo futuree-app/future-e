@@ -123,7 +123,8 @@ export function EvidenceRow(
 ) {
   const refs = fact.role === "compromise" ? fact.sides.flatMap((s) => s.evidence) : fact.evidence;
   const chips = toChips(refs, provenance);
-  const action = fact.role === "verification" || fact.role === "unknown" ? fact.action : undefined;
+  const action = fact.role === "verification" || fact.role === "unknown" || fact.role === "condition_check"
+    ? fact.action : undefined;
   return (
     <div className="mt-2.5 flex flex-col gap-2">
       {chips.length > 0 ? (
@@ -180,17 +181,27 @@ export function MethodDetails({ conventions, checks = [] }: { conventions: strin
   );
 }
 
+// CE QU'UNE CONDITION OUVERTE NE DIT PAS SUR SA FACE : pourquoi futur•e ne tranche pas (la convention, la
+// limite de la mesure). Rendu dans « Données et limites », à côté des sources.
+export function conditionLimits(fact: DecisionFact): string[] {
+  return fact.role === "condition_check" && fact.whyNotDecided ? [fact.whyNotDecided] : [];
+}
+
 // Ce que la carte a de concret à faire regarder : le `detail` de l'action, jamais son `label` (déjà
 // sur la face). Une composition porte les actions de ses côtés ou de ses items.
 export function factChecks(fact: DecisionFact): string[] {
-  const action = fact.role === "verification" || fact.role === "unknown" ? fact.action : undefined;
+  const action = fact.role === "verification" || fact.role === "unknown" || fact.role === "condition_check"
+    ? fact.action : undefined;
   return action?.detail ? [action.detail] : [];
 }
 
 export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }) {
   // Un mismatch porte aussi son état (« 20 % les moins favorables », « Un village ») : la section
   // « Ce qui correspond moins bien » se lit alors comme celle des constats établis, même repère visuel.
-  const status = (fact.role === "verification" || fact.role === "unknown" || fact.role === "mismatch") ? fact.status : undefined;
+  const status = (
+    fact.role === "verification" || fact.role === "unknown" || fact.role === "mismatch"
+    || fact.role === "condition_check" || fact.role === "condition_met"
+  ) ? fact.status : undefined;
   if (fact.role === "compromise") {
     return (
       <>
@@ -209,6 +220,28 @@ export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }
     fact.role === "incompatibility" || fact.role === "verification" || fact.role === "mismatch"
       ? fact.limitation
       : undefined;
+  // UNE CONDITION OUVERTE (FUT-7) se lit en quelques secondes : son ÉTAT, puis le FAIT, puis le geste
+  // éventuel (EvidenceRow). Pourquoi futur•e ne tranche pas, la convention retenue, la limite de la mesure
+  // vivent dans « Données et limites » (cf. `conditionLimits`) : elles restent accessibles, elles ne
+  // chargent plus la face. L'étiquette porte déjà le sens ; la carte ne le redit pas.
+  if (fact.role === "condition_check") {
+    return (
+      <>
+        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{fact.headlineSubject}</p>
+        <StatusTag label={fact.status} color={color ?? "var(--muted)"} />
+        <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
+      </>
+    );
+  }
+  if (fact.role === "condition_met") {
+    return (
+      <>
+        <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{fact.headlineSubject}</p>
+        <StatusTag label={fact.status} color={color ?? "var(--muted)"} />
+        <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
+      </>
+    );
+  }
   // La face garde le constat et UNE ligne ghost (la limitation). `signalConvention` est désormais rendu
   // par MethodDetails, à côté de FactBody (voir les appelants), plus sur la face.
   return (

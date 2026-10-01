@@ -151,9 +151,10 @@ function face(c: CandidatCompare): FaceCandidat {
       criterionKey: x.criterionKey, label: x.label, outcome: x.outcome as "incompatible" | "mismatch",
     })),
     compromis: registre.filter((x) => x.outcome === "reserve").map((x) => ({ criterionKey: x.criterionKey, label: x.label })),
-    // Une inconnue, c'est un critère DÉCLARÉ resté sans réponse : `indeterminate`, ou non examiné.
+    // Une inconnue, c'est un critère DÉCLARÉ resté sans réponse : `indeterminate`, ou non examiné. Une
+    // condition « à confirmer » (FUT-7) en est une aussi : futur•e l'a appréciée sans pouvoir l'établir.
     inconnues: registre
-      .filter((x) => x.outcome === "indeterminate" || x.coverage === "unexamined")
+      .filter((x) => x.outcome === "indeterminate" || x.outcome === "to_confirm" || x.coverage === "unexamined")
       .map((x) => ({ criterionKey: x.criterionKey, label: x.label, raison: x.unexaminedReason })),
     controlesPrioritaires: (plan.priorityControl?.actions ?? []).map((a) => ({ label: a.label, anchorId: a.anchorId })),
     couverture: artifact.dossier.criteria.coverage,
@@ -195,7 +196,10 @@ function comparabilite(a: CandidatCompare, b: CandidatCompare): Comparabilite {
 
 function relation(a: EtatCritere | null, b: EtatCritere | null, memeCadre: boolean): RelationCritere {
   if (!a || !b) return "indetermine_ici";
+  // Une condition « à confirmer » (FUT-7) n'est établie ni d'un côté ni de l'autre : deux lieux ne se
+  // départagent pas sur ce que futur•e n'a pas pu trancher.
   if (a.outcome === "indeterminate" || b.outcome === "indeterminate") return "indetermine_ici";
+  if (a.outcome === "to_confirm" || b.outcome === "to_confirm") return "indetermine_ici";
   if (a.coverage === "unexamined" || b.coverage === "unexamined") return "indetermine_ici";
   if (a.outcome === b.outcome) return "meme_lecture";
   return memeCadre ? "difference_dans_le_meme_cadre" : "difference_hors_cadre_commun";

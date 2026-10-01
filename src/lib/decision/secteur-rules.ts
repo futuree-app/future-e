@@ -20,7 +20,7 @@
 //  3. ELLE NE DIT NI « DÉPENDANCE » NI « ON PEUT Y VIVRE SANS VOITURE ». Cf. `secteur-facts.ts`.
 
 import type { DecisionRule, RuleEvaluation, VerificationFact, EvidenceRef } from "./decision-fact.ts";
-import { preferenceWeight } from "./project-view.ts";
+import { preferenceSurfaced } from "./conditions.ts";
 import {
   ecartNotable, equipementAutoStatement, equipementAutoLimitation, pctFr,
 } from "./secteur-facts.ts";
@@ -37,7 +37,7 @@ const equipementAutoRule: DecisionRule = {
       ({ ruleId: RULE_EQUIPEMENT_AUTO, projectKeys: ["faible_dependance_auto"], outcome, facts, reason });
 
     // La priorité gouverne l'EXAMINABILITÉ : sans elle, ce constat n'aide personne à décider.
-    if (preferenceWeight(p, "faible_dependance_auto") < 2) {
+    if (!preferenceSurfaced(p, "faible_dependance_auto")) {
       return ret("not_applicable", [], "priorité non déclarée");
     }
     const e = f.secteur?.equipementAuto;

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { buildCriteriaRegistry, uncoveredPreferences, uncoveredConstraints, inconclusivePreferences } from "./criteria-registry.ts";
 import type { RunResult, RuleEvaluation, DecisionFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
+import { buildConfirmation } from "./conditions.ts";
 
 function project(hard: Record<string, unknown>, prefs: { key: string; weight: number }[]): UserProject {
   return {
@@ -140,16 +141,26 @@ test("les priorités non couvertes se DÉRIVENT du registre, plus d'une liste é
   assert.equal(un[0]!.label, "une vie locale animée");
 });
 
-test("les contraintes non examinées portent le libellé DU LECTEUR, pas une catégorie", () => {
+test("les conditions non examinées portent le libellé DU LECTEUR, pas une catégorie", () => {
   // « la proximité d'un lieu » ne veut rien dire pour quelqu'un qui a écrit « la gare Matabiau ».
-  const s = buildCriteriaRegistry(
-    project({ departements: ["31"], nearPlace: { label: "la gare Matabiau", maxKm: null } }, []),
-    run([ev("r1", ["departements"], "satisfied")]),
-  );
+  const brut = project({ departements: ["31"], nearPlace: { label: "la gare Matabiau", maxKm: null } }, []);
+  const p = { ...brut, conditions: [buildConfirmation(brut, { kind: "hard", key: "nearPlace" }, "2026-10-01T00:00:00.000Z")!] };
+  const s = buildCriteriaRegistry(p, run([ev("r1", ["departements"], "satisfied"), ev("territoire.hard.nearPlace", ["nearPlace"], "uncertain")]));
   const un = uncoveredConstraints(s);
   assert.equal(un.length, 1);
   assert.equal(un[0]!.key, "nearPlace");
   assert.equal(un[0]!.label, "la proximité de la gare Matabiau");
+  assert.equal(un[0]!.cause, "donnee_absente");
+});
+
+test("FUT-7 : NON confirmé, un critère géographique non examiné est une priorité comme une autre, sans couperet", () => {
+  const s = buildCriteriaRegistry(
+    project({ departements: ["31"], nearPlace: { label: "la gare Matabiau", maxKm: null } }, []),
+    run([ev("r1", ["departements"], "satisfied"), ev("territoire.hard.nearPlace", ["nearPlace"], "uncertain")]),
+  );
+  assert.deepEqual(uncoveredConstraints(s), []);
+  assert.deepEqual(inconclusivePreferences(s).map((x) => x.key), ["nearPlace"]);
+  assert.equal(s.openConditions.length, 0);
 });
 
 test("le libellé instancié couvre aussi le département et la taille de commune", () => {
