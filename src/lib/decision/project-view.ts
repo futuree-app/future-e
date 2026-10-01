@@ -9,7 +9,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { HardConstraintKey } from "./decision-fact.ts";
 import { lieuEnPhrase } from "../hard-constraints.ts";
 import { deCommune } from "../typography.ts";
-import { ZONE_TABLE } from "../geo-zones.ts";
+import { ZONE_TABLE, resolveExclusions } from "../geo-zones.ts";
 import { departementsDansLesZones } from "../hard-constraint-schema.ts";
 import { excludePlaceDeclares } from "../hard-constraints-hydrate.ts";
 
@@ -98,8 +98,9 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
       return labels.length > 0 ? joinFr(labels, hc.zonesMatch === "any" ? "ou" : "et") : generic;
     }
     case "excludeZones": {
+      // FUT-8 : les MOTS du lecteur (« la région parisienne »), puis le libellé du jeton.
       const labels = (hc.excludeZones ?? [])
-        .map((t) => ZONE_TABLE[t]?.label)
+        .map((t) => hc.excludeZonesDits?.find((d) => d.token === t)?.said ?? resolveExclusions([t]).applied[0]?.label)
         .filter((l): l is string => Boolean(l));
       return labels.length > 0 ? `le fait d'éviter ${joinFr(labels)}` : generic;
     }

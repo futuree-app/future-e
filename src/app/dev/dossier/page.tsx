@@ -24,6 +24,10 @@ import { DossierDecisionSection } from "@/components/report/DossierDecisionSecti
 import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import type { UserProject, CriterionRef } from "@/lib/user-project";
 import { buildConfirmation } from "@/lib/decision/conditions";
+import { parsedFingerprint } from "@/lib/decision/effective-value";
+import { normalizeUserProject } from "@/lib/user-project";
+import { vueCriteres } from "@/lib/decision/projet-criteres-vue";
+import { CriteresDuProjet } from "@/components/report/CriteresDuProjet";
 import { HARD_CONSTRAINT_KEYS, type HardConstraintKey } from "@/lib/hard-constraints";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +68,9 @@ export default async function DevDossierPage({
   // FUT-7 : `hc` = les critères géographiques en JSON ({"zones":[{"zone":"bretagne","strength":"hard"}]}),
   // `confirmer` = les critères confirmés comme conditions sans compromis (« zones,proximite_mer »). Les
   // confirmations sont construites comme le fera le geste de FUT-8, et n'existent que dans cette page.
-  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; hc?: string; confirmer?: string }>;
+  // FUT-8 : `confirmer` accepte un élément (« excludePlace:lyon ») ; `def` = des précisions du lecteur en
+  // JSON ([{"criterion":{"kind":"hard","key":"nearPlace"},"definition":{"kind":"distance_lieu",…}}]).
+  searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; hc?: string; confirmer?: string; def?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
 
@@ -81,14 +87,28 @@ export default async function DevDossierPage({
   } catch {
     hcErreur = "critères géographiques illisibles (JSON attendu)";
   }
-  const base = {
+  const brut = {
     posture: "recherche", intent: null, rawText: null, updatedAt: "1970-01-01T00:00:00.000Z",
     parsed: { reformulation: "projet de test", hardConstraints: hc, preferences: prefs },
   } as unknown as UserProject;
+  let defs: { criterion: CriterionRef; definition: Record<string, unknown> }[] = [];
+  try {
+    defs = sp.def ? JSON.parse(sp.def) : [];
+  } catch {
+    hcErreur = "précisions illisibles (JSON attendu)";
+  }
+  const base = normalizeUserProject({
+    ...brut,
+    definitions: defs.map((d) => ({
+      ...d.definition, criterion: d.criterion, parsedFingerprint: parsedFingerprint(brut, d.criterion),
+      definedAt: "2026-10-01T00:00:00.000Z", source: "user",
+    })),
+  }) ?? brut;
   const aConfirmer = (sp.confirmer ?? "").split(",").map((x) => x.trim()).filter(Boolean);
-  const conditions = aConfirmer.flatMap((cle) => {
-    const ref: CriterionRef = (HARD_CONSTRAINT_KEYS as string[]).includes(cle)
-      ? { kind: "hard", key: cle as HardConstraintKey }
+  const conditions = aConfirmer.flatMap((entree) => {
+    const [cle, instance] = entree.split(":");
+    const ref: CriterionRef = (HARD_CONSTRAINT_KEYS as string[]).includes(cle!)
+      ? { kind: "hard", key: cle as HardConstraintKey, instance: instance ?? null }
       : { kind: "preference", key: cle as never };
     const c = buildConfirmation(base, ref, "2026-10-01T00:00:00.000Z");
     return c ? [c] : [];
@@ -126,6 +146,12 @@ export default async function DevDossierPage({
           Voir le dossier
         </button>
       </form>
+
+      {/* FUT-8 : la carte « Votre projet », telle que /rapport la montre (les gestes exigent un compte). */}
+      <section className="glass rounded-2xl p-7 mb-8">
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-ghost mb-1">Votre projet (vue des critères)</p>
+        <CriteresDuProjet criteres={vueCriteres(project)} />
+      </section>
 
       {hcErreur ? <p className="mb-6 text-[13px]" style={{ color: "var(--red)" }}>{hcErreur}</p> : null}
       {inconnues.length > 0 ? (

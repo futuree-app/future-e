@@ -735,7 +735,10 @@ function enLieu(label: string): string {
   return `dans ${label}`;
 }
 function intituleCondition(label: string, key?: string): string {
-  return key === "zones" || key === "departements" ? `de vivre ${enLieu(label)}` : `sur ${label}`;
+  if (key === "zones" || key === "departements") return `de vivre ${enLieu(label)}`;
+  // « le fait de quitter Lyon » → « de quitter Lyon » ; « le fait d'éviter … » → « d'éviter … ».
+  const geste = label.match(/^le fait (de |d')(.*)$/);
+  return geste ? `${geste[1]}${geste[2]}` : `sur ${label}`;
 }
 
 // CE QUE L'ON SAIT DES CONDITIONS OUVERTES, PAR SENS : une phrase par groupe, jamais une proposition par

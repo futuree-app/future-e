@@ -421,7 +421,7 @@ export function evaluateZones(
     return {
       key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: perimetre, evidenceKeys, topic,
-      statement: `${c.nom} se situe hors ${deCommune(perimetre)}.`,
+      statement: `${c.nom} se situe hors ${deLieu(perimetre)}.`,
     };
   }
   if (incomplet && !(union && dedans)) {
@@ -911,6 +911,13 @@ export function evaluateNearPlace(
 const PLM_PREFIXE_PAR_UU: Record<string, string> = { "00851": "751", "00760": "6938", "00759": "132" };
 export function estArrondissementPLM(insee: string): boolean {
   return /^(751\d\d|6938\d|132\d\d)$/.test(insee);
+}
+
+// « le Sud-Ouest » → « du Sud-Ouest » ; « les Alpes » → « des Alpes » ; sinon comme une commune.
+function deLieu(label: string): string {
+  if (/^le /.test(label)) return `du ${label.slice(3)}`;
+  if (/^les /.test(label)) return `des ${label.slice(4)}`;
+  return deCommune(label);
 }
 
 export function evaluateExcludePlace(

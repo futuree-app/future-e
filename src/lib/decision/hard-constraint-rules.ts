@@ -414,9 +414,14 @@ function makeRule(key: HardConstraintKey): DecisionRule {
     },
   };
 
-  function evaluerVue(f: ModuleFacts, project: UserProject, vue: Vue): RuleEvaluation {
+  function evaluerVue(f: ModuleFacts, projetComplet: UserProject, vue: Vue): RuleEvaluation {
     {
       const hard = vue.hard;
+      // Les libellés de la vue ne nomment QUE ses éléments : la carte sur « quitter Lyon » ne parle pas de
+      // Bordeaux. La confirmation et la capacité viennent de la vue, pas de ce projet restreint.
+      const project: UserProject = vue.hc !== projetComplet.parsed?.hardConstraints && projetComplet.parsed
+        ? { ...projetComplet, parsed: { ...projetComplet.parsed, hardConstraints: vue.hc } }
+        : projetComplet;
       // Les 11 évaluations ont été calculées UNE fois, par runRules. Les rappeler ici en ferait 121.
       const a = hard.byKey[key];
       const ret = (outcome: RuleEvaluation["outcome"], facts: RuleEvaluation["facts"], reason: string): RuleEvaluation =>
