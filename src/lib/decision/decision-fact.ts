@@ -152,12 +152,13 @@ export type ConditionCheckFact = BaseFact & {
   action?: DecisionAction;
 };
 
-// « CONDITION REMPLIE ». Confirmée, tranchable, satisfaite : un constat sobre, jamais un bilan.
+// « CONDITION RESPECTÉE ». Confirmée, tranchable, satisfaite : un constat sobre, jamais un bilan. Le couple
+// visible est « respectée / non respectée ».
 export type ConditionMetFact = BaseFact & {
   role: "condition_met";
   criterion: CriterionRef;
   headlineSubject: string;
-  status: "Condition remplie";
+  status: "Condition respectée";
   evidence: EvidenceRef[];
 };
 export type CompromiseSide = { projectKey: PreferenceKey; statement: string; evidence: EvidenceRef[] };

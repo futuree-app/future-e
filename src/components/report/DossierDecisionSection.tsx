@@ -8,7 +8,7 @@ import type { Dossier, DecisionFact, DossierCard } from "@/lib/decision/decision
 import { ConclusionBlock, planToBlocks, type NiveauTitre } from "@/components/report/ConclusionBlock";
 import { conditionPorteeParLeBloc, sectionsDeLaMinute, ancresRendues, sectionHorsPriorites, sectionMixte, carteHorsPriorites } from "@/lib/decision/dossier-view";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
-import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
+import { FactBody, EvidenceRow, MethodDetails, StatusTag, factSources, factChecks, conditionLimits } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
@@ -170,6 +170,12 @@ export function DossierDecisionSection({
   // Les cartes que CETTE section rend : la ligne « À contrôler en priorité » n'active un renvoi que
   // vers l'une d'elles. Le plan ne peut pas le savoir — il ignore les masquages d'affichage.
   const renderedIds = ancresRendues(dossier);
+  // LES CONDITIONS SANS CARTE (FUT-7) : celles que futur•e ne sait pas encore évaluer, ou dont la donnée
+  // manque ici. Le moteur ne fabrique aucun fait pour elles (rien n'est établi) ; l'écran les liste quand
+  // même dans la section des conditions, pour qu'aucune condition du lecteur ne disparaisse. Absent des
+  // dossiers antérieurs à FUT-7 : `?? []`.
+  const conditionsSansCarte = (dossier.criteria.openConditions ?? []).filter((c) => c.cause !== "a_confirmer");
+  const sectionConditions = sections.some((s) => s.key === "incompatibilities");
 
   return (
     <section className={espacement} id="dossier-decision">
@@ -253,6 +259,16 @@ export function DossierDecisionSection({
             la pastille du titre, plus dans un filet qui rivalisait avec la réponse. */}
         <div className={supportingPane ? "lg:col-start-1 lg:row-start-2" : ""}>
           <div className="grid gap-3.5">
+            {conditionsSansCarte.length > 0 && !sectionConditions ? (
+              <div className="glass rounded-xl p-5 sm:p-6">
+                <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mb-2" style={{ color: "var(--reg-controle)" }}>
+                  <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: "var(--reg-controle)", boxShadow: "0 0 6px var(--reg-controle)" }} />
+                  Vos conditions sans compromis
+                </div>
+                <div className="mb-2" />
+                <ConditionsSansCarte conditions={conditionsSansCarte} />
+              </div>
+            ) : null}
             {sections.map((s) => {
               // Le repli est le registre du NON SU, jamais une teinte de constat : une section dont la
               // clé n'est pas connue de cette table est, par définition, quelque chose qu'on ne sait pas
@@ -374,6 +390,7 @@ export function DossierDecisionSection({
                         // sont les deux choses qu'on veut pouvoir vérifier sans les lire à chaque carte.
                         const conventions = [
                           ...(f.role === "verification" && f.signalConvention ? [f.signalConvention] : []),
+                          ...conditionLimits(f),
                           ...factSources(f),
                         ];
                         // UNE TEINTE PAR NATURE DE CONDITION (FUT-7). La section des conditions porte trois natures :
@@ -402,6 +419,11 @@ export function DossierDecisionSection({
                       });
                     })()}
                   </ul>
+                  {s.key === "incompatibilities" && conditionsSansCarte.length > 0 ? (
+                    <div className="mt-6 pt-6 border-t border-[var(--border-1)]">
+                      <ConditionsSansCarte conditions={conditionsSansCarte} />
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -442,5 +464,29 @@ export function DossierDecisionSection({
         </div>
       </div>
     </section>
+  );
+}
+
+// UNE CONDITION SANS LECTURE : son nom, son état, une phrase. Aucun geste : nous n'en connaissons pas.
+function ConditionsSansCarte({
+  conditions,
+}: {
+  conditions: { key: string; label: string; cause: "a_confirmer" | "ne_pas_mesurer" | "donnee_absente" }[];
+}) {
+  const col = "var(--reg-non-su)";
+  return (
+    <ul className="flex flex-col gap-6 [&>li:not(:first-child)]:border-t [&>li:not(:first-child)]:border-[var(--border-1)] [&>li:not(:first-child)]:pt-6">
+      {conditions.map((c) => (
+        <li key={c.key}>
+          <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{c.label}</p>
+          <StatusTag label={c.cause === "ne_pas_mesurer" ? "Non évaluée" : "Condition ouverte"} color={col} />
+          <p className="text-label text-[15px] leading-[1.6]">
+            {c.cause === "ne_pas_mesurer"
+              ? `futur•e ne sait pas encore évaluer de façon suffisamment fiable ${c.label}.`
+              : `La donnée qui permettrait d'évaluer ${c.label} manque pour cette commune.`}
+          </p>
+        </li>
+      ))}
+    </ul>
   );
 }

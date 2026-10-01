@@ -598,7 +598,7 @@ test("incompatibilité : la condition non respectée EST la réponse", () => {
   }));
   assert.equal(p.verdictLabel, "Condition non respectée");
   assert.equal(p.verdictTone, "critical");
-  assert.match(p.verdict.headline.text, /Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer/);
+  assert.match(p.verdict.headline.text, /Votre condition sur la proximité de la mer n'est pas respectée à Toulouse\./);
   assert.match(p.blocks[0]!.fallbackText, /180 km du littoral/);
 });
 
@@ -1099,7 +1099,7 @@ test("incompatibilité : la contrainte est nommée, le fait consommé", () => {
   assert.equal(plan.verdict.headline.kind, "named_issues");
   assert.equal(
     plan.verdict.headline.text,
-    "Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer.",
+    "Votre condition sur la proximité de la mer n'est pas respectée à Toulouse.",
   );
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["i1"]);
   assert.equal(plan.verdict.headline.consumedFrom, "constraint");
@@ -1245,7 +1245,7 @@ test("gate calée sur le réel : une incompatibilité sur commune à article res
     establishedIncompatibility: { factId: "i1", statement: "La gare la plus proche est à 42 km.", constraintLabel: "la proximité d'une gare" },
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
-  assert.match(plan.verdict.headline.text, /aux Sables-d'Olonne : la proximité d'une gare/);
+  assert.match(plan.verdict.headline.text, /Votre condition sur la proximité d'une gare n'est pas respectée aux Sables-d'Olonne\./);
 });
 
 test("le détail ne redit JAMAIS la phrase du héros", () => {

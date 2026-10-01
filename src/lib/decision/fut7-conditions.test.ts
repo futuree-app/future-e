@@ -98,7 +98,7 @@ test("T1 « impérativement en Bretagne », jamais confirmé, à Nantes : un éc
   assert.equal(d.criteria.orientation, "arbitration");
   assert.equal(d.narrativePlan.verdict.headline.text, "Nantes répond moins bien à une de vos priorités : la Bretagne.");
   const ecart = cartes(d).find((f) => f.role === "mismatch")!;
-  assert.equal(ecart.statement, "Cette commune est hors de la Bretagne, le périmètre qu'indique votre projet.");
+  assert.equal(ecart.statement, "Nantes se situe hors de la Bretagne.");
   assert.doesNotMatch(d.conclusion, /condition/i);
 });
 
@@ -106,26 +106,26 @@ test("T2 la Bretagne CONFIRMÉE, à Nantes : « Condition non respectée », et 
   const { d } = dossier(commune(), confirme(projet(BRETAGNE), hard("zones")));
   assert.equal(d.narrativePlan.verdictLabel, "Condition non respectée");
   assert.equal(d.criteria.orientation, "incompatible");
-  assert.equal(d.narrativePlan.verdict.headline.text, "Une condition de votre projet n'est pas remplie à Nantes : la Bretagne.");
-  assert.equal(d.narrativePlan.verdict.detail, "Cette commune est hors de la Bretagne, le périmètre qu'indique votre projet.");
+  assert.equal(d.narrativePlan.verdict.headline.text, "Votre condition de vivre en Bretagne n'est pas respectée à Nantes.");
+  assert.equal(d.narrativePlan.verdict.detail, "Nantes se situe hors de la Bretagne.");
 });
 
 // ── T3 à T5 : APPRÉCIER, NE PAS MESURER, LE POIDS ────────────────────────────────
 
-test("T3 condition confirmée seulement appréciable, signal DÉFAVORABLE : à confirmer, jamais incompatible, signal exposé", () => {
+test("T3 condition confirmée seulement appréciable, signal DÉFAVORABLE : ouverte, jamais incompatible, signal exposé", () => {
   const p = confirme(projet({}, [{ key: "proximite_mer", weight: 3 }]), pref("proximite_mer"));
   const { d, run } = dossier(commune({ distance_cote_km: 240 }), p);
   assert.equal(run.facts.some((f) => f.role === "incompatibility"), false);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
-  assert.equal(d.narrativePlan.verdictLabel, "Condition à confirmer");
-  assert.equal(d.narrativePlan.verdict.headline.text, "Une condition sans compromis reste à confirmer à Nantes : la proximité de la mer.");
-  assert.equal(d.narrativePlan.verdict.detail, "Ce que l'on sait penche contre la proximité de la mer.");
+  assert.equal(d.narrativePlan.verdictLabel, "Condition ouverte");
+  assert.equal(d.narrativePlan.verdict.headline.text, "Une condition sans compromis reste ouverte à Nantes : la proximité de la mer.");
+  assert.equal(d.narrativePlan.verdict.detail, "Les données disponibles sont plutôt défavorables pour la proximité de la mer.");
   const c = cartes(d).find((f) => f.role === "condition_check")!;
   assert.ok(c.role === "condition_check");
   assert.equal(c.signal, "defavorable");
-  assert.equal(c.status, "À confirmer · plutôt défavorable");
-  assert.match(c.statement, /240 km/); // le signal disponible
-  assert.match(c.whyNotDecided, /sans seuil fixé par vous/); // pourquoi futur•e ne tranche pas
+  assert.equal(c.status, "Ouverte · plutôt défavorable");
+  assert.equal(c.statement, "Le point de référence de Nantes se situe à environ 240 km du littoral."); // le fait, seul
+  assert.match(c.whyNotDecided, /mesurée à l'échelle de la commune/); // pourquoi futur•e ne tranche pas (dépliable)
   assert.match(c.consequence, /penche contre cette condition\. Elle reste ouverte/); // ce que cela change
   // L'écart de la règle littorale est RÉUNI dans la carte : il ne se lit pas une seconde fois.
   assert.equal(cartes(d).some((f) => f.role === "mismatch" && f.projectKey === "proximite_mer"), false);
@@ -133,16 +133,16 @@ test("T3 condition confirmée seulement appréciable, signal DÉFAVORABLE : à c
   assert.equal(d.sections[0]!.title, "Vos conditions sans compromis");
 });
 
-test("T4 même condition, signal FAVORABLE : reste à confirmer, ne devient JAMAIS « Condition remplie »", () => {
+test("T4 même condition, signal FAVORABLE : reste ouverte, ne devient JAMAIS « Condition respectée »", () => {
   const p = confirme(projet({}, [{ key: "proximite_mer", weight: 3 }]), pref("proximite_mer"));
   const { d } = dossier(commune({ distance_cote_km: 4 }), p);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
   const c = cartes(d).find((f) => f.role === "condition_check")!;
   assert.ok(c.role === "condition_check" && c.signal === "favorable");
-  assert.equal(c.status, "À confirmer · plutôt favorable");
+  assert.equal(c.status, "Ouverte · plutôt favorable");
   assert.equal(cartes(d).some((f) => f.role === "condition_met"), false);
-  assert.equal(d.narrativePlan.verdict.detail, "Ce que l'on sait va dans le sens de la proximité de la mer, sans pouvoir l'établir.");
-  assert.doesNotMatch(d.conclusion, /remplie/);
+  assert.equal(d.narrativePlan.verdict.detail, "Les données disponibles sont plutôt favorables pour la proximité de la mer.");
+  assert.doesNotMatch(d.conclusion, /respectée/);
 });
 
 test("T5 condition confirmée NON MESURABLE : dite non évaluable, jamais un verdict", () => {
@@ -151,7 +151,9 @@ test("T5 condition confirmée NON MESURABLE : dite non évaluable, jamais un ver
   assert.equal(run.facts.some((f) => f.role === "incompatibility" || f.role === "condition_check"), false);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
   assert.deepEqual(d.criteria.openConditions.map((c) => c.cause), ["ne_pas_mesurer"]);
-  assert.match(d.narrativePlan.verdict.detail, /^futur•e ne sait pas encore évaluer un environnement peu marqué par l'agriculture intensive\./);
+  assert.equal(d.narrativePlan.verdictLabel, "Condition non évaluée");
+  assert.equal(d.narrativePlan.verdict.headline.text, "futur•e ne sait pas encore évaluer votre condition sur un environnement peu marqué par l'agriculture intensive à Nantes.");
+  assert.equal(d.narrativePlan.verdict.detail, ""); // le titre a tout dit
   assert.notEqual(d.criteria.coverage, "high");
 });
 
@@ -269,22 +271,22 @@ test("T12 projet sans condition confirmée : jamais « Aucune de vos conditions 
 
 // ── T13 : CONDITION REMPLIE ──────────────────────────────────────────────────────
 
-test("T13 condition confirmée, tranchable, satisfaite : « Condition remplie » et le constat, sans bilan global", () => {
+test("T13 condition confirmée, tranchable, satisfaite : « Condition respectée » et le fait, sans bilan global", () => {
   const { d } = dossier(RENNES, confirme(projet(BRETAGNE), hard("zones")));
   const remplie = cartes(d).find((f) => f.role === "condition_met")!;
   assert.ok(remplie.role === "condition_met");
-  assert.equal(remplie.status, "Condition remplie");
+  assert.equal(remplie.status, "Condition respectée");
   assert.equal(remplie.headlineSubject, "la Bretagne");
-  assert.equal(remplie.statement, "Cette commune fait partie de la Bretagne, le périmètre qu'indique votre projet.");
+  assert.equal(remplie.statement, "Rennes se situe en Bretagne.");
   assert.doesNotMatch(d.conclusion, /Toutes vos conditions/);
 });
 
-test("T13b une condition remplie et une condition ouverte : jamais « vos conditions sont remplies »", () => {
+test("T13b une condition respectée et une condition ouverte : jamais « vos conditions sont respectées »", () => {
   const p = confirme(projet(BRETAGNE, [{ key: "proximite_mer", weight: 2 }]), hard("zones"), pref("proximite_mer"));
   const { d } = dossier(commune({ ...RENNES, distance_cote_km: 60 }), p);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
-  assert.match(d.narrativePlan.verdict.detail, /La condition la Bretagne est remplie\./);
-  assert.doesNotMatch(d.conclusion, /Toutes vos conditions|vos conditions sont remplies/);
+  assert.match(d.narrativePlan.verdict.detail, /Votre condition de vivre en Bretagne est respectée\./);
+  assert.doesNotMatch(d.conclusion, /Toutes vos conditions|vos conditions sont respectées/);
 });
 
 // ── T14 à T19 : LA CAPACITÉ ──────────────────────────────────────────────────────
@@ -322,7 +324,7 @@ test("T16 la mer confirmée, à 240 km : à confirmer, et jamais « Condition no
   assert.equal(c.action?.label, "Mesurez la distance depuis l'adresse visée");
   // Le geste affine la mesure ; il ne prétend pas savoir quelle métrique le lecteur avait en tête.
   assert.doesNotMatch(c.action?.detail ?? "", /que vise votre condition/);
-  assert.match(c.action?.detail ?? "", /à vol d'oiseau, par la route ou en temps de trajet/);
+  assert.match(c.whyNotDecided, /à vol d'oiseau, par la route ou en temps de trajet/); // dans « Données et limites »
 });
 
 test("T16b « il nous faut la mer », sans distance, confirmée : la mesure se montre, avec son sens", () => {
@@ -330,7 +332,7 @@ test("T16b « il nous faut la mer », sans distance, confirmée : la mesure se m
   const { d } = dossier(commune({ distance_cote_km: 240 }), p);
   const c = cartes(d).find((f) => f.role === "condition_check")!;
   assert.ok(c.role === "condition_check");
-  assert.equal(c.statement, "Cette commune est à environ 240 km du littoral, mesurés depuis son point de référence.");
+  assert.equal(c.statement, "Le point de référence de Nantes se situe à environ 240 km du littoral.");
   assert.equal(c.signal, "defavorable");
   assert.match(c.whyNotDecided, /ne fixe pas de distance à la mer/);
 });
@@ -344,7 +346,7 @@ test("T17 taille et « petite ville » : appréciables seulement avec le schéma
   const { d } = dossier(commune({ population: 26_000 }), p);
   assert.notEqual(d.narrativePlan.verdictLabel, "Condition non respectée");
   const c = cartes(d).find((f) => f.role === "condition_check")!;
-  assert.match(c.statement, /au-dessus de la limite de 25 000 qu'indique votre projet/);
+  assert.equal(c.statement, "Nantes compte 26 000 habitants.");
   assert.doesNotMatch(c.statement, /vous avez posé/);
 });
 
@@ -405,17 +407,18 @@ test("« ne pas mesurer » est exactement l'ensemble des préférences qu'aucune
 
 // ── T20, T21 : LES CONDITIONS OUVERTES RESTENT UTILES ET PRIORITAIRES ───────────
 
-test("T20 une condition ouverte expose signal, limite et conséquence, pas seulement « À confirmer »", () => {
+test("T20 une condition ouverte montre son état et le fait ; la convention reste accessible dans le dépliable", () => {
   const p = confirme(projet({ montagne: { strength: "hard" } }), hard("montagne"));
   const { d } = dossier(commune({ altitude: 540 }), p);
   const c = cartes(d).find((f) => f.role === "condition_check")!;
   assert.ok(c.role === "condition_check");
-  assert.equal(c.statement, "Cette commune se situe à 540 m d'altitude. Votre exigence de montagne est ici entendue comme une altitude d'au moins 600 m.");
-  assert.match(c.whyNotDecided, /convention de futur•e/);
+  assert.equal(c.statement, "Nantes se situe à 540 m d'altitude au point de référence de la commune.");
+  assert.equal(c.status, "Ouverte · plutôt défavorable");
+  // La convention n'est pas masquée : elle est dans « Données et limites », avec ce que le geste ne lève pas.
+  assert.match(c.whyNotDecided, /600 m comme définition opérationnelle/);
+  assert.match(c.whyNotDecided, /sans déterminer à lui seul ce que vous entendez par « montagne »/);
   assert.match(c.consequence, /penche contre cette condition/);
-  assert.equal(c.action?.label, "Regardez l'altitude de l'adresse visée");
-  // Le geste précise le constat, sans prétendre lever l'ambiguïté de la convention.
-  assert.match(c.action?.detail ?? "", /ne dit pas si ce seuil correspond à ce que vous entendez par vivre à la montagne/);
+  assert.equal(c.action?.label, "Vérifiez l'altitude exacte de l'adresse");
   for (const f of cartes(d)) assertFactValid(f, p);
 });
 
@@ -426,9 +429,9 @@ test("T21 plusieurs conditions ouvertes : elles passent en tête, nommées, sans
   );
   const { d } = dossier(commune({ altitude: 540, distance_cote_km: 240 }), p);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
-  assert.equal(d.narrativePlan.verdictLabel, "Conditions à confirmer");
-  assert.match(d.narrativePlan.verdict.headline.text, /^Trois conditions sans compromis restent à confirmer à Nantes\./);
-  assert.match(d.narrativePlan.verdict.detail, /penche contre l'exigence de montagne/);
+  assert.equal(d.narrativePlan.verdictLabel, "Conditions ouvertes");
+  assert.match(d.narrativePlan.verdict.headline.text, /^Trois conditions sans compromis restent ouvertes à Nantes\./);
+  assert.match(d.narrativePlan.verdict.detail, /plutôt défavorables pour l'exigence de montagne et la proximité de la mer\./);
   assert.match(d.narrativePlan.verdict.detail, /futur•e ne sait pas encore évaluer un environnement peu marqué/);
   assert.doesNotMatch(d.conclusion, /Toutes vos conditions|vos conditions sont remplies/);
   // Les cartes de condition ouvrent la minute.
@@ -548,19 +551,20 @@ test("la confirmation ne change pas l'importance : une préférence confirmée g
   }
 });
 
-test("smoke visuel du 01/10 : plusieurs conditions ouvertes se disent par sens, une phrase chacun ; le seuil n'est pas dit deux fois", () => {
+test("smoke visuel du 01/10 : plusieurs conditions ouvertes se disent par sens, une phrase chacun ; le seuil vit au dépliable", () => {
   const p = confirme(
     projet({ montagne: { strength: "hard" } }, [{ key: "proximite_mer", weight: 3 }, { key: "faible_pression_agricole", weight: 2 }, { key: "cadre_calme", weight: 1 }]),
     hard("montagne"), pref("proximite_mer"), pref("faible_pression_agricole"), pref("cadre_calme"),
   );
   const { d } = dossier(commune({ altitude: 27, distance_cote_km: 50 }), p);
   const detail = d.narrativePlan.verdict.detail;
-  assert.match(detail, /^Ce que l'on sait penche contre l'exigence de montagne/);
-  assert.match(detail, /Rien ne penche nettement pour ou contre la proximité de la mer\./);
+  assert.match(detail, /^Les données disponibles sont plutôt défavorables pour l'exigence de montagne/);
+  assert.match(detail, /Elles ne permettent pas encore de conclure sur la proximité de la mer\./);
   assert.match(detail, /futur•e ne sait pas encore évaluer un environnement peu marqué par l'agriculture intensive\./);
   const mer = cartes(d).find((f) => f.role === "condition_check" && f.criterion.key === "proximite_mer")!;
-  assert.equal(mer.statement, "La distance au littoral est estimée à environ 50 km depuis le point de référence de Nantes.");
+  assert.equal(mer.statement, "Le point de référence de Nantes se situe à environ 50 km du littoral.");
   const montagne = cartes(d).find((f) => f.role === "condition_check" && f.criterion.key === "montagne")!;
   assert.ok(montagne.role === "condition_check");
-  assert.doesNotMatch(montagne.whyNotDecided, /600/); // le constat le dit déjà
+  assert.doesNotMatch(montagne.statement, /600/); // la face dit le fait ; la convention est au dépliable
+  assert.match(montagne.whyNotDecided, /600 m/);
 });

@@ -181,6 +181,12 @@ export function MethodDetails({ conventions, checks = [] }: { conventions: strin
   );
 }
 
+// CE QU'UNE CONDITION OUVERTE NE DIT PAS SUR SA FACE : pourquoi futur•e ne tranche pas (la convention, la
+// limite de la mesure). Rendu dans « Données et limites », à côté des sources.
+export function conditionLimits(fact: DecisionFact): string[] {
+  return fact.role === "condition_check" && fact.whyNotDecided ? [fact.whyNotDecided] : [];
+}
+
 // Ce que la carte a de concret à faire regarder : le `detail` de l'action, jamais son `label` (déjà
 // sur la face). Une composition porte les actions de ses côtés ou de ses items.
 export function factChecks(fact: DecisionFact): string[] {
@@ -214,17 +220,16 @@ export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }
     fact.role === "incompatibility" || fact.role === "verification" || fact.role === "mismatch"
       ? fact.limitation
       : undefined;
-  // UNE CONDITION À CONFIRMER (FUT-7) se lit en trois temps, et aucun ne se cache : ce que l'on sait (le
-  // constat), pourquoi cela ne suffit pas à trancher, ce que cela change pour la décision. C'est ce qui la
-  // distingue d'un « nous ne savons pas ».
+  // UNE CONDITION OUVERTE (FUT-7) se lit en quelques secondes : son ÉTAT, puis le FAIT, puis le geste
+  // éventuel (EvidenceRow). Pourquoi futur•e ne tranche pas, la convention retenue, la limite de la mesure
+  // vivent dans « Données et limites » (cf. `conditionLimits`) : elles restent accessibles, elles ne
+  // chargent plus la face. L'étiquette porte déjà le sens ; la carte ne le redit pas.
   if (fact.role === "condition_check") {
     return (
       <>
         <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{fact.headlineSubject}</p>
         <StatusTag label={fact.status} color={color ?? "var(--muted)"} />
         <p className="text-label text-[15px] leading-[1.6]">{fact.statement}</p>
-        <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{fact.whyNotDecided}</p>
-        <p className="text-muted text-[14px] leading-[1.55] mt-1.5">{fact.consequence}</p>
       </>
     );
   }

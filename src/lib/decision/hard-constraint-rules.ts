@@ -126,28 +126,62 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
   const ici = hard.context.point?.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(f.nom)}`;
   switch (key) {
     case "departements":
-      return `Cette commune est dans le ${a.observedLabel}, ${a.expectedValue.kind === "departments" && a.expectedValue.value.length > 1 ? "l'un de ceux qu'indique votre projet" : "celui qu'indique votre projet"}.`;
+      return `${f.nom} est dans le ${a.observedLabel}.`;
     case "zones":
-      return `Cette commune fait partie ${deCommune(a.expectedLabel)}, le périmètre qu'indique votre projet.`;
+      return `${f.nom} se situe ${enLieu(a.expectedLabel)}.`;
     case "excludeZones":
-      return `Cette commune est ${a.expectedLabel}, une zone que votre projet écarte.`;
+      return `${f.nom} est ${a.expectedLabel}.`;
     case "montagne":
-      return `Cette commune se situe à ${a.observedLabel} d'altitude de référence.`;
+      return `${f.nom} se situe à ${a.observedLabel} d'altitude au point de référence de la commune.`;
     case "reliefProche":
       return f.reliefAltitudeMaxM != null
         ? `Dans un rayon de 35 km autour ${deCommune(f.nom)}, une commune atteint ${a.observedLabel} d'altitude de référence.`
-        : `Un relief montagneux est à portée ${deCommune(f.nom)}, selon la convention retenue.`;
+        : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
     case "nearSea":
     case "excludeSea":
-      return `Cette commune est à ${a.observedLabel} du littoral.`;
+      return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
     case "nearPlace":
       return `${ici} est ${a.observedLabel.startsWith("dans ") ? "" : "à "}${a.observedLabel}, pour ${a.expectedLabel} attendu.`;
     case "communeSize":
     case "sizeRelativeTo":
-      return `${f.uu ? "L'agglomération" : "Cette commune"} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
     case "excludePlace":
-      return `Cette commune est ${a.expectedLabel}, que votre projet prévoit de quitter.`;
+      return `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
   }
+}
+
+// LE FAIT, QUAND LE LIEU NE REMPLIT PAS LE CRITÈRE ET QUE futur•e NE SAIT QUE L'APPRÉCIER. Une phrase,
+// factuelle : la convention et la limite de la mesure vont dans « Données et limites » (`whyNotDecided`),
+// le sens est porté par l'étiquette. L'évaluation canonique, elle, rédige pour un écart et répète la
+// convention dans la phrase : sous une carte « Condition ouverte », ce serait la troisième fois.
+function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts): string {
+  switch (key) {
+    case "montagne":
+      return `${f.nom} se situe à ${a.observedLabel} d'altitude au point de référence de la commune.`;
+    case "reliefProche": {
+      const premiere = "statement" in a ? a.statement.split(". ")[0] : "";
+      return premiere ? `${premiere.replace(/\.$/, "")}.` : `Aucun relief montagneux n'est à portée ${deCommune(f.nom)}.`;
+    }
+    case "nearSea":
+    case "excludeSea":
+      return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
+    case "communeSize":
+    case "sizeRelativeTo":
+      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+    case "excludePlace":
+      return `${f.nom} fait partie de l'${a.observedLabel.replace(/^dans l'/, "")}.`;
+    default:
+      return "statement" in a ? a.statement : constatSatisfait(key, a, f, { context: { point: null } } as never);
+  }
+}
+
+// « la Bretagne » -> « en Bretagne », « le Grand Est » -> « dans le Grand Est ». Un périmètre composé
+// (« la Bretagne ou la Normandie ») garde « dans », qui se lit toujours.
+function enLieu(label: string): string {
+  if (/ (ou|et) /.test(label)) return `dans ${label}`;
+  if (label.startsWith("la ")) return `en ${label.slice(3)}`;
+  if (label.startsWith("l'")) return `en ${label.slice(2)}`;
+  return `dans ${label}`;
 }
 
 // POURQUOI futur•e NE TRANCHE PAS. Une phrase par cause, au plus près du critère : c'est ce qui
@@ -156,15 +190,15 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
 function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): string {
   switch (c.reason) {
     case "convention_produit":
-      // Le constat dit déjà le seuil (« … entendue comme une altitude d'au moins 600 m ») : ici, seulement
-      // ce qu'il est, une convention, et ce qu'elle ne dit pas.
-      if (key === "montagne") return "Ce seuil est une convention de futur•e, et l'altitude varie fortement au sein d'une même commune.";
-      if (key === "reliefProche") return "Ce seuil est une convention de futur•e, pas une limite que vous avez fixée.";
-      if (key === "excludeSea") return "Cette distance est une convention de futur•e, pas une limite que vous avez fixée.";
+      // La carte ne montre que le fait : la définition retenue, et ce qu'elle ne dit pas, vivent ici, dans
+      // « Données et limites ». Elles restent accessibles ; elles ne chargent plus la face.
+      if (key === "montagne") return "futur•e utilise actuellement 600 m comme définition opérationnelle de « vivre à la montagne ». Ce seuil est une convention, et l'altitude peut varier au sein d'une commune. Vérifier l'adresse précise le constat sans déterminer à lui seul ce que vous entendez par « montagne ».";
+      if (key === "reliefProche") return "futur•e considère actuellement un relief montagneux à portée à partir d'environ 1 250 m d'altitude de référence dans un rayon de 35 km. Ce seuil est une convention, pas une limite que vous avez fixée.";
+      if (key === "excludeSea") return "futur•e considère actuellement « loin du littoral » comme au moins 15 km de la côte. Cette distance est une convention, pas une limite que vous avez fixée.";
       return "Ce périmètre est lu comme une liste de départements choisie par futur•e. Cette convention éclaire votre condition sans pouvoir la trancher.";
     case "point_de_reference":
       return key === "nearSea"
-        ? "La distance au littoral est mesurée depuis le point de référence de la commune, même quand une adresse est connue. Elle ne suffit pas à trancher une limite en kilomètres."
+        ? "La distance au littoral est mesurée depuis le point de référence de la commune, même quand une adresse est connue. Elle ne dit pas non plus quelle mesure vous visez : à vol d'oiseau, par la route ou en temps de trajet."
         : "Le temps de trajet est estimé depuis le point de référence de la commune. Il ne vaut pas pour toutes ses adresses.";
     case "metrique_non_enregistree":
       return "Votre limite est en kilomètres, sans préciser à vol d'oiseau ou par la route. La distance mesurée ici est à vol d'oiseau, ce qui ne suffit pas à trancher.";
@@ -176,8 +210,8 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
       return "Quitter une ville est lu ici comme quitter toute son agglomération. Votre projet ne le précise pas : cette lecture ne suffit pas à trancher.";
     case "sans_seuil":
       return key === "nearSea"
-        ? "Votre projet ne fixe pas de distance à la mer. La mesure situe la commune, elle ne dit pas si votre condition est remplie."
-        : "Votre projet ne fixe ni distance ni temps de trajet. La mesure situe le lieu, elle ne dit pas si votre condition est remplie.";
+        ? "Votre projet ne fixe pas de distance à la mer. La mesure situe la commune, elle ne dit pas si votre condition est respectée."
+        : "Votre projet ne fixe ni distance ni temps de trajet. La mesure situe le lieu, elle ne dit pas si votre condition est respectée.";
     default:
       return "La donnée disponible éclaire cette condition sans pouvoir la trancher.";
   }
@@ -193,9 +227,11 @@ export function consequenceDuSignal(signal: ConditionSignal): string {
 }
 
 export function etatDuSignal(signal: ConditionSignal): string {
-  if (signal === "defavorable") return "À confirmer · plutôt défavorable";
-  if (signal === "favorable") return "À confirmer · plutôt favorable";
-  return "À confirmer";
+  // « OUVERTE », PAS « À CONFIRMER » : le lecteur a déjà confirmé que c'est une condition. Ce qui reste
+  // ouvert, c'est son RESPECT par ce lieu.
+  if (signal === "defavorable") return "Ouverte · plutôt défavorable";
+  if (signal === "favorable") return "Ouverte · plutôt favorable";
+  return "Condition ouverte";
 }
 
 // LE GESTE, SEULEMENT QUAND IL EST CONNU. Une condition sur une convention de périmètre ou sur une unité
@@ -207,14 +243,14 @@ export function etatDuSignal(signal: ConditionSignal): string {
 function gesteConnu(key: HardConstraintKey, c: CapabilityAssessment): DecisionAction | undefined {
   if (key === "montagne") {
     return {
-      type: "verifier_sur_place", label: "Regardez l'altitude de l'adresse visée",
-      detail: "L'altitude d'un logement se lit sur la carte de l'IGN (Géoportail) et peut s'écarter fortement de celle du chef-lieu. Elle précise le constat ; elle ne dit pas si ce seuil correspond à ce que vous entendez par vivre à la montagne.",
+      type: "verifier_sur_place", label: "Vérifiez l'altitude exacte de l'adresse",
+      detail: "Elle se lit sur la carte de l'IGN (Géoportail), et peut s'écarter fortement de celle du point de référence de la commune.",
     };
   }
   if (key === "nearSea" && c.reason === "point_de_reference") {
     return {
       type: "verifier_sur_place", label: "Mesurez la distance depuis l'adresse visée",
-      detail: "Une mesure depuis l'adresse, et non depuis le centre de la commune, précise ce constat. Choisissez celle qui correspond à votre condition : à vol d'oiseau, par la route ou en temps de trajet.",
+      detail: "Depuis l'adresse plutôt que depuis le point de référence de la commune, avec la mesure qui correspond à votre condition.",
     };
   }
   if (key === "nearPlace" && c.reason === "metrique_non_enregistree") {
@@ -271,7 +307,7 @@ function mesureSansSeuil(
     const v = classifyCoastDistance(f.distanceCoteKm);
     const signal: ConditionSignal = v === "satisfied" ? "favorable" : v === "mismatch" ? "defavorable" : "neutre";
     return conditionCheck(key, project, f, c, signal,
-      `Cette commune est à environ ${km} km du littoral, mesurés depuis son point de référence.`,
+      `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du littoral.`,
       [{
         factId: "commune.distanceCoteKm", module: "territoire", label: `Distance au littoral · ${f.nom}`,
         observedValue: `${km} km`, grain, relation: "proximite", href: territoireHref,
@@ -335,7 +371,7 @@ function makeRule(key: HardConstraintKey): DecisionRule {
           const remplie: ConditionMetFact = {
             id: `${f.insee}:condition:${key}`, ruleId: id, sourceFactIds: a.evidenceKeys, module: "territoire",
             role: "condition_met", criterion: { kind: "hard", key },
-            headlineSubject: topic, status: "Condition remplie",
+            headlineSubject: topic, status: "Condition respectée",
             materialityTier: "structuring", topic, statement: constat, evidence,
           };
           return ret("satisfied", [remplie], "condition confirmée, remplie");
@@ -366,7 +402,7 @@ function makeRule(key: HardConstraintKey): DecisionRule {
       }
       if (confirme) {
         return ret("condition_check",
-          [conditionCheck(key, project, f, capacite, "defavorable", a.statement, toEvidence(a, f, hard), a.evidenceKeys, a.topic)],
+          [conditionCheck(key, project, f, capacite, "defavorable", constatDefavorable(key, a, f), toEvidence(a, f, hard), a.evidenceKeys, a.topic)],
           "condition confirmée, signal défavorable");
       }
       // NON CONFIRMÉ : un critère du projet que le lieu ne remplit pas. Un écart STRUCTURANT, visible, à

@@ -177,7 +177,12 @@ export type ConclusionPlanInput = {
   // héros le nomme lui aussi : « … n'est pas satisfaite à Toulouse : la distance de Toulouse au
   // littoral. » L'appelant résout donc le libellé (hardConstraintLabel) et le passe ici, comme le
   // bloc `unexamined_hard_constraints` le fait déjà pour les contraintes non examinées.
-  establishedIncompatibility: { factId: string; statement: string; constraintLabel: string } | null;
+  establishedIncompatibility: {
+    factId: string; statement: string; constraintLabel: string;
+    // La famille du critère : elle choisit la tournure du héros (« de vivre en Bretagne », « sur la
+    // proximité de la gare Matabiau »). Optionnelle pour les appelants partiels.
+    constraintKey?: string;
+  } | null;
   // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
   coverage: CoverageLevel;
   orientation: Orientation;
@@ -721,26 +726,23 @@ function suiteControles(p: PerimetreControles): string {
   return `${ici}${controlesPlusBas(p)}`;
 }
 
-// CE QUE L'ON SAIT D'UNE CONDITION OUVERTE, en une proposition qui se termine sans point. La carte
-// « À confirmer » porte le constat et la limite ; le verdict ne dit que le SENS et la CAUSE, pour que le
-// lecteur sache, avant de descendre, si ce qu'on sait penche pour ou contre.
-function etatDeCondition(c: OpenCondition, cartes: Map<string, Extract<DecisionFact, { role: "condition_check" }>>): string {
-  if (c.cause === "ne_pas_mesurer") return `futur•e ne sait pas encore évaluer ${c.label}`;
-  if (c.cause === "donnee_absente") return `la donnée qui permettrait d'évaluer ${c.label} manque ici`;
-  const carte = cartes.get(c.key);
-  if (carte?.signal === "defavorable") return `ce que l'on sait penche contre ${c.label}`;
-  if (carte?.signal === "favorable") return `ce que l'on sait va dans le sens de ${c.label}, sans pouvoir l'établir`;
-  return `ce que l'on sait ne penche ni pour ni contre ${c.label}`;
+// LE NOM D'UNE CONDITION DANS UNE PHRASE. « Votre condition de vivre en Bretagne » se lit ; « votre
+// condition la Bretagne » non. Un périmètre se dit avec « vivre » ; tout le reste avec « sur ».
+function enLieu(label: string): string {
+  if (/ (ou|et) /.test(label)) return `dans ${label}`;
+  if (label.startsWith("la ")) return `en ${label.slice(3)}`;
+  if (label.startsWith("l'")) return `en ${label.slice(2)}`;
+  return `dans ${label}`;
+}
+function intituleCondition(label: string, key?: string): string {
+  return key === "zones" || key === "departements" ? `de vivre ${enLieu(label)}` : `sur ${label}`;
 }
 
+// CE QUE L'ON SAIT DES CONDITIONS OUVERTES, PAR SENS : une phrase par groupe, jamais une proposition par
+// condition. Le détail de chaque condition vit sur sa carte ; ici, seulement la direction.
 function sensRegroupes(
   ouvertes: OpenCondition[], cartes: Map<string, Extract<DecisionFact, { role: "condition_check" }>>,
 ): string {
-  // Une seule condition : sa proposition, telle quelle.
-  if (ouvertes.length === 1) {
-    const e = etatDeCondition(ouvertes[0]!, cartes);
-    return `${e.startsWith("futur•e") ? e : capitalize(e)}.`;
-  }
   const groupe = (pred: (c: OpenCondition) => boolean) => ouvertes.filter(pred).map((c) => c.label);
   const signal = (c: OpenCondition) => cartes.get(c.key)?.signal;
   const contre = groupe((c) => c.cause === "a_confirmer" && signal(c) === "defavorable");
@@ -749,9 +751,11 @@ function sensRegroupes(
   const nonMesurees = groupe((c) => c.cause === "ne_pas_mesurer");
   const absentes = groupe((c) => c.cause === "donnee_absente");
   const phrases: string[] = [];
-  if (contre.length > 0) phrases.push(`Ce que l'on sait penche contre ${joinFr(contre)}.`);
-  if (pour.length > 0) phrases.push(`Ce que l'on sait va dans le sens de ${joinFr(pour)}, sans pouvoir l'établir.`);
-  if (neutres.length > 0) phrases.push(`Rien ne penche nettement pour ou contre ${joinFr(neutres)}.`);
+  if (contre.length > 0) phrases.push(`Les données disponibles sont plutôt défavorables pour ${joinFr(contre)}.`);
+  if (pour.length > 0) phrases.push(`Les données disponibles sont plutôt favorables pour ${joinFr(pour)}.`);
+  if (neutres.length > 0) {
+    phrases.push(`${phrases.length > 0 ? "Elles" : "Les données disponibles"} ne permettent pas encore de conclure sur ${joinFr(neutres)}.`);
+  }
   if (nonMesurees.length > 0) phrases.push(`futur•e ne sait pas encore évaluer ${joinFr(nonMesurees)}.`);
   if (absentes.length > 0) phrases.push(`La donnée qui permettrait d'évaluer ${joinFr(absentes)} manque ici.`);
   return phrases.join(" ");
@@ -766,6 +770,9 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
   );
   const n = ouvertes.length;
   const sujets = joinFr(ouvertes.map((c) => c.label));
+  // NON ÉVALUÉE quand AUCUNE condition ouverte n'a de lecture : futur•e ne sait pas les évaluer. Ce
+  // n'est pas une condition « ouverte » à vérifier, c'est une limite du produit, dite comme telle.
+  const nonEvaluees = ouvertes.every((c) => c.cause === "ne_pas_mesurer");
   // LE HÉROS NOMME LES CONDITIONS OUVERTES, et consomme leurs cartes : la strate voisine ne les renomme
   // pas. Au-delà de deux, ou trop long, il retombe en posture et le détail nomme.
   const candidats: LeadCandidate[] = ouvertes.flatMap((c) => {
@@ -774,10 +781,14 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
       ? [{ factId: carte.id, topic: carte.topic, subject: c.label, statement: carte.statement, materialityTier: carte.materialityTier, role: carte.role }]
       : [];
   });
-  const phrase = n === 1
-    ? `Une condition sans compromis reste à confirmer ${a} : ${sujets}.`
-    : `${capitalize(enLettres(n))} conditions sans compromis restent à confirmer ${a} : ${sujets}.`;
-  // Une condition sans carte (non mesurable, donnée absente) se nomme quand même : `nameIssues` exige au
+  const phrase = nonEvaluees
+    ? n === 1
+      ? `futur•e ne sait pas encore évaluer votre condition ${intituleCondition(ouvertes[0]!.label)} ${a}.`
+      : `futur•e ne sait pas encore évaluer ${enLettres(n)} de vos conditions ${a} : ${sujets}.`
+    : n === 1
+      ? `Une condition sans compromis reste ouverte ${a} : ${sujets}.`
+      : `${capitalize(enLettres(n))} conditions sans compromis restent ouvertes ${a} : ${sujets}.`;
+  // Une condition sans carte (non évaluée, donnée absente) se nomme quand même : `nameIssues` exige au
   // moins un candidat, alors le texte se contrôle ici sur sa seule longueur.
   const named = candidats.length > 0
     ? nameIssues(phrase, candidats, "constraint")
@@ -785,28 +796,30 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
       ? { kind: "named_issues" as const, text: phrase, consumedFactIds: [], consumedCompositionIds: [], consumedFrom: "constraint" as const }
       : null;
 
-  // LE DÉTAIL DIT LE SENS, puis ce qui est rempli, puis le reste du dossier. Jamais « toutes vos
-  // conditions sont remplies » : une condition au moins ne l'est pas, par construction de cette branche.
-  // UNE PHRASE PAR SENS, pas une proposition par condition. À quatre conditions, une seule phrase
-  // énumérant quatre états devenait illisible : on regroupe ce qui penche contre, ce qui va dans le sens,
-  // ce qui ne penche pas, ce qui ne s'évalue pas, ce dont la donnée manque.
-  const sens = sensRegroupes(ouvertes, cartes);
-  const remplies = input.metConditions ?? [];
-  const remplie = remplies.length > 0
-    ? ` ${remplies.length === 1 ? "La condition" : "Les conditions"} ${joinFr(remplies.map((r) => r.label))} ${remplies.length === 1 ? "est remplie" : "sont remplies"}.`
+  // LE DÉTAIL DIT LE SENS, puis ce qui est respecté, puis le reste du dossier. Jamais « toutes vos
+  // conditions sont respectées » : une condition au moins ne l'est pas, par construction de cette branche.
+  // Une seule condition non évaluée : le héros a tout dit, le détail ne le répète pas.
+  const sens = nonEvaluees && n === 1 ? "" : sensRegroupes(ouvertes, cartes);
+  const respectees = input.metConditions ?? [];
+  const respectee = respectees.length > 0
+    ? ` ${respectees.length === 1 ? "Votre condition" : "Vos conditions"} ${joinFr(respectees.map((r) => intituleCondition(r.label, r.key)))} ${respectees.length === 1 ? "est respectée" : "sont respectées"}.`
     : "";
   const ecarts = input.mismatchTotal > 0
     ? ` Par ailleurs, ${nom} répond moins bien à ${input.mismatchTotal === 1 ? "une" : enLettres(input.mismatchTotal)} de vos priorités.`
     : "";
   return {
-    label: n === 1 ? "Condition à confirmer" : "Conditions à confirmer",
+    label: nonEvaluees
+      ? (n === 1 ? "Condition non évaluée" : "Conditions non évaluées")
+      : (n === 1 ? "Condition ouverte" : "Conditions ouvertes"),
     tone: "caution",
     headline: named ?? POSTURE(
-      n === 1
-        ? `Une condition sans compromis reste à confirmer ${a}.`
-        : `${capitalize(enLettres(n))} conditions sans compromis restent à confirmer ${a}.`,
+      nonEvaluees
+        ? `futur•e ne sait pas encore évaluer ${n === 1 ? "une de vos conditions" : `${enLettres(n)} de vos conditions`} ${a}.`
+        : n === 1
+          ? `Une condition sans compromis reste ouverte ${a}.`
+          : `${capitalize(enLettres(n))} conditions sans compromis restent ouvertes ${a}.`,
     ),
-    detail: `${sens}${remplie}${ecarts}`,
+    detail: `${sens}${respectee}${ecarts}`.trim(),
   };
 }
 
@@ -854,15 +867,17 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
     // sur le vide. Les fixtures de test échappent au typecheck (tsconfig exclut *.test.ts) : cette
     // garde est la seule qui vaille au runtime.
     const label = inc?.constraintLabel?.trim();
+    // « Votre condition de vivre en Bretagne n'est pas respectée à Nantes. » Le couple visible est
+    // « respectée / non respectée » ; la condition est nommée comme le lecteur la dirait.
     const named = inc && label
-      ? nameIssues(`${voc.condition} n'est pas remplie ${a} : ${label}.`, [{
+      ? nameIssues(`Votre condition ${intituleCondition(label, inc.constraintKey)} n'est pas respectée ${a}.`, [{
           factId: inc.factId, topic: label, subject: label, statement: inc.statement,
           materialityTier: "decision_critical", role: "incompatibility",
         }], "constraint")
       : null;
     return {
       label: "Condition non respectée", tone: "critical",
-      headline: named ?? POSTURE(`${voc.condition} n'est pas remplie ${a}.`),
+      headline: named ?? POSTURE(`Une de vos conditions sans compromis n'est pas respectée ${a}.`),
       detail: inc ? endWithPeriod(inc.statement) : "L'une de vos conditions non négociables n'est pas respectée ici.",
     };
   }

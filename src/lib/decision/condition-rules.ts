@@ -22,6 +22,7 @@ import { preferenceWeight } from "./project-view.ts";
 import { criterionCapability } from "./capability.ts";
 import { consequenceDuSignal, etatDuSignal } from "./hard-constraint-rules.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
+import { deCommune } from "../typography.ts";
 
 const territoireHref = "/rapport/quartier";
 
@@ -29,6 +30,9 @@ const territoireHref = "/rapport/quartier";
 // est lue à l'échelle du lieu. Une seule phrase pour toutes, parce que c'est une seule raison.
 const POURQUOI_PREFERENCE =
   "Cette lecture est faite à l'échelle de la commune, sans seuil fixé par vous. Elle éclaire votre condition sans pouvoir la trancher.";
+
+const POURQUOI_MER =
+  "Cette distance est mesurée à l'échelle de la commune et ne correspond pas encore nécessairement à la mesure exacte que vous souhaitez utiliser pour cette condition.";
 
 const DEFAVORABLES = new Set<RuleEvaluation["outcome"]>(["mismatch", "verification"]);
 
@@ -71,35 +75,42 @@ function preuvesDe(reunis: DecisionFact[], f: ModuleFacts, key: PreferenceKey, l
   return out;
 }
 
+// LE FAIT, EN UNE PHRASE. La carte « Condition ouverte » porte déjà le sens dans son étiquette ; la phrase
+// dit seulement ce que l'on observe. On reprend donc le constat des règles, débarrassé de ce qui
+// n'appartient pas à une condition : le préambule d'un écart (« Vous avez placé … parmi vos
+// priorités. ») et la conclusion d'une correspondance (« … dans ce que vous recherchez »).
+function sansPreambule(statement: string): string {
+  return statement.replace(/^Vous avez placé [^.]*\. /, "");
+}
+function sansConclusion(statement: string): string {
+  return statement.replace(/,\s*(dans )?ce que vous recherchez/, "");
+}
+
 function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: string): string {
-  // UN SIGNAL FAVORABLE NE SE DIT PAS AVEC LES MOTS D'UNE CORRESPONDANCE. La phrase d'un alignment
-  // conclut (« … dans ce que vous recherchez ») : sous une étiquette « À confirmer », elle affirmerait ce
-  // que la carte refuse d'établir. On garde la MESURE, et on dit seulement vers quoi elle penche.
   if (signal === "favorable") {
-    const mesure = reunis.find((r) => r.role === "alignment")?.evidence.find((e) => e.observedValue)?.observedValue;
-    if (mesure) return `À l'échelle de la commune, la lecture va dans le sens de ${label} : ${mesure}.`;
+    const align = reunis.find((r) => r.role === "alignment");
+    if (align) return sansConclusion(align.statement);
   }
   const premier = signal === "favorable" ? undefined : reunis.find((r) => r.role !== "alignment");
-  if (premier && premier.role !== "compromise") return premier.statement;
+  if (premier && premier.role !== "compromise") return sansPreambule(premier.statement);
   return signal === "favorable"
     ? `À l'échelle de la commune, rien de défavorable n'apparaît pour ${label}.`
     : `À l'échelle de la commune, ${label} ne se distingue ni parmi les communes les plus favorables, ni parmi les moins favorables.`;
 }
 
-// UNE LECTURE NEUTRE QUI A UNE MESURE LA DIT. La proximité de la mer, entre 15 et 100 km, n'est ni un écart
-// ni une correspondance : sa règle se tait, mais la distance existe, et c'est elle que le lecteur veut lire.
-function mesureNeutre(key: PreferenceKey, f: ModuleFacts): { statement: string; evidence: EvidenceRef } | null {
-  if (key === "proximite_mer" && f.distanceCoteKm != null) {
-    const km = Math.round(f.distanceCoteKm);
-    return {
-      statement: `La distance au littoral est estimée à environ ${km} km depuis le point de référence de ${f.nom}.`,
-      evidence: {
-        factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-        observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", relation: "proximite", href: territoireHref,
-      },
-    };
-  }
-  return null;
+// LA MER A UNE MESURE, ET ELLE SE DIT TOUJOURS DE LA MÊME FAÇON, quel que soit son sens : la distance du
+// point de référence de la commune au littoral. Neutre (entre 15 et 100 km), sa règle se tait ; la
+// distance existe pourtant, et c'est elle que le lecteur veut lire.
+function mesureMer(f: ModuleFacts): { statement: string; evidence: EvidenceRef } | null {
+  if (f.distanceCoteKm == null) return null;
+  const km = Math.round(f.distanceCoteKm);
+  return {
+    statement: `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du littoral.`,
+    evidence: {
+      factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
+      observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", relation: "proximite", href: territoireHref,
+    },
+  };
 }
 
 function actionDe(reunis: DecisionFact[]): DecisionAction | undefined {
@@ -129,7 +140,7 @@ export function conditionsDePreference(
     const signal = signalDe(key, evaluations, reunis);
     if (signal == null) continue;
     const action = actionDe(reunis);
-    const neutre = signal === "neutre" ? mesureNeutre(key, f) : null;
+    const mer = key === "proximite_mer" ? mesureMer(f) : null;
     const carte: ConditionCheckFact = {
       id: `${f.insee}:condition:${key}`,
       ruleId: `condition.${key}`,
@@ -145,9 +156,9 @@ export function conditionsDePreference(
       // le statut de condition. Une préférence de poids 1 confirmée reste, sur cet axe, de poids 1.
       materialityTier: preferenceWeight(project, key) >= 3 ? "structuring" : "secondary",
       topic: reunis[0]?.topic ?? label,
-      statement: neutre?.statement ?? constatDe(reunis, signal, label),
-      evidence: neutre ? [neutre.evidence] : preuvesDe(reunis, f, key, label),
-      whyNotDecided: POURQUOI_PREFERENCE,
+      statement: mer?.statement ?? constatDe(reunis, signal, label),
+      evidence: mer ? [mer.evidence] : preuvesDe(reunis, f, key, label),
+      whyNotDecided: key === "proximite_mer" ? POURQUOI_MER : POURQUOI_PREFERENCE,
       capabilityReason: capacite.reason,
       consequence: consequenceDuSignal(signal),
       ...(action ? { action } : {}),

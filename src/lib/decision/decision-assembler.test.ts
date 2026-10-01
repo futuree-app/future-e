@@ -49,7 +49,7 @@ test("incompatibilité établie -> established_incompatibility, et le verdict le
   assert.equal(d.criteria.orientation, "incompatible");
   // Le héros NOMME la CONDITION telle que le lecteur l'a posée (hardConstraintLabel, résolu depuis le
   // projet), et non le `topic` du fait : celui-ci porte le nom de la commune, que le héros nomme déjà.
-  assert.match(d.narrativePlan.verdict.headline.text, /Une condition de votre projet n'est pas remplie à Toulouse : la proximité de la mer \(moins de 5 km\)\./);
+  assert.match(d.narrativePlan.verdict.headline.text, /Votre condition sur la proximité de la mer \(moins de 5 km\) n'est pas respectée à Toulouse\./);
   assert.equal(d.narrativePlan.verdict.headline.text.includes(incompat().topic), false);
   assert.match(d.conclusion, /trop loin/);
 });
@@ -73,7 +73,7 @@ test("condition confirmée non couverte -> nommée dans uncovered, et le verdict
   assert.deepEqual(d.uncovered.map((u) => u.key), ["communeSize"]);
   assert.equal(d.criteria.orientation, "condition_to_confirm");
   // La condition est nommée comme le lecteur l'a posée, avec sa cause.
-  assert.match(d.narrativePlan.verdict.headline.text, /Une condition sans compromis reste à confirmer à Toulouse : une commune de moins de 20 000 habitants\./);
+  assert.match(d.narrativePlan.verdict.headline.text, /Une condition sans compromis reste ouverte à Toulouse : une commune de moins de 20 000 habitants\./);
   assert.match(d.conclusion, /La donnée qui permettrait d'évaluer une commune de moins de 20 000 habitants manque ici\./);
 
   // Non confirmée, la même taille n'est qu'une priorité restée sans réponse : jamais une condition.

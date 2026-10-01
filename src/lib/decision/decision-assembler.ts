@@ -209,6 +209,7 @@ export function assembleDossier(
           factId: established.id,
           statement: established.statement,
           constraintLabel: hardConstraintLabel(project, established.hardConstraintKey),
+          constraintKey: established.hardConstraintKey,
         }
       : null,
     coverage: criteria.coverage,

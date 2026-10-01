@@ -355,7 +355,8 @@ export function evaluateDepartements(
   return {
     key: "departements", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`le département ${deCommune(c.nom)}`, "le département de cette commune"),
-    statement: `Cette commune est dans le département ${c.dept}, hors de ceux qu'indique votre projet (${wanted.join(", ")}).`,
+    // LE FAIT, DIT SIMPLEMENT : le lieu, et où il se trouve. La condition, elle, est nommée par le titre.
+    statement: `${c.nom} est dans le département ${c.dept}, hors ${wanted.length === 1 ? `du département ${wanted[0]}` : `des départements ${wanted.join(", ")}`}.`,
   };
 }
 
@@ -413,7 +414,7 @@ export function evaluateZones(
     return {
       key: "zones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: perimetre, evidenceKeys, topic,
-      statement: `Cette commune est hors ${deCommune(perimetre)}, le périmètre qu'indique votre projet.`,
+      statement: `${c.nom} se situe hors ${deCommune(perimetre)}.`,
     };
   }
   if (incomplet && !(union && dedans)) {
@@ -484,7 +485,7 @@ export function evaluateExcludeZones(
       key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
       expectedLabel: `hors ${deCommune(zonesLabel)}`, evidenceKeys,
       topic: topicFit(`la zone où se situe ${c.nom}`, "la zone où se situe cette commune"),
-      statement: `Cette commune se trouve dans ${zonesLabel}, une zone que votre projet écarte.`,
+      statement: `${c.nom} se trouve dans ${zonesLabel}.`,
     };
   }
   if (z.unresolvedLabels.length > 0) {
