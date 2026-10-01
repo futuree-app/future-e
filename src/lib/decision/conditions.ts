@@ -16,8 +16,9 @@ import { canonique, valeurDecisionnelle } from "./criterion-value.ts";
 
 export type { CriterionRef, ConditionConfirmation } from "../user-project.ts";
 
+// FUT-8 : le même ÉLÉMENT, pas seulement la même famille. `instance` absente et `null` se valent.
 export function sameCriterion(a: CriterionRef, b: CriterionRef): boolean {
-  return a.kind === b.kind && a.key === b.key;
+  return a.kind === b.kind && a.key === b.key && (a.instance ?? null) === (b.instance ?? null);
 }
 
 /**

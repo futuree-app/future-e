@@ -28,9 +28,14 @@ export type UserProjectInput = {
 // ELLE EST ÉPINGLÉE À UNE EMPREINTE : la valeur décisionnelle du critère au moment du geste
 // (`criterionFingerprint`, conditions.ts). « La Bretagne » confirmée ne vaut pas pour « la
 // Normandie » : la confirmation reste stockée (on pourra la proposer à nouveau), elle ne vaut plus.
+// FUT-8 : L'IDENTITÉ D'UN ÉLÉMENT, pas d'une position dans un tableau. `instance` désigne l'élément d'une
+// famille multiple : le nom normalisé de la ville pour `excludePlace` (« lyon »), le jeton pour
+// `excludeZones` (« idf »). `null` (ou absent, en lecture legacy) = la famille entière, ou une famille à
+// un seul élément ; `zones` et `departements` sont un seul périmètre, instance `null`.
 export type CriterionRef =
-  | { kind: "hard"; key: HardConstraintKey }
-  | { kind: "preference"; key: PreferenceKey };
+  | { kind: "hard"; key: HardConstraintKey; instance?: string | null }
+  | { kind: "preference"; key: PreferenceKey; instance?: null };
+export type CriterionInstanceRef = CriterionRef;
 
 export type ConditionConfirmation = {
   criterion: CriterionRef;
@@ -41,15 +46,59 @@ export type ConditionConfirmation = {
   source: "user";
 };
 
+// ── LES DÉFINITIONS (FUT-8) : ce que le lecteur a PRÉCISÉ ou ACCEPTÉ comme sens d'un critère ──────────
+// Indépendantes des conditions : « à moins de 20 km de Nantes, à vol d'oiseau » est une précision, pas une
+// condition sans compromis. Une variante par famille de précision ; la lecture refuse les combinaisons
+// impossibles (une métrique « route » sur un temps, une unité sur une région).
+export type DistanceMetricDef = "vol_oiseau" | "route";
+export type SizeUnitDef = "commune" | "unite_urbaine";
+export type PerimetreParisien = "paris" | "petite_couronne" | "agglomeration" | "ile_de_france";
+
+export type DefinitionBody =
+  | { kind: "distance_lieu"; metric: DistanceMetricDef; maxKm: number }
+  | { kind: "temps_lieu"; mode: "car" | "walk"; maxMinutes: number }
+  | { kind: "taille"; unit: SizeUnitDef; min: number | null; max: number | null }
+  | { kind: "taille_relative"; unit: SizeUnitDef }
+  | { kind: "quitter_ville"; scope: SizeUnitDef }
+  | { kind: "perimetre_parisien"; perimetre: PerimetreParisien }
+  // Le périmètre géographique ENTIER : une convention acceptée par ancre conventionnelle (macro-zone).
+  | { kind: "perimetre_zones"; conventions: { token: string; conventionId: string; conventionVersion: number }[] }
+  // Une convention acceptée pour un critère non géographique (plus tard : tailles qualitatives, climat).
+  | { kind: "convention"; conventionId: string; conventionVersion: number };
+
+export type Definition = DefinitionBody & {
+  criterion: CriterionRef;
+  // L'empreinte de la valeur `parsed` de CET élément, telle que le lecteur l'avait sous les yeux. Si le
+  // reparse la change, la définition ne vaut plus (elle reste stockée).
+  parsedFingerprint: string;
+  definedAt: string;
+  source: "user";
+};
+
+// ── LES ADOPTIONS (FUT-8) : « futur•e m'a proposé ce critère, je le reprends à mon compte » ──────────
+// Un choix DURABLE : il survit au changement ou au retrait de l'ancre qui l'a inspiré. `origin` raconte
+// d'où vient l'idée ; il ne décide de rien.
+export type Adoption = {
+  criterion: { kind: "preference"; key: PreferenceKey; instance?: null };
+  weight: 1 | 2 | 3;
+  origin: { kind: "ancre"; label: string };
+  adoptedAt: string;
+  source: "user";
+};
+
 export type UserProject = UserProjectInput & {
   // `schemaVersion` DÉCRIT LA FORME DU CONTRAT, rien d'autre. La v2 dit qu'un projet PEUT porter des
   // `conditions`. Elle n'est ni une trace de migration, ni la preuve que le lecteur a vu le nouveau
   // modèle, ni celle que d'anciennes contraintes ont été confirmées : un projet legacy lu aujourd'hui
   // est exposé en v2, sans aucune confirmation.
-  schemaVersion?: 2; // optionnel pour l'ergonomie de construction ; le serveur l'écrit toujours
+  // v3 (FUT-8) : la forme peut porter `definitions` et `adoptions`. Toujours une forme, jamais un historique.
+  schemaVersion?: 3; // optionnel pour l'ergonomie de construction ; le serveur l'écrit toujours
   updatedAt: string | null; // estampille serveur ; null = inconnue (jamais une date inventée)
   // Absent = aucune condition confirmée. Jamais vide en base : on n'écrit pas un tableau vide.
   conditions?: ConditionConfirmation[];
+  // FUT-8. Absents = aucune précision, aucune adoption. Jamais vides en base.
+  definitions?: Definition[];
+  adoptions?: Adoption[];
 };
 
 const POSTURES: ProjectPosture[] = ["recherche", "adresse", "habitant", "recherche_quartier"];
@@ -97,7 +146,99 @@ function coerceParsed(v: unknown): ParsedProject | null {
 function isCriterionRef(v: unknown): v is CriterionRef {
   if (!v || typeof v !== "object") return false;
   const o = v as Record<string, unknown>;
-  return (o.kind === "hard" || o.kind === "preference") && typeof o.key === "string" && o.key.length > 0;
+  if (!((o.kind === "hard" || o.kind === "preference") && typeof o.key === "string" && o.key.length > 0)) return false;
+  // Une instance est une chaîne non vide, ou rien. Une préférence n'a pas d'instance.
+  if (o.instance != null && (o.kind === "preference" || typeof o.instance !== "string" || o.instance.length === 0)) return false;
+  return true;
+}
+
+function refDe(o: CriterionRef): CriterionRef {
+  return o.kind === "hard"
+    ? { kind: "hard", key: o.key, instance: o.instance ?? null }
+    : { kind: "preference", key: o.key, instance: null };
+}
+
+const finitePos = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n) && n > 0;
+const borne = (n: unknown): n is number | null => n === null || finitePos(n);
+const UNITES = new Set(["commune", "unite_urbaine"]);
+
+// Le CORPS d'une définition, validé variante par variante. Ce qui ne colle pas à sa variante tombe.
+function definitionBody(o: Record<string, unknown>): DefinitionBody | null {
+  switch (o.kind) {
+    case "distance_lieu":
+      return (o.metric === "vol_oiseau" || o.metric === "route") && finitePos(o.maxKm)
+        ? { kind: "distance_lieu", metric: o.metric, maxKm: o.maxKm } : null;
+    case "temps_lieu":
+      return (o.mode === "car" || o.mode === "walk") && finitePos(o.maxMinutes)
+        ? { kind: "temps_lieu", mode: o.mode, maxMinutes: o.maxMinutes } : null;
+    case "taille":
+      return UNITES.has(o.unit as string) && borne(o.min) && borne(o.max) && (o.min != null || o.max != null)
+        ? { kind: "taille", unit: o.unit as SizeUnitDef, min: o.min, max: o.max } : null;
+    case "taille_relative":
+      return UNITES.has(o.unit as string) ? { kind: "taille_relative", unit: o.unit as SizeUnitDef } : null;
+    case "quitter_ville":
+      return UNITES.has(o.scope as string) ? { kind: "quitter_ville", scope: o.scope as SizeUnitDef } : null;
+    case "perimetre_parisien":
+      return ["paris", "petite_couronne", "agglomeration", "ile_de_france"].includes(o.perimetre as string)
+        ? { kind: "perimetre_parisien", perimetre: o.perimetre as PerimetreParisien } : null;
+    case "perimetre_zones": {
+      if (!Array.isArray(o.conventions) || o.conventions.length === 0) return null;
+      const conventions = o.conventions.flatMap((c) => {
+        const x = (c ?? {}) as Record<string, unknown>;
+        return typeof x.token === "string" && x.token && typeof x.conventionId === "string" && x.conventionId
+          && Number.isInteger(x.conventionVersion) && (x.conventionVersion as number) > 0
+          ? [{ token: x.token, conventionId: x.conventionId, conventionVersion: x.conventionVersion as number }]
+          : [];
+      });
+      return conventions.length === o.conventions.length ? { kind: "perimetre_zones", conventions } : null;
+    }
+    case "convention":
+      return typeof o.conventionId === "string" && o.conventionId && Number.isInteger(o.conventionVersion)
+        && (o.conventionVersion as number) > 0
+        ? { kind: "convention", conventionId: o.conventionId, conventionVersion: o.conventionVersion as number } : null;
+    default:
+      return null;
+  }
+}
+
+// LES DÉFINITIONS LUES EN BASE, tolérantes : une entrée illisible tombe, jamais le projet. La compatibilité
+// entre la variante et la famille du critère (une unité sur une région, par exemple) se vérifie à
+// l'usage, là où la famille est connue (cf. decision/effective-value.ts).
+export function normalizeDefinitions(raw: unknown): Definition[] {
+  if (!Array.isArray(raw)) return [];
+  const out: Definition[] = [];
+  for (const d of raw) {
+    if (!d || typeof d !== "object") continue;
+    const o = d as Record<string, unknown>;
+    if (o.source !== "user" || !isCriterionRef(o.criterion)) continue;
+    if (typeof o.parsedFingerprint !== "string" || !o.parsedFingerprint) continue;
+    if (typeof o.definedAt !== "string" || Number.isNaN(Date.parse(o.definedAt))) continue;
+    const body = definitionBody(o);
+    if (!body) continue;
+    out.push({ ...body, criterion: refDe(o.criterion), parsedFingerprint: o.parsedFingerprint, definedAt: o.definedAt, source: "user" });
+  }
+  return out;
+}
+
+export function normalizeAdoptions(raw: unknown): Adoption[] {
+  if (!Array.isArray(raw)) return [];
+  const out: Adoption[] = [];
+  for (const a of raw) {
+    if (!a || typeof a !== "object") continue;
+    const o = a as Record<string, unknown>;
+    const c = o.criterion as Record<string, unknown> | undefined;
+    const origin = o.origin as Record<string, unknown> | undefined;
+    if (o.source !== "user" || !c || c.kind !== "preference" || typeof c.key !== "string" || !c.key) continue;
+    if (c.instance != null) continue;
+    if (o.weight !== 1 && o.weight !== 2 && o.weight !== 3) continue;
+    if (!origin || origin.kind !== "ancre" || typeof origin.label !== "string" || !origin.label) continue;
+    if (typeof o.adoptedAt !== "string" || Number.isNaN(Date.parse(o.adoptedAt))) continue;
+    out.push({
+      criterion: { kind: "preference", key: c.key as PreferenceKey, instance: null },
+      weight: o.weight, origin: { kind: "ancre", label: origin.label }, adoptedAt: o.adoptedAt, source: "user",
+    });
+  }
+  return out;
 }
 
 export function normalizeConditions(raw: unknown): ConditionConfirmation[] {
@@ -111,7 +252,7 @@ export function normalizeConditions(raw: unknown): ConditionConfirmation[] {
     if (typeof o.fingerprint !== "string" || o.fingerprint.length === 0) continue;
     if (typeof o.confirmedAt !== "string" || Number.isNaN(Date.parse(o.confirmedAt))) continue;
     out.push({
-      criterion: { kind: o.criterion.kind, key: o.criterion.key } as CriterionRef,
+      criterion: refDe(o.criterion),
       fingerprint: o.fingerprint, confirmedAt: o.confirmedAt, source: "user",
     });
   }
@@ -122,6 +263,19 @@ export function normalizeConditions(raw: unknown): ConditionConfirmation[] {
 // `undefined` explicite casserait la sérialisation stable des artefacts.
 function withConditions<T extends object>(base: T, conditions: ConditionConfirmation[]): T & { conditions?: ConditionConfirmation[] } {
   return conditions.length > 0 ? { ...base, conditions } : base;
+}
+
+// Les trois structures écrites par les GESTES du lecteur, lues ensemble. Une structure vide ne s'écrit pas.
+function withGestes<T extends object>(base: T, raw: { conditions?: unknown; definitions?: unknown; adoptions?: unknown }): T & {
+  conditions?: ConditionConfirmation[]; definitions?: Definition[]; adoptions?: Adoption[];
+} {
+  const definitions = normalizeDefinitions(raw.definitions);
+  const adoptions = normalizeAdoptions(raw.adoptions);
+  return {
+    ...withConditions(base, normalizeConditions(raw.conditions)),
+    ...(definitions.length > 0 ? { definitions } : {}),
+    ...(adoptions.length > 0 ? { adoptions } : {}),
+  };
 }
 
 // Validation de l'ENTRÉE client. Elle IGNORE `conditions` : une écriture générique du projet (le texte,
@@ -151,10 +305,14 @@ export function normalizeUserProjectInput(raw: unknown): UserProjectInput | null
 // premier enregistrement de l'éditeur (qui écrit le projet en entier) effacerait en silence toutes les
 // conditions du lecteur. Elles sont reportées telles quelles, y compris celles que le nouveau texte
 // rend périmées : une confirmation périmée ne vaut plus, mais elle reste l'historique du geste.
+// `existant` (FUT-8) : le projet DÉJÀ EN BASE. Ses conditions, définitions et adoptions sont reportées,
+// telles quelles : un enregistrement du texte ne les efface jamais, et une écriture générique ne peut pas
+// en fabriquer (le navigateur ne les envoie pas, `normalizeUserProjectInput` les ignore).
 export function stampUserProject(
-  input: UserProjectInput, now: string, preserved: unknown = undefined,
+  input: UserProjectInput, now: string, existant: unknown = undefined,
 ): UserProject {
-  return withConditions({ ...input, schemaVersion: 2 as const, updatedAt: now }, normalizeConditions(preserved));
+  const e = (existant && typeof existant === "object" ? existant : {}) as Record<string, unknown>;
+  return withGestes({ ...input, schemaVersion: 3 as const, updatedAt: now }, e);
 }
 
 // Lecture DB, tolérante au legacy. schemaVersion -> 2 (la forme, pas un historique). updatedAt absent
@@ -163,8 +321,8 @@ export function normalizeUserProject(raw: unknown): UserProject | null {
   const input = normalizeUserProjectInput(raw);
   if (!input) return null;
   const r = raw as Record<string, unknown>;
-  return withConditions(
-    { ...input, schemaVersion: 2 as const, updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : null },
-    normalizeConditions(r.conditions),
+  return withGestes(
+    { ...input, schemaVersion: 3 as const, updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : null },
+    r,
   );
 }

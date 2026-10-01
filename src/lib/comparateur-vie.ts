@@ -125,7 +125,10 @@ export const PREFERENCE_KEYS = [
 ] as const;
 export type PreferenceKey = (typeof PREFERENCE_KEYS)[number];
 
-export type Preference = { key: PreferenceKey; weight: number };
+// `source` (FUT-8) : « parse » = lue dans le texte ; « ancre » = dérivée d'une commune-ancre. Écrite par
+// le parseur et la dérivation, jamais par un geste du lecteur (une reprise est une `adoption`).
+// Absente = « parse » (legacy).
+export type Preference = { key: PreferenceKey; weight: number; source?: "parse" | "ancre" };
 
 // Le schéma des contraintes dures vit désormais dans un module NEUTRE (hard-constraint-schema.ts) : le
 // noyau canonique en a besoin, et il ne peut pas dépendre en type de ce module server-only. On le
@@ -160,6 +163,12 @@ export type ParsedProject = {
   // ambiant (sinon « j'ai retiré X » et X réapparaît dans les cartes). N'affecte NI le
   // score NI le filtre. cf. assignDecouverte / assignSignaux (union dans requestedKeys).
   suppressNarrativeKeys?: PreferenceKey[];
+  // FUT-8. « Petite ville », « ville moyenne », « grande ville » : le MOT, jamais des bornes inventées.
+  // Il sert les libellés ; le classement passe par les préférences de taille.
+  sizeWord?: import("./hard-constraint-schema.ts").SizeWord | null;
+  // FUT-8. Les mots forts (« absolument », « rédhibitoire ») : une SUGGESTION de condition, rattachée à
+  // un élément précis, jamais une condition.
+  forceMarkers?: { criterion: import("./user-project.ts").CriterionRef; quote: string }[];
 };
 
 export type MatchResult = {

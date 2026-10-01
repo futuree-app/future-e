@@ -7,6 +7,15 @@
 import type { ZoneAnchor, ZoneMatch, ZoneStrength } from "./geo-zones.ts";
 export type { ZoneAnchor, ZoneMatch, ZoneStrength };
 
+// ── CE QUE LE LECTEUR A DIT, ET QUE LE PROJET NE DOIT PLUS PERDRE (FUT-8) ─────────────────────
+// `null` ou absent = NON DIT. Jamais une valeur par défaut : le moteur ne devine ni une métrique, ni une
+// unité, ni un périmètre. Ces champs sont écrits par le parseur, et par lui seul ; ce que le lecteur
+// précise ensuite vit dans `UserProject.definitions` (cf. user-project.ts).
+export type DistanceMetric = "vol_oiseau" | "route";
+export type SizeUnit = "commune" | "unite_urbaine";
+export type CityScope = "commune" | "unite_urbaine";
+export type SizeWord = "petite" | "moyenne" | "grande";
+
 export type HardConstraints = {
   departements?: string[];
   // Ancres géographiques avec gradient de force (cf. geo-zones.ts). Chaque ancre
@@ -44,13 +53,21 @@ export type HardConstraints = {
     maxKm?: number | null;
     maxMinutes?: number | null;
     mode?: "car" | "walk" | "bike" | null;
+    // FUT-8 : « à vol d'oiseau », « par la route ». Sans elle, des kilomètres ne se tranchent pas.
+    metric?: DistanceMetric | null;
   } | null;
-  communeSize?: { min?: number | null; max?: number | null } | null;
+  // FUT-8 : `unit` = « commune de… », « agglomération de… ». Des bornes sans unité ne se tranchent pas.
+  communeSize?: { min?: number | null; max?: number | null; unit?: SizeUnit | null } | null;
   // « Quitter {ville} » : exclut l'unité urbaine de la ville (le moteur résout label -> UU).
-  excludePlace?: { label: string }[];
+  // FUT-8 : `scope` = « quitter la commune de Lyon » / « quitter l'agglomération lyonnaise ».
+  excludePlace?: { label: string; scope?: CityScope | null }[];
+  // FUT-8 : le MOT du lecteur à côté de chaque jeton d'exclusion. « La région parisienne » et
+  // « l'Île-de-France » donnent le même jeton (`idf`) et ne disent pas la même chose. Liste parallèle à
+  // `excludeZones` (qui reste `string[]` : la Recherche la lit telle quelle).
+  excludeZonesDits?: { token: string; said: string }[];
   // « Plus petit / grand que {ville} » : le moteur résout label -> population d'agglomération de
   // référence (cf. chantier C : la taille se lit sur l'unité urbaine).
-  sizeRelativeTo?: { label: string; direction: "smaller" | "larger" } | null;
+  sizeRelativeTo?: { label: string; direction: "smaller" | "larger"; unit?: SizeUnit | null } | null;
 };
 
 /**

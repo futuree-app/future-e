@@ -140,7 +140,7 @@ export async function PATCH(request: NextRequest) {
       const input = normalizeUserProjectInput(body.value);
       if (!input) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
       const now = new Date().toISOString();
-      // LES CONDITIONS CONFIRMÉES SURVIVENT À L'ÉDITION (FUT-7). Le navigateur ne peut pas en écrire
+      // LES GESTES DU LECTEUR SURVIVENT À L'ÉDITION (FUT-7, FUT-8). Le navigateur ne peut pas en écrire
       // (`normalizeUserProjectInput` les ignore) ; le serveur relit celles déjà en base et les reporte.
       // Sans cette relecture, corriger une virgule du texte effacerait toutes les conditions du lecteur.
       const { data: existant, error: lectureError } = await supabase
@@ -152,9 +152,9 @@ export async function PATCH(request: NextRequest) {
         console.error("[profile] PATCH user_project read error:", lectureError);
         return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       }
-      const conditionsExistantes = (existant as { user_project?: { conditions?: unknown } | null } | null)
-        ?.user_project?.conditions;
-      const project = stampUserProject(input, now, conditionsExistantes);
+      // FUT-8 : conditions, définitions et adoptions, toutes reportées.
+      const projetExistant = (existant as { user_project?: unknown } | null)?.user_project;
+      const project = stampUserProject(input, now, projetExistant);
       const { error } = await supabase
         .from("user_profiles")
         .update({ user_project: project, updated_at: now })
