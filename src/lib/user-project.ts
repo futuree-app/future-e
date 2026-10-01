@@ -44,6 +44,10 @@ export type ConditionConfirmation = {
   // La seule valeur admise. Toute autre provenance (un parseur, une migration, une convention) se lit
   // comme « non confirmé ».
   source: "user";
+  // FUT-8 : l'identifiant versionné de la phrase d'interprétation montrée au lecteur au moment de
+  // confirmer (« Ici, Bretagne désigne la région dans ses limites actuelles. »). Pour l'audit seulement :
+  // il n'entre pas dans l'empreinte, et son absence ne rend pas la confirmation invalide.
+  interpretation?: string;
 };
 
 // ── LES DÉFINITIONS (FUT-8) : ce que le lecteur a PRÉCISÉ ou ACCEPTÉ comme sens d'un critère ──────────
@@ -254,6 +258,7 @@ export function normalizeConditions(raw: unknown): ConditionConfirmation[] {
     out.push({
       criterion: refDe(o.criterion),
       fingerprint: o.fingerprint, confirmedAt: o.confirmedAt, source: "user",
+      ...(typeof o.interpretation === "string" && o.interpretation ? { interpretation: o.interpretation.slice(0, 200) } : {}),
     });
   }
   return out;

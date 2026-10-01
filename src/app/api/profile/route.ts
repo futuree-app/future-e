@@ -12,7 +12,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { WizardAnswers } from "@/components/wizard/types";
-import { normalizeUserProjectInput, stampUserProject } from "@/lib/user-project";
+import { normalizeUserProject, normalizeUserProjectInput, stampUserProject } from "@/lib/user-project";
+import { ecrireProjetSiInchange } from "@/lib/server/projet-ecriture";
 
 // Normalise un objet réponses-wizard reçu du client vers la forme WizardAnswers
 // stricte (cf. src/components/wizard/types.ts). Tout champ invalide retombe sur
@@ -155,14 +156,14 @@ export async function PATCH(request: NextRequest) {
       // FUT-8 : conditions, définitions et adoptions, toutes reportées.
       const projetExistant = (existant as { user_project?: unknown } | null)?.user_project;
       const project = stampUserProject(input, now, projetExistant);
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ user_project: project, updated_at: now })
-        .eq("user_id", user.id);
-      if (error) {
-        console.error("[profile] PATCH user_project error:", error);
-        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
+      // Écriture gardée (FUT-8) : un geste du lecteur arrivé entre la lecture et l'écriture n'est pas
+      // écrasé ; le client est prié de recharger.
+      const lu = normalizeUserProject(projetExistant ?? null);
+      const ecrit = await ecrireProjetSiInchange(supabase, user.id, project, { existe: projetExistant != null, updatedAt: lu?.updatedAt ?? null });
+      if (ecrit === "conflit") {
+        return NextResponse.json({ error: "Votre projet a changé entre-temps. Rechargez la page." }, { status: 409 });
       }
+      if (ecrit === "erreur") return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
       return NextResponse.json({ success: true, project });
     }
 
