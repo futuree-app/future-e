@@ -405,3 +405,28 @@ adresse → `trancher` ; `communeSize` + `unit` + `source: user` → `trancher` 
    pré-rempli tant que le geste « Utiliser cette recherche » n'existe pas. Acceptable ?
 7. **Mer et montagne** : on les sort de FUT-8 (nouvelle donnée : trait de côte, zonage montagne,
    altitude de l'adresse) ? Je le recommande.
+
+---
+
+## Arbitrages retenus après revue produit (1er octobre 2026)
+
+Ils corrigent les recommandations de la phase 0. La spécification d'implémentation est
+`docs/superpowers/specs/2026-10-01-fut8-projet-fidele-design.md`.
+
+- **Climat** : pas de veto doctrinal sur les projections. L'architecture (définitions, registre des
+  conventions, empreintes, capacité) doit permettre plus tard une condition climatique tranchable,
+  formulée comme une conclusion prospective. Mais aucun verdict climatique dur dans ce lot, et la
+  lecture climatique actuelle ne doit pas se dégrader.
+- **Préférences reformulées en faits** (P5, P7, P13, P14, P17, P20, P26) : hors FUT-8. Ce sont des
+  sous-questions différentes du critère large ; le rayon BPE de 500 m n'est pas une définition.
+- **Tailles qualitatives** : aucune convention silencieuse. Le parseur cesse d'écrire des bornes ;
+  « petite ville » reste qualitative tant qu'aucune convention justifiée n'est validée. Les tailles
+  chiffrées avec unité sont tranchables.
+- **Macro-zones** : tranchables après acceptation explicite du périmètre proposé.
+- **Façades et massifs** : non tranchables avec les données actuelles.
+- **Mer et montagne** (et relief) : pas de promotion dans FUT-8 ; architecture prête pour une donnée
+  adaptée.
+- **Recherche → Projet** : fin de l'écriture automatique ; geste explicite « Reprendre cette recherche
+  pour définir mon projet ».
+- **Langage** : interface humaine ; la précision technique vit dans une couche secondaire.
+- **`definitions` indépendantes des `conditions`** : une précision existe sans condition.
