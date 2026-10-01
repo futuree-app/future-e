@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { RepriseRecherche } from "./RepriseRecherche";
 import type { UserProject, ProjectPosture, ProjectIntent } from "@/lib/user-project";
 import { doitReparser, parsedASauvegarder } from "@/lib/decision/projet-edition";
 // `import type` et rien d'autre : `lib/report-context.ts` est `server-only`, et une importation de
@@ -345,16 +346,21 @@ export function ProjectSummaryCard({
     return (
       <div className="glass rounded-2xl p-7">
         <ProjectEyebrow label={eyebrowLabel} />
+        <p className="text-[16px] leading-[1.65] text-label mb-1">Projet non encore défini.</p>
         <p className="text-[16px] leading-[1.65] text-muted mb-5">
           Décrivez votre projet pour une lecture qui parle de votre situation, pas d&apos;une commune en général.
         </p>
-        <button
-          type="button"
-          onClick={() => { setError(null); setEditing(true); }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] hover:opacity-90 transition-opacity"
-        >
-          Décrire mon projet
-        </button>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <button
+            type="button"
+            onClick={() => { setError(null); setEditing(true); }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-canvas font-semibold text-[14px] hover:opacity-90 transition-opacity"
+          >
+            Décrire mon projet
+          </button>
+          {/* FUT-8 : la dernière recherche « Où vivre » se reprend par un geste, jamais d'elle-même. */}
+          <RepriseRecherche />
+        </div>
         {blocRelation()}
       </div>
     );

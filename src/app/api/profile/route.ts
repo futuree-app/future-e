@@ -166,29 +166,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: true, project });
     }
 
-    // Projet de l'utilisateur : amorçage depuis /ou-vivre, n'écrit QUE si aucun projet en base.
-    if (field === "user_project_if_empty") {
-      const input = normalizeUserProjectInput(body.value);
-      if (!input) return NextResponse.json({ error: "Projet invalide." }, { status: 400 });
-      const now = new Date().toISOString();
-      const project = stampUserProject(input, now);
-      // Atomique : n'écrit QUE si user_project est null. Deux amorçages concurrents ne peuvent plus
-      // écraser (la garde est SQL, pas espérée par le code). data non-null = ligne effectivement écrite.
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .update({ user_project: project, updated_at: now })
-        .eq("user_id", user.id)
-        .is("user_project", null)
-        .select("user_id")
-        .maybeSingle();
-      if (error) {
-        console.error("[profile] PATCH user_project_if_empty error:", error);
-        return NextResponse.json({ error: "Erreur de sauvegarde." }, { status: 500 });
-      }
-      const written = Boolean(data);
-      return NextResponse.json({ success: true, written, project: written ? project : null });
-    }
-
     // Cas spécial : mise à jour de la commune (deux champs atomiques).
     if (field === "commune") {
       const inseeCode = typeof body.insee_code === "string" ? body.insee_code.trim() : null;

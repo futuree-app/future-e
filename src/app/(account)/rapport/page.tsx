@@ -10,7 +10,6 @@ import { TrackedAddressCta, TrackedUpgradeLink } from "./RapportTrackedLinks";
 import { CommuneSetupBanner } from "@/components/CommuneSetupBanner";
 import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLecture";
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
-import { OuVivreProjectSync } from "@/components/OuVivreProjectSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { EnTeteDossier } from "@/components/report/EnTeteDossier";
 import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
@@ -319,7 +318,8 @@ export default async function RapportPage() {
         {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
             page authentifiée, si elles ne sont pas déjà en base. */}
         <WizardAnswersSync hasServerAnswers={hasWizardContent(serverWizardAnswers)} />
-        <OuVivreProjectSync hasServerProject={Boolean((profile as { user_project?: unknown } | null)?.user_project)} />
+        {/* FUT-8 : une recherche « Où vivre » n'écrit plus le Projet d'elle-même. Le lecteur la reprend
+            par un geste explicite (ProjectSummaryCard → RepriseRecherche), après un aperçu. */}
 
         {/* ── Bandeau territoire refusé (activé sans rapport débloqué) ── */}
         {territory.deniedInsee && (
