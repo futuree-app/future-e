@@ -36,14 +36,18 @@ demande seulement :
 
 ---
 
-## 2. Quatre dimensions indépendantes du Projet
+## 2. Les dimensions indépendantes du Projet
 
 | Dimension | Ce qu'elle dit | Qui l'écrit | Où elle vit |
 |---|---|---|---|
 | `parsed` | ce que futur•e a **compris** du texte | le parseur | `UserProject.parsed` |
 | `definitions` | ce que le lecteur a **précisé ou accepté** comme sens d'un critère | un geste du lecteur | `UserProject.definitions` (nouveau, hors de `parsed`) |
 | importance | ce critère compte peu, beaucoup, énormément | le parseur, puis le lecteur | `parsed.preferences[].weight` aujourd'hui (voir §2.1) |
+| `adoptions` | « futur•e m'a proposé ce critère, je le reprends à mon compte » | un geste du lecteur | `UserProject.adoptions` (nouveau, hors de `parsed`) |
 | `conditions` | « si ce critère n'est pas respecté, je n'envisage pas ce lieu » | un geste du lecteur | `UserProject.conditions` (FUT-7) |
+
+**Un seul écrivain par structure.** Le parseur écrit `parsed`, et lui seul ; aucun geste du lecteur ne
+modifie `parsed`. Les gestes écrivent `definitions`, `adoptions` et `conditions`, jamais l'inverse.
 
 **Une définition existe sans condition.** « À moins de 20 km de Nantes, à vol d'oiseau » est une
 précision du Projet ; ce n'est pas, en soi, une condition sans compromis. Le modèle ne lie jamais une
@@ -60,6 +64,40 @@ FUT-8 n'ajoute pas d'écran d'importance. Il garantit seulement qu'elle reste s�
 ---
 
 ## 3. Les types cibles
+
+### 3.0 L'identité d'un critère : `CriterionInstanceRef`
+
+Une famille peut contenir plusieurs éléments (« quitter Lyon, éviter Bordeaux »). Une définition, une
+adoption, une condition et une suggestion désignent donc un **élément**, jamais une position dans un
+tableau.
+
+```ts
+type CriterionInstanceRef =
+  | { kind: "hard"; key: HardConstraintKey; instance: string | null }
+  | { kind: "preference"; key: PreferenceKey; instance: null };
+```
+
+L'identité canonique de l'instance, par famille, ne dépend ni de l'ordre ni de la casse :
+
+| Famille | Instance | Raison |
+|---|---|---|
+| `excludePlace` | nom normalisé de la ville (`normalizeName`) : `"lyon"` | chaque ville se quitte indépendamment |
+| `excludeZones` | jeton : `"idf"`, `"nord"` | chaque exclusion est indépendante (une union) |
+| `zones`, `departements` | `null` : le **périmètre entier** | les ancres se composent (`zonesMatch` all / any) en un seul périmètre ; la condition porte sur lui |
+| `nearPlace`, `communeSize`, `sizeRelativeTo`, `nearSea`, `excludeSea`, `montagne`, `reliefProche` | `null` | un seul élément par famille |
+| préférences | `null` | une clé, une préférence (dédoublonnée depuis le 12/08) |
+
+`CriterionRef` de FUT-7 devient `CriterionInstanceRef` (`instance` absent = `null` à la lecture). Aucune
+confirmation n'existe en production : l'évolution ne périme rien de réel.
+
+Conséquences :
+- **évaluation par instance** dans le dossier : pour `excludePlace` et `excludeZones`, l'adaptateur
+  évalue chaque élément séparément (le noyau est appelé avec un seul élément) ; la Recherche garde
+  l'évaluation de la famille entière, inchangée ;
+- **péremption par instance** : si « Lyon » devient « Nantes » au reparse, l'instance `lyon` disparaît ;
+  sa définition et sa condition deviennent périmées, et celles de `bordeaux` restent valides ;
+- **suggestions par instance** : « absolument quitter Lyon, éviter Bordeaux » produit un `forceMarker`
+  sur `{excludePlace, "lyon"}` seulement.
 
 ### 3.1 Ce que le parseur conserve (`parsed`)
 
@@ -102,10 +140,11 @@ type ExcludeZoneParsed = { token: string; said: string | null };
 // Compatibilité : `excludeZones: string[]` legacy reste lisible (said: null).
 
 // Mots forts : une SUGGESTION de condition, jamais une condition.
-type ForceMarker = { criterion: CriterionRef; quote: string };   // parsed.forceMarkers?: ForceMarker[]
+type ForceMarker = { criterion: CriterionInstanceRef; quote: string };   // parsed.forceMarkers?: ForceMarker[]
 
-// Préférences : la provenance.
-type PreferenceSource = "texte" | "ancre";   // parsed.preferences[].source ; absent = "texte" legacy
+// Préférences : la provenance, telle que le parseur l'a produite. « parse » = lue dans le texte ;
+// « ancre » = dérivée d'une commune-ancre. Un geste ne la change JAMAIS (voir `adoptions`).
+type PreferenceSource = "parse" | "ancre";   // parsed.preferences[].source ; absent = "parse" legacy
 ```
 
 Ce que la consigne du parseur **cesse** de faire : écrire `communeSize: {5000, 25000}` pour « petite
@@ -120,9 +159,8 @@ unité sur une région.
 
 ```ts
 type DefinitionBase = {
-  criterion: CriterionRef;          // { kind: "hard" | "preference", key }
-  instance?: string;                // pour les familles multiples (excludePlace : le nom normalisé de la ville)
-  parsedFingerprint: string;        // empreinte de la valeur `parsed` que le lecteur avait sous les yeux
+  criterion: CriterionInstanceRef;  // la famille ET l'élément (§3.0)
+  parsedFingerprint: string;        // empreinte de la valeur `parsed` de CET élément, vue par le lecteur
   definedAt: string;
   source: "user";                   // la seule valeur admise
 };
@@ -145,8 +183,17 @@ type Definition = DefinitionBase & (
   | { kind: "convention"; conventionId: string; conventionVersion: number }
 );
 
+// « Je reprends ce critère à mon compte » : une préférence proposée par une ancre, adoptée.
+type Adoption = {
+  criterion: Extract<CriterionInstanceRef, { kind: "preference" }>;
+  parsedFingerprint: string;        // la préférence telle que futur•e l'a proposée
+  adoptedAt: string;
+  source: "user";
+};
+
 type UserProject = /* FUT-7 */ & {
   definitions?: Definition[];   // absent = aucune précision ; jamais vide en base
+  adoptions?: Adoption[];       // absent = aucune adoption ; jamais vide en base
 };
 ```
 
@@ -178,7 +225,8 @@ changent pas), sauf quand le lecteur reprend explicitement son Projet pour cherc
 | Objet | Empreinte | Devient périmé quand… | Effet |
 |---|---|---|---|
 | définition | `parsedFingerprint` = empreinte de la valeur `parsed` du critère (et de l'instance) | le reparse change ce que le lecteur avait sous les yeux (« Nantes » → « Rennes ») | ignorée, gardée en base, proposée à nouveau |
-| condition (FUT-7) | empreinte de la **valeur effective** (`criterion-value.ts` étendu à la définition) | la valeur effective change (nouvelle définition, nouveau seuil, reparse) | ignorée, gardée, proposée à nouveau |
+| adoption | `parsedFingerprint` = empreinte de la préférence proposée | l'ancre ou le trait proposé change au reparse | ignorée, gardée, proposée à nouveau |
+| condition (FUT-7) | empreinte de la **valeur effective** de l'élément (`criterion-value.ts` étendu à la définition et à l'instance) | la valeur effective change (nouvelle définition, nouveau seuil, reparse) | ignorée, gardée, proposée à nouveau |
 
 `criterionFingerprint` évolue ainsi : `hard:<clé>:<canonique(valeurDecisionnelle(valeurEffective))>`,
 où la valeur décisionnelle inclut désormais `metric`, `unit`, `scope`, le périmètre parisien et
@@ -275,6 +323,16 @@ sans convention validée ; toutes les préférences. Reste `ne_pas_mesurer` : v�
 route `user_project_if_empty` aussi si plus rien ne l'appelle). La session locale de « Où vivre » reste
 inchangée : elle restaure la recherche, rien d'autre.
 
+### 5.1 bis « Petite ville » dans la Recherche
+
+Le parseur cesse d'écrire 5 000-25 000. Dans « Où vivre », « je cherche une petite ville » reste un
+**signal de classement** par la préférence `eviter_grandes_villes` (la cloche petite / moyenne ville
+existante, avec son plancher `eviter_isolement`), et n'est plus un **filtre numérique dur**. Effet
+visible : une ville de 30 000 habitants n'est plus exclue, elle est classée plus bas. « Ville moyenne »
+(`eviter_grandes_villes` + `eviter_isolement`) et « grande ville » (`prefere_grande_ville`) suivent la
+même règle. Un chiffre dit par le lecteur (« moins de 20 000 habitants ») reste un filtre dur, comme
+aujourd'hui.
+
 ### 5.2 Le geste « Reprendre cette recherche pour définir mon projet » (V1)
 
 **Où** : sur la page de résultats d'« Où vivre », pour un lecteur connecté. Libellé : « Reprendre cette
@@ -311,10 +369,11 @@ session « Où vivre » existe, il propose aussi « Reprendre votre recherche »
   moment de la recherche** depuis `communeAncre` (dans `matchProjects`), jamais écrites dans `parsed`.
   La route `/parse` cesse de les injecter dans `hardConstraints`.
 - **Garantie « jamais une condition sans reprise »** : la route de condition refuse de confirmer une
-  préférence `source: "ancre"`. Pour en faire une condition, le lecteur la **reprend à son compte** :
-  le geste « Garder ce critère » réécrit la préférence en `source: "texte"` (même clé, même poids), ce
-  qui ne se fait que par un geste explicite. Un reparse ne transforme jamais une préférence d'ancre en
-  préférence de texte.
+  préférence `source: "ancre"` qui n'est pas **adoptée**. Le geste « Garder ce critère » écrit une
+  `adoption` ; il ne touche pas `parsed`, et la provenance reste vraie (« inspiré de Brest », adopté).
+  « En faire une condition sans compromis » sur une préférence d'ancre fait les deux d'un coup :
+  adoption et confirmation, atomiquement. Une adoption périme si la préférence proposée change au
+  reparse (nouvelle ancre, trait disparu).
 
 ---
 
@@ -331,19 +390,22 @@ type CriterionAction =
   | { action: "retirer_definition"; criterion: CriterionRef; instance?: string }
   | { action: "confirmer"; criterion: CriterionRef; seen: string; definition?: DefinitionInput }
   | { action: "retirer_condition"; criterion: CriterionRef }
-  | { action: "reprendre_preference_ancre"; key: PreferenceKey };
+  | { action: "adopter"; criterion: Extract<CriterionInstanceRef, { kind: "preference" }>; seen: string }
+  | { action: "retirer_adoption"; criterion: Extract<CriterionInstanceRef, { kind: "preference" }> };
+// Tous les `criterion` sont des CriterionInstanceRef. « confirmer » sur une préférence d'ancre non
+// adoptée écrit l'adoption et la confirmation dans la même écriture.
 // `seen` = l'empreinte de la valeur que le client affichait (parsed pour « definir », effective pour
 // « confirmer »). `DefinitionInput` = la variante de Definition sans les champs serveur.
 ```
 
 Déroulé, pour chaque geste :
 1. relire le Projet en base ;
-2. vérifier que le critère est déclaré et, pour `reprendre_preference_ancre`, qu'il vient d'une ancre ;
+2. vérifier que l'élément est déclaré (famille + instance) et, pour `adopter`, qu'il vient d'une ancre ;
 3. comparer `seen` à l'empreinte serveur : différente → `409`, le client recharge ;
 4. valider la définition (variante compatible, seuils, convention connue et applicable) ;
 5. calculer la nouvelle valeur effective ;
-6. créer ou retirer la confirmation (empreinte de la valeur effective) ; refuser `confirmer` sur une
-   préférence `source: "ancre"` ;
+6. créer ou retirer la confirmation (empreinte de la valeur effective de l'élément) ; pour une
+   préférence d'ancre non adoptée, écrire aussi l'adoption ;
 7. écrire atomiquement, avec contrôle de concurrence sur `updatedAt` (une écriture concurrente → `409`).
 
 Cas couverts : définition seule ; modification ; retrait de définition (la condition qui en dépendait
@@ -365,10 +427,19 @@ Chaque critère est une ligne en langage du lecteur, avec au plus une action vis
 | Suggestion de condition (mot fort) | « Vous avez écrit « absolument ». En faire une condition sans compromis ? » | « Oui » / « Non » |
 | À préciser (seulement au moment de confirmer, ou si le lecteur affine) | « Par 20 km, vous pensez à vol d'oiseau ou par la route ? » | deux choix, puis confirmation |
 | Périmètre à accepter (macro-zone) | « Voici le périmètre que futur•e utilise pour le Sud-Ouest. » | « Voir le périmètre » ; « Ça me convient » ; « Modifier mon texte » |
+| Confirmation d'un critère dont le sens peut surprendre | au moment du geste, une phrase : « Ici, Bretagne désigne la région dans ses limites actuelles. » | « Ça me convient » (puis confirmé) / « Annuler » |
 | Condition sans compromis | « Vivre en Bretagne · condition sans compromis » | « Retirer la condition » |
 | Condition à revoir (périmée) | « Votre condition portait sur Nantes ; votre projet parle désormais de Rennes. » | « La garder pour Rennes » / « La retirer » |
 | Non tranchable ici | au moment de confirmer : « futur•e pourra apprécier cette condition, sans pouvoir la trancher avec les données actuelles. » | confirmer quand même |
 | Tranchable seulement à l'adresse | au moment de confirmer : « Elle sera tranchée dans les dossiers d'adresse. » | confirmer |
+
+**Règle de confirmation** : quand l'interprétation de futur•e peut écarter un lieu que le lecteur croirait
+dedans (une région, une macro-zone, une agglomération, une unité de taille), elle s'affiche **au moment
+de confirmer**, en une phrase en langage du lecteur, et la confirmation ne part qu'après « Ça me
+convient ». Ce n'est pas une définition (le sens n'est pas ambigu pour le moteur) : c'est rendre visible
+le sens au moment où il devient décisif. La confirmation garde la trace de l'interprétation montrée
+(`ConditionConfirmation.interpretation?: string`, l'identifiant versionné de la phrase), pour l'audit ;
+elle n'entre pas dans l'empreinte.
 
 ### 8.2 Dans le dossier
 
@@ -429,13 +500,16 @@ dossiers figés inchangés.
 |---|---|
 | `nearPlace.maxKm` | `metric: null` |
 | `nearPlace.mode` absent | `mode: null` |
-| `communeSize` | `unit: null` ; si les bornes valent exactement 5 000-25 000, 25 000-100 000 ou 100 000-∞ : retirées et `sizeWord` reconstruit (convention probable du parseur) |
+| `communeSize` | bornes **conservées**, `unit: null`, provenance inconnue. Jamais déduite des chiffres : un lecteur a pu écrire « entre 5 000 et 25 000 habitants ». L'unité se demande seulement si le critère devient une condition |
 | `excludePlace` | `scope: null` |
 | `excludePlace` = une ancre résolue | retiré (comme FUT-7) |
 | `communeSize` = fourchette exacte d'ancre | retirée (comme FUT-7) |
 | `excludeZones: string[]` | `{ token, said: null }` |
-| préférences | `source: "texte"`, sauf dérivées reconnaissables d'une ancre (`source: "ancre"`) |
-| `definitions`, `conditions` | absents |
+| préférences | `source: "parse"`, sauf dérivées démontrablement d'une ancre (traits recalculés depuis `communeAncre` à l'identique : `source: "ancre"`) |
+| `definitions`, `adoptions`, `conditions` | absents |
+
+**On ne retire une valeur legacy que si son origine technique est démontrable** : la fourchette d'ancre
+(formule et ancre connues) et l'exclusion de l'ancre. Rien d'autre.
 
 `schemaVersion: 3` décrit la forme lisible par le contrat v3, rien d'autre : ni migration faite, ni
 acceptation, ni confirmation.
@@ -464,7 +538,7 @@ le geste ; capacité commune / adresse ; condition possible ; résultat après c
 | 2 | En Bretagne | zones `bretagne` | non | aucune | aucune | T / T | oui (geste sans suggestion) | idem |
 | 3 | Je veux éviter les canicules | `faible_chaleur` | non | aucune | aucune | Ap / Ap | oui | ouverte, plutôt favorable / défavorable |
 | 4 | Les canicules sont rédhibitoires pour moi | `faible_chaleur` + `forceMarkers` | oui | aucune | aucune | Ap / Ap | oui | ouverte (jamais respectée / non respectée dans ce lot) |
-| 5 | Une petite ville | `eviter_grandes_villes`, `sizeWord: petite`, **aucune borne** | non | « Préférez-vous fixer une taille ? » (facultatif) | `taille` si le lecteur donne un chiffre | Ap / Ap ; T si `taille` | oui | ouverte ; tranchée seulement si le lecteur fixe un chiffre et une unité |
+| 5 | Une petite ville | `eviter_grandes_villes`, `sizeWord: petite`, **aucune borne** | non | « Préférez-vous fixer une taille ? » (facultatif) | `taille` si le lecteur donne un chiffre | Ap / Ap ; T si `taille` | oui | ouverte ; tranchée seulement si le lecteur fixe un chiffre et une unité. Recherche : aucune exclusion numérique, classement par la préférence |
 | 6 | Une commune de moins de 20 000 habitants | `communeSize {max 20000, unit commune}` | non | aucune | aucune | T / T | oui | tranchée sur la population communale |
 | 7 | Une agglomération de moins de 100 000 habitants | `communeSize {max 100000, unit unite_urbaine}` | non | aucune | aucune | T / T | oui | tranchée sur l'unité urbaine |
 | 8 | À moins de 20 km de Nantes | `nearPlace {maxKm 20, metric null}` | non | « À vol d'oiseau ou par la route ? » | `distance_lieu {vol_oiseau, 20}` | Ap / T (vol d'oiseau) ; Ap (route) | oui | adresse : respectée / non respectée ; commune : ouverte |
@@ -479,9 +553,13 @@ le geste ; capacité commune / adresse ; condition possible ; résultat après c
 | 17 | Sur la côte atlantique | zones `atlantique` | non | aucune (rien qui la rendrait tranchable) | aucune | Ap / Ap | oui | ouverte ; Bordeaux jamais « respectée » |
 | 18 | Dans les Pyrénées | zones `pyrenees` | non | aucune | aucune | Ap / Ap | oui | ouverte ; Toulouse jamais « respectée » |
 | 19 | Vivre à la montagne | `montagne` | non | aucune | aucune | Ap / Ap | oui | ouverte (« selon l'altitude du centre de la commune ») |
-| 20 | Une ville comme Brest | `communeAncre [Brest]`, préférences `source: ancre` ; **ni exclusion ni fourchette dans `parsed`** | non | « Garder ces critères ? » (facultatif) | aucune | Ap / Ap | non tant que non repris ; oui après « Garder ce critère » | la Recherche exclut Brest et applique le gabarit ; le dossier sur Brest ne parle jamais de quitter Brest |
+| 20 | Une ville comme Brest | `communeAncre [Brest]`, préférences `source: ancre` ; **ni exclusion ni fourchette dans `parsed`** | non | « Garder ces critères ? » (facultatif) | aucune ; `adoption` après « Garder ce critère » | Ap / Ap | oui, avec adoption (même geste possible) ; `parsed` jamais modifié | la Recherche exclut Brest et applique le gabarit ; le dossier sur Brest ne parle jamais de quitter Brest |
+| 21 | Je dois absolument quitter Lyon, et j'aimerais éviter Bordeaux | `excludePlace [{Lyon}, {Bordeaux}]`, `forceMarkers` sur `{excludePlace, "lyon"}` | oui, pour Lyon seulement | périmètre de Lyon au moment de confirmer | `quitter_ville` sur l'instance `lyon` | T / T (Lyon, une fois le périmètre défini) ; Bordeaux : écart | oui, par ville | à Villeurbanne : « quitter Lyon » tranchée selon le périmètre ; Bordeaux reste un écart ; reparse « Lyon » → « Nantes » : la condition sur `lyon` est périmée, rien ne bouge pour Bordeaux |
 
-Tests supplémentaires : une définition sans condition change la lecture (8 : la carte d'écart parle
+Tests supplémentaires : le parseur et les gestes n'écrivent jamais la même structure (aucun geste ne
+modifie `parsed`) ; un legacy `communeSize {5000, 25000}` garde ses bornes et sa provenance inconnue ;
+« petite ville » dans « Où vivre » ne filtre plus numériquement et classe par la préférence ; la
+confirmation de « Vivre en Bretagne » affiche l'interprétation avant de partir ; une définition sans condition change la lecture (8 : la carte d'écart parle
 de vol d'oiseau) sans créer de condition ; un reparse « Nantes » → « Rennes » périme la définition et
 la condition ; `PATCH /api/profile` ne peut injecter ni définition ni condition ; la Recherche filtre à
 l'identique (parité) ; aucun dossier figé ne change.
@@ -490,7 +568,7 @@ l'identique (parité) ; aucun dossier figé ne change.
 
 ## 13. Séquence d'implémentation
 
-1. **Types et lecture** : `definitions`, `ExcludeZoneParsed`, `metric` / `unit` / `scope` / `sizeWord` /
+1. **Types et lecture** : `CriterionInstanceRef`, `definitions`, `adoptions`, `ExcludeZoneParsed`, `metric` / `unit` / `scope` / `sizeWord` /
    `source`, normalisation à la lecture (§10), registre des conventions.
 2. **Valeur effective et empreintes** : `parsed ⊕ definition`, `criterionFingerprint` étendu,
    péremption ; mise à jour des tests FUT-7.
@@ -526,7 +604,12 @@ l'identique (parité) ; aucun dossier figé ne change.
 - Statut de convention `perimetre` : une macro-zone devient tranchable une fois son périmètre accepté,
   parce que l'appartenance se mesure exactement.
 - Distance routière en km : reportée (documentée au §11).
-- Une préférence d'ancre devient confirmable seulement après « Garder ce critère ».
+- Une préférence d'ancre devient confirmable seulement adoptée (`adoptions`), jamais en réécrivant `parsed`.
+- Identité des éléments multiples : `CriterionInstanceRef`, instance = ville normalisée pour
+  `excludePlace`, jeton pour `excludeZones`, périmètre entier (`null`) pour `zones` et `departements`.
+- Legacy : aucune provenance déduite des chiffres ; seuls les dérivés d'ancre démontrables sont retirés.
+- « Petite ville » : signal de classement dans la Recherche, plus de filtre numérique.
+- Une interprétation qui peut surprendre s'affiche au moment de confirmer.
 - « Remplacer mon projet par cette recherche » abandonne les définitions et conditions de l'ancien
   projet.
 - Normalisation legacy à la lecture, sans script d'écriture.
