@@ -151,10 +151,23 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
       return `${ici} est ${a.observedLabel.startsWith("dans ") ? "" : "à "}${a.observedLabel}, pour ${a.expectedLabel} attendu.`;
     case "communeSize":
     case "sizeRelativeTo":
-      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+      return tailleRelativeDite(a, f);
     case "excludePlace":
-      return `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
+      // FUT-8 : l'étiquette porte le périmètre quand une ville est précisée « commune ».
+      return /^hors de (la commune|l'agglomération)/.test(a.observedLabel)
+        ? `${f.nom} se trouve ${a.observedLabel}.`
+        : `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
   }
+}
+
+// LA TAILLE, DITE À L'ÉCHELLE MESURÉE (FUT-8) : la population de la commune quand la comparaison porte sur
+// les communes ; sinon l'agglomération À LAQUELLE la commune appartient (Villeurbanne est dans celle de
+// Lyon : « l'agglomération de Villeurbanne » n'existe pas).
+function tailleRelativeDite(a: HardConstraintAssessment, f: ModuleFacts): string {
+  const habitants = "observedLabel" in a ? a.observedLabel.replace(/ hab\.$/, " habitants") : "";
+  const surLaCommune = "observedValue" in a && a.observedValue?.kind === "population" && a.observedValue.unit === "commune";
+  if (surLaCommune || !f.uu) return `${f.nom} compte ${habitants}.`;
+  return `${f.nom} appartient à une agglomération de ${habitants}.`;
 }
 
 // LE FAIT, QUAND LE LIEU NE REMPLIT PAS LE CRITÈRE ET QUE futur•e NE SAIT QUE L'APPRÉCIER. Une phrase,
@@ -174,9 +187,9 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
       return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
     case "communeSize":
     case "sizeRelativeTo":
-      return `${f.uu ? `L'agglomération ${deCommune(f.nom)}` : f.nom} compte ${a.observedLabel.replace(/ hab\.$/, " habitants")}.`;
+      return tailleRelativeDite(a, f);
     case "excludePlace":
-      return `${f.nom} fait partie de l'${a.observedLabel.replace(/^dans l'/, "")}.`;
+      return `${f.nom} fait partie ${a.observedLabel.replace(/^dans /, "de ")}.`;
     default:
       return "statement" in a ? a.statement : constatSatisfait(key, a, f, { context: { point: null } } as never);
   }

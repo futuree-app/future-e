@@ -28,7 +28,7 @@ const VILLES: Record<string, { insee: string; nom: string; lat: number; lon: num
   nantes: { insee: "44109", nom: "Nantes", lat: 47.22, lon: -1.55, uu: "44701", tailleVille: 670_000 },
   lyon: { insee: "69123", nom: "Lyon", lat: 45.76, lon: 4.83, uu: "00760", tailleVille: 1_700_000 },
   bordeaux: { insee: "33063", nom: "Bordeaux", lat: 44.84, lon: -0.58, uu: "00752", tailleVille: 1_000_000 },
-  brest: { insee: "29019", nom: "Brest", lat: 48.39, lon: -4.48, uu: "29701", tailleVille: 202_000 },
+  brest: { insee: "29019", nom: "Brest", lat: 48.39, lon: -4.48, uu: "29701", tailleVille: 202_000, population: 139_000 },
 };
 const DIR: PlaceDirectory = { byName: (k) => VILLES[k] ?? null, plmByName: () => null };
 
@@ -255,4 +255,34 @@ test("21. « Je dois absolument quitter Lyon, et j'aimerais éviter Bordeaux » 
   const vm = verdict(merignac, c);
   assert.equal(vm.nonRespectee, false);
   assert.ok(vm.run.facts.some((f) => f.role === "mismatch" && f.projectKey === "excludePlace"), "Bordeaux reste un écart");
+});
+
+// ── LE TEXTE RENDU DIT CE QUE LE DOSSIER A RETENU (corollaire d'AGENTS.md : apparaître ≠ dire vrai) ──
+
+const texteDe = (v: ReturnType<typeof verdict>, role: string) =>
+  v.run.facts.filter((f) => f.role === role).map((f) => f.statement).join(" ");
+
+test("texte : « quitter la commune de Lyon » se dit avec la commune, à Villeurbanne comme à Lyon 3e", () => {
+  const p = confirmer(lu("Quitter la commune de Lyon", { hardConstraints: { excludePlace: [{ label: "Lyon", scope: "commune" }] } }), H("excludePlace", "lyon"));
+  const villeurbanne = texteDe(verdict(C.villeurbanne, p), "condition_met");
+  assert.match(villeurbanne, /hors de la commune de Lyon/);
+  assert.doesNotMatch(villeurbanne, /agglomération/);
+  assert.match(texteDe(verdict(C.lyon3, p), "incompatibility"), /fait partie de la commune de Lyon/);
+});
+
+test("texte : « plus petite que la commune de Brest » parle de la commune, jamais d'une agglomération qui n'existe pas", () => {
+  const brest = H("sizeRelativeTo");
+  const p = confirmer(lu("Une commune plus petite que Brest", { hardConstraints: { sizeRelativeTo: { label: "Brest", direction: "smaller", unit: "commune" } } }), brest);
+  const villeurbanne = texteDe(verdict(C.villeurbanne, p), "incompatibility");
+  assert.match(villeurbanne, /150\D000 habitants, plus que la commune de Brest/);
+  const petite = texteDe(verdict({ ...C.petite, insee: "29232", nom: "Quimper", uu: "29701" } as IndexCommune, p), "condition_met");
+  assert.match(petite, /^Quimper compte/);
+  assert.doesNotMatch(petite, /agglomération/);
+});
+
+test("texte : une commune de l'agglomération de référence ne se dit jamais « plus grande » qu'elle-même", () => {
+  const lyon = { label: "Lyon", direction: "smaller" as const, unit: "unite_urbaine" as const };
+  const p = confirmer(lu("Une agglomération plus petite que Lyon", { hardConstraints: { sizeRelativeTo: lyon } }), H("sizeRelativeTo"));
+  const t = texteDe(verdict({ ...C.villeurbanne, tailleVille: 1_700_000 } as IndexCommune, p), "incompatibility");
+  assert.match(t, /fait partie de l'agglomération de Lyon elle-même/);
 });

@@ -945,6 +945,18 @@ export function evaluateExcludePlace(
   });
   if (hit) {
     const label = hit.reference.status === "resolved" ? hit.reference.canonicalLabel : hit.label;
+    // FUT-8 : « quitter la commune de Lyon » se dit avec la commune, jamais avec l'agglomération.
+    if (hit.scope === "commune") {
+      return {
+        key: "excludePlace", status: "incompatible",
+        observedValue: { kind: "boolean", value: true }, expectedValue,
+        observedLabel: `dans la commune ${deCommune(label)}`,
+        expectedLabel: `hors ${deCommune(tousLabels)}`,
+        evidenceKeys,
+        topic: topicFit(`la commune ${deCommune(label)}`, "la commune à quitter"),
+        statement: `${c.nom} fait partie de la commune ${deCommune(label)}, que votre projet prévoit de quitter.`,
+      };
+    }
     return {
       key: "excludePlace", status: "incompatible",
       observedValue: { kind: "boolean", value: true }, expectedValue,
@@ -966,10 +978,17 @@ export function evaluateExcludePlace(
       detail: unresolved.map((e) => e.label).join(", "),
     };
   }
+  // FUT-8 : dès qu'une ville est précisée « commune », chaque ville se nomme avec son périmètre
+  // (« hors de la commune de Lyon et de l'agglomération de Bordeaux ») ; sinon, l'étiquette historique.
+  const avecPerimetre = list.some((e) => e.scope === "commune");
+  const parPerimetre = joinFr(list.map((e) => {
+    const nom = e.reference.status === "resolved" ? e.reference.canonicalLabel : e.label;
+    return e.scope === "commune" ? `de la commune ${deCommune(nom)}` : `de l'agglomération ${deCommune(nom)}`;
+  }));
   return {
     key: "excludePlace", status: "satisfied",
     observedValue: { kind: "boolean", value: false }, expectedValue,
-    observedLabel: `hors ${deCommune(tousLabels)}`,
+    observedLabel: avecPerimetre ? `hors ${parPerimetre}` : `hors ${deCommune(tousLabels)}`,
     expectedLabel: `hors ${deCommune(tousLabels)}`,
     evidenceKeys,
   };
@@ -1025,8 +1044,16 @@ export function evaluateSizeRelativeTo(
   if (ok) {
     return { key: "sizeRelativeTo", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
-  // Le SUJET suit la donnée : une commune hors unité urbaine n'est pas « une agglomération ».
-  const sujet = c.uu ? "Cette agglomération compte" : "Cette commune compte";
+  // Le SUJET suit la donnée : une commune hors unité urbaine n'est pas « une agglomération ». Et la commune
+  // évaluée appartient à SON agglomération, qui ne porte pas forcément son nom (Villeurbanne, Lyon).
+  if (ref.urbanUnitCode != null && c.uu === ref.urbanUnitCode) {
+    return {
+      key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
+      topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
+      statement: `${c.nom} fait partie de l'agglomération ${deCommune(ref.canonicalLabel)} elle-même (${fmt(t)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    };
+  }
+  const sujet = c.uu ? `${c.nom} appartient à une agglomération de` : "Cette commune compte";
   return {
     key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),

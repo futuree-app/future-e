@@ -116,7 +116,9 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
     case "sizeRelativeTo": {
       const s = hc.sizeRelativeTo;
       if (!s) return generic;
-      return `une commune ${s.direction === "smaller" ? "plus petite" : "plus grande"} que ${s.label}`;
+      // FUT-8 : l'unité précisée se dit (« une agglomération plus petite que celle de Lyon »).
+      const sens = s.direction === "smaller" ? "plus petite" : "plus grande";
+      return s.unit === "unite_urbaine" ? `une agglomération ${sens} que celle ${deCommune(s.label)}` : `une commune ${sens} que ${s.label}`;
     }
     case "communeSize": {
       const cs = hc.communeSize;
