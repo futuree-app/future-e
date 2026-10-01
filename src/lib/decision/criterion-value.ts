@@ -88,6 +88,14 @@ export function valeurDecisionnelle(cle: string, hc: HardConstraints): unknown {
       // FUT-5 : « la Bretagne ET les Pays de la Loire » et « la Bretagne OU les Pays de la Loire » portent
       // les mêmes ancres et ne désignent pas le même territoire. L'opérateur n'entre dans la signature
       // qu'en « au moins une » : un projet enregistré avant lui garde exactement sa signature.
+      // FUT-8 : les conventions de macro-zone acceptées entrent dans la valeur (absentes : inchangée).
+      if (hc.zonesConventions?.length) {
+        return {
+          ancres: hardZoneAnchorsDe(hc.zones), match: hc.zonesMatch === "any" ? "any" : "all",
+          departements: departementsDansLesZones(hc) ? hc.departements ?? [] : [],
+          conventions: hc.zonesConventions.map((c) => `${c.token}=${c.conventionId}@${c.conventionVersion}`),
+        };
+      }
       return hc.zonesMatch === "any"
         ? {
             ancres: hardZoneAnchorsDe(hc.zones),
@@ -97,10 +105,19 @@ export function valeurDecisionnelle(cle: string, hc: HardConstraints): unknown {
         : hardZoneAnchorsDe(hc.zones);
     case "excludePlace":
       return excludePlaceDeclares(hc.excludePlace);
+    case "excludeZones":
+      // FUT-8 : le périmètre parisien choisi entre dans la valeur (sans choix, la liste de jetons, comme avant).
+      return hc.excludeZonesPerimetres && Object.keys(hc.excludeZonesPerimetres).length > 0
+        ? { jetons: hc.excludeZones ?? [], perimetres: hc.excludeZonesPerimetres }
+        : hc.excludeZones;
     case "nearPlace":
       // Le LABEL (qui désigne le lieu) et le SEUIL appliqué. Le mode ne compte que dans un seuil en
       // temps, où il y est déjà : sur un seuil en distance, l'hydratation ne le lit pas.
-      return hc.nearPlace ? { label: hc.nearPlace.label, seuil: nearPlaceThreshold(hc.nearPlace) } : null;
+      // FUT-8 : la métrique (« à vol d'oiseau ») change le sens du seuil, elle entre dans la valeur. Absente
+      // ou nulle, `canonique` l'ignore : la valeur d'un projet legacy ne bouge pas.
+      return hc.nearPlace
+        ? { label: hc.nearPlace.label, seuil: nearPlaceThreshold(hc.nearPlace), metric: hc.nearPlace.metric ?? null }
+        : null;
     case "nearSea":
       // `active` est déjà dit par la présence de la famille ; ne reste que le seuil, qui suit la même
       // règle qu'ailleurs (un `maxKm` nul, négatif ou absent ne pose aucune limite).

@@ -68,6 +68,13 @@ export type HardConstraints = {
   // « Plus petit / grand que {ville} » : le moteur résout label -> population d'agglomération de
   // référence (cf. chantier C : la taille se lit sur l'unité urbaine).
   sizeRelativeTo?: { label: string; direction: "smaller" | "larger"; unit?: SizeUnit | null } | null;
+  // ── VALEUR EFFECTIVE SEULEMENT (FUT-8) ────────────────────────────────────────────────────────
+  // Ces deux champs ne sont JAMAIS écrits par le parseur : ils naissent de `parsed ⊕ definitions`
+  // (decision/effective-value.ts), pour que l'évaluateur du dossier sache ce que le lecteur a précisé.
+  // Le périmètre parisien choisi, par jeton d'exclusion (`paris`, `idf`).
+  excludeZonesPerimetres?: Record<string, "paris" | "petite_couronne" | "agglomeration" | "ile_de_france">;
+  // Les conventions de macro-zone acceptées, par jeton de `zones`.
+  zonesConventions?: { token: string; conventionId: string; conventionVersion: number }[];
 };
 
 /**
