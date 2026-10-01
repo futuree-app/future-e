@@ -83,7 +83,23 @@ function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: strin
   if (premier && premier.role !== "compromise") return premier.statement;
   return signal === "favorable"
     ? `À l'échelle de la commune, rien de défavorable n'apparaît pour ${label}.`
-    : `À l'échelle de la commune, rien ne penche nettement pour ou contre ${label}.`;
+    : `À l'échelle de la commune, ${label} ne se distingue ni parmi les communes les plus favorables, ni parmi les moins favorables.`;
+}
+
+// UNE LECTURE NEUTRE QUI A UNE MESURE LA DIT. La proximité de la mer, entre 15 et 100 km, n'est ni un écart
+// ni une correspondance : sa règle se tait, mais la distance existe, et c'est elle que le lecteur veut lire.
+function mesureNeutre(key: PreferenceKey, f: ModuleFacts): { statement: string; evidence: EvidenceRef } | null {
+  if (key === "proximite_mer" && f.distanceCoteKm != null) {
+    const km = Math.round(f.distanceCoteKm);
+    return {
+      statement: `La distance au littoral est estimée à environ ${km} km depuis le point de référence de ${f.nom}.`,
+      evidence: {
+        factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
+        observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", relation: "proximite", href: territoireHref,
+      },
+    };
+  }
+  return null;
 }
 
 function actionDe(reunis: DecisionFact[]): DecisionAction | undefined {
@@ -113,6 +129,7 @@ export function conditionsDePreference(
     const signal = signalDe(key, evaluations, reunis);
     if (signal == null) continue;
     const action = actionDe(reunis);
+    const neutre = signal === "neutre" ? mesureNeutre(key, f) : null;
     const carte: ConditionCheckFact = {
       id: `${f.insee}:condition:${key}`,
       ruleId: `condition.${key}`,
@@ -128,8 +145,8 @@ export function conditionsDePreference(
       // le statut de condition. Une préférence de poids 1 confirmée reste, sur cet axe, de poids 1.
       materialityTier: preferenceWeight(project, key) >= 3 ? "structuring" : "secondary",
       topic: reunis[0]?.topic ?? label,
-      statement: constatDe(reunis, signal, label),
-      evidence: preuvesDe(reunis, f, key, label),
+      statement: neutre?.statement ?? constatDe(reunis, signal, label),
+      evidence: neutre ? [neutre.evidence] : preuvesDe(reunis, f, key, label),
       whyNotDecided: POURQUOI_PREFERENCE,
       capabilityReason: capacite.reason,
       consequence: consequenceDuSignal(signal),

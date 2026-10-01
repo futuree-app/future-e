@@ -733,6 +733,30 @@ function etatDeCondition(c: OpenCondition, cartes: Map<string, Extract<DecisionF
   return `ce que l'on sait ne penche ni pour ni contre ${c.label}`;
 }
 
+function sensRegroupes(
+  ouvertes: OpenCondition[], cartes: Map<string, Extract<DecisionFact, { role: "condition_check" }>>,
+): string {
+  // Une seule condition : sa proposition, telle quelle.
+  if (ouvertes.length === 1) {
+    const e = etatDeCondition(ouvertes[0]!, cartes);
+    return `${e.startsWith("futur•e") ? e : capitalize(e)}.`;
+  }
+  const groupe = (pred: (c: OpenCondition) => boolean) => ouvertes.filter(pred).map((c) => c.label);
+  const signal = (c: OpenCondition) => cartes.get(c.key)?.signal;
+  const contre = groupe((c) => c.cause === "a_confirmer" && signal(c) === "defavorable");
+  const pour = groupe((c) => c.cause === "a_confirmer" && signal(c) === "favorable");
+  const neutres = groupe((c) => c.cause === "a_confirmer" && signal(c) !== "defavorable" && signal(c) !== "favorable");
+  const nonMesurees = groupe((c) => c.cause === "ne_pas_mesurer");
+  const absentes = groupe((c) => c.cause === "donnee_absente");
+  const phrases: string[] = [];
+  if (contre.length > 0) phrases.push(`Ce que l'on sait penche contre ${joinFr(contre)}.`);
+  if (pour.length > 0) phrases.push(`Ce que l'on sait va dans le sens de ${joinFr(pour)}, sans pouvoir l'établir.`);
+  if (neutres.length > 0) phrases.push(`Rien ne penche nettement pour ou contre ${joinFr(neutres)}.`);
+  if (nonMesurees.length > 0) phrases.push(`futur•e ne sait pas encore évaluer ${joinFr(nonMesurees)}.`);
+  if (absentes.length > 0) phrases.push(`La donnée qui permettrait d'évaluer ${joinFr(absentes)} manque ici.`);
+  return phrases.join(" ");
+}
+
 function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: string): VerdictBuild {
   const ouvertes = input.openConditions ?? [];
   const cartes = new Map(
@@ -763,10 +787,10 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
 
   // LE DÉTAIL DIT LE SENS, puis ce qui est rempli, puis le reste du dossier. Jamais « toutes vos
   // conditions sont remplies » : une condition au moins ne l'est pas, par construction de cette branche.
-  const etats = ouvertes.map((c) => etatDeCondition(c, cartes));
-  // « futur•e » s'écrit en minuscules, même en tête de phrase : on ne lui applique pas la majuscule.
-  const enTete = joinFr(etats);
-  const sens = `${enTete.startsWith("futur•e") ? enTete : capitalize(enTete)}.`;
+  // UNE PHRASE PAR SENS, pas une proposition par condition. À quatre conditions, une seule phrase
+  // énumérant quatre états devenait illisible : on regroupe ce qui penche contre, ce qui va dans le sens,
+  // ce qui ne penche pas, ce qui ne s'évalue pas, ce dont la donnée manque.
+  const sens = sensRegroupes(ouvertes, cartes);
   const remplies = input.metConditions ?? [];
   const remplie = remplies.length > 0
     ? ` ${remplies.length === 1 ? "La condition" : "Les conditions"} ${joinFr(remplies.map((r) => r.label))} ${remplies.length === 1 ? "est remplie" : "sont remplies"}.`

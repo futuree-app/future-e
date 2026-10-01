@@ -547,3 +547,20 @@ test("la confirmation ne change pas l'importance : une préférence confirmée g
     assert.equal(dossier(commune({ distance_cote_km: 240 }), p).d.criteria.orientation, "condition_to_confirm");
   }
 });
+
+test("smoke visuel du 01/10 : plusieurs conditions ouvertes se disent par sens, une phrase chacun ; le seuil n'est pas dit deux fois", () => {
+  const p = confirme(
+    projet({ montagne: { strength: "hard" } }, [{ key: "proximite_mer", weight: 3 }, { key: "faible_pression_agricole", weight: 2 }, { key: "cadre_calme", weight: 1 }]),
+    hard("montagne"), pref("proximite_mer"), pref("faible_pression_agricole"), pref("cadre_calme"),
+  );
+  const { d } = dossier(commune({ altitude: 27, distance_cote_km: 50 }), p);
+  const detail = d.narrativePlan.verdict.detail;
+  assert.match(detail, /^Ce que l'on sait penche contre l'exigence de montagne/);
+  assert.match(detail, /Rien ne penche nettement pour ou contre la proximité de la mer\./);
+  assert.match(detail, /futur•e ne sait pas encore évaluer un environnement peu marqué par l'agriculture intensive\./);
+  const mer = cartes(d).find((f) => f.role === "condition_check" && f.criterion.key === "proximite_mer")!;
+  assert.equal(mer.statement, "La distance au littoral est estimée à environ 50 km depuis le point de référence de Nantes.");
+  const montagne = cartes(d).find((f) => f.role === "condition_check" && f.criterion.key === "montagne")!;
+  assert.ok(montagne.role === "condition_check");
+  assert.doesNotMatch(montagne.whyNotDecided, /600/); // le constat le dit déjà
+});

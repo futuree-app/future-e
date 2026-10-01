@@ -156,9 +156,11 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
 function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): string {
   switch (c.reason) {
     case "convention_produit":
-      if (key === "montagne") return "« À la montagne » est lu ici comme une altitude de référence d'au moins 600 m. Ce seuil est une convention de futur•e, et l'altitude varie fortement au sein d'une même commune.";
-      if (key === "reliefProche") return "« Proche d'une montagne » est lu ici comme un relief d'environ 1 250 m dans un rayon de 35 km. Ce seuil est une convention de futur•e, pas une limite que vous avez fixée.";
-      if (key === "excludeSea") return "« Loin du littoral » est lu ici comme au moins 15 km de la côte. Ce seuil est une convention de futur•e, pas une distance que vous avez fixée.";
+      // Le constat dit déjà le seuil (« … entendue comme une altitude d'au moins 600 m ») : ici, seulement
+      // ce qu'il est, une convention, et ce qu'elle ne dit pas.
+      if (key === "montagne") return "Ce seuil est une convention de futur•e, et l'altitude varie fortement au sein d'une même commune.";
+      if (key === "reliefProche") return "Ce seuil est une convention de futur•e, pas une limite que vous avez fixée.";
+      if (key === "excludeSea") return "Cette distance est une convention de futur•e, pas une limite que vous avez fixée.";
       return "Ce périmètre est lu comme une liste de départements choisie par futur•e. Cette convention éclaire votre condition sans pouvoir la trancher.";
     case "point_de_reference":
       return key === "nearSea"
@@ -186,7 +188,8 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
 export function consequenceDuSignal(signal: ConditionSignal): string {
   if (signal === "defavorable") return "Ce que l'on sait penche contre cette condition. Elle reste ouverte : à vérifier avant de décider.";
   if (signal === "favorable") return "Ce que l'on sait va dans le sens de cette condition. Elle reste ouverte : à confirmer avant de décider.";
-  return "La mesure disponible ne penche ni pour ni contre. Cette condition reste ouverte.";
+  // Le constat porte déjà la mesure neutre : la conséquence ne la redit pas.
+  return "Elle reste ouverte : à vérifier avant de décider.";
 }
 
 export function etatDuSignal(signal: ConditionSignal): string {
