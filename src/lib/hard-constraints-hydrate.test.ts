@@ -44,7 +44,7 @@ test("sizeRelativeTo ne mute PLUS communeSize : les deux contraintes coexistent,
     { communeSize: { max: 100_000 }, sizeRelativeTo: { label: "Brest", direction: "smaller" } },
     dir,
   );
-  assert.deepEqual(n.communeSize, { min: null, max: 100_000 }); // INTACTE
+  assert.deepEqual(n.communeSize, { min: null, max: 100_000, unit: null }); // INTACTE (unité non dite)
   assert.equal(n.sizeRelativeTo?.reference.status, "resolved");
 });
 

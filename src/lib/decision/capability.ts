@@ -40,6 +40,7 @@ import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { HardConstraints } from "../hard-constraint-schema.ts";
 import { hardZoneAnchorsDe, nearPlaceThreshold } from "../hard-constraints-hydrate.ts";
 import { ZONE_TABLE } from "../geo-zones.ts";
+import { conventionPar, conventionTranchable } from "./conventions.ts";
 
 export type Capability = "trancher" | "apprecier" | "ne_pas_mesurer";
 export type EvaluationGrain = "commune" | "adresse";
@@ -58,7 +59,13 @@ export type CapabilityReason =
   | "parametre_manquant"        // un temps sans mode
   | "metrique_non_supportee"    // le vélo
   | "position_relative"         // un rang, une catégorie, un indicateur communal
-  | "aucune_regle";             // aucune règle ne sait l'examiner
+  | "aucune_regle"              // aucune règle ne sait l'examiner
+  // FUT-8 : les promotions par la sémantique du Projet.
+  | "distance_a_vol_oiseau"     // des km, dits à vol d'oiseau, mesurés depuis l'adresse
+  | "distance_par_la_route"     // des km par la route : aucune mesure routière en km aujourd'hui
+  | "seuil_et_unite_du_lecteur" // une taille chiffrée par le lecteur, avec son unité
+  | "perimetre_choisi"          // un périmètre choisi (ville, région parisienne)
+  | "definition_acceptee";      // une convention de périmètre acceptée par le lecteur
 
 export type CapabilityAssessment = { capability: Capability; reason: CapabilityReason };
 
@@ -94,16 +101,25 @@ function hardCapability(key: HardConstraintKey, hc: HardConstraints, grain: Eval
     case "departements":
       return t("perimetre_administratif");
     case "zones": {
+      // FUT-8 : une macro-zone tranche si le lecteur a accepté son périmètre (convention « périmètre »),
+      // pour CHAQUE ancre non administrative. Une façade ou un massif n'a pas de convention tranchable.
       const ancres = hardZoneAnchorsDe(hc.zones);
-      return ancres.length > 0 && ancres.every((z) => ADMIN_REGION_TOKENS.includes(z.zone))
-        ? t("perimetre_administratif")
-        : a("convention_produit");
+      const acceptees = hc.zonesConventions ?? [];
+      const tranche = (token: string) => ADMIN_REGION_TOKENS.includes(token)
+        || acceptees.some((c) => {
+          const conv = conventionPar(c.conventionId, c.conventionVersion);
+          return c.token === token && conv != null && conv.definition.kind === "departements"
+            && conv.definition.token === token && conventionTranchable(conv, grain);
+        });
+      if (ancres.length === 0 || !ancres.every((z) => tranche(z.zone))) return a("convention_produit");
+      return ancres.every((z) => ADMIN_REGION_TOKENS.includes(z.zone)) ? t("perimetre_administratif") : t("definition_acceptee");
     }
     case "excludeZones": {
+      // FUT-8 : « région parisienne » tranche une fois son périmètre choisi par le lecteur.
       const tokens = hc.excludeZones ?? [];
-      return tokens.length > 0 && tokens.every((z) => ADMIN_EXCLUSION_TOKENS.has(z))
-        ? t("perimetre_administratif")
-        : a("convention_produit");
+      const choisis = hc.excludeZonesPerimetres ?? {};
+      if (tokens.length === 0 || !tokens.every((z) => ADMIN_EXCLUSION_TOKENS.has(z) || choisis[z] != null)) return a("convention_produit");
+      return tokens.some((z) => choisis[z] != null) ? t("perimetre_choisi") : t("perimetre_administratif");
     }
     // Une convention SANS définition acceptée par le lecteur s'apprécie. Avec une définition versionnée et
     // confirmée comme sens de la condition (FUT-8), elle pourra trancher.
@@ -120,16 +136,31 @@ function hardCapability(key: HardConstraintKey, hc: HardConstraints, grain: Eval
       const np = hc.nearPlace;
       const seuil = np ? nearPlaceThreshold(np) : null;
       if (seuil == null) return a("sans_seuil");
-      if (seuil.metric === "distance") return a("metrique_non_enregistree");
+      if (seuil.metric === "distance") {
+        // FUT-8 : des kilomètres DITS à vol d'oiseau se tranchent depuis l'adresse ; par la route, aucune
+        // mesure routière en km n'existe encore ; sans métrique, rien ne dit ce que le lecteur vise.
+        if (np?.metric === "vol_oiseau") return grain === "adresse" ? t("distance_a_vol_oiseau") : a("point_de_reference");
+        if (np?.metric === "route") return a("distance_par_la_route");
+        return a("metrique_non_enregistree");
+      }
       if (seuil.mode == null) return n("parametre_manquant");
       if (!ROUTABLE_MODES.includes(seuil.mode)) return n("metrique_non_supportee");
       return grain === "adresse" ? t("temps_de_trajet") : a("point_de_reference");
     }
+    // FUT-8 : une taille chiffrée AVEC son unité se tranche. Sans unité (legacy, ou mot qualitatif), non.
+    // La taille relative ne tranche qu'en agglomération : la population communale de la ville de référence
+    // n'est pas encore dans l'annuaire.
     case "communeSize":
+      return hc.communeSize?.unit && (hc.communeSize.min != null || hc.communeSize.max != null)
+        ? t("seuil_et_unite_du_lecteur") : a("unite_non_enregistree");
     case "sizeRelativeTo":
-      return a("unite_non_enregistree");
-    case "excludePlace":
-      return a("agglomeration_implicite");
+      return hc.sizeRelativeTo?.unit === "unite_urbaine" ? t("seuil_et_unite_du_lecteur") : a("unite_non_enregistree");
+    case "excludePlace": {
+      // FUT-8 : chaque ville à quitter doit avoir son périmètre (commune ou agglomération).
+      const villes = (hc.excludePlace ?? []).filter((e) => e?.label);
+      return villes.length > 0 && villes.every((e) => e.scope === "commune" || e.scope === "unite_urbaine")
+        ? t("perimetre_choisi") : a("agglomeration_implicite");
+    }
   }
 }
 

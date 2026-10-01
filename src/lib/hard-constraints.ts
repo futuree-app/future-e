@@ -227,12 +227,15 @@ export type NormalizedHardConstraints = {
   zones: {
     hardDepartements: Set<string>; labels: string[]; unresolvedLabels: string[]; match: "all" | "any";
   } | null;
-  excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[] } | null;
+  // `uuExclues` (FUT-8) : « l'agglomération parisienne », choisie par le lecteur, se teste sur l'unité
+  // urbaine, pas sur des départements.
+  excludeZones: { departements: Set<string>; labels: string[]; unresolvedLabels: string[]; uuExclues?: string[] } | null;
   montagne: boolean; // seulement strength === "hard"
   reliefProche: boolean; // seulement strength === "hard"
   nearSea: { threshold: PlaceThreshold | null } | null;
   excludeSea: boolean;
-  communeSize: { min: number | null; max: number | null } | null;
+  // `unit` (FUT-8) : « commune de… » se lit sur la population communale ; sinon, l'agglomération.
+  communeSize: { min: number | null; max: number | null; unit?: "commune" | "unite_urbaine" | null } | null;
   nearPlace: {
     label: string;
     threshold: PlaceThreshold | null;
@@ -241,7 +244,8 @@ export type NormalizedHardConstraints = {
     // pas de réseau : il reçoit. `null` = personne n'a même eu à essayer (aucun seuil de temps).
     reachability: ReachabilityState | null;
   } | null;
-  excludePlace: { label: string; reference: ResolvedUrbanAreaReference }[];
+  // `scope` (FUT-8) : « quitter la commune de Lyon » ne vise que la commune ; sinon, l'agglomération.
+  excludePlace: { label: string; reference: ResolvedUrbanAreaReference; scope?: "commune" | "unite_urbaine" | null }[];
   sizeRelativeTo: { label: string; direction: "smaller" | "larger"; reference: ResolvedSizeReference } | null;
 };
 
@@ -479,7 +483,7 @@ export function evaluateExcludeZones(
   const expectedValue: ConstraintValue = { kind: "departments", value: [...z.departements] };
   const observedLabel = `département ${c.dept}`;
 
-  if (z.departements.has(c.dept)) {
+  if (z.departements.has(c.dept) || (c.uu != null && (z.uuExclues ?? []).includes(c.uu))) {
     const zonesLabel = joinFr(z.labels);
     return {
       key: "excludeZones", status: "incompatible", observedValue, expectedValue, observedLabel,
@@ -632,10 +636,15 @@ export function evaluateCommuneSize(
   // LA TAILLE SE LIT SUR L'AGGLOMÉRATION (doctrine du chantier C), et le comparateur le faisait déjà.
   // Le dossier lisait la population COMMUNALE : une commune de 8 000 habitants dans l'unité urbaine de
   // Lyon était exclue par l'un et déclarée conforme par l'autre.
-  if (c.tailleVille == null) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
+  // FUT-8 : UNE TAILLE DITE « COMMUNE » SE LIT SUR LA COMMUNE. Paris, Lyon, Marseille sont indexées par
+  // arrondissement : la population d'un arrondissement n'est pas celle de la ville, on ne conclut pas.
+  const surLaCommune = cs.unit === "commune";
+  if (surLaCommune && estArrondissementPLM(c.insee)) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
+  const lue = surLaCommune ? c.population : c.tailleVille;
+  if (lue == null) return { key: "communeSize", status: "unexamined", reason: "missing_data" };
 
-  const t = c.tailleVille;
-  const unit = c.uu ? "urban_unit" : "commune";
+  const t = lue;
+  const unit = surLaCommune || !c.uu ? "commune" : "urban_unit";
   const observedValue: ConstraintValue = { kind: "population", value: t, unit };
   const expectedValue: ConstraintValue = { kind: "population_range", min: cs.min, max: cs.max, unit: "urban_unit" };
   const observedLabel = `${fmt(t)} hab.`;
@@ -658,7 +667,7 @@ export function evaluateCommuneSize(
   // Le SUJET de la phrase suit la donnée réellement lue : l'agglomération quand la commune en a une, la
   // commune quand elle est son propre bassin. Juger sur une donnée et en montrer une autre serait pire
   // que la divergence elle-même.
-  const sujet = c.uu ? `L'agglomération à laquelle appartient ${c.nom} compte` : "Cette commune compte";
+  const sujet = c.uu && !surLaCommune ? `L'agglomération à laquelle appartient ${c.nom} compte` : "Cette commune compte";
   // « en dessous de 100 000 de la taille que vous avez posée » n'est pas une phrase française : le
   // seuil et son complément se télescopaient. Le seuil porte maintenant sa propre subordonnée.
   const seuil = over
@@ -895,6 +904,12 @@ export function evaluateNearPlace(
 // « Quitter Lyon ET Saint-Jean-de-Machin », dont seul Lyon se résout, sur une commune hors de Lyon :
 // rendre `satisfied` affirmerait une condition dont la MOITIÉ n'a jamais été testée. Une ville résolue
 // qui matche décide (c'est SÛR) ; sinon, une ville non résolue bloque ; sinon seulement, satisfied.
+// LES ARRONDISSEMENTS de Paris (751xx), Lyon (6938x) et Marseille (132xx), par unité urbaine parente.
+const PLM_PREFIXE_PAR_UU: Record<string, string> = { "00851": "751", "00760": "6938", "00759": "132" };
+export function estArrondissementPLM(insee: string): boolean {
+  return /^(751\d\d|6938\d|132\d\d)$/.test(insee);
+}
+
 export function evaluateExcludePlace(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -907,9 +922,16 @@ export function evaluateExcludePlace(
   const expectedValue: ConstraintValue = { kind: "boolean", value: false };
   const tousLabels = joinFr(list.map((e) => e.label));
 
-  const hit = list.find(
-    (e) => e.reference.status === "resolved" && e.reference.normalizedTerritoryCode === territoire,
-  );
+  // FUT-8 : « quitter la commune de Lyon » ne vise que la commune (ses arrondissements, pour Paris, Lyon,
+  // Marseille) ; sans précision, l'agglomération, comme avant.
+  const hit = list.find((e) => {
+    if (e.reference.status !== "resolved") return false;
+    if (e.scope === "commune") {
+      const prefixe = e.reference.urbanUnitCode ? PLM_PREFIXE_PAR_UU[e.reference.urbanUnitCode] : undefined;
+      return prefixe ? c.insee.startsWith(prefixe) : c.insee === e.reference.referenceCommuneInsee;
+    }
+    return e.reference.normalizedTerritoryCode === territoire;
+  });
   if (hit) {
     const label = hit.reference.status === "resolved" ? hit.reference.canonicalLabel : hit.label;
     return {

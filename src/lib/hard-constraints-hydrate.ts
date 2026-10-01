@@ -85,6 +85,28 @@ export function nearPlaceThreshold(np: NonNullable<HardConstraints["nearPlace"]>
   return thresholdFrom(np.maxKm);
 }
 
+// FUT-8 : LA RÉGION PARISIENNE, AU PÉRIMÈTRE CHOISI PAR LE LECTEUR. Le champ `excludeZonesPerimetres`
+// n'existe que dans la valeur effective du dossier (jamais dans `parsed`) : la Recherche n'est pas touchée.
+const PERIMETRES_PARISIENS: Record<string, { label: string; departements: string[]; uu?: string }> = {
+  paris: { label: "Paris", departements: ["75"] },
+  petite_couronne: { label: "Paris et la petite couronne", departements: ["75", "92", "93", "94"] },
+  ile_de_france: { label: "l'Île-de-France", departements: ["75", "77", "78", "91", "92", "93", "94", "95"] },
+  agglomeration: { label: "l'agglomération parisienne", departements: [], uu: "00851" },
+};
+
+function exclusionsAvecPerimetres(c: HardConstraints) {
+  const perimetres = c.excludeZonesPerimetres ?? {};
+  const libres = (c.excludeZones ?? []).filter((t) => !perimetres[t]);
+  const excl = resolveExclusions(libres);
+  const choisis = Object.values(perimetres).map((p) => PERIMETRES_PARISIENS[p]!).filter(Boolean);
+  return {
+    departements: new Set<string>([...excl.departements, ...choisis.flatMap((p) => p.departements)]),
+    labels: [...excl.applied.map((a) => a.label), ...choisis.map((p) => p.label)],
+    unresolvedLabels: excl.unknown,
+    uuExclues: choisis.flatMap((p) => (p.uu ? [p.uu] : [])),
+  };
+}
+
 export function hydrateHardConstraints(
   hc: HardConstraints | undefined | null,
   dir: PlaceDirectory | null,
@@ -95,7 +117,6 @@ export function hydrateHardConstraints(
   const c = hc ?? {};
   const match = c.zonesMatch === "any" ? "any" : "all";
   const zone = resolveZoneAnchors(c.zones, match);
-  const excl = resolveExclusions(c.excludeZones);
   // « La Bretagne OU la Loire-Atlantique » : un seul périmètre, qui réunit l'ancre et le département.
   const fusion = departementsDansLesZones(c);
   const departementsFusionnes = fusion ? c.departements ?? [] : [];
@@ -124,15 +145,14 @@ export function hydrateHardConstraints(
             match,
           }
         : null,
-    excludeZones:
-      (c.excludeZones?.length ?? 0) > 0
-        ? { departements: excl.departements, labels: excl.applied.map((a) => a.label), unresolvedLabels: excl.unknown }
-        : null,
+    excludeZones: (c.excludeZones?.length ?? 0) > 0 ? exclusionsAvecPerimetres(c) : null,
     montagne: c.montagne?.strength === "hard",
     reliefProche: c.reliefProche?.strength === "hard",
     nearSea: c.nearSea?.active ? { threshold: thresholdFrom(c.nearSea.maxKm) } : null,
     excludeSea: c.excludeSea === true,
-    communeSize: c.communeSize ? { min: c.communeSize.min ?? null, max: c.communeSize.max ?? null } : null,
+    communeSize: c.communeSize
+      ? { min: c.communeSize.min ?? null, max: c.communeSize.max ?? null, unit: c.communeSize.unit ?? null }
+      : null,
     nearPlace:
       c.nearPlace?.label && dir
         ? {
@@ -146,7 +166,7 @@ export function hydrateHardConstraints(
         : null,
     excludePlace: dir
       ? excludePlaceDeclares(c.excludePlace)
-          .map((e) => ({ label: e.label, reference: resolveUrbanArea(e.label, dir, input) }))
+          .map((e) => ({ label: e.label, reference: resolveUrbanArea(e.label, dir, input), scope: e.scope ?? null }))
       : [],
     // sizeRelativeTo ne MUTE PLUS communeSize (matchProjects réécrivait hc.communeSize en douce) : les
     // deux contraintes coexistent, et le lecteur voit la sienne nommée.
