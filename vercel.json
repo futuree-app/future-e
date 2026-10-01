@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["cdg1"],
   "build": {
     "env": {
       "VERCEL_SUPPORT_LARGE_FUNCTIONS": "1"
