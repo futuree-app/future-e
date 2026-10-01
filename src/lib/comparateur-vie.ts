@@ -15,6 +15,7 @@ import { tailleVilleFrom, resolveTailleVille, communeAttributesFrom } from "@/li
 import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/winter-mildness";
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
+import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -157,7 +158,12 @@ export type ParsedProject = {
   // Communes-ANCRES (« une ville comme {commune} »). Le LLM n'extrait que le label ;
   // la dérivation des traits est déterministe, dans la route parse (post-LLM).
   // ANCRAGE, pas similarité : traduit en préférences nommées, jamais en score. cf. Pari #7.
-  communeAncre?: { label: string }[];
+  // `insee` (FUT-8) : posé par l'amorce « Explorer depuis une commune », qui connaît la commune exacte ;
+  // il évite qu'un homonyme soit pris pour l'ancre quand la Recherche recalcule ses dérivés.
+  communeAncre?: { label: string; insee?: string }[];
+  // FUT-8 : le lecteur a retiré la puce « ~ taille de {ancre} ». La Recherche ne recalcule pas la
+  // fourchette de taille de l'ancre. Sans effet sur le Projet (qui ne porte jamais cette fourchette).
+  ancreSansTaille?: boolean;
   // Traits dérivés que l'utilisateur a EXPLICITEMENT retirés (Phase B). On les traite
   // comme « déjà adressés » : le moteur ne les re-surface pas en découverte ni en signal
   // ambiant (sinon « j'ai retiré X » et X réapparaît dans les cartes). N'affecte NI le
@@ -2749,7 +2755,28 @@ export async function seedComparaison(
   return { trio: picks, comparaison, ignores };
 }
 
-export async function matchProjects(parsed: ParsedProject): Promise<MatchOutcome> {
+// LES DÉRIVÉS D'ANCRE, RECALCULÉS POUR LA RECHERCHE SEULEMENT (FUT-8). « Une ville comme Brest » ne doit
+// pas reproposer Brest, et cherche des villes de taille proche (÷/× 2,5 autour de l'agglomération). Ces
+// deux règles servent la recherche : elles ne sont plus écrites dans `parsed` (donc jamais dans le
+// Projet), elles sont reconstruites ici, à chaque recherche, depuis `communeAncre`.
+//
+// L'explicite écrase le dérivé, comme avant : une taille dite (communeSize, sizeRelativeTo) ou une
+// préférence de taille LUE DANS LE TEXTE supprime la fourchette. Idempotent : un `parsed` ancien qui
+// porte déjà l'exclusion ou la fourchette n'est pas doublé.
+export async function avecDerivesDAncre(parsed: ParsedProject): Promise<ParsedProject> {
+  const ancres = (parsed.communeAncre ?? []).filter((a) => a?.label?.trim());
+  if (ancres.length === 0) return parsed;
+  const resolues: IndexCommune[] = [];
+  for (const a of ancres) {
+    const e = a.insee ? await getCommuneEntry(a.insee) : await resolveCommuneByName(a.label);
+    if (e) resolues.push(e);
+  }
+  if (resolues.length === 0) return parsed;
+  return derivesDAncrePourRecherche(parsed, resolues, deriveAnchorPreferences(resolues).communeSize);
+}
+
+export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<MatchOutcome> {
+  const parsed = await avecDerivesDAncre(parsedDuLecteur);
   const communes = await loadIndex();
   await loadZeTable(); // nom + taille des bassins (signature + raison emploi graduée)
 

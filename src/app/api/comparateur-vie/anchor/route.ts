@@ -69,14 +69,15 @@ export async function POST(request: NextRequest) {
   const chips: { key: string; text: string }[] = traits.map((t) => ({ key: t.key, text: t.text }));
   if (keepSize) chips.push({ key: SIZE_KEY, text: `~ taille ${deCommune(entry.nom)}` });
 
+  // FUT-8 : ni l'exclusion de l'ancre ni sa fourchette de taille ne sont écrites dans `parsed` : la
+  // Recherche les recalcule (avecDerivesDAncre), le Projet ne les porte jamais. Le retrait de la puce
+  // de taille est transmis tel quel (`ancreSansTaille`).
   const parsed: ParsedProject = {
     reformulation: anchorReformulationSuffix([entry.nom], traits.map((t) => t.text)),
-    hardConstraints: {
-      excludePlace: [{ label: entry.nom }],
-      ...(keepSize ? { communeSize: deriv.communeSize } : {}),
-    },
-    preferences,
-    communeAncre: [{ label: entry.nom }],
+    hardConstraints: {},
+    preferences: preferences.map((p) => ({ ...p, source: "ancre" as const })),
+    communeAncre: [{ label: entry.nom, insee: entry.insee }],
+    ...(deriv.communeSize != null && !keepSize ? { ancreSansTaille: true } : {}),
     ...(suppressNarrativeKeys.length ? { suppressNarrativeKeys } : {}),
   };
 
