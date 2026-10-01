@@ -683,8 +683,9 @@ périmée, legacy : non confirmé. Le navigateur ne peut pas en écrire ; la rou
 et reporte celles qui existent. `schemaVersion: 2` décrit la forme du contrat, rien d'autre.
 
 **Capacité (`capability.ts`).** Fonction pure du critère, de ses paramètres et du grain. Avec le schéma
-actuel, ne tranchent que : un département, une région administrative nommée (exclusion d'une région ou de
-l'Île-de-France comprise), un temps de trajet avec mode explicite évalué à l'adresse. Tout le reste
+actuel, ne tranchent que : un département, une région administrative nommée (son exclusion comprise), un
+temps de trajet avec mode explicite évalué à l'adresse. « La région parisienne » (`idf`) s'apprécie : la
+frontière est nette, mais elle traduit une expression vernaculaire. Tout le reste
 s'apprécie (conventions de futur•e, distances en kilomètres, mer, tailles, « quitter une ville ») ou ne se
 mesure pas (temps sans mode, vélo, `faible_secheresse`, `faible_pression_agricole`).
 
@@ -712,3 +713,31 @@ condition confirmée » ; le tier reste celui du poids.
 condition périme un dossier figé ; un projet sans condition signe comme avant.
 
 **Version du moteur.** `engine-2`. Les dossiers figés en `engine-1` gardent leur verdict d'origine.
+
+### Correctifs du 1er octobre (revue de la V1)
+
+- La confirmation ne change plus l'importance : une préférence confirmée garde le tier de son poids. Le
+  statut de condition vient du rôle (`condition_check`) et de l'orientation (`condition_to_confirm`).
+- Les gestes proposés affinent la mesure sans prétendre lever l'ambiguïté du projet (seuil de la
+  montagne, métrique d'une distance).
+- `idf` (« région parisienne ») passe de `trancher` à `apprecier`.
+
+### La cible n'est pas cette prudence
+
+La table actuelle est prudente parce que le schéma perd de l'information. La cible produit est de
+**trancher le plus possible** : dès qu'une demande se traduit en une définition opérationnelle exacte,
+transparente et défendable, soit par une mesure qui correspond exactement à la formulation du lecteur,
+soit par une convention de futur•e justifiée, précise, versionnée, visible et **acceptée par le lecteur
+comme le sens de sa condition** (« Pour cette analyse, vivre à la montagne veut dire […]. Est-ce bien
+votre condition ? »).
+
+Rien dans FUT-7 ne l'empêche :
+- `criterionCapability` lit déjà les **paramètres** du critère, pas sa seule famille : une branche
+  « définition acceptée → trancher » s'ajoute sans rien déconstruire ;
+- l'empreinte de confirmation porte la **valeur décisionnelle** : une définition acceptée y entrera, et
+  la confirmation portera sur elle, pas sur le seul mot ;
+- la porte du verdict et `assertFactValid` demandent une capacité « trancher », jamais une famille de
+  critère : un critère promu tranchable produira « Condition non respectée » sans autre changement.
+
+FUT-8 devra donc enrichir le projet (unité d'une taille, métrique d'une distance, définition acceptée
+d'une convention, distinction région nommée / expression vernaculaire), et `capability.ts` suivra.

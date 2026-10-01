@@ -319,7 +319,10 @@ test("T16 la mer confirmée, à 240 km : à confirmer, et jamais « Condition no
   const c = cartes(d).find((f) => f.role === "condition_check")!;
   assert.ok(c.role === "condition_check" && c.signal === "defavorable");
   assert.match(c.whyNotDecided, /point de référence de la commune/);
-  assert.equal(c.action?.label, "Mesurez la distance réelle depuis l'adresse visée");
+  assert.equal(c.action?.label, "Mesurez la distance depuis l'adresse visée");
+  // Le geste affine la mesure ; il ne prétend pas savoir quelle métrique le lecteur avait en tête.
+  assert.doesNotMatch(c.action?.detail ?? "", /que vise votre condition/);
+  assert.match(c.action?.detail ?? "", /à vol d'oiseau, par la route ou en temps de trajet/);
 });
 
 test("T16b « il nous faut la mer », sans distance, confirmée : la mesure se montre, avec son sens", () => {
@@ -363,7 +366,10 @@ test("T19 les conventions de futur•e ne tranchent jamais ; les régions admini
   assert.equal(conv("zones", { zones: [{ zone: "bretagne", strength: "hard" }] }).capability, "trancher");
   // Une ancre conventionnelle À CÔTÉ d'une région suffit à rendre le périmètre conventionnel.
   assert.equal(conv("zones", { zones: [{ zone: "bretagne", strength: "hard" }, { zone: "atlantique", strength: "hard" }] }).capability, "apprecier");
-  assert.equal(conv("excludeZones", { excludeZones: ["idf"] }).capability, "trancher");
+  // « La région parisienne » (`idf`) traduit une expression vernaculaire : la frontière est nette, le sens
+  // ne l'est pas. Seule la région nommée tranche.
+  assert.deepEqual(conv("excludeZones", { excludeZones: ["idf"] }), { capability: "apprecier", reason: "convention_produit" });
+  assert.equal(conv("excludeZones", { excludeZones: ["ile_de_france"] }).capability, "trancher");
   assert.equal(conv("excludeZones", { excludeZones: ["paris"] }).capability, "apprecier");
   assert.equal(conv("departements", { departements: ["35"] }).capability, "trancher");
   // Un critère confirmé « à la montagne », sous 600 m : jamais « Condition non respectée ».
@@ -408,6 +414,8 @@ test("T20 une condition ouverte expose signal, limite et conséquence, pas seule
   assert.match(c.whyNotDecided, /convention de futur•e/);
   assert.match(c.consequence, /penche contre cette condition/);
   assert.equal(c.action?.label, "Regardez l'altitude de l'adresse visée");
+  // Le geste précise le constat, sans prétendre lever l'ambiguïté de la convention.
+  assert.match(c.action?.detail ?? "", /ne dit pas si ce seuil correspond à ce que vous entendez par vivre à la montagne/);
   for (const f of cartes(d)) assertFactValid(f, p);
 });
 
@@ -528,4 +536,14 @@ test("confirmer ou retirer une condition périme un dossier figé ; une confirma
     ...confirmee, parsed: { ...confirmee.parsed!, hardConstraints: { zones: [{ zone: "normandie", strength: "hard" }] } },
   })!;
   assert.match(signatureDecisionnelle(normandie), /§conditions=$/);
+});
+
+test("la confirmation ne change pas l'importance : une préférence confirmée garde le tier de son poids", () => {
+  for (const [weight, tier] of [[1, "secondary"], [2, "secondary"], [3, "structuring"]] as const) {
+    const p = confirme(projet({}, [{ key: "proximite_mer", weight }]), pref("proximite_mer"));
+    const c = cartes(dossier(commune({ distance_cote_km: 240 }), p).d).find((f) => f.role === "condition_check")!;
+    assert.equal(c.materialityTier, tier, `poids ${weight}`);
+    // Le statut de condition, lui, vient du rôle et de l'orientation, quel que soit le poids.
+    assert.equal(dossier(commune({ distance_cote_km: 240 }), p).d.criteria.orientation, "condition_to_confirm");
+  }
 });

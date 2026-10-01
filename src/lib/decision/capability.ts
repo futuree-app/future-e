@@ -17,6 +17,18 @@
 // pas une capacité : la mélanger ferait dire « futur•e ne sait pas » là où il faut dire « la donnée
 // manque ici ». C'est pourquoi cette fonction ne reçoit aucun `ModuleFacts`.
 //
+// ── CE N'EST PAS LA CIBLE : LA CIBLE EST DE TRANCHER LE PLUS POSSIBLE ─────────────────────────
+// La prudence de cette table est la conséquence du schéma ACTUEL, qui perd de l'information. Ce n'est
+// pas une doctrine définitive. futur•e tranche dès qu'une demande se traduit en une définition
+// opérationnelle exacte, transparente et défendable, de deux façons :
+//   A. une mesure qui correspond exactement à ce que le lecteur a formulé (métrique, seuil, mode, grain) ;
+//   B. une CONVENTION de futur•e (la montagne, une petite ville, la proximité de la mer) justifiée,
+//      précise, versionnée, visible, et ACCEPTÉE par le lecteur comme le sens de sa condition.
+// Dans le cas B, la confirmation porte sur la définition elle-même : elle entre dans les paramètres du
+// critère, donc dans son empreinte (`criterion-value.ts`), et cette fonction pourra alors rendre
+// « trancher ». Rien ici ne l'empêche : la capacité lit déjà les paramètres du critère, pas sa seule
+// famille. FUT-8 n'aura qu'à ajouter ces paramètres et leurs branches.
+//
 // ── LE SCHÉMA ACTUEL LIMITE CE QUI SE TRANCHE, ET C'EST ASSUMÉ ───────────────────────────────
 // Le projet n'enregistre ni l'unité d'une taille (commune ou agglomération), ni la provenance d'un
 // seuil (dit par le lecteur ou posé par la consigne du parseur), ni le caractère « à vol d'oiseau »
@@ -63,8 +75,11 @@ export const ADMIN_REGION_TOKENS: readonly string[] = [
   "provence_alpes_cote_d_azur", "auvergne_rhone_alpes", "bourgogne_franche_comte", "grand_est",
   "hauts_de_france", "centre_val_de_loire", "ile_de_france",
 ];
-// « La région parisienne » (exclusion `idf`) désigne toute l'Île-de-France : c'est la région.
-const ADMIN_EXCLUSION_TOKENS = new Set<string>([...ADMIN_REGION_TOKENS, "idf"]);
+// « La région parisienne » (`idf`) N'EN FAIT PAS PARTIE. Le jeton désigne bien toute l'Île-de-France, une
+// frontière nette ; mais il traduit une expression VERNACULAIRE, et rien ne dit que le lecteur pensait à
+// la frontière administrative. La netteté de la géométrie n'est pas la fidélité au sens. Seul le jeton
+// de la région nommée (`ile_de_france`) tranche.
+const ADMIN_EXCLUSION_TOKENS = new Set<string>(ADMIN_REGION_TOKENS);
 
 // LES PRÉFÉRENCES QU'AUCUNE RÈGLE NE SAIT EXAMINER. Un test vérifie, en faisant tourner le registre,
 // que toutes les autres sont bien examinées par au moins une règle.
@@ -90,6 +105,8 @@ function hardCapability(key: HardConstraintKey, hc: HardConstraints, grain: Eval
         ? t("perimetre_administratif")
         : a("convention_produit");
     }
+    // Une convention SANS définition acceptée par le lecteur s'apprécie. Avec une définition versionnée et
+    // confirmée comme sens de la condition (FUT-8), elle pourra trancher.
     case "montagne":
     case "reliefProche":
     case "excludeSea":

@@ -18,6 +18,7 @@ import type {
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { confirmedCriteria } from "./conditions.ts";
+import { preferenceWeight } from "./project-view.ts";
 import { criterionCapability } from "./capability.ts";
 import { consequenceDuSignal, etatDuSignal } from "./hard-constraint-rules.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
@@ -122,7 +123,10 @@ export function conditionsDePreference(
       headlineSubject: label,
       signal,
       status: etatDuSignal(signal),
-      materialityTier: "structuring",
+      // LA CONFIRMATION NE CHANGE PAS L'IMPORTANCE. Le poids règle la matérialité, comme pour toute
+      // préférence ; c'est le rôle (`condition_check`) et l'orientation (`condition_to_confirm`) qui portent
+      // le statut de condition. Une préférence de poids 1 confirmée reste, sur cet axe, de poids 1.
+      materialityTier: preferenceWeight(project, key) >= 3 ? "structuring" : "secondary",
       topic: reunis[0]?.topic ?? label,
       statement: constatDe(reunis, signal, label),
       evidence: preuvesDe(reunis, f, key, label),

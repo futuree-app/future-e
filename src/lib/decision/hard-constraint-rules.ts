@@ -197,23 +197,27 @@ export function etatDuSignal(signal: ConditionSignal): string {
 
 // LE GESTE, SEULEMENT QUAND IL EST CONNU. Une condition sur une convention de périmètre ou sur une unité
 // non précisée n'appelle aucune vérification sur place : on n'en invente pas.
+//
+// ET LE GESTE NE PRÉTEND PAS LEVER CE QU'IL NE LÈVE PAS. Il peut affiner la MESURE (l'altitude exacte d'un
+// logement, un itinéraire réel) ; il ne dit pas si la convention de futur•e, ou la métrique mesurée, est
+// celle que le lecteur avait en tête. Cette ambiguïté appartient au projet, et elle reste ouverte.
 function gesteConnu(key: HardConstraintKey, c: CapabilityAssessment): DecisionAction | undefined {
   if (key === "montagne") {
     return {
       type: "verifier_sur_place", label: "Regardez l'altitude de l'adresse visée",
-      detail: "L'altitude d'un logement se lit sur la carte de l'IGN (Géoportail). Elle peut s'écarter fortement de celle du chef-lieu.",
+      detail: "L'altitude d'un logement se lit sur la carte de l'IGN (Géoportail) et peut s'écarter fortement de celle du chef-lieu. Elle précise le constat ; elle ne dit pas si ce seuil correspond à ce que vous entendez par vivre à la montagne.",
     };
   }
   if (key === "nearSea" && c.reason === "point_de_reference") {
     return {
-      type: "verifier_sur_place", label: "Mesurez la distance réelle depuis l'adresse visée",
-      detail: "Un itinéraire depuis l'adresse jusqu'à la côte donne la distance que vise votre condition.",
+      type: "verifier_sur_place", label: "Mesurez la distance depuis l'adresse visée",
+      detail: "Une mesure depuis l'adresse, et non depuis le centre de la commune, précise ce constat. Choisissez celle qui correspond à votre condition : à vol d'oiseau, par la route ou en temps de trajet.",
     };
   }
   if (key === "nearPlace" && c.reason === "metrique_non_enregistree") {
     return {
-      type: "verifier_sur_place", label: "Mesurez le trajet réel depuis l'adresse visée",
-      detail: "Un itinéraire depuis l'adresse donne la distance par la route, que la mesure à vol d'oiseau ne dit pas.",
+      type: "verifier_sur_place", label: "Mesurez le trajet depuis l'adresse visée",
+      detail: "La distance affichée est à vol d'oiseau. Un itinéraire depuis l'adresse précise ce constat si votre condition vise la route ou un temps de trajet.",
     };
   }
   if (key === "nearPlace" && c.reason === "point_de_reference") {
