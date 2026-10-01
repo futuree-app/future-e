@@ -44,11 +44,13 @@ export function elementDeclare(project: UserProject, ref: CriterionRef): boolean
 }
 
 // La préférence vient d'une ancre, et le lecteur ne l'a pas (encore) reprise à son compte.
-function ancreNonAdoptee(project: UserProject, key: PreferenceKey): { weight: number; ancre: string } | null {
+function ancreNonAdoptee(project: UserProject, key: PreferenceKey): { weight: number; ancres: string[] } | null {
   const p = project.parsed?.preferences?.find((x) => x.key === key);
   if (!p || p.source !== "ancre") return null;
   if ((project.adoptions ?? []).some((a) => a.criterion.key === key)) return null;
-  return { weight: p.weight, ancre: project.parsed?.communeAncre?.[0]?.label ?? "votre commune de référence" };
+  // Toutes les communes-ancres : un trait commun à Brest et Lorient vient des deux.
+  const ancres = (project.parsed?.communeAncre ?? []).map((a) => a?.label).filter((l): l is string => Boolean(l));
+  return { weight: p.weight, ancres: ancres.length > 0 ? ancres : ["votre commune de référence"] };
 }
 
 function avec(project: UserProject, change: Partial<Pick<UserProject, "definitions" | "adoptions" | "conditions" | "rejets">>): UserProject {
@@ -113,7 +115,7 @@ export function appliquerGeste(project: UserProject, geste: CriterionAction, now
           const adoption: Adoption = {
             criterion: { kind: "preference", key: ref.key, instance: null },
             weight: Math.min(3, Math.max(1, Math.round(ancre.weight))) as 1 | 2 | 3,
-            origin: { kind: "ancre", label: ancre.ancre }, adoptedAt: now, source: "user",
+            origin: { kind: "ancre", labels: ancre.ancres }, adoptedAt: now, source: "user",
           };
           suivant = avec(suivant, { adoptions: [...(suivant.adoptions ?? []), adoption] });
         }
@@ -140,7 +142,7 @@ export function appliquerGeste(project: UserProject, geste: CriterionAction, now
       const adoption: Adoption = {
         criterion: { kind: "preference", key: ref.key, instance: null },
         weight: Math.min(3, Math.max(1, Math.round(ancre.weight))) as 1 | 2 | 3,
-        origin: { kind: "ancre", label: ancre.ancre }, adoptedAt: now, source: "user",
+        origin: { kind: "ancre", labels: ancre.ancres }, adoptedAt: now, source: "user",
       };
       // Adopter après un refus : le lecteur a changé d'avis, le rejet tombe.
       return {
@@ -159,7 +161,7 @@ export function appliquerGeste(project: UserProject, geste: CriterionAction, now
       if (pref && (pref.source ?? "parse") === "parse") return refus(400, "Ce critère vient de votre texte : modifiez votre texte pour le retirer.");
       if (!pref && !adoptee) return refus(404, "Ce critère n'est pas une suggestion de votre projet.");
       if (geste.seen !== criterionFingerprint(project, ref)) return refus(409, CHANGE);
-      const labels = adoptee ? [adoptee.origin.label] : (project.parsed?.communeAncre ?? []).map((a) => a.label).filter(Boolean);
+      const labels = adoptee ? adoptee.origin.labels : (project.parsed?.communeAncre ?? []).map((a) => a.label).filter(Boolean);
       const rejet: Rejet = { criterion: { kind: "preference", key: ref.key, instance: null }, origin: { kind: "ancre", labels }, rejectedAt: now, source: "user" };
       // Rejeter retire l'adoption éventuelle ET toute condition sur ce critère : une condition « à revoir »
       // sur un critère que le lecteur vient de dire ne pas vouloir n'aurait aucun sens.

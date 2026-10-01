@@ -89,7 +89,7 @@ test("ancre : confirmer une préférence d'ancre l'adopte dans la même écritur
   const vie: CriterionRef = { kind: "preference", key: "vie_locale", instance: null };
   const conf = ok(p, { action: "confirmer", criterion: vie, seen: criterionFingerprint(p, vie)! });
   assert.equal(conf.adoptions?.length, 1);
-  assert.deepEqual(conf.adoptions?.[0]?.origin, { kind: "ancre", label: "Brest" });
+  assert.deepEqual(conf.adoptions?.[0]?.origin, { kind: "ancre", labels: ["Brest"] });
   assert.equal(isConfirmed(conf, vie), true);
   // Garder seul.
   const garde = ok(p, { action: "adopter", criterion: { kind: "preference", key: "vie_locale" }, seen: criterionFingerprint(p, vie)! });

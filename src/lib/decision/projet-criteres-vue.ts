@@ -13,7 +13,7 @@ import {
   effectiveProject, effectivePreferences, parsedFingerprint, FAMILLES_MULTIPLES, instancesDe,
 } from "./effective-value.ts";
 import { criterionCapability } from "./capability.ts";
-import { presenterCritere } from "./criterion-labels.ts";
+import { presenterCritere, listeFr } from "./criterion-labels.ts";
 import { appliquerGeste } from "./criterion-gestes.ts";
 import { conventionDeZone } from "./conventions.ts";
 import { ADMIN_REGION_TOKENS } from "./capability.ts";
@@ -37,6 +37,9 @@ export type CritereVue = {
   etat: "compris" | "inspire" | "condition" | "a_revoir" | "rejete";
   // « Inspiré de Brest » : la commune d'où vient la suggestion, tant que le lecteur ne l'a pas gardée.
   ancre: string | null;
+  // Un critère que le lecteur a gardé (adopté) : il peut dire ensuite « Ça ne compte plus pour moi ».
+  // Un critère écrit dans son texte, non : il modifie son texte.
+  adopte: boolean;
   // Un mot fort écrit par le lecteur sur CE critère : la suggestion de condition.
   motFort: string | null;
   seenParsed: string | null;
@@ -151,7 +154,8 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
     const perimee = isStale(project, ref);
     const pref = ref.kind === "preference" ? project.parsed.preferences?.find((p) => p.key === ref.key) : null;
     const adoptee = ref.kind === "preference" && (project.adoptions ?? []).some((a) => a.criterion.key === ref.key);
-    const ancre = pref?.source === "ancre" && !adoptee ? project.parsed.communeAncre?.[0]?.label ?? null : null;
+    const ancres = (project.parsed.communeAncre ?? []).map((a) => a?.label).filter((l): l is string => Boolean(l));
+    const ancre = pref?.source === "ancre" && !adoptee && ancres.length > 0 ? listeFr(ancres) : null;
     const motFort = (project.parsed.forceMarkers ?? []).find((m) => sameCriterion(m.criterion, ref))?.quote ?? null;
     const options = (optionsPour(eff, ref) ?? []).flatMap((definition): OptionDePrecision[] => {
       const essai = appliquerGeste(project, { action: "definir", criterion: ref, seen: parsedFingerprint(project, ref) ?? "", definition }, "1970-01-01T00:00:00.000Z");
@@ -167,7 +171,7 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
       ref, titre: pres.titre,
       interpretation: pres.interpretation ?? null,
       etat: perimee ? "a_revoir" : confirme ? "condition" : ancre ? "inspire" : "compris",
-      ancre, motFort: confirme ? null : motFort,
+      ancre, adopte: adoptee && (pref?.source ?? "ancre") !== "parse", motFort: confirme ? null : motFort,
       seenParsed: parsedFingerprint(project, ref),
       seenEffectif: criterionFingerprint(project, ref),
       confirmation: {
@@ -189,8 +193,8 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
     const pres = presenterCritere(project, ref);
     if (!pres) continue;
     vues.push({
-      id: `rejet:${r.criterion.key}`, ref, titre: pres.titre, interpretation: null, etat: "rejete",
-      ancre: project.parsed.communeAncre?.[0]?.label ?? r.origin.labels[0] ?? null, motFort: null,
+      id: `rejet:${r.criterion.key}`, ref, titre: pres.titre, interpretation: null, etat: "rejete", adopte: false,
+      ancre: listeFr((project.parsed.communeAncre ?? []).map((a) => a.label).filter(Boolean)) || listeFr(r.origin.labels) || null, motFort: null,
       seenParsed: null, seenEffectif: `pref:${r.criterion.key}`,
       confirmation: { question: null, options: [], saisieSeuil: null, phrase: null, portee: "ne_pas_mesurer" },
       revoir: null,
@@ -204,7 +208,7 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
     vues.push({
       id: `orpheline:${c.criterion.kind}:${c.criterion.key}:${c.criterion.instance ?? ""}`,
       ref: c.criterion, titre: c.criterion.key === "excludePlace" ? `Quitter ${nom.replace(/\b\w/g, (l) => l.toUpperCase())}` : "Une condition",
-      interpretation: null, etat: "a_revoir", ancre: null, motFort: null, seenParsed: null, seenEffectif: null,
+      interpretation: null, etat: "a_revoir", ancre: null, adopte: false, motFort: null, seenParsed: null, seenEffectif: null,
       confirmation: { question: null, options: [], saisieSeuil: null, phrase: null, portee: "ne_pas_mesurer" },
       revoir: "Votre projet n'en parle plus.",
     });

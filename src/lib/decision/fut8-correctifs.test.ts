@@ -14,6 +14,7 @@ import { criterionCapability } from "./capability.ts";
 import { evaluateSizeRelativeTo, type CommuneAttributes, type EvaluationContext } from "../hard-constraints.ts";
 import { resolveSizeReference, type PlaceDirectory } from "../hard-constraints-resolve.ts";
 import { populationCommunalePLM } from "../plm-population.ts";
+import { vueCriteres } from "./projet-criteres-vue.ts";
 import type { ParsedProject } from "../comparateur-vie.ts";
 import type { HardConstraints } from "../hard-constraint-schema.ts";
 
@@ -169,8 +170,20 @@ test("6. plus petite que Brest : en agglomération et en commune, tranchable", (
 });
 
 test("6. Paris, Lyon, Marseille : population communale reconstruite ; inconnue, jamais de faux verdict", () => {
-  assert.equal(populationCommunalePLM("lyon", [{ insee: "69381", population: 30_000 }, { insee: "69382", population: 31_000 }, { insee: "69123", population: 999 }]), 61_000);
-  assert.equal(populationCommunalePLM("lyon", [{ insee: "69381", population: 30_000 }, { insee: "69382", population: null }]), null);
+  // Les NEUF arrondissements de Lyon, tous chiffrés : la somme. L'INSEE de la commune (69123) n'y entre pas.
+  const lyon = Array.from({ length: 9 }, (_, i) => ({ insee: `6938${i + 1}`, population: 50_000 + i }));
+  assert.equal(populationCommunalePLM("lyon", [...lyon, { insee: "69123", population: 999 }]), 450_036);
+  // Deux arrondissements seulement : inconnue (sept manquent), jamais un total partiel.
+  assert.equal(populationCommunalePLM("lyon", lyon.slice(0, 2)), null);
+  // Les neuf présents, un sans population : inconnue.
+  assert.equal(populationCommunalePLM("lyon", lyon.map((a, i) => (i === 4 ? { ...a, population: null } : a))), null);
+  // Paris : 20 arrondissements attendus ; Marseille : 16.
+  const paris = Array.from({ length: 20 }, (_, i) => ({ insee: `751${String(i + 1).padStart(2, "0")}`, population: 100_000 }));
+  assert.equal(populationCommunalePLM("paris", paris), 2_000_000);
+  assert.equal(populationCommunalePLM("paris", paris.slice(1)), null);
+  const marseille = Array.from({ length: 16 }, (_, i) => ({ insee: `132${String(i + 1).padStart(2, "0")}`, population: 50_000 }));
+  assert.equal(populationCommunalePLM("marseille", marseille), 800_000);
+  assert.equal(populationCommunalePLM("marseille", marseille.slice(0, 15)), null);
   assert.equal(populationCommunalePLM("paris", []), null);
   const ref = resolveSizeReference("Lyon", DIR, { context: null } as never);
   assert.ok(ref.status === "resolved" && ref.communePopulation === 520_000 && ref.comparisonPopulation === 1_700_000);
@@ -182,4 +195,33 @@ test("6. Paris, Lyon, Marseille : population communale reconstruite ; inconnue, 
   assert.equal(evaluateSizeRelativeTo(ctx({ sizeRelativeTo: { label: "Brest", direction: "smaller", unit: "commune" } }), commune({ insee: "69383", population: 100_000 })).status, "unexamined");
   // Une référence introuvable : jamais un verdict.
   assert.equal(evaluateSizeRelativeTo(ctx({ sizeRelativeTo: { label: "Nulle-Part", direction: "smaller", unit: "commune" } }), c).status, "unexamined");
+});
+
+// ── Revue du 01/10 (2) : critère gardé retirable, provenance multi-ancre ────────────────────────
+
+test("un critère gardé se retire depuis l'écran : « Ça ne compte plus pour moi » rejette, l'ancre ne le repropose plus", () => {
+  const p = projet({}, [{ key: "vie_locale", weight: 2, source: "ancre" }]);
+  const garde = geste(p, { action: "adopter", criterion: { kind: "preference", key: "vie_locale" }, seen: "pref:vie_locale" });
+  const ligne = vueCriteres(garde).find((v) => v.ref.key === "vie_locale")!;
+  assert.equal(ligne.adopte, true);
+  assert.equal(ligne.etat, "compris");
+  const plus = geste(garde, { action: "rejeter", criterion: { kind: "preference", key: "vie_locale" }, seen: ligne.seenEffectif! });
+  assert.equal(plus.adoptions, undefined);
+  assert.equal(effectivePreferences(plus).some((x) => x.key === "vie_locale"), false);
+  assert.equal(vueCriteres(plus).find((v) => v.ref.key === "vie_locale")?.etat, "rejete");
+  // Un critère écrit dans le texte n'offre pas ce geste.
+  const ecrit = projet({}, [{ key: "vie_locale", weight: 2, source: "parse" }]);
+  assert.equal(vueCriteres(ecrit).find((v) => v.ref.key === "vie_locale")?.adopte, false);
+});
+
+test("provenance multi-ancre : « Inspiré de Brest et Lorient », gardée telle quelle dans l'adoption et le rejet", () => {
+  const p = projet({}, [{ key: "vie_locale", weight: 2, source: "ancre" }], {}, [{ label: "Brest" }, { label: "Lorient" }]);
+  assert.equal(vueCriteres(p).find((v) => v.ref.key === "vie_locale")?.titre, "Inspiré de Brest et Lorient : une vie locale animée");
+  const garde = geste(p, { action: "adopter", criterion: { kind: "preference", key: "vie_locale" }, seen: "pref:vie_locale" });
+  assert.deepEqual(garde.adoptions?.[0]?.origin, { kind: "ancre", labels: ["Brest", "Lorient"] });
+  const rejete = geste(garde, { action: "rejeter", criterion: { kind: "preference", key: "vie_locale" }, seen: "pref:vie_locale" });
+  assert.deepEqual(rejete.rejets?.[0]?.origin, { kind: "ancre", labels: ["Brest", "Lorient"] });
+  // Une adoption de première forme (`label` seul) se lit comme une liste d'un élément.
+  const ancienne = normalizeUserProject({ ...p, adoptions: [{ criterion: { kind: "preference", key: "vie_locale" }, weight: 2, origin: { kind: "ancre", label: "Brest" }, adoptedAt: NOW, source: "user" }] })!;
+  assert.deepEqual(ancienne.adoptions?.[0]?.origin, { kind: "ancre", labels: ["Brest"] });
 });

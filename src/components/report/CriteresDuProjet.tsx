@@ -170,6 +170,12 @@ function LigneCritere({ c }: { c: CritereVue }) {
           <button type="button" className={lienAction} onClick={() => setConfirmation(true)}>
             En faire une condition sans compromis
           </button>
+          {/* Un critère gardé reste retirable : le rejet retire l'adoption, et la ville ne le repropose plus. */}
+          {c.adopte ? (
+            <button type="button" disabled={busy} className={lienAction} onClick={() => envoyer({ action: "rejeter", seen: c.seenEffectif })}>
+              Ça ne compte plus pour moi
+            </button>
+          ) : null}
         </div>
       ) : null}
 

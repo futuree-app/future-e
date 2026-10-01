@@ -8,7 +8,7 @@ import { ZONE_TABLE } from "../geo-zones.ts";
 
 const LE_1ER = "2026-10-01T00:00:00.000Z";
 const DEF = { kind: "distance_lieu", metric: "vol_oiseau", maxKm: 20, criterion: { kind: "hard", key: "nearPlace" }, parsedFingerprint: "fp", definedAt: LE_1ER, source: "user" };
-const ADOPTION = { criterion: { kind: "preference", key: "vie_locale" }, weight: 2, origin: { kind: "ancre", label: "Brest" }, adoptedAt: LE_1ER, source: "user" };
+const ADOPTION = { criterion: { kind: "preference", key: "vie_locale" }, weight: 2, origin: { kind: "ancre", labels: ["Brest"] }, adoptedAt: LE_1ER, source: "user" };
 
 test("définitions : chaque variante n'admet que ses combinaisons possibles ; l'illisible tombe une à une", () => {
   const lues = normalizeDefinitions([

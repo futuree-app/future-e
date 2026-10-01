@@ -31,6 +31,11 @@ const REGIONS = new Set([
 const nombre = (n: number) => n.toLocaleString("fr-FR").replace(/ /g, " ");
 const capitale = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** « Brest », « Brest et Lorient », « Brest, Lorient et Vannes ». */
+export function listeFr(noms: string[]): string {
+  return noms.length <= 1 ? noms[0] ?? "" : `${noms.slice(0, -1).join(", ")} et ${noms[noms.length - 1]}`;
+}
+
 /** « la Bretagne » → « en Bretagne » ; « le Sud-Ouest » → « dans le Sud-Ouest » ; « les Alpes » → « dans les Alpes ». */
 export function enLieuFr(label: string): string {
   if (/^la /i.test(label)) return `en ${label.slice(3)}`;
@@ -177,7 +182,10 @@ function presenterPreference(project: UserProject, key: PreferenceKey): Criterio
   const court = label.charAt(0).toLowerCase() + label.slice(1);
   const pref = parsed.preferences?.find((p) => p.key === key);
   const adoption = project.adoptions?.find((a) => a.criterion.key === key);
-  const ancre = pref?.source === "ancre" ? parsed.communeAncre?.[0]?.label : adoption?.origin.label;
+  const ancres = pref?.source === "ancre"
+    ? (parsed.communeAncre ?? []).map((a) => a?.label).filter((l): l is string => Boolean(l))
+    : adoption?.origin.labels ?? [];
+  const ancre = ancres.length > 0 ? listeFr(ancres) : null;
   if (key === "eviter_grandes_villes" && parsed.sizeWord === "petite") return { titre: "Une petite ville", court: "la taille de la ville" };
   if (key === "eviter_grandes_villes" && parsed.sizeWord === "moyenne") return { titre: "Une ville moyenne", court: "la taille de la ville" };
   if (key === "prefere_grande_ville" && parsed.sizeWord === "grande") return { titre: "Une grande ville", court: "la taille de la ville" };

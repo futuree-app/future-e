@@ -86,7 +86,7 @@ test("région parisienne et macro-zones : la précision entre dans la valeur eff
 });
 
 test("adoption durable : retirer l'ancre ne retire pas « une vie locale forte » gardée par le lecteur", () => {
-  const adoption = { criterion: { kind: "preference", key: "vie_locale" }, weight: 2, origin: { kind: "ancre", label: "Brest" }, adoptedAt: LE_1ER, source: "user" };
+  const adoption = { criterion: { kind: "preference", key: "vie_locale" }, weight: 2, origin: { kind: "ancre", labels: ["Brest"] }, adoptedAt: LE_1ER, source: "user" };
   const sansBrest = projet({}, [], { adoptions: [adoption] });
   assert.deepEqual(effectivePreferences(sansBrest), [{ key: "vie_locale", weight: 2, source: "ancre" }]);
   assert.equal(preferenceSurfaced(sansBrest, "vie_locale"), true);

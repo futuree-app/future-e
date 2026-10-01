@@ -85,7 +85,7 @@ export type Definition = DefinitionBody & {
 export type Adoption = {
   criterion: { kind: "preference"; key: PreferenceKey; instance?: null };
   weight: 1 | 2 | 3;
-  origin: { kind: "ancre"; label: string };
+  origin: { kind: "ancre"; labels: string[] };
   adoptedAt: string;
   source: "user";
 };
@@ -264,11 +264,16 @@ export function normalizeAdoptions(raw: unknown): Adoption[] {
     if (o.source !== "user" || !c || c.kind !== "preference" || typeof c.key !== "string" || !c.key) continue;
     if (c.instance != null) continue;
     if (o.weight !== 1 && o.weight !== 2 && o.weight !== 3) continue;
-    if (!origin || origin.kind !== "ancre" || typeof origin.label !== "string" || !origin.label) continue;
+    // `labels` : toutes les communes d'où venait la suggestion (« Brest et Lorient »). Un `label` seul,
+    // forme d'un premier jet jamais écrite en production, se lit comme une liste d'un élément.
+    const labels = Array.isArray(origin?.labels)
+      ? origin.labels.filter((l): l is string => typeof l === "string" && l.length > 0)
+      : typeof origin?.label === "string" && origin.label ? [origin.label] : [];
+    if (!origin || origin.kind !== "ancre" || labels.length === 0) continue;
     if (typeof o.adoptedAt !== "string" || Number.isNaN(Date.parse(o.adoptedAt))) continue;
     out.push({
       criterion: { kind: "preference", key: c.key as PreferenceKey, instance: null },
-      weight: o.weight, origin: { kind: "ancre", label: origin.label }, adoptedAt: o.adoptedAt, source: "user",
+      weight: o.weight, origin: { kind: "ancre", labels }, adoptedAt: o.adoptedAt, source: "user",
     });
   }
   return out;
