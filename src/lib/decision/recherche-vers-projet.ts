@@ -7,6 +7,7 @@
 import type { ParsedProject } from "../comparateur-vie.ts";
 import type { UserProject, CriterionRef } from "../user-project.ts";
 import { normalizeUserProject } from "../user-project.ts";
+import { canonique } from "./criterion-value.ts";
 import { assainirParsed } from "../parse-assainir.ts";
 import { projetSansDerivesDAncre, type AncreResolue } from "./ancres-derivees.ts";
 import { declaredHardConstraintKeys, declaredPreferenceKeys } from "./project-view.ts";
@@ -49,4 +50,39 @@ export function apercuReprise(parsedProjet: ParsedProject, parsedRecherche: Pars
     ...(parsedRecherche.ancreSansTaille || hc.communeSize || hc.sizeRelativeTo ? [] : [`des villes d'une taille proche de ${nom}`]),
   ]);
   return { retenus, propresALaRecherche };
+}
+
+/**
+ * La recherche EST-ELLE DÉJÀ le projet ? Même texte, et même lecture une fois nettoyée pour le projet.
+ * Sans cette garde, la recherche qui vient de devenir le projet lui serait proposée indéfiniment comme
+ * son propre remplacement. Une précision ou une condition posée depuis ne change rien : reprendre la même
+ * recherche ne ferait que les effacer.
+ */
+export function rechercheDejaReprise(actuel: UserProject | null, parsedProjet: ParsedProject | null, rawText: string): boolean {
+  if (!actuel || (actuel.rawText ?? "") !== rawText) return false;
+  const candidat = normalizeUserProject({ posture: "recherche", rawText, parsed: parsedProjet })?.parsed ?? null;
+  return canonique(candidat) === canonique(actuel.parsed ?? null);
+}
+
+/** L'aperçu complet que la feuille montre : ce qui est retenu, ce qui serait remplacé et abandonné. */
+export function apercuComplet(actuel: UserProject | null, parsedProjet: ParsedProject | null, recherche: ParsedProject | null, rawText: string) {
+  return {
+    ...(parsedProjet && recherche ? apercuReprise(parsedProjet, recherche) : { retenus: [], propresALaRecherche: [] }),
+    remplace: actuel ? { texte: actuel.rawText ?? actuel.parsed?.reformulation ?? "", updatedAt: actuel.updatedAt ?? null } : null,
+    dejaRepris: rechercheDejaReprise(actuel, parsedProjet, rawText),
+    abandonnes: actuel
+      ? { conditions: actuel.conditions?.length ?? 0, precisions: actuel.definitions?.length ?? 0, adoptions: (actuel.adoptions?.length ?? 0) + (actuel.rejets?.length ?? 0) }
+      : null,
+  };
+}
+
+/**
+ * CE QUE LA ROUTE A LE DROIT DE FAIRE. L'aperçu n'écrit jamais ; l'enregistrement n'écrit que si le projet
+ * que le lecteur a vu dans l'aperçu (`vuUpdatedAt`) est encore celui en base.
+ */
+export function decisionReprise(mode: unknown, actuel: UserProject | null, vuUpdatedAt: unknown): "apercu" | "ecrire" | "conflit" | "mode_inconnu" {
+  if (mode === "apercu") return "apercu";
+  if (mode !== "enregistrer") return "mode_inconnu";
+  const vu = typeof vuUpdatedAt === "string" ? vuUpdatedAt : null;
+  return (actuel?.updatedAt ?? null) === vu ? "ecrire" : "conflit";
 }

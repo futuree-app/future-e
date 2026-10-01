@@ -12,7 +12,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeUserProject, stampUserProject, normalizeUserProjectInput } from "@/lib/user-project";
 import { placeDirectory, type ParsedProject } from "@/lib/comparateur-vie";
-import { parsedPourLeProjet, apercuReprise } from "@/lib/decision/recherche-vers-projet";
+import { parsedPourLeProjet, apercuComplet, decisionReprise } from "@/lib/decision/recherche-vers-projet";
 import { ecrireProjetSiInchange } from "@/lib/server/projet-ecriture";
 
 export const runtime = "nodejs";
@@ -43,20 +43,11 @@ export async function POST(request: NextRequest) {
     return e ? { nom: e.nom, tailleVille: e.tailleVille } : null;
   });
 
-  if (body.mode === "apercu") {
-    return NextResponse.json({
-      ...(parsed && recherche ? apercuReprise(parsed, recherche) : { retenus: [], propresALaRecherche: [] }),
-      remplace: actuel ? { texte: actuel.rawText ?? actuel.parsed?.reformulation ?? "", updatedAt: actuel.updatedAt ?? null } : null,
-      abandonnes: actuel
-        ? { conditions: actuel.conditions?.length ?? 0, precisions: actuel.definitions?.length ?? 0, adoptions: (actuel.adoptions?.length ?? 0) + (actuel.rejets?.length ?? 0) }
-        : null,
-    });
-  }
-  if (body.mode !== "enregistrer") return NextResponse.json({ error: "Mode inconnu." }, { status: 400 });
-
+  const decision = decisionReprise(body.mode, actuel, body.vuUpdatedAt);
+  if (decision === "apercu") return NextResponse.json(apercuComplet(actuel, parsed, recherche, rawText || ""));
+  if (decision === "mode_inconnu") return NextResponse.json({ error: "Mode inconnu." }, { status: 400 });
   // Le lecteur a validé un aperçu : si le Projet a changé depuis, il n'a pas vu ce qu'il remplace.
-  const vu = typeof body.vuUpdatedAt === "string" ? body.vuUpdatedAt : null;
-  if ((actuel?.updatedAt ?? null) !== vu) {
+  if (decision === "conflit") {
     return NextResponse.json({ error: "Votre projet a changé entre-temps. Rechargez la page." }, { status: 409 });
   }
   const input = normalizeUserProjectInput({
