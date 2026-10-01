@@ -239,6 +239,9 @@ export type NormalizedHardConstraints = {
   nearPlace: {
     label: string;
     threshold: PlaceThreshold | null;
+    // FUT-8 : la métrique DITE ou précisée par le lecteur, pour la phrase seulement. Le moteur mesure
+    // toujours à vol d'oiseau ; le seuil, lui, ne change pas (il entre dans les empreintes vendues).
+    metriqueDite?: "vol_oiseau" | "route" | null;
     reference: ResolvedPlaceReference;
     // L'isochrone, DÉJÀ CALCULÉE par la couche serveur (hard-constraints-external.ts). Le noyau ne fait
     // pas de réseau : il reçoit. `null` = personne n'a même eu à essayer (aucun seuil de temps).
@@ -895,7 +898,7 @@ export function evaluateNearPlace(
   return {
     key: "nearPlace", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} à ${ref.canonicalLabel}`, `la distance à ${ref.canonicalLabel}`),
-    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km qu'indique votre projet.`,
+    statement: `${ctx.point.grain === "address" ? "Cette adresse" : `Le point de référence ${deCommune(c.nom)}`} est à ${Math.round(km)} km${np.metriqueDite ? " à vol d'oiseau" : ""} ${deCommune(ref.canonicalLabel)}, au-delà de la limite de ${max} km${np.metriqueDite === "vol_oiseau" ? " à vol d'oiseau" : np.metriqueDite === "route" ? " par la route" : ""} qu'indique votre projet.`,
   };
 }
 

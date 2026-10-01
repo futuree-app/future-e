@@ -36,6 +36,8 @@ import { exclusionsAvecPerimetres } from "../hard-constraints-hydrate.ts";
 import type { HardConstraints } from "../hard-constraint-schema.ts";
 import { FAMILLES_MULTIPLES, hcRestreint, instancesDe, instanceDeVille } from "./effective-value.ts";
 import { toCommuneAttributes } from "./module-facts-map.ts";
+import { presenterCritere } from "./criterion-labels.ts";
+import type { CriterionRef } from "../user-project.ts";
 import { criterionCapability, type CapabilityAssessment, type EvaluationGrain } from "./capability.ts";
 import { hardConstraintLabel, HARD_CONSTRAINT_LABELS } from "./project-view.ts";
 import { classifyCoastDistance } from "./coast-facts.ts";
@@ -362,6 +364,20 @@ function vuesParElement(key: HardConstraintKey, f: ModuleFacts, project: UserPro
   return [...confirmees.map((i) => vue([i], true, i)), ...(autres.length > 0 ? [vue(autres, false, null)] : [])];
 }
 
+// FUT-8 : UNE CONDITION DIT LE SENS QUE futur•e LUI A DONNÉ. Le projet lu ici est la valeur effective :
+// une précision du lecteur (« à vol d'oiseau », « la commune seulement ») y est déjà, et le registre des
+// libellés la met en mots. Seules les cartes de condition la portent ; un écart reste un écart.
+function avecSensRetenu(ev: RuleEvaluation, project: UserProject, ref: CriterionRef): RuleEvaluation {
+  const sens = presenterCritere(project, ref)?.interpretation;
+  if (!sens) return ev;
+  const phrase = /^Pour cette analyse/.test(sens) ? sens : `Pour cette analyse : ${sens.charAt(0).toLowerCase()}${sens.slice(1)}`;
+  return {
+    ...ev,
+    facts: ev.facts.map((x) =>
+      x.role === "condition_check" || x.role === "condition_met" || x.role === "incompatibility" ? { ...x, senseRetenu: phrase } : x),
+  };
+}
+
 // L'issue la plus grave l'emporte quand plusieurs vues sont fusionnées.
 const GRAVITE: RuleEvaluation["outcome"][] = ["incompatible", "condition_check", "mismatch", "uncertain", "satisfied", "not_applicable"];
 const gravite = (o: RuleEvaluation["outcome"]) => { const i = GRAVITE.indexOf(o); return i < 0 ? GRAVITE.length : i; };
@@ -385,12 +401,12 @@ function makeRule(key: HardConstraintKey): DecisionRule {
     evaluate: (f, project, hard): RuleEvaluation => {
       const vues = vuesParElement(key, f, project, hard);
       if (!vues) {
-        return evaluerVue(f, project, {
+        return avecSensRetenu(evaluerVue(f, project, {
           hard, hc: project.parsed?.hardConstraints ?? {}, confirme: isConfirmed(project, { kind: "hard", key }), instance: null,
-        });
+        }), project, { kind: "hard", key, instance: null });
       }
       const evs = vues.map((v) => {
-        const ev = evaluerVue(f, project, v);
+        const ev = avecSensRetenu(evaluerVue(f, project, v), project, { kind: "hard", key, instance: v.instance });
         return v.instance ? { ...ev, facts: ev.facts.map((x) => marquerElement(x, v.instance!)) } : ev;
       });
       const pire = evs.reduce((p, e) => (gravite(e.outcome) < gravite(p.outcome) ? e : p));

@@ -158,6 +158,7 @@ export function hydrateHardConstraints(
         ? {
             label: c.nearPlace.label,
             threshold: nearPlaceThreshold(c.nearPlace),
+            metriqueDite: c.nearPlace.maxKm != null ? c.nearPlace.metric ?? null : null,
             // LE SAC PRIME sur l'index, et il ne contient QUE ce que l'index ne savait pas résoudre :
             // « près de Brest » n'est donc jamais parti géocoder.
             reference: ext?.place ?? resolveNearPlace(c.nearPlace.label, dir, input),

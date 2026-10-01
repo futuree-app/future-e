@@ -184,7 +184,9 @@ export function MethodDetails({ conventions, checks = [] }: { conventions: strin
 // CE QU'UNE CONDITION OUVERTE NE DIT PAS SUR SA FACE : pourquoi futur•e ne tranche pas (la convention, la
 // limite de la mesure). Rendu dans « Données et limites », à côté des sources.
 export function conditionLimits(fact: DecisionFact): string[] {
-  return fact.role === "condition_check" && fact.whyNotDecided ? [fact.whyNotDecided] : [];
+  const sens = (fact.role === "condition_check" || fact.role === "condition_met" || fact.role === "incompatibility") && fact.senseRetenu
+    ? [fact.senseRetenu] : [];
+  return [...sens, ...(fact.role === "condition_check" && fact.whyNotDecided ? [fact.whyNotDecided] : [])];
 }
 
 // Ce que la carte a de concret à faire regarder : le `detail` de l'action, jamais son `label` (déjà

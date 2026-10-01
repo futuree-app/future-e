@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { vueCriteres } from "@/lib/decision/projet-criteres-vue";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { MODULE_HREF } from "@/lib/product";
@@ -594,6 +595,7 @@ export default async function RapportPage() {
         <div id={ANCRE_PROJET} className="scroll-mt-24 mt-12">
           <ProjectSummaryCard
             initial={userProject}
+            criteres={vueCriteres(userProject)}
             // Le hero porte déjà « Décrire mon projet » dans cet état : la carte n'a pas à répéter
             // le même appel, elle reçoit le geste avec son formulaire ouvert.
             ouvertDemblee={heroContenu.kind === "invite"}

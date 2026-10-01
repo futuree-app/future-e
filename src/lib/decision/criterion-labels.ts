@@ -118,7 +118,8 @@ export function presenterCritere(project: UserProject, ref: CriterionRef): Crite
         const mode = np.mode === "car" ? " en voiture" : np.mode === "walk" ? " à pied" : np.mode === "bike" ? " à vélo" : "";
         return {
           titre: `Être à moins de ${np.maxMinutes} minutes ${de(np.label)}${mode}`, court: `le trajet vers ${np.label}`,
-          ...(np.mode === "car" || np.mode === "walk" ? { interpretation: "Temps estimé sans trafic, depuis votre logement." } : {}),
+          ...(np.mode === "car" ? { interpretation: "Temps estimé sans trafic, depuis votre logement." } : {}),
+          ...(np.mode === "walk" ? { interpretation: "Temps estimé à pied, depuis votre logement." } : {}),
           ...(!np.mode ? { question: `Vos ${np.maxMinutes} minutes ${de(np.label)} : à pied ou en voiture ?` } : {}),
         };
       }
