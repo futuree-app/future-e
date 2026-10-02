@@ -1,0 +1,1775 @@
+{
+ "_source": "gatherCommuneEnrichment réel (sources publiques en direct) et lignes communes_tension / communes_categorization lues en production, le 2026-10-02. Figé pour les tests FUT-16.",
+ "communes": {
+  "13039": {
+   "nom": "Fos-sur-Mer",
+   "categorization": null,
+   "tensions": [
+    {
+     "slug": "dependance-auto",
+     "score": 93,
+     "ind_exposition": 87,
+     "ind_vulnerabilite": 96,
+     "ind_adaptation": 94,
+     "ind_occurrence": 93
+    },
+    {
+     "slug": "feux",
+     "score": 75,
+     "ind_exposition": 100,
+     "ind_vulnerabilite": 100,
+     "ind_adaptation": 0,
+     "ind_occurrence": 100
+    },
+    {
+     "slug": "secheresse",
+     "score": 74,
+     "ind_exposition": 100,
+     "ind_vulnerabilite": 100,
+     "ind_adaptation": 72,
+     "ind_occurrence": 22
+    },
+    {
+     "slug": "submersion",
+     "score": 93,
+     "ind_exposition": null,
+     "ind_vulnerabilite": null,
+     "ind_adaptation": null,
+     "ind_occurrence": null
+    }
+   ],
+   "enrichment": {
+    "ademe": {
+     "commune": {
+      "inseeCode": "13039",
+      "nom": "Fos-sur-Mer",
+      "population": 15469,
+      "vieillissement_pct": 2.77,
+      "logements": {
+       "vacants_2022": 288,
+       "vacants_pct": 4.1,
+       "sociaux_2023": 1164,
+       "sociaux_pct": 18
+      },
+      "qualite_air": {
+       "pm25": 10.13997446,
+       "pm10": 18.32332341,
+       "no2": 17.38933459,
+       "o3": 61.6491788
+      },
+      "economie": {
+       "revenu_median": 23680,
+       "inferiorite_nationale_pct": -2.59965338
+      },
+      "sante": {
+       "acces_medecins": 2.883,
+       "eloignement_services_pct": 0
+      },
+      "territoire": {
+       "densite": 170.03,
+       "incendies": 41,
+       "taux_boisement": 19.7
+      }
+     },
+     "iris": {
+      "iris_count": 7,
+      "passoires_taux": 37.3,
+      "preca_energetique_pct": 5.4,
+      "taux_propriete": 52.6,
+      "taux_location": 45.7,
+      "taux_hlm": 14.3,
+      "taux_suroccupation": 3.2,
+      "part_deplacements_motorises": 87.5,
+      "taux_transports_communs": 1.1
+     },
+     "irisScope": {
+      "kind": "commune",
+      "irisCount": 7
+     }
+    },
+    "drias": {
+     "inseeCode": "13039",
+     "commune": {
+      "n": "Fos-sur-Mer",
+      "s": {
+       "gwl15": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 16.25,
+         "NORTMm_seas_JJA": 24.82,
+         "NORTMm_seas_DJF": 8.34,
+         "NORTXm_seas_JJA": 29.68,
+         "NORTX35D_yr": 5.1,
+         "NORTX30D_yr": 49.7,
+         "NORTR_yr": 62,
+         "NORRR_yr": 580.34,
+         "NORRR_seas_JJA": 67.52,
+         "NORRR_seas_DJF": 138.64,
+         "NORRRq99_yr": 31.38,
+         "NORRx1d_yr": 63.88,
+         "NORRRq99refD_yr": 4.3,
+         "NORIFM40_yr": 69,
+         "NORSWI04_yr": 218,
+         "ATMm_seas_JJA": 1.53,
+         "ATMm_seas_DJF": 1.3,
+         "ATX35D_yr": 3.7,
+         "ATX30D_yr": 20.6,
+         "ATR_yr": 25.5,
+         "AIFM40_yr": 10,
+         "ARRx1d_yr": 0.09
+        }
+       },
+       "gwl20": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 16.92,
+         "NORTMm_seas_JJA": 25.53,
+         "NORTMm_seas_DJF": 9.01,
+         "NORTXm_seas_JJA": 30.31,
+         "NORTX35D_yr": 8.2,
+         "NORTX30D_yr": 60,
+         "NORTR_yr": 74.8,
+         "NORRR_yr": 581.18,
+         "NORRR_seas_JJA": 63.43,
+         "NORRR_seas_DJF": 138.89,
+         "NORRRq99_yr": 30.66,
+         "NORRx1d_yr": 61.16,
+         "NORRRq99refD_yr": 4.2,
+         "NORIFM40_yr": 72,
+         "NORSWI04_yr": 221,
+         "ATMm_seas_JJA": 2.21,
+         "ATMm_seas_DJF": 1.9,
+         "ATX35D_yr": 7,
+         "ATX30D_yr": 30.5,
+         "ATR_yr": 37.8,
+         "AIFM40_yr": 13.5,
+         "ARRx1d_yr": 0.05
+        }
+       },
+       "gwl30": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 18.18,
+         "NORTMm_seas_JJA": 27.1,
+         "NORTMm_seas_DJF": 10.03,
+         "NORTXm_seas_JJA": 31.95,
+         "NORTX35D_yr": 20.3,
+         "NORTX30D_yr": 82.4,
+         "NORTR_yr": 95.4,
+         "NORRR_yr": 548.25,
+         "NORRR_seas_JJA": 59.59,
+         "NORRR_seas_DJF": 138.48,
+         "NORRRq99_yr": 30.26,
+         "NORRx1d_yr": 63.17,
+         "NORRRq99refD_yr": 4.3,
+         "NORIFM40_yr": 87.5,
+         "NORSWI04_yr": 242,
+         "ATMm_seas_JJA": 3.79,
+         "ATMm_seas_DJF": 2.99,
+         "ATX35D_yr": 19.1,
+         "ATX30D_yr": 53.2,
+         "ATR_yr": 59.2,
+         "AIFM40_yr": 28.5,
+         "ARRx1d_yr": 0.13
+        }
+       }
+      }
+     }
+    },
+    "eau": {
+     "inseeCode": "13039",
+     "drinkingWater": null,
+     "drought": null
+    },
+    "vigieau": {
+     "inseeCode": "13039",
+     "maxLevel": null,
+     "topZone": null,
+     "zones": [],
+     "status": "unavailable",
+     "consultedAt": "2026-10-02T14:44:26.437Z"
+    },
+    "georisques": {
+     "inseeCode": "13039",
+     "communeName": "FOS-SUR-MER",
+     "riskLabels": [
+      "Inondation",
+      "Par submersion marine",
+      "Mouvement de terrain",
+      "Affaissements et effondrements d'origine anthropique (anciennes carrières souterraines, hors mines)",
+      "Eboulement ou chutes de pierres et de blocs",
+      "Glissement de terrain",
+      "Recul du trait de côte et de falaises",
+      "Tassements différentiels",
+      "Séisme",
+      "Feu de forêt",
+      "Nucléaire",
+      "Rupture de barrage",
+      "Transport de marchandises dangereuses"
+     ],
+     "flags": {
+      "flood": true,
+      "marineSubmersion": true,
+      "landslide": true,
+      "clay": true,
+      "storm": false,
+      "seismic": true,
+      "wildfire": true
+     },
+     "seismic": {
+      "code": "3",
+      "label": "3 - MODEREE"
+     }
+    },
+    "catnat": {
+     "total": 11,
+     "firstYear": 1982,
+     "lastYear": 2023,
+     "byRisk": [
+      {
+       "label": "Inondations",
+       "count": 7
+      },
+      {
+       "label": "Sécheresse des sols",
+       "count": 3
+      },
+      {
+       "label": "Tempête",
+       "count": 1
+      }
+     ],
+     "byDecade": [
+      {
+       "decade": 1980,
+       "count": 3
+      },
+      {
+       "decade": 1990,
+       "count": 4
+      },
+      {
+       "decade": 2010,
+       "count": 2
+      },
+      {
+       "decade": 2020,
+       "count": 2
+      }
+     ],
+     "years": [
+      {
+       "year": 1982,
+       "family": "inondation"
+      },
+      {
+       "year": 1989,
+       "family": "secheresse"
+      },
+      {
+       "year": 1993,
+       "family": "inondation"
+      },
+      {
+       "year": 1994,
+       "family": "inondation"
+      },
+      {
+       "year": 1999,
+       "family": "inondation"
+      },
+      {
+       "year": 2011,
+       "family": "inondation"
+      },
+      {
+       "year": 2019,
+       "family": "inondation"
+      },
+      {
+       "year": 2022,
+       "family": "secheresse"
+      },
+      {
+       "year": 2023,
+       "family": "secheresse"
+      }
+     ],
+     "topRisk": "Inondations",
+     "summary": "Surtout inondations."
+    },
+    "littoral": {
+     "insee": "13039",
+     "facade": "mediterranee",
+     "traitDeCote": {
+      "concernee": false,
+      "decret": null
+     },
+     "erosion": {
+      "classe": "modéré",
+      "amenage": true,
+      "pctRecul": 67,
+      "medianeMpan": -0.13,
+      "reculMaxMpan": -0.17,
+      "nbValid": 3,
+      "periode": [
+       1927,
+       2011
+      ]
+     }
+    },
+    "baignade": {
+     "saison": 2025,
+     "nSites": 2,
+     "classements": {
+      "Excellent": 2
+     },
+     "meilleur": "Excellent",
+     "pire": "Excellent",
+     "types": [
+      "mer"
+     ]
+    }
+   }
+  },
+  "74056": {
+   "nom": "Chamonix-Mont-Blanc",
+   "categorization": {
+    "commune_name": "Chamonix-Mont-Blanc",
+    "insee_code": "74056",
+    "categories": [
+     "montagne"
+    ]
+   },
+   "tensions": [],
+   "enrichment": {
+    "ademe": {
+     "commune": {
+      "inseeCode": "74056",
+      "nom": "Chamonix-Mont-Blanc",
+      "population": 8642,
+      "vieillissement_pct": 2.01,
+      "logements": {
+       "vacants_2022": 154,
+       "vacants_pct": 1.1,
+       "sociaux_2023": 728,
+       "sociaux_pct": 17
+      },
+      "qualite_air": {
+       "pm25": 9.316345161,
+       "pm10": 14.21339875,
+       "no2": 8.355875934,
+       "o3": 60.23701954
+      },
+      "economie": {
+       "revenu_median": 24310,
+       "inferiorite_nationale_pct": -5.329289428
+      },
+      "sante": {
+       "acces_medecins": 5.916,
+       "eloignement_services_pct": 0
+      },
+      "territoire": {
+       "densite": 74.45,
+       "incendies": 2,
+       "taux_boisement": 15.7
+      }
+     },
+     "iris": {
+      "iris_count": 4,
+      "passoires_taux": 23.5,
+      "preca_energetique_pct": 19.9,
+      "taux_propriete": 52.8,
+      "taux_location": 39.4,
+      "taux_hlm": 16.5,
+      "taux_suroccupation": 5,
+      "part_deplacements_motorises": 47.3,
+      "taux_transports_communs": 12.7
+     },
+     "irisScope": {
+      "kind": "commune",
+      "irisCount": 4
+     }
+    },
+    "drias": {
+     "inseeCode": "74056",
+     "commune": {
+      "n": "Chamonix-Mont-Blanc",
+      "s": {
+       "gwl15": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 2.87,
+         "NORTMm_seas_JJA": 10.58,
+         "NORTMm_seas_DJF": -3.92,
+         "NORTXm_seas_JJA": 12.71,
+         "NORTX35D_yr": 0,
+         "NORTX30D_yr": 0,
+         "NORTR_yr": 0,
+         "NORRR_yr": 1950.51,
+         "NORRR_seas_JJA": 472.33,
+         "NORRR_seas_DJF": 526.53,
+         "NORRRq99_yr": 50.68,
+         "NORRx1d_yr": 79.76,
+         "NORRRq99refD_yr": 4.5,
+         "NORIFM40_yr": 0,
+         "NORSWI04_yr": 0,
+         "ATMm_seas_JJA": 2.18,
+         "ATMm_seas_DJF": 1.14,
+         "ATX35D_yr": 0,
+         "ATX30D_yr": 0,
+         "ATR_yr": 0,
+         "AIFM40_yr": 0,
+         "ARRx1d_yr": 0.1
+        }
+       },
+       "gwl20": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 3.66,
+         "NORTMm_seas_JJA": 11.49,
+         "NORTMm_seas_DJF": -3.13,
+         "NORTXm_seas_JJA": 13.72,
+         "NORTX35D_yr": 0,
+         "NORTX30D_yr": 0,
+         "NORTR_yr": 0,
+         "NORRR_yr": 1920.65,
+         "NORRR_seas_JJA": 477.01,
+         "NORRR_seas_DJF": 546.65,
+         "NORRRq99_yr": 48.6,
+         "NORRx1d_yr": 79.68,
+         "NORRRq99refD_yr": 4,
+         "NORIFM40_yr": 0,
+         "NORSWI04_yr": 1,
+         "ATMm_seas_JJA": 3.1,
+         "ATMm_seas_DJF": 1.96,
+         "ATX35D_yr": 0,
+         "ATX30D_yr": 0,
+         "ATR_yr": 0,
+         "AIFM40_yr": 0,
+         "ARRx1d_yr": 0.11
+        }
+       },
+       "gwl30": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 5.36,
+         "NORTMm_seas_JJA": 13.67,
+         "NORTMm_seas_DJF": -1.81,
+         "NORTXm_seas_JJA": 15.93,
+         "NORTX35D_yr": 0,
+         "NORTX30D_yr": 0,
+         "NORTR_yr": 0.4,
+         "NORRR_yr": 1829.5,
+         "NORRR_seas_JJA": 468.56,
+         "NORRR_seas_DJF": 489.04,
+         "NORRRq99_yr": 49.37,
+         "NORRx1d_yr": 80.02,
+         "NORRRq99refD_yr": 4.2,
+         "NORIFM40_yr": 0,
+         "NORSWI04_yr": 9,
+         "ATMm_seas_JJA": 5.22,
+         "ATMm_seas_DJF": 3.28,
+         "ATX35D_yr": 0,
+         "ATX30D_yr": 0,
+         "ATR_yr": 0.4,
+         "AIFM40_yr": 0,
+         "ARRx1d_yr": 0.08
+        }
+       }
+      }
+     }
+    },
+    "eau": {
+     "inseeCode": "74056",
+     "drinkingWater": null,
+     "drought": {
+      "lastObservationDate": "2026-09-26",
+      "riverName": "L'Arve",
+      "status": null,
+      "isDry": false
+     }
+    },
+    "vigieau": {
+     "inseeCode": "74056",
+     "maxLevel": "alerte",
+     "topZone": {
+      "label": "Arve amont",
+      "resourceType": "surface",
+      "level": "alerte",
+      "startDate": "2026-10-01T00:00:00.000Z",
+      "endDate": "2026-10-31T00:00:00.000Z"
+     },
+     "zones": [
+      {
+       "label": "Arve amont",
+       "resourceType": "surface",
+       "level": "alerte",
+       "startDate": "2026-10-01T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Arve amont",
+       "resourceType": "souterrain",
+       "level": "alerte",
+       "startDate": "2026-10-01T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Arve amont",
+       "resourceType": "autre",
+       "level": "alerte",
+       "startDate": "2026-10-01T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      }
+     ],
+     "status": "ok",
+     "consultedAt": "2026-10-02T14:44:50.575Z"
+    },
+    "georisques": {
+     "inseeCode": "74056",
+     "communeName": "CHAMONIX-MONT-BLANC",
+     "riskLabels": [
+      "Inondation",
+      "Par une crue torrentielle ou à montée rapide de cours d'eau",
+      "Par ruissellement et coulée de boue",
+      "Par lave torrentielle (torrent et talweg)",
+      "Par remontées de nappes naturelles",
+      "Mouvement de terrain",
+      "Eboulement ou chutes de pierres et de blocs",
+      "Glissement de terrain",
+      "Séisme",
+      "Avalanche",
+      "Radon",
+      "Risque industriel",
+      "Effet de surpression",
+      "Rupture de barrage",
+      "Transport de marchandises dangereuses",
+      "Engins de guerre"
+     ],
+     "flags": {
+      "flood": true,
+      "marineSubmersion": false,
+      "landslide": true,
+      "clay": false,
+      "storm": false,
+      "seismic": true,
+      "wildfire": false
+     },
+     "seismic": {
+      "code": "4",
+      "label": "4 - MOYENNE"
+     }
+    },
+    "catnat": {
+     "total": 17,
+     "firstYear": 1982,
+     "lastYear": 2023,
+     "byRisk": [
+      {
+       "label": "Inondations",
+       "count": 6
+      },
+      {
+       "label": "Avalanche",
+       "count": 6
+      },
+      {
+       "label": "Séisme",
+       "count": 2
+      },
+      {
+       "label": "Mouvements de terrain",
+       "count": 2
+      },
+      {
+       "label": "Tempête",
+       "count": 1
+      }
+     ],
+     "byDecade": [
+      {
+       "decade": 1980,
+       "count": 7
+      },
+      {
+       "decade": 1990,
+       "count": 6
+      },
+      {
+       "decade": 2000,
+       "count": 1
+      },
+      {
+       "decade": 2010,
+       "count": 1
+      },
+      {
+       "decade": 2020,
+       "count": 2
+      }
+     ],
+     "years": [
+      {
+       "year": 1982,
+       "family": "inondation"
+      },
+      {
+       "year": 1983,
+       "family": "autre"
+      },
+      {
+       "year": 1984,
+       "family": "autre"
+      },
+      {
+       "year": 1986,
+       "family": "autre"
+      },
+      {
+       "year": 1988,
+       "family": "autre"
+      },
+      {
+       "year": 1990,
+       "family": "inondation"
+      },
+      {
+       "year": 1994,
+       "family": "autre"
+      },
+      {
+       "year": 1996,
+       "family": "inondation"
+      },
+      {
+       "year": 1999,
+       "family": "autre"
+      },
+      {
+       "year": 2009,
+       "family": "inondation"
+      },
+      {
+       "year": 2015,
+       "family": "inondation"
+      },
+      {
+       "year": 2023,
+       "family": "inondation"
+      }
+     ],
+     "topRisk": "Inondations",
+     "summary": "Inondations et avalanche sont les aléas les plus fréquents."
+    },
+    "littoral": null,
+    "baignade": null
+   }
+  },
+  "84080": {
+   "nom": "Monteux",
+   "categorization": null,
+   "tensions": [
+    {
+     "slug": "canicule",
+     "score": 70,
+     "ind_exposition": 65,
+     "ind_vulnerabilite": 86,
+     "ind_adaptation": 72,
+     "ind_occurrence": 57
+    },
+    {
+     "slug": "dependance-auto",
+     "score": 87,
+     "ind_exposition": 77,
+     "ind_vulnerabilite": 94,
+     "ind_adaptation": 89,
+     "ind_occurrence": 87
+    },
+    {
+     "slug": "secheresse",
+     "score": 33,
+     "ind_exposition": 1,
+     "ind_vulnerabilite": 1,
+     "ind_adaptation": 72,
+     "ind_occurrence": 57
+    }
+   ],
+   "enrichment": {
+    "ademe": {
+     "commune": {
+      "inseeCode": "84080",
+      "nom": "Monteux",
+      "population": 13129,
+      "vieillissement_pct": 2.17,
+      "logements": {
+       "vacants_2022": 383,
+       "vacants_pct": 6.1,
+       "sociaux_2023": 924,
+       "sociaux_pct": 15
+      },
+      "qualite_air": {
+       "pm25": 9.063323408,
+       "pm10": 14.99891648,
+       "no2": 9.074375796,
+       "o3": 59.13088704
+      },
+      "economie": {
+       "revenu_median": 21430,
+       "inferiorite_nationale_pct": 7.149046794
+      },
+      "sante": {
+       "acces_medecins": 3.371,
+       "eloignement_services_pct": 0
+      },
+      "territoire": {
+       "densite": 337.41,
+       "incendies": null,
+       "taux_boisement": 2.5
+      }
+     },
+     "iris": {
+      "iris_count": 4,
+      "passoires_taux": 21.9,
+      "preca_energetique_pct": 11.8,
+      "taux_propriete": 55.1,
+      "taux_location": 42.5,
+      "taux_hlm": 16.9,
+      "taux_suroccupation": 2.5,
+      "part_deplacements_motorises": 77.3,
+      "taux_transports_communs": 1.7
+     },
+     "irisScope": {
+      "kind": "commune",
+      "irisCount": 4
+     }
+    },
+    "drias": {
+     "inseeCode": "84080",
+     "commune": {
+      "n": "Monteux",
+      "s": {
+       "gwl15": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 15.66,
+         "NORTMm_seas_JJA": 24.86,
+         "NORTMm_seas_DJF": 7.19,
+         "NORTXm_seas_JJA": 30.95,
+         "NORTX35D_yr": 16,
+         "NORTX30D_yr": 65.8,
+         "NORTR_yr": 38.4,
+         "NORRR_yr": 685.09,
+         "NORRR_seas_JJA": 113.85,
+         "NORRR_seas_DJF": 139.25,
+         "NORRRq99_yr": 30.6,
+         "NORRx1d_yr": 61.4,
+         "NORRRq99refD_yr": 4.1,
+         "NORIFM40_yr": 33.5,
+         "NORSWI04_yr": 174,
+         "ATMm_seas_JJA": 1.57,
+         "ATMm_seas_DJF": 1.36,
+         "ATX35D_yr": 10.3,
+         "ATX30D_yr": 17.6,
+         "ATR_yr": 19.8,
+         "AIFM40_yr": 8.5,
+         "ARRx1d_yr": 0.12
+        }
+       },
+       "gwl20": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 16.39,
+         "NORTMm_seas_JJA": 25.61,
+         "NORTMm_seas_DJF": 7.95,
+         "NORTXm_seas_JJA": 31.85,
+         "NORTX35D_yr": 22.7,
+         "NORTX30D_yr": 78.2,
+         "NORTR_yr": 51.5,
+         "NORRR_yr": 687.18,
+         "NORRR_seas_JJA": 107.03,
+         "NORRR_seas_DJF": 148.63,
+         "NORRRq99_yr": 30.18,
+         "NORRx1d_yr": 60.84,
+         "NORRRq99refD_yr": 4.1,
+         "NORIFM40_yr": 37.5,
+         "NORSWI04_yr": 172,
+         "ATMm_seas_JJA": 2.37,
+         "ATMm_seas_DJF": 2.09,
+         "ATX35D_yr": 16.7,
+         "ATX30D_yr": 30.3,
+         "ATR_yr": 32.3,
+         "AIFM40_yr": 14.5,
+         "ARRx1d_yr": 0.08
+        }
+       },
+       "gwl30": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 17.77,
+         "NORTMm_seas_JJA": 27.31,
+         "NORTMm_seas_DJF": 8.94,
+         "NORTXm_seas_JJA": 33.72,
+         "NORTX35D_yr": 41.5,
+         "NORTX30D_yr": 96.6,
+         "NORTR_yr": 75.9,
+         "NORRR_yr": 650.03,
+         "NORRR_seas_JJA": 89.25,
+         "NORRR_seas_DJF": 145.86,
+         "NORRRq99_yr": 31.99,
+         "NORRx1d_yr": 58.32,
+         "NORRRq99refD_yr": 4.4,
+         "NORIFM40_yr": 56,
+         "NORSWI04_yr": 182,
+         "ATMm_seas_JJA": 4.02,
+         "ATMm_seas_DJF": 3.15,
+         "ATX35D_yr": 35.4,
+         "ATX30D_yr": 48.6,
+         "ATR_yr": 57.3,
+         "AIFM40_yr": 31.5,
+         "ARRx1d_yr": 0.07
+        }
+       }
+      }
+     }
+    },
+    "eau": {
+     "inseeCode": "84080",
+     "drinkingWater": null,
+     "drought": null
+    },
+    "vigieau": {
+     "inseeCode": "84080",
+     "maxLevel": "alerte",
+     "topZone": {
+      "label": "Bassin du sud-ouest du Mont Ventoux",
+      "resourceType": "souterrain",
+      "level": "alerte",
+      "startDate": "2026-09-24T00:00:00.000Z",
+      "endDate": "2026-10-31T00:00:00.000Z"
+     },
+     "zones": [
+      {
+       "label": "Bassin du sud-ouest du Mont Ventoux",
+       "resourceType": "souterrain",
+       "level": "alerte",
+       "startDate": "2026-09-24T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Bassin du sud-ouest du Mont Ventoux",
+       "resourceType": "surface",
+       "level": "alerte",
+       "startDate": "2026-09-24T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Bassin du sud-ouest du Mont Ventoux",
+       "resourceType": "autre",
+       "level": "alerte",
+       "startDate": "2026-09-24T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      }
+     ],
+     "status": "ok",
+     "consultedAt": "2026-10-02T14:44:34.523Z"
+    },
+    "georisques": {
+     "inseeCode": "84080",
+     "communeName": "MONTEUX",
+     "riskLabels": [
+      "Inondation",
+      "Par une crue torrentielle ou à montée rapide de cours d'eau",
+      "Mouvement de terrain",
+      "Tassements différentiels",
+      "Séisme",
+      "Feu de forêt",
+      "Rupture de barrage",
+      "Transport de marchandises dangereuses"
+     ],
+     "flags": {
+      "flood": true,
+      "marineSubmersion": false,
+      "landslide": true,
+      "clay": true,
+      "storm": false,
+      "seismic": true,
+      "wildfire": true
+     },
+     "seismic": {
+      "code": "3",
+      "label": "3 - MODEREE"
+     }
+    },
+    "catnat": {
+     "total": 16,
+     "firstYear": 1982,
+     "lastYear": 2022,
+     "byRisk": [
+      {
+       "label": "Inondations",
+       "count": 10
+      },
+      {
+       "label": "Sécheresse des sols",
+       "count": 5
+      },
+      {
+       "label": "Tempête",
+       "count": 1
+      }
+     ],
+     "byDecade": [
+      {
+       "decade": 1980,
+       "count": 3
+      },
+      {
+       "decade": 1990,
+       "count": 5
+      },
+      {
+       "decade": 2000,
+       "count": 3
+      },
+      {
+       "decade": 2010,
+       "count": 3
+      },
+      {
+       "decade": 2020,
+       "count": 2
+      }
+     ],
+     "years": [
+      {
+       "year": 1982,
+       "family": "inondation"
+      },
+      {
+       "year": 1986,
+       "family": "inondation"
+      },
+      {
+       "year": 1992,
+       "family": "inondation"
+      },
+      {
+       "year": 1993,
+       "family": "inondation"
+      },
+      {
+       "year": 1994,
+       "family": "inondation"
+      },
+      {
+       "year": 1995,
+       "family": "secheresse"
+      },
+      {
+       "year": 2002,
+       "family": "inondation"
+      },
+      {
+       "year": 2003,
+       "family": "inondation"
+      },
+      {
+       "year": 2008,
+       "family": "inondation"
+      },
+      {
+       "year": 2012,
+       "family": "secheresse"
+      },
+      {
+       "year": 2015,
+       "family": "inondation"
+      },
+      {
+       "year": 2019,
+       "family": "secheresse"
+      },
+      {
+       "year": 2020,
+       "family": "secheresse"
+      },
+      {
+       "year": 2022,
+       "family": "secheresse"
+      }
+     ],
+     "topRisk": "Inondations",
+     "summary": "Surtout inondations."
+    },
+    "littoral": null,
+    "baignade": {
+     "saison": 2025,
+     "nSites": 1,
+     "classements": {
+      "Excellent": 1
+     },
+     "meilleur": "Excellent",
+     "pire": "Excellent",
+     "types": [
+      "lac"
+     ]
+    }
+   }
+  },
+  "01053": {
+   "nom": "Bourg-en-Bresse",
+   "categorization": null,
+   "tensions": [
+    {
+     "slug": "dependance-auto",
+     "score": 59,
+     "ind_exposition": 59,
+     "ind_vulnerabilite": 76,
+     "ind_adaptation": 41,
+     "ind_occurrence": 59
+    },
+    {
+     "slug": "feux",
+     "score": 75,
+     "ind_exposition": 100,
+     "ind_vulnerabilite": 1,
+     "ind_adaptation": 99,
+     "ind_occurrence": 100
+    }
+   ],
+   "enrichment": {
+    "ademe": {
+     "commune": {
+      "inseeCode": "01053",
+      "nom": "Bourg-en-Bresse",
+      "population": 41525,
+      "vieillissement_pct": 1.39,
+      "logements": {
+       "vacants_2022": 2274,
+       "vacants_pct": 9.6,
+       "sociaux_2023": 7223,
+       "sociaux_pct": 35
+      },
+      "qualite_air": {
+       "pm25": 8.347006028,
+       "pm10": 13.14618638,
+       "no2": 11.00463765,
+       "o3": 56.93783488
+      },
+      "economie": {
+       "revenu_median": 20210,
+       "inferiorite_nationale_pct": 12.43500867
+      },
+      "sante": {
+       "acces_medecins": 3.201,
+       "eloignement_services_pct": 0
+      },
+      "territoire": {
+       "densite": 1760.04,
+       "incendies": null,
+       "taux_boisement": 17.1
+      }
+     },
+     "iris": {
+      "iris_count": 18,
+      "passoires_taux": 19.2,
+      "preca_energetique_pct": 17.6,
+      "taux_propriete": 38.5,
+      "taux_location": 60,
+      "taux_hlm": 32.7,
+      "taux_suroccupation": 4.1,
+      "part_deplacements_motorises": 59.4,
+      "taux_transports_communs": 6.7
+     },
+     "irisScope": {
+      "kind": "commune",
+      "irisCount": 18
+     }
+    },
+    "drias": {
+     "inseeCode": "01053",
+     "commune": {
+      "n": "Bourg-en-Bresse",
+      "s": {
+       "gwl15": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 12.28,
+         "NORTMm_seas_JJA": 21.05,
+         "NORTMm_seas_DJF": 3.9,
+         "NORTXm_seas_JJA": 25.55,
+         "NORTX35D_yr": 2.8,
+         "NORTX30D_yr": 18.5,
+         "NORTR_yr": 13.6,
+         "NORRR_yr": 1042.77,
+         "NORRR_seas_JJA": 221.56,
+         "NORRR_seas_DJF": 256.97,
+         "NORRRq99_yr": 32.79,
+         "NORRx1d_yr": 57.23,
+         "NORRRq99refD_yr": 4.9,
+         "NORIFM40_yr": 2,
+         "NORSWI04_yr": 68,
+         "ATMm_seas_JJA": 1.55,
+         "ATMm_seas_DJF": 1.37,
+         "ATX35D_yr": 2.2,
+         "ATX30D_yr": 8.7,
+         "ATR_yr": 9.1,
+         "AIFM40_yr": 1,
+         "ARRx1d_yr": 0.12
+        }
+       },
+       "gwl20": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 13.06,
+         "NORTMm_seas_JJA": 21.86,
+         "NORTMm_seas_DJF": 4.64,
+         "NORTXm_seas_JJA": 26.56,
+         "NORTX35D_yr": 4.5,
+         "NORTX30D_yr": 25.9,
+         "NORTR_yr": 18.6,
+         "NORRR_yr": 1070.43,
+         "NORRR_seas_JJA": 213.84,
+         "NORRR_seas_DJF": 274.42,
+         "NORRRq99_yr": 33.21,
+         "NORRx1d_yr": 61.17,
+         "NORRRq99refD_yr": 5.1,
+         "NORIFM40_yr": 3.5,
+         "NORSWI04_yr": 76,
+         "ATMm_seas_JJA": 2.47,
+         "ATMm_seas_DJF": 2.13,
+         "ATX35D_yr": 3.8,
+         "ATX30D_yr": 16.2,
+         "ATR_yr": 14.3,
+         "AIFM40_yr": 2,
+         "ARRx1d_yr": 0.18
+        }
+       },
+       "gwl30": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 14.33,
+         "NORTMm_seas_JJA": 23.61,
+         "NORTMm_seas_DJF": 5.66,
+         "NORTXm_seas_JJA": 28.26,
+         "NORTX35D_yr": 11.9,
+         "NORTX30D_yr": 42.2,
+         "NORTR_yr": 33.8,
+         "NORRR_yr": 1045.68,
+         "NORRR_seas_JJA": 182.89,
+         "NORRR_seas_DJF": 267.56,
+         "NORRRq99_yr": 33.83,
+         "NORRx1d_yr": 56.12,
+         "NORRRq99refD_yr": 5.2,
+         "NORIFM40_yr": 6,
+         "NORSWI04_yr": 99,
+         "ATMm_seas_JJA": 4.22,
+         "ATMm_seas_DJF": 3.17,
+         "ATX35D_yr": 11.3,
+         "ATX30D_yr": 31.9,
+         "ATR_yr": 29.8,
+         "AIFM40_yr": 3.5,
+         "ARRx1d_yr": 0.1
+        }
+       }
+      }
+     }
+    },
+    "eau": {
+     "inseeCode": "01053",
+     "drinkingWater": {
+      "conformBacterio": true,
+      "conformPhysicoChem": true,
+      "lastSampleDate": "2026-07-17T13:09:00Z",
+      "nitrates": 37.3,
+      "nitrites": null
+     },
+     "drought": null
+    },
+    "vigieau": {
+     "inseeCode": "01053",
+     "maxLevel": null,
+     "topZone": null,
+     "zones": [],
+     "status": "unavailable",
+     "consultedAt": "2026-10-02T14:44:34.338Z"
+    },
+    "georisques": {
+     "inseeCode": "01053",
+     "communeName": "BOURG-EN-BRESSE",
+     "riskLabels": [
+      "Inondation",
+      "Par une crue à débordement lent de cours d'eau",
+      "Séisme",
+      "Transport de marchandises dangereuses"
+     ],
+     "flags": {
+      "flood": true,
+      "marineSubmersion": false,
+      "landslide": false,
+      "clay": false,
+      "storm": false,
+      "seismic": true,
+      "wildfire": false
+     },
+     "seismic": {
+      "code": "3",
+      "label": "3 - MODEREE"
+     }
+    },
+    "catnat": {
+     "total": 13,
+     "firstYear": 1983,
+     "lastYear": 2022,
+     "byRisk": [
+      {
+       "label": "Inondations",
+       "count": 6
+      },
+      {
+       "label": "Sécheresse des sols",
+       "count": 4
+      },
+      {
+       "label": "Mouvements de terrain",
+       "count": 1
+      },
+      {
+       "label": "Tempête",
+       "count": 1
+      },
+      {
+       "label": "Grêle",
+       "count": 1
+      }
+     ],
+     "byDecade": [
+      {
+       "decade": 1980,
+       "count": 5
+      },
+      {
+       "decade": 1990,
+       "count": 3
+      },
+      {
+       "decade": 2000,
+       "count": 1
+      },
+      {
+       "decade": 2010,
+       "count": 2
+      },
+      {
+       "decade": 2020,
+       "count": 2
+      }
+     ],
+     "years": [
+      {
+       "year": 1983,
+       "family": "inondation"
+      },
+      {
+       "year": 1993,
+       "family": "inondation"
+      },
+      {
+       "year": 1994,
+       "family": "inondation"
+      },
+      {
+       "year": 1995,
+       "family": "inondation"
+      },
+      {
+       "year": 2005,
+       "family": "inondation"
+      },
+      {
+       "year": 2018,
+       "family": "secheresse"
+      },
+      {
+       "year": 2019,
+       "family": "secheresse"
+      },
+      {
+       "year": 2020,
+       "family": "secheresse"
+      },
+      {
+       "year": 2022,
+       "family": "secheresse"
+      }
+     ],
+     "topRisk": "Inondations",
+     "summary": "Inondations : près de la moitié des reconnaissances."
+    },
+    "littoral": null,
+    "baignade": {
+     "saison": 2025,
+     "nSites": 1,
+     "classements": {
+      "Excellent": 1
+     },
+     "meilleur": "Excellent",
+     "pire": "Excellent",
+     "types": [
+      "lac"
+     ]
+    }
+   }
+  },
+  "06088": {
+   "nom": "Nice",
+   "categorization": {
+    "commune_name": "Nice",
+    "insee_code": "06088",
+    "categories": [
+     "vectoriel",
+     "littoral_mediterranee",
+     "mediterranee",
+     "tourisme_urbain",
+     "urbain_dense_sud"
+    ]
+   },
+   "tensions": [
+    {
+     "slug": "dependance-auto",
+     "score": 19,
+     "ind_exposition": 45,
+     "ind_vulnerabilite": 11,
+     "ind_adaptation": 0,
+     "ind_occurrence": 19
+    },
+    {
+     "slug": "submersion",
+     "score": 58,
+     "ind_exposition": null,
+     "ind_vulnerabilite": null,
+     "ind_adaptation": null,
+     "ind_occurrence": null
+    }
+   ],
+   "enrichment": {
+    "ademe": {
+     "commune": {
+      "inseeCode": "06088",
+      "nom": "Nice",
+      "population": 348085,
+      "vieillissement_pct": 0.53,
+      "logements": {
+       "vacants_2022": 30708,
+       "vacants_pct": 12.9,
+       "sociaux_2023": 24996,
+       "sociaux_pct": 14
+      },
+      "qualite_air": {
+       "pm25": 9.158256109,
+       "pm10": 16.67195068,
+       "no2": 19.25419256,
+       "o3": 60.78142435
+      },
+      "economie": {
+       "revenu_median": 21570,
+       "inferiorite_nationale_pct": 6.542461005
+      },
+      "sante": {
+       "acces_medecins": 4.788,
+       "eloignement_services_pct": 0.1
+      },
+      "territoire": {
+       "densite": 4919.35,
+       "incendies": null,
+       "taux_boisement": 17.3
+      }
+     },
+     "iris": {
+      "iris_count": 146,
+      "passoires_taux": 27,
+      "preca_energetique_pct": 14.2,
+      "taux_propriete": 46.8,
+      "taux_location": 50.2,
+      "taux_hlm": 13,
+      "taux_suroccupation": 14.8,
+      "part_deplacements_motorises": 45,
+      "taux_transports_communs": 25.5
+     },
+     "irisScope": {
+      "kind": "commune",
+      "irisCount": 146
+     }
+    },
+    "drias": {
+     "inseeCode": "06088",
+     "commune": {
+      "n": "Nice",
+      "s": {
+       "gwl15": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 16.9,
+         "NORTMm_seas_JJA": 24.5,
+         "NORTMm_seas_DJF": 9.9,
+         "NORTXm_seas_JJA": 27.58,
+         "NORTX35D_yr": 0.8,
+         "NORTX30D_yr": 17.6,
+         "NORTR_yr": 83.4,
+         "NORRR_yr": 706.34,
+         "NORRR_seas_JJA": 72.75,
+         "NORRR_seas_DJF": 183.3,
+         "NORRRq99_yr": 35.81,
+         "NORRx1d_yr": 75.58,
+         "NORRRq99refD_yr": 4.3,
+         "NORIFM40_yr": 5,
+         "NORSWI04_yr": 170,
+         "ATMm_seas_JJA": 1.44,
+         "ATMm_seas_DJF": 1.14,
+         "ATX35D_yr": 0.7,
+         "ATX30D_yr": 11,
+         "ATR_yr": 27.6,
+         "AIFM40_yr": 1,
+         "ARRx1d_yr": 0.15
+        }
+       },
+       "gwl20": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 17.46,
+         "NORTMm_seas_JJA": 25.18,
+         "NORTMm_seas_DJF": 10.26,
+         "NORTXm_seas_JJA": 28.22,
+         "NORTX35D_yr": 1.7,
+         "NORTX30D_yr": 25,
+         "NORTR_yr": 95.4,
+         "NORRR_yr": 730.83,
+         "NORRR_seas_JJA": 69.55,
+         "NORRR_seas_DJF": 196.82,
+         "NORRRq99_yr": 34.79,
+         "NORRx1d_yr": 75.66,
+         "NORRRq99refD_yr": 4,
+         "NORIFM40_yr": 8,
+         "NORSWI04_yr": 176,
+         "ATMm_seas_JJA": 2.12,
+         "ATMm_seas_DJF": 1.6,
+         "ATX35D_yr": 1.6,
+         "ATX30D_yr": 18.2,
+         "ATR_yr": 38.8,
+         "AIFM40_yr": 2.5,
+         "ARRx1d_yr": 0.09
+        }
+       },
+       "gwl30": {
+        "h": "2050",
+        "v": {
+         "NORTMm_yr": 18.62,
+         "NORTMm_seas_JJA": 26.55,
+         "NORTMm_seas_DJF": 11.2,
+         "NORTXm_seas_JJA": 29.57,
+         "NORTX35D_yr": 4.2,
+         "NORTX30D_yr": 47.3,
+         "NORTR_yr": 113.7,
+         "NORRR_yr": 649.6,
+         "NORRR_seas_JJA": 58.5,
+         "NORRR_seas_DJF": 183.02,
+         "NORRRq99_yr": 34.21,
+         "NORRx1d_yr": 69.73,
+         "NORRRq99refD_yr": 3.9,
+         "NORIFM40_yr": 10,
+         "NORSWI04_yr": 189,
+         "ATMm_seas_JJA": 3.52,
+         "ATMm_seas_DJF": 2.55,
+         "ATX35D_yr": 4.1,
+         "ATX30D_yr": 40.5,
+         "ATR_yr": 57.5,
+         "AIFM40_yr": 6,
+         "ARRx1d_yr": 0.09
+        }
+       }
+      }
+     }
+    },
+    "eau": {
+     "inseeCode": "06088",
+     "drinkingWater": null,
+     "drought": null
+    },
+    "vigieau": {
+     "inseeCode": "06088",
+     "maxLevel": "alerte",
+     "topZone": {
+      "label": "groupement Var aval et Paillon",
+      "resourceType": "autre",
+      "level": "alerte",
+      "startDate": "2026-09-30T00:00:00.000Z",
+      "endDate": "2026-10-31T00:00:00.000Z"
+     },
+     "zones": [
+      {
+       "label": "groupement Var aval et Paillon",
+       "resourceType": "autre",
+       "level": "alerte",
+       "startDate": "2026-09-30T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Bassin versant du Var aval",
+       "resourceType": "souterrain",
+       "level": "alerte",
+       "startDate": "2026-09-30T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      },
+      {
+       "label": "Bassin versant du Var aval",
+       "resourceType": "surface",
+       "level": "alerte",
+       "startDate": "2026-09-30T00:00:00.000Z",
+       "endDate": "2026-10-31T00:00:00.000Z"
+      }
+     ],
+     "status": "ok",
+     "consultedAt": "2026-10-02T14:44:42.606Z"
+    },
+    "georisques": {
+     "inseeCode": "06088",
+     "communeName": "NICE",
+     "riskLabels": [
+      "Inondation",
+      "Par une crue torrentielle ou à montée rapide de cours d'eau",
+      "Par ruissellement et coulée de boue",
+      "Par submersion marine",
+      "Mouvement de terrain",
+      "Affaissements et effondrements d'origine anthropique (anciennes carrières souterraines, hors mines)",
+      "Eboulement ou chutes de pierres et de blocs",
+      "Glissement de terrain",
+      "Recul du trait de côte et de falaises",
+      "Tassements différentiels",
+      "Séisme",
+      "Feu de forêt",
+      "Risque industriel",
+      "Effet thermique",
+      "Transport de marchandises dangereuses"
+     ],
+     "flags": {
+      "flood": true,
+      "marineSubmersion": true,
+      "landslide": true,
+      "clay": true,
+      "storm": false,
+      "seismic": true,
+      "wildfire": true
+     },
+     "seismic": {
+      "code": "4",
+      "label": "4 - MOYENNE"
+     }
+    },
+    "catnat": {
+     "total": 83,
+     "firstYear": 1982,
+     "lastYear": 2024,
+     "byRisk": [
+      {
+       "label": "Inondations",
+       "count": 37
+      },
+      {
+       "label": "Mouvements de terrain",
+       "count": 26
+      },
+      {
+       "label": "Chocs liés aux vagues",
+       "count": 11
+      },
+      {
+       "label": "Sécheresse des sols",
+       "count": 6
+      },
+      {
+       "label": "Tempête",
+       "count": 2
+      },
+      {
+       "label": "Grêle",
+       "count": 1
+      }
+     ],
+     "byDecade": [
+      {
+       "decade": 1980,
+       "count": 8
+      },
+      {
+       "decade": 1990,
+       "count": 18
+      },
+      {
+       "decade": 2000,
+       "count": 20
+      },
+      {
+       "decade": 2010,
+       "count": 28
+      },
+      {
+       "decade": 2020,
+       "count": 9
+      }
+     ],
+     "years": [
+      {
+       "year": 1982,
+       "family": "inondation"
+      },
+      {
+       "year": 1983,
+       "family": "inondation"
+      },
+      {
+       "year": 1989,
+       "family": "inondation"
+      },
+      {
+       "year": 1991,
+       "family": "inondation"
+      },
+      {
+       "year": 1992,
+       "family": "inondation"
+      },
+      {
+       "year": 1993,
+       "family": "inondation"
+      },
+      {
+       "year": 1994,
+       "family": "inondation"
+      },
+      {
+       "year": 1996,
+       "family": "inondation"
+      },
+      {
+       "year": 1998,
+       "family": "inondation"
+      },
+      {
+       "year": 1999,
+       "family": "inondation"
+      },
+      {
+       "year": 2000,
+       "family": "inondation"
+      },
+      {
+       "year": 2002,
+       "family": "inondation"
+      },
+      {
+       "year": 2003,
+       "family": "secheresse"
+      },
+      {
+       "year": 2004,
+       "family": "secheresse"
+      },
+      {
+       "year": 2005,
+       "family": "inondation"
+      },
+      {
+       "year": 2008,
+       "family": "autre"
+      },
+      {
+       "year": 2009,
+       "family": "autre"
+      },
+      {
+       "year": 2010,
+       "family": "autre"
+      },
+      {
+       "year": 2011,
+       "family": "autre"
+      },
+      {
+       "year": 2012,
+       "family": "inondation"
+      },
+      {
+       "year": 2013,
+       "family": "autre"
+      },
+      {
+       "year": 2014,
+       "family": "autre"
+      },
+      {
+       "year": 2015,
+       "family": "inondation"
+      },
+      {
+       "year": 2019,
+       "family": "autre"
+      },
+      {
+       "year": 2020,
+       "family": "inondation"
+      },
+      {
+       "year": 2022,
+       "family": "secheresse"
+      },
+      {
+       "year": 2023,
+       "family": "secheresse"
+      },
+      {
+       "year": 2024,
+       "family": "inondation"
+      }
+     ],
+     "topRisk": "Inondations",
+     "summary": "Inondations : près de la moitié des reconnaissances."
+    },
+    "littoral": {
+     "insee": "06088",
+     "facade": "mediterranee",
+     "traitDeCote": {
+      "concernee": false,
+      "decret": null
+     },
+     "erosion": {
+      "classe": "faible",
+      "amenage": false,
+      "pctRecul": 15,
+      "medianeMpan": 0.09,
+      "reculMaxMpan": -0.11,
+      "nbValid": 33,
+      "periode": [
+       1924,
+       2011
+      ]
+     }
+    },
+    "baignade": {
+     "saison": 2025,
+     "nSites": 26,
+     "classements": {
+      "Suffisant": 2,
+      "Excellent": 16,
+      "Bon": 8
+     },
+     "meilleur": "Excellent",
+     "pire": "Suffisant",
+     "types": [
+      "mer"
+     ]
+    }
+   }
+  }
+ }
+}
