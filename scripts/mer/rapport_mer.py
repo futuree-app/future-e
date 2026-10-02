@@ -62,12 +62,13 @@ def principal():
     tolerances = [0.05, 0.2, 0.5, 1.0]
     mer_hors = {t: [c for c in mer if c["territoire_km"] is not None and c["territoire_km"] > t] for t in tolerances}
     sans = [c for c in com if not loi(c)]
+    sans_effectif_touchant = [c for c in com if not c.get("loi_effective") and c["territoire_km"] == 0]
     sans_touchant = [c for c in sans if c["territoire_km"] is not None and c["territoire_km"] == 0]
     estuaire = [c for c in com if "Estuaire" in loi(c) and "Mer" not in loi(c)]
     lac = [c for c in com if loi(c) == {"Lac"}]
 
     def court(c):
-        return {k: c.get(k) for k in ("insee", "nom", "dept", "ancienne_km", "centre_km", "territoire_km", "centre_brut_km", "territoire_brut_km", "loi")}
+        return {k: c.get(k) for k in ("insee", "nom", "dept", "ancienne_km", "centre_km", "territoire_km", "centre_brut_km", "territoire_brut_km", "loi", "loi_effective", "loi_source_commune")}
 
     plus_grosses = sorted(com, key=lambda c: -abs((c["centre_km"] or 0) - (c["ancienne_km"] or 0)))[:25]
     rapport = {
@@ -87,6 +88,7 @@ def principal():
             "Mer_exceptions_0.5km": [court(c) for c in mer_hors[0.5]],
             "sans_classement_touchant_le_rivage": len(sans_touchant),
             "sans_classement_touchant_exemples": [court(c) for c in sans_touchant[:60]],
+            "sans_classement_effectif_touchant (après héritage PLM)": len(sans_effectif_touchant),
             "Estuaire_seul": len(estuaire),
             "Estuaire_territoire_0": sum(1 for c in estuaire if c["territoire_km"] == 0),
             "Lac_seul": len(lac),
@@ -96,6 +98,36 @@ def principal():
         "exemples_faux_positifs_dept": [court(c) for c in sorted(faux_positifs_dept, key=lambda c: -c["territoire_km"])[:15]],
         "cas": {g: [court(par[i]) if i in par else {"insee": i, "absent_index": True} for i in ids] for g, ids in CAS.items()},
     }
+    # ── D10 : distributions par seuil, et communes qui basculent (les plus peuplées de chaque tranche) ──
+    seuils = [1, 2, 5, 8, 10, 15, 20, 30, 50, 100]
+    d10 = {}
+    bornes = [0] + seuils
+    for mesure in ("centre_km", "territoire_km"):
+        lignes = {}
+        for i, s_ in enumerate(seuils):
+            bas = bornes[i]
+            tranche = [c for c in com if c[mesure] is not None and bas < c[mesure] <= s_]
+            tranche.sort(key=lambda c: -(c.get("pop") or 0))
+            lignes[str(s_)] = {"cumul": compte([c[mesure] for c in com], s_), "tranche": len(tranche),
+                               "exemples": [f'{c["nom"]} ({c["dept"]}) {c[mesure]}' for c in tranche[:6]]}
+        d10[mesure] = lignes
+    rapport["d10"] = d10
+    # ── D5 : ancre « au bord de la mer » ──
+    d5_cas = ["29019", "22113", "29151", "22168", "17300", "17094", "35288", "44184", "33009", "64122", "06088", "13207",
+              "34172", "14118", "33063", "44109", "56260", "34301", "76217", "76351", "17306", "85194", "83137", "62193",
+              "59183", "2A004", "50129", "34003", "11262", "56121", "29232", "33529", "06029", "83061"]
+    rapport["d5"] = []
+    for i in d5_cas:
+        c = par.get(i)
+        if not c:
+            continue
+        le = c.get("loi_effective") or []
+        rapport["d5"].append({"insee": i, "nom": c["nom"], "mer": "Mer" in le, "centre_km": c["centre_km"], "territoire_km": c["territoire_km"],
+                              **{f"centre_le_{s_}": c["centre_km"] <= s_ for s_ in (2, 5, 8, 15)},
+                              **{f"mer_et_centre_le_{s_}": ("Mer" in le) and c["centre_km"] <= s_ for s_ in (2, 5, 8, 15)}})
+    tot_mer = sum(1 for c in com if "Mer" in (c.get("loi_effective") or []))
+    rapport["d5_national"] = {"mer": tot_mer, **{f"centre_le_{s_}": compte([c["centre_km"] for c in com], s_) for s_ in (2, 5, 8, 15)},
+                              **{f"mer_et_centre_le_{s_}": sum(1 for c in com if "Mer" in (c.get("loi_effective") or []) and c["centre_km"] <= s_) for s_ in (2, 5, 8, 15)}}
     (a.out / "rapport-chiffres.json").write_text(json.dumps(rapport, ensure_ascii=False, indent=1))
     fixture = {"source": "build_mer.py (FUT-33 phase 1)", "methode": json.loads((a.out / "build-meta.json").read_text())["methode"],
                "cas": {i: court(par[i]) for ids in CAS.values() for i in ids if i in par}}

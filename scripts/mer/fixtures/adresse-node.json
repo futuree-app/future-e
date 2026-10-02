@@ -1,0 +1,62 @@
+{
+ "points": 5000,
+ "niveaux": [
+  {
+   "tolerance_m": 5,
+   "segments": 410002,
+   "fichier_mo": 6.6,
+   "gzip_mo": 2.5,
+   "init_ms": 36,
+   "memoire_mo": 8.3,
+   "cellules": 1189,
+   "latence_ms": {
+    "p50": 0.12,
+    "p95": 0.447,
+    "max": 4
+   },
+   "erreur_m": {
+    "moyenne": 0.53,
+    "p99": 3.8,
+    "max": 4.9
+   }
+  },
+  {
+   "tolerance_m": 10,
+   "segments": 289808,
+   "fichier_mo": 4.6,
+   "gzip_mo": 1.9,
+   "init_ms": 25,
+   "memoire_mo": 5.9,
+   "cellules": 1192,
+   "latence_ms": {
+    "p50": 0.085,
+    "p95": 0.316,
+    "max": 2.72
+   },
+   "erreur_m": {
+    "moyenne": 0.99,
+    "p99": 7.4,
+    "max": 10
+   }
+  },
+  {
+   "tolerance_m": 20,
+   "segments": 227195,
+   "fichier_mo": 3.6,
+   "gzip_mo": 1.5,
+   "init_ms": 31,
+   "memoire_mo": 4.6,
+   "cellules": 1194,
+   "latence_ms": {
+    "p50": 0.067,
+    "p95": 0.246,
+    "max": 1.31
+   },
+   "erreur_m": {
+    "moyenne": 1.99,
+    "p99": 15.1,
+    "max": 19.5
+   }
+  }
+ ]
+}

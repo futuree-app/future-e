@@ -1,0 +1,272 @@
+[
+ {
+  "insee": "13201",
+  "nom": "Marseille 1er Arrondissement",
+  "dept": "13",
+  "centre_km": 0.89,
+  "contact_m": 354,
+  "contact_par_nature_m": {
+   "vide": 354
+  },
+  "voisins_classes": []
+ },
+ {
+  "insee": "13202",
+  "nom": "Marseille 2e Arrondissement",
+  "dept": "13",
+  "centre_km": 0.0,
+  "contact_m": 32592,
+  "contact_par_nature_m": {
+   "vide": 32592
+  },
+  "voisins_classes": []
+ },
+ {
+  "insee": "13207",
+  "nom": "Marseille 7e Arrondissement",
+  "dept": "13",
+  "centre_km": 0.0,
+  "contact_m": 43164,
+  "contact_par_nature_m": {
+   "vide": 43164
+  },
+  "voisins_classes": []
+ },
+ {
+  "insee": "13208",
+  "nom": "Marseille 8e Arrondissement",
+  "dept": "13",
+  "centre_km": 0.01,
+  "contact_m": 49754,
+  "contact_par_nature_m": {
+   "vide": 49754
+  },
+  "voisins_classes": []
+ },
+ {
+  "insee": "13209",
+  "nom": "Marseille 9e Arrondissement",
+  "dept": "13",
+  "centre_km": 2.71,
+  "contact_m": 27251,
+  "contact_par_nature_m": {
+   "vide": 27251
+  },
+  "voisins_classes": [
+   "13022:Mer"
+  ]
+ },
+ {
+  "insee": "13215",
+  "nom": "Marseille 15e Arrondissement",
+  "dept": "13",
+  "centre_km": 2.08,
+  "contact_m": 864,
+  "contact_par_nature_m": {
+   "vide": 864
+  },
+  "voisins_classes": []
+ },
+ {
+  "insee": "13216",
+  "nom": "Marseille 16e Arrondissement",
+  "dept": "13",
+  "centre_km": 0.46,
+  "contact_m": 26103,
+  "contact_par_nature_m": {
+   "vide": 26103
+  },
+  "voisins_classes": [
+   "13088:Mer"
+  ]
+ },
+ {
+  "insee": "17348",
+  "nom": "Saint-Jean-d'Angle",
+  "dept": "17",
+  "centre_km": 3.54,
+  "contact_m": 21,
+  "contact_par_nature_m": {
+   "fermeture LTM": 21
+  },
+  "voisins_classes": [
+   "17219:Mer",
+   "17351:Mer"
+  ]
+ },
+ {
+  "insee": "2A032",
+  "nom": "Bastelicaccia",
+  "dept": "2A",
+  "centre_km": 3.78,
+  "contact_m": 640,
+  "contact_par_nature_m": {
+   "vide": 640
+  },
+  "voisins_classes": [
+   "2A004:Mer",
+   "2A130:Mer"
+  ]
+ },
+ {
+  "insee": "30033",
+  "nom": "Beauvoisin",
+  "dept": "30",
+  "centre_km": 5.16,
+  "contact_m": 32,
+  "contact_par_nature_m": {
+   "fermeture LTM": 32
+  },
+  "voisins_classes": [
+   "30341:Estuaire"
+  ]
+ },
+ {
+  "insee": "35116",
+  "nom": "La Fresnais",
+  "dept": "35",
+  "centre_km": 2.56,
+  "contact_m": 483,
+  "contact_par_nature_m": {
+   "vide": 483
+  },
+  "voisins_classes": [
+   "35132:Mer",
+   "35186:Mer",
+   "35255:Mer"
+  ]
+ },
+ {
+  "insee": "35270",
+  "nom": "Saint-Georges-de-Gréhaigne",
+  "dept": "35",
+  "centre_km": 1.38,
+  "contact_m": 479,
+  "contact_par_nature_m": {
+   "1,3,6": 479
+  },
+  "voisins_classes": [
+   "35247:Mer",
+   "50042:Mer",
+   "50410:Mer"
+  ]
+ },
+ {
+  "insee": "44183",
+  "nom": "Saint-Molf",
+  "dept": "44",
+  "centre_km": 2.28,
+  "contact_m": 12232,
+  "contact_par_nature_m": {
+   "vide": 12232
+  },
+  "voisins_classes": [
+   "44006:Mer",
+   "44069:Mer",
+   "44097:Mer",
+   "44211:Mer"
+  ]
+ },
+ {
+  "insee": "59155",
+  "nom": "Coudekerque-Branche",
+  "dept": "59",
+  "centre_km": 1.44,
+  "contact_m": 69,
+  "contact_par_nature_m": {
+   "vide": 69
+  },
+  "voisins_classes": [
+   "59183:Mer"
+  ]
+ },
+ {
+  "insee": "66002",
+  "nom": "Alénya",
+  "dept": "66",
+  "centre_km": 0.84,
+  "contact_m": 2942,
+  "contact_par_nature_m": {
+   "vide": 2942
+  },
+  "voisins_classes": [
+   "66037:Mer",
+   "66065:Mer",
+   "66171:Mer",
+   "66186:Mer"
+  ]
+ },
+ {
+  "insee": "76255",
+  "nom": "Eu",
+  "dept": "76",
+  "centre_km": 1.26,
+  "contact_m": 2375,
+  "contact_par_nature_m": {
+   "vide": 2375
+  },
+  "voisins_classes": [
+   "76711:Mer",
+   "80533:Mer",
+   "80714:Mer"
+  ]
+ },
+ {
+  "insee": "76341",
+  "nom": "Harfleur",
+  "dept": "76",
+  "centre_km": 1.32,
+  "contact_m": 108,
+  "contact_par_nature_m": {
+   "1": 83,
+   "fermeture LTM": 24
+  },
+  "voisins_classes": [
+   "76305:Mer",
+   "76351:Mer"
+  ]
+ },
+ {
+  "insee": "76414",
+  "nom": "Martin-Église",
+  "dept": "76",
+  "centre_km": 2.31,
+  "contact_m": 49,
+  "contact_par_nature_m": {
+   "1,5": 32,
+   "fermeture LTM": 17
+  },
+  "voisins_classes": [
+   "76217:Mer",
+   "76618:Mer"
+  ]
+ },
+ {
+  "insee": "76545",
+  "nom": "Rouxmesnil-Bouteilles",
+  "dept": "76",
+  "centre_km": 1.91,
+  "contact_m": 39,
+  "contact_par_nature_m": {
+   "1,5": 26,
+   "fermeture LTM": 13
+  },
+  "voisins_classes": [
+   "76217:Mer"
+  ]
+ },
+ {
+  "insee": "83099",
+  "nom": "Puget-sur-Argens",
+  "dept": "83",
+  "centre_km": 3.98,
+  "contact_m": 1193,
+  "contact_par_nature_m": {
+   "vide": 1193
+  },
+  "voisins_classes": [
+   "83061:Mer",
+   "83107:Mer"
+  ]
+ }
+]

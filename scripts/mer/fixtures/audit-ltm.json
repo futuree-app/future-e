@@ -1,0 +1,1218 @@
+[
+ {
+  "fermeture": 4,
+  "statut": "incertain",
+  "lon": -2.0327,
+  "lat": 46.969,
+  "largeur_m": 19.9,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   0.1
+  ]
+ },
+ {
+  "fermeture": 6,
+  "statut": "incertain",
+  "lon": -1.0771,
+  "lat": 45.9539,
+  "largeur_m": 974.9,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "B",
+  "cote_amont_plausible": {
+   "cote_km": 15.4,
+   "communes": 2,
+   "delta_max_km": 1.12,
+   "touchees": [
+    {
+     "insee": "17329",
+     "nom": "Saint-Froult",
+     "pop": 382,
+     "avant_km": 1.1,
+     "apres_km": 2.22
+    },
+    {
+     "insee": "17429",
+     "nom": "Soubise",
+     "pop": 3641,
+     "avant_km": 5.38,
+     "apres_km": 5.86
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   19.4
+  ]
+ },
+ {
+  "fermeture": 15,
+  "statut": "incertain",
+  "lon": -1.0816,
+  "lat": 45.7627,
+  "largeur_m": 102.2,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 4.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   11.7
+  ]
+ },
+ {
+  "fermeture": 18,
+  "statut": "incertain",
+  "lon": -1.0268,
+  "lat": 45.7267,
+  "largeur_m": 25.5,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 7.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   7.8
+  ]
+ },
+ {
+  "fermeture": 21,
+  "statut": "incertain",
+  "lon": -0.9601,
+  "lat": 45.7052,
+  "largeur_m": 191.3,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 2.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   6.8
+  ]
+ },
+ {
+  "fermeture": 47,
+  "statut": "incertain",
+  "lon": -2.5674,
+  "lat": 48.5746,
+  "largeur_m": 7.6,
+  "commentaire": "Troncon LimTM isole",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": null,
+  "autres_cotes_km": []
+ },
+ {
+  "fermeture": 52,
+  "statut": "incertain",
+  "lon": -2.1393,
+  "lat": 48.6156,
+  "largeur_m": 343.3,
+  "commentaire": "Limite 35 - 22",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 2.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   3.3,
+   26.9,
+   59.8
+  ]
+ },
+ {
+  "fermeture": 53,
+  "statut": "incertain",
+  "lon": -2.0013,
+  "lat": 48.4912,
+  "largeur_m": 83.9,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   162.9
+  ]
+ },
+ {
+  "fermeture": 54,
+  "statut": "incertain",
+  "lon": -2.002,
+  "lat": 48.4914,
+  "largeur_m": 9.2,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   59.8
+  ]
+ },
+ {
+  "fermeture": 60,
+  "statut": "incertain",
+  "lon": -4.2948,
+  "lat": 48.6347,
+  "largeur_m": 533.5,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.5,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   49.9,
+   87.9
+  ]
+ },
+ {
+  "fermeture": 69,
+  "statut": "incertain",
+  "lon": -4.2007,
+  "lat": 48.2476,
+  "largeur_m": 430.5,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 24.5,
+   "communes": 1,
+   "delta_max_km": 0.31,
+   "touchees": [
+    {
+     "insee": "29240",
+     "nom": "Rosnoën",
+     "pop": 974,
+     "avant_km": 1.33,
+     "apres_km": 1.63
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   398.7
+  ]
+ },
+ {
+  "fermeture": 78,
+  "statut": "incertain",
+  "lon": -3.579,
+  "lat": 48.6705,
+  "largeur_m": 6.3,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   0.2
+  ]
+ },
+ {
+  "fermeture": 100,
+  "statut": "incertain",
+  "lon": -1.6458,
+  "lat": 46.4414,
+  "largeur_m": 515.1,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "B",
+  "cote_amont_plausible": {
+   "cote_km": 4.1,
+   "communes": 8,
+   "delta_max_km": 0.83,
+   "touchees": [
+    {
+     "insee": "85179",
+     "nom": "Poiroux",
+     "pop": 1214,
+     "avant_km": 10.07,
+     "apres_km": 10.9
+    },
+    {
+     "insee": "85161",
+     "nom": "Nieul-le-Dolent",
+     "pop": 2535,
+     "avant_km": 16.47,
+     "apres_km": 17.15
+    },
+    {
+     "insee": "85008",
+     "nom": "Aubigny-Les Clouzeaux",
+     "pop": 7069,
+     "avant_km": 21.97,
+     "apres_km": 22.63
+    },
+    {
+     "insee": "85103",
+     "nom": "Grosbreuil",
+     "pop": 2220,
+     "avant_km": 10.85,
+     "apres_km": 11.31
+    },
+    {
+     "insee": "85099",
+     "nom": "Le Girouard",
+     "pop": 1124,
+     "avant_km": 14.54,
+     "apres_km": 14.97
+    },
+    {
+     "insee": "85211",
+     "nom": "Sainte-Flaive-des-Loups",
+     "pop": 2522,
+     "avant_km": 18.47,
+     "apres_km": 18.89
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   31.4
+  ]
+ },
+ {
+  "fermeture": 103,
+  "statut": "incertain",
+  "lon": -1.9225,
+  "lat": 46.716,
+  "largeur_m": 115.1,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 4.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   58.5
+  ]
+ },
+ {
+  "fermeture": 113,
+  "statut": "incertain",
+  "lon": -0.4612,
+  "lat": 49.3346,
+  "largeur_m": 16.8,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   22.4
+  ]
+ },
+ {
+  "fermeture": 114,
+  "statut": "incertain",
+  "lon": -0.4611,
+  "lat": 49.3348,
+  "largeur_m": 17.7,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   60.2
+  ]
+ },
+ {
+  "fermeture": 124,
+  "statut": "incertain",
+  "lon": -1.1639,
+  "lat": 44.7762,
+  "largeur_m": 27.1,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 7.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   147.1
+  ]
+ },
+ {
+  "fermeture": 131,
+  "statut": "incertain",
+  "lon": -1.0771,
+  "lat": 44.7244,
+  "largeur_m": 2.8,
+  "commentaire": "Reference juridique non identifiee. Limite pas prise en compte",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": null,
+  "autres_cotes_km": []
+ },
+ {
+  "fermeture": 132,
+  "statut": "incertain",
+  "lon": -2.1786,
+  "lat": 47.2742,
+  "largeur_m": 1922.3,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "B",
+  "cote_amont_plausible": {
+   "cote_km": 35.5,
+   "communes": 15,
+   "delta_max_km": 2.02,
+   "touchees": [
+    {
+     "insee": "44055",
+     "nom": "La Baule-Escoublac",
+     "pop": 16468,
+     "avant_km": 1.78,
+     "apres_km": 3.8
+    },
+    {
+     "insee": "44210",
+     "nom": "Trignac",
+     "pop": 8106,
+     "avant_km": 2.47,
+     "apres_km": 3.53
+    },
+    {
+     "insee": "44151",
+     "nom": "Saint-André-des-Eaux",
+     "pop": 6881,
+     "avant_km": 6.97,
+     "apres_km": 8.0
+    },
+    {
+     "insee": "44168",
+     "nom": "Saint-Joachim",
+     "pop": 4139,
+     "avant_km": 9.85,
+     "apres_km": 10.84
+    },
+    {
+     "insee": "44176",
+     "nom": "Saint-Malo-de-Guersac",
+     "pop": 3188,
+     "avant_km": 8.09,
+     "apres_km": 8.95
+    },
+    {
+     "insee": "44050",
+     "nom": "Crossac",
+     "pop": 2997,
+     "avant_km": 13.28,
+     "apres_km": 14.1
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   71.6
+  ]
+ },
+ {
+  "fermeture": 134,
+  "statut": "incertain",
+  "lon": -2.4168,
+  "lat": 47.2852,
+  "largeur_m": 40.4,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.4,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   154.1
+  ]
+ },
+ {
+  "fermeture": 140,
+  "statut": "incertain",
+  "lon": -3.1875,
+  "lat": 47.6609,
+  "largeur_m": 4.2,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   109.6
+  ]
+ },
+ {
+  "fermeture": 147,
+  "statut": "incertain",
+  "lon": -3.1873,
+  "lat": 47.661,
+  "largeur_m": 2.8,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   20.2
+  ]
+ },
+ {
+  "fermeture": 152,
+  "statut": "incertain",
+  "lon": 1.6007,
+  "lat": 50.7234,
+  "largeur_m": 6.7,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   7.5
+  ]
+ },
+ {
+  "fermeture": 154,
+  "statut": "incertain",
+  "lon": 1.6005,
+  "lat": 50.7233,
+  "largeur_m": 12.1,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   0.0
+  ]
+ },
+ {
+  "fermeture": 155,
+  "statut": "incertain",
+  "lon": 1.6003,
+  "lat": 50.7232,
+  "largeur_m": 7.6,
+  "commentaire": "",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.0,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   47.4
+  ]
+ },
+ {
+  "fermeture": 163,
+  "statut": "non_accrochee",
+  "lon": -1.7909,
+  "lat": 43.3715,
+  "largeur_m": 438.1,
+  "commentaire": "Limite 64 - Espagne",
+  "facade": "Manche-Atlantique",
+  "classe": "B",
+  "cote_amont_plausible": {
+   "cote_km": 7.8,
+   "communes": 1,
+   "delta_max_km": 0.94,
+   "touchees": [
+    {
+     "insee": "64260",
+     "nom": "Hendaye",
+     "pop": 17796,
+     "avant_km": 1.3,
+     "apres_km": 2.24
+    }
+   ]
+  },
+  "autres_cotes_km": []
+ },
+ {
+  "fermeture": 172,
+  "statut": "incertain",
+  "lon": 0.3536,
+  "lat": 49.4585,
+  "largeur_m": 4785.7,
+  "commentaire": "Limite 76 - 27",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.5,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   4.7
+  ]
+ },
+ {
+  "fermeture": 173,
+  "statut": "incertain",
+  "lon": -1.1478,
+  "lat": 49.3626,
+  "largeur_m": 4320.7,
+  "commentaire": "Limite 14 - 50",
+  "facade": "Manche-Atlantique",
+  "classe": "C",
+  "cote_amont_plausible": {
+   "cote_km": 60.2,
+   "communes": 70,
+   "delta_max_km": 6.22,
+   "touchees": [
+    {
+     "insee": "14745",
+     "nom": "Vierville-sur-Mer",
+     "pop": 231,
+     "avant_km": 1.0,
+     "apres_km": 7.22
+    },
+    {
+     "insee": "14605",
+     "nom": "Saint-Laurent-sur-Mer",
+     "pop": 256,
+     "avant_km": 1.22,
+     "apres_km": 6.23
+    },
+    {
+     "insee": "14281",
+     "nom": "Formigny La Bataille",
+     "pop": 752,
+     "avant_km": 3.41,
+     "apres_km": 7.68
+    },
+    {
+     "insee": "14739",
+     "nom": "Ver-sur-Mer",
+     "pop": 1662,
+     "avant_km": 1.39,
+     "apres_km": 4.49
+    },
+    {
+     "insee": "14165",
+     "nom": "Colleville-sur-Mer",
+     "pop": 193,
+     "avant_km": 1.09,
+     "apres_km": 4.08
+    },
+    {
+     "insee": "14711",
+     "nom": "Trévières",
+     "pop": 920,
+     "avant_km": 8.21,
+     "apres_km": 10.82
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   269.0
+  ]
+ },
+ {
+  "fermeture": 184,
+  "statut": "incertain",
+  "lon": -1.1057,
+  "lat": 46.3157,
+  "largeur_m": 356.3,
+  "commentaire": "Limite 85 - 17",
+  "facade": "Manche-Atlantique",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 8.9,
+   "communes": 0,
+   "delta_max_km": 0.14,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   88.8
+  ]
+ },
+ {
+  "fermeture": 185,
+  "statut": "incertain",
+  "lon": -1.0272,
+  "lat": 45.5751,
+  "largeur_m": 5375.5,
+  "commentaire": "Limite 17 - 33",
+  "facade": "Manche-Atlantique",
+  "classe": "B",
+  "cote_amont_plausible": {
+   "cote_km": 81.0,
+   "communes": 6,
+   "delta_max_km": 2.5,
+   "touchees": [
+    {
+     "insee": "17225",
+     "nom": "Les Mathes",
+     "pop": 2179,
+     "avant_km": 2.11,
+     "apres_km": 4.62
+    },
+    {
+     "insee": "17306",
+     "nom": "Royan",
+     "pop": 19029,
+     "avant_km": 1.52,
+     "apres_km": 2.92
+    },
+    {
+     "insee": "17333",
+     "nom": "Saint-Georges-de-Didonne",
+     "pop": 5170,
+     "avant_km": 0.33,
+     "apres_km": 1.72
+    },
+    {
+     "insee": "17380",
+     "nom": "Saint-Palais-sur-Mer",
+     "pop": 3918,
+     "avant_km": 1.2,
+     "apres_km": 1.83
+    },
+    {
+     "insee": "17311",
+     "nom": "Saint-Augustin",
+     "pop": 1462,
+     "avant_km": 3.88,
+     "apres_km": 4.51
+    },
+    {
+     "insee": "17425",
+     "nom": "Semussac",
+     "pop": 2479,
+     "avant_km": 5.78,
+     "apres_km": 6.39
+    }
+   ]
+  },
+  "autres_cotes_km": [
+   147.1
+  ]
+ },
+ {
+  "fermeture": 226,
+  "statut": "incertain",
+  "lon": 4.0948,
+  "lat": 43.6041,
+  "largeur_m": 21.6,
+  "commentaire": "",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.2,
+   "communes": 0,
+   "delta_max_km": 0.13,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.7
+  ]
+ },
+ {
+  "fermeture": 238,
+  "statut": "incertain",
+  "lon": 4.0701,
+  "lat": 43.5695,
+  "largeur_m": 17.7,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 4.2,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   9.6
+  ]
+ },
+ {
+  "fermeture": 240,
+  "statut": "incertain",
+  "lon": 3.7773,
+  "lat": 43.4444,
+  "largeur_m": 12.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 10.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   36.6
+  ]
+ },
+ {
+  "fermeture": 241,
+  "statut": "incertain",
+  "lon": 3.7773,
+  "lat": 43.4447,
+  "largeur_m": 10.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.2
+  ]
+ },
+ {
+  "fermeture": 242,
+  "statut": "incertain",
+  "lon": 3.7899,
+  "lat": 43.4494,
+  "largeur_m": 10.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.2,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   10.7
+  ]
+ },
+ {
+  "fermeture": 243,
+  "statut": "incertain",
+  "lon": 3.8215,
+  "lat": 43.4683,
+  "largeur_m": 10.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 3.4,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   14.5
+  ]
+ },
+ {
+  "fermeture": 244,
+  "statut": "incertain",
+  "lon": 3.848,
+  "lat": 43.4919,
+  "largeur_m": 27.8,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   14.3
+  ]
+ },
+ {
+  "fermeture": 245,
+  "statut": "incertain",
+  "lon": 3.8476,
+  "lat": 43.4921,
+  "largeur_m": 97.9,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.2,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   3.4
+  ]
+ },
+ {
+  "fermeture": 246,
+  "statut": "incertain",
+  "lon": 3.8584,
+  "lat": 43.5004,
+  "largeur_m": 9.2,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.2,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.3
+  ]
+ },
+ {
+  "fermeture": 247,
+  "statut": "incertain",
+  "lon": 3.8587,
+  "lat": 43.5002,
+  "largeur_m": 10.6,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.3
+  ]
+ },
+ {
+  "fermeture": 248,
+  "statut": "incertain",
+  "lon": 3.8693,
+  "lat": 43.5088,
+  "largeur_m": 11.3,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.3
+  ]
+ },
+ {
+  "fermeture": 249,
+  "statut": "incertain",
+  "lon": 3.8696,
+  "lat": 43.5086,
+  "largeur_m": 13.5,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   14.3
+  ]
+ },
+ {
+  "fermeture": 250,
+  "statut": "incertain",
+  "lon": 3.8801,
+  "lat": 43.5171,
+  "largeur_m": 12.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   14.5
+  ]
+ },
+ {
+  "fermeture": 251,
+  "statut": "incertain",
+  "lon": 3.8987,
+  "lat": 43.5241,
+  "largeur_m": 14.2,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   16.2
+  ]
+ },
+ {
+  "fermeture": 252,
+  "statut": "incertain",
+  "lon": 3.899,
+  "lat": 43.5238,
+  "largeur_m": 16.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 2.8,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   36.6
+  ]
+ },
+ {
+  "fermeture": 253,
+  "statut": "incertain",
+  "lon": 3.8996,
+  "lat": 43.5246,
+  "largeur_m": 18.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   16.2
+  ]
+ },
+ {
+  "fermeture": 254,
+  "statut": "incertain",
+  "lon": 3.9378,
+  "lat": 43.5392,
+  "largeur_m": 11.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.6,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   8.0
+  ]
+ },
+ {
+  "fermeture": 255,
+  "statut": "incertain",
+  "lon": 3.9379,
+  "lat": 43.5389,
+  "largeur_m": 11.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 2.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   7.0
+  ]
+ },
+ {
+  "fermeture": 256,
+  "statut": "incertain",
+  "lon": 3.9564,
+  "lat": 43.5436,
+  "largeur_m": 5.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 2.1,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   7.0
+  ]
+ },
+ {
+  "fermeture": 257,
+  "statut": "incertain",
+  "lon": 3.9562,
+  "lat": 43.5439,
+  "largeur_m": 21.2,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.6
+  ]
+ },
+ {
+  "fermeture": 258,
+  "statut": "incertain",
+  "lon": 3.9697,
+  "lat": 43.5474,
+  "largeur_m": 10.8,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.7,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   1.3
+  ]
+ },
+ {
+  "fermeture": 259,
+  "statut": "incertain",
+  "lon": 3.9809,
+  "lat": 43.5505,
+  "largeur_m": 42.9,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 1.3,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   15.5
+  ]
+ },
+ {
+  "fermeture": 260,
+  "statut": "incertain",
+  "lon": 4.037,
+  "lat": 43.5624,
+  "largeur_m": 25.4,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 4.2,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   15.5
+  ]
+ },
+ {
+  "fermeture": 263,
+  "statut": "incertain",
+  "lon": 3.9706,
+  "lat": 43.5513,
+  "largeur_m": 17.0,
+  "commentaire": "Ajout limite manquante",
+  "facade": "Mediterranee",
+  "classe": "A",
+  "cote_amont_plausible": {
+   "cote_km": 0.7,
+   "communes": 0,
+   "delta_max_km": 0.0,
+   "touchees": []
+  },
+  "autres_cotes_km": [
+   8.6
+  ]
+ }
+]

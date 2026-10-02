@@ -36,10 +36,16 @@ python lagunes_b.py --limtm $D/sources/limtm --index data/comparateur-index.json
   --contours $D/sources/communes-5m-2026.geojson.gz --rivage $D/out/rivage-marin.wkb --out $D/out/lagunes.json
 python adresse_proto.py --rivage $D/out/rivage-marin.wkb --out $D/out/adresse.json
 python facades_test.py --planif $D/sources/planif/PLANIFICATION_MARITIME_PACK --out $D/out
+# phase 1.5 : sécurisation
+python build_mer.py --limtm $D/sources/limtm --contours x --loi-littoral x --index x --out /tmp/x --sauver-etat $D/etat.pkl
+python audit_ltm.py --etat $D/etat.pkl --index data/comparateur-index.json.gz --out $D/out/audit-ltm.json
+python divergences.py --etat $D/etat.pkl --contours $D/sources/communes-5m-2026.geojson.gz --out $D/out
+python export_node.py --rivage $D/out/rivage-marin.wkb --out $D/node     # (depuis scripts/mer)
+node scripts/mer/adresse-node.mjs $D/node                                 # prototype adresse, non branché
 ```
 
-Seule la fixture `fixtures/cas-reference.json` (cas de test, quelques Ko) est versionnée ; elle est relue par
-`src/lib/fut33-mer-pipeline.test.ts`.
+Seules de petites fixtures sont versionnées (`fixtures/`, moins de 100 Ko) ; elles sont relues par
+`src/lib/fut33-mer-pipeline.test.ts` et `src/lib/fut33-mer-securisation.test.ts`.
 
 ## Attribution obligatoire
 

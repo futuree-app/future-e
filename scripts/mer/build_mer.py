@@ -26,6 +26,8 @@ de la mer (LTM). La LimTM brute remonte les estuaires jusqu'à la limite de la m
      côte de l'Hérault).
   C. COMPLÉMENTS EXPLICITES (`COMPLEMENTS`) : estuaires non codés que la géométrie ne sait pas trancher
      (fermeture trop large), désignés par un point amont de référence, avec les mêmes garde-fous.
+  E. RESTES ORPHELINS : composante codée amont (2) sur plus de 90 % de sa longueur, retirée entièrement (tronçons non codés
+     isolés au milieu d'un estuaire codé : Adour, Odet).
   D. ÎLES D'ESTUAIRE : une île (contour fermé) nettement plus proche des rives retirées que du rivage conservé, et
      à plus de 5 km de celui-ci, est retirée (îles de la Seine en amont, de la Loire, de la Gironde).
 Les segments de fermeture LTM sont ajoutés au rivage (ils bordent la mer). Toute fermeture restée incertaine
@@ -61,6 +63,7 @@ GARDE_B_MAX_M = 5_000
 # Une île n'est retirée que loin de tout rivage marin conservé : sinon bassins portuaires et lagunes (D2)
 # seraient pris pour des îles de fleuve.
 ILE_ESTUAIRE_MIN_MER_M = 5_000
+ORPHELIN_PART_RETIREE = 0.9
 
 # Estuaires dont la donnée officielle ne code pas l'amont et dont la fermeture est trop large pour la règle
 # géométrique. Un point amont de référence désigne le morceau à retirer ; les garde-fous s'appliquent.
@@ -118,6 +121,17 @@ def lire_loi_littoral(xlsx: Path) -> dict[str, list[str]]:
             ligne = dict(zip(entete, vals))
             out[ligne["INSEE_COM"]].append(ligne["CLASSEMENT"])
     return dict(out)
+
+
+def commune_parent(insee: str) -> str:
+    """Même règle que src/lib/plm.ts (communeParent) : arrondissement de Paris, Lyon, Marseille → commune."""
+    if "75101" <= insee <= "75120":
+        return "75056"
+    if "69381" <= insee <= "69389":
+        return "69123"
+    if "13201" <= insee <= "13216":
+        return "13055"
+    return insee
 
 
 def lire_index(chemin: Path) -> list[dict]:
@@ -282,6 +296,7 @@ def principal():
     ap.add_argument("--millesime-contours", default="2026")
     ap.add_argument("--cog-loi-littoral", default="2022")
     ap.add_argument("--coupure-seule", action="store_true", help="contrôle rapide : coupure et compteurs, sans mesures")
+    ap.add_argument("--sauver-etat", type=Path, help="phase 1.5 : sauvegarde de l'état de coupure (pickle) pour les audits, puis arrêt")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     t = {"debut": time.time()}
@@ -358,6 +373,27 @@ def principal():
     en_amont_geo = np.array([comp[i] in amont_retenu for i in range(len(morceaux))]) | retire_complement
     retire = en_amont_geo | code2
 
+    # E. RESTES ORPHELINS. Dans un estuaire codé, quelques tronçons non codés (confluences, ouvrages) restent isolés
+    # au milieu de rives retirées : 100 m de ligne suffisent à rendre Hastingues « à 0,7 km de la mer ». Une
+    # composante codée amont (2) sur plus de 90 % de sa longueur est retirée entièrement.
+    lg_comp = collections.Counter(); lg_ret = collections.Counter()
+    for i in range(len(morceaux)):
+        lg_comp[comp[i]] += longueur[i]
+        if code2[i]:
+            lg_ret[comp[i]] += longueur[i]
+    # Seule la part retirée PAR LE CODAGE OFFICIEL compte : une côte réelle soudée à un fleuve retiré par un
+    # complément (Honfleur, sur la Seine) ne doit jamais être emportée.
+    garde_lg = collections.Counter()
+    for i in range(len(morceaux)):
+        if not retire[i]:
+            garde_lg[comp[i]] += longueur[i]
+    orphelins = [c for c in lg_comp if garde_lg[c] > 0 and lg_ret[c] >= ORPHELIN_PART_RETIREE * lg_comp[c]]
+    orph = set(orphelins)
+    restes_orphelins_km = round(sum(garde_lg[c] for c in orphelins) / 1000, 2)
+    for i in range(len(morceaux)):
+        if comp[i] in orph:
+            retire[i] = True
+
     # D. ÎLES D'ESTUAIRE. Une île est un contour fermé, sans lien avec les rives : la coupure, faite le long des
     # rives, ne l'atteint pas (îles de la Seine, de la Loire, de la Gironde). Une île non codée est retirée si
     # elle est nettement plus proche des rives retirées (fleuve) que du rivage marin conservé, et à plus de 5 km de celui-ci.
@@ -391,9 +427,17 @@ def principal():
         "retire_en_plus_par_geometrie_et_complements_km": round(float(longueur[en_amont_geo & ~code2].sum()) / 1000, 1),
     }
     rivage = [m for m, r in zip(morceaux, retire) if not r] + [f["geom"] for f in ltm]
+    if args.sauver_etat:
+        import pickle
+        args.sauver_etat.write_bytes(pickle.dumps({
+            "morceaux": morceaux, "codes": codes, "comp": comp, "retire": retire, "decisions": decisions,
+            "ltm": ltm, "extremites": extremites, "ile": ile}))
+        print("état sauvegardé", args.sauver_etat)
+        return
     brut = list(lignes)
     t["coupure_s"] = time.time() - t["debut"] - t["lecture_limtm_s"]
     if args.coupure_seule:
+        print("restes orphelins :", len(orphelins), "composantes,", restes_orphelins_km, "km")
         print("îles retirées :", len(iles_retirees), "longueur km :", round(sum(x["km"] for x in iles_retirees), 1))
         for x in sorted(iles_retirees, key=lambda x: -x["km"])[:20]:
             print("  île", x)
@@ -404,7 +448,8 @@ def principal():
                     "Belle-Île (Le Palais)": (-3.155, 47.347), "Île-aux-Moines": (-2.85, 47.595), "Île d'Arz": (-2.80, 47.59), "Noirmoutier": (-2.25, 47.0),
                     "Île de Batz": (-4.01, 48.745), "Île de Bréhat": (-3.00, 48.85),
                     "Portiragnes plage": (3.37, 43.278), "Vias plage": (3.415, 43.29), "Saint-Georges-de-Didonne": (-1.0, 45.6),
-                    "Royan": (-1.03, 45.62)}
+                    "Royan": (-1.03, 45.62), "Hastingues": (-1.15, 43.53), "Saint-Étienne-d'Orthe": (-1.18, 43.55),
+                    "Quimper": (-4.10, 47.996), "Bayonne": (-1.475, 43.493), "Anglet plage": (-1.53, 43.50), "Bénodet": (-4.10, 47.87)}
         for nom, q in test_pts.items():
             pt = shapely.Point(*vers93.transform(*q))
             print(nom, round(shapely.distance(pt, riv[int(ar.query_nearest(pt)[0])]) / 1000, 2), "km")
@@ -431,13 +476,17 @@ def principal():
             j = int(arbre_brut.query_nearest(poly)[0])
             d_terr_brut = shapely.distance(poly, brut[j])
         resultats.append({
-            "insee": c["insee"], "nom": c["nom"], "dept": c.get("dept"),
+            "insee": c["insee"], "nom": c["nom"], "dept": c.get("dept"), "pop": c.get("population"),
             "ancienne_km": c.get("distance_cote_km"),
             "centre_km": round(d_centre[n] / 1000, 2),
             "territoire_km": None if d_terr is None else round(d_terr / 1000, 3),
             "centre_brut_km": round(d_centre_brut[n] / 1000, 2),
             "territoire_brut_km": None if d_terr_brut is None else round(d_terr_brut / 1000, 3),
             "loi": loi.get(c["insee"]),
+            # Doctrine PLM (phase 1.5) : la qualification juridique est COMMUNALE et s'hérite par les
+            # arrondissements, avec son origine ; les distances restent propres à chaque arrondissement.
+            "loi_effective": loi.get(commune_parent(c["insee"])),
+            "loi_source_commune": commune_parent(c["insee"]) if commune_parent(c["insee"]) != c["insee"] else None,
             "contour": poly is not None,
         })
     # Communes PLM : la commune entière (13055, 69123, 75056), reconstruite depuis son contour.
@@ -474,6 +523,7 @@ def principal():
             "fermetures_ltm": len(ltm), "extremites_non_accrochees": non_accrochees,
             "decisions": dict(statuts), "longueur_brute_km": round(float(longueur.sum()) / 1000, 1),
             "longueur_retiree_km": round(float(longueur[retire].sum()) / 1000, 1), "desaccords": desaccords,
+            "restes_orphelins_composantes": len(orphelins), "restes_orphelins_km": restes_orphelins_km,
             "iles_estuaire_retirees": len(iles_retirees), "iles_estuaire_km": round(sum(x["km"] for x in iles_retirees), 1),
             "segments_rivage": len(rivage), "communes_mesurees": len(resultats), "complements": complements,
         },
