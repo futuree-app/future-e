@@ -2093,7 +2093,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // On nomme, on ne mesure pas : paliers qualitatifs, jamais la distance brute
   // (le chiffre cassait le récit sur le révélateur d'arbitrages). Le détail au rapport.
   // FUT-33 : un FAIT, jamais un palier déduit de la courbe de classement (« loin de la mer » n'est pas un score).
-  eloignement_mer: (c) => `à ${Math.round(c.mer_centre_km ?? 0)} km de la mer`,
+  eloignement_mer: (c) => (c.mer_centre_km != null ? `à ${kmLisible(c.mer_centre_km)} du rivage marin` : "à distance du rivage marin"),
   // FUT-33 : la distance est l'information, le seul qualificatif honnête (lagunes comprises, jamais « plage »).
   proximite_mer: (c) => (c.mer_centre_km != null ? `rivage marin à ${kmLisible(c.mer_centre_km)}` : "rivage marin proche"),
   cadre_calme: "cadre calme et habitable",
@@ -2971,13 +2971,19 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
         ? inZoneDept && mountainPref
         : inZoneDept || mountainPref;
     const visible = subs.filter((x) => !x.baseline);
-    const ranked = [...visible].sort((a, b) => b.weight * b.s - a.weight * a.s);
-    let reasons = ranked.slice(0, 3).filter((x) => x.s >= 55).map((x) => reasonText(x.key, c));
+    // LES RAISONS SUIVENT LE PROJET (02/10/2026). La carte n'en montre qu'une (`reasons[0]`, la confirmation) :
+    // triées par force, elles faisaient passer un critère tantôt devant, tantôt derrière, d'une commune à l'autre
+    // (« loin de la mer » visible sur une carte, invisible sur les deux suivantes). D'abord les critères les plus
+    // lourds, et à poids égal l'ordre où le lecteur les a dits : toutes les cartes d'une recherche ouvrent sur le
+    // même critère dès que la commune le remplit (seuil de saillance inchangé).
+    const parProjet = visible.map((x, ordre) => ({ ...x, ordre })).sort((a, b) => b.weight - a.weight || a.ordre - b.ordre);
+    let reasons = parProjet.filter((x) => x.s >= 55).slice(0, 3).map((x) => reasonText(x.key, c));
     // Garantie : une carte ne doit jamais paraître vide ou « pas finie ». Si aucun
     // aspect ne dépasse le seuil de saillance, on montre quand même les 1 à 2
     // meilleurs aspects relatifs (ce qui explique pourquoi la commune ressort), sans
     // le seuil. Le tri reste honnête, on ne fabrique pas une raison qui n'existe pas.
-    if (reasons.length === 0) reasons = ranked.slice(0, 2).map((x) => reasonText(x.key, c));
+    const parForce = [...visible].sort((a, b) => b.weight * b.s - a.weight * a.s);
+    if (reasons.length === 0) reasons = parForce.slice(0, 2).map((x) => reasonText(x.key, c));
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
     const tradeoffKey: PreferenceKey | null = worst && worst.s < 50 ? worst.key : null;
     const tradeoff = tradeoffKey ? REASON_NEG[tradeoffKey] : null;

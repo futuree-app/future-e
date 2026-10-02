@@ -72,6 +72,9 @@ test("la position se dit par la distance : carte d'identité, raison de carte, D
   const vie = lire("src/lib/comparateur-vie.ts");
   assert.match(vie, /proximite_mer: \(c\) => \(c\.mer_centre_km != null \? `rivage marin à \$\{kmLisible\(c\.mer_centre_km\)\}`/);
   assert.match(vie, /if \(dim\.id === "mer" && c\.mer_centre_km != null\) return `Rivage marin · \$\{kmLisible\(c\.mer_centre_km\)\}`;/);
+  assert.match(vie, /eloignement_mer: \(c\) => \(c\.mer_centre_km != null \? `à \$\{kmLisible\(c\.mer_centre_km\)\} du rivage marin`/);
+  // Les raisons suivent le projet : poids, puis ordre dit par le lecteur (jamais la force d'un critère par commune).
+  assert.match(vie, /sort\(\(a, b\) => b\.weight - a\.weight \|\| a\.ordre - b\.ordre\)/);
   const faits = lire("src/lib/territoire/facts.ts");
   assert.match(faits, /merCentreKm: num\(e\.mer_centre_km\)/);
 });
