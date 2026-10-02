@@ -669,7 +669,6 @@ export default function FutureELanding() {
                 indicator_code: indicatorCode,
                 value_numeric: valueNumeric,
                 scenario: scenarioId,
-                horizon: scenarioPayload.h,
               };
             }
           }

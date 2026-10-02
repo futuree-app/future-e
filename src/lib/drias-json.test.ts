@@ -28,7 +28,7 @@ const num = (r: Ligne | undefined, col: string): number | null => {
   return v === null || v === undefined || v === "" ? null : Number(v);
 };
 
-// Les colonnes que le produit consomme réellement (cf. COLUMN_MAP dans drias-json.ts).
+// Les colonnes que le produit consomme réellement (cf. COLUMN_MAP et COLONNES_ACCUEIL dans drias-json.ts).
 const UTILISEES: Record<string, string> = {
   NORTMm_yr: "column04", NORTMm_seas_JJA: "column05", NORTMm_seas_DJF: "column06",
   NORTXm_seas_JJA: "column07", NORTX35D_yr: "column08", NORTX30D_yr: "column09",
