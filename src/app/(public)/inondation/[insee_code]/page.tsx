@@ -12,6 +12,7 @@ export const revalidate = 86400;
 // (revalidate 24h), donc aucune commune ne manque : seule change celle qui attend déjà.
 // Liste figée dans src/data/top1000-communes.json, régénérer avec scripts/update-top-communes.sh
 import { communesAPregenerer } from '@/lib/communes-pregenerees';
+import communesLoiLittoralMer from "@/data/communes-loi-littoral-mer.json";
 import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
@@ -21,6 +22,9 @@ export function generateStaticParams() {
 const ACCENT = '#60a5fa';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
+
+// FUT-33 : les communes classées « Mer » (loi Littoral, héritage PLM), générées par scripts/mer/liste-communes-mer.mjs.
+const COMMUNES_MER = new Set<string>(communesLoiLittoralMer.communes);
 
 function getAnon() {
   return createClient(
@@ -168,7 +172,6 @@ export default async function InondationCommune({
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
-  const dept = commune?.departement ?? insee_code.slice(0, 2);
   // LES DEUX HORIZONS, CHACUN SOUS SA VRAIE DATE (04/08/2026). Même correction que sur la page
   // chaleur jumelle : la page titrait « Projections 2050 » en lisant `gwl30`, le palier +3 °C
   // mondial (+4 °C en France) atteint vers 2100.
@@ -193,13 +196,11 @@ export default async function InondationCommune({
     .filter((rk) => rk.label === 'Inondations' || rk.label === 'Submersion marine')
     .reduce((s, rk) => s + rk.count, 0);
 
-  // Score submersion marine : toute commune littorale ayant un score en base
-  // (alimenté par populate-coastal-submersion.js — altitude au-dessus du niveau de la mer)
-  // Les départements côtiers de France métropolitaine :
-  const COASTAL_DEPTS = new Set(['06','11','13','14','17','22','29','30','33','34','35','40','44','50','56','59','62','64','66','76','83','85','2A','2B']);
-  // On ne montre le bloc que si la commune est littorale ET a un score explicitement
-  // inséré par le script côtier (ind_exposition null = score altimétrique, pas DRIAS fluvial)
-  const coastalScore = (commune != null && COASTAL_DEPTS.has(dept) && commune.ind_exposition == null)
+  // Score submersion marine (alimenté par populate-coastal-submersion.js, altitude au-dessus du niveau de la mer).
+  // FUT-33 : « commune littorale » = commune classée « Mer » au titre de la loi Littoral, et plus un département
+  // côtier. On ne montre le bloc que si la commune l'est ET a un score explicitement inséré par le script côtier
+  // (ind_exposition null = score altimétrique, pas DRIAS fluvial).
+  const coastalScore = (commune != null && COMMUNES_MER.has(insee_code) && commune.ind_exposition == null)
     ? commune.score
     : null;
 

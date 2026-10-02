@@ -2,6 +2,12 @@
 /**
  * populate-coastal-submersion.js
  *
+ * ⚠ LEGACY (FUT-33, 02/10/2026) : NE PLUS EXÉCUTER EN L'ÉTAT. Il sélectionne les communes par DÉPARTEMENT côtier
+ * (une commune intérieure d'un département côtier est traitée), et tient pour « eau » tout pixel d'eau, rivières
+ * comprises. La page /inondation/[insee] n'affiche plus son score que pour les communes classées « Mer » au titre
+ * de la loi Littoral (src/data/communes-loi-littoral-mer.json). Sa refonte (sélection par la loi Littoral, altitude
+ * par un MNT de référence) relève d'un ticket dédié ; il écrit en production (Supabase), d'où le verrou ci-dessous.
+ *
  * Calcule les scores de submersion côtière pour les communes littorales et
  * les insère dans communes_tension (slug='submersion').
  *
@@ -152,6 +158,12 @@ function deptFromInsee(insee) {
 }
 
 async function main() {
+  // FUT-33 : verrou. Ce script écrit dans la base de production avec une sélection par département (voir l'en-tête).
+  if (!process.argv.includes("--legacy-confirme")) {
+    console.error("populate-coastal-submersion.js est un pipeline LEGACY (FUT-33) : sélection par département, rivières comprises.\n" +
+      "Il n'est plus à exécuter en l'état. Pour le lancer malgré tout, après revue : --legacy-confirme");
+    process.exit(1);
+  }
   // Charger la liste des 1000 communes cibles
   const top1000Raw = await fs.readFile(
     path.join(process.cwd(), 'src/data/top1000-communes.json'),

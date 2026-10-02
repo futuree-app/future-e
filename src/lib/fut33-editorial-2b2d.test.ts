@@ -104,7 +104,11 @@ const fichiersProduit = () => {
 test("plus aucun reliquat : ancien proxy, tables départementales de façade, libellés de palier", () => {
   for (const f of fichiersProduit()) {
     const s = readFileSync(f, "utf8");
-    assert.doesNotMatch(s, /distance_cote_km|distanceCoteKm|DEPT_LITTORAL_ATLANTIQUE|FACADE_BY_DEPT|ANCRE_COAST_KM|excludeSeaMinKm|COAST_ANCHORS/, f);
+    assert.doesNotMatch(s, /distance_cote_km|distanceCoteKm|DEPT_LITTORAL_ATLANTIQUE|FACADE_BY_DEPT|ANCRE_COAST_KM|excludeSeaMinKm|COAST_ANCHORS|COASTAL_DEPTS|DEPTS?_COTIERS?/, f);
+    // Un littoral ne se déduit jamais d'un département. Seule exception assumée : les ZONES de recherche
+    // « côte atlantique / Manche / Méditerranée » (geo-zones.ts), conventions de périmètre DITES au lecteur
+    // (« les départements côtiers de l'Atlantique… »), qui délimitent un territoire et ne qualifient aucune commune.
+    if (!f.endsWith("/geo-zones.ts")) assert.doesNotMatch(s, /départements? côtiers?/i, f);
     // Le prompt du parseur cite les MOTS DU LECTEUR (« loin de la mer ») : ce ne sont pas des libellés affichés.
     if (!f.endsWith("/parse/route.ts")) {
       assert.doesNotMatch(s, /["'`](En bord de mer|Proche du littoral|Loin de la mer|Climat maritime)["'`]/, f);
@@ -112,4 +116,21 @@ test("plus aucun reliquat : ancien proxy, tables départementales de façade, li
   }
   assert.ok(communes.every((x) => !("distance_cote_km" in x)));
   assert.doesNotMatch(lire("scripts/build-comparateur-index.mjs"), /distance_cote_km|COAST_ANCHORS/);
+});
+
+test("submersion marine (/inondation) : le bloc côtier lit la loi Littoral ; le pipeline départemental est verrouillé", () => {
+  const page = lire("src/app/(public)/inondation/[insee_code]/page.tsx");
+  assert.match(page, /COMMUNES_MER\.has\(insee_code\)/);
+  assert.doesNotMatch(page, /COASTAL_DEPTS/);
+  const liste = JSON.parse(lire("src/data/communes-loi-littoral-mer.json")).communes as string[];
+  const attendu = new Set<string>();
+  for (const x of communes) {
+    if ((x.loi_effective ?? []).includes("Mer")) { attendu.add(x.insee); if (x.loi_source_commune) attendu.add(x.loi_source_commune); }
+  }
+  assert.deepEqual([...liste].sort(), [...attendu].sort(), "la liste suit data/mer (régénérer : node scripts/mer/liste-communes-mer.mjs)");
+  for (const insee of ["29019", "22113", "13055", "13207", "13004"]) assert.ok(liste.includes(insee), insee);
+  for (const insee of ["14118", "33063", "17299", "74010"]) assert.ok(!liste.includes(insee), insee);
+  const script = lire("scripts/populate-coastal-submersion.js");
+  assert.match(script, /LEGACY \(FUT-33/);
+  assert.match(script, /--legacy-confirme/);
 });
