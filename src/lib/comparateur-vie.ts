@@ -16,6 +16,7 @@ import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/w
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
+import { scoreProximiteMer, bonusMer, ancreLittorale } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
@@ -1265,7 +1266,10 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       const p = avgPct(c, ["NORRRq99_yr", "NORRx1d_yr"]); return p == null ? null : 100 - p;
     }
     case "proximite_mer":
-      return clamp(100 - c.distance_cote_km / 1.5, 0, 100);
+      // FUT-33 (2B.1) : centre de la commune → rivage marin (lagunes comprises, D2). La recherche classe une
+      // COMMUNE : le centre, pas le point le plus proche de son territoire (Arles toucherait sinon la mer).
+      // Courbe conservée : linéaire, 100 au rivage, 0 à 150 km ; aucun seuil de rejet (D10).
+      return scoreProximiteMer(c);
     case "cadre_calme":
       return lerp(CALME, c.densite);
     case "eviter_isolement":
@@ -2371,7 +2375,8 @@ function explorationBonus(
   }
   const sea = hints.find((h) => h.kind === "near_sea_radius");
   if (sea) {
-    bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - c.distance_cote_km / sea.valueKm));
+    // FUT-33 (2B.1) : même mesure que la préférence ; bonus de classement seulement, jamais un filtre.
+    bonus = Math.max(bonus, bonusMer(c, sea.valueKm, EXPLORATION_BONUS_MAX));
   }
   return bonus;
 }
@@ -2529,7 +2534,7 @@ const SIGNATURE_KEYS: PreferenceKey[] = [
 ];
 const SIGNATURE_MIN = 70;      // percentile minimal pour qu'un trait « distingue » la commune
 const SIGNATURE_MAX_KEYS = 4;  // 1 dominant (poids 3) + jusqu'à 3 secondaires (poids 2)
-const ANCRE_COAST_KM = 15;     // au-delà, pas « au bord de la mer » (aligné sur buildSignature)
+// FUT-33 (D5) : la règle de l'ancre littorale vit dans mer-recherche.ts (ancreLittorale).
 
 // subScore mais SANS ses valeurs par défaut (donnée absente) : on n'invente pas une
 // signature à partir d'un champ manquant. Dans subScore, calme_sonore/expo défaut=100,
@@ -2572,10 +2577,13 @@ export function communeToPreferences(entry: IndexCommune): AnchorDerivation {
     traits.push({ key: x.key, text: reasonText(x.key, entry) });
   });
 
-  // 2) Faits identitaires évidents. Bord de mer -> proximite_mer (poids selon distance).
-  if (entry.distance_cote_km != null && entry.distance_cote_km <= ANCRE_COAST_KM) {
-    preferences.push({ key: "proximite_mer", weight: entry.distance_cote_km <= 5 ? 3 : 2 });
-    traits.push({ key: "proximite_mer", text: reasonText("proximite_mer", entry) });
+  // 2) FUT-33 (D5) : une ville de référence littorale SUGGÈRE la proximité du littoral. Règle : commune classée
+  //    « Mer » (loi Littoral, après héritage PLM) ET centre à 5 km au plus du rivage marin. C'est une suggestion
+  //    (source « ancre », adoptable ou rejetable, FUT-8), jamais une condition. Vocabulaire : « littoral »,
+  //    jamais « plage » ni « océan » (Narbonne et Vannes passent par un étang et un golfe).
+  if (ancreLittorale(entry)) {
+    preferences.push({ key: "proximite_mer", weight: 2 });
+    traits.push({ key: "proximite_mer", text: "proximité du littoral" });
   }
 
   // 3) Gabarit de taille (taille d'AGGLOMÉRATION), fourchette large autour de l'ancre.
@@ -2643,7 +2651,7 @@ export async function perimeterAllowsCoast(hc: HardConstraints): Promise<boolean
   if (hardDepts.size === 0) return true; // aucun périmètre géographique dur -> littoral atteignable
   const communes = await loadIndex();
   return communes.some(
-    (c) => hardDepts.has(c.dept) && c.distance_cote_km != null && c.distance_cote_km <= ANCRE_COAST_KM,
+    (c) => hardDepts.has(c.dept) && ancreLittorale(c),
   );
 }
 

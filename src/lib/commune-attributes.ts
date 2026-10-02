@@ -1,6 +1,7 @@
 // Le mapping index -> attributs, PUR. Il est pur pour une raison précise : c'est l'une des frontières où
 // les deux moteurs divergeaient (le comparateur lisait tailleVille, le dossier la population communale).
 // Les tests de parité doivent pouvoir la TRAVERSER, pas la contourner.
+import { communeLittoraleMer } from "./mer-recherche.ts";
 import type { CommuneAttributes } from "./hard-constraints.ts";
 
 // La forme minimale d'une entrée d'index. On ne dépend pas d'IndexCommune (server-only) : on décrit ce
@@ -17,6 +18,8 @@ export type IndexCommuneLike = {
   relief_proximite?: number | null;
   relief_altitude_max_m?: number | null;
   distance_cote_km: number;
+  mer_centre_km?: number | null;
+  loi_effective?: string[] | null;
 };
 
 // LA DOCTRINE DE LA TAILLE (chantier C) : une commune dans une unité urbaine porte la taille de son
@@ -61,5 +64,9 @@ export function communeAttributesFrom(c: IndexCommuneLike, tailleVille: number |
     reliefProximite: c.relief_proximite ?? null,
     reliefAltitudeMaxM: c.relief_altitude_max_m ?? null,
     distanceCoteKm: c.distance_cote_km,
+    // FUT-33 (phase 2B.1) : la recherche lit la vérité littorale de l'index quand elle y est (toujours en
+    // production). Absente (fixture ancienne), l'évaluateur garde l'ancien chemin.
+    ...("mer_centre_km" in c ? { merCentreKm: c.mer_centre_km ?? null } : {}),
+    ...("loi_effective" in c ? { communeLittoraleMer: communeLittoraleMer(c) } : {}),
   };
 }

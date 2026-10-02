@@ -57,7 +57,7 @@ test("rivage 5 m embarqué : la distance à l'adresse retrouve la distance du ce
   }
 });
 
-test("phase 2A : aucun code produit ne lit encore les champs mer_* ni loi_*", () => {
+test("phase 2B.1 : seuls la recherche (mer-recherche, commune-attributes, comparateur-vie) lit les champs mer_* / loi_*", () => {
   const fichiers: string[] = [];
   const parcourir = (dossier: string) => {
     for (const n of readdirSync(dossier)) {
@@ -68,5 +68,5 @@ test("phase 2A : aucun code produit ne lit encore les champs mer_* ni loi_*", ()
   };
   parcourir(fileURLToPath(new URL("src", racine)));
   const lecteurs = fichiers.filter((f) => /mer_centre_km|mer_territoire_km|loi_effective|loi_source_commune/.test(readFileSync(f, "utf8")));
-  assert.deepEqual(lecteurs.map((f) => f.split("/src/")[1]), ["lib/comparateur-vie.ts"], "seul le type de l'index les déclare");
+  assert.deepEqual(lecteurs.map((f) => f.split("/src/")[1]).sort(), ["lib/commune-attributes.ts", "lib/comparateur-vie.ts", "lib/mer-recherche.ts"], "ni le dossier, ni le Territoire, ni l'adresse ne les lisent encore");
 });

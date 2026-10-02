@@ -129,6 +129,12 @@ export type CommuneAttributes = {
    */
   reliefAltitudeMaxM?: number | null;
   distanceCoteKm: number | null;
+  // FUT-33 (phase 2B.1) : vérité littorale, fournie par la RECHERCHE seulement (commune-attributes.ts).
+  // `undefined` = l'appelant ne la fournit pas encore (dossier, non migré) : l'évaluateur garde alors l'ancien
+  // chemin. Ce n'est JAMAIS une distance d'adresse : la mesure part du point de référence de la commune.
+  merCentreKm?: number | null;
+  // Commune classée « Mer » au titre de la loi Littoral (après héritage PLM). Estuaire ou Lac seuls : false.
+  communeLittoraleMer?: boolean | null;
 };
 
 // ── Les valeurs, structurées ─────────────────────────────────────────────────
@@ -584,6 +590,24 @@ export function evaluateNearSea(
   // que rien n'affichait nulle part. On ne le remplace pas, on le DEMANDE (lot 2 : une ambiguïté au parse).
   if (ns.threshold == null) return { key: "nearSea", status: "unexamined", reason: "missing_parameter" };
   if (ns.threshold.metric !== "distance") return { key: "nearSea", status: "unexamined", reason: "unsupported_metric" };
+  // FUT-33 : la recherche mesure le centre de la commune au rivage marin (Limite terre-mer Shom-IGN coupée aux
+  // limites transversales de la mer). Le nombre du lecteur est appliqué tel quel ; aucun seuil universel.
+  if (c.merCentreKm !== undefined) {
+    if (c.merCentreKm == null) return { key: "nearSea", status: "unexamined", reason: "missing_data" };
+    const maxM = ns.threshold.maxKm;
+    const kmM = Math.round(c.merCentreKm * 10) / 10;
+    const obs: ConstraintValue = { kind: "distance_km", value: c.merCentreKm };
+    const exp: ConstraintValue = { kind: "distance_km", value: maxM };
+    const keys = ["commune.merCentreKm", "project.hardConstraints.nearSea"];
+    if (c.merCentreKm <= maxM) {
+      return { key: "nearSea", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: `${kmM} km`, expectedLabel: `au plus ${maxM} km`, evidenceKeys: keys };
+    }
+    return {
+      key: "nearSea", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: `${kmM} km`, expectedLabel: `au plus ${maxM} km`, evidenceKeys: keys,
+      topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
+      statement: `Le centre de cette commune est à ${kmM} km du rivage marin, au-delà de la limite de ${maxM} km qu'indique votre projet.`,
+    };
+  }
   if (c.distanceCoteKm == null) return { key: "nearSea", status: "unexamined", reason: "missing_data" };
 
   const max = ns.threshold.maxKm;
@@ -611,6 +635,22 @@ export function evaluateExcludeSea(
   c: CommuneAttributes,
 ): HardConstraintAssessment<"excludeSea"> {
   if (!ctx.constraints.excludeSea) return { key: "excludeSea", status: "not_declared" };
+  // FUT-33 (D4) : « pas le littoral » = commune classée Mer au titre de la loi Littoral, et rien d'autre. Ni
+  // distance, ni département. Une commune d'estuaire ou de lac n'est pas une commune littorale de la mer.
+  if (c.communeLittoraleMer !== undefined) {
+    if (c.communeLittoraleMer == null) return { key: "excludeSea", status: "unexamined", reason: "missing_data" };
+    const obs: ConstraintValue = { kind: "boolean", value: c.communeLittoraleMer };
+    const exp: ConstraintValue = { kind: "boolean", value: false };
+    const keys = ["commune.loiLittoral", "project.hardConstraints.excludeSea"];
+    if (!c.communeLittoraleMer) {
+      return { key: "excludeSea", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: "hors commune littorale", expectedLabel: "hors commune littorale", evidenceKeys: keys };
+    }
+    return {
+      key: "excludeSea", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: "commune littorale", expectedLabel: "hors commune littorale", evidenceKeys: keys,
+      topic: topicFit(`le caractère littoral ${deCommune(c.nom)}`, "le caractère littoral"),
+      statement: "Cette commune est une commune littorale (classée « Mer » au titre de la loi Littoral). Votre souhait de ne pas habiter le littoral est ici entendu comme : hors des communes littorales.",
+    };
+  }
   if (c.distanceCoteKm == null) return { key: "excludeSea", status: "unexamined", reason: "missing_data" };
 
   const min = PRODUCT_CONVENTIONS.excludeSeaMinKm;

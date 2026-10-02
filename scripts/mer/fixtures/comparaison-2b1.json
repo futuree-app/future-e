@@ -1,0 +1,456 @@
+{
+ "preference": [
+  {
+   "commune": "Lannion",
+   "ancienne_km": 58,
+   "mer_centre_km": 0.66,
+   "score_avant": 61,
+   "score_apres": 100
+  },
+  {
+   "commune": "Perros-Guirec",
+   "ancienne_km": 63,
+   "mer_centre_km": 0,
+   "score_avant": 58,
+   "score_apres": 100
+  },
+  {
+   "commune": "Morlaix",
+   "ancienne_km": 54,
+   "mer_centre_km": 3.18,
+   "score_avant": 64,
+   "score_apres": 98
+  },
+  {
+   "commune": "Châtelaillon-Plage",
+   "ancienne_km": 11,
+   "mer_centre_km": 1.04,
+   "score_avant": 93,
+   "score_apres": 99
+  },
+  {
+   "commune": "La Rochelle",
+   "ancienne_km": 2,
+   "mer_centre_km": 0.95,
+   "score_avant": 99,
+   "score_apres": 99
+  },
+  {
+   "commune": "Bordeaux",
+   "ancienne_km": 51,
+   "mer_centre_km": 39.35,
+   "score_avant": 66,
+   "score_apres": 74
+  },
+  {
+   "commune": "Nantes",
+   "ancienne_km": 49,
+   "mer_centre_km": 38.93,
+   "score_avant": 67,
+   "score_apres": 74
+  },
+  {
+   "commune": "Caen",
+   "ancienne_km": 1,
+   "mer_centre_km": 9.23,
+   "score_avant": 99,
+   "score_apres": 94
+  },
+  {
+   "commune": "Montpellier",
+   "ancienne_km": 17,
+   "mer_centre_km": 6.85,
+   "score_avant": 89,
+   "score_apres": 95
+  },
+  {
+   "commune": "Arles",
+   "ancienne_km": 23,
+   "mer_centre_km": 13.36,
+   "score_avant": 85,
+   "score_apres": 91
+  },
+  {
+   "commune": "Narbonne",
+   "ancienne_km": 12,
+   "mer_centre_km": 1.62,
+   "score_avant": 92,
+   "score_apres": 99
+  },
+  {
+   "commune": "Vannes",
+   "ancienne_km": 1,
+   "mer_centre_km": 0.82,
+   "score_avant": 99,
+   "score_apres": 99
+  },
+  {
+   "commune": "Annecy",
+   "ancienne_km": 260,
+   "mer_centre_km": 259.71,
+   "score_avant": 0,
+   "score_apres": 0
+  },
+  {
+   "commune": "Rochefort",
+   "ancienne_km": 27,
+   "mer_centre_km": 7.97,
+   "score_avant": 82,
+   "score_apres": 95
+  },
+  {
+   "commune": "Brest",
+   "ancienne_km": 2,
+   "mer_centre_km": 1.36,
+   "score_avant": 99,
+   "score_apres": 99
+  },
+  {
+   "commune": "Lacanau",
+   "ancienne_km": 37,
+   "mer_centre_km": 8.46,
+   "score_avant": 75,
+   "score_apres": 94
+  },
+  {
+   "commune": "Carcans",
+   "ancienne_km": 48,
+   "mer_centre_km": 11.94,
+   "score_avant": 68,
+   "score_apres": 92
+  },
+  {
+   "commune": "Marseille 7e Arrondissement",
+   "ancienne_km": 4,
+   "mer_centre_km": 0,
+   "score_avant": 97,
+   "score_apres": 100
+  },
+  {
+   "commune": "Parentis-en-Born",
+   "ancienne_km": 14,
+   "mer_centre_km": 14.6,
+   "score_avant": 91,
+   "score_apres": 90
+  }
+ ],
+ "numerique": [
+  {
+   "maxKm": 2,
+   "avant": 36,
+   "apres": 546,
+   "entrants": [
+    "Dunkerque (59)",
+    "Marseille 8e Arrondissement (13)",
+    "Antibes (06)",
+    "Ajaccio (2A)",
+    "La Seyne-sur-Mer (83)",
+    "Narbonne (11)"
+   ],
+   "sortants": [
+    "Caen (14)",
+    "Saint-Brieuc (22)",
+    "Agde (34)",
+    "Abbeville (80)"
+   ]
+  },
+  {
+   "maxKm": 5,
+   "avant": 156,
+   "apres": 1132,
+   "entrants": [
+    "Marseille 8e Arrondissement (13)",
+    "Marseille 15e Arrondissement (13)",
+    "Marseille 9e Arrondissement (13)",
+    "Antibes (06)",
+    "La Seyne-sur-Mer (83)",
+    "Narbonne (11)"
+   ],
+   "sortants": [
+    "Caen (14)",
+    "Quimper (29)",
+    "Abbeville (80)",
+    "Hérouville-Saint-Clair (14)",
+    "Ifs (14)",
+    "Saint-Avé (56)"
+   ]
+  },
+  {
+   "maxKm": 10,
+   "avant": 559,
+   "apres": 1944,
+   "entrants": [
+    "Montpellier (34)",
+    "Narbonne (11)",
+    "Martigues (13)",
+    "Aubagne (13)",
+    "Salon-de-Provence (13)",
+    "Istres (13)"
+   ],
+   "sortants": [
+    "Quimper (29)",
+    "Abbeville (80)",
+    "Solliès-Pont (83)",
+    "Ifs (14)",
+    "Ergué-Gabéric (29)",
+    "Fleury-sur-Orne (14)"
+   ]
+  },
+  {
+   "maxKm": 15,
+   "avant": 1082,
+   "apres": 2673,
+   "entrants": [
+    "Montpellier (34)",
+    "Aix-en-Provence (13)",
+    "Béziers (34)",
+    "Arles (13)",
+    "Martigues (13)",
+    "Aubagne (13)"
+   ],
+   "sortants": [
+    "Cuers (83)",
+    "Thue et Mue (14)",
+    "Verson (14)",
+    "Fontaine-Étoupefour (14)",
+    "Saint-Brandan (22)",
+    "Laize-Clinchamps (14)"
+   ]
+  },
+  {
+   "maxKm": 30,
+   "avant": 3289,
+   "apres": 4539,
+   "entrants": [
+    "Nîmes (30)",
+    "Pessac (33)",
+    "La Roche-sur-Yon (85)",
+    "Salon-de-Provence (13)",
+    "Saint-Médard-en-Jalles (33)",
+    "Saintes (17)"
+   ],
+   "sortants": [
+    "Brignoles (83)",
+    "Les Monts d'Aunay (14)",
+    "Thury-Harcourt-le-Hom (14)",
+    "Flixecourt (80)",
+    "Rion-des-Landes (40)",
+    "Auxi-le-Château (62)"
+   ]
+  }
+ ],
+ "hors_littoral": {
+  "satisfaites_avant": 33827,
+  "satisfaites_apres": 33933,
+  "cas": [
+   {
+    "commune": "Lannion",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Perros-Guirec",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Morlaix",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Châtelaillon-Plage",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "La Rochelle",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Bordeaux",
+    "avant": "acceptée",
+    "apres": "acceptée",
+    "loi": null
+   },
+   {
+    "commune": "Nantes",
+    "avant": "acceptée",
+    "apres": "acceptée",
+    "loi": null
+   },
+   {
+    "commune": "Caen",
+    "avant": "écartée",
+    "apres": "acceptée",
+    "loi": null
+   },
+   {
+    "commune": "Montpellier",
+    "avant": "acceptée",
+    "apres": "acceptée",
+    "loi": null
+   },
+   {
+    "commune": "Arles",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Narbonne",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Vannes",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Annecy",
+    "avant": "acceptée",
+    "apres": "acceptée",
+    "loi": [
+     "Lac"
+    ]
+   },
+   {
+    "commune": "Rochefort",
+    "avant": "acceptée",
+    "apres": "acceptée",
+    "loi": [
+     "Estuaire"
+    ]
+   },
+   {
+    "commune": "Brest",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Lacanau",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Lac",
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Carcans",
+    "avant": "acceptée",
+    "apres": "écartée",
+    "loi": [
+     "Lac",
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Marseille 7e Arrondissement",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Mer"
+    ]
+   },
+   {
+    "commune": "Parentis-en-Born",
+    "avant": "écartée",
+    "apres": "écartée",
+    "loi": [
+     "Lac",
+     "Mer"
+    ]
+   }
+  ]
+ },
+ "ancres": [
+  {
+   "ancre": "Brest",
+   "avant": "proximite_mer poids 3",
+   "apres": "suggestion « proximité du littoral » (poids 2)"
+  },
+  {
+   "ancre": "Lannion",
+   "avant": "rien",
+   "apres": "suggestion « proximité du littoral » (poids 2)"
+  },
+  {
+   "ancre": "La Rochelle",
+   "avant": "proximite_mer poids 3",
+   "apres": "suggestion « proximité du littoral » (poids 2)"
+  },
+  {
+   "ancre": "Narbonne",
+   "avant": "proximite_mer poids 2",
+   "apres": "suggestion « proximité du littoral » (poids 2)"
+  },
+  {
+   "ancre": "Arles",
+   "avant": "rien",
+   "apres": "rien"
+  },
+  {
+   "ancre": "Bordeaux",
+   "avant": "rien",
+   "apres": "rien"
+  },
+  {
+   "ancre": "Vannes",
+   "avant": "proximite_mer poids 3",
+   "apres": "suggestion « proximité du littoral » (poids 2)"
+  },
+  {
+   "ancre": "Annecy",
+   "avant": "rien",
+   "apres": "rien"
+  },
+  {
+   "ancre": "Caen",
+   "avant": "proximite_mer poids 3",
+   "apres": "rien"
+  },
+  {
+   "ancre": "Lacanau",
+   "avant": "rien",
+   "apres": "rien"
+  },
+  {
+   "ancre": "Carcans",
+   "avant": "rien",
+   "apres": "rien"
+  }
+ ],
+ "ancres_national": {
+  "avant": 1082,
+  "apres": 810
+ }
+}

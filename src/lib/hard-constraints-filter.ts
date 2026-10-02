@@ -77,7 +77,7 @@ const UNAPPLIED_LABELS: Record<HardConstraintKey, (detail?: string) => string> =
   montagne: () => "l'exigence de montagne",
   reliefProche: () => "la proximité du relief",
   nearSea: () => "la proximité de la mer",
-  excludeSea: () => "l'éloignement de la mer",
+  excludeSea: () => "l'exclusion des communes littorales", // FUT-33 (D4) : classement loi Littoral, plus une distance
   // Le lieu est NOMMÉ comme le lecteur l'a posé : « la proximité de la gare Matabiau », jamais
   // « la proximité de Gare Matabiau, Toulouse » (la forme d'index), ni « la proximité d'un lieu ».
   nearPlace: (d) => (d ? `la proximité ${deCommune(lieuEnPhrase(d))}` : "la proximité d'un lieu"),
