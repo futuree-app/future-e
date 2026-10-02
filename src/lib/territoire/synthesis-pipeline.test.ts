@@ -201,7 +201,12 @@ test("les données existantes restent intactes : aucune migration FUT-6 ne touch
   assert.doesNotMatch(sql, /workbook|terrain_observations|report_context|user_profiles/);
   // Et les chemins d'écriture restent en place, pour AskFuture et la future Lecture pour votre projet.
   assert.match(readFileSync("src/app/api/terrain-observations/route.ts", "utf8"), /terrain_observations/);
-  assert.match(readFileSync("src/app/api/ask/route.ts", "utf8"), /workbook_quartier/);
+  // AskFuture lit toujours le carnet : depuis FUT-16, la mise en forme du profil (dont `workbook_quartier`)
+  // vit dans le module pur du system prompt, que la route appelle.
+  assert.match(
+    readFileSync("src/app/api/ask/route.ts", "utf8") + readFileSync("src/lib/ask/system-prompt.ts", "utf8"),
+    /workbook_quartier/,
+  );
 });
 
 // ── Budget : une réservation avant CHAQUE appel payant (correction du 28/09) ────────────────
