@@ -1,8 +1,10 @@
 // LE PROMPT SYSTÈME D'ASKFUTURE, EN FONCTIONS PURES (FUT-16).
 //
-// Extrait de src/app/api/ask/route.ts sans changer un mot, pour qu'un test puisse inspecter le `system`
-// EXACTEMENT passé à `anthropic.messages.create()`. La route ne garde que les accès (Supabase,
-// enrichissement, Anthropic) ; tout ce qui devient texte pour le modèle passe par `construireSystemPrompt`.
+// Extrait de src/app/api/ask/route.ts pour qu'un test puisse inspecter le `system` EXACTEMENT passé à
+// `anthropic.messages.create()`. Le prompt de base, les blocs d'enrichissement et le profil ont été
+// déplacés sans changer un mot ; seuls le référentiel interne et l'assemblage ont changé, pour retirer
+// `communes_tension` (FUT-16). La route ne garde que les accès (Supabase, enrichissement, Anthropic) ;
+// tout ce qui devient texte pour le modèle passe par `construireSystemPrompt`.
 //
 // Module PUR : aucune I/O, imports de types seulement, chemins relatifs (testable sous `node --test`).
 import type { CommuneFullData } from "../commune-data.ts";
@@ -324,7 +326,7 @@ export function formatEnrichmentBlock(enr: EnrichmentResult): string {
 // ─── Profil utilisateur connu ──────────────────────────────────────────────
 export type ProfileRow = Record<string, unknown> | null;
 
-export function buildUserProfileText(profile: ProfileRow): string {
+function buildUserProfileText(profile: ProfileRow): string {
   if (!profile) return "Profil non renseigné.";
 
   const lines: string[] = [];

@@ -547,16 +547,49 @@ l'absence de risque incendie recensé par Géorisques (il écrivait « expositio
 Monteux, la sécheresse devient « un enjeu documenté » (GASPAR, VigiEau, 172 à 182 jours de sol sec) au lieu
 de « pas structurellement parmi les plus exposés ».
 
-### Reliquats renvoyés
+### Décision : la baignade compte comme une vraie source
 
+L'ancienne condition d'absence de données (`!anyEnrichmentData && !hasTensionData`) ignorait la baignade.
+Elle ne dépend plus que des vraies sources, baignade comprise (`aDesDonneesDetaillees`) : une commune pour
+laquelle futur•e a des sites de baignade classés ne reçoit plus « aucune donnée détaillée disponible ».
+Décision validée le 02/10/2026. Le bloc littoral, lu par l'enrichissement mais jamais mis en forme dans le
+prompt, n'y compte pas.
+
+### Revue finale (02/10/2026)
+
+- Code déplacé vérifié identique à l'original (prompt de base, sept blocs d'enrichissement, profil).
+- En-tête du module corrigé : seuls le référentiel et l'assemblage ont changé.
+- `buildUserProfileText` n'est plus exporté (aucun usage hors du module).
+- Tests renforcés : un test vérifie la liste exacte des blocs du `system` (un bloc de notes réintroduit sous
+  un autre nom échoue) ; la liste noire d'adjectifs de T4 est remplacée par l'égalité des blocs de sources
+  avec `formatEnrichmentBlock`. Contrôle par mutation : un bloc « [Indices internes] - feux : niveau élevé »
+  réinjecté fait échouer trois tests.
+
+### Reliquats hors périmètre
+
+- **FUT-33** (proxys littoraux) : catégories AskFuture tirées du préfixe de département (Monteux
+  « littoral »).
 - **FUT-28** (formulaire d'accueil) : `WizardTeaser` et `/api/wizard-preview` (« Score X/100 · exposition
   élevée », « Signal officiellement recensé »).
 - **FUT-52** (articles SEO) : scores écrits en dur de `/chaleur/villes-les-plus-exposees`, classements par
   score (submersion, dépendance automobile).
-- **FUT-51** (rôle d'AskFuture) : contrôle de sortie d'AskFuture (les réponses peuvent encore dire
-  « aujourd'hui » d'une projection ou conclure sur la « ressource en eau ») ; historique `messages[]` fourni
-  par le client ; libellé DRIAS « Jours risque feu » (doctrine FUT-37 : « météo propice aux feux »).
-- **Ticket à créer** : catégories issues du préfixe de département (Monteux « littoral »).
-- **Ticket à créer** (données) : les 99 lignes corrompues du 09/05 et le décalage de colonnes de
-  `populate-communes-tension.js`, si la table survit à FUT-28 et FUT-52 ; `LocalTensionContext.tsx` (code
-  mort, non touché).
+- **FUT-51** (rôle d'AskFuture) : contrôle des sorties (une projection 2030 appelée « aujourd'hui », la
+  « tension sur la ressource en eau ») ; historique `messages[]` transmis par le client ; libellés et
+  interprétations plus généraux, dont « Jours risque feu » (doctrine FUT-37 : « météo propice aux feux ») ;
+  autorité générale d'AskFuture et cohérence avec le Projet.
+
+### Dette `communes_tension` (documentée, aucun ticket créé)
+
+La trajectoire retenue est de **retirer progressivement la dépendance produit** à la table plutôt que de
+réparer une architecture de scores abandonnée. Les 99 lignes corrompues du 09/05 et le décalage de colonnes
+de `scripts/populate-communes-tension.js` ne sont donc pas corrigés. Consommateurs restants après FUT-16 :
+
+| Consommateur | Usage | Repris dans |
+|---|---|---|
+| `src/app/api/wizard-preview/route.ts` → `WizardTeaser.tsx` | score affiché au public | FUT-28 |
+| `src/app/(public)/inondation/villes-les-plus-exposees-submersion/page.tsx` | classement par score | FUT-52 |
+| `src/app/(public)/j-utilise-beaucoup-ma-voiture/villes-les-plus-dependantes/page.tsx` | classement par score | FUT-52 |
+| `src/app/(public)/inondation/[insee_code]/page.tsx` | score côtier altimétrique | FUT-52 |
+| `src/app/(public)/chaleur/[insee_code]/page.tsx` | identité seulement (nom, département) | inoffensif |
+| `src/components/LocalTensionContext.tsx` | code mort (monté nulle part), non rendu mort par FUT-16 | laissé en place |
+| `scripts/populate-*.js`, migration `001_communes_tension.sql` | alimentation et schéma | suivront le retrait |

@@ -10,7 +10,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { aDesDonneesDetaillees, construireReferentiel, construireSystemPrompt, SYSTEM_PROMPT_BASE } from "./system-prompt.ts";
+import { aDesDonneesDetaillees, construireReferentiel, construireSystemPrompt, formatEnrichmentBlock, SYSTEM_PROMPT_BASE } from "./system-prompt.ts";
 import { deriveCategories } from "../commune-categories.ts";
 
 type LigneTension = { slug: string; score: number; ind_exposition: number | null; ind_vulnerabilite: number | null; ind_adaptation: number | null; ind_occurrence: number | null };
@@ -55,6 +55,15 @@ test("T1 : pour une commune qui a des lignes communes_tension, le system ne port
       /ind_(exposition|vulnerabilite|adaptation|occurrence)/,
       /dependance-auto|\bsecheresse\b|\bfeux : /,
     ]) assert.doesNotMatch(s, motif, `${F[insee].nom} : ${motif}`);
+  }
+});
+
+test("T1 : le system ne contient que les blocs attendus ; aucun bloc de notes ne peut revenir sous un autre nom", () => {
+  // Les en-têtes « [ … ] » en début de ligne sont exactement ceux du référentiel et des sources réelles.
+  const ATTENDUS = ["Référentiel interne futur•e", "ADEME", "DRIAS-TRACC", "Géorisques", "GASPAR", "VigiEau", "Hub'Eau", "Baignade"];
+  for (const insee of [...COMMUNES_AVEC_LIGNES, "74056"]) {
+    const entetes = (systemDe(insee).match(/^\[[^\]]+\]/gm) ?? []).map((e) => e.slice(1, -1).split(" — ")[0]);
+    assert.deepEqual(entetes, ATTENDUS, F[insee].nom);
   }
 });
 
@@ -127,13 +136,13 @@ test("T4 : le référentiel ne contient que l'identité et les catégories, sans
   }
 });
 
-test("T4 : retirer les notes n'a changé aucun bloc de source (seul le référentiel diffère)", () => {
-  // Le texte des blocs DRIAS, ADEME, Géorisques… est identique à ce qu'il était : rien n'a été réécrit en
-  // adjectifs à partir des notes retirées.
-  for (const insee of COMMUNES_AVEC_LIGNES) {
+test("T4 : les blocs de sources sont exactement la sortie du formateur, rien n'a été dérivé des notes retirées", () => {
+  // Le texte des sources est celui de formatEnrichmentBlock, mot pour mot, et il suit immédiatement le
+  // référentiel : aucune qualification n'a pu être insérée entre eux ni à partir des anciennes notes.
+  for (const insee of [...COMMUNES_AVEC_LIGNES, "74056"]) {
     const s = systemDe(insee);
-    const sources = s.slice(s.indexOf("\n[ADEME"), s.indexOf("PROFIL UTILISATEUR CONNU"));
-    assert.doesNotMatch(sources, /\b(très )?(faible|modérée?|élevée?|forte?|favorable|défavorable|vulnérable|bien adaptée?)\b/i, insee);
+    const referentiel = blocReferentiel(s);
+    assert.ok(s.includes(`${referentiel}\n${formatEnrichmentBlock(F[insee].enrichment)}\n`), F[insee].nom);
   }
 });
 
