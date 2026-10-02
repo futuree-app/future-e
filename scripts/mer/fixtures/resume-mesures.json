@@ -1,0 +1,1336 @@
+{
+ "build": {
+  "sources": {
+   "limtm": {
+    "producteur": "Shom-IGN",
+    "millesime": 2021,
+    "attribution": "© Shom-IGN, 2021, http://dx.doi.org/10.17183/LIMTM",
+    "licence": "Licence Ouverte 2.0",
+    "fichier": "Limite_terre_mer_France_metropolitaine.7z"
+   },
+   "contours": {
+    "producteur": "IGN ADMIN EXPRESS via Etalab (contours-administratifs)",
+    "millesime": "2026",
+    "simplification": "5 m",
+    "licence": "Licence Ouverte 2.0"
+   },
+   "loi_littoral": {
+    "producteur": "DGALN - SIDAUH",
+    "cog": "2022",
+    "licence": "Licence Ouverte"
+   }
+  },
+  "methode": "mer-v2 : LimTM coupée aux LTM (côté amont géométrique ∪ limarc 2), fermetures LTM ajoutées au rivage",
+  "parametres": {
+   "marche_amont_m": 500.0,
+   "accroche_max_m": 1.0,
+   "grille_noeud_m": 0.05
+  },
+  "compteurs": {
+   "troncons_limtm": 105715,
+   "morceaux_apres_coupe": 105741,
+   "composantes": 34105,
+   "fermetures_ltm": 271,
+   "extremites_non_accrochees": 1,
+   "decisions": {
+    "refusée par les garde-fous": 60,
+    "A (codage officiel)": 136,
+    "incertain": 53,
+    "B (géométrie gardée)": 21,
+    "non_accrochee": 1
+   },
+   "longueur_brute_km": 17668.4,
+   "longueur_retiree_km": 4492.7,
+   "desaccords": {
+    "retire_par_codage_km": 4113.8,
+    "retire_en_plus_par_geometrie_et_complements_km": 361.0
+   },
+   "iles_estuaire_retirees": 28,
+   "iles_estuaire_km": 18.0,
+   "segments_rivage": 89390,
+   "communes_mesurees": 34788,
+   "complements": [
+    {
+     "nom": "Seine",
+     "motif": "rives de la Seine non codées entre la LTM (Tancarville / Honfleur) et Rouen ; fermeture de 4,8 km",
+     "amont_km": 353.5,
+     "applique": true,
+     "controles": {
+      "Honfleur": true,
+      "Trouville": true,
+      "Le Havre": true,
+      "Étretat": true,
+      "Fécamp": true,
+      "Dieppe": true
+     }
+    }
+   ]
+  },
+  "durees_s": {
+   "lecture_limtm_s": 1.2,
+   "coupure_s": 40.1,
+   "mesures_s": 512.7
+  }
+ },
+ "rapport": {
+  "communes": 34788,
+  "distributions": {
+   "ancienne_km": {
+    "= 0": 5,
+    "<= 2": 36,
+    "<= 5": 156,
+    "<= 8": 377,
+    "<= 15": 1082,
+    "<= 30": 3289,
+    "<= 100": 11794
+   },
+   "centre_km": {
+    "= 0": 30,
+    "<= 2": 552,
+    "<= 5": 1163,
+    "<= 8": 1698,
+    "<= 15": 2731,
+    "<= 30": 4648,
+    "<= 100": 12425
+   },
+   "territoire_km": {
+    "= 0": 875,
+    "<= 2": 1117,
+    "<= 5": 1611,
+    "<= 8": 2082,
+    "<= 15": 3107,
+    "<= 30": 4989,
+    "<= 100": 12686
+   },
+   "centre_brut_km": {
+    "= 0": 32,
+    "<= 2": 842,
+    "<= 5": 1668,
+    "<= 8": 2399,
+    "<= 15": 3772,
+    "<= 30": 6153,
+    "<= 100": 14319
+   },
+   "territoire_brut_km": {
+    "= 0": 1208,
+    "<= 2": 1563,
+    "<= 5": 2281,
+    "<= 8": 2918,
+    "<= 15": 4243,
+    "<= 30": 6519,
+    "<= 100": 14604
+   }
+  },
+  "changements": {
+   "centre_km ~ 5 km": {
+    "entrent": 1038,
+    "sortent": 31
+   },
+   "centre_km ~ 15 km": {
+    "entrent": 1749,
+    "sortent": 100
+   },
+   "territoire_km ~ 5 km": {
+    "entrent": 1478,
+    "sortent": 23
+   },
+   "territoire_km ~ 15 km": {
+    "entrent": 2097,
+    "sortent": 72
+   }
+  },
+  "ancien_monde": {
+   "proxy_littoral_le_5km": 156,
+   "faux_positifs_proxy (≤5 km, non Mer, territoire > 2 km)": 39,
+   "dept_listes_anciennes": 5065,
+   "faux_positifs_dept (non Mer, territoire > 5 km)": 3881,
+   "communes_Mer_ratees_par_le_proxy (> 5 km)": 754
+  },
+  "validation": {
+   "communes_Mer": 839,
+   "Mer_territoire_au_dela": {
+    "0.05": 3,
+    "0.2": 2,
+    "0.5": 2,
+    "1.0": 2
+   },
+   "Mer_exceptions_0.5km": [
+    {
+     "insee": "40217",
+     "nom": "Parentis-en-Born",
+     "dept": "40",
+     "ancienne_km": 14,
+     "centre_km": 14.6,
+     "territoire_km": 6.252,
+     "centre_brut_km": 14.6,
+     "territoire_brut_km": 6.252,
+     "loi": [
+      "Lac",
+      "Mer"
+     ]
+    },
+    {
+     "insee": "40287",
+     "nom": "Sanguinet",
+     "dept": "40",
+     "ancienne_km": 16,
+     "centre_km": 12.79,
+     "territoire_km": 4.103,
+     "centre_brut_km": 12.79,
+     "territoire_brut_km": 4.103,
+     "loi": [
+      "Lac",
+      "Mer"
+     ]
+    }
+   ],
+   "sans_classement_touchant_le_rivage": 28,
+   "sans_classement_touchant_exemples": [
+    {
+     "insee": "13201",
+     "nom": "Marseille 1er Arrondissement",
+     "dept": "13",
+     "ancienne_km": 1,
+     "centre_km": 0.89,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.89,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13202",
+     "nom": "Marseille 2e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 3,
+     "centre_km": 0.0,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.0,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13207",
+     "nom": "Marseille 7e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 4,
+     "centre_km": 0.0,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.0,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13208",
+     "nom": "Marseille 8e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 10,
+     "centre_km": 0.01,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.01,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13209",
+     "nom": "Marseille 9e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 10,
+     "centre_km": 2.71,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.71,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13215",
+     "nom": "Marseille 15e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 6,
+     "centre_km": 2.08,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.08,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "13216",
+     "nom": "Marseille 16e Arrondissement",
+     "dept": "13",
+     "ancienne_km": 8,
+     "centre_km": 0.46,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.46,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "17348",
+     "nom": "Saint-Jean-d'Angle",
+     "dept": "17",
+     "ancienne_km": 24,
+     "centre_km": 3.54,
+     "territoire_km": 0.0,
+     "centre_brut_km": 3.54,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "22101",
+     "nom": "Langoat",
+     "dept": "22",
+     "ancienne_km": 46,
+     "centre_km": 2.88,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.88,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "29170",
+     "nom": "Plomelin",
+     "dept": "29",
+     "ancienne_km": 6,
+     "centre_km": 3.2,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.85,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "dept": "29",
+     "ancienne_km": 3,
+     "centre_km": 5.29,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.3,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "29233",
+     "nom": "Quimperlé",
+     "dept": "29",
+     "ancienne_km": 18,
+     "centre_km": 2.51,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.14,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "2A032",
+     "nom": "Bastelicaccia",
+     "dept": "2A",
+     "ancienne_km": 8,
+     "centre_km": 3.78,
+     "territoire_km": 0.0,
+     "centre_brut_km": 3.78,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "30033",
+     "nom": "Beauvoisin",
+     "dept": "30",
+     "ancienne_km": 24,
+     "centre_km": 5.16,
+     "territoire_km": 0.0,
+     "centre_brut_km": 5.12,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "35116",
+     "nom": "La Fresnais",
+     "dept": "35",
+     "ancienne_km": 15,
+     "centre_km": 2.56,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.56,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "35270",
+     "nom": "Saint-Georges-de-Gréhaigne",
+     "dept": "35",
+     "ancienne_km": 29,
+     "centre_km": 1.38,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.38,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "40120",
+     "nom": "Hastingues",
+     "dept": "40",
+     "ancienne_km": 31,
+     "centre_km": 2.9,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.15,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "40256",
+     "nom": "Saint-Étienne-d'Orthe",
+     "dept": "40",
+     "ancienne_km": 23,
+     "centre_km": 0.91,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.91,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "40268",
+     "nom": "Saint-Laurent-de-Gosse",
+     "dept": "40",
+     "ancienne_km": 22,
+     "centre_km": 2.22,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.97,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "40273",
+     "nom": "Saint-Martin-de-Seignanx",
+     "dept": "40",
+     "ancienne_km": 16,
+     "centre_km": 4.56,
+     "territoire_km": 0.0,
+     "centre_brut_km": 4.43,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "44183",
+     "nom": "Saint-Molf",
+     "dept": "44",
+     "ancienne_km": 20,
+     "centre_km": 2.28,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.28,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "59155",
+     "nom": "Coudekerque-Branche",
+     "dept": "59",
+     "ancienne_km": 2,
+     "centre_km": 1.44,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.43,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "66002",
+     "nom": "Alénya",
+     "dept": "66",
+     "ancienne_km": 8,
+     "centre_km": 0.84,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.84,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "76255",
+     "nom": "Eu",
+     "dept": "76",
+     "ancienne_km": 28,
+     "centre_km": 1.26,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.26,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "76341",
+     "nom": "Harfleur",
+     "dept": "76",
+     "ancienne_km": 7,
+     "centre_km": 0.83,
+     "territoire_km": 0.0,
+     "centre_brut_km": 0.83,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "76414",
+     "nom": "Martin-Église",
+     "dept": "76",
+     "ancienne_km": 4,
+     "centre_km": 2.31,
+     "territoire_km": 0.0,
+     "centre_brut_km": 2.31,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "76545",
+     "nom": "Rouxmesnil-Bouteilles",
+     "dept": "76",
+     "ancienne_km": 3,
+     "centre_km": 1.91,
+     "territoire_km": 0.0,
+     "centre_brut_km": 1.91,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    },
+    {
+     "insee": "83099",
+     "nom": "Puget-sur-Argens",
+     "dept": "83",
+     "ancienne_km": 9,
+     "centre_km": 3.98,
+     "territoire_km": 0.0,
+     "centre_brut_km": 3.98,
+     "territoire_brut_km": 0.0,
+     "loi": null
+    }
+   ],
+   "Estuaire_seul": 82,
+   "Estuaire_territoire_0": 12,
+   "Lac_seul": 144,
+   "Lac_territoire_le_5km": []
+  },
+  "exemples_faux_positifs_dept": [
+   {
+    "insee": "04150",
+    "nom": "Piégut",
+    "dept": "04",
+    "ancienne_km": 123,
+    "centre_km": 119.55,
+    "territoire_km": 117.493,
+    "centre_brut_km": 119.55,
+    "territoire_brut_km": 117.493,
+    "loi": null
+   },
+   {
+    "insee": "04234",
+    "nom": "Venterol",
+    "dept": "04",
+    "ancienne_km": 124,
+    "centre_km": 119.62,
+    "territoire_km": 116.339,
+    "centre_brut_km": 119.62,
+    "territoire_brut_km": 116.339,
+    "loi": null
+   },
+   {
+    "insee": "04066",
+    "nom": "Curbans",
+    "dept": "04",
+    "ancienne_km": 125,
+    "centre_km": 119.52,
+    "territoire_km": 115.471,
+    "centre_brut_km": 119.52,
+    "territoire_brut_km": 115.471,
+    "loi": null
+   },
+   {
+    "insee": "04093",
+    "nom": "Gigors",
+    "dept": "04",
+    "ancienne_km": 120,
+    "centre_km": 116.15,
+    "territoire_km": 113.947,
+    "centre_brut_km": 116.15,
+    "territoire_brut_km": 113.947,
+    "loi": null
+   },
+   {
+    "insee": "04118",
+    "nom": "Melve",
+    "dept": "04",
+    "ancienne_km": 121,
+    "centre_km": 114.48,
+    "territoire_km": 111.669,
+    "centre_brut_km": 114.48,
+    "territoire_brut_km": 111.669,
+    "loi": null
+   },
+   {
+    "insee": "04058",
+    "nom": "Claret",
+    "dept": "04",
+    "ancienne_km": 124,
+    "centre_km": 115.19,
+    "territoire_km": 111.178,
+    "centre_brut_km": 115.19,
+    "territoire_brut_km": 111.178,
+    "loi": null
+   },
+   {
+    "insee": "04037",
+    "nom": "Le Caire",
+    "dept": "04",
+    "ancienne_km": 119,
+    "centre_km": 114.07,
+    "territoire_km": 110.906,
+    "centre_brut_km": 114.07,
+    "territoire_brut_km": 110.906,
+    "loi": null
+   },
+   {
+    "insee": "04085",
+    "nom": "Faucon-du-Caire",
+    "dept": "04",
+    "ancienne_km": 119,
+    "centre_km": 114.72,
+    "territoire_km": 110.883,
+    "centre_brut_km": 114.72,
+    "territoire_brut_km": 110.883,
+    "loi": null
+   },
+   {
+    "insee": "04154",
+    "nom": "Pontis",
+    "dept": "04",
+    "ancienne_km": 114,
+    "centre_km": 112.83,
+    "territoire_km": 109.514,
+    "centre_brut_km": 112.83,
+    "territoire_brut_km": 109.514,
+    "loi": [
+     "Lac"
+    ]
+   },
+   {
+    "insee": "04222",
+    "nom": "Turriers",
+    "dept": "04",
+    "ancienne_km": 116,
+    "centre_km": 112.46,
+    "territoire_km": 109.23,
+    "centre_brut_km": 112.46,
+    "territoire_brut_km": 109.23,
+    "loi": null
+   },
+   {
+    "insee": "04026",
+    "nom": "Bellaffaire",
+    "dept": "04",
+    "ancienne_km": 116,
+    "centre_km": 112.71,
+    "territoire_km": 108.897,
+    "centre_brut_km": 112.71,
+    "territoire_brut_km": 108.897,
+    "loi": null
+   },
+   {
+    "insee": "04134",
+    "nom": "La Motte-du-Caire",
+    "dept": "04",
+    "ancienne_km": 118,
+    "centre_km": 111.73,
+    "territoire_km": 108.295,
+    "centre_brut_km": 111.73,
+    "territoire_brut_km": 108.295,
+    "loi": null
+   },
+   {
+    "insee": "04216",
+    "nom": "Thèze",
+    "dept": "04",
+    "ancienne_km": 122,
+    "centre_km": 109.44,
+    "territoire_km": 106.918,
+    "centre_brut_km": 109.44,
+    "territoire_brut_km": 106.918,
+    "loi": null
+   },
+   {
+    "insee": "04207",
+    "nom": "Sigoyer",
+    "dept": "04",
+    "ancienne_km": 119,
+    "centre_km": 110.47,
+    "territoire_km": 106.495,
+    "centre_brut_km": 110.47,
+    "territoire_brut_km": 106.495,
+    "loi": null
+   },
+   {
+    "insee": "04137",
+    "nom": "Nibles",
+    "dept": "04",
+    "ancienne_km": 114,
+    "centre_km": 108.04,
+    "territoire_km": 106.305,
+    "centre_brut_km": 108.04,
+    "territoire_brut_km": 106.305,
+    "loi": null
+   }
+  ]
+ },
+ "lagunes": [
+  {
+   "site": "Arcachon",
+   "insee": "33009",
+   "nom": "Arcachon",
+   "A_centre_km": 1.34,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 1.37,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 1.39,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 1.41,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Arcachon",
+   "insee": "33529",
+   "nom": "La Teste-de-Buch",
+   "A_centre_km": 2.81,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 2.81,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 2.91,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 3.05,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Arcachon",
+   "insee": "33236",
+   "nom": "Lège-Cap-Ferret",
+   "A_centre_km": 0.0,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 0.01,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 0.01,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 0.01,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Arcachon",
+   "insee": "33063",
+   "nom": "Bordeaux",
+   "A_centre_km": 39.35,
+   "A_territoire_km": 35.09,
+   "B250_centre_km": 40.47,
+   "B250_territoire_km": 36.23,
+   "B500_centre_km": 40.48,
+   "B500_territoire_km": 36.24,
+   "B1000_centre_km": 40.64,
+   "B1000_territoire_km": 36.43
+  },
+  {
+   "site": "Golfe du Morbihan",
+   "insee": "56260",
+   "nom": "Vannes",
+   "A_centre_km": 0.82,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 5.2,
+   "B250_territoire_km": 1.08,
+   "B500_centre_km": 16.7,
+   "B500_territoire_km": 12.58,
+   "B1000_centre_km": 16.73,
+   "B1000_territoire_km": 12.61
+  },
+  {
+   "site": "Golfe du Morbihan",
+   "insee": "56240",
+   "nom": "Sarzeau",
+   "A_centre_km": 1.32,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 1.33,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 2.77,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 2.86,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Golfe du Morbihan",
+   "insee": "56003",
+   "nom": "Arradon",
+   "A_centre_km": 1.4,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 1.42,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 11.47,
+   "B500_territoire_km": 8.23,
+   "B1000_centre_km": 11.59,
+   "B1000_territoire_km": 8.51
+  },
+  {
+   "site": "Thau",
+   "insee": "34301",
+   "nom": "Sète",
+   "A_centre_km": 0.0,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 0.0,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 0.0,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 0.0,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Thau",
+   "insee": "34157",
+   "nom": "Mèze",
+   "A_centre_km": 1.67,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 7.19,
+   "B250_territoire_km": 2.78,
+   "B500_centre_km": 7.19,
+   "B500_territoire_km": 2.79,
+   "B1000_centre_km": 7.19,
+   "B1000_territoire_km": 2.79
+  },
+  {
+   "site": "Thau",
+   "insee": "34023",
+   "nom": "Balaruc-les-Bains",
+   "A_centre_km": 0.27,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 4.95,
+   "B250_territoire_km": 3.47,
+   "B500_centre_km": 4.95,
+   "B500_territoire_km": 3.47,
+   "B1000_centre_km": 4.97,
+   "B1000_territoire_km": 3.49
+  },
+  {
+   "site": "Étangs palavasiens",
+   "insee": "34172",
+   "nom": "Montpellier",
+   "A_centre_km": 6.85,
+   "A_territoire_km": 3.12,
+   "B250_centre_km": 10.41,
+   "B250_territoire_km": 6.61,
+   "B500_centre_km": 10.45,
+   "B500_territoire_km": 6.62,
+   "B1000_centre_km": 10.47,
+   "B1000_territoire_km": 6.64
+  },
+  {
+   "site": "Étangs palavasiens",
+   "insee": "34154",
+   "nom": "Mauguio",
+   "A_centre_km": 0.15,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 4.18,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 4.18,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 4.18,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Étangs palavasiens",
+   "insee": "34192",
+   "nom": "Palavas-les-Flots",
+   "A_centre_km": 0.38,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 0.49,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 0.57,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 0.61,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Mauguio / La Grande-Motte",
+   "insee": "34154",
+   "nom": "Mauguio",
+   "A_centre_km": 0.15,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 4.18,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 4.18,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 4.18,
+   "B1000_territoire_km": 0.0
+  },
+  {
+   "site": "Mauguio / La Grande-Motte",
+   "insee": "34344",
+   "nom": "La Grande-Motte",
+   "A_centre_km": 0.03,
+   "A_territoire_km": 0.0,
+   "B250_centre_km": 1.58,
+   "B250_territoire_km": 0.0,
+   "B500_centre_km": 1.58,
+   "B500_territoire_km": 0.0,
+   "B1000_centre_km": 1.58,
+   "B1000_territoire_km": 0.0
+  }
+ ],
+ "adresse": {
+  "panel": {
+   "points": 5000,
+   "proches_0_30km": 4503
+  },
+  "temps_reference_ms": 0.1,
+  "niveaux": [
+   {
+    "tolerance_m": 0,
+    "sommets": 8049366,
+    "wkb_mo": 129.6,
+    "wkb_gzip_mo": 73.1,
+    "erreur_max_m": 0.0,
+    "erreur_moyenne_m": 0.0,
+    "erreur_p99_m": 0.0,
+    "erreur_max_proches_m": 0.0,
+    "temps_par_point_ms": 0.105
+   },
+   {
+    "tolerance_m": 2,
+    "sommets": 819312,
+    "wkb_mo": 13.9,
+    "wkb_gzip_mo": 8.2,
+    "erreur_max_m": 2.0,
+    "erreur_moyenne_m": 0.19,
+    "erreur_p99_m": 1.5,
+    "erreur_max_proches_m": 2.0,
+    "temps_par_point_ms": 0.031
+   },
+   {
+    "tolerance_m": 5,
+    "sommets": 499499,
+    "wkb_mo": 8.8,
+    "wkb_gzip_mo": 4.9,
+    "erreur_max_m": 4.9,
+    "erreur_moyenne_m": 0.5,
+    "erreur_p99_m": 3.7,
+    "erreur_max_proches_m": 4.9,
+    "temps_par_point_ms": 0.026
+   },
+   {
+    "tolerance_m": 10,
+    "sommets": 379280,
+    "wkb_mo": 6.9,
+    "wkb_gzip_mo": 3.7,
+    "erreur_max_m": 9.9,
+    "erreur_moyenne_m": 0.97,
+    "erreur_p99_m": 7.3,
+    "erreur_max_proches_m": 9.9,
+    "temps_par_point_ms": 0.025
+   },
+   {
+    "tolerance_m": 20,
+    "sommets": 316654,
+    "wkb_mo": 5.9,
+    "wkb_gzip_mo": 3.0,
+    "erreur_max_m": 19.5,
+    "erreur_moyenne_m": 1.91,
+    "erreur_p99_m": 14.5,
+    "erreur_max_proches_m": 19.5,
+    "temps_par_point_ms": 0.023
+   },
+   {
+    "tolerance_m": 50,
+    "sommets": 280068,
+    "wkb_mo": 5.3,
+    "wkb_gzip_mo": 2.6,
+    "erreur_max_m": 48.8,
+    "erreur_moyenne_m": 4.14,
+    "erreur_p99_m": 34.6,
+    "erreur_max_proches_m": 48.8,
+    "temps_par_point_ms": 0.023
+   },
+   {
+    "tolerance_m": 100,
+    "sommets": 269207,
+    "wkb_mo": 5.1,
+    "wkb_gzip_mo": 2.5,
+    "erreur_max_m": 95.9,
+    "erreur_moyenne_m": 7.26,
+    "erreur_p99_m": 65.5,
+    "erreur_max_proches_m": 95.9,
+    "temps_par_point_ms": 0.023
+   }
+  ]
+ },
+ "facades": {
+  "communes_testees": 1117,
+  "par_facade": {
+   "MED": 277,
+   "MEMN": 332,
+   "SA": 137,
+   "NAMO": 371
+  },
+  "distance_point_rivage_a_emprise_m": {
+   "mediane": 0.0,
+   "p95": 5359.200000000001,
+   "max": 26297
+  },
+  "ambigues_marge_lt_2km": [
+   {
+    "insee": "17091",
+    "nom": "Charron",
+    "dept": "17",
+    "facade": "SA",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 1895
+   },
+   {
+    "insee": "85049",
+    "nom": "Champagné-les-Marais",
+    "dept": "85",
+    "facade": "SA",
+    "dist_emprise_m": 607,
+    "marge_seconde_m": 1606
+   },
+   {
+    "insee": "85185",
+    "nom": "Puyravault",
+    "dept": "85",
+    "facade": "SA",
+    "dist_emprise_m": 741,
+    "marge_seconde_m": 1662
+   },
+   {
+    "insee": "85267",
+    "nom": "Sainte-Radégonde-des-Noyers",
+    "dept": "85",
+    "facade": "SA",
+    "dist_emprise_m": 742,
+    "marge_seconde_m": 1662
+   }
+  ],
+  "loin_emprise_gt_2km": [
+   {
+    "insee": "11024",
+    "nom": "Bages",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 10162,
+    "marge_seconde_m": 348495
+   },
+   {
+    "insee": "11086",
+    "nom": "Caves",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 3950,
+    "marge_seconde_m": 362881
+   },
+   {
+    "insee": "11144",
+    "nom": "Fitou",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 4066,
+    "marge_seconde_m": 365159
+   },
+   {
+    "insee": "11170",
+    "nom": "Gruissan",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 2258,
+    "marge_seconde_m": 363565
+   },
+   {
+    "insee": "11188",
+    "nom": "La Palme",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 3803,
+    "marge_seconde_m": 363104
+   },
+   {
+    "insee": "11202",
+    "nom": "Leucate",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 2968,
+    "marge_seconde_m": 367393
+   },
+   {
+    "insee": "11262",
+    "nom": "Narbonne",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 6989,
+    "marge_seconde_m": 353911
+   },
+   {
+    "insee": "11285",
+    "nom": "Peyriac-de-Mer",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 9027,
+    "marge_seconde_m": 350310
+   },
+   {
+    "insee": "11295",
+    "nom": "Portel-des-Corbières",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 8743,
+    "marge_seconde_m": 350732
+   },
+   {
+    "insee": "11379",
+    "nom": "Sigean",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 3365,
+    "marge_seconde_m": 361604
+   },
+   {
+    "insee": "11398",
+    "nom": "Treilles",
+    "dept": "11",
+    "facade": "MED",
+    "dist_emprise_m": 3462,
+    "marge_seconde_m": 365438
+   },
+   {
+    "insee": "13014",
+    "nom": "Berre-l'Étang",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 15568,
+    "marge_seconde_m": 472869
+   },
+   {
+    "insee": "13026",
+    "nom": "Châteauneuf-les-Martigues",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 7475,
+    "marge_seconde_m": 486688
+   },
+   {
+    "insee": "13043",
+    "nom": "Gignac-la-Nerthe",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 6903,
+    "marge_seconde_m": 493051
+   },
+   {
+    "insee": "13047",
+    "nom": "Istres",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 13535,
+    "marge_seconde_m": 464190
+   },
+   {
+    "insee": "13051",
+    "nom": "Lançon-Provence",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 15658,
+    "marge_seconde_m": 470687
+   },
+   {
+    "insee": "13054",
+    "nom": "Marignane",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 8324,
+    "marge_seconde_m": 489727
+   },
+   {
+    "insee": "13056",
+    "nom": "Martigues",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 3208,
+    "marge_seconde_m": 483058
+   },
+   {
+    "insee": "13063",
+    "nom": "Miramas",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 14989,
+    "marge_seconde_m": 462852
+   },
+   {
+    "insee": "13081",
+    "nom": "Rognac",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 15505,
+    "marge_seconde_m": 480139
+   },
+   {
+    "insee": "13092",
+    "nom": "Saint-Chamas",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 13783,
+    "marge_seconde_m": 469319
+   },
+   {
+    "insee": "13098",
+    "nom": "Saint-Mitre-les-Remparts",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 5996,
+    "marge_seconde_m": 475687
+   },
+   {
+    "insee": "13102",
+    "nom": "Saint-Victoret",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 6906,
+    "marge_seconde_m": 493051
+   },
+   {
+    "insee": "13117",
+    "nom": "Vitrolles",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 11755,
+    "marge_seconde_m": 485993
+   },
+   {
+    "insee": "22101",
+    "nom": "Langoat",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 9150,
+    "marge_seconde_m": 36010
+   },
+   {
+    "insee": "22152",
+    "nom": "Minihy-Tréguier",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 5417,
+    "marge_seconde_m": 35864
+   },
+   {
+    "insee": "22221",
+    "nom": "Plouguiel",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 5097,
+    "marge_seconde_m": 35853
+   },
+   {
+    "insee": "22264",
+    "nom": "La Roche-Jaudy",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 9285,
+    "marge_seconde_m": 36018
+   },
+   {
+    "insee": "22362",
+    "nom": "Tréguier",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 5099,
+    "marge_seconde_m": 35867
+   },
+   {
+    "insee": "22383",
+    "nom": "Troguéry",
+    "dept": "22",
+    "facade": "NAMO",
+    "dist_emprise_m": 5338,
+    "marge_seconde_m": 35875
+   }
+  ],
+  "cas": [
+   {
+    "insee": "13201",
+    "nom": "Marseille 1er Arrondissement",
+    "dept": "13",
+    "facade": "MED",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 515670
+   },
+   {
+    "insee": "17094",
+    "nom": "Châtelaillon-Plage",
+    "dept": "17",
+    "facade": "SA",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 22132
+   },
+   {
+    "insee": "29019",
+    "nom": "Brest",
+    "dept": "29",
+    "facade": "NAMO",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 121801
+   },
+   {
+    "insee": "33009",
+    "nom": "Arcachon",
+    "dept": "33",
+    "facade": "SA",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 177128
+   },
+   {
+    "insee": "34301",
+    "nom": "Sète",
+    "dept": "34",
+    "facade": "MED",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 386146
+   },
+   {
+    "insee": "44184",
+    "nom": "Saint-Nazaire",
+    "dept": "44",
+    "facade": "NAMO",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 102448
+   },
+   {
+    "insee": "50129",
+    "nom": "Cherbourg-en-Cotentin",
+    "dept": "50",
+    "facade": "MEMN",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 92075
+   },
+   {
+    "insee": "62193",
+    "nom": "Calais",
+    "dept": "62",
+    "facade": "MEMN",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 355878
+   },
+   {
+    "insee": "64122",
+    "nom": "Biarritz",
+    "dept": "64",
+    "facade": "SA",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 310012
+   },
+   {
+    "insee": "76217",
+    "nom": "Dieppe",
+    "dept": "76",
+    "facade": "MEMN",
+    "dist_emprise_m": 0,
+    "marge_seconde_m": 240850
+   },
+   {
+    "insee": "85194",
+    "nom": "Les Sables-d'Olonne",
+    "dept": "85",
+    "facade": "NAMO",
+    "dist_emprise_m": 4817,
+    "marge_seconde_m": 18261
+   }
+  ]
+ }
+}

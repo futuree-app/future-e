@@ -1,0 +1,394 @@
+{
+ "source": "build_mer.py (FUT-33 phase 1)",
+ "methode": "mer-v2 : LimTM coupée aux LTM (côté amont géométrique ∪ limarc 2), fermetures LTM ajoutées au rivage",
+ "cas": {
+  "17094": {
+   "insee": "17094",
+   "nom": "Châtelaillon-Plage",
+   "dept": "17",
+   "ancienne_km": 11,
+   "centre_km": 1.04,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.04,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "29019": {
+   "insee": "29019",
+   "nom": "Brest",
+   "dept": "29",
+   "ancienne_km": 2,
+   "centre_km": 1.36,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.36,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "06088": {
+   "insee": "06088",
+   "nom": "Nice",
+   "dept": "06",
+   "ancienne_km": 1,
+   "centre_km": 1.14,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.14,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "76217": {
+   "insee": "76217",
+   "nom": "Dieppe",
+   "dept": "76",
+   "ancienne_km": 0,
+   "centre_km": 0.3,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.3,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "35288": {
+   "insee": "35288",
+   "nom": "Saint-Malo",
+   "dept": "35",
+   "ancienne_km": 0,
+   "centre_km": 0.33,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.33,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "44184": {
+   "insee": "44184",
+   "nom": "Saint-Nazaire",
+   "dept": "44",
+   "ancienne_km": 2,
+   "centre_km": 1.7,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.7,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "22168": {
+   "insee": "22168",
+   "nom": "Perros-Guirec",
+   "dept": "22",
+   "ancienne_km": 63,
+   "centre_km": 0.0,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.0,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "22113": {
+   "insee": "22113",
+   "nom": "Lannion",
+   "dept": "22",
+   "ancienne_km": 58,
+   "centre_km": 0.66,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.66,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "29151": {
+   "insee": "29151",
+   "nom": "Morlaix",
+   "dept": "29",
+   "ancienne_km": 54,
+   "centre_km": 3.18,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.39,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "29133": {
+   "insee": "29133",
+   "nom": "Locquirec",
+   "dept": "29",
+   "ancienne_km": 68,
+   "centre_km": 0.71,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.71,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "22343": {
+   "insee": "22343",
+   "nom": "Trébeurden",
+   "dept": "22",
+   "ancienne_km": 65,
+   "centre_km": 1.24,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.24,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "33063": {
+   "insee": "33063",
+   "nom": "Bordeaux",
+   "dept": "33",
+   "ancienne_km": 51,
+   "centre_km": 39.35,
+   "territoire_km": 35.091,
+   "centre_brut_km": 1.79,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "44109": {
+   "insee": "44109",
+   "nom": "Nantes",
+   "dept": "44",
+   "ancienne_km": 49,
+   "centre_km": 38.93,
+   "territoire_km": 30.966,
+   "centre_brut_km": 2.74,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "14118": {
+   "insee": "14118",
+   "nom": "Caen",
+   "dept": "14",
+   "ancienne_km": 1,
+   "centre_km": 9.23,
+   "territoire_km": 6.543,
+   "centre_brut_km": 1.17,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "17299": {
+   "insee": "17299",
+   "nom": "Rochefort",
+   "dept": "17",
+   "ancienne_km": 27,
+   "centre_km": 7.97,
+   "territoire_km": 5.157,
+   "centre_brut_km": 1.12,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Estuaire"
+   ]
+  },
+  "76540": {
+   "insee": "76540",
+   "nom": "Rouen",
+   "dept": "76",
+   "ancienne_km": 53,
+   "centre_km": 48.21,
+   "territoire_km": 43.84,
+   "centre_brut_km": 0.34,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "17415": {
+   "insee": "17415",
+   "nom": "Saintes",
+   "dept": "17",
+   "ancienne_km": 33,
+   "centre_km": 23.79,
+   "territoire_km": 18.334,
+   "centre_brut_km": 22.86,
+   "territoire_brut_km": 18.062,
+   "loi": null
+  },
+  "17347": {
+   "insee": "17347",
+   "nom": "Saint-Jean-d'Angély",
+   "dept": "17",
+   "ancienne_km": 54,
+   "centre_km": 39.44,
+   "territoire_km": 36.83,
+   "centre_brut_km": 24.22,
+   "territoire_brut_km": 21.903,
+   "loi": null
+  },
+  "35238": {
+   "insee": "35238",
+   "nom": "Rennes",
+   "dept": "35",
+   "ancienne_km": 64,
+   "centre_km": 47.55,
+   "territoire_km": 43.494,
+   "centre_brut_km": 45.83,
+   "territoire_brut_km": 41.697,
+   "loi": null
+  },
+  "56178": {
+   "insee": "56178",
+   "nom": "Pontivy",
+   "dept": "56",
+   "ancienne_km": 46,
+   "centre_km": 37.19,
+   "territoire_km": 33.664,
+   "centre_brut_km": 35.57,
+   "territoire_brut_km": 32.75,
+   "loi": null
+  },
+  "29024": {
+   "insee": "29024",
+   "nom": "Carhaix-Plouguer",
+   "dept": "29",
+   "ancienne_km": 52,
+   "centre_km": 43.36,
+   "territoire_km": 40.325,
+   "centre_brut_km": 38.24,
+   "territoire_brut_km": 34.419,
+   "loi": null
+  },
+  "33009": {
+   "insee": "33009",
+   "nom": "Arcachon",
+   "dept": "33",
+   "ancienne_km": 1,
+   "centre_km": 1.34,
+   "territoire_km": 0.0,
+   "centre_brut_km": 1.34,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "56260": {
+   "insee": "56260",
+   "nom": "Vannes",
+   "dept": "56",
+   "ancienne_km": 1,
+   "centre_km": 0.82,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.82,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "34301": {
+   "insee": "34301",
+   "nom": "Sète",
+   "dept": "34",
+   "ancienne_km": 5,
+   "centre_km": 0.0,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.0,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "34172": {
+   "insee": "34172",
+   "nom": "Montpellier",
+   "dept": "34",
+   "ancienne_km": 17,
+   "centre_km": 6.85,
+   "territoire_km": 3.117,
+   "centre_brut_km": 5.55,
+   "territoire_brut_km": 1.917,
+   "loi": null
+  },
+  "34154": {
+   "insee": "34154",
+   "nom": "Mauguio",
+   "dept": "34",
+   "ancienne_km": 6,
+   "centre_km": 0.15,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.15,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "34344": {
+   "insee": "34344",
+   "nom": "La Grande-Motte",
+   "dept": "34",
+   "ancienne_km": 1,
+   "centre_km": 0.03,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.03,
+   "territoire_brut_km": 0.0,
+   "loi": [
+    "Mer"
+   ]
+  },
+  "74010": {
+   "insee": "74010",
+   "nom": "Annecy",
+   "dept": "74",
+   "ancienne_km": 260,
+   "centre_km": 259.71,
+   "territoire_km": 254.022,
+   "centre_brut_km": 258.78,
+   "territoire_brut_km": 249.012,
+   "loi": [
+    "Lac"
+   ]
+  },
+  "13201": {
+   "insee": "13201",
+   "nom": "Marseille 1er Arrondissement",
+   "dept": "13",
+   "ancienne_km": 1,
+   "centre_km": 0.89,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.89,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "13207": {
+   "insee": "13207",
+   "nom": "Marseille 7e Arrondissement",
+   "dept": "13",
+   "ancienne_km": 4,
+   "centre_km": 0.0,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.0,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "13208": {
+   "insee": "13208",
+   "nom": "Marseille 8e Arrondissement",
+   "dept": "13",
+   "ancienne_km": 10,
+   "centre_km": 0.01,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.01,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  },
+  "13216": {
+   "insee": "13216",
+   "nom": "Marseille 16e Arrondissement",
+   "dept": "13",
+   "ancienne_km": 8,
+   "centre_km": 0.46,
+   "territoire_km": 0.0,
+   "centre_brut_km": 0.46,
+   "territoire_brut_km": 0.0,
+   "loi": null
+  }
+ }
+}
