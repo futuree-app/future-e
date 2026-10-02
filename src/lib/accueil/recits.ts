@@ -401,6 +401,26 @@ export function getPreviewCards(
   return result.slice(0, 4);
 }
 
+/**
+ * Ce que le hero affiche pour une commune. Pendant le chargement de DRIAS et de Géorisques : un SQUELETTE,
+ * sans aucune phrase. Avant FUT-37, les cartes construites avec des données encore vides racontaient des
+ * récits de repli (submersion tirée de la seule catégorie `littoral`, immobilier sans donnée), grisés
+ * mais lisibles. Une absence de phrase vaut mieux qu'une phrase fausse.
+ */
+export type ApercuCommune = { etat: "squelette" } | { etat: "cartes"; cartes: CarteApercu[] };
+
+export function apercuCommune(args: {
+  commune: string;
+  chargement: boolean;
+  categories: readonly string[] | null | undefined;
+  indicators: Indicators;
+  georisques: GeorisquesAccueil;
+  horizon: HorizonAccueil;
+}): ApercuCommune {
+  if (args.chargement) return { etat: "squelette" };
+  return { etat: "cartes", cartes: getPreviewCards(args.commune, args.categories, args.indicators, args.georisques, args.horizon) };
+}
+
 // ── Sous-titres chiffrés des questions ───────────────────────────────────────────────────────
 
 // Seulement les questions dont l'indicateur RÉPOND à la question posée. `eau_potable` (« L'eau du

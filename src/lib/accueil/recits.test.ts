@@ -9,6 +9,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
+  apercuCommune,
   cartesClimat,
   carteMachineASous,
   carteRisqueRecense,
@@ -316,4 +317,20 @@ test("T16 panel réel : la carte d'accroche (position 1) est toujours un fait ch
     assert.match(cartes[0].source, /DRIAS/);
     for (const x of cartes) assert.ok(x.fait && x.source, `${c.nom} ${x.cle}`);
   }
+});
+
+// ── Chargement ───────────────────────────────────────────────────────────────────────────────
+
+test("D10 chargement : tant que les données ne sont pas arrivées, aucune phrase, quelles que soient les catégories", () => {
+  const vannes = PANEL["56260"];
+  for (const h of H) {
+    for (const geo of [null, { flags: vannes.flags }, DRAPEAUX_VRAIS]) {
+      const a = apercuCommune({ commune: vannes.nom, chargement: true, categories: [...vannes.categories, ...TOUTES_CATEGORIES], indicators: {}, georisques: geo, horizon: h });
+      assert.deepEqual(a, { etat: "squelette" });
+    }
+  }
+  // Une fois chargé, les cartes reviennent, construites sur les vraies données.
+  const pret = apercuCommune({ commune: vannes.nom, chargement: false, categories: vannes.categories, indicators: ind(vannes.drias), georisques: { flags: vannes.flags }, horizon: "2050" });
+  assert.equal(pret.etat, "cartes");
+  assert.ok(pret.etat === "cartes" && pret.cartes[0].fait.startsWith("2 jours par an"));
 });

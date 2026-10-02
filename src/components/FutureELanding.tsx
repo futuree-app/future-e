@@ -17,14 +17,15 @@ import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
 import { Logo } from "@/components/Logo";
 import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import {
+  apercuCommune,
   carteMachineASous,
   getDriaSub,
   getEmptyStateCopy,
   getHeroCopy,
-  getPreviewCards,
   getQuestionIntro,
 } from "@/lib/accueil/recits";
 import { construireFaitsCommune } from "@/lib/accueil/faits";
+import { reponseDeRepli } from "@/lib/accueil/reponses";
 
 const C = {
   bg: 'var(--bg)',
@@ -109,49 +110,6 @@ const LANDING_QNA_LIMIT = 1;
 // Persiste la commune choisie pour la restaurer au retour arrière (navigation
 // dure vers /ou-vivre puis « précédent »), sinon on repart à zéro.
 const LANDING_COMMUNE_STORAGE_KEY = 'futuree:landing-commune';
-
-const STATIC_ANSWERS = {
-  acheter_littoral: {
-    verdict: 'À acheter avec les yeux ouverts.',
-    detail:
-      "Sur le littoral, le risque de submersion et d'érosion progresse, et le coût de l'assurance habitation grimpe dans les zones exposées. L'achat reste viable, à condition de regarder le risque à l'adresse, la qualité énergétique du logement (diagnostic de performance énergétique) et son assurabilité dans la durée. Le choix du quartier change tout.",
-    cta: 'Voir le dossier sur votre commune',
-  },
-  enfants_sante: {
-    verdict: 'Plusieurs signaux méritent votre attention.',
-    detail:
-      "La santé des enfants face au climat se joue sur quelques fronts : la qualité de l'air, l'allongement de la saison pollinique, le nombre de jours de forte chaleur qui augmente, et selon les territoires la qualité des sols. Rien d'irrémédiable, mais autant connaître la situation de votre commune tôt pour agir au bon moment.",
-    cta: 'Voir l’échelle Territoire de votre dossier',
-  },
-  mobilite_fragile: {
-    verdict: "Ici, la place de la voiture mérite d'être posée.",
-    detail:
-      "Dans beaucoup de communes rurales et périurbaines, la voiture n'est pas un choix : l'offre de transport collectif reste limitée et les trajets du quotidien sont longs. Cette dépendance expose directement le budget des foyers à la volatilité du prix des carburants. Les alternatives, vélo, covoiturage, recharge électrique, dépendent fortement du territoire.",
-    cta: "Voir l’échelle Autour de l’adresse de votre dossier",
-  },
-  metier_general: {
-    verdict: "Ça dépend du secteur. Certains gagnent, d'autres perdent.",
-    detail:
-      "Le secteur associatif et de l'ESS sera relativement peu exposé aux risques physiques directs, mais fortement affecté par l'évolution des financements et des priorités. Les métiers liés à l'adaptation climatique (bilan carbone, transition énergétique) sont en forte croissance. Les secteurs à exposition extérieure (BTP, agriculture) sont les plus vulnérables à la chaleur croissante (INRS).",
-    cta: 'Voir l’échelle Territoire de votre dossier',
-  },
-  valeur_immo: {
-    verdict: "Moins risqué que ce qu'on raconte, mais pas sans condition.",
-    detail:
-      'Les zones exposées aux risques documentés (PPRi, RGA, submersion) voient déjà leurs prix stagner ou baisser par rapport à des zones similaires sans risque (DVF 2024). Le DPE devient un facteur de valeur majeur : un logement F ou G se négocie en moyenne 6 à 15 % moins cher que son équivalent C (ADEME). À l\'horizon 2030, les obligations de rénovation énergétique rendront certains biens quasi invendables sans travaux.',
-    cta: 'Voir l’échelle Logement de votre dossier',
-  },
-  default: {
-    verdict: 'Les données pour cette commune pointent plusieurs signaux.',
-    detail:
-      "Les données climatiques, sanitaires, immobilières et professionnelles existent, dispersées et illisibles. Ce qui manque, c'est leur position les unes par rapport aux autres, sur votre commune, mesurée de la même façon que sur les 34 000 autres. C'est là que se décide ce qui vous concerne vraiment.",
-    cta: 'Ouvrir le dossier de votre commune',
-  },
-};
-
-function getFallbackAnswer(tensionId) {
-  return STATIC_ANSWERS[tensionId] || STATIC_ANSWERS.default;
-}
 
 function glass(extra = {}) {
   return {
@@ -245,19 +203,6 @@ function buildTensions(catalog, categories) {
   }
 
   return result.slice(0, MAX_TENSIONS);
-}
-
-function buildGeorisquesContext(georisques) {
-  if (!georisques) {
-    return null;
-  }
-
-  return {
-    commune: georisques.communeName || null,
-    official_risks: georisques.riskLabels || [],
-    flags: georisques.flags || {},
-    seismic: georisques.seismic || null,
-  };
 }
 
 function getCommuneMetaCopy(communeName, usedFallback) {
@@ -778,6 +723,45 @@ export default function FutureELanding() {
     }
   };
 
+  // FUT-37 : une question reçoit la réponse du modèle si /qna l'a contrôlée, sinon le repli déterministe
+  // construit sur les SEULS faits de la commune demandée (src/lib/accueil/reponses.ts). La table
+  // `tension_answers` n'est plus lue : ses textes, écrits pour La Rochelle, Bressuire ou la Charente,
+  // étaient servis à toutes les communes. /qna ne renvoie jamais le texte brut du modèle.
+  async function demanderReponse(tension, extra = {}) {
+    const faits = construireFaitsCommune(commune, communeIndicators, communeGeorisques);
+    const repliLocal = reponseDeRepli(tension.id, faits);
+    try {
+      const response = await fetch('/qna', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          commune,
+          categories: communeMeta?.categories || ['all'],
+          faits,
+          tension,
+          inseeCode: communeMeta?.inseeCode ?? null,
+          ...extra,
+        }),
+      });
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(errorPayload?.error || `qna a répondu ${response.status}`);
+      }
+      const r = await response.json();
+      if (r && typeof r.verdict === 'string' && typeof r.detail === 'string' && typeof r.cta === 'string') {
+        setAnswer({ verdict: r.verdict, detail: r.detail, cta: r.cta, href: '#' });
+        setAnswerSource(r.source === 'modele' ? 'claude' : 'repli_serveur');
+        if (r.violations?.length) setAnswerError(`Réponse du modèle écartée : ${r.violations.join(', ')}`);
+        return;
+      }
+      throw new Error('Réponse /qna illisible.');
+    } catch (error) {
+      setAnswer({ ...repliLocal, href: '#' });
+      setAnswerSource('fallback_local');
+      setAnswerError(`/qna indisponible, repli local affiché. Détail : ${error instanceof Error ? error.message : 'inconnu'}`);
+    }
+  }
+
   const selectTension = async (tension) => {
     if (questionLimitReached || loading) {
       return;
@@ -790,91 +774,8 @@ export default function FutureELanding() {
     setAnswerError('');
     setAnswerSource('');
 
-    const client = ensureSupabaseClient();
-    if (!client) {
-      setAnswer(getFallbackAnswer(tension.id));
-      setAnswerSource('fallback_local');
-      setAnswerError(
-        "Supabase indisponible. Réponse locale affichée. Vérifiez les variables d'environnement côté application.",
-      );
-      setLoading(false);
-      return;
-    }
+    await demanderReponse(tension);
 
-    const { data } = await client
-      .from('tension_answers')
-      .select('tension_id, verdict, detail, cta_label, cta_href')
-      .eq('tension_id', tension.id)
-      .maybeSingle();
-
-    const supabaseAnswer = data
-      ? {
-          verdict: data.verdict,
-          detail: data.detail,
-          cta: data.cta_label,
-          href: data.cta_href || '#',
-        }
-      : getFallbackAnswer(tension.id);
-
-    let nextAnswer = supabaseAnswer;
-    let nextAnswerSource = data ? 'supabase' : 'fallback_local';
-
-    try {
-      const response = await fetch('/qna', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          commune,
-          categories: communeMeta?.categories || ['all'],
-          driasContext: construireFaitsCommune(commune, communeIndicators, communeGeorisques),
-          georisquesContext: buildGeorisquesContext(communeGeorisques),
-          tension,
-          inseeCode: communeMeta?.inseeCode ?? null,
-          fallbackAnswer: supabaseAnswer,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorPayload = await response.json().catch(() => null);
-        const errorMessage =
-          errorPayload?.details ||
-          errorPayload?.error ||
-          `Claude request failed with status ${response.status}`;
-        throw new Error(errorMessage);
-      }
-
-      const generatedAnswer = await response.json();
-      if (
-        generatedAnswer &&
-        typeof generatedAnswer.verdict === 'string' &&
-        typeof generatedAnswer.detail === 'string' &&
-        typeof generatedAnswer.cta === 'string'
-      ) {
-        nextAnswer = {
-          verdict: generatedAnswer.verdict,
-          detail: generatedAnswer.detail,
-          cta: generatedAnswer.cta,
-          href: '#',
-        };
-        nextAnswerSource = 'claude';
-      }
-    } catch (error) {
-      const reason =
-        error instanceof Error ? error.message : 'Erreur inconnue côté serveur.';
-      setAnswerError(
-        `Claude API indisponible pour le moment. Réponse éditoriale Supabase affichée. Détail : ${reason}`,
-      );
-      if (!data) {
-        setAnswerError(
-          `Claude API indisponible et réponse Supabase absente. Fallback local affiché. Détail : ${reason}`,
-        );
-      }
-    }
-
-    setAnswer(nextAnswer);
-    setAnswerSource(nextAnswerSource);
     setLoading(false);
     setTimeout(
       () =>
@@ -886,7 +787,7 @@ export default function FutureELanding() {
     );
   };
 
-  const submitFree = () => {
+  const submitFree = async () => {
     if (!freeText.trim() || questionLimitReached || loading) {
       return;
     }
@@ -898,82 +799,22 @@ export default function FutureELanding() {
     setAnswer(null);
     setAnswerError('');
     setAnswerSource('');
-
-    const fallbackAnswer = STATIC_ANSWERS.default;
-    const tension = {
-      id: 'free',
-      label: question,
-      sub: 'Question libre',
-      color: C.violet,
-    };
-
-    fetch('/qna', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        commune,
-        categories: communeMeta?.categories || ['all'],
-        driasContext: construireFaitsCommune(commune, communeIndicators, communeGeorisques),
-        georisquesContext: buildGeorisquesContext(communeGeorisques),
-        tension,
-        fallbackAnswer,
-        questionType: 'free',
-        freeTextQuestion: question,
-      }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const errorPayload = await response.json().catch(() => null);
-          const errorMessage =
-            errorPayload?.details ||
-            errorPayload?.error ||
-            `Claude request failed with status ${response.status}`;
-          throw new Error(errorMessage);
-        }
-
-        const generatedAnswer = await response.json();
-        if (
-          generatedAnswer &&
-          typeof generatedAnswer.verdict === 'string' &&
-          typeof generatedAnswer.detail === 'string' &&
-          typeof generatedAnswer.cta === 'string'
-        ) {
-          setAnswer({
-            verdict: generatedAnswer.verdict,
-            detail: generatedAnswer.detail,
-            cta: generatedAnswer.cta,
-            href: '#',
-          });
-          setAnswerSource('claude');
-          return;
-        }
-
-        throw new Error('Claude returned an invalid payload.');
-      })
-      .catch((error) => {
-        const reason =
-          error instanceof Error ? error.message : 'Erreur inconnue côté serveur.';
-        setAnswer(fallbackAnswer);
-        setAnswerSource('fallback_local');
-        setAnswerError(
-          `Question libre indisponible pour le moment. Réponse générale affichée. Détail : ${reason}`,
-        );
-      })
-      .finally(() => {
-        setLoading(false);
-        setTimeout(
-          () =>
-            answerRef.current?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-            }),
-          100,
-        );
-      });
-
     setFreeText('');
+
+    await demanderReponse(
+      { id: 'free', label: question, sub: 'Question libre', color: C.violet },
+      { questionType: 'free', freeTextQuestion: question },
+    );
+
+    setLoading(false);
+    setTimeout(
+      () =>
+        answerRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        }),
+      100,
+    );
   };
 
   const styles = {
@@ -1866,6 +1707,7 @@ export default function FutureELanding() {
     },
   ];
 
+  // FUT-37 : « ACPR / Banque de France » retiré, aucune donnée de cette source n'est lue par futur•e.
   const SOURCES = [
     'DRIAS / Météo-France',
     'Géorisques / BRGM',
@@ -1879,7 +1721,6 @@ export default function FutureELanding() {
     'Copernicus',
     'transport.data.gouv.fr',
     'IRVE, data.gouv',
-    'ACPR / Banque de France',
     'ARS',
     'PhytAtmo / AASQA',
     'INRAE',
@@ -1902,9 +1743,17 @@ export default function FutureELanding() {
     commune,
     communeMeta?.usedFallback,
   );
-  const previewCards = commune
-    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, horizon)
-    : activeSlotCity.cards;
+  const apercu = commune
+    ? apercuCommune({
+        commune,
+        chargement: communeDataLoading,
+        categories: activeCategories,
+        indicators: communeIndicators,
+        georisques: communeGeorisques,
+        horizon,
+      })
+    : { etat: 'cartes', cartes: activeSlotCity.cards };
+  const previewCards = apercu.etat === 'cartes' ? apercu.cartes : [];
   // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
   const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
 
@@ -2097,7 +1946,7 @@ export default function FutureELanding() {
                 l'arrivée de DRIAS et de Géorisques racontaient des récits de repli (submersion tirée
                 de la seule catégorie « littoral », immobilier sans donnée). Une absence de phrase vaut
                 mieux qu'une phrase fausse. */}
-            {commune && communeDataLoading
+            {apercu.etat === 'squelette'
               ? [0, 1, 2, 3].map((index) => (
                   <div
                     key={`squelette-${index}`}
@@ -2375,10 +2224,10 @@ export default function FutureELanding() {
               <div style={{ ...styles.metaBadge, marginBottom: 16 }}>
                 Source de la réponse :{' '}
                 {answerSource === 'claude'
-                  ? 'Claude API'
-                  : answerSource === 'supabase'
-                    ? 'Supabase'
-                    : 'fallback local'}
+                  ? 'modèle, contrôlé'
+                  : answerSource === 'repli_serveur'
+                    ? 'repli déterministe (serveur)'
+                    : 'repli déterministe (local)'}
               </div>
             )}
 

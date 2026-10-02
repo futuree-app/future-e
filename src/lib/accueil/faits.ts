@@ -52,12 +52,26 @@ function enScenarios(ind: Indicators): GwlScenarios {
   return out;
 }
 
+/** Ce que les faits ne disent pas, envoyé au modèle avec eux. Constant : jamais repris du navigateur. */
+export const NOTES_FAITS: readonly string[] = [
+  "Les valeurs climatiques sont des projections DRIAS-TRACC (médiane des modèles) pour la commune, à l'horizon indiqué, et leur référence 1976-2005 reconstruite. Aucune n'est une valeur actuelle.",
+  "Un nombre de jours par an ne dit rien de la durée ni de la continuité d'une période.",
+  "Les jours de sol sec décrivent l'humidité du sol pour la végétation ; ils ne mesurent ni les nappes, ni les rivières, ni l'eau du robinet.",
+  "L'indice forêt-météo décrit une météo favorable aux feux, pas la probabilité qu'un incendie se déclare.",
+  "Les risques recensés sont des faits actuels, à l'échelle de la commune : ils ne disent ni quelle partie est concernée, ni comment ils évolueront.",
+];
+
+/** L'horizon des faits : celui du dossier. */
+export function horizonDesFaits(): FaitsCommune["horizon"] {
+  const h = HORIZON[CLIMAT_HORIZON as keyof typeof HORIZON];
+  return { annee: h.annee, scenario: h.key, rechauffement_france: h.france, reference: "1976-2005" };
+}
+
 export function construireFaitsCommune(
   commune: string,
   indicators: Indicators | null | undefined,
   georisques: { flags?: GeorisquesFlags | null; riskLabels?: string[] | null } | null | undefined,
 ): FaitsCommune {
-  const h = HORIZON[CLIMAT_HORIZON as keyof typeof HORIZON];
   const sc = enScenarios(indicators ?? {});
   const aDuClimat = Object.values(sc).some((s) => Object.keys(s.v).length > 0);
   const mesure = (absolu: string, ecart: string | null, unite: Mesure["unite"]): Mesure => ({
@@ -68,7 +82,7 @@ export function construireFaitsCommune(
   const f = georisques?.flags;
   return {
     commune,
-    horizon: { annee: h.annee, scenario: h.key, rechauffement_france: h.france, reference: "1976-2005" },
+    horizon: horizonDesFaits(),
     climat: aDuClimat
       ? {
           jours_au_dessus_de_35C: mesure("NORTX35D_yr", "ATX35D_yr", "jours/an"),
@@ -89,12 +103,6 @@ export function construireFaitsCommune(
           libelles: Array.isArray(georisques?.riskLabels) ? georisques!.riskLabels!.slice(0, 12) : [],
         }
       : null,
-    notes: [
-      "Les valeurs climatiques sont des projections DRIAS-TRACC (médiane des modèles) pour la commune, à l'horizon indiqué, et leur référence 1976-2005 reconstruite. Aucune n'est une valeur actuelle.",
-      "Un nombre de jours par an ne dit rien de la durée ni de la continuité d'une période.",
-      "Les jours de sol sec décrivent l'humidité du sol pour la végétation ; ils ne mesurent ni les nappes, ni les rivières, ni l'eau du robinet.",
-      "L'indice forêt-météo décrit une météo favorable aux feux, pas la probabilité qu'un incendie se déclare.",
-      "Les risques recensés sont des faits actuels, à l'échelle de la commune : ils ne disent ni quelle partie est concernée, ni comment ils évolueront.",
-    ],
+    notes: [...NOTES_FAITS],
   };
 }
