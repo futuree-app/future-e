@@ -23,7 +23,7 @@
 //   confirmé,             non examiné   -> condition ouverte, sans fait (le registre la porte)
 //   non confirmé,         incompatible  -> ÉCART au projet, visible, jamais éliminatoire
 //   non confirmé,         satisfait     -> silencieux, point favorable (comme avant)
-import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible, aEnviron } from "../hard-constraints.ts";
+import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible, aEnviron, limiteDuLecteur } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
 import type {
   DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts, HardEvaluation,
@@ -156,9 +156,9 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
         : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
     // FUT-33 : la condition remplie se dit avec la limite du lecteur, dans son sens.
     case "nearSea":
-      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, dans les ${limiteDite(a)} km au plus que vous avez indiqués.`;
+      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, dans ${limiteDuLecteur(limiteDite(a), "au plus")}.`;
     case "farFromSea":
-      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, au-delà des ${limiteDite(a)} km que vous avez indiqués.`;
+      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, ${auDelaDe(limiteDuLecteur(limiteDite(a), ""))}.`;
     case "excludeSea":
       return `${f.nom} n'est pas classée « Mer » au titre de la loi Littoral.`;
     case "nearPlace":
@@ -181,8 +181,11 @@ function sujetMer(a: HardConstraintAssessment, f: ModuleFacts): string {
   return keys.includes("adresse.merKm") ? "Cette adresse" : `Le point de référence ${deCommune(f.nom)}`;
 }
 
-function limiteDite(a: HardConstraintAssessment): string {
-  return "expectedValue" in a && a.expectedValue?.kind === "distance_km" ? String(a.expectedValue.value) : "";
+// « au-delà des 30 km », jamais « au-delà de les 30 km ».
+const auDelaDe = (s: string) => (s.startsWith("les ") ? `au-delà des ${s.slice(4)}` : `au-delà de ${s}`);
+
+function limiteDite(a: HardConstraintAssessment): number {
+  return "expectedValue" in a && a.expectedValue?.kind === "distance_km" ? a.expectedValue.value : 0;
 }
 
 // LA TAILLE, DITE À L'ÉCHELLE MESURÉE (FUT-8) : la population de la commune quand la comparaison porte sur

@@ -256,3 +256,14 @@ test("performance : l'index du rivage se construit en moins d'une seconde", () =
   assert.ok(initMs < 1000, `${Math.round(initMs)} ms`);
   assert.equal(segments.length / 4, 410002);
 });
+
+test("faits : la condition remplie se dit dans le sens du lecteur, sans faute d'accord", () => {
+  const f = faits("33063"); // Bordeaux, 39 km
+  for (const [km, attendu] of [[30, /^Le point de référence de Bordeaux est à environ 39 km du rivage marin, au-delà des 30 km que vous avez indiqués\.$/], [1, /au-delà de la limite de 1 km que vous avez indiquée\.$/]] as const) {
+    const p = projet({ farFromSea: { active: true, minKm: km } }, "farFromSea");
+    const h = hardEval(ctx(loin(km), f), f);
+    const fait = regle("farFromSea").evaluate(f, p, h).facts[0]!;
+    assert.match(fait.statement, attendu);
+    assert.doesNotMatch(fait.statement, /de les|les 1 km/);
+  }
+});

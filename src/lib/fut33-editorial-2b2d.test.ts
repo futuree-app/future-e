@@ -135,13 +135,26 @@ test("submersion marine (/inondation) : le bloc côtier lit la loi Littoral ; le
   assert.match(script, /--legacy-confirme/);
 });
 
-test("la distance se dit lisiblement : jamais « 0 km », au dixième sous 10 km, au kilomètre au-delà", async () => {
+test("la distance se dit comme on la dit : mètres sous 1 km, dixième jusqu'à 10 km, kilomètre au-delà", async () => {
   const { kmLisible, aEnviron } = await import("./hard-constraints.ts");
   assert.equal(kmLisible(0), "moins de 100 m");
   assert.equal(kmLisible(0.04), "moins de 100 m");
-  assert.equal(kmLisible(0.66), "0,7 km");
+  assert.equal(kmLisible(0.12), "100 m");
+  assert.equal(kmLisible(0.38), "400 m");
+  assert.equal(kmLisible(0.66), "700 m");
+  assert.equal(kmLisible(0.96), "1 km");
+  assert.equal(kmLisible(1.62), "1,6 km");
+  assert.equal(aEnviron(kmLisible(0.38)), "à environ 400 m");
   assert.equal(kmLisible(9.23), "9,2 km");
   assert.equal(kmLisible(39.35), "39 km");
   assert.equal(aEnviron(kmLisible(0)), "à moins de 100 m");
   assert.equal(aEnviron(kmLisible(24.3)), "à environ 24 km");
+});
+
+test("la limite du lecteur s'accorde : « la limite de 1 km », « les 10 km », « 1,5 km »", async () => {
+  const { limiteDuLecteur } = await import("./hard-constraints.ts");
+  assert.equal(limiteDuLecteur(1, "au plus"), "la limite de 1 km au plus que vous avez indiquée");
+  assert.equal(limiteDuLecteur(1.5, "au moins"), "la limite de 1,5 km au moins que vous avez indiquée");
+  assert.equal(limiteDuLecteur(10, "au plus"), "les 10 km au plus que vous avez indiqués");
+  assert.equal(limiteDuLecteur(30, ""), "les 30 km que vous avez indiqués");
 });

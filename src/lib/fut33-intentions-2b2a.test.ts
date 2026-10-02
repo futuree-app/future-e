@@ -54,7 +54,7 @@ test("Caen sépare les deux sens : hors commune littorale, mais à 9 km du rivag
   assert.equal(evaluateFarFromSea(ctx({ farFromSea: { active: true, minKm: 30 } }), attrs("Annecy|74")).status, "satisfied");
   const a = evaluateFarFromSea(ctx({ farFromSea: { active: true, minKm: 20 } }), attrs("Lannion|22"));
   assert.ok("evidenceKeys" in a && a.evidenceKeys.includes("commune.merCentreKm"));
-  assert.match("statement" in a ? a.statement ?? "" : "", /^Le point de référence de Lannion est à environ 0,7 km du rivage marin, plus près que les 20 km au moins que vous avez indiqués\./);
+  assert.match("statement" in a ? a.statement ?? "" : "", /^Le point de référence de Lannion est à environ 700 m du rivage marin, plus près que les 20 km au moins que vous avez indiqués\./);
 });
 
 test("« loin de la mer » sans nombre n'est jamais une condition : ni filtre, ni « condition non appliquée »", () => {
