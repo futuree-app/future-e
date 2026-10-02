@@ -98,7 +98,7 @@ textes ci-dessus. Le cas le plus parlant est la première requête : avec A, un 
 ## Recommandation
 
 **C, avec un point milieu à 20 km** : score = 100 / (1 + (d/20)²). Le paramètre est une convention produit ; il se
-discute avant d'être codé. Repères pour en juger : 15 km donnerait Caen 61 et Arles 50 ; 25 km donnerait Caen 88
+discute avant d'être codé. Repères pour en juger : 15 km donnerait Caen 73 et Arles 56 ; 25 km donnerait Caen 88
 et Bordeaux 29.
 
 Deux choses à NE PAS faire en codant C :
