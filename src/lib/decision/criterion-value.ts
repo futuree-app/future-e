@@ -122,6 +122,11 @@ export function valeurDecisionnelle(cle: string, hc: HardConstraints): unknown {
       // `active` est déjà dit par la présence de la famille ; ne reste que le seuil, qui suit la même
       // règle qu'ailleurs (un `maxKm` nul, négatif ou absent ne pose aucune limite).
       return { seuil: thresholdFrom(hc.nearSea?.maxKm) };
+    case "farFromSea": {
+      // FUT-33 : le seul paramètre est le nombre dit (nul, négatif ou absent : aucune limite).
+      const km = hc.farFromSea?.minKm;
+      return { minKm: typeof km === "number" && km > 0 ? km : null };
+    }
     default:
       return (hc as Record<string, unknown>)[cle];
   }

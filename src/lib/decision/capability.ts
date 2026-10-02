@@ -132,6 +132,11 @@ function hardCapability(key: HardConstraintKey, hc: HardConstraints, grain: Eval
       return typeof hc.nearSea?.maxKm === "number" && hc.nearSea.maxKm > 0
         ? a("point_de_reference")
         : a("sans_seuil");
+    case "farFromSea":
+      // FUT-33 : même mesure, même capacité que `nearSea` (aucune promotion avant le calcul à l'adresse).
+      return typeof hc.farFromSea?.minKm === "number" && hc.farFromSea.minKm > 0
+        ? a("point_de_reference")
+        : a("sans_seuil");
     case "nearPlace": {
       const np = hc.nearPlace;
       const seuil = np ? nearPlaceThreshold(np) : null;

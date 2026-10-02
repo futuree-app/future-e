@@ -14,6 +14,10 @@ const texte = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : nu
 // chiffre ailleurs dans le texte (« 3 chambres », « à 30 minutes ») ne fonde aucune borne de taille.
 export const POPULATION_CHIFFREE = /\d[\d\s\u00a0\u202f.,]*\s*(k|000|mille)?\s*(habitants?|hab\b|hab\.|âmes)/i;
 
+// FUT-33 : un nombre RATTACHÉ à des kilomètres (« 30 km », « 20 kilomètres »). Sans lui, « loin de la mer »
+// n'a aucun seuil, et un `minKm` ne peut venir que d'une convention que le modèle aurait inventée.
+export const KILOMETRES_CHIFFRES = /\d[\d\s\u00a0\u202f.,]*\s*(km\b|kilom)/i;
+
 export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedProject {
   const hc = { ...(parsed.hardConstraints ?? {}) };
 
@@ -29,6 +33,15 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
     const metric = hc.nearPlace.metric === "vol_oiseau" || hc.nearPlace.metric === "route" ? hc.nearPlace.metric : null;
     // Une métrique ne qualifie que des kilomètres.
     hc.nearPlace = { ...hc.nearPlace, metric: hc.nearPlace.maxKm != null ? metric : null };
+  }
+  // FUT-33 : « loin de la mer » garde son intention ; son nombre n'existe que s'il est dit en kilomètres.
+  if (hc.farFromSea) {
+    if (hc.farFromSea.active !== true) hc.farFromSea = null;
+    else {
+      const km = hc.farFromSea.minKm;
+      const dit = typeof km === "number" && km > 0 && KILOMETRES_CHIFFRES.test(rawText ?? "");
+      hc.farFromSea = { active: true, minKm: dit ? km : null };
+    }
   }
   if (hc.sizeRelativeTo) hc.sizeRelativeTo = { ...hc.sizeRelativeTo, unit: unite(hc.sizeRelativeTo.unit) };
   if (Array.isArray(hc.excludePlace)) {

@@ -176,18 +176,18 @@ test("règle inondation : priorité NON déclarée -> not_applicable (hors sujet
   assert.equal(ev?.outcome, "not_applicable");
 });
 
-// ── Le registre fait tourner les 11 contraintes dures, au-dessus de l'évaluateur partagé ──
+// ── Le registre fait tourner les 12 contraintes dures, au-dessus de l'évaluateur partagé ──
 
-test("le registre porte les 11 contraintes dures, et le dossier les examine", () => {
+test("le registre porte les 12 contraintes dures, et le dossier les examine", () => {
   const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
   const r = run(facts({ distanceCoteKm: 42 }), p);
   const hardEvals = r.evaluations.filter((e) => e.ruleId.startsWith("territoire.hard."));
-  assert.equal(hardEvals.length, 11);
+  assert.equal(hardEvals.length, 12);
   // FUT-7 : non confirmée, la mer à 42 km pour une limite de 5 km est un ÉCART au projet, examiné, jamais
   // une incompatibilité.
   assert.equal(r.evaluations.find((e) => e.ruleId === "territoire.hard.nearSea")?.outcome, "mismatch");
-  // Les dix autres ne sont pas déclarées : HORS SUJET, pas un trou de couverture.
-  assert.equal(hardEvals.filter((e) => e.outcome === "not_applicable").length, 10);
+  // Les onze autres ne sont pas déclarées : HORS SUJET, pas un trou de couverture.
+  assert.equal(hardEvals.filter((e) => e.outcome === "not_applicable").length, 11);
 });
 
 // ── LES RÈGLES CLIMAT ────────────────────────────────────────────────────────

@@ -70,8 +70,8 @@ const BREST_REF: ResolvedPlaceReference = {
   lat: 48.39, lon: -4.48, source: "commune_index", sourceId: "29019", confidence: "exact", meta: META,
 };
 
-test("une règle par contrainte dure : 11", () => {
-  assert.equal(HARD_CONSTRAINT_RULES.length, 11);
+test("une règle par contrainte dure : 12", () => {
+  assert.equal(HARD_CONSTRAINT_RULES.length, 12);
 });
 
 test("not_declared -> not_applicable (le critère n'est pas déclaré, ce n'est pas un trou)", () => {

@@ -20,11 +20,11 @@ import type {
 
 export type HardConstraintKey =
   | "departements" | "zones" | "excludeZones" | "montagne" | "reliefProche"
-  | "nearSea" | "excludeSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
+  | "nearSea" | "excludeSea" | "farFromSea" | "nearPlace" | "communeSize" | "excludePlace" | "sizeRelativeTo";
 
 export const HARD_CONSTRAINT_KEYS: HardConstraintKey[] = [
   "departements", "zones", "excludeZones", "montagne", "reliefProche",
-  "nearSea", "excludeSea", "nearPlace", "communeSize", "excludePlace", "sizeRelativeTo",
+  "nearSea", "excludeSea", "farFromSea", "nearPlace", "communeSize", "excludePlace", "sizeRelativeTo",
 ];
 
 // Le moyen de transport d'un temps de trajet. C'est un PARAMÈTRE de l'évaluation : « à 30 minutes de la
@@ -240,6 +240,8 @@ export type NormalizedHardConstraints = {
   reliefProche: boolean; // seulement strength === "hard"
   nearSea: { threshold: PlaceThreshold | null } | null;
   excludeSea: boolean;
+  // FUT-33 : `minKm` null = « loin de la mer » sans nombre, déclaré mais jamais filtré.
+  farFromSea?: { minKm: number | null } | null;
   // `unit` (FUT-8) : « commune de… » se lit sur la population communale ; sinon, l'agglomération.
   communeSize: { min: number | null; max: number | null; unit?: "commune" | "unite_urbaine" | null } | null;
   nearPlace: {
@@ -668,6 +670,39 @@ export function evaluateExcludeSea(
     key: "excludeSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la proximité ${deCommune(c.nom)} au littoral`, "la proximité du littoral"),
     statement: `Cette commune est à ${km} km de la côte. Votre souhait de ne pas habiter près du littoral est ici entendu comme une distance d'au moins ${min} km.`,
+  };
+}
+
+// « À AU MOINS N KM DE LA MER » (FUT-33, 2B.2 A). Le N est celui du lecteur, et lui seul : sans nombre, la
+// contrainte est comprise mais non examinée (`missing_parameter`), exactement comme « il nous faut la mer ».
+// La recherche mesure le centre de la commune au rivage marin ; le dossier, tant qu'il n'est pas migré (étape
+// C), garde l'ancienne distance, comme pour `nearSea`.
+export function evaluateFarFromSea(
+  ctx: EvaluationContext,
+  c: CommuneAttributes,
+): HardConstraintAssessment<"farFromSea"> {
+  const fs = ctx.constraints.farFromSea;
+  if (fs == null) return { key: "farFromSea", status: "not_declared" };
+  if (fs.minKm == null) return { key: "farFromSea", status: "unexamined", reason: "missing_parameter" };
+  const min = fs.minKm;
+  const nouvelle = c.merCentreKm !== undefined;
+  const mesure = nouvelle ? c.merCentreKm : c.distanceCoteKm;
+  if (mesure == null) return { key: "farFromSea", status: "unexamined", reason: "missing_data" };
+  const km = nouvelle ? Math.round(mesure * 10) / 10 : Math.round(mesure);
+  const observedValue: ConstraintValue = { kind: "distance_km", value: mesure };
+  const expectedValue: ConstraintValue = { kind: "distance_km", value: min };
+  const observedLabel = `${km} km`;
+  const expectedLabel = `au moins ${min} km`;
+  const evidenceKeys = [nouvelle ? "commune.merCentreKm" : "commune.distanceCoteKm", "project.hardConstraints.farFromSea"];
+  if (mesure >= min) {
+    return { key: "farFromSea", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
+  }
+  return {
+    key: "farFromSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
+    topic: topicFit(`la distance ${deCommune(c.nom)} ${nouvelle ? "au rivage marin" : "au littoral"}`, nouvelle ? "la distance au rivage marin" : "la distance au littoral"),
+    statement: nouvelle
+      ? `Le centre de cette commune est à ${km} km du rivage marin, en deçà des ${min} km au moins qu'indique votre projet.`
+      : `Cette commune est à ${km} km du littoral, en deçà des ${min} km au moins qu'indique votre projet.`,
   };
 }
 
@@ -1115,6 +1150,7 @@ export const HARD_CONSTRAINT_EVALUATORS: {
   reliefProche: evaluateReliefProche,
   nearSea: evaluateNearSea,
   excludeSea: evaluateExcludeSea,
+  farFromSea: evaluateFarFromSea,
   nearPlace: evaluateNearPlace,
   communeSize: evaluateCommuneSize,
   excludePlace: evaluateExcludePlace,

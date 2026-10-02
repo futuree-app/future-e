@@ -2386,7 +2386,8 @@ function explorationBonus(
 // Jamais si l'utilisateur exclut le littoral. Aucun effet sur le score ni le tri.
 function hasCoastalIntent(parsed: ParsedProject): boolean {
   const hc = parsed.hardConstraints ?? {};
-  if (hc.excludeSea) return false;
+  // FUT-33 : « loin de la mer », avec ou sans nombre, contredit une intention littorale.
+  if (hc.excludeSea || hc.farFromSea?.active) return false;
   if (hc.nearSea?.active) return true;
   const FACADES = new Set(["atlantique", "manche", "mediterranee", "cote_basque"]);
   if (hc.zones?.some((z) => FACADES.has(z.zone))) return true;
@@ -2641,7 +2642,8 @@ export async function resolveCommuneByName(label: string): Promise<IndexCommune 
 // trait que le périmètre ne peut pas tenir (honnêteté du signal). Data-driven : on regarde
 // si une commune du périmètre est réellement côtière, plutôt qu'une liste de départements.
 export async function perimeterAllowsCoast(hc: HardConstraints): Promise<boolean> {
-  if (hc.excludeSea) return false;
+  // FUT-33 : « loin de la mer », avec ou sans nombre, contredit une intention littorale.
+  if (hc.excludeSea || hc.farFromSea?.active) return false;
   if (hc.nearSea?.active) return true;
   const zone = resolveZoneAnchors(hc.zones, hc.zonesMatch === "any" ? "any" : "all");
   const hardDepts = new Set<string>([
@@ -2829,6 +2831,14 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     const s = constraints.sizeRelativeTo;
     appliedPlaces.push(`communes plus ${s.direction === "smaller" ? "petites" : "grandes"} que ${s.label}`);
   }
+  // FUT-33 : la mer, dite avec la mesure appliquée (le centre de la commune, le classement loi Littoral).
+  if (constraints.nearSea?.threshold?.metric === "distance") {
+    appliedPlaces.push(`centre de la commune à ${constraints.nearSea.threshold.maxKm} km au plus du rivage marin`);
+  }
+  if (constraints.farFromSea?.minKm != null) {
+    appliedPlaces.push(`centre de la commune à au moins ${constraints.farFromSea.minKm} km du rivage marin`);
+  }
+  if (constraints.excludeSea) appliedPlaces.push("hors communes littorales (classement loi Littoral)");
   // Le rayon que le produit s'est choisi est DIT, et sa portée exacte avec lui.
   for (const h of hints) {
     const quoi = h.kind === "near_place_radius" ? constraints.nearPlace?.label ?? "ce lieu" : "la mer";

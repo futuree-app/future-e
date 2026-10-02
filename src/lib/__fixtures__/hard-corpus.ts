@@ -60,6 +60,8 @@ export const PROJETS: { nom: string; hc: HardConstraints }[] = [
   { nom: "mer 30 km", hc: { nearSea: { active: true, maxKm: 30 } } },
   { nom: "mer sans distance", hc: { nearSea: { active: true } } },
   { nom: "pas la mer", hc: { excludeSea: true } },
+  { nom: "au moins 20 km de la mer", hc: { farFromSea: { active: true, minKm: 20 } } },
+  { nom: "loin de la mer, sans nombre", hc: { farFromSea: { active: true, minKm: null } } },
   { nom: "petite agglo", hc: { communeSize: { max: 25_000 } } },
   { nom: "près de Brest", hc: { nearPlace: { label: "Brest", maxKm: 60 } } },
   { nom: "près d'un lieu non résolu", hc: { nearPlace: { label: "Gare Matabiau", maxKm: 30 } } },

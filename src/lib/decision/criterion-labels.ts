@@ -173,6 +173,8 @@ export function presenterCritere(project: UserProject, ref: CriterionRef): Crite
       return { titre: "Être près de la mer", court: "la mer", interpretation: "futur•e estime la distance depuis le centre de la commune." };
     case "excludeSea":
       return { titre: "Ne pas habiter près du littoral", court: "l'éloignement du littoral", interpretation: "futur•e estime la distance depuis le centre de la commune." };
+    case "farFromSea":
+      return { titre: "Être loin de la mer", court: "la distance à la mer", interpretation: "futur•e estime la distance depuis le centre de la commune." };
   }
 }
 

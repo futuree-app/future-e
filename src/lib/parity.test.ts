@@ -129,7 +129,7 @@ test("PARITÉ : une commune RETENUE par le filtre n'est JAMAIS `incompatible` au
   }
 });
 
-test("PARITÉ : la table de correspondance tient sur les 11 clés, dans les deux sens", () => {
+test("PARITÉ : la table de correspondance tient sur les 12 clés, dans les deux sens", () => {
   for (const c of CORPUS) {
     for (const p of PROJETS) {
       const { assessments, run } = chaines(c, p.hc);

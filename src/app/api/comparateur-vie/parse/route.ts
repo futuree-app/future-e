@@ -89,7 +89,18 @@ const TOOL_INPUT_SCHEMA = {
           required: ["active"],
           description: "active=true SEULEMENT si la proximité de la mer est explicitement indispensable ('au bord de la mer', 'il nous faut la mer'). 'pas trop loin de l'océan' ou 'on aime la mer' n'est PAS une contrainte dure : c'est la préférence proximite_mer.",
         },
-        excludeSea: { type: "boolean", description: "true si l'utilisateur ne veut PAS le littoral." },
+        excludeSea: {
+          type: "boolean",
+          description:
+            "true SEULEMENT si l'utilisateur refuse une COMMUNE LITTORALE ('pas le littoral', 'pas une commune littorale', 'hors littoral', 'pas sur la côte'). Le moteur l'entend au sens de la loi Littoral, sans aucune distance. 'Loin de la mer', 'dans les terres', 'à au moins 30 km de la mer' ne vont PAS ici : c'est farFromSea.",
+        },
+        farFromSea: {
+          type: ["object", "null"],
+          properties: { active: { type: "boolean" }, minKm: { type: ["number", "null"] } },
+          required: ["active"],
+          description:
+            "ÊTRE LOIN DE LA MER, par la distance ('loin de la mer', 'plutôt dans les terres', 'éloigné de la côte', 'à au moins 30 km de la mer', 'pas à moins de 20 km de la côte'). minKm = le nombre DIT par l'utilisateur, recopié tel quel ; null s'il n'en dit aucun. N'inventez JAMAIS de nombre. 'Je n'aime pas la mer' sans parler de distance ni de commune littorale : ni farFromSea ni excludeSea. null sinon.",
+        },
         nearPlace: {
           type: ["object", "null"],
           properties: {
@@ -242,6 +253,7 @@ Votre rôle : traduire un projet de vie exprimé en langage libre vers une struc
 RÈGLES
 - Distinguez fortement ce qui ÉLIMINE (contrainte dure) de ce qui PONDÈRE (préférence). En cas de doute, préférez la préférence : on n'élimine que sur un critère explicite.
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
+- Trois refus de la mer, à ne JAMAIS confondre : "pas le littoral / pas une commune littorale / hors littoral" → excludeSea:true (statut de la commune). "loin de la mer / dans les terres / éloigné de la côte" → farFromSea { active:true, minKm:null }. "à au moins N km de la mer" → farFromSea { active:true, minKm:N }. Une même phrase peut porter les deux ("pas sur le littoral, au moins 20 km de la mer" → excludeSea:true ET farFromSea minKm 20). Une négation de proximité ("pas forcément près de la mer", "la mer n'est pas indispensable") n'est AUCUN refus : rien.
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur des hivers" (douceur_climat = température moyenne hivernale), "rechercher le soleil / l'ensoleillement" (ensoleillement_recherche, = rayonnement solaire, pas la chaleur). Une douceur ANNUELLE ("un climat doux et agréable toute l'année") se traduit par DEUX préférences : douceur_climat (hivers doux) + faible_chaleur (étés supportables). Une douceur purement hivernale → douceur_climat seul.
 - Inondation vs pluies (ne pas confondre) : "inondation / crue / zone inondable / débordement / ruissellement / sans risque d'inondation" → faible_risque_inondation (risque réel). "pluies intenses / orages violents / grosses averses / précipitations extrêmes" → faible_precip_extremes (pluie, pas inondation). Ne routez JAMAIS "inondation" vers faible_precip_extremes.
 - Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).

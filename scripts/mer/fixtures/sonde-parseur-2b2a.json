@@ -1,0 +1,162 @@
+[
+ {
+  "texte": "Je ne veux pas vivre sur le littoral, une petite ville calme.",
+  "nearSea": null,
+  "excludeSea": true,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Hors littoral, avec une gare.",
+  "nearSea": null,
+  "excludeSea": true,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Pas une commune littorale s'il vous plaît.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": true,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Je veux être à au moins 30 km de la mer.",
+  "nearSea": null,
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": 30
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Pas à moins de 20 km de la côte, une ville moyenne.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": 20
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "On veut vivre loin de la mer.",
+  "nearSea": null,
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": null
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Plutôt dans les terres, au calme.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": null
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Je n'aime pas la mer, je préfère la campagne.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": null,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Je veux être proche de la mer.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": null,
+  "farFromSea": null,
+  "proximite_mer": 3,
+  "communeAncre": null
+ },
+ {
+  "texte": "Il nous faut absolument la mer, à moins de 10 km.",
+  "nearSea": {
+   "active": true,
+   "maxKm": 10
+  },
+  "excludeSea": null,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Pas forcément près de la mer, mais pas trop chaud.",
+  "nearSea": null,
+  "excludeSea": null,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Surtout pas au bord de la mer.",
+  "nearSea": null,
+  "excludeSea": true,
+  "farFromSea": null,
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Pas sur le littoral, et au moins 20 km de la mer.",
+  "nearSea": {
+   "active": false
+  },
+  "excludeSea": true,
+  "farFromSea": {
+   "active": true,
+   "minKm": 20
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Je ne veux pas être près de la mer.",
+  "nearSea": null,
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": null
+  },
+  "proximite_mer": null,
+  "communeAncre": null
+ },
+ {
+  "texte": "Une ville comme Brest mais loin de la mer.",
+  "nearSea": null,
+  "excludeSea": null,
+  "farFromSea": {
+   "active": true,
+   "minKm": null
+  },
+  "proximite_mer": null,
+  "communeAncre": [
+   {
+    "label": "Brest"
+   }
+  ]
+ }
+]

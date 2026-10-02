@@ -539,16 +539,16 @@ test("sizeRelativeTo : plus grand que la référence alors qu'on voulait plus pe
 
 // ── le registre ──────────────────────────────────────────────────────────────
 
-test("le registre est EXHAUSTIF : les 11 clés ont un évaluateur", () => {
-  assert.equal(Object.keys(HARD_CONSTRAINT_EVALUATORS).length, 11);
+test("le registre est EXHAUSTIF : les 12 clés ont un évaluateur", () => {
+  assert.equal(Object.keys(HARD_CONSTRAINT_EVALUATORS).length, 12);
   for (const k of HARD_CONSTRAINT_KEYS) assert.ok(typeof HARD_CONSTRAINT_EVALUATORS[k] === "function", k);
 });
 
 test("assessHardConstraints : une évaluation par clé, et chacune porte SA clé", () => {
   const all = assessHardConstraints(ctx({ departements: ["31"] }), commune());
-  assert.equal(all.length, 11);
+  assert.equal(all.length, 12);
   for (const a of all) assert.ok(HARD_CONSTRAINT_KEYS.includes(a.key));
-  assert.equal(all.filter((a) => a.status === "not_declared").length, 10);
+  assert.equal(all.filter((a) => a.status === "not_declared").length, 11);
 });
 
 test("les topics tiennent dans la limite dure d'assertFactValid (70 car.), même sur un nom très long", () => {

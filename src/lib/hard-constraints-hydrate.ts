@@ -158,6 +158,10 @@ export function hydrateHardConstraints(
     reliefProche: c.reliefProche?.strength === "hard",
     nearSea: c.nearSea?.active ? { threshold: thresholdFrom(c.nearSea.maxKm) } : null,
     excludeSea: c.excludeSea === true,
+    // FUT-33 : un nombre DIT et positif, sinon null (« loin de la mer » sans nombre : déclaré, jamais filtré).
+    farFromSea: c.farFromSea?.active
+      ? { minKm: typeof c.farFromSea.minKm === "number" && c.farFromSea.minKm > 0 ? c.farFromSea.minKm : null }
+      : null,
     communeSize: c.communeSize
       ? { min: c.communeSize.min ?? null, max: c.communeSize.max ?? null, unit: c.communeSize.unit ?? null }
       : null,

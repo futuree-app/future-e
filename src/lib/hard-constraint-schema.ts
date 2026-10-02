@@ -43,7 +43,14 @@ export type HardConstraints = {
   // preferred / inspiration = bonus proportionnel. Adossé à relief_proximite (index).
   reliefProche?: { strength: ZoneStrength } | null;
   nearSea?: { active: boolean; maxKm?: number | null };
+  // FUT-33 (2B.2, A) : TROIS intentions littorales qui ne se confondent plus.
+  //   - excludeSea   = « pas une commune littorale » : STRICTEMENT une commune non classée Mer au titre de la
+  //                    loi Littoral. Aucun kilomètre.
+  //   - farFromSea   = « loin de la mer » : `minKm` = le nombre DIT par le lecteur (« à au moins 30 km ») ;
+  //                    sans nombre, l'intention est comprise mais rien ne filtre (aucun seuil inventé, D10).
+  // « Loin de la mer » n'est PAS « hors commune littorale » : Caen (9 km du rivage) n'est pas classée Mer.
   excludeSea?: boolean;
+  farFromSea?: { active: boolean; minKm?: number | null } | null;
   // « Près de {lieu} » : le lieu n'est PAS forcément une commune (une gare, un hôpital, un campus). Deux
   // métriques, et elles ne se convertissent pas l'une dans l'autre : une distance à vol d'oiseau n'établit
   // pas un temps de trajet. Le mode est un PARAMÈTRE de l'évaluation, pas une décoration : sans lui, « à

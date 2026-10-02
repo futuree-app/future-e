@@ -146,6 +146,7 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
         : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
     case "nearSea":
     case "excludeSea":
+    case "farFromSea":
       return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
     case "nearPlace":
       return `${ici} est ${a.observedLabel.startsWith("dans ") ? "" : "à "}${a.observedLabel}, pour ${a.expectedLabel} attendu.`;
@@ -184,6 +185,7 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
     }
     case "nearSea":
     case "excludeSea":
+    case "farFromSea":
       return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
     case "communeSize":
     case "sizeRelativeTo":
@@ -217,7 +219,7 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
       if (key === "excludeSea") return "futur•e considère actuellement « loin du littoral » comme au moins 15 km de la côte. Cette distance est une convention, pas une limite que vous avez fixée.";
       return "Ce périmètre est lu comme une liste de départements choisie par futur•e. Cette convention éclaire votre condition sans pouvoir la trancher.";
     case "point_de_reference":
-      return key === "nearSea"
+      return key === "nearSea" || key === "farFromSea"
         ? "La distance au littoral est mesurée depuis le point de référence de la commune, même quand une adresse est connue. Elle ne dit pas non plus quelle mesure vous visez : à vol d'oiseau, par la route ou en temps de trajet."
         : "Le temps de trajet est estimé depuis le point de référence de la commune. Il ne vaut pas pour toutes ses adresses.";
     case "metrique_non_enregistree":
@@ -229,7 +231,7 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
     case "agglomeration_implicite":
       return "Quitter une ville est lu ici comme quitter toute son agglomération. Votre projet ne le précise pas : cette lecture ne suffit pas à trancher.";
     case "sans_seuil":
-      return key === "nearSea"
+      return key === "nearSea" || key === "farFromSea"
         ? "Votre projet ne fixe pas de distance à la mer. La mesure situe la commune, elle ne dit pas si votre condition est respectée."
         : "Votre projet ne fixe ni distance ni temps de trajet. La mesure situe le lieu, elle ne dit pas si votre condition est respectée.";
     default:
