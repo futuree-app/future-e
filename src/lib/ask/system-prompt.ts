@@ -54,54 +54,36 @@ QUESTION DE PROFIL
 N'incluez profile_question QUE si l'information manquante améliorerait substantiellement votre prochaine réponse, et UNE SEULE par message. Le champ "contextualization" est obligatoire et doit dire en une phrase pourquoi vous demandez. Choisissez "field" dans la liste autorisée du schéma.`;
 
 // ─── Référentiel interne (texte) ───────────────────────────────────────────
-export type LigneTension = {
-  slug: string;
-  score: number | null;
-  ind_exposition: number | null;
-  ind_vulnerabilite: number | null;
-  ind_adaptation: number | null;
-  ind_occurrence: number | null;
-};
+// FUT-16 : le référentiel ne porte plus que l'identité de la commune et ses catégories territoriales.
+// Il recevait aussi les lignes de `communes_tension` (« score », « exposition », « vulnérabilité »,
+// « adaptation », « occurrence » sur 100) : des colonnes DRIAS ou ADEME normalisées et rebaptisées, dont
+// 99 lignes climat sur 267 contredisaient la mesure transmise dans le même prompt, et que le modèle
+// citait comme « référentiel interne futur•e ». Les mesures elles-mêmes restent, en clair, dans les
+// blocs DRIAS et ADEME. Aucun adjectif ne remplace les notes retirées.
+//
+// LE CONTRAT EST FERMÉ : une clé inattendue est refusée. On ne réinjecte pas une couche de notation en
+// l'ajoutant discrètement à un argument existant.
+const CLES_REFERENTIEL = ["insee", "nomCommune", "categories"] as const;
 
-export function construireReferentiel(args: {
-  insee: string;
-  nomCommune: string | null;
-  categories: string[];
-  tensions: LigneTension[] | null;
-}): { text: string; hasTensionData: boolean } {
-  const { insee, categories, tensions } = args;
-  const lines: string[] = [`INSEE : ${insee}`];
+export type EntreeReferentiel = { insee: string; nomCommune: string | null; categories: string[] };
+
+function refuserClesInattendues(objet: object, permises: readonly string[], contexte: string) {
+  const inattendues = Object.keys(objet).filter((k) => !permises.includes(k));
+  if (inattendues.length > 0) {
+    throw new Error(`${contexte} : clé(s) non prévue(s) par le contrat : ${inattendues.join(", ")}`);
+  }
+}
+
+export function construireReferentiel(args: EntreeReferentiel): string {
+  refuserClesInattendues(args, CLES_REFERENTIEL, "construireReferentiel");
+  const lines: string[] = [`INSEE : ${args.insee}`];
   if (args.nomCommune) {
     lines.push(`Nom commune (référentiel interne) : ${args.nomCommune}`);
   }
-  if (categories.length > 0) {
-    lines.push(`Catégories territoriales : ${categories.join(", ")}`);
+  if (args.categories.length > 0) {
+    lines.push(`Catégories territoriales : ${args.categories.join(", ")}`);
   }
-
-  const hasTensionData = Array.isArray(tensions) && tensions.length > 0;
-
-  if (hasTensionData) {
-    lines.push("");
-    lines.push(
-      "Tensions territoriales (table communes_tension, scores et indicateurs sur 100) :",
-    );
-    for (const t of tensions!) {
-      const detail: string[] = [];
-      if (t.ind_exposition != null) detail.push(`exposition ${t.ind_exposition}`);
-      if (t.ind_vulnerabilite != null) detail.push(`vulnérabilité ${t.ind_vulnerabilite}`);
-      if (t.ind_adaptation != null) detail.push(`adaptation ${t.ind_adaptation}`);
-      if (t.ind_occurrence != null) detail.push(`occurrence ${t.ind_occurrence}`);
-      const detailStr = detail.length > 0 ? ` (${detail.join(", ")})` : "";
-      lines.push(`- ${t.slug} : score ${t.score}${detailStr}`);
-    }
-  } else {
-    lines.push("");
-    lines.push(
-      "Pas de scores de tension détaillés disponibles dans futur•e pour cette commune.",
-    );
-  }
-
-  return { text: lines.join("\n"), hasTensionData };
+  return lines.join("\n");
 }
 
 // ─── Formatage des blocs d'enrichissement pour le system prompt ────────────
@@ -418,43 +400,48 @@ export function buildUserProfileText(profile: ProfileRow): string {
 }
 
 // ─── Le system prompt complet, tel qu'il part chez Anthropic ───────────────
-export function construireSystemPrompt(args: {
+const CLES_SYSTEM = ["communeName", "communeInsee", "referentiel", "enrichment", "profile"] as const;
+
+export type EntreeSystemPrompt = {
   communeName: string;
   communeInsee: string;
-  referentiel: { text: string; hasTensionData: boolean };
+  /** Le texte de `construireReferentiel`. */
+  referentiel: string;
   enrichment: EnrichmentResult;
   profile: ProfileRow;
-}): string {
-  const { communeName, communeInsee, enrichment } = args;
-  const communeContext = args.referentiel.text;
-  const hasTensionData = args.referentiel.hasTensionData;
-  const profileText = buildUserProfileText(args.profile);
-  const enrichmentText = formatEnrichmentBlock(enrichment);
-  const anyEnrichmentData =
+};
+
+/** Y a-t-il au moins une source détaillée ? Seules les vraies sources comptent. */
+export function aDesDonneesDetaillees(enrichment: EnrichmentResult): boolean {
+  return (
     enrichment.ademe !== null ||
     enrichment.drias !== null ||
     enrichment.eau !== null ||
     enrichment.georisques !== null ||
     enrichment.catnat !== null ||
-    enrichment.vigieau !== null;
+    enrichment.vigieau !== null ||
+    enrichment.baignade !== null
+  );
+}
+
+export function construireSystemPrompt(args: EntreeSystemPrompt): string {
+  refuserClesInattendues(args, CLES_SYSTEM, "construireSystemPrompt");
+  const { communeName, communeInsee, referentiel, enrichment } = args;
+  const profileText = buildUserProfileText(args.profile);
+  const enrichmentText = formatEnrichmentBlock(enrichment);
 
   return `${SYSTEM_PROMPT_BASE}
 
 DONNÉES TERRITORIALES DISPONIBLES — ${communeName} (INSEE ${communeInsee})
 
 [Référentiel interne futur•e]
-${communeContext}
-${
-  hasTensionData
-    ? ""
-    : "\n(Pas de scores de tension détaillés en base interne pour cette commune.)"
-}
+${referentiel}
 
 ${enrichmentText}
 ${
-  !anyEnrichmentData && !hasTensionData
-    ? "\nIndication : aucune donnée détaillée disponible dans futur•e pour cette commune. Si l'utilisateur demande des chiffres précis, dites-le explicitement plutôt que d'extrapoler."
-    : ""
+  aDesDonneesDetaillees(enrichment)
+    ? ""
+    : "\nIndication : aucune donnée détaillée disponible dans futur•e pour cette commune. Si l'utilisateur demande des chiffres précis, dites-le explicitement plutôt que d'extrapoler."
 }
 
 PROFIL UTILISATEUR CONNU

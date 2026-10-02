@@ -5,7 +5,7 @@
 //
 // Schéma de sortie strict via Anthropic tool use → pas de parsing texte fragile.
 // Périmètre strict : on s'appuie uniquement sur les données futur•e disponibles
-// (communes_categorization, communes_tension, user_profiles). Si une donnée
+// (communes_categorization, sources publiques de l'enrichissement, user_profiles). Si une donnée
 // manque, Claude doit le dire explicitement, jamais inventer.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -108,25 +108,17 @@ type ToolInput = {
 // Le prompt de base, le référentiel, les blocs d'enrichissement, le profil et leur assemblage vivent dans
 // src/lib/ask/system-prompt.ts (fonctions pures, testées) : ce qui part chez Anthropic s'y construit.
 
-// ─── Contexte territorial à partir des tables Supabase ─────────────────────
+// ─── Référentiel interne : identité et catégories de la commune ────────────
+// FUT-16 : `communes_tension` n'est plus lue. Ses notes « sur 100 » ne font plus partie de ce que le
+// modèle reçoit ; les mesures correspondantes sont dans les blocs DRIAS et ADEME.
 type SupabaseServer = Awaited<ReturnType<typeof createClient>>;
 
-async function buildCommuneContext(
-  insee: string,
-  supabase: SupabaseServer,
-): Promise<{ text: string; hasTensionData: boolean }> {
+async function lireReferentielInterne(insee: string, supabase: SupabaseServer): Promise<string> {
   const { data: catRow } = await supabase
     .from("communes_categorization")
     .select("commune_name, insee_code, categories")
     .eq("insee_code", insee)
     .maybeSingle();
-
-  const { data: tensions } = await supabase
-    .from("communes_tension")
-    .select(
-      "slug, score, ind_exposition, ind_vulnerabilite, ind_adaptation, ind_occurrence",
-    )
-    .eq("insee_code", insee);
 
   const categories =
     catRow?.categories && catRow.categories.length > 0
@@ -137,7 +129,6 @@ async function buildCommuneContext(
     insee,
     nomCommune: catRow?.commune_name ?? null,
     categories,
-    tensions: tensions ?? null,
   });
 }
 
@@ -250,7 +241,7 @@ export async function POST(request: NextRequest) {
     // Les 4 sources tournent en parallèle. Supabase (rapide, déjà ouvert)
     // + ADEME/DRIAS/Hub'Eau (caches framework côté lib).
     const [referentiel, enrichment] = await Promise.all([
-      buildCommuneContext(communeInsee, supabase),
+      lireReferentielInterne(communeInsee, supabase),
       gatherCommuneEnrichment(communeInsee),
     ]);
     const systemPrompt = construireSystemPrompt({
