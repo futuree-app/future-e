@@ -2,13 +2,22 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getCommuneEntry, buildTerritorySignals } from "@/lib/comparateur-vie";
+import { getClimatDataCommune } from "@/lib/drias-json";
+import { getGeorisquesSummary } from "@/lib/georisques";
 import {
   SYSTEM_PROMPT,
-  assainirFaits,
   construirePromptUtilisateur,
+  contexteDepuisCorps,
   finaliserReponseQna,
-  type ContexteQna,
+  type SourcesFaits,
 } from "@/lib/accueil/qna";
+
+// Les faits d'une question viennent des sources canoniques, lues ICI à partir de l'INSEE. Le navigateur
+// ne transmet que la commune, l'INSEE et la question (FUT-37).
+const SOURCES_FAITS: SourcesFaits = {
+  climat: async (insee) => (await getClimatDataCommune(insee, { accueil: true }))?.commune.s ?? null,
+  georisques: (insee) => getGeorisquesSummary(insee),
+};
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -72,30 +81,16 @@ function resolveQuestionCategory(tensionId: string): string {
 // plus rien ne la lit.
 export async function POST(request: Request) {
   const body = await request.json();
-  const {
-    commune,
-    categories,
-    faits,
-    tension,
-    questionType = "preset",
-    freeTextQuestion = null,
-    inseeCode = null,
-  } = body ?? {};
+  const { categories, tension, questionType = "preset", freeTextQuestion = null, inseeCode = null } = body ?? {};
 
-  if (!commune || !tension?.id || !tension?.label) {
+  // Les faits sont reconstruits côté serveur depuis l'INSEE ; un champ `faits` du corps est ignoré.
+  const contexte = await contexteDepuisCorps(body, SOURCES_FAITS);
+  if (!contexte) {
     return NextResponse.json(
       { error: "Missing commune or tension payload." },
       { status: 400 },
     );
   }
-
-  const contexte: ContexteQna = {
-    commune: String(commune),
-    tensionId: String(tension.id),
-    questionLabel: String(freeTextQuestion ?? tension.label),
-    questionSub: typeof tension.sub === "string" ? tension.sub : null,
-    faits: assainirFaits(faits, String(commune)),
-  };
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {

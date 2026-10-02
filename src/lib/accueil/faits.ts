@@ -67,6 +67,15 @@ export function horizonDesFaits(): FaitsCommune["horizon"] {
   return { annee: h.annee, scenario: h.key, rechauffement_france: h.france, reference: "1976-2005" };
 }
 
+/** La forme renvoyée par `getClimatDataCommune` (commune.s) convertie en celle de l'accueil. */
+export function indicatorsDepuisScenarios(s: GwlScenarios | null | undefined): Indicators {
+  const out: Indicators = {};
+  for (const [gwl, sc] of Object.entries(s ?? {})) {
+    out[gwl] = Object.fromEntries(Object.entries(sc?.v ?? {}).map(([k, n]) => [k, { value_numeric: n }]));
+  }
+  return out;
+}
+
 export function construireFaitsCommune(
   commune: string,
   indicators: Indicators | null | undefined,

@@ -723,7 +723,9 @@ export default function FutureELanding() {
   };
 
   // FUT-37 : une question reçoit la réponse du modèle si /qna l'a contrôlée, sinon le repli déterministe
-  // construit sur les SEULS faits de la commune demandée (src/lib/accueil/reponses.ts). La table
+  // construit sur les SEULS faits de la commune demandée (src/lib/accueil/reponses.ts). Les faits qui
+  // font autorité sont ceux que /qna reconstruit depuis l'INSEE ; ceux d'ici ne servent qu'au repli local,
+  // quand /qna est injoignable (les mêmes données que les cartes affichées). La table
   // `tension_answers` n'est plus lue : ses textes, écrits pour La Rochelle, Bressuire ou la Charente,
   // étaient servis à toutes les communes. /qna ne renvoie jamais le texte brut du modèle.
   async function demanderReponse(tension, extra = {}) {
@@ -733,10 +735,10 @@ export default function FutureELanding() {
       const response = await fetch('/qna', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
+        // Les faits ne partent pas : /qna les reconstruit depuis l'INSEE. Le navigateur ne fait pas autorité.
         body: JSON.stringify({
           commune,
           categories: communeMeta?.categories || ['all'],
-          faits,
           tension,
           inseeCode: communeMeta?.inseeCode ?? null,
           ...extra,

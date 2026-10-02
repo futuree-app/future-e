@@ -15,7 +15,9 @@
 //      reproduire la même dérive.
 import { checkRecitPublic, type Violation } from "../garde-fous/assertions.ts";
 import { reponseDeRepli, type ReponseQna } from "./reponses.ts";
-import { horizonDesFaits, NOTES_FAITS, type FaitsCommune } from "./faits.ts";
+import { construireFaitsCommune, indicatorsDepuisScenarios, type FaitsCommune } from "./faits.ts";
+import type { GwlScenarios } from "../decision/climat-facts.ts";
+import type { GeorisquesFlags } from "./recits.ts";
 
 export const SYSTEM_PROMPT = `You are the short-answer engine of the futur•e landing page, a French web app that helps people decide where to live using public data.
 
@@ -196,43 +198,40 @@ export function finaliserReponseQna(texteModele: string | null, ctx: ContexteQna
   return { ...reponseDeRepli(ctx.tensionId, ctx.faits), source: "repli", violations: [...new Set(c.violations.map((v) => v.rule))] };
 }
 
+// ── L'autorité des faits ─────────────────────────────────────────────────────────────────────
+
 /**
- * Les faits reçus du navigateur sont reconstruits champ par champ : seuls des nombres, des booléens et
- * des libellés courts passent. Une clé inconnue est ignorée, jamais transmise au modèle ; l'horizon et
- * les notes sont ceux du serveur, jamais ceux du navigateur.
+ * Les sources canoniques que le serveur interroge. Injectées pour rester testables ; la route branche
+ * `getClimatDataCommune` (DRIAS, colonnes de l'accueil) et `getGeorisquesSummary` (GASPAR).
  */
-export function assainirFaits(entree: unknown, commune: string): FaitsCommune {
-  const e = (entree ?? {}) as Partial<FaitsCommune>;
-  const nombre = (x: unknown) => (typeof x === "number" && Number.isFinite(x) ? Math.round(x * 10) / 10 : null);
-  const mesure = (m: unknown, unite: "jours/an" | "nuits/an" | "°C") => {
-    const x = (m ?? {}) as { projete?: unknown; reference?: unknown };
-    return { projete: nombre(x.projete), reference: nombre(x.reference), unite };
-  };
-  const c = e.climat as Record<string, unknown> | null | undefined;
-  const r = e.risques_recenses_sur_la_commune as Record<string, unknown> | null | undefined;
+export type SourcesFaits = {
+  climat: (insee: string) => Promise<GwlScenarios | null>;
+  georisques: (insee: string) => Promise<{ flags?: GeorisquesFlags | null; riskLabels?: string[] | null } | null>;
+};
+
+/**
+ * Le contexte d'une question, construit à partir du CORPS de la requête. Seuls la commune (pour la
+ * formulation), l'INSEE et la question en sont lus. Les FAITS sont reconstruits ici, côté serveur, depuis
+ * les sources canoniques : tout champ `faits`, `driasContext`, `georisquesContext` ou
+ * `editorial_base_answer` envoyé par le navigateur est ignoré. Un visiteur ne peut donc faire dire au
+ * modèle, ni au contrôle des nombres, une valeur que futur•e ne tient pas de sa source.
+ *
+ * Une source en échec donne un fait absent (`null`), jamais une valeur par défaut.
+ */
+export async function contexteDepuisCorps(body: unknown, sources: SourcesFaits): Promise<ContexteQna | null> {
+  const b = (body ?? {}) as Record<string, unknown>;
+  const tension = (b.tension ?? {}) as Record<string, unknown>;
+  if (typeof b.commune !== "string" || !b.commune.trim() || typeof tension.id !== "string" || typeof tension.label !== "string") return null;
+  const commune = b.commune.trim().slice(0, 120);
+  const insee = typeof b.inseeCode === "string" && /^[0-9AB]{5}$/i.test(b.inseeCode.trim()) ? b.inseeCode.trim() : null;
+  const [scenarios, georisques] = insee
+    ? await Promise.all([sources.climat(insee).catch(() => null), sources.georisques(insee).catch(() => null)])
+    : [null, null];
   return {
     commune,
-    horizon: horizonDesFaits(),
-    climat: c
-      ? {
-          jours_au_dessus_de_35C: mesure(c.jours_au_dessus_de_35C, "jours/an"),
-          jours_au_dessus_de_30C: mesure(c.jours_au_dessus_de_30C, "jours/an"),
-          nuits_tropicales_20C: mesure(c.nuits_tropicales_20C, "nuits/an"),
-          jours_meteo_propice_aux_feux_IFM40: mesure(c.jours_meteo_propice_aux_feux_IFM40, "jours/an"),
-          jours_de_sol_sec_SWI04: mesure(c.jours_de_sol_sec_SWI04, "jours/an"),
-          temperature_moyenne_hiver_C: mesure(c.temperature_moyenne_hiver_C, "°C"),
-        }
-      : null,
-    risques_recenses_sur_la_commune: r
-      ? {
-          submersion_marine: r.submersion_marine === true,
-          inondation: r.inondation === true,
-          tassements_argiles: r.tassements_argiles === true,
-          mouvement_de_terrain: r.mouvement_de_terrain === true,
-          feu_de_foret: r.feu_de_foret === true,
-          libelles: Array.isArray(r.libelles) ? r.libelles.filter((x): x is string => typeof x === "string").map((x) => x.slice(0, 80)).slice(0, 12) : [],
-        }
-      : null,
-    notes: [...NOTES_FAITS],
+    tensionId: tension.id,
+    questionLabel: (typeof b.freeTextQuestion === "string" && b.freeTextQuestion.trim() ? b.freeTextQuestion : tension.label).slice(0, 300),
+    questionSub: typeof tension.sub === "string" ? tension.sub.slice(0, 200) : null,
+    faits: construireFaitsCommune(commune, indicatorsDepuisScenarios(scenarios), georisques),
   };
 }
