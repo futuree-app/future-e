@@ -1109,15 +1109,32 @@ export default function FutureELanding() {
       marginBottom: 4,
     },
     previewSub: { fontSize: 12, color: C.dim, lineHeight: 1.5 },
-    previewFact: { fontSize: 13, color: C.text, lineHeight: 1.5, marginBottom: 4 },
-    previewLimit: { fontSize: 11.5, color: C.dim, lineHeight: 1.5, marginTop: 4 },
+    previewValue: {
+      fontSize: 20,
+      fontWeight: 600,
+      color: C.text,
+      lineHeight: 1.2,
+      letterSpacing: '-0.01em',
+      fontVariantNumeric: 'tabular-nums',
+      marginBottom: 2,
+    },
+    previewMeta: { marginTop: 8 },
     previewSource: {
       fontFamily: "var(--font-mono)",
       fontSize: 10,
       letterSpacing: '0.04em',
       color: C.dim,
-      marginTop: 6,
     },
+    previewDetails: { marginTop: 4 },
+    previewDetailsSummary: {
+      fontFamily: "var(--font-mono)",
+      fontSize: 10,
+      letterSpacing: '0.04em',
+      color: C.muted,
+      cursor: 'pointer',
+      listStyle: 'none',
+    },
+    previewDetailsBody: { fontSize: 12, color: C.dim, lineHeight: 1.5, marginTop: 6 },
     previewSkeletonLine: (width, height) => ({
       width,
       height,
@@ -1974,13 +1991,32 @@ export default function FutureELanding() {
                 }}
               >
                 <div style={styles.previewDot(item.col)} />
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={styles.previewTitle}>{item.titre}</div>
-                  {/* Le fait d'abord, toujours visible : avant FUT-37, le chiffre était calculé puis jeté. */}
-                  <div style={styles.previewFact}>{item.fait}</div>
-                  {item.lecture && <div style={styles.previewSub}>{item.lecture}</div>}
-                  {item.limite && <div style={styles.previewLimit}>{item.limite}</div>}
-                  <div style={styles.previewSource}>{item.source}</div>
+                  {/* Le fait d'abord, visible et compact : avant FUT-37, le chiffre était calculé puis
+                      jeté. L'horizon (onglet) et la commune (page) ne sont pas répétés dans la carte. */}
+                  {item.valeur ? (
+                    <>
+                      <div style={styles.previewValue}>{item.valeur}</div>
+                      {item.comparaison && <div style={styles.previewSub}>{item.comparaison}</div>}
+                      {item.complement && <div style={styles.previewSub}>{item.complement}</div>}
+                    </>
+                  ) : (
+                    <div style={styles.previewSub}>{item.fait}</div>
+                  )}
+                  <div style={styles.previewMeta}>
+                    <span style={styles.previewSource}>{item.source}</span>
+                    {item.valeur && (
+                      <details style={styles.previewDetails}>
+                        <summary style={styles.previewDetailsSummary}>ⓘ Données et limites</summary>
+                        <div style={styles.previewDetailsBody}>
+                          <p style={{ margin: 0 }}>{item.fait}</p>
+                          {item.lecture && <p style={{ margin: '6px 0 0' }}>{item.lecture}</p>}
+                          {item.limite && <p style={{ margin: '6px 0 0' }}>{item.limite}</p>}
+                        </div>
+                      </details>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

@@ -861,7 +861,7 @@ du haut de page relève de FUT-50.
 | D5 | `immobilierNarrative` supprimée ; `valeur_immo` : « futur•e ne prédit pas les prix futurs », sans chiffre ADEME. |
 | D6 | `tension_answers` n'est plus lue (aucune écriture Supabase). Plus de `editorial_base_answer`. Replis déterministes : `src/lib/accueil/reponses.ts`. |
 | D7 | `pluiesNarrative` supprimée (récit mort). |
-| D8 | `/qna` : faits de la commune seulement → modèle → contrôle déterministe (règles partagées + nombres sourcés + présent projeté) → repli si violation, sans seconde tentative. |
+| D8 | `/qna` : faits de la commune **reconstruits côté serveur depuis l'INSEE** (DRIAS + Géorisques ; le navigateur n'envoie aucun fait, un champ `faits` est ignoré) → modèle → contrôle déterministe (règles partagées + nombres sourcés + présent appliqué au climat + classement, comparaison et explication non mesurées) → repli si violation, sans seconde tentative. |
 | D9 | `rural_viticole` et `tension_hydrique_connue` ne déclenchent plus aucun récit ; `vigneNarrative` supprimée. Aucune écriture Supabase. |
 | D10 | `apercuCommune` : squelette sans texte pendant le chargement. |
 | D11 | Mobilité / Vie locale inchangées (textes identiques). |
@@ -869,6 +869,28 @@ du haut de page relève de FUT-50.
 Règles partagées : `src/lib/garde-fous/assertions.ts` porte le moteur et les quatre règles universelles
 déplacées verbatim de `synthesis-checks.ts` (le dossier garde exactement ses règles), plus les règles des
 récits publics (immobilier, durée, neige, feu, crue, projection d'un risque recensé, grain, ressource en eau).
+
+### Revue du 2 octobre : densité et autorité
+
+- **Rendu compact.** La carte affiche un titre court (la grandeur), une valeur forte (« 119 j/an »), une
+  comparaison courte (« +25 j vs 1976–2005 ») et sa source (« DRIAS · Météo-France »). L'horizon (onglet)
+  et la commune (page) ne sont plus répétés. Le fait en toutes lettres, la lecture et la limite restent
+  dans le modèle et s'affichent au second niveau (« ⓘ Données et limites »). Défaut du sélecteur : 2050.
+- **Autorité des faits.** La première version de `/qna` prenait les faits du navigateur, filtrés dans leur
+  seule forme. Le serveur les reconstruit désormais depuis l'INSEE (`contexteDepuisCorps`).
+- **Essais réels** (7 appels sur le panel, 02/10) : 5 réponses du modèle acceptées, 2 écartées et
+  remplacées par le repli (un classement « parmi les plus frais de France », une prédiction
+  d'enneigement). Un premier essai avait laissé passer un classement, « aujourd'hui » appliqué à la
+  référence et une explication causale (« l'influence maritime limite les pics ») : trois règles ont été
+  ajoutées sur ces tournures réelles.
+
+### Exception temporaire : `ASWI04_yr` réservé à l'accueil
+
+La home consomme une colonne déjà présente dans DRIAS (`ASWI04_yr`, écart des jours de sol sec), servie
+par `/drias?dataset=landing` uniquement, **sans modifier le contrat FactsSnapshot du dossier**. Raison :
+la carte DRIAS entre telle quelle dans l'empreinte du snapshot Territoire ; l'y ajouter changerait
+l'empreinte de toutes les communes et régénérerait les synthèses. À résorber quand le contrat du snapshot
+sera revu (par exemple en hachant une projection des faits plutôt que la carte DRIAS brute).
 
 ### Reliquat documenté (hors FUT-37)
 
@@ -881,7 +903,8 @@ récits publics (immobilier, durée, neige, feu, crue, projection d'un risque re
   restrictions », « Enneigement, stations, saisons » restent des promesses de sujets, non des affirmations ;
   les réponses, elles, sont désormais bornées.
 - **`getClimatDataCommune` code `h: "2050"`** pour les trois scénarios : faux, lu par personne, laissé tel
-  quel car il entre dans l'empreinte du snapshot Territoire.
+  quel car il entre dans l'empreinte du snapshot Territoire. **Une donnée fausse conservée volontairement :
+  un ticket doit porter sa sortie** (même chantier que l'exception `ASWI04_yr` ci-dessus).
 - **Drapeaux GASPAR** : Nîmes (30189) n'a pas de drapeau « inondation » d'après `riskFlagsFromLabels`, et
   les arrondissements de Marseille n'en ont aucun. À vérifier dans le libellé source (hors FUT-37).
 

@@ -32,7 +32,7 @@ export type HorizonAccueil = "reference" | "2030" | "2050" | "2100";
 export const PERIODE_REFERENCE = "1976-2005";
 
 export const HORIZONS_ACCUEIL: readonly { key: HorizonAccueil; label: string; mention: string }[] = [
-  { key: "reference", label: PERIODE_REFERENCE, mention: `référence ${PERIODE_REFERENCE} · reconstruite depuis DRIAS-TRACC` },
+  { key: "reference", label: "1976–2005", mention: "référence 1976–2005 · reconstruite depuis DRIAS-TRACC" },
   ...HORIZONS.map((h) => ({
     key: h.annee as HorizonAccueil,
     label: h.annee,
@@ -120,31 +120,67 @@ function comparaison(v: number, ref: number | null): string {
 
 // ── La carte ─────────────────────────────────────────────────────────────────────────────────
 
+// DEUX NIVEAUX DE LECTURE. La carte AFFICHE un titre (la grandeur), une valeur forte, une comparaison
+// courte et sa source. Ce que l'interface dit déjà n'y est pas répété : l'horizon est celui de l'onglet
+// sélectionné, la commune celle de la page. Le fait en toutes lettres, la lecture et la limite vivent au
+// second niveau (« Données et limites ») : ils sont exacts, mais une accueil n'est pas un rapport.
 export type CarteApercu = {
   /** Stable, pour les tests et le dédoublonnage. */
   cle: string;
   titre: string;
-  /** Le fait chiffré ou recensé : toujours affiché. */
+  /** La valeur forte, affichée en grand : « 14 j/an », « < 1 j/an », « −1,8 °C », « Risque recensé par l'État ». */
+  valeur?: string;
+  /** La comparaison courte : « +11 j vs 1976–2005 », « identique à 1976–2005 ». */
+  comparaison?: string;
+  /** Un second fait court, juxtaposé sans raccord (« Feu de forêt recensé par l'État »). */
+  complement?: string;
+  /** Le fait en toutes lettres (second niveau ; seul niveau des cartes sans valeur). */
   fait: string;
-  /** Une lecture qui reste dans la grandeur mesurée. */
+  /** Une lecture qui reste dans la grandeur mesurée (second niveau). */
   lecture?: string;
-  /** Ce que la donnée ne mesure pas. */
+  /** Ce que la donnée ne mesure pas (second niveau). */
   limite?: string;
   source: string;
   col: string;
 };
 
+/** La période de référence telle que l'interface l'écrit (tiret demi-cadratin). */
+export const PERIODE_REFERENCE_AFFICHEE = "1976–2005";
+
+/** « 14 j/an », « < 1 j/an », « 0 j/an » ; « 43 nuits/an », « < 1 nuit/an ». */
+export function valeurCompacte(n: number, c: Compte = JOURNEE): string {
+  const p = palier(n);
+  const u = c.feminin ? (p === "aucun" || p === "moins-d-un" || p === 1 ? "nuit" : "nuits") : "j";
+  if (p === "aucun") return `0 ${u}/an`;
+  if (p === "moins-d-un") return `< 1 ${u}/an`;
+  return `${p} ${u}/an`;
+}
+
+/** « +11 j vs 1976–2005 », « identique à 1976–2005 », « réf. 1976–2005 : < 1 ». */
+export function comparaisonCompacte(v: number, ref: number | null, c: Compte = JOURNEE): string | undefined {
+  if (ref == null) return undefined;
+  const pv = palier(v);
+  const pr = palier(ref);
+  if (pv === pr) return `identique à ${PERIODE_REFERENCE_AFFICHEE}`;
+  if (typeof pv === "number" && typeof pr === "number") {
+    const d = pv - pr;
+    const u = c.feminin ? (Math.abs(d) > 1 ? "nuits" : "nuit") : "j";
+    return `${d > 0 ? "+" : "−"}${Math.abs(d)} ${u} vs ${PERIODE_REFERENCE_AFFICHEE}`;
+  }
+  return `réf. ${PERIODE_REFERENCE_AFFICHEE} : ${pr === "aucun" ? "0" : pr === "moins-d-un" ? "< 1" : pr}`;
+}
+
 const COL = { rouge: "var(--red)", bleu: "var(--blue)", vert: "var(--green)", violet: "var(--violet)", orange: "var(--orange)" };
 
-const SOURCE_DRIAS = "DRIAS-TRACC, médiane des modèles (Météo-France)";
-const SOURCE_GASPAR = "Géorisques, risques recensés (GASPAR) · fait actuel, sans projection";
+const SOURCE_DRIAS = "DRIAS · Météo-France";
+const SOURCE_GASPAR = "Géorisques · fait actuel";
 
 type IndicateurCompte = {
   cle: string;
   absolu: string;
   ecart: string;
   compte: Compte;
-  titre: (nom: string) => string;
+  titre: string;
   /** La phrase de fait, valeur et comparaison déjà écrites. */
   fait: (compte: string, horizon: string, comparaison: string) => string;
   faitReference: (compte: string) => string;
@@ -158,7 +194,7 @@ const CHALEUR: IndicateurCompte = {
   absolu: "NORTX35D_yr",
   ecart: "ATX35D_yr",
   compte: JOURNEE,
-  titre: (nom) => `Jours au-dessus de 35 °C ${aCommune(nom)}`,
+  titre: "Jours > 35 °C",
   fait: (compte, horizon, comp) => `${majuscule(compte)} par an à l'horizon ${horizon}${comp}.`,
   faitReference: (compte) => `${majuscule(compte)} par an ${CLIMAT_REFERENCE_LABEL}.`,
   col: COL.rouge,
@@ -169,7 +205,7 @@ const NUITS: IndicateurCompte = {
   absolu: "NORTR_yr",
   ecart: "ATR_yr",
   compte: NUIT,
-  titre: (nom) => `Nuits tropicales ${aCommune(nom)}`,
+  titre: "Nuits tropicales",
   fait: (compte, horizon, comp) =>
     `${majuscule(compte)} par an où la température ne descend pas sous 20 °C, à l'horizon ${horizon}${comp}.`,
   faitReference: (compte) => `${majuscule(compte)} par an où la température ne descend pas sous 20 °C, ${CLIMAT_REFERENCE_LABEL}.`,
@@ -184,7 +220,7 @@ const FEUX: IndicateurCompte = {
   absolu: "NORIFM40_yr",
   ecart: "AIFM40_yr",
   compte: JOURNEE,
-  titre: (nom) => `Météo propice aux feux ${aCommune(nom)}`,
+  titre: "Météo propice aux feux",
   fait: (compte, horizon, comp) =>
     `${majuscule(compte)} par an de danger météorologique élevé pour les feux (indice forêt-météo ≥ 40), à l'horizon ${horizon}${comp}.`,
   faitReference: (compte) =>
@@ -202,7 +238,7 @@ const SOLS_SECS: IndicateurCompte = {
   absolu: "NORSWI04_yr",
   ecart: "ASWI04_yr",
   compte: JOURNEE,
-  titre: (nom) => `Sols secs ${aCommune(nom)}`,
+  titre: "Sols secs",
   fait: (compte, horizon, comp) => `${environ(compte)} par an de sol sec, à l'horizon ${horizon}${comp}.`,
   faitReference: (compte) => `${environ(compte)} par an de sol sec, ${CLIMAT_REFERENCE_LABEL}.`,
   limite:
@@ -210,24 +246,32 @@ const SOLS_SECS: IndicateurCompte = {
   col: COL.bleu,
 };
 
-function carteCompte(def: IndicateurCompte, nom: string, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
+function carteCompte(def: IndicateurCompte, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
   const ref = reconstructReference(enScenarios(ind), def.absolu, def.ecart);
   const gwl = gwlDeHorizon(horizon);
   let fait: string;
   let lecture: string | undefined;
+  let valeurAffichee: string;
+  let comp: string | undefined;
   if (gwl == null) {
     if (ref == null) return null; // pas de référence reconstructible : la carte se tait plutôt que d'inventer
     fait = def.faitReference(formatCompte(ref, def.compte));
     lecture = def.lecture?.(ref);
+    valeurAffichee = valeurCompacte(ref, def.compte);
+    comp = `période de référence ${PERIODE_REFERENCE_AFFICHEE}`;
   } else {
     const v = valeur(ind, gwl, def.absolu);
     if (v == null) return null;
     fait = def.fait(formatCompte(v, def.compte), horizon, comparaison(v, ref));
     lecture = def.lecture?.(v);
+    valeurAffichee = valeurCompacte(v, def.compte);
+    comp = comparaisonCompacte(v, ref, def.compte);
   }
   return {
     cle: def.cle,
-    titre: def.titre(nom),
+    titre: def.titre,
+    valeur: valeurAffichee,
+    ...(comp ? { comparaison: comp } : {}),
     fait,
     ...(lecture ? { lecture } : {}),
     ...(def.limite ? { limite: def.limite } : {}),
@@ -237,20 +281,31 @@ function carteCompte(def: IndicateurCompte, nom: string, ind: Indicators, horizo
 }
 
 /** Température moyenne de l'hiver. Rien sur la neige : futur•e ne la mesure pas. */
-function carteHivers(nom: string, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
+function carteHivers(ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
   const ref = reconstructReference(enScenarios(ind), "NORTMm_seas_DJF", "ATMm_seas_DJF");
   const gwl = gwlDeHorizon(horizon);
-  const base = { cle: "hivers", titre: `Hivers ${aCommune(nom)}`, source: SOURCE_DRIAS, col: COL.bleu };
+  const base = { cle: "hivers", titre: "Hivers · température moyenne", source: SOURCE_DRIAS, col: COL.bleu };
   if (gwl == null) {
     if (ref == null) return null;
-    return { ...base, fait: `Température moyenne de l'hiver : ${formatTemperature(ref)} ${CLIMAT_REFERENCE_LABEL}.` };
+    return {
+      ...base,
+      valeur: formatTemperature(ref),
+      comparaison: `période de référence ${PERIODE_REFERENCE_AFFICHEE}`,
+      fait: `Température moyenne de l'hiver : ${formatTemperature(ref)} ${CLIMAT_REFERENCE_LABEL}.`,
+    };
   }
   const v = valeur(ind, gwl, "NORTMm_seas_DJF");
   if (v == null) return null;
   const comp = ref == null ? "" : `, contre ${formatTemperature(ref)} sur ${PERIODE_REFERENCE}`;
   const ecart = ref == null ? null : Math.round((v - ref) * 10) / 10;
+  const ecartAffiche =
+    ecart == null ? undefined
+      : ecart === 0 ? `identique à ${PERIODE_REFERENCE_AFFICHEE}`
+        : `${ecart > 0 ? "+" : "−"}${formatTemperature(Math.abs(ecart))} vs ${PERIODE_REFERENCE_AFFICHEE}`;
   return {
     ...base,
+    valeur: formatTemperature(v),
+    ...(ecartAffiche ? { comparaison: ecartAffiche } : {}),
     fait: `Température moyenne de l'hiver : ${formatTemperature(v)} à l'horizon ${horizon}${comp}.`,
     ...(ecart != null && ecart > 0 ? { lecture: `Des hivers plus doux de ${formatTemperature(ecart)}.` } : {}),
   };
@@ -262,21 +317,21 @@ const LIMITE_RECENSEMENT =
   "Ce recensement ne dit pas quelle partie de la commune est concernée ni comment elle évoluera. L'exposition d'une adresse se vérifie dans le dossier Logement.";
 
 /** Le premier risque recensé, dans l'ordre d'avant FUT-37. Aucun paramètre d'horizon : il n'en a pas. */
-export function carteRisqueRecense(nom: string, georisques: GeorisquesAccueil): CarteApercu | null {
+export function carteRisqueRecense(georisques: GeorisquesAccueil): CarteApercu | null {
   const f = georisques?.flags;
   if (!f) return null;
-  const base = { source: SOURCE_GASPAR, limite: LIMITE_RECENSEMENT };
+  const base = { source: SOURCE_GASPAR, limite: LIMITE_RECENSEMENT, valeur: "Risque recensé par l'État" };
   if (f.marineSubmersion) {
-    return { ...base, cle: "submersion", titre: `Submersion marine ${aCommune(nom)}`, fait: "L'État recense un risque de submersion marine sur la commune.", col: COL.bleu };
+    return { ...base, cle: "submersion", titre: "Submersion marine", fait: "L'État recense un risque de submersion marine sur la commune.", col: COL.bleu };
   }
   if (f.flood) {
-    return { ...base, cle: "inondation", titre: `Inondation ${aCommune(nom)}`, fait: "L'État recense un risque d'inondation sur la commune.", col: COL.bleu };
+    return { ...base, cle: "inondation", titre: "Inondation", fait: "L'État recense un risque d'inondation sur la commune.", col: COL.bleu };
   }
   if (f.clay) {
     return {
       ...base,
       cle: "argiles",
-      titre: `Argiles ${aCommune(nom)}`,
+      titre: "Argiles · tassements différentiels",
       fait: "L'État recense un risque de tassements différentiels, liés aux sols argileux, sur la commune.",
       limite:
         "Ce recensement ne dit pas quelle partie de la commune est concernée. L'effet sur un bâtiment dépend du sol de la parcelle et des fondations : il se vérifie à l'adresse, dans le dossier Logement.",
@@ -284,7 +339,7 @@ export function carteRisqueRecense(nom: string, georisques: GeorisquesAccueil): 
     };
   }
   if (f.landslide) {
-    return { ...base, cle: "terrain", titre: `Mouvements de terrain ${aCommune(nom)}`, fait: "L'État recense un risque de mouvement de terrain sur la commune.", col: COL.orange };
+    return { ...base, cle: "terrain", titre: "Mouvements de terrain", fait: "L'État recense un risque de mouvement de terrain sur la commune.", col: COL.orange };
   }
   return null;
 }
@@ -308,7 +363,6 @@ function hashName(str: string): number {
  * ne déclenchent plus rien ici.
  */
 export function cartesClimat(
-  nom: string,
   categories: readonly string[],
   ind: Indicators,
   georisques: GeorisquesAccueil,
@@ -316,20 +370,21 @@ export function cartesClimat(
 ): CarteApercu[] {
   const has = (c: string) => categories.includes(c);
   const out: (CarteApercu | null)[] = [];
-  out.push(carteCompte(CHALEUR, nom, ind, horizon));
+  out.push(carteCompte(CHALEUR, ind, horizon));
   if (has("mediterranee") || has("rural_forestier")) {
-    const feux = carteCompte(FEUX, nom, ind, horizon);
+    const feux = carteCompte(FEUX, ind, horizon);
     // Un second fait, actuel et administratif, juxtaposé SANS raccord : l'indice météo ne « confirme »
     // pas le recensement, et le recensement ne « prouve » pas l'indice.
     if (feux && georisques?.flags?.wildfire) {
+      feux.complement = "Feu de forêt recensé par l'État (Géorisques)";
       feux.lecture = "Par ailleurs, l'État recense un risque de feu de forêt sur la commune (Géorisques).";
     }
     out.push(feux);
   }
-  if (has("rural_agricole")) out.push(carteCompte(SOLS_SECS, nom, ind, horizon));
-  if (has("montagne")) out.push(carteHivers(nom, ind, horizon));
-  out.push(carteCompte(NUITS, nom, ind, horizon));
-  out.push(carteRisqueRecense(nom, georisques));
+  if (has("rural_agricole")) out.push(carteCompte(SOLS_SECS, ind, horizon));
+  if (has("montagne")) out.push(carteHivers(ind, horizon));
+  out.push(carteCompte(NUITS, ind, horizon));
+  out.push(carteRisqueRecense(georisques));
   return out.filter((c): c is CarteApercu => c != null);
 }
 
@@ -376,7 +431,7 @@ export function getPreviewCards(
   const name = communeName || "votre commune";
   const cats = categories && categories.length > 0 ? categories : ["all"];
 
-  const climate = cartesClimat(name, cats, indicators, georisques, horizon);
+  const climate = cartesClimat(cats, indicators, georisques, horizon);
   const depth = cartesProfondeur(name, cats);
 
   // Assemblage d'avant FUT-37 : accroche climat en position 1, puis un climat et deux profondeurs,
@@ -554,16 +609,28 @@ function indicateursFiges(insee: keyof typeof MACHINE_A_SOUS_DRIAS): Indicators 
   );
 }
 
-/** Les cartes climat et risques d'une ville de la machine à sous, ou `null` si elle n'en a pas le fait. */
+/**
+ * Les cartes climat et risques d'une ville de la machine à sous, ou `null` si elle n'en a pas le fait.
+ * Ici, aucun sélecteur n'est affiché : la ville et l'horizon entrent donc dans la carte (« · Lyon »,
+ * « en 2050 · »), alors qu'une carte de commune ne les répète pas.
+ */
 export function carteMachineASous(
   ville: "Lyon" | "Marseille" | "Vannes" | "La Rochelle",
   famille: "chaleur" | "nuits" | "risque",
 ): CarteApercu | null {
-  if (famille === "risque") return carteRisqueRecense(ville, { flags: MACHINE_A_SOUS_GASPAR[ville] });
+  if (famille === "risque") {
+    const r = carteRisqueRecense({ flags: MACHINE_A_SOUS_GASPAR[ville] });
+    return r && { ...r, titre: `${r.titre} · ${ville}` };
+  }
   const insee = ({ Lyon: "69381", Marseille: "13201", Vannes: "56260", "La Rochelle": "17300" } as const)[ville];
   const def = famille === "chaleur" ? CHALEUR : NUITS;
-  const carte = carteCompte(def, ville, indicateursFiges(insee), HORIZON_MACHINE_A_SOUS);
+  const carte = carteCompte(def, indicateursFiges(insee), HORIZON_MACHINE_A_SOUS);
   if (!carte) return null;
   const maille = insee === "69381" || insee === "13201" ? " · maille du 1er arrondissement" : "";
-  return { ...carte, source: `${carte.source}${maille}` };
+  return {
+    ...carte,
+    titre: `${carte.titre} · ${ville}`,
+    comparaison: [`en ${HORIZON_MACHINE_A_SOUS}`, carte.comparaison].filter(Boolean).join(" · "),
+    source: `${carte.source}${maille}`,
+  };
 }

@@ -263,6 +263,41 @@ export const REGLES_RECITS_PUBLICS: readonly RegleAssertion[] = [
       /\bpénuries?\b/,
     ],
   },
+  // Classement et comparaison sans donnée comparative. Vu en réel sur /qna le 02/10 (Brest) : « les étés
+  // resteront parmi les plus frais de France métropolitaine », « nettement plus supportable que dans la
+  // plupart des autres grandes villes françaises ». Aucun fait de l'accueil ne compare deux communes.
+  {
+    id: "interdit:comparaison-sans-donnee",
+    polarity: "any",
+    patterns: [
+      /\bparmi (les|celles|ceux) (les )?(plus|moins)\b/,
+      /\b(la plupart|la majorité|beaucoup|nombre) (des|d')( autres)? ?(grandes |petites )?(villes|communes|territoires|régions)\b/,
+      /\b(plus|moins) \w+ que (dans |pour |à )?(les |la |le |d')?(autres|ailleurs|reste de la france|moyenne)/,
+      /\b(record|exceptionnel\w*) (en|de) france\b/,
+    ],
+  },
+  // Le présent appliqué au climat. DRIAS n'a aucune valeur actuelle : « contre moins d'un jour
+  // aujourd'hui » (vu en réel le 02/10) parle de la période 1976-2005 comme du présent.
+  {
+    id: "temps:climat-au-present",
+    polarity: "any",
+    patterns: [
+      /\b(aujourd'hui|actuellement|de nos jours|à présent)\b[^.]*\b(jours?|nuits?|°\s?c|sols? secs?|chaleur|températures?|indice)\b/,
+      /\b(jours?|nuits?|°\s?c|sols? secs?|chaleur|températures?|indice)\b[^.]*\b(aujourd'hui|actuellement|de nos jours|à présent)\b/,
+    ],
+  },
+  // Une explication causale que les faits ne portent pas. Vu en réel le 02/10 : « la façade atlantique
+  // et l'influence maritime de Brest limitent les pics de chaleur ». Plausible, mais aucun fait fourni ne
+  // le mesure ; la réponse ne dit que ce que les projections comptent.
+  {
+    id: "interdit:explication-non-mesuree",
+    polarity: "any",
+    patterns: [
+      /\b(influence|effet|proximité) (maritime|océanique|de la mer|de l'océan|du littoral|du relief|de l'altitude|montagnarde?)\b/,
+      /\b(limit\w*|atténu\w*|tempèr\w*|adouci\w*|modér\w*) (les|la|le) (pics?|chaleurs?|températures?|canicules?)\b/,
+      /\b(îlots? de chaleur|bétonisation|artificialisation)\b/,
+    ],
+  },
 ];
 
 export function checkRecitPublic(text: string): Violation[] {

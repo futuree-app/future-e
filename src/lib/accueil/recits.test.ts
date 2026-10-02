@@ -37,10 +37,11 @@ const ind = (drias: Record<string, Record<string, number>>): Indicators =>
 
 const climat = (insee: string, h: HorizonAccueil, geo: unknown = { flags: PANEL[insee].flags }) => {
   const c = PANEL[insee];
-  return cartesClimat(c.nom, c.categories, ind(c.drias), geo as never, h);
+  return cartesClimat(c.categories, ind(c.drias), geo as never, h);
 };
 const carte = (insee: string, h: HorizonAccueil, cle: string) => climat(insee, h).find((x) => x.cle === cle);
-const texte = (c: CarteApercu | undefined) => (c ? [c.titre, c.fait, c.lecture, c.limite].filter(Boolean).join(" ") : "");
+const texte = (c: CarteApercu | undefined) =>
+  c ? [c.titre, c.valeur, c.comparaison, c.complement, c.fait, c.lecture, c.limite].filter(Boolean).join(" ") : "";
 
 /** Une grille synthétique : toutes les valeurs d'un indicateur, y compris nulles, à tous les horizons. */
 function grille(valeurs: Record<string, number>): Indicators {
@@ -55,7 +56,7 @@ function toutesLesSorties(): CarteApercu[] {
   for (const n of [0, 0.04, 0.4, 0.96, 1, 1.4, 3, 8, 14, 31, 66, 144]) {
     const v = { NORTX35D_yr: n, ATX35D_yr: n / 2, NORTR_yr: n, ATR_yr: n / 2, NORIFM40_yr: n, AIFM40_yr: n / 2, NORSWI04_yr: n, ASWI04_yr: n / 3, NORTMm_seas_DJF: n / 10 - 3, ATMm_seas_DJF: 1.2 };
     for (const h of H) for (const geo of [null, { flags: {} }, DRAPEAUX_VRAIS]) {
-      out.push(...cartesClimat("Saint-Exemple", TOUTES_CATEGORIES, grille(v), geo, h));
+      out.push(...cartesClimat(TOUTES_CATEGORIES, grille(v), geo, h));
       out.push(...getPreviewCards("Saint-Exemple", TOUTES_CATEGORIES, grille(v), geo, h));
     }
   }
@@ -66,7 +67,7 @@ function toutesLesSorties(): CarteApercu[] {
 // ── Temps ────────────────────────────────────────────────────────────────────────────────────
 
 test("T5 temps : l'onglet de gauche est la référence 1976-2005, plus aucun « Aujourd'hui »", () => {
-  assert.deepEqual(HORIZONS_ACCUEIL.map((h) => h.label), ["1976-2005", "2030", "2050", "2100"]);
+  assert.deepEqual(HORIZONS_ACCUEIL.map((h) => h.label), ["1976–2005", "2030", "2050", "2100"]);
   assert.ok(!HORIZONS_ACCUEIL.some((h) => /aujourd|actuel/i.test(h.label + h.mention)));
   assert.equal(gwlDeHorizon("reference"), null);
 });
@@ -127,7 +128,7 @@ test("T2 valeur : Briançon (0 à 1 jour d'IFM ≥ 40) n'a pas de récit de fort
 test("T2 valeur : une valeur nulle ou faible ne porte jamais de hausse, de « courant » ni de durée", () => {
   for (const n of [0, 0.04, 0.4, 0.96]) {
     const v = { NORTX35D_yr: n, ATX35D_yr: n, NORTR_yr: n, ATR_yr: n, NORIFM40_yr: n, AIFM40_yr: n, NORSWI04_yr: n, ASWI04_yr: n };
-    for (const h of H) for (const c of cartesClimat("X", TOUTES_CATEGORIES, grille(v), null, h)) {
+    for (const h of H) for (const c of cartesClimat(TOUTES_CATEGORIES, grille(v), null, h)) {
       assert.doesNotMatch(texte(c), /plus fréquent|courant|davantage|s'intensifi|progress|semaines|durer/, `${n} ${h} ${c.cle}`);
       assert.equal(c.lecture, undefined, `aucune lecture sur une valeur < 1 (${c.cle}, ${n})`);
     }
@@ -136,13 +137,13 @@ test("T2 valeur : une valeur nulle ou faible ne porte jamais de hausse, de « co
 
 test("T3 valeur : la comparaison suit le signe réel de l'écart (aucune hausse plaquée)", () => {
   // Projeté 10, écart 0 : la référence vaut 10, la carte dit « comme sur 1976-2005 ».
-  const egal = cartesClimat("X", [], grille({ NORTX35D_yr: 10, ATX35D_yr: 0 }), null, "2050").find((c) => c.cle === "chaleur")!;
+  const egal = cartesClimat([], grille({ NORTX35D_yr: 10, ATX35D_yr: 0 }), null, "2050").find((c) => c.cle === "chaleur")!;
   assert.equal(egal.fait, "10 jours par an à l'horizon 2050, comme sur 1976-2005.");
   // Écart négatif (référence plus haute) : la carte dit la référence plus haute, sans « hausse ».
-  const baisse = cartesClimat("X", [], grille({ NORTX35D_yr: 10, ATX35D_yr: -5 }), null, "2050").find((c) => c.cle === "chaleur")!;
+  const baisse = cartesClimat([], grille({ NORTX35D_yr: 10, ATX35D_yr: -5 }), null, "2050").find((c) => c.cle === "chaleur")!;
   assert.equal(baisse.fait, "10 jours par an à l'horizon 2050, contre 15 sur 1976-2005.");
   // Hiver plus froid que la référence : aucune lecture « plus doux ».
-  const froid = cartesClimat("X", ["montagne"], grille({ NORTMm_seas_DJF: -2, ATMm_seas_DJF: -0.5 }), null, "2050").find((c) => c.cle === "hivers")!;
+  const froid = cartesClimat(["montagne"], grille({ NORTMm_seas_DJF: -2, ATMm_seas_DJF: -0.5 }), null, "2050").find((c) => c.cle === "hivers")!;
   assert.equal(froid.lecture, undefined);
 });
 
@@ -156,7 +157,7 @@ test("T4 + T7 + T8 + T9 grandeur : aucune sortie possible n'affirme durée, eau,
 
 test("T7 grandeur : Rodez lit des sols secs, plus « l'accès à l'eau »", () => {
   const c = carte("12202", "2050", "sols-secs")!;
-  assert.equal(c.titre, "Sols secs à Rodez");
+  assert.equal(c.titre, "Sols secs");
   assert.equal(c.fait, "Environ 119 jours par an de sol sec, à l'horizon 2050, contre 94 sur 1976-2005.");
   assert.match(c.limite!, /ne mesure ni les nappes, ni les rivières, ni l'eau du robinet/);
 });
@@ -170,12 +171,14 @@ test("T8 grandeur : Chamonix lit une température d'hiver, rien sur la neige", (
 
 test("T9 grandeur : la carte feux nomme la météo et sa limite, et juxtapose GASPAR sans raccord", () => {
   const c = carte("30189", "2050", "feux")!;
-  assert.equal(c.titre, "Météo propice aux feux à Nîmes");
+  assert.equal(c.titre, "Météo propice aux feux");
   assert.equal(c.fait, "50 jours par an de danger météorologique élevé pour les feux (indice forêt-météo ≥ 40), à l'horizon 2050, contre 34 sur 1976-2005.");
   assert.equal(c.limite, "Cet indice décrit des conditions météorologiques favorables aux feux ; il ne mesure ni la végétation ni la probabilité qu'un incendie se déclare.");
   assert.equal(c.lecture, "Par ailleurs, l'État recense un risque de feu de forêt sur la commune (Géorisques).");
+  assert.equal(c.complement, "Feu de forêt recensé par l'État (Géorisques)");
   // Sans drapeau GASPAR, pas de second fait.
   assert.equal(climat("30189", "2050", { flags: {} }).find((x) => x.cle === "feux")!.lecture, undefined);
+  assert.equal(climat("30189", "2050", { flags: {} }).find((x) => x.cle === "feux")!.complement, undefined);
 });
 
 test("T13 grain : aucune sortie ne parle d'un logement, d'une adresse ni de quartiers", () => {
@@ -194,10 +197,11 @@ test("T10 Géorisques : un risque recensé est identique sur les quatre horizons
   }
   // Le texte de La Rochelle, en clair.
   const lr = carte("17300", "2100", "submersion")!;
-  assert.equal(lr.titre, "Submersion marine à La Rochelle");
+  assert.equal(lr.titre, "Submersion marine");
+  assert.equal(lr.valeur, "Risque recensé par l'État");
   assert.equal(lr.fait, "L'État recense un risque de submersion marine sur la commune.");
   assert.equal(lr.limite, "Ce recensement ne dit pas quelle partie de la commune est concernée ni comment elle évoluera. L'exposition d'une adresse se vérifie dans le dossier Logement.");
-  assert.match(lr.source, /fait actuel, sans projection/);
+  assert.equal(lr.source, "Géorisques · fait actuel");
 });
 
 test("T11 Géorisques : aucune submersion sans drapeau GASPAR, même `littoral` (Vannes)", () => {
@@ -213,12 +217,12 @@ test("T11 Géorisques : aucune submersion sans drapeau GASPAR, même `littoral` 
     const vide = getPreviewCards(vannes.nom, vannes.categories, {}, null, h).map((c) => c.cle);
     assert.deepEqual(vide.filter((k) => !["mobilite", "nature", "vie-locale"].includes(k)), []);
   }
-  assert.equal(carteRisqueRecense("Vannes", null), null);
+  assert.equal(carteRisqueRecense(null), null);
 });
 
 test("T10 Géorisques : le grain communal est dit, et l'adresse renvoyée au dossier Logement", () => {
   for (const flags of [{ marineSubmersion: true }, { flood: true }, { clay: true }, { landslide: true }]) {
-    const c = carteRisqueRecense("X", { flags })!;
+    const c = carteRisqueRecense({ flags })!;
     assert.match(c.fait, /^L'État recense un risque .* sur la commune\.$/);
     assert.match(c.limite!, /dossier Logement/);
   }
@@ -234,8 +238,8 @@ test("T12 immobilier, vigne, air, pluies, sols GisSol : plus aucune carte, quell
 
 test("D9 : `rural_viticole` et `tension_hydrique_connue` ne déclenchent plus aucun récit", () => {
   const base = PANEL["17300"]; // La Rochelle porte `tension_hydrique_connue` dans la table manuelle
-  const avec = cartesClimat(base.nom, ["tension_hydrique_connue", "rural_viticole"], ind(base.drias), null, "2050").map((c) => c.cle);
-  const sans = cartesClimat(base.nom, [], ind(base.drias), null, "2050").map((c) => c.cle);
+  const avec = cartesClimat(["tension_hydrique_connue", "rural_viticole"], ind(base.drias), null, "2050").map((c) => c.cle);
+  const sans = cartesClimat([], ind(base.drias), null, "2050").map((c) => c.cle);
   assert.deepEqual(avec, sans);
   assert.doesNotMatch(getQuestionIntro("X", ["rural_viticole"], false), /viticult/);
   assert.doesNotMatch(getQuestionIntro("X", ["tension_hydrique_connue"], false), /ressource|stress|tension/);
@@ -270,10 +274,16 @@ test("machine à sous : Vannes n'a plus de submersion, et aucune carte n'emploie
       if (!c) continue;
       assert.doesNotMatch(texte(c) + c.source, /\+4|seront|parmi les|les plus exposées/);
       assert.deepEqual(checkRecitPublic(texte(c)), []);
-      if (f !== "risque") assert.match(c.fait, /à l'horizon 2050/);
+      if (f !== "risque") {
+        assert.match(c.fait, /à l'horizon 2050/);
+        assert.match(c.comparaison!, /^en 2050/); // pas de sélecteur affiché : l'horizon entre dans la carte
+      }
+      assert.match(c.titre, new RegExp(`· ${v}$`));
     }
   }
-  assert.equal(carteMachineASous("Lyon", "chaleur")!.fait, "8 jours par an à l'horizon 2050, contre 2 sur 1976-2005.");
+  const lyon = carteMachineASous("Lyon", "chaleur")!;
+  assert.equal(lyon.fait, "8 jours par an à l'horizon 2050, contre 2 sur 1976-2005.");
+  assert.deepEqual([lyon.titre, lyon.valeur, lyon.comparaison], ["Jours > 35 °C · Lyon", "8 j/an", "en 2050 · +6 j vs 1976–2005"]);
   assert.equal(carteMachineASous("Marseille", "risque")!.fait, "L'État recense un risque de submersion marine sur la commune.");
 });
 
@@ -315,6 +325,7 @@ test("T16 panel réel : la carte d'accroche (position 1) est toujours un fait ch
     assert.equal(cartes[0].cle, "chaleur", `${c.nom} ${h}`);
     assert.match(cartes[0].fait, /par an/);
     assert.match(cartes[0].source, /DRIAS/);
+    assert.ok(cartes[0].valeur, "la carte d'accroche montre une valeur forte");
     for (const x of cartes) assert.ok(x.fait && x.source, `${c.nom} ${x.cle}`);
   }
 });
@@ -333,4 +344,39 @@ test("D10 chargement : tant que les données ne sont pas arrivées, aucune phras
   const pret = apercuCommune({ commune: vannes.nom, chargement: false, categories: vannes.categories, indicators: ind(vannes.drias), georisques: { flags: vannes.flags }, horizon: "2050" });
   assert.equal(pret.etat, "cartes");
   assert.ok(pret.etat === "cartes" && pret.cartes[0].fait.startsWith("2 jours par an"));
+});
+
+// ── Rendu compact (revue du 02/10) ──────────────────────────────────────────────────────────
+
+test("compact : titre court, valeur forte, comparaison courte ; ni horizon ni commune répétés", () => {
+  const vu = (insee: string, h: HorizonAccueil, cle: string) => {
+    const c = carte(insee, h, cle)!;
+    return [c.titre, c.valeur, c.comparaison];
+  };
+  // Les quatre exemples de la revue.
+  assert.deepEqual(vu("29019", "2100", "chaleur"), ["Jours > 35 °C", "< 1 j/an", "identique à 1976–2005"]);
+  assert.deepEqual(vu("05023", "2050", "feux"), ["Météo propice aux feux", "0 j/an", "identique à 1976–2005"]);
+  assert.deepEqual(vu("12202", "2050", "sols-secs"), ["Sols secs", "119 j/an", "+25 j vs 1976–2005"]);
+  assert.deepEqual(vu("17300", "2050", "submersion"), ["Submersion marine", "Risque recensé par l'État", undefined]);
+  // Et les autres familles.
+  assert.deepEqual(vu("30189", "2050", "chaleur"), ["Jours > 35 °C", "14 j/an", "+11 j vs 1976–2005"]);
+  assert.deepEqual(vu("30189", "2050", "nuits"), ["Nuits tropicales", "69 nuits/an", "+36 nuits vs 1976–2005"]);
+  assert.deepEqual(vu("74056", "2100", "hivers"), ["Hivers · température moyenne", "−1,8 °C", "+3,3 °C vs 1976–2005"]);
+  assert.deepEqual(vu("12202", "2050", "chaleur"), ["Jours > 35 °C", "7 j/an", "réf. 1976–2005 : < 1"]);
+  // Onglet de référence : la valeur de 1976-2005, sans comparaison à elle-même.
+  assert.deepEqual(vu("30189", "reference", "chaleur"), ["Jours > 35 °C", "3 j/an", "période de référence 1976–2005"]);
+  // Rien de ce que l'interface affiche déjà : ni l'année de l'onglet, ni le nom de la commune.
+  for (const c of Object.values(PANEL)) for (const h of H) {
+    for (const x of cartesClimat(c.categories, ind(c.drias), { flags: c.flags }, h)) {
+      const visible = [x.titre, x.valeur, x.comparaison, x.complement].filter(Boolean).join(" ");
+      assert.ok(!visible.includes(c.nom), `${c.nom} ${x.cle} : ${visible}`);
+      assert.doesNotMatch(visible, /horizon|2030|2050|2100/, `${c.nom} ${x.cle} : ${visible}`);
+    }
+  }
+});
+
+test("compact : la limite reste disponible au second niveau, jamais perdue", () => {
+  assert.match(carte("12202", "2050", "sols-secs")!.limite!, /ne mesure ni les nappes/);
+  assert.match(carte("30189", "2050", "feux")!.limite!, /ni la probabilité qu'un incendie se déclare/);
+  assert.match(carte("17300", "2050", "submersion")!.limite!, /dossier Logement/);
 });

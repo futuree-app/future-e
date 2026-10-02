@@ -36,6 +36,11 @@ test("les phrases fautives de l'ancien accueil sont toutes détectées", () => {
     ["Votre logement sera exposé aux inondations.", "grain:logement-depuis-commune"],
     ["Les nappes de la commune vont baisser.", "interdit:ressource-eau-affirmee"],
     ["Les habitants feront face à des pénuries d'eau.", "interdit:ressource-eau-affirmee"],
+    // Vus en réel sur /qna le 02/10 (Brest), passés à travers la première version du contrôle.
+    ["Les étés à Brest resteront parmi les plus frais de France métropolitaine.", "interdit:comparaison-sans-donnee"],
+    ["Vivre les étés ici restera nettement plus supportable que dans la plupart des autres grandes villes françaises.", "interdit:comparaison-sans-donnee"],
+    ["Moins d'un jour par an au-dessus de 35 °C, contre moins d'un jour aujourd'hui pour cette référence.", "temps:climat-au-present"],
+    ["La façade atlantique et l'influence maritime de Brest limitent les pics de chaleur.", "interdit:explication-non-mesuree"],
   ];
   for (const [phrase, regle] of fautives) assert.ok(regles(phrase).includes(regle), `${regle} manqué : ${phrase}`);
 });
@@ -55,6 +60,8 @@ test("les formulations justes, y compris niées, passent", () => {
     "Température moyenne de l'hiver : −1,8 °C à l'horizon 2100, contre −5,1 °C sur 1976-2005.",
     "L'État recense un risque d'inondation sur la commune.",
     "Ce sont des nuits sans fraîcheur, où le corps récupère mal de la chaleur du jour.",
+    "Les projections comptent à Brest moins d'une journée par an au-dessus de 35 °C, contre moins d'une sur la période de référence 1976-2005.",
+    "L'État recense un risque de submersion marine sur la commune : c'est un fait actuel, sans projection.",
   ];
   for (const p of justes) assert.deepEqual(regles(p), [], p);
 });
