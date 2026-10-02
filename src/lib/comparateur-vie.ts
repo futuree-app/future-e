@@ -37,11 +37,7 @@ import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
 import { travelThresholdLabel, ROUTABLE_MODES, kmLisible } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
-import {
-  deptRegionalCategories,
-  deptFromInsee,
-  DEPT_MEDITERRANEE,
-} from "@/lib/commune-categories";
+import { deptRegionalCategories } from "@/lib/commune-categories";
 import { centraliteRang } from "@/lib/centralite-services";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -724,7 +720,6 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
   // Régional (département = bonne maille) : climat méditerranéen, moustique tigre.
   for (const cat of deptRegionalCategories(c.insee)) cats.add(cat);
 
-  const dept = deptFromInsee(c.insee);
   const lat = c.lat;
   const sud = lat != null && lat < 45.3; // axe canicule : framing « sud » vs « nord »
 
