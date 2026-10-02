@@ -50,6 +50,18 @@ const COLUMN_MAP: Record<string, string> = {
   // column19/22/26/28+ = autres anomalies — non utilisées à ce stade.
 };
 
+// FUT-37 : les colonnes que seul l'ACCUEIL lit. L'écart des jours de sol sec restitue la référence
+// 1976-2005 de sa carte « Sols secs » (projeté moins écart, en jours). La colonne était déjà dans le
+// fichier : aucune donnée nouvelle.
+//
+// ELLE N'ENTRE PAS DANS COLUMN_MAP, et c'est voulu : la carte DRIAS d'une commune entre telle quelle dans
+// l'empreinte du snapshot Territoire (FUT-6, `climate.scenarios`). Un indicateur de plus changerait
+// l'empreinte de toutes les communes et ferait régénérer toutes les synthèses du dossier, pour une donnée
+// qu'il ne lit pas.
+const COLONNES_ACCUEIL: Record<string, string> = {
+  ASWI04_yr: "column28", // Anomaly of soil dryness days (SWI < 0.4) (days/yr)
+};
+
 type RawRow = Record<string, string | number | null>;
 type ScenarioId = "gwl15" | "gwl20" | "gwl30";
 
@@ -188,9 +200,9 @@ export async function getRangNational(
   return rangDe(await getEchelle(scenario, indicateur), valeur);
 }
 
-function rowToIndicators(row: RawRow): Record<string, number> {
+function rowToIndicators(row: RawRow, colonnes: Record<string, string> = COLUMN_MAP): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const [code, col] of Object.entries(COLUMN_MAP)) {
+  for (const [code, col] of Object.entries(colonnes)) {
     const raw = row[col];
     if (raw !== null && raw !== undefined) {
       const n = Number(raw);
@@ -204,7 +216,7 @@ function rowToIndicators(row: RawRow): Record<string, number> {
  * Récupère les données climatiques pour une commune donnée.
  * @param inseeCode Le code INSEE (ex: "13055")
  */
-export async function getClimatDataCommune(inseeCode: string) {
+export async function getClimatDataCommune(inseeCode: string, options: { accueil?: boolean } = {}) {
   const index = await getIndex();
   
   // Formatage de la recherche pour correspondre à l'index
@@ -223,7 +235,12 @@ export async function getClimatDataCommune(inseeCode: string) {
   const scenarios: Record<string, { h: string; v: Record<string, number> }> = {};
 
   for (const [id, row] of scenarioMap) {
-    scenarios[id] = { h: "2050", v: rowToIndicators(row) };
+    // `h` vaut "2050" pour les trois scénarios, gwl30 (2100) compris. Faux, mais inchangé : il entre dans
+    // l'empreinte du snapshot Territoire, et personne ne le lit (l'année se lit dans horizons.ts).
+    scenarios[id] = {
+      h: "2050",
+      v: rowToIndicators(row, options.accueil ? { ...COLUMN_MAP, ...COLONNES_ACCUEIL } : COLUMN_MAP),
+    };
   }
 
   // Si on a utilisé un arrondissement comme proxy, on restitue le nom de la ville entière
