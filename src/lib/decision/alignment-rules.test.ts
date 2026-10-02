@@ -12,7 +12,7 @@ import type { RankBand } from "./mismatch-facts.ts";
 function facts(bands: Record<string, RankBand> | null): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6, lon: 1.44, uu: "31701",
-    tailleVille: 1_050_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 90, population: 500_000, altitude: 30,
+    tailleVille: 1_050_000, tailleVilleSource: "urban_unit", reliefProximite: 0, merCentreKm: 90, population: 500_000, altitude: 30,
     catnatInondation: 0, inondationRisque: 10, climat: null, sante: null,
     rankBands: bands, scores: {}, hasAddress: false,
   };

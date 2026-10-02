@@ -43,7 +43,7 @@ test("« à moins de N km de la mer » applique N au centre de la commune (mer_c
   assert.equal(evaluateNearSea(dix, attrs("Bordeaux|33")).status, "incompatible");
   const a = evaluateNearSea(cinq, attrs("Caen|14"));
   assert.ok("evidenceKeys" in a && a.evidenceKeys.includes("commune.merCentreKm"));
-  assert.match("statement" in a ? a.statement ?? "" : "", /centre de cette commune.*rivage marin/);
+  assert.match("statement" in a ? a.statement ?? "" : "", /^Le point de référence de Caen se situe à environ 9,2 km du rivage marin/);
 });
 
 test("« pas le littoral » = commune classée Mer : Annecy, Rochefort, Bordeaux acceptées ; Arles et Marseille écartées", () => {
@@ -64,13 +64,13 @@ test("ancre (D5) : Brest, Lannion, Vannes, Narbonne suggèrent ; Arles, Lacanau,
   assert.doesNotMatch(bloc, /plage|océan|condition|confirm/i);
 });
 
-test("grain et capacité : le dossier n'est pas migré, aucune capacité ne change, mer_centre_km n'est pas une adresse", () => {
-  // Le dossier construit ses attributs sans les champs mer : il garde l'ancien chemin, inchangé en 2B.1.
+test("grain et capacité : depuis la phase C, le dossier lit la même vérité de commune ; aucune capacité ne change", () => {
+  // Phase 2B.2 C : le dossier porte la vérité littorale de la commune (et plus l'ancienne distance).
   const facts = mapCommuneToModuleFacts(c("Lannion|22") as never, {}, { hasAddress: true, tailleVille: null, tailleVilleSource: "commune" });
   const d = toCommuneAttributes(facts);
-  assert.equal("merCentreKm" in d, false);
-  assert.equal("communeLittoraleMer" in d, false);
-  // nearSea avec nombre : toujours « apprécier » au point de référence, même à l'adresse (le calcul adresse n'est pas branché).
+  assert.equal(d.merCentreKm, c("Lannion|22").mer_centre_km);
+  assert.equal(d.communeLittoraleMer, true);
+  // nearSea avec nombre : toujours « apprécier », à la commune comme à l'adresse (aucune promotion en FUT-33).
   for (const grain of ["commune", "adresse"] as const) {
     assert.equal(criterionCapability({ kind: "hard", key: "nearSea", hc: { nearSea: { active: true, maxKm: 5 } } }, grain).capability, "apprecier");
     assert.equal(criterionCapability({ kind: "hard", key: "excludeSea", hc: { excludeSea: true } }, grain).capability, "apprecier");

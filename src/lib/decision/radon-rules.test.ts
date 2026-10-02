@@ -13,7 +13,7 @@ const CTX = {} as EvaluationContext;
 function facts(radon: RadonFacts | null, nom = "Clermont-Ferrand"): ModuleFacts {
   return {
     insee: "63113", nom, dept: "63", lat: 45.78, lon: 3.08, uu: null,
-    tailleVille: 140000, tailleVilleSource: "commune", reliefProximite: 1, distanceCoteKm: null,
+    tailleVille: 140000, tailleVilleSource: "commune", reliefProximite: 1, merCentreKm: null,
     population: 140000, altitude: 400, catnatInondation: 0, inondationRisque: 10,
     climat: null, sante: null, scores: {}, hasAddress: true, radon,
   };

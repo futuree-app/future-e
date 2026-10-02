@@ -13,7 +13,7 @@ const rule = SECTEUR_RULES[0]!;
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "17300", nom: "La Rochelle", dept: "17", lat: 46.16, lon: -1.15, uu: null,
-    tailleVille: 75000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 1,
+    tailleVille: 75000, tailleVilleSource: "urban_unit", reliefProximite: 0, merCentreKm: 1,
     population: 75000, altitude: 10, catnatInondation: 0, inondationRisque: 10,
     climat: null, sante: null, scores: {}, hasAddress: true, ...over,
   };

@@ -20,7 +20,7 @@ export function commune(over: Partial<CommuneAttributes> = {}): CommuneAttribute
     insee: "31555", nom: "Toulouse", dept: "31",
     lat: 43.6045, lon: 1.4442,
     population: 493_465, tailleVille: 1_060_000, uu: "31701",
-    altitude: 146, reliefProximite: 0, distanceCoteKm: 150,
+    altitude: 146, reliefProximite: 0, merCentreKm: 150, communeLittoraleMer: false,
     ...over,
   };
 }
@@ -328,7 +328,7 @@ test("nearSea : non déclarée -> not_declared", () => {
 });
 
 test("nearSea : DÉCLARÉE SANS DISTANCE -> unexamined(missing_parameter), JAMAIS les 30 km inventés", () => {
-  const a = evaluateNearSea(ctx({ nearSea: { threshold: null } }), commune({ distanceCoteKm: 200 }));
+  const a = evaluateNearSea(ctx({ nearSea: { threshold: null } }), commune({ merCentreKm: 200 }));
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "missing_parameter");
 });
@@ -336,7 +336,7 @@ test("nearSea : DÉCLARÉE SANS DISTANCE -> unexamined(missing_parameter), JAMAI
 test("nearSea : sous le seuil déclaré -> satisfied", () => {
   const a = evaluateNearSea(
     ctx({ nearSea: { threshold: { metric: "distance", maxKm: 30, source: "user" } } }),
-    commune({ distanceCoteKm: 12 }),
+    commune({ merCentreKm: 12 }),
   );
   assert.equal(a.status, "satisfied");
 });
@@ -344,18 +344,19 @@ test("nearSea : sous le seuil déclaré -> satisfied", () => {
 test("nearSea : au-delà du seuil déclaré -> incompatible", () => {
   const a = evaluateNearSea(
     ctx({ nearSea: { threshold: { metric: "distance", maxKm: 30, source: "user" } } }),
-    commune({ distanceCoteKm: 150 }),
+    commune({ merCentreKm: 150 }),
   );
   assert.ok(a.status === "incompatible");
   assert.match(a.statement, /150 km/);
   assert.match(a.statement, /30 km/);
-  assert.equal(a.topic, "la distance de Toulouse au littoral");
+  assert.match(a.statement, /^Le point de référence de Toulouse se situe à environ 150 km du rivage marin/);
+  assert.equal(a.topic, "la distance de Toulouse au rivage marin");
 });
 
 test("nearSea : un seuil en TEMPS DE TRAJET n'est jamais évalué par un haversine", () => {
   const a = evaluateNearSea(
     ctx({ nearSea: { threshold: { metric: "travel_time", maxMinutes: 30, mode: "car", direction: "to_reference", source: "user" } } }),
-    commune({ distanceCoteKm: 150 }),
+    commune({ merCentreKm: 150 }),
   );
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "unsupported_metric");
@@ -364,20 +365,27 @@ test("nearSea : un seuil en TEMPS DE TRAJET n'est jamais évalué par un haversi
 test("nearSea : distance à la côte absente -> unexamined(missing_data)", () => {
   const a = evaluateNearSea(
     ctx({ nearSea: { threshold: { metric: "distance", maxKm: 30, source: "user" } } }),
-    commune({ distanceCoteKm: null }),
+    commune({ merCentreKm: null }),
   );
   assert.ok(a.status === "unexamined");
   assert.equal(a.reason, "missing_data");
 });
 
-test("excludeSea : trop près de la côte -> incompatible, la convention (15 km) est DITE", () => {
-  const a = evaluateExcludeSea(ctx({ excludeSea: true }), commune({ distanceCoteKm: 4 }));
+test("excludeSea : commune classée Mer -> incompatible, le STATUT est dit, jamais une distance", () => {
+  const a = evaluateExcludeSea(ctx({ excludeSea: true }), commune({ communeLittoraleMer: true, merCentreKm: 40 }));
   assert.ok(a.status === "incompatible");
-  assert.match(a.statement, /15 km/);
+  assert.equal(a.statement, "Toulouse est classée « Mer » au titre de la loi Littoral.");
+  assert.doesNotMatch(a.statement, /km/);
 });
 
-test("excludeSea : assez loin -> satisfied", () => {
-  assert.equal(evaluateExcludeSea(ctx({ excludeSea: true }), commune({ distanceCoteKm: 80 })).status, "satisfied");
+test("excludeSea : commune non classée Mer -> satisfied, même à 2 km du rivage", () => {
+  assert.equal(evaluateExcludeSea(ctx({ excludeSea: true }), commune({ communeLittoraleMer: false, merCentreKm: 2 })).status, "satisfied");
+});
+
+test("excludeSea : classement inconnu -> unexamined(missing_data), jamais « non classée »", () => {
+  const a = evaluateExcludeSea(ctx({ excludeSea: true }), commune({ communeLittoraleMer: null }));
+  assert.ok(a.status === "unexamined");
+  assert.equal(a.reason, "missing_data");
 });
 
 // ── communeSize ──────────────────────────────────────────────────────────────
@@ -552,7 +560,7 @@ test("assessHardConstraints : une évaluation par clé, et chacune porte SA clé
 });
 
 test("les topics tiennent dans la limite dure d'assertFactValid (70 car.), même sur un nom très long", () => {
-  const long = commune({ nom: "Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson", dept: "51", uu: null, tailleVille: 500, distanceCoteKm: 200, altitude: 100, reliefProximite: 0 });
+  const long = commune({ nom: "Saint-Rémy-en-Bouzemont-Saint-Genest-et-Isson", dept: "51", uu: null, tailleVille: 500, merCentreKm: 200, altitude: 100, reliefProximite: 0 });
   const bordeaux: ResolvedSizeReference = {
     status: "resolved", originalLabel: "Bordeaux", canonicalLabel: "Bordeaux", urbanUnitCode: "33701",
     comparisonPopulation: 1_000_000, populationYear: 2021, populationKind: "urban_unit",
@@ -571,7 +579,7 @@ test("les topics tiennent dans la limite dure d'assertFactValid (70 car.), même
     normalized({ sizeRelativeTo: { label: "Bordeaux", direction: "larger", reference: bordeaux } }),
   ];
   // excludeSea ne devient incompatible que sur une commune littorale : on lui donne son cas.
-  const longLittorale = commune({ ...long, distanceCoteKm: 4 });
+  const longLittorale = commune({ ...long, merCentreKm: 4, communeLittoraleMer: true });
   const cas: { c: CommuneAttributes; constraints: NormalizedHardConstraints }[] = [
     ...cases.map((constraints) => ({ c: long, constraints })),
     { c: longLittorale, constraints: normalized({ excludeSea: true }) },

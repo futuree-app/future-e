@@ -1,0 +1,103 @@
+{
+ "source": "rivage marin complet (non simplifié), LimTM Shom-IGN 2021 coupée aux LTM",
+ "points": [
+  {
+   "nom": "Châtelaillon-Plage, front de mer",
+   "insee": "17094",
+   "lat": 46.0745,
+   "lon": -1.0915,
+   "km_reference": 0.1905
+  },
+  {
+   "nom": "Châtelaillon-Plage, est de la commune",
+   "insee": "17094",
+   "lat": 46.079,
+   "lon": -1.064,
+   "km_reference": 2.3635
+  },
+  {
+   "nom": "Lannion, centre",
+   "insee": "22113",
+   "lat": 48.7326,
+   "lon": -3.4566,
+   "km_reference": 0.3306
+  },
+  {
+   "nom": "Lannion, est de la commune",
+   "insee": "22113",
+   "lat": 48.748,
+   "lon": -3.418,
+   "km_reference": 3.6438
+  },
+  {
+   "nom": "Arles, centre",
+   "insee": "13004",
+   "lat": 43.6766,
+   "lon": 4.6278,
+   "km_reference": 24.305
+  },
+  {
+   "nom": "Arles, Salin-de-Giraud",
+   "insee": "13004",
+   "lat": 43.411,
+   "lon": 4.732,
+   "km_reference": 5.7087
+  },
+  {
+   "nom": "Narbonne, centre",
+   "insee": "11262",
+   "lat": 43.184,
+   "lon": 3.0042,
+   "km_reference": 3.6559
+  },
+  {
+   "nom": "Vannes, centre",
+   "insee": "56260",
+   "lat": 47.6582,
+   "lon": -2.7608,
+   "km_reference": 0.4989
+  },
+  {
+   "nom": "Rochefort, centre",
+   "insee": "17299",
+   "lat": 45.942,
+   "lon": -0.964,
+   "km_reference": 8.7244
+  },
+  {
+   "nom": "Marseille, Vieux-Port",
+   "insee": "13201",
+   "lat": 43.2951,
+   "lon": 5.374,
+   "km_reference": 0.0218
+  },
+  {
+   "nom": "Caen, centre",
+   "insee": "14118",
+   "lat": 49.1829,
+   "lon": -0.3707,
+   "km_reference": 9.2607
+  },
+  {
+   "nom": "Bordeaux, centre",
+   "insee": "33063",
+   "lat": 44.8378,
+   "lon": -0.5792,
+   "km_reference": 38.3597
+  },
+  {
+   "nom": "Rouen, centre",
+   "insee": "76540",
+   "lat": 49.4431,
+   "lon": 1.0993,
+   "km_reference": 48.7938
+  },
+  {
+   "nom": "Annecy, centre",
+   "insee": "74010",
+   "lat": 45.8992,
+   "lon": 6.1294,
+   "km_reference": 259.2849
+  }
+ ]
+}

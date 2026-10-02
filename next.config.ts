@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
       "./data/bpe-points/**",
       "./data/icu.json",
     ],
+    // FUT-33 : le dossier mesure la distance d'une ADRESSE au rivage marin (lib/server/rivage-mer.ts). Les
+    // trois points d'entrée qui génèrent ou affichent un dossier d'adresse lisent ce fichier.
+    "/rapport": ["./data/mer/rivage-5m.f32.gz"],
+    "/api/dossier/actualiser": ["./data/mer/rivage-5m.f32.gz"],
+    "/api/stripe/webhook": ["./data/mer/rivage-5m.f32.gz"],
     // (Il exista ici deux entrées pour les métriques de police de pdfkit. Elles n'ont RIEN changé :
     // la production répondait toujours `ENOENT ... pdfkit/js/data/Helvetica.afm`. Le rendu passe
     // désormais par `pdfkit.standalone.js`, qui embarque ces métriques et ne lit aucun fichier ;

@@ -7,6 +7,7 @@ import type { ModuleFacts } from "./decision-fact.ts";
 import type { ClimatFacts } from "./climat-facts.ts";
 import type { RadonFacts } from "./radon-facts.ts";
 import { buildSanteFacts } from "./sante-facts.ts";
+import { merDeLaCommune } from "../commune-attributes.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 
 export function mapCommuneToModuleFacts(
@@ -30,7 +31,9 @@ export function mapCommuneToModuleFacts(
     tailleVilleSource: opts.tailleVilleSource,
     reliefProximite: entry.relief_proximite ?? null,
     reliefAltitudeMaxM: entry.relief_altitude_max_m ?? null,
-    distanceCoteKm: entry.distance_cote_km,
+    // FUT-33 : la vérité littorale de la commune (centre → rivage marin, classement loi Littoral). La distance
+    // d'une ADRESSE n'est jamais ici : elle se mesure au point évalué (EvaluationContext.merAuPoint).
+    ...merDeLaCommune(entry),
     population: entry.population ?? null,
     altitude: entry.altitude ?? null,
     catnatInondation: entry.inondation ? entry.inondation.catnat : null,
@@ -91,6 +94,7 @@ export function toCommuneAttributes(f: ModuleFacts): CommuneAttributes {
     altitude: f.altitude,
     reliefProximite: f.reliefProximite,
     reliefAltitudeMaxM: f.reliefAltitudeMaxM ?? null,
-    distanceCoteKm: f.distanceCoteKm,
+    merCentreKm: f.merCentreKm,
+    communeLittoraleMer: f.communeLittoraleMer,
   };
 }

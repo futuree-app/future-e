@@ -16,7 +16,7 @@ import type { PlaceDirectory } from "../hard-constraints-resolve.ts";
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
-    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 1, population: 5000, altitude: 100,
+    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, merCentreKm: 1, population: 5000, altitude: 100,
     catnatInondation: 0, inondationRisque: 10, climat: null, sante: null, scores: {}, hasAddress: false, ...over,
   };
 }
@@ -43,7 +43,7 @@ function run(f: ModuleFacts, p: UserProject) {
 
 test("invariant : chaque fait porte ruleId + preuve", () => {
   const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
-  const r = run(facts({ distanceCoteKm: 42 }), p);
+  const r = run(facts({ merCentreKm: 42 }), p);
   assert.ok(r.facts.length > 0);
   for (const f of r.facts) {
     assert.ok(f.ruleId.length > 0);
@@ -180,7 +180,7 @@ test("règle inondation : priorité NON déclarée -> not_applicable (hors sujet
 
 test("le registre porte les 12 contraintes dures, et le dossier les examine", () => {
   const p = project({ reformulation: "x", hardConstraints: { nearSea: { active: true, maxKm: 5 } }, preferences: [] });
-  const r = run(facts({ distanceCoteKm: 42 }), p);
+  const r = run(facts({ merCentreKm: 42 }), p);
   const hardEvals = r.evaluations.filter((e) => e.ruleId.startsWith("territoire.hard."));
   assert.equal(hardEvals.length, 12);
   // FUT-7 : non confirmée, la mer à 42 km pour une limite de 5 km est un ÉCART au projet, examiné, jamais

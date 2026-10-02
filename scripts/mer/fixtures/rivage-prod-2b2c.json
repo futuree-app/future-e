@@ -1,0 +1,15 @@
+{
+ "fichier_mo": 2.29,
+ "decompresse_mo": 6.56,
+ "segments": 410002,
+ "lecture_decompression_ms": 38,
+ "index_ms": 36,
+ "froid_total_ms": 74,
+ "memoire_mo": 15.2,
+ "latence_ms": {
+  "p50": 0.351,
+  "p95": 2.123,
+  "p99": 3.044,
+  "max": 8.33
+ }
+}

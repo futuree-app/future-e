@@ -32,7 +32,7 @@ const POURQUOI_PREFERENCE =
   "Cette lecture est faite à l'échelle de la commune, sans seuil fixé par vous. Elle éclaire votre condition sans pouvoir la trancher.";
 
 const POURQUOI_MER =
-  "Cette distance est mesurée à l'échelle de la commune et ne correspond pas encore nécessairement à la mesure exacte que vous souhaitez utiliser pour cette condition.";
+  "Cette distance est mesurée à vol d'oiseau depuis le point de référence de la commune jusqu'au rivage marin. Elle ne correspond pas nécessairement à la mesure que vous visez pour cette condition.";
 
 const DEFAVORABLES = new Set<RuleEvaluation["outcome"]>(["mismatch", "verification"]);
 
@@ -99,16 +99,16 @@ function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: strin
 }
 
 // LA MER A UNE MESURE, ET ELLE SE DIT TOUJOURS DE LA MÊME FAÇON, quel que soit son sens : la distance du
-// point de référence de la commune au littoral. Neutre (entre 15 et 100 km), sa règle se tait ; la
-// distance existe pourtant, et c'est elle que le lecteur veut lire.
+// point de référence de la commune au rivage marin (FUT-33). Neutre (entre 15 et 100 km), sa règle se tait ;
+// la distance existe pourtant, et c'est elle que le lecteur veut lire.
 function mesureMer(f: ModuleFacts): { statement: string; evidence: EvidenceRef } | null {
-  if (f.distanceCoteKm == null) return null;
-  const km = Math.round(f.distanceCoteKm);
+  if (f.merCentreKm == null) return null;
+  const km = Math.round(f.merCentreKm);
   return {
-    statement: `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du littoral.`,
+    statement: `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du rivage marin.`,
     evidence: {
       factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-      observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", relation: "proximite", href: territoireHref,
+      observedValue: `point de référence à environ ${km} km du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
     },
   };
 }

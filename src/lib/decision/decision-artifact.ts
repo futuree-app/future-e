@@ -36,7 +36,10 @@ import type { UserProject } from "../user-project.ts";
 // une capacité à TRANCHER. Un dossier engine-1 a pu le dire sur un critère que personne n'avait confirmé :
 // il reste tel qu'il a été vendu, et sa version le dit. Le comparatif refuse de rapprocher deux dossiers
 // de moteurs différents (comparaison-candidats.ts).
-export const ENGINE_VERSION = "engine-2";
+// engine-3 (FUT-33, 02/10/2026) : la mer se mesure au RIVAGE MARIN (au point évalué : l'adresse, ou le point de
+// référence de la commune), « pas le littoral » se lit sur le classement loi Littoral. Un dossier engine-2 lisait
+// une distance à une liste de villes côtières : il reste tel qu'il a été vendu, et sa version le dit.
+export const ENGINE_VERSION = "engine-3";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

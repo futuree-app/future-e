@@ -20,7 +20,7 @@ function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
 function entry(over: Partial<IndexCommune> = {}): IndexCommune {
   return { insee: "59512", nom: "Roubaix", dept: "59", region: "HF", lat: 50.69, lon: 3.18,
-    population: 98000, densite: 6800, distance_cote_km: 90, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
+    population: 98000, densite: 6800, distance_cote_km: 90, mer_centre_km: 90, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
 }
 function project(prefs: { key: string; weight: number }[]): UserProject {
   return { posture: "recherche", intent: null, rawText: null,

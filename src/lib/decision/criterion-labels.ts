@@ -31,6 +31,10 @@ const REGIONS = new Set([
 const nombre = (n: number) => n.toLocaleString("fr-FR").replace(/ /g, " ");
 const capitale = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// FUT-33 : ce que mesure la distance à la mer, selon le grain du dossier. Jamais une plage ni un trajet.
+const MESURE_MER =
+  "futur•e mesure la distance à vol d'oiseau jusqu'au rivage marin : depuis l'adresse quand elle est connue, sinon depuis le point de référence de la commune.";
+
 /** « Brest », « Brest et Lorient », « Brest, Lorient et Vannes ». */
 export function listeFr(noms: string[]): string {
   return noms.length <= 1 ? noms[0] ?? "" : `${noms.slice(0, -1).join(", ")} et ${noms[noms.length - 1]}`;
@@ -170,11 +174,11 @@ export function presenterCritere(project: UserProject, ref: CriterionRef): Crite
     case "reliefProche":
       return { titre: "Être près de la montagne", court: "la montagne à proximité" };
     case "nearSea":
-      return { titre: "Être près de la mer", court: "la mer", interpretation: "futur•e estime la distance depuis le centre de la commune." };
+      return { titre: "Être près de la mer", court: "la mer", interpretation: MESURE_MER };
     case "excludeSea":
-      return { titre: "Ne pas habiter près du littoral", court: "l'éloignement du littoral", interpretation: "futur•e estime la distance depuis le centre de la commune." };
+      return { titre: "Ne pas habiter une commune littorale", court: "hors commune littorale", interpretation: "futur•e s'appuie sur le classement des communes au titre de la loi Littoral (communes classées « Mer »)." };
     case "farFromSea":
-      return { titre: "Être loin de la mer", court: "la distance à la mer", interpretation: "futur•e estime la distance depuis le centre de la commune." };
+      return { titre: "Être loin de la mer", court: "la distance à la mer", interpretation: MESURE_MER };
   }
 }
 

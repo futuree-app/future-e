@@ -57,7 +57,7 @@ test("rivage 5 m embarqué : la distance à l'adresse retrouve la distance du ce
   }
 });
 
-test("phase 2B.1 : seuls la recherche (mer-recherche, commune-attributes, comparateur-vie) lit les champs mer_* / loi_*", () => {
+test("phase 2B.2 C : la recherche et le dossier lisent les champs mer_* / loi_* ; ni le Territoire ni l'éditorial", () => {
   const fichiers: string[] = [];
   const parcourir = (dossier: string) => {
     for (const n of readdirSync(dossier)) {
@@ -68,5 +68,10 @@ test("phase 2B.1 : seuls la recherche (mer-recherche, commune-attributes, compar
   };
   parcourir(fileURLToPath(new URL("src", racine)));
   const lecteurs = fichiers.filter((f) => /mer_centre_km|mer_territoire_km|loi_effective|loi_source_commune/.test(readFileSync(f, "utf8")));
-  assert.deepEqual(lecteurs.map((f) => f.split("/src/")[1]).sort(), ["lib/commune-attributes.ts", "lib/comparateur-vie.ts", "lib/mer-recherche.ts"], "ni le dossier, ni le Territoire, ni l'adresse ne les lisent encore");
+  // commune-attributes (merDeLaCommune) sert la recherche ET le dossier ; hard-constraints et territory-facts ne
+  // les nomment qu'en commentaire ; hard-corpus est une fixture de test. Le Territoire et l'éditorial : étape D.
+  assert.deepEqual(lecteurs.map((f) => f.split("/src/")[1]).sort(), [
+    "lib/__fixtures__/hard-corpus.ts", "lib/commune-attributes.ts", "lib/comparateur-vie.ts",
+    "lib/decision/territory-facts.ts", "lib/hard-constraints.ts", "lib/mer-recherche.ts",
+  ]);
 });

@@ -4,6 +4,19 @@
 import { communeLittoraleMer } from "./mer-recherche.ts";
 import type { CommuneAttributes } from "./hard-constraints.ts";
 
+/**
+ * FUT-33 : la vérité littorale d'une commune de l'index, pour la recherche ET le dossier (une seule lecture).
+ * Un champ ABSENT de l'entrée donne `null` (inconnu), jamais « non classée » ni une distance par défaut.
+ */
+export function merDeLaCommune(c: { mer_centre_km?: number | null; loi_effective?: string[] | null }): {
+  merCentreKm: number | null; communeLittoraleMer: boolean | null;
+} {
+  return {
+    merCentreKm: typeof c.mer_centre_km === "number" ? c.mer_centre_km : null,
+    communeLittoraleMer: "loi_effective" in c ? communeLittoraleMer(c) : null,
+  };
+}
+
 // La forme minimale d'une entrée d'index. On ne dépend pas d'IndexCommune (server-only) : on décrit ce
 // dont on a besoin.
 export type IndexCommuneLike = {
@@ -63,10 +76,6 @@ export function communeAttributesFrom(c: IndexCommuneLike, tailleVille: number |
     altitude: c.altitude ?? null,
     reliefProximite: c.relief_proximite ?? null,
     reliefAltitudeMaxM: c.relief_altitude_max_m ?? null,
-    distanceCoteKm: c.distance_cote_km,
-    // FUT-33 (phase 2B.1) : la recherche lit la vérité littorale de l'index quand elle y est (toujours en
-    // production). Absente (fixture ancienne), l'évaluateur garde l'ancien chemin.
-    ...("mer_centre_km" in c ? { merCentreKm: c.mer_centre_km ?? null } : {}),
-    ...("loi_effective" in c ? { communeLittoraleMer: communeLittoraleMer(c) } : {}),
+    ...merDeLaCommune(c),
   };
 }

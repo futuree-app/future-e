@@ -33,14 +33,14 @@ const VILLES: Record<string, { insee: string; nom: string; lat: number; lon: num
 const DIR: PlaceDirectory = { byName: (k) => VILLES[k] ?? null, plmByName: () => null };
 
 function commune(over: Partial<IndexCommune>): IndexCommune {
-  return { insee: "00000", nom: "X", dept: "44", region: "PDL", lat: 47.2, lon: -1.5, population: 50_000, densite: 1000, distance_cote_km: 50, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
+  return { insee: "00000", nom: "X", dept: "44", region: "PDL", lat: 47.2, lon: -1.5, population: 50_000, densite: 1000, distance_cote_km: 50, mer_centre_km: 50, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
 }
 const C = {
   nantes: commune({ insee: "44109", nom: "Nantes", dept: "44", uu: "44701", population: 320_000 } as Partial<IndexCommune>),
   rennes: commune({ insee: "35238", nom: "Rennes", dept: "35", region: "BRE", lat: 48.11, lon: -1.68, uu: "35701", population: 220_000 } as Partial<IndexCommune>),
   villeurbanne: commune({ insee: "69266", nom: "Villeurbanne", dept: "69", region: "ARA", lat: 45.77, lon: 4.88, uu: "00760", population: 150_000 } as Partial<IndexCommune>),
   lyon3: commune({ insee: "69383", nom: "Lyon 3e", dept: "69", region: "ARA", lat: 45.76, lon: 4.85, uu: "00760", population: 100_000 } as Partial<IndexCommune>),
-  bordeaux: commune({ insee: "33063", nom: "Bordeaux", dept: "33", region: "NAQ", lat: 44.84, lon: -0.58, uu: "00752", population: 260_000, distance_cote_km: 50 } as Partial<IndexCommune>),
+  bordeaux: commune({ insee: "33063", nom: "Bordeaux", dept: "33", region: "NAQ", lat: 44.84, lon: -0.58, uu: "00752", population: 260_000, distance_cote_km: 50, mer_centre_km: 50 } as Partial<IndexCommune>),
   toulouse: commune({ insee: "31555", nom: "Toulouse", dept: "31", region: "OCC", lat: 43.6, lon: 1.44, uu: "31701", population: 500_000 } as Partial<IndexCommune>),
   petite: commune({ insee: "44190", nom: "Savenay", dept: "44", uu: "44701", population: 8_000 } as Partial<IndexCommune>),
 };

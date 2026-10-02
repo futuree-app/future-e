@@ -376,7 +376,7 @@ export type LogementFacts = {
 // champs, sous les mêmes noms, et `toCommuneAttributes` ne fait que SÉLECTIONNER (si elle devait
 // convertir, c'est que les deux moteurs auraient recommencé à diverger).
 //
-// `distanceCoteKm` est NULLABLE, comme dans CommuneAttributes : le forcer à `number` obligerait ses
+// `merCentreKm` est NULLABLE, comme dans CommuneAttributes : le forcer à `number` obligerait ses
 // appelants à inventer une valeur, et une distance inconnue deviendrait une commune littorale.
 export type ModuleFacts = CommuneAttributes & {
   catnatInondation: number | null;

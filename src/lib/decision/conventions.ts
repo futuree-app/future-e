@@ -26,7 +26,7 @@ export type Convention = {
     | { kind: "departements"; token: string; departements: string[] }
     | { kind: "seuil_population"; unit: SizeUnit; min: number | null; max: number | null }
     | { kind: "seuil_altitude"; metres: number; mesure: "chef_lieu" | "adresse" }
-    | { kind: "seuil_distance"; km: number; mesure: "villes_cotieres_depuis_centre" };
+    | { kind: "classement_loi_littoral"; classement: "Mer" };
   grainsValides: ("commune" | "adresse")[];
   libelleCourt: string;
   explication: string;
@@ -79,11 +79,14 @@ const HISTORIQUES: Convention[] = [
     explication: "futur•e lit aujourd'hui l'altitude du centre de la commune, pas celle du logement.",
     justification: null, status: "historique",
   },
+  // FUT-33 (02/10/2026) : « pas le littoral » n'est plus une distance (l'ancienne « littoral:15km » mesurait
+  // une distance du centre à des villes côtières). C'est le classement de la commune au titre de la loi Littoral.
+  // Toujours historique : une condition qui s'appuie dessus s'apprécie, elle ne tranche pas (aucune promotion).
   {
-    id: "littoral:15km", version: 1, criterion: { kind: "hard", key: "excludeSea" },
-    definition: { kind: "seuil_distance", km: 15, mesure: "villes_cotieres_depuis_centre" }, grainsValides: [],
-    libelleCourt: "au moins 15 km de la côte",
-    explication: "futur•e estime la distance depuis le centre de la commune vers des villes côtières.",
+    id: "littoral:loi-littoral-mer", version: 1, criterion: { kind: "hard", key: "excludeSea" },
+    definition: { kind: "classement_loi_littoral", classement: "Mer" }, grainsValides: [],
+    libelleCourt: "hors des communes classées « Mer » au titre de la loi Littoral",
+    explication: "futur•e lit le classement de la commune au titre de la loi Littoral ; il ne dit rien de la distance du logement au rivage.",
     justification: null, status: "historique",
   },
 ];

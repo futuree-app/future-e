@@ -10,16 +10,16 @@ import type { HardConstraints } from "../hard-constraint-schema.ts";
 export const POP_FLOOR = 1500; // doctrine de RECHERCHE du comparateur (anti-hameaux), pas une contrainte
 
 export const CORPUS: IndexCommuneLike[] = [
-  { insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, population: 493_465, uu: "31701", altitude: 146, relief_proximite: 0, distance_cote_km: 150 },
-  { insee: "29019", nom: "Brest", dept: "29", lat: 48.3904, lon: -4.4861, population: 139_456, uu: "29701", altitude: 35, relief_proximite: 5, distance_cote_km: 1 },
-  { insee: "05023", nom: "Briançon", dept: "05", lat: 44.899, lon: 6.645, population: 11_000, uu: null, altitude: 1326, relief_proximite: 100, distance_cote_km: 130 },
+  { insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, population: 493_465, uu: "31701", altitude: 146, relief_proximite: 0, distance_cote_km: 150, mer_centre_km: 150, loi_effective: null },
+  { insee: "29019", nom: "Brest", dept: "29", lat: 48.3904, lon: -4.4861, population: 139_456, uu: "29701", altitude: 35, relief_proximite: 5, distance_cote_km: 1, mer_centre_km: 1, loi_effective: ["Mer"] },
+  { insee: "05023", nom: "Briançon", dept: "05", lat: 44.899, lon: 6.645, population: 11_000, uu: null, altitude: 1326, relief_proximite: 100, distance_cote_km: 130, mer_centre_km: 130, loi_effective: null },
   // Dans l'unité urbaine de Lyon : le cas qui faisait DIVERGER les deux moteurs (8 000 hab. communaux,
   // 1,6 M dans l'agglomération).
-  { insee: "69266", nom: "Villeurbanne", dept: "69", lat: 45.77, lon: 4.88, population: 8_000, uu: "00760", altitude: 168, relief_proximite: 30, distance_cote_km: 250 },
+  { insee: "69266", nom: "Villeurbanne", dept: "69", lat: 45.77, lon: 4.88, population: 8_000, uu: "00760", altitude: 168, relief_proximite: 30, distance_cote_km: 250, mer_centre_km: 250, loi_effective: null },
   // Données manquantes : altitude et relief absents. Le filtre exclut, le dossier doit rester uncertain.
-  { insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43.0, lon: 1.0, population: 3_000, uu: null, altitude: null, relief_proximite: null, distance_cote_km: 90 },
+  { insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43.0, lon: 1.0, population: 3_000, uu: null, altitude: null, relief_proximite: null, distance_cote_km: 90, mer_centre_km: 90, loi_effective: null },
   // Sous le plancher anti-hameaux : exclue par la doctrine de RECHERCHE, pas par une contrainte.
-  { insee: "09999", nom: "Hameau", dept: "09", lat: 42.9, lon: 1.5, population: 300, uu: null, altitude: 900, relief_proximite: 90, distance_cote_km: 120 },
+  { insee: "09999", nom: "Hameau", dept: "09", lat: 42.9, lon: 1.5, population: 300, uu: null, altitude: 900, relief_proximite: 90, distance_cote_km: 120, mer_centre_km: 120, loi_effective: null },
 ];
 
 export const UU_POP = new Map<string, number>([

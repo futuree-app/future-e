@@ -10,8 +10,12 @@ import { preferenceWeight } from "./project-view.ts";
 import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { COAST_PROXIMITY_CONVENTION, classifyCoastDistance } from "./coast-facts.ts";
+import { deCommune } from "../typography.ts";
 
 const territoireHref = "/rapport/quartier";
+// FUT-33 : ce que la mesure dit, et ce qu'elle ne dit pas. Le rivage marin comprend lagunes et bassins.
+const LIMITE_MESURE =
+  "Distance à vol d'oiseau du point de référence de la commune au rivage marin (limite terre-mer Shom-IGN, lagunes comprises). Elle ne dit ni la distance de votre logement, ni la distance par la route, ni l'accès à une plage.";
 const RULE_ID = "territoire.mer-proximite_mer";
 
 // (Il exista ici un `COAST_KEYS` listant les clés couvertes. Rien ne le lisait : la couverture des critères se
@@ -34,7 +38,8 @@ function makeCoastRule(): DecisionRule {
       // montre quel que soit son poids (conditions.ts).
       const visible = preferenceSurfaced(p, "proximite_mer");
 
-      const distanceKm = f.distanceCoteKm;
+      // FUT-33 : le point de référence de la commune → rivage marin (préférence de COMMUNE, grain commune).
+      const distanceKm = f.merCentreKm;
       const verdict = classifyCoastDistance(distanceKm);
       if (verdict === "uncertain") return ret("uncertain", [], "distance à la côte indisponible");
 
@@ -43,22 +48,21 @@ function makeCoastRule(): DecisionRule {
       if (verdict === "satisfied" && visible && distanceKm != null && Number.isFinite(distanceKm)) {
         const km = Math.round(distanceKm);
         const tier = weight >= 3 ? "structuring" : "secondary";
-        const face = `Le littoral est à environ ${km} km, dans ce que vous recherchez.`;
+        const face = `Le rivage marin est à environ ${km} km du point de référence de la commune, dans ce que vous recherchez.`;
         const ev: EvidenceRef = {
           factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-          observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune",
+          observedValue: `point de référence à environ ${km} km du rivage marin`, grain: "commune",
           relation: "proximite", href: territoireHref,
         };
         const alignment: AlignmentFact = {
           id: `${f.insee}:alignment-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],
           module: "territoire", role: "alignment", projectKey: "proximite_mer", materialityTier: tier,
           topic: "la proximité de la mer", headlineSubject: "la proximité de la mer",
-          statement: `Pour la proximité de la mer, ${f.nom} est à environ ${km} km du littoral, dans ce que vous recherchez.`,
+          statement: `Pour la proximité de la mer, le point de référence ${deCommune(f.nom)} est à environ ${km} km du rivage marin, dans ce que vous recherchez.`,
           faceStatement: face,
           basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
           evidence: [ev],
-          limitation:
-            "Cette estimation est calculée à vol d'oiseau depuis un ensemble de localités côtières de référence. Elle ne correspond ni à la distance minimale au trait de côte, ni à la distance routière, ni au temps de trajet.",
+          limitation: LIMITE_MESURE,
         };
         return ret("satisfied", [alignment], "proche du littoral, matérialisé");
       }
@@ -80,7 +84,7 @@ function makeCoastRule(): DecisionRule {
       const tier = weight >= 3 ? "structuring" : "secondary";
       const ev: EvidenceRef = {
         factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-        observedValue: `distance au littoral estimée à environ ${km} km`, grain: "commune", href: territoireHref,
+        observedValue: `point de référence à environ ${km} km du rivage marin`, grain: "commune", href: territoireHref,
       };
       const fact: MismatchFact = {
         id: `${f.insee}:mismatch-proximite_mer`, ruleId: id, sourceFactIds: ["coastDistance.proximite_mer"],
@@ -88,12 +92,11 @@ function makeCoastRule(): DecisionRule {
         topic: "la distance à la mer",
         // Le lecteur a déclaré vouloir la PROXIMITÉ de la mer ; « la distance » nommerait l'écart.
         headlineSubject: "la proximité de la mer",
-        status: `À ${km} km du littoral`,
-        statement: `Vous avez placé la proximité de la mer parmi vos priorités. La distance au littoral est estimée à environ ${km} km depuis le point de référence retenu pour ${f.nom}.`,
+        status: `À ${km} km du rivage marin`,
+        statement: `Vous avez placé la proximité de la mer parmi vos priorités. Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du rivage marin.`,
         basis: { kind: "absolute_measure", value: distanceKm, unit: "km", conventionId: COAST_PROXIMITY_CONVENTION.id },
         evidence: [ev],
-        limitation:
-          "Cette estimation est calculée à vol d'oiseau depuis un ensemble de localités côtières de référence. Elle ne correspond ni à la distance minimale au trait de côte, ni à la distance routière, ni au temps de trajet. Une version ultérieure pourra utiliser directement le trait de côte IGN.",
+        limitation: LIMITE_MESURE,
       };
       return ret("mismatch", [fact], "éloignement attesté de la côte");
     },

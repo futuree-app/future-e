@@ -22,7 +22,7 @@ const DIR: PlaceDirectory = {
   plmByName: () => null,
 };
 function commune(over: Partial<IndexCommune>): IndexCommune {
-  return { insee: "00000", nom: "X", dept: "69", region: "ARA", lat: 45.77, lon: 4.88, population: 150_000, densite: 5000, distance_cote_km: 250, altitude: 170, clim: {}, pct: {}, ...(over as IndexCommune) };
+  return { insee: "00000", nom: "X", dept: "69", region: "ARA", lat: 45.77, lon: 4.88, population: 150_000, densite: 5000, distance_cote_km: 250, mer_centre_km: 250, altitude: 170, clim: {}, pct: {}, ...(over as IndexCommune) };
 }
 const VILLEURBANNE = commune({ insee: "69266", nom: "Villeurbanne", uu: "00760" } as Partial<IndexCommune>);
 const MERIGNAC = commune({ insee: "33281", nom: "Mérignac", dept: "33", lat: 44.84, lon: -0.65, uu: "00752" } as Partial<IndexCommune>);

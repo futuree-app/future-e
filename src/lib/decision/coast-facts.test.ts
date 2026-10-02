@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { classifyCoastDistance, COAST_PROXIMITY_CONVENTION } from "./coast-facts.ts";
 
-test("convention coast-proximity-v1 : seuils gravés", () => {
-  assert.equal(COAST_PROXIMITY_CONVENTION.id, "coast-proximity-v1");
+test("convention coast-proximity-v2 : la mesure change (rivage marin), les seuils restent gravés", () => {
+  assert.equal(COAST_PROXIMITY_CONVENTION.id, "coast-proximity-v2");
+  assert.equal(COAST_PROXIMITY_CONVENTION.measure, "distance_point_reference_commune_rivage_marin_limtm");
   assert.equal(COAST_PROXIMITY_CONVENTION.satisfiedMaxKm, 15);
   assert.equal(COAST_PROXIMITY_CONVENTION.mismatchMinKm, 100);
 });

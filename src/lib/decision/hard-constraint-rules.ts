@@ -23,7 +23,7 @@
 //   confirmé,             non examiné   -> condition ouverte, sans fait (le registre la porte)
 //   non confirmé,         incompatible  -> ÉCART au projet, visible, jamais éliminatoire
 //   non confirmé,         satisfait     -> silencieux, point favorable (comme avant)
-import { HARD_CONSTRAINT_KEYS, haversineKm } from "../hard-constraints.ts";
+import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
 import type {
   DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts, HardEvaluation,
@@ -55,16 +55,23 @@ const territoireHref = "/rapport/quartier";
 // logement : c'est `echelles.ts` qui en tire la conséquence, pas cette table.
 const OBSERVATIONS_DE_PROXIMITE = new Set([
   "commune.reliefProximite",
-  "commune.distanceCoteKm",
+  "commune.merCentreKm",
+  "adresse.merKm",
   "commune.lat",
   "commune.lon",
 ]);
+
+const GRAIN_COMMUNE_TOUJOURS = new Set(["commune.merCentreKm", "commune.loiLittoral"]);
 
 const OBSERVATION_LABELS: Record<string, string> = {
   "commune.dept": "Département",
   "commune.altitude": "Altitude",
   "commune.reliefProximite": "Relief à portée",
-  "commune.distanceCoteKm": "Distance au littoral",
+  // FUT-33 : la distance au rivage marin se dit à son grain (adresse, ou point de référence de la commune) ;
+  // le classement loi Littoral est un statut de la COMMUNE.
+  "commune.merCentreKm": "Distance au rivage marin",
+  "adresse.merKm": "Distance au rivage marin",
+  "commune.loiLittoral": "Loi Littoral",
   "commune.tailleVille": "Taille de l'agglomération",
   "commune.population": "Population",
   "commune.uu": "Unité urbaine",
@@ -81,11 +88,15 @@ const grainDe = (hard: HardEvaluation): EvaluationGrain =>
 function toEvidence(a: Evaluee, f: ModuleFacts, hard: HardEvaluation): EvidenceRef[] {
   // LE GRAIN SUIT LE POINT RÉELLEMENT TESTÉ. Marquer « commune » une distance mesurée depuis une adresse
   // mentirait sur la finesse de la lecture.
-  const grain = hard.context.point?.grain === "address" ? "adresse" : "commune";
+  const grainDuPoint = hard.context.point?.grain === "address" ? "adresse" : "commune";
   const seen = new Set<string>();
   const refs: EvidenceRef[] = [];
   for (const k of a.evidenceKeys) {
-    if (!k.startsWith("commune.")) continue;
+    if (!k.startsWith("commune.") && !k.startsWith("adresse.")) continue;
+    // FUT-33 : une mesure de l'adresse est au grain adresse ; une observation qui ne peut être que communale (le
+    // classement loi Littoral, la distance du point de référence) reste au grain commune, même dans un dossier
+    // d'adresse : la dire « adresse » ferait passer la commune pour le logement.
+    const grain = k.startsWith("adresse.") ? "adresse" : GRAIN_COMMUNE_TOUJOURS.has(k) ? "commune" : grainDuPoint;
     const label = OBSERVATION_LABELS[k] ?? "Territoire";
     if (seen.has(label)) continue; // commune.lat + commune.lon = UNE position, pas deux preuves
     seen.add(label);
@@ -104,7 +115,7 @@ function toEvidence(a: Evaluee, f: ModuleFacts, hard: HardEvaluation): EvidenceR
   if (refs.length === 0) {
     refs.push({
       factId: "commune", module: "territoire", label: `Territoire · ${f.nom}`,
-      observedValue: a.observedLabel, grain, href: territoireHref,
+      observedValue: a.observedLabel, grain: grainDuPoint, href: territoireHref,
     });
   }
   return refs;
@@ -145,9 +156,10 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
         ? `Dans un rayon de 35 km autour ${deCommune(f.nom)}, une commune atteint ${a.observedLabel} d'altitude de référence.`
         : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
     case "nearSea":
-    case "excludeSea":
     case "farFromSea":
-      return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
+      return `${sujetMer(a, f)} se situe à environ ${a.observedLabel} du rivage marin.`;
+    case "excludeSea":
+      return `${f.nom} n'est pas classée « Mer » au titre de la loi Littoral.`;
     case "nearPlace":
       return `${ici} est ${a.observedLabel.startsWith("dans ") ? "" : "à "}${a.observedLabel}, pour ${a.expectedLabel} attendu.`;
     case "communeSize":
@@ -159,6 +171,13 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
         ? `${f.nom} se trouve ${a.observedLabel}.`
         : `${f.nom} ne fait pas partie de l'agglomération ${a.expectedLabel.replace(/^hors /, "")}.`;
   }
+}
+
+// FUT-33 : LE SUJET DE LA MESURE MER EST LE POINT RÉELLEMENT MESURÉ, lu dans la preuve elle-même (et pas dans
+// le grain du dossier) : une distance d'adresse ne se dit jamais du point de référence, ni l'inverse.
+function sujetMer(a: HardConstraintAssessment, f: ModuleFacts): string {
+  const keys = "evidenceKeys" in a ? a.evidenceKeys : [];
+  return keys.includes("adresse.merKm") ? "Cette adresse" : `Le point de référence ${deCommune(f.nom)}`;
 }
 
 // LA TAILLE, DITE À L'ÉCHELLE MESURÉE (FUT-8) : la population de la commune quand la comparaison porte sur
@@ -184,9 +203,10 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
       return premiere ? `${premiere.replace(/\.$/, "")}.` : `Aucun relief montagneux n'est à portée ${deCommune(f.nom)}.`;
     }
     case "nearSea":
-    case "excludeSea":
     case "farFromSea":
-      return `Le point de référence ${deCommune(f.nom)} se situe à ${a.observedLabel} du littoral.`;
+      return `${sujetMer(a, f)} se situe à environ ${a.observedLabel} du rivage marin.`;
+    case "excludeSea":
+      return `${f.nom} est classée « Mer » au titre de la loi Littoral.`;
     case "communeSize":
     case "sizeRelativeTo":
       return tailleRelativeDite(a, f);
@@ -216,11 +236,11 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
       // « Données et limites ». Elles restent accessibles ; elles ne chargent plus la face.
       if (key === "montagne") return "futur•e utilise actuellement 600 m comme définition opérationnelle de « vivre à la montagne ». Ce seuil est une convention, et l'altitude peut varier au sein d'une commune. Vérifier l'adresse précise le constat sans déterminer à lui seul ce que vous entendez par « montagne ».";
       if (key === "reliefProche") return "futur•e considère actuellement un relief montagneux à portée à partir d'environ 1 250 m d'altitude de référence dans un rayon de 35 km. Ce seuil est une convention, pas une limite que vous avez fixée.";
-      if (key === "excludeSea") return "futur•e considère actuellement « loin du littoral » comme au moins 15 km de la côte. Cette distance est une convention, pas une limite que vous avez fixée.";
+      if (key === "excludeSea") return "futur•e lit « ne pas habiter le littoral » comme : hors des communes classées « Mer » au titre de la loi Littoral. Ce classement est celui de la commune ; il ne dit rien de la distance de votre logement au rivage.";
       return "Ce périmètre est lu comme une liste de départements choisie par futur•e. Cette convention éclaire votre condition sans pouvoir la trancher.";
     case "point_de_reference":
       return key === "nearSea" || key === "farFromSea"
-        ? "La distance au littoral est mesurée depuis le point de référence de la commune, même quand une adresse est connue. Elle ne dit pas non plus quelle mesure vous visez : à vol d'oiseau, par la route ou en temps de trajet."
+        ? "La distance au rivage marin est mesurée à vol d'oiseau, depuis l'adresse quand elle est connue, sinon depuis le point de référence de la commune. Elle ne dit pas quelle mesure vous visez : à vol d'oiseau, par la route ou en temps de trajet."
         : "Le temps de trajet est estimé depuis le point de référence de la commune. Il ne vaut pas pour toutes ses adresses.";
     case "metrique_non_enregistree":
       return "Votre limite est en kilomètres, sans préciser à vol d'oiseau ou par la route. La distance mesurée ici est à vol d'oiseau, ce qui ne suffit pas à trancher.";
@@ -262,18 +282,25 @@ export function etatDuSignal(signal: ConditionSignal): string {
 // ET LE GESTE NE PRÉTEND PAS LEVER CE QU'IL NE LÈVE PAS. Il peut affiner la MESURE (l'altitude exacte d'un
 // logement, un itinéraire réel) ; il ne dit pas si la convention de futur•e, ou la métrique mesurée, est
 // celle que le lecteur avait en tête. Cette ambiguïté appartient au projet, et elle reste ouverte.
-function gesteConnu(key: HardConstraintKey, c: CapabilityAssessment): DecisionAction | undefined {
+function gesteConnu(key: HardConstraintKey, c: CapabilityAssessment, sourceFactIds: string[]): DecisionAction | undefined {
   if (key === "montagne") {
     return {
       type: "verifier_sur_place", label: "Vérifiez l'altitude exacte de l'adresse",
       detail: "Elle se lit sur la carte de l'IGN (Géoportail), et peut s'écarter fortement de celle du point de référence de la commune.",
     };
   }
-  if (key === "nearSea" && c.reason === "point_de_reference") {
-    return {
-      type: "verifier_sur_place", label: "Mesurez la distance depuis l'adresse visée",
-      detail: "Depuis l'adresse plutôt que depuis le point de référence de la commune, avec la mesure qui correspond à votre condition.",
-    };
+  if ((key === "nearSea" || key === "farFromSea") && c.reason === "point_de_reference") {
+    // FUT-33 : mesurée depuis l'adresse, la distance n'a plus à être « remesurée depuis l'adresse » ; reste la
+    // métrique (à vol d'oiseau, par la route), qui appartient au lecteur.
+    return sourceFactIds.includes("adresse.merKm")
+      ? {
+          type: "verifier_sur_place", label: "Vérifiez la distance avec la mesure qui compte pour vous",
+          detail: "La distance indiquée est à vol d'oiseau jusqu'au rivage marin, lagunes comprises. Par la route, depuis le logement, elle peut être plus longue.",
+        }
+      : {
+          type: "verifier_sur_place", label: "Mesurez la distance depuis l'adresse visée",
+          detail: "Depuis l'adresse plutôt que depuis le point de référence de la commune, avec la mesure qui correspond à votre condition.",
+        };
   }
   if (key === "nearPlace" && c.reason === "metrique_non_enregistree") {
     return {
@@ -291,7 +318,7 @@ function conditionCheck(
   key: HardConstraintKey, project: UserProject, f: ModuleFacts, c: CapabilityAssessment,
   signal: ConditionSignal, statement: string, evidence: EvidenceRef[], sourceFactIds: string[], topic: string,
 ): ConditionCheckFact {
-  const action = gesteConnu(key, c);
+  const action = gesteConnu(key, c, sourceFactIds);
   return {
     id: `${f.insee}:condition:${key}`,
     ruleId: `territoire.hard.${key}`,
@@ -324,17 +351,19 @@ function mesureSansSeuil(
   key: HardConstraintKey, project: UserProject, f: ModuleFacts, hard: HardEvaluation, c: CapabilityAssessment,
 ): ConditionCheckFact | null {
   const grain = hard.context.point?.grain === "address" ? "adresse" : "commune";
-  if (key === "nearSea" && f.distanceCoteKm != null) {
-    const km = Math.round(f.distanceCoteKm);
-    const v = classifyCoastDistance(f.distanceCoteKm);
+  // FUT-33 : la mesure du POINT évalué. À l'adresse sans distance d'adresse, rien : jamais le centre à sa place.
+  const mer = key === "nearSea" ? mesureMerEvaluee(hard.context, toCommuneAttributes(f)) : null;
+  if (key === "nearSea" && mer?.ok) {
+    const km = Math.round(mer.km);
+    const v = classifyCoastDistance(mer.km);
     const signal: ConditionSignal = v === "satisfied" ? "favorable" : v === "mismatch" ? "defavorable" : "neutre";
     return conditionCheck(key, project, f, c, signal,
-      `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du littoral.`,
+      `${mer.sujet} se situe à environ ${km} km du rivage marin.`,
       [{
-        factId: "commune.distanceCoteKm", module: "territoire", label: `Distance au littoral · ${f.nom}`,
-        observedValue: `${km} km`, grain, relation: "proximite", href: territoireHref,
+        factId: mer.evidenceKey, module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
+        observedValue: `${km} km`, grain: mer.grain === "address" ? "adresse" : "commune", relation: "proximite", href: territoireHref,
       }],
-      ["commune.distanceCoteKm", "project.hardConstraints.nearSea"], "la distance au littoral");
+      [mer.evidenceKey, "project.hardConstraints.nearSea"], "la distance au rivage marin");
   }
   const np = hard.context.constraints.nearPlace;
   const point = hard.context.point;

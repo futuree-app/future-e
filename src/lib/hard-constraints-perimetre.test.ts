@@ -19,7 +19,7 @@ const dir: PlaceDirectory = { byName: () => null, plmByName: () => null };
 function commune(over: Partial<CommuneAttributes>): CommuneAttributes {
   return {
     insee: "00000", nom: "Commune", dept: null, lat: null, lon: null,
-    population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, distanceCoteKm: null,
+    population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, merCentreKm: null,
     ...over,
   };
 }

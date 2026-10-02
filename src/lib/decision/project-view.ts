@@ -45,7 +45,7 @@ export const HARD_CONSTRAINT_LABELS: Record<HardConstraintKey, string> = {
   montagne: "l'exigence de montagne",
   reliefProche: "la proximité du relief",
   nearSea: "la proximité de la mer",
-  excludeSea: "l'éloignement de la mer",
+  excludeSea: "hors commune littorale",
   farFromSea: "la distance minimale à la mer",
   nearPlace: "la proximité d'un lieu",
   communeSize: "la taille de la commune",

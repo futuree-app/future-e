@@ -18,7 +18,7 @@ import type { HardConstraintKey } from "../hard-constraints.ts";
 function facts(over: Partial<ModuleFacts> = {}): ModuleFacts {
   return {
     insee: "31555", nom: "Toulouse", dept: "31", lat: 43.6045, lon: 1.4442, uu: "31701",
-    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, distanceCoteKm: 150, population: 493_465, altitude: 146,
+    tailleVille: 1_060_000, tailleVilleSource: "urban_unit", reliefProximite: 0, merCentreKm: 150, population: 493_465, altitude: 146,
     catnatInondation: 0, inondationRisque: 10, climat: null, scores: {}, hasAddress: false, ...over,
   };
 }
@@ -148,7 +148,7 @@ test("le GRAIN suit le point réellement testé : une mesure depuis l'adresse n'
   assert.match(fact.whyNotDecided, /vol d'oiseau/);
 });
 
-test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de commune très long", () => {
+test("LES 12 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de commune très long", () => {
   // Les topics ont une limite dure (70 caractères, aucune ponctuation de phrase). Un topic construit sur
   // le nom de la commune ET sur celui d'un lieu de référence peut la dépasser sans qu'aucun test de
   // l'évaluateur ne s'en aperçoive : c'est ici que ça doit tomber, pas en production.
@@ -172,8 +172,10 @@ test("LES 11 INCOMPATIBILITÉS PASSENT assertFactValid, même avec un nom de com
     { key: "montagne", hc: { montagne: { strength: "hard" } }, over: { montagne: true }, f: facts({ nom, altitude: 100 }) },
     { key: "reliefProche", hc: { reliefProche: { strength: "hard" } }, over: { reliefProche: true }, f: facts({ nom, reliefProximite: 0 }) },
     { key: "nearSea", hc: { nearSea: { active: true, maxKm: 10 } },
-      over: { nearSea: { threshold: { metric: "distance", maxKm: 10, source: "user" } } }, f: facts({ nom, distanceCoteKm: 200 }) },
-    { key: "excludeSea", hc: { excludeSea: true }, over: { excludeSea: true }, f: facts({ nom, distanceCoteKm: 4 }) },
+      over: { nearSea: { threshold: { metric: "distance", maxKm: 10, source: "user" } } }, f: facts({ nom, merCentreKm: 200 }) },
+    // FUT-33 : « pas le littoral » se lit sur le classement loi Littoral ; « au moins N km » sur la distance.
+    { key: "excludeSea", hc: { excludeSea: true }, over: { excludeSea: true }, f: facts({ nom, communeLittoraleMer: true }) },
+    { key: "farFromSea", hc: { farFromSea: { active: true, minKm: 50 } }, over: { farFromSea: { minKm: 50 } }, f: facts({ nom, merCentreKm: 4 }) },
     { key: "communeSize", hc: { communeSize: { min: 100_000 } }, over: { communeSize: { min: 100_000, max: null } }, f: facts({ nom, tailleVille: 500 }) },
     { key: "nearPlace", hc: { nearPlace: { label: "Brest", maxKm: 5 } },
       over: { nearPlace: { label: "Brest", threshold: { metric: "distance", maxKm: 5, source: "user" }, reference: BREST_REF, reachability: null } }, f: facts({ nom }) },

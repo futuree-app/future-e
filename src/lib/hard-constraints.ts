@@ -35,9 +35,8 @@ export type PlaceMode = "car" | "walk" | "bike";
 // Elles ne mesurent pas une exigence du lecteur : elles définissent le SENS D'UN MOT (« la montagne »,
 // « pas au bord de la mer »). Elles sont donc légitimes, à trois conditions : centralisées, versionnées,
 // et NOMMÉES dans le texte qui les applique. Un seuil qu'on n'ose pas dire est un seuil qu'on invente.
-export const PRODUCT_CONVENTIONS_VERSION = "hc-conv-2"; // conv-2 : la bande de tolérance de l'isochrone
+export const PRODUCT_CONVENTIONS_VERSION = "hc-conv-3"; // conv-2 : bande de tolérance de l'isochrone ; conv-3 (FUT-33) : « pas le littoral » = loi Littoral, la mer mesurée au rivage marin
 export const PRODUCT_CONVENTIONS = {
-  excludeSeaMinKm: 15, // « pas le littoral » = au moins 15 km de la côte
   montagneMinScore: 50, // « à la montagne » = montagnosité >= 50, soit environ 600 m
   reliefProcheMinScore: 50, // « proche d'une montagne » = un massif à portée
   // LA MÊME CONVENTION, DITE EN MÈTRES (24/09/2026). Ce n'est PAS un second seuil : c'est la
@@ -128,13 +127,14 @@ export type CommuneAttributes = {
    * fixture, peut ne pas la porter, et la phrase retombe alors sur une formulation sans chiffre.
    */
   reliefAltitudeMaxM?: number | null;
-  distanceCoteKm: number | null;
-  // FUT-33 (phase 2B.1) : vérité littorale, fournie par la RECHERCHE seulement (commune-attributes.ts).
-  // `undefined` = l'appelant ne la fournit pas encore (dossier, non migré) : l'évaluateur garde alors l'ancien
-  // chemin. Ce n'est JAMAIS une distance d'adresse : la mesure part du point de référence de la commune.
-  merCentreKm?: number | null;
+  // FUT-33 : la vérité littorale de la COMMUNE, lue par la recherche ET par le dossier (l'ancienne distance à
+  // une liste de villes côtières n'est plus lue par aucun des deux).
+  // Distance du point de référence de la commune au rivage marin. JAMAIS la distance d'une adresse : celle-ci
+  // vit dans `EvaluationContext.merAuPoint`. NULLABLE, non optionnelle : `null` = inconnue.
+  merCentreKm: number | null;
   // Commune classée « Mer » au titre de la loi Littoral (après héritage PLM). Estuaire ou Lac seuls : false.
-  communeLittoraleMer?: boolean | null;
+  // `null` = classement inconnu (jamais « non classée » par défaut).
+  communeLittoraleMer: boolean | null;
 };
 
 // ── Les valeurs, structurées ─────────────────────────────────────────────────
@@ -272,8 +272,22 @@ export type EvaluationContext = {
   // Guinée, et nearPlace en tirerait une incompatibilité ÉTABLIE sur une donnée inventée. Sans point, les
   // contraintes qui en dépendent rendent unexamined(missing_data).
   point: EvaluationPoint | null;
+  // FUT-33 : la distance au rivage marin DU POINT évalué, quand ce point est une ADRESSE. Calculée par l'appelant
+  // (le rivage est un fichier : le noyau reste pur), comme `travelTime`. Absente ou `unavailable` à l'adresse :
+  // nearSea / farFromSea ne sont pas examinées, et le centre de la commune ne la remplace jamais.
+  merAuPoint?: MerAuPoint | null;
   conventionsVersion: string;
 };
+
+export const MER_PROVENANCE = {
+  source: "Limite terre-mer © Shom-IGN, 2021, coupée aux limites transversales de la mer",
+  version: "mer-v2",
+  toleranceM: 5,
+} as const;
+
+export type MerAuPoint =
+  | { status: "measured"; km: number; grain: "address"; version: typeof MER_PROVENANCE.version }
+  | { status: "unavailable" };
 
 // ── Outillage de texte ───────────────────────────────────────────────────────
 
@@ -582,6 +596,34 @@ export function evaluateReliefProche(
   };
 }
 
+// ── LA MER (FUT-33, phase 2B.2 C) ───────────────────────────────────────────────────────────────────────
+// Trois questions, et chacune sa vérité :
+//   - nearSea / farFromSea : une DISTANCE au rivage marin, mesurée là où le dossier évalue. À l'adresse, depuis
+//     l'adresse (`ctx.merAuPoint`, rivage simplifié à 5 m) ; sinon, depuis le point de référence de la commune
+//     (`mer_centre_km`). Le N vient du lecteur ; aucun seuil produit.
+//   - excludeSea : un STATUT, « commune classée Mer au titre de la loi Littoral ». Aucun kilomètre.
+//
+// À L'ADRESSE, LE CENTRE DE LA COMMUNE N'EST JAMAIS UN REPLI. Si la distance de l'adresse manque, la condition
+// n'est pas examinée : afficher la distance du centre sous le nom de l'adresse ferait passer un autre lieu pour
+// le logement (Arles : 24 km au centre-ville, 5,7 km à Salin-de-Giraud, 13,4 km au point de référence).
+type MesureMer =
+  | { ok: true; km: number; grain: "address" | "commune_reference"; evidenceKey: string; sujet: string }
+  | { ok: false };
+
+export function mesureMerEvaluee(ctx: EvaluationContext, c: CommuneAttributes): MesureMer {
+  if (ctx.point?.grain === "address") {
+    const m = ctx.merAuPoint;
+    return m?.status === "measured"
+      ? { ok: true, km: m.km, grain: "address", evidenceKey: "adresse.merKm", sujet: "Cette adresse" }
+      : { ok: false };
+  }
+  return c.merCentreKm != null
+    ? { ok: true, km: c.merCentreKm, grain: "commune_reference", evidenceKey: "commune.merCentreKm", sujet: `Le point de référence ${deCommune(c.nom)}` }
+    : { ok: false };
+}
+
+const kmLisible = (km: number) => `${(Math.round(km * 10) / 10).toString().replace(".", ",")} km`;
+
 export function evaluateNearSea(
   ctx: EvaluationContext,
   c: CommuneAttributes,
@@ -594,43 +636,22 @@ export function evaluateNearSea(
   // que rien n'affichait nulle part. On ne le remplace pas, on le DEMANDE (lot 2 : une ambiguïté au parse).
   if (ns.threshold == null) return { key: "nearSea", status: "unexamined", reason: "missing_parameter" };
   if (ns.threshold.metric !== "distance") return { key: "nearSea", status: "unexamined", reason: "unsupported_metric" };
-  // FUT-33 : la recherche mesure le centre de la commune au rivage marin (Limite terre-mer Shom-IGN coupée aux
-  // limites transversales de la mer). Le nombre du lecteur est appliqué tel quel ; aucun seuil universel.
-  if (c.merCentreKm !== undefined) {
-    if (c.merCentreKm == null) return { key: "nearSea", status: "unexamined", reason: "missing_data" };
-    const maxM = ns.threshold.maxKm;
-    const kmM = Math.round(c.merCentreKm * 10) / 10;
-    const obs: ConstraintValue = { kind: "distance_km", value: c.merCentreKm };
-    const exp: ConstraintValue = { kind: "distance_km", value: maxM };
-    const keys = ["commune.merCentreKm", "project.hardConstraints.nearSea"];
-    if (c.merCentreKm <= maxM) {
-      return { key: "nearSea", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: `${kmM} km`, expectedLabel: `au plus ${maxM} km`, evidenceKeys: keys };
-    }
-    return {
-      key: "nearSea", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: `${kmM} km`, expectedLabel: `au plus ${maxM} km`, evidenceKeys: keys,
-      topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
-      statement: `Le centre de cette commune est à ${kmM} km du rivage marin, au-delà de la limite de ${maxM} km qu'indique votre projet.`,
-    };
-  }
-  if (c.distanceCoteKm == null) return { key: "nearSea", status: "unexamined", reason: "missing_data" };
-
+  const m = mesureMerEvaluee(ctx, c);
+  if (!m.ok) return { key: "nearSea", status: "unexamined", reason: "missing_data" };
   const max = ns.threshold.maxKm;
-  const km = Math.round(c.distanceCoteKm);
-  const observedValue: ConstraintValue = { kind: "distance_km", value: c.distanceCoteKm };
+  const observedValue: ConstraintValue = { kind: "distance_km", value: m.km };
   const expectedValue: ConstraintValue = { kind: "distance_km", value: max };
-  const observedLabel = `${km} km`;
-  // « moins de 30 km » alors que le moteur accepte `<= 30` : à exactement 30 km, la commune passe et la
-  // phrase dit le contraire. On écrit l'opérateur qu'on applique.
+  // « moins de 30 km » alors que le moteur accepte `<= 30` : on écrit l'opérateur qu'on applique.
+  const observedLabel = kmLisible(m.km);
   const expectedLabel = `au plus ${max} km`;
-  const evidenceKeys = ["commune.distanceCoteKm", "project.hardConstraints.nearSea"];
-
-  if (c.distanceCoteKm <= max) {
+  const evidenceKeys = [m.evidenceKey, "project.hardConstraints.nearSea"];
+  if (m.km <= max) {
     return { key: "nearSea", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
   return {
     key: "nearSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la distance ${deCommune(c.nom)} au littoral`, "la distance au littoral"),
-    statement: `Cette commune est à ${km} km du littoral, au-delà de la limite de ${max} km qu'indique votre projet.`,
+    topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
+    statement: `${m.sujet} se situe à environ ${observedLabel} du rivage marin, au-delà de la limite de ${max} km qu'indique votre projet.`,
   };
 }
 
@@ -639,72 +660,47 @@ export function evaluateExcludeSea(
   c: CommuneAttributes,
 ): HardConstraintAssessment<"excludeSea"> {
   if (!ctx.constraints.excludeSea) return { key: "excludeSea", status: "not_declared" };
-  // FUT-33 (D4) : « pas le littoral » = commune classée Mer au titre de la loi Littoral, et rien d'autre. Ni
-  // distance, ni département. Une commune d'estuaire ou de lac n'est pas une commune littorale de la mer.
-  if (c.communeLittoraleMer !== undefined) {
-    if (c.communeLittoraleMer == null) return { key: "excludeSea", status: "unexamined", reason: "missing_data" };
-    const obs: ConstraintValue = { kind: "boolean", value: c.communeLittoraleMer };
-    const exp: ConstraintValue = { kind: "boolean", value: false };
-    const keys = ["commune.loiLittoral", "project.hardConstraints.excludeSea"];
-    if (!c.communeLittoraleMer) {
-      return { key: "excludeSea", status: "satisfied", observedValue: obs, expectedValue: exp, observedLabel: "hors commune littorale", expectedLabel: "hors commune littorale", evidenceKeys: keys };
-    }
-    return {
-      key: "excludeSea", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: "commune littorale", expectedLabel: "hors commune littorale", evidenceKeys: keys,
-      topic: topicFit(`le caractère littoral ${deCommune(c.nom)}`, "le caractère littoral"),
-      statement: "Cette commune est une commune littorale (classée « Mer » au titre de la loi Littoral). Votre souhait de ne pas habiter le littoral est ici entendu comme : hors des communes littorales.",
-    };
-  }
-  if (c.distanceCoteKm == null) return { key: "excludeSea", status: "unexamined", reason: "missing_data" };
-
-  const min = PRODUCT_CONVENTIONS.excludeSeaMinKm;
-  const km = Math.round(c.distanceCoteKm);
-  const observedValue: ConstraintValue = { kind: "distance_km", value: c.distanceCoteKm };
-  const expectedValue: ConstraintValue = { kind: "distance_km", value: min };
-  const observedLabel = `${km} km`;
-  const expectedLabel = `au moins ${min} km`;
-  const evidenceKeys = ["commune.distanceCoteKm", "project.hardConstraints.excludeSea"];
-
-  if (c.distanceCoteKm >= min) {
-    return { key: "excludeSea", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
+  // D4 : « pas le littoral » = commune classée Mer au titre de la loi Littoral (héritage PLM compris), et rien
+  // d'autre. Ni distance, ni département. Une commune d'estuaire ou de lac n'est pas une commune littorale de la
+  // mer. Le statut est celui de la COMMUNE : il ne change pas avec l'adresse.
+  if (c.communeLittoraleMer == null) return { key: "excludeSea", status: "unexamined", reason: "missing_data" };
+  const observedValue: ConstraintValue = { kind: "boolean", value: c.communeLittoraleMer };
+  const expectedValue: ConstraintValue = { kind: "boolean", value: false };
+  const evidenceKeys = ["commune.loiLittoral", "project.hardConstraints.excludeSea"];
+  const expectedLabel = "hors commune classée « Mer »";
+  if (!c.communeLittoraleMer) {
+    return { key: "excludeSea", status: "satisfied", observedValue, expectedValue, observedLabel: "non classée « Mer »", expectedLabel, evidenceKeys };
   }
   return {
-    key: "excludeSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la proximité ${deCommune(c.nom)} au littoral`, "la proximité du littoral"),
-    statement: `Cette commune est à ${km} km de la côte. Votre souhait de ne pas habiter près du littoral est ici entendu comme une distance d'au moins ${min} km.`,
+    key: "excludeSea", status: "incompatible", observedValue, expectedValue, observedLabel: "classée « Mer »", expectedLabel, evidenceKeys,
+    topic: topicFit(`le classement ${deCommune(c.nom)} au titre de la loi Littoral`, "le classement au titre de la loi Littoral"),
+    statement: `${c.nom} est classée « Mer » au titre de la loi Littoral.`,
   };
 }
 
-// « À AU MOINS N KM DE LA MER » (FUT-33, 2B.2 A). Le N est celui du lecteur, et lui seul : sans nombre, la
-// contrainte est comprise mais non examinée (`missing_parameter`), exactement comme « il nous faut la mer ».
-// La recherche mesure le centre de la commune au rivage marin ; le dossier, tant qu'il n'est pas migré (étape
-// C), garde l'ancienne distance, comme pour `nearSea`.
+// « À AU MOINS N KM DE LA MER » (FUT-33). Le N est celui du lecteur, et lui seul : sans nombre, ce n'est pas une
+// contrainte (la préférence eloignement_mer porte l'intention). Même mesure, même grain que `nearSea`.
 export function evaluateFarFromSea(
   ctx: EvaluationContext,
   c: CommuneAttributes,
 ): HardConstraintAssessment<"farFromSea"> {
   const fs = ctx.constraints.farFromSea;
-  if (fs == null) return { key: "farFromSea", status: "not_declared" };
-  if (fs.minKm == null) return { key: "farFromSea", status: "unexamined", reason: "missing_parameter" };
+  if (fs == null || fs.minKm == null) return { key: "farFromSea", status: "not_declared" };
+  const m = mesureMerEvaluee(ctx, c);
+  if (!m.ok) return { key: "farFromSea", status: "unexamined", reason: "missing_data" };
   const min = fs.minKm;
-  const nouvelle = c.merCentreKm !== undefined;
-  const mesure = nouvelle ? c.merCentreKm : c.distanceCoteKm;
-  if (mesure == null) return { key: "farFromSea", status: "unexamined", reason: "missing_data" };
-  const km = nouvelle ? Math.round(mesure * 10) / 10 : Math.round(mesure);
-  const observedValue: ConstraintValue = { kind: "distance_km", value: mesure };
+  const observedValue: ConstraintValue = { kind: "distance_km", value: m.km };
   const expectedValue: ConstraintValue = { kind: "distance_km", value: min };
-  const observedLabel = `${km} km`;
+  const observedLabel = kmLisible(m.km);
   const expectedLabel = `au moins ${min} km`;
-  const evidenceKeys = [nouvelle ? "commune.merCentreKm" : "commune.distanceCoteKm", "project.hardConstraints.farFromSea"];
-  if (mesure >= min) {
+  const evidenceKeys = [m.evidenceKey, "project.hardConstraints.farFromSea"];
+  if (m.km >= min) {
     return { key: "farFromSea", status: "satisfied", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys };
   }
   return {
     key: "farFromSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
-    topic: topicFit(`la distance ${deCommune(c.nom)} ${nouvelle ? "au rivage marin" : "au littoral"}`, nouvelle ? "la distance au rivage marin" : "la distance au littoral"),
-    statement: nouvelle
-      ? `Le centre de cette commune est à ${km} km du rivage marin, en deçà des ${min} km au moins qu'indique votre projet.`
-      : `Cette commune est à ${km} km du littoral, en deçà des ${min} km au moins qu'indique votre projet.`,
+    topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
+    statement: `${m.sujet} se situe à environ ${observedLabel} du rivage marin, en deçà des ${min} km au moins qu'indique votre projet.`,
   };
 }
 

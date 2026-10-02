@@ -154,7 +154,7 @@ const DIR: PlaceDirectory = {
   plmByName: (k) => (k === "lyon" ? { uu: "00760", pop: 522_250, communePop: 520_000, uuPop: 1_700_000 } : k === "marseille" ? { uu: "00759", pop: 873_076, communePop: null, uuPop: 1_600_000 } : null),
 };
 function commune(over: Partial<CommuneAttributes>): CommuneAttributes {
-  return { insee: "00000", nom: "X", dept: null, lat: null, lon: null, population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, distanceCoteKm: null, ...over };
+  return { insee: "00000", nom: "X", dept: null, lat: null, lon: null, population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, merCentreKm: null, ...over };
 }
 const ctx = (hc: HardConstraints): EvaluationContext => ({ constraints: hydrateHardConstraints(hc, DIR), point: null, conventionsVersion: "test" });
 const cap = (hc: HardConstraints) => criterionCapability({ kind: "hard", key: "sizeRelativeTo", hc }, "commune").capability;

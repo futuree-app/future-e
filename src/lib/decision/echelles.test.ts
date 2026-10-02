@@ -124,7 +124,7 @@ test("LIMITE LEVÉE (28/07/2026) : une distance ancrée sur l'adresse va dans «
 
 test("ÉCHELLE : une proximité mesurée depuis l'adresse décrit le QUARTIER, pas le logement", () => {
   const proche: EvidenceRef = {
-    factId: "commune.distanceCoteKm", module: "territoire", label: "Distance au littoral",
+    factId: "commune.merCentreKm", module: "territoire", label: "Distance au littoral",
     grain: "adresse", relation: "proximite",
   };
   assert.equal(echelleDeLaPreuve(proche), "quartier");

@@ -12,13 +12,22 @@ function entry(over: Partial<IndexCommune> = {}): IndexCommune {
 }
 
 test("mapping : passe-plats honnêtes", () => {
-  const f = mapCommuneToModuleFacts(entry({ population: 18000, distance_cote_km: 42, inondation: { catnat: 5, tri: false, risque: 72 } }), { faible_chaleur: 40 }, { hasAddress: false, tailleVille: 18000 });
+  const f = mapCommuneToModuleFacts(entry({ population: 18000, mer_centre_km: 42, loi_effective: ["Estuaire"], inondation: { catnat: 5, tri: false, risque: 72 } }), { faible_chaleur: 40 }, { hasAddress: false, tailleVille: 18000 });
   assert.equal(f.population, 18000);
-  assert.equal(f.distanceCoteKm, 42);
+  // FUT-33 : la vérité littorale de la commune passe telle quelle ; Estuaire seul n'est pas « Mer ».
+  assert.equal(f.merCentreKm, 42);
+  assert.equal(f.communeLittoraleMer, false);
+  assert.equal("distanceCoteKm" in f, false, "le dossier ne porte plus l'ancienne distance");
   assert.equal(f.catnatInondation, 5);
   assert.equal(f.inondationRisque, 72);
   assert.equal(f.scores.faible_chaleur, 40);
   assert.equal(f.hasAddress, false);
+});
+
+test("mapping : une commune sans vérité littorale rend null, jamais « non classée » ni 0 km", () => {
+  const f = mapCommuneToModuleFacts(entry(), {}, { hasAddress: false, tailleVille: 4000 });
+  assert.equal(f.merCentreKm, null);
+  assert.equal(f.communeLittoraleMer, null);
 });
 
 test("mapping : absence d'inondation -> null (jamais 0)", () => {

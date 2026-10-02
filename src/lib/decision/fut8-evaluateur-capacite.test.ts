@@ -18,7 +18,7 @@ const ANNECY: ResolvedUrbanAreaReference = {
   urbanUnitCode: "74501", normalizedTerritoryCode: "uu:74501", source: "commune_index", meta: META,
 };
 function commune(over: Partial<CommuneAttributes>): CommuneAttributes {
-  return { insee: "00000", nom: "Commune", dept: null, lat: null, lon: null, population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, distanceCoteKm: null, ...over };
+  return { insee: "00000", nom: "Commune", dept: null, lat: null, lon: null, population: null, tailleVille: null, uu: null, altitude: null, reliefProximite: null, merCentreKm: null, ...over };
 }
 function ctx(hc: HardConstraints, excludePlace?: EvaluationContext["constraints"]["excludePlace"]): EvaluationContext {
   const constraints = hydrateHardConstraints(hc, dir);

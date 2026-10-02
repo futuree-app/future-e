@@ -10,8 +10,9 @@ import { resolveExternalReferences } from "../hard-constraints-external.ts";
 import {
   PRODUCT_CONVENTIONS_VERSION, ROUTABLE_MODES,
   type EvaluationContext, type EvaluationPoint, type NormalizedHardConstraints,
-  type TravelTimeEstimate,
+  type TravelTimeEstimate, type MerAuPoint,
 } from "../hard-constraints.ts";
+import { mesurerMerAdresse } from "../server/rivage-mer.ts";
 import { estimateTravelMinutes, routeRequestHash } from "../route-time.ts";
 import { reachabilityStore } from "../reachability-store.ts";
 import { mapCommuneToModuleFacts } from "./module-facts-map.ts";
@@ -143,8 +144,21 @@ export async function buildHardContext(
     // LE DOSSIER MESURE, LUI AUSSI. Un seul itinéraire (sa commune, ou son adresse), aucun plafond : le
     // comparateur en calcule vingt-quatre, le dossier n'en a qu'un.
     travelTime: await estimateTravelTimeAt(constraints, evalPoint),
+    merAuPoint: await merAuPointEvalue(constraints, evalPoint),
     conventionsVersion: PRODUCT_CONVENTIONS_VERSION,
   };
+}
+
+// FUT-33 : LA DISTANCE AU RIVAGE MARIN DU POINT ÉVALUÉ, quand ce point est une ADRESSE et qu'une contrainte de
+// distance à la mer la demande. Le rivage n'est chargé que dans ce cas. Au point de référence d'une commune, rien
+// ici : le noyau lit `mer_centre_km` dans les attributs de la commune.
+async function merAuPointEvalue(
+  constraints: NormalizedHardConstraints,
+  point: EvaluationPoint | null,
+): Promise<MerAuPoint | null> {
+  if (point?.grain !== "address") return null;
+  if (!constraints.nearSea && !constraints.farFromSea) return null;
+  return mesurerMerAdresse(point.lat, point.lon);
 }
 
 // L'ESTIMATION, AU POINT RÉELLEMENT ÉVALUÉ. Une durée calculée depuis le centroïde de la commune ne vaut
@@ -188,7 +202,12 @@ export async function withEvaluationPoint(
   hard: EvaluationContext,
   point: EvaluationPoint,
 ): Promise<EvaluationContext> {
-  return { ...hard, point, travelTime: await estimateTravelTimeAt(hard.constraints, point) };
+  return {
+    ...hard, point,
+    travelTime: await estimateTravelTimeAt(hard.constraints, point),
+    // FUT-33 : la distance à la mer se remesure au nouveau point. Celle d'un autre point n'est jamais traînée.
+    merAuPoint: await merAuPointEvalue(hard.constraints, point),
+  };
 }
 
 // LE PROJET TEL QUE LE DOSSIER LE LIT (FUT-7). Les critères qu'une commune-ancre a fabriqués (« une ville
