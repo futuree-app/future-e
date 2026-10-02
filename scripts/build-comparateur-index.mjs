@@ -24,6 +24,7 @@
  *   node scripts/build-comparateur-index.mjs
  */
 
+import { lireMer, ajouterMer } from './lib/mer-index.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -425,6 +426,9 @@ async function main() {
     ],
     columnMapSource: 'src/lib/drias-json.ts',
   };
+
+  // FUT-33 (phase 2A) : vérité littorale (data/mer), à côté de distance_cote_km qui reste inchangé.
+  meta.mer = ajouterMer(communes, lireMer(root));
 
   const outPath = path.join(root, 'data', 'comparateur-index.json');
   await fs.writeFile(outPath, JSON.stringify({ meta, communes }), 'utf8');

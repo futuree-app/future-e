@@ -1,0 +1,81 @@
+{
+ "version": "mer-v2",
+ "definition": "Distance au rivage marin : Limite terre-mer Shom-IGN coupée aux limites transversales de la mer (règles A à E, complément Seine), lagunes et bassins compris (D2). Centre = point de référence de l'index ; territoire = contour communal (0 si contact).",
+ "sources": {
+  "limtm": {
+   "producteur": "Shom-IGN",
+   "millesime": 2021,
+   "attribution": "© Shom-IGN, 2021, http://dx.doi.org/10.17183/LIMTM",
+   "licence": "Licence Ouverte 2.0",
+   "fichier": "Limite_terre_mer_France_metropolitaine.7z"
+  },
+  "contours": {
+   "producteur": "IGN ADMIN EXPRESS via Etalab (contours-administratifs)",
+   "millesime": "2026",
+   "simplification": "5 m",
+   "licence": "Licence Ouverte 2.0"
+  },
+  "loi_littoral": {
+   "producteur": "DGALN - SIDAUH",
+   "cog": "2022",
+   "licence": "Licence Ouverte"
+  }
+ },
+ "loi_littoral": {
+  "typologie": "DGALN-SIDAUH, COG 2022 (Mer / Estuaire / Lac)",
+  "controle": "Observatoire des territoires, COG 2025 (classée / non classée) : liste identique",
+  "plm": "classement communal hérité par les arrondissements (loi_source_commune)"
+ },
+ "attribution": "Limite terre-mer © Shom-IGN, 2021, http://dx.doi.org/10.17183/LIMTM",
+ "limites": "Donnée non destinée à la navigation. Une distance au rivage marin n'est ni une distance à une plage, ni à l'océan.",
+ "rivage_adresse": {
+  "fichier": "rivage-5m.f32.gz",
+  "tolerance_m": 5,
+  "segments": 410002,
+  "format": "Float32 little-endian, x1 y1 x2 y2, Lambert 93 (EPSG:2154), mètres"
+ },
+ "construction": {
+  "compteurs": {
+   "troncons_limtm": 105715,
+   "morceaux_apres_coupe": 105741,
+   "composantes": 34105,
+   "fermetures_ltm": 271,
+   "extremites_non_accrochees": 1,
+   "decisions": {
+    "refusée par les garde-fous": 60,
+    "A (codage officiel)": 136,
+    "incertain": 53,
+    "B (géométrie gardée)": 21,
+    "non_accrochee": 1
+   },
+   "longueur_brute_km": 17668.4,
+   "longueur_retiree_km": 4496.2,
+   "desaccords": {
+    "retire_par_codage_km": 4113.8,
+    "retire_en_plus_par_geometrie_et_complements_km": 361.0
+   },
+   "restes_orphelins_composantes": 19,
+   "restes_orphelins_km": 3.45,
+   "iles_estuaire_retirees": 28,
+   "iles_estuaire_km": 18.0,
+   "segments_rivage": 89330,
+   "communes_mesurees": 34788
+  },
+  "complements": [
+   {
+    "nom": "Seine",
+    "motif": "rives de la Seine non codées entre la LTM (Tancarville / Honfleur) et Rouen ; fermeture de 4,8 km",
+    "amont_km": 353.5,
+    "applique": true,
+    "controles": {
+     "Honfleur": true,
+     "Trouville": true,
+     "Le Havre": true,
+     "Étretat": true,
+     "Fécamp": true,
+     "Dieppe": true
+    }
+   }
+  ]
+ }
+}

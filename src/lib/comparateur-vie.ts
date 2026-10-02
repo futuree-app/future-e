@@ -435,7 +435,16 @@ export type IndexCommune = {
   lon: number;
   population: number | null;
   densite: number | null;
+  // ANCIEN proxy (min haversine vers une liste de villes côtières). Gardé tant que ses consommateurs n'ont pas
+  // migré un par un vers les champs mer_* ci-dessous (FUT-33, phase 2B). Ne pas l'utiliser pour du neuf.
   distance_cote_km: number;
+  // FUT-33 (phase 2A) : vérité littorale, NON branchée. Rivage marin = Limite terre-mer Shom-IGN coupée aux
+  // limites transversales de la mer, lagunes comprises (data/mer/provenance.json). Jamais « plage » ni « océan ».
+  mer_centre_km?: number;            // point de référence de la commune → rivage marin
+  mer_territoire_km?: number | null; // territoire communal → rivage marin (0 = la commune touche le rivage)
+  loi_littoral?: string[] | null;    // classement DGALN brut : "Mer" | "Estuaire" | "Lac"
+  loi_effective?: string[] | null;   // après héritage PLM (arrondissement → commune)
+  loi_source_commune?: string | null; // commune dont le classement est hérité, sinon null
   altitude?: number | null; // m NGF, centroïde IGN RGE ALTI (base de la détection « montagne »)
   // Proximité au relief (0–100) : altitude max dans ~35 km. Distingue « proche
   // d'une montagne » (Grenoble 95, Pau 69) de la plaine (Toulouse 0), là où
