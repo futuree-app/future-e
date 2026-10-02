@@ -17,13 +17,14 @@ import HeroProjetTerritoires from '@/components/HeroProjetTerritoires';
 import { Logo } from "@/components/Logo";
 import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import {
-  buildDriasContext,
+  carteMachineASous,
   getDriaSub,
   getEmptyStateCopy,
   getHeroCopy,
   getPreviewCards,
   getQuestionIntro,
 } from "@/lib/accueil/recits";
+import { construireFaitsCommune } from "@/lib/accueil/faits";
 
 const C = {
   bg: 'var(--bg)',
@@ -46,42 +47,47 @@ const PLM_CENTRAL_CODES: Record<string, { city: string; example: string }> = {
   '13055': { city: 'Marseille', example: 'Marseille 7e Arrondissement' },
 };
 
+// La machine à sous du hero (avant toute commune). Ses cartes climat et risques sont construites par
+// les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis des valeurs DRIAS figées et
+// testées (src/lib/accueil/recits.ts). Les cartes de cadre de vie sont restées telles quelles : elles
+// relèvent du repositionnement du haut de l'accueil (FUT-50). Vannes n'a plus de carte submersion :
+// l'État n'y recense pas ce risque.
+const slotCard = (cle, titre, fait, col, source) => ({ cle, titre, fait, col, source });
 const SLOT_CITIES = [
   {
     name: 'Lyon',
     cards: [
-      { label: 'Canicule à Lyon',      val: 'Les projections placent Lyon parmi les communes les plus exposées aux étés futurs.', col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Mobilité à Lyon',      val: 'Métro, tram et train dessinent un quotidien moins dépendant de la voiture à Lyon.',  col: C.violet, src: 'INSEE MOBPRO / SNCF' },
-      { label: 'Vie locale à Lyon',    val: 'Commerces, écoles et vie associative restent denses dans le quotidien lyonnais.',    col: C.green,  src: 'INSEE BPE / RNA' },
-      { label: 'Nuits tropicales',      val: 'Les nuits sans fraîcheur, celles où l\'on ne récupère pas, seront plus fréquentes à Lyon.', col: C.red, src: 'DRIAS · +4°C' },
-    ],
+      carteMachineASous('Lyon', 'chaleur'),
+      slotCard('mobilite', 'Mobilité à Lyon', 'Métro, tram et train dessinent un quotidien moins dépendant de la voiture à Lyon.', C.violet, 'INSEE MOBPRO / SNCF'),
+      slotCard('vie-locale', 'Vie locale à Lyon', 'Commerces, écoles et vie associative restent denses dans le quotidien lyonnais.', C.green, 'INSEE BPE / RNA'),
+      carteMachineASous('Lyon', 'nuits'),
+    ].filter(Boolean),
   },
   {
     name: 'Marseille',
     cards: [
-      { label: 'Chaleur à Marseille',   val: 'Les projections placent Marseille parmi les communes les plus exposées aux étés futurs.',  col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Nature à Marseille',     val: 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.',           col: C.green,  src: 'OSM / IGN' },
-      { label: 'Mobilité à Marseille',   val: 'Au quotidien, se déplacer à Marseille tient encore beaucoup à la voiture.',                      col: C.violet, src: 'INSEE MOBPRO' },
-      { label: 'Submersion à Marseille', val: 'Marseille figure parmi les communes exposées au risque de submersion.',                           col: C.blue,   src: 'Géorisques / BRGM' },
-    ],
+      carteMachineASous('Marseille', 'nuits'),
+      slotCard('nature', 'Nature à Marseille', 'Entre mer et calanques, l\'accès à la nature pèse dans le quotidien marseillais.', C.green, 'OSM / IGN'),
+      slotCard('mobilite', 'Mobilité à Marseille', 'Au quotidien, se déplacer à Marseille tient encore beaucoup à la voiture.', C.violet, 'INSEE MOBPRO'),
+      carteMachineASous('Marseille', 'risque'),
+    ].filter(Boolean),
   },
   {
     name: 'Vannes',
     cards: [
-      { label: 'Canicule à Vannes',     val: 'D\'ici 2050, les étés à Vannes seront sensiblement plus chauds qu\'aujourd\'hui.',          col: C.red,    src: 'DRIAS · +4°C' },
-      { label: 'Vie locale à Vannes',   val: 'À taille humaine, Vannes garde un centre dense en commerces et en services.',                col: C.green,  src: 'INSEE BPE' },
-      { label: 'Mobilité à Vannes',     val: 'Courtes distances : à Vannes, une partie des trajets du quotidien se fait à pied ou à vélo.', col: C.violet, src: 'INSEE MOBPRO' },
-      { label: 'Littoral à Vannes',     val: 'Vannes figure parmi les communes exposées au risque de submersion.',                          col: C.blue,   src: 'Géorisques / BRGM' },
-    ],
+      carteMachineASous('Vannes', 'chaleur'),
+      slotCard('vie-locale', 'Vie locale à Vannes', 'À taille humaine, Vannes garde un centre dense en commerces et en services.', C.green, 'INSEE BPE'),
+      slotCard('mobilite', 'Mobilité à Vannes', 'Courtes distances : à Vannes, une partie des trajets du quotidien se fait à pied ou à vélo.', C.violet, 'INSEE MOBPRO'),
+    ].filter(Boolean),
   },
   {
     name: 'La Rochelle',
     cards: [
-      { label: 'Submersion à La Rochelle', val: 'La Rochelle figure parmi les communes exposées au risque de submersion.',                     col: C.blue,   src: 'Géorisques / BRGM' },
-      { label: 'Mobilité à La Rochelle',   val: 'La Rochelle reste une ville où le vélo tient une vraie place dans les trajets.',             col: C.violet, src: 'INSEE MOBPRO' },
-      { label: 'Nature à La Rochelle',     val: 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.',               col: C.green,  src: 'OSM / IGN' },
-      { label: 'Chaleur à La Rochelle',    val: 'Les fortes chaleurs devraient devenir plus fréquentes à La Rochelle.',                        col: C.red,    src: 'DRIAS · +4°C' },
-    ],
+      carteMachineASous('La Rochelle', 'risque'),
+      slotCard('mobilite', 'Mobilité à La Rochelle', 'La Rochelle reste une ville où le vélo tient une vraie place dans les trajets.', C.violet, 'INSEE MOBPRO'),
+      slotCard('nature', 'Nature à La Rochelle', 'Océan, marais et parcs : l\'accès à la nature marque le quotidien rochelais.', C.green, 'OSM / IGN'),
+      carteMachineASous('La Rochelle', 'chaleur'),
+    ].filter(Boolean),
   },
 ];
 
@@ -300,11 +306,11 @@ export default function FutureELanding() {
   const [communeMeta, setCommuneMeta] = useState(null);
   const [communeIndicators, setCommuneIndicators] = useState({});
   const [communeGeorisques, setCommuneGeorisques] = useState(null);
-  const [communeGissol, setCommuneGissol] = useState(null);
   const [communeDataLoading, setCommuneDataLoading] = useState(false);
   const [tensions, setTensions] = useState([]);
   const [activeTension, setActiveTension] = useState(null);
-  const [horizon, setHorizon] = useState<Horizon>('today');
+  // 2050 : l'horizon de décision du dossier (CLIMAT_HORIZON). L'ancien défaut « Aujourd'hui » lisait 2030.
+  const [horizon, setHorizon] = useState<Horizon>('2050');
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [answerError, setAnswerError] = useState('');
@@ -616,15 +622,18 @@ export default function FutureELanding() {
     setCommuneMeta(null);
     setCommuneIndicators({});
     setCommuneGeorisques(null);
-    setCommuneGissol(null);
     setCommuneDataLoading(true);
 
+    // Ces deux sorties anticipées ne chargent aucune donnée : l'état de chargement doit se lever, sinon
+    // le squelette (FUT-37, aucune phrase avant les données) resterait affiché indéfiniment.
     if (tensionsCatalog.length === 0) {
+      setCommuneDataLoading(false);
       return;
     }
 
     const client = ensureSupabaseClient();
     if (!client) {
+      setCommuneDataLoading(false);
       return;
     }
 
@@ -692,10 +701,11 @@ export default function FutureELanding() {
     const indicatorInseeCode = nextCommune.citycode || matchedRow?.insee_code;
 
     if (indicatorInseeCode) {
-      const [driasResult, georisquesResult, gissolResult] = await Promise.allSettled([
+      // GisSol n'est plus lu ici : sa seule carte (« Qualité des sols ») disait « les sols de X » depuis
+      // une maille de 16 km, et n'était jamais atteignable une fois DRIAS chargé (FUT-37).
+      const [driasResult, georisquesResult] = await Promise.allSettled([
         fetch(`/drias?dataset=landing&insee=${indicatorInseeCode}`),
         fetch(`/georisques?insee=${indicatorInseeCode}`),
-        fetch(`/api/gissol?insee=${indicatorInseeCode}`),
       ]);
 
       if (
@@ -739,19 +749,6 @@ export default function FutureELanding() {
       } else {
         setCommuneGeorisques(null);
       }
-
-      if (
-        gissolResult.status === 'fulfilled' &&
-        gissolResult.value.ok
-      ) {
-        try {
-          setCommuneGissol(await gissolResult.value.json());
-        } catch {
-          setCommuneGissol(null);
-        }
-      } else {
-        setCommuneGissol(null);
-      }
     }
 
     setTensions(buildTensions(tensionsCatalog, categories));
@@ -774,7 +771,6 @@ export default function FutureELanding() {
       setCommuneMeta(null);
       setCommuneIndicators({});
       setCommuneGeorisques(null);
-      setCommuneGissol(null);
       setTensions([]);
       setActiveTension(null);
       setAnswer(null);
@@ -832,7 +828,7 @@ export default function FutureELanding() {
         body: JSON.stringify({
           commune,
           categories: communeMeta?.categories || ['all'],
-          driasContext: buildDriasContext(commune, communeIndicators),
+          driasContext: construireFaitsCommune(commune, communeIndicators, communeGeorisques),
           georisquesContext: buildGeorisquesContext(communeGeorisques),
           tension,
           inseeCode: communeMeta?.inseeCode ?? null,
@@ -919,7 +915,7 @@ export default function FutureELanding() {
       body: JSON.stringify({
         commune,
         categories: communeMeta?.categories || ['all'],
-        driasContext: buildDriasContext(commune, communeIndicators),
+        driasContext: construireFaitsCommune(commune, communeIndicators, communeGeorisques),
         georisquesContext: buildGeorisquesContext(communeGeorisques),
         tension,
         fallbackAnswer,
@@ -1271,6 +1267,22 @@ export default function FutureELanding() {
       marginBottom: 4,
     },
     previewSub: { fontSize: 12, color: C.dim, lineHeight: 1.5 },
+    previewFact: { fontSize: 13, color: C.text, lineHeight: 1.5, marginBottom: 4 },
+    previewLimit: { fontSize: 11.5, color: C.dim, lineHeight: 1.5, marginTop: 4 },
+    previewSource: {
+      fontFamily: "var(--font-mono)",
+      fontSize: 10,
+      letterSpacing: '0.04em',
+      color: C.dim,
+      marginTop: 6,
+    },
+    previewSkeletonLine: (width, height) => ({
+      width,
+      height,
+      borderRadius: 4,
+      background: 'var(--bg-elev-3)',
+      marginBottom: 8,
+    }),
     previewBadge: (col) => ({
       display: 'inline-block',
       padding: '2px 8px',
@@ -1891,7 +1903,7 @@ export default function FutureELanding() {
     communeMeta?.usedFallback,
   );
   const previewCards = commune
-    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, communeGissol, horizon)
+    ? getPreviewCards(commune, activeCategories, communeIndicators, communeGeorisques, horizon)
     : activeSlotCity.cards;
   // Clé d'animation : change à chaque étape du slot, puis à chaque sélection de commune
   const slotAnimKey = commune ? `c-${commune}` : slotSettled ? 'settled' : `s-${slotIndex}`;
@@ -2081,9 +2093,29 @@ export default function FutureELanding() {
             {/* `hero-preview-extra` porte les cartes 3 et 4 : sur téléphone, la preuve produit se
                 réduit aux deux premières (l'accroche climat, puis la carte de profondeur) plutôt
                 que de disparaître entièrement comme avant. Voir la media query 768 px. */}
-            {previewCards.map((item, index) => (
+            {/* FUT-37 : pendant le chargement, un squelette SANS TEXTE. Les cartes construites avant
+                l'arrivée de DRIAS et de Géorisques racontaient des récits de repli (submersion tirée
+                de la seule catégorie « littoral », immobilier sans donnée). Une absence de phrase vaut
+                mieux qu'une phrase fausse. */}
+            {commune && communeDataLoading
+              ? [0, 1, 2, 3].map((index) => (
+                  <div
+                    key={`squelette-${index}`}
+                    aria-hidden="true"
+                    className={index >= 2 ? 'hero-preview-extra' : undefined}
+                    style={{ ...styles.previewCard, opacity: 1 - index * 0.08 }}
+                  >
+                    <div style={styles.previewDot('var(--border-hi)')} />
+                    <div style={{ flex: 1 }}>
+                      <div style={styles.previewSkeletonLine('55%', 12)} />
+                      <div style={styles.previewSkeletonLine('90%', 10)} />
+                      <div style={styles.previewSkeletonLine('70%', 10)} />
+                    </div>
+                  </div>
+                ))
+              : previewCards.map((item, index) => (
               <div
-                key={`${slotAnimKey}-${index}`}
+                key={`${slotAnimKey}-${item.cle ?? index}`}
                 className={`${commune || slotSettled ? 'slot-card-settle' : 'slot-card-spin'}${index >= 2 ? ' hero-preview-extra' : ''}`}
                 style={{
                   ...styles.previewCard,
@@ -2093,8 +2125,12 @@ export default function FutureELanding() {
               >
                 <div style={styles.previewDot(item.col)} />
                 <div>
-                  <div style={styles.previewTitle}>{item.label}</div>
-                  <div style={{ ...styles.previewSub, opacity: communeDataLoading ? 0.35 : 1, transition: 'opacity 0.4s' }}>{item.val}</div>
+                  <div style={styles.previewTitle}>{item.titre}</div>
+                  {/* Le fait d'abord, toujours visible : avant FUT-37, le chiffre était calculé puis jeté. */}
+                  <div style={styles.previewFact}>{item.fait}</div>
+                  {item.lecture && <div style={styles.previewSub}>{item.lecture}</div>}
+                  {item.limite && <div style={styles.previewLimit}>{item.limite}</div>}
+                  <div style={styles.previewSource}>{item.source}</div>
                 </div>
               </div>
             ))}
@@ -2115,7 +2151,7 @@ export default function FutureELanding() {
                   lineHeight: 1.5,
                   margin: 0,
                 }}>
-                  Ces projections ne sont qu&apos;un aperçu de ce qui pourrait changer à {commune}. futur•e croise près de 30 critères (cadre de vie, santé, mobilité, climat) avec votre profil.
+                  Un aperçu à l&apos;échelle de la commune : projections climatiques DRIAS et risques recensés par l&apos;État. futur•e croise près de 30 critères (cadre de vie, santé, mobilité, climat) avec votre profil.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
                   <button
@@ -2284,7 +2320,7 @@ export default function FutureELanding() {
 
             <div style={styles.tensionsGrid} className="tensions-grid">
               {tensions.map((tension) => {
-                const { sub, isDriasProjectable } = getDriaSub(
+                const sub = getDriaSub(
                   tension.id,
                   horizon,
                   communeIndicators,

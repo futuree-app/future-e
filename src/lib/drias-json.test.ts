@@ -34,7 +34,7 @@ const UTILISEES: Record<string, string> = {
   NORTXm_seas_JJA: "column07", NORTX35D_yr: "column08", NORTX30D_yr: "column09",
   NORTR_yr: "column10", NORRR_yr: "column11", NORRRq99_yr: "column14", NORRx1d_yr: "column15",
   NORIFM40_yr: "column17", NORSWI04_yr: "column18",
-  ATX35D_yr: "column23", ATR_yr: "column25", AIFM40_yr: "column27", ARRx1d_yr: "column33",
+  ATX35D_yr: "column23", ATR_yr: "column25", AIFM40_yr: "column27", ASWI04_yr: "column28", ARRx1d_yr: "column33",
 };
 
 test("CONTRAT — les trois scénarios existent, pour toutes les communes", () => {
@@ -121,4 +121,15 @@ test("CONTRAT — l'anomalie de pluie est RELATIVE, les autres sont ABSOLUES", (
   // Les anomalies de jours, elles, se comptent en jours et dépassent largement 1.
   const abs = g20.map((r) => num(r, "column25")).filter((v): v is number => v !== null);
   assert.ok(Math.max(...abs) > 5, "l'anomalie de nuits tropicales devrait être un nombre de nuits");
+});
+
+test("INVARIANT — la référence reconstruite des sols secs (projeté moins écart) n'est jamais négative", () => {
+  // ASWI04_yr (column28) est un écart ABSOLU en jours : la référence 1976-2005 de l'accueil en dépend.
+  // Une colonne décalée d'un rang (column27, l'écart de l'indice feu ; column29, un écart RELATIF de pluie)
+  // donnerait des références négatives ou absurdes, sans que l'écran le signale.
+  const viole = lignes().filter((r) => {
+    const p = num(r, "column18"), a = num(r, "column28");
+    return p !== null && a !== null && (p - a < 0 || p - a > 366);
+  });
+  assert.equal(viole.length, 0, `${viole.length} lignes à la référence de sols secs hors de [0, 366] jours`);
 });

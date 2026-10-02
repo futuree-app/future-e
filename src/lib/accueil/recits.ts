@@ -1,639 +1,549 @@
-// LES RÉCITS DE L'ACCUEIL, EXTRAITS DU COMPOSANT (FUT-37, étape 1 : extraction à l'identique).
+// LES RÉCITS DE L'ACCUEIL (FUT-37). Module PUR : aucune I/O, aucun JSX, imports relatifs (testable
+// sous `node --test`, lisible par le client).
 //
-// Ces fonctions vivaient dans FutureELanding.tsx, un composant client de 3 700 lignes sous
-// `@ts-nocheck` : aucune n'était testable. Elles sont déplacées ici SANS changer un mot, pour que les
-// tests de caractérisation figent ce qu'elles disent avant qu'on les corrige.
+// LA RÈGLE : une phrase ne conclut que sur ce que mesure son entrée. Chaque carte porte donc d'abord
+// son FAIT (la grandeur exacte, l'horizon, la référence), puis, au plus, une lecture qui reste dans la
+// même grandeur et une limite qui nomme ce que la donnée ne mesure pas. Avant FUT-37, les phrases
+// étaient les mêmes pour toutes les communes de France à un horizon donné (Chamonix, 0 jour au-dessus de
+// 35 °C, recevait « plusieurs semaines par an »), et le chiffre était calculé puis jeté.
 //
-// Module PUR : aucune I/O, aucun JSX, imports relatifs (testable sous `node --test`).
-import { deCommune } from "../typography.ts";
+// TROIS FAITS DU DOSSIER S'APPLIQUENT ICI SANS ÊTRE RECOPIÉS (src/lib/decision/climat-facts.ts) :
+//   1. DRIAS n'expose aucune valeur présente. L'onglet qui disait « Aujourd'hui · données actuelles »
+//      lisait en réalité la projection 2030 (gwl15). Il devient la période de référence 1976-2005,
+//      reconstruite par `reconstructReference` (projeté moins écart), la brique du dossier.
+//   2. Les horizons et leurs niveaux viennent de src/lib/horizons.ts, jamais d'une table locale (l'accueil
+//      envoyait à /qna les valeurs de 2100 sous la date « 2050 »).
+//   3. Un nombre de jours dans l'année ne dit rien de la durée ni de la continuité d'une période.
+//
+// Les risques recensés par l'État (Géorisques, GASPAR) sont des faits ACTUELS et COMMUNAUX : leur texte
+// ne change pas avec l'horizon, et aucune carte de risque ne naît d'une simple catégorie (`littoral`).
+//
+// Ce module ne choisit PAS « le meilleur fait » de la commune : l'assemblage des cartes reste celui
+// d'avant FUT-37. Le repositionnement du haut de l'accueil relève de FUT-50.
+import { HORIZONS, type HorizonKey } from "../horizons.ts";
+import { reconstructReference, CLIMAT_REFERENCE_LABEL, type GwlScenarios } from "../decision/climat-facts.ts";
+import { aCommune, deCommune } from "../typography.ts";
 
-export type Horizon = "today" | "2030" | "2050" | "2100";
+// ── Horizons ─────────────────────────────────────────────────────────────────────────────────
 
-type Indicators = Record<string, Record<string, { value_numeric?: number | null } | undefined> | undefined>;
-type Georisques = { flags?: Record<string, boolean | undefined> | null } | null | undefined;
-type Gissol = { cadmium?: { label?: string | null; score?: number | null } | null } | null | undefined;
+/** L'onglet « reference » est la période 1976-2005 reconstruite ; les trois autres sont les paliers DRIAS. */
+export type HorizonAccueil = "reference" | "2030" | "2050" | "2100";
 
-export type PreviewCard = { label: string; val: string; note?: string | null; col: string; src: string };
+export const PERIODE_REFERENCE = "1976-2005";
 
-const C = {
-  orange: "var(--orange)",
-  red: "var(--red)",
-  violet: "var(--violet)",
-  green: "var(--green)",
-  blue: "var(--blue)",
-};
-export const LANDING_DRIAS_SCENARIO = {
-  id: 'gwl30',
-  horizon: '2050',
-  shortLabel: '+4°C',
-  longLabel: 'niveau de réchauffement +4°C',
-};
+export const HORIZONS_ACCUEIL: readonly { key: HorizonAccueil; label: string; mention: string }[] = [
+  { key: "reference", label: PERIODE_REFERENCE, mention: `référence ${PERIODE_REFERENCE} · reconstruite depuis DRIAS-TRACC` },
+  ...HORIZONS.map((h) => ({
+    key: h.annee as HorizonAccueil,
+    label: h.annee,
+    mention: `projection DRIAS-TRACC · ${h.france} en France`,
+  })),
+];
 
-export const HORIZON_TO_GWL: Record<Horizon, string | null> = {
-  today: null,
-  '2030': 'gwl15',
-  '2050': 'gwl20',
-  '2100': 'gwl30',
-};
-
-// Tensions pour lesquelles on peut afficher une valeur DRIAS par horizon
-export const DRIAS_TENSION_CONFIG: Record<string, {
-  indicator: string;
-  getSub: (value: number, name: string) => string;
-}> = {
-  canicule_vivable: {
-    indicator: 'NORTX30D_yr',
-    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
-  },
-  acheter_canicule: {
-    indicator: 'NORTX30D_yr',
-    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
-  },
-  enfants_chaleur: {
-    indicator: 'NORTX30D_yr',
-    getSub: (v, name) => `${Math.round(v)} jours > 30°C par an à ${name}`,
-  },
-  feux: {
-    indicator: 'NORIFM40_yr',
-    getSub: (v, _name) => `${Math.round(v)} jours de risque incendie élevé par an`,
-  },
-  randonner_ici: {
-    indicator: 'NORIFM40_yr',
-    getSub: (v, _name) => `${Math.round(v)} jours de risque incendie élevé par an`,
-  },
-  eau_potable: {
-    indicator: 'NORSWI04_yr',
-    getSub: (v, name) => `${Math.round(v)} jours de sol sec par an à ${name}`,
-  },
-  metier_agricole: {
-    indicator: 'NORRR_seas_JJA',
-    getSub: (v, name) => `${Math.round(v)} mm de pluie en été à ${name}`,
-  },
-  vignobles: {
-    indicator: 'NORTMm_seas_JJA',
-    getSub: (v, name) => `${v.toFixed(1)} °C en été à ${name}`,
-  },
-};
-
-function formatIndicatorValue(value: number | null | undefined, digits = 0) {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return null;
-  }
-
-  return new Intl.NumberFormat('fr-FR', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
+/** Le scénario DRIAS d'un onglet. `null` pour la référence : elle n'est la valeur d'aucun scénario. */
+export function gwlDeHorizon(h: HorizonAccueil): HorizonKey | null {
+  return HORIZONS.find((x) => x.annee === h)?.key ?? null;
 }
 
-function getLandingIndicatorValue(indicators: Indicators, indicatorCode: string, gwlId: string = LANDING_DRIAS_SCENARIO.id): number | null {
-  return indicators?.[gwlId]?.[indicatorCode]?.value_numeric ?? null;
+// ── Entrées ──────────────────────────────────────────────────────────────────────────────────
+
+/** La forme que l'accueil construit à partir de /drias : scénario → indicateur → { value_numeric }. */
+export type Indicators = Record<string, Record<string, { value_numeric?: number | null } | undefined> | undefined>;
+export type GeorisquesFlags = Partial<Record<"flood" | "marineSubmersion" | "landslide" | "clay" | "wildfire" | "storm" | "seismic", boolean>>;
+export type GeorisquesAccueil = { flags?: GeorisquesFlags | null } | null | undefined;
+
+function fini(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
 }
 
-export function getDriaSub(
-  tensionId: string,
-  horizon: Horizon,
-  indicators: Indicators,
-  communeName: string,
-  staticSub: string,
-): { sub: string; isDriasProjectable: boolean } {
-  const config = DRIAS_TENSION_CONFIG[tensionId];
-  if (!config) return { sub: staticSub, isDriasProjectable: false };
-
-  if (horizon === 'today') return { sub: staticSub, isDriasProjectable: true };
-
-  const gwlId = HORIZON_TO_GWL[horizon];
-  if (!gwlId) return { sub: staticSub, isDriasProjectable: true };
-
-  const value = indicators?.[gwlId]?.[config.indicator]?.value_numeric;
-  if (value == null || Number.isNaN(Number(value))) return { sub: staticSub, isDriasProjectable: true };
-
-  return { sub: config.getSub(Number(value), communeName), isDriasProjectable: true };
+function valeur(ind: Indicators, gwl: string, cle: string): number | null {
+  const v = ind?.[gwl]?.[cle]?.value_numeric;
+  return fini(v) ? v : null;
 }
 
-export function buildDriasContext(communeName: string, indicators: Indicators) {
-  const hotDays = getLandingIndicatorValue(indicators, 'NORTX30D_yr');
-  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr');
-  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA');
+function enScenarios(ind: Indicators): GwlScenarios {
+  const out: GwlScenarios = {};
+  for (const [gwl, parCle] of Object.entries(ind ?? {})) {
+    const v: Record<string, number> = {};
+    for (const [cle, x] of Object.entries(parCle ?? {})) if (fini(x?.value_numeric)) v[cle] = x!.value_numeric!;
+    out[gwl] = { h: gwl, v };
+  }
+  return out;
+}
 
-  if (hotDays !== null && hotDays !== undefined) {
+// ── Formats ──────────────────────────────────────────────────────────────────────────────────
+
+const FR1 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** Une température, au dixième, avec le vrai signe moins. */
+export function formatTemperature(t: number): string {
+  return `${FR1.format(t).replace("-", "−")} °C`;
+}
+
+type Compte = { singulier: string; pluriel: string; feminin: boolean };
+const JOURNEE: Compte = { singulier: "jour", pluriel: "jours", feminin: false };
+const NUIT: Compte = { singulier: "nuit", pluriel: "nuits", feminin: true };
+
+// Les trois paliers d'écriture d'un compte. Ce ne sont pas des seuils d'interprétation : « moins d'une
+// journée » EST la valeur 0,4 écrite en français, sans rien en conclure.
+type Palier = "aucun" | "moins-d-un" | number;
+function palier(n: number): Palier {
+  if (n < 0.05) return "aucun";
+  if (n < 1) return "moins-d-un";
+  return Math.round(n);
+}
+
+/** « 14 jours », « moins d'une journée », « aucune nuit ». */
+export function formatCompte(n: number, c: Compte = JOURNEE): string {
+  const p = palier(n);
+  if (p === "aucun") return c.feminin ? `aucune ${c.singulier}` : "aucune journée";
+  if (p === "moins-d-un") return c.feminin ? `moins d'une ${c.singulier}` : "moins d'une journée";
+  return `${p} ${p > 1 ? c.pluriel : c.singulier}`;
+}
+
+/** Le même compte, sans son nom, pour la comparaison : « contre 3 », « contre moins d'une ». */
+function formatCompteNu(n: number): string {
+  const p = palier(n);
+  if (p === "aucun") return "aucune";
+  if (p === "moins-d-un") return "moins d'une";
+  return String(p);
+}
+
+const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** « …, contre 3 sur 1976-2005 » ou « …, comme sur 1976-2005 » quand l'écriture ne distingue pas. */
+function comparaison(v: number, ref: number | null): string {
+  if (ref == null) return "";
+  if (palier(v) === palier(ref)) return `, comme sur ${PERIODE_REFERENCE}`;
+  return `, contre ${formatCompteNu(ref)} sur ${PERIODE_REFERENCE}`;
+}
+
+// ── La carte ─────────────────────────────────────────────────────────────────────────────────
+
+export type CarteApercu = {
+  /** Stable, pour les tests et le dédoublonnage. */
+  cle: string;
+  titre: string;
+  /** Le fait chiffré ou recensé : toujours affiché. */
+  fait: string;
+  /** Une lecture qui reste dans la grandeur mesurée. */
+  lecture?: string;
+  /** Ce que la donnée ne mesure pas. */
+  limite?: string;
+  source: string;
+  col: string;
+};
+
+const COL = { rouge: "var(--red)", bleu: "var(--blue)", vert: "var(--green)", violet: "var(--violet)", orange: "var(--orange)" };
+
+const SOURCE_DRIAS = "DRIAS-TRACC, médiane des modèles (Météo-France)";
+const SOURCE_GASPAR = "Géorisques, risques recensés (GASPAR) · fait actuel, sans projection";
+
+type IndicateurCompte = {
+  cle: string;
+  absolu: string;
+  ecart: string;
+  compte: Compte;
+  titre: (nom: string) => string;
+  /** La phrase de fait, valeur et comparaison déjà écrites. */
+  fait: (compte: string, horizon: string, comparaison: string) => string;
+  faitReference: (compte: string) => string;
+  lecture?: (v: number) => string | undefined;
+  limite?: string;
+  col: string;
+};
+
+const CHALEUR: IndicateurCompte = {
+  cle: "chaleur",
+  absolu: "NORTX35D_yr",
+  ecart: "ATX35D_yr",
+  compte: JOURNEE,
+  titre: (nom) => `Jours au-dessus de 35 °C ${aCommune(nom)}`,
+  fait: (compte, horizon, comp) => `${majuscule(compte)} par an à l'horizon ${horizon}${comp}.`,
+  faitReference: (compte) => `${majuscule(compte)} par an ${CLIMAT_REFERENCE_LABEL}.`,
+  col: COL.rouge,
+};
+
+const NUITS: IndicateurCompte = {
+  cle: "nuits",
+  absolu: "NORTR_yr",
+  ecart: "ATR_yr",
+  compte: NUIT,
+  titre: (nom) => `Nuits tropicales ${aCommune(nom)}`,
+  fait: (compte, horizon, comp) =>
+    `${majuscule(compte)} par an où la température ne descend pas sous 20 °C, à l'horizon ${horizon}${comp}.`,
+  faitReference: (compte) => `${majuscule(compte)} par an où la température ne descend pas sous 20 °C, ${CLIMAT_REFERENCE_LABEL}.`,
+  // La nuit tropicale est le marqueur sanitaire des fortes chaleurs : c'est sa définition, pas une
+  // extrapolation. La lecture ne s'écrit que s'il y a des nuits à lire.
+  lecture: (v) => (v >= 1 ? "Ce sont des nuits sans fraîcheur, où le corps récupère mal de la chaleur du jour." : undefined),
+  col: COL.rouge,
+};
+
+const FEUX: IndicateurCompte = {
+  cle: "feux",
+  absolu: "NORIFM40_yr",
+  ecart: "AIFM40_yr",
+  compte: JOURNEE,
+  titre: (nom) => `Météo propice aux feux ${aCommune(nom)}`,
+  fait: (compte, horizon, comp) =>
+    `${majuscule(compte)} par an de danger météorologique élevé pour les feux (indice forêt-météo ≥ 40), à l'horizon ${horizon}${comp}.`,
+  faitReference: (compte) =>
+    `${majuscule(compte)} par an de danger météorologique élevé pour les feux (indice forêt-météo ≥ 40), ${CLIMAT_REFERENCE_LABEL}.`,
+  limite:
+    "Cet indice décrit des conditions météorologiques favorables aux feux ; il ne mesure ni la végétation ni la probabilité qu'un incendie se déclare.",
+  col: COL.rouge,
+};
+
+// Le SWI est modélisé : « environ » devant un nombre, jamais devant « moins d'une journée ».
+const environ = (compte: string) => (/^\d/.test(compte) ? `Environ ${compte}` : majuscule(compte));
+
+const SOLS_SECS: IndicateurCompte = {
+  cle: "sols-secs",
+  absolu: "NORSWI04_yr",
+  ecart: "ASWI04_yr",
+  compte: JOURNEE,
+  titre: (nom) => `Sols secs ${aCommune(nom)}`,
+  fait: (compte, horizon, comp) => `${environ(compte)} par an de sol sec, à l'horizon ${horizon}${comp}.`,
+  faitReference: (compte) => `${environ(compte)} par an de sol sec, ${CLIMAT_REFERENCE_LABEL}.`,
+  limite:
+    "Indice d'humidité des sols (SWI) inférieur à 0,4 : il décrit l'eau disponible pour la végétation. Il ne mesure ni les nappes, ni les rivières, ni l'eau du robinet.",
+  col: COL.bleu,
+};
+
+function carteCompte(def: IndicateurCompte, nom: string, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
+  const ref = reconstructReference(enScenarios(ind), def.absolu, def.ecart);
+  const gwl = gwlDeHorizon(horizon);
+  let fait: string;
+  let lecture: string | undefined;
+  if (gwl == null) {
+    if (ref == null) return null; // pas de référence reconstructible : la carte se tait plutôt que d'inventer
+    fait = def.faitReference(formatCompte(ref, def.compte));
+    lecture = def.lecture?.(ref);
+  } else {
+    const v = valeur(ind, gwl, def.absolu);
+    if (v == null) return null;
+    fait = def.fait(formatCompte(v, def.compte), horizon, comparaison(v, ref));
+    lecture = def.lecture?.(v);
+  }
+  return {
+    cle: def.cle,
+    titre: def.titre(nom),
+    fait,
+    ...(lecture ? { lecture } : {}),
+    ...(def.limite ? { limite: def.limite } : {}),
+    source: SOURCE_DRIAS,
+    col: def.col,
+  };
+}
+
+/** Température moyenne de l'hiver. Rien sur la neige : futur•e ne la mesure pas. */
+function carteHivers(nom: string, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
+  const ref = reconstructReference(enScenarios(ind), "NORTMm_seas_DJF", "ATMm_seas_DJF");
+  const gwl = gwlDeHorizon(horizon);
+  const base = { cle: "hivers", titre: `Hivers ${aCommune(nom)}`, source: SOURCE_DRIAS, col: COL.bleu };
+  if (gwl == null) {
+    if (ref == null) return null;
+    return { ...base, fait: `Température moyenne de l'hiver : ${formatTemperature(ref)} ${CLIMAT_REFERENCE_LABEL}.` };
+  }
+  const v = valeur(ind, gwl, "NORTMm_seas_DJF");
+  if (v == null) return null;
+  const comp = ref == null ? "" : `, contre ${formatTemperature(ref)} sur ${PERIODE_REFERENCE}`;
+  const ecart = ref == null ? null : Math.round((v - ref) * 10) / 10;
+  return {
+    ...base,
+    fait: `Température moyenne de l'hiver : ${formatTemperature(v)} à l'horizon ${horizon}${comp}.`,
+    ...(ecart != null && ecart > 0 ? { lecture: `Des hivers plus doux de ${formatTemperature(ecart)}.` } : {}),
+  };
+}
+
+// ── Risques recensés (Géorisques) : faits actuels, invariants par horizon ───────────────────
+
+const LIMITE_RECENSEMENT =
+  "Ce recensement ne dit pas quelle partie de la commune est concernée ni comment elle évoluera. L'exposition d'une adresse se vérifie dans le dossier Logement.";
+
+/** Le premier risque recensé, dans l'ordre d'avant FUT-37. Aucun paramètre d'horizon : il n'en a pas. */
+export function carteRisqueRecense(nom: string, georisques: GeorisquesAccueil): CarteApercu | null {
+  const f = georisques?.flags;
+  if (!f) return null;
+  const base = { source: SOURCE_GASPAR, limite: LIMITE_RECENSEMENT };
+  if (f.marineSubmersion) {
+    return { ...base, cle: "submersion", titre: `Submersion marine ${aCommune(nom)}`, fait: "L'État recense un risque de submersion marine sur la commune.", col: COL.bleu };
+  }
+  if (f.flood) {
+    return { ...base, cle: "inondation", titre: `Inondation ${aCommune(nom)}`, fait: "L'État recense un risque d'inondation sur la commune.", col: COL.bleu };
+  }
+  if (f.clay) {
     return {
-      commune: communeName,
-      primary_signal: 'heat_days_over_30c',
-      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(hotDays, 0)} jours > 30°C/an`,
-      scenarios: [{
-        id: LANDING_DRIAS_SCENARIO.id,
-        horizon: LANDING_DRIAS_SCENARIO.horizon,
-        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
-        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
-        value: hotDays,
-        unit: 'jours/an',
-      }],
+      ...base,
+      cle: "argiles",
+      titre: `Argiles ${aCommune(nom)}`,
+      fait: "L'État recense un risque de tassements différentiels, liés aux sols argileux, sur la commune.",
+      limite:
+        "Ce recensement ne dit pas quelle partie de la commune est concernée. L'effet sur un bâtiment dépend du sol de la parcelle et des fondations : il se vérifie à l'adresse, dans le dossier Logement.",
+      col: COL.orange,
     };
   }
-
-  if (tropicalNights !== null && tropicalNights !== undefined) {
-    return {
-      commune: communeName,
-      primary_signal: 'tropical_nights',
-      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(tropicalNights, 0)} nuits tropicales/an`,
-      scenarios: [{
-        id: LANDING_DRIAS_SCENARIO.id,
-        horizon: LANDING_DRIAS_SCENARIO.horizon,
-        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
-        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
-        value: tropicalNights,
-        unit: 'nuits/an',
-      }],
-    };
+  if (f.landslide) {
+    return { ...base, cle: "terrain", titre: `Mouvements de terrain ${aCommune(nom)}`, fait: "L'État recense un risque de mouvement de terrain sur la commune.", col: COL.orange };
   }
-
-  if (summerTemp !== null && summerTemp !== undefined) {
-    return {
-      commune: communeName,
-      primary_signal: 'summer_mean_temperature',
-      summary: `${LANDING_DRIAS_SCENARIO.shortLabel} : ${formatIndicatorValue(summerTemp, 1)} °C en été`,
-      scenarios: [{
-        id: LANDING_DRIAS_SCENARIO.id,
-        horizon: LANDING_DRIAS_SCENARIO.horizon,
-        shortLabel: LANDING_DRIAS_SCENARIO.shortLabel,
-        longLabel: LANDING_DRIAS_SCENARIO.longLabel,
-        value: summerTemp,
-        unit: '°C',
-      }],
-    };
-  }
-
   return null;
 }
 
-// Narratives canicule sévère (NORTX35D_yr = jours > 35°C)
-function caniiculeNarrative(days: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const note = (horizon !== 'today') ? `≈ ${Math.round(days)} jours > 35°C/an` : null;
-  if (horizon === 'today') return { val: `Les épisodes de chaleur extrême restent ponctuels à ${name}.`, note };
-  if (horizon === '2030') return { val: `Les journées au-dessus de 35°C deviennent plus fréquentes l'été.`, note };
-  if (horizon === '2050') return { val: `Les épisodes de chaleur extrême pourraient devenir courants à ${name}.`, note };
-  return { val: `Les chaleurs extrêmes pourraient durer plusieurs semaines par an.`, note };
-}
+// ── Assemblage (inchangé dans son principe : FUT-50 le repensera) ───────────────────────────
 
-// Narratives nuits tropicales (NORTR_yr = nuits > 20°C)
-function nightsNarrative(nights: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const note = (horizon !== 'today') ? `≈ ${Math.round(nights)} nuits tropicales/an` : null;
-  if (horizon === 'today') return { val: `Les nuits très chaudes restent relativement rares à ${name}.`, note };
-  if (horizon === '2030') return { val: `Les nuits sans fraîcheur deviennent plus fréquentes.`, note };
-  if (horizon === '2050') return { val: `Les nuits où l'on récupère difficilement pourraient devenir courantes.`, note };
-  return { val: `Les nuits tropicales pourraient transformer durablement les étés à ${name}.`, note };
-}
-
-// Narratives température estivale par horizon
-function summerTempNarrative(temp: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const t = Number(temp).toFixed(1);
-  const note = (horizon !== 'today') ? `≈ ${t} °C en moyenne l'été` : null;
-
-  if (horizon === 'today') {
-    if (temp >= 26) return { val: `Les étés chauds sont déjà la norme à ${name}.`, note };
-    return { val: `Les étés à ${name} se réchauffent progressivement.`, note };
-  }
-
-  if (horizon === '2030') {
-    if (temp >= 26) return { val: `Les étés à ${name} pourraient encore se réchauffer sensiblement d'ici 2030.`, note };
-    return { val: `Les températures estivales à ${name} devraient augmenter.`, note };
-  }
-
-  if (horizon === '2050') {
-    if (temp >= 26) return { val: `Les étés à ${name} tels que vous les connaissez vont changer de nature.`, note };
-    return { val: `Les étés à ${name} pourraient devenir nettement plus chauds d'ici 2050.`, note };
-  }
-
-  // 2100
-  if (temp >= 28) return { val: `${name} pourrait connaître des étés comparables aux zones les plus chaudes d'Europe.`, note };
-  return { val: `Les températures estivales à ${name} pourraient dépasser largement ce qui est normal aujourd'hui.`, note };
-}
-
-// Narratives feux de forêt (NORIFM40_yr = jours à risque incendie)
-function feuxNarrative(firedays: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const note = (horizon !== 'today') ? `≈ ${Math.round(firedays)} jours/an à risque incendie` : null;
-  if (horizon === 'today') return { val: `Les périodes à risque restent concentrées sur les étés secs.`, note };
-  if (horizon === '2030') return { val: `Les conditions favorables aux incendies deviennent plus fréquentes.`, note };
-  if (horizon === '2050') return { val: `Le risque d'incendie pourrait fortement progresser autour ${deCommune(name)}.`, note };
-  return { val: `Les périodes à risque élevé pourraient durer une grande partie de l'été.`, note };
-}
-
-// Narratives stress hydrique (NORSWI04_yr = jours sols secs SWI < 0.4)
-function eauNarrative(drydays: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const note = (horizon !== 'today') ? `≈ ${Math.round(drydays)} jours/an avec sols secs` : null;
-  if (horizon === 'today') return { val: `Les périodes sèches restent occasionnelles à ${name}.`, note };
-  if (horizon === '2030') return { val: `Les épisodes de sécheresse deviennent plus fréquents.`, note };
-  if (horizon === '2050') return { val: `L'accès à l'eau pourrait devenir plus tendu pendant les étés.`, note };
-  return { val: `Les sécheresses estivales pourraient transformer durablement le territoire.`, note };
-}
-
-// Narratives précipitations extrêmes (NORRRq99_yr = percentile 99 précipitations)
-function pluiesNarrative(mm: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const note = (horizon !== 'today') ? `≈ ${Math.round(mm)} mm lors des épisodes extrêmes` : null;
-  if (horizon === 'today') return { val: `Certaines pluies intenses provoquent déjà des tensions localement.`, note };
-  if (horizon === '2030') return { val: `Les épisodes de pluie intense pourraient devenir plus fréquents.`, note };
-  if (horizon === '2050') return { val: `Les pluies extrêmes pourraient accentuer les risques de crue.`, note };
-  return { val: `Les épisodes de pluie intense pourraient devenir beaucoup plus violents.`, note };
-}
-
-// Narratives viticulture (NORTMm_seas_JJA = température moyenne été)
-function vigneNarrative(summerTemp: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const t = Number(summerTemp).toFixed(1);
-  const note = (horizon !== 'today') ? `≈ ${t} °C en moyenne l'été` : null;
-
-  if (horizon === 'today') {
-    if (summerTemp >= 24) return { val: `Les vignes autour ${deCommune(name)} sont déjà soumises à des étés chauds.`, note };
-    return { val: `La chaleur pourrait modifier les équilibres viticoles autour ${deCommune(name)}.`, note };
-  }
-
-  if (horizon === '2030') {
-    if (summerTemp >= 24) return { val: `Les vignes autour ${deCommune(name)} pourraient voir leurs conditions d'été changer d'ici 2030.`, note };
-    return { val: `La maturité des raisins autour ${deCommune(name)} pourrait s'avancer progressivement.`, note };
-  }
-
-  if (horizon === '2050') {
-    if (summerTemp >= 26) return { val: `Les cépages traditionnels autour ${deCommune(name)} pourraient ne plus être adaptés aux étés de 2050.`, note };
-    if (summerTemp >= 24) return { val: `Le réchauffement des étés autour ${deCommune(name)} pourrait transformer les vins du territoire.`, note };
-    return { val: `Les parcelles viticoles autour ${deCommune(name)} pourraient nécessiter une adaptation profonde d'ici 2050.`, note };
-  }
-
-  // 2100
-  if (summerTemp >= 28) return { val: `La viticulture autour ${deCommune(name)} pourrait migrer vers des altitudes ou des cépages très différents.`, note };
-  return { val: `Les vignes autour ${deCommune(name)} pourraient connaître des étés sans précédent historique d'ici 2100.`, note };
-}
-
-// Narratives neige / montagne (NORTMm_seas_DJF = température moyenne hiver)
-function neigeNarrative(winterTemp: number, name: string, horizon: Horizon): { val: string; note: string | null } {
-  const t = Number(winterTemp).toFixed(1);
-  const note = (horizon !== 'today') ? `≈ ${t} °C en moyenne l'hiver` : null;
-
-  if (horizon === 'today') {
-    if (winterTemp >= 2) return { val: `Les hivers enneigés à ${name} sont déjà moins réguliers qu'autrefois.`, note };
-    return { val: `Les hivers enneigés pourraient devenir plus rares à ${name}.`, note };
-  }
-
-  if (horizon === '2030') {
-    if (winterTemp >= 2) return { val: `L'enneigement à ${name} pourrait devenir moins fiable d'ici 2030.`, note };
-    return { val: `Les hivers à ${name} pourraient se réchauffer progressivement.`, note };
-  }
-
-  if (horizon === '2050') {
-    if (winterTemp >= 4) return { val: `La neige pourrait devenir rare et imprévisible à ${name} d'ici 2050.`, note };
-    if (winterTemp >= 2) return { val: `Le manteau neigeux à ${name} pourrait se réduire significativement d'ici 2050.`, note };
-    return { val: `Les hivers à ${name} pourraient se transformer profondément avant la moitié du siècle.`, note };
-  }
-
-  // 2100
-  if (winterTemp >= 6) return { val: `${name} pourrait connaître des hivers sans neige fiable en fin de siècle.`, note };
-  if (winterTemp >= 3) return { val: `L'économie montagnarde autour ${deCommune(name)} pourrait être fragilisée par des hivers trop doux.`, note };
-  return { val: `Les hivers à ${name} pourraient être méconnaissables d'ici la fin du siècle.`, note };
-}
-
-// Narratives submersion marine (horizon-aware, basées sur projections SLR)
-function submersionNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `${name} figure parmi les communes exposées au risque de submersion marine.` };
-  if (horizon === '2030') return { val: `La montée des eaux pourrait aggraver le risque de submersion marine à ${name} d'ici 2030.` };
-  if (horizon === '2050') return { val: `La submersion marine à ${name} pourrait s'étendre à de nouvelles zones d'ici 2050.` };
-  return { val: `En fin de siècle, des quartiers ${deCommune(name)} pourraient être régulièrement submergés par la mer.` };
-}
-
-// Narratives inondation fluviale (horizon-aware)
-function inondationNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `Certaines zones ${deCommune(name)} sont exposées aux inondations.` };
-  if (horizon === '2030') return { val: `Les épisodes de crues à ${name} pourraient devenir plus fréquents d'ici 2030.` };
-  if (horizon === '2050') return { val: `Le risque d'inondation à ${name} pourrait s'intensifier avec des pluies plus violentes.` };
-  return { val: `Les inondations à ${name} pourraient toucher des zones aujourd'hui épargnées d'ici 2100.` };
-}
-
-// Narratives argiles/sécheresse géotechnique (horizon-aware)
-function argilesNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `Les sols argileux ${deCommune(name)} peuvent provoquer des fissures dans les bâtiments lors des sécheresses.` };
-  if (horizon === '2030') return { val: `Les sécheresses plus fréquentes à ${name} pourraient aggraver le retrait-gonflement des argiles.` };
-  if (horizon === '2050') return { val: `Le risque de fissuration lié aux argiles à ${name} pourrait s'accroître avec l'allongement des sécheresses.` };
-  return { val: `Les épisodes de retrait-gonflement des argiles à ${name} pourraient devenir nettement plus fréquents d'ici 2100.` };
-}
-
-// Narratives valeur immobilière (horizon-aware)
-function immobilierNarrative(name: string, horizon: Horizon): { val: string } {
-  if (horizon === 'today') return { val: `À ${name}, les risques climatiques et les normes énergétiques vont peser sur les prix.` };
-  if (horizon === '2030') return { val: `D'ici 2030, les biens en zone à risque à ${name} pourraient connaître une première décote.` };
-  if (horizon === '2050') return { val: `Les biens exposés aux risques climatiques à ${name} pourraient perdre significativement de leur valeur d'ici 2050.` };
-  return { val: `Certains biens immobiliers à ${name} pourraient devenir difficiles à assurer ou à revendre d'ici 2100.` };
-}
-
-function getDriasCard(communeName: string, indicators: Indicators, horizon: Horizon = "today"): PreviewCard | null {
-  const gwlId = HORIZON_TO_GWL[horizon] ?? 'gwl15';
-  const days35 = getLandingIndicatorValue(indicators, 'NORTX35D_yr', gwlId);
-
-  if (days35 !== null && days35 !== undefined) {
-    const { val, note } = caniiculeNarrative(days35, communeName, horizon);
-    return { label: `Canicule à ${communeName}`, val, note, col: C.red, src: 'DRIAS / Météo-France' };
-  }
-
-  // Fallback sur température estivale si NORTX35D_yr absent
-  const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA', gwlId);
-  if (summerTemp !== null && summerTemp !== undefined) {
-    const { val, note } = summerTempNarrative(summerTemp, communeName, horizon);
-    return { label: `Été à ${communeName}`, val, note, col: C.red, src: 'DRIAS / Météo-France' };
-  }
-
-  return null;
-}
-
-function getGeorisquesCard(communeName: string, georisques: Georisques, horizon: Horizon = "today"): PreviewCard | null {
-  if (!georisques) return null;
-
-  if (georisques.flags?.marineSubmersion) {
-    return {
-      label: `Submersion à ${communeName}`,
-      val: submersionNarrative(communeName, horizon).val,
-      col: C.blue,
-      src: 'Géorisques / BRGM',
-    };
-  }
-
-  if (georisques.flags?.flood) {
-    return {
-      label: `Inondation à ${communeName}`,
-      val: inondationNarrative(communeName, horizon).val,
-      col: C.blue,
-      src: 'Géorisques / BRGM',
-    };
-  }
-
-  if (georisques.flags?.clay) {
-    return {
-      label: `Argiles à ${communeName}`,
-      val: argilesNarrative(communeName, horizon).val,
-      col: C.orange,
-      src: 'Géorisques / BRGM',
-    };
-  }
-
-  if (georisques.flags?.landslide) {
-    return {
-      label: `Terrain à ${communeName}`,
-      val: `Le territoire ${deCommune(communeName)} présente une sensibilité aux mouvements de terrain.`,
-      col: C.orange,
-      src: 'Géorisques / BRGM',
-    };
-  }
-
-  return null;
-}
-
-// Hash déterministe d'un nom de commune → varie le mix de cartes d'une commune
-// à l'autre sans flicker (pas de Math.random, stable au re-render et au SSR).
+// Hash déterministe d'un nom de commune → varie le mix de cartes d'une commune à l'autre sans
+// flicker (pas de Math.random, stable au re-render et au SSR).
 function hashName(str: string): number {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  }
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
   return h;
 }
 
-export function getPreviewCards(communeName: string, categories: string[] | null | undefined, indicators: Indicators, georisques: Georisques, gissol: Gissol, horizon: Horizon = "today"): PreviewCard[] {
-  const name = communeName || 'votre commune';
-  const safeCategories =
-    categories && categories.length > 0 ? categories : ['all'];
-
-  const hasCategory = (category: string) => safeCategories.includes(category);
-  const hasAny = (...cats: string[]) => cats.some((category) => safeCategories.includes(category));
-
-  const gwlId = HORIZON_TO_GWL[horizon] ?? 'gwl15';
-
-  // ── Cartes CLIMAT (par ordre de priorité) ─────────────────────────
-  // La canicule sévère reste l'accroche : toujours en position 1.
-  const climate: PreviewCard[] = [];
-  const driasCard = getDriasCard(name, indicators, horizon);
-  if (driasCard) {
-    climate.push(driasCard);
-  }
-
-  if (hasCategory('mediterranee') || hasCategory('rural_forestier')) {
-    const firedays = getLandingIndicatorValue(indicators, 'NORIFM40_yr', gwlId);
-    if (firedays !== null && firedays !== undefined) {
-      const { val, note } = feuxNarrative(firedays, name, horizon);
-      climate.push({ label: `Feux autour ${deCommune(name)}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
+/**
+ * Les cartes climat d'une commune, dans l'ordre d'avant FUT-37 (chaleur, feux, sols secs, hivers,
+ * nuits, risque recensé). Les récits sans base fiable ont disparu : pluies, vigne, air, immobilier,
+ * qualité des sols, et la submersion déduite de la seule catégorie `littoral`.
+ *
+ * `rural_viticole` et `tension_hydrique_connue` (catégories saisies à la main, sans donnée derrière)
+ * ne déclenchent plus rien ici.
+ */
+export function cartesClimat(
+  nom: string,
+  categories: readonly string[],
+  ind: Indicators,
+  georisques: GeorisquesAccueil,
+  horizon: HorizonAccueil,
+): CarteApercu[] {
+  const has = (c: string) => categories.includes(c);
+  const out: (CarteApercu | null)[] = [];
+  out.push(carteCompte(CHALEUR, nom, ind, horizon));
+  if (has("mediterranee") || has("rural_forestier")) {
+    const feux = carteCompte(FEUX, nom, ind, horizon);
+    // Un second fait, actuel et administratif, juxtaposé SANS raccord : l'indice météo ne « confirme »
+    // pas le recensement, et le recensement ne « prouve » pas l'indice.
+    if (feux && georisques?.flags?.wildfire) {
+      feux.lecture = "Par ailleurs, l'État recense un risque de feu de forêt sur la commune (Géorisques).";
     }
+    out.push(feux);
   }
+  if (has("rural_agricole")) out.push(carteCompte(SOLS_SECS, nom, ind, horizon));
+  if (has("montagne")) out.push(carteHivers(nom, ind, horizon));
+  out.push(carteCompte(NUITS, nom, ind, horizon));
+  out.push(carteRisqueRecense(nom, georisques));
+  return out.filter((c): c is CarteApercu => c != null);
+}
 
-  if (hasCategory('rural_agricole') || hasCategory('tension_hydrique_connue')) {
-    const drydays = getLandingIndicatorValue(indicators, 'NORSWI04_yr', gwlId);
-    if (drydays !== null && drydays !== undefined) {
-      const { val, note } = eauNarrative(drydays, name, horizon);
-      climate.push({ label: `Eau à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
-    }
-  }
-
-  if (hasCategory('rural_viticole')) {
-    const summerTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_JJA', gwlId);
-    if (summerTemp !== null && summerTemp !== undefined) {
-      const { val, note } = vigneNarrative(summerTemp, name, horizon);
-      climate.push({ label: `Vigne à ${name}`, val, note, col: C.green, src: 'DRIAS / Météo-France' });
-    }
-  }
-
-  if (hasCategory('montagne')) {
-    const winterTemp = getLandingIndicatorValue(indicators, 'NORTMm_seas_DJF', gwlId);
-    if (winterTemp !== null && winterTemp !== undefined) {
-      const { val, note } = neigeNarrative(winterTemp, name, horizon);
-      climate.push({ label: `Neige à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
-    }
-  }
-
-  const tropicalNights = getLandingIndicatorValue(indicators, 'NORTR_yr', gwlId);
-  if (tropicalNights !== null && tropicalNights !== undefined) {
-    const { val, note } = nightsNarrative(tropicalNights, name, horizon);
-    climate.push({ label: `Nuits à ${name}`, val, note, col: C.red, src: 'DRIAS / Météo-France' });
-  }
-
-  const extremeRain = getLandingIndicatorValue(indicators, 'NORRRq99_yr', gwlId);
-  if (extremeRain !== null && extremeRain !== undefined) {
-    const { val, note } = pluiesNarrative(extremeRain, name, horizon);
-    climate.push({ label: `Pluies à ${name}`, val, note, col: C.blue, src: 'DRIAS / Météo-France' });
-  }
-
-  const georisquesCard = getGeorisquesCard(name, georisques, horizon);
-  if (georisquesCard) {
-    climate.push(georisquesCard);
-  } else if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
-    climate.push({ label: `Submersion à ${name}`, val: submersionNarrative(name, horizon).val, col: C.blue, src: 'Géorisques / BRGM' });
-  }
-
-  if (hasCategory('vallee_industrielle')) {
-    climate.push({ label: `Air à ${name}`, val: `La qualité de l'air à ${name} se dégrade lors des pics de chaleur, avec une hausse de l'ozone.`, col: C.red, src: 'ATMO / Santé publique France' });
-  }
-
-  // ── Cartes PROFONDEUR (cadre de vie / nature / mobilité) ──────────
-  // Qualitatives, ancrées sur le profil de la commune : elles montrent
-  // l'étendue du produit au-delà du climat, sans entrer dans la donnée.
-  const depth: PreviewCard[] = [];
-  // Mobilité (violet) — toujours présente, formulation selon le profil
+/** Les cartes de profondeur : textes d'avant FUT-37, inchangés. Non prospectives, hors périmètre
+ *  (dette notée dans l'audit : proxy de densité pour la voiture, vie locale servie aux communes classées
+ *  `faible_vie_locale`). Elles relèvent de FUT-50. */
+function cartesProfondeur(name: string, categories: readonly string[]): CarteApercu[] {
+  const has = (c: string) => categories.includes(c);
+  const hasAny = (...cats: string[]) => cats.some(has);
   const carDependent = hasAny(
-    'periurbain_dependance_auto', 'rural_peri_urbain', 'rural_agricole',
-    'rural_forestier', 'rural_viticole', 'montagne',
+    "periurbain_dependance_auto", "rural_peri_urbain", "rural_agricole",
+    "rural_forestier", "rural_viticole", "montagne",
   );
-  depth.push({
-    label: `Mobilité à ${name}`,
-    val: carDependent
+  const depth: CarteApercu[] = [{
+    cle: "mobilite",
+    titre: `Mobilité à ${name}`,
+    fait: carDependent
       ? `À ${name}, le quotidien dépend largement de la voiture pour se déplacer.`
       : `À ${name}, transports et courtes distances pèsent dans les trajets du quotidien.`,
-    col: C.violet,
-    src: 'INSEE MOBPRO',
-  });
-  // Nature ou vie locale (vert) — selon le profil
-  if (hasAny('littoral', 'littoral_atlantique')) {
-    depth.push({ label: `Nature à ${name}`, val: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, col: C.green, src: 'OSM / IGN' });
-  } else if (hasCategory('montagne')) {
-    depth.push({ label: `Nature à ${name}`, val: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, col: C.green, src: 'OSM / IGN' });
-  } else if (hasAny('rural_forestier', 'rural_agricole', 'rural_viticole')) {
-    depth.push({ label: `Nature à ${name}`, val: `Autour ${deCommune(name)}, espaces agricoles et nature rythment le quotidien.`, col: C.green, src: 'OSM / IGN' });
-  } else if (hasCategory('tourisme_urbain')) {
-    depth.push({ label: `Vie locale à ${name}`, val: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, col: C.green, src: 'INSEE BPE / RNA' });
+    source: "INSEE MOBPRO",
+    col: COL.violet,
+  }];
+  if (hasAny("littoral", "littoral_atlantique")) {
+    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le littoral et les espaces ouverts façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
+  } else if (has("montagne")) {
+    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `À ${name}, le relief et le plein air façonnent le cadre de vie.`, source: "OSM / IGN", col: COL.vert });
+  } else if (hasAny("rural_forestier", "rural_agricole", "rural_viticole")) {
+    depth.push({ cle: "nature", titre: `Nature à ${name}`, fait: `Autour ${deCommune(name)}, espaces agricoles et nature rythment le quotidien.`, source: "OSM / IGN", col: COL.vert });
+  } else if (has("tourisme_urbain")) {
+    depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie culturelle animent le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   } else {
-    depth.push({ label: `Vie locale à ${name}`, val: `À ${name}, commerces, services et vie associative font le quotidien.`, col: C.green, src: 'INSEE BPE / RNA' });
+    depth.push({ cle: "vie-locale", titre: `Vie locale à ${name}`, fait: `À ${name}, commerces, services et vie associative font le quotidien.`, source: "INSEE BPE / RNA", col: COL.vert });
   }
+  return depth;
+}
 
-  // ── Cartes de repli (non-climat, hors « profondeur ») ─────────────
-  const fillers: PreviewCard[] = [];
-  fillers.push({ label: `Valeur immobilière à ${name}`, val: immobilierNarrative(name, horizon).val, col: C.orange, src: 'DVF / ADEME' });
-  if (gissol?.cadmium?.label) {
-    const cdScore = gissol.cadmium.score ?? 0;
-    const cdCol = cdScore >= 65 ? C.red : cdScore >= 45 ? C.orange : C.green;
-    const cdLevel = cdScore >= 65
-      ? `Les données disponibles montrent une vigilance élevée sur les sols ${deCommune(name)}.`
-      : cdScore >= 45
-        ? `Un niveau de vigilance modéré a été relevé dans les sols autour ${deCommune(name)}.`
-        : `Les données disponibles montrent un niveau de vigilance faible pour les sols ${deCommune(name)}.`;
-    fillers.push({ label: `Qualité des sols à ${name}`, val: cdLevel, col: cdCol, src: 'GisSol / RMQS' });
-  }
+export function getPreviewCards(
+  communeName: string,
+  categories: readonly string[] | null | undefined,
+  indicators: Indicators,
+  georisques: GeorisquesAccueil,
+  horizon: HorizonAccueil,
+): CarteApercu[] {
+  const name = communeName || "votre commune";
+  const cats = categories && categories.length > 0 ? categories : ["all"];
 
-  // ── Assemblage : viser 2 climat + 2 profondeur, accroche climat en
-  //    position 1, entrelacement varié d'une commune à l'autre (seed =
-  //    hash du nom, donc stable par commune, insensible à l'horizon). ──
-  const result: PreviewCard[] = [];
-  const pushUnique = (card: PreviewCard | undefined) => {
-    if (card && !result.some((c) => c.label === card!.label)) result.push(card);
+  const climate = cartesClimat(name, cats, indicators, georisques, horizon);
+  const depth = cartesProfondeur(name, cats);
+
+  // Assemblage d'avant FUT-37 : accroche climat en position 1, puis un climat et deux profondeurs,
+  // entrelacés selon le nom (stable par commune, insensible à l'horizon).
+  const result: CarteApercu[] = [];
+  const pushUnique = (card: CarteApercu | undefined) => {
+    if (card && !result.some((c) => c.cle === card.cle)) result.push(card);
   };
-
-  const hook = climate.shift(); // canicule (ou 1er climat disponible)
-  pushUnique(hook);
-
-  const restClimate = climate.slice(0, 1); // un climat de plus
-  const restDepth = depth.slice(0, 2);
-  const c = [...restClimate];
-  const d = [...restDepth];
-  const order = [['c', 'd', 'd'], ['d', 'c', 'd'], ['d', 'd', 'c']][hashName(name) % 3];
+  pushUnique(climate.shift());
+  const c = climate.slice(0, 1);
+  const d = depth.slice(0, 2);
+  const order = [["c", "d", "d"], ["d", "c", "d"], ["d", "d", "c"]][hashName(name) % 3];
   for (const slot of order) {
-    if (slot === 'c' && c.length) pushUnique(c.shift());
-    else if (slot === 'd' && d.length) pushUnique(d.shift());
+    if (slot === "c" && c.length) pushUnique(c.shift());
+    else if (slot === "d" && d.length) pushUnique(d.shift());
   }
   [...c, ...d].forEach(pushUnique);
-
-  // Compléter à 4 si besoin : climat restant → profondeur → repli
-  for (const card of [...climate, ...depth, ...fillers]) {
+  for (const card of [...climate, ...depth]) {
     if (result.length >= 4) break;
     pushUnique(card);
   }
-
   return result.slice(0, 4);
 }
 
-export function getHeroCopy(communeName: string, categories: string[] | null | undefined, usedFallback: boolean | undefined): string {
-  const name = communeName || 'votre commune';
-  const safeCategories =
-    categories && categories.length > 0 ? categories : ['all'];
+// ── Sous-titres chiffrés des questions ───────────────────────────────────────────────────────
 
-  const hasCategory = (category: string) => safeCategories.includes(category);
+// Seulement les questions dont l'indicateur RÉPOND à la question posée. `eau_potable` (« L'eau du
+// robinet va-t-elle rester bonne ? ») n'y est plus : des jours de sol sec ne disent rien de la qualité
+// de l'eau distribuée.
+export const DRIAS_TENSION_CONFIG: Record<string, { indicator: string; getSub: (value: number, name: string) => string }> = {
+  canicule_vivable: { indicator: "NORTX30D_yr", getSub: (v, name) => `${Math.round(v)} jours au-dessus de 30 °C par an ${aCommune(name)}` },
+  acheter_canicule: { indicator: "NORTX30D_yr", getSub: (v, name) => `${Math.round(v)} jours au-dessus de 30 °C par an ${aCommune(name)}` },
+  enfants_chaleur: { indicator: "NORTX30D_yr", getSub: (v, name) => `${Math.round(v)} jours au-dessus de 30 °C par an ${aCommune(name)}` },
+  feux: { indicator: "NORIFM40_yr", getSub: (v) => `${Math.round(v)} jours par an de météo très propice aux feux` },
+  randonner_ici: { indicator: "NORIFM40_yr", getSub: (v) => `${Math.round(v)} jours par an de météo très propice aux feux` },
+  metier_agricole: { indicator: "NORRR_seas_JJA", getSub: (v, name) => `${Math.round(v)} mm de pluie en été ${aCommune(name)}` },
+  vignobles: { indicator: "NORTMm_seas_JJA", getSub: (v, name) => `${formatTemperature(v)} en moyenne l'été ${aCommune(name)}` },
+};
 
-  if (usedFallback) {
-    return `futur•e décode les données publiques pour lire ce que le changement climatique change déjà dans votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et de l'immobilier.`;
-  }
-
-  if (hasCategory('littoral')) {
-    return `futur•e lit ${name} à travers ses tensions côtières : submersion, érosion, chaleur estivale, assurance, eau et qualité de vie. Pas une carte générale du climat, mais ce que ce territoire change concrètement pour vos décisions.`;
-  }
-
-  if (hasCategory('montagne')) {
-    return `futur•e lit ${name} à travers ses équilibres de montagne : enneigement, saisons touristiques, accès, chaleur estivale et mutation économique locale. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.`;
-  }
-
-  if (hasCategory('urbain_dense_sud') || hasCategory('mediterranee')) {
-    return `futur•e croise chaleur, qualité de l'air, eau, mobilité et immobilier pour lire ce que devenir à ${name} veut vraiment dire dans un territoire déjà exposé aux étés plus durs.`;
-  }
-
-  if (hasCategory('rural_peri_urbain') || hasCategory('periurbain_dependance_auto')) {
-    return `futur•e lit ${name} à partir de vos contraintes réelles : dépendance à la voiture, chaleur, ressource en eau, valeur du logement et capacité d'adaptation du territoire.`;
-  }
-
-  return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et de l'immobilier.`;
+/** Le sous-titre d'une question : chiffré à un horizon projeté, celui du catalogue sinon. */
+export function getDriaSub(tensionId: string, horizon: HorizonAccueil, indicators: Indicators, communeName: string, staticSub: string): string {
+  const config = DRIAS_TENSION_CONFIG[tensionId];
+  const gwl = gwlDeHorizon(horizon);
+  if (!config || gwl == null) return staticSub;
+  const v = valeur(indicators, gwl, config.indicator);
+  return v == null ? staticSub : config.getSub(v, communeName);
 }
 
-export function getQuestionIntro(communeName: string, categories: string[] | null | undefined, usedFallback: boolean | undefined): string {
-  const safeCategories =
-    categories && categories.length > 0 ? categories : ['all'];
-  const hasCategory = (category: string) => safeCategories.includes(category);
-  const name = communeName || 'votre commune';
+// ── Cadrage (hero, intro des questions, état vide) ──────────────────────────────────────────
+// Ne promet que des sujets que futur•e couvre : plus d'enneigement, d'assurance, d'accès à l'eau ni de
+// « tension sur l'eau ». La structure reste celle d'avant ; le fond est l'affaire de FUT-50.
+
+export function getHeroCopy(communeName: string, categories: readonly string[] | null | undefined, usedFallback: boolean | undefined): string {
+  const name = communeName || "votre commune";
+  const cats = categories && categories.length > 0 ? categories : ["all"];
+  const has = (c: string) => cats.includes(c);
 
   if (usedFallback) {
-    return `À ${name}, le futur se joue déjà entre chaleur, logement, eau et qualité de vie.`;
+    return `futur•e décode les données publiques pour lire ce que le changement climatique change déjà dans votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et du logement.`;
   }
-
-  if (hasCategory('littoral') || hasCategory('littoral_atlantique')) {
-    return `À ${name}, le futur se joue déjà entre chaleur, submersion, accès à l'eau et pression sur le littoral.`;
+  if (has("littoral")) {
+    return `futur•e lit ${name} à travers ses enjeux côtiers : risques recensés, érosion du trait de côte, chaleur estivale et qualité de vie. Pas une carte générale du climat, mais ce que ce territoire change concrètement pour vos décisions.`;
   }
-
-  if (hasCategory('littoral_mediterranee')) {
-    return `À ${name}, le futur se joue entre canicule, submersion marine, feux et fragilité du littoral.`;
+  if (has("montagne")) {
+    return `futur•e lit ${name} à travers ses équilibres de montagne : hivers, accès, chaleur estivale et risques naturels recensés. L'objectif n'est pas d'alimenter l'angoisse, mais d'éclairer vos choix avec des signaux crédibles.`;
   }
-
-  if (hasCategory('montagne')) {
-    return `À ${name}, le futur se joue entre enneigement, chaleur estivale, eau et transformation du territoire de montagne.`;
+  if (has("urbain_dense_sud") || has("mediterranee")) {
+    return `futur•e croise chaleur, qualité de l'air, mobilité et logement pour lire ce que vivre ${aCommune(name)} veut vraiment dire dans un territoire où les étés se réchauffent.`;
   }
-
-  if (hasCategory('mediterranee')) {
-    return `À ${name}, le futur se joue déjà entre canicule, nuits tropicales, feux de forêt et tension sur l'eau.`;
+  if (has("rural_peri_urbain") || has("periurbain_dependance_auto")) {
+    return `futur•e lit ${name} à partir de vos contraintes réelles : dépendance à la voiture, chaleur, sécheresse des sols, logement et risques recensés.`;
   }
-
-  if (hasCategory('rural_viticole')) {
-    return `À ${name}, le futur se joue entre chaleur estivale, stress hydrique, viticulture et transformation des sols.`;
-  }
-
-  if (hasCategory('rural_agricole') || hasCategory('tension_hydrique_connue')) {
-    return `À ${name}, le futur se joue entre sécheresse, ressource en eau, agriculture et résilience du territoire.`;
-  }
-
-  if (hasCategory('periurbain_dependance_auto') || hasCategory('rural_peri_urbain')) {
-    return `À ${name}, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.`;
-  }
-
-  if (hasCategory('urbain_dense_sud') || hasCategory('urbain_dense_nord')) {
-    return `À ${name}, le futur se joue entre canicule urbaine, qualité de l'air, logement et pression sur les services.`;
-  }
-
-  return `À ${name}, le futur se joue déjà entre chaleur, eau, logement et qualité de vie.`;
+  return `futur•e décode les données publiques pour projeter l'impact du changement climatique sur votre quotidien. Accédez à une première lecture personnalisée de l'évolution ${deCommune(name)} à travers le prisme du climat, de la santé et du logement.`;
 }
 
-export function getEmptyStateCopy(categories: string[] | null | undefined): string {
-  const safeCategories =
-    categories && categories.length > 0 ? categories : ['all'];
+export function getQuestionIntro(communeName: string, categories: readonly string[] | null | undefined, usedFallback: boolean | undefined): string {
+  const cats = categories && categories.length > 0 ? categories : ["all"];
+  const has = (c: string) => cats.includes(c);
+  const lieu = majuscule(aCommune(communeName || "votre commune"));
 
-  if (safeCategories.includes('littoral')) {
-    return 'Les questions porteront ici sur le littoral, la chaleur, le logement et les projets de vie.';
+  if (usedFallback) return `${lieu}, le futur se joue déjà entre chaleur, logement et qualité de vie.`;
+  if (has("littoral") || has("littoral_atlantique")) return `${lieu}, le futur se joue déjà entre chaleur, littoral et qualité de vie.`;
+  if (has("littoral_mediterranee")) return `${lieu}, le futur se joue entre chaleur, météo propice aux feux et littoral.`;
+  if (has("montagne")) return `${lieu}, le futur se joue entre hivers plus doux, chaleur estivale et risques naturels.`;
+  if (has("mediterranee")) return `${lieu}, le futur se joue déjà entre chaleur, nuits tropicales et météo propice aux feux.`;
+  if (has("rural_agricole")) return `${lieu}, le futur se joue entre chaleur, sols plus souvent secs et vie agricole.`;
+  if (has("periurbain_dependance_auto") || has("rural_peri_urbain")) {
+    return `${lieu}, le futur se joue entre dépendance à la voiture, coût de l'énergie, chaleur et accès aux services.`;
   }
+  if (has("urbain_dense_sud") || has("urbain_dense_nord")) return `${lieu}, le futur se joue entre chaleur urbaine, qualité de l'air, logement et services.`;
+  return `${lieu}, le futur se joue déjà entre chaleur, logement et qualité de vie.`;
+}
 
-  if (safeCategories.includes('montagne')) {
-    return "Les questions porteront ici sur la montagne, l'enneigement, le tourisme et l'habitabilité.";
+export function getEmptyStateCopy(categories: readonly string[] | null | undefined): string {
+  const cats = categories && categories.length > 0 ? categories : ["all"];
+  if (cats.includes("littoral")) return "Les questions porteront ici sur le littoral, la chaleur, le logement et les projets de vie.";
+  if (cats.includes("montagne")) return "Les questions porteront ici sur la montagne, les hivers, le relief et l'habitabilité.";
+  if (cats.includes("periurbain_dependance_auto") || cats.includes("rural_peri_urbain")) {
+    return "Les questions porteront ici sur les déplacements, le logement et l'adaptation du territoire.";
   }
+  return "Quatre questions sélectionnées pour votre territoire apparaîtront ici.";
+}
 
-  if (
-    safeCategories.includes('periurbain_dependance_auto') ||
-    safeCategories.includes('rural_peri_urbain')
-  ) {
-    return "Les questions porteront ici sur les déplacements, l'eau, le logement et l'adaptation du territoire.";
-  }
+// ── Machine à sous du hero ───────────────────────────────────────────────────────────────────
+// Avant toute commune, l'accueil fait défiler quatre villes. Leurs cartes climat sont désormais
+// CONSTRUITES par les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis un extrait
+// figé de public/data_climat.json (un test vérifie qu'il n'a pas dérivé). Les cartes non climatiques
+// restent dans le composant (hors FUT-37).
+//
+// Retirés : « parmi les communes les plus exposées » (classement sans base affichée), « seront »
+// (certitude), « DRIAS · +4 °C » sous « d'ici 2050 » (le palier de 2100), et la submersion de Vannes,
+// que l'État ne recense pas (GASPAR, vérifié le 02/10/2026).
 
-  return 'Quatre questions sélectionnées pour votre territoire apparaîtront ici.';
+export const HORIZON_MACHINE_A_SOUS: HorizonAccueil = "2050";
+
+/** Valeurs DRIAS (médiane) des mailles utilisées. Lyon et Marseille : la maille du 1er arrondissement,
+ *  comme `DRIAS_CITY_FALLBACK` le fait pour la ville entière. */
+export const MACHINE_A_SOUS_DRIAS = {
+  "69381": {
+    gwl15: { NORTX35D_yr: 5.1, ATX35D_yr: 3.7, NORTR_yr: 31.6, ATR_yr: 16.3 },
+    gwl20: { NORTX35D_yr: 7.8, ATX35D_yr: 6.3, NORTR_yr: 42.7, ATR_yr: 28.2 },
+    gwl30: { NORTX35D_yr: 16.5, ATX35D_yr: 14.9, NORTR_yr: 63.1, ATR_yr: 48.8 },
+  },
+  "13201": {
+    gwl15: { NORTX35D_yr: 1.6, ATX35D_yr: 1.5, NORTR_yr: 76.8, ATR_yr: 26.3 },
+    gwl20: { NORTX35D_yr: 2.8, ATX35D_yr: 2.7, NORTR_yr: 89.8, ATR_yr: 39.7 },
+    gwl30: { NORTX35D_yr: 8.6, ATX35D_yr: 8.5, NORTR_yr: 112.5, ATR_yr: 61.7 },
+  },
+  "56260": {
+    gwl15: { NORTX35D_yr: 0.8, ATX35D_yr: 0.6, NORTR_yr: 5.9, ATR_yr: 4.4 },
+    gwl20: { NORTX35D_yr: 2, ATX35D_yr: 1.8, NORTR_yr: 9.4, ATR_yr: 7.9 },
+    gwl30: { NORTX35D_yr: 4.8, ATX35D_yr: 4.6, NORTR_yr: 20.2, ATR_yr: 18.9 },
+  },
+  "17300": {
+    gwl15: { NORTX35D_yr: 1.2, ATX35D_yr: 1, NORTR_yr: 13.6, ATR_yr: 8.6 },
+    gwl20: { NORTX35D_yr: 2.8, ATX35D_yr: 2.5, NORTR_yr: 23.4, ATR_yr: 18.1 },
+    gwl30: { NORTX35D_yr: 6.6, ATX35D_yr: 6.3, NORTR_yr: 41.5, ATR_yr: 36.4 },
+  },
+} as const;
+
+/** Drapeaux GASPAR des villes de la machine à sous, relevés le 02/10/2026 (13055 pour Marseille). */
+export const MACHINE_A_SOUS_GASPAR: Record<string, GeorisquesFlags> = {
+  Marseille: { marineSubmersion: true, flood: true },
+  "La Rochelle": { marineSubmersion: true, flood: true },
+  Vannes: {},
+  Lyon: {},
+};
+
+function indicateursFiges(insee: keyof typeof MACHINE_A_SOUS_DRIAS): Indicators {
+  return Object.fromEntries(
+    Object.entries(MACHINE_A_SOUS_DRIAS[insee]).map(([g, v]) => [
+      g,
+      Object.fromEntries(Object.entries(v as Record<string, number>).map(([k, n]) => [k, { value_numeric: n }])),
+    ]),
+  );
+}
+
+/** Les cartes climat et risques d'une ville de la machine à sous, ou `null` si elle n'en a pas le fait. */
+export function carteMachineASous(
+  ville: "Lyon" | "Marseille" | "Vannes" | "La Rochelle",
+  famille: "chaleur" | "nuits" | "risque",
+): CarteApercu | null {
+  if (famille === "risque") return carteRisqueRecense(ville, { flags: MACHINE_A_SOUS_GASPAR[ville] });
+  const insee = ({ Lyon: "69381", Marseille: "13201", Vannes: "56260", "La Rochelle": "17300" } as const)[ville];
+  const def = famille === "chaleur" ? CHALEUR : NUITS;
+  const carte = carteCompte(def, ville, indicateursFiges(insee), HORIZON_MACHINE_A_SOUS);
+  if (!carte) return null;
+  const maille = insee === "69381" || insee === "13201" ? " · maille du 1er arrondissement" : "";
+  return { ...carte, source: `${carte.source}${maille}` };
 }

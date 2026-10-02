@@ -46,6 +46,10 @@ const COLUMN_MAP: Record<string, string> = {
   ATX30D_yr:        "column24", // Anomaly of days with Tmax > 30°C (days/yr)
   ATR_yr:           "column25", // Anomaly of tropical nights (days/yr)
   AIFM40_yr:        "column27", // Anomaly of fire weather index days > 40 (days/yr)
+  // FUT-37 : l'écart des jours de sol sec. Il restitue la référence 1976-2005 de la carte « Sols secs »
+  // de l'accueil (projeté moins écart, en jours), sans quoi elle ne pourrait citer que des projections.
+  // La colonne était déjà dans le fichier ; aucune donnée nouvelle.
+  ASWI04_yr:        "column28", // Anomaly of soil dryness days (SWI < 0.4) (days/yr)
   ARRx1d_yr:        "column33", // Anomaly of maximum 1-day precipitation (mm)
   // column19/22/26/28+ = autres anomalies — non utilisées à ce stade.
 };

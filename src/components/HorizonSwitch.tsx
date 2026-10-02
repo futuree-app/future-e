@@ -2,26 +2,17 @@
 
 import type { CSSProperties } from 'react';
 
-export type Horizon = 'today' | '2030' | '2050' | '2100';
+import { HORIZONS_ACCUEIL, type HorizonAccueil } from '@/lib/accueil/recits';
+
+// FUT-37 : l'onglet « Aujourd'hui · données actuelles » lisait la projection 2030 (gwl15). DRIAS n'expose
+// aucune valeur présente : l'onglet devient la période de référence 1976-2005, reconstruite. Les paliers
+// et leur équivalent France viennent de src/lib/horizons.ts, via le module des récits.
+export type Horizon = HorizonAccueil;
 
 interface HorizonSwitchProps {
   value: Horizon;
   onChange: (horizon: Horizon) => void;
 }
-
-const HORIZONS: { key: Horizon; label: string }[] = [
-  { key: 'today', label: "Aujourd'hui" },
-  { key: '2030',  label: '2030'        },
-  { key: '2050',  label: '2050'        },
-  { key: '2100',  label: '2100'        },
-];
-
-const SCENARIO_LABEL: Record<Horizon, string> = {
-  today: 'données actuelles',
-  '2030': 'projection +2°C · DRIAS TRACC-2023',
-  '2050': 'projection +2.7°C · DRIAS TRACC-2023',
-  '2100': 'projection +4°C · DRIAS TRACC-2023',
-};
 
 const wrapper: CSSProperties = {
   display: 'flex',
@@ -70,7 +61,7 @@ export function HorizonSwitch({ value, onChange }: HorizonSwitchProps) {
   return (
     <div style={wrapper}>
       <div style={track}>
-        {HORIZONS.map((h) => (
+        {HORIZONS_ACCUEIL.map((h) => (
           <button
             key={h.key}
             onClick={() => onChange(h.key)}
@@ -81,7 +72,7 @@ export function HorizonSwitch({ value, onChange }: HorizonSwitchProps) {
           </button>
         ))}
       </div>
-      <span style={scenarioLine}>{SCENARIO_LABEL[value]}</span>
+      <span style={scenarioLine}>{HORIZONS_ACCUEIL.find((h) => h.key === value)?.mention}</span>
     </div>
   );
 }
