@@ -1,0 +1,990 @@
+{
+ "seuilsImplicites": {
+  "A": {
+   "palier_en_bord_de_mer_jusqua_km": 51,
+   "palier_loin_de_la_mer_au_dela_km": 99,
+   "raison_de_carte_jusqua_km": 67.5,
+   "compromis_eloignee_au_dela_km": 75
+  },
+  "B": {
+   "palier_en_bord_de_mer_jusqua_km": 10.4,
+   "palier_loin_de_la_mer_au_dela_km": 27,
+   "raison_de_carte_jusqua_km": 14.9,
+   "compromis_eloignee_au_dela_km": 17.3
+  },
+  "C": {
+   "palier_en_bord_de_mer_jusqua_km": 14.4,
+   "palier_loin_de_la_mer_au_dela_km": 27.9,
+   "raison_de_carte_jusqua_km": 18.1,
+   "compromis_eloignee_au_dela_km": 20
+  }
+ },
+ "courbes": {
+  "A": "linéaire, 0 à 150 km",
+  "B": "exponentielle, 100·e^(-d/25)",
+  "C": "rationnelle, 100/(1+(d/20)²)"
+ },
+ "panel": [
+  {
+   "commune": "Perros-Guirec",
+   "mer_centre_km": 0,
+   "A": 100,
+   "B": 100,
+   "C": 100
+  },
+  {
+   "commune": "Lannion",
+   "mer_centre_km": 0.66,
+   "A": 100,
+   "B": 97,
+   "C": 100
+  },
+  {
+   "commune": "Brest",
+   "mer_centre_km": 1.36,
+   "A": 99,
+   "B": 95,
+   "C": 100
+  },
+  {
+   "commune": "La Rochelle",
+   "mer_centre_km": 0.95,
+   "A": 99,
+   "B": 96,
+   "C": 100
+  },
+  {
+   "commune": "Châtelaillon-Plage",
+   "mer_centre_km": 1.04,
+   "A": 99,
+   "B": 96,
+   "C": 100
+  },
+  {
+   "commune": "Vannes",
+   "mer_centre_km": 0.82,
+   "A": 99,
+   "B": 97,
+   "C": 100
+  },
+  {
+   "commune": "Narbonne",
+   "mer_centre_km": 1.62,
+   "A": 99,
+   "B": 94,
+   "C": 99
+  },
+  {
+   "commune": "Morlaix",
+   "mer_centre_km": 3.18,
+   "A": 98,
+   "B": 88,
+   "C": 98
+  },
+  {
+   "commune": "Montpellier",
+   "mer_centre_km": 6.85,
+   "A": 95,
+   "B": 76,
+   "C": 90
+  },
+  {
+   "commune": "Rochefort",
+   "mer_centre_km": 7.97,
+   "A": 95,
+   "B": 73,
+   "C": 86
+  },
+  {
+   "commune": "Lacanau",
+   "mer_centre_km": 8.46,
+   "A": 94,
+   "B": 71,
+   "C": 85
+  },
+  {
+   "commune": "Caen",
+   "mer_centre_km": 9.23,
+   "A": 94,
+   "B": 69,
+   "C": 82
+  },
+  {
+   "commune": "Carcans",
+   "mer_centre_km": 11.94,
+   "A": 92,
+   "B": 62,
+   "C": 74
+  },
+  {
+   "commune": "Arles",
+   "mer_centre_km": 13.36,
+   "A": 91,
+   "B": 59,
+   "C": 69
+  },
+  {
+   "commune": "Béziers",
+   "mer_centre_km": 12.2,
+   "A": 92,
+   "B": 61,
+   "C": 73
+  },
+  {
+   "commune": "Nîmes",
+   "mer_centre_km": 20.99,
+   "A": 86,
+   "B": 43,
+   "C": 48
+  },
+  {
+   "commune": "Saintes",
+   "mer_centre_km": 23.79,
+   "A": 84,
+   "B": 39,
+   "C": 41
+  },
+  {
+   "commune": "Pessac",
+   "mer_centre_km": 28.57,
+   "A": 81,
+   "B": 32,
+   "C": 33
+  },
+  {
+   "commune": "Bordeaux",
+   "mer_centre_km": 39.35,
+   "A": 74,
+   "B": 21,
+   "C": 21
+  },
+  {
+   "commune": "Nantes",
+   "mer_centre_km": 38.93,
+   "A": 74,
+   "B": 21,
+   "C": 21
+  },
+  {
+   "commune": "Rennes",
+   "mer_centre_km": 47.55,
+   "A": 68,
+   "B": 15,
+   "C": 15
+  },
+  {
+   "commune": "Niort",
+   "mer_centre_km": 49.55,
+   "A": 67,
+   "B": 14,
+   "C": 14
+  },
+  {
+   "commune": "Angers",
+   "mer_centre_km": 118.09,
+   "A": 21,
+   "B": 1,
+   "C": 3
+  },
+  {
+   "commune": "Poitiers",
+   "mer_centre_km": 117.25,
+   "A": 22,
+   "B": 1,
+   "C": 3
+  },
+  {
+   "commune": "Toulouse",
+   "mer_centre_km": 135.77,
+   "A": 9,
+   "B": 0,
+   "C": 2
+  },
+  {
+   "commune": "Lyon 1er Arrondissement",
+   "mer_centre_km": 239.47,
+   "A": 0,
+   "B": 0,
+   "C": 1
+  },
+  {
+   "commune": "Annecy",
+   "mer_centre_km": 259.71,
+   "A": 0,
+   "B": 0,
+   "C": 1
+  },
+  {
+   "commune": "Clermont-Ferrand",
+   "mer_centre_km": 252.8,
+   "A": 0,
+   "B": 0,
+   "C": 1
+  }
+ ],
+ "requetes": [
+  {
+   "texte": "Une petite ville près de la mer.",
+   "preferences": [
+    {
+     "key": "eviter_grandes_villes",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "proximite_mer",
+     "weight": 2,
+     "source": "parse"
+    }
+   ],
+   "contraintes_dures": {},
+   "sizeWord": "petite",
+   "parCourbe": {
+    "A": {
+     "mediane_mer_top20_km": 2.16,
+     "mediane_mer_top100_km": 1.33,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.762,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 21481,
+      "Lannion": 22273,
+      "Brest": 14990,
+      "La Rochelle": 17247,
+      "Châtelaillon-Plage": 17331,
+      "Vannes": 19206,
+      "Narbonne": 24998,
+      "Morlaix": 25357,
+      "Montpellier": 21151,
+      "Rochefort": 28346,
+      "Lacanau": 19751,
+      "Caen": 22986,
+      "Carcans": 2183,
+      "Arles": 28339,
+      "Béziers": 28354,
+      "Nîmes": 28452,
+      "Saintes": 28710,
+      "Pessac": 28484,
+      "Bordeaux": 28766,
+      "Nantes": 28745,
+      "Rennes": 29084,
+      "Niort": 29304,
+      "Angers": 30631,
+      "Poitiers": 30736,
+      "Toulouse": 31107,
+      "Lyon 1er Arrondissement": 34777,
+      "Annecy": 32147,
+      "Clermont-Ferrand": 31954
+     },
+     "top10_recalcule": [
+      "La Hague (2.76 km)",
+      "Plouarzel (3.23 km)",
+      "Logonna-Daoulas (0.71 km)",
+      "Daoulas (0.01 km)",
+      "Plouédern (3.65 km)",
+      "La Forest-Landerneau (0.71 km)",
+      "Port-Bail-sur-Mer (0.88 km)",
+      "Plounéour-Brignogan-plages (0.7 km)",
+      "Barneville-Carteret (0 km)",
+      "Lanvéoc (1.64 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Crozon (0.12 km)",
+      "Ouistreham (0.38 km)",
+      "Bray-Dunes (0.89 km)",
+      "Aigues-Mortes (1.1 km)"
+     ]
+    },
+    "B": {
+     "mediane_mer_top20_km": 0.15,
+     "mediane_mer_top100_km": 0.71,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 1,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 345,
+      "Lannion": 452,
+      "Brest": 1966,
+      "La Rochelle": 1501,
+      "Châtelaillon-Plage": 1520,
+      "Vannes": 956,
+      "Narbonne": 841,
+      "Morlaix": 619,
+      "Montpellier": 6066,
+      "Rochefort": 1689,
+      "Lacanau": 855,
+      "Caen": 3907,
+      "Carcans": 2447,
+      "Arles": 2567,
+      "Béziers": 3568,
+      "Nîmes": 8112,
+      "Saintes": 3626,
+      "Pessac": 33394,
+      "Bordeaux": 33679,
+      "Nantes": 33485,
+      "Rennes": 33396,
+      "Niort": 15947,
+      "Angers": 33414,
+      "Poitiers": 33118,
+      "Toulouse": 34275,
+      "Lyon 1er Arrondissement": 34772,
+      "Annecy": 33197,
+      "Clermont-Ferrand": 33523
+     },
+     "top10_recalcule": [
+      "Lège-Cap-Ferret (0 km)",
+      "Crozon (0.12 km)",
+      "Ouistreham (0.38 km)",
+      "Piriac-sur-Mer (0 km)",
+      "La Grande-Motte (0.03 km)",
+      "Pont-l'Abbé (0.01 km)",
+      "Mauguio (0.15 km)",
+      "Port-Louis (0 km)",
+      "Île-Tudy (0.1 km)",
+      "Palavas-les-Flots (0.38 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Crozon (0.12 km)",
+      "Ouistreham (0.38 km)",
+      "Piriac-sur-Mer (0 km)",
+      "La Grande-Motte (0.03 km)"
+     ]
+    },
+    "C": {
+     "mediane_mer_top20_km": 1.1,
+     "mediane_mer_top100_km": 1.38,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 1,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 772,
+      "Lannion": 782,
+      "Brest": 2257,
+      "La Rochelle": 1913,
+      "Châtelaillon-Plage": 1915,
+      "Vannes": 1392,
+      "Narbonne": 1138,
+      "Morlaix": 558,
+      "Montpellier": 4434,
+      "Rochefort": 1623,
+      "Lacanau": 622,
+      "Caen": 3212,
+      "Carcans": 2325,
+      "Arles": 2463,
+      "Béziers": 3114,
+      "Nîmes": 6822,
+      "Saintes": 3628,
+      "Pessac": 33387,
+      "Bordeaux": 33712,
+      "Nantes": 33490,
+      "Rennes": 33399,
+      "Niort": 17281,
+      "Angers": 33406,
+      "Poitiers": 33106,
+      "Toulouse": 34180,
+      "Lyon 1er Arrondissement": 34772,
+      "Annecy": 33233,
+      "Clermont-Ferrand": 33513
+     },
+     "top10_recalcule": [
+      "Lège-Cap-Ferret (0 km)",
+      "Crozon (0.12 km)",
+      "Plouguerneau (1.28 km)",
+      "Lannilis (1.4 km)",
+      "Ouistreham (0.38 km)",
+      "Saint-Aubin-sur-Mer (0.94 km)",
+      "Luc-sur-Mer (1.28 km)",
+      "Langrune-sur-Mer (1.56 km)",
+      "Bray-Dunes (0.89 km)",
+      "Zuydcoote (0.94 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Crozon (0.12 km)",
+      "Ouistreham (0.38 km)",
+      "Bray-Dunes (0.89 km)",
+      "Aigues-Mortes (1.1 km)"
+     ]
+    }
+   }
+  },
+  {
+   "texte": "Une ville moyenne près de la mer, avec un train pour Paris.",
+   "preferences": [
+    {
+     "key": "proximite_mer",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "acces_transports",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "eviter_grandes_villes",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "eviter_isolement",
+     "weight": 2,
+     "source": "parse"
+    }
+   ],
+   "contraintes_dures": {},
+   "sizeWord": "moyenne",
+   "parCourbe": {
+    "A": {
+     "mediane_mer_top20_km": 1.86,
+     "mediane_mer_top100_km": 4.71,
+     "part_top100_a_10km_ou_moins": 0.74,
+     "part_top1000_a_10km_ou_moins": 0.471,
+     "part_top1000_au_dela_de_30km": 0.286,
+     "rangs": {
+      "Perros-Guirec": 2159,
+      "Lannion": 1881,
+      "Brest": 474,
+      "La Rochelle": 203,
+      "Châtelaillon-Plage": 272,
+      "Vannes": 135,
+      "Narbonne": 63,
+      "Morlaix": 797,
+      "Montpellier": 782,
+      "Rochefort": 564,
+      "Lacanau": 290,
+      "Caen": 376,
+      "Carcans": 1318,
+      "Arles": 333,
+      "Béziers": 683,
+      "Nîmes": 526,
+      "Saintes": 1503,
+      "Pessac": 1613,
+      "Bordeaux": 2010,
+      "Nantes": 1720,
+      "Rennes": 1428,
+      "Niort": 1767,
+      "Angers": 5640,
+      "Poitiers": 4782,
+      "Toulouse": 11737,
+      "Lyon 1er Arrondissement": 13085,
+      "Annecy": 10567,
+      "Clermont-Ferrand": 11112
+     },
+     "top10_recalcule": [
+      "Carry-le-Rouet (1.78 km)",
+      "Cassis (0.97 km)",
+      "Èze (0.85 km)",
+      "Cap-d'Ail (0.48 km)",
+      "Sausset-les-Pins (1.86 km)",
+      "La Turbie (2.27 km)",
+      "Beausoleil (0.83 km)",
+      "Mauguio (0.15 km)",
+      "Audenge (6.06 km)",
+      "Roquebrune-Cap-Martin (0.43 km)"
+     ],
+     "top5_moteur": [
+      "Carry-le-Rouet (1.78 km)",
+      "Mauguio (0.15 km)",
+      "Audenge (6.06 km)",
+      "Les Moutiers-en-Retz (0.7 km)",
+      "Merville-Franceville-Plage (1.47 km)"
+     ]
+    },
+    "B": {
+     "mediane_mer_top20_km": 1.47,
+     "mediane_mer_top100_km": 1.36,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.741,
+     "part_top1000_au_dela_de_30km": 0.099,
+     "rangs": {
+      "Perros-Guirec": 739,
+      "Lannion": 702,
+      "Brest": 189,
+      "La Rochelle": 85,
+      "Châtelaillon-Plage": 115,
+      "Vannes": 63,
+      "Narbonne": 42,
+      "Morlaix": 402,
+      "Montpellier": 564,
+      "Rochefort": 496,
+      "Lacanau": 361,
+      "Caen": 452,
+      "Carcans": 1440,
+      "Arles": 567,
+      "Béziers": 746,
+      "Nîmes": 1045,
+      "Saintes": 2698,
+      "Pessac": 3116,
+      "Bordeaux": 4202,
+      "Nantes": 3625,
+      "Rennes": 3164,
+      "Niort": 3743,
+      "Angers": 4064,
+      "Poitiers": 3585,
+      "Toulouse": 8597,
+      "Lyon 1er Arrondissement": 7784,
+      "Annecy": 5071,
+      "Clermont-Ferrand": 5537
+     },
+     "top10_recalcule": [
+      "Cap-d'Ail (0.48 km)",
+      "Cassis (0.97 km)",
+      "Èze (0.85 km)",
+      "Mauguio (0.15 km)",
+      "Beausoleil (0.83 km)",
+      "Carry-le-Rouet (1.78 km)",
+      "Roquebrune-Cap-Martin (0.43 km)",
+      "La Grande-Motte (0.03 km)",
+      "Sausset-les-Pins (1.86 km)",
+      "La Turbie (2.27 km)"
+     ],
+     "top5_moteur": [
+      "Cap-d'Ail (0.48 km)",
+      "Mauguio (0.15 km)",
+      "Les Moutiers-en-Retz (0.7 km)",
+      "Andernos-les-Bains (2.06 km)",
+      "Merville-Franceville-Plage (1.47 km)"
+     ]
+    },
+    "C": {
+     "mediane_mer_top20_km": 1.86,
+     "mediane_mer_top100_km": 1.86,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.799,
+     "part_top1000_au_dela_de_30km": 0.019,
+     "rangs": {
+      "Perros-Guirec": 951,
+      "Lannion": 831,
+      "Brest": 225,
+      "La Rochelle": 106,
+      "Châtelaillon-Plage": 147,
+      "Vannes": 77,
+      "Narbonne": 43,
+      "Morlaix": 372,
+      "Montpellier": 485,
+      "Rochefort": 403,
+      "Lacanau": 278,
+      "Caen": 351,
+      "Carcans": 1055,
+      "Arles": 537,
+      "Béziers": 689,
+      "Nîmes": 1069,
+      "Saintes": 2803,
+      "Pessac": 3401,
+      "Bordeaux": 4634,
+      "Nantes": 4052,
+      "Rennes": 3538,
+      "Niort": 4135,
+      "Angers": 4254,
+      "Poitiers": 3826,
+      "Toulouse": 8693,
+      "Lyon 1er Arrondissement": 8155,
+      "Annecy": 5415,
+      "Clermont-Ferrand": 5881
+     },
+     "top10_recalcule": [
+      "Carry-le-Rouet (1.78 km)",
+      "Cassis (0.97 km)",
+      "Èze (0.85 km)",
+      "Cap-d'Ail (0.48 km)",
+      "Sausset-les-Pins (1.86 km)",
+      "Beausoleil (0.83 km)",
+      "La Turbie (2.27 km)",
+      "Mauguio (0.15 km)",
+      "Roquebrune-Cap-Martin (0.43 km)",
+      "Biganos (3.67 km)"
+     ],
+     "top5_moteur": [
+      "Carry-le-Rouet (1.78 km)",
+      "Mauguio (0.15 km)",
+      "Biganos (3.67 km)",
+      "Les Moutiers-en-Retz (0.7 km)",
+      "Merville-Franceville-Plage (1.47 km)"
+     ]
+    }
+   }
+  },
+  {
+   "texte": "Proche de la mer, mais pas trop chaud l'été.",
+   "preferences": [
+    {
+     "key": "proximite_mer",
+     "weight": 3,
+     "source": "parse"
+    },
+    {
+     "key": "faible_chaleur",
+     "weight": 3,
+     "source": "parse"
+    }
+   ],
+   "contraintes_dures": {},
+   "sizeWord": null,
+   "parCourbe": {
+    "A": {
+     "mediane_mer_top20_km": 2.24,
+     "mediane_mer_top100_km": 1.91,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.872,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 26,
+      "Lannion": 14,
+      "Brest": 3,
+      "La Rochelle": 3890,
+      "Châtelaillon-Plage": 4115,
+      "Vannes": 1806,
+      "Narbonne": 7431,
+      "Morlaix": 70,
+      "Montpellier": 7039,
+      "Rochefort": 4785,
+      "Lacanau": 6172,
+      "Caen": 454,
+      "Carcans": 6884,
+      "Arles": 7901,
+      "Béziers": 7950,
+      "Nîmes": 8960,
+      "Saintes": 6137,
+      "Pessac": 7313,
+      "Bordeaux": 8665,
+      "Nantes": 5316,
+      "Rennes": 4164,
+      "Niort": 8421,
+      "Angers": 13122,
+      "Poitiers": 16398,
+      "Toulouse": 29637,
+      "Lyon 1er Arrondissement": 34027,
+      "Annecy": 19358,
+      "Clermont-Ferrand": 24441
+     },
+     "top10_recalcule": [
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Le Relecq-Kerhuon (0.89 km)",
+      "Brest (1.36 km)",
+      "Plouzané (3.04 km)",
+      "Landerneau (0.37 km)",
+      "Pencran (2.27 km)",
+      "Tollevast (6.21 km)",
+      "Martinvast (4.39 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Guipavas (3.25 km)"
+     ],
+     "top5_moteur": [
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Le Relecq-Kerhuon (0.89 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Pornichet (1.26 km)",
+      "Ciboure (0.94 km)"
+     ]
+    },
+    "B": {
+     "mediane_mer_top20_km": 0.87,
+     "mediane_mer_top100_km": 0.94,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.992,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 5,
+      "Lannion": 7,
+      "Brest": 6,
+      "La Rochelle": 1447,
+      "Châtelaillon-Plage": 1592,
+      "Vannes": 696,
+      "Narbonne": 3931,
+      "Morlaix": 135,
+      "Montpellier": 5179,
+      "Rochefort": 2894,
+      "Lacanau": 4536,
+      "Caen": 923,
+      "Carcans": 6927,
+      "Arles": 9677,
+      "Béziers": 9282,
+      "Nîmes": 15607,
+      "Saintes": 8953,
+      "Pessac": 13432,
+      "Bordeaux": 18713,
+      "Nantes": 8173,
+      "Rennes": 4985,
+      "Niort": 18142,
+      "Angers": 15530,
+      "Poitiers": 20870,
+      "Toulouse": 29901,
+      "Lyon 1er Arrondissement": 33250,
+      "Annecy": 15655,
+      "Clermont-Ferrand": 20756
+     },
+     "top10_recalcule": [
+      "Landerneau (0.37 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Le Relecq-Kerhuon (0.89 km)",
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Perros-Guirec (0 km)",
+      "Brest (1.36 km)",
+      "Lannion (0.66 km)",
+      "Dieppe (0.3 km)",
+      "Le Portel (0.11 km)",
+      "Cabourg (0.63 km)"
+     ],
+     "top5_moteur": [
+      "Landerneau (0.37 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Pornichet (1.26 km)",
+      "Ciboure (0.94 km)"
+     ]
+    },
+    "C": {
+     "mediane_mer_top20_km": 1.4,
+     "mediane_mer_top100_km": 1.52,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.992,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 25,
+      "Lannion": 10,
+      "Brest": 3,
+      "La Rochelle": 1685,
+      "Châtelaillon-Plage": 1780,
+      "Vannes": 1011,
+      "Narbonne": 3645,
+      "Morlaix": 71,
+      "Montpellier": 3902,
+      "Rochefort": 2362,
+      "Lacanau": 3485,
+      "Caen": 872,
+      "Carcans": 5152,
+      "Arles": 7370,
+      "Béziers": 6813,
+      "Nîmes": 14376,
+      "Saintes": 8680,
+      "Pessac": 13447,
+      "Bordeaux": 19139,
+      "Nantes": 8763,
+      "Rennes": 5278,
+      "Niort": 18374,
+      "Angers": 15247,
+      "Poitiers": 20406,
+      "Toulouse": 29647,
+      "Lyon 1er Arrondissement": 33468,
+      "Annecy": 15829,
+      "Clermont-Ferrand": 20860
+     },
+     "top10_recalcule": [
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Le Relecq-Kerhuon (0.89 km)",
+      "Brest (1.36 km)",
+      "Landerneau (0.37 km)",
+      "Pencran (2.27 km)",
+      "Plouzané (3.04 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Guipavas (3.25 km)",
+      "Lannilis (1.4 km)",
+      "Lannion (0.66 km)"
+     ],
+     "top5_moteur": [
+      "Cherbourg-en-Cotentin (1.3 km)",
+      "Le Relecq-Kerhuon (0.89 km)",
+      "Grand-Fort-Philippe (0.21 km)",
+      "Pornichet (1.26 km)",
+      "Ciboure (0.94 km)"
+     ]
+    }
+   }
+  },
+  {
+   "texte": "Une petite ville vivante près du littoral.",
+   "preferences": [
+    {
+     "key": "proximite_mer",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "eviter_grandes_villes",
+     "weight": 2,
+     "source": "parse"
+    },
+    {
+     "key": "vie_locale",
+     "weight": 2,
+     "source": "parse"
+    }
+   ],
+   "contraintes_dures": {},
+   "sizeWord": "petite",
+   "parCourbe": {
+    "A": {
+     "mediane_mer_top20_km": 0.74,
+     "mediane_mer_top100_km": 0.89,
+     "part_top100_a_10km_ou_moins": 0.99,
+     "part_top1000_a_10km_ou_moins": 0.656,
+     "part_top1000_au_dela_de_30km": 0.092,
+     "rangs": {
+      "Perros-Guirec": 192,
+      "Lannion": 278,
+      "Brest": 1491,
+      "La Rochelle": 731,
+      "Châtelaillon-Plage": 768,
+      "Vannes": 451,
+      "Narbonne": 765,
+      "Morlaix": 2529,
+      "Montpellier": 2945,
+      "Rochefort": 326,
+      "Lacanau": 82,
+      "Caen": 1504,
+      "Carcans": 586,
+      "Arles": 4088,
+      "Béziers": 1904,
+      "Nîmes": 2268,
+      "Saintes": 584,
+      "Pessac": 17393,
+      "Bordeaux": 6204,
+      "Nantes": 5528,
+      "Rennes": 5127,
+      "Niort": 2241,
+      "Angers": 11385,
+      "Poitiers": 10458,
+      "Toulouse": 25044,
+      "Lyon 1er Arrondissement": 28688,
+      "Annecy": 17717,
+      "Clermont-Ferrand": 34125
+     },
+     "top10_recalcule": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "Soorts-Hossegor (1.98 km)",
+      "Bray-Dunes (0.89 km)",
+      "Aigues-Mortes (1.1 km)",
+      "Capbreton (1.8 km)",
+      "Landunvez (0.72 km)",
+      "La Grande-Motte (0.03 km)",
+      "Cassis (0.97 km)",
+      "Douarnenez (0.38 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "Bray-Dunes (0.89 km)",
+      "Landunvez (0.72 km)",
+      "Cassis (0.97 km)"
+     ]
+    },
+    "B": {
+     "mediane_mer_top20_km": 0.47,
+     "mediane_mer_top100_km": 0.66,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.873,
+     "part_top1000_au_dela_de_30km": 0.001,
+     "rangs": {
+      "Perros-Guirec": 109,
+      "Lannion": 200,
+      "Brest": 724,
+      "La Rochelle": 444,
+      "Châtelaillon-Plage": 460,
+      "Vannes": 305,
+      "Narbonne": 477,
+      "Morlaix": 1263,
+      "Montpellier": 1870,
+      "Rochefort": 486,
+      "Lacanau": 315,
+      "Caen": 1161,
+      "Carcans": 784,
+      "Arles": 4660,
+      "Béziers": 1605,
+      "Nîmes": 2858,
+      "Saintes": 1140,
+      "Pessac": 33032,
+      "Bordeaux": 11731,
+      "Nantes": 10943,
+      "Rennes": 10506,
+      "Niort": 4210,
+      "Angers": 10518,
+      "Poitiers": 9775,
+      "Toulouse": 26260,
+      "Lyon 1er Arrondissement": 27094,
+      "Annecy": 12008,
+      "Clermont-Ferrand": 33794
+     },
+     "top10_recalcule": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "La Grande-Motte (0.03 km)",
+      "Piriac-sur-Mer (0 km)",
+      "Bray-Dunes (0.89 km)",
+      "Landunvez (0.72 km)",
+      "Port-Louis (0 km)",
+      "Douarnenez (0.38 km)",
+      "Aigues-Mortes (1.1 km)",
+      "La Flotte (0.44 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "Piriac-sur-Mer (0 km)",
+      "Bray-Dunes (0.89 km)",
+      "Landunvez (0.72 km)"
+     ]
+    },
+    "C": {
+     "mediane_mer_top20_km": 0.74,
+     "mediane_mer_top100_km": 0.88,
+     "part_top100_a_10km_ou_moins": 1,
+     "part_top1000_a_10km_ou_moins": 0.885,
+     "part_top1000_au_dela_de_30km": 0,
+     "rangs": {
+      "Perros-Guirec": 180,
+      "Lannion": 252,
+      "Brest": 811,
+      "La Rochelle": 505,
+      "Châtelaillon-Plage": 521,
+      "Vannes": 366,
+      "Narbonne": 520,
+      "Morlaix": 1226,
+      "Montpellier": 1591,
+      "Rochefort": 411,
+      "Lacanau": 225,
+      "Caen": 1055,
+      "Carcans": 753,
+      "Arles": 3613,
+      "Béziers": 1442,
+      "Nîmes": 2860,
+      "Saintes": 1271,
+      "Pessac": 32950,
+      "Bordeaux": 11982,
+      "Nantes": 11224,
+      "Rennes": 10721,
+      "Niort": 4632,
+      "Angers": 10429,
+      "Poitiers": 9701,
+      "Toulouse": 25862,
+      "Lyon 1er Arrondissement": 27303,
+      "Annecy": 12099,
+      "Clermont-Ferrand": 33848
+     },
+     "top10_recalcule": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "Bray-Dunes (0.89 km)",
+      "Soorts-Hossegor (1.98 km)",
+      "Aigues-Mortes (1.1 km)",
+      "Capbreton (1.8 km)",
+      "Landunvez (0.72 km)",
+      "La Grande-Motte (0.03 km)",
+      "Cassis (0.97 km)",
+      "Douarnenez (0.38 km)"
+     ],
+     "top5_moteur": [
+      "Lège-Cap-Ferret (0 km)",
+      "Palavas-les-Flots (0.38 km)",
+      "Bray-Dunes (0.89 km)",
+      "Landunvez (0.72 km)",
+      "Cassis (0.97 km)"
+     ]
+    }
+   }
+  }
+ ]
+}
