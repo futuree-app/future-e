@@ -488,3 +488,75 @@ Tous sur la fonction pure qui produit **le `system` exactement passé** à `anth
    production ; `gatherCommuneEnrichment` réel (sources publiques en direct, 02/10/2026).
 4. Appels : `claude-sonnet-4-6`, `thinking` désactivé, `effort: medium`, `system` = prompt de base +
    contexte reconstruit + « Profil non renseigné. », un message utilisateur. Trois appels.
+
+---
+
+## Addendum du 2 octobre 2026 : implémentation (phase 1)
+
+### Décisions appliquées
+
+| Décision | Appliqué |
+|---|---|
+| A | `/api/ask` ne lit plus `communes_tension` ; aucun de ses champs n'atteint Anthropic. |
+| B | Aucun adjectif ne remplace les notes ; les blocs de sources sont inchangés. |
+| C | Aucun sous-indice recréé. |
+| D | L'altitude de submersion n'est pas remontée ; Géorisques et GASPAR restent ; FUT-33 traite la vérité littorale. |
+| E | Catégories conservées, inchangées (Monteux « littoral » reste un reliquat). |
+| F | Plus aucune mention de « scores de tension » ; les deux phrases d'absence ont disparu. |
+| G | Extraction minimale `src/lib/ask/system-prompt.ts`. |
+
+### Fichiers
+
+- `src/lib/ask/system-prompt.ts` (nouveau) : `SYSTEM_PROMPT_BASE`, `construireReferentiel`, les blocs
+  d'enrichissement, `buildUserProfileText`, `aDesDonneesDetaillees`, `construireSystemPrompt`. Déplacés tels
+  quels (étape 1), puis débarrassés des tensions (étape 2).
+- `src/app/api/ask/route.ts` : `lireReferentielInterne` (lit `communes_categorization` seulement) ;
+  `system: construireSystemPrompt(...)`.
+- `src/lib/ask/system-prompt.test.ts`, `src/lib/ask/__fixtures__/communes.json` (enrichissements et lignes
+  réels du 02/10).
+- `src/lib/territoire/synthesis-pipeline.test.ts` : l'assertion FUT-6 « AskFuture lit toujours
+  `workbook_quartier` » cherche désormais aussi dans le module extrait (même intention).
+
+### Architecture finale du contexte
+
+```
+[Référentiel interne futur•e]
+INSEE : <insee>
+Nom commune (référentiel interne) : <nom>      (si la commune est dans communes_categorization)
+Catégories territoriales : <…>
+
+[ADEME …] [DRIAS-TRACC …] [Géorisques …] [GASPAR …] [VigiEau …] [Hub'Eau …] [Baignade …]
+(Indication d'absence de données, seulement si aucune de ces sources n'est disponible)
+
+PROFIL UTILISATEUR CONNU
+```
+
+`construireReferentiel` et `construireSystemPrompt` refusent toute clé non prévue : une couche de notation
+ne peut pas revenir par un argument existant.
+
+### Tests
+
+12 tests de contrat sur le `system` (T1 absence de toute note et de toute valeur ; T2 contrat fermé ; T3
+faits DRIAS, ADEME, Géorisques, GASPAR, VigiEau, Hub'Eau, baignade et profil préservés ; T4 référentiel
+réduit à l'identité et aux catégories, blocs de sources sans qualification ; T5 commune sans ligne ; T6
+absence de données ; T7 la route ne lit plus la table, un seul `anthropic.messages.create`, `system:
+systemPrompt`, pré-warm sain). Suite complète : 2 024/2 024. Typecheck, lint et build de production OK.
+
+Deux appels contrôlés avec le nouveau `system` : à Bourg-en-Bresse, Claude cite « 3,5 jours vers 2050 » et
+l'absence de risque incendie recensé par Géorisques (il écrivait « exposition maximale 100/100 ») ; à
+Monteux, la sécheresse devient « un enjeu documenté » (GASPAR, VigiEau, 172 à 182 jours de sol sec) au lieu
+de « pas structurellement parmi les plus exposés ».
+
+### Reliquats renvoyés
+
+- **FUT-28** (formulaire d'accueil) : `WizardTeaser` et `/api/wizard-preview` (« Score X/100 · exposition
+  élevée », « Signal officiellement recensé »).
+- **FUT-52** (articles SEO) : scores écrits en dur de `/chaleur/villes-les-plus-exposees`, classements par
+  score (submersion, dépendance automobile).
+- **FUT-51** (rôle d'AskFuture) : contrôle de sortie d'AskFuture (les réponses peuvent encore dire
+  « aujourd'hui » d'une projection ou conclure sur la « ressource en eau ») ; historique `messages[]` fourni
+  par le client ; libellé DRIAS « Jours risque feu » (doctrine FUT-37 : « météo propice aux feux »).
+- **Ticket à créer** : catégories issues du préfixe de département (Monteux « littoral »).
+- **Ticket à créer** (données) : les 99 lignes corrompues du 09/05 et le décalage de colonnes de
+  `populate-communes-tension.js`, si la table survit à FUT-28 et FUT-52 ; `LocalTensionContext.tsx` (code
+  mort, non touché).
