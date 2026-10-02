@@ -842,3 +842,51 @@ Sources primaires consultées : [DRIAS, ajout des indicateurs IFM40 et SWI04 (TR
 [Météo-France, l'indicateur SWI uniforme](https://donneespubliques.meteofrance.fr/client/document/doc_swi_catnat_268.pdf) ;
 [Eaufrance Rhône-Méditerranée, fiche indice d'humidité des sols](https://www.rhone-mediterranee.eaufrance.fr/sites/sierm/files/content/migrate_documents/indicateur_swi.pdf) ;
 API Géorisques GASPAR v1 (`/gaspar/risques`), interrogée le 02/10/2026.
+
+---
+
+## Addendum du 2 octobre 2026 : ce qui a été implémenté (phase 1)
+
+Décisions D1 à D11 tranchées par le porteur ; FUT-37 sécurise l'accueil **actuel**, le repositionnement
+du haut de page relève de FUT-50.
+
+### Ce qui a changé
+
+| Décision | Appliqué |
+|---|---|
+| D1 | Onglet « Aujourd'hui » remplacé par « 1976-2005 » (référence reconstruite par `reconstructReference`). Paliers lus dans `horizons.ts` ; défaut sur 2050 (horizon du dossier). `/qna` reçoit gwl20 / 2050 / +2,7 °C. |
+| D2 | Carte « Sols secs » (SWI) avec référence via `ASWI04_yr`, lue **seulement** par `/drias?dataset=landing` (la carte DRIAS du dossier, hachée dans le snapshot Territoire, est inchangée). `eau_potable` n'a plus de sous-titre chiffré. |
+| D3 | Carte « Hivers » : température moyenne, référence, écart. Aucun mot sur la neige. |
+| D4 | Assemblage inchangé ; textes conditionnés par la valeur (« aucune journée », « moins d'une journée », « 14 jours, contre 3 »), sans seuil nouveau. |
+| D5 | `immobilierNarrative` supprimée ; `valeur_immo` : « futur•e ne prédit pas les prix futurs », sans chiffre ADEME. |
+| D6 | `tension_answers` n'est plus lue (aucune écriture Supabase). Plus de `editorial_base_answer`. Replis déterministes : `src/lib/accueil/reponses.ts`. |
+| D7 | `pluiesNarrative` supprimée (récit mort). |
+| D8 | `/qna` : faits de la commune seulement → modèle → contrôle déterministe (règles partagées + nombres sourcés + présent projeté) → repli si violation, sans seconde tentative. |
+| D9 | `rural_viticole` et `tension_hydrique_connue` ne déclenchent plus aucun récit ; `vigneNarrative` supprimée. Aucune écriture Supabase. |
+| D10 | `apercuCommune` : squelette sans texte pendant le chargement. |
+| D11 | Mobilité / Vie locale inchangées (textes identiques). |
+
+Règles partagées : `src/lib/garde-fous/assertions.ts` porte le moteur et les quatre règles universelles
+déplacées verbatim de `synthesis-checks.ts` (le dossier garde exactement ses règles), plus les règles des
+récits publics (immobilier, durée, neige, feu, crue, projection d'un risque recensé, grain, ressource en eau).
+
+### Reliquat documenté (hors FUT-37)
+
+- **Supabase `tension_answers`** : six lignes toujours en base, dont des textes propres à La Rochelle
+  (`acheter_littoral`, `enfants_sante`), Bressuire (`mobilite_fragile`) et des prédictions immobilières
+  (`valeur_immo`). Plus aucun code ne les lit. À vider ou supprimer lors d'un passage base.
+- **Supabase `communes_categorization`** : `84099` est saisi « Richerenches » mais désigne **Robion**.
+  Sans effet sur un récit depuis FUT-37 (`rural_viticole` n'en déclenche plus). Correction à faire en base.
+- **Sous-titres du catalogue** (`tensions_catalog`, Supabase) : « valeur à 20 ans », « Ressource, qualité,
+  restrictions », « Enneigement, stations, saisons » restent des promesses de sujets, non des affirmations ;
+  les réponses, elles, sont désormais bornées.
+- **`getClimatDataCommune` code `h: "2050"`** pour les trois scénarios : faux, lu par personne, laissé tel
+  quel car il entre dans l'empreinte du snapshot Territoire.
+- **Drapeaux GASPAR** : Nîmes (30189) n'a pas de drapeau « inondation » d'après `riskFlagsFromLabels`, et
+  les arrondissements de Marseille n'en ont aucun. À vérifier dans le libellé source (hors FUT-37).
+
+### Pour FUT-50
+
+Machine à sous (principe et villes), choix de la carte d'accroche, cartes Mobilité et Vie locale (proxy de
+densité ; phrase par défaut servie aux communes `faible_vie_locale`), sous-titre du hero, intro des
+questions, catalogue des questions et leur pertinence.
