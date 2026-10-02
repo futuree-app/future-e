@@ -4,6 +4,9 @@ import { getClimatDataCommune } from "@/lib/drias-json";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const inseeCode = searchParams.get("insee");
+  // L'accueil (`dataset=landing`) lit en plus l'écart des jours de sol sec (FUT-37). Les autres lecteurs
+  // gardent la carte DRIAS exacte du dossier : elle entre dans l'empreinte du snapshot Territoire.
+  const accueil = searchParams.get("dataset") === "landing";
 
   if (!inseeCode) {
     return NextResponse.json(
@@ -13,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const record = await getClimatDataCommune(inseeCode);
+    const record = await getClimatDataCommune(inseeCode, { accueil });
 
     if (!record) {
       return NextResponse.json(

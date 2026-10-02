@@ -18,7 +18,20 @@
 // Limite V1, assumée : les nombres écrits en LETTRES (« quatorze ») ne sont pas contrôlés.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-export type Violation = { rule: string; excerpt: string };
+import {
+  isNegated,
+  normalizeText,
+  sentencesOf,
+  REGLE_CLASSEMENT_NATIONAL,
+  REGLE_MARCHE_LOGEMENT,
+  REGLE_RACCORD,
+  REGLE_TENSION_EAU,
+  type Violation,
+} from "../garde-fous/assertions.ts";
+
+// Les quatre règles sans condition de fait (eau, raccord, marché, classement) et le moteur d'assertion
+// vivent désormais dans src/lib/garde-fous/assertions.ts, partagés avec l'accueil et /qna (FUT-37).
+export { normalizeText, type Violation };
 
 type Projection = Record<string, unknown>;
 
@@ -213,39 +226,9 @@ const RULES: Rule[] = [
       /\bcette sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
     ],
   },
-  // ── Eau : aucune conclusion sur la ressource (décision du 30/09) ──
-  // Sols secs, CatNat et restrictions en vigueur ne prouvent pas une tension future sur la ressource
-  // ou l'accès à l'eau (chantier Explore2 / Eau 2050). On juxtapose les faits, on ne fabrique pas la
-  // conclusion. « Des restrictions d'eau sont en vigueur » reste permis : c'est un fait.
-  {
-    id: "interdit:tension-eau",
-    when: always,
-    polarity: "affirmative",
-    patterns: [
-      /\b(tension|pression|stress)s? (sur|de|autour de) (l'|la )?(eau|ressource)/,
-      /\bressource en eau (sous tension|menacée|fragilisée|sous pression)/,
-      /\b(raréfaction|rareté|manque|pénurie) (de l'|d')eau\b/,
-      /\bl'eau (devient|deviendra|devenir|se fait) (plus )?(rare|précieuse)/,
-      /\baccès à l'eau\b/,
-    ],
-  },
-  // ── Raccords implicites non autorisés par le contrat de faits (décision du 30/09) ──
-  // « Ces deux réalités décrivent une tension », « ces deux lectures pointent dans une direction
-  // commune » : un raccord n'est permis qu'entre faits mesurant la même grandeur. Seule exception
-  // outillée ici : le réchauffement OBSERVÉ et les températures PROJETÉES.
-  {
-    id: "raccord:non-autorise",
-    when: always,
-    polarity: "any",
-    patterns: [
-      /\bces deux (réalités|lectures|signaux|phénomènes|indicateurs|faits|dynamiques)\b[^.]*(direction commune|même (direction|mouvement|sens)|tension|pression|pointent|convergent)/,
-      // Vu en réel à Nantes : sols secs et pluies intenses « décrivent ensemble un régime hydrique ».
-      /\b(décrivent|dessinent|forment|composent|racontent) ensemble\b/,
-      /(direction commune|même direction|même mouvement)[^.]*\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)/,
-      /\b(sécheresse|sols secs|restrictions|catastrophes? naturelles?)[^.]*(direction commune|même direction|même mouvement)/,
-    ],
-    unless: /réchauffement|températures?|°c/,
-  },
+  // ── Eau et raccords (décisions du 30/09) : règles universelles, partagées avec l'accueil et /qna ──
+  { ...REGLE_TENSION_EAU, when: always },
+  { ...REGLE_RACCORD, when: always },
   // ── Psychologie collective (interdite par la consigne ; contrôlée sur les tournures vues en réel) ──
   {
     id: "interdit:psychologie-collective",
@@ -303,17 +286,7 @@ const RULES: Rule[] = [
       new RegExp(`\\bconvoité${A}\\b`),
     ],
   },
-  {
-    id: "interdit:marche-logement",
-    when: always,
-    polarity: "affirmative",
-    patterns: [
-      /\btension (sur |du |de )?(le |l'|la )?(logement|marché|parc)/,
-      /\bmarché (immobilier |du logement )?tendu/,
-      /\bpeu de (biens|logements) disponibles/,
-      /\bperte d'attractivité/,
-    ],
-  },
+  { ...REGLE_MARCHE_LOGEMENT, when: always },
   {
     id: "interdit:impermeabilisation",
     when: always,
@@ -328,16 +301,7 @@ const RULES: Rule[] = [
       /\bs'infiltr(e|ent|er) mal/,
     ],
   },
-  {
-    id: "interdit:classement-national",
-    when: always,
-    polarity: "any",
-    patterns: [
-      /\bparmi les (communes|villes|territoires) (les )?(plus|moins)/,
-      /\bl'une? des (communes|villes|territoires) (les )?(plus|moins)/,
-      /\b(record|première|premier|dernière|dernier) de france/,
-    ],
-  },
+  { ...REGLE_CLASSEMENT_NATIONAL, when: always },
   {
     id: "interdit:rural",
     when: always,
@@ -352,43 +316,7 @@ const RULES: Rule[] = [
   },
 ];
 
-// ── Négation dans la proposition ─────────────────────────────────────────────────────────────
-
-// Négation au sens large : les tournures de CONTRASTE (« ce qui la distingue d'un territoire
-// entièrement bâti », « loin d'être très dense ») écartent l'assertion au lieu de l'affirmer.
-// Vu en réel le 28/09 : la première formule faisait refuser une phrase juste, au prix d'un second appel.
-const NEGATION = /(\bn'|\bne\b|\baucune?\b|\bpas\b|\bjamais\b|\bni\b|\bsans\b|\bnon\b|\brien\b|\bdistingu\w*|\bloin d'|\bplutôt que\b|\bcontrairement\b|\bà la différence\b|\bmoins\b)/;
-const CLAUSE_BREAK = /[,;:()]/g;
-
-/** La proposition qui contient la correspondance est-elle niée ? (début de proposition → fin de phrase) */
-function isNegated(sentence: string, index: number): boolean {
-  let start = 0;
-  CLAUSE_BREAK.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = CLAUSE_BREAK.exec(sentence)) && m.index < index) start = m.index + 1;
-  const breakAfter = sentence.slice(index).search(/[,;:()]/);
-  const end = breakAfter === -1 ? sentence.length : index + breakAfter;
-  return NEGATION.test(sentence.slice(start, end));
-}
-
-export function normalizeText(t: string): string {
-  return t
-    .toLowerCase()
-    .replace(/[’ʼ]/g, "'")
-    .replace(/[  ]/g, " ");
-}
-
-function sentencesOf(text: string): string[] {
-  // Les INTITULÉS de bloc (« ## Ce qu'on sous-estime ici ») sont imposés par le format : ils ne sont
-  // pas des assertions du texte, et une règle ne doit jamais les refuser.
-  return normalizeText(text)
-    .split("\n")
-    .filter((line) => !/^\s*#/.test(line))
-    .join("\n")
-    .split(/\n+|(?<=[.!?])\s+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
+// ── Négation, normalisation, découpage : déplacés dans src/lib/garde-fous/assertions.ts (FUT-37) ──
 
 // ── Composition par FAMILLES (décision du 30/09) ─────────────────────────────────────────────
 // Deux faits ne se relient que s'ils mesurent la même grandeur. Plutôt qu'une regex par phrase
