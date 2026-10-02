@@ -202,8 +202,10 @@ export type PlaceThreshold =
     };
 
 export type SearchExplorationHint = {
-  kind: "near_place_radius" | "near_sea_radius";
-  valueKm: number;
+  // FUT-33 : la mer sans nombre suit la courbe de classement (mer-recherche.ts), plus aucun rayon : `valueKm`
+  // n'a de sens que pour un lieu.
+  kind: "near_place_radius" | "near_sea_curve";
+  valueKm: number | null;
   source: "legacy_default";
   confirmedByUser: false;
 };

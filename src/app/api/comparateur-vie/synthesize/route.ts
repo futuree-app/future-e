@@ -34,6 +34,7 @@ const PREF_LABELS: Record<string, string> = {
   faible_risque_feu: "un faible risque de feu",
   faible_precip_extremes: "moins de pluies intenses",
   proximite_mer: "la proximité de la mer",
+  eloignement_mer: "l'éloignement de la mer",
   cadre_calme: "un cadre calme",
   eviter_isolement: "ne pas être isolé",
   air_sain: "un air plus pur",

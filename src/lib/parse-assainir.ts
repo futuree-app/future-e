@@ -34,14 +34,14 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
     // Une métrique ne qualifie que des kilomètres.
     hc.nearPlace = { ...hc.nearPlace, metric: hc.nearPlace.maxKm != null ? metric : null };
   }
-  // FUT-33 : « loin de la mer » garde son intention ; son nombre n'existe que s'il est dit en kilomètres.
+  // FUT-33 : une distance minimale à la mer n'est une CONTRAINTE qu'avec un nombre dit en kilomètres. Sans lui,
+  // l'intention reste, mais comme préférence graduée (eloignement_mer), jamais comme condition.
+  let eloignementSansNombre = false;
   if (hc.farFromSea) {
-    if (hc.farFromSea.active !== true) hc.farFromSea = null;
-    else {
-      const km = hc.farFromSea.minKm;
-      const dit = typeof km === "number" && km > 0 && KILOMETRES_CHIFFRES.test(rawText ?? "");
-      hc.farFromSea = { active: true, minKm: dit ? km : null };
-    }
+    const km = hc.farFromSea.minKm;
+    const dit = hc.farFromSea.active === true && typeof km === "number" && km > 0 && KILOMETRES_CHIFFRES.test(rawText ?? "");
+    if (!dit && hc.farFromSea.active === true) eloignementSansNombre = true;
+    hc.farFromSea = dit ? { active: true, minKm: km } : null;
   }
   if (hc.sizeRelativeTo) hc.sizeRelativeTo = { ...hc.sizeRelativeTo, unit: unite(hc.sizeRelativeTo.unit) };
   if (Array.isArray(hc.excludePlace)) {
@@ -58,6 +58,14 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
   delete hc.zonesConventions;
 
   const preferences = (parsed.preferences ?? []).map((p) => ({ key: p.key, weight: p.weight, source: "parse" as const }));
+  if (eloignementSansNombre && !preferences.some((p) => p.key === "eloignement_mer")) {
+    preferences.push({ key: "eloignement_mer", weight: 2, source: "parse" as const });
+  }
+  // « Loin de la mer » et « près de la mer » ne se cumulent pas : le refus l'emporte, il est le plus spécifique.
+  if (preferences.some((p) => p.key === "eloignement_mer")) {
+    const i = preferences.findIndex((p) => p.key === "proximite_mer");
+    if (i >= 0) preferences.splice(i, 1);
+  }
   const sizeWord = parsed.sizeWord === "petite" || parsed.sizeWord === "moyenne" || parsed.sizeWord === "grande" ? parsed.sizeWord : null;
 
   const out: ParsedProject = { ...parsed, hardConstraints: hc, preferences, sizeWord };

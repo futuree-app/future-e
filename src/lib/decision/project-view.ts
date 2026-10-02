@@ -135,7 +135,7 @@ export function hardConstraintLabel(project: UserProject, key: HardConstraintKey
     }
     case "farFromSea": {
       const km = hc.farFromSea?.minKm;
-      return typeof km === "number" && km > 0 ? `au moins ${km} km de la mer` : "l'éloignement de la mer";
+      return typeof km === "number" && km > 0 ? `au moins ${km} km de la mer` : generic;
     }
     default:
       return generic;
@@ -163,7 +163,8 @@ export function declaredHardConstraintKeys(project: UserProject): HardConstraint
   if (hc.reliefProche?.strength === "hard") out.push("reliefProche");
   if (hc.nearSea?.active) out.push("nearSea");
   if (hc.excludeSea === true) out.push("excludeSea");
-  if (hc.farFromSea?.active) out.push("farFromSea");
+  // FUT-33 : sans nombre, ce n'est pas une contrainte (la préférence eloignement_mer la porte).
+  if (hc.farFromSea?.active && typeof hc.farFromSea.minKm === "number" && hc.farFromSea.minKm > 0) out.push("farFromSea");
   if (hc.nearPlace?.label) out.push("nearPlace");
   if (hc.communeSize && (hc.communeSize.min != null || hc.communeSize.max != null)) out.push("communeSize");
   if (excludePlaceDeclares(hc.excludePlace).length > 0) out.push("excludePlace");

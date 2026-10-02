@@ -29,6 +29,8 @@ for (const texte of PHRASES) {
     texte,
     nearSea: hc.nearSea ?? null, excludeSea: hc.excludeSea ?? null, farFromSea: hc.farFromSea ?? null,
     proximite_mer: (p.preferences ?? []).find((x) => x.key === "proximite_mer")?.weight ?? null,
+    eloignement_mer: (p.preferences ?? []).find((x) => x.key === "eloignement_mer")?.weight ?? null,
+    motsForts: (p.forceMarkers ?? []).map((m) => `${m.criterion.key} : « ${m.quote} »`),
     communeAncre: p.communeAncre ?? null,
   });
 }

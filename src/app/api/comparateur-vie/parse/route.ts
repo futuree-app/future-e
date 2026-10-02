@@ -92,14 +92,14 @@ const TOOL_INPUT_SCHEMA = {
         excludeSea: {
           type: "boolean",
           description:
-            "true SEULEMENT si l'utilisateur refuse une COMMUNE LITTORALE ('pas le littoral', 'pas une commune littorale', 'hors littoral', 'pas sur la côte'). Le moteur l'entend au sens de la loi Littoral, sans aucune distance. 'Loin de la mer', 'dans les terres', 'à au moins 30 km de la mer' ne vont PAS ici : c'est farFromSea.",
+            "true SEULEMENT si l'utilisateur refuse une COMMUNE LITTORALE, avec le mot littoral ou commune ('pas le littoral', 'pas une commune littorale', 'hors littoral'). Le moteur l'entend au sens de la loi Littoral, sans aucune distance. 'Loin de la mer', 'dans les terres', 'pas au bord de la mer', 'à au moins 30 km de la mer' ne vont PAS ici (distance physique : eloignement_mer ou farFromSea).",
         },
         farFromSea: {
           type: ["object", "null"],
           properties: { active: { type: "boolean" }, minKm: { type: ["number", "null"] } },
           required: ["active"],
           description:
-            "ÊTRE LOIN DE LA MER, par la distance ('loin de la mer', 'plutôt dans les terres', 'éloigné de la côte', 'à au moins 30 km de la mer', 'pas à moins de 20 km de la côte'). minKm = le nombre DIT par l'utilisateur, recopié tel quel ; null s'il n'en dit aucun. N'inventez JAMAIS de nombre. 'Je n'aime pas la mer' sans parler de distance ni de commune littorale : ni farFromSea ni excludeSea. null sinon.",
+            "Distance MINIMALE à la mer DITE EN KILOMÈTRES ('à au moins 30 km de la mer', 'pas à moins de 20 km de la côte'). minKm = le nombre dit, recopié tel quel. SANS nombre ('loin de la mer', 'dans les terres'), JAMAIS ici : c'est la préférence eloignement_mer. N'inventez JAMAIS de nombre. null sinon.",
         },
         nearPlace: {
           type: ["object", "null"],
@@ -253,7 +253,11 @@ Votre rôle : traduire un projet de vie exprimé en langage libre vers une struc
 RÈGLES
 - Distinguez fortement ce qui ÉLIMINE (contrainte dure) de ce qui PONDÈRE (préférence). En cas de doute, préférez la préférence : on n'élimine que sur un critère explicite.
 - "proche de l'océan / de la mer" = contrainte dure (nearSea.active) UNIQUEMENT si c'est présenté comme indispensable. Sinon, préférence proximite_mer (poids 2 ou 3).
-- Trois refus de la mer, à ne JAMAIS confondre : "pas le littoral / pas une commune littorale / hors littoral" → excludeSea:true (statut de la commune). "loin de la mer / dans les terres / éloigné de la côte" → farFromSea { active:true, minKm:null }. "à au moins N km de la mer" → farFromSea { active:true, minKm:N }. Une même phrase peut porter les deux ("pas sur le littoral, au moins 20 km de la mer" → excludeSea:true ET farFromSea minKm 20). Une négation de proximité ("pas forcément près de la mer", "la mer n'est pas indispensable") n'est AUCUN refus : rien.
+- Trois refus de la mer, à ne JAMAIS confondre :
+  • STATUT : "pas le littoral / pas une commune littorale / hors littoral" → excludeSea:true.
+  • DISTANCE CHIFFRÉE : "à au moins N km de la mer", "pas à moins de N km de la côte" → farFromSea { active:true, minKm:N }.
+  • DISTANCE SANS NOMBRE : "loin de la mer", "plutôt dans les terres", "éloigné de la côte", "pas près de la mer", "pas au bord de la mer" → préférence eloignement_mer, poids 2 ; poids 3 avec un mot fort ("surtout pas au bord de la mer", "absolument loin de la mer"), et ce mot fort va dans forceMarkers (criterion { kind:'preference', key:'eloignement_mer' }). Jamais excludeSea, jamais farFromSea.
+  Les deux premiers peuvent coexister ("pas sur le littoral, au moins 20 km de la mer" → excludeSea:true ET farFromSea minKm 20). Une négation de proximité ("pas forcément près de la mer", "la mer n'est pas indispensable") n'est AUCUN refus : rien. "Je n'aime pas la mer" sans parler de distance ni de commune littorale : rien.
 - Climat perçu : distinguez "fuir la chaleur" (faible_chaleur), "rechercher la douceur des hivers" (douceur_climat = température moyenne hivernale), "rechercher le soleil / l'ensoleillement" (ensoleillement_recherche, = rayonnement solaire, pas la chaleur). Une douceur ANNUELLE ("un climat doux et agréable toute l'année") se traduit par DEUX préférences : douceur_climat (hivers doux) + faible_chaleur (étés supportables). Une douceur purement hivernale → douceur_climat seul.
 - Inondation vs pluies (ne pas confondre) : "inondation / crue / zone inondable / débordement / ruissellement / sans risque d'inondation" → faible_risque_inondation (risque réel). "pluies intenses / orages violents / grosses averses / précipitations extrêmes" → faible_precip_extremes (pluie, pas inondation). Ne routez JAMAIS "inondation" vers faible_precip_extremes.
 - Nature vs calme (faux-ami à ne pas confondre) : "nature" = couvert naturel autour (forêts, prairies, milieux naturels) → nature. "calme / tranquille / peu de monde" = densité, ambiance → cadre_calme. "la campagne" est AMBIGU : selon la phrase, c'est souvent les DEUX (nature + cadre_calme) ; n'activez les deux que si le sens le porte, sinon le plus explicite. Ne confondez jamais "vert/forêts" (nature) avec "calme" (densité).
@@ -314,6 +318,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_precip_extremes : moins de pluies intenses / orages violents / épisodes de précipitations extrêmes (PAS le risque d'inondation réel)
 - faible_risque_inondation : faible risque d'inondation fluviale/pluviale (historique d'arrêtés CatNat inondation). Pour « inondation », « inondable », « zone inondable », « crue », « débordement », « ruissellement », « sans risque d'inondation »
 - proximite_mer : proche du littoral (version souple)
+- eloignement_mer : loin de la mer, dans les terres (version souple, SANS nombre). Jamais avec proximite_mer.
 - cadre_calme : moins dense, calme mais habitable
 - eviter_isolement : commune suffisamment vivante, pas isolée
 - air_sain : air de fond plus pur (moins de particules fines)
@@ -456,7 +461,9 @@ export async function POST(request: NextRequest) {
         // identitaire mer dérivé (préférence ET trait nommé) plutôt que de promettre une mer
         // que le périmètre ne peut pas livrer. cf. perimeterAllowsCoast (honnêteté du signal).
         const hasMer = deriv.preferences.some((p) => p.key === "proximite_mer");
-        if (hasMer && !(await perimeterAllowsCoast(hc))) {
+        // FUT-33 : un éloignement de la mer DIT sans nombre (préférence eloignement_mer) contredit aussi la mer.
+        const eloignementDit = parsed.preferences.some((p) => p.key === "eloignement_mer");
+        if (hasMer && (eloignementDit || !(await perimeterAllowsCoast(hc)))) {
           deriv.preferences = deriv.preferences.filter((p) => p.key !== "proximite_mer");
           deriv.traits = deriv.traits.filter((t) => t.key !== "proximite_mer");
         }

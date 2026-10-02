@@ -90,7 +90,9 @@ const ADMIN_EXCLUSION_TOKENS = new Set<string>(ADMIN_REGION_TOKENS);
 
 // LES PRÉFÉRENCES QU'AUCUNE RÈGLE NE SAIT EXAMINER. Un test vérifie, en faisant tourner le registre,
 // que toutes les autres sont bien examinées par au moins une règle.
-export const PREFERENCES_SANS_REGLE: readonly PreferenceKey[] = ["faible_secheresse", "faible_pression_agricole"];
+// FUT-33 : `eloignement_mer` (« loin de la mer » sans nombre) n'a pas encore de règle au dossier (étape C) :
+// le dossier dit qu'il ne la mesure pas, plutôt que de la juger avec l'ancienne distance.
+export const PREFERENCES_SANS_REGLE: readonly PreferenceKey[] = ["faible_secheresse", "faible_pression_agricole", "eloignement_mer"];
 
 const t = (reason: CapabilityReason): CapabilityAssessment => ({ capability: "trancher", reason });
 const a = (reason: CapabilityReason): CapabilityAssessment => ({ capability: "apprecier", reason });

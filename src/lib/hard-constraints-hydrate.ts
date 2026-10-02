@@ -21,7 +21,6 @@ import type { ExternalResolutions } from "./hard-constraints-external.ts";
 // LES RAYONS QUE LE PRODUIT S'EST INVENTÉS. Ils sortent du contrat dur : ils peuvent CADRER une
 // recherche, jamais ÉLIMINER une commune ni produire un verdict opposable au lecteur.
 const LEGACY_NEAR_PLACE_KM = 50;
-const LEGACY_NEAR_SEA_KM = 30;
 
 export function explorationHints(hc: HardConstraints | undefined | null): SearchExplorationHint[] {
   const c = hc ?? {};
@@ -34,7 +33,7 @@ export function explorationHints(hc: HardConstraints | undefined | null): Search
     out.push({ kind: "near_place_radius", valueKm: LEGACY_NEAR_PLACE_KM, source: "legacy_default", confirmedByUser: false });
   }
   if (c.nearSea?.active && c.nearSea.maxKm == null) {
-    out.push({ kind: "near_sea_radius", valueKm: LEGACY_NEAR_SEA_KM, source: "legacy_default", confirmedByUser: false });
+    out.push({ kind: "near_sea_curve", valueKm: null, source: "legacy_default", confirmedByUser: false });
   }
   return out;
 }
@@ -158,9 +157,9 @@ export function hydrateHardConstraints(
     reliefProche: c.reliefProche?.strength === "hard",
     nearSea: c.nearSea?.active ? { threshold: thresholdFrom(c.nearSea.maxKm) } : null,
     excludeSea: c.excludeSea === true,
-    // FUT-33 : un nombre DIT et positif, sinon null (« loin de la mer » sans nombre : déclaré, jamais filtré).
-    farFromSea: c.farFromSea?.active
-      ? { minKm: typeof c.farFromSea.minKm === "number" && c.farFromSea.minKm > 0 ? c.farFromSea.minKm : null }
+    // FUT-33 : une contrainte seulement avec un nombre DIT ; sans nombre, c'est la préférence eloignement_mer.
+    farFromSea: c.farFromSea?.active && typeof c.farFromSea.minKm === "number" && c.farFromSea.minKm > 0
+      ? { minKm: c.farFromSea.minKm }
       : null,
     communeSize: c.communeSize
       ? { min: c.communeSize.min ?? null, max: c.communeSize.max ?? null, unit: c.communeSize.unit ?? null }

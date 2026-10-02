@@ -16,7 +16,7 @@ import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/w
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
-import { scoreProximiteMer, bonusMer, ancreLittorale } from "@/lib/mer-recherche";
+import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
@@ -70,6 +70,7 @@ export const PREFERENCE_KEYS = [
   "faible_risque_feu",
   "faible_precip_extremes",
   "proximite_mer",
+  "eloignement_mer",           // FUT-33 : « loin de la mer » sans nombre, inverse de la même courbe
   "cadre_calme",
   "eviter_isolement",
   // Viabilité du bassin d'emploi (ZE2020, Flores A38) : taille + diversité
@@ -1270,6 +1271,8 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       // COMMUNE : le centre, pas le point le plus proche de son territoire (Arles toucherait sinon la mer).
       // Courbe conservée : linéaire, 100 au rivage, 0 à 150 km ; aucun seuil de rejet (D10).
       return scoreProximiteMer(c);
+    case "eloignement_mer":
+      return scoreEloignementMer(c);
     case "cadre_calme":
       return lerp(CALME, c.densite);
     case "eviter_isolement":
@@ -2079,6 +2082,8 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   faible_precip_extremes: "pluies extrêmes rares",
   // On nomme, on ne mesure pas : paliers qualitatifs, jamais la distance brute
   // (le chiffre cassait le récit sur le révélateur d'arbitrages). Le détail au rapport.
+  // FUT-33 : un FAIT, jamais un palier déduit de la courbe de classement (« loin de la mer » n'est pas un score).
+  eloignement_mer: (c) => `à ${Math.round(c.mer_centre_km ?? 0)} km de la mer`,
   proximite_mer: (c) =>
     c.distance_cote_km <= 2
       ? "en bord de mer"
@@ -2138,6 +2143,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_risque_feu: "risque de feu notable",
   faible_precip_extremes: "pluies intenses fréquentes",
   proximite_mer: "éloignée du littoral",
+  eloignement_mer: "plus proche de la mer que souhaité",
   cadre_calme: "plus dense que recherché",
   eviter_isolement: "bassin de vie réduit, plus isolé",
   air_sain: "air plus chargé en particules",
@@ -2369,14 +2375,14 @@ function explorationBonus(
   let bonus = 0;
   const place = hints.find((h) => h.kind === "near_place_radius");
   const ref = constraints.nearPlace?.reference;
-  if (place && ref?.status === "resolved") {
+  if (place?.valueKm != null && ref?.status === "resolved") {
     const km = haversineCanonical(c.lat, c.lon, ref.lat, ref.lon);
     bonus = Math.max(bonus, EXPLORATION_BONUS_MAX * Math.max(0, 1 - km / place.valueKm));
   }
-  const sea = hints.find((h) => h.kind === "near_sea_radius");
+  const sea = hints.find((h) => h.kind === "near_sea_curve");
   if (sea) {
     // FUT-33 (2B.1) : même mesure que la préférence ; bonus de classement seulement, jamais un filtre.
-    bonus = Math.max(bonus, bonusMer(c, sea.valueKm, EXPLORATION_BONUS_MAX));
+    bonus = Math.max(bonus, bonusMer(c, EXPLORATION_BONUS_MAX));
   }
   return bonus;
 }
@@ -2388,6 +2394,7 @@ function hasCoastalIntent(parsed: ParsedProject): boolean {
   const hc = parsed.hardConstraints ?? {};
   // FUT-33 : « loin de la mer », avec ou sans nombre, contredit une intention littorale.
   if (hc.excludeSea || hc.farFromSea?.active) return false;
+  if (parsed.preferences?.some((p) => p.key === "eloignement_mer")) return false;
   if (hc.nearSea?.active) return true;
   const FACADES = new Set(["atlantique", "manche", "mediterranee", "cote_basque"]);
   if (hc.zones?.some((z) => FACADES.has(z.zone))) return true;

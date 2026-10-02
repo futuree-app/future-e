@@ -85,3 +85,46 @@ ou demander au lecteur au prochain passage.
   à l'écran, jamais un filtre. À revoir avec la courbe B.
 - `@/lib/littoral` (érosion du trait de côte) porte une façade PAR DÉPARTEMENT : consommateur éditorial / risque, à
   traiter en D.
+
+## Révision après relecture (02/10/2026) : ce qui remplace les sections ci-dessus
+
+Décisions validées : courbe C, point milieu 20 km ; la courbe CLASSE et ne définit jamais un libellé ;
+`excludeSea` = « pas une commune littorale » ; un nombre dit = seuil du lecteur ; aucune réinterprétation
+silencieuse des anciens `excludeSea` ; plus de rayon caché de 30 km.
+
+Deux corrections de sens :
+
+1. **« Loin de la mer » sans nombre n'est jamais une condition.** Ni `farFromSea`, ni « condition non appliquée ».
+   C'est une nouvelle préférence graduée, `eloignement_mer`, l'exact inverse de la courbe C (0 au rivage, 50 à
+   20 km, 80 à 40 km). Elle oriente le classement et n'écarte rien. « Plutôt » donne le poids 2 ; un mot fort
+   (« surtout pas », « absolument ») donne le poids 3 et un mot fort enregistré, que FUT-8 peut proposer de
+   confirmer comme condition, à définir. `farFromSea` n'existe plus qu'avec un nombre dit en kilomètres :
+   l'assainissement convertit tout `farFromSea` sans nombre en préférence. « Loin » et « près » ne se cumulent
+   pas : le refus l'emporte.
+2. **« Surtout pas au bord de la mer » est une distance physique**, pas la loi Littoral : préférence
+   `eloignement_mer` poids 3, avec son mot fort.
+
+Code : `scoreEloignementMer` et la courbe C dans `mer-recherche.ts` ; le bonus de « il nous faut la mer » sans
+nombre suit la même courbe (`near_sea_curve`, `LEGACY_NEAR_SEA_KM` supprimé). Une ancre littorale (« comme
+Brest ») perd sa suggestion de mer dès que l'éloignement est dit. Au dossier, `eloignement_mer` n'a pas encore de
+règle : il dit ne pas la mesurer (`PREFERENCES_SANS_REGLE`) plutôt que de la juger avec l'ancienne distance.
+
+Phrases réelles, deuxième passage (fixture mise à jour) :
+
+| Phrase | Représentation | Filtre | Classement |
+|---|---|---|---|
+| On veut vivre loin de la mer. | eloignement_mer 2 | non | oui |
+| Plutôt dans les terres, au calme. | eloignement_mer 2 | non | oui |
+| Je ne veux pas être près de la mer. | eloignement_mer 2 | non | oui |
+| Surtout pas au bord de la mer. | eloignement_mer 3 + mot fort | non | oui |
+| Une ville comme Brest mais loin de la mer. | eloignement_mer 2 ; mer de Brest retirée | non | oui |
+| À au moins 30 km de la mer. | farFromSea 30 | oui | – |
+| Pas sur le littoral, et au moins 20 km. | excludeSea + farFromSea 20 | oui | – |
+| Je n'aime pas la mer, je préfère la campagne. | eloignement_mer 2 | non | oui |
+
+Écart connu : sur « je n'aime pas la mer », le modèle ajoute une préférence d'éloignement alors que le prompt dit
+de ne rien faire. L'effet reste un classement doux, sans filtre ; à surveiller.
+
+Anciens projets (pour l'étape C) : un `excludeSea: true` enregistré avant ce changement peut venir de « loin de
+la mer ». Il ne sera ni réinterprété en silence comme « hors commune littorale », ni changé : reparser le texte
+d'origine s'il existe, sinon reconfirmer auprès du lecteur.

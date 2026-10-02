@@ -25,7 +25,7 @@ test("les rayons inventés deviennent des indices d'exploration, hors du contrat
   const hints = explorationHints({ nearSea: { active: true }, nearPlace: { label: "Brest" } });
   assert.deepEqual(
     hints.map((h) => [h.kind, h.valueKm]),
-    [["near_place_radius", 50], ["near_sea_radius", 30]],
+    [["near_place_radius", 50], ["near_sea_curve", null]], // FUT-33 : la mer suit la courbe de classement, plus aucun rayon
   );
   assert.ok(hints.every((h) => h.source === "legacy_default" && h.confirmedByUser === false));
 });
