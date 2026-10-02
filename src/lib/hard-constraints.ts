@@ -623,8 +623,12 @@ export function mesureMerEvaluee(ctx: EvaluationContext, c: CommuneAttributes): 
 }
 
 // Au kilomètre près au-delà de 10 km (« environ 24 km ») ; au dixième en deçà, où il compte (« 0,7 km »).
+// Sous 100 m, la distance d'un point de référence sur le rivage se dit « moins de 100 m », jamais « 0 km ».
 export const kmLisible = (km: number) =>
-  km >= 10 ? `${Math.round(km)} km` : `${(Math.round(km * 10) / 10).toString().replace(".", ",")} km`;
+  km < 0.1 ? "moins de 100 m"
+  : km >= 10 ? `${Math.round(km)} km` : `${(Math.round(km * 10) / 10).toString().replace(".", ",")} km`;
+/** « à environ 2,4 km », « à moins de 100 m » : une distance lisible, précédée de sa préposition. */
+export const aEnviron = (label: string) => (label.startsWith("moins") ? `à ${label}` : `à environ ${label}`);
 
 export function evaluateNearSea(
   ctx: EvaluationContext,
@@ -653,7 +657,7 @@ export function evaluateNearSea(
   return {
     key: "nearSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
-    statement: `${m.sujet} est à environ ${observedLabel} du rivage marin, plus loin que les ${max} km au plus que vous avez indiqués.`,
+    statement: `${m.sujet} est ${aEnviron(observedLabel)} du rivage marin, plus loin que les ${max} km au plus que vous avez indiqués.`,
   };
 }
 
@@ -702,7 +706,7 @@ export function evaluateFarFromSea(
   return {
     key: "farFromSea", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la distance ${deCommune(c.nom)} au rivage marin`, "la distance au rivage marin"),
-    statement: `${m.sujet} est à environ ${observedLabel} du rivage marin, plus près que les ${min} km au moins que vous avez indiqués.`,
+    statement: `${m.sujet} est ${aEnviron(observedLabel)} du rivage marin, plus près que les ${min} km au moins que vous avez indiqués.`,
   };
 }
 

@@ -23,7 +23,7 @@
 //   confirmé,             non examiné   -> condition ouverte, sans fait (le registre la porte)
 //   non confirmé,         incompatible  -> ÉCART au projet, visible, jamais éliminatoire
 //   non confirmé,         satisfait     -> silencieux, point favorable (comme avant)
-import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible } from "../hard-constraints.ts";
+import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible, aEnviron } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
 import type {
   DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts, HardEvaluation,
@@ -156,9 +156,9 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
         : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
     // FUT-33 : la condition remplie se dit avec la limite du lecteur, dans son sens.
     case "nearSea":
-      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin, dans les ${limiteDite(a)} km au plus que vous avez indiqués.`;
+      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, dans les ${limiteDite(a)} km au plus que vous avez indiqués.`;
     case "farFromSea":
-      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin, au-delà des ${limiteDite(a)} km que vous avez indiqués.`;
+      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin, au-delà des ${limiteDite(a)} km que vous avez indiqués.`;
     case "excludeSea":
       return `${f.nom} n'est pas classée « Mer » au titre de la loi Littoral.`;
     case "nearPlace":
@@ -209,7 +209,7 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
     }
     case "nearSea":
     case "farFromSea":
-      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin.`;
+      return `${sujetMer(a, f)} est ${aEnviron(a.observedLabel)} du rivage marin.`;
     case "excludeSea":
       return `${f.nom} est classée « Mer » au titre de la loi Littoral.`;
     case "communeSize":
@@ -359,7 +359,7 @@ function mesureSansSeuil(
   const mer = key === "nearSea" ? mesureMerEvaluee(hard.context, toCommuneAttributes(f)) : null;
   if (key === "nearSea" && mer?.ok) {
     return conditionCheck(key, project, f, c, "neutre",
-      `${mer.sujet} est à environ ${kmLisible(mer.km)} du rivage marin.`,
+      `${mer.sujet} est ${aEnviron(kmLisible(mer.km))} du rivage marin.`,
       [{
         factId: mer.evidenceKey, module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
         observedValue: kmLisible(mer.km), grain: mer.grain === "address" ? "adresse" : "commune", relation: "proximite", href: territoireHref,

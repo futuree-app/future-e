@@ -134,3 +134,14 @@ test("submersion marine (/inondation) : le bloc côtier lit la loi Littoral ; le
   assert.match(script, /LEGACY \(FUT-33/);
   assert.match(script, /--legacy-confirme/);
 });
+
+test("la distance se dit lisiblement : jamais « 0 km », au dixième sous 10 km, au kilomètre au-delà", async () => {
+  const { kmLisible, aEnviron } = await import("./hard-constraints.ts");
+  assert.equal(kmLisible(0), "moins de 100 m");
+  assert.equal(kmLisible(0.04), "moins de 100 m");
+  assert.equal(kmLisible(0.66), "0,7 km");
+  assert.equal(kmLisible(9.23), "9,2 km");
+  assert.equal(kmLisible(39.35), "39 km");
+  assert.equal(aEnviron(kmLisible(0)), "à moins de 100 m");
+  assert.equal(aEnviron(kmLisible(24.3)), "à environ 24 km");
+});

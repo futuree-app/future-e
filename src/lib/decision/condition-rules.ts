@@ -23,7 +23,7 @@ import { criterionCapability } from "./capability.ts";
 import { consequenceDuSignal, etatDuSignal } from "./hard-constraint-rules.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 import { deCommune } from "../typography.ts";
-import { kmLisible } from "../hard-constraints.ts";
+import { kmLisible, aEnviron } from "../hard-constraints.ts";
 
 const territoireHref = "/rapport/quartier";
 
@@ -106,10 +106,10 @@ function mesureMer(f: ModuleFacts): { statement: string; evidence: EvidenceRef }
   if (f.merCentreKm == null) return null;
   const km = kmLisible(f.merCentreKm);
   return {
-    statement: `Le point de référence ${deCommune(f.nom)} est à environ ${km} du rivage marin.`,
+    statement: `Le point de référence ${deCommune(f.nom)} est ${aEnviron(km)} du rivage marin.`,
     evidence: {
       factId: "commune.merCentreKm", module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
-      observedValue: `point de référence à environ ${km} du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
+      observedValue: `point de référence ${aEnviron(km)} du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
     },
   };
 }
