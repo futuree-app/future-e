@@ -261,19 +261,20 @@ function buildClimatWhy(
 ): string {
   if (theme === "nuits") {
     const core: Record<TerritoryType, string> = {
-      littoral_atlantique: `À ${communeName}, les nuits restaient fraîches au bord de l'Atlantique ; elles gardent de plus en plus la chaleur du jour.`,
+      // FUT-33 : aucune cause maritime affirmée sans donnée climatique ; le type ne dit que « commune littorale ».
+      littoral_atlantique: `À ${communeName}, les nuits d'été gardent de plus en plus la chaleur du jour.`,
       mediterraneen: `À ${communeName}, les nuits chaudes font déjà partie de l'été méditerranéen ; elles deviennent plus nombreuses et la saison s'étire.`,
       montagne: `À ${communeName}, l'altitude a longtemps garanti des nuits fraîches ; elles commencent à céder lors des étés les plus chauds.`,
-      plaine: `À ${communeName}, loin de la mer, les nuits suivent le jour : quand les étés chauffent, elles cessent plus souvent de rafraîchir.`,
+      plaine: `À ${communeName}, les nuits suivent le jour : quand les étés chauffent, elles cessent plus souvent de rafraîchir.`,
     };
     return core[type];
   }
   if (theme === "chaleur") {
     const core: Record<TerritoryType, string> = {
-      littoral_atlantique: `À ${communeName}, le climat atlantique a longtemps gardé les fortes chaleurs rares ; elles deviennent peu à peu une part ordinaire de l'été.`,
+      littoral_atlantique: `À ${communeName}, les fortes chaleurs deviennent peu à peu une part ordinaire de l'été.`,
       mediterraneen: `À ${communeName}, les fortes chaleurs font déjà partie de l'été ; ce qui change, c'est leur nombre et la longueur des épisodes.`,
       montagne: `À ${communeName}, l'altitude a longtemps tenu les fortes chaleurs à distance ; elles gagnent désormais les étés.`,
-      plaine: `À ${communeName}, sans façade maritime ni relief pour tempérer, les fortes chaleurs s'installent plus tôt et durent plus longtemps.`,
+      plaine: `À ${communeName}, les fortes chaleurs s'installent plus tôt et durent plus longtemps.`,
     };
     return `${core[type]} La progression s'accélère, elle ne fait pas que monter.`;
   }
@@ -282,10 +283,10 @@ function buildClimatWhy(
   // est net (>0,3 °C), pour ne jamais affirmer une généralité fausse (ex. à la
   // montagne l'été se réchauffe plus vite que l'hiver).
   const core: Record<TerritoryType, string> = {
-    littoral_atlantique: `À ${communeName}, le climat atlantique tempère encore les extrêmes, mais cet effet d'amortisseur faiblit à mesure que les saisons se réchauffent.`,
+    littoral_atlantique: `À ${communeName}, les saisons se réchauffent l'une après l'autre, et les extrêmes gagnent du terrain.`,
     mediterraneen: `À ${communeName}, la chaleur fait déjà partie du climat ; ce qui change, c'est son intensité et sa durée au fil de l'année.`,
     montagne: `À ${communeName}, le froid d'altitude a longtemps marqué le climat ; il devient moins présent, saison après saison.`,
-    plaine: `À ${communeName}, le climat intérieur se réchauffe sans l'amortisseur direct de l'océan ou de l'altitude.`,
+    plaine: `À ${communeName}, le climat se réchauffe saison après saison.`,
   };
   let seasonClause = "";
   const { summerAnom, winterAnom } = signals;
@@ -1022,7 +1023,8 @@ function buildFactors(
     const classNarrative = e?.classe ? CLASSE_NARRATIVE[e.classe] : null;
 
     const littoralDetail: CardDetail = {
-      eyebrow: `Littoral · ${FACADE_LABEL[littoral.facade]}`,
+      // FUT-33 : la façade vient de la liste officielle (loi Climat et Résilience) ; sans elle, aucune n'est devinée.
+      eyebrow: littoral.facade ? `Littoral · ${FACADE_LABEL[littoral.facade]}` : "Littoral",
       title: "Érosion du littoral",
       headline,
       subhead:

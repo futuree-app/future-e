@@ -1,4 +1,4 @@
-# Vérité littorale (FUT-33, phase 1) : construction hors produit
+# Vérité littorale (FUT-33) : construction hors produit
 
 Rien ici n'est branché à futur•e. Ces scripts construisent et mesurent la distance à la mer pour décider des
 règles produit (rapport : `docs/audits/2026-10-02-fut33-phase1-mesures-littorales.md`).
@@ -41,13 +41,22 @@ python build_mer.py --limtm $D/sources/limtm --contours x --loi-littoral x --ind
 python audit_ltm.py --etat $D/etat.pkl --index data/comparateur-index.json.gz --out $D/out/audit-ltm.json
 python divergences.py --etat $D/etat.pkl --contours $D/sources/communes-5m-2026.geojson.gz --out $D/out
 python export_node.py --rivage $D/out/rivage-marin.wkb --out $D/node     # (depuis scripts/mer)
-node scripts/mer/adresse-node.mjs $D/node                                 # prototype adresse, non branché
+node scripts/mer/adresse-node.mjs $D/node                                 # prototype adresse (phase 1.5)
+# phase 2A : publication dans le dépôt, puis injection dans l'index
+python publier_mer.py --out $D/out --dest ../../data/mer
+# phase 2B.2 D : façade officielle des communes classées « Mer » (colonne mer_facade)
+python facades_communes.py --planif $D/sources/planif/PLANIFICATION_MARITIME_PACK --rivage $D/out/rivage-marin.wkb --dest ../../data/mer
+node scripts/mer/injecter-index.mjs                                        # (racine du dépôt) ajoute mer_*, retire distance_cote_km
+# phase 2B.2 C : distances de référence des adresses de test
+python reference_adresses.py --rivage $D/out/rivage-marin.wkb --out fixtures/adresses-test-2b2c.json
 ```
 
 Seules de petites fixtures sont versionnées (`fixtures/`, moins de 100 Ko) ; elles sont relues par
 `src/lib/fut33-mer-pipeline.test.ts` et `src/lib/fut33-mer-securisation.test.ts`.
 
-## Attribution obligatoire
+## Attribution
 
-« © Shom-IGN, 2021, http://dx.doi.org/10.17183/LIMTM » (descriptif Shom, §5.3), avec l'indication des limites
-d'usage et, sur un site, les logos du Shom et de l'IGN liés à shom.fr et ign.fr.
+« Limite terre-mer © Shom-IGN, 2021, http://dx.doi.org/10.17183/LIMTM » (descriptif Shom, §5.3), avec l'indication
+des limites d'usage. Le descriptif demande aussi, sur un site, les logos du Shom et de l'IGN : le porteur a décidé
+le 02/10/2026 que la mention suffit (risque connu). Façades : « DGAMPA-Shom, 2026. Planification maritime.
+https://dx.doi.org/10.17183/MSP » (Licence Ouverte 2.0).

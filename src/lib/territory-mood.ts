@@ -6,8 +6,8 @@
 // les cartes climat (type). L'ex-cover illustrée (TerritoryCover) a été
 // remplacée par la ligne des années (TerritoryYearsBand), qui ne dépend pas du mood.
 
-import { deriveCategories } from "@/lib/commune-categories";
-import { deCommune } from "@/lib/typography";
+import { deriveCategories } from "./commune-categories.ts";
+import { deCommune } from "./typography.ts";
 
 export type TerritoryType =
   | "littoral_atlantique"
@@ -43,8 +43,10 @@ type TerritoireInput = { densite?: number | null; taux_boisement?: number | null
 const PRESETS: Record<TerritoryType, Omit<TerritoryMood, "title" | "inseeCode" | "density" | "vegetation">> = {
   littoral_atlantique: {
     type: "littoral_atlantique",
-    typeLabel: "Littoral atlantique",
-    palette: ["bleu océan", "sable", "gris clair lumineux"],
+    // FUT-33 : le type garde sa clé historique (snapshots, pictogramme), mais il dit « Littoral » : il couvre toute
+    // commune classée « Mer » hors climat méditerranéen, Manche et mer du Nord comprises.
+    typeLabel: "Littoral",
+    palette: ["bleu marin", "sable", "gris clair lumineux"],
     colors: {
       skyTop: "#1e3344",
       skyHorizon: "#7fa6b8",
@@ -54,7 +56,7 @@ const PRESETS: Record<TerritoryType, Omit<TerritoryMood, "title" | "inseeCode" |
       sun: "#e6d7b8",
       accent: "#9ec3d4",
     },
-    motifs: ["océan", "ville basse", "horizon"],
+    motifs: ["mer", "ville basse", "horizon"],
     atmosphere: "ouverte et lumineuse",
   },
   mediterraneen: {
@@ -107,13 +109,20 @@ const PRESETS: Record<TerritoryType, Omit<TerritoryMood, "title" | "inseeCode" |
   },
 };
 
-export function deriveTerritoryType(inseeCode: string | null): TerritoryType {
+// FUT-33 : avec les catégories de la COMMUNE (deriveCategoriesFromEntry, côté serveur), « littoral » vient du
+// classement loi Littoral. Sans elles, le repli par département ne connaît plus aucun littoral (D-6).
+export function deriveTerritoryType(inseeCode: string | null, categories?: string[]): TerritoryType {
   if (!inseeCode) return "plaine";
-  const cats = deriveCategories(inseeCode);
+  const cats = categories ?? deriveCategories(inseeCode);
   if (cats.includes("montagne")) return "montagne";
   if (cats.includes("mediterranee")) return "mediterraneen";
   if (cats.includes("littoral")) return "littoral_atlantique";
   return "plaine";
+}
+
+export function territoryTypeFromLabel(label: string): TerritoryType | null {
+  const t = (Object.keys(PRESETS) as TerritoryType[]).find((k) => PRESETS[k].typeLabel === label);
+  return t ?? (label === "Littoral atlantique" ? "littoral_atlantique" : null);
 }
 
 function pickDensity(d: number | null | undefined): TerritoryMood["density"] {
@@ -134,8 +143,12 @@ export function deriveTerritoryMood(params: {
   communeName: string | null;
   inseeCode: string | null;
   territoire?: TerritoireInput;
+  categories?: string[];
+  // Le libellé de typologie déjà figé dans le snapshot Territoire : la page le relit, pour ne jamais diverger.
+  typeLabel?: string | null;
 }): TerritoryMood {
-  const type = deriveTerritoryType(params.inseeCode);
+  const figee = params.typeLabel ? territoryTypeFromLabel(params.typeLabel) : null;
+  const type = figee ?? deriveTerritoryType(params.inseeCode, params.categories);
   const preset = PRESETS[type];
   return {
     ...preset,

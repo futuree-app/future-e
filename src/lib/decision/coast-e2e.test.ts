@@ -15,12 +15,13 @@ function sectionFacts(s?: { cards?: import("./decision-fact.ts").DossierCard[] }
 }
 
 
-// BOUT EN BOUT : IndexCommune -> mapCommuneToModuleFacts -> runRules -> assembleDossier. On prouve que la
-// mesure de distance à la mer traverse toute la chaîne et ressort en carte dans la section « mismatches ».
+// BOUT EN BOUT : IndexCommune -> mapCommuneToModuleFacts -> runRules -> assembleDossier. FUT-33 (2B.2 D) : la
+// préférence « la mer compte », sans distance dite, est EXAMINÉE (la distance existe) sans verdict : ni carte
+// « favorable », ni écart, quelle que soit la distance. Le critère reste une appréciation (« indéterminé »).
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
 function entry(over: Partial<IndexCommune> = {}): IndexCommune {
   return { insee: "59512", nom: "Roubaix", dept: "59", region: "HF", lat: 50.69, lon: 3.18,
-    population: 98000, densite: 6800, distance_cote_km: 240, mer_centre_km: 240, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
+    population: 98000, densite: 6800, mer_centre_km: 240, altitude: 30, clim: {}, pct: {}, ...(over as IndexCommune) };
 }
 function project(prefs: { key: string; weight: number }[]): UserProject {
   return { posture: "recherche", intent: null, rawText: null,
@@ -36,43 +37,19 @@ function dossierFor(e: IndexCommune, p: UserProject) {
   return assembleDossier(runRules(mf, p, context(mf)), p, "commune", e.nom);
 }
 
-test("E2E mer loin (>=100, poids 3) -> carte absolute_measure dans « mismatches », arbitrage", () => {
-  const d = dossierFor(entry({ mer_centre_km: 240 }), project([{ key: "proximite_mer", weight: 3 }]));
-  const sec = d.sections.find((s) => s.key === "mismatches");
-  assert.ok(sec, "la section « mismatches » doit exister");
-  const mer = sectionFacts(sec).find((f) => f.role === "mismatch" && (f as { basis: { kind: string } }).basis.kind === "absolute_measure");
-  assert.ok(mer, "une carte de distance à la mer doit être présente");
-  assert.match(mer!.statement, /point de référence de .* se situe à environ 240 km du rivage marin/);
-  assert.equal(d.criteria.orientation, "arbitration");
-});
+for (const [km, poids] of [[0.7, 3], [8, 3], [50, 3], [240, 3], [240, 1]] as const) {
+  test(`E2E mer à ${km} km, poids ${poids} : examinée, sans carte ni verdict (aucun seuil inventé)`, () => {
+    const d = dossierFor(entry({ mer_centre_km: km }), project([{ key: "proximite_mer", weight: poids }]));
+    const toutes = d.sections.flatMap((s) => sectionFacts(s));
+    assert.equal(toutes.some((f) => (f as { projectKey?: string }).projectKey === "proximite_mer"), false);
+    const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
+    assert.equal(crit?.coverage, "examined");
+    assert.equal(crit?.outcome, "indeterminate");
+    assert.equal(d.criteria.orientation, "neutral");
+  });
+}
 
-test("E2E mer proche (<=15) -> satisfied : couverture examinée, outcome favorable, orientation favorable, aucune carte", () => {
-  const d = dossierFor(entry({ mer_centre_km: 4 }), project([{ key: "proximite_mer", weight: 3 }]));
-  const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
-  assert.equal(mer.length, 0, "aucune carte quand la commune est proche du littoral");
-  const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
-  assert.equal(crit?.coverage, "examined");
-  assert.equal(crit?.outcome, "favorable"); // satisfied (RuleOutcome) -> favorable (CriterionOutcome)
-  assert.equal(d.criteria.orientation, "favorable");
-});
-
-test("E2E mer intermédiaire (15 < d < 100) -> neutral : couverture examinée, orientation neutral, aucune carte", () => {
-  const d = dossierFor(entry({ mer_centre_km: 50 }), project([{ key: "proximite_mer", weight: 3 }]));
-  const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
-  assert.equal(mer.length, 0, "aucune carte en zone intermédiaire");
-  const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
-  assert.equal(crit?.coverage, "examined");
-  assert.equal(d.criteria.orientation, "neutral"); // examiné, aucun signal favorable matériel
-});
-
-test("E2E poids 1 : loin -> couverture acquise, aucune carte, pas d'arbitrage", () => {
-  const d = dossierFor(entry({ mer_centre_km: 240 }), project([{ key: "proximite_mer", weight: 1 }]));
-  const sec = d.sections.find((s) => s.key === "mismatches");
-  const mer = sectionFacts(sec).filter((f) => (f as { basis?: { kind: string } }).basis?.kind === "absolute_measure");
-  assert.equal(mer.length, 0, "poids 1 : silencieux");
-  assert.notEqual(d.criteria.orientation, "arbitration");
-  const crit = d.criteria.registry.find((c) => c.criterionKey === "proximite_mer");
-  assert.equal(crit?.coverage, "examined"); // examiné : le mismatch poids-1 monte la couverture
+test("E2E mer : distance inconnue -> non examinée (jamais un verdict)", () => {
+  const d = dossierFor(entry({ mer_centre_km: undefined }), project([{ key: "proximite_mer", weight: 3 }]));
+  assert.equal(d.criteria.registry.find((c) => c.criterionKey === "proximite_mer")?.coverage, "unexamined");
 });

@@ -99,7 +99,7 @@ for (const c of sample) {
   }
   const detour = route.km / best;
   rows.push({ insee: c.insee, nom: c.nom, population: c.population, altitude: c.altitude ?? null,
-    cote_km: c.distance_cote_km ?? null, pole: pole.nom,
+    cote_km: c.mer_centre_km ?? null, pole: pole.nom,
     vol_oiseau_km: Number(best.toFixed(1)), route_km: Number(route.km.toFixed(1)),
     minutes: Number(route.minutes.toFixed(0)), detour: Number(detour.toFixed(2)), fetch_status: "ok" });
   process.stderr.write(`${c.nom} -> ${pole.nom}: detour ${detour.toFixed(2)}\n`);

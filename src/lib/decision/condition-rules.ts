@@ -23,6 +23,7 @@ import { criterionCapability } from "./capability.ts";
 import { consequenceDuSignal, etatDuSignal } from "./hard-constraint-rules.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 import { deCommune } from "../typography.ts";
+import { kmLisible } from "../hard-constraints.ts";
 
 const territoireHref = "/rapport/quartier";
 
@@ -98,17 +99,17 @@ function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: strin
     : `À l'échelle de la commune, ${label} ne se distingue ni parmi les communes les plus favorables, ni parmi les moins favorables.`;
 }
 
-// LA MER A UNE MESURE, ET ELLE SE DIT TOUJOURS DE LA MÊME FAÇON, quel que soit son sens : la distance du
-// point de référence de la commune au rivage marin (FUT-33). Neutre (entre 15 et 100 km), sa règle se tait ;
-// la distance existe pourtant, et c'est elle que le lecteur veut lire.
+// LA MER A UNE MESURE, ET ELLE SE DIT TOUJOURS DE LA MÊME FAÇON : la distance du point de référence de la
+// commune au rivage marin (FUT-33). Sans seuil déclaré, sa règle ne juge pas ; la distance existe pourtant, et
+// c'est elle que le lecteur veut lire.
 function mesureMer(f: ModuleFacts): { statement: string; evidence: EvidenceRef } | null {
   if (f.merCentreKm == null) return null;
-  const km = Math.round(f.merCentreKm);
+  const km = kmLisible(f.merCentreKm);
   return {
-    statement: `Le point de référence ${deCommune(f.nom)} se situe à environ ${km} km du rivage marin.`,
+    statement: `Le point de référence ${deCommune(f.nom)} est à environ ${km} du rivage marin.`,
     evidence: {
-      factId: "coastDistance.proximite_mer", module: "territoire", label: `Territoire · ${f.nom}`,
-      observedValue: `point de référence à environ ${km} km du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
+      factId: "commune.merCentreKm", module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
+      observedValue: `point de référence à environ ${km} du rivage marin`, grain: "commune", relation: "proximite", href: territoireHref,
     },
   };
 }

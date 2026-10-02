@@ -43,7 +43,7 @@ test("« à moins de N km de la mer » applique N au centre de la commune (mer_c
   assert.equal(evaluateNearSea(dix, attrs("Bordeaux|33")).status, "incompatible");
   const a = evaluateNearSea(cinq, attrs("Caen|14"));
   assert.ok("evidenceKeys" in a && a.evidenceKeys.includes("commune.merCentreKm"));
-  assert.match("statement" in a ? a.statement ?? "" : "", /^Le point de référence de Caen se situe à environ 9,2 km du rivage marin/);
+  assert.match("statement" in a ? a.statement ?? "" : "", /^Le point de référence de Caen est à environ 9,2 km du rivage marin, plus loin que les 5 km au plus que vous avez indiqués\./);
 });
 
 test("« pas le littoral » = commune classée Mer : Annecy, Rochefort, Bordeaux acceptées ; Arles et Marseille écartées", () => {
@@ -77,7 +77,7 @@ test("grain et capacité : depuis la phase C, le dossier lit la même vérité d
   }
 });
 
-test("legacy : les consommateurs migrés ne lisent plus distance_cote_km ; le champ reste dans l'index", () => {
+test("legacy : aucun consommateur ne lit plus distance_cote_km, retiré de l'index en 2B.2 D", () => {
   const src = readFileSync(new URL("src/lib/comparateur-vie.ts", racine), "utf8");
   const fenetre = (debut: string, n: number) => src.slice(src.indexOf(debut), src.indexOf(debut) + n);
   for (const bloc of [fenetre('case "proximite_mer":', 400), fenetre('const sea = hints.find', 300), fenetre("if (ancreLittorale(entry))", 300), fenetre("export async function perimeterAllowsCoast", 900)]) {
@@ -85,5 +85,5 @@ test("legacy : les consommateurs migrés ne lisent plus distance_cote_km ; le ch
     assert.doesNotMatch(bloc, /distance_cote_km/);
   }
   assert.doesNotMatch(readFileSync(new URL("src/lib/mer-recherche.ts", racine), "utf8"), /distance_cote_km/);
-  assert.ok(communes.every((x) => typeof x.distance_cote_km === "number"));
+  assert.ok(communes.every((x) => !("distance_cote_km" in x)));
 });

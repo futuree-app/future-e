@@ -16,7 +16,7 @@ import { winterMildnessScore, WINTER_MILDNESS_CONVENTION } from "@/lib/climate/w
 import { deCommune } from "@/lib/typography";
 import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
-import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale } from "@/lib/mer-recherche";
+import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale, communeLittoraleMer, categorieDeFacade, presDuRivage } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
@@ -34,14 +34,13 @@ import {
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
 import { etalerResultats } from "@/lib/comparateur-etalement";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
-import { travelThresholdLabel, ROUTABLE_MODES } from "@/lib/hard-constraints";
+import { travelThresholdLabel, ROUTABLE_MODES, kmLisible } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import {
   deptRegionalCategories,
   deptFromInsee,
   DEPT_MEDITERRANEE,
-  DEPT_LITTORAL_ATLANTIQUE,
 } from "@/lib/commune-categories";
 import { centraliteRang } from "@/lib/centralite-services";
 
@@ -262,7 +261,8 @@ export type MatchResult = {
   // -> phrase. Jamais de chiffre. cf. assignSignaux + AMBIENT_DIMENSIONS.
   signaux: Record<string, string>;
   metrics: {
-    distance_cote_km: number;
+    // FUT-33 : point de référence → rivage marin (km), ou null si inconnu.
+    mer_centre_km: number | null;
     population: number | null;
     jours_chauds_30: number | null;
     temp_hiver: number | null;
@@ -437,16 +437,17 @@ export type IndexCommune = {
   lon: number;
   population: number | null;
   densite: number | null;
-  // ANCIEN proxy (min haversine vers une liste de villes côtières). Gardé tant que ses consommateurs n'ont pas
-  // migré un par un vers les champs mer_* ci-dessous (FUT-33, phase 2B). Ne pas l'utiliser pour du neuf.
-  distance_cote_km: number;
-  // FUT-33 (phase 2A) : vérité littorale, NON branchée. Rivage marin = Limite terre-mer Shom-IGN coupée aux
-  // limites transversales de la mer, lagunes comprises (data/mer/provenance.json). Jamais « plage » ni « océan ».
+  // FUT-33 : la vérité littorale. Rivage marin = Limite terre-mer Shom-IGN coupée aux limites transversales de la
+  // mer, lagunes comprises (data/mer/provenance.json). Jamais « plage » ni « océan ». L'ancien proxy (distance
+  // à une liste de villes côtières) a été retiré de l'index le 02/10/2026.
   mer_centre_km?: number;            // point de référence de la commune → rivage marin
   mer_territoire_km?: number | null; // territoire communal → rivage marin (0 = la commune touche le rivage)
   loi_littoral?: string[] | null;    // classement DGALN brut : "Mer" | "Estuaire" | "Lac"
   loi_effective?: string[] | null;   // après héritage PLM (arrondissement → commune)
   loi_source_commune?: string | null; // commune dont le classement est hérité, sinon null
+  // Façade maritime OFFICIELLE (planification maritime DGAMPA-Shom), valeur source : "MEMN" | "NAMO" | "SA" |
+  // "MED", pour les seules communes classées « Mer » ; sinon null. Sa traduction éditoriale : mer-recherche.ts.
+  mer_facade?: string | null;
   altitude?: number | null; // m NGF, centroïde IGN RGE ALTI (base de la détection « montagne »)
   // Proximité au relief (0–100) : altitude max dans ~35 km. Distingue « proche
   // d'une montagne » (Grenoble 95, Pau 69) de la plaine (Toulouse 0), là où
@@ -727,11 +728,13 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
   const lat = c.lat;
   const sud = lat != null && lat < 45.3; // axe canicule : framing « sud » vs « nord »
 
-  // ── Côte : distance réelle, plus le préfixe département ─────────────────────
-  if (c.distance_cote_km != null && c.distance_cote_km <= 5) {
+  // ── Côte (FUT-33) : commune classée « Mer » au titre de la loi Littoral ; l'orientation vient de la façade
+  //    officielle (planification maritime), traduite par une convention éditoriale versionnée. Ce tag choisit un
+  //    ANGLE de question (submersion, érosion…) ; il ne prouve aucun risque : la donnée dédiée le fait.
+  if (communeLittoraleMer(c)) {
     cats.add('littoral');
-    if (DEPT_MEDITERRANEE.has(dept)) cats.add('littoral_mediterranee');
-    else if (DEPT_LITTORAL_ATLANTIQUE.has(dept)) cats.add('littoral_atlantique');
+    const orientation = categorieDeFacade(c);
+    if (orientation) cats.add(orientation);
   }
 
   // ── Montagne : altitude propre OU proximité au relief ──────────────────────
@@ -952,7 +955,9 @@ function bassinLabel(nom: string): string {
 
 function buildSignature(c: IndexCommune): string[] {
   const sig: string[] = [];
-  const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
+  // FUT-33 : la signature « Côte bretonne », « Côte méditerranéenne » nomme une COMMUNE LITTORALE (loi Littoral),
+  // par le nom d'usage de sa région. Elle ne dit pas que le centre est au bord de l'eau.
+  const coastal = communeLittoraleMer(c);
   const massifToken = DEPT_TO_MASSIF[c.dept];
   const alt = c.altitude ?? 0;
 
@@ -992,14 +997,9 @@ function buildSignature(c: IndexCommune): string[] {
   //    remplir, une signature courte est assumée.
   if (sig.length < 3) {
     const djf = c.clim?.NORTMm_seas_DJF ?? null;
-    // Sur la côte méditerranéenne, « Climat méditerranéen » répète le mot déjà posé
-    // par « Côte méditerranéenne » : il n'ajoute aucune facette. On laisse alors
-    // parler le climat VÉCU distinctif, la douceur des hivers (« Hivers doux »), via
-    // la cascade ci-dessous. L'Atlantique/Manche n'a pas ce doublon : « Climat
-    // maritime » est une facette neuve à côté de « Côte bretonne/normande ».
-    const med = coastal && c.region != null && MED_REGIONS.has(c.region);
-    if (coastal && !med) sig.push("Climat maritime");
-    else if (massifToken && alt >= 600) sig.push("En altitude");
+    // FUT-33 : plus de « Climat maritime » déduit de la côte. Être une commune littorale n'établit aucun climat ;
+    // la facette climatique vient des données climatiques (douceur des hivers, DRIAS), comme ailleurs.
+    if (massifToken && alt >= 600) sig.push("En altitude");
     else if (djf != null && djf <= 3) sig.push("Hivers marqués");
     else if (djf != null && djf >= 8) sig.push("Hivers doux");
   }
@@ -1025,7 +1025,9 @@ function tailleLabel(pop: number | null): "village" | "petite" | "moyenne" | "gr
 function buildIdentiteCandidates(c: IndexCommune): string[] {
   const uuPop = tailleVille(c);
   const taille = tailleLabel(uuPop);
-  const coastal = c.distance_cote_km != null && c.distance_cote_km <= 15;
+  // FUT-33 : une promesse « au bord de l'eau » exige une commune littorale ET un point de référence près du
+  // rivage (repère de présentation, 8 km). Arles est littorale, son centre est loin de l'eau : pas de promesse.
+  const coastal = communeLittoraleMer(c) && presDuRivage(c);
   const altitude = c.altitude ?? 0;
   const relief = c.relief_proximite ?? 0;
   // Montagne : altitude propre élevée, ou massif vraiment à portée et déjà en hauteur.
@@ -1431,7 +1433,7 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "industrie", label: "Sites industriels", themeId: "sante_env", key: "faible_exposition_industrielle", paliers: ["Peu exposé aux sites industriels à risque", "Présence industrielle modérée", "Environnement industriel marqué"], gp: "les sites industriels", forte: "son éloignement des sites industriels", aide: "La présence de sites industriels classés à proximité, pas un niveau de pollution.", risque: true, directionnel: true },
   { id: "agriculture", label: "Agriculture intensive", themeId: "sante_env", key: "faible_pression_agricole", paliers: ["Peu d'agriculture intensive", "Agriculture intensive modérée", "Agriculture intensive marquée"], gp: "l'agriculture intensive", forte: "le peu d'agriculture intensive autour", aide: "L'éloignement des cultures à traitements fréquents.", risque: true, directionnel: true },
   { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", forte: "ses espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie.", risque: false, directionnel: true },
-  { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["En bord de mer", "Proche du littoral", "Loin de la mer"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "La proximité de la côte.", risque: false, directionnel: true },
+  { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["Rivage marin proche", "Rivage marin à distance", "Rivage marin éloigné"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "Distance du centre de la commune au rivage marin, lagunes comprises.", risque: false, directionnel: true },
   { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
   { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Peu dépendant de la voiture", "Dépendance modérée à la voiture", "Voiture indispensable"], gp: "la vie sans voiture", forte: "sa faible dépendance à la voiture", aide: "Part des trajets du quotidien faisables autrement qu'en voiture.", risque: false, directionnel: true },
   { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", forte: "sa desserte ferroviaire", aide: "La desserte par le train et les gares proches.", risque: false, directionnel: true },
@@ -1612,7 +1614,7 @@ export function buildComparaisonComplete(
         return { insee: r.insee, palier: "Non concernée", qualifier: null, disponible: false, alerte: false };
       }
       const band = bands[i];
-      const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : dim.paliers[band!];
+      const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : palierAffiche(dim, band!, c);
       // Qualifier (source proche) seulement pour expliquer une EXPOSITION : pas sur le tier
       // favorable, pas sur la commune qui MÈNE (sinon « Avantage » + « site à risque proche »
       // se contredisent).
@@ -1636,15 +1638,16 @@ export function buildComparaisonComplete(
         if (spread >= 1) {
           const leaderIdx = bands.findIndex((b) => b === minBand);
           const exposeIdx = bands.findIndex((b) => b === maxBand);
+          const leaderCol = cols[leaderIdx], exposeCol = cols[exposeIdx];
           divCands.push({
             dimId: dim.id,
             themeId: dim.themeId,
             label: dim.label,
             themeIdx: THEME_ORDER.findIndex((t) => t.id === dim.themeId),
             leaderInsee: trio[leaderIdx].insee,
-            leaderPalier: dim.paliers[minBand],
+            leaderPalier: leaderCol ? palierAffiche(dim, minBand as 0 | 1 | 2, leaderCol) : dim.paliers[minBand],
             exposeInsee: trio[exposeIdx].insee,
-            exposePalier: dim.paliers[maxBand],
+            exposePalier: exposeCol ? palierAffiche(dim, maxBand as 0 | 1 | 2, exposeCol) : dim.paliers[maxBand],
             spread,
             risque: !!dim.risque,
           });
@@ -1861,6 +1864,13 @@ function heritageRecit(c: IndexCommune): string | null {
   return `${art} ${mot} est ${rec} à proximité.`;
 }
 const SIGNAUX_MAX = 5;
+
+// FUT-33 : la dimension « Mer » montre la DISTANCE (« Rivage marin · 0,7 km »), jamais un palier tiré du score de
+// classement (qui écrivait « En bord de mer » jusqu'à 51 km). Le score ne sert plus qu'à dire qui est le plus près.
+function palierAffiche(dim: (typeof DIMENSIONS)[number], band: 0 | 1 | 2, c: IndexCommune): string {
+  if (dim.id === "mer" && c.mer_centre_km != null) return `Rivage marin · ${kmLisible(c.mer_centre_km)}`;
+  return dim.paliers[band];
+}
 
 function bandIndex(score: number): 0 | 1 | 2 {
   return score >= 66 ? 0 : score < 34 ? 2 : 1;
@@ -2084,12 +2094,8 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   // (le chiffre cassait le récit sur le révélateur d'arbitrages). Le détail au rapport.
   // FUT-33 : un FAIT, jamais un palier déduit de la courbe de classement (« loin de la mer » n'est pas un score).
   eloignement_mer: (c) => `à ${Math.round(c.mer_centre_km ?? 0)} km de la mer`,
-  proximite_mer: (c) =>
-    c.distance_cote_km <= 2
-      ? "en bord de mer"
-      : c.distance_cote_km <= 8
-        ? "à deux pas du littoral"
-        : "à proximité du littoral",
+  // FUT-33 : la distance est l'information, le seul qualificatif honnête (lagunes comprises, jamais « plage »).
+  proximite_mer: (c) => (c.mer_centre_km != null ? `rivage marin à ${kmLisible(c.mer_centre_km)}` : "rivage marin proche"),
   cadre_calme: "cadre calme et habitable",
   // On nomme, on ne mesure pas : paliers qualitatifs sur la taille du bassin de vie,
   // jamais le nombre d'habitants brut (le chiffre cassait le récit). Détail au rapport.
@@ -2730,7 +2736,7 @@ function baseResult(
     heritageIndustriel: heritageRecit(c),
     signaux: {}, // rempli après l'assemblage final sur le groupe affiché (cf. assignSignaux)
     metrics: {
-      distance_cote_km: c.distance_cote_km,
+      mer_centre_km: c.mer_centre_km ?? null,
       population: c.population,
       jours_chauds_30: c.clim.NORTX30D_yr ?? null,
       temp_hiver: c.clim.NORTMm_seas_DJF ?? null,

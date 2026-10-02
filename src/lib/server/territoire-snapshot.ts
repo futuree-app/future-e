@@ -12,7 +12,7 @@ import "server-only";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { getTerritoryContext, getCommuneDistinctive } from "@/lib/comparateur-vie";
+import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry } from "@/lib/comparateur-vie";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 import { getEra5Trend } from "@/lib/era5-trend";
@@ -36,7 +36,8 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     getEra5Trend(insee).catch(() => null),
   ]);
   const entry = ctx?.entry ?? null;
-  const mood = deriveTerritoryMood({ communeName, inseeCode: insee, territoire: null });
+  // FUT-33 : la typologie se lit sur la COMMUNE (loi Littoral, façade officielle), plus sur son département.
+  const mood = deriveTerritoryMood({ communeName, inseeCode: insee, territoire: null, categories: entry ? deriveCategoriesFromEntry(entry) : undefined });
   const ademe = enrichment?.ademe?.commune ?? null;
 
   const inputs: TerritoireInputs = {
@@ -46,7 +47,7 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
       ? {
           population: entry.population ?? null,
           densite: entry.densite ?? null,
-          distance_cote_km: entry.distance_cote_km ?? null,
+          mer_centre_km: entry.mer_centre_km ?? null,
           relief_proximite: entry.relief_proximite ?? null,
           altitude: entry.altitude ?? null,
           nature: entry.nature

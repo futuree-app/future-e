@@ -1,4 +1,6 @@
 // FUT-33 phase 2B.1 : comparaison ancien / nouveau comportement de la recherche, sur l'index réel.
+// HISTORIQUE : exige un index antérieur au 02/10/2026 (2B.2 D), qui portait encore distance_cote_km ; le résultat
+// est figé dans scripts/mer/fixtures/comparaison-2b1.json.
 // Usage : node scripts/mer/comparer-2b1.mts > scripts/mer/fixtures/comparaison-2b1.json
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";

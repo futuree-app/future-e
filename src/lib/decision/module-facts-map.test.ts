@@ -6,7 +6,7 @@ import type { IndexCommune } from "../comparateur-vie.ts";
 function entry(over: Partial<IndexCommune> = {}): IndexCommune {
   return {
     insee: "17300", nom: "Fouras", dept: "17", region: "NA", lat: 46, lon: -1,
-    population: 4000, densite: 500, distance_cote_km: 0.5, altitude: 8,
+    population: 4000, densite: 500, altitude: 8,
     clim: {}, pct: {}, ...(over as IndexCommune),
   };
 }
@@ -38,13 +38,13 @@ test("mapping : absence d'inondation -> null (jamais 0)", () => {
 });
 
 test("le mapping reconstitue rankBands depuis la forme COMPACTE (points de base)", () => {
-  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0,
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0,
     rankBands: { nature: [1234, 1258] } } as never;
   const mf = mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null });
   assert.deepEqual(mf.rankBands, { nature: { low: 0.1234, high: 0.1258 } });
 });
 test("une commune SANS rankBands rend null (jamais un objet vide)", () => {
-  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0, distance_cote_km: 0 } as never;
+  const entry = { insee: "1", nom: "X", dept: "01", lat: 0, lon: 0 } as never;
   assert.equal(mapCommuneToModuleFacts(entry, {}, { hasAddress: false, tailleVille: 1000, climat: null }).rankBands, null);
 });
 

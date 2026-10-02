@@ -6,11 +6,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { unpackGz, packFile, INDEX_JSON_PATH, INDEX_GZ_PATH } from "../lib/index-io.mjs";
-import { lireMer, ajouterMer, MER_CHAMPS } from "../lib/mer-index.mjs";
+import { lireMer, ajouterMer, MER_CHAMPS, CHAMPS_RETIRES } from "../lib/mer-index.mjs";
 
 const empreinte = (o) => createHash("sha256").update(JSON.stringify(o)).digest("hex");
 const index = JSON.parse(unpackGz(readFileSync(INDEX_GZ_PATH)).toString("utf8"));
-const sansMer = (idx) => ({ ...idx, meta: { ...idx.meta, mer: undefined }, communes: idx.communes.map((c) => Object.fromEntries(Object.entries(c).filter(([k]) => !MER_CHAMPS.includes(k)))) });
+// Les champs mer (ajoutés) et les champs retirés (phase 2B.2 D : distance_cote_km) sont hors de l'empreinte :
+// TOUT LE RESTE doit être identique.
+const sansMer = (idx) => ({ ...idx, meta: { ...idx.meta, mer: undefined }, communes: idx.communes.map((c) => Object.fromEntries(Object.entries(c).filter(([k]) => !MER_CHAMPS.includes(k) && !CHAMPS_RETIRES.includes(k)))) });
 const avant = empreinte(sansMer(index));
 index.meta.mer = ajouterMer(index.communes, lireMer());
 if (empreinte(sansMer(index)) !== avant) throw new Error("Un champ existant de l'index a changé : refus.");

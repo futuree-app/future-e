@@ -7,7 +7,7 @@
 // Le rivage marin comprend lagunes et bassins (D2) : jamais « plage », « océan », « baignade ».
 // Aucune de ces mesures n'est une distance d'adresse : à l'adresse, ce sera point → rivage 5 m (non branché).
 
-type CommuneMer = { mer_centre_km?: number | null; loi_effective?: string[] | null };
+type CommuneMer = { mer_centre_km?: number | null; loi_effective?: string[] | null; mer_facade?: string | null };
 
 // LA COURBE DE CLASSEMENT (FUT-33 2B.2, validée le 02/10/2026 ; étude : docs/audits/2026-10-02-fut33-phase2b2b-
 // etude-courbe.md). Rationnelle, 100 / (1 + (d/20)²) : un plateau au bord de l'eau (≥ 94 jusqu'à 5 km, les
@@ -45,4 +45,26 @@ export function communeLittoraleMer(c: CommuneMer): boolean {
 export const ANCRE_LITTORALE_CENTRE_MAX_KM = 5;
 export function ancreLittorale(c: CommuneMer): boolean {
   return communeLittoraleMer(c) && c.mer_centre_km != null && c.mer_centre_km <= ANCRE_LITTORALE_CENTRE_MAX_KM;
+}
+
+// LA FAÇADE, TRADUITE POUR LES TEXTES (FUT-33, 2B.2 D). L'index stocke la valeur SOURCE (planification maritime
+// DGAMPA-Shom : MEMN, NAMO, SA, MED), jamais un mot du lecteur. Cette table est une CONVENTION ÉDITORIALE
+// versionnée, qui choisit des angles de texte (les questions de l'accueil) ; elle ne prétend pas que la façade
+// officielle « est » l'Atlantique. MEMN (Manche Est-mer du Nord) n'a pas de catégorie d'orientation : la commune
+// reste « littorale », sans plus.
+export const FACADE_EDITORIALE = {
+  version: "facade-editoriale-v1",
+  categories: { NAMO: "littoral_atlantique", SA: "littoral_atlantique", MED: "littoral_mediterranee" } as Record<string, string>,
+} as const;
+
+export function categorieDeFacade(c: CommuneMer): string | null {
+  return c.mer_facade ? FACADE_EDITORIALE.categories[c.mer_facade] ?? null : null;
+}
+
+// LE REPÈRE DE PRÉSENTATION « près du rivage » (validé le 02/10/2026) : 8 km au plus du point de référence.
+// Il ne sert qu'à choisir un texte (une promesse « au bord de l'eau ») ; il ne décide rien et ne s'affiche
+// jamais sans la distance elle-même.
+export const REPERE_PRES_DU_RIVAGE_KM = 8;
+export function presDuRivage(c: CommuneMer): boolean {
+  return c.mer_centre_km != null && c.mer_centre_km <= REPERE_PRES_DU_RIVAGE_KM;
 }

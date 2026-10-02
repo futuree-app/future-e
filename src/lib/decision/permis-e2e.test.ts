@@ -36,7 +36,7 @@ const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
 function entry(): IndexCommune {
   return {
     insee: "17300", nom: "La Rochelle", dept: "17", region: "Nouvelle-Aquitaine",
-    lat: 46.16, lon: -1.15, population: 75000, densite: 2900, distance_cote_km: 1, mer_centre_km: 1,
+    lat: 46.16, lon: -1.15, population: 75000, densite: 2900, mer_centre_km: 1,
     altitude: 10, clim: {}, pct: {},
   } as IndexCommune;
 }

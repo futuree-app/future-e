@@ -4,7 +4,7 @@
  "entry": {
   "population": 6227,
   "densite": 975.76,
-  "distance_cote_km": 11,
+  "mer_centre_km": 1.04,
   "relief_proximite": 0,
   "altitude": 2,
   "nature": {
@@ -33,7 +33,7 @@
  },
  "typology": {
   "type": "littoral_atlantique",
-  "label": "Littoral atlantique"
+  "label": "Littoral"
  },
  "ademe": {
   "densite": 975.76,

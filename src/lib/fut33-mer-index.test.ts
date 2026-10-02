@@ -18,18 +18,27 @@ const c = (insee: string) => par.get(insee) as Record<string, any>;
 
 test("métadonnées : version, champs, attribution Shom-IGN", () => {
   assert.equal(index.meta.mer?.version, "mer-v2");
-  assert.deepEqual(index.meta.mer?.champs, ["mer_centre_km", "mer_territoire_km", "loi_littoral", "loi_effective", "loi_source_commune"]);
+  assert.deepEqual(index.meta.mer?.champs, ["mer_centre_km", "mer_territoire_km", "loi_littoral", "loi_effective", "loi_source_commune", "mer_facade"]);
   assert.match(index.meta.mer!.attribution, /© Shom-IGN, 2021, http:\/\/dx\.doi\.org\/10\.17183\/LIMTM/);
 });
 
-test("toutes les communes portent les nouveaux champs ; l'ancien distance_cote_km est intact", () => {
+test("toutes les communes portent la vérité littorale ; l'ancien distance_cote_km est retiré (2B.2 D)", () => {
   for (const x of index.communes) {
     assert.equal(typeof x.mer_centre_km, "number", String(x.insee));
     assert.ok(x.mer_territoire_km === null || typeof x.mer_territoire_km === "number");
-    assert.equal(typeof x.distance_cote_km, "number");
+    assert.equal("distance_cote_km" in x, false, String(x.insee));
   }
-  assert.equal(c("17094").distance_cote_km, 11, "ancien proxy conservé tel quel");
-  assert.equal(c("22113").distance_cote_km, 58);
+});
+
+test("façade officielle : valeur source, communes classées « Mer » seulement", () => {
+  const facades = new Set(index.communes.map((x) => x.mer_facade ?? null));
+  assert.deepEqual([...facades].sort(), ["MED", "MEMN", "NAMO", "SA", null].sort());
+  for (const x of index.communes) {
+    if (x.mer_facade != null) assert.ok(((x.loi_effective as string[] | null) ?? []).includes("Mer"), String(x.insee));
+  }
+  const attendu: [string, string | null][] = [["29019", "NAMO"], ["17300", "SA"], ["59183", "MEMN"], ["13207", "MED"], ["2A004", "MED"], ["14118", null], ["74010", null]];
+  for (const [insee, f] of attendu) assert.equal(c(insee).mer_facade ?? null, f, insee);
+  assert.match(JSON.stringify((index.meta.mer as Record<string, unknown>).facade), /DGAMPA-Shom, 2026/);
 });
 
 test("valeurs : Châtelaillon et Lannion au bord de la mer, Bordeaux et Rouen intérieures", () => {
@@ -57,7 +66,7 @@ test("rivage 5 m embarqué : la distance à l'adresse retrouve la distance du ce
   }
 });
 
-test("phase 2B.2 C : la recherche et le dossier lisent les champs mer_* / loi_* ; ni le Territoire ni l'éditorial", () => {
+test("phase 2B.2 D : la liste fermée des fichiers qui lisent les champs mer_* / loi_* de l'index", () => {
   const fichiers: string[] = [];
   const parcourir = (dossier: string) => {
     for (const n of readdirSync(dossier)) {
@@ -68,10 +77,12 @@ test("phase 2B.2 C : la recherche et le dossier lisent les champs mer_* / loi_* 
   };
   parcourir(fileURLToPath(new URL("src", racine)));
   const lecteurs = fichiers.filter((f) => /mer_centre_km|mer_territoire_km|loi_effective|loi_source_commune/.test(readFileSync(f, "utf8")));
-  // commune-attributes (merDeLaCommune) sert la recherche ET le dossier ; hard-constraints et territory-facts ne
-  // les nomment qu'en commentaire ; hard-corpus est une fixture de test. Le Territoire et l'éditorial : étape D.
+  // commune-attributes (merDeLaCommune) sert la recherche ET le dossier ; mer-recherche porte les règles et la
+  // traduction des façades ; comparateur-vie l'éditorial du comparateur ; territoire (faits, snapshot) le passeport.
+  // hard-constraints et territory-facts ne les nomment qu'en commentaire ; hard-corpus est une fixture.
   assert.deepEqual(lecteurs.map((f) => f.split("/src/")[1]).sort(), [
     "lib/__fixtures__/hard-corpus.ts", "lib/commune-attributes.ts", "lib/comparateur-vie.ts",
     "lib/decision/territory-facts.ts", "lib/hard-constraints.ts", "lib/mer-recherche.ts",
+    "lib/server/territoire-snapshot.ts", "lib/territoire/facts.ts",
   ]);
 });

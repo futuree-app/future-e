@@ -9,21 +9,6 @@ export type LittoralFacade =
   | "mediterranee"
   | "outre_mer";
 
-// Façade par département (pour les communes connues seulement par l'érosion,
-// sans enregistrement dans la liste loi Climat et Résilience).
-const FACADE_BY_DEPT: Record<string, LittoralFacade> = {
-  "62": "manche", "59": "manche", "80": "manche", "76": "manche", "14": "manche", "50": "manche",
-  "22": "bretagne", "29": "bretagne", "35": "bretagne", "56": "bretagne",
-  "44": "atlantique", "85": "atlantique", "17": "atlantique", "33": "atlantique", "40": "atlantique", "64": "atlantique",
-  "66": "mediterranee", "11": "mediterranee", "34": "mediterranee", "30": "mediterranee",
-  "13": "mediterranee", "83": "mediterranee", "06": "mediterranee", "2A": "mediterranee", "2B": "mediterranee",
-};
-
-function facadeFromInsee(insee: string): LittoralFacade {
-  const p = insee.slice(0, 2);
-  if (p === "97" || p === "98") return "outre_mer";
-  return FACADE_BY_DEPT[p] ?? "atlantique";
-}
 
 export type LittoralDecret = { numero: string | null; url: string | null; debut: string | null };
 
@@ -44,7 +29,8 @@ export type LittoralErosion = {
 
 export type LittoralSummary = {
   insee: string;
-  facade: LittoralFacade;
+  // FUT-33 : la façade de la liste officielle (loi Climat et Résilience), ou null : jamais devinée du département.
+  facade: LittoralFacade | null;
   // Inscription au titre du recul du trait de côte (loi Climat et Résilience, L321-15).
   traitDeCote: { concernee: boolean; decret: LittoralDecret | null };
   // Recul observé (Cerema), null si la commune n'a pas de donnée d'érosion.
@@ -102,7 +88,7 @@ async function loadErosion(): Promise<Map<string, ErosionRecord>> {
 function build(insee: string, cr: CrRecord | undefined, er: ErosionRecord | undefined): LittoralSummary {
   return {
     insee,
-    facade: cr?.facade ?? facadeFromInsee(insee),
+    facade: cr?.facade ?? null,
     traitDeCote: { concernee: !!cr?.concernee, decret: cr?.decret ?? null },
     erosion:
       er && er.littoral

@@ -94,7 +94,12 @@ export default async function RapportQuartierPage(
   const drought = screen?.drought ?? null;
 
   // Identité visuelle du territoire (déterministe, sans appel réseau).
-  const territoryMood = deriveTerritoryMood({ communeName, inseeCode, territoire: null });
+  // FUT-33 : la typologie figée dans le snapshot (commune, loi Littoral) fait foi ; le repli ne sait plus rien
+  // du littoral.
+  const territoryMood = deriveTerritoryMood({
+    communeName, inseeCode, territoire: null,
+    typeLabel: snapshot ? valueOf<string>(snapshot, "place.typology") : null,
+  });
 
   // LE COMPTE QUE LA PREUVE DU DOSSIER ANNONCE, et il vient de l'ARTEFACT quand il existe.
   //

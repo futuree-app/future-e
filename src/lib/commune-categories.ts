@@ -13,12 +13,6 @@ export const DEPT_MEDITERRANEE = new Set([
   '04', '06', '11', '13', '30', '34', '66', '83', '84', '2A', '2B',
 ]);
 
-// Only departments whose main city is genuinely coastal — avoids mislabeling
-// Rennes (35), Nantes (44), Bordeaux (33), Rouen (76), Pau (64), Amiens (80), Arras (62).
-export const DEPT_LITTORAL_ATLANTIQUE = new Set([
-  '14', '17', '22', '29', '50', '56', '85',
-]);
-
 export const DEPT_MONTAGNE = new Set([
   '04', '05', '09', '38', '48', '63', '65', '73', '74',
 ]);
@@ -68,7 +62,8 @@ export function deptRegionalCategories(inseeCode: string): string[] {
 }
 
 // Fallback when the commune is absent from the index (no commune-level data).
-// Department prefix only: regional categories + a coarse montagne/littoral guess.
+// Department prefix only: regional categories + a coarse montagne guess. FUT-33 : no littoral guess any more —
+// « littoral » is a commune-level fact (loi Littoral classification), never a department.
 export function deriveCategories(inseeCode: string): string[] {
   const dept = deptFromInsee(inseeCode);
   if (!dept) return ['all'];
@@ -76,13 +71,6 @@ export function deriveCategories(inseeCode: string): string[] {
   const cats = deptRegionalCategories(inseeCode);
 
   if (DEPT_MONTAGNE.has(dept)) cats.push('montagne');
-  // littoral (generic) + orientation, so littoral_atlantique / littoral_mediterranee
-  // questions (surfer_ici, baignade_ici) can fire even on the dept fallback path.
-  if (DEPT_LITTORAL_ATLANTIQUE.has(dept)) {
-    cats.push('littoral', 'littoral_atlantique');
-  } else if (DEPT_MEDITERRANEE.has(dept)) {
-    cats.push('littoral', 'littoral_mediterranee');
-  }
 
   return cats.length > 0 ? cats : ['all'];
 }

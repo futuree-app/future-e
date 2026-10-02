@@ -116,7 +116,7 @@ async function loadIndex() {
 
 function classify(commune) {
   if (commune.population >= 100000) return "grande_ville";
-  if ((commune.distance_cote_km ?? Infinity) <= 8) return "littorale";
+  if ((commune.mer_centre_km ?? Infinity) <= 8) return "littorale";
   if (
     commune.expoIndustrielle?.sourceDominante ||
     commune.heritageIndustriel ||
@@ -223,7 +223,7 @@ function buildSample(size, seed, index) {
     "industrielle_portuaire",
   );
 
-  const coastal = index.filter((c) => (c.distance_cote_km ?? Infinity) <= 12);
+  const coastal = index.filter((c) => (c.mer_centre_km ?? Infinity) <= 12);
   roundRobinBuckets(
     out,
     seen,

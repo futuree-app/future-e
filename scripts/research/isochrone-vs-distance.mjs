@@ -97,7 +97,7 @@ for (const [insee, nom] of cible) {
     continue;
   }
   const rayonEq = Math.sqrt(aire / Math.PI);
-  rows.push({ insee, nom, altitude: c.altitude ?? null, cote_km: c.distance_cote_km ?? null,
+  rows.push({ insee, nom, altitude: c.altitude ?? null, cote_km: c.mer_centre_km ?? null,
     aire_km2: Math.round(aire), rayon_equivalent_km: Number(rayonEq.toFixed(1)), fetch_status: "ok" });
   process.stderr.write(`${nom}: ${Math.round(aire)} km2, rayon eq. ${rayonEq.toFixed(1)} km\n`);
   await sleep(400);

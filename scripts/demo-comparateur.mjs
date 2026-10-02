@@ -28,7 +28,7 @@ const PREF_DEFS={
 const POS={ faible_chaleur:'étés plus frais', douceur_climat:'climat doux',
   ensoleillement_recherche:'plus ensoleillé', faible_secheresse:'sols peu exposés à la sécheresse',
   faible_risque_feu:'faible risque de feu', faible_precip_extremes:'pluies extrêmes rares',
-  proximite_mer:(c)=>`à ${c.distance_cote_km} km de la côte`, cadre_calme:'cadre calme et habitable',
+  proximite_mer:(c)=>`à ${c.mer_centre_km} km de la côte`, cadre_calme:'cadre calme et habitable',
   eviter_isolement:(c)=>`vie locale réelle (${c.population?.toLocaleString('fr-FR')} hab.)`,
   air_sain:'air de fond plus pur', acces_soins:'bon accès aux médecins', acces_services:'services à proximité' };
 const NEG={ faible_chaleur:'chaleur en hausse', douceur_climat:'hivers rudes ou étés marqués',
@@ -42,7 +42,7 @@ function clamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
 function subScore(key,c){
   const d=PREF_DEFS[key]; if(!d) return null;
   if(d.kind==='clim'){ const p=pctClim(c,d.fields); return p==null?null:(d.dir==='lower'?100-p:p); }
-  if(d.kind==='coast') return clamp(100-c.distance_cote_km/1.5,0,100);
+  if(d.kind==='coast') return clamp(100-c.mer_centre_km/1.5,0,100);
   if(d.kind==='calme') return lerp(CALME,c.densite);
   if(d.kind==='isolement') return lerp(ISOLEMENT,c.population);
   if(d.kind==='douceur'){ const w=lerp(WINTER_MILD,c.clim.NORTMm_seas_DJF); if(w==null) return null;
@@ -58,7 +58,7 @@ function subScore(key,c){
 function passesHard(c,hc){
   if(c.population!=null && c.population<POP_FLOOR) return false;
   if(hc.region && c.region!==hc.region) return false;
-  if(hc.nearSea?.active && c.distance_cote_km>(hc.nearSea.maxKm??30)) return false;
+  if(hc.nearSea?.active && c.mer_centre_km>(hc.nearSea.maxKm??30)) return false;
   if(hc.communeSize){ if(hc.communeSize.min!=null && (c.population??0)<hc.communeSize.min) return false;
     if(hc.communeSize.max!=null && (c.population??Infinity)>hc.communeSize.max) return false; }
   return true;
@@ -76,7 +76,7 @@ function run(index,parsed){
     const reasons=[...vis].sort((a,b)=>b.weight*b.s-a.weight*a.s).slice(0,3).filter(x=>x.s>=55).map(x=>reason(x.key,c));
     const worst=[...vis].sort((a,b)=>a.weight*a.s-b.weight*b.s)[0];
     const tradeoff=worst&&worst.s<50?NEG[worst.key]:null;
-    return {nom:c.nom,dept:c.dept,pop:c.population,pm25:c.viv?.pm25,apl:c.viv?.apl,j30:c.clim.NORTX30D_yr,cote:c.distance_cote_km,compatibility,reasons,tradeoff};
+    return {nom:c.nom,dept:c.dept,pop:c.population,pm25:c.viv?.pm25,apl:c.viv?.apl,j30:c.clim.NORTX30D_yr,cote:c.mer_centre_km,compatibility,reasons,tradeoff};
   }).sort((a,b)=>b.compatibility-a.compatibility);
   const seen=new Set(),out=[];
   for(const s of scored){ const k=/^751\d\d$/.test('')?'':s.nom; if(seen.has(k)) continue; seen.add(k); out.push(s); if(out.length>=3) break; }

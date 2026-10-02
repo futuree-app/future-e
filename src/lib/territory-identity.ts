@@ -9,6 +9,8 @@
 
 import { derivedOf, valueOf, type FactsSnapshot } from "./facts/contract.ts";
 import { DEMOGRAPHY_PHRASE, isDemographyCode, type UrbanRole } from "./territoire/facts.ts";
+import { REPERE_PRES_DU_RIVAGE_KM } from "./mer-recherche.ts";
+import { kmLisible } from "./hard-constraints.ts";
 import { deCommune } from "./typography.ts";
 
 export type TerritoryIdentity = {
@@ -51,13 +53,14 @@ function roleLabel(r: UrbanRole, communePop: number | null): string | null {
   }
 }
 
-type Position = { distanceCoteKm: number | null; reliefProximite: number | null; altitude: number | null };
+type Position = { merCentreKm?: number | null; reliefProximite: number | null; altitude: number | null };
 
-// Seuils inchangés (inventaire FUT-6, règle 5). La distance à la côte est un proxy connu (FUT-33).
+// FUT-33 : la DISTANCE est l'information (« Rivage marin à 1,6 km »), jamais « En bord de mer » (la mesure compte
+// les lagunes : Narbonne est à 1,6 km de l'étang de Bages). Le repère de 8 km (validé le 02/10/2026) décide
+// seulement si la ligne s'affiche. Un snapshot ancien (ancienne distance, sans `merCentreKm`) n'en montre aucune.
 function geoLabel(p: Position | null): string | null {
   if (!p) return null;
-  if (p.distanceCoteKm != null && p.distanceCoteKm <= 2) return "En bord de mer";
-  if (p.distanceCoteKm != null && p.distanceCoteKm <= 8) return "Proche du littoral";
+  if (p.merCentreKm != null && p.merCentreKm <= REPERE_PRES_DU_RIVAGE_KM) return `Rivage marin à ${kmLisible(p.merCentreKm)}`;
   if (p.reliefProximite != null && p.reliefProximite >= 55) return "Proche du relief";
   if (p.altitude != null && p.altitude >= 600) return "En altitude";
   return null;

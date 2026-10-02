@@ -80,50 +80,9 @@ const DEPT_TO_REGION = {
   '95': 'Île-de-France',
 };
 
-// ── Distance à la côte (APPROXIMATION V1) ───────────────────────────────────
-// On calcule la distance haversine au point le plus proche parmi une liste de
-// villes côtières de référence. C'est une APPROXIMATION assumée pour la V1 :
-// entre deux ancres éloignées (longues plages des Landes, par ex.), la distance
-// est surestimée. À remplacer par le trait de côte IGN avant de durcir la
-// contrainte. Isolé ici pour un remplacement trivial. [lat, lon]
-const COAST_ANCHORS = [
-  // Mer du Nord / Manche
-  [51.03, 2.38], [50.95, 1.86], [50.73, 1.61], [50.10, 1.84], [49.92, 1.08],
-  [49.49, 0.11], [49.29, -0.25], [49.18, -0.37], [49.64, -1.62], [48.84, -1.60],
-  [48.65, -2.01],
-  // Bretagne
-  [48.51, -2.77], [48.39, -4.49], [47.97, -4.10], [47.87, -3.92], [47.75, -3.37],
-  [47.66, -2.76],
-  // Atlantique
-  [47.27, -2.21], [46.50, -1.78], [46.16, -1.15], [45.62, -1.03], [44.66, -1.17],
-  [44.39, -1.25], [44.00, -1.31], [43.69, -1.44], [43.48, -1.56], [43.36, -1.78],
-  // Méditerranée (golfe du Lion → Côte d'Azur)
-  [42.45, 3.17], [42.70, 3.03], [43.02, 3.04], [43.18, 3.18], [43.29, 3.47],
-  [43.40, 3.70], [43.56, 4.08], [43.40, 4.85], [43.30, 5.37], [43.12, 5.93],
-  [43.12, 6.13], [43.27, 6.64], [43.42, 6.77], [43.55, 7.02], [43.70, 7.27], [43.78, 7.50],
-  // Corse
-  [42.70, 9.45], [42.57, 8.76], [41.93, 8.74], [41.59, 9.28], [41.39, 9.16],
-];
+// (FUT-33, 02/10/2026 : l'ancienne distance à une liste de villes côtières est retirée ; la vérité littorale
+// vient de data/mer, ajoutée en fin de construction par scripts/lib/mer-index.mjs.)
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-function distanceCoteKm(lat, lon) {
-  let min = Infinity;
-  for (const [aLat, aLon] of COAST_ANCHORS) {
-    const d = haversineKm(lat, lon, aLat, aLon);
-    if (d < min) min = d;
-  }
-  return Math.round(min);
-}
 
 // ── Pression agricole / phytosanitaire (V1.6) ───────────────────────────────
 // pression = intensité de traitement (IFT) × prévalence agricole (part SAU).
@@ -270,7 +229,6 @@ async function main() {
       lon,
       population: pop.population ?? null,
       densite: pop.densite ?? null,
-      distance_cote_km: distanceCoteKm(lat, lon),
       altitude: altMap[insee] ?? null, // m NGF, centroïde IGN RGE ALTI (cf. populate-communes-altitude.js)
       // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
       emploi: emploiMap[insee]
@@ -418,7 +376,6 @@ async function main() {
     vivSource: 'ADEME data_communes (air de fond, APL médecins, éloignement services)',
     percentile: 'ascendant 0–100 sur la France métropolitaine (0 = plus faible valeur)',
     approximations: [
-      'distance_cote_km : min haversine à une liste de villes côtières (V1, à remplacer par le trait de côte IGN)',
       'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)',
       'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
       'emploi : viabilité du bassin (taille + diversité A38) à la maille ZE2020 INSEE, héritée par commune. Flores fin 2024, salarié uniquement (sous-estime agriculture/indépendants).',
@@ -427,7 +384,7 @@ async function main() {
     columnMapSource: 'src/lib/drias-json.ts',
   };
 
-  // FUT-33 (phase 2A) : vérité littorale (data/mer), à côté de distance_cote_km qui reste inchangé.
+  // FUT-33 : vérité littorale (data/mer) : distances au rivage marin, loi Littoral, façade officielle.
   meta.mer = ajouterMer(communes, lireMer(root));
 
   const outPath = path.join(root, 'data', 'comparateur-index.json');

@@ -30,7 +30,6 @@ export type IndexCommuneLike = {
   altitude?: number | null;
   relief_proximite?: number | null;
   relief_altitude_max_m?: number | null;
-  distance_cote_km: number;
   mer_centre_km?: number | null;
   loi_effective?: string[] | null;
 };

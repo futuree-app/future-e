@@ -44,7 +44,7 @@ test("communeAttributesFrom : les absences restent des absences (aucun repli sur
   const a = communeAttributesFrom(
     {
       insee: "99999", nom: "Sans-Donnée", dept: "31", lat: 43, lon: 1,
-      population: 3_000, uu: null, altitude: null, relief_proximite: null, distance_cote_km: 90, mer_centre_km: 90,
+      population: 3_000, uu: null, altitude: null, relief_proximite: null, mer_centre_km: 90,
     },
     3_000,
   );

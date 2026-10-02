@@ -23,7 +23,7 @@
 //   confirmé,             non examiné   -> condition ouverte, sans fait (le registre la porte)
 //   non confirmé,         incompatible  -> ÉCART au projet, visible, jamais éliminatoire
 //   non confirmé,         satisfait     -> silencieux, point favorable (comme avant)
-import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee } from "../hard-constraints.ts";
+import { HARD_CONSTRAINT_KEYS, haversineKm, mesureMerEvaluee, kmLisible } from "../hard-constraints.ts";
 import type { HardConstraintKey, HardConstraintAssessment } from "../hard-constraints.ts";
 import type {
   DecisionRule, RuleEvaluation, IncompatibilityFact, EvidenceRef, ModuleFacts, HardEvaluation,
@@ -40,7 +40,6 @@ import { presenterCritere } from "./criterion-labels.ts";
 import type { CriterionRef } from "../user-project.ts";
 import { criterionCapability, type CapabilityAssessment, type EvaluationGrain } from "./capability.ts";
 import { hardConstraintLabel, HARD_CONSTRAINT_LABELS } from "./project-view.ts";
-import { classifyCoastDistance } from "./coast-facts.ts";
 import { deCommune } from "../typography.ts";
 
 const territoireHref = "/rapport/quartier";
@@ -155,9 +154,11 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
       return f.reliefAltitudeMaxM != null
         ? `Dans un rayon de 35 km autour ${deCommune(f.nom)}, une commune atteint ${a.observedLabel} d'altitude de référence.`
         : `Un relief montagneux est à portée ${deCommune(f.nom)}.`;
+    // FUT-33 : la condition remplie se dit avec la limite du lecteur, dans son sens.
     case "nearSea":
+      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin, dans les ${limiteDite(a)} km au plus que vous avez indiqués.`;
     case "farFromSea":
-      return `${sujetMer(a, f)} se situe à environ ${a.observedLabel} du rivage marin.`;
+      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin, au-delà des ${limiteDite(a)} km que vous avez indiqués.`;
     case "excludeSea":
       return `${f.nom} n'est pas classée « Mer » au titre de la loi Littoral.`;
     case "nearPlace":
@@ -178,6 +179,10 @@ function constatSatisfait(key: HardConstraintKey, a: Evaluee, f: ModuleFacts, ha
 function sujetMer(a: HardConstraintAssessment, f: ModuleFacts): string {
   const keys = "evidenceKeys" in a ? a.evidenceKeys : [];
   return keys.includes("adresse.merKm") ? "Cette adresse" : `Le point de référence ${deCommune(f.nom)}`;
+}
+
+function limiteDite(a: HardConstraintAssessment): string {
+  return "expectedValue" in a && a.expectedValue?.kind === "distance_km" ? String(a.expectedValue.value) : "";
 }
 
 // LA TAILLE, DITE À L'ÉCHELLE MESURÉE (FUT-8) : la population de la commune quand la comparaison porte sur
@@ -204,7 +209,7 @@ function constatDefavorable(key: HardConstraintKey, a: Evaluee, f: ModuleFacts):
     }
     case "nearSea":
     case "farFromSea":
-      return `${sujetMer(a, f)} se situe à environ ${a.observedLabel} du rivage marin.`;
+      return `${sujetMer(a, f)} est à environ ${a.observedLabel} du rivage marin.`;
     case "excludeSea":
       return `${f.nom} est classée « Mer » au titre de la loi Littoral.`;
     case "communeSize":
@@ -344,9 +349,8 @@ function conditionCheck(
 // peut rien conclure sans limite (`missing_parameter`) ; la mesure existe pourtant, et la taire ferait
 // d'« à confirmer » un « nous ne savons pas ». Elle se montre donc, avec ce qu'elle permet d'en dire.
 //
-// La mer s'apprécie avec la convention que la préférence `proximite_mer` emploie déjà (`coast-facts.ts`) :
-// proche, intermédiaire, éloignée. Un lieu nommé sans seuil n'a aucune convention : la distance est
-// dite, sans pencher.
+// FUT-33 : la mer sans seuil n'a, elle non plus, aucune convention : la distance est dite, sans pencher
+// (l'ancienne lecture « proche jusqu'à 15 km, éloignée dès 100 km » fabriquait le seuil du lecteur).
 function mesureSansSeuil(
   key: HardConstraintKey, project: UserProject, f: ModuleFacts, hard: HardEvaluation, c: CapabilityAssessment,
 ): ConditionCheckFact | null {
@@ -354,14 +358,11 @@ function mesureSansSeuil(
   // FUT-33 : la mesure du POINT évalué. À l'adresse sans distance d'adresse, rien : jamais le centre à sa place.
   const mer = key === "nearSea" ? mesureMerEvaluee(hard.context, toCommuneAttributes(f)) : null;
   if (key === "nearSea" && mer?.ok) {
-    const km = Math.round(mer.km);
-    const v = classifyCoastDistance(mer.km);
-    const signal: ConditionSignal = v === "satisfied" ? "favorable" : v === "mismatch" ? "defavorable" : "neutre";
-    return conditionCheck(key, project, f, c, signal,
-      `${mer.sujet} se situe à environ ${km} km du rivage marin.`,
+    return conditionCheck(key, project, f, c, "neutre",
+      `${mer.sujet} est à environ ${kmLisible(mer.km)} du rivage marin.`,
       [{
         factId: mer.evidenceKey, module: "territoire", label: `Distance au rivage marin · ${f.nom}`,
-        observedValue: `${km} km`, grain: mer.grain === "address" ? "adresse" : "commune", relation: "proximite", href: territoireHref,
+        observedValue: kmLisible(mer.km), grain: mer.grain === "address" ? "adresse" : "commune", relation: "proximite", href: territoireHref,
       }],
       [mer.evidenceKey, "project.hardConstraints.nearSea"], "la distance au rivage marin");
   }

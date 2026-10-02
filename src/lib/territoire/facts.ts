@@ -33,7 +33,8 @@ export type GwlScenarios = Record<string, { h: string; v: Record<string, number>
 export type TerritoireIndexEntry = {
   population: number | null;
   densite: number | null;
-  distance_cote_km: number | null;
+  // FUT-33 : distance du point de référence au rivage marin (l'ancienne distance à des villes côtières est retirée).
+  mer_centre_km: number | null;
   relief_proximite: number | null;
   altitude: number | null;
   nature: {
@@ -230,9 +231,9 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
-      key: "place.typology", value: i.typology.label, scale: "department",
-      source: { producer: "futur•e", dataset: "Catégories par département", field: "deriveCategories" },
-      limits: "Attribuée par département : toute commune d'un département côtier reçoit un type littoral (FUT-33).",
+      key: "place.typology", value: i.typology.label, scale: "commune",
+      source: { producer: "futur•e", dataset: "Index du comparateur ; loi Littoral (DGALN) ; planification maritime (DGAMPA-Shom)", field: "loi_effective, mer_facade" },
+      limits: "« Littoral » désigne une commune classée « Mer » au titre de la loi Littoral ; le type ne dit rien du climat ni de l'exposition.",
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
@@ -242,12 +243,14 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     }),
     fact({
       key: "place.position",
-      value: e ? { distanceCoteKm: num(e.distance_cote_km), reliefProximite: num(e.relief_proximite), altitude: num(e.altitude) } : null,
+      value: e ? { merCentreKm: num(e.mer_centre_km), reliefProximite: num(e.relief_proximite), altitude: num(e.altitude) } : null,
       scale: "point",
-      source: { producer: "futur•e", dataset: "Index du comparateur", field: "distance_cote_km, relief_proximite, altitude" },
-      limits: "La distance à la côte est approximée par une liste de villes côtières (FUT-33).",
+      source: { producer: "futur•e", dataset: "Index du comparateur ; Limite terre-mer © Shom-IGN, 2021", field: "mer_centre_km, relief_proximite, altitude" },
+      limits: "Distance à vol d'oiseau du point de référence de la commune au rivage marin, lagunes comprises ; ni une plage, ni un trajet.",
       card: card("identity"),
-      synthesis: exclude("Proxy littoral non fiable (Châtelaillon-Plage à « 11 km » de la mer) : traité dans FUT-33."),
+      // La carte d'identité dit la distance ; la synthèse n'en tire aucun qualificatif (lagunes comprises, une
+      // distance au rivage n'est ni une plage ni un climat).
+      synthesis: exclude("Distance au rivage marin : montrée sur la carte d'identité, jamais qualifiée par la synthèse."),
     }),
     fact({
       key: "land.composition", value: composition, unit: "%", scale: "commune", vintage: "2023",

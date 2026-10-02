@@ -98,7 +98,7 @@ test("adresse : nearSea et farFromSea se décident sur la distance de l'ADRESSE,
   const centre = ref("Arles, centre");
   const b = evaluateFarFromSea(ctx(loin(30), f, { lat: centre.lat, lon: centre.lon, mer: mesure(centre.lat, centre.lon) }), toCommuneAttributes(f));
   assert.ok(b.status === "incompatible");
-  assert.match(b.statement, /^Cette adresse se situe à environ 24,3 km du rivage marin, en deçà des 30 km/);
+  assert.match(b.statement, /^Cette adresse est à environ 24 km du rivage marin, plus près que les 30 km au moins que vous avez indiqués\.$/);
   assert.doesNotMatch(b.statement, /plage|océan|baignade|balnéaire/);
 });
 
@@ -142,7 +142,7 @@ test("commune : le point de référence → rivage marin, la limite du lecteur a
   const bdx = faits("33063");
   const b = evaluateNearSea(ctx(proche(10), bdx), toCommuneAttributes(bdx));
   assert.ok(b.status === "incompatible");
-  assert.match(b.statement, /^Le point de référence de Bordeaux se situe à environ 39,4 km du rivage marin/);
+  assert.match(b.statement, /^Le point de référence de Bordeaux est à environ 39 km du rivage marin, plus loin que les 10 km au plus que vous avez indiqués\.$/);
 });
 
 test("excludeSea : le classement loi Littoral de la commune, sans aucun kilomètre", () => {
@@ -188,7 +188,7 @@ test("faits : la preuve d'une distance d'adresse est au grain adresse ; le class
   const p = projet({ nearSea: { active: true, maxKm: 3 }, excludeSea: true }, "nearSea", "excludeSea");
   const mer = regle("nearSea").evaluate(f, p, h).facts[0]!;
   assert.equal(mer.role, "condition_check");
-  assert.match(mer.statement, /^Cette adresse se situe à environ 5,7 km du rivage marin\.$/);
+  assert.match(mer.statement, /^Cette adresse est à environ 5,7 km du rivage marin\.$/);
   assert.ok(mer.evidence.every((e) => e.grain === "adresse"));
   assertFactValid(mer, p);
   const loi = regle("excludeSea").evaluate(f, p, h).facts[0]!;
@@ -242,15 +242,8 @@ test("INVARIANT : aucune capacité FUT-7 ne change (table complète des critère
   }
 });
 
-test("INVARIANT : les libellés éditoriaux de l'étape D sont intacts", () => {
-  const vie = readFileSync(new URL("src/lib/comparateur-vie.ts", racine), "utf8");
-  assert.match(vie, /paliers: \["En bord de mer", "Proche du littoral", "Loin de la mer"\]/);
-  assert.match(vie, /proximite_mer: \(c\) =>\n    c\.distance_cote_km <= 2/);
-  assert.match(vie, /cats\.add\('littoral'\)/);
-  const identite = readFileSync(new URL("src/lib/territory-identity.ts", racine), "utf8");
-  assert.match(identite, /return "En bord de mer"/);
-  assert.match(identite, /distanceCoteKm/);
-});
+// (L'invariant « libellés de l'étape D intacts » de la phase C a été remplacé, une fois l'étape D faite, par
+// src/lib/fut33-editorial-2b2d.test.ts.)
 
 test("INVARIANT : le calcul à l'adresse n'écrit rien nulle part (aucune base, aucun réseau)", () => {
   for (const f of ["src/lib/mer-rivage.ts", "src/lib/server/rivage-mer.ts"]) {

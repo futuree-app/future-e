@@ -349,7 +349,7 @@ test("nearSea : au-delà du seuil déclaré -> incompatible", () => {
   assert.ok(a.status === "incompatible");
   assert.match(a.statement, /150 km/);
   assert.match(a.statement, /30 km/);
-  assert.match(a.statement, /^Le point de référence de Toulouse se situe à environ 150 km du rivage marin/);
+  assert.match(a.statement, /^Le point de référence de Toulouse est à environ 150 km du rivage marin, plus loin que les 30 km au plus que vous avez indiqués\./);
   assert.equal(a.topic, "la distance de Toulouse au rivage marin");
 });
 

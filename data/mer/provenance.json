@@ -77,5 +77,43 @@
     }
    }
   ]
+ },
+ "facade": {
+  "source": "Planification maritime, DGAMPA-Shom, 2026 (couche MSP_Spatial_Plan)",
+  "citation": "DGAMPA-Shom, 2026. Planification maritime. https://dx.doi.org/10.17183/MSP",
+  "licence": "Licence Ouverte 2.0",
+  "valeurs": {
+   "MEMN": "Manche Est-mer du Nord",
+   "NAMO": "Nord Atlantique-Manche Ouest",
+   "SA": "Sud-Atlantique",
+   "MED": "Méditerranée"
+  },
+  "methode": "communes classées « Mer » seulement : point de référence → point de rivage marin le plus proche → emprise de façade la plus proche",
+  "ambigus_marge_moins_2km": [
+   {
+    "insee": "17091",
+    "nom": "Charron",
+    "facade": "SA",
+    "marge_m": 1895
+   },
+   {
+    "insee": "85049",
+    "nom": "Champagné-les-Marais",
+    "facade": "SA",
+    "marge_m": 1606
+   },
+   {
+    "insee": "85185",
+    "nom": "Puyravault",
+    "facade": "SA",
+    "marge_m": 1662
+   },
+   {
+    "insee": "85267",
+    "nom": "Sainte-Radégonde-des-Noyers",
+    "facade": "SA",
+    "marge_m": 1662
+   }
+  ]
  }
 }
