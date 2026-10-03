@@ -280,25 +280,35 @@ export function buildCriteriaRegistry(
 // ── POURQUOI UNE DEMANDE COMPRISE RESTE HORS DE LA RÉPONSE (FUT-45) ─────────────────────────────────
 // Le plus petit modèle qui dit la bonne raison. La donnée absente ICI n'en fait pas partie : elle concerne un
 // critère que le moteur sait lire (registre, `unexaminedReason: "inconclusive"`).
-//   manque_produit   une question objectivable et décisive que futur•e ne sait pas ENCORE traiter (le budget) ;
+//   manque_produit   une question résidentielle concrète et légitime que des faits solides pourraient éclairer, et
+//                    que futur•e ne sait pas ENCORE traiter (le budget, l'eau du robinet…) ; aucun score promis ;
 //   ressenti         une appréciation personnelle que futur•e ne transforme pas en mesure (« authentique ») ;
-//   choix_editorial  futur•e choisit de ne pas réduire la notion à un jugement ou un score (réputation des
-//                    écoles, sécurité d'un quartier), ce qui n'empêche pas de montrer un jour des faits définis ;
-//   non_classee      aucune règle sûre : la lecture dit qu'elle ne répond pas, SANS inventer de raison.
-// La règle est déterministe : la famille que le parseur donne déjà (affectif, écoles = qualité seulement, culture,
-// autre), puis le mot du lecteur pour deux familles d'« autre ». Dans le doute : non_classee.
+//   choix_editorial  futur•e choisit de ne pas en faire un jugement global ou un score (réputation des écoles,
+//                    quartier sûr, mairie dynamique, mentalité prêtée aux habitants) ;
+//   non_classee      FILET TECHNIQUE : aucune raison valide n'a été donnée ; la lecture ne l'invente pas.
+// La raison vient du PARSEUR (le `kind` décrit la formulation, pas la raison : « pas trop de touristes » et « bonne
+// mentalité » sont tous deux « affectif »). Trois règles FIXES l'emportent toujours sur le modèle, pour que ces
+// doctrines ne varient pas avec lui : un montant ou un budget, la sécurité, la réputation des écoles.
 export type RaisonNonMesuree = "manque_produit" | "ressenti" | "choix_editorial" | "non_classee";
 export type DemandeNonMesuree = { terme: string; raison: RaisonNonMesuree; theme: "budget" | "ecoles" | "securite" | null };
 
 const ARGENT = /budget|€|euros?\b|\bprix\b|\bk€|\bloyer/i;
-// « sûr » exige son accent (« sur » est une préposition) : dans le doute, la demande reste non classée.
+// « sûr » exige son accent (« sur » est une préposition).
 const SECURITE = /s[ée]curit|\bsûre?s?\b|ins[ée]curit|d[ée]linquan|cambriol|criminalit|agressi|tranquillit[ée] publique/i;
+const ECOLE = /[ée]cole|coll[èe]ge|lyc[ée]e|scol|[ée]tablissement|enseignement/i;
+// La sécurité d'un AMÉNAGEMENT (« pistes cyclables sécurisées ») n'est pas un verdict de sécurité d'un lieu.
+const SECURITE_AMENAGEMENT = /s[ée]curis[ée]/i;
 
-export function classerNonMesuree(kind: string | undefined, terme: string): Omit<DemandeNonMesuree, "terme"> {
-  if (kind === "affectif") return { raison: "ressenti", theme: null };
-  if (kind === "ecoles") return { raison: "choix_editorial", theme: "ecoles" };
-  if (kind === "autre" && ARGENT.test(terme)) return { raison: "manque_produit", theme: "budget" };
-  if (kind === "autre" && SECURITE.test(terme)) return { raison: "choix_editorial", theme: "securite" };
+export function classerNonMesuree(
+  kind: string | undefined, terme: string, raisonModele?: string,
+): Omit<DemandeNonMesuree, "terme"> {
+  if (ARGENT.test(terme)) return { raison: "manque_produit", theme: "budget" };
+  if (SECURITE.test(terme) && !SECURITE_AMENAGEMENT.test(terme)) return { raison: "choix_editorial", theme: "securite" };
+  // Seulement si le terme parle d'école : le modèle range parfois autre chose en « écoles » (vu le 03/10).
+  if (kind === "ecoles" && ECOLE.test(terme)) return { raison: "choix_editorial", theme: "ecoles" };
+  if (raisonModele === "manque_produit" || raisonModele === "ressenti" || raisonModele === "choix_editorial") {
+    return { raison: raisonModele, theme: null };
+  }
   return { raison: "non_classee", theme: null };
 }
 
@@ -310,7 +320,7 @@ export function demandesNonMesurees(project: UserProject): DemandeNonMesuree[] {
     const terme = typeof h?.term === "string" ? h.term.trim() : "";
     if (!terme || vus.has(terme.toLowerCase())) continue;
     vus.add(terme.toLowerCase());
-    out.push({ terme, ...classerNonMesuree(h?.kind, terme) });
+    out.push({ terme, ...classerNonMesuree(h?.kind, terme, (h as { raison?: string } | undefined)?.raison) });
   }
   return out;
 }

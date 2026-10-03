@@ -9,7 +9,7 @@ import { runRules } from "./decision/materiality-rules.ts";
 import { assembleDossier } from "./decision/decision-assembler.ts";
 import { hydrateHardConstraints } from "./hard-constraints-hydrate.ts";
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "./hard-constraints.ts";
-import { budgetRattrape } from "./parse-assainir.ts";
+import { budgetRattrape, raisonsValidees } from "./parse-assainir.ts";
 import { classerNonMesuree, type DemandeNonMesuree } from "./decision/criteria-registry.ts";
 import { phrasesNonMesurees } from "./decision/conclusion-plan.ts";
 import type { IndexCommune } from "./comparateur-vie.ts";
@@ -20,10 +20,10 @@ const village = (): IndexCommune => ({
   insee: "31999", nom: "Saint-Exemple", dept: "31", region: "OCC", lat: 43.5, lon: 1.4, population: 1200, densite: 40,
   mer_centre_km: 150, altitude: 200, clim: {}, pct: {},
 } as unknown as IndexCommune);
-function projet(prefs: { key: string; weight: number }[], horsMesure: string[] = [], kind = "autre"): UserProject {
+function projet(prefs: { key: string; weight: number }[], horsMesure: string[] = [], kind = "autre", raison?: string): UserProject {
   return {
     posture: "recherche", intent: null, rawText: "x", updatedAt: "1970-01-01T00:00:00.000Z",
-    parsed: { reformulation: "x", hardConstraints: {}, preferences: prefs, horsMesure: horsMesure.map((term) => ({ term, kind })) } as unknown as UserProject["parsed"],
+    parsed: { reformulation: "x", hardConstraints: {}, preferences: prefs, horsMesure: horsMesure.map((term) => ({ term, kind, ...(raison ? { raison } : {}) })) } as unknown as UserProject["parsed"],
   };
 }
 function dossier(p: UserProject) {
@@ -58,7 +58,7 @@ test("NON-RÉGRESSION : « budget 250 000 € et … » ne peut jamais produire 
 });
 
 test("F. une demande faite seulement de choses non mesurées : la vraie cause, jamais « la donnée manque ici »", () => {
-  const d = dossier(projet([], ["authentique", "chaleureuse"], "affectif"));
+  const d = dossier(projet([], ["authentique", "chaleureuse"], "affectif", "ressenti"));
   assert.equal(d.criteria.coverage, "none");
   assert.equal(d.narrativePlan.verdict.headline.text, "Ce que vous avez demandé reste hors de ce que futur•e évalue.");
   assert.equal(d.narrativePlan.blocks.find((b) => b.key === "uncovered_priorities"), undefined, "le verdict dit déjà la raison : pas de redite");
@@ -95,8 +95,8 @@ test("G. le trou principal est nommé, quel que soit le nombre de critères lus"
 
 test("parseur : un budget dit n'est jamais perdu, même si le modèle l'a jeté", () => {
   assert.deepEqual(budgetRattrape([{ term: "eau du robinet potable", kind: "autre" }], "Un budget de 300 000 €, une eau du robinet potable."),
-    [{ term: "eau du robinet potable", kind: "autre" }, { term: "budget de 300 000 €", kind: "autre" }]);
-  assert.deepEqual(budgetRattrape([], "Jusqu'à 250 000 euros, au calme."), [{ term: "250 000 euros", kind: "autre" }]);
+    [{ term: "eau du robinet potable", kind: "autre" }, { term: "budget de 300 000 €", kind: "autre", raison: "manque_produit" }]);
+  assert.deepEqual(budgetRattrape([], "Jusqu'à 250 000 euros, au calme."), [{ term: "250 000 euros", kind: "autre", raison: "manque_produit" }]);
   const deja = [{ term: "budget 250 000 €", kind: "autre" as const }];
   assert.equal(budgetRattrape(deja, "budget 250 000 € et air sain"), deja, "déjà porté : rien n'est doublé");
   assert.equal(budgetRattrape(undefined, "de l'air sain"), undefined, "rien d'argent : rien n'est inventé");
@@ -110,35 +110,60 @@ test("aucun score composite de complétude : trois états, aucun seuil, aucun ra
 
 // ── Les raisons d'une demande non mesurée ──────────────────────────────────────────────────────────
 
-const dnm = (terme: string, kind: string): DemandeNonMesuree => ({ terme, ...classerNonMesuree(kind, terme) });
+const dnm = (terme: string, kind: string, raison?: string): DemandeNonMesuree => ({ terme, ...classerNonMesuree(kind, terme, raison) });
 
-test("classement : budget = manque produit, ressenti, écoles réputées et sécurité = choix éditorial, le reste neutre", () => {
-  assert.deepEqual(classerNonMesuree("autre", "budget 250 000 €"), { raison: "manque_produit", theme: "budget" });
-  assert.deepEqual(classerNonMesuree("autre", "250k€ max"), { raison: "manque_produit", theme: "budget" });
-  assert.deepEqual(classerNonMesuree("affectif", "authentique"), { raison: "ressenti", theme: null });
-  assert.deepEqual(classerNonMesuree("ecoles", "bonnes écoles réputées"), { raison: "choix_editorial", theme: "ecoles" });
-  assert.deepEqual(classerNonMesuree("autre", "quartier sûr"), { raison: "choix_editorial", theme: "securite" });
-  assert.deepEqual(classerNonMesuree("autre", "sentiment de sécurité"), { raison: "choix_editorial", theme: "securite" });
-  // Dans le doute, aucune raison inventée.
-  assert.deepEqual(classerNonMesuree("autre", "eau du robinet potable"), { raison: "non_classee", theme: null });
-  assert.deepEqual(classerNonMesuree("culture", "vie culturelle animée"), { raison: "non_classee", theme: null });
-  assert.deepEqual(classerNonMesuree("autre", "vie sur place"), { raison: "non_classee", theme: null }, "« sur » n'est pas « sûr »");
+test("classement : la raison du MODÈLE, validée ; trois règles fixes l'emportent toujours", () => {
+  // Règles fixes : un montant, la sécurité d'un lieu, la réputation des écoles. Le modèle ne peut pas les déplacer.
+  assert.deepEqual(classerNonMesuree("autre", "budget 250 000 €", "ressenti"), { raison: "manque_produit", theme: "budget" });
+  assert.deepEqual(classerNonMesuree("affectif", "loyer pas trop cher", "choix_editorial"), { raison: "manque_produit", theme: "budget" });
+  assert.deepEqual(classerNonMesuree("autre", "quartier sûr", "manque_produit"), { raison: "choix_editorial", theme: "securite" });
+  assert.deepEqual(classerNonMesuree("ecoles", "bonnes écoles réputées", "manque_produit"), { raison: "choix_editorial", theme: "ecoles" });
+  // La raison du modèle, quand aucune règle fixe ne s'applique.
+  assert.deepEqual(classerNonMesuree("autre", "eau du robinet potable", "manque_produit"), { raison: "manque_produit", theme: null });
+  assert.deepEqual(classerNonMesuree("culture", "vie culturelle animée", "manque_produit"), { raison: "manque_produit", theme: null });
+  assert.deepEqual(classerNonMesuree("affectif", "pas trop de touristes l'été", "manque_produit"), { raison: "manque_produit", theme: null }, "le kind ne décide pas");
+  assert.deepEqual(classerNonMesuree("affectif", "bonne mentalité", "choix_editorial"), { raison: "choix_editorial", theme: null });
+  assert.deepEqual(classerNonMesuree("affectif", "authentique", "ressenti"), { raison: "ressenti", theme: null });
+  // Pièges vus en vrai : un aménagement « sécurisé » n'est pas un verdict de sécurité ; « écoles » mal rangé.
+  assert.deepEqual(classerNonMesuree("autre", "pistes cyclables sécurisées", "manque_produit"), { raison: "manque_produit", theme: null });
+  assert.deepEqual(classerNonMesuree("ecoles", "pas de cas sociaux dans le quartier", "choix_editorial"), { raison: "choix_editorial", theme: null });
+  assert.deepEqual(classerNonMesuree("autre", "vie sur place", "manque_produit"), { raison: "manque_produit", theme: null }, "« sur » n'est pas « sûr »");
+  // Filet technique : sans raison valide, aucune raison inventée.
+  assert.deepEqual(classerNonMesuree("autre", "quelque chose", undefined), { raison: "non_classee", theme: null });
+  assert.deepEqual(classerNonMesuree("autre", "quelque chose", "n_importe_quoi"), { raison: "non_classee", theme: null });
+});
+
+test("parseur : la raison du modèle est validée contre l'enum, la famille invalide redevient « autre »", () => {
+  const v = raisonsValidees([
+    { term: "eau du robinet", kind: "autre", raison: "manque_produit" },
+    { term: "x", kind: "autre", raison: "inventee" as never },
+    { term: "mairie dynamique", kind: "choix_editorial" as never, raison: "choix_editorial" },
+  ]);
+  assert.deepEqual(v, [
+    { term: "eau du robinet", kind: "autre", raison: "manque_produit" },
+    { term: "x", kind: "autre" },
+    { term: "mairie dynamique", kind: "autre", raison: "choix_editorial" },
+  ]);
+  assert.deepEqual(budgetRattrape([], "budget 250 000 € et air sain"), [{ term: "budget 250 000 €", kind: "autre", raison: "manque_produit" }]);
 });
 
 test("« encore » n'est dit QUE d'un manque du produit, jamais d'un ressenti ni d'un choix éditorial", () => {
   const phrases = phrasesNonMesurees([
-    dnm("budget 250 000 €", "autre"), dnm("authentique", "affectif"), dnm("bonnes écoles réputées", "ecoles"),
-    dnm("quartier sûr", "autre"), dnm("eau du robinet potable", "autre"),
+    dnm("budget 250 000 €", "autre"), dnm("authentique", "affectif", "ressenti"), dnm("bonnes écoles réputées", "ecoles"),
+    dnm("quartier sûr", "autre"), dnm("eau du robinet potable", "autre", "manque_produit"),
+    dnm("mairie dynamique", "autre", "choix_editorial"), dnm("quelque chose", "autre"),
   ]);
   assert.deepEqual(phrases, [
     "futur•e ne sait pas encore confronter un lieu à un budget : « budget 250 000 € » reste sans réponse dans ce dossier.",
+    "futur•e ne sait pas encore éclairer « eau du robinet potable » avec des faits assez solides : cette question reste sans réponse dans ce dossier.",
     "« authentique » relève de votre appréciation : futur•e ne le transforme pas en critère mesuré.",
     "futur•e ne classe pas les écoles selon leur réputation (« bonnes écoles réputées ») : il n'en fait pas un jugement de qualité.",
     "futur•e ne résume pas la sécurité d'un lieu par un score (« quartier sûr »).",
-    "futur•e ne répond pas à « eau du robinet potable » dans ce dossier.",
+    "futur•e ne porte pas de jugement global sur « mairie dynamique » : il n'en fait ni un classement ni un score.",
+    "futur•e ne répond pas à « quelque chose » dans ce dossier.",
   ]);
-  for (const p of phrases.slice(1)) assert.doesNotMatch(p, /encore/, p);
-  assert.match(phrases[0]!, /encore/, "le budget garde la notion de capacité manquante");
+  // « Encore » : seulement pour les manques du produit (budget, eau du robinet).
+  for (const p of phrases) assert.equal(/encore/.test(p), /budget|robinet/.test(p), p);
 });
 
 test("la donnée absente ici reste une autre cause, jamais une demande non mesurée", () => {
@@ -155,6 +180,6 @@ test("parseur : le budget rattrapé s'arrête à la somme, la suite reste un cri
     ["je ne veux pas dépasser 300 000 euros", "300 000 euros"],
   ];
   for (const [texteLecteur, attendu] of cas) {
-    assert.deepEqual(budgetRattrape([], texteLecteur), [{ term: attendu, kind: "autre" }], texteLecteur);
+    assert.deepEqual(budgetRattrape([], texteLecteur), [{ term: attendu, kind: "autre", raison: "manque_produit" }], texteLecteur);
   }
 });

@@ -61,7 +61,7 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
   // au lieu de le garder hors mesure (« un budget de 300 000 €… » : disparu deux fois sur deux, le 03/10/2026). Il
   // reste alors une demande sans réponse que la lecture finale doit nommer : on la rattrape ici, avec les mots du
   // lecteur, si aucune demande hors mesure ne la porte déjà.
-  const horsMesure = budgetRattrape(parsed.horsMesure, rawText);
+  const horsMesure = budgetRattrape(raisonsValidees(parsed.horsMesure), rawText);
   const preferences = (parsed.preferences ?? []).map((p) => ({ key: p.key, weight: p.weight, source: "parse" as const }));
   if (eloignementSansNombre && !preferences.some((p) => p.key === "eloignement_mer")) {
     preferences.push({ key: "eloignement_mer", weight: 2, source: "parse" as const });
@@ -127,5 +127,20 @@ export function budgetRattrape(
   const deja = (horsMesure ?? []).some((h) => /budget|€|euro|prix|\d/i.test(h?.term ?? ""));
   if (deja) return horsMesure;
   const terme = m[0].trim().replace(/\s+/g, " ");
-  return [...(horsMesure ?? []), { term: terme, kind: "autre" }];
+  return [...(horsMesure ?? []), { term: terme, kind: "autre", raison: "manque_produit" }];
+}
+
+// FUT-45 : la raison donnée par le modèle n'est gardée que si elle appartient à l'enum fermé ; sinon elle tombe (la
+// lecture dira alors une phrase neutre). Les règles fixes (budget, sécurité, écoles) s'appliquent ensuite.
+const RAISONS = new Set(["manque_produit", "ressenti", "choix_editorial"]);
+const KINDS = new Set(["ecoles", "culture", "affectif", "autre"]);
+export function raisonsValidees(horsMesure: ParsedProject["horsMesure"]): ParsedProject["horsMesure"] {
+  if (!Array.isArray(horsMesure)) return horsMesure;
+  return horsMesure.map((h) => {
+    const { raison, ...reste } = h ?? ({} as NonNullable<ParsedProject["horsMesure"]>[number]);
+    // Une famille hors de l'enum (le modèle y a mis une raison, vu le 03/10) redevient « autre » : sinon « Où vivre »
+    // ignorerait la demande, et elle disparaîtrait de la lecture.
+    const kind = KINDS.has(reste.kind as string) ? reste.kind : "autre";
+    return RAISONS.has(raison as string) ? { ...reste, kind, raison } : { ...reste, kind };
+  });
 }

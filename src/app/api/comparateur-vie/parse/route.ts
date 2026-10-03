@@ -228,8 +228,14 @@ const TOOL_INPUT_SCHEMA = {
             description:
               "ecoles = qualité/réputation des établissements. culture = vitalité, programmation, scène locale. affectif = caractère du lieu (authentique, chaleureux, de l'âme). autre = TOUT AUTRE sujet réellement exprimé et non mesuré : eau du robinet, moustiques et tiques, pollens, ondes, qualité des commerces… Sans cette valeur, ces sujets tombaient en « affectif » et recevaient une phrase sur le caractère du lieu.",
           },
+          raison: {
+            type: "string",
+            enum: ["manque_produit", "ressenti", "choix_editorial"],
+            description:
+              "POURQUOI futur•e ne répond pas à cette demande (indépendant de kind). manque_produit = une question résidentielle concrète, légitime et potentiellement objectivable, que des faits solides pourraient éclairer (eau du robinet, moustiques tigres, fibre, offre ou vie culturelle même « animée », scène locale, marché, touristes, propreté (« ville propre, sans tags »), crèches, impôts locaux, pollens…) ; cela ne promet aucun score. ressenti = appréciation essentiellement personnelle, sans définition externe stable (authentique, chaleureux, du charme, s'y sentir bien, voisins sympas, bonne ambiance). choix_editorial = futur•e choisit de ne pas en faire un jugement global, un classement ou un score normatif (réputation des écoles, quartier sûr, mairie dynamique, et tout jugement GLOBAL sur la population d'un lieu : mentalité, ouverture d'esprit, « bonne population », « cas sociaux »). Mais le souhait de bonnes relations personnelles (voisins sympas, gens accueillants, bonne ambiance) reste ressenti.",
+          },
         },
-        required: ["term", "kind"],
+        required: ["term", "kind", "raison"],
       },
     },
     emploiHorsSujet: {

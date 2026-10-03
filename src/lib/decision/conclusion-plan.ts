@@ -249,9 +249,15 @@ export function phrasesNonMesurees(items: DemandeNonMesuree[]): string[] {
   const de = (r: DemandeNonMesuree["raison"], theme?: DemandeNonMesuree["theme"]) =>
     items.filter((i) => i.raison === r && (theme === undefined || i.theme === theme));
   const out: string[] = [];
-  const budget = de("manque_produit");
+  const budget = de("manque_produit", "budget");
   if (budget.length > 0) {
     out.push(`futur•e ne sait pas encore confronter un lieu à un budget : ${listeTermes(budget)} ${budget.length > 1 ? "restent" : "reste"} sans réponse dans ce dossier.`);
+  }
+  // Les autres manques du produit : une question concrète que des faits solides pourraient éclairer. Aucun score
+  // promis : « commerces de qualité » pourra se lire un jour par des faits (diversité, proximité), pas par une note.
+  const manques = de("manque_produit", null);
+  if (manques.length > 0) {
+    out.push(`futur•e ne sait pas encore éclairer ${listeTermes(manques)} avec des faits assez solides : ${manques.length > 1 ? "ces questions restent" : "cette question reste"} sans réponse dans ce dossier.`);
   }
   const ressenti = de("ressenti");
   if (ressenti.length > 0) {
@@ -263,7 +269,10 @@ export function phrasesNonMesurees(items: DemandeNonMesuree[]): string[] {
   if (ecoles.length > 0) out.push(`futur•e ne classe pas les écoles selon leur réputation (${listeTermes(ecoles)}) : il n'en fait pas un jugement de qualité.`);
   const securite = de("choix_editorial", "securite");
   if (securite.length > 0) out.push(`futur•e ne résume pas la sécurité d'un lieu par un score (${listeTermes(securite)}).`);
-  const autres = items.filter((i) => i.raison === "non_classee" || (i.raison === "choix_editorial" && i.theme !== "ecoles" && i.theme !== "securite"));
+  // Un jugement global que futur•e ne porte pas : une équipe municipale, la mentalité prêtée aux habitants.
+  const jugements = de("choix_editorial", null);
+  if (jugements.length > 0) out.push(`futur•e ne porte pas de jugement global sur ${listeTermes(jugements)} : il n'en fait ni un classement ni un score.`);
+  const autres = de("non_classee");
   if (autres.length > 0) out.push(`futur•e ne répond pas à ${listeTermes(autres)} dans ce dossier.`);
   return out; // « futur•e » garde sa minuscule ; une phrase ouverte par « … » n'a rien à capitaliser
 }

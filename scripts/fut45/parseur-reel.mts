@@ -9,7 +9,11 @@ const route = readFileSync("src/app/api/comparateur-vie/parse/route.ts", "utf8")
 const vie = readFileSync("src/lib/comparateur-vie.ts", "utf8");
 const debutPref = vie.indexOf("export const PREFERENCE_KEYS = [");
 const PREFERENCE_KEYS = new Function(`return ${vie.slice(vie.indexOf("[", debutPref), vie.indexOf("] as const;", debutPref) + 1)};`)() as string[];
-const schemaTxt = route.slice(28, 247).join("\n").replace(/^const TOOL_INPUT_SCHEMA = /, "").replace(/ as const/g, "").replace(/;\s*$/, "");
+// Le schéma se repère par son ouverture et la première accolade fermante en début de ligne qui suit (jamais par des
+// numéros de ligne, qui bougent à chaque modification du prompt).
+const debutSchema = route.findIndex((l) => l.startsWith("const TOOL_INPUT_SCHEMA = {"));
+const finSchema = route.findIndex((l, i) => i > debutSchema && l === "};");
+const schemaTxt = route.slice(debutSchema, finSchema + 1).join("\n").replace(/^const TOOL_INPUT_SCHEMA = /, "").replace(/ as const/g, "").replace(/;\s*$/, "");
 const TOOL_INPUT_SCHEMA = new Function("PREFERENCE_KEYS", "ANCHOR_ZONE_TOKENS", "EXCLUSION_ZONE_TOKENS", `return (${schemaTxt});`)(PREFERENCE_KEYS, ANCHOR_ZONE_TOKENS, EXCLUSION_ZONE_TOKENS);
 const brut = route.join("\n");
 const debutSys = brut.indexOf("const SYSTEM = `") + "const SYSTEM = `".length;

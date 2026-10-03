@@ -160,3 +160,25 @@ le poids des demandes hors mesure.
   redite.
 - Budget rattrapé : la capture s'arrête à la somme (« budget 250 000 € », « budget de 200 000 € au maximum »,
   « 250k€ max », « 300 000 euros »), jamais la suite (« et air sain » reste un critère).
+
+## Raison donnée par le parseur (03/10/2026, après la mise en production de a929f3e3)
+
+Sonde : 17 termes réels sur 18 tombaient en `non_classee`, dont 16 manques produit ; la famille `affectif` mêlait
+« pas trop de touristes » (objectivable) et « bonne mentalité » (jugement sur les habitants). La famille du parseur
+décrit la FORMULATION, pas la RAISON.
+
+- Le parseur donne `raison` (enum fermé : manque_produit, ressenti, choix_editorial), définitions et exemples dans le
+  schéma. `raisonsValidees` (parse-assainir) écarte une raison hors enum et ramène une famille invalide à « autre ».
+- Règles fixes, plus fortes que le modèle : un montant ou un budget → manque_produit ; la sécurité d'un lieu →
+  choix_editorial (pas un aménagement « sécurisé ») ; la réputation des écoles → choix_editorial (seulement si le
+  terme parle d'école). `non_classee` = filet technique : aucune raison valide.
+- `manque_produit` ne promet aucun score : « commerces de qualité » pourra se lire par des faits.
+- Nouvelles phrases : « futur•e ne sait pas encore éclairer … avec des faits assez solides : cette question reste
+  sans réponse dans ce dossier. » ; « futur•e ne porte pas de jugement global sur … : il n'en fait ni un classement
+  ni un score. »
+- Sonde finale (`scripts/fut45/sonder-raisons.mjs`, vrai prompt) : eau du robinet, moustiques tigres, vie culturelle
+  animée, fibre, 4G, commerces de qualité, marché le dimanche, ondes, antenne relais, touristes l'été, impôts locaux,
+  loyer, crèche, pistes cyclables sécurisées, embouteillages, ville propre, pollens, club de foot, conservatoire,
+  budget → manque produit ; se sentir bien, charme, voisins sympas, bonne ambiance → ressenti ; mairie dynamique,
+  bonne mentalité, gens ouverts d'esprit, « pas de cas sociaux », écoles réputées, quartier sûr → choix éditorial.
+  Aucun `non_classee`.

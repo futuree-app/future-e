@@ -152,7 +152,9 @@ export type ParsedProject = {
   // Notions exprimées par l'utilisateur SANS critère dans le moteur (écoles, vie
   // culturelle, caractère affectif). Pur affichage honnête au gate, aucun impact
   // sur le score. cf. plan 2026-06-03 (constat QA : ces notions étaient avalées en silence).
-  horsMesure?: { term: string; kind: HorsMesureKind }[];
+  // FUT-45 : `raison` dit POURQUOI futur•e ne répond pas (donnée par le parseur, validée et corrigée par des règles
+  // fixes dans criteria-registry.ts). Absente sur les projets d'avant : la lecture retombe sur une phrase neutre.
+  horsMesure?: { term: string; kind: HorsMesureKind; raison?: "manque_produit" | "ressenti" | "choix_editorial" }[];
   // Communes-ANCRES (« une ville comme {commune} »). Le LLM n'extrait que le label ;
   // la dérivation des traits est déterministe, dans la route parse (post-LLM).
   // ANCRAGE, pas similarité : traduit en préférences nommées, jamais en score. cf. Pari #7.
