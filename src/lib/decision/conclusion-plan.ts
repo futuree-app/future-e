@@ -183,6 +183,15 @@ export type ConclusionPlanInput = {
     // proximité de la gare Matabiau »). Optionnelle pour les appelants partiels.
     constraintKey?: string;
   } | null;
+  // FUT-45 : les demandes comprises que futur•e ne mesure pas, avec les mots du lecteur (horsMesure). Elles sont
+  // nommées dans la conclusion et rendent la lecture partielle. Optionnelles pour les appelants partiels.
+  nonMesurees?: { terme: string }[];
+  // Combien de critères ont été lus (neutres compris) et combien ne l'ont pas été : « vos critères vont dans ce
+  // sens » exige que TOUS les critères lus soient favorables (un neutre est lu, jamais favorable).
+  examinedCount?: number;
+  unexaminedCount?: number;
+  // Quand rien n'a pu être lu : rien de mesurable dans la demande, ou donnée absente ici.
+  lectureImpossible?: "rien_de_mesurable" | "donnee_absente" | null;
   // Les deux mesures du verdict (criteria-registry.ts), plus les comptes qui accordent ses phrases.
   coverage: CoverageLevel;
   orientation: Orientation;
@@ -219,6 +228,38 @@ const NUMBER_WORDS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "
 function numberForms(n: number): string[] {
   const word = NUMBER_WORDS[n];
   return word ? [String(n), word] : [String(n)];
+}
+
+// ── FUT-45 : LA LECTURE DIT CE QU'ELLE N'A PAS LU ────────────────────────────────────────────────
+// Les demandes non mesurées, citées avec les mots du lecteur : « budget 250 000 € », « authentique ».
+function listeNonMesurees(input: { nonMesurees?: { terme: string }[] }): string {
+  const t = (input.nonMesurees ?? []).map((n) => `« ${n.terme} »`);
+  const montres = t.slice(0, 5);
+  const reste = t.length - montres.length;
+  const liste = montres.length <= 1 ? montres[0] ?? "" : `${montres.slice(0, -1).join(", ")} et ${montres[montres.length - 1]}`;
+  return reste > 0 ? `${liste}, et ${reste} autre${reste > 1 ? "s" : ""} demande${reste > 1 ? "s" : ""}` : liste;
+}
+
+// Ce qui reste sans lecture, en une proposition : critères non examinés, demandes non mesurées, ou les deux.
+function resteSansLecture(input: ConclusionPlanInput, voc: { autresCriteres: string }): string {
+  const nm = (input.nonMesurees ?? []).length > 0;
+  const nonLus = input.unexaminedCount == null ? !nm : input.unexaminedCount > 0;
+  if (nm && nonLus) return `${voc.autresCriteres} n'ont pas pu être examinés, et futur•e ne mesure pas encore ${listeNonMesurees(input)}`;
+  if (nm) return `futur•e ne mesure pas encore ${listeNonMesurees(input)}`;
+  return `${voc.autresCriteres} n'ont pas encore pu être examinés`;
+}
+
+// Un trou CONNU dans la lecture : une demande non mesurée, ou un critère compté comme non lu. Un appelant qui ne
+// fournit pas ces comptes garde le comportement d'avant (on n'invente pas un trou qu'on ne connaît pas).
+function trouConnu(input: ConclusionPlanInput): boolean {
+  return input.coverage !== "complete" && ((input.nonMesurees ?? []).length > 0 || (input.unexaminedCount ?? 0) > 0);
+}
+
+// « Vos critères vont dans ce sens » seulement si TOUS les critères lus sont favorables (un neutre est lu, jamais
+// favorable). Sans le compte (appelant partiel), la phrase d'avant.
+function vontDansCeSens(input: ConclusionPlanInput, voc: { criteresExamines: string }): string {
+  const tous = input.examinedCount == null || input.favorableCount === input.examinedCount;
+  return tous ? `${voc.criteresExamines} vont dans ce sens.` : "Une partie de vos priorités va dans ce sens.";
 }
 
 function reserves(facts: DecisionFact[]): DecisionFact[] {
@@ -893,6 +934,16 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
     return verdictConditionOuverte(input, nom, a);
   }
 
+  if (input.coverage === "none" && input.lectureImpossible === "rien_de_mesurable" && (input.nonMesurees ?? []).length > 0) {
+    // FUT-45 : rien de ce qui a été demandé n'est mesuré par futur•e. Ce n'est pas une donnée qui manque ici : la
+    // phrase d'en dessous l'aurait fait croire (« une ville authentique et chaleureuse »).
+    return {
+      label: "Lecture non disponible", tone: "neutral",
+      headline: POSTURE(`futur•e ne mesure pas encore ce que vous avez demandé.`),
+      detail: `Votre demande porte sur ${listeNonMesurees(input)} : futur•e ne sait pas encore les lire, ${a} comme ailleurs.`,
+    };
+  }
+
   if (input.coverage === "none") {
     return {
       label: "Lecture non disponible", tone: "neutral",
@@ -1057,13 +1108,14 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
   if (input.orientation === "favorable") {
     const named = herosPositif(input, nom);
     if (named) {
-      return { label: "Correspondance favorable", tone: "positive", headline: named, detail: `${voc.criteresExamines} vont dans ce sens.` };
+      // FUT-45 : nommer le positif ne dispense pas de dire ce qui n'a pas été lu.
+      return { label: "Correspondance favorable", tone: "positive", headline: named, detail: trouConnu(input) ? `La lecture reste incomplète : ${resteSansLecture(input, voc)}.` : vontDansCeSens(input, voc) };
     }
-    return input.coverage === "high"
+    return input.coverage === "complete"
       ? {
           label: "Bonne correspondance", tone: "positive",
           headline: POSTURE(`${voc.sembleRepondre(nom)}.`),
-          detail: `${voc.criteresExamines} vont dans ce sens.`,
+          detail: vontDansCeSens(input, voc),
         }
       : {
           label: "Signaux favorables", tone: "neutral",
@@ -1071,7 +1123,7 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
           // le lecteur au lieu de finir sur « les critères déjà couverts », vocabulaire de couverture
           // qui recevait l'accent de fin de phrase.
           headline: POSTURE(`Sur ce qui a pu être examiné, ${nom} va dans le sens de ce que vous avez demandé.`),
-          detail: `La lecture reste incomplète : ${voc.autresCriteres} n'ont pas encore pu être examinés.`,
+          detail: `La lecture reste incomplète : ${resteSansLecture(input, voc)}.`,
         };
   }
 
@@ -1093,8 +1145,9 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
         ? `${capitalize(enLettres(r))} constats restent néanmoins ${engage}.`
         : r === 1
           ? `Un constat reste néanmoins ${engage}.`
-          : `${voc.criteresExamines} vont dans ce sens.`;
-      const detail = `${ici}${controlesPlusBas(controles)}`;
+          : vontDansCeSens(input, voc);
+      const manque = trouConnu(input) ? ` La lecture reste incomplète : ${resteSansLecture(input, voc)}.` : "";
+      const detail = `${ici}${controlesPlusBas(controles)}${manque}`;
       return { label: "Correspondance favorable", tone: "positive", headline: named, detail };
     }
   }
@@ -1118,7 +1171,7 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
   const r = input.reservesShown;
   const plusieurs = input.favorableCount >= 2;
 
-  if (input.coverage === "high") {
+  if (input.coverage === "complete") {
     if (input.orientation === "minor_reserves") {
       return {
         label: input.hasFavorable ? "Correspondance favorable" : "Correspondance à confirmer",
@@ -1142,7 +1195,7 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
             ? `${capitalize(enLettres(controles.visibles))} constats restent à contrôler avant de conclure.`
             : controles.visibles === 1
               ? "Un constat reste à contrôler avant de conclure."
-              : `${voc.criteresExamines} vont dans ce sens.`}${controlesPlusBas(controles)}`,
+              : vontDansCeSens(input, voc)}${controlesPlusBas(controles)}`,
       };
     }
     // Le détail recopiait le héros mot pour mot (« 2 points structurants empêchent … de conclure
@@ -1215,7 +1268,7 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
         ? `La lecture ${deCommune(nom)} reste incomplète.${resteAControler(r, true)}`
         : input.hasFavorable
           ? `Sur ce qui a pu être examiné, ${nom} va plutôt dans le sens de ce que vous avez demandé.${resteAControler(r, false)}`
-          : `${capitalize(voc.autresCriteres)} n'ont pas encore pu être examinés.${resteAControler(r, false)}`,
+          : `${capitalize(resteSansLecture(input, voc))}.${resteAControler(r, false)}`,
     };
   }
   return {
@@ -1374,7 +1427,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // nommée par le HEADLINE du verdict, en tête du bloc. Un registre construit, généré, validé et
   // stocké, mais rendu nulle part, coûtait un appel au modèle pour un texte que personne ne lisait.
 
-  // DEUX LIMITES, DEUX PHRASES, UN SEUL BLOC (13/08/2026).
+  // DEUX LIMITES, DEUX PHRASES, UN SEUL BLOC (13/08/2026) ; TROIS depuis FUT-45 (les demandes non mesurées).
   // ══════════════════════════════════════════════════════════════════════════════════════════
   // « Vos priorités concernant X ne sont pas encore couvertes » se disait aussi bien d'un critère
   // qu'aucune règle ne sait examiner (l'agriculture intensive, faute de seuil défendable au grain
@@ -1387,10 +1440,16 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // prompt. Deux phrases dans un même bloc distinguent ce qu'il faut distinguer sans toucher au
   // contrat de génération.
   const inconclusives = input.inconclusivePriorities ?? [];
-  if (input.uncoveredPriorities.length > 0 || inconclusives.length > 0) {
+  const nonMesurees = input.nonMesurees ?? [];
+  if (input.uncoveredPriorities.length > 0 || inconclusives.length > 0 || nonMesurees.length > 0) {
     const topAbsentes = input.uncoveredPriorities.slice(0, 3);
     const topNonConclues = inconclusives.slice(0, 3);
     const phrases: string[] = [];
+    // FUT-45 : D'ABORD ce que le lecteur a demandé et que futur•e ne mesure pas (son budget, « authentique ») :
+    // c'est la limite qu'il risque le plus d'oublier, puisqu'aucune carte ne la porte.
+    if (nonMesurees.length > 0) {
+      phrases.push(`futur•e ne mesure pas encore ${listeNonMesurees(input)} : ${nonMesurees.length > 1 ? "ces demandes restent" : "cette demande reste"} sans réponse dans ce dossier.`);
+    }
     if (topAbsentes.length > 0) {
       phrases.push(`Vos priorités concernant ${topAbsentes.map((p) => p.label).join(", ")} ne sont pas encore couvertes dans cette synthèse.`);
     }
@@ -1406,7 +1465,7 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
     blocks.push({
       key: "uncovered_priorities",
       fallbackText: phrases.join(" "),
-      sourceIds: [...topAbsentes, ...topNonConclues].map((p) => p.key),
+      sourceIds: [...topAbsentes, ...topNonConclues].map((p) => p.key).concat(nonMesurees.length > 0 ? ["horsMesure"] : []),
       // LE NOYAU QUI PORTE LA DISTINCTION EST EXIGÉ, sans quoi le modèle pourrait fondre les deux
       // phrases en « ne sont pas encore couvertes » et effacer la nuance sans violer aucune règle.
       // « conclu » couvre conclue, conclues, conclure et conclusion : le modèle garde sa tournure,
@@ -1415,11 +1474,17 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
       requiredPhrases: [
         ...[...topAbsentes, ...topNonConclues].map((p) => coreLabel(p.label)),
         ...(topNonConclues.length > 0 ? ["conclu"] : []),
+        // Les mots du lecteur restent : le modèle ne peut pas taire le budget en le résumant.
+        ...nonMesurees.slice(0, 5).map((n) => n.terme),
       ],
-      allowedNumbers: numberForms(topAbsentes.length + topNonConclues.length),
+      // Les nombres DITS par le lecteur (« 250 000 € ») sont vrais : ils sont admis, sous leurs formes courantes.
+      allowedNumbers: [
+        ...numberForms(topAbsentes.length + topNonConclues.length),
+        ...nonMesurees.flatMap((n) => (n.terme.match(/\d[\d\s\u00a0\u202f]*/g) ?? []).flatMap((x) => [x.trim(), x.replace(/\s|\u00a0|\u202f/g, "")])),
+      ],
       // Deux phrases au lieu d'une : la borne suit, sinon la seconde limite serait tronquée par une
       // règle écrite pour la première.
-      maxChars: 420,
+      maxChars: nonMesurees.length > 0 ? 620 : 420,
       generable: true,
     });
   }

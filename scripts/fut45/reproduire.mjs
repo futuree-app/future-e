@@ -18,5 +18,6 @@ for (const insee of insees) {
   console.log(`  ${r.moduleFacts.nom} : couverture ${d.criteria.coverage} · orientation ${d.criteria.orientation}`);
   for (const c of d.criteria.registry) console.log(`     - ${c.label} : ${c.coverage}/${c.outcome}/${c.capability}${c.unexaminedReason ? " (" + c.unexaminedReason + ")" : ""}`);
   console.log(`     verdict [${v.label}] ${v.headline.text ?? v.headline} | ${v.detail}`);
-  console.log(`     conclusion : ${(d.conclusion ?? "").slice(0, 400)}`);
+  const bloc = d.narrativePlan.blocks.find((b) => b.key === "uncovered_priorities");
+  if (bloc) console.log(`     limites : ${bloc.fallbackText}`);
 }

@@ -104,7 +104,8 @@ export type FaceCandidat = {
   /** Les démarches du contrôle prioritaire, reprises mot pour mot du plan. Jamais réécrites. */
   controlesPrioritaires: { label: string; anchorId: string }[];
   /** La couverture des critères déclarés, telle que le moteur l'a qualifiée. */
-  couverture: "none" | "partial" | "high";
+  // FUT-45 : « complete » depuis engine-4 ; un dossier figé avant garde son « high » (seuil de 70 %, sens plus large).
+  couverture: "none" | "partial" | "complete" | "high";
   /** La version et la date de l'analyse : elles sont la condition de lecture de tout le reste. */
   version: { engineVersion: string; conventionsVersion: string; generatedAt: string };
 };

@@ -76,7 +76,7 @@ const MER = { key: "nearSea" as const, label: "la proximité de la mer" };
 
 test("favorable + deux alignments structuring : le héros NOMME les priorités (D2 pluriel)", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "favorable", coverage: "high", hasFavorable: true, favorableCount: 2, reservesShown: 0, majorReserveCount: 0,
+    orientation: "favorable", coverage: "complete", hasFavorable: true, favorableCount: 2, reservesShown: 0, majorReserveCount: 0,
     shownFacts: [alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"), alignmentFact("a2", "structuring", "vie_locale", "la vie locale")],
   }));
   assert.equal(p.verdictTone, "positive");
@@ -86,7 +86,7 @@ test("favorable + deux alignments structuring : le héros NOMME les priorités (
 
 test("favorable + un alignment structuring : héros singulier « l'une de vos priorités »", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "favorable", coverage: "high", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
+    orientation: "favorable", coverage: "complete", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
     shownFacts: [alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins")],
   }));
   assert.match(p.verdict.headline.text, /^Toulouse répond à l'une de vos priorités : l'accès aux soins\.$/);
@@ -94,7 +94,7 @@ test("favorable + un alignment structuring : héros singulier « l'une de vos pr
 
 test("favorable + seulement secondary : le héros ne couronne pas un signal faible (posture)", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "favorable", coverage: "high", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
+    orientation: "favorable", coverage: "complete", favorableCount: 1, reservesShown: 0, majorReserveCount: 0,
     shownFacts: [alignmentFact("a1", "secondary", "acces_soins", "l'accès aux soins")],
   }));
   assert.equal(p.verdict.headline.kind, "posture");
@@ -102,13 +102,13 @@ test("favorable + seulement secondary : le héros ne couronne pas un signal faib
 });
 
 test("favorable SANS alignment affiché : posture (favorableCount seul ne donne pas de sujet)", () => {
-  const p = buildConclusionPlan(baseInput({ orientation: "favorable", coverage: "high", favorableCount: 2, shownFacts: [] }));
+  const p = buildConclusionPlan(baseInput({ orientation: "favorable", coverage: "complete", favorableCount: 2, shownFacts: [] }));
   assert.equal(p.verdict.headline.kind, "posture");
 });
 
 test("arbitrage : le détail NOMME les sujets favorables affichés, pas « plusieurs de vos autres priorités »", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "arbitration", coverage: "high", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 2,
+    orientation: "arbitration", coverage: "complete", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 2,
     shownFacts: [
       mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
       alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
@@ -128,7 +128,7 @@ test("arbitrage : UN favorable + UN écart -> tout au singulier (le cas le plus 
   // Vu à l'écran sur Lège-Cap-Ferret : « entre ces correspondances et l'écart relevé » alors qu'une seule
   // correspondance était nommée. Le pluriel était codé en dur de ce côté-ci de la balance.
   const p = buildConclusionPlan(baseInput({
-    orientation: "arbitration", coverage: "high", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 1,
+    orientation: "arbitration", coverage: "complete", mismatchTotal: 1, mismatchShown: 1, hasFavorable: true, favorableCount: 1,
     shownFacts: [
       mismatchFact("m1", "structuring", "faible_risque_feu", "un environnement peu exposé aux incendies"),
       alignmentFact("a1", "secondary", "vie_locale", "la vie locale"),
@@ -140,7 +140,7 @@ test("arbitrage : UN favorable + UN écart -> tout au singulier (le cas le plus 
 
 test("arbitrage : DEUX écarts + côté favorable nommé -> « les écarts relevés » (pluriel accordé sur le compte)", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "arbitration", coverage: "high", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1,
+    orientation: "arbitration", coverage: "complete", mismatchTotal: 2, mismatchShown: 2, hasFavorable: true, favorableCount: 1,
     shownFacts: [
       mismatchFact("m1", "structuring", "cadre_calme", "le calme"),
       mismatchFact("m2", "structuring", "nature", "l'accès aux espaces naturels"),
@@ -153,7 +153,7 @@ test("arbitrage : DEUX écarts + côté favorable nommé -> « les écarts relev
 
 test("minor_reserves + alignment structuring : le positif prime dans le héros, la réserve secondaire au détail", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "minor_reserves", coverage: "high", favorableCount: 2, reservesShown: 2, majorReserveCount: 0,
+    orientation: "minor_reserves", coverage: "complete", favorableCount: 2, reservesShown: 2, majorReserveCount: 0,
     shownFacts: [
       alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
       alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
@@ -167,7 +167,7 @@ test("minor_reserves + alignment structuring : le positif prime dans le héros, 
 
 test("minor_reserves SANS alignment structuring : le héros garde la réserve (repli inchangé)", () => {
   const p = buildConclusionPlan(baseInput({
-    orientation: "minor_reserves", coverage: "high", favorableCount: 1, reservesShown: 1, hasFavorable: true,
+    orientation: "minor_reserves", coverage: "complete", favorableCount: 1, reservesShown: 1, hasFavorable: true,
     shownFacts: [verification("v1", "secondary")],
   }));
   assert.doesNotMatch(p.verdict.headline.text, /répond à l'une|répond à deux/);
@@ -462,7 +462,7 @@ test("incompatibilité établie : le verdict porte le constat, et reste détermi
 // Le déterministe gagne le droit de dire qu'un lieu correspond, à condition de pouvoir le prouver.
 
 test("high + favorable : le lieu correspond, et on ose le dire", () => {
-  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
+  const p = buildConclusionPlan(baseInput({ coverage: "complete", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
   assert.equal(p.verdictLabel, "Bonne correspondance");
   assert.equal(p.verdictTone, "positive");
   assert.match(p.verdict.headline.text, /^Toulouse semble bien correspondre à votre projet/);
@@ -470,7 +470,7 @@ test("high + favorable : le lieu correspond, et on ose le dire", () => {
 
 test("high + major_reserves AVEC 2 favorables : « plusieurs dimensions » est prouvé", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 2, majorReserveCount: 2,
   }));
   // LA RÉSERVE D'ABORD, le favorable ensuite. « Ces points » suit immédiatement le héros qui vient de
   // les nommer : aucun antécédent concurrent ne s'intercale (cf. le commentaire de la branche).
@@ -484,7 +484,7 @@ test("high + major_reserves : UN favorable mais DEUX points — le démonstratif
   // Le cas vu à l'écran : « Toulouse présente un élément favorable… Ils peuvent encore peser », où
   // « Ils » (2 points) tombait juste après « un élément favorable » (singulier) et sonnait faux.
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 2,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 2,
   }));
   assert.match(p.blocks[0]!.fallbackText, /Par ailleurs, Toulouse présente un élément favorable pour votre projet\.$/);
   assert.match(p.blocks[0]!.fallbackText, /^Ces points pèsent dans votre décision\./);
@@ -499,7 +499,7 @@ test("major_reserves : le contrepoint NOMME le sujet favorable quand il est stru
   // « présente un élément favorable pour votre projet » ne dit rien : le lecteur doit descendre dans les
   // cartes pour savoir de quoi on parle. La conclusion NOMME, les cartes démontrent.
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
     shownFacts: [
       verification("f1", "decision_critical", "c1", "le risque de feu de forêt recensé"),
       alignmentFact("a1", "structuring", "vie_locale", "la vie locale"),
@@ -516,7 +516,7 @@ test("major_reserves : un favorable SECONDAIRE est nommé aussi — il est déj�
   // « la vie locale, parmi les 5 % de communes les plus animées » s'affichait en carte pendant que le
   // verdict disait « présente un élément favorable ». On ne couronne pas ici, on désigne.
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
     shownFacts: [
       verification("f1", "decision_critical"),
       alignmentFact("a1", "secondary", "vie_locale", "la vie locale"),
@@ -528,7 +528,7 @@ test("major_reserves : un favorable SECONDAIRE est nommé aussi — il est déj�
 
 test("major_reserves : AUCUN alignment affiché -> le repli générique, qui ne promet rien de faux", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
     shownFacts: [verification("f1", "decision_critical")],
   }));
   assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet\.$/);
@@ -536,7 +536,7 @@ test("major_reserves : AUCUN alignment affiché -> le repli générique, qui ne 
 
 test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » serait faux", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: true, favorableCount: 1, majorReserveCount: 1,
   }));
   assert.equal(p.blocks[0]!.fallbackText.includes("plusieurs"), false);
   assert.match(p.blocks[0]!.fallbackText, /présente un élément favorable pour votre projet/);
@@ -545,7 +545,7 @@ test("high + major_reserves avec UN SEUL favorable : « plusieurs dimensions » 
 
 test("high + major_reserves SANS favorable : aucun positif n'est promis", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
   }));
   assert.equal(p.blocks[0]!.fallbackText.includes("répond bien"), false);
   assert.equal(p.blocks[0]!.fallbackText.includes("favorable"), false);
@@ -555,7 +555,7 @@ test("high + major_reserves SANS favorable : aucun positif n'est promis", () => 
 
 test("high + minor_reserves SANS favorable : aucun « bien correspondre » ne s'échappe", () => {
   const p = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 2,
   }));
   const tout = `${p.verdict.headline.text} ${p.blocks[0]!.fallbackText}`;
   assert.equal(tout.includes("bien correspondre"), false);
@@ -603,7 +603,7 @@ test("incompatibilité : la condition non respectée EST la réponse", () => {
 });
 
 test("le verdict reste NON générable, quelle que soit la case", () => {
-  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable" }));
+  const p = buildConclusionPlan(baseInput({ coverage: "complete", orientation: "favorable" }));
   assert.equal(p.blocks[0]!.generable, false);
 });
 
@@ -817,7 +817,7 @@ test("lead : un tradeoff structurant seul devient le fait de tête, sans bloc co
 // favorable.
 test("héros : une composition en tête nomme son headlineSubject, jamais son titre", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f9", "secondary")],
     shownCompositions: [tradeoff("decision_critical")],
     reservesShown: 2, majorReserveCount: 1,
@@ -1063,7 +1063,7 @@ test("gate de longueur : la même commune garde son héros nommé quand la phras
 
 test("réserve dominante unique : le sujet est nommé, le fait consommé", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f1", "decision_critical", "constat f1", "la chaleur estivale"), verification("f2", "secondary")],
     reservesShown: 2, majorReserveCount: 1,
   }));
@@ -1075,7 +1075,7 @@ test("réserve dominante unique : le sujet est nommé, le fait consommé", () =>
 
 test("réserves à égalité : aucune ne domine, le headline reste en posture", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
     reservesShown: 2, majorReserveCount: 2,
   }));
@@ -1085,7 +1085,7 @@ test("réserves à égalité : aucune ne domine, le headline reste en posture", 
 
 test("cas favorable : posture, jamais un positif nommé", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3,
+    coverage: "complete", orientation: "favorable", hasFavorable: true, favorableCount: 3,
   }));
   assert.equal(plan.verdict.headline.kind, "posture");
   assert.equal(plan.verdict.headline.text, "Toulouse semble bien correspondre à votre projet.");
@@ -1158,7 +1158,7 @@ test("consommation NARRATIVE seulement : les comptes ne bougent pas", () => {
 
 test("la démarche se reconstruit sur ce que le headline n'a pas consommé", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [
       verification("f1", "decision_critical", "constat f1", "la chaleur estivale"),
       verification("f2", "structuring", "constat f2", "le retrait-gonflement des argiles"),
@@ -1174,7 +1174,7 @@ test("la démarche se reconstruit sur ce que le headline n'a pas consommé", () 
 
 test("même pool : l'ordre vit dans l'étiquette de l'UI, jamais dans le corps", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [
       verification("f1", "decision_critical", "constat f1", "la chaleur estivale"),
       verification("f2", "structuring", "constat f2", "le retrait-gonflement des argiles"),
@@ -1206,7 +1206,7 @@ test("pool différent : la démarche existe quand même (le pool des réserves r
 
 test("pas de résiduel, pas de démarche", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f1", "decision_critical", "constat f1", "la chaleur estivale")],
     reservesShown: 1, majorReserveCount: 1,
   }));
@@ -1217,7 +1217,7 @@ test("pas de résiduel, pas de démarche", () => {
 
 test("un headline de posture ne consomme rien : la strate est complète", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "decision_critical")],
     reservesShown: 2, majorReserveCount: 2,
   }));
@@ -1252,7 +1252,7 @@ test("le détail ne redit JAMAIS la phrase du héros", () => {
   // Le héros porte « semble bien correspondre » ; le détail le répétait mot pour mot, soit exactement
   // les deux strates de même poids que ce lot supprime.
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     reservesShown: 2, majorReserveCount: 1,
     shownFacts: [verification("f1", "decision_critical"), verification("f2", "secondary")],
   }));
@@ -1366,13 +1366,13 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
   assert.match(unEcart.verdict.detail, /Cet écart est à peser avant de vous décider\. Un constat figure plus bas\.$/);
 
   const unPoint = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1,
   }));
   assert.match(unPoint.verdict.headline.text, /^Un point reste à contrôler avant de conclure sur Toulouse\.$/);
   assert.match(unPoint.verdict.detail, /^Tant que ce point n'est pas levé,/);
 
   const unConstat = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1,
   }));
   assert.equal(unConstat.verdict.detail, "Un constat reste à contrôler avant de conclure.");
 });
@@ -1381,7 +1381,7 @@ test("le singulier est accordé partout : un écart, un point, un constat", () =
 
 test("démarche : consumedFrom « reserves » (le héros a déjà nommé un point de CE registre) -> l'UI rendra « À contrôler ensuite »", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0,
     shownFacts: [
       verification("f1", "decision_critical", "c1", "l'exposition à l'inondation"),
       verification("f2", "structuring", "c2", "le retrait-gonflement des argiles"),
@@ -1411,7 +1411,7 @@ test("démarche : consumedFrom « mismatches » (le héros a puisé dans un AUTR
 // faire, et sous un verdict d'arbitrage un second point défavorable. Elle porte maintenant les gestes.
 test("démarche : un tradeoff en tête reprend l'action de son côté DÉFAVORABLE, jamais son titre ni son résumé", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     shownFacts: [verification("f9", "secondary")],
     shownCompositions: [tradeoff("structuring")],
     reservesShown: 2,
@@ -1428,7 +1428,7 @@ test("démarche : un tradeoff en tête reprend l'action de son côté DÉFAVORAB
 
 test("démarche : un grouped_verification en tête rend DEUX actions, une par item, dans l'ordre de la carte", () => {
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     shownFacts: [verification("f9", "secondary")],
     shownCompositions: [grouped("decision_critical")],
     reservesShown: 2,
@@ -1450,7 +1450,7 @@ test("démarche : le plafond tronque le DERNIER candidat, y compris une composit
   // candidat servi, exactement comme il tronque une composition à trois items. Les deux cartes restent
   // sources : chacune a fourni une ligne.
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     shownFacts: [
       verification("f7", "structuring", "c7", "l'inondation", "Consultez l'exposition de l'adresse aux inondations"),
       verification("f9", "secondary"),
@@ -1476,7 +1476,7 @@ test("démarche : DEUX actions au plus (une orientation, jamais une checklist)",
     },
   ];
   const plan = buildConclusionPlan(baseInput({
-    coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
+    coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2,
     shownFacts: [verification("f9", "secondary")],
     shownCompositions: [troisItems],
     reservesShown: 2,
@@ -1515,10 +1515,10 @@ test("posture habitant : le verdict ne parle plus de « projet »", () => {
   const branches: Partial<ConclusionPlanInput>[] = [
     { conclusionState: "project_not_structured" },
     { orientation: "incompatible", conclusionState: "established_incompatibility", establishedIncompatibility: { factId: "i1", statement: "s.", constraintLabel: "la proximité de la mer" } },
-    { coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 },
+    { coverage: "complete", orientation: "favorable", hasFavorable: true, favorableCount: 3 },
     { coverage: "partial", orientation: "favorable" },
-    { coverage: "high", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2, reservesShown: 2 },
-    { coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1 },
+    { coverage: "complete", orientation: "minor_reserves", hasFavorable: true, favorableCount: 2, reservesShown: 2 },
+    { coverage: "complete", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 1 },
     { coverage: "partial", orientation: "major_reserves", hasFavorable: false, favorableCount: 0, majorReserveCount: 2 },
     { coverage: "partial", orientation: "minor_reserves", hasFavorable: false, favorableCount: 0, reservesShown: 1 },
   ];
@@ -1532,7 +1532,7 @@ test("posture habitant : le verdict ne parle plus de « projet »", () => {
 });
 
 test("posture recherche : « votre projet » reste, c'est le mot juste", () => {
-  const p = buildConclusionPlan(baseInput({ coverage: "high", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
+  const p = buildConclusionPlan(baseInput({ coverage: "complete", orientation: "favorable", hasFavorable: true, favorableCount: 3 }));
   assert.equal(p.verdict.headline.text, "Toulouse semble bien correspondre à votre projet.");
 });
 
@@ -1549,7 +1549,7 @@ test("le héros compte les contrôles MONTRÉS, et dit ceux qui restent plus bas
   // (indemnisations, permis, périmètre patrimonial), comme sur le dossier réel.
   const plan = buildConclusionPlan(baseInput({
     communeNom: "La Rochelle",
-    coverage: "high", orientation: "major_reserves", hasFavorable: false, favorableCount: 0,
+    coverage: "complete", orientation: "major_reserves", hasFavorable: false, favorableCount: 0,
     majorReserveCount: 3, reservesShown: 6,
     shownFacts: [
       verification("f1", "structuring"), verification("f2", "structuring"),
@@ -1615,7 +1615,7 @@ test("un compte supérieur aux sujets nommés n'est jamais rabaissé", () => {
   // L'invariant borne le compte par le bas, il ne le remplace pas : trois critères favorables
   // dont deux nommables gardent leur « dont ».
   const p = buildConclusionPlan(baseInput({
-    orientation: "favorable", coverage: "high", hasFavorable: true, favorableCount: 3,
+    orientation: "favorable", coverage: "complete", hasFavorable: true, favorableCount: 3,
     reservesShown: 0, majorReserveCount: 0,
     shownFacts: [
       alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
@@ -1762,7 +1762,7 @@ test("couverture élevée sans héros positif : même règle, le compte de l'éc
   const sinistres = verificationFact("sin", "logement.sinistralite", "secondary", "Demandez l'état des risques");
   const soins = verificationFact("soins2", "autour.acces-soins", "secondary", "Vérifiez qu'un médecin prend de nouveaux patients");
   const plan = buildConclusionPlan(baseInput({
-    orientation: "minor_reserves", coverage: "high", favorableCount: 1, hasFavorable: true,
+    orientation: "minor_reserves", coverage: "complete", favorableCount: 1, hasFavorable: true,
     reservesShown: 3, majorReserveCount: 1,
     shownFacts: [bati, sinistres, soins],
     reglesDeclarees: ["autour.acces-soins"],

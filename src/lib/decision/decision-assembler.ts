@@ -220,6 +220,12 @@ export function assembleDossier(
         }
       : null,
     coverage: criteria.coverage,
+    // FUT-45 : ce qui a été compris sans être lu, et les comptes qui empêchent « vos critères vont dans ce sens »
+    // quand un critère lu n'est pas favorable.
+    nonMesurees: criteria.nonMesurees,
+    examinedCount: criteria.examinedCount,
+    unexaminedCount: criteria.unexaminedCount,
+    lectureImpossible: criteria.lectureImpossible,
     orientation: criteria.orientation,
     openConditions: criteria.openConditions,
     metConditions: criteria.metConditions,

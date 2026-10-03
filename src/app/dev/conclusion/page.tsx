@@ -147,7 +147,7 @@ const CAS: { titre: string; attendu: string; plan: ReturnType<typeof buildConclu
     titre: "5 · Le héros a déjà nommé une réserve -> « À contrôler ensuite »",
     attendu: "L'étiquette bascule sur « À contrôler ensuite » (consumedFrom = reserves), la démarche porte le fait résiduel.",
     plan: buildConclusionPlan(input({
-      coverage: "high", hasFavorable: false, favorableCount: 0,
+      coverage: "complete", hasFavorable: false, favorableCount: 0,
       shownFacts: [INONDATION, ARGILES], reservesShown: 2, majorReserveCount: 2,
     })),
     cibles: [{ id: "exposition-bati", titre: "Le retrait-gonflement des argiles" }],

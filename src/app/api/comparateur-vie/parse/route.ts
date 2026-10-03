@@ -217,7 +217,7 @@ const TOOL_INPUT_SCHEMA = {
     horsMesure: {
       type: "array",
       description:
-        "Notions exprimées par l'utilisateur qui n'ont AUCUN critère dans le moteur. Ne JAMAIS fabriquer de proxy, NI de préférence approchante. Maximum 3. Vide si aucune.",
+        "Notions exprimées par l'utilisateur qui n'ont AUCUN critère dans le moteur, TOUTES, y compris un budget ou un prix (« budget 250 000 € »). Ne JAMAIS fabriquer de proxy, NI de préférence approchante. Vide si aucune.",
       items: {
         type: "object",
         properties: {

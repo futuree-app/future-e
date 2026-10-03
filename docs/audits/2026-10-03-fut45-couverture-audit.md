@@ -121,3 +121,27 @@ d'interface nouvelle, pas de changement de règle d'orientation, pas de changeme
 | 3 | issue `favorable` d'une préférence | « répond à votre priorité » | position dans le classement national (parmi les X % les plus favorables) | un rang relatif dit « mieux que la plupart », pas « suffisant pour vous » ; le verdict reste en « semble » | moyenne | **conserver**, en surveillant le vocabulaire | non |
 | 4 | « budget » rangé hors mesure | — | le parseur classe « prix » hors périmètre | la question n° 1 d'un acheteur reste sans réponse, alors que l'index porte un niveau de marché immobilier (`logementNiveau`, utilisé par le comparateur) | **forte** : un budget est souvent la première condition | **améliorer** : examiner si un niveau de prix communal honnête peut éclairer le budget | oui |
 | 5 | `horsMesure` sans poids | — | une liste de termes | le « surtout » du lecteur est perdu (cas G) | moyenne | **améliorer** (parseur : garder l'insistance) | oui, petit |
+
+## Implémentation (modèle A validé le 03/10/2026, avec trois précisions)
+
+- `CoverageLevel` = `none | partial | complete`. **`complete` = chaque demande comprise a reçu une lecture explicite**
+  (une appréciation suffit) : ni « futur•e a répondu précisément à tout », ni « le lieu convient ». Seuil de 70 % et
+  `high` retirés.
+- `CriteriaSummary.nonMesurees` (mots du lecteur, sans limite de nombre, dédoublonnés), `examinedCount`,
+  `unexaminedCount`, `lectureImpossible` (`rien_de_mesurable` | `donnee_absente`).
+- Un critère `neutral` est lu (couverture), jamais favorable : « vos critères vont dans ce sens » exige que tous les
+  critères lus le soient, sinon « une partie de vos priorités va dans ce sens ».
+- Conclusion : le verdict ne dit « Bonne correspondance » que sur une lecture complète ; sinon la tournure « sur ce
+  qui a pu être examiné… » et le détail nomme ce qui manque ; les variantes qui nomment une priorité satisfaite le
+  disent aussi. Le bloc de limites nomme d'abord les demandes non mesurées (« … : cette demande reste sans réponse
+  dans ce dossier »), termes exigés dans la version rédigée, nombres du lecteur admis.
+- Lecture impossible : « futur•e ne mesure pas encore ce que vous avez demandé » quand rien n'est mesurable ; la
+  phrase « les données manquent pour cette commune » seulement quand c'est le cas.
+- **Limite de 3 vérifiée** : elle n'était pas appliquée (le modèle rend 5 ou 6 demandes, le code ne tronque pas) ;
+  la mention « Maximum 3 » est retirée du schéma. **Perte réelle trouvée** : le budget, jeté par le modèle deux fois
+  sur deux dans une phrase à cinq sujets (le prompt range le prix « hors périmètre »). Garde-fou minimal :
+  `budgetRattrape` (parse-assainir) remet un budget ou une somme en euros dans `horsMesure` s'il n'y est pas.
+- `ENGINE_VERSION` → `engine-4`. Dossiers figés intacts ; le comparatif accepte l'ancien `high`.
+
+Hors FUT-45, comme décidé : la règle d'arbitrage (un écart secondaire unique), le traitement du budget comme critère,
+le poids des demandes hors mesure.

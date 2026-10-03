@@ -57,6 +57,11 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
   delete hc.excludeZonesPerimetres;
   delete hc.zonesConventions;
 
+  // FUT-45 : UN BUDGET DIT NE SE PERD JAMAIS. Le prompt range le prix hors périmètre, et le modèle le jette parfois
+  // au lieu de le garder hors mesure (« un budget de 300 000 €… » : disparu deux fois sur deux, le 03/10/2026). Il
+  // reste alors une demande sans réponse que la lecture finale doit nommer : on la rattrape ici, avec les mots du
+  // lecteur, si aucune demande hors mesure ne la porte déjà.
+  const horsMesure = budgetRattrape(parsed.horsMesure, rawText);
   const preferences = (parsed.preferences ?? []).map((p) => ({ key: p.key, weight: p.weight, source: "parse" as const }));
   if (eloignementSansNombre && !preferences.some((p) => p.key === "eloignement_mer")) {
     preferences.push({ key: "eloignement_mer", weight: 2, source: "parse" as const });
@@ -68,7 +73,7 @@ export function assainirParsed(parsed: ParsedProject, rawText: string): ParsedPr
   }
   const sizeWord = parsed.sizeWord === "petite" || parsed.sizeWord === "moyenne" || parsed.sizeWord === "grande" ? parsed.sizeWord : null;
 
-  const out: ParsedProject = { ...parsed, hardConstraints: hc, preferences, sizeWord };
+  const out: ParsedProject = { ...parsed, hardConstraints: hc, preferences, sizeWord, ...(horsMesure ? { horsMesure } : {}) };
   const marqueurs = forceMarkersValides(out, parsed.forceMarkers);
   if (marqueurs.length > 0) out.forceMarkers = marqueurs;
   else delete out.forceMarkers;
@@ -104,4 +109,18 @@ function forceMarkersValides(p: ParsedProject, raw: unknown): { criterion: Crite
     if (declare) out.push({ criterion: { kind: "hard", key: c.key as CriterionRef["key"], instance: null } as CriterionRef, quote });
   }
   return out;
+}
+
+// Un budget ou une somme dits par le lecteur : « budget 250 000 € », « 300 000 euros », « 250k€ ».
+const BUDGET_DIT = /budget[^,.;!?\n]*|\d[\d\s\u00a0\u202f.,]*\s*(?:k\s*€|k€|€|euros?\b|k\s*euros?)/i;
+
+export function budgetRattrape(
+  horsMesure: ParsedProject["horsMesure"], rawText: string,
+): ParsedProject["horsMesure"] {
+  const m = (rawText ?? "").match(BUDGET_DIT);
+  if (!m) return horsMesure;
+  const deja = (horsMesure ?? []).some((h) => /budget|€|euro|prix|\d/i.test(h?.term ?? ""));
+  if (deja) return horsMesure;
+  const terme = m[0].trim().replace(/\s+/g, " ");
+  return [...(horsMesure ?? []), { term: terme, kind: "autre" }];
 }

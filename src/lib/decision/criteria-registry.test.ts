@@ -72,12 +72,12 @@ test("le COUPERET : une contrainte dure non examinée interdit `high`, même à 
   assert.equal(s.coverage, "partial");
 });
 
-test("`high` exige toutes les contraintes dures ET 70 % des critères", () => {
+test("FUT-45 : `complete` exige que CHAQUE critère compris ait été lu (plus de seuil de 70 %)", () => {
   const s = buildCriteriaRegistry(
     project({ departements: ["31"] }, [{ key: "faible_chaleur", weight: 3 }]),
     run([ev("r1", ["departements"], "satisfied"), ev("r2", ["faible_chaleur"], "satisfied")]),
   );
-  assert.equal(s.coverage, "high");
+  assert.equal(s.coverage, "complete");
   assert.equal(s.orientation, "favorable");
 });
 
@@ -273,4 +273,65 @@ test("not_applicable ne vaut pas tentative : le critère reste une lacune du pro
     run([ev("r1", ["calme_sonore"], "not_applicable")]),
   );
   assert.equal(s.registry[0]!.unexaminedReason, "no_rule");
+});
+
+// ── FUT-45 : la couverture fidèle à TOUTE la demande ─────────────────────────────────────────────────
+
+function avecHorsMesure(p: UserProject, termes: string[]): UserProject {
+  return { ...p, parsed: { ...p.parsed!, horsMesure: termes.map((term) => ({ term, kind: "autre" as const })) } };
+}
+
+test("A. « budget 250 000 € et air sain » : la lecture n'est JAMAIS complète, le budget est nommé", () => {
+  const s = buildCriteriaRegistry(
+    avecHorsMesure(project({}, [{ key: "air_sain", weight: 3 }]), ["budget 250 000 €"]),
+    run([ev("r1", ["air_sain"], "satisfied")]),
+  );
+  assert.equal(s.coverage, "partial");
+  assert.deepEqual(s.nonMesurees, [{ terme: "budget 250 000 €" }]);
+  assert.equal(s.orientation, "favorable", "l'orientation reste un autre axe");
+});
+
+test("B / C. une préférence seulement appréciable, lue et favorable : lecture complète, capacité « apprécier »", () => {
+  const s = buildCriteriaRegistry(project({}, [{ key: "faible_chaleur", weight: 3 }]), run([ev("r1", ["faible_chaleur"], "satisfied")]));
+  assert.equal(s.coverage, "complete");
+  assert.equal(s.registry[0]!.capability, "apprecier", "complétude de la lecture ≠ capacité à trancher");
+});
+
+test("D. donnée absente ici : lecture impossible pour cause de DONNÉE, pas de produit", () => {
+  const s = buildCriteriaRegistry(project({}, [{ key: "nature", weight: 2 }]), run([ev("r1", ["nature"], "uncertain")]));
+  assert.equal(s.coverage, "none");
+  assert.equal(s.lectureImpossible, "donnee_absente");
+});
+
+test("E. trois critères lus et une demande non mesurée : partielle ; un neutre est lu, jamais favorable", () => {
+  const s = buildCriteriaRegistry(
+    avecHorsMesure(project({}, [{ key: "air_sain", weight: 3 }, { key: "nature", weight: 2 }, { key: "faible_chaleur", weight: 2 }]), ["bonnes écoles réputées"]),
+    run([ev("r1", ["air_sain"], "satisfied"), ev("r2", ["nature"], "neutral"), ev("r3", ["faible_chaleur"], "satisfied")]),
+  );
+  assert.equal(s.coverage, "partial");
+  assert.equal(s.examinedCount, 3);
+  assert.equal(s.favorableCount, 2, "le neutre n'est pas favorable");
+  assert.equal(s.registry.find((c) => c.criterionKey === "nature")!.outcome, "indeterminate");
+});
+
+test("F. seulement des demandes non mesurées : rien de mesurable, jamais « la donnée manque ici »", () => {
+  const s = buildCriteriaRegistry(avecHorsMesure(project({}, []), ["authentique", "chaleureuse"]), run([]));
+  assert.equal(s.coverage, "none");
+  assert.equal(s.lectureImpossible, "rien_de_mesurable");
+  assert.equal(s.nonMesurees.length, 2);
+});
+
+test("G. beaucoup de critères lus ne compensent pas une demande majeure non mesurée", () => {
+  const prefs = ["cadre_calme", "nature", "air_sain", "acces_services", "faible_chaleur", "acces_soins"].map((key) => ({ key, weight: 2 }));
+  const s = buildCriteriaRegistry(
+    avecHorsMesure(project({}, prefs), ["budget de 200 000 € maximum"]),
+    run(prefs.map((p, i) => ev(`r${i}`, [p.key], "satisfied"))),
+  );
+  assert.equal(s.examinedCount, 6);
+  assert.equal(s.coverage, "partial", "six critères lus sur six ne rendent pas la lecture complète");
+});
+
+test("aucune limite de nombre : cinq demandes non mesurées restent cinq, dédoublonnées", () => {
+  const s = buildCriteriaRegistry(avecHorsMesure(project({}, []), ["a", "b", "c", "d", "e", "A"]), run([]));
+  assert.deepEqual(s.nonMesurees.map((n) => n.terme), ["a", "b", "c", "d", "e"]);
 });

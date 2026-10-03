@@ -135,7 +135,7 @@ export type Preference = { key: PreferenceKey; weight: number; source?: "parse" 
 export type { HardConstraints } from "./hard-constraint-schema.ts";
 import type { HardConstraints } from "./hard-constraint-schema.ts";
 
-export type HorsMesureKind = "ecoles" | "culture" | "affectif";
+export type HorsMesureKind = "ecoles" | "culture" | "affectif" | "autre"; // « autre » : émis par le parseur depuis longtemps, il manquait au type
 
 export type ParsedProject = {
   reformulation: string;

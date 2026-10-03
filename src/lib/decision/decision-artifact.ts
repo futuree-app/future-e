@@ -39,7 +39,9 @@ import type { UserProject } from "../user-project.ts";
 // engine-3 (FUT-33, 02/10/2026) : la mer se mesure au RIVAGE MARIN (au point évalué : l'adresse, ou le point de
 // référence de la commune), « pas le littoral » se lit sur le classement loi Littoral. Un dossier engine-2 lisait
 // une distance à une liste de villes côtières : il reste tel qu'il a été vendu, et sa version le dit.
-export const ENGINE_VERSION = "engine-3";
+// engine-4 (FUT-45, 03/10/2026) : la lecture n'est « complète » que si chaque demande comprise a été lue ; les
+// demandes non mesurées (le budget d'un lecteur) sont nommées dans la conclusion. Plus de seuil de 70 %.
+export const ENGINE_VERSION = "engine-4";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

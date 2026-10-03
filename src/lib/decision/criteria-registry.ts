@@ -76,7 +76,11 @@ export type OpenCondition = {
   cause: "a_confirmer" | "ne_pas_mesurer" | "donnee_absente";
 };
 
-export type CoverageLevel = "none" | "partial" | "high";
+// FUT-45 : LA COMPLÉTUDE DE LA LECTURE, et rien d'autre. `complete` = chaque demande comprise a reçu une lecture
+// explicite (y compris par une simple appréciation) ; ce n'est ni « futur•e a répondu précisément à tout » (la
+// capacité, trancher ou apprécier, est un autre axe), ni « le lieu convient » (l'orientation en est un troisième).
+// Aucun seuil, aucun ratio : un seul trou suffit à rendre la lecture partielle.
+export type CoverageLevel = "none" | "partial" | "complete";
 export type Orientation =
   | "favorable" | "neutral" | "minor_reserves" | "major_reserves" | "arbitration" | "incompatible" | "indeterminate"
   // FUT-7 : une condition sans compromis reste ouverte. Plus lourd qu'un arbitrage, jamais un blocage.
@@ -98,11 +102,20 @@ export type CriteriaSummary = {
   // d'une condition qui ne l'est pas.
   openConditions: OpenCondition[];
   metConditions: { key: string; label: string }[];
+  // FUT-45 : les demandes COMPRISES que futur•e ne mesure pas (`horsMesure`), avec les mots du lecteur. Elles ne
+  // sont pas des critères (aucune règle, aucun poids), mais elles font partie de la demande : la lecture finale
+  // les nomme, et elles empêchent une lecture « complète ».
+  nonMesurees: { terme: string }[];
+  // Combien de critères ont été LUS (examinés, neutres compris), et combien ne l'ont pas été. Un critère neutre
+  // est lu, jamais favorable : « vos critères vont dans ce sens » exige favorableCount === examinedCount.
+  examinedCount: number;
+  unexaminedCount: number;
+  // Quand RIEN n'a pu être lu, pourquoi : rien de mesurable dans la demande (une limite du produit), ou une
+  // donnée absente ici (une limite de ce lieu). Null dès qu'au moins un critère a été lu.
+  lectureImpossible: "rien_de_mesurable" | "donnee_absente" | null;
 };
 
-// Une DÉCISION, pas une intuition. Elle vit ici, nommée, couverte par une table de vérité : sinon
-// « couverture élevée » redevient une décision éditoriale dispersée dans le code.
-export const COVERAGE_HIGH_THRESHOLD = 0.7;
+// (FUT-45, 03/10/2026 : le seuil de 70 % qui décidait d'une « couverture élevée » est retiré ; voir CoverageLevel.)
 
 // Un outcome EXPLOITABLE prouve que le critère a été regardé. `unknown` / `uncertain` disent que la
 // donnée manque, `not_applicable` que la règle est hors sujet : aucun des deux n'est un examen.
@@ -201,7 +214,7 @@ export function buildCriteriaRegistry(
   ];
 
   const examined = registry.filter((c) => c.coverage === "examined");
-  const ratio = registry.length === 0 ? 0 : examined.length / registry.length;
+  const nonMesurees = demandesNonMesurees(project);
 
   // LES CONDITIONS OUVERTES (FUT-7) : confirmées par le lecteur, et ni tranchées ni remplies.
   const openConditions: OpenCondition[] = registry
@@ -220,11 +233,17 @@ export function buildCriteriaRegistry(
   // dite élevée, quel que soit le ratio : un « 8 préférences sur 10 » ne rachète pas la seule condition
   // du lecteur, restée muette. Depuis FUT-7, ce sont les conditions CONFIRMÉES qui le déclenchent : un
   // critère géographique non confirmé est un critère comme un autre.
-  const conditionNonExaminee = registry.some((c) => c.confirmed && c.coverage === "unexamined");
+  // FUT-45 : la lecture n'est complète que si TOUT ce qui a été compris a été lu : chaque critère, chaque condition,
+  // et aucune demande non mesurée. Plus de seuil (le 0,7 laissait dire « élevée » avec trois critères sur dix
+  // muets, et ignorait le budget d'un lecteur rangé hors mesure).
   const coverage: CoverageLevel =
     examined.length === 0 ? "none"
-    : !conditionNonExaminee && ratio >= COVERAGE_HIGH_THRESHOLD ? "high"
+    : examined.length === registry.length && nonMesurees.length === 0 ? "complete"
     : "partial";
+  const lectureImpossible: CriteriaSummary["lectureImpossible"] =
+    examined.length > 0 ? null
+    : registry.some((c) => c.unexaminedReason === "inconclusive") ? "donnee_absente"
+    : "rien_de_mesurable";
 
   const favorableCount = examined.filter((c) => c.outcome === "favorable").length;
 
@@ -254,7 +273,21 @@ export function buildCriteriaRegistry(
   return {
     registry, coverage, orientation, hasFavorable: favorableCount > 0, favorableCount,
     mismatchStructuring, mismatchSecondary, openConditions, metConditions,
+    nonMesurees, examinedCount: examined.length, unexaminedCount: registry.length - examined.length, lectureImpossible,
   };
+}
+
+/** FUT-45 : les demandes comprises hors mesure, avec les mots du lecteur, sans doublon ni limite de nombre. */
+export function demandesNonMesurees(project: UserProject): { terme: string }[] {
+  const vus = new Set<string>();
+  const out: { terme: string }[] = [];
+  for (const h of project.parsed?.horsMesure ?? []) {
+    const terme = typeof h?.term === "string" ? h.term.trim() : "";
+    if (!terme || vus.has(terme.toLowerCase())) continue;
+    vus.add(terme.toLowerCase());
+    out.push({ terme });
+  }
+  return out;
 }
 
 // LES CRITÈRES NON CONFIRMÉS restés non examinés, préférences et critères géographiques confondus :
