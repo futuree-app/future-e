@@ -413,3 +413,65 @@ DevTools ouverts (Application > Cookies, Network « Preserve log »).
 Liens plats `<a>` de la Navbar (performance) ; `server.ts` sans `try/catch` dans `setAll` ; choix de
 `VERCEL_PROJECT_PRODUCTION_URL` pour les e-mails de confirmation ; architecture générale des providers
 d'auth ; `getUser()` → `getClaims()`.
+
+## Validation réelle (phase 1.5, 3 octobre 2026)
+
+### Environnement
+
+- **Commit testé** : `5dee93d1a0642251385e5f7e4ad843179935f40a` (HEAD de `bonjourfuturee/fut-40-session-navigation`).
+- **Preview Vercel inutilisable** : le déploiement `dpl_DXJnMWxZaQHXMGJ5qvLY4EvJRQ9Y` (même SHA) est en `ERROR`,
+  `npm run build` échoue au « Collecting page data » de `/api/logement-autour` : `supabaseKey is required`.
+  Les clés Supabase serveur (`SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`…) n'existent que dans
+  l'environnement Production ; le scope Preview ne porte que l'URL et la clé publishable. Tous les Previews de
+  branche échouent de la même façon (FUT-33, FUT-34, y compris le SHA `7b5f0aa9`, `READY` en Production) :
+  le défaut est de configuration d'environnement, antérieur et étranger à FUT-40. Aucune variable n'a été
+  ajoutée ni modifiée.
+- **Environnement retenu** : build de production (`next build` + `next start`, port 3040) du commit ci-dessus,
+  en local, branché sur le **vrai projet Supabase** (variables de `.env.local`). Compte : **compte de test
+  authentifié**, connexion par e-mail + mot de passe effectuée par le porteur ; aucun dossier créé ni modifié.
+- **Écart constaté hors FUT-40** : une première connexion par Google depuis `localhost:3040` a ramené la
+  session sur `https://futur-e.fr/compte` (l'URL de retour OAuth non autorisée retombe sur le Site URL
+  Supabase). Comportement attendu de la configuration Supabase globale, non modifiée ; la connexion par mot
+  de passe, qui redirige vers un chemin relatif, reste sur l'hôte courant.
+
+### Matrice
+
+| Cas | Action | Attendu | Observé |
+|---|---|---|---|
+| A | `/rapport` → clic « Pourquoi futur•e » | Navbar connectée, aucun « Se connecter / Commencer » | `/pourquoi`, « Mon compte / Mon rapport » visibles ✅ |
+| B | `/pourquoi` → clic « Mon rapport » | `/rapport` sans connexion | `/rapport`, aucun formulaire ✅ |
+| B | `/rapport` en URL directe puis rechargement | idem | `navigation.type = reload`, `/rapport`, Navbar connectée ✅ |
+| C | `/connexion` connecté | `/compte` | `/compte` ✅ |
+| D | `/connexion?next=/rapport` | `/rapport` | `/rapport` ✅ |
+| D | `next=//evil.example`, `https://evil.example`, `/%2Fevil.example` | `/compte`, jamais externe | `/compte` (navigation réelle pour `//evil.example`) ✅ |
+| E | `/inscription` connecté | `/compte` | `/compte` ✅ |
+| E | `/inscription?next=/rapport/dossiers` | `/rapport/dossiers` | `/rapport/dossiers` ✅ |
+| F | `/rapport` dans un nouvel onglet | session conservée | `/rapport`, Navbar connectée ✅ |
+
+Cookie : présence établie par le comportement serveur (les gardes `getCurrentSessionUser()` reconnaissent la
+session à chaque requête, y compris nouvel onglet et rechargement) ; les valeurs n'ont été ni lues ni notées.
+
+### Refresh
+
+Refresh réel Supabase non observé pendant le smoke ; propagation couverte par tests d'intégration locaux
+(T9, T12 de `src/proxy.test.ts`).
+
+### Erreurs
+
+Aucune erreur navigateur sur les parcours rejoués sous surveillance : ni `AuthApiError`, ni erreur de
+refresh, ni erreur React / hydratation, ni boucle de redirection. Seuls messages : les scripts Vercel
+Analytics / Speed Insights introuvables, attendus hors Vercel. Log serveur : aucune erreur (un
+avertissement Node `--localstorage-file` sans rapport). Aucune anomalie liée à `x-futuree-url`.
+
+### Navbar, état `unknown`
+
+Le HTML serveur de `/pourquoi` rend les boutons avec `visibility:hidden` et `aria-hidden="true"` : aucun
+flash anonyme. Largeur du bloc d'actions desktop identique masqué / final (233 px), hauteur 36 px : aucun
+saut de mise en page. Rendu final conforme (capture vérifiée). Pas de refonte nécessaire.
+
+### Conclusion
+
+Les trois corrections de FUT-40 tiennent contre le vrai Supabase : la Navbar reflète la session, les pages
+d'auth redirigent un utilisateur connecté vers une destination interne sûre, et la session survit à la
+navigation, au rechargement et à un nouvel onglet. Restent non validés en réel : le refresh à expiration
+du jeton, et le Preview Vercel (bloqué par la configuration d'environnement, hors périmètre).
