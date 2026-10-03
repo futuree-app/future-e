@@ -178,7 +178,10 @@ décrit la FORMULATION, pas la RAISON.
   ni un score. »
 - Sonde finale (`scripts/fut45/sonder-raisons.mjs`, vrai prompt) : eau du robinet, moustiques tigres, vie culturelle
   animée, fibre, 4G, commerces de qualité, marché le dimanche, ondes, antenne relais, touristes l'été, impôts locaux,
-  loyer, crèche, pistes cyclables sécurisées, embouteillages, ville propre, pollens, club de foot, conservatoire,
-  budget → manque produit ; se sentir bien, charme, voisins sympas, bonne ambiance → ressenti ; mairie dynamique,
+  loyer, crèche, pistes cyclables sécurisées, embouteillages, pollens, club de foot, conservatoire,
+  budget → manque produit ; se sentir bien, charme, voisins sympas, bonne ambiance, ville propre / sans tags → ressenti ; mairie dynamique,
   bonne mentalité, gens ouverts d'esprit, « pas de cas sociaux », écoles réputées, quartier sûr → choix éditorial.
   Aucun `non_classee`.
+- Décision du porteur (03/10) : « ville propre, sans tags » = ressenti. Aucune source officielle ne mesure la
+  propreté des communes de façon comparable (la grille de l'AVPU n'est appliquée que par des villes volontaires,
+  sans publication par commune). Critère de bascule : `manque_produit` exige qu'une source fiable puisse exister.
