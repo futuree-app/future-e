@@ -6,18 +6,16 @@ import type { AuthActionState } from "@/app/auth/shared";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { destinationApresConnexion } from "@/lib/auth-destination";
 
 function getStringField(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
 }
 
+// La règle est partagée avec /connexion et /inscription (FUT-40) : src/lib/auth-destination.ts.
 function getSafeNextPath(value: string) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/compte";
-  }
-
-  return value;
+  return destinationApresConnexion(value);
 }
 
 async function getBaseUrl() {
