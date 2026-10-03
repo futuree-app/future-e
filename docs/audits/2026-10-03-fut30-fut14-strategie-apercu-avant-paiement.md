@@ -1056,3 +1056,152 @@ Chaque phase est livrable seule. La phase 1 améliore le 14 € même si le rest
    l'aperçu » du 07/06.
 8. **Le sort du score /100** du questionnaire (recommandé : suppression, ticket séparé).
 9. **Les textes** de la maquette, à faire relire par l'Editorial avant implémentation.
+
+---
+
+## Addendum du 3 octobre 2026 : FUT-30, implémentation
+
+Ticket : « FUT-30, rendre l'aperçu Territoire instantané, spécifique et indépendant des sources
+live ». Branche `bonjourfuturee/fut-30-apercu-territoire`, partie de `dff060bc` (l'audit
+ci-dessus), sans réintégration de `main`. Périmètre : le paywall du Dossier de territoire à 14 €
+(`/territoire/[insee]/debloquer`) et rien d'autre.
+
+### Ancien chemin
+
+```text
+getQuartierPreview(insee)
+  → gatherCommuneEnrichment(insee)      8 sources, dont 5 en réseau (ADEME ×3, Hub'Eau, VigiEau,
+                                         Géorisques, GASPAR), plus DRIAS lu depuis un fichier de 63 Mo
+  → Promise.race(…, 1 200 ms) → null    le bloc disparaît
+  → 3 textes fixes, identiques partout  « Aperçu réel du dossier », « Ce que futur•e a déjà analysé »
+  → footer : 8 sources possibles du moteur complet, pas celles des cartes
+```
+
+### Nouveau substrat
+
+| | |
+|---|---|
+| Fichier | `src/data/apercu-climat-communes.json`, 2,7 Mo (351 Ko compressé), importé statiquement, chunk serveur uniquement (absent du bundle client, vérifié) |
+| Production | `scripts/build-apercu-climat.mjs`, depuis `public/data_climat.json` |
+| Contenu | Pour les 35 006 communes DRIAS : six clés (`NORTX35D_yr`, `ATX35D_yr`, `NORTR_yr`, `ATR_yr`, `NORIFM40_yr`, `AIFM40_yr`) aux trois horizons `gwl15`, `gwl20`, `gwl30` |
+| Fidélité | Le mapping des colonnes est **lu** dans `src/lib/drias-json.ts` (jamais recopié) ; la conversion reproduit `rowToIndicators` ; un test compare l'extrait au fichier DRIAS sur sept communes et vérifie l'empreinte SHA-256 du fichier source |
+| Logique climatique | Aucune nouvelle : l'extrait se reconvertit dans la forme de `getClimatDataCommune`, et `buildClimatFacts` (`decision/climat-facts.ts`) le lit comme il lit le dossier, référence 1976-2005 reconstruite comprise |
+| Lecture | 37 ms à froid, contre 0,7 à 0,9 s pour le fichier complet |
+
+Substrats examinés et écartés : `public/data_climat.json` (63 Mo, trop lent à froid) ;
+`data/comparateur-index.json.gz` (11,7 Mo, 1,28 s de lecture, plus lent encore) ; le rang
+national (il exige l'index complet, et la consigne en fait un fait possible, pas un mécanisme de
+choix) ; `territory_facts_snapshot` (une photo **construite** par la page Territoire depuis les sources
+live, en base, pas un substrat local) ; les fichiers ONRN, CatNat et inondation (domaine de FUT-60,
+réconciliation non tranchée).
+
+### Règle de sélection
+
+Liste blanche courte, ordre fixe, premier candidat qui remplit le contrat. Aucun percentile, aucun
+classement, aucun score.
+
+| Rang | Candidat | Famille | Condition |
+|---|---|---|---|
+| 1 | Jours au-dessus de 35 °C (`joursTresChauds`) | chaleur | Contrat de lecture |
+| 2 | Nuits tropicales, minimum ≥ 20 °C (`nuitsTropicales`) | chaleur | Contrat de lecture, si le rang 1 ne le remplit pas |
+| Second fait | Jours d'indice forêt-météo > 40 (`joursFeu`) | feu | Contrat de lecture **et** valeur projetée ≥ seuil ambiant du dossier (`seuilApplicable(…, "ambiante")`, 15 jours, ~5 % des communes), limite obligatoire |
+
+**Contrat de lecture** (`contratRempli`) : valeur projetée présente, référence 1976-2005
+reconstructible, et trajectoire lisible en entiers (au moins 1 vers 2050, et davantage qu'en
+1976-2005). C'est une condition de lisibilité, pas un seuil d'exposition : aucun texte ne dit « élevé »
+ni « exposé ».
+
+Au plus deux faits, jamais deux de la même famille. Écartés : sécheresse des sols (la doctrine du
+dossier n'a pas de seuil défendable), pluies extrêmes (écart relatif, pas de doctrine de constat non
+demandé), toute source réseau.
+
+### Champs, grain, période, source
+
+| Élément affiché | Origine |
+|---|---|
+| Valeur (« 6 jours par an au-dessus de 35 °C ») | `ClimatAxe.projete`, horizon `gwl20`, arrondi à l'entier |
+| Période (« vers 2050, contre 1 jour sur la période de référence 1976-2005 ») | `ClimatAxe.reference`, reconstruite (médiane des trois horizons) |
+| Horizon (« horizon 2050 · +2 °C dans le monde, soit +2,7 °C en France ») | `mentionHorizon("gwl20")`, `horizons.ts` |
+| Ce que mesure l'indicateur | Texte fixe par candidat |
+| Limite | Feu uniquement : « Il décrit une météo, pas la probabilité qu'un incendie se déclare… » |
+| Source | « DRIAS-TRACC, médiane des modèles · Météo-France », sur chaque fait |
+| Grain | « échelle de la commune », « valeur établie pour la commune » ; aucun « ici », aucune adresse |
+
+Codes ville de Paris, Lyon et Marseille : DRIAS n'a de ligne que pour les arrondissements, et le
+comparateur ouvre le paywall par arrondissement. Le dossier emprunte le 1er arrondissement pour la ville
+entière ; l'aperçu ne fait pas cet emprunt et rend l'état sans fait.
+
+### Fallback
+
+Si aucun candidat ne remplit le contrat, l'aperçu rend `{ etat: "sans_fait" }`, jamais `null`. La
+section reste affichée, sous le surtitre « Aperçu du dossier » et le titre « Ce que le dossier examine
+sur {commune} » :
+
+> Cet aperçu ne met en avant aucun fait isolé pour {commune} : aucun des indicateurs qu'il retient ne
+> se lit assez clairement sans le contexte du dossier.
+>
+> Le dossier examine la trajectoire climatique de la commune, les risques recensés, son cadre de vie
+> et ce qui la transforme, chaque constat avec sa source et sa limite.
+
+### Nommage
+
+« Aperçu réel du dossier » et « Ce que futur•e a déjà analysé sur {commune} » sont remplacés par
+« Un fait de ce territoire » / « Deux faits de ce territoire » et « Ce que les projections disent déjà
+de {commune} », avec la mention « Un extrait des données du dossier, donné tel quel ». Les cadenas et
+la mention « Lecture complète dans le rapport » disparaissent : rien n'est verrouillé dans ce bloc.
+
+### Suppression du timeout
+
+Oui. `getApercuTerritoire` est **synchrone** : ni `Promise.race`, ni `setTimeout`, ni appel réseau,
+ni `gatherCommuneEnrichment`. `src/lib/quartier-signals.ts`, qui ne servait qu'à l'ancien pied de
+bloc, est supprimé. Aucun Suspense ni streaming : rien ne reste à attendre.
+
+### Tests
+
+`src/lib/apercu-territoire.test.ts`, 16 tests : T1 (pas de course ni de plafond), T2 (deux textes
+différents fidèles à leurs nombres ; rendus distincts sur l'extrait réel), T3 (déterminisme), T4
+(source par fait, plus de liste globale), T5 (horizon et référence datée, pas de fait sans
+référence), T6 (aucun vocabulaire d'adresse, grain commune), T7 (absence : rien d'inventé, pas
+d'emprunt d'arrondissement), T8 (état sans fait explicite, section toujours rendue, surtitre
+honnête), T9 (ordre fixe ; feu seulement au-delà du seuil ambiant ; au plus deux faits de familles
+différentes), T10 (aucun import réseau), plus deux gardes de l'extrait (empreinte, fidélité à DRIAS).
+Contrôle de mutation : inverser l'ordre de la liste blanche fait échouer T9 ; remettre l'ancien
+`quartier-preview.ts` fait échouer T1, T4 et T10.
+
+### Mesures
+
+| | Avant | Après |
+|---|---|---|
+| Premier rendu après redémarrage (page complète, anonyme) | 1 066 ms, bloc présent ; une absence observée au navigateur | 244 à 339 ms sur trois redémarrages, bloc présent à chaque fois |
+| Rendu chaud | 35 à 38 ms | 39 à 51 ms |
+| Appels réseau de l'aperçu | 5 sources réseau | 0 |
+| Communes recevant un fait propre | 0 (texte identique partout) | 34 858 sur 35 006 |
+
+Répartition sur les 35 006 communes DRIAS : 31 380 jours au-dessus de 35 °C seuls ; 1 791 jours au-dessus de 35 °C
+et feu ; 1 687 nuits tropicales ; 148 sans fait (montagne : départements 04, 05, 06, 09, 38, 65, 66,
+73, 74).
+
+Rendus obtenus : La Rochelle « 3 jours par an au-dessus de 35 °C vers 2050, contre moins d'un jour » ;
+Brest « 3 nuits tropicales par an, contre moins d'une nuit » ; Paris 7e « 4 jours, contre 1 jour » ;
+Périgueux « 6 jours, contre 1 » ; Ciré-d'Aunis « 5 jours, contre 1 » ; Marseille 1er « 3 jours,
+contre moins d'un » et « 41 jours d'indice forêt-météo supérieur à 40, contre 32 », avec sa limite ;
+Briançon et le code ville de Paris : état sans fait.
+
+Coût : zéro appel Anthropic. Validation sur données locales, tests unitaires et un serveur de
+production local interrogé en anonyme sur une dizaine de communes.
+
+### Limites
+
+1. **Une famille domine.** 94 % des communes reçoivent un fait chaleur. Les valeurs diffèrent, le
+   thème non : l'aperçu prouve une matière réelle et propre à la commune, il ne montre pas la largeur
+   du dossier.
+2. **Des faits minces.** « 1 jour vers 2050, contre moins d'un jour » est vrai et lisible, mais peu
+   parlant. Le contrat de lecture en entiers est une convention nouvelle, à valider (voir la revue).
+3. **La montagne tombe dans l'état sans fait**, faute de chaleur lisible et de feu au-dessus du seuil.
+   C'est honnête ; un candidat non climatique local pourrait un jour y répondre.
+4. **L'extrait doit suivre DRIAS.** Si `public/data_climat.json` change, le test d'empreinte échoue
+   tant que `node scripts/build-apercu-climat.mjs` n'a pas été relancé.
+5. **2,7 Mo de plus** dans le dépôt et dans un chunk serveur.
+6. **Hors périmètre, non corrigé** : « Pourquoi ce dossier est payant ? » invoque toujours la
+   position parmi 34 000 communes, que l'aperçu ne montre pas ; « La Rochellesera » et « 34 000 »
+   sans insécable dans ce même paragraphe.
