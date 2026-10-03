@@ -35,8 +35,10 @@ export const TRAITS_NATIONAUX: readonly TraitNational[] = [
   { pct: (c) => c.pct.NORIFM40_yr ?? null, dir: "high", label: "compte parmi les communes les plus exposées aux conditions de feu" },
   // Le HAUT du couvert naturel dans 15 km : « entourées » dit le rayon. Son bas n'a pas de libellé (voir l'en-tête).
   { pct: (c) => c.nature?.score ?? null, dir: "high", label: "compte parmi les communes les plus entourées d'espaces naturels" },
-  { pct: (c) => c.demographie?.croissance ?? null, dir: "high", label: "compte parmi les communes les plus dynamiques sur le plan démographique" },
-  { pct: (c) => c.demographie?.croissance ?? null, dir: "low", label: "compte parmi les communes qui perdent le plus d'habitants" },
+  // La croissance est le percentile national d'un TAUX annuel de variation de la population (INSEE 2015-2021) :
+  // ni « dynamisme » (attractivité, emploi, jeunesse), ni nombre d'habitants perdus (qui favoriserait les grandes villes).
+  { pct: (c) => c.demographie?.croissance ?? null, dir: "high", label: "compte parmi les communes dont la population augmente le plus" },
+  { pct: (c) => c.demographie?.croissance ?? null, dir: "low", label: "compte parmi les communes dont la population diminue le plus" },
   { pct: (c) => c.relief_proximite ?? null, dir: "high", label: "compte parmi les communes les plus proches du relief" },
 ];
 

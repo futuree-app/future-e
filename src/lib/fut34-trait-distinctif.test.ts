@@ -27,7 +27,7 @@ test("aucune commune de l'index ne reçoit un libellé d'urbanisation, et aucun 
 
 test("le repli de Châtelaillon est un trait fidèle à sa mesure (croissance démographique, percentile national)", () => {
   const c = par.get("17094")!;
-  assert.equal(trait("17094"), "compte parmi les communes les plus dynamiques sur le plan démographique");
+  assert.equal(trait("17094"), "compte parmi les communes dont la population augmente le plus");
   assert.ok((c.demographie?.croissance ?? 0) >= 88, "le trait n'est retenu qu'au-delà du 88e percentile national");
 });
 
@@ -40,4 +40,19 @@ test("une commune sans trait marqué reçoit null, jamais un trait de repli inve
 test("les traits fidèles restent : commune très naturelle, montagne", () => {
   assert.equal(trait("2B096"), "compte parmi les communes les plus entourées d'espaces naturels"); // Corte
   assert.equal(trait("05023"), "compte parmi les communes les plus proches du relief"); // Briançon
+});
+
+test("les traits démographiques disent une évolution relative de la population, rien de plus", () => {
+  const demo = TRAITS_NATIONAUX.filter((t) => t.pct({ pct: {}, demographie: { croissance: 50 } }) === 50);
+  assert.deepEqual(demo.map((t) => t.label), [
+    "compte parmi les communes dont la population augmente le plus",
+    "compte parmi les communes dont la population diminue le plus",
+  ]);
+  for (const t of TRAITS_NATIONAUX) assert.doesNotMatch(t.label, /dynamique|perdent le plus d'habitants/);
+  // Le bas du classement : toutes ces communes perdent réellement des habitants (taux négatif).
+  for (const c of communes) {
+    const d = (c as { demographie?: { croissance?: number; taux_total?: number } }).demographie;
+    if (d?.croissance != null && d.croissance <= 12) assert.ok((d.taux_total ?? 0) < 0, c.nom);
+  }
+  assert.equal(trait("51454"), "compte parmi les communes dont la population diminue le plus"); // Reims
 });
