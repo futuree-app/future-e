@@ -309,11 +309,13 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("territory.vacancy"), synthesis: INCLUDE,
     }),
     fact({
-      key: "place.distinctive_trait", value: i.distinctiveTrait, scale: "radius_15km",
+      key: "place.distinctive_trait", value: i.distinctiveTrait, scale: "commune",
       source: { producer: "futur•e", dataset: "Percentiles nationaux de l'index", field: "getCommuneDistinctive" },
-      limits: "Le trait « urbanisées » lit la part naturelle dans 15 km, cultures comptées comme non naturelles.",
+      // FUT-34 : le trait « urbanisées » (bas du couvert naturel dans 15 km, cultures comprises) est retiré. Les traits
+      // restants n'ont pas tous la même échelle : climat et démographie à la commune, nature dans 15 km, relief dans 35 km.
+      limits: "Trait national le plus marqué parmi climat, couvert naturel (15 km), démographie et relief (35 km) ; l'échelle dépend du trait.",
       card: noCard("other", "Trait d'identité du comparateur, jamais affiché sur Territoire."),
-      synthesis: exclude("D2 : change d'échelle et de définition ; ne prouve pas une urbanisation communale (FUT-34)."),
+      synthesis: exclude("D2 : l'échelle change d'un trait à l'autre ; la synthèse s'appuie sur les faits mesurés eux-mêmes."),
     }),
     fact({
       key: "climate.scenarios", value: i.scenarios, scale: "commune", vintage: "DRIAS-TRACC, référence 1976-2005",

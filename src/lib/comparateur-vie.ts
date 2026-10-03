@@ -2491,41 +2491,8 @@ function buildDistinctive(
 }
 
 // ── Distinctif mono-commune (relatif au national) ─────────────────────────────
-// Indépendant de buildDistinctive (qui compare un trio). Ici on lit les
-// percentiles nationaux déjà stockés et on retient le trait le plus marqué, s'il
-// dépasse un seuil de saillance. Sinon null (commune sans trait distinctif net).
-// Périmètre Territoire : climat, couvert naturel, trajectoire démographique,
-// relief. Aucun signal logement / santé / mobilité / métier.
-type MonoDistinctive = { pct: (c: IndexCommune) => number | null; dir: "high" | "low"; label: string };
-const MONO_DISTINCTIVE: MonoDistinctive[] = [
-  { pct: (c) => avgPct(c, ["NORTX30D_yr", "NORTX35D_yr", "NORTR_yr"]), dir: "high", label: "compte parmi les communes aux étés les plus chauds de France" },
-  { pct: (c) => c.pct.NORRR_yr ?? null, dir: "high", label: "compte parmi les communes les plus pluvieuses de France" },
-  { pct: (c) => avgPct(c, ["NORRRq99_yr", "NORRx1d_yr"]), dir: "high", label: "compte parmi les communes aux pluies les plus intenses de France" },
-  { pct: (c) => c.pct.NORSWI04_yr ?? null, dir: "high", label: "compte parmi les communes aux sols les plus exposés à la sécheresse" },
-  { pct: (c) => c.pct.NORIFM40_yr ?? null, dir: "high", label: "compte parmi les communes les plus exposées aux conditions de feu" },
-  { pct: (c) => c.nature?.score ?? null, dir: "high", label: "compte parmi les communes les plus entourées d'espaces naturels" },
-  { pct: (c) => c.nature?.score ?? null, dir: "low", label: "compte parmi les communes les plus urbanisées de France" },
-  { pct: (c) => c.demographie?.croissance ?? null, dir: "high", label: "compte parmi les communes les plus dynamiques sur le plan démographique" },
-  { pct: (c) => c.demographie?.croissance ?? null, dir: "low", label: "compte parmi les communes qui perdent le plus d'habitants" },
-  { pct: (c) => c.relief_proximite ?? null, dir: "high", label: "compte parmi les communes les plus proches du relief" },
-];
-const MONO_HI = 88;
-const MONO_LO = 12;
-// Trait distinctif d'une commune par rapport au national. Le percentile le plus
-// extrême au-delà du seuil l'emporte. null = pas de trait assez marqué.
-export function getCommuneDistinctive(c: IndexCommune): string | null {
-  let best: { label: string; extremity: number } | null = null;
-  for (const d of MONO_DISTINCTIVE) {
-    const p = d.pct(c);
-    if (p == null) continue;
-    let extremity: number | null = null;
-    if (d.dir === "high" && p >= MONO_HI) extremity = p;
-    else if (d.dir === "low" && p <= MONO_LO) extremity = 100 - p;
-    if (extremity == null) continue;
-    if (!best || extremity > best.extremity) best = { label: d.label, extremity };
-  }
-  return best?.label ?? null;
-}
+// Vit dans trait-distinctif.ts (lib pure, testable sur l'index réel) ; réexporté ici pour les appelants.
+export { getCommuneDistinctive } from "@/lib/trait-distinctif";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Explorer à partir d'une commune (ANCRAGE, pas similarité) — Pari #7.
