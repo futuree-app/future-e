@@ -20,11 +20,17 @@ import { NextResponse, type NextRequest } from 'next/server';
  */
 export const HEADER_URL = "x-futuree-url";
 
+// FUT-40 : LE CONTRAT DE PROPAGATION (motif @supabase/ssr 0.10). Quand la session est rafraîchie :
+//   1. les cookies rafraîchis sont écrits dans la REQUÊTE transmise aux Server Components ;
+//   2. les mêmes cookies, et les en-têtes anti-cache que fournit la bibliothèque, sont écrits dans la
+//      RÉPONSE au navigateur (une réponse qui pose un cookie de session ne doit pas être mise en cache).
+// Avant FUT-40, la requête aval était reconstruite à partir d'une copie des en-têtes prise AVANT le
+// refresh : les Server Components ne lisaient le nouveau cookie que grâce à une fusion interne de Next.
+// `x-futuree-url` est posé sur la requête elle-même : il suit chaque `NextResponse.next({ request })`.
 export async function proxy(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set(HEADER_URL, `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  request.headers.set(HEADER_URL, `${request.nextUrl.pathname}${request.nextUrl.search}`);
 
-  let supabaseResponse = NextResponse.next({ request: { headers: requestHeaders } });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,13 +40,14 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({ request: { headers: requestHeaders } });
+        setAll(cookiesToSet, headers) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
+          );
+          Object.entries(headers ?? {}).forEach(([cle, valeur]) =>
+            supabaseResponse.headers.set(cle, valeur),
           );
         },
       },
