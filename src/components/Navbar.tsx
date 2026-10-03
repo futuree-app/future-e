@@ -5,6 +5,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { NAV_ITEMS, type NavDropdownItem, type NavItem } from '@/config/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Logo } from '@/components/Logo';
+import { createClient } from '@/lib/supabase/client';
+import {
+  abonnerEtatSession,
+  boutonsNavbar,
+  type EtatSession,
+  type NavCtas as NavCtasSession,
+} from '@/lib/navbar-session';
 
 const C = {
   bg: 'var(--bg)',
@@ -21,12 +28,23 @@ function isDropdown(item: NavItem): item is NavDropdownItem {
   return 'groups' in item && item.groups !== undefined;
 }
 
-interface NavCtas {
-  secondary?: { href: string; label: string };
-  primary?: { href: string; label: string };
-}
+// Les boutons d'une page (les pages du compte passent les leurs) et l'état de session affiché : voir
+// src/lib/navbar-session.ts. FUT-40 : la Navbar ne disait jamais « connecté », et proposait
+// « Se connecter » à un utilisateur qui l'était.
+type NavCtas = NavCtasSession;
 
 export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
+  // État de PRÉSENTATION, lu du client Supabase navigateur. L'autorisation reste serveur.
+  const [etatSession, setEtatSession] = useState<EtatSession>('unknown');
+  useEffect(() => {
+    if (ctas) return; // une page du compte fournit ses boutons : rien à résoudre
+    return abonnerEtatSession(createClient().auth, setEtatSession);
+  }, [ctas]);
+  const boutons = boutonsNavbar(etatSession, ctas);
+  // Tant que l'état n'est pas résolu : la place est réservée, rien n'est lisible ni cliquable.
+  const masque = boutons.masques
+    ? ({ visibility: 'hidden' } as const)
+    : undefined;
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
@@ -342,10 +360,11 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
             <ThemeToggle />
             <div
               className="nb-actions-desktop"
-              style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, ...masque }}
+              aria-hidden={boutons.masques || undefined}
             >
               <Link
-                href={ctas?.secondary?.href ?? '/connexion'}
+                href={boutons.secondary.href}
                 style={{
                   padding: '8px 12px',
                   borderRadius: 999,
@@ -359,10 +378,10 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   background: 'var(--bg-elev)',
                 }}
               >
-                {ctas?.secondary?.label ?? 'Se connecter'}
+                {boutons.secondary.label}
               </Link>
               <Link
-                href={ctas?.primary?.href ?? '/inscription'}
+                href={boutons.primary.href}
                 style={{
                   padding: '8px 20px',
                   borderRadius: 6,
@@ -382,7 +401,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {ctas?.primary?.label ?? 'Commencer'}
+                {boutons.primary.label}
               </Link>
             </div>
 
@@ -558,9 +577,12 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
               })}
 
               {/* Mobile CTA */}
-              <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div
+                style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10, ...masque }}
+                aria-hidden={boutons.masques || undefined}
+              >
                 <Link
-                  href={ctas?.secondary?.href ?? '/connexion'}
+                  href={boutons.secondary.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: 'block',
@@ -576,10 +598,10 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {ctas?.secondary?.label ?? 'Se connecter'}
+                  {boutons.secondary.label}
                 </Link>
                 <Link
-                  href={ctas?.primary?.href ?? '/inscription'}
+                  href={boutons.primary.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: 'block',
@@ -597,7 +619,7 @@ export default function Navbar({ ctas }: { ctas?: NavCtas } = {}) {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {ctas?.primary?.label ?? 'Commencer'}
+                  {boutons.primary.label}
                 </Link>
               </div>
             </div>
