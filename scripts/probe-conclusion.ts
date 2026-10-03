@@ -112,7 +112,7 @@ const planMismatch = buildConclusionPlan({
   ],
   shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
-  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  establishedIncompatibility: null, coverage: "complete", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 1,
   mismatchTotal: 2, mismatchShown: 2,
 });
@@ -147,7 +147,7 @@ const planAbsence = buildConclusionPlan({
   ],
   shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
-  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  establishedIncompatibility: null, coverage: "complete", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 2, mismatchShown: 2,
 });
@@ -173,7 +173,7 @@ const planCoast = buildConclusionPlan({
   ],
   shownCompositions: [],
   uncovered: [], uncoveredPriorities: [],
-  establishedIncompatibility: null, coverage: "high", orientation: "arbitration",
+  establishedIncompatibility: null, coverage: "complete", orientation: "arbitration",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
 });
@@ -197,7 +197,7 @@ const planSize = buildConclusionPlan({
       "Roubaix appartient à une métropole selon la population de son unité urbaine et la convention de taille utilisée par futur•e.", "metropole"),
   ],
   shownCompositions: [],
-  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "complete",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
 });
@@ -210,7 +210,7 @@ const planSizeIsolation = buildConclusionPlan({
       "Petiville est classée comme un village selon sa population communale. Cette petite taille répond moins bien à la priorité d'éviter l'isolement, sans permettre de conclure à son isolement effectif.", "village"),
   ],
   shownCompositions: [],
-  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "complete",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
 });
@@ -221,7 +221,7 @@ const planSun = buildConclusionPlan({
   scope: "commune", communeNom: "Roubaix", conclusionState: "no_incompatibility_established", posture: "recherche",
   shownFacts: [ mismatch("ensoleillement_recherche", "structuring", "l'ensoleillement") ],
   shownCompositions: [],
-  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "high",
+  uncovered: [], uncoveredPriorities: [], establishedIncompatibility: null, coverage: "complete",
   orientation: "arbitration", hasFavorable: false, favorableCount: 0, majorReserveCount: 0, reservesShown: 0,
   mismatchTotal: 1, mismatchShown: 1,
 });
@@ -249,7 +249,7 @@ const planCompositionLead = buildConclusionPlan({
   shownFacts: [verif("f9", "secondary", "le retrait-gonflement des argiles", "À cette adresse, le sol est exposé au retrait-gonflement des argiles.")],
   shownCompositions: [tradeoffAntibes],
   uncovered: [], uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
-  establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
+  establishedIncompatibility: null, coverage: "complete", orientation: "minor_reserves",
   hasFavorable: true, favorableCount: 1, majorReserveCount: 1, reservesShown: 2,
   mismatchTotal: 0, mismatchShown: 0,
 });
@@ -259,7 +259,7 @@ const planCompositionBloc = buildConclusionPlan({
   shownFacts: [verif("f8", "structuring", "l'exposition d'Antibes à l'inondation", "L'exposition de la commune à l'inondation ressort élevée.")],
   shownCompositions: [tradeoffAntibes],
   uncovered: [], uncoveredPriorities: [],
-  establishedIncompatibility: null, coverage: "high", orientation: "major_reserves",
+  establishedIncompatibility: null, coverage: "complete", orientation: "major_reserves",
   hasFavorable: true, favorableCount: 1, majorReserveCount: 2, reservesShown: 2,
   mismatchTotal: 0, mismatchShown: 0,
 });
@@ -332,7 +332,7 @@ const planStrateSuite = buildConclusionPlan({
   shownCompositions: [],
   uncovered: [{ key: "nearPlace", label: "la proximité de la gare Matabiau", cause: "donnee_absente" }],
   uncoveredPriorities: [{ key: "qualite_air", label: "la qualité de l'air" }],
-  establishedIncompatibility: null, coverage: "high", orientation: "minor_reserves",
+  establishedIncompatibility: null, coverage: "complete", orientation: "minor_reserves",
   hasFavorable: false, favorableCount: 0, majorReserveCount: 3, reservesShown: 3,
   mismatchTotal: 0, mismatchShown: 0,
 });
