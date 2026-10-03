@@ -20,5 +20,5 @@ import {
 // emprunte la valeur du 1er arrondissement pour la ville entière ; l'aperçu, qui promet un fait de la
 // commune, ne fait pas cet emprunt et rend l'état sans fait.
 export function getApercuTerritoire(insee: string, commune: string): ApercuTerritoire {
-  return construireApercu(commune, scenariosDepuisExtrait(extrait as ExtraitClimat, insee));
+  return construireApercu(insee, commune, scenariosDepuisExtrait(extrait as ExtraitClimat, insee));
 }

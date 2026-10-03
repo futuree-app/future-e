@@ -175,7 +175,9 @@ const COL = { rouge: "var(--red)", bleu: "var(--blue)", vert: "var(--green)", vi
 const SOURCE_DRIAS = "DRIAS · Météo-France";
 const SOURCE_GASPAR = "Géorisques · fait actuel";
 
-type IndicateurCompte = {
+// EXPORTÉS POUR L'APERÇU DU PAYWALL TERRITOIRE (FUT-30), qui formule ses faits climatiques avec ces
+// définitions et `carteCompte`, sans second vocabulaire ni second arrondi. Aucun changement de comportement.
+export type IndicateurCompte = {
   cle: string;
   absolu: string;
   ecart: string;
@@ -189,7 +191,7 @@ type IndicateurCompte = {
   col: string;
 };
 
-const CHALEUR: IndicateurCompte = {
+export const CHALEUR: IndicateurCompte = {
   cle: "chaleur",
   absolu: "NORTX35D_yr",
   ecart: "ATX35D_yr",
@@ -200,7 +202,7 @@ const CHALEUR: IndicateurCompte = {
   col: COL.rouge,
 };
 
-const NUITS: IndicateurCompte = {
+export const NUITS: IndicateurCompte = {
   cle: "nuits",
   absolu: "NORTR_yr",
   ecart: "ATR_yr",
@@ -215,7 +217,7 @@ const NUITS: IndicateurCompte = {
   col: COL.rouge,
 };
 
-const FEUX: IndicateurCompte = {
+export const FEUX: IndicateurCompte = {
   cle: "feux",
   absolu: "NORIFM40_yr",
   ecart: "AIFM40_yr",
@@ -246,7 +248,7 @@ const SOLS_SECS: IndicateurCompte = {
   col: COL.bleu,
 };
 
-function carteCompte(def: IndicateurCompte, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
+export function carteCompte(def: IndicateurCompte, ind: Indicators, horizon: HorizonAccueil): CarteApercu | null {
   const ref = reconstructReference(enScenarios(ind), def.absolu, def.ecart);
   const gwl = gwlDeHorizon(horizon);
   let fait: string;

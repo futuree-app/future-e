@@ -1205,3 +1205,65 @@ production local interrogé en anonyme sur une dizaine de communes.
 6. **Hors périmètre, non corrigé** : « Pourquoi ce dossier est payant ? » invoque toujours la
    position parmi 34 000 communes, que l'aperçu ne montre pas ; « La Rochellesera » et « 34 000 »
    sans insécable dans ce même paragraphe.
+
+### Phase 1.1 : durcissement sémantique (4 octobre 2026)
+
+**Ce qui change, et pourquoi.** La Phase 1 retenait un fait seulement si « la valeur arrondie vaut au
+moins 1 vers 2050 et dépasse celle de 1976-2005 », et arrondissait elle-même à l'entier. C'était une
+convention de signification propre au paywall : le moteur n'en a aucune pour la chaleur, et l'accueil
+(FUT-37) formule ce fait pour toute commune dès que la valeur projetée existe. L'arrondi divergeait aussi :
+0,6 jour s'écrivait « 1 jour », là où le produit écrit « moins d'une journée ». Les deux sont retirés.
+
+**Règle canonique désormais utilisée.**
+
+| Brique | Origine |
+|---|---|
+| Donnée lue | `buildClimatFacts` (dossier) ; une valeur projetée absente n'est jamais formulée |
+| Formulation, arrondi, comparaison, titre, source | `carteCompte` et les définitions `CHALEUR`, `NUITS`, `FEUX` de `accueil/recits.ts` (FUT-37), exportées sans changement de comportement |
+| Paliers d'écriture | Ceux de l'accueil : sous 0,05 « aucune », sous 1 « moins d'une », puis l'entier. 0,4 et 0,6 → « < 1 j/an » ; 1,1 → « 1 j/an » |
+| Note de lecture | `NOTES_FAITS` (« Un nombre de jours par an ne dit rien de la durée ni de la continuité d'une période. ») |
+| Horizon | `mentionHorizon("gwl20")` (`horizons.ts`), le libellé documenté pour une valeur projetée |
+| Seuil feu | `seuilApplicable(…, "ambiante")`, celui du dossier pour un constat non demandé (15 jours) |
+
+FUT-30 ne fixe plus que l'**ordre** : jours au-dessus de 35 °C, puis nuits tropicales ; le feu en second,
+facultatif. Aucun emplacement n'est rempli d'office.
+
+**Effet mesuré sur les 35 006 communes DRIAS.** Toutes reçoivent un fait : 33 215 un fait chaleur seul,
+1 791 un fait chaleur et un fait feu. Les nuits tropicales ne servent plus que si les jours au-dessus de
+35 °C manquent. Les communes que la Phase 1 laissait sans fait (montagne) reçoivent désormais leur
+valeur réelle, par exemple Briançon « 0 j/an, identique à 1976–2005 », un fait vrai et non alarmant.
+L'état sans fait ne concerne plus que les codes sans ligne DRIAS. La domination de la chaleur est
+assumée : c'est le fait climatique que le produit formule pour toute commune, chacun avec sa valeur.
+
+**Feu.** Conservé : éligibilité par le seuil ambiant du dossier, titre « Météo propice aux feux », fait
+« … jours par an de danger météorologique élevé pour les feux (indice forêt-météo ≥ 40) … » et limite
+« Cet indice décrit des conditions météorologiques favorables aux feux ; il ne mesure ni la végétation ni
+la probabilité qu'un incendie se déclare », tous trois repris de l'accueil.
+
+**Paris, Lyon, Marseille dans le vrai parcours.** `/ou-vivre` regroupe les arrondissements sous la ville
+mère mais garde le code de l'arrondissement retenu (`comparateur-vie.ts`, `insee: c.insee`,
+`nom: "Paris"`). Vérifié sur le classement déterministe `/api/comparateur-vie/match` (aucune analyse de
+projet, aucun appel Anthropic) : un projet parisien renvoie `75101` sous le nom « Paris ». Le paywall
+reçoit donc un arrondissement ; l'aperçu le dit désormais (« échelle de l'arrondissement », « valeur
+établie pour l'arrondissement ») au lieu de « commune ». Les codes ville `75056`, `69123`, `13055`
+peuvent encore arriver par les pages `chaleur/` et `inondation/` ou par `/rapport` : ils rendent l'état
+sans fait, et un test interdit d'y substituer la valeur du 1er arrondissement. Le nom affiché (« Paris »
+sur une valeur d'arrondissement) relève de FUT-43.
+
+**État sans fait, reformulé.** « Le dossier de {commune} lit ensemble la trajectoire climatique, les
+risques recensés, le cadre de vie et ce qui transforme la commune. Cet aperçu gratuit n'en isole aucun
+indicateur : sorti de son contexte, aucun ne serait assez parlant. »
+
+**Artefact.** Inchangé : 2,7 Mo, 351 Ko compressé, serveur seulement (vérifié après build). Les six clés
+aux trois horizons sont toutes lues : la référence 1976-2005 se reconstruit à partir des trois. Le script
+est déterministe (même empreinte SHA-256 à la régénération). Le test d'empreinte dit désormais quoi
+faire : régénérer par `node scripts/build-apercu-climat.mjs` et committer l'extrait avec le changement
+de DRIAS. Aucune génération cachée au build.
+
+**Duplication restante.** Aucune formulation, aucun arrondi, aucun seuil propre. Deux libellés d'horizon
+coexistent dans le produit (`mentionHorizon` et la mention des onglets de l'accueil) : l'aperçu prend
+celui que `horizons.ts` documente pour une valeur projetée.
+
+**Tests** : 21 (A fidélité au moteur, B arrondi, C feu, D Paris-Lyon-Marseille ajoutés ; T1 à T10
+réécrits sur la règle canonique). Mutations : réintroduire un arrondi propre fait échouer 3 tests ;
+passer le feu au seuil déclaré en fait échouer 1.
