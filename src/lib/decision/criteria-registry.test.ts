@@ -287,7 +287,7 @@ test("A. « budget 250 000 € et air sain » : la lecture n'est JAMAIS complèt
     run([ev("r1", ["air_sain"], "satisfied")]),
   );
   assert.equal(s.coverage, "partial");
-  assert.deepEqual(s.nonMesurees, [{ terme: "budget 250 000 €" }]);
+  assert.deepEqual(s.nonMesurees, [{ terme: "budget 250 000 €", raison: "manque_produit", theme: "budget" }]);
   assert.equal(s.orientation, "favorable", "l'orientation reste un autre axe");
 });
 

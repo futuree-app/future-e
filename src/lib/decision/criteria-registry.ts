@@ -105,7 +105,7 @@ export type CriteriaSummary = {
   // FUT-45 : les demandes COMPRISES que futur•e ne mesure pas (`horsMesure`), avec les mots du lecteur. Elles ne
   // sont pas des critères (aucune règle, aucun poids), mais elles font partie de la demande : la lecture finale
   // les nomme, et elles empêchent une lecture « complète ».
-  nonMesurees: { terme: string }[];
+  nonMesurees: DemandeNonMesuree[];
   // Combien de critères ont été LUS (examinés, neutres compris), et combien ne l'ont pas été. Un critère neutre
   // est lu, jamais favorable : « vos critères vont dans ce sens » exige favorableCount === examinedCount.
   examinedCount: number;
@@ -277,15 +277,40 @@ export function buildCriteriaRegistry(
   };
 }
 
-/** FUT-45 : les demandes comprises hors mesure, avec les mots du lecteur, sans doublon ni limite de nombre. */
-export function demandesNonMesurees(project: UserProject): { terme: string }[] {
+// ── POURQUOI UNE DEMANDE COMPRISE RESTE HORS DE LA RÉPONSE (FUT-45) ─────────────────────────────────
+// Le plus petit modèle qui dit la bonne raison. La donnée absente ICI n'en fait pas partie : elle concerne un
+// critère que le moteur sait lire (registre, `unexaminedReason: "inconclusive"`).
+//   manque_produit   une question objectivable et décisive que futur•e ne sait pas ENCORE traiter (le budget) ;
+//   ressenti         une appréciation personnelle que futur•e ne transforme pas en mesure (« authentique ») ;
+//   choix_editorial  futur•e choisit de ne pas réduire la notion à un jugement ou un score (réputation des
+//                    écoles, sécurité d'un quartier), ce qui n'empêche pas de montrer un jour des faits définis ;
+//   non_classee      aucune règle sûre : la lecture dit qu'elle ne répond pas, SANS inventer de raison.
+// La règle est déterministe : la famille que le parseur donne déjà (affectif, écoles = qualité seulement, culture,
+// autre), puis le mot du lecteur pour deux familles d'« autre ». Dans le doute : non_classee.
+export type RaisonNonMesuree = "manque_produit" | "ressenti" | "choix_editorial" | "non_classee";
+export type DemandeNonMesuree = { terme: string; raison: RaisonNonMesuree; theme: "budget" | "ecoles" | "securite" | null };
+
+const ARGENT = /budget|€|euros?\b|\bprix\b|\bk€|\bloyer/i;
+// « sûr » exige son accent (« sur » est une préposition) : dans le doute, la demande reste non classée.
+const SECURITE = /s[ée]curit|\bsûre?s?\b|ins[ée]curit|d[ée]linquan|cambriol|criminalit|agressi|tranquillit[ée] publique/i;
+
+export function classerNonMesuree(kind: string | undefined, terme: string): Omit<DemandeNonMesuree, "terme"> {
+  if (kind === "affectif") return { raison: "ressenti", theme: null };
+  if (kind === "ecoles") return { raison: "choix_editorial", theme: "ecoles" };
+  if (kind === "autre" && ARGENT.test(terme)) return { raison: "manque_produit", theme: "budget" };
+  if (kind === "autre" && SECURITE.test(terme)) return { raison: "choix_editorial", theme: "securite" };
+  return { raison: "non_classee", theme: null };
+}
+
+/** FUT-45 : les demandes comprises hors mesure, avec les mots du lecteur et leur raison, sans doublon ni limite. */
+export function demandesNonMesurees(project: UserProject): DemandeNonMesuree[] {
   const vus = new Set<string>();
-  const out: { terme: string }[] = [];
+  const out: DemandeNonMesuree[] = [];
   for (const h of project.parsed?.horsMesure ?? []) {
     const terme = typeof h?.term === "string" ? h.term.trim() : "";
     if (!terme || vus.has(terme.toLowerCase())) continue;
     vus.add(terme.toLowerCase());
-    out.push({ terme });
+    out.push({ terme, ...classerNonMesuree(h?.kind, terme) });
   }
   return out;
 }

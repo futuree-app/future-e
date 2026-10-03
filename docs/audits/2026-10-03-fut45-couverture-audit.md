@@ -145,3 +145,18 @@ d'interface nouvelle, pas de changement de règle d'orientation, pas de changeme
 
 Hors FUT-45, comme décidé : la règle d'arbitrage (un écart secondaire unique), le traitement du budget comme critère,
 le poids des demandes hors mesure.
+
+## Dernière passe (03/10/2026) : la raison de chaque demande non mesurée
+
+- `nonMesurees: { terme, raison, theme }`, raison déterministe : `manque_produit` (catégorie « autre » + argent :
+  budget, €, euros, prix) ; `ressenti` (catégorie « affectif ») ; `choix_editorial` (catégorie « écoles », que le
+  parseur réserve à la qualité / réputation ; ou « autre » + sécurité, « sûr » avec son accent) ; `non_classee`
+  (tout le reste : aucune raison inventée). La donnée absente ici reste une cause distincte du registre.
+- Phrases : « futur•e ne sait pas encore confronter un lieu à un budget : … reste sans réponse dans ce dossier. » ;
+  « … relèvent de votre appréciation : futur•e ne les transforme pas en critères mesurés. » ; « futur•e ne classe
+  pas les écoles selon leur réputation (…) : il n'en fait pas un jugement de qualité. » ; « futur•e ne résume pas la
+  sécurité d'un lieu par un score (…). » ; « futur•e ne répond pas à … dans ce dossier. » « Encore » n'est dit que
+  du manque produit (test). Le verdict nomme ce qui reste sans réponse, le bloc des limites dit pourquoi, sans
+  redite.
+- Budget rattrapé : la capture s'arrête à la somme (« budget 250 000 € », « budget de 200 000 € au maximum »,
+  « 250k€ max », « 300 000 euros »), jamais la suite (« et air sain » reste un critère).

@@ -14,7 +14,7 @@
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
-import type { CoverageLevel, Orientation, OpenCondition } from "./criteria-registry.ts";
+import type { DemandeNonMesuree, CoverageLevel, Orientation, OpenCondition } from "./criteria-registry.ts";
 import { deCommune, aCommune } from "../typography.ts";
 import { selectionMinute } from "./minute-selection.ts";
 
@@ -185,7 +185,7 @@ export type ConclusionPlanInput = {
   } | null;
   // FUT-45 : les demandes comprises que futur•e ne mesure pas, avec les mots du lecteur (horsMesure). Elles sont
   // nommées dans la conclusion et rendent la lecture partielle. Optionnelles pour les appelants partiels.
-  nonMesurees?: { terme: string }[];
+  nonMesurees?: DemandeNonMesuree[];
   // Combien de critères ont été lus (neutres compris) et combien ne l'ont pas été : « vos critères vont dans ce
   // sens » exige que TOUS les critères lus soient favorables (un neutre est lu, jamais favorable).
   examinedCount?: number;
@@ -233,19 +233,50 @@ function numberForms(n: number): string[] {
 // ── FUT-45 : LA LECTURE DIT CE QU'ELLE N'A PAS LU ────────────────────────────────────────────────
 // Les demandes non mesurées, citées avec les mots du lecteur : « budget 250 000 € », « authentique ».
 function listeNonMesurees(input: { nonMesurees?: { terme: string }[] }): string {
-  const t = (input.nonMesurees ?? []).map((n) => `« ${n.terme} »`);
+  return listeTermes(input.nonMesurees ?? []);
+}
+function listeTermes(items: { terme: string }[]): string {
+  const t = items.map((n) => `« ${n.terme} »`);
   const montres = t.slice(0, 5);
   const reste = t.length - montres.length;
   const liste = montres.length <= 1 ? montres[0] ?? "" : `${montres.slice(0, -1).join(", ")} et ${montres[montres.length - 1]}`;
   return reste > 0 ? `${liste}, et ${reste} autre${reste > 1 ? "s" : ""} demande${reste > 1 ? "s" : ""}` : liste;
 }
 
+// POURQUOI chaque demande reste hors de la réponse, une phrase par raison (FUT-45). « Encore » n'est dit QUE d'un
+// manque du produit : un ressenti ou un jugement que futur•e choisit de ne pas produire ne sont pas un retard.
+export function phrasesNonMesurees(items: DemandeNonMesuree[]): string[] {
+  const de = (r: DemandeNonMesuree["raison"], theme?: DemandeNonMesuree["theme"]) =>
+    items.filter((i) => i.raison === r && (theme === undefined || i.theme === theme));
+  const out: string[] = [];
+  const budget = de("manque_produit");
+  if (budget.length > 0) {
+    out.push(`futur•e ne sait pas encore confronter un lieu à un budget : ${listeTermes(budget)} ${budget.length > 1 ? "restent" : "reste"} sans réponse dans ce dossier.`);
+  }
+  const ressenti = de("ressenti");
+  if (ressenti.length > 0) {
+    out.push(ressenti.length > 1
+      ? `${listeTermes(ressenti)} relèvent de votre appréciation : futur•e ne les transforme pas en critères mesurés.`
+      : `${listeTermes(ressenti)} relève de votre appréciation : futur•e ne le transforme pas en critère mesuré.`);
+  }
+  const ecoles = de("choix_editorial", "ecoles");
+  if (ecoles.length > 0) out.push(`futur•e ne classe pas les écoles selon leur réputation (${listeTermes(ecoles)}) : il n'en fait pas un jugement de qualité.`);
+  const securite = de("choix_editorial", "securite");
+  if (securite.length > 0) out.push(`futur•e ne résume pas la sécurité d'un lieu par un score (${listeTermes(securite)}).`);
+  const autres = items.filter((i) => i.raison === "non_classee" || (i.raison === "choix_editorial" && i.theme !== "ecoles" && i.theme !== "securite"));
+  if (autres.length > 0) out.push(`futur•e ne répond pas à ${listeTermes(autres)} dans ce dossier.`);
+  return out; // « futur•e » garde sa minuscule ; une phrase ouverte par « … » n'a rien à capitaliser
+}
+
 // Ce qui reste sans lecture, en une proposition : critères non examinés, demandes non mesurées, ou les deux.
 function resteSansLecture(input: ConclusionPlanInput, voc: { autresCriteres: string }): string {
   const nm = (input.nonMesurees ?? []).length > 0;
   const nonLus = input.unexaminedCount == null ? !nm : input.unexaminedCount > 0;
-  if (nm && nonLus) return `${voc.autresCriteres} n'ont pas pu être examinés, et futur•e ne mesure pas encore ${listeNonMesurees(input)}`;
-  if (nm) return `futur•e ne mesure pas encore ${listeNonMesurees(input)}`;
+  // Le verdict NOMME ce qui reste sans réponse, sans en dire la raison : le bloc des limites la donne (un budget
+  // que futur•e ne sait pas encore lire, un ressenti qu'il ne mesure pas, un jugement qu'il ne produit pas).
+  const sansReponse = `${listeNonMesurees(input)} ${(input.nonMesurees ?? []).length > 1 ? "restent" : "reste"} sans réponse dans ce dossier`;
+  if (nm && nonLus) return `${voc.autresCriteres} n'ont pas pu être examinés, et ${sansReponse}`;
+  if (nm) return sansReponse;
   return `${voc.autresCriteres} n'ont pas encore pu être examinés`;
 }
 
@@ -939,8 +970,8 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
     // phrase d'en dessous l'aurait fait croire (« une ville authentique et chaleureuse »).
     return {
       label: "Lecture non disponible", tone: "neutral",
-      headline: POSTURE(`futur•e ne mesure pas encore ce que vous avez demandé.`),
-      detail: `Votre demande porte sur ${listeNonMesurees(input)} : futur•e ne sait pas encore les lire, ${a} comme ailleurs.`,
+      headline: POSTURE(`Ce que vous avez demandé reste hors de ce que futur•e évalue.`),
+      detail: phrasesNonMesurees(input.nonMesurees ?? []).join(" "),
     };
   }
 
@@ -1440,16 +1471,16 @@ export function buildConclusionPlan(input: ConclusionPlanInput): ConclusionNarra
   // prompt. Deux phrases dans un même bloc distinguent ce qu'il faut distinguer sans toucher au
   // contrat de génération.
   const inconclusives = input.inconclusivePriorities ?? [];
-  const nonMesurees = input.nonMesurees ?? [];
+  // Quand le verdict dit DÉJÀ ces raisons (rien d'autre n'a été demandé), le bloc ne les redit pas.
+  const dejaDansLeVerdict = input.coverage === "none" && input.lectureImpossible === "rien_de_mesurable";
+  const nonMesurees = dejaDansLeVerdict ? [] : input.nonMesurees ?? [];
   if (input.uncoveredPriorities.length > 0 || inconclusives.length > 0 || nonMesurees.length > 0) {
     const topAbsentes = input.uncoveredPriorities.slice(0, 3);
     const topNonConclues = inconclusives.slice(0, 3);
     const phrases: string[] = [];
     // FUT-45 : D'ABORD ce que le lecteur a demandé et que futur•e ne mesure pas (son budget, « authentique ») :
     // c'est la limite qu'il risque le plus d'oublier, puisqu'aucune carte ne la porte.
-    if (nonMesurees.length > 0) {
-      phrases.push(`futur•e ne mesure pas encore ${listeNonMesurees(input)} : ${nonMesurees.length > 1 ? "ces demandes restent" : "cette demande reste"} sans réponse dans ce dossier.`);
-    }
+    if (nonMesurees.length > 0) phrases.push(...phrasesNonMesurees(nonMesurees));
     if (topAbsentes.length > 0) {
       phrases.push(`Vos priorités concernant ${topAbsentes.map((p) => p.label).join(", ")} ne sont pas encore couvertes dans cette synthèse.`);
     }

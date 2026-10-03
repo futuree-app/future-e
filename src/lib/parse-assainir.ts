@@ -111,13 +111,18 @@ function forceMarkersValides(p: ParsedProject, raw: unknown): { criterion: Crite
   return out;
 }
 
-// Un budget ou une somme dits par le lecteur : « budget 250 000 € », « 300 000 euros », « 250k€ ».
-const BUDGET_DIT = /budget[^,.;!?\n]*|\d[\d\s\u00a0\u202f.,]*\s*(?:k\s*€|k€|€|euros?\b|k\s*euros?)/i;
+// Un budget ou une somme dits par le lecteur, ET RIEN DE PLUS : « budget 250 000 € », « budget de 200 000 € au
+// maximum », « 250k€ max », « 300 000 euros ». La capture s'arrête à la devise (et à un « max » qui la suit) :
+// « budget 250 000 € et air sain » ne doit jamais emporter « et air sain », qui reste un critère mesuré.
+const MONTANT = String.raw`\d[\d\s\u00a0\u202f.,]*\s*(?:k\s*€|k€|€|euros?\b|k\s*euros?\b)(?:\s+(?:au\s+)?max(?:imum)?\b)?`;
+const BUDGET_DIT = new RegExp(String.raw`budget\s+(?:(?:de|d'environ|d’environ|maximum|max|autour\s+de)\s+)*` + MONTANT + "|" + MONTANT, "i");
+// Le mot « budget » sans montant (« un petit budget ») : le mot seul, jamais la suite de la phrase.
+const BUDGET_SEUL = /\bbudget\b/i;
 
 export function budgetRattrape(
   horsMesure: ParsedProject["horsMesure"], rawText: string,
 ): ParsedProject["horsMesure"] {
-  const m = (rawText ?? "").match(BUDGET_DIT);
+  const m = (rawText ?? "").match(BUDGET_DIT) ?? (rawText ?? "").match(BUDGET_SEUL);
   if (!m) return horsMesure;
   const deja = (horsMesure ?? []).some((h) => /budget|€|euro|prix|\d/i.test(h?.term ?? ""));
   if (deja) return horsMesure;
