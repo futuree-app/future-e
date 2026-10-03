@@ -315,3 +315,101 @@ pour la performance, ailleurs).
    (`onAuthStateChange`, un seul fichier, risque de clignotement) ?
 5. **Test E2E** : introduire Playwright (absent du dépôt) avec le faux GoTrue, ou s'en tenir aux tests
    unitaires et d'intégration ?
+
+---
+
+## Addendum du 3 octobre 2026 : implémentation (phase 1)
+
+### Décisions retenues
+
+- La cause exacte de l'incident du 30/09 reste **indéterminée** (faux état Navbar + `/connexion`, ou vraie
+  course de refresh) ; les défauts démontrés suffisent à agir.
+- Aucun réglage Supabase Auth modifié (rotation, tolérance de réutilisation, détection, durée).
+- Les `<a>` de la Navbar restent : ils ne détruisent pas la session (performance, hors périmètre).
+- État UI ≠ autorisation : la Navbar lit l'état navigateur pour choisir ses boutons ; l'autorisation
+  des pages et des données reste `requireCurrentUser()` côté serveur. Aucun `AuthContext` créé.
+
+### Défauts corrigés et contrats finaux
+
+**Navbar** (`src/components/Navbar.tsx`, `src/lib/navbar-session.ts`)
+
+| État | Boutons (sans boutons fournis par la page) |
+|---|---|
+| `unknown` (avant résolution) | place réservée, **masquée** (`visibility: hidden`, `aria-hidden`) : aucun faux « Se connecter » |
+| `authenticated` | « Mon compte » → `/compte`, « Mon rapport » → `/rapport` (vocabulaire des pages du compte) |
+| `anonymous` | « Se connecter » → `/connexion`, « Commencer » → `/inscription` |
+
+Résolution au montage (`getSession` du client navigateur), puis suivi de `onAuthStateChange` (`SIGNED_IN`,
+`SIGNED_OUT`, `TOKEN_REFRESHED`…), désabonnement au démontage ; un événement reçu avant la première lecture
+l'emporte sur elle. Une page qui fournit ses boutons (pages du compte) les garde et ne lit pas la session.
+
+**`/connexion`, `/inscription`** (`src/lib/auth-destination.ts`) : garde serveur avant le rendu
+(`getCurrentSessionUser()`). Session valide → `next` s'il est sûr (relatif, commence par « / », jamais
+« // »), sinon `/compte`. Anonyme : formulaire inchangé. La règle `next` est désormais unique, partagée par
+les deux pages et par les actions d'auth (`getSafeNextPath`).
+
+**Proxy** (`src/proxy.ts`), motif `@supabase/ssr` 0.10.2 (types et sources de la version installée) :
+
+```
+requête → cookies lus → getUser() (refresh si besoin)
+  setAll(cookies, headers) :
+    cookies rafraîchis → request.cookies        (requête aval : Server Components)
+    NextResponse.next({ request })
+    cookies rafraîchis → response.cookies       (navigateur)
+    headers fournis par la bibliothèque → réponse (Cache-Control: private, no-store…, Expires, Pragma)
+x-futuree-url = pathname + search, posé sur request.headers (suit chaque NextResponse.next({ request }))
+```
+
+Les en-têtes anti-cache n'étaient pas appliqués avant FUT-40 : une réponse posant un cookie de session
+pouvait, en théorie, être traitée comme cacheable.
+
+### Fichiers
+
+`src/proxy.ts`, `src/components/Navbar.tsx`, `src/app/(auth)/connexion/page.tsx`,
+`src/app/(auth)/inscription/page.tsx`, `src/app/auth/actions.ts` ; nouveaux : `src/lib/auth-destination.ts`,
+`src/lib/navbar-session.ts`, et leurs tests, `src/proxy.test.ts`.
+
+### Tests
+
+| # | Couverture | Où |
+|---|---|---|
+| T1–T4 | garde `/connexion` et `/inscription` (anonyme, connecté, `next` sûr / non sûr, garde avant rendu) | `auth-destination.test.ts` + navigateur |
+| T5–T7 | boutons de la Navbar par état, place masquée tant que l'état est inconnu | `navbar-session.test.ts` + navigateur |
+| T8 | suivi `SIGNED_IN` / `SIGNED_OUT`, désabonnement, priorité de l'événement | `navbar-session.test.ts` (faux client) |
+| T9 | rotation : requête aval avec le **nouveau** cookie, jamais l'ancien ; `Set-Cookie` au navigateur ; `Cache-Control` privé | `proxy.test.ts` (vraie fonction `proxy`, faux GoTrue) |
+| T10 | `x-futuree-url` = `/rapport/logement?dossierId=abc`, avec et sans refresh | `proxy.test.ts` |
+| T11 | connecté → `/rapport/quartier` → `/pourquoi` (`<a>`) → `/rapport`, reload : authentifié, Navbar « Mon compte / Mon rapport » | navigateur (banc de phase 0) |
+| T12 | course de refresh tolérée : aucune perte ; témoin à réutilisation refusée : la perte est détectée | `proxy.test.ts` |
+
+Contrôle par mutation : l'ancien `proxy.ts` échoue T9 et T12 (la requête aval porte l'ancien cookie).
+
+Résultats : tests FUT-40 16/16 ; suite complète 2 064/2 064 ; `tsc --noEmit` propre ; lint propre ; `next
+build` OK (277 pages).
+
+### Limites restantes
+
+- **Aucun smoke sur le vrai Supabase** (Preview ou Production) : la vérification reste locale, contre un
+  faux GoTrue au format Supabase. Le smoke ci-dessous est nécessaire avant de passer FUT-40 en Done.
+- T11 est vérifié dans un vrai navigateur mais n'est pas automatisé (pas de `@playwright/test` ajouté, comme
+  demandé) ; T9, T10 et T12 couvrent la chaîne serveur de façon déterministe.
+- Pendant la résolution (`unknown`), la place des boutons reste vide quelques millisecondes sur les pages
+  publiques.
+
+### Smoke réel à exécuter (compte réel, non destructif)
+
+DevTools ouverts (Application > Cookies, Network « Preserve log »).
+
+- **A** — Connecté : `/rapport` → clic « Pourquoi futur•e ». Attendu : la Navbar affiche « Mon compte /
+  Mon rapport » ; `sb-…-auth-token` présent. Clic « Mon rapport » : `/rapport`, aucun formulaire.
+- **B** — Connecté : ouvrir `/connexion`. Attendu : redirection vers `/compte`.
+- **C** — Connecté : ouvrir `/connexion?next=/rapport`. Attendu : redirection vers `/rapport`.
+- **D** — Laisser un onglet `/rapport` ouvert plus d'une heure (jeton d'accès expiré), puis naviguer vers
+  `/pourquoi` puis `/rapport`. Attendu : une réponse porte un `Set-Cookie` `sb-…-auth-token` avec
+  `Cache-Control: private, no-cache, no-store…` ; la valeur du cookie change (rotation) ; `/rapport`
+  s'affiche sans connexion.
+
+### Hors périmètre (inchangé)
+
+Liens plats `<a>` de la Navbar (performance) ; `server.ts` sans `try/catch` dans `setAll` ; choix de
+`VERCEL_PROJECT_PRODUCTION_URL` pour les e-mails de confirmation ; architecture générale des providers
+d'auth ; `getUser()` → `getClaims()`.
