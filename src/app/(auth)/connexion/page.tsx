@@ -1,15 +1,13 @@
+import { redirect } from "next/navigation";
+import { getCurrentSessionUser } from "@/lib/user-account";
+import { cheminSur, redirectionSiDejaConnecte } from "@/lib/auth-destination";
 import Link from "next/link";
 import { PasswordForm } from "@/components/AuthForms";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { signInWithPasswordAction } from "@/app/auth/actions";
 
-function getSafeNext(value?: string) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return undefined;
-  }
-
-  return value;
-}
+// La règle est partagée avec les actions d'auth (FUT-40) : src/lib/auth-destination.ts.
+const getSafeNext = cheminSur;
 
 // VOCABULAIRE CANONIQUE (04/08/2026). Ces trois tuiles annonçaient « 6 modules » et « 3 scénarios »
 // pendant que le reste du site parlait de trois échelles et de près de trente critères : un
@@ -27,6 +25,11 @@ export default async function ConnexionPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const query = await searchParams;
+  // FUT-40 : un utilisateur déjà connecté n'a rien à faire ici. Avant, il voyait le formulaire, et le site
+  // lui redemandait ses identifiants alors que sa session était valide. L'autorité est serveur.
+  const { user } = await getCurrentSessionUser();
+  const dejaConnecte = redirectionSiDejaConnecte(user, query.next);
+  if (dejaConnecte) redirect(dejaConnecte);
   const next = getSafeNext(query.next);
 
   return (
