@@ -184,4 +184,7 @@ décrit la FORMULATION, pas la RAISON.
   Aucun `non_classee`.
 - Décision du porteur (03/10) : « ville propre, sans tags » = ressenti. Aucune source officielle ne mesure la
   propreté des communes de façon comparable (la grille de l'AVPU n'est appliquée que par des villes volontaires,
-  sans publication par commune). Critère de bascule : `manque_produit` exige qu'une source fiable puisse exister.
+  sans publication par commune). Décision propre à ce cas, pas une doctrine générale : « non
+  mesurable correctement aujourd'hui » n'est pas « intrinsèquement subjectif » (les tags sont observables). L'absence
+  d'une source comparable ne suffit pas à ranger une demande en ressenti ; ce classement est à rouvrir si une mesure
+  robuste apparaît.
