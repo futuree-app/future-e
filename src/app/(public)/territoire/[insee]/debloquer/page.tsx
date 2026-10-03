@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { getCheckoutProduct } from "@/lib/checkout-products";
-import { getQuartierPreview } from "@/lib/quartier-preview";
+import { getApercuTerritoire } from "@/lib/quartier-preview";
 import { TerritoryUnlockPanel } from "./TerritoryUnlockPanel";
 import { TerritoryUnlockPreview } from "./TerritoryUnlockPreview";
 import { PersonalTouch } from "./PersonalTouch";
@@ -53,7 +53,8 @@ export default async function TerritoryUnlockPage({
   const rank = rawRank && /^[1-3]$/.test(rawRank) ? Number.parseInt(rawRank, 10) : null;
 
   const product = getCheckoutProduct("rapport-complet")!;
-  const preview = await getQuartierPreview(insee);
+  // Local et synchrone : l'aperçu ne dépend d'aucune source réseau et ne peut plus disparaître (FUT-30).
+  const apercu = getApercuTerritoire(insee, displayName);
 
   const supabase = await createClient();
   const {
@@ -126,22 +127,29 @@ export default async function TerritoryUnlockPage({
           ))}
         </div>
 
-        {/* 3. Aperçu réel = le héros visuel (masqué si indisponible) */}
-        {preview && (
-          <section className="mt-20" style={reveal(2)}>
-            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
-              Aperçu réel du dossier
-            </p>
-            <h2 className="text-[length:var(--text-section)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
-              Ce que futur•e a déjà analysé sur {displayName}
-            </h2>
-            <p className="text-[13px] text-muted mb-5">
-              Le constat est visible, l&apos;analyse complète s&apos;ouvre avec le dossier.
-            </p>
-            <PersonalTouch commune={displayName} />
-            <TerritoryUnlockPreview preview={preview} commune={displayName} />
-          </section>
-        )}
+        {/* 3. Aperçu : un ou deux faits de la commune, ou un état explicite sans fait. Toujours rendu.
+            RENOMMÉ (FUT-30). « Aperçu réel du dossier » et « Ce que futur•e a déjà analysé sur {commune} »
+            annonçaient une analyse du lieu, au-dessus de trois textes identiques partout. Le bloc montre
+            désormais un fait tiré des données du dossier, et son titre dit exactement cela. */}
+        <section className="mt-20" style={reveal(2)}>
+          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
+            {apercu.etat === "sans_fait"
+              ? "Aperçu du dossier"
+              : apercu.faits.length > 1 ? "Deux faits de ce territoire" : "Un fait de ce territoire"}
+          </p>
+          <h2 className="text-[length:var(--text-section)] leading-[1.15] text-label mb-1" style={{ fontFamily: "var(--font-serif)" }}>
+            {apercu.etat === "faits"
+              ? `Ce que les projections disent déjà de ${displayName}`
+              : `Ce que le dossier examine sur ${displayName}`}
+          </h2>
+          <p className="text-[13px] text-muted mb-5">
+            {apercu.etat === "faits"
+              ? "Un extrait des données du dossier, donné tel quel. La lecture d'ensemble, ce qu'elle implique et ce qu'il reste à vérifier s'ouvrent avec le dossier."
+              : "La lecture d'ensemble, ce qu'elle implique et ce qu'il reste à vérifier s'ouvrent avec le dossier."}
+          </p>
+          <PersonalTouch commune={displayName} />
+          <TerritoryUnlockPreview apercu={apercu} />
+        </section>
 
         {/* 4. AskFuture par l'exemple */}
         <section className="mt-20" style={reveal(3)}>

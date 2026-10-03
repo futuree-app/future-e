@@ -1,53 +1,24 @@
 import "server-only";
-import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { deriveQuartierSources } from "@/lib/quartier-signals";
+import extrait from "@/data/apercu-climat-communes.json";
+import {
+  construireApercu, scenariosDepuisExtrait, type ApercuTerritoire, type ExtraitClimat,
+} from "@/lib/apercu-territoire";
 
-export type QuartierPreviewCard = { titre: string; constat: string };
-export type QuartierPreview = { cards: QuartierPreviewCard[]; sources: string[] };
-
-// Garde-fou latence : une paywall doit rester rapide. L'enrichissement fait des appels
-// externes (DRIAS, Géorisques…) ; on plafonne l'attente et, au-delà, on rend null (la page
-// masque le bloc aperçu). Jamais d'erreur bloquante, jamais de rendu retardé au-delà du cap.
-const PREVIEW_TIMEOUT_MS = 1200;
-
-// Aperçu RÉEL du module Quartier pour un INSEE. Cartes déterministes gatées sur la présence
-// de la donnée (pas de fabrication, pas de chiffre). null = pas d'aperçu exploitable OU trop
-// lent -> la page masque le bloc. cf. spec 2026-06-07-paywall-territoire.
-export async function getQuartierPreview(insee: string): Promise<QuartierPreview | null> {
-  const enrichment = await Promise.race([
-    gatherCommuneEnrichment(insee).catch(() => null),
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), PREVIEW_TIMEOUT_MS)),
-  ]);
-  if (!enrichment) return null;
-
-  const georisques = enrichment.georisques ?? null;
-  const catnat = enrichment.catnat ?? null;
-  const sources = deriveQuartierSources(enrichment, georisques, catnat, "gwl30");
-
-  const cards: QuartierPreviewCard[] = [];
-
-  if (enrichment.drias?.commune?.s) {
-    cards.push({
-      titre: "Le climat à venir",
-      constat:
-        "La trajectoire climatique de cette commune est projetée à plusieurs horizons : étés plus chauds, saisons qui se transforment, nouveaux équilibres à anticiper.",
-    });
-  }
-  if (georisques?.flags?.flood || georisques?.flags?.marineSubmersion || (catnat && catnat.total > 0)) {
-    cards.push({
-      titre: "Inondation et catastrophes naturelles",
-      constat:
-        "Le territoire porte un historique de catastrophes naturelles reconnues, que le rapport replace dans son contexte.",
-    });
-  }
-  if (georisques) {
-    cards.push({
-      titre: "Les risques du secteur",
-      constat:
-        "Les risques naturels, technologiques et environnementaux recensés autour du territoire sont passés en revue, un par un.",
-    });
-  }
-
-  if (cards.length === 0) return null;
-  return { cards: cards.slice(0, 4), sources };
+// L'APERÇU DU PAYWALL TERRITOIRE (FUT-30). Synchrone, local, déterministe.
+//
+// Il ne contacte AUCUNE source. L'ancien aperçu attendait `gatherCommuneEnrichment` (huit sources, dont
+// cinq en réseau) sous un `Promise.race` de 1 200 ms et rendait `null` au-delà : le bloc disparaissait,
+// au premier visiteur de chaque fonction neuve notamment, parce que la seule lecture de DRIAS
+// (`public/data_climat.json`, 63 Mo) consommait déjà 0,7 à 0,9 s. Il lit désormais un extrait de 2,7 Mo
+// (`scripts/build-apercu-climat.mjs`), embarqué dans le bundle, et ne peut donc ni attendre ni échouer
+// sur une source tierce.
+//
+// Il rend TOUJOURS un aperçu : des faits, ou un état explicite sans fait (cf. `apercu-territoire.ts`).
+//
+// LES CODES VILLE DE PARIS, LYON ET MARSEILLE (75056, 69123, 13055) n'ont pas de ligne DRIAS : DRIAS
+// indexe leurs arrondissements, et le comparateur ouvre ce paywall par arrondissement. Le dossier
+// emprunte la valeur du 1er arrondissement pour la ville entière ; l'aperçu, qui promet un fait de la
+// commune, ne fait pas cet emprunt et rend l'état sans fait.
+export function getApercuTerritoire(insee: string, commune: string): ApercuTerritoire {
+  return construireApercu(commune, scenariosDepuisExtrait(extrait as ExtraitClimat, insee));
 }
