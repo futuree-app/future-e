@@ -168,7 +168,8 @@ préfixe `ep_` et avec les valeurs, fait foi ici.
 ### Attribution
 
 Le repli spatial servait un seul consommateur : `/api/georisques-logement`, donc l'écran Logement → Énergie.
-Il est **supprimé** plutôt que qualifié : une proximité n'attribue pas un audit énergétique. Le type
+Il a d'abord été supprimé, puis rétabli **sous un autre type** (Phase 1.2, ci-dessous) : une proximité
+n'attribue pas un audit énergétique, mais elle reste une piste qu'une preuve future pourra confirmer. Le type
 `AuditRecord` porte sa provenance, `correspondance: "identifiant_ban"`, seule valeur possible ; la lecture
 ne garde que les lignes dont l'identifiant BAN est exactement celui de l'adresse ; l'écran refuse tout
 audit d'une autre provenance.
@@ -177,7 +178,7 @@ audit d'une autre provenance.
 |---|---|---|
 | Identifiant BAN exact, audit d'un logement | Oui | « Audit d'un logement de N m², rattaché à cette adresse » |
 | Identifiant BAN exact, audit de l'immeuble | Oui | « Audit de l'immeuble entier (N m² habitables), pas de ce seul logement » |
-| Proximité seule (ancien carré de 50 m) | **Non** | Aucune |
+| Proximité seule (carré d'environ 50 m) | **Non** | Aucune ; conservé côté API comme `auditProche` (référence, date, distance, aucune valeur) |
 | Adresse sans identifiant BAN | Non | Aucune |
 
 Avant : une adresse sans identifiant BAN recevait le dernier audit trouvé dans un carré d'environ 50 m de
@@ -212,3 +213,29 @@ Mutation : supprimer le filtre par identifiant BAN fait échouer T9.
 Smoke sur la donnée publique : A (immeuble exact) 503,5 kWh EP/m²/an avec mention immeuble ; B (logement
 exact) 408 kWh EP/m²/an, « rattaché à cette adresse » ; C (sans audit) rien ; D (carré de 50 m, adresse
 voisine) rien.
+
+### Phase 1.2 : la proximité, un candidat et jamais un audit (4 octobre 2026)
+
+Le défaut n'était pas de chercher à proximité : c'était de présenter le résultat comme l'audit de
+l'adresse. Les deux concepts vivent désormais dans deux types.
+
+| Concept | Type | Contenu | Usage |
+|---|---|---|---|
+| `exact_address` | `AuditRecord` | Valeurs par m², objet audité, référence, date | Seul audit affichable dans `EnergieSection` |
+| `nearby_candidate` | `AuditCandidatProche` | Référence, date, distance en mètres. Aucune valeur, aucune classe, aucun scénario | API seulement, pour une confirmation future (parcelle, identifiant de bâtiment, BDNB) |
+
+- `getNearbyAuditCandidate` interroge le même carré d'environ 50 m, mais ne demande à la source **que**
+  `n_audit`, `identifiant_ban`, `date_etablissement_audit` et `_geopoint` : aucune valeur n'est téléchargée.
+  Il écarte les audits de l'adresse elle-même et garde le plus proche.
+- `/api/georisques-logement` ne le lance que **sans** audit exact, et `resultatAudit` garantit que l'exact
+  gagne toujours. La réponse porte `audit` (exact ou `null`) et `auditProche` (candidat ou `null`).
+- `EnergieSection` n'affiche rien du candidat, et n'accepte que `correspondance === "exact_address"`.
+
+Smoke sur la donnée publique : à l'adresse de l'incident, l'audit exact (immeuble, 503,5 kWh EP/m²/an) est
+rendu et aucun candidat n'est cherché ; pour une adresse voisine sans audit, aucun audit, et un candidat à
+22 m, sans valeur.
+
+Tests : T9 (un voisin n'est jamais l'audit de l'adresse), T10 (le candidat est détecté, le plus proche,
+hors audits de l'adresse), T11 (l'exact gagne), T12 (aucune valeur d'un voisin n'existe ni n'atteint
+l'écran). Mutations : rendre l'exact et le voisin ensemble fait échouer T11 ; demander une valeur dans la
+recherche spatiale fait échouer T12.

@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  AUDIT_SELECT, formatKwhEpM2, libelleObjet, objetAudite, toAuditRecord, type AuditApiRow,
+  AUDIT_PROCHE_SELECT, AUDIT_SELECT, candidatProche, formatKwhEpM2, libelleObjet, objetAudite, resultatAudit,
+  toAuditRecord, type AuditApiRow, type AuditProcheApiRow,
 } from "./audit-record.ts";
 
 // FUT-59 : LE CONTRAT DE L'AUDIT ÉNERGÉTIQUE ADEME.
@@ -112,7 +113,9 @@ test("T7 : les émissions suivent le même contrat, et le chargeur ne relit pas 
   const a = toAuditRecord(incident, BAN)!;
   assert.equal(a.scenarios[0].emission_ges_m2, 512.345678901234 / 6);
   const chargeur = readFileSync("src/lib/audit.ts", "utf8");
-  assert.match(chargeur, /AUDIT_SELECT\.join/);
+  // Chaque requête porte SA liste de colonnes : les valeurs pour l'adresse exacte, aucune pour le voisin.
+  assert.match(chargeur, /\{ qs: `identifiant_ban:"\$\{banId\}"`, size: "20" \}, AUDIT_SELECT\)/);
+  assert.match(chargeur, /\{ bbox, size: "20" \}, AUDIT_PROCHE_SELECT\)/);
   assert.match(chargeur, /toAuditRecord\(rows, banId\)/);
   assert.doesNotMatch(chargeur, /ep_conso_5_usages|emission_ges_5_usages/);
   // Le contrat du rapport Logement est celui-ci, et pas une copie.
@@ -121,57 +124,74 @@ test("T7 : les émissions suivent le même contrat, et le chargeur ne relit pas 
   assert.match(readFileSync("src/app/api/audit/[insee]/route.ts", "utf8"), /getAuditByBanId/);
 });
 
-// ── Phase 1.1 : attribution ─────────────────────────────────────────────────────────────────────────
+// ── Phase 1.1 : attribution exacte, candidat voisin ─────────────────────────────────────────────────
+
+// Point de l'adresse examinée, et deux audits voisins à environ 30 m et 45 m (synthétiques).
+const POINT = { latitude: 48.0, longitude: 2.0 };
+const voisin = (n: string, dLat: number, ban = "99999_test_00003"): AuditProcheApiRow => ({
+  n_audit: n, identifiant_ban: ban, date_etablissement_audit: "2025-01-01", _geopoint: `${48.0 + dLat},2`,
+});
 
 // ── T8 : correspondance exacte ──────────────────────────────────────────────────────────────────────
 test("T8 : un audit portant l'identifiant BAN exact de l'adresse est retenu, avec sa provenance", () => {
   const a = toAuditRecord(incident, BAN)!;
-  assert.equal(a.correspondance, "identifiant_ban");
+  assert.equal(a.correspondance, "exact_address");
   assert.equal(a.n_audit, "A-SYNTHETIQUE-0001");
   assert.equal(a.date_audit, "2025-05-30"); // l'audit reste identifiable (référence et date)
 });
 
-// ── T9 : repli spatial ──────────────────────────────────────────────────────────────────────────────
-test("T9 : un audit voisin, sans le même identifiant BAN, n'est jamais retenu ni affiché", () => {
-  // La source renverrait ici l'audit d'une autre adresse (plein texte, ou ancien carré de 50 m).
-  const voisin = incident.map((r) => ({ ...r, n_audit: "A-SYNTHETIQUE-VOISIN", identifiant_ban: "99999_test_00003" }));
-  assert.equal(toAuditRecord(voisin, BAN), null);
+// ── T9 : un voisin n'est jamais l'audit de l'adresse ────────────────────────────────────────────────
+test("T9 : un audit à moins de 50 m sans le même identifiant BAN n'est jamais exposé comme audit de l'adresse", () => {
+  const lignesVoisines = incident.map((r) => ({ ...r, n_audit: "A-SYNTHETIQUE-VOISIN", identifiant_ban: "99999_test_00003" }));
+  assert.equal(toAuditRecord(lignesVoisines, BAN), null);
   // Mélangé à l'audit de l'adresse, il est écarté même s'il est plus récent.
-  const a = toAuditRecord([...voisin, ...incident], BAN)!;
-  assert.equal(a.n_audit, "A-SYNTHETIQUE-0001");
-  // Le repli par coordonnées n'existe plus, ni dans le chargeur ni dans la route du module Logement.
-  const chargeur = readFileSync("src/lib/audit.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
-  assert.doesNotMatch(chargeur, /getAuditByCoordinates|bbox/);
-  const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
-  assert.doesNotMatch(route, /getAuditByCoordinates/);
-  assert.match(route, /address\.id \? getAuditByBanId\(address\.id\)\.catch\(\(\) => null\) : Promise\.resolve\(null\)/);
-  // Et l'écran refuse tout audit dont la provenance n'est pas l'adresse exacte.
+  assert.equal(toAuditRecord([...lignesVoisines, ...incident], BAN)!.n_audit, "A-SYNTHETIQUE-0001");
+  // Sans audit exact, le module rend AUCUN audit, seulement un candidat.
+  const r = resultatAudit(null, candidatProche([voisin("A-V1", 0.0003)], POINT, BAN));
+  assert.equal(r.audit, null);
+  assert.equal(r.auditProche?.correspondance, "nearby_candidate");
+});
+
+// ── T10 : le candidat voisin est détecté ────────────────────────────────────────────────────────────
+test("T10 : le candidat voisin est détecté, le plus proche, avec sa référence et sa distance", () => {
+  const c = candidatProche([voisin("A-LOIN", 0.0004), voisin("A-PRES", 0.00027)], POINT, BAN)!;
+  assert.equal(c.correspondance, "nearby_candidate");
+  assert.equal(c.n_audit, "A-PRES");
+  assert.ok(c.distance_m! >= 29 && c.distance_m! <= 31, String(c.distance_m));
+  // Un audit de l'adresse elle-même n'est pas un « voisin » : il relève de la correspondance exacte.
+  assert.equal(candidatProche([voisin("A-MEME", 0.0001, BAN)], POINT, BAN), null);
+  assert.equal(candidatProche([], POINT, BAN), null);
+});
+
+// ── T11 : l'exact gagne ─────────────────────────────────────────────────────────────────────────────
+test("T11 : quand un audit exact et un candidat voisin coexistent, l'exact gagne systématiquement", () => {
+  const exact = toAuditRecord(incident, BAN)!;
+  const proche = candidatProche([voisin("A-PRES", 0.0001)], POINT, BAN)!;
+  assert.deepEqual(resultatAudit(exact, proche), { audit: exact, auditProche: null });
+  // La route ne cherche un voisin que sans audit exact, et passe par la même règle.
+  const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
+  assert.match(route, /const auditProche = auditExact\s*\?\s*null/);
+  assert.match(route, /resultatAudit\(auditExact, auditProche\)/);
+});
+
+// ── T12 : aucune valeur du voisin dans l'écran ──────────────────────────────────────────────────────
+test("T12 : aucune valeur énergétique d'un voisin n'existe, ni n'atteint EnergieSection", () => {
+  const c = candidatProche([voisin("A-PRES", 0.0002)], POINT, BAN)!;
+  assert.deepEqual(Object.keys(c).sort(), ["correspondance", "date_audit", "distance_m", "n_audit"]);
+  // La recherche spatiale ne demande même pas les colonnes de valeur à la source.
+  for (const col of AUDIT_PROCHE_SELECT) assert.doesNotMatch(col, /conso|emission|classe|surface|etape|scenario/);
   const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.match(ecran, /audit\.correspondance === "identifiant_ban" &&/);
+  assert.doesNotMatch(ecran, /auditProche|nearby_candidate/);
+  assert.match(ecran, /audit\.correspondance === "exact_address" &&/);
+  // Et l'audit exact, lui, garde des noms qui rendent impossible la confusion total / par m².
+  const cles = Object.keys(toAuditRecord(incident, BAN)!.scenarios[0]).sort();
+  assert.deepEqual(cles, ["categorie", "conso_ep_m2", "emission_ges_m2", "etape", "travaux"]);
+  for (const col of AUDIT_SELECT) assert.doesNotMatch(col, /^(ep_conso|emission_ges)_5_usages$/);
 });
 
-// ── T10 : immeuble ──────────────────────────────────────────────────────────────────────────────────
-test("T10 : un audit exact d'immeuble dit explicitement son grain", () => {
-  const a = toAuditRecord(incident, BAN)!;
-  assert.equal(a.objet?.grain, "immeuble");
-  assert.match(libelleObjet(a.objet), /immeuble entier/);
-  assert.match(libelleObjet(a.objet), /pas de ce seul logement/);
-});
-
-// ── T11 : logement à la même adresse ────────────────────────────────────────────────────────────────
-test("T11 : un audit de logement à la même adresse est dit « rattaché à cette adresse », jamais « votre logement »", () => {
-  const a = toAuditRecord([{ n_audit: "A-SYNTHETIQUE-0004", identifiant_ban: BAN, ep_conso_5_usages_m2: 220, surface_habitable_logement: 48 }], BAN)!;
-  const l = libelleObjet(a.objet);
+test("T10 : un audit d'immeuble exact dit explicitement son grain, un audit de logement reste « rattaché à cette adresse »", () => {
+  assert.match(libelleObjet(toAuditRecord(incident, BAN)!.objet), /immeuble entier.*pas de ce seul logement/);
+  const l = libelleObjet(toAuditRecord([{ n_audit: "A-SYNTHETIQUE-0004", identifiant_ban: BAN, ep_conso_5_usages_m2: 220, surface_habitable_logement: 48 }], BAN)!.objet);
   assert.match(l, /rattaché à cette adresse/);
   assert.doesNotMatch(l, /votre logement|ce logement|du logement/i);
-});
-
-// ── T12 : contrat ADEME ─────────────────────────────────────────────────────────────────────────────
-test("T12 : les noms rendent la confusion total / par m² impossible", () => {
-  const a = toAuditRecord(incident, BAN)!;
-  const cles = Object.keys(a.scenarios[0]).sort();
-  assert.deepEqual(cles, ["categorie", "conso_ep_m2", "emission_ges_m2", "etape", "travaux"]);
-  // Aucune clé interne sans unité, aucune colonne source totale demandée.
-  assert.ok(!cles.includes("conso_ep") && !cles.includes("emission_ges"));
-  for (const col of AUDIT_SELECT) assert.doesNotMatch(col, /^(ep_conso|emission_ges)_5_usages$/);
 });

@@ -177,7 +177,7 @@ export function EnergieSection({
         </div>
 
         {/* Un audit ne s'affiche que s'il est rattaché par l'identifiant BAN de l'adresse (FUT-59). */}
-        {audit && audit.correspondance === "identifiant_ban" && audit.scenarios.length > 0 && (
+        {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               Audit énergétique · {audit.scenarios.length} scénarios

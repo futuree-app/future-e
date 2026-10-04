@@ -46,11 +46,24 @@ export type AuditObjet =
   | null;
 
 /**
- * COMMENT L'AUDIT A ÉTÉ TROUVÉ (FUT-59, Phase 1.1). Une seule valeur possible : le même identifiant BAN
- * que l'adresse. Une proximité spatiale (l'ancien repli à 50 m) n'attribue pas un audit énergétique :
- * elle n'a plus de valeur dans ce type, donc aucun écran ne peut la recevoir.
+ * COMMENT L'AUDIT A ÉTÉ TROUVÉ (FUT-59). Deux concepts, deux TYPES, jamais mélangés :
+ *   - `exact_address` : le même identifiant BAN que l'adresse. Seul cas qui porte des valeurs, et seul
+ *     cas que l'écran Logement peut afficher (`AuditRecord`) ;
+ *   - `nearby_candidate` : un audit trouvé à moins d'environ 50 m, SANS correspondance d'adresse
+ *     (`AuditCandidatProche`). Une distance ne prouve pas qu'il concerne ce bâtiment : ce type ne porte
+ *     donc AUCUNE valeur énergétique. Il est conservé pour qu'une preuve future (parcelle, identifiant de
+ *     bâtiment, BDNB…) puisse un jour confirmer l'attribution ; la distance seule ne la confirme jamais.
  */
-export type AuditCorrespondance = "identifiant_ban";
+export type AuditCorrespondance = "exact_address";
+
+/** Un audit voisin, non attribué. Référence et distance seulement : aucune consommation, aucune classe. */
+export type AuditCandidatProche = {
+  correspondance: "nearby_candidate";
+  n_audit: string;
+  date_audit: string | null;
+  /** Distance à vol d'oiseau entre le point de l'adresse et le point géocodé de l'audit, en mètres. */
+  distance_m: number | null;
+};
 
 export type AuditRecord = {
   /** La provenance de l'attribution. Seule une correspondance d'adresse exacte existe. */
@@ -131,7 +144,7 @@ export function toAuditRecord(rows: AuditApiRow[], banId: string): AuditRecord |
   const head = auditRows[0];
 
   return {
-    correspondance: "identifiant_ban",
+    correspondance: "exact_address",
     n_audit: head.n_audit,
     date_audit: head.date_etablissement_audit ?? null,
     classe_dpe_actuel: head.classe_bilan_dpe ?? null,
@@ -163,4 +176,52 @@ export function libelleObjet(objet: AuditObjet): string {
   return objet.grain === "logement"
     ? `Audit d'un logement de ${s} m², rattaché à cette adresse`
     : `Audit de l'immeuble entier (${s} m² habitables), pas de ce seul logement`;
+}
+
+// ── LA RECHERCHE À PROXIMITÉ ─────────────────────────────────────────────────────────────────────
+// Elle ne demande à la source AUCUNE colonne de valeur : seulement de quoi identifier l'audit et le situer.
+
+/** Les seules colonnes de la recherche spatiale. */
+export const AUDIT_PROCHE_SELECT = ["n_audit", "identifiant_ban", "date_etablissement_audit", "_geopoint"] as const;
+
+export type AuditProcheApiRow = {
+  n_audit: string;
+  identifiant_ban?: string | null;
+  date_etablissement_audit?: string | null;
+  /** « lat,lon », tel que la source le publie. */
+  _geopoint?: string | null;
+};
+
+function distanceM(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6_371_000;
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const a = Math.sin(rad(lat2 - lat1) / 2) ** 2
+    + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lon2 - lon1) / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+/**
+ * Le candidat le plus proche, hors audits de l'adresse elle-même (ceux-là sont des correspondances
+ * exactes, et passent par `toAuditRecord`). Jamais une valeur : une référence, une date, une distance.
+ */
+export function candidatProche(
+  rows: AuditProcheApiRow[], point: { latitude: number; longitude: number }, banId: string | null,
+): AuditCandidatProche | null {
+  let meilleur: AuditCandidatProche | null = null;
+  for (const r of rows) {
+    if (banId && r.identifiant_ban === banId) continue;
+    const [lat, lon] = String(r._geopoint ?? "").split(",").map(Number);
+    const d = Number.isFinite(lat) && Number.isFinite(lon) ? Math.round(distanceM(point.latitude, point.longitude, lat, lon)) : null;
+    if (!meilleur || (d != null && (meilleur.distance_m == null || d < meilleur.distance_m))) {
+      meilleur = { correspondance: "nearby_candidate", n_audit: r.n_audit, date_audit: r.date_etablissement_audit ?? null, distance_m: d };
+    }
+  }
+  return meilleur;
+}
+
+/** Ce que rend le module Logement : l'audit exact s'il existe, sinon (et seulement sinon) un candidat voisin. */
+export function resultatAudit(
+  exact: AuditRecord | null, proche: AuditCandidatProche | null,
+): { audit: AuditRecord | null; auditProche: AuditCandidatProche | null } {
+  return exact ? { audit: exact, auditProche: null } : { audit: null, auditProche: proche };
 }
