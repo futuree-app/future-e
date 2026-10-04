@@ -15,7 +15,7 @@ import { fetchHeritageProtections } from "@/lib/gpu";
 import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
-import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
+import { getAuditByBanId } from "@/lib/audit";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
@@ -40,9 +40,9 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address.id
         ? getDpeCandidatesByBanId(address.id).catch(() => [])
         : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []),
-      address.id
-        ? getAuditByBanId(address.id).catch(() => null)
-        : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
+      // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59). Sans identifiant BAN, aucun audit :
+      // l'ancien repli prenait le dernier audit d'un carré de 50 m, donc parfois celui d'un autre bâtiment.
+      address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null),
     ]);
 
     const [georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([

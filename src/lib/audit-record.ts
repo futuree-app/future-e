@@ -35,13 +35,26 @@ export type AuditScenario = {
   emission_ges_m2: number | null;
 };
 
-/** L'objet audité, et la surface à laquelle se rapportent les valeurs par m². */
+/**
+ * L'objet audité, et la surface à laquelle se rapportent les valeurs par m². Dictionnaire ADEME (JDD) :
+ * `surface_habitable_logement` est « renseignée sauf dans le cas du dpe à l'immeuble » ;
+ * `surface_habitable_immeuble` est la « surface habitable totale de l'immeuble ».
+ */
 export type AuditObjet =
   | { grain: "logement"; surface_m2: number }
   | { grain: "immeuble"; surface_m2: number }
   | null;
 
+/**
+ * COMMENT L'AUDIT A ÉTÉ TROUVÉ (FUT-59, Phase 1.1). Une seule valeur possible : le même identifiant BAN
+ * que l'adresse. Une proximité spatiale (l'ancien repli à 50 m) n'attribue pas un audit énergétique :
+ * elle n'a plus de valeur dans ce type, donc aucun écran ne peut la recevoir.
+ */
+export type AuditCorrespondance = "identifiant_ban";
+
 export type AuditRecord = {
+  /** La provenance de l'attribution. Seule une correspondance d'adresse exacte existe. */
+  correspondance: AuditCorrespondance;
   n_audit: string;
   date_audit: string | null;
   classe_dpe_actuel: string | null;
@@ -96,8 +109,15 @@ export function objetAudite(row: AuditApiRow): AuditObjet {
   return null;
 }
 
-/** Les lignes d'un ou plusieurs audits, triées du plus récent : on garde le premier audit rencontré. */
-export function toAuditRecord(rows: AuditApiRow[]): AuditRecord | null {
+/**
+ * L'audit d'UNE adresse, à partir des lignes renvoyées par la source (triées du plus récent).
+ *
+ * Seules les lignes dont l'identifiant BAN est EXACTEMENT celui de l'adresse sont gardées : la recherche
+ * plein texte de la source ne doit jamais faire entrer l'audit d'une autre adresse. Puis le premier audit
+ * rencontré (le plus récent) est retenu, avec toutes ses étapes.
+ */
+export function toAuditRecord(rows: AuditApiRow[], banId: string): AuditRecord | null {
+  rows = rows.filter((r) => r.identifiant_ban === banId);
   if (rows.length === 0) return null;
 
   const byAudit = new Map<string, AuditApiRow[]>();
@@ -111,6 +131,7 @@ export function toAuditRecord(rows: AuditApiRow[]): AuditRecord | null {
   const head = auditRows[0];
 
   return {
+    correspondance: "identifiant_ban",
     n_audit: head.n_audit,
     date_audit: head.date_etablissement_audit ?? null,
     classe_dpe_actuel: head.classe_bilan_dpe ?? null,

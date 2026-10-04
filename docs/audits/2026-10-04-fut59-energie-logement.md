@@ -121,8 +121,8 @@ avec « Audit d'un logement de 155 m² » ; un identifiant sans audit ne rend ri
 
 ## 13. Hors périmètre, observés et non traités
 
-1. `getAuditByCoordinates` (adresse sans identifiant BAN) prend le dernier audit trouvé dans un carré de
-   50 m : il peut appartenir à un autre bâtiment. Non attribuable par construction.
+1. ~~`getAuditByCoordinates` (adresse sans identifiant BAN) prend le dernier audit trouvé dans un carré de
+   50 m : il peut appartenir à un autre bâtiment.~~ **Corrigé en Phase 1.1** (voir plus bas).
 2. `classe_dpe_actuel` reprend `classe_bilan_dpe` de la PREMIÈRE ligne lue, alors que cette classe varie
    d'une étape à l'autre (G à l'état initial, A à l'étape finale) et que l'ordre des lignes d'un même
    audit n'est pas garanti. Le champ n'est affiché nulle part aujourd'hui.
@@ -131,3 +131,84 @@ avec « Audit d'un logement de 155 m² » ; un identifiant sans audit ne rend ri
 5. Pour les émissions, le total n'égale la valeur par m² multipliée par la surface que sur une partie des
    lignes (17/40 et 26/40). Sans effet ici, puisque seule la valeur par m² est lue désormais.
 6. FUT-58, FUT-60, FUT-43, FUT-13 et FUT-61 : non touchés.
+
+---
+
+## Phase 1.1 : contrat officiel et attribution (4 octobre 2026)
+
+### Contrat ADEME
+
+Documents officiels attachés au jeu (`data.ademe.fr/datasets/audit-opendata`, pièces jointes de
+métadonnées) : « Audits énergétique - Dictionnaire de données du jeu de données »
+(`AUDIT_dictionnaire_de_données_JDD.xlsx`), « Audits énergétiques - Dictionnaire de données du DUMP »
+(`AUDIT_dictionnaire_de_données_DUMP.xlsx`), énumérateurs des tables et journal des évolutions. Les
+définitions ci-dessous sont celles du dictionnaire JDD (colonne « Description »), identiques dans le
+dictionnaire du DUMP.
+
+| Champ open data | Libellé officiel (table) | Description officielle | Unité officielle | Objet |
+|---|---|---|---|---|
+| `ep_conso_5_usages` | `conso_ep_5_usages` (`audit_ep_conso`) | consommation annuelle 5 usages (ECS, chauffage, climatisation, éclairage, auxiliaires) en énergie primaire, déduit de la production PV autoconsommée | **kWhep/an** | total de l'objet audité |
+| `ep_conso_5_usages_m2` | `conso_ep_5_usages_par_m2` (`audit_ep_conso`) | même grandeur | **kWhep/m²/an** (« m²SHAB » dans les champs de gain) | par m² de surface habitable |
+| `emission_ges_5_usages` | `emission_ges_5_usages` (`audit_emission_ges`) | estimation GES totale 5 usages, déduit de la production PV autoconsommée | **kgCO2/an** | total |
+| `emission_ges_5_usages_m2` | `emission_ges_5_usages_par_m2` (`audit_emission_ges`) | estimation GES totale 5 usages rapportée au m² | **kgCO2/m²/an** | par m² |
+| `surface_habitable_logement` | `surface_habitable_logement` (`audit_logement`) | « surface habitable du logement renseignée sauf dans le cas du dpe à l'immeuble » | m² | logement |
+| `surface_habitable_immeuble` | `surface_habitable_immeuble` (`audit_logement`) | « surface habitable totale de l'immeuble dans le cas d'un DPE appartement avec usage collectif ou d'un DPE immeuble » | m² | immeuble |
+| `identifiant_ban` | `ban_id` (`audit_t_adresse`) | « identifiant de la BAN référençant l'adresse », issu du géocodage ADEME (score publié dans `score_ban`) | sans unité | adresse |
+
+Ce contrat confirme la correction : l'écran lit une consommation **conventionnelle** d'**énergie
+primaire** par m², et l'écrit « kWh EP/m²/an ». `emission_ges_5_usages_m2` est documenté avec son unité
+(cas A) : le mapping corrigé est conservé, sans être affiché. Le ratio irrégulier total / par m² des
+émissions observé en Phase 1 ne remet pas en cause ce champ, seul lu désormais.
+
+Précautions : les valeurs sont **conventionnelles** (méthode 3CL 2021 de l'audit harmonisé), jamais une
+consommation mesurée. Le dictionnaire range `ep_conso_5_usages` sous la catégorie « Consommation en énergie
+finale » alors que sa description dit « énergie primaire » et `kWhep` : la description, cohérente avec le
+préfixe `ep_` et avec les valeurs, fait foi ici.
+
+### Attribution
+
+Le repli spatial servait un seul consommateur : `/api/georisques-logement`, donc l'écran Logement → Énergie.
+Il est **supprimé** plutôt que qualifié : une proximité n'attribue pas un audit énergétique. Le type
+`AuditRecord` porte sa provenance, `correspondance: "identifiant_ban"`, seule valeur possible ; la lecture
+ne garde que les lignes dont l'identifiant BAN est exactement celui de l'adresse ; l'écran refuse tout
+audit d'une autre provenance.
+
+| Correspondance | Affiché dans Logement ? | Formulation |
+|---|---|---|
+| Identifiant BAN exact, audit d'un logement | Oui | « Audit d'un logement de N m², rattaché à cette adresse » |
+| Identifiant BAN exact, audit de l'immeuble | Oui | « Audit de l'immeuble entier (N m² habitables), pas de ce seul logement » |
+| Proximité seule (ancien carré de 50 m) | **Non** | Aucune |
+| Adresse sans identifiant BAN | Non | Aucune |
+
+Avant : une adresse sans identifiant BAN recevait le dernier audit trouvé dans un carré d'environ 50 m de
+côté. Mesuré sur l'adresse de l'incident : le carré contient 20 lignes d'audit portant sur 2 adresses
+différentes. Après : aucun audit.
+
+`/api/audit/[insee]` rend le même `AuditRecord` : provenance, objet audité (logement ou immeuble, avec sa
+surface), valeurs nommées avec leur unité (`conso_ep_m2`, `emission_ges_m2`).
+
+### Limites ajoutées
+
+- **Plusieurs audits à la même adresse** : seul le plus récent est montré, avec sa référence et sa date.
+  L'écran ne prétend pas qu'il décrit le logement examiné. Pas de refonte multi-audits dans FUT-59.
+- La correspondance repose sur le géocodage BAN de l'ADEME : un audit mal géocodé à la source ne sera pas
+  trouvé (absence, jamais une fausse attribution).
+
+### Dettes laissées hors périmètre
+
+- `classe_dpe_actuel` est pris sur une ligne arbitraire alors que `classe_bilan_dpe` varie d'une étape à
+  l'autre. Non affiché : à traiter dans un ticket dédié si le champ doit servir.
+- Le DPE garde, lui, un repli par coordonnées pour les adresses sans identifiant BAN
+  (`getDpeByCoordinates`) : il relève de l'attribution du DPE, pas de l'audit.
+- Multi-audits, classes et libellés des scénarios, FUT-58, FUT-60, FUT-43, FUT-13, FUT-61.
+
+### Tests
+
+13 au total (T1 à T12). T8 : correspondance exacte, provenance, référence et date. T9 : un audit voisin
+n'est ni retenu, ni affichable, et le repli n'existe plus dans le chargeur ni dans la route. T10 : grain
+immeuble. T11 : jamais « votre logement ». T12 : aucune clé sans unité, aucune colonne totale demandée.
+Mutation : supprimer le filtre par identifiant BAN fait échouer T9.
+
+Smoke sur la donnée publique : A (immeuble exact) 503,5 kWh EP/m²/an avec mention immeuble ; B (logement
+exact) 408 kWh EP/m²/an, « rattaché à cette adresse » ; C (sans audit) rien ; D (carré de 50 m, adresse
+voisine) rien.

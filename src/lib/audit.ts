@@ -19,19 +19,13 @@ async function fetchAuditLines(params: Record<string, string>): Promise<AuditApi
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
+//
+// UNE SEULE ENTRÉE : l'identifiant BAN de l'adresse. Le repli par coordonnées (`getAuditByCoordinates`,
+// un carré d'environ 50 m) est supprimé (FUT-59, Phase 1.1) : il prenait le dernier audit trouvé dans le
+// carré, donc possiblement celui d'un autre bâtiment, et l'écran Logement l'affichait comme celui de
+// l'adresse. Une proximité n'attribue pas un audit énergétique.
 
 export async function getAuditByBanId(banId: string): Promise<AuditRecord | null> {
   const rows = await fetchAuditLines({ qs: `identifiant_ban:"${banId}"`, size: "20" });
-  return toAuditRecord(rows);
-}
-
-export async function getAuditByCoordinates(
-  latitude: number,
-  longitude: number,
-  radiusM = 50,
-): Promise<AuditRecord | null> {
-  const deg  = radiusM / 111_000;
-  const bbox = `${longitude - deg},${latitude - deg},${longitude + deg},${latitude + deg}`;
-  const rows = await fetchAuditLines({ bbox, size: "20" });
-  return toAuditRecord(rows);
+  return toAuditRecord(rows, banId);
 }
