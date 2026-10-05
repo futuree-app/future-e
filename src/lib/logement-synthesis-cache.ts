@@ -62,7 +62,9 @@ export type SynthesisData = {
   georisques?: { parcel?: { risks?: { labels?: string[] }; pprn?: { labels?: string[] }; seismic?: { label?: string | null } | null; rga?: { label?: string | null } | null } | null } | null;
   sinistralite?: unknown;
   /**
-   * LE COMPTE D'ARRÊTÉS INONDATION DE LA COMMUNE, quand la page a pu le résoudre.
+   * LE COMPTE DE RECONNAISSANCES CATNAT INONDATION DE LA COMMUNE, quand la page a pu le résoudre.
+   * Unité (FUT-60) : la ligne GASPAR, un arrêté × un phénomène × un événement ; ce n'est pas un
+   * nombre d'arrêtés distincts (Paris : 20 lignes pour 16 arrêtés).
    *
    * Il n'entre dans le payload que pour CONTEXTUALISER une absence de sinistre indemnisé (cf.
    * `sinistralitePourRecit`). Sans absence à contextualiser, il n'y entre pas : il n'a rien à
@@ -168,15 +170,15 @@ export function buildCoverage(data: SynthesisData): SynthesisCoverage {
 //
 // Le payload transmettait l'objet ONRN brut, `{ kind: "aucun" }` compris. Le modèle pouvait donc
 // écrire « aucun sinistre d'inondation n'a été indemnisé dans la commune » pendant que le module
-// Territoire comptait cinq arrêtés depuis 1982 : la contradiction du premier test réel, rejouée en
+// Territoire comptait cinq reconnaissances depuis 1982 : la contradiction du premier test réel, rejouée en
 // prose, sur une surface où aucune carte ne vient la borner.
 //
 // La leçon du vault s'applique telle quelle : un prompt n'est pas une frontière de sûreté, la
 // frontière est de NE PAS FOURNIR LA DONNÉE. Une absence sans son contexte administratif sort donc
 // du payload. Le lecteur ne perd rien : la carte déterministe la porte, bornée par sa période et
-// son échantillon, et la carte de réconciliation la met en regard des arrêtés.
+// son échantillon, et la carte de réconciliation la met en regard des reconnaissances.
 //
-// Quand le compte d'arrêtés EST connu, l'absence reste, accompagnée de lui : le modèle a alors de
+// Quand le compte de reconnaissances EST connu, l'absence reste, accompagnée de lui : le modèle a alors de
 // quoi ne pas se tromper, et l'écart fait partie de ce qu'il peut avoir à dire.
 //
 // ── INVARIANT DE CACHE ───────────────────────────────────────────────────────────────────────
@@ -197,7 +199,9 @@ export function sinistralitePourRecit(
         kind: "aucun_sinistre_indemnise",
         periode: "1995-2021",
         echantillon: "CCR, contrats assurés de la commune",
-        arretes_catnat_inondation_depuis_1982: catnatInondationCount,
+        // FUT-60 : « reconnaissances », l'unité réelle du compte (lignes GASPAR). Le renommage change le
+        // hash des seules synthèses qui portent ce contexte : la clé n'existe pas ailleurs.
+        reconnaissances_catnat_inondation_depuis_1982: catnatInondationCount,
       };
       continue;
     }

@@ -15,6 +15,7 @@ import { artifactScopeKey } from "@/lib/decision/decision-artifact";
 import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
 import { getCommuneEntry } from "@/lib/comparateur-vie";
 import { lireDerniereVersion } from "@/lib/server/logement-report-versions";
+import { deriveClimatProjete } from "@/lib/drias-json";
 import { metaDe, syntheseCompatible } from "@/lib/logement-report-version";
 
 export default async function RapportLogementPage({
@@ -121,6 +122,10 @@ export default async function RapportLogementPage({
   // module s'affiche avec elle. Sans version (dossier neuf, antérieur au lot, ou table absente), le
   // module construit une fois et la route écrit la version 1.
   const versionLogement = loadable ? await lireDerniereVersion(supabase, dossier.id) : null;
+  // FUT-60 : le signal climat que la route injecte avant de hacher la synthèse (même fonction, même
+  // INSEE du dossier, local et sans réseau). Le module le reçoit pour calculer la MÊME empreinte que le
+  // serveur, et ne réafficher une synthèse enregistrée que si elle a lu les faits courants.
+  const climatProjete = loadable ? await deriveClimatProjete(dossier.insee).catch(() => null) : null;
 
   return (
     <>
@@ -136,6 +141,7 @@ export default async function RapportLogementPage({
         rehydrateSource={targetId ? "deeplink" : "auto"}
         project={userProject}
         catnatInondation={catnatInondation}
+        climatProjete={climatProjete}
         versionInitiale={versionLogement ? {
           ...versionLogement.report,
           version: {

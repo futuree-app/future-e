@@ -1,3 +1,4 @@
+import { villeGaspar } from "../georisques-flags.ts";
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE COMPTE D'ARRÊTÉS INONDATION, DIT UNE SEULE FOIS.
 //
@@ -15,7 +16,7 @@
 //
 // ── POURQUOI L'INDEX, ET PAS L'APPEL DIRECT ──────────────────────────────────────────────────
 // Le moteur de décision est déterministe et sans réseau : il lit l'index (`comparateur-index.json`,
-// alimenté par `scripts/populate-inondation.py`, submersion marine exclue). La carte, elle, a
+// alimenté par `scripts/gaspar/collecter-catnat.mts`, submersion marine exclue). La carte, elle, a
 // l'appel direct sous la main. Faire descendre l'index jusqu'à la carte est le seul sens qui
 // marche : l'inverse demanderait au moteur un appel réseau, qu'il refuse par construction.
 //
@@ -41,10 +42,30 @@ export const CATNAT_DEPUIS = 1982;
  * promesse s'arrête à la convention, et ce commentaire est la seule chose qui empêche de croire
  * l'inverse.
  */
-export const CATNAT_EVIDENCE_VERSION = "catnat-1";
+export const CATNAT_EVIDENCE_VERSION = "catnat-2";
+
+// ── catnat-2 (FUT-60, 05/10/2026) : PARIS, LYON ET MARSEILLE COMPTÉS À LEUR COMMUNE ───────────────
+// GASPAR ne connaît ces trois villes qu'au code de la commune (75056, 69123, 13055). L'index les
+// avait interrogées arrondissement par arrondissement, et GASPAR y répond zéro ligne : les 45
+// arrondissements portaient « 0 arrêté inondation », sous une carte qui comptait, en direct, 20
+// reconnaissances à Paris, surtout des inondations. Un compte `catnat-1` d'une de ces trois communes
+// est donc faux PAR CONSTRUCTION, quel que soit le dossier qui l'a figé.
+/**
+ * UN COMPTE FIGÉ EST-IL ENCORE AFFICHABLE ? Non pour un `catnat-1` de Paris, Lyon ou Marseille : il
+ * vient de l'index d'avant FUT-60, qui écrivait zéro pour ces trois villes. Le dossier n'est pas
+ * modifié ; sa carte retombe sur l'index courant, corrigé, plutôt que de réafficher un zéro faux.
+ */
+export function catnatFigeAffichable(o: CatnatInondation | null | undefined): o is CatnatInondation {
+  if (!o) return false;
+  return !(o.version === "catnat-1" && villeGaspar(o.insee) != null);
+}
 
 export type CatnatInondation = {
-  /** Arrêtés de catastrophe naturelle INONDATION (fluviale et pluviale, submersion marine exclue). */
+  /**
+   * Reconnaissances CatNat INONDATION (submersion marine exclue). UNITÉ (FUT-60) : la ligne GASPAR,
+   * soit un arrêté × un phénomène × un événement. Paris : 20 lignes pour 16 arrêtés distincts. Ce
+   * n'est donc pas un nombre d'arrêtés, et le texte dit « reconnaissances ».
+   */
   count: number;
   /** Année d'origine du comptage, commune à toutes les communes. */
   depuis: number;
@@ -100,7 +121,17 @@ export function catnatInondationDepuisCompte(
  */
 export function libelleCatnatInondation(o: CatnatInondation): string {
   const pluriel = o.count > 1 ? "s" : "";
-  return `${o.count} arrêté${pluriel} inondation depuis ${o.depuis}`;
+  return `${o.count} reconnaissance${pluriel} liée${pluriel} aux inondations depuis ${o.depuis}${echelle(o)}`;
+}
+
+/**
+ * FUT-60 : LE GRAIN SE DIT. À Paris, Lyon et Marseille, GASPAR ne publie que la ville : le compte
+ * d'un arrondissement est celui de toute la ville, et la phrase ne doit pas laisser croire qu'il
+ * décrit l'arrondissement. Ailleurs, le compte est celui de la commune, et rien ne s'ajoute.
+ */
+function echelle(o: CatnatInondation): string {
+  const ville = villeGaspar(o.insee);
+  return ville ? `, à l'échelle de ${ville}` : "";
 }
 
 /**
@@ -115,7 +146,7 @@ export function libelleCatnatInondation(o: CatnatInondation): string {
  */
 export function phraseConstatCatnatInondation(o: CatnatInondation): string {
   const pluriel = o.count > 1 ? "s" : "";
-  return `${o.count} arrêté${pluriel} de catastrophe naturelle inondation depuis ${o.depuis}`;
+  return `${o.count} reconnaissance${pluriel} de catastrophe naturelle liée${pluriel} aux inondations depuis ${o.depuis}${echelle(o)}`;
 }
 
 /**
@@ -123,5 +154,5 @@ export function phraseConstatCatnatInondation(o: CatnatInondation): string {
  * dossier figé doit pouvoir dire sous quelle règle son compte a été établi.
  */
 export function sourceCatnatInondation(o: CatnatInondation): string {
-  return `Arrêtés CatNat inondation (GASPAR), submersion marine exclue · ${o.version}`;
+  return `Reconnaissances CatNat inondation (GASPAR), submersion marine exclue · ${o.version}`;
 }

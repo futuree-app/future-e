@@ -4,6 +4,7 @@ import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
 import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
+import { codeGaspar, villeGaspar } from '@/lib/georisques-flags';
 import { getAtmoForCommune } from '@/lib/atmo';
 import { getEra5Trend } from '@/lib/era5-trend';
 import { createClient } from '@supabase/supabase-js';
@@ -179,6 +180,9 @@ export default async function ChaleurCommune({
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
+  // FUT-60 : à Paris, Lyon, Marseille, GASPAR ne publie que la ville. Le compte affiché sur la page
+  // d'un arrondissement est celui de toute la ville, et la phrase le dit.
+  const villeCatnat = insee_code !== codeGaspar(insee_code) ? villeGaspar(insee_code) : null;
 
   // LES DEUX HORIZONS, CHACUN SOUS SA VRAIE DATE (04/08/2026). Cette page ne lisait que `gwl30` en
   // titrant « projections 2050 » partout, jusque dans son H1 et sa meta description : gwl30 est le
@@ -447,16 +451,16 @@ export default async function ChaleurCommune({
                 Ce que la commune a déjà vécu
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Arrêtés de catastrophe naturelle · base GASPAR (Géorisques)
+                Reconnaissances de catastrophe naturelle · base GASPAR (Géorisques)
               </div>
             </div>
             <div className="data-card">
               <div className="data-card-label">Sécheresse des sols · reconnaissances officielles</div>
               <div className="data-card-value">
-                {catnatSecheresse}<span className="data-card-unit"> arrêté{catnatSecheresse > 1 ? 's' : ''}</span>
+                {catnatSecheresse}<span className="data-card-unit"> reconnaissance{catnatSecheresse > 1 ? 's' : ''}</span>
               </div>
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
-                {communeName} a déjà été reconnue {catnatSecheresse} fois en état de catastrophe naturelle
+                {villeCatnat ? `À l'échelle de ${villeCatnat} (GASPAR ne publie pas les arrondissements), la ville` : communeName} a déjà été reconnue {catnatSecheresse} fois en état de catastrophe naturelle
                 pour sécheresse des sols. Ce phénomène de retrait-gonflement des argiles fissure les
                 fondations, et des étés plus secs l&apos;aggravent directement.
               </div>

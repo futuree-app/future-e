@@ -12,7 +12,8 @@ import "server-only";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry } from "@/lib/comparateur-vie";
+import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry, getCommuneEntry } from "@/lib/comparateur-vie";
+import { arrondissementsDe } from "@/lib/plm";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
 import { getEra5Trend } from "@/lib/era5-trend";
@@ -36,6 +37,12 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     getEra5Trend(insee).catch(() => null),
   ]);
   const entry = ctx?.entry ?? null;
+  // FUT-60 : l'index n'a pas d'entrée pour Paris, Lyon ou Marseille (75056…), seulement leurs
+  // arrondissements. Le compte d'arrêtés, lui, est celui de la COMMUNE (GASPAR ne connaît qu'elle) :
+  // chaque arrondissement le porte à l'identique. On le lit donc sur le premier, au nom de la commune.
+  const premierArrondissement = entry ? null : arrondissementsDe(insee)[0] ?? null;
+  const entreeArr = premierArrondissement ? await getCommuneEntry(premierArrondissement).catch(() => null) : null;
+  const entreeCatnat = entry ?? (entreeArr ? { insee, inondation: entreeArr.inondation ?? null } : undefined);
   // FUT-33 : la typologie se lit sur la COMMUNE (loi Littoral, façade officielle), plus sur son département.
   const mood = deriveTerritoryMood({ communeName, inseeCode: insee, territoire: null, categories: entry ? deriveCategoriesFromEntry(entry) : undefined });
   const ademe = enrichment?.ademe?.commune ?? null;
@@ -72,7 +79,7 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
     scenarios: enrichment?.drias?.commune.s ?? null,
     georisques: enrichment?.georisques ?? null,
     catnat: enrichment?.catnat ?? null,
-    catnatInondationIndex: catnatInondationDepuisIndex(entry ?? undefined),
+    catnatInondationIndex: catnatInondationDepuisIndex(entreeCatnat),
     vigieau: enrichment?.vigieau ?? null,
     drought: enrichment?.eau?.drought ?? null,
     littoral: enrichment?.littoral ?? null,

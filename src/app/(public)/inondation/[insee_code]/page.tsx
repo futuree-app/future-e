@@ -4,6 +4,7 @@ import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
 import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
 import { getGeorisquesSummary, getGasparCatnatSummary } from '@/lib/georisques';
+import { codeGaspar, villeGaspar } from '@/lib/georisques-flags';
 import { createClient } from '@supabase/supabase-js';
 
 export const revalidate = 86400;
@@ -172,6 +173,9 @@ export default async function InondationCommune({
   ]);
 
   const communeName = commune?.nom_commune ?? driasData?.commune?.n ?? insee_code;
+  // FUT-60 : à Paris, Lyon, Marseille, GASPAR ne publie que la ville. Le compte affiché sur la page
+  // d'un arrondissement est celui de toute la ville, et la phrase le dit.
+  const villeCatnat = insee_code !== codeGaspar(insee_code) ? villeGaspar(insee_code) : null;
   // LES DEUX HORIZONS, CHACUN SOUS SA VRAIE DATE (04/08/2026). Même correction que sur la page
   // chaleur jumelle : la page titrait « Projections 2050 » en lisant `gwl30`, le palier +3 °C
   // mondial (+4 °C en France) atteint vers 2100.
@@ -429,16 +433,16 @@ export default async function InondationCommune({
                 Ce que la commune a déjà vécu
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--fg-4)' }}>
-                Arrêtés de catastrophe naturelle · base GASPAR (Géorisques)
+                Reconnaissances de catastrophe naturelle · base GASPAR (Géorisques)
               </div>
             </div>
             <div className="data-card">
               <div className="data-card-label">Inondation · reconnaissances officielles</div>
               <div className="data-card-value">
-                {catnatInond}<span className="data-card-unit"> arrêté{catnatInond > 1 ? 's' : ''}</span>
+                {catnatInond}<span className="data-card-unit"> reconnaissance{catnatInond > 1 ? 's' : ''}</span>
               </div>
               <div className="data-card-note" style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg-3)' }}>
-                {communeName} a déjà été reconnue {catnatInond} fois en état de catastrophe naturelle
+                {villeCatnat ? `À l'échelle de ${villeCatnat} (GASPAR ne publie pas les arrondissements), la ville` : communeName} a déjà été reconnue {catnatInond} fois en état de catastrophe naturelle
                 pour inondation ou submersion marine. C&apos;est l&apos;histoire vécue du territoire :
                 des événements qui ont réellement marqué la commune.
               </div>

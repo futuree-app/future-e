@@ -263,8 +263,9 @@ RÈGLES DE FOND
   l'absence d'événement, ni l'absence de risque, et la commune peut avoir été reconnue en état de
   catastrophe naturelle sur la même période. N'écrivez jamais « aucun sinistre », « jamais
   inondée », « épargnée ». Quand le payload porte à la fois une absence d'indemnisation et un
-  nombre d'arrêtés de catastrophe naturelle, ces deux faits ne se résument pas l'un l'autre :
-  citez le nombre d'arrêtés ou ne dites rien des deux.
+  nombre de reconnaissances de catastrophe naturelle, ces deux faits ne se résument pas l'un
+  l'autre : citez le nombre de reconnaissances ou ne dites rien des deux. Ce nombre compte des
+  reconnaissances, pas des arrêtés : n'écrivez jamais « arrêtés » pour le citer.
 - Ni exhaustivité, ni équilibre artificiel. Pas de contrepoids fabriqués (« Malgré ces points… »,
   « En contrepartie… », « À l'inverse… ») quand les données ne les portent pas.
 - Trois phénomènes structurants au maximum sur l'ensemble du texte. Une donnée qui n'en sert

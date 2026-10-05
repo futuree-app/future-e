@@ -504,7 +504,7 @@ export type IndexCommune = {
   // Unité urbaine INSEE (UU2020, cf. scripts/populate-unite-urbaine.py). null = commune hors
   // unité urbaine (isolée/rurale). Sert à « quitter {ville} » (exclusion par agglomération).
   uu?: string | null;
-  // Risque inondation (cf. scripts/populate-inondation.py). catnat = nb d'arrêtés CatNat
+  // Risque inondation (cf. scripts/gaspar/collecter-catnat.mts). catnat = nb de reconnaissances CatNat (lignes GASPAR)
   // inondation (hors submersion marine) ; tri réservé (false en V1) ; risque 0-100 (haut = exposé).
   inondation?: { catnat: number; tri: boolean; risque: number } | null;
   // Mobilité domicile-travail (cf. scripts/populate-mobilite.py, RP MOBPRO 2022). part_voiture
@@ -2113,7 +2113,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   nature: "forêts et espaces naturels à proximité",
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
-  faible_risque_inondation: "peu d'arrêtés CatNat inondation",
+  faible_risque_inondation: "peu de reconnaissances CatNat inondation",
   faible_dependance_auto: "peu dépendante de la voiture au quotidien",
   acces_transports: "bien reliée par le train",
   mobilite_quotidienne: (c) => {

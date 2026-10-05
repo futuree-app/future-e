@@ -105,7 +105,7 @@ test("T3 : les mesures qui rendaient les notes redondantes sont toujours là (DR
   assert.match(fos, /Jours sécheresse sol \(SWI < 0\.4\) : 221 j/);
   assert.match(fos, /Actifs utilisant un mode motorisé pour aller travailler \(%\) : 87\.5 %/); // « dependance-auto : exposition 87 »
   assert.match(fos, /Risques recensés : .*submersion marine/);
-  assert.match(fos, /\[GASPAR — historique des arrêtés de catastrophe naturelle \(CatNat\)\]/);
+  assert.match(fos, /\[GASPAR — historique des reconnaissances de catastrophe naturelle \(CatNat\)/);
   assert.match(fos, /\[VigiEau\]/);
   assert.match(fos, /\[Hub'Eau — eau potable et hydrologie\]/);
   assert.match(fos, /\[Baignade — /);

@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { LogementReport } from "@/lib/logement-report-types";
-import { jsonCanonique, lireLigneVersion, rangementSynthese, sourcesAbsentes, type VersionLogement } from "@/lib/logement-report-version";
+import { jsonCanonique, ligneVersionSuivanteSynthese, lireLigneVersion, rangementSynthese, sourcesAbsentes, type VersionLogement } from "@/lib/logement-report-version";
 
 // LE STOCKAGE DES VERSIONS DU RAPPORT LOGEMENT (FUT-13, lot B). Lecture par le client de session du
 // lecteur (la RLS ne lui montre que ses dossiers non révoqués) ; écriture par le service role, comme
@@ -97,10 +97,8 @@ export async function rangerSynthese(
     if (error) console.error("[logement-report-versions] synthèse non attachée", error.message);
     return;
   }
-  const { error } = await admin.from("logement_report_versions").insert({
-    dossier_id: dossierId, user_id: userId, version: derniere.numero + 1,
-    report: derniere.report, report_hash: derniere.reportHash, sources_absentes: derniere.sourcesAbsentes,
-    collected_at: derniere.collecteeLe, ...synthese,
-  });
+  const { error } = await admin.from("logement_report_versions").insert(
+    ligneVersionSuivanteSynthese(derniere, userId, dossierId, synthese),
+  );
   if (error) console.error("[logement-report-versions] version de synthèse non créée", error.message);
 }

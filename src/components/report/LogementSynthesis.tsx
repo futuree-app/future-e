@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ReportSection } from "@/components/report/kit";
-import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cache";
+import { buildFactHash, type ClimatProjete, type SynthesisData } from "@/lib/logement-synthesis-cache";
+import { syntheseEnregistreeUtilisable } from "@/lib/logement-report-version";
 
 // « refused » n'est PAS une erreur : la génération a abouti, et le contrôle a refusé de montrer le
 // texte parce qu'il affirmait plus que ce que le moteur établit (voir `synthesis-guardrails`). Le
@@ -16,8 +17,12 @@ import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cach
 type State = "idle" | "loading" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
-  ready, data, dossierId, insee, texteEnregistre = null, versionNumero = null,
+  ready, data, dossierId, insee, texteEnregistre = null, hashEnregistre = null, climatProjete = null, versionNumero = null,
 }: {
+  /** L'empreinte des faits que la synthèse enregistrée a lus (FUT-60). `null` : elle ne vaut pour rien. */
+  hashEnregistre?: string | null;
+  /** Le signal climat injecté par le serveur avant son hash : sans lui, les deux empreintes divergent. */
+  climatProjete?: ClimatProjete | null;
   ready: boolean;
   data: SynthesisData;
   dossierId: string;
@@ -26,13 +31,15 @@ export function LogementSynthesis({
   insee: string;
   /**
    * LA SYNTHÈSE ENREGISTRÉE, quand le module s'ouvre depuis une version (FUT-13, lot B). Elle s'affiche
-   * telle quelle, sans appel : le modèle n'est sollicité que si les faits CHANGENT ensuite (une
-   * actualisation, un diagnostic choisi), jamais pour vérifier, à l'ouverture, ce qui est déjà écrit.
+   * sans appel SI ELLE A LU LES FAITS COURANTS (même empreinte, FUT-60) ; sinon elle n'est pas montrée
+   * et une lecture est générée. Le modèle n'est sollicité que si les faits diffèrent de ceux qu'elle a lus.
    */
   texteEnregistre?: string | null;
 }) {
   const posthog = usePostHog();
   const [text, setText] = useState(texteEnregistre ?? "");
+  // L'empreinte des faits que le texte affiché a lus. Un texte ne se montre que pour SES faits.
+  const [texteHash, setTexteHash] = useState<string | null>(texteEnregistre ? hashEnregistre : null);
   const [state, setState] = useState<State>(texteEnregistre ? "done" : "idle");
   const lastHashRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -42,13 +49,15 @@ export function LogementSynthesis({
   // posture. Il porte aussi la version du prompt : une synthèse figée sous une version antérieure
   // ne peut pas être resservie, elle est régénérée — c'est ce qui a retiré tout seul l'entourage
   // des textes écrits avant le 29/07/2026.
-  const factHash = buildFactHash(data);
+  // Le climat entre dans l'empreinte comme côté serveur : c'est ce qui rend les deux comparables.
+  const factHash = buildFactHash({ ...data, climatProjete });
 
   const run = useCallback(async (force = false) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     lastHashRef.current = factHash;
+    const hashDeCetteLecture = factHash;
     setText("");
     setState("loading");
     posthog?.capture("logement_ai_summary_started", { insee });
@@ -76,6 +85,7 @@ export function LogementSynthesis({
         buffer += decoder.decode(value, { stream: true });
         setText(buffer);
       }
+      setTexteHash(hashDeCetteLecture);
       setState("done");
       posthog?.capture("logement_ai_summary_completed", { insee, char_count: buffer.length });
     } catch (err) {
@@ -94,14 +104,15 @@ export function LogementSynthesis({
   // bouton dont il ignore qu'il contient le produit.
   useEffect(() => {
     if (!ready) return;
-    // Première lecture d'une version : la synthèse enregistrée vaut pour ces faits. Aucun appel.
-    if (texteEnregistre && lastHashRef.current === null) {
+    // Première lecture d'une version : la synthèse enregistrée vaut pour ces faits SI elle les a lus
+    // (même empreinte). Aucun appel. Sinon, elle n'est pas resservie : une lecture est générée.
+    if (lastHashRef.current === null && syntheseEnregistreeUtilisable(texteEnregistre, hashEnregistre, factHash)) {
       lastHashRef.current = factHash;
       return;
     }
     if (lastHashRef.current === factHash) return;
     run();
-  }, [ready, factHash, run, texteEnregistre]);
+  }, [ready, factHash, run, texteEnregistre, hashEnregistre]);
 
   if (!ready) return <></>;
 
@@ -117,25 +128,31 @@ export function LogementSynthesis({
   // et le silence est la seule réponse honnête.
   if (state === "refused") return <></>;
 
+  // UN TEXTE QUI N'A PAS LU LES FAITS COURANTS NE S'AFFICHE PAS, même une fraction de seconde avant
+  // que la génération ne parte : il se lit comme « en cours ».
+  const perime = state === "done" && texteHash !== factHash;
+  const affiche = perime ? "loading" : state;
+  const texteVisible = perime ? "" : text;
+
   return (
     <ReportSection eyebrow="Lecture de ce logement" tone="accent">
       <div style={{ padding: "4px 0" }}>
-        {text && (
+        {texteVisible && (
           // Paragraphes explicites (split sur les sauts doubles) avec inter-paragraphe serré :
           // le pre-wrap + lineHeight 1.75 laissaient des blancs trop grands entre blocs (retour porteur).
           <div style={{ fontSize: 16, lineHeight: 1.62, color: "var(--fg-2)" }}>
-            {text.split(/\n{2,}/).map((para, i) => (
+            {texteVisible.split(/\n{2,}/).map((para, i) => (
               <p key={i} style={{ margin: i === 0 ? 0 : "0.6em 0 0" }}>{para}</p>
             ))}
           </div>
         )}
-        {state === "loading" && !text && (
+        {affiche === "loading" && !texteVisible && (
           <p style={{ fontSize: 14, color: "var(--fg-4)" }}>Lecture en cours…</p>
         )}
-        {state === "error" && (
+        {affiche === "error" && (
           <p style={{ fontSize: 14, color: "var(--fg-3)" }}>La lecture n&apos;a pas pu être générée. Réessayez dans un instant.</p>
         )}
-        {(state === "done" || state === "error") && (
+        {(affiche === "done" || affiche === "error") && (
           <button
             onClick={() => run(state === "error" ? false : true)}
             style={{ marginTop: 14, fontSize: 12.5, padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border-1)", background: "transparent", color: "var(--fg-3)", cursor: "pointer" }}

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
-import { libelleCatnatInondation, type CatnatInondation } from "@/lib/decision/catnat-evidence";
+import { CATNAT_DEPUIS, libelleCatnatInondation, type CatnatInondation } from "@/lib/decision/catnat-evidence";
+import { resumeCatnat } from "@/lib/georisques-flags";
 import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
@@ -828,8 +829,17 @@ function buildFactors(
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
   if (catnat !== undefined) {
     const hasCatnat = !!catnat && catnat.total > 0;
+    // FUT-60 : un relevé qui RÉPOND sans aucune ligne n'est pas une panne. La carte disait « Le relevé
+    // de tous les risques n'a pas répondu » d'une commune qui n'a simplement aucune reconnaissance.
+    const releveVide = !!catnat && catnat.total === 0;
     const headline = hasCatnat
-      ? `${catnat!.total} arrêté${catnat!.total > 1 ? "s" : ""}${catnat!.firstYear ? ` depuis ${catnat!.firstYear}` : ""}`
+      // FUT-60 : « depuis 1982 », comme la ligne « Dont … inondation depuis 1982 » qu'elle surplombe.
+      // Les deux comptent la même histoire (tout GASPAR, depuis l'origine du régime) ; « depuis 1983 »
+      // (première reconnaissance) au-dessus de « depuis 1982 » laissait lire deux périodes. L'année de
+      // la première reconnaissance reste dans le volet.
+      // FUT-60 : le relevé compte des LIGNES GASPAR (un arrêté × un phénomène × un événement), pas des
+      // arrêtés distincts (Paris : 20 lignes, 16 arrêtés). Le mot suit la donnée.
+      ? `${catnat!.total} reconnaissance${catnat!.total > 1 ? "s" : ""} depuis ${CATNAT_DEPUIS}`
       : "—";
     const detail: CardDetail | undefined = hasCatnat
       ? {
@@ -855,19 +865,15 @@ function buildFactors(
           why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
           whyLabel: "Ce que cela raconte",
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
-          sources: "Géorisques · base GASPAR (arrêtés de catastrophe naturelle)",
+          sources: "Géorisques · base GASPAR (reconnaissances de catastrophe naturelle)",
         }
       : undefined;
-    // Flagship du bloc risque : le dominant remonte sur la FACE (distinctif et
-    // identitaire), plus planqué dans la source. Le 2e aléa n'apparaît que s'il
-    // est comparable au 1er (sinon « Surtout X » suffit, pas de faux pluriel).
-    const sortedRisks = hasCatnat ? [...catnat!.byRisk].sort((a, b) => b.count - a.count) : [];
-    const dominantSub =
-      sortedRisks.length === 0
-        ? undefined
-        : sortedRisks.length >= 2 && sortedRisks[1].count >= sortedRisks[0].count * 0.5
-          ? `Surtout ${sortedRisks[0].label.toLowerCase()} et ${sortedRisks[1].label.toLowerCase()}`
-          : `Surtout ${sortedRisks[0].label.toLowerCase()}`;
+    // La répartition remonte sur la FACE quand aucun compte inondation ne l'occupe. FUT-60 : elle
+    // disait « Surtout X » dès qu'un aléa existait ; elle suit désormais la règle partagée
+    // (`resumeCatnat`, dominante à 55 %), la même que la synthèse.
+    const dominantSub = hasCatnat
+      ? resumeCatnat(catnat!.byRisk, catnat!.total)?.replace(/\.$/, "") ?? undefined
+      : undefined;
     // ── DEUX OBSERVATIONS, DEUX LIGNES QUI SE DISENT (revue du 11/08/2026) ────────────────────
     // Le total tous risques vient du relevé DIRECT sur GASPAR, depuis la première reconnaissance
     // réelle de la commune. Le compte d'arrêtés inondation vient de l'INDEX, depuis l'origine du
@@ -904,7 +910,9 @@ function buildFactors(
       // le total ne s'affichant pas. Le compte local reste vrai, il devient la face de la carte.
       val: hasCatnat
         ? totalTousRisques
-        : (catnatInondation ? libelleCatnatInondation(catnatInondation) : headline),
+        : releveVide
+          ? `Aucune reconnaissance depuis ${CATNAT_DEPUIS}`
+          : (catnatInondation ? libelleCatnatInondation(catnatInondation) : headline),
       // ── LE LECTEUR ARRIVE AVEC UN CHIFFRE EN TÊTE, IL DOIT LE RETROUVER ICI ─────────────────
       // La pastille du dossier annonce « 7 arrêtés inondation depuis 1982 » ; cette carte ouvrait
       // sur son total TOUS RISQUES relevé en direct (« 23 arrêtés depuis 1987 »), et le compte
@@ -916,12 +924,14 @@ function buildFactors(
       sub: [
         hasCatnat
           ? (ligneInondation ?? dominantSub)
-          : (catnatInondation ? "Le relevé de tous les risques n'a pas répondu" : dominantSub),
+          : releveVide
+            ? undefined
+            : (catnatInondation ? "Le relevé de tous les risques n'a pas répondu" : dominantSub),
         ligneMisAJour,
       ].filter(Boolean).join(" · ") || undefined,
       col: "var(--blue)",
-      src: "Géorisques · GASPAR · arrêtés CatNat",
-      missing: !hasCatnat && !catnatInondation,
+      src: "Géorisques · GASPAR · reconnaissances CatNat",
+      missing: !hasCatnat && !releveVide && !catnatInondation,
       detail: detail
         ? {
             ...detail,

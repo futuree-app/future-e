@@ -29,9 +29,9 @@ test("une absence de donnée n'est jamais un zéro", () => {
 });
 
 test("la phrase est écrite une seule fois, et elle s'accorde", () => {
-  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(7)!), "7 arrêtés inondation depuis 1982");
-  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(1)!), "1 arrêté inondation depuis 1982");
-  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(0)!), "0 arrêté inondation depuis 1982");
+  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(7)!), "7 reconnaissances liées aux inondations depuis 1982");
+  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(1)!), "1 reconnaissance liée aux inondations depuis 1982");
+  assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(0)!), "0 reconnaissance liée aux inondations depuis 1982");
 });
 
 test("le jargon « CatNat » ne revient pas dans la phrase du lecteur", () => {
@@ -61,9 +61,9 @@ test("deux formes, un seul endroit : la pastille abrège, le constat nomme le r�
   // ensemble, et ce test dit laquelle sert à quoi : la pastille est COMPARÉE à la carte, le constat
   // est lu à côté d'elle.
   const o = catnatInondationDepuisCompte(7)!;
-  assert.equal(libelleCatnatInondation(o), "7 arrêtés inondation depuis 1982");
-  assert.equal(phraseConstatCatnatInondation(o), "7 arrêtés de catastrophe naturelle inondation depuis 1982");
-  assert.equal(phraseConstatCatnatInondation(catnatInondationDepuisCompte(1)!), "1 arrêté de catastrophe naturelle inondation depuis 1982");
+  assert.equal(libelleCatnatInondation(o), "7 reconnaissances liées aux inondations depuis 1982");
+  assert.equal(phraseConstatCatnatInondation(o), "7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982");
+  assert.equal(phraseConstatCatnatInondation(catnatInondationDepuisCompte(1)!), "1 reconnaissance de catastrophe naturelle liée aux inondations depuis 1982");
 });
 
 // ── LE GARDE-FOU : personne ne réécrit la phrase ailleurs ─────────────────────────────────────
@@ -88,7 +88,8 @@ test("la phrase du compte n'est écrite QUE dans catnat-evidence", async () => {
   parcourir("src");
 
   // Le gabarit interpolé, sous ses deux formes de rédaction possibles.
-  const motifs = [/arrêtés? inondation depuis/, /arrêtés? de catastrophe naturelle inondation depuis/];
+  // FUT-60 : les anciennes formes (« arrêtés ») restent interdites, avec les nouvelles.
+  const motifs = [/arrêtés? inondation depuis/, /arrêtés? de catastrophe naturelle inondation depuis/, /reconnaissances? liées? aux inondations depuis/, /reconnaissances? de catastrophe naturelle liées? aux inondations/];
   // LES TESTS ONT LE DROIT DE CITER LA PHRASE, et c'est même leur rôle : recopier à la main une
   // sortie éditoriale est ce qui la FIGE (un test qui importe la constante qu'il vérifie change avec
   // elle et ne prouve rien). Ils ne créent aucune seconde source de vérité en production.

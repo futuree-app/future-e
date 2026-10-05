@@ -21,12 +21,45 @@ export type VersionMeta = {
   sourcesAbsentes: string[];
   /** La synthèse de CETTE version, ou null tant qu'elle n'est pas rédigée. */
   synthese: string | null;
+  /**
+   * L'empreinte des faits que cette synthèse a lus (`buildFactHash`, côté serveur). FUT-60 : sans elle,
+   * le module réaffichait une synthèse écrite sous un autre contrat de faits (le payload disait
+   * « arretes_* », il dit « reconnaissances_* ») comme si elle valait pour les faits courants.
+   */
+  syntheseHash: string | null;
 };
 
 export type VersionLogement = VersionMeta & {
   report: LogementReport; reportHash: string;
-  syntheseHash: string | null; syntheseDpe: string | null;
+  syntheseDpe: string | null;
 };
+
+/**
+ * UNE SYNTHÈSE ENREGISTRÉE NE S'AFFICHE QUE POUR LES FAITS QU'ELLE A LUS (FUT-60). Le DPE ne suffit
+ * pas : un changement de contrat du payload (une clé renommée, un fait ajouté) change l'empreinte sans
+ * changer le DPE. Une empreinte absente n'est pas une empreinte compatible : on ne sait pas ce que le
+ * texte a lu, il ne vaut donc pour rien.
+ */
+export function syntheseEnregistreeUtilisable(
+  texte: string | null | undefined, hashEnregistre: string | null | undefined, hashCourant: string,
+): boolean {
+  return !!texte && typeof hashEnregistre === "string" && hashEnregistre === hashCourant;
+}
+
+/**
+ * La version SUIVANTE qui porte une synthèse nouvelle sur les MÊMES faits collectés : même rapport,
+ * même empreinte de rapport, même date de collecte. Seule la synthèse change.
+ */
+export function ligneVersionSuivanteSynthese(
+  derniere: VersionLogement, userId: string, dossierId: string,
+  synthese: { synthesis_text: string; synthesis_fact_hash: string; synthesis_generated_at: string; synthesis_dpe_numero: string | null },
+) {
+  return {
+    dossier_id: dossierId, user_id: userId, version: derniere.numero + 1,
+    report: derniere.report, report_hash: derniere.reportHash, sources_absentes: derniere.sourcesAbsentes,
+    collected_at: derniere.collecteeLe, ...synthese,
+  };
+}
 
 /**
  * Où ranger une synthèse rédigée (ou relue) pour des faits d'empreinte `hash` :
@@ -123,7 +156,7 @@ export function lireLigneVersion(row: unknown): VersionLogement | null {
 }
 
 export function metaDe(v: VersionLogement): VersionMeta {
-  return { numero: v.numero, collecteeLe: v.collecteeLe, sourcesAbsentes: v.sourcesAbsentes, synthese: v.synthese };
+  return { numero: v.numero, collecteeLe: v.collecteeLe, sourcesAbsentes: v.sourcesAbsentes, synthese: v.synthese, syntheseHash: v.syntheseHash };
 }
 
 // ── LA SÉQUENCE, INJECTABLE ──────────────────────────────────────────────────────────────────

@@ -168,9 +168,16 @@ test("jsonCanonique : l'ordre des clés ne change pas l'empreinte ; lireLigneVer
 test("T2 : ouvert depuis une version, la synthèse enregistrée s'affiche sans appeler le modèle", () => {
   const synthese = readFileSync("src/components/report/LogementSynthesis.tsx", "utf8");
   assert.match(synthese, /useState\(texteEnregistre \?\? ""\)/);
-  assert.match(synthese, /if \(texteEnregistre && lastHashRef\.current === null\) \{\s*lastHashRef\.current = factHash;\s*return;/);
+  // FUT-60 : SANS appel seulement si elle a lu les faits courants (même empreinte, climat compris) ;
+  // sinon elle n'est ni montrée ni tenue pour valide, et la génération normale part.
+  assert.match(synthese, /if \(lastHashRef\.current === null && syntheseEnregistreeUtilisable\(texteEnregistre, hashEnregistre, factHash\)\) \{\s*lastHashRef\.current = factHash;\s*return;/);
+  assert.match(synthese, /const factHash = buildFactHash\(\{ \.\.\.data, climatProjete \}\);/);
+  assert.match(synthese, /const perime = state === "done" && texteHash !== factHash;/);
   const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
   assert.match(module, /texteEnregistre=\{versionInitiale\?\.version\?\.synthese \?\? null\}/);
+  assert.match(module, /hashEnregistre=\{versionInitiale\?\.version\?\.syntheseHash \?\? null\}/);
+  const page = readFileSync("src/app/(account)/rapport/logement/page.tsx", "utf8");
+  assert.match(page, /deriveClimatProjete\(dossier\.insee\)/);
 });
 
 // ── La lecture passe par la version, sans appel au montage ──────────────────────────────────────────

@@ -124,7 +124,7 @@ Licence Ouverte / Etalab ; **OSM = ODbL**.
 ### Risques
 | Source | Organisme | Surface / usage | Lib ou script | Échelle |
 |---|---|---|---|---|
-| **Géorisques GASPAR / CatNat** | BRGM / Géorisques | Scoring inondation + rapport catastrophes | `populate-inondation.py`, `georisques.ts` | commune |
+| **Géorisques GASPAR / CatNat** | BRGM / Géorisques | Scoring inondation + rapport catastrophes | `scripts/gaspar/collecter-catnat.mts` (ex-`populate-inondation.py`), `georisques.ts` | commune |
 | **Géorisques v1/v2** (PPRN, RGA, submersion, sismique) | BRGM / Géorisques | Rapport Logement/Quartier | `georisques.ts` | commune/point/parcelle |
 | **Géorisques ICPE** (~137k) | Géorisques | Scoring `faible_exposition_industrielle` | `populate-exposition-industrielle.py`, `irep.ts` | point |
 | **Géorisques SSP** (sols pollués) | Géorisques | Scoring `heritage_industriel` (narratif) | `populate-heritage-industriel.py` | point/commune |

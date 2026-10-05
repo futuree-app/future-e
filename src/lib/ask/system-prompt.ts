@@ -269,7 +269,7 @@ function formatGasparBlock(c: GasparCatnatSummary | null): string {
   if (!c || c.total === 0) {
     return "[GASPAR] Aucune reconnaissance de catastrophe naturelle recensée (ou donnée indisponible) pour cette commune.";
   }
-  const out: string[] = ["[GASPAR — historique des arrêtés de catastrophe naturelle (CatNat)]"];
+  const out: string[] = ["[GASPAR — historique des reconnaissances de catastrophe naturelle (CatNat) : une ligne par arrêté, phénomène et événement]"];
   out.push(
     `- ${c.total} reconnaissance${c.total > 1 ? "s" : ""} de l'état de catastrophe naturelle${c.firstYear ? ` depuis ${c.firstYear}` : ""}${c.lastYear ? `, la plus récente en ${c.lastYear}` : ""}.`,
   );
