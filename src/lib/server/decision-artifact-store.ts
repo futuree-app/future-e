@@ -6,6 +6,7 @@ import {
   type DataSnapshot,
 } from "@/lib/decision/decision-artifact";
 import { communeParent } from "@/lib/plm";
+import { catnatFigeAffichable } from "@/lib/decision/catnat-evidence";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // L'ACCÈS À L'ARTEFACT DE DÉCISION. Aucune règle métier ici : la génération vit chez l'appelant,
@@ -144,6 +145,14 @@ export async function readLatestDataSnapshot(
     if (inseeSnapshot != null && inseeSnapshot !== insee) {
       console.warn("[artefact] dataSnapshot d'une autre commune, ignoré", { attendu: insee, trouve: inseeSnapshot });
       continue;
+    }
+    // FUT-60 : un compte figé d'avant la correction de Paris, Lyon et Marseille est faux par
+    // construction (zéro). Le dossier n'est pas modifié ; seul ce compte n'est plus réaffiché, et
+    // la carte retombe sur l'index courant.
+    if (snapshot.catnatInondation && !catnatFigeAffichable(snapshot.catnatInondation)) {
+      const { catnatInondation: _faux, ...reste } = snapshot;
+      void _faux;
+      return reste;
     }
     return snapshot;
   }

@@ -24,7 +24,7 @@ Parmi les évolutions projetées pour 2050 (scénario France +2,7 °C) : 19 jour
 
 ## Ce que la commune a déjà connu
 
-Châtelaillon-Plage a été reconnue 14 fois en état de catastrophe naturelle depuis 1982, surtout au titre de : sécheresse des sols, inondations et chocs liés aux vagues. Des périmètres d'inondation et de submersion marine y sont recensés. L'effet concret de ces évolutions dépend du quartier et du logement, qu'examinent les modules Autour de l'adresse et Logement.`;
+Châtelaillon-Plage a été reconnue 14 fois en état de catastrophe naturelle depuis 1982. Des périmètres d'inondation et de submersion marine y sont recensés. L'effet concret de ces évolutions dépend du quartier et du logement, qu'examinent les modules Autour de l'adresse et Logement.`;
 
 test("Châtelaillon 2050 : le texte déterministe de référence", () => {
   assert.equal(deterministicSynthesis(projection(), "gwl20"), CHATELAILLON_2050);

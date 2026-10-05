@@ -41,7 +41,30 @@ export const CATNAT_DEPUIS = 1982;
  * promesse s'arrête à la convention, et ce commentaire est la seule chose qui empêche de croire
  * l'inverse.
  */
-export const CATNAT_EVIDENCE_VERSION = "catnat-1";
+export const CATNAT_EVIDENCE_VERSION = "catnat-2";
+
+// ── catnat-2 (FUT-60, 05/10/2026) : PARIS, LYON ET MARSEILLE COMPTÉS À LEUR COMMUNE ───────────────
+// GASPAR ne connaît ces trois villes qu'au code de la commune (75056, 69123, 13055). L'index les
+// avait interrogées arrondissement par arrondissement, et GASPAR y répond zéro ligne : les 45
+// arrondissements portaient « 0 arrêté inondation », sous une carte qui comptait, en direct, 20
+// reconnaissances à Paris, surtout des inondations. Un compte `catnat-1` d'une de ces trois communes
+// est donc faux PAR CONSTRUCTION, quel que soit le dossier qui l'a figé.
+const COMMUNES_PLM = new Set(["75056", "69123", "13055"]);
+function estPlm(insee: string | null): boolean {
+  if (!insee) return false;
+  return COMMUNES_PLM.has(insee) || (insee >= "75101" && insee <= "75120")
+    || (insee >= "69381" && insee <= "69389") || (insee >= "13201" && insee <= "13216");
+}
+
+/**
+ * UN COMPTE FIGÉ EST-IL ENCORE AFFICHABLE ? Non pour un `catnat-1` de Paris, Lyon ou Marseille : il
+ * vient de l'index d'avant FUT-60, qui écrivait zéro pour ces trois villes. Le dossier n'est pas
+ * modifié ; sa carte retombe sur l'index courant, corrigé, plutôt que de réafficher un zéro faux.
+ */
+export function catnatFigeAffichable(o: CatnatInondation | null | undefined): o is CatnatInondation {
+  if (!o) return false;
+  return !(o.version === "catnat-1" && estPlm(o.insee));
+}
 
 export type CatnatInondation = {
   /** Arrêtés de catastrophe naturelle INONDATION (fluviale et pluviale, submersion marine exclue). */

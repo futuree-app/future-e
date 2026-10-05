@@ -16,6 +16,8 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import { HORIZON_META, type HorizonKey } from "./synthesis-contract.ts";
+import { aleaDominant } from "../georisques-flags.ts";
+import { CATNAT_DEPUIS } from "../decision/catnat-evidence.ts";
 
 type P = Record<string, unknown>;
 type Metric = { valeur: number; ecart_par_rapport_a_1976_2005?: number } | null;
@@ -156,9 +158,12 @@ function blocMemoire(p: P): string[] {
     p, "catastrophes_naturelles_reconnues",
   );
   if (cn) {
-    const aleas = cn.principaux_aleas.map((a) => a.label.toLowerCase());
+    // FUT-60 : « surtout » seulement pour un aléa qui pèse au moins 55 % des reconnaissances (règle
+    // partagée avec la carte) ; les trois premiers ne se présentent plus comme une dominante. La
+    // période est celle du comptage (depuis 1982), la même que le compte inondation de la carte.
+    const dominant = aleaDominant(cn.principaux_aleas, cn.nombre_arretes);
     out.push(
-      `${nom} a été reconnue ${frNum(cn.nombre_arretes)} fois en état de catastrophe naturelle${cn.premiere_annee ? ` depuis ${cn.premiere_annee}` : ""}${aleas.length ? `, surtout au titre de : ${joinFr(aleas)}` : ""}.`,
+      `${nom} a été reconnue ${frNum(cn.nombre_arretes)} fois en état de catastrophe naturelle depuis ${CATNAT_DEPUIS}${dominant ? `, surtout au titre de : ${dominant.toLowerCase()}` : ""}.`,
     );
   }
   const risks = at<{ inondation: string; submersion_marine: string }>(p, "risques_recenses_echelle_communale");
