@@ -22,6 +22,8 @@ import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
 import type { LogementReport } from "@/lib/logement-report-types";
+import { consulterOuActualiser } from "@/lib/logement-report-version";
+import { empreinteRapport, enregistrerVersion, lireDerniereVersion } from "@/lib/server/logement-report-versions";
 
 // Cœur commun : construit le rapport à partir d'une adresse déjà résolue (géocodée en GET,
 // sélectionnée en POST). Renvoie la LISTE des DPE candidats (pas un « plus récent » arbitraire)
@@ -31,7 +33,7 @@ type ResolvedAddress = {
   postcode: string | null; latitude: number; longitude: number;
 };
 
-async function buildReport(address: ResolvedAddress, banFeatureType: string | null) {
+async function buildReport(address: ResolvedAddress, banFeatureType: string | null): Promise<LogementReport> {
     // TOUT PART EN MÊME TEMPS (FUT-13). La route enchaînait quatre étapes en série (cadastre, puis DPE
     // et audit, puis neuf sources, puis Géorisques au point, puis à la parcelle) : son temps était la
     // SOMME des sources les plus lentes de chaque étape. Seules deux dépendances réelles restent
@@ -159,11 +161,12 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
             ? "Ce résultat combine une adresse géocodée BAN, une lecture Géorisques v2 au point géocodé et un résumé communal. La lecture parcellaire complète n'est pas encore disponible pour cette adresse dans l'application."
             : "Ce résultat combine une adresse géocodée BAN et un résumé Géorisques communal. Pour activer la lecture Géorisques v2 au point géocodé et par parcelle, configurez GEORISQUES_API_TOKEN côté serveur.",
     };
-    return NextResponse.json(report, {
-      headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-      },
-    });
+    return report;
+}
+
+// Une réponse du module : jamais mise en cache partagé, elle porte les données d'un dossier payé.
+function repondre(corps: LogementReport) {
+  return NextResponse.json(corps, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 // POST : adresse BAN sélectionnée avec précision (objet atomique validé). Chemin principal.
@@ -204,7 +207,17 @@ export async function POST(request: Request) {
       id: sel.banId, label: sel.label, city: sel.city, citycode: sel.citycode,
       postcode: sel.postcode, latitude: sel.latitude, longitude: sel.longitude,
     };
-    return await buildReport(address, sel.type);
+    // LIRE AVANT DE CONSTRUIRE (FUT-13, lot B). Un dossier qui a une version la reçoit telle quelle :
+    // aucune des ~14 sources n'est appelée. Seule une actualisation demandée par le lecteur
+    // (`refresh: true`) reconstruit ; N reste la dernière version tant que N+1 n'est pas écrite.
+    // La séquence vit dans `consulterOuActualiser`, testée sans réseau.
+    const refresh = (body as { refresh?: unknown })?.refresh === true;
+    return repondre(await consulterOuActualiser(refresh, {
+      lire: () => lireDerniereVersion(supabase, dossier.id),
+      construire: () => buildReport(address, sel.type),
+      empreinte: empreinteRapport,
+      enregistrer: (r, h) => enregistrerVersion(user.id, dossier.id, r, h),
+    }));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to resolve Géorisques logement preview.";
     return NextResponse.json({ error: message }, { status: 500 });

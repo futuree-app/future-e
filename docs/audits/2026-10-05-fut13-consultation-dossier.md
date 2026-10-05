@@ -184,3 +184,114 @@ puisqu'il reste la source la plus lente même en arrière-plan).
 - Une source ZFE en panne rend toujours « hors ZFE » (`inZfe: false`) au lieu d'une absence : ce
   comportement est antérieur, il est noté ici et non corrigé.
 - Hors périmètre : FUT-60, FUT-58, FUT-43, FUT-61, design Logement, prompts, AskFuture.
+
+---
+
+## Lot B : version persistée (5 octobre 2026)
+
+### Schéma retenu
+
+`supabase/35_logement_report_versions.sql` (retour arrière : `35_logement_report_versions_down.sql`),
+**créé, non appliqué**.
+
+| Colonne | Rôle |
+|---|---|
+| `id` | identifiant |
+| `dossier_id` | FK `address_dossiers(id)`, `on delete cascade` |
+| `user_id` | FK `auth.users(id)`, `on delete cascade` |
+| `version` | `int >= 1`, `unique (dossier_id, version)` |
+| `schema_version` | forme du JSON, 1 |
+| `report` | `jsonb`, le `LogementReport` rendu par la route, sans réponse brute de fournisseur |
+| `report_hash` | SHA-256 du JSON canonique (clés triées) |
+| `sources_absentes` | `text[]`, les sources muettes de la collecte |
+| `collected_at` | date de collecte |
+
+Index `(dossier_id, version desc)`. RLS : lecture seule pour le propriétaire d'un dossier **non révoqué**
+(`auth.uid() = user_id` et dossier possédé avec `access_revoked_at is null`) ; aucune policy d'écriture ;
+`insert, update, delete, truncate` révoqués à `authenticated` et `anon` ; écriture par le service role
+seulement, comme `address_dossiers`.
+
+**Pourquoi pas `decision_artifact`** : il porte le dossier de DÉCISION du hub (verdict, cartes,
+conclusion), écrit par le hub et versionné par le projet. Le rapport Logement est la matière des preuves
+du module, écrite par le module et versionnée par ses sources.
+
+**Taille** : 7 130 octets de JSON pour le dossier de référence (immeuble parisien, 5 étapes d'audit),
+aucun blob : le rapport ne contient déjà que la représentation métier.
+
+**Hors de la version** : le DPE choisi et la synthèse restent sur `address_dossiers`, où ils vivent déjà.
+Un geste sur le DPE ne touche donc jamais une version, et une version ne peut pas contredire le DPE que le
+lecteur vient de choisir (T8).
+
+### Lecture
+
+```text
+page /rapport/logement → lireDerniereVersion(dossier)      une requête indexée
+  version → LogementModule la pose, aucune source, aucun appel au modèle
+            + synthèse enregistrée affichée telle quelle, son empreinte n'est pas recalculée
+  pas de version → le module construit une fois (route), qui écrit la version 1
+```
+
+La route applique la même règle (`consulterOuActualiser`, testée sans réseau) : une version existante est
+rendue sans construire, même si un client rappelle la route.
+
+### Actualisation (geste explicite)
+
+Bandeau « Données collectées le … · Actualiser les données ». Pendant le calcul, le rapport reste affiché
+(« Actualisation en cours… »). Décision avant toute écriture (`issueActualisation`) :
+
+- collecte invalide, ou qui perd une source que N avait (délai dépassé, 500) : `refusee`, N reste la
+  dernière version, « L'actualisation n'a pas abouti. La dernière version disponible reste affichée. » ;
+- empreinte identique : `identique`, aucune version créée ;
+- sinon : écriture de N+1 (service role, numéro suivant, une reprise sur collision), puis remplacement à
+  l'écran à la fin de la requête, le DPE choisi en session étant conservé.
+
+Pas de délai de fraîcheur automatique, pas de traitement en arrière-plan.
+
+### Synthèse
+
+- **Ouverture d'une version** : la synthèse enregistrée s'affiche, 0 appel.
+- **Actualisation ou choix du DPE** : si les faits changent, le composant demande la synthèse, et le
+  serveur garde sa règle (même empreinte : texte réutilisé, 0 appel ; empreinte différente : génération).
+
+### Rattrapage paresseux
+
+Aucun backfill. Un dossier antérieur au lot n'a pas de version : sa prochaine ouverture construit en live
+et écrit la version 1, les suivantes sont immédiates. Un script de backfill pourrait parcourir les dossiers
+payés ; il n'est ni écrit ni lancé.
+
+Sans la table (migration pas encore appliquée), lecture et écriture échouent proprement (vérifié :
+« Could not find the table »), et le module garde le comportement du lot A.
+
+### Mesures
+
+| Cas | TTUD | Appels sources | Appels Claude |
+|---|---:|---:|---:|
+| Avant (lot 0) | 10,4 s | ~14 | 0 (cache trouvé) |
+| Lot A, sans version | 6,0 à 12,1 s (GPU 2 à 8 s) | ~14 | 0 |
+| Lot B, version, à froid* | 1,12 s (premier affichage, le module rendu dans la foulée) | 0 | 0 |
+| Lot B, version, à chaud* | 1,15 s | 0 | 0 |
+| Actualisation explicite* | rapport visible tout du long ; réponse en 8,6 s | ~14 | 0 |
+
+\* **Simulé localement** : la migration n'étant pas appliquée, la lecture de version a été remplacée, le
+temps de la mesure, par la lecture d'un vrai rapport capturé (7 130 octets). Décomposition à froid :
+document reçu à 0,29 s, premier affichage à 1,12 s, seul appel `/api/dossier/actif`. Ce temps est celui de
+l'application (session, page, hydratation) ; la lecture d'une version y ajoute une requête indexée. Lors de
+l'actualisation mesurée, GPU a de nouveau dépassé son délai : la collecte perdait le patrimoine, et la
+version N a été conservée (cas T4 observé en réel).
+
+### Tests
+
+`src/lib/logement-report-version.test.ts`, 16 tests : T1, T9 (version lue, 0 source), T3 (sans version :
+une collecte, version 1), T4, T5 (source muette ou en erreur : N intacte), T6 (N+1 après la collecte ;
+collecte identique sans version), T7 (écriture ratée ou rapport invalide : rien d'écrit), T2 (synthèse
+enregistrée sans appel), T8 (DPE hors version, conservé en session), T10 (RLS). Mutations : rouvrir les
+sources sur une version (T1, T3, T9 échouent), écrire avant de valider (5 échecs), retirer le contrôle
+propriétaire de la RLS (T10 échoue).
+
+### À décider avant la migration de production
+
+1. Relire le schéma et la RLS ; appliquer `35_logement_report_versions.sql`.
+2. Les synthèses des anciennes versions ne sont pas conservées : une seule synthèse par dossier, la
+   dernière. Les figer par version demanderait de les écrire dans la version, après sa création.
+3. La règle « aucune source perdue » peut bloquer une actualisation tant que GPU dépasse son délai : FUT-63.
+4. Le plancher de l'application (environ 1,1 s ici, plus sur un démarrage à froid Vercel) n'est pas traité ici.

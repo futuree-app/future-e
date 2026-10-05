@@ -5,6 +5,7 @@
 // un SOUS-ENSEMBLE de ce que les libs renvoient : le client ne consomme que ces champs.
 
 import type { AuditCandidatProche, AuditRecord } from "./audit-record.ts";
+import type { IssueActualisation, VersionMeta } from "./logement-report-version.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
@@ -16,6 +17,11 @@ import type { LogementCoverage } from "./decision/logement-coverage.ts";
 
 export type LogementReport = {
   error?: string;
+  // FUT-13 lot B : la version d'où vient ce rapport (`null` = construit sans version écrite), et
+  // l'issue d'une actualisation demandée par le lecteur.
+  version?: VersionMeta | null;
+  actualisation?: IssueActualisation;
+  sourcesNonActualisees?: string[];
   address?: { id: string | null; label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
   altitude?: number | null;
   parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;

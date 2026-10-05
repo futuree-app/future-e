@@ -76,7 +76,14 @@ export default function LogementModule({
   rehydrateSource = "auto",
   project,
   catnatInondation = null,
+  versionInitiale = null,
 }: {
+  /**
+   * LA DERNIÈRE VERSION DU RAPPORT, lue par la page (FUT-13, lot B). Présente, elle s'affiche telle quelle :
+   * aucune source n'est appelée à l'ouverture. Absente (dossier neuf ou antérieur au lot), le module
+   * construit le rapport une fois, et la route en fait la version 1.
+   */
+  versionInitiale?: ApiResponse | null;
   defaultCommune?: string | null;
   dossier: AddressDossierRow | null;
   rehydrateSource?: "auto" | "deeplink";
@@ -118,6 +125,8 @@ export default function LogementModule({
   // qualification, qui est la seule surface capable de la produire avant tout paiement.
   // Rehydratation au montage : ne s'exécute qu'une fois (sinon boucle sur re-render).
   const rehydratedRef = useRef(false);
+  // L'ACTUALISATION EST UN GESTE DU LECTEUR, et le rapport affiché le reste pendant tout le calcul.
+  const [actualisation, setActualisation] = useState<"idle" | "en_cours" | "nouvelle_version" | "identique" | "refusee" | "erreur">("idle");
   const posthog = usePostHog();
 
   // CHEMIN UNIQUE : on charge le bien du dossier. Le re-fetch Géorisques est systématique (le
@@ -145,10 +154,25 @@ export default function LogementModule({
       });
       const payload = (await res.json()) as ApiResponse & { code?: string };
       if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
+      appliquerRapport(payload, row, false);
+    } catch (err) {
+      setResult(null);
+      setError(err instanceof Error ? err.message : "Erreur de chargement.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  /**
+   * Pose un rapport à l'écran. `garderDpe` : après une actualisation, le diagnostic choisi pendant la
+   * session reste celui que le lecteur voit ; seule la matière collectée change.
+   */
+  function appliquerRapport(payload: ApiResponse, row: AddressDossierRow, garderDpe: boolean) {
+    {
       setResult(payload);
       const candidates = payload.dpeCandidates ?? [];
       setDpeCandidates(candidates);
+      if (garderDpe) return;
 
       // Un dossier dont le diagnostic est déjà attribué le RESTAURE. Un dossier neuf dérive
       // l'attribution pour la première fois, ce qui est le seul moment où elle se calcule.
@@ -192,11 +216,34 @@ export default function LogementModule({
         source: rehydrateSource,
         address_token: addressToken(row.ban_id),
       });
-    } catch (err) {
-      setResult(null);
-      setError(err instanceof Error ? err.message : "Erreur de chargement.");
-    } finally {
-      setLoading(false);
+    }
+  }
+
+  /** Actualiser les données : nouvelle collecte, N reste affichée tant que N+1 n'est pas écrite. */
+  async function actualiser() {
+    const row = dossier;
+    if (!row || actualisation === "en_cours") return;
+    setActualisation("en_cours");
+    try {
+      const res = await fetch("/api/georisques-logement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dossierId: row.id,
+          refresh: true,
+          address: {
+            banId: row.ban_id, label: row.address_label, postcode: row.postcode, city: row.city,
+            citycode: row.insee, latitude: row.latitude, longitude: row.longitude, type: null,
+          },
+        }),
+      });
+      const payload = (await res.json()) as ApiResponse;
+      if (!res.ok) throw new Error(payload.error ?? `Erreur ${res.status}`);
+      // Demandée par le lecteur, la nouvelle version remplace l'ancienne À LA FIN, une fois écrite.
+      if (payload.actualisation === "nouvelle_version") appliquerRapport(payload, row, true);
+      setActualisation(payload.actualisation ?? "erreur");
+    } catch {
+      setActualisation("erreur");
     }
   }
 
@@ -205,6 +252,11 @@ export default function LogementModule({
     if (rehydratedRef.current || !dossier) return;
     rehydratedRef.current = true;
     const row = dossier;
+    // UNE VERSION EXISTE : elle s'affiche, aucune source n'est appelée (FUT-13, lot B).
+    if (versionInitiale) {
+      void Promise.resolve().then(() => appliquerRapport(versionInitiale, row, false));
+      return;
+    }
     void Promise.resolve().then(() => loadDossier(row));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -418,6 +470,15 @@ export default function LogementModule({
               </div>
             )}
 
+            {/* LA DATE DE COLLECTE ET L'ACTUALISATION (FUT-13, lot B). Le rapport reste affiché pendant le calcul. */}
+            {result?.version && (
+              <BandeauVersion
+                collecteeLe={result.version.collecteeLe}
+                etat={actualisation}
+                onActualiser={() => { void actualiser(); }}
+              />
+            )}
+
             {!loading && !error && (
               <Link
                 href="/rapport/dossiers"
@@ -469,6 +530,8 @@ export default function LogementModule({
             data={synthesisData}
             dossierId={dossier?.id ?? ""}
             insee={result.address?.citycode ?? ""}
+            // Ouvert depuis une version : la synthèse enregistrée s'affiche telle quelle, sans appel.
+            texteEnregistre={versionInitiale ? dossier?.synthesis_text ?? null : null}
           />
 
           {/* Beat 3 — Les preuves : pourquoi ? (2 sous-familles) */}
@@ -605,6 +668,37 @@ export default function LogementModule({
         </section>
       )}
       </div>
+    </div>
+  );
+}
+
+const LIBELLE_ETAT: Record<"en_cours" | "nouvelle_version" | "identique" | "refusee" | "erreur", string> = {
+  en_cours: "Actualisation en cours…",
+  nouvelle_version: "Données actualisées.",
+  identique: "Aucune donnée n'a changé depuis cette collecte.",
+  refusee: "L'actualisation n'a pas abouti. La dernière version disponible reste affichée.",
+  erreur: "L'actualisation n'a pas abouti. La dernière version disponible reste affichée.",
+};
+
+/** La date de la collecte affichée, et le geste qui la renouvelle. Discret : aucun spinner global. */
+function BandeauVersion({ collecteeLe, etat, onActualiser }: {
+  collecteeLe: string;
+  etat: "idle" | "en_cours" | "nouvelle_version" | "identique" | "refusee" | "erreur";
+  onActualiser: () => void;
+}) {
+  const date = new Date(collecteeLe).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "baseline", marginBottom: 14, fontSize: 12.5, color: "var(--fg-4)" }}>
+      <span>Données collectées le {date}</span>
+      <button
+        type="button"
+        onClick={onActualiser}
+        disabled={etat === "en_cours"}
+        style={{ color: "var(--accent-dim, #7a6e60)", textDecoration: "underline", background: "none", border: "none", padding: 0, font: "inherit", cursor: etat === "en_cours" ? "default" : "pointer" }}
+      >
+        Actualiser les données
+      </button>
+      {etat !== "idle" && <span aria-live="polite">{LIBELLE_ETAT[etat]}</span>}
     </div>
   );
 }

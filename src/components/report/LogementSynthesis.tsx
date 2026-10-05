@@ -16,16 +16,22 @@ import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cach
 type State = "idle" | "loading" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
-  ready, data, dossierId, insee,
+  ready, data, dossierId, insee, texteEnregistre = null,
 }: {
   ready: boolean;
   data: SynthesisData;
   dossierId: string;
   insee: string;
+  /**
+   * LA SYNTHÈSE ENREGISTRÉE, quand le module s'ouvre depuis une version (FUT-13, lot B). Elle s'affiche
+   * telle quelle, sans appel : le modèle n'est sollicité que si les faits CHANGENT ensuite (une
+   * actualisation, un diagnostic choisi), jamais pour vérifier, à l'ouverture, ce qui est déjà écrit.
+   */
+  texteEnregistre?: string | null;
 }) {
   const posthog = usePostHog();
-  const [text, setText] = useState("");
-  const [state, setState] = useState<State>("idle");
+  const [text, setText] = useState(texteEnregistre ?? "");
+  const [state, setState] = useState<State>(texteEnregistre ? "done" : "idle");
   const lastHashRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -86,9 +92,14 @@ export function LogementSynthesis({
   // bouton dont il ignore qu'il contient le produit.
   useEffect(() => {
     if (!ready) return;
+    // Première lecture d'une version : la synthèse enregistrée vaut pour ces faits. Aucun appel.
+    if (texteEnregistre && lastHashRef.current === null) {
+      lastHashRef.current = factHash;
+      return;
+    }
     if (lastHashRef.current === factHash) return;
     run();
-  }, [ready, factHash, run]);
+  }, [ready, factHash, run, texteEnregistre]);
 
   if (!ready) return <></>;
 
