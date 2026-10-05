@@ -239,10 +239,10 @@ test("T16 : la version restaurée garde provenance, grain, limite et couverture"
 test("T12 : N garde S1 quand S2 naît pour d'autres faits ; S2 va dans une NOUVELLE version", () => {
   const n: VersionLogement = { ...version(1, rapport(), "h1"), synthese: "S1", syntheseHash: "f1", syntheseDpe: "DPE-A" };
   const avant = structuredClone(n);
-  assert.equal(rangementSynthese(n, "f2"), "nouvelle_version");
-  assert.equal(rangementSynthese(n, "f1"), "deja_la");
-  assert.equal(rangementSynthese({ ...n, synthese: null, syntheseHash: null }, "f1"), "attacher");
-  assert.equal(rangementSynthese(null, "f1"), "aucune_version");
+  assert.equal(rangementSynthese(n, "f2", 1), "nouvelle_version");
+  assert.equal(rangementSynthese(n, "f1", 1), "deja_la");
+  assert.equal(rangementSynthese({ ...n, synthese: null, syntheseHash: null }, "f1", 1), "attacher");
+  assert.equal(rangementSynthese(null, "f1", null), "aucune_version");
   assert.deepEqual(n, avant);
   const store = readFileSync("src/lib/server/logement-report-versions.ts", "utf8");
   assert.match(store, /\.is\("synthesis_text", null\)/); // l'attache n'écrase jamais
@@ -251,6 +251,9 @@ test("T12 : N garde S1 quand S2 naît pour d'autres faits ; S2 va dans une NOUVE
 test("T13 : une version ne change jamais, et sa synthèse s'écrit une seule fois (trigger)", () => {
   const sql = readFileSync("supabase/35_logement_report_versions.sql", "utf8");
   assert.match(sql, /before update on public\.logement_report_versions/);
+  // Corps de fonction délimité par $$ : un « $ » seul rendait la migration invalide (constaté le 05/10
+  // en l'exécutant sur un Postgres 18 jetable ; les regex du texte ne l'avaient pas vu).
+  assert.match(sql, /language plpgsql as \$\$\n[\s\S]*?\n\$\$;/);
   assert.match(sql, /new\.report is distinct from old\.report/);
   assert.match(sql, /if old\.synthesis_text is not null and \(/);
   assert.match(sql, /synthesis_dpe_numero\s+text/);
@@ -274,4 +277,66 @@ test("§9 : une synthèse ne s'affiche qu'avec le DPE qu'elle a lu", () => {
   assert.equal(syntheseCompatible(null, "DPE-B"), false);
   const page = readFileSync("src/app/(account)/rapport/logement/page.tsx", "utf8");
   assert.match(page, /syntheseCompatible\(versionLogement\.syntheseDpe, dossier\.selected_dpe_id\)/);
+});
+
+// ── Deux sortes de N+1 : nouvelle collecte (nouveaux faits) ou nouvelle synthèse (mêmes faits) ─────────
+import { createHash } from "node:crypto";
+const sha = (r: LogementReport) => createHash("sha256").update(jsonCanonique(r)).digest("hex");
+
+test("T17 : des faits qui changent ne créent jamais N+1 avec l'ancien report_hash", async () => {
+  const r1 = rapport({ altitude: 35 });
+  const r2 = rapport({ altitude: 36 }); // un seul fait change
+  let derniere: VersionLogement | null = version(1, r1, sha(r1));
+  const d: Dependances = {
+    lire: async () => derniere,
+    construire: async () => r2,
+    empreinte: sha, // la vraie empreinte, celle de la route
+    enregistrer: async (r, h) => (derniere = version(2, r, h)),
+  };
+  const r = await consulterOuActualiser(true, d);
+  assert.equal(r.actualisation, "nouvelle_version");
+  assert.deepEqual(derniere!.report, r2);
+  assert.equal(derniere!.reportHash, sha(r2));
+  assert.notEqual(derniere!.reportHash, sha(r1));
+  // Côté stockage : une collecte écrit l'empreinte reçue de SON rapport, et laisse collected_at à now().
+  const store = readFileSync("src/lib/server/logement-report-versions.ts", "utf8");
+  const enregistrer = store.slice(store.indexOf("export async function enregistrerVersion"), store.indexOf("export async function rangerSynthese"));
+  assert.match(enregistrer, /report, report_hash: reportHash, sources_absentes: sourcesAbsentes\(report\)/);
+  assert.doesNotMatch(enregistrer, /collected_at/);
+  assert.match(readFileSync("src/app/api/georisques-logement/route.ts", "utf8"), /empreinte: empreinteRapport/);
+});
+
+test("T18 : une synthèse ne reprend le report_hash d'une version QUE si c'est la version qu'elle a lue", () => {
+  const n: VersionLogement = { ...version(1, rapport(), "h1"), synthese: "S1", syntheseHash: "f1", syntheseDpe: "DPE-A" };
+  // Autre DPE, mêmes faits collectés : N+1 reprend légitimement report, report_hash, collected_at.
+  assert.equal(rangementSynthese(n, "f2", 1), "nouvelle_version");
+  // Une collecte N+1 est arrivée pendant la rédaction d'une synthèse lue sur N : rien n'est rangé.
+  const n1 = { ...version(2, rapport({ altitude: 1 }), "h2") };
+  assert.equal(rangementSynthese(n1, "f-de-N", 1), "version_depassee");
+  assert.equal(rangementSynthese(n1, "f-de-N", null), "version_depassee");
+  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(module, /versionNumero=\{result\.version\?\.numero \?\? null\}/);
+});
+
+test("T19 : à la première génération, une source indisponible est « non vérifiable », jamais « aucun risque »", async () => {
+  const { deriveLogementCoverage } = await import("./decision/logement-coverage.ts");
+  // Géorisques (point et parcelle), cavités et patrimoine en panne au moment de la première collecte.
+  const couverture = deriveLogementCoverage({
+    georisquesAddress: null, georisquesParcel: null, cavites: null,
+    heritage: { items: [], sourceStatus: "unavailable" }, sinistralite: null,
+  });
+  for (const famille of ["rga", "pprn", "cavites", "patrimoine", "sinistralite"] as const)
+    assert.equal(couverture[famille].coverage, "unavailable", famille);
+  const { d } = deps({ existante: null, construit: () => rapport({
+    georisques: { address: null, parcel: null, commune: {} as never },
+    heritage: { items: [], sourceStatus: "unavailable" } as never, decision: couverture as never,
+  }) });
+  const v = await consulterOuActualiser(false, d);
+  assert.ok(v.version, "la première collecte est bien enregistrée");
+  assert.ok(v.version!.sourcesAbsentes.includes("georisques_point"));
+  assert.ok(v.version!.sourcesAbsentes.includes("patrimoine"));
+  assert.equal((v.decision as unknown as typeof couverture).pprn.coverage, "unavailable");
+  // À l'écran : sans résumé Géorisques, le bloc dit « non déterminé », jamais la phrase de l'état « rien ici ».
+  const bloc = readFileSync("src/components/report/logement/RegulatorySection.tsx", "utf8");
+  assert.match(bloc, /\{!g \? \([\s\S]*?Statut réglementaire non déterminé[\s\S]*?\) : plans\.length === 0/);
 });

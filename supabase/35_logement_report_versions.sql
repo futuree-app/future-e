@@ -54,7 +54,7 @@ create table if not exists public.logement_report_versions (
 
 -- UNE VERSION NE CHANGE PAS. Seul geste permis : poser sa synthèse, une fois, de null à son texte.
 create or replace function public.logement_report_versions_immuable() returns trigger
-language plpgsql as $
+language plpgsql as $$
 begin
   if new.dossier_id is distinct from old.dossier_id or new.user_id is distinct from old.user_id
      or new.version is distinct from old.version or new.schema_version is distinct from old.schema_version
@@ -71,7 +71,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 create trigger logement_report_versions_immuable
   before update on public.logement_report_versions

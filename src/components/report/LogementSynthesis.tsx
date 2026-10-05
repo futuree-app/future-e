@@ -16,11 +16,13 @@ import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cach
 type State = "idle" | "loading" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
-  ready, data, dossierId, insee, texteEnregistre = null,
+  ready, data, dossierId, insee, texteEnregistre = null, versionNumero = null,
 }: {
   ready: boolean;
   data: SynthesisData;
   dossierId: string;
+  /** Le numéro de la version affichée : la synthèse n'est rangée que dans la version qu'elle a lue. */
+  versionNumero?: number | null;
   insee: string;
   /**
    * LA SYNTHÈSE ENREGISTRÉE, quand le module s'ouvre depuis une version (FUT-13, lot B). Elle s'affiche
@@ -56,7 +58,7 @@ export function LogementSynthesis({
         headers: { "Content-Type": "application/json" },
         // `insee` n'est plus transmis : le serveur le lit sur le dossier. Il reste ici pour
         // l'instrumentation seule.
-        body: JSON.stringify({ data, dossierId, force }),
+        body: JSON.stringify({ data, dossierId, force, versionNumero }),
         signal: controller.signal,
       });
       if (res.status === 422) {
@@ -81,7 +83,7 @@ export function LogementSynthesis({
       setState("error");
       posthog?.capture("logement_ai_summary_failed", { insee, error: err instanceof Error ? err.message : "unknown" });
     }
-  }, [data, dossierId, insee, factHash, posthog]);
+  }, [data, dossierId, insee, factHash, posthog, versionNumero]);
 
   // Auto-déclenchement : données prêtes et le hash de faits a changé (gating). Un hash inchangé
   // sert le texte figé sans appeler le modèle, donc l'auto ne dépense que sur un fait nouveau.

@@ -339,3 +339,27 @@ Le bandeau affiche « Données collectées le … » et un bouton « Actualiser 
 
 ### Géorisques
 Si une version valide existe, une panne de Géorisques n'empêche pas sa consultation : la lecture ne touche aucune source. Une actualisation pendant la panne est refusée, car elle perd une source présente. Les données affichées ne sont donc jamais remplacées par du vide.
+
+## Validation de la migration et sémantique des N+1
+
+### Migration exécutée sur un Postgres 18.4 jetable
+Le serveur est lancé par `embedded-postgres`, dans le scratchpad. Un socle Supabase minimal est recréé : rôles anon, authenticated et service_role (bypassrls), `auth.uid()`, les privilèges par défaut de Supabase, et un `address_dossiers` réduit avec sa RLS.
+
+Défaut trouvé : le corps de la fonction du trigger était délimité par un `$` seul, si bien que la migration était invalide. Elle est corrigée en `$$`, et un test garde ce point.
+
+Résultat : 25 vérifications sur 25.
+- La table, l'index, la RLS et le trigger sont créés.
+- Lecture : le propriétaire lit sa version. Il ne lit pas celle d'un autre. Un dossier révoqué devient illisible. anon ne voit rien.
+- Écritures du navigateur refusées : INSERT, UPDATE et DELETE en authenticated, INSERT en anon.
+- Le service role peut insérer.
+- report, report_hash, collected_at, sources_absentes, version et schema_version sont immuables, y compris pour le service role.
+- La synthèse se pose une fois. Une deuxième modification est refusée, même si elle ne touche que le DPE, et l'écriture conditionnelle de l'application touche alors 0 ligne.
+- La clé (dossier, version) est unique.
+- La suppression d'un dossier supprime ses versions en cascade.
+- Le `_down` est appliqué, puis l'`up` est rejoué.
+
+### Deux sortes de N+1
+1. **Nouvelle collecte** (actualisation dont les faits changent). La route reconstruit le rapport, calcule `report_hash` sur CE rapport, et `enregistrerVersion` l'insère avec `collected_at = now()`. N+1 ne reprend jamais l'ancien `report_hash` (T17).
+2. **Nouvelle synthèse sans nouvelle collecte** (autre DPE choisi, autre projet). Le DPE choisi et le projet ne font pas partie du rapport collecté : ils entrent dans l'empreinte des faits de la synthèse, pas dans `report`. N+1 porte donc le même rapport, donc le même `report_hash`, et la même `collected_at`, puisque rien n'a été recollecté. Seule la synthèse diffère.
+
+Cette reprise n'est légitime que si la synthèse a lu la version qui est la dernière. Le client envoie le numéro de la version affichée (`versionNumero`). Si une collecte plus récente est devenue la dernière pendant la rédaction, rien n'est rangé (`version_depassee`, T18).

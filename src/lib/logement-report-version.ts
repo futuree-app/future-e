@@ -34,8 +34,13 @@ export type VersionLogement = VersionMeta & {
  * - elle a déjà celle de ces faits : rien ;
  * - elle en a une autre (autre DPE, autres faits) : une NOUVELLE version, même rapport, cette synthèse.
  */
-export function rangementSynthese(derniere: VersionLogement | null, hash: string): "aucune_version" | "attacher" | "deja_la" | "nouvelle_version" {
+export function rangementSynthese(
+  derniere: VersionLogement | null, hash: string, versionLue: number | null,
+): "aucune_version" | "version_depassee" | "attacher" | "deja_la" | "nouvelle_version" {
   if (!derniere) return "aucune_version";
+  // La synthèse a lu les faits d'une version précise. Si une collecte plus récente est devenue la dernière
+  // entre-temps, ses faits ne sont plus ceux de la synthèse : rien n'est rangé.
+  if (derniere.numero !== versionLue) return "version_depassee";
   if (derniere.synthese == null) return "attacher";
   if (derniere.syntheseHash === hash) return "deja_la";
   return "nouvelle_version";

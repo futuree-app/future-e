@@ -534,6 +534,7 @@ export default function LogementModule({
             // Ouvert depuis une version : la synthèse enregistrée s'affiche telle quelle, sans appel.
             // La synthèse DE LA VERSION ouverte, jamais celle d'un autre état du dossier.
             texteEnregistre={versionInitiale?.version?.synthese ?? null}
+            versionNumero={result.version?.numero ?? null}
           />
 
           {/* Beat 3 — Les preuves : pourquoi ? (2 sous-familles) */}

@@ -79,14 +79,14 @@ export async function enregistrerVersion(
  * suivante qui porte le même rapport et cette synthèse. Ne modifie jamais une synthèse existante.
  */
 export async function rangerSynthese(
-  userId: string, dossierId: string, texte: string, hash: string, dpeNumero: string | null,
+  userId: string, dossierId: string, texte: string, hash: string, dpeNumero: string | null, versionLue: number | null,
 ): Promise<void> {
   const { data } = await admin
     .from("logement_report_versions").select(COLONNES)
     .eq("dossier_id", dossierId).order("version", { ascending: false }).limit(1).maybeSingle();
   const derniere = lireLigneVersion(data);
-  const decision = rangementSynthese(derniere, hash);
-  if (!derniere || decision === "aucune_version" || decision === "deja_la") return;
+  const decision = rangementSynthese(derniere, hash, versionLue);
+  if (!derniere || decision === "aucune_version" || decision === "version_depassee" || decision === "deja_la") return;
   const synthese = {
     synthesis_text: texte, synthesis_fact_hash: hash,
     synthesis_generated_at: new Date().toISOString(), synthesis_dpe_numero: dpeNumero,
