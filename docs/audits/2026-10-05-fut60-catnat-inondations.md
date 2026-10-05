@@ -71,7 +71,7 @@ Sur ces libellés, les deux classifieurs concordent. **La taxonomie n'est pas la
 
 ## 7. Cause racine
 
-**Grain de la source.** `scripts/populate-inondation.py` interrogeait GASPAR avec le code de chaque
+**Grain de la source.** `scripts/populate-inondation.py` (retiré, voir §13) interrogeait GASPAR avec le code de chaque
 entrée de l'index. Or l'index stocke Paris, Lyon et Marseille par arrondissement.
 
 - **Effet** : 45 arrondissements à `catnat: 0, risque: 1`, c'est-à-dire faussement parmi les communes les moins
@@ -98,7 +98,8 @@ Pages publiques : `getGasparCatnatSummary(<arrondissement>)` avait le même déf
 
 ## 9. Correction
 
-1. **Source** : `populate-inondation.py` et `georisques.ts` interrogent `communeParent(insee)` pour
+1. **Source** : la collecte (§13) et `georisques.ts` interrogent `codeGaspar(insee)`, table propre à
+   GASPAR, et non un helper PLM général (le zonage sismique fait l'inverse), pour
    `/gaspar/catnat` et `/gaspar/risques`.
 2. **Données** : les 45 arrondissements de l'index reçoivent le compte de leur commune (relevé du
    05/10 : Paris 16, Lyon 19, Marseille 29), et le rang est recalculé avec la formule du script.
@@ -135,15 +136,129 @@ année » 2.
 
 ## 12. Limites
 
-- **Le mot « arrêté »** désigne des lignes (Paris : « 20 arrêtés » pour 16 arrêtés distincts).
-  Compter des arrêtés distincts exige de régénérer l'index de 35 000 communes. Dire
-  « reconnaissances » change la phrase figée des pastilles vendues. C'est une décision à part.
+- **Pastilles déjà vendues** : elles gardent « 7 arrêtés inondation » ; la carte qu'elles visent dit
+  désormais « 7 reconnaissances liées aux inondations ». Même nombre, même unité, mot corrigé.
 - **Zonage sismique** : grain inverse (75056 ne répond rien, 75111 oui). Le Territoire de Paris n'a
   donc pas de zone sismique. Hors de ce lot.
 - **Décisions déjà vendues** : un dossier Paris, Lyon ou Marseille avec la priorité inondation a figé
   « exposition non notable » sur un faux zéro. Il n'est pas modifié (version moteur figée).
   Recensement : lecture de production, à lancer par le porteur.
-- **Données de l'index** : le reste de l'index date de sa dernière génération (Toulouse : 19 dans
-  l'index, 20 dans GASPAR aujourd'hui). Le comptage Paris, Lyon et Marseille est du 05/10/2026.
 - **Effet de taille** : le compte d'une grande commune s'applique à chaque arrondissement, comme pour
   toute grande commune non découpée (Toulouse, Nice). C'est le grain de la source, dit comme tel.
+
+## Seconde passe (05/10/2026) : vocabulaire, grain visible, fraîcheur
+
+### 13. Vocabulaire et grain
+
+- **Le mot suit la donnée.** Le produit compte des lignes GASPAR, que le dictionnaire GASPAR décrit
+  comme des reconnaissances (une commune, un événement, un risque). Les textes disent donc :
+  - carte : « Tous risques · 20 reconnaissances depuis 1982 · Dont 16 reconnaissances liées aux
+    inondations depuis 1982, à l'échelle de Paris » ;
+  - preuve et constat : « 16 reconnaissances (de catastrophe naturelle) liées aux inondations… » ;
+  - pages publiques, comparateur, AskFuture, libellés de source.
+
+  « CatNat » reste hors de la phrase lue (règle existante), mais apparaît dans les libellés de source.
+- **Le grain se dit.** À Paris, Lyon et Marseille, la phrase partagée ajoute « , à l'échelle de
+  Paris ». Une page publique d'arrondissement écrit « À l'échelle de Paris (GASPAR ne publie pas
+  les arrondissements), la ville a déjà été reconnue… ». Le comparateur n'affiche aucun compte, seulement
+  un libellé de force (« peu de reconnaissances CatNat inondation »), jamais attribué à ces trois villes
+  dont le rang est de 100.
+- **Non fait** : la synthèse Logement reçoit le compte sous le nom `arretes_catnat_inondation_depuis_1982`
+  (`logement-synthesis-cache.ts`). Ce fichier relève de FUT-13 et n'a pas été touché.
+
+### 14. Le cache d'avant : un stockage définitif
+
+`populate-inondation.py` construisait `todo = [communes absentes du cache]` : une commune déjà en
+cache n'était **jamais** réinterrogée. Le cache `{insee: compte}` ne portait aucune date. Relancer le
+script ne rafraîchissait rien. Toulouse valait 19 dans l'index et 20 dans GASPAR (inondation du
+08/02/2026, arrêté `INTE2623922A`).
+
+### 15. Options de collecte étudiées (mesurées le 05/10/2026)
+
+| Option | Mesure | Verdict |
+|---|---|---|
+| A. API v1, une commune par requête | 34 746 requêtes ; ~1 h 40 d'après la spec d'origine | trop de charge pour Géorisques |
+| B. API v1, `code_insee` multiple | **20 codes au plus** (au-delà : « Le nombre de codes Insee à traiter ne doit pas dépasser 20 ») ; 1 738 requêtes ; 0,17 s médiane ; collecte complète en **498 s**, 0 échec ; comptes identiques à l'interrogation unitaire (6 témoins) | **retenue** |
+| C. Export national `files.georisques.fr/GASPAR/gaspar.zip` | officiel (jeu GASPAR du ministère de la Transition écologique sur data.gouv.fr), 8 Mo, 247 140 lignes catnat. Fichier daté du jour, **mais contenu arrêté vers janvier 2026** : dernière modification 2026-01-28, manque `INTE2623922A` (Toulouse) et `INTE2609024A` (Bordeaux) | **écartée** : moins frais que l'API de plusieurs mois |
+| D. API v2 | répond 401 sans jeton | non nécessaire |
+
+Aucune page web n'est lue : seules l'API documentée et le fichier officiel ont été testés.
+
+### 16. Mécanisme retenu : `scripts/gaspar/collecter-catnat.mts`
+
+- **Modes explicites** :
+  - `--nouvelle` : collecte complète, repart de rien ;
+  - `--reprendre` : ne refait que ce qui manque à la collecte en cours ;
+  - `--sans-publier` : collecte sans écrire l'index.
+
+  Sans option, le script refuse de tourner.
+- **Fichier de travail** : `data/.cache/gaspar-catnat-collecte.json` (non versionné), qui sert seulement à la
+  reprise. Il est supprimé après publication. L'ancien cache `communes-inondation.json` n'est plus lu :
+  aucune migration n'est nécessaire, puisqu'une collecte ne réutilise aucune valeur passée.
+- **Panne totale** : chaque lot est réessayé 3 fois, puis laissé « à faire ». L'index n'est pas
+  écrit et le script sort en erreur (code 1). L'index publié reste celui de la veille.
+- **Panne partielle** : même règle. **Pas de mosaïque.** Garder la dernière valeur d'une commune non
+  rafraîchie mélangerait deux dates dans le rang national. On préfère donc un instantané entier, ou rien.
+  `--reprendre` complète le même instantané.
+- **Atomicité** : le nouvel index est construit en mémoire, puis écrit à côté, relu (empreinte
+  identique) et renommé. Le contrôle de structure (`assertIndexInvariants`) passe avant l'écriture.
+- **Rang** : recalculé sur les comptes du seul instantané. Une hausse déplace des classes entières.
+  Cette collecte en donne l'exemple : les communes à 1 reconnaissance passent de 15 à 14, celles à 5
+  de 77 à 76 (8 253 communes, compte inchangé). C'est l'effet attendu, pas une anomalie. Les ~73
+  communes de la première passe bougeaient pour la même raison.
+- **Une seule taxonomie** : le compte de l'index est le groupe « Inondations » de `simplifyCatnatRisk`,
+  celui de la carte. L'ancien classifieur Python ignorait « Coulée de Boue » et « Lave
+  Torrentielle » (10 lignes en France).
+
+### 17. Résultat de la collecte du 05/10/2026
+
+- **Durée** : 17:14:39 → 17:22:56 UTC, 34 746 codes GASPAR, 0 échec.
+- **Écarts** : 225 communes en hausse (220 de +1, 5 de +2), 0 baisse. Toulouse passe de 19 à 20.
+- **Seuil de décision** : 29 communes passent la limite 66, toutes par une nouvelle reconnaissance qui
+  leur est propre (aucune par simple glissement de rang).
+- **Métadonnées** (`meta.sources.gaspar_catnat`) :
+  - source, début et fin de collecte, statut `complete` ;
+  - unité, codes interrogés et communes de l'index ;
+  - lignes inondation, convention `catnat-2`.
+
+  L'index n'a toujours pas de date de génération globale : le script de construction n'en écrit pas.
+
+### 18. Afficher la fraîcheur
+
+La date de collecte est dans l'index. La faire descendre jusqu'à « Source : Géorisques / GASPAR,
+collecte futur•e du … » demande de la porter dans l'objet `CatnatInondation`. Cela change
+l'empreinte des instantanés Territoire et des artefacts figés : c'est un chantier transverse, non fait ici.
+
+### 19. Automatisation : conception (non implémentée)
+
+- **Contrainte décisive** : depuis le 26/09/2026, Géorisques ne répond qu'aux IP françaises
+  (mémoire `piege-georisques-france-seulement`). Les runners hébergés de GitHub Actions sont
+  hors de France : la collecte y échouerait très probablement. À vérifier par un premier run.
+- **Options** :
+  - **runner auto-hébergé en France** : garde l'index dans le dépôt, mais dépend d'une machine
+    allumée ;
+  - **Vercel Cron en `cdg1`** : en France, mais la collecte (~500 s) frôle la durée maximale d'une
+    fonction, et une fonction ne peut pas réécrire le dépôt. Il faudrait donc sortir ce champ de
+    l'index, vers Supabase Storage (objet versionné) ou une table ;
+  - **GitHub Actions + proxy français** : fragile, déconseillé.
+- **PR automatique ou publication automatique** :
+  - la donnée est dérivée, et la collecte se valide seule (complétude, invariants, relecture
+    atomique) ;
+  - la publication automatique est défendable, à quatre garde-fous : collecte complète ;
+    `index:verify` ; diff limité à `inondation` et `meta.sources` ; plafond d'écart (par exemple
+    aucune baisse, moins de 2 % de communes modifiées) ;
+  - ce plafond est un **seuil à discuter** ;
+  - le retour arrière se fait par simple revert du commit de données.
+- **Cadence** :
+  - quotidienne, possible par la charge : 1 738 requêtes, ~8 min, ~5 requêtes/s ;
+  - GASPAR change au rythme des arrêtés publiés au Journal officiel, plutôt hebdomadaire ;
+  - une collecte quotidienne garantit un retard d'un jour au plus sur l'API.
+- **Surveillance** :
+  - un run en échec est visible dans GitHub Actions ;
+  - alerte si `meta.sources.gaspar_catnat.collecte_fin` a plus de 3 jours ;
+  - un contrôle peut lire cette date dans l'index déployé.
+- **Hors repo** :
+  - Supabase Storage évite un redéploiement Vercel par jour et permet une collecte en `cdg1` ;
+  - mais il ajoute une lecture réseau ou un cache au démarrage du comparateur, et sépare ce champ du
+    reste de l'index ;
+  - à décider dans un ticket séparé ; l'index reste statique ici.
