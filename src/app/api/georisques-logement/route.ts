@@ -15,7 +15,8 @@ import { fetchHeritageProtections } from "@/lib/gpu";
 import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
-import { getAuditByBanId, getAuditByCoordinates } from "@/lib/audit";
+import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
+import { resultatAudit } from "@/lib/audit-record";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
@@ -36,14 +37,20 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address.latitude,
     ).catch(() => null);
 
-    const [dpeCandidates, audit] = await Promise.all([
+    const [dpeCandidates, auditExact] = await Promise.all([
       address.id
         ? getDpeCandidatesByBanId(address.id).catch(() => [])
         : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []),
-      address.id
-        ? getAuditByBanId(address.id).catch(() => null)
-        : getAuditByCoordinates(address.latitude, address.longitude).catch(() => null),
+      // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
+      // donne un audit exploitable.
+      address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null),
     ]);
+    // Sans audit exact, et seulement alors, un audit VOISIN peut être signalé comme candidat : une
+    // référence et une distance, jamais une valeur. L'exact gagne toujours (`resultatAudit`).
+    const auditProche = auditExact
+      ? null
+      : await getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null);
+    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
 
     const [georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
@@ -103,6 +110,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       dpeCandidates,
       banFeatureType,
       audit,
+      auditProche: candidat,
       zfe,
       // IREP DÉBRANCHÉ LE 29/07/2026 — l'appel, pas la source. Les rejets industriels déclarés
       // étaient fetchés à chaque dossier, transportés dans le payload, et lus par AUCUN composant ni

@@ -4,6 +4,7 @@
 // (dérive = erreur tsc) et le client le lit. Les sous-formes Géorisques/ONRN sont volontairement
 // un SOUS-ENSEMBLE de ce que les libs renvoient : le client ne consomme que ces champs.
 
+import type { AuditCandidatProche, AuditRecord } from "./audit-record.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
@@ -20,10 +21,11 @@ export type LogementReport = {
   parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
   dpeCandidates?: DpeRecord[];
   banFeatureType?: string | null;
-  audit?: {
-    n_audit: string; date_audit: string | null; classe_dpe_actuel: string | null;
-    scenarios: Array<{ categorie: string | null; etape: string | null; travaux: string | null; conso_ep: number | null; emission_ges: number | null; }>;
-  } | null;
+  // FUT-59 : la forme de `audit-record.ts`, valeurs PAR M² (kWh EP/m²/an) et objet audité (logement ou immeuble).
+  audit?: AuditRecord | null;
+  // FUT-59 : un audit VOISIN, non attribué (référence et distance, aucune valeur). Jamais lu par l'écran
+  // Énergie : conservé pour qu'une preuve future (parcelle, bâtiment) puisse confirmer l'attribution.
+  auditProche?: AuditCandidatProche | null;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   // `irep` retiré du contrat le 29/07/2026 : il n'était lu par aucun composant ni aucune règle.
   // La source vit toujours (`src/lib/irep.ts`, `/api/proxy/irep`, page /agir/pollutions-invisibles).

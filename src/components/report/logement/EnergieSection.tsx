@@ -4,6 +4,7 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
+import { formatKwhEpM2, libelleObjet } from "@/lib/audit-record";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
 // diagnostic confirmé) et audit énergétique s'il existe. La lecture thermique riche (confort d'été)
@@ -170,25 +171,30 @@ export function EnergieSection({
         {erreur ? <p style={{ fontSize: 13, color: "var(--danger, #c0563a)", lineHeight: 1.55, margin: 0 }}>{erreur}</p> : null}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
-          {dpe.conso_ep_m2 != null && <Block label="Consommation" value={`${dpe.conso_ep_m2} kWh EP/m²/an`} />}
+          {dpe.conso_ep_m2 != null && <Block label="Consommation" value={formatKwhEpM2(dpe.conso_ep_m2)} />}
           {dpe.emission_ges_m2 != null && <Block label="Émissions GES" value={`${dpe.emission_ges_m2} kg CO₂/m²/an`} />}
           {dpe.type_batiment && <Block label="Type" value={dpe.type_batiment} />}
         </div>
 
-        {audit && audit.scenarios.length > 0 && (
+        {/* Un audit ne s'affiche que s'il est rattaché par l'identifiant BAN de l'adresse (FUT-59). */}
+        {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               Audit énergétique · {audit.scenarios.length} scénarios
             </div>
+            {/* FUT-59 : l'objet audité, lu dans les surfaces de la source. Un audit trouvé par
+                l'adresse peut porter sur l'immeuble entier : il ne passe pas pour celui du logement. */}
+            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>{libelleObjet(audit.objet)}</p>
             {audit.scenarios.map((s, i) => (
               <div key={i} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <div>
                   {s.categorie && <div style={{ fontSize: 13, color: "var(--fg-1)" }}>{s.categorie}</div>}
                   {s.etape && <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 2 }}>{s.etape}</div>}
                 </div>
-                {s.conso_ep != null && (
+                {/* Valeur PAR M² (source `ep_conso_5_usages_m2`). Avant FUT-59 : le total annuel, sous l'unité par m². */}
+                {s.conso_ep_m2 != null && (
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
-                    {s.conso_ep} kWh/m²/an
+                    {formatKwhEpM2(s.conso_ep_m2)}
                   </span>
                 )}
               </div>
