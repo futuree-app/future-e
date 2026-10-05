@@ -281,7 +281,7 @@ test("péril « aucun » sans compte d'arrêtés : il quitte le payload narratif
   assert.deepEqual(p.sinistralite, {});
 });
 
-test("cas Ciré-d'Aunis : l'absence d'inondation reste, accompagnée des arrêtés comptés", () => {
+test("cas Ciré-d'Aunis : l'absence d'inondation reste, accompagnée des reconnaissances comptées", () => {
   const p = buildSynthesisPayload(fullData({
     sinistralite: { secheresse: { kind: "aucun" }, inondation: { kind: "aucun" } },
     catnatInondationCount: 5,
@@ -291,7 +291,7 @@ test("cas Ciré-d'Aunis : l'absence d'inondation reste, accompagnée des arrêt�
       kind: "aucun_sinistre_indemnise",
       periode: "1995-2021",
       echantillon: "CCR, contrats assurés de la commune",
-      arretes_catnat_inondation_depuis_1982: 5,
+      reconnaissances_catnat_inondation_depuis_1982: 5,
     },
   });
   // La sécheresse, elle, n'a pas d'historique administratif à lui opposer : elle sort.
@@ -315,4 +315,28 @@ test("les états mesurés passent inchangés, et le hash des dossiers existants 
 test("la couverture reste « examinée » : on a bien regardé, on ne raconte pas", () => {
   const c = buildCoverage(fullData({ sinistralite: { inondation: { kind: "aucun" } } }) as Parameters<typeof buildCoverage>[0]);
   assert.equal(c.sinistralite_communale, "examined");
+});
+
+// ── FUT-60 : le compteur GASPAR s'appelle comme ce qu'il compte ─────────────────────────────────
+// La valeur est un nombre de LIGNES GASPAR (reconnaissances), pas d'arrêtés distincts. Le modèle ne
+// doit plus recevoir un champ qui lui dit « arrêtés ».
+const minimal = (over: Record<string, unknown>) =>
+  ({ dpeSelectionStatus: null, selectedDpe: null, georisques: null, communeData: { commune: { nom: "X", population: 1 } }, ...over }) as Parameters<typeof buildFactHash>[0];
+
+test("L1. le payload expose « reconnaissances_catnat_inondation_depuis_1982 », jamais « arretes_* »", () => {
+  const p = buildSynthesisPayload(minimal({ sinistralite: { inondation: { kind: "aucun" } }, catnatInondationCount: 16 }));
+  const json = JSON.stringify(p);
+  assert.match(json, /"reconnaissances_catnat_inondation_depuis_1982":16/);
+  assert.doesNotMatch(json, /arretes_catnat_inondation_depuis_1982/);
+  assert.doesNotMatch(json, /"arretes_/);
+});
+
+test("L2. le renommage ne change le hash QUE des payloads qui portent le contexte CatNat", () => {
+  // Hash relevés le 06/10/2026 avec la version de main d'avant le renommage (syn:v10).
+  const sans = minimal({ sinistralite: { secheresse: { kind: "lecture", cout: "a" } }, catnatInondationCount: 5 });
+  const avec = minimal({ sinistralite: { inondation: { kind: "aucun" } }, catnatInondationCount: 5 });
+  // Structurel : sans contexte, aucune clé CatNat n'entre dans le payload, le renommage ne peut pas le toucher.
+  assert.doesNotMatch(JSON.stringify(buildSynthesisPayload(sans)), /catnat/);
+  assert.equal(buildFactHash(sans), "syn:v10:7e13aeb4", "inchangé : identique au hash d'avant le renommage");
+  assert.equal(buildFactHash(avec), "syn:v10:84079811", "changé (avant : syn:v10:f96dbb22), et seulement lui");
 });

@@ -82,6 +82,8 @@ const REGLES: Regle[] = [
       "aucun sinistre", "aucun degat", "aucun dommage", "pas de sinistre",
       "jamais ete inonde", "jamais ete inondee", "jamais connu d'inondation",
       "aucune inondation", "aucune indemnisation", "aucun arrete de catastrophe",
+      // FUT-60 : le payload dit « reconnaissances » ; la même conclusion sous ce mot reste interdite.
+      "aucune reconnaissance de catastrophe",
       "n'a pas ete inondee", "epargnee par les inondations",
     ],
     desamorcable: true,

@@ -163,8 +163,22 @@ année » 2.
   les arrondissements), la ville a déjà été reconnue… ». Le comparateur n'affiche aucun compte, seulement
   un libellé de force (« peu de reconnaissances CatNat inondation »), jamais attribué à ces trois villes
   dont le rang est de 100.
-- **Non fait** : la synthèse Logement reçoit le compte sous le nom `arretes_catnat_inondation_depuis_1982`
-  (`logement-synthesis-cache.ts`). Ce fichier relève de FUT-13 et n'a pas été touché.
+- **Synthèse Logement (06/10, après le rebase sur FUT-13)** :
+  - le champ du payload devient `reconnaissances_catnat_inondation_depuis_1982` ;
+  - la consigne du prompt dit « nombre de reconnaissances », et n'écrit jamais « arrêtés » ;
+  - le garde-fou interdit aussi « aucune reconnaissance de catastrophe ».
+
+  Effet sur le cache :
+  - **ce qui change** : la clé n'existe que pour une inondation sans sinistre indemnisé ET un compte
+    connu, donc seul le `buildFactHash` de ces synthèses change (L2 : `f96dbb22` → `84079811`).
+    Tout autre dossier garde son hash (`7e13aeb4` inchangé) ;
+  - **ce que fait FUT-13** : à la prochaine ouverture, le cache est raté. La synthèse est régénérée
+    (un appel au modèle), puis rangée par `rangementSynthese` en `nouvelle_version`, avec le même
+    rapport, le même `report_hash` et le même `collected_at`. C'est légitime : même collecte, faits dits
+    autrement ;
+  - **pas de bump** de `SYNTHESIS_PROMPT_VERSION`, et le texte du prompt n'entre pas dans le hash.
+  - Le rafraîchissement de l'index (§17) change aussi la VALEUR du compte pour ces mêmes dossiers
+    quand leur commune a reçu une reconnaissance : même périmètre.
 
 ### 14. Le cache d'avant : un stockage définitif
 
