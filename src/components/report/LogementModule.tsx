@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import type { SynthesisData } from "@/lib/logement-synthesis-cache";
+import type { ClimatProjete, SynthesisData } from "@/lib/logement-synthesis-cache";
 import type { LogementReport as ApiResponse } from "@/lib/logement-report-types";
 import type { AddressDossierRow, DpeSelectionStatus } from "@/lib/address-dossier-store";
 import { ReportSection, GlassCard } from "@/components/report/kit";
@@ -76,8 +76,15 @@ export default function LogementModule({
   rehydrateSource = "auto",
   project,
   catnatInondation = null,
+  climatProjete = null,
   versionInitiale = null,
 }: {
+  /**
+   * LE SIGNAL CLIMAT DU DOSSIER, dérivé par la page comme le fait la route de synthèse (FUT-60). Sans lui,
+   * l'empreinte calculée ici différerait de celle du serveur pour les communes les plus chaudes, et une
+   * synthèse enregistrée ne pourrait pas être reconnue comme valide pour les faits courants.
+   */
+  climatProjete?: ClimatProjete | null;
   /**
    * LA DERNIÈRE VERSION DU RAPPORT, lue par la page (FUT-13, lot B). Présente, elle s'affiche telle quelle :
    * aucune source n'est appelée à l'ouverture. Absente (dossier neuf ou antérieur au lot), le module
@@ -534,6 +541,8 @@ export default function LogementModule({
             // Ouvert depuis une version : la synthèse enregistrée s'affiche telle quelle, sans appel.
             // La synthèse DE LA VERSION ouverte, jamais celle d'un autre état du dossier.
             texteEnregistre={versionInitiale?.version?.synthese ?? null}
+            hashEnregistre={versionInitiale?.version?.syntheseHash ?? null}
+            climatProjete={climatProjete}
             versionNumero={result.version?.numero ?? null}
           />
 

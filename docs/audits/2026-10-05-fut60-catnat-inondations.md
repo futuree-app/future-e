@@ -177,6 +177,21 @@ année » 2.
     rapport, le même `report_hash` et le même `collected_at`. C'est légitime : même collecte, faits dits
     autrement ;
   - **pas de bump** de `SYNTHESIS_PROMPT_VERSION`, et le texte du prompt n'entre pas dans le hash.
+- **Défaut d'intégration trouvé en revue (06/10)** : la route compare bien l'empreinte, mais la page
+  ne la voyait pas.
+  - `metaDe` jetait `syntheseHash`, et la page ne filtrait la synthèse enregistrée que sur le DPE.
+  - `LogementSynthesis` la tenait pour valide sous l'empreinte COURANTE (`lastHashRef = factHash`).
+  - Une synthèse écrite sous « arretes_* » aurait donc été réaffichée indéfiniment, sans régénération.
+- **Correction** :
+  - l'empreinte remonte dans `VersionMeta` jusqu'au module ;
+  - le texte enregistré n'est réutilisé que si le DPE est compatible ET si l'empreinte est égale ;
+  - une empreinte `null` vaut une incompatibilité ;
+  - un texte qui n'a pas lu les faits courants ne s'affiche pas, même une fraction de seconde.
+- **Piège évité** : l'empreinte du serveur inclut le signal climat (`deriveClimatProjete`), celle du
+  navigateur ne l'avait pas. La page le dérive désormais comme la route (local, sans réseau) et le
+  transmet : les deux empreintes sont égales (test E4). Sans cela, la comparaison aurait rejeté les
+  synthèses des communes au signal climat émis (environ 10 à 12 %), et cassé le « 0 appel à
+  l'ouverture » de FUT-13.
   - Le rafraîchissement de l'index (§17) change aussi la VALEUR du compte pour ces mêmes dossiers
     quand leur commune a reçu une reconnaissance : même périmètre.
 
