@@ -3,7 +3,7 @@ import { BPE_WALK_RADIUS_M, libelleCourant, type EspaceVert, type Face3Snapshot,
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
-import { ecartAuCommune, partSansVoiture, type CarOwnership } from "@/lib/iris-logement";
+import { texteVoiture, type CarOwnership } from "@/lib/iris-logement";
 
 // « Autour de cette adresse » (buffer local au point géocodé) — le corps du module 02 depuis le
 // 29/07/2026, où il n'était jusque-là que la « Face 3 » du module Logement. Hiérarchie : vie
@@ -87,13 +87,6 @@ const FACE3_FAMILY: React.CSSProperties = {
   fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em",
   textTransform: "uppercase", color: "var(--fg-4)",
 };
-/** Pourcentage en typographie française : virgule décimale, espace insécable avant le %. */
-function pct(v: number, sansUnite = false): string {
-  const n = Math.round(v * 10) / 10;
-  const txt = (Number.isInteger(n) ? String(n) : n.toFixed(1)).replace(".", ",");
-  return sansUnite ? `${txt} points` : `${txt}\u00a0%`;
-}
-
 function fmtDist(m: number): string {
   return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${m} m`;
 }
@@ -110,60 +103,26 @@ function fmtDist(m: number): string {
 // LE MOT « MOTORISATION » EST BANNI. On dit ce que la donnée mesure : des ménages qui DISPOSENT d'une
 // voiture. Ni leur dépendance, ni leur besoin, ni la possibilité de vivre sans.
 function CarOwnershipBlock({ car }: { car: CarOwnership }) {
-  if (car.kind === "unknown") return null;
-
-  const ecart = ecartAuCommune(car);
+  // Le texte se décide dans `texteVoiture` (pur, testé) : ce composant ne fait que le poser.
+  const t = texteVoiture(car);
+  if (!t) return null;
   return (
     <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 8 }}>
       <div style={FACE3_SUBHEAD}>Ménages et voiture</div>
 
-      {car.kind === "secteur" && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-            <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
-              Ménages disposant d’au moins une voiture
-            </span>
-            <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-              {pct(car.share)}
-            </span>
-          </div>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-            {ecart != null && Math.abs(ecart) >= 1
-              ? `Soit ${pct(Math.abs(ecart), true)} ${ecart < 0 ? "de moins" : "de plus"} que dans l’ensemble de la commune. `
-              : ecart != null
-                ? "C’est le niveau de l’ensemble de la commune. "
-                : ""}
-            {`À l’inverse, ${pct(partSansVoiture(car.share))} des ménages de ce secteur n’en ont aucune.`}
-          </p>
-        </>
+      {t.valeur != null && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+          <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
+            Ménages disposant d’au moins une voiture
+          </span>
+          <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+            {t.valeur}
+          </span>
+        </div>
       )}
-
-      {car.kind === "commune_entiere" && (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-            <span style={{ fontSize: 15, color: "var(--fg-1)", fontWeight: 500 }}>
-              Ménages disposant d’au moins une voiture
-            </span>
-            <span style={{ fontSize: 15, color: "var(--fg-hi)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-              {pct(car.share)}
-            </span>
-          </div>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-            Cette commune n’est pas découpée en secteurs : la valeur porte sur la commune entière,
-            et aucune variation locale ne peut être établie.
-          </p>
-        </>
-      )}
-
-      {car.kind === "secteur_non_residentiel" && (
-        <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-          Cette adresse se situe dans un secteur principalement consacré à l’activité. Le profil
-          automobile des ménages n’y est pas établissable.
-          {car.communeShare != null
-            ? ` Sur l’ensemble de la commune, ${pct(car.communeShare)} des ménages disposent d’au moins une voiture.`
-            : ""}
-        </p>
-      )}
+      <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+        {t.phrase}
+      </p>
 
       <p style={{ ...FACE3_FAMILY, margin: 0 }}>
         Insee, recensement 2022 · estimation
