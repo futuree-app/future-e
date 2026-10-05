@@ -161,8 +161,11 @@ async function fetchLines(params: Record<string, string>): Promise<{ rows: ApiRe
   const url = new URL(`${BASE}/lines`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.set("select", SELECT);
-  const res = await fetch(url.toString(), { next: { revalidate: 86400 } });
-  if (!res.ok) return { rows: [], total: null };
+  // BORNÉE (FUT-13), au délai des autres sources du module Logement : une réponse qui traîne
+  // tenait tout le module. Un dépassement rejette, comme une panne réseau, et l'appelant rend null.
+  const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
+  // UNE PANNE N'EST PAS « AUCUNE FRICHE » (FUT-13) : on lève, la route rend null (« non vérifiable »).
+  if (!res.ok) throw new Error(`cartofriches:${res.status}`);
   const json = (await res.json()) as { results?: ApiRecord[]; total?: number };
   return { rows: json.results ?? [], total: typeof json.total === "number" ? json.total : null };
 }

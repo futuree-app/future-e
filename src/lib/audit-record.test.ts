@@ -170,7 +170,8 @@ test("T11 : quand un audit exact et un candidat voisin coexistent, l'exact gagne
   assert.deepEqual(resultatAudit(exact, proche), { audit: exact, auditProche: null });
   // La route ne cherche un voisin que sans audit exact, et passe par la même règle.
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
-  assert.match(route, /const auditProche = auditExact\s*\?\s*null/);
+  // FUT-13 : la route est parallèle, la recherche du voisin reste CHAÎNÉE derrière l'audit exact.
+  assert.match(route, /const auditProcheP = auditExactP\.then\(\(exact\) =>\s*exact\s*\?\s*null/);
   assert.match(route, /resultatAudit\(auditExact, auditProche\)/);
 });
 

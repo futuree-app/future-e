@@ -14,6 +14,8 @@ import { readLatestDataSnapshot } from "@/lib/server/decision-artifact-store";
 import { artifactScopeKey } from "@/lib/decision/decision-artifact";
 import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
 import { getCommuneEntry } from "@/lib/comparateur-vie";
+import { lireDerniereVersion } from "@/lib/server/logement-report-versions";
+import { metaDe, syntheseCompatible } from "@/lib/logement-report-version";
 
 export default async function RapportLogementPage({
   searchParams,
@@ -115,6 +117,11 @@ export default async function RapportLogementPage({
     ?? (await getCommuneEntry(contexte.inseeCode).catch(() => null));
   const catnatInondation = snapshotFige?.catnatInondation ?? catnatInondationDepuisIndex(entreeIndex);
 
+  // LA DERNIÈRE VERSION DU RAPPORT LOGEMENT (FUT-13, lot B). Une requête indexée, aucune source : le
+  // module s'affiche avec elle. Sans version (dossier neuf, antérieur au lot, ou table absente), le
+  // module construit une fois et la route écrit la version 1.
+  const versionLogement = loadable ? await lireDerniereVersion(supabase, dossier.id) : null;
+
   return (
     <>
       <ModuleTracker moduleId="logement" commune={contexte.communeName} inseeCode={contexte.inseeCode} source="page" />
@@ -129,6 +136,15 @@ export default async function RapportLogementPage({
         rehydrateSource={targetId ? "deeplink" : "auto"}
         project={userProject}
         catnatInondation={catnatInondation}
+        versionInitiale={versionLogement ? {
+          ...versionLogement.report,
+          version: {
+            ...metaDe(versionLogement),
+            // UNE SYNTHÈSE NE S'AFFICHE QU'AVEC LE DPE QU'ELLE A LU. Si le lecteur a choisi un autre diagnostic
+            // depuis, elle est retenue : le module en demande une pour l'état actuel.
+            synthese: syntheseCompatible(versionLogement.syntheseDpe, dossier.selected_dpe_id) ? versionLogement.synthese : null,
+          },
+        } : null}
       />
     </>
   );

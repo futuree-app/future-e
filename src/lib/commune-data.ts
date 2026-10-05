@@ -174,12 +174,16 @@ function num(v: string | number | null | undefined): number | null {
 
 // ── Fetchers ──────────────────────────────────────────────────────────────────
 
+// BORNÉES (FUT-13) : ces trois requêtes ADEME n'avaient aucun délai, et une réponse qui traîne tenait
+// tout le module Logement. Délai des autres sources du module (Géorisques, GPU, cadastre).
+const SOURCE_TIMEOUT_MS = 8_000;
+
 async function fetchCommuneRecord(inseeCode: string): Promise<CommuneApiRecord | null> {
   const url = new URL(`${COMMUNES_DS}/lines`);
   url.searchParams.set("qs", `code_commune_insee:${inseeCode}`);
   url.searchParams.set("size", "1");
   url.searchParams.set("select", SELECT_COMMUNE);
-  const res = await fetch(url.toString(), { next: { revalidate: 604800 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 604800 }, signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS) });
   if (!res.ok) return null;
   const json = (await res.json()) as { results?: CommuneApiRecord[] };
   return json.results?.[0] ?? null;
@@ -206,7 +210,7 @@ async function fetchIrisRecords(inseeCode: string): Promise<IrisApiRecord[] | nu
     url.searchParams.set("size", String(IRIS_PAGE_SIZE));
     url.searchParams.set("page", String(page));
     url.searchParams.set("select", SELECT_IRIS);
-    const res = await fetch(url.toString(), { next: { revalidate: 604800 } });
+    const res = await fetch(url.toString(), { next: { revalidate: 604800 }, signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS) });
     if (!res.ok) return null;
     const json = (await res.json()) as { results?: IrisApiRecord[]; total?: number };
     const batch = json.results ?? [];
@@ -231,7 +235,7 @@ async function fetchIrisAtPoint(lat: number, lon: number): Promise<IrisApiRecord
   url.searchParams.set("geo_distance", `${lon},${lat},0`);
   url.searchParams.set("size", "1");
   url.searchParams.set("select", SELECT_IRIS);
-  const res = await fetch(url.toString(), { next: { revalidate: 604800 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 604800 }, signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS) });
   if (!res.ok) throw new Error(`iris-point:${res.status}`);
   const json = (await res.json()) as { results?: IrisApiRecord[] };
   return json.results?.[0] ?? null;

@@ -22,6 +22,8 @@ import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
 import type { LogementReport } from "@/lib/logement-report-types";
+import { consulterOuActualiser } from "@/lib/logement-report-version";
+import { empreinteRapport, enregistrerVersion, lireDerniereVersion } from "@/lib/server/logement-report-versions";
 
 // Cœur commun : construit le rapport à partir d'une adresse déjà résolue (géocodée en GET,
 // sélectionnée en POST). Renvoie la LISTE des DPE candidats (pas un « plus récent » arbitraire)
@@ -31,28 +33,41 @@ type ResolvedAddress = {
   postcode: string | null; latitude: number; longitude: number;
 };
 
-async function buildReport(address: ResolvedAddress, banFeatureType: string | null) {
-    const parcel = await findCadastreParcelByPoint(
+async function buildReport(address: ResolvedAddress, banFeatureType: string | null): Promise<LogementReport> {
+    // TOUT PART EN MÊME TEMPS (FUT-13). La route enchaînait quatre étapes en série (cadastre, puis DPE
+    // et audit, puis neuf sources, puis Géorisques au point, puis à la parcelle) : son temps était la
+    // SOMME des sources les plus lentes de chaque étape. Seules deux dépendances réelles restent
+    // chaînées, chacune derrière la sienne : la lecture Géorisques par parcelle attend la parcelle, et
+    // la recherche d'un audit voisin attend de savoir qu'aucun audit exact n'existe.
+    const parcelP = findCadastreParcelByPoint(
       address.longitude,
       address.latitude,
     ).catch(() => null);
 
-    const [dpeCandidates, auditExact] = await Promise.all([
-      address.id
-        ? getDpeCandidatesByBanId(address.id).catch(() => [])
-        : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []),
-      // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
-      // donne un audit exploitable.
-      address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null),
-    ]);
+    const dpeCandidatesP = address.id
+      ? getDpeCandidatesByBanId(address.id).catch(() => [])
+      : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []);
+    // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
+    // donne un audit exploitable.
+    const auditExactP = address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null);
     // Sans audit exact, et seulement alors, un audit VOISIN peut être signalé comme candidat : une
     // référence et une distance, jamais une valeur. L'exact gagne toujours (`resultatAudit`).
-    const auditProche = auditExact
-      ? null
-      : await getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null);
-    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
+    const auditProcheP = auditExactP.then((exact) =>
+      exact
+        ? null
+        : getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null),
+    );
 
-    const [georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([
+    const georisquesAddressP = process.env.GEORISQUES_API_TOKEN
+      ? getGeorisquesAddressSummary(address.latitude, address.longitude).catch(() => null)
+      : Promise.resolve(null);
+    const georisquesParcelP = parcelP.then((parcel) =>
+      process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
+        ? getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
+        : null,
+    );
+
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeCandidates, auditExact, auditProche, georisquesAddress, georisquesParcel] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -77,17 +92,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]);
-
-    const georisquesAddress = process.env.GEORISQUES_API_TOKEN
-      ? await getGeorisquesAddressSummary(address.latitude, address.longitude).catch(
-          () => null,
-        )
-      : null;
-    const georisquesParcel =
-      process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
-        ? await getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
-        : null;
+    ]), parcelP, dpeCandidatesP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
+    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
     // communal (aléas GASPAR sans source fine). Les labels GASPAR au point donnent le signalement
@@ -155,11 +161,12 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
             ? "Ce résultat combine une adresse géocodée BAN, une lecture Géorisques v2 au point géocodé et un résumé communal. La lecture parcellaire complète n'est pas encore disponible pour cette adresse dans l'application."
             : "Ce résultat combine une adresse géocodée BAN et un résumé Géorisques communal. Pour activer la lecture Géorisques v2 au point géocodé et par parcelle, configurez GEORISQUES_API_TOKEN côté serveur.",
     };
-    return NextResponse.json(report, {
-      headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-      },
-    });
+    return report;
+}
+
+// Une réponse du module : jamais mise en cache partagé, elle porte les données d'un dossier payé.
+function repondre(corps: LogementReport) {
+  return NextResponse.json(corps, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 // POST : adresse BAN sélectionnée avec précision (objet atomique validé). Chemin principal.
@@ -200,7 +207,17 @@ export async function POST(request: Request) {
       id: sel.banId, label: sel.label, city: sel.city, citycode: sel.citycode,
       postcode: sel.postcode, latitude: sel.latitude, longitude: sel.longitude,
     };
-    return await buildReport(address, sel.type);
+    // LIRE AVANT DE CONSTRUIRE (FUT-13, lot B). Un dossier qui a une version la reçoit telle quelle :
+    // aucune des ~14 sources n'est appelée. Seule une actualisation demandée par le lecteur
+    // (`refresh: true`) reconstruit ; N reste la dernière version tant que N+1 n'est pas écrite.
+    // La séquence vit dans `consulterOuActualiser`, testée sans réseau.
+    const refresh = (body as { refresh?: unknown })?.refresh === true;
+    return repondre(await consulterOuActualiser(refresh, {
+      lire: () => lireDerniereVersion(supabase, dossier.id),
+      construire: () => buildReport(address, sel.type),
+      empreinte: empreinteRapport,
+      enregistrer: (r, h) => enregistrerVersion(user.id, dossier.id, r, h),
+    }));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to resolve Géorisques logement preview.";
     return NextResponse.json({ error: message }, { status: 500 });

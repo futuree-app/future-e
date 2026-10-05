@@ -16,16 +16,24 @@ import { buildFactHash, type SynthesisData } from "@/lib/logement-synthesis-cach
 type State = "idle" | "loading" | "done" | "error" | "refused";
 
 export function LogementSynthesis({
-  ready, data, dossierId, insee,
+  ready, data, dossierId, insee, texteEnregistre = null, versionNumero = null,
 }: {
   ready: boolean;
   data: SynthesisData;
   dossierId: string;
+  /** Le numéro de la version affichée : la synthèse n'est rangée que dans la version qu'elle a lue. */
+  versionNumero?: number | null;
   insee: string;
+  /**
+   * LA SYNTHÈSE ENREGISTRÉE, quand le module s'ouvre depuis une version (FUT-13, lot B). Elle s'affiche
+   * telle quelle, sans appel : le modèle n'est sollicité que si les faits CHANGENT ensuite (une
+   * actualisation, un diagnostic choisi), jamais pour vérifier, à l'ouverture, ce qui est déjà écrit.
+   */
+  texteEnregistre?: string | null;
 }) {
   const posthog = usePostHog();
-  const [text, setText] = useState("");
-  const [state, setState] = useState<State>("idle");
+  const [text, setText] = useState(texteEnregistre ?? "");
+  const [state, setState] = useState<State>(texteEnregistre ? "done" : "idle");
   const lastHashRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -50,7 +58,7 @@ export function LogementSynthesis({
         headers: { "Content-Type": "application/json" },
         // `insee` n'est plus transmis : le serveur le lit sur le dossier. Il reste ici pour
         // l'instrumentation seule.
-        body: JSON.stringify({ data, dossierId, force }),
+        body: JSON.stringify({ data, dossierId, force, versionNumero }),
         signal: controller.signal,
       });
       if (res.status === 422) {
@@ -75,7 +83,7 @@ export function LogementSynthesis({
       setState("error");
       posthog?.capture("logement_ai_summary_failed", { insee, error: err instanceof Error ? err.message : "unknown" });
     }
-  }, [data, dossierId, insee, factHash, posthog]);
+  }, [data, dossierId, insee, factHash, posthog, versionNumero]);
 
   // Auto-déclenchement : données prêtes et le hash de faits a changé (gating). Un hash inchangé
   // sert le texte figé sans appeler le modèle, donc l'auto ne dépense que sur un fait nouveau.
@@ -86,9 +94,14 @@ export function LogementSynthesis({
   // bouton dont il ignore qu'il contient le produit.
   useEffect(() => {
     if (!ready) return;
+    // Première lecture d'une version : la synthèse enregistrée vaut pour ces faits. Aucun appel.
+    if (texteEnregistre && lastHashRef.current === null) {
+      lastHashRef.current = factHash;
+      return;
+    }
     if (lastHashRef.current === factHash) return;
     run();
-  }, [ready, factHash, run]);
+  }, [ready, factHash, run, texteEnregistre]);
 
   if (!ready) return <></>;
 

@@ -13,6 +13,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
+import { rangerSynthese } from "@/lib/server/logement-report-versions";
 import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "@/lib/logement-synthesis-cache";
 import { deriveClimatProjete } from "@/lib/drias-json";
 import { validateAssertions } from "@/lib/synthesis-guardrails";
@@ -359,6 +360,8 @@ type Body = {
   // Force la régénération malgré un cache chaud (bouton « Régénérer »). Sans lui, re-POST -> hash
   // identique -> cache hit -> même texte : le bouton mentirait.
   force?: boolean;
+  /** La version du rapport Logement dont les faits ont nourri cette synthèse (FUT-13). */
+  versionNumero?: number | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -408,6 +411,10 @@ export async function POST(req: NextRequest) {
   if (!body.force && existing?.synthesis_fact_hash === factHash && existing.synthesis_text) {
     const verdictCache = validateAssertions(existing.synthesis_text);
     if (verdictCache.ok) {
+      // FUT-13 lot B : la synthèse relue rejoint la version de ces faits (version 1 d'un dossier
+      // historique, par exemple), sans appel au modèle.
+      const texteCache = existing.synthesis_text;
+      after(() => rangerSynthese(user.id, body.dossierId!, texteCache, factHash, body.data?.selectedDpe?.id_dpe ?? null, body.versionNumero ?? null));
       return new Response(existing.synthesis_text, {
         headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
       });
@@ -480,6 +487,8 @@ ${JSON.stringify(payload, null, 2)}`;
       synthesis_fact_hash: factHash,
       synthesis_generated_at: new Date().toISOString(),
     }).catch((e: unknown) => console.error("[synthesize-logement] persist failed:", e));
+    // FUT-13 lot B : la synthèse appartient à la version de ses faits ; une ancienne n'est jamais réécrite.
+    await rangerSynthese(user.id, body.dossierId!, issue.texte, factHash, body.data?.selectedDpe?.id_dpe ?? null, body.versionNumero ?? null);
   });
 
   return new Response(issue.texte, {
