@@ -1,0 +1,361 @@
+{
+ "75056": {
+  "results": 20,
+  "data": [
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE0100460A",
+    "date_debut_evt": "06/07/2001",
+    "date_fin_evt": "07/07/2001",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE0300592A",
+    "date_debut_evt": "31/05/2003",
+    "date_fin_evt": "31/05/2003",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE0600132A",
+    "date_debut_evt": "01/07/2003",
+    "date_fin_evt": "30/09/2003",
+    "libelle_risque_jo": "Sécheresse"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE0600186A",
+    "date_debut_evt": "23/06/2005",
+    "date_fin_evt": "23/06/2005",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE1615488A",
+    "date_debut_evt": "28/05/2016",
+    "date_fin_evt": "05/06/2016",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE1804348A",
+    "date_debut_evt": "15/01/2018",
+    "date_fin_evt": "05/02/2018",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE1831446A",
+    "date_debut_evt": "27/07/2018",
+    "date_fin_evt": "27/07/2018",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE1831446A",
+    "date_debut_evt": "09/07/2017",
+    "date_fin_evt": "10/07/2017",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9200482A",
+    "date_debut_evt": "31/05/1992",
+    "date_fin_evt": "01/06/1992",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9200533A",
+    "date_debut_evt": "25/05/1992",
+    "date_fin_evt": "25/05/1992",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9300513A",
+    "date_debut_evt": "29/04/1993",
+    "date_fin_evt": "30/04/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9400582A",
+    "date_debut_evt": "18/07/1994",
+    "date_fin_evt": "19/07/1994",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9900346A",
+    "date_debut_evt": "30/05/1999",
+    "date_fin_evt": "30/05/1999",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9900627A",
+    "date_debut_evt": "25/12/1999",
+    "date_fin_evt": "29/12/1999",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "INTE9900627A",
+    "date_debut_evt": "25/12/1999",
+    "date_fin_evt": "29/12/1999",
+    "libelle_risque_jo": "Mouvement de Terrain"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "MDIE900018A",
+    "date_debut_evt": "27/06/1990",
+    "date_fin_evt": "27/06/1990",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "NOR19830803",
+    "date_debut_evt": "05/06/1983",
+    "date_fin_evt": "06/06/1983",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "NOR19830910",
+    "date_debut_evt": "05/06/1983",
+    "date_fin_evt": "06/06/1983",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "NOR19830910",
+    "date_debut_evt": "05/06/1983",
+    "date_fin_evt": "06/06/1983",
+    "libelle_risque_jo": "Tempête"
+   },
+   {
+    "code_insee": "75056",
+    "code_national_catnat": "NOR19830910",
+    "date_debut_evt": "05/06/1983",
+    "date_fin_evt": "06/06/1983",
+    "libelle_risque_jo": "Grêle"
+   }
+  ]
+ },
+ "sansinond": {
+  "results": 5,
+  "data": [
+   {
+    "code_insee": "01024",
+    "code_national_catnat": "INTE0400918A",
+    "date_debut_evt": "01/07/2003",
+    "date_fin_evt": "30/09/2003",
+    "libelle_risque_jo": "Sécheresse"
+   },
+   {
+    "code_insee": "01024",
+    "code_national_catnat": "INTE1917051A",
+    "date_debut_evt": "01/07/2018",
+    "date_fin_evt": "30/09/2018",
+    "libelle_risque_jo": "Sécheresse"
+   },
+   {
+    "code_insee": "01024",
+    "code_national_catnat": "INTE2014522A",
+    "date_debut_evt": "01/01/2019",
+    "date_fin_evt": "31/03/2019",
+    "libelle_risque_jo": "Sécheresse"
+   },
+   {
+    "code_insee": "01024",
+    "code_national_catnat": "INTE2114775A",
+    "date_debut_evt": "01/04/2020",
+    "date_fin_evt": "30/09/2020",
+    "libelle_risque_jo": "Sécheresse"
+   },
+   {
+    "code_insee": "01024",
+    "code_national_catnat": "IOME2308745A",
+    "date_debut_evt": "01/04/2022",
+    "date_fin_evt": "30/09/2022",
+    "libelle_risque_jo": "Sécheresse"
+   }
+  ]
+ },
+ "sansinond_insee": "01024",
+ "multi": {
+  "results": 24,
+  "data": [
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE0000045A",
+    "date_debut_evt": "22/10/1999",
+    "date_fin_evt": "24/10/1999",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE0000391A",
+    "date_debut_evt": "10/06/2000",
+    "date_fin_evt": "10/06/2000",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE0100232A",
+    "date_debut_evt": "20/03/2001",
+    "date_fin_evt": "23/03/2001",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE0200011A",
+    "date_debut_evt": "18/03/2001",
+    "date_fin_evt": "28/03/2001",
+    "libelle_risque_jo": "Inondations Remontée Nappe"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE0500697A",
+    "date_debut_evt": "17/04/2005",
+    "date_fin_evt": "18/04/2005",
+    "libelle_risque_jo": "Mouvement de Terrain"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9300601A",
+    "date_debut_evt": "05/10/1993",
+    "date_fin_evt": "10/10/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9400065A",
+    "date_debut_evt": "05/10/1993",
+    "date_fin_evt": "10/10/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9400220A",
+    "date_debut_evt": "18/10/1993",
+    "date_fin_evt": "18/10/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9400269A",
+    "date_debut_evt": "07/01/1994",
+    "date_fin_evt": "21/01/1994",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9400424A",
+    "date_debut_evt": "07/01/1994",
+    "date_fin_evt": "21/01/1994",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9500304A",
+    "date_debut_evt": "10/10/1993",
+    "date_fin_evt": "10/10/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9500748A",
+    "date_debut_evt": "07/09/1995",
+    "date_fin_evt": "07/09/1995",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "INTE9600255A",
+    "date_debut_evt": "05/10/1993",
+    "date_fin_evt": "10/10/1993",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "IOCE0800746A",
+    "date_debut_evt": "06/08/2007",
+    "date_fin_evt": "06/08/2007",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "IOME2400969A",
+    "date_debut_evt": "03/06/2023",
+    "date_fin_evt": "03/06/2023",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "MDIE900017A",
+    "date_debut_evt": "29/07/1990",
+    "date_fin_evt": "29/07/1990",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19821118",
+    "date_debut_evt": "06/11/1982",
+    "date_fin_evt": "10/11/1982",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19821118",
+    "date_debut_evt": "06/11/1982",
+    "date_fin_evt": "10/11/1982",
+    "libelle_risque_jo": "Tempête"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19821215",
+    "date_debut_evt": "26/11/1982",
+    "date_fin_evt": "28/11/1982",
+    "libelle_risque_jo": "Poids de la Neige"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19830111",
+    "date_debut_evt": "08/12/1982",
+    "date_fin_evt": "31/12/1982",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19830621",
+    "date_debut_evt": "01/05/1983",
+    "date_fin_evt": "31/05/1983",
+    "libelle_risque_jo": "Glissement de Terrain"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19830621",
+    "date_debut_evt": "01/05/1983",
+    "date_fin_evt": "31/05/1983",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19830621",
+    "date_debut_evt": "01/04/1983",
+    "date_fin_evt": "30/04/1983",
+    "libelle_risque_jo": "Inondations et/ou Coulées de Boue"
+   },
+   {
+    "code_insee": "69123",
+    "code_national_catnat": "NOR19830621",
+    "date_debut_evt": "01/04/1983",
+    "date_fin_evt": "30/04/1983",
+    "libelle_risque_jo": "Glissement de Terrain"
+   }
+  ]
+ }
+}
