@@ -101,9 +101,13 @@ test("T5 : une source qui répond 500 rend une absence, sans lever", async () =>
   const { getCartofrichesNearPoint } = await import("./cartofriches.ts");
   sourceRepond(500, { error: "boom" });
   assert.equal(await getAuditByBanId("99999_test_00001"), null);
+  // Une panne de Cartofriches ou de la ZFE n'est plus « aucune friche » ni « hors ZFE » : elle lève, et la
+  // route la rend null (« non vérifiable »).
+  const { getZfeForPoint } = await import("./zfe.ts");
   sourceRepond(500, { error: "boom" });
-  const friches = await getCartofrichesNearPoint(48.86, 2.31, 1000);
-  assert.equal(friches === null || typeof friches === "object", true);
+  await assert.rejects(getCartofrichesNearPoint(48.86, 2.31, 1000));
+  sourceRepond(500, { error: "boom" });
+  await assert.rejects(getZfeForPoint(48.86, 2.31));
 });
 
 // ── La route ne fait plus la somme de ses sources ───────────────────────────────────────────────────

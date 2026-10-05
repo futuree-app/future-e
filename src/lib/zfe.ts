@@ -80,7 +80,9 @@ async function getZonesAtPoint(latitude: number, longitude: number): Promise<Zfe
 
   // Bornée au délai des autres sources du module Logement : un dépassement rejette, l'appelant rend null.
   const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
-  if (!res.ok) return [];
+  // UNE PANNE N'EST PAS « HORS ZFE » (FUT-13) : rendre [] ici faisait lire une erreur de la source comme
+  // l'absence de zone. On lève : la route rend null, donc « non vérifiable », comme un délai dépassé.
+  if (!res.ok) throw new Error(`zfe:${res.status}`);
 
   const json = (await res.json()) as { results?: ZfeApiRecord[] };
   return json.results ?? [];

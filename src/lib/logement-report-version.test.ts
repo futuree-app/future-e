@@ -28,6 +28,7 @@ const rapport = (over: Partial<LogementReport> = {}): LogementReport => ({
 
 const version = (numero: number, r: LogementReport, hash: string): VersionLogement => ({
   numero, collecteeLe: "2026-10-01T10:00:00.000Z", sourcesAbsentes: sourcesAbsentes(r), report: r, reportHash: hash,
+  synthese: null, syntheseHash: null, syntheseDpe: null,
 });
 
 /** Des dépendances qui comptent leurs appels. */
@@ -169,7 +170,7 @@ test("T2 : ouvert depuis une version, la synthèse enregistrée s'affiche sans a
   assert.match(synthese, /useState\(texteEnregistre \?\? ""\)/);
   assert.match(synthese, /if \(texteEnregistre && lastHashRef\.current === null\) \{\s*lastHashRef\.current = factHash;\s*return;/);
   const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /texteEnregistre=\{versionInitiale \? dossier\?\.synthesis_text \?\? null : null\}/);
+  assert.match(module, /texteEnregistre=\{versionInitiale\?\.version\?\.synthese \?\? null\}/);
 });
 
 // ── La lecture passe par la version, sans appel au montage ──────────────────────────────────────────
@@ -186,7 +187,9 @@ test("T1 : la page lit la version et le module ne collecte pas quand elle existe
 // ── T8 : le diagnostic choisi n'est jamais dans la version ──────────────────────────────────────────
 test("T8 : le DPE choisi vit sur le dossier ; une version ne peut pas le contredire", () => {
   const sql = readFileSync("supabase/35_logement_report_versions.sql", "utf8").replace(/--.*$/gm, "");
-  assert.doesNotMatch(sql, /dpe/i);
+  // La seule mention d'un DPE est celui qu'a lu la SYNTHÈSE de la version (sa provenance) : aucune
+  // colonne ne porte le choix courant du lecteur, qui reste sur `address_dossiers.selected_dpe_id`.
+  assert.deepEqual(sql.match(/\w*dpe\w*/gi)?.filter((m, i, a) => a.indexOf(m) === i), ["synthesis_dpe_numero"]);
   const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
   // Après une actualisation, le diagnostic choisi pendant la session reste celui affiché.
   assert.match(module, /appliquerRapport\(payload, row, true\)/);
@@ -204,4 +207,71 @@ test("T10 : un lecteur ne lit que les versions de SES dossiers non révoqués, e
   assert.match(sql, /revoke insert, update, delete, truncate on public\.logement_report_versions from authenticated, anon/);
   assert.match(sql, /references public\.address_dossiers\(id\) on delete cascade/);
   assert.match(sql, /unique \(dossier_id, version\)/);
+});
+
+// ── Phase 1.1 du lot B : synthèse versionnée, aucune perte ──────────────────────────────────────────
+import { rangementSynthese, syntheseCompatible } from "./logement-report-version.ts";
+
+const riche = (): LogementReport => rapport({
+  audit: { correspondance: "exact_address", n_audit: "A-SYN", date_audit: "2025-05-30", classe_dpe_actuel: "G", adresse: null,
+    objet: { grain: "immeuble", surface_m2: 400 }, scenarios: [{ categorie: "état initial", etape: "état initial", travaux: null, conso_ep_m2: 503.5447, emission_ges_m2: null }] },
+  granularity: { geocoding: "address", cadastre: "parcel", georisques_address: "point", georisques_parcel: null, georisques_commune: "commune" },
+  caveat: "Ce résultat combine une adresse géocodée BAN…",
+  decision: { familles: [{ cle: "rga", couverture: "present" }] } as unknown as LogementReport["decision"],
+} as Partial<LogementReport>);
+
+test("T11 : rapport live → JSON persisté → version restaurée, sans aucun champ perdu", () => {
+  const live = riche();
+  const persiste = JSON.parse(jsonCanonique(live)); // jsonb réordonne les clés, ne retire rien
+  const v = lireLigneVersion({ version: 1, report: persiste, report_hash: "h", sources_absentes: [], collected_at: "2026-10-05" })!;
+  assert.deepEqual(v.report, JSON.parse(JSON.stringify(live)));
+});
+
+test("T16 : la version restaurée garde provenance, grain, limite et couverture", () => {
+  const v = lireLigneVersion({ version: 1, report: JSON.parse(jsonCanonique(riche())), report_hash: "h", sources_absentes: [], collected_at: "2026-10-05" })!;
+  assert.equal(v.report.granularity?.georisques_address, "point");
+  assert.match(v.report.caveat ?? "", /géocodée BAN/);
+  assert.ok(v.report.decision);
+  assert.equal(v.report.audit?.objet?.grain, "immeuble");
+  assert.equal(v.report.audit?.scenarios[0].conso_ep_m2, 503.5447); // aucune perte de précision
+});
+
+test("T12 : N garde S1 quand S2 naît pour d'autres faits ; S2 va dans une NOUVELLE version", () => {
+  const n: VersionLogement = { ...version(1, rapport(), "h1"), synthese: "S1", syntheseHash: "f1", syntheseDpe: "DPE-A" };
+  const avant = structuredClone(n);
+  assert.equal(rangementSynthese(n, "f2"), "nouvelle_version");
+  assert.equal(rangementSynthese(n, "f1"), "deja_la");
+  assert.equal(rangementSynthese({ ...n, synthese: null, syntheseHash: null }, "f1"), "attacher");
+  assert.equal(rangementSynthese(null, "f1"), "aucune_version");
+  assert.deepEqual(n, avant);
+  const store = readFileSync("src/lib/server/logement-report-versions.ts", "utf8");
+  assert.match(store, /\.is\("synthesis_text", null\)/); // l'attache n'écrase jamais
+});
+
+test("T13 : une version ne change jamais, et sa synthèse s'écrit une seule fois (trigger)", () => {
+  const sql = readFileSync("supabase/35_logement_report_versions.sql", "utf8");
+  assert.match(sql, /before update on public\.logement_report_versions/);
+  assert.match(sql, /new\.report is distinct from old\.report/);
+  assert.match(sql, /if old\.synthesis_text is not null and \(/);
+  assert.match(sql, /synthesis_dpe_numero\s+text/);
+});
+
+test("T14 : une première collecte avec une source muette est écrite, et l'absence est NOMMÉE", async () => {
+  const { d } = deps({ existante: null, construit: () => rapport({ georisques: { address: null, parcel: null, commune: {} as never } }) });
+  const r = await consulterOuActualiser(false, d);
+  assert.deepEqual(r.version?.sourcesAbsentes, ["georisques_point"]);
+  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(module, /Leurs données sont indiquées comme non vérifiables, pas comme absentes\./);
+  // Et la ZFE ou les friches en panne ne se lisent plus comme « rien ici » : elles lèvent, la route rend null.
+  assert.match(readFileSync("src/lib/zfe.ts", "utf8"), /if \(!res\.ok\) throw new Error/);
+  assert.match(readFileSync("src/lib/cartofriches.ts", "utf8"), /if \(!res\.ok\) throw new Error/);
+});
+
+test("§9 : une synthèse ne s'affiche qu'avec le DPE qu'elle a lu", () => {
+  assert.equal(syntheseCompatible("DPE-A", "DPE-A"), true);
+  assert.equal(syntheseCompatible(null, null), true);
+  assert.equal(syntheseCompatible("DPE-A", "DPE-B"), false);
+  assert.equal(syntheseCompatible(null, "DPE-B"), false);
+  const page = readFileSync("src/app/(account)/rapport/logement/page.tsx", "utf8");
+  assert.match(page, /syntheseCompatible\(versionLogement\.syntheseDpe, dossier\.selected_dpe_id\)/);
 });

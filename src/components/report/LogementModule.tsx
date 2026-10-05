@@ -474,6 +474,7 @@ export default function LogementModule({
             {result?.version && (
               <BandeauVersion
                 collecteeLe={result.version.collecteeLe}
+                sourcesAbsentes={result.version.sourcesAbsentes}
                 etat={actualisation}
                 onActualiser={() => { void actualiser(); }}
               />
@@ -531,7 +532,8 @@ export default function LogementModule({
             dossierId={dossier?.id ?? ""}
             insee={result.address?.citycode ?? ""}
             // Ouvert depuis une version : la synthèse enregistrée s'affiche telle quelle, sans appel.
-            texteEnregistre={versionInitiale ? dossier?.synthesis_text ?? null : null}
+            // La synthèse DE LA VERSION ouverte, jamais celle d'un autre état du dossier.
+            texteEnregistre={versionInitiale?.version?.synthese ?? null}
           />
 
           {/* Beat 3 — Les preuves : pourquoi ? (2 sous-familles) */}
@@ -681,8 +683,16 @@ const LIBELLE_ETAT: Record<"en_cours" | "nouvelle_version" | "identique" | "refu
 };
 
 /** La date de la collecte affichée, et le geste qui la renouvelle. Discret : aucun spinner global. */
-function BandeauVersion({ collecteeLe, etat, onActualiser }: {
+// Les sources muettes, dites en clair (FUT-13) : une source qui n'a pas répondu n'est pas « rien à signaler ».
+const NOM_SOURCE: Record<string, string> = {
+  parcelle: "cadastre", altitude: "altitude", zfe: "zones à faibles émissions", friches: "friches (Cartofriches)",
+  donnees_communales: "données communales", sinistralite: "sinistralité", georisques_commune: "Géorisques (commune)",
+  georisques_point: "Géorisques (adresse)", patrimoine: "servitudes patrimoniales",
+};
+
+function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {
   collecteeLe: string;
+  sourcesAbsentes?: string[];
   etat: "idle" | "en_cours" | "nouvelle_version" | "identique" | "refusee" | "erreur";
   onActualiser: () => void;
 }) {
@@ -699,6 +709,12 @@ function BandeauVersion({ collecteeLe, etat, onActualiser }: {
         Actualiser les données
       </button>
       {etat !== "idle" && <span aria-live="polite">{LIBELLE_ETAT[etat]}</span>}
+      {sourcesAbsentes.length > 0 && (
+        <span style={{ flexBasis: "100%" }}>
+          Lors de cette collecte, ces sources n&apos;ont pas répondu : {sourcesAbsentes.map((s) => NOM_SOURCE[s] ?? s).join(", ")}.
+          Leurs données sont indiquées comme non vérifiables, pas comme absentes.
+        </span>
+      )}
     </div>
   );
 }

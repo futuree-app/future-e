@@ -295,3 +295,47 @@ propriétaire de la RLS (T10 échoue).
    dernière. Les figer par version demanderait de les écrire dans la version, après sa création.
 3. La règle « aucune source perdue » peut bloquer une actualisation tant que GPU dépasse son délai : FUT-63.
 4. Le plancher de l'application (environ 1,1 s ici, plus sur un démarrage à froid Vercel) n'est pas traité ici.
+
+## Passe finale : synthèse versionnée et preuve d'absence de perte
+
+### Synthèse portée par la version
+Chaque ligne de `logement_report_versions` porte sa synthèse : `synthesis_text`, `synthesis_fact_hash` (même empreinte serveur que `address_dossiers.synthesis_fact_hash`), `synthesis_generated_at`, `synthesis_dpe_numero`. Un trigger refuse toute modification du rapport et toute réécriture d'une synthèse déjà posée. Le seul geste permis sur une ligne existante est de poser sa synthèse, une fois, de null à son texte.
+
+`rangementSynthese(derniere, empreinte)` décide :
+- pas de version : rien n'est écrit (fallback live) ;
+- version sans synthèse : `attacher`, écriture conditionnelle `synthesis_text is null` ;
+- même empreinte : `deja_la`, rien n'est écrit ;
+- empreinte différente (autre DPE choisi, autre projet) : `nouvelle_version`, insertion de N+1 avec le même rapport, le même `report_hash`, la même `collected_at` et la nouvelle synthèse. N garde S1.
+
+### Dossiers existants
+Aucun backfill. À la première ouverture, la version 1 se construit en live. La synthèse arrive ensuite par `/api/synthesize-logement` :
+- si l'empreinte des faits de la version 1 égale `address_dossiers.synthesis_fact_hash`, le cache sert le texte existant, et `rangerSynthese` l'attache à la version 1 (0 appel Anthropic) ;
+- sinon, la synthèse est générée normalement et rangée dans la version qui correspond à ses faits.
+
+Une ancienne synthèse n'est jamais attachée à des faits différents.
+
+### Garde DPE
+À l'affichage, la synthèse d'une version n'est montrée que si `synthesis_dpe_numero` égale le DPE choisi sur le dossier (`syntheseCompatible`). Sinon, le module régénère pour le DPE affiché.
+
+### Aller-retour live → JSON → restauré
+Sur un rapport réel capturé (immeuble parisien) : égalité profonde, 129 chemins de champs, 6 699 octets. Le client recevait déjà exactement ce JSON. L'entrée de la synthèse (rapport + ligne DPE + projet) est donc identique avant et après.
+
+### Ce qui n'est pas persisté
+Les réponses brutes des fournisseurs ne sont pas conservées : géométries ZFE complètes, réponses Géorisques brutes, colonnes ADEME non mappées, features BAN et cadastre complètes.
+
+Limite analytique : une nouvelle métrique dérivée de ces réponses ne peut pas être recalculée sur une ancienne version. Il faut une actualisation, qui interroge les sources du jour.
+
+### Contrat de fraîcheur
+Le bandeau affiche « Données collectées le … » et un bouton « Actualiser les données ». Aucune actualisation n'est automatique, et rien n'est présenté comme du temps réel.
+
+### Absence et indisponibilité
+- Une source en délai dépassé ou en erreur rend `null`, et `sources_absentes` la nomme. Le bandeau la liste comme non vérifiable, pas comme absente.
+- Correction de cette passe : une erreur HTTP de la ZFE ou de Cartofriches rendait `[]`, lu comme « hors ZFE » ou « aucune friche ». Elle lève désormais, et la route rend `null`.
+- La base des audits rend encore `[]` sur une erreur. Cette confusion n'a pas été corrigée : elle n'affirme aucun risque.
+- Une première collecte incomplète est écrite comme version 1, avec ses absences nommées. Une actualisation qui retrouve la source est acceptée. Une actualisation qui perd une source présente est refusée, et N reste affichée.
+
+### ZFE
+10 points réels sur 10 donnent un résultat identique entre l'ancienne méthode (toutes les zones, filtre local) et la nouvelle (`geo_distance` au point, puis le même `pointInShape`) : dedans, dehors, près d'une limite, zones imbriquées (Strasbourg, 4).
+
+### Géorisques
+Si une version valide existe, une panne de Géorisques n'empêche pas sa consultation : la lecture ne touche aucune source. Une actualisation pendant la panne est refusée, car elle perd une source présente. Les données affichées ne sont donc jamais remplacées par du vide.
