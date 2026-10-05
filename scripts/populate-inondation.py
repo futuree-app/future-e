@@ -27,9 +27,28 @@ def is_flood(label):
     return "inondation" in l and "vague" not in l
 
 
+def commune_parent(insee):
+    """GASPAR est au grain COMMUNE : Paris, Lyon et Marseille n'y existent que sous 75056, 69123 et
+    13055. Interrogé avec un arrondissement (75111), il répond zéro ligne, et l'index écrivait alors
+    « 0 arrêté inondation » pour les 45 arrondissements (FUT-60, 05/10/2026). Miroir de
+    `communeParent` (src/lib/plm.ts)."""
+    if "75101" <= insee <= "75120":
+        return "75056"
+    if "69381" <= insee <= "69389":
+        return "69123"
+    if "13201" <= insee <= "13216":
+        return "13055"
+    return insee
+
+
 def fetch_count(insee):
-    """Nombre d'arrêtés inondation (hors submersion marine) pour une commune. None si échec."""
-    qs = urllib.parse.urlencode({"code_insee": insee, "page": "1", "page_size": "500"})
+    """Lignes GASPAR inondation (hors submersion marine) de la commune. None si échec.
+
+    UNITÉ : une ligne GASPAR = une reconnaissance (un arrêté, un phénomène, un événement). Un même
+    arrêté peut porter plusieurs lignes (deux événements, ou inondation + tempête) : ce compte n'est
+    donc PAS un nombre d'arrêtés distincts. Le relevé direct (src/lib/georisques.ts) compte la même
+    unité, ce qui garde les deux chiffres comparables."""
+    qs = urllib.parse.urlencode({"code_insee": commune_parent(insee), "page": "1", "page_size": "500"})
     url = f"{BASE}?{qs}"
     for attempt in range(3):
         try:

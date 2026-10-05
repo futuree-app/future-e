@@ -1,6 +1,7 @@
 import "server-only";
-import { riskFlagsFromLabels, simplifyCatnatRisk } from "./georisques-flags.ts";
+import { agregerLignesCatnat, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
 import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
+import { communeParent } from "./plm.ts";
 
 type GasparRiskDetail = {
   libelle_risque_long?: string | null;
@@ -206,9 +207,12 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
 
 async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSummary> {
   const [gasparJson, seismicJson] = await Promise.all([
+    // Même grain que les arrêtés (FUT-60) : GASPAR ne connaît que la commune (75056 recense
+    // l'inondation, 75111 ne répond rien). Le zonage sismique, lui, est À L'ARRONDISSEMENT (75056
+    // ne répond rien) : il garde son code, et ce sens inverse reste hors de ce lot.
     fetchJson<GasparResponse>(
       "/gaspar/risques",
-      new URLSearchParams({ code_insee: inseeCode }),
+      new URLSearchParams({ code_insee: communeParent(inseeCode) }),
     ),
     fetchJson<SeismicResponse>(
       "/zonage_sismique",
@@ -485,137 +489,19 @@ type GasparCatnatResponse = {
   results?: number | null;
 };
 
-/** Famille visuelle d'une année marquante (palette bande-trajectoire, jamais de rouge). */
-export type CatnatBandFamily = "inondation" | "secheresse" | "tempete" | "autre";
-
-export type GasparCatnatSummary = {
-  /** Nombre total d'arrêtés CatNat sur la commune. */
-  total: number;
-  firstYear: number | null;
-  lastYear: number | null;
-  /** Répartition par famille d'aléa, triée par fréquence décroissante. */
-  byRisk: { label: string; count: number }[];
-  /** Comptage par décennie (frise temporelle), ordre chronologique. decade = 1980, 1990… */
-  byDecade: { decade: number; count: number }[];
-  /**
-   * Années marquées par au moins un arrêté, ordre chronologique, une famille
-   * dominante par année (la plus fréquente dans l'année ; égalité tranchée par
-   * gravité inondation > sécheresse > tempête > autre). Alimente la bande
-   * « ligne des années » du rapport Territoire.
-   */
-  years: { year: number; family: CatnatBandFamily }[];
-  topRisk: string | null;
-  /** Phrase de synthèse déterministe (≤ 120 car.), ou null si aucun arrêté. */
-  summary: string | null;
-};
-
-// Phrase de synthèse déterministe (≤ 120 car.) à partir de la répartition.
-// Aucune IA : pure logique sur les fréquences.
-function describeCatnat(
-  byRisk: { label: string; count: number }[],
-  total: number,
-): string | null {
-  if (total === 0 || byRisk.length === 0) return null;
-  const top = byRisk[0];
-  const lower = top.label.toLowerCase();
-  if (byRisk.length === 1) return `Uniquement ${lower}.`;
-  const ratio = top.count / total;
-  if (ratio >= 0.55) return `Surtout ${lower}.`;
-  if (ratio >= 0.4) return `${top.label} : près de la moitié des reconnaissances.`;
-  const sentence = `${top.label} et ${byRisk[1].label.toLowerCase()} sont les aléas les plus fréquents.`;
-  return sentence.length <= 120 ? sentence : `Plusieurs aléas, surtout ${lower}.`;
-}
-
-// Famille visuelle d'un libellé simplifié (couche bande-trajectoire, 4 couleurs).
-const BAND_FAMILY_ORDER: CatnatBandFamily[] = ["inondation", "secheresse", "tempete", "autre"];
-
-function bandFamilyOf(simplified: string): CatnatBandFamily {
-  if (
-    simplified === "Inondations" ||
-    simplified === "Submersion marine" ||
-    simplified === "Érosion et impact des vagues"
-  )
-    return "inondation";
-  if (simplified === "Sécheresse des sols") return "secheresse";
-  if (simplified === "Tempête" || simplified === "Cyclone") return "tempete";
-  return "autre";
-}
-
-function parseEvtYear(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const year = Number(value.split("/")[2]);
-  return Number.isFinite(year) && year > 1900 ? year : null;
-}
+// FUT-60 : les types et l'agrégation des lignes GASPAR vivent dans georisques-flags (pur, testable).
+export type { CatnatBandFamily, GasparCatnatSummary } from "./georisques-flags.ts";
 
 async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatSummary> {
   const json = await fetchJson<GasparCatnatResponse>(
     "/gaspar/catnat",
-    new URLSearchParams({ code_insee: inseeCode, page: "1", page_size: "500" }),
+    // GASPAR EST AU GRAIN COMMUNE (FUT-60) : interrogé avec un arrondissement de Paris, Lyon ou
+    // Marseille, il répond zéro ligne, et une page d'arrondissement affirmait « aucun arrêté » d'une
+    // commune qui en compte des dizaines. Les arrêtés de l'arrondissement SONT ceux de sa commune.
+    new URLSearchParams({ code_insee: communeParent(inseeCode), page: "1", page_size: "500" }),
   );
 
-  const items = json?.data ?? [];
-  const counts = new Map<string, number>();
-  const decadeCounts = new Map<number, number>();
-  const yearFamilyCounts = new Map<number, Map<CatnatBandFamily, number>>();
-  let firstYear: number | null = null;
-  let lastYear: number | null = null;
-
-  for (const item of items) {
-    const label = item.libelle_risque_jo?.trim();
-    const year = parseEvtYear(item.date_debut_evt);
-    if (label) {
-      const family = simplifyCatnatRisk(label);
-      counts.set(family, (counts.get(family) ?? 0) + 1);
-      if (year != null) {
-        const perYear = yearFamilyCounts.get(year) ?? new Map<CatnatBandFamily, number>();
-        const band = bandFamilyOf(family);
-        perYear.set(band, (perYear.get(band) ?? 0) + 1);
-        yearFamilyCounts.set(year, perYear);
-      }
-    }
-    if (year != null) {
-      firstYear = firstYear == null ? year : Math.min(firstYear, year);
-      lastYear = lastYear == null ? year : Math.max(lastYear, year);
-      const decade = Math.floor(year / 10) * 10;
-      decadeCounts.set(decade, (decadeCounts.get(decade) ?? 0) + 1);
-    }
-  }
-
-  const years = Array.from(yearFamilyCounts.entries())
-    .map(([year, perYear]) => {
-      let family: CatnatBandFamily = "autre";
-      let best = -1;
-      for (const candidate of BAND_FAMILY_ORDER) {
-        const count = perYear.get(candidate) ?? 0;
-        if (count > best) {
-          best = count;
-          family = candidate;
-        }
-      }
-      return { year, family };
-    })
-    .sort((a, b) => a.year - b.year);
-
-  const byRisk = Array.from(counts.entries())
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count);
-
-  const byDecade = Array.from(decadeCounts.entries())
-    .map(([decade, count]) => ({ decade, count }))
-    .sort((a, b) => a.decade - b.decade);
-
-  const total = typeof json?.results === "number" ? json.results : items.length;
-
-  return {
-    total,
-    firstYear,
-    lastYear,
-    byRisk,
-    byDecade,
-    years,
-    topRisk: byRisk[0]?.label ?? null,
-    summary: describeCatnat(byRisk, total),
-  };
+  return agregerLignesCatnat(json?.data ?? [], json?.results);
 }
 
 const catnatSummaryCache = new Map<string, Promise<GasparCatnatSummary>>();
