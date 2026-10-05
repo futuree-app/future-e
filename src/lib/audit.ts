@@ -10,12 +10,16 @@ export type { AuditCandidatProche, AuditRecord, AuditScenario } from "@/lib/audi
 
 const BASE = "https://data.ademe.fr/data-fair/api/v1/datasets/audit-opendata";
 
+// Le délai des autres sources du module Logement (Géorisques, GPU, cadastre : 8 s).
+const SOURCE_TIMEOUT_MS = 8_000;
+
 async function fetchAuditLines<T>(params: Record<string, string>, select: readonly string[]): Promise<T[]> {
   const url = new URL(`${BASE}/lines`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.set("select", select.join(","));
   url.searchParams.set("sort", "-date_etablissement_audit");
-  const res = await fetch(url.toString(), { next: { revalidate: 86400 } });
+  // BORNÉE (FUT-13) : sans délai, une réponse ADEME qui traîne tenait tout le module Logement.
+  const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS) });
   if (!res.ok) return [];
   const json = (await res.json()) as { results?: T[] };
   return json.results ?? [];

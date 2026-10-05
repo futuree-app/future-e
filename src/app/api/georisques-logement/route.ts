@@ -32,27 +32,40 @@ type ResolvedAddress = {
 };
 
 async function buildReport(address: ResolvedAddress, banFeatureType: string | null) {
-    const parcel = await findCadastreParcelByPoint(
+    // TOUT PART EN MÊME TEMPS (FUT-13). La route enchaînait quatre étapes en série (cadastre, puis DPE
+    // et audit, puis neuf sources, puis Géorisques au point, puis à la parcelle) : son temps était la
+    // SOMME des sources les plus lentes de chaque étape. Seules deux dépendances réelles restent
+    // chaînées, chacune derrière la sienne : la lecture Géorisques par parcelle attend la parcelle, et
+    // la recherche d'un audit voisin attend de savoir qu'aucun audit exact n'existe.
+    const parcelP = findCadastreParcelByPoint(
       address.longitude,
       address.latitude,
     ).catch(() => null);
 
-    const [dpeCandidates, auditExact] = await Promise.all([
-      address.id
-        ? getDpeCandidatesByBanId(address.id).catch(() => [])
-        : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []),
-      // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
-      // donne un audit exploitable.
-      address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null),
-    ]);
+    const dpeCandidatesP = address.id
+      ? getDpeCandidatesByBanId(address.id).catch(() => [])
+      : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []);
+    // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
+    // donne un audit exploitable.
+    const auditExactP = address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null);
     // Sans audit exact, et seulement alors, un audit VOISIN peut être signalé comme candidat : une
     // référence et une distance, jamais une valeur. L'exact gagne toujours (`resultatAudit`).
-    const auditProche = auditExact
-      ? null
-      : await getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null);
-    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
+    const auditProcheP = auditExactP.then((exact) =>
+      exact
+        ? null
+        : getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null),
+    );
 
-    const [georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage] = await Promise.all([
+    const georisquesAddressP = process.env.GEORISQUES_API_TOKEN
+      ? getGeorisquesAddressSummary(address.latitude, address.longitude).catch(() => null)
+      : Promise.resolve(null);
+    const georisquesParcelP = parcelP.then((parcel) =>
+      process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
+        ? getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
+        : null,
+    );
+
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeCandidates, auditExact, auditProche, georisquesAddress, georisquesParcel] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -77,17 +90,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]);
-
-    const georisquesAddress = process.env.GEORISQUES_API_TOKEN
-      ? await getGeorisquesAddressSummary(address.latitude, address.longitude).catch(
-          () => null,
-        )
-      : null;
-    const georisquesParcel =
-      process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
-        ? await getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null)
-        : null;
+    ]), parcelP, dpeCandidatesP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
+    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
     // communal (aléas GASPAR sans source fine). Les labels GASPAR au point donnent le signalement

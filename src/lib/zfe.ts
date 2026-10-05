@@ -60,32 +60,36 @@ function pointInShape(lon: number, lat: number, shape: GeoPolygon | GeoMultiPoly
   return shape.coordinates.some((poly) => pointInRing(lon, lat, poly[0]));
 }
 
-// ── Cache ────────────────────────────────────────────────────────────────────
+// ── Requête ──────────────────────────────────────────────────────────────────
+//
+// LA SOURCE FILTRE AU POINT (FUT-13). La version précédente téléchargeait les contours de TOUTES les
+// zones (2,29 Mo) pour tester le point localement : trop gros pour le cache de données de Next (plafond
+// de 2 Mo, d'où l'avertissement « Failed to set Next.js data cache… »), donc retéléchargé à chaque
+// dossier ouvert sur une instance neuve, et sans délai. `geo_distance=lon,lat,0` demande à Data Fair les
+// seules zones qui CONTIENNENT le point (même usage que l'IRIS au point, `commune-data.ts`) : quelques
+// dizaines de Ko au plus, mis en cache. Le test géométrique local est CONSERVÉ comme contrôle final.
 
-let cachedZones: ZfeApiRecord[] | null = null;
-
-async function getAllZones(): Promise<ZfeApiRecord[]> {
-  if (cachedZones) return cachedZones;
-
+async function getZonesAtPoint(latitude: number, longitude: number): Promise<ZfeApiRecord[]> {
   const url = new URL(`${DATASET_URL}/lines`);
+  url.searchParams.set("geo_distance", `${longitude},${latitude},0`);
   url.searchParams.set("size", "50");
   url.searchParams.set(
     "select",
     "id,nom,name,vp_critair,deux_rm_critair,vul_critair,vp_horaires,date_debut,date_fin,url_site_information,_geoshape",
   );
 
-  const res = await fetch(url.toString(), { next: { revalidate: 86400 } });
+  // Bornée au délai des autres sources du module Logement : un dépassement rejette, l'appelant rend null.
+  const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
   if (!res.ok) return [];
 
   const json = (await res.json()) as { results?: ZfeApiRecord[] };
-  cachedZones = json.results ?? [];
-  return cachedZones;
+  return json.results ?? [];
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
 export async function getZfeForPoint(latitude: number, longitude: number): Promise<ZfeResult> {
-  const zones = await getAllZones();
+  const zones = await getZonesAtPoint(latitude, longitude);
 
   const matching = zones
     .filter((z) => z._geoshape && pointInShape(longitude, latitude, z._geoshape))
