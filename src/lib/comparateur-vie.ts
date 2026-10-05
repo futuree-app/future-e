@@ -39,6 +39,7 @@ import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
 import { centraliteRang } from "@/lib/centralite-services";
+import { libellesAgglomeration, lectureCommunalePLM, villePLM, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -656,16 +657,8 @@ function buildInseeIndex(communes: IndexCommune[]): void {
 }
 
 function buildUuLabels(communes: IndexCommune[]): void {
-  const best = new Map<string, { nom: string; pop: number }>();
-  for (const c of communes) {
-    if (!c.uu) continue;
-    const pop = c.population ?? 0;
-    const prev = best.get(c.uu);
-    if (!prev || pop > prev.pop) best.set(c.uu, { nom: c.nom, pop });
-  }
-  const m = new Map<string, string>();
-  for (const [uu, v] of best) m.set(uu, v.nom);
-  uuLabelCache = m;
+  // FUT-43 : Paris, Lyon, Marseille concourent en ville entière (cf. libellesAgglomeration).
+  uuLabelCache = libellesAgglomeration(communes);
 }
 
 export async function getCommuneEntry(insee: string): Promise<IndexCommune | null> {
@@ -675,6 +668,26 @@ export async function getCommuneEntry(insee: string): Promise<IndexCommune | nul
   // 69123/13055) n'existe pas ici. Repli null assumé (la page n'affiche alors pas
   // les cartes concernées plutôt qu'un trou).
   return inseeIndexCache!.get(insee.trim()) ?? null;
+}
+
+/**
+ * FUT-43 : LA LECTURE COMMUNALE DE PARIS, LYON, MARSEILLE (75056, 69123, 13055), absente de l'index qui ne
+ * les connaît que par arrondissement. Agrégée champ par champ (`lectureCommunalePLM`), jamais copiée d'un
+ * arrondissement. `null` pour toute autre commune.
+ */
+export async function getLectureCommunalePLM(insee: string): Promise<{
+  lecture: LectureCommunalePLM; uuLabel: string | null; role: TerritoryContext["role"];
+} | null> {
+  const ville = villePLM(insee.trim());
+  if (!ville) return null;
+  const communes = await loadIndex();
+  if (!uuLabelCache) buildUuLabels(communes);
+  const lecture = lectureCommunalePLM(insee.trim(), communes);
+  if (!lecture) return null;
+  const uuLabel = lecture.uu ? uuLabelCache!.get(lecture.uu) ?? null : null;
+  const role: TerritoryContext["role"] = !lecture.uu ? "isolee"
+    : uuLabel && normalizeName(uuLabel) === normalizeName(ville.nom) ? "pole" : "agglo";
+  return { lecture, uuLabel, role };
 }
 
 export type TerritoryContext = {
