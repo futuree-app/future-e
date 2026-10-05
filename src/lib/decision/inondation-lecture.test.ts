@@ -56,7 +56,7 @@ test("Ciré-d'Aunis : l'absence de sinistre ONRN n'est jamais isolée de l'histo
   // Et la réconciliation, produite par le MÊME objet, rappelle le compte d'arrêtés et refuse de
   // conclure. Ces deux phrases ne peuvent pas être séparées : elles sortent du même appel.
   assert.match(l.reconciliation, /ne permet pas de conclure à l'absence d'événement ou de risque/);
-  assert.match(l.reconciliation, /5 arrêtés de catastrophe naturelle inondation depuis 1982/);
+  assert.match(l.reconciliation, /5 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982/);
 });
 
 test("Ciré-d'Aunis : le compte affiché est celui de la preuve du dossier, mot pour mot", () => {
@@ -64,7 +64,7 @@ test("Ciré-d'Aunis : le compte affiché est celui de la preuve du dossier, mot 
   // `catnat-evidence`, jamais réécrite ici.
   const l = construireLectureInondation(CIRE)!;
   const catnat = l.constats.find((c) => c.cle === "catnat_commune")!;
-  assert.match(catnat.enonce, /^La commune compte 5 arrêtés de catastrophe naturelle inondation depuis 1982\./);
+  assert.match(catnat.enonce, /^La commune compte 5 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982\./);
   assert.match(catnat.source, /submersion marine exclue/);
   assert.equal(catnat.periode, "depuis 1982");
 });

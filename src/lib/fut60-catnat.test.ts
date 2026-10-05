@@ -75,7 +75,7 @@ test("T4. une seule période : le total et le compte inondation disent « depuis
   assert.match(texte, new RegExp(`reconnue 20 fois en état de catastrophe naturelle depuis ${CATNAT_DEPUIS}`));
   assert.doesNotMatch(texte, /depuis 1983/, "la date de la première reconnaissance ne se présente plus comme la période");
   const o = catnatInondationDepuisIndex({ insee: "75056", inondation: INDEX.get("75111")!.inondation ?? null })!;
-  assert.match(libelleCatnatInondation(o), new RegExp(`depuis ${CATNAT_DEPUIS}$`));
+  assert.match(libelleCatnatInondation(o), new RegExp(`depuis ${CATNAT_DEPUIS}, à l.échelle de Paris$`));
 });
 
 test("T5. une seule unité : les deux chemins comptent des LIGNES GASPAR (reconnaissances), pas des arrêtés distincts", () => {
@@ -102,7 +102,7 @@ test("T7. le texte rendu du cas fautif : un total, une dominante, un compte inon
   const texte = synthese("Paris", "75056", GASPAR["75056"], "75111");
   assert.match(texte, /Paris a été reconnue 20 fois en état de catastrophe naturelle depuis 1982, surtout au titre de : inondations\./);
   const o = catnatInondationDepuisIndex({ insee: "75056", inondation: INDEX.get("75111")!.inondation ?? null })!;
-  assert.equal(`Dont ${libelleCatnatInondation(o)}`, "Dont 16 arrêtés inondation depuis 1982");
+  assert.equal(`Dont ${libelleCatnatInondation(o)}`, "Dont 16 reconnaissances liées aux inondations depuis 1982, à l'échelle de Paris");
   // Un compte figé avant la correction (zéro, catnat-1) n'est plus réaffiché ; un compte ordinaire l'est.
   assert.equal(catnatFigeAffichable({ count: 0, depuis: 1982, origine: "index_local", insee: "75056", version: "catnat-1" }), false);
   assert.equal(catnatFigeAffichable({ count: 7, depuis: 1982, origine: "index_local", insee: "17300", version: "catnat-1" }), true);

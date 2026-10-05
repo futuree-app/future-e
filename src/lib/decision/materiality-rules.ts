@@ -175,7 +175,7 @@ const ruleInondation: DecisionRule = {
     // fait ; sans quoi le lecteur ne peut ni vérifier ni contester.
     //
     // Ici, les deux preuves viennent de la MÊME matière, les arrêtés CatNat inondation de GASPAR
-    // (`scripts/populate-inondation.py`, submersion marine exclue). L'une la donne brute, l'autre
+    // (`scripts/gaspar/collecter-catnat.mts`, submersion marine exclue). L'une la donne brute, l'autre
     // la donne mise en rang parmi les communes de l'index, dont le périmètre V1 est la France
     // MÉTROPOLITAINE, Corse comprise et DROM exclus (`scripts/build-comparateur-index.mjs`).
     // « Rang national » couvrait un territoire que ce calcul n'a jamais parcouru. La supprimer n'était pas une option :
@@ -183,7 +183,7 @@ const ruleInondation: DecisionRule = {
     //
     // Elle reste SANS valeur affichée : le rang est un calcul interne que la doctrine ne montre pas.
     const evidence: EvidenceRef[] = [
-      { factId: "inondation.risque", module: "territoire", label: "Arrêtés inondation (GASPAR), position en France métropolitaine", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
+      { factId: "inondation.risque", module: "territoire", label: "Reconnaissances CatNat inondation (GASPAR), position en France métropolitaine", grain: "commune", href: territoireHref, targetKey: "risk.flooding" },
       ...(catnat
         ? [{
             factId: "inondation.catnat", module: "territoire" as const,

@@ -1,7 +1,6 @@
 import "server-only";
-import { agregerLignesCatnat, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
+import { agregerLignesCatnat, codeGaspar, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
 import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
-import { communeParent } from "./plm.ts";
 
 type GasparRiskDetail = {
   libelle_risque_long?: string | null;
@@ -212,7 +211,7 @@ async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSumma
     // ne répond rien) : il garde son code, et ce sens inverse reste hors de ce lot.
     fetchJson<GasparResponse>(
       "/gaspar/risques",
-      new URLSearchParams({ code_insee: communeParent(inseeCode) }),
+      new URLSearchParams({ code_insee: codeGaspar(inseeCode) }),
     ),
     fetchJson<SeismicResponse>(
       "/zonage_sismique",
@@ -498,7 +497,7 @@ async function loadGasparCatnatSummary(inseeCode: string): Promise<GasparCatnatS
     // GASPAR EST AU GRAIN COMMUNE (FUT-60) : interrogé avec un arrondissement de Paris, Lyon ou
     // Marseille, il répond zéro ligne, et une page d'arrondissement affirmait « aucun arrêté » d'une
     // commune qui en compte des dizaines. Les arrêtés de l'arrondissement SONT ceux de sa commune.
-    new URLSearchParams({ code_insee: communeParent(inseeCode), page: "1", page_size: "500" }),
+    new URLSearchParams({ code_insee: codeGaspar(inseeCode), page: "1", page_size: "500" }),
   );
 
   return agregerLignesCatnat(json?.data ?? [], json?.results);

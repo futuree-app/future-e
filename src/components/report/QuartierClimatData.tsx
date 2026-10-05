@@ -837,7 +837,9 @@ function buildFactors(
       // Les deux comptent la même histoire (tout GASPAR, depuis l'origine du régime) ; « depuis 1983 »
       // (première reconnaissance) au-dessus de « depuis 1982 » laissait lire deux périodes. L'année de
       // la première reconnaissance reste dans le volet.
-      ? `${catnat!.total} arrêté${catnat!.total > 1 ? "s" : ""} depuis ${CATNAT_DEPUIS}`
+      // FUT-60 : le relevé compte des LIGNES GASPAR (un arrêté × un phénomène × un événement), pas des
+      // arrêtés distincts (Paris : 20 lignes, 16 arrêtés). Le mot suit la donnée.
+      ? `${catnat!.total} reconnaissance${catnat!.total > 1 ? "s" : ""} depuis ${CATNAT_DEPUIS}`
       : "—";
     const detail: CardDetail | undefined = hasCatnat
       ? {
@@ -863,7 +865,7 @@ function buildFactors(
           why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
           whyLabel: "Ce que cela raconte",
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
-          sources: "Géorisques · base GASPAR (arrêtés de catastrophe naturelle)",
+          sources: "Géorisques · base GASPAR (reconnaissances de catastrophe naturelle)",
         }
       : undefined;
     // La répartition remonte sur la FACE quand aucun compte inondation ne l'occupe. FUT-60 : elle
@@ -909,7 +911,7 @@ function buildFactors(
       val: hasCatnat
         ? totalTousRisques
         : releveVide
-          ? `Aucun arrêté depuis ${CATNAT_DEPUIS}`
+          ? `Aucune reconnaissance depuis ${CATNAT_DEPUIS}`
           : (catnatInondation ? libelleCatnatInondation(catnatInondation) : headline),
       // ── LE LECTEUR ARRIVE AVEC UN CHIFFRE EN TÊTE, IL DOIT LE RETROUVER ICI ─────────────────
       // La pastille du dossier annonce « 7 arrêtés inondation depuis 1982 » ; cette carte ouvrait
@@ -928,7 +930,7 @@ function buildFactors(
         ligneMisAJour,
       ].filter(Boolean).join(" · ") || undefined,
       col: "var(--blue)",
-      src: "Géorisques · GASPAR · arrêtés CatNat",
+      src: "Géorisques · GASPAR · reconnaissances CatNat",
       missing: !hasCatnat && !releveVide && !catnatInondation,
       detail: detail
         ? {

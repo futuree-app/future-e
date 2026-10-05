@@ -118,7 +118,7 @@ export function resumeCatnat(byRisk: Repartition, total: number): string | null 
 // ── L'AGRÉGATION DES LIGNES GASPAR (déplacée de georisques.ts, FUT-60, comportement inchangé) ────
 // UNITÉ : une ligne GASPAR = une reconnaissance (un arrêté, un phénomène, un événement). Un arrêté
 // peut porter plusieurs lignes ; le total et la répartition comptent donc des LIGNES, la même unité
-// que le compte inondation de l'index (scripts/populate-inondation.py).
+// que le compte inondation de l'index (scripts/gaspar/collecter-catnat.mts).
 /** Famille visuelle d'une année marquante (palette bande-trajectoire, jamais de rouge). */
 export type CatnatBandFamily = "inondation" | "secheresse" | "tempete" | "autre";
 
@@ -229,4 +229,34 @@ export function agregerLignesCatnat(items: LigneCatnat[], results?: number | nul
     topRisk: byRisk[0]?.label ?? null,
     summary: resumeCatnat(byRisk, total),
   };
+}
+
+// ── LE GRAIN DE GASPAR, PROPRIÉTÉ DE CETTE SOURCE ET D'ELLE SEULE (FUT-60) ─────────────────────────
+// GASPAR publie Paris, Lyon et Marseille à la VILLE (75056, 69123, 13055) : un arrondissement n'y a
+// aucune ligne. Ce n'est pas une règle PLM générale : le zonage sismique de Géorisques fait l'inverse
+// (seul l'arrondissement répond). D'où une table propre à GASPAR, et pas un détour par un helper
+// commun qui laisserait croire que toutes les sources se lisent à la ville.
+const VILLES_GASPAR: { code: string; ville: string; premier: number; dernier: number }[] = [
+  { code: "75056", ville: "Paris", premier: 75101, dernier: 75120 },
+  { code: "69123", ville: "Lyon", premier: 69381, dernier: 69389 },
+  { code: "13055", ville: "Marseille", premier: 13201, dernier: 13216 },
+];
+const villeGasparDe = (insee: string | null | undefined) => {
+  if (!insee) return null;
+  const n = Number(insee);
+  return VILLES_GASPAR.find((v) => v.code === insee || (n >= v.premier && n <= v.dernier)) ?? null;
+};
+
+/** Le code sous lequel GASPAR publie les reconnaissances de ce lieu. */
+export function codeGaspar(insee: string): string {
+  return villeGasparDe(insee)?.code ?? insee;
+}
+
+/**
+ * La ville dont GASPAR donne le compte, quand ce compte n'est PAS propre au lieu demandé : « Paris »
+ * pour 75111 comme pour 75056 (le compte d'un arrondissement est celui de toute la ville). `null`
+ * partout ailleurs, où le compte est celui de la commune elle-même.
+ */
+export function villeGaspar(insee: string | null | undefined): string | null {
+  return villeGasparDe(insee)?.ville ?? null;
 }
