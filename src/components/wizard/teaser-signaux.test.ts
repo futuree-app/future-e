@@ -91,3 +91,87 @@ test("un questionnaire entièrement passé ne compte pas comme un projet renseig
     true,
   );
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// FUT-61 (06/10/2026) : PLUS DE SCORE COMPOSITE NI DE REGISTRE DE GRAVITÉ DANS LE TEASER.
+//
+// La carte territoriale affichait « Score X/100 · exposition élevée » à partir de `communes_tension`,
+// avec deux seuils maison (65 et 40) ; le titre comptait des « points d'attention », les cartes
+// floutées des « points d'attention verrouillés », et le repli concluait « aucune exposition
+// majeure » dès qu'aucun score ne passait le seuil. Ces tests lisent la source ET éprouvent ce que
+// `computeSignals` produit : « la carte n'apparaît plus » et « rien ne dit de gravité » sont deux
+// assertions distinctes.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+import { computeSignals, type SignalContent } from "./teaser-signaux.ts";
+import type { WizardAnswers } from "./types.ts";
+import type { WizardPreviewData } from "../../app/api/wizard-preview/route.ts";
+
+const SIGNAUX = readFileSync("src/components/wizard/teaser-signaux.ts", "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, "").split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+const RENDU = TEASER + "\n" + SIGNAUX;
+
+const reponses = (r: Partial<WizardAnswers> = {}): WizardAnswers =>
+  ({ quartier: "Carpentras", logement: null, metier: null, sante: [], mobilite: null, projets: null, ...r }) as WizardAnswers;
+const apercu = (r: Partial<WizardPreviewData> = {}): WizardPreviewData => ({
+  commune_name: "Carpentras", drias: null, tensions: [], atmo: null, era5: null, fallback: false, ...r,
+});
+const texte = (s: SignalContent[]) => s.map((x) => [x.headline, x.stat, x.precision ?? "", x.source].join(" | ")).join("\n");
+const tension = (score: number, ind_exposition: number | null) =>
+  [{ slug: "canicule", score, ind_exposition, ind_vulnerabilite: 50 }, { slug: "feux", score: score - 1, ind_exposition, ind_vulnerabilite: 10 }];
+
+test("T1 : aucun « Score X/100 » dans le teaser", () => {
+  assert.doesNotMatch(RENDU, /Score\s*\$?\{?[^\n]*\/100/);
+  assert.doesNotMatch(RENDU, /SCORE_FORT|SCORE_MODERE/);
+  for (const s of [0, 39, 40, 64, 65, 100])
+    assert.doesNotMatch(texte(computeSignals(apercu({ tensions: tension(s, s) }), reponses(), "Carpentras")), /\/100|score/i);
+});
+
+test("T2 : aucun « exposition élevée » / « exposition modérée » dérivé du score", () => {
+  assert.doesNotMatch(RENDU, /exposition (élevée|modérée)/i);
+  assert.doesNotMatch(RENDU, /SLUG_HEADLINES_(FORT|MODERE)/);
+  const t = texte(computeSignals(apercu({ tensions: tension(90, 90) }), reponses(), "Carpentras"));
+  assert.doesNotMatch(t, /exposition (élevée|modérée)|nettement exposée|risque d'incendie de forêt est élevé/i);
+});
+
+test("T3 : aucun compteur « N points d'attention » (titre, repère ERA5)", () => {
+  assert.doesNotMatch(RENDU, /points? d(&apos;|')attention/i);
+  assert.match(TEASER, /Voici une\{" "\}\s*<span className="italic text-accent">première lecture<\/span>/);
+});
+
+test("T4 : aucun « N points d'attention verrouillés »", () => {
+  assert.doesNotMatch(RENDU, /verrouillé/i);
+  assert.match(TEASER, /La suite dans votre dossier/);
+});
+
+test("T5 : le repli ne conclut plus « aucune exposition majeure »", () => {
+  assert.doesNotMatch(RENDU, /aucune exposition majeure/i);
+  // Scores tous sous l'ancien seuil, aucune autre donnée : le repli ne dit rien de l'exposition.
+  const s = computeSignals(apercu({ tensions: tension(10, 10) }), reponses(), "Carpentras");
+  assert.equal(s.length, 1);
+  assert.match(s[0].headline, /ne fait pas ressortir de donnée spécifique à afficher ici/);
+  assert.doesNotMatch(texte(s), /aucun(e)? (exposition|risque)|pas de risque|épargn/i);
+});
+
+test("T6 : changer score / ind_exposition ne change plus rien de visible", () => {
+  const base = reponses({ logement: { type: "maison" } as WizardAnswers["logement"], mobilite: "voiture" });
+  const sans = texte(computeSignals(apercu(), base, "Carpentras"));
+  for (const [score, expo] of [[0, null], [39, 39], [40, 40], [65, 65], [100, 100], [100, null]] as const)
+    assert.equal(texte(computeSignals(apercu({ tensions: tension(score, expo) }), base, "Carpentras")), sans, `score ${score}`);
+});
+
+test("T7 : les cartes indépendantes du score fonctionnent toujours", () => {
+  const drias = { canicule_gwl20: 23, canicule_gwl30: 40, delta_canicule: 6, nuits_tropicales_gwl20: 12, delta_precip_pct: -10 };
+  const s = computeSignals(apercu({ drias }), reponses({ logement: { type: "appartement" } as WizardAnswers["logement"], mobilite: "voiture" }), "Carpentras");
+  assert.deepEqual(s.map((x) => x.icon), ["🌡", "🏠", "🚗"]);
+  assert.equal(s[0].stat, "23 jours très chauds par an");
+  assert.equal(s[0].precision, "et environ 12 nuits tropicales");
+  assert.equal(s[1].stat, "À établir sur le document");
+  assert.match(texte(computeSignals(apercu(), reponses({ projets: "achat" }), "Carpentras")), /Ce que votre dossier examinera/);
+  assert.match(TEASER, /<Era5AnchorCard era5=\{data\.era5\} ville=\{ville\} \/>/);
+});
+
+test("T8 : le CTA est toujours là, au même prix, vers le même checkout", () => {
+  assert.match(TEASER, /href="\/checkout\/rapport-complet"/);
+  assert.match(TEASER, /Débloquer mon dossier · 14 €/);
+  assert.match(TEASER, /Le dossier approfondit cette première lecture à l&apos;échelle de la commune, autour de l&apos;adresse et du logement\./);
+});
