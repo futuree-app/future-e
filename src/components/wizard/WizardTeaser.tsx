@@ -1,19 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { deCommune } from "@/lib/typography";
 import { useEffect, useState } from "react";
 import type { WizardAnswers } from "./types";
 import type { WizardPreviewData } from "@/app/api/wizard-preview/route";
 import type { Era5Trend } from "@/lib/era5-trend";
+import { computeSignals, type SignalContent } from "./teaser-signaux";
 
-type SignalContent = {
-  icon: string;
-  headline: string;   // ce que ça change (humain, conversationnel)
-  stat: string;       // chiffre principal
-  precision?: string; // précision concrète (chiffre/contexte secondaire)
-  source: string;     // source / méthode (micro-ligne)
-};
 
 /* ── Carte d'ancrage ERA5 — affichée toujours, au-dessus des signaux d'exposition ── */
 function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
@@ -33,7 +26,7 @@ function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
         </span>
         <div className="min-w-0 flex flex-col gap-1.5">
           <p className="font-mono text-[10px] tracking-[0.16em] uppercase" style={{ color: "rgb(96,165,250)" }}>
-            Repère · climat déjà observé (hors points d&apos;attention)
+            Repère · climat déjà observé
           </p>
           <p className="text-[16px] text-label leading-[1.4] font-medium text-balance mt-1">
             À {ville}, le changement climatique est déjà mesurable aujourd&apos;hui.
@@ -52,46 +45,6 @@ function Era5AnchorCard({ era5, ville }: { era5: Era5Trend; ville: string }) {
     </div>
   );
 }
-
-const SLUG_LABELS: Record<string, string> = {
-  canicule: "Canicule",
-  submersion: "Submersion marine",
-  feux: "Feux de forêt",
-  cadmium: "Pollution agricole",
-  "dependance-auto": "Dépendance automobile",
-  secheresse: "Sécheresse",
-};
-
-const SLUG_HEADLINES_FORT: Record<string, string> = {
-  canicule: "Les vagues de chaleur deviendront un risque récurrent ici.",
-  submersion: "Votre commune est nettement exposée à la submersion marine.",
-  feux: "Le risque d'incendie de forêt est élevé dans votre territoire.",
-  cadmium: "Les sols agricoles autour de chez vous présentent une pollution notable.",
-  "dependance-auto": "Votre territoire dépend fortement de la voiture pour vivre au quotidien.",
-  secheresse: "La ressource en eau locale est sous tension croissante.",
-};
-
-const SLUG_HEADLINES_MODERE: Record<string, string> = {
-  canicule: "Les épisodes de chaleur devraient s'intensifier ici dans les prochaines décennies.",
-  submersion: "Une partie de votre commune est exposée à la submersion marine.",
-  feux: "Votre territoire connaîtra ponctuellement un risque d'incendie à surveiller.",
-  cadmium: "Quelques sols agricoles autour de chez vous montrent une pollution mesurable.",
-  "dependance-auto": "Votre territoire reste assez dépendant de la voiture pour les trajets du quotidien.",
-  secheresse: "La ressource en eau locale connaît des tensions saisonnières.",
-};
-
-const SLUG_SOURCES: Record<string, string> = {
-  canicule: "Projections DRIAS · Météo-France",
-  submersion: "IGN (côtier) · Géorisques (fluvial)",
-  feux: "Base Prométhée · DREAL",
-  cadmium: "GisSol · RMQS (qualité des sols agricoles)",
-  "dependance-auto": "ADEME · INSEE RP (taux de motorisation)",
-  secheresse: "BRGM · Agences de l'eau",
-};
-
-/* Seuils d'intensité d'exposition (sur le score 0–100) */
-const SCORE_FORT = 65;
-const SCORE_MODERE = 40;
 
 /* ── Signal card — 4 lignes : headline / stat / precision / source ── */
 function Signal({ icon, headline, stat, precision, source }: SignalContent) {
@@ -130,128 +83,6 @@ function Signal({ icon, headline, stat, precision, source }: SignalContent) {
   );
 }
 
-/* ── Calcul des signaux ── */
-function computeSignals(
-  data: WizardPreviewData | null,
-  answers: WizardAnswers,
-  ville: string,
-): SignalContent[] {
-  const signals: SignalContent[] = [];
-
-  /* Canicule (DRIAS) */
-  if (data?.drias?.canicule_gwl20 !== null && data?.drias?.canicule_gwl20 !== undefined) {
-    const d = data.drias!;
-    const tropicales = d.nuits_tropicales_gwl20;
-    signals.push({
-      icon: "🌡",
-      headline: `Les étés deviendraient nettement plus difficiles à ${ville} d'ici 2050.`,
-      stat: `${d.canicule_gwl20} jours très chauds par an`,
-      precision: tropicales !== null && tropicales > 0
-        ? `et environ ${tropicales} nuits tropicales`
-        : (d.delta_canicule !== null && d.delta_canicule > 0
-          ? `soit +${d.delta_canicule} jours par rapport à un scénario climatique modéré`
-          : undefined),
-      source: "Projection DRIAS · horizon +2°C (2050)",
-    });
-  } else if (answers.sante.includes("Sensibilité à la chaleur") || answers.sante.includes("Asthme / Troubles respiratoires")) {
-    signals.push({
-      icon: "🌡",
-      headline: "Votre profil de santé est plus exposé aux extrêmes climatiques.",
-      stat: "Vagues de chaleur et air dégradé à surveiller",
-      precision: "L'augmentation des canicules pèsera davantage sur votre quotidien.",
-      source: "Estimation basée sur vos sensibilités déclarées",
-    });
-  }
-
-  /* Signal territorial — uniquement si exposition au moins modérée (≥ 40/100) */
-  if (data?.tensions && data.tensions.length > 0) {
-    const top = data.tensions[0];
-    const score = top.ind_exposition !== null ? Math.round(top.ind_exposition) : top.score;
-
-    if (score >= SCORE_MODERE) {
-      const isFort = score >= SCORE_FORT;
-      const slugLabel = SLUG_LABELS[top.slug] ?? top.slug;
-      const headline = isFort
-        ? (SLUG_HEADLINES_FORT[top.slug] ?? `Exposition élevée à ${slugLabel.toLowerCase()} sur votre commune.`)
-        : (SLUG_HEADLINES_MODERE[top.slug] ?? `Exposition modérée à ${slugLabel.toLowerCase()} à surveiller.`);
-      const intensityLabel = isFort ? "exposition élevée" : "exposition modérée";
-
-      signals.push({
-        icon: "📍",
-        headline,
-        stat: `Score ${score}/100 · ${intensityLabel}`,
-        precision: data.tensions.length > 1
-          ? `Un des ${data.tensions.length} signaux d'exposition recensés pour ${ville}.`
-          : (isFort ? "Signal officiellement recensé dans votre territoire." : "Signal à surveiller dans votre territoire."),
-        source: SLUG_SOURCES[top.slug] ?? "Données publiques françaises",
-      });
-    }
-  }
-
-  /* Logement — CE QUE LE DOSSIER POURRA ÉTABLIR, JAMAIS UNE CLASSE DÉDUITE (19/09/2026).
-     Ce bloc affichait « DPE estimé A–B » à partir du seul âge déclaré, sous une source ADEME.
-     Le module Logement refuse cette déduction depuis toujours : sans diagnostic ATTRIBUÉ, il ne
-     qualifie ni la performance ni le confort d'été. L'accueil offrait donc gratuitement ce que le
-     produit payé s'interdit, et sur un logement que personne n'avait examiné. */
-  if (answers.logement) {
-    const typeLabel =
-      answers.logement.type === "maison" ? "Maison"
-      : answers.logement.type === "appartement" ? "Appartement"
-      : "Logement atypique";
-    signals.push({
-      icon: "🏠",
-      headline: "La performance de ce logement se lit sur son diagnostic, pas sur son âge.",
-      stat: "À établir sur le document",
-      precision: `${typeLabel} · votre dossier cherchera le diagnostic rattaché à cette adresse, et dira ce qu'il permet ou non de conclure.`,
-      source: "Diagnostics de performance énergétique (ADEME)",
-    });
-  }
-
-  /* Mobilité */
-  if (answers.mobilite === "voiture") {
-    signals.push({
-      icon: "🚗",
-      headline: "Vos trajets dépendent de la voiture : reste à savoir ce que ce territoire permet.",
-      stat: "À mesurer sur la commune",
-      precision: "Votre dossier lit la part des trajets faits autrement, la desserte en transports et l'accès aux gares.",
-      source: "Mobilités INSEE, arrêts et gares recensés",
-    });
-  } else if (answers.sante.length > 0 && !answers.sante.includes("Aucune sensibilité particulière")) {
-    const filtered = answers.sante.filter((s) => s !== "Aucune sensibilité particulière");
-    signals.push({
-      icon: "🫁",
-      headline: "Plusieurs sensibilités de santé à surveiller dans votre environnement.",
-      stat: `${filtered.length} sensibilité${filtered.length > 1 ? "s" : ""} identifiée${filtered.length > 1 ? "s" : ""}`,
-      precision: filtered.slice(0, 3).join(" · "),
-      source: "Sur la base de vos réponses",
-    });
-  } else if (answers.projets === "achat") {
-    signals.push({
-      icon: "🏗",
-      headline: "Avant de signer, plusieurs points se vérifient et personne ne les rassemble pour vous.",
-      stat: "Ce que votre dossier examinera",
-      precision: "Exposition du sol au point précis, zonages applicables, diagnostics rattachés à l'adresse, trajectoire du climat.",
-      source: "Géorisques, BRGM, ADEME, Météo-France",
-    });
-  }
-
-  /* Fallback si aucun signal */
-  if (signals.length === 0) {
-    signals.push({
-      icon: "📊",
-      // LE REPLI NE DIT PLUS « renseignez votre commune » : il se déclenche aussi, et surtout,
-      // quand la commune EST renseignée et qu'aucune exposition n'atteint le seuil d'affichage.
-      // Accuser le lecteur d'une saisie manquante était faux dans ce cas, le plus fréquent.
-      headline: `Aucune exposition majeure n'est ressortie ${deCommune(ville)} à ce premier examen.`,
-      stat: "Ce que votre dossier examinera",
-      precision: "La trajectoire du climat à 2050 et 2100, les risques recensés, la qualité de l'air, et ce que ces sources ne permettent pas d'établir.",
-      source: "Météo-France, Géorisques, sources publiques",
-    });
-  }
-
-  return signals.slice(0, 4);
-}
-
 export function WizardTeaser({
   answers,
   context: _context,
@@ -285,7 +116,6 @@ export function WizardTeaser({
   const visibleCount = signals.length >= 3 ? 2 : 1;
   const visibleSignals = signals.slice(0, visibleCount);
   const lockedSignals = signals.slice(visibleCount);
-  const hasMultipleSignals = signals.length > 1;
 
   return (
     <div className="wizard-step flex flex-col gap-10 md:gap-12">
@@ -320,16 +150,14 @@ export function WizardTeaser({
             className="font-semibold text-[length:var(--text-display)] leading-[1.04] tracking-[-0.03em] text-label text-balance"
             style={{ fontFamily: "var(--font-serif)" }}
           >
-            Votre situation fait déjà ressortir{" "}
-            <span className="italic text-accent">
-              {hasMultipleSignals ? `${signals.length} points d'attention` : "un point d'attention"}
-            </span>{" "}
-            à {ville}.
+            Voici une{" "}
+            <span className="italic text-accent">première lecture</span>{" "}
+            de votre situation à{"\u00a0"}{ville}.
           </h2>
         )}
       </div>
 
-      {/* Carte d'ancrage ERA5 — toujours visible, hors décompte signaux */}
+      {/* Carte d'ancrage ERA5, toujours visible */}
       {!loading && data?.era5 && (
         <Era5AnchorCard era5={data.era5} ville={ville} />
       )}
@@ -356,7 +184,7 @@ export function WizardTeaser({
               </div>
               <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(6,8,18,0.45)" }}>
                 <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-muted border border-[var(--border-2)] rounded-full bg-canvas/85" style={{ padding: "0.75rem 1.5rem" }}>
-                  {lockedSignals.length} point{lockedSignals.length > 1 ? "s" : ""} d&apos;attention verrouillé{lockedSignals.length > 1 ? "s" : ""}
+                  La suite dans votre dossier
                 </span>
               </div>
             </div>
@@ -379,7 +207,7 @@ export function WizardTeaser({
               className="max-w-[42rem] text-[length:var(--text-title)] font-normal text-label leading-[1.08] tracking-[-0.025em] text-balance"
               style={{ fontFamily: "var(--font-serif)" }}
             >
-              Découvrez ce que ces points d&apos;attention signifient vraiment pour votre logement, votre santé, votre mobilité et vos projets.
+              Le dossier approfondit cette première lecture à l&apos;échelle de la commune, autour de l&apos;adresse et du logement.
             </p>
             <p className="max-w-[42rem] text-[15px] text-muted leading-7">
               Construit à partir de vos réponses et des données publiques de {ville}.

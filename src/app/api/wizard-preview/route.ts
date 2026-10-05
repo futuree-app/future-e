@@ -13,6 +13,9 @@ export type WizardPreviewData = {
     nuits_tropicales_gwl20: number | null;
     delta_precip_pct: number | null;
   } | null;
+  // PLUS LU PAR LE TEASER depuis FUT-61 : la carte territoriale reposait sur ce score composite legacy
+  // et ses seuils. Le champ (et sa requête `communes_tension`) reste pour ne pas élargir le correctif ;
+  // son retrait relève de la refonte du teaser (FUT-28).
   tensions: Array<{
     slug: string;
     score: number;
