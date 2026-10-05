@@ -12,7 +12,7 @@ import "server-only";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { gatherCommuneEnrichment } from "@/lib/commune-enrichment";
-import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry, getCommuneEntry } from "@/lib/comparateur-vie";
+import { getTerritoryContext, getCommuneDistinctive, deriveCategoriesFromEntry, getCommuneEntry, getLectureCommunalePLM } from "@/lib/comparateur-vie";
 import { arrondissementsDe } from "@/lib/plm";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { getResidencesSecondairesPct } from "@/lib/saisonnalite";
@@ -30,9 +30,12 @@ import { reserverBudgetModele } from "@/lib/server/garde-appels-modele";
 export const DEFAULT_HORIZON: HorizonKey = "gwl20";
 
 export async function loadTerritoireSnapshot(insee: string, communeName: string): Promise<HashedSnapshot> {
-  const [enrichment, ctx, saisonnalitePct, era5] = await Promise.all([
+  const [enrichment, ctx, plm, saisonnalitePct, era5] = await Promise.all([
     gatherCommuneEnrichment(insee).catch(() => null),
     getTerritoryContext(insee).catch(() => null),
+    // FUT-43 : Paris, Lyon, Marseille n'ont pas d'entrée d'index à leur code commune ; leur lecture
+    // communale est AGRÉGÉE depuis tous leurs arrondissements, champ par champ (cf. plm-communal.ts).
+    getLectureCommunalePLM(insee).catch(() => null),
     getResidencesSecondairesPct(insee).catch(() => null),
     getEra5Trend(insee).catch(() => null),
   ]);
@@ -50,7 +53,18 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
   const inputs: TerritoireInputs = {
     insee,
     communeName,
-    entry: entry
+    entry: !entry && plm
+      ? {
+          // Seuls les champs qui s'agrègent sans mensonge ; le reste est absent, jamais copié d'un arrondissement.
+          population: plm.lecture.population,
+          densite: null,
+          mer_centre_km: null,
+          relief_proximite: null,
+          altitude: null,
+          nature: null,
+          demographie: plm.lecture.demographie,
+        }
+      : entry
       ? {
           population: entry.population ?? null,
           densite: entry.densite ?? null,
@@ -65,7 +79,9 @@ export async function loadTerritoireSnapshot(insee: string, communeName: string)
             : null,
         }
       : null,
-    urbanRole: ctx ? { role: ctx.role, uuLabel: ctx.uuLabel, uuPop: ctx.uuPop } : null,
+    urbanRole: ctx
+      ? { role: ctx.role, uuLabel: ctx.uuLabel, uuPop: ctx.uuPop }
+      : plm?.lecture.uu ? { role: plm.role, uuLabel: plm.uuLabel, uuPop: plm.lecture.uuPop } : null,
     typology: { type: mood.type, label: mood.typeLabel },
     ademe: ademe
       ? {

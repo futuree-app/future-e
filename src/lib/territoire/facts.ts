@@ -243,7 +243,11 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
     }),
     fact({
       key: "place.position",
-      value: e ? { merCentreKm: num(e.mer_centre_km), reliefProximite: num(e.relief_proximite), altitude: num(e.altitude) } : null,
+      // FUT-43 : une position dont aucun champ n'est connu (Paris, Lyon, Marseille lus à la commune : une
+      // position se mesure en un point, elle ne s'agrège pas) est une ABSENCE, pas un objet vide.
+      value: e && [e.mer_centre_km, e.relief_proximite, e.altitude].some((v) => num(v) != null)
+        ? { merCentreKm: num(e.mer_centre_km), reliefProximite: num(e.relief_proximite), altitude: num(e.altitude) }
+        : null,
       scale: "point",
       source: { producer: "futur•e", dataset: "Index du comparateur ; Limite terre-mer © Shom-IGN, 2021", field: "mer_centre_km, relief_proximite, altitude" },
       limits: "Distance à vol d'oiseau du point de référence de la commune au rivage marin, lagunes comprises ; ni une plage, ni un trajet.",
