@@ -38,8 +38,13 @@ export type CarOwnership =
       households: number;       // résidences principales du secteur (ordre de grandeur)
       irisLabel: string;        // LAB_IRIS, CONSERVÉ TEL QUEL et jamais interprété (cf. build)
     }
-  /** Commune non découpée en IRIS : l'INSEE fournit une ligne communale. Aucune variation locale. */
-  | { kind: "commune_entiere"; share: number; insee: string }
+  /**
+   * La valeur de la commune entière. Aucune variation locale. Deux raisons, qui ne se disent pas pareil :
+   * - `commune_non_decoupee` : l'INSEE ne découpe pas la commune (ligne `Z`), la commune EST le secteur ;
+   * - `secteur_non_determine` : la commune est découpée, mais le secteur de l'adresse n'a pas été établi
+   *   (WFS IGN en délai ou en erreur, code absent du millésime). Dire « commune non découpée » serait faux.
+   */
+  | { kind: "commune_entiere"; share: number; insee: string; motif: "commune_non_decoupee" | "secteur_non_determine" }
   /**
    * L'adresse tombe dans un IRIS d'ACTIVITÉ ou DIVERS (zone d'emploi, gare, parc). Presque personne
    * n'y habite : en tirer un profil résidentiel serait un chiffre calculé sur presque rien. On ne
@@ -62,7 +67,7 @@ export function readCarOwnership(
   if (!row || !irisCode) {
     // Pas de secteur : la valeur communale ne peut se présenter que COMME communale.
     return communeShare != null && insee
-      ? { kind: "commune_entiere", share: communeShare, insee }
+      ? { kind: "commune_entiere", share: communeShare, insee, motif: "secteur_non_determine" }
       : { kind: "unknown" };
   }
   const [typ, lab, share, households] = row;
@@ -70,7 +75,7 @@ export function readCarOwnership(
     return { kind: "secteur_non_residentiel", irisType: typ, communeShare, irisCode };
   }
   if (typ === "Z") {
-    return insee ? { kind: "commune_entiere", share, insee } : { kind: "unknown" };
+    return insee ? { kind: "commune_entiere", share, insee, motif: "commune_non_decoupee" } : { kind: "unknown" };
   }
   if (typ !== "H" || !Number.isFinite(share)) return { kind: "unknown" };
   return { kind: "secteur", share, communeShare, irisCode, households, irisLabel: lab };
@@ -85,4 +90,43 @@ export function ecartAuCommune(o: CarOwnership): number | null {
 /** La part de ménages SANS voiture, dérivée pour la restitution — la donnée canonique reste positive. */
 export function partSansVoiture(share: number): number {
   return Math.round((100 - share) * 10) / 10;
+}
+
+/** Pourcentage en typographie française : virgule décimale, espace insécable avant le %. */
+function pct(v: number, sansUnite = false): string {
+  const n = Math.round(v * 10) / 10;
+  const txt = (Number.isInteger(n) ? String(n) : n.toFixed(1)).replace(".", ",");
+  return sansUnite ? `${txt} points` : `${txt}\u00a0%`;
+}
+
+/**
+ * CE QUE LA CARTE « Ménages et voiture » ÉCRIT, pour chaque état. Pur, pour que les tests éprouvent le
+ * texte rendu et pas seulement l'état : l'état `commune_entiere` était juste, et la phrase qui
+ * l'accompagnait affirmait « commune non découpée » même quand le secteur n'avait simplement pas été
+ * résolu (FUT-58). `null` : la carte ne s'affiche pas.
+ */
+export function texteVoiture(o: CarOwnership): { valeur: string | null; phrase: string } | null {
+  if (o.kind === "unknown") return null;
+  if (o.kind === "secteur") {
+    const ecart = ecartAuCommune(o);
+    const situe = ecart != null && Math.abs(ecart) >= 1
+      ? `Soit ${pct(Math.abs(ecart), true)} ${ecart < 0 ? "de moins" : "de plus"} que dans l’ensemble de la commune. `
+      : ecart != null
+        ? "C’est le niveau de l’ensemble de la commune. "
+        : "";
+    return { valeur: pct(o.share), phrase: `${situe}À l’inverse, ${pct(partSansVoiture(o.share))} des ménages de ce secteur n’en ont aucune.` };
+  }
+  if (o.kind === "commune_entiere") {
+    return {
+      valeur: pct(o.share),
+      phrase: o.motif === "commune_non_decoupee"
+        ? "Cette commune n’est pas découpée en secteurs : la valeur porte sur la commune entière, et aucune variation locale ne peut être établie."
+        : "Le secteur de cette adresse n’a pas pu être déterminé : la valeur porte sur la commune entière, et aucune variation locale ne peut être établie.",
+    };
+  }
+  return {
+    valeur: null,
+    phrase: "Cette adresse se situe dans un secteur principalement consacré à l’activité. Le profil automobile des ménages n’y est pas établissable."
+      + (o.communeShare != null ? ` Sur l’ensemble de la commune, ${pct(o.communeShare)} des ménages disposent d’au moins une voiture.` : ""),
+  };
 }
