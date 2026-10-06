@@ -225,9 +225,11 @@ champ est absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
 
 Si un champ "evolution_demographique" est fourni pour un territoire, mentionnez-le UNE
 fois comme une nuance descriptive de la TRAJECTOIRE du territoire (gagne ou perd des
-habitants, attire de nouveaux arrivants, renouvellement résidentiel). RÈGLES STRICTES :
+habitants, part d'arrivants récents, renouvellement résidentiel). RÈGLES STRICTES :
 DÉCRIVEZ, ne JUGEZ jamais (« peu dynamique », « territoire d'avenir », « en perte de
 vitesse » sont INTERDITS — certains cherchent justement un territoire stable ou détendu) ;
+n'écrivez jamais qu'un territoire « attire », qu'il est « attractif » ni qu'il a une
+« attractivité » : une part d'arrivants récents ne dit pas pourquoi ils sont venus ;
 jamais un chiffre, jamais une prédiction ; c'est une trajectoire observée, pas une
 désirabilité. Si le champ est absent ou nul, n'en parlez pas (ne le déduisez jamais).
 
