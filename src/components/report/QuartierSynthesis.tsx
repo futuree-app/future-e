@@ -20,7 +20,8 @@ import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/territoire/screen";
 import {
-  displayReducer, initialDisplay, offersEnriched, type DisplayEvent, type DisplayState,
+  displayReducer, eventFromAnswer, initialDisplay, offersEnriched,
+  type DisplayEvent, type DisplayState, type SynthesisAnswer,
 } from "@/lib/territoire/synthesis-display";
 
 const HORIZON_PILLS: { key: HorizonKey; year: string; recommended?: boolean }[] = [
@@ -55,7 +56,7 @@ function reducer(state: ByHorizon, a: Action): ByHorizon {
   return next === state[a.horizon] ? state : { ...state, [a.horizon]: next };
 }
 
-type ApiAnswer = { status: "ready"; text: string; origin: string } | { status: "pending" } | { status: "unavailable" } | { status: "absent" };
+type ApiAnswer = SynthesisAnswer;
 
 export default function QuartierSynthesis({
   communeName,
@@ -73,7 +74,7 @@ export default function QuartierSynthesis({
   const [byHorizon, dispatch] = useReducer(
     reducer,
     null,
-    () => Object.fromEntries(HORIZON_KEYS.map((h) => [h, initialDisplay(initialEnriched[h] ?? null)])) as ByHorizon,
+    () => Object.fromEntries(HORIZON_KEYS.map((h) => [h, initialDisplay(initialEnriched[h] ?? null, deterministic[h])])) as ByHorizon,
   );
   const state = byHorizon[horizon];
 
@@ -101,17 +102,16 @@ export default function QuartierSynthesis({
     const startedAt = Date.now();
     const h = horizon;
 
+    // FUT-76 : `ready` ne suffit pas. L'événement se décide dans `eventFromAnswer` (pur, testé) : un
+    // repli déterministe, ou une origine inconnue, reste une lecture enrichie INDISPONIBLE.
     const settle = (a: ApiAnswer): boolean => {
-      if (a.status === "ready") {
-        dispatch({ horizon: h, event: { type: "enrichedArrived", text: a.text } });
-        posthog?.capture("quartier_ai_summary_completed", { commune: communeName, insee_code: inseeCode, horizon: h, origin: a.origin });
-        return true;
+      const event = eventFromAnswer(a, deterministic[h]);
+      if (!event) return false;
+      dispatch({ horizon: h, event });
+      if (event.type === "enrichedArrived") {
+        posthog?.capture("quartier_ai_summary_completed", { commune: communeName, insee_code: inseeCode, horizon: h, origin: a.status === "ready" ? a.origin : null });
       }
-      if (a.status === "unavailable") {
-        dispatch({ horizon: h, event: { type: "enrichedUnavailable" } });
-        return true;
-      }
-      return false;
+      return true;
     };
 
     const poll = async () => {

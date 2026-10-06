@@ -41,9 +41,24 @@ type Rule = {
   when: (p: Projection) => boolean;
   patterns: RegExp[];
   polarity: "affirmative" | "any";
-  /** Une phrase qui porte cette précision échappe à la règle. */
-  unless?: RegExp;
+  /** Une phrase qui porte cette précision échappe à la règle. Une fonction quand une regex ne suffit pas. */
+  unless?: RegExp | ((sentence: string) => boolean);
 };
+
+// Les marqueurs d'une DISTINCTION affirmée entre deux faits (texte normalisé, en minuscules).
+const DISTINCTION = /\b(deux|des) (mesures|faits|objets|indicateurs|données|phénomènes|réalités|grandeurs) distincte?s\b|\b(objets|faits|indicateurs|phénomènes) distincts\b|\bmesures distinctes\b|\blue?s? séparément\b|\bne (sont|désignent|mesurent|décrivent|disent) pas (le même|la même|les mêmes)\b|\bsans que l'une? (n')?(annonce|prolonge|explique|découle de) l'autre\b|\bsans (en faire|y voir|établir|faire) (la |une |de )?(continuité|lien|prolongement)\b/;
+// Une continuité AFFIRMÉE entre les deux. Les tournures négatives (« sans que l'un annonce l'autre »,
+// « sans en faire la continuité ») sont retirées avant ce test : elles sont la distinction elle-même.
+const CONTINUITE = /annonc|prolong|s'inscri|continuité|amplifi|s'intensifi|s'accentu|aggrav|préfigur|présag/;
+const NEGATIONS = /\bsans (que |en |y |établir |faire )[^,;:.]*|\bni (l'une?|l'autre)[^,;:.]*|\bpas (le |la |un |une )?(prolongement|continuité|annonce)[^,;:.]*/g;
+
+/** La phrase affirme-t-elle que les deux faits sont distincts, sans affirmer ailleurs leur continuité ? */
+export function distinctionExplicite(sentence: string): boolean {
+  return DISTINCTION.test(sentence) && !CONTINUITE.test(sentence.replace(NEGATIONS, " "));
+}
+
+const escapes = (rule: Rule, s: string): boolean =>
+  rule.unless == null ? false : typeof rule.unless === "function" ? rule.unless(s) : rule.unless.test(s);
 
 // ── Lecture de la projection ─────────────────────────────────────────────────────────────────
 
@@ -208,7 +223,7 @@ const RULES: Rule[] = [
     // vivaient ailleurs un an plus tôt » (vue en réel le 28/09, refusée à tort).
     unless: /\bun an (plus tôt|avant|auparavant)|l'année (précédente|d'avant|précédant)/,
   },
-  // ── CatNat « sécheresse » ≠ jours de sols secs projetés (correction du 28/09) ──
+  // ── CatNat « sécheresse » ≠ jours de sols secs projetés (correction du 28/09, exception FUT-76) ──
   // La reconnaissance CatNat « sécheresse des sols » vise surtout des dommages liés aux argiles ; les
   // jours de sols secs sont un indicateur climatique DRIAS. Les présenter comme un même phénomène qui
   // se prolonge est un raccord que les données n'établissent pas.
@@ -225,6 +240,14 @@ const RULES: Rule[] = [
       // les jours de sols secs projetés (vu en réel le 28/09).
       /\bcette sécheresse[^.]*(catastrophes? naturelles?|arrêtés?|reconnue?s?|reconnaissances?)/,
     ],
+    // UNE PHRASE QUI DIT EXPLICITEMENT QUE CE SONT DEUX CHOSES DISTINCTES fait exactement ce que la
+    // consigne demande (FUT-76). Les 5 refus de cette règle journalisés en base au 06/10/2026, sur
+    // Toulouse et Paris, étaient tous de cette forme : « sont deux mesures distinctes », « lues
+    // séparément […] sans en faire la continuité », « sans que l'un annonce l'autre ». Paris 2050 s'est
+    // fait refuser deux fois de suite pour cela, et Toulouse 2030 y a perdu sa première tentative.
+    // L'exception reste fermée dès qu'une continuité est AFFIRMÉE hors d'une négation : « deux faits
+    // distincts, mais la sécheresse reconnue annonce celle à venir » est toujours refusé.
+    unless: distinctionExplicite,
   },
   // ── Eau et raccords (décisions du 30/09) : règles universelles, partagées avec l'accueil et /qna ──
   { ...REGLE_TENSION_EAU, when: always },
@@ -358,7 +381,7 @@ export function checkAssertions(text: string, projection: Projection): Violation
   for (const rule of RULES) {
     if (!rule.when(projection)) continue;
     for (const s of sentences) {
-      if (rule.unless?.test(s)) continue;
+      if (escapes(rule, s)) continue;
       for (const re of rule.patterns) {
         const m = re.exec(s);
         if (!m) continue;
@@ -463,7 +486,8 @@ const FORBIDDEN_UNIT = /^\s*(mois|semaines?|fois (plus|moins))\b/;
 const ECART_BEFORE = /(hausse|augmentation|progression|gain|baisse|recul|diminution|écart|ecart|réchauffement)s?(\s+[^\s]+){0,3}\s+d(e |')\s*$|(hausse|augmentation|écart|réchauffement)s? d(e |')\s*$|\b(augment|progress|gagn|grimp|recul|baiss|diminu)\w* de\s*$|\b(a|ont|aurait|auraient) (déjà )?(gagné|pris|grimpé)\s*$|\b(ajout|rajout)\w*\s*$/;
 // « 2,6 °C au-dessus de la référence » est un écart (vu en réel à Aurillac, 30/09) ; « 5 nuits au-dessus
 // de 20 °C » reste un seuil, d'où les degrés exigés avant et la référence exigée après.
-const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse)|^\s*(°\s*c|degrés?)\s+(au-dessus|au-dessous|en dessous|en deçà) d(e|u)\s+(la |cette |sa |leur )?(même |valeur |période |moyenne )?(de )?(référence|1976)/;
+// « soit 2 °C d'écart », « 12,7 jours d'écart » (FUT-76, refusés à tort à Toulouse et Paris le 05/10).
+const ECART_AFTER = /^\s*(jours?|nuits?|°\s*c|degrés?)?\s*(supplémentaires?|de plus|en plus|additionnel|de réchauffement|de hausse|d'écarts?\b|d'ecarts?\b)|^\s*(°\s*c|degrés?)\s+(au-dessus|au-dessous|en dessous|en deçà) d(e|u)\s+(la |cette |sa |leur )?(même |valeur |période |moyenne )?(de )?(référence|1976)/;
 
 function numbersIn(text: string): WrittenNumber[] {
   const out: WrittenNumber[] = [];
@@ -481,7 +505,10 @@ function numbersIn(text: string): WrittenNumber[] {
     const q = QUALIFIER.exec(before);
     const unit = unitAfter(after);
     const signed = (m[1] === "+" || m[1] === "-" || m[1] === "\u2212") && !signIsRange;
-    const sense = signed || ECART_BEFORE.test(beforeLong) || ECART_AFTER.test(after) ? "ecart" : "valeur";
+    // « l'écart est de PRESQUE 15 jours » : le qualificatif s'intercale entre le marqueur et le nombre.
+    // Il reste porté par `qualifier` (et sa tolérance) ; il ne doit pas masquer le sens (FUT-76, Toulouse).
+    const beforeSansQualif = beforeLong.replace(QUALIFIER, "");
+    const sense = signed || ECART_BEFORE.test(beforeSansQualif) || ECART_AFTER.test(after) ? "ecart" : "valeur";
     out.push({ value, raw: m[0], index: m.index, qualifier: q ? q[1] : null, unit, sense, warming: /réchauff/.test(normalizeText(text)) });
   }
   return out;
@@ -544,11 +571,19 @@ export function checkNumbers(text: string, projection: Projection): Violation[] 
   for (const s of text.split(/\n+|(?<=[.!?])\s+/)) {
     for (const w of numbersIn(s)) {
       if (!matches(w, allowed)) {
+        const proche = (a: AllowedNumber) => close(Math.abs(w.value), Math.round(a.value)) || close(Math.abs(w.value), a.value);
         const rule = w.unit === "forbidden"
           ? "nombre:transformation-non-admise"
-          : allowed.some((a) => close(Math.abs(w.value), Math.round(a.value)) || close(Math.abs(w.value), a.value))
-            ? "nombre:sens-incoherent" // le nombre existe, mais pas avec le sens que la phrase lui donne
-            : "nombre:absent-des-donnees";
+          : allowed.some((a) => a.unit === w.unit && proche(a))
+            ? "nombre:sens-incoherent" // le nombre existe dans cette unité, mais pas avec le sens que la phrase lui donne
+            // LE BON NOMBRE, AU BON SENS, DANS UNE AUTRE UNITÉ (FUT-76) : « 29,5 jours d'écart » pour des
+            // NUITS. Le refus est juste, mais l'appeler « sens incohérent » ne disait pas au modèle quoi
+            // corriger, et il recommençait. Le diagnostic nomme maintenant l'unité.
+            : w.unit !== "other" && matches({ ...w, unit: "other" }, allowed.filter((a) => a.unit !== w.unit && a.unit !== "other"))
+              ? "nombre:unite-incoherente"
+              : allowed.some(proche)
+                ? "nombre:sens-incoherent"
+                : "nombre:absent-des-donnees";
         out.push({ rule, excerpt: `« ${w.raw.trim()} » dans : ${s.replace(/^#+\s*/, "").trim()}` });
       }
     }
@@ -567,7 +602,26 @@ export function checkSynthesis(text: string, projection: Projection): Violation[
   return [...checkFormat(text), ...checkAssertions(text, projection), ...checkNumbers(text, projection)];
 }
 
-/** Les violations, dites au modèle pour sa seconde tentative. */
+/**
+ * CE QU'IL FAUT CORRIGER, PAR FAMILLE DE RÈGLE (FUT-76). La seconde tentative recevait « règle :
+ * extrait », sans dire quoi changer : à Paris 2050, le même refus CatNat est revenu deux fois, et
+ * les refus de nombres (« sens incohérent ») ne disaient pas si c'était l'unité ou le sens.
+ */
+const CONSIGNES: [RegExp, string][] = [
+  [/^nombre:unite-incoherente$/, "l'unité ne correspond pas à la donnée (les nuits au-dessus de 20 °C se comptent en nuits, pas en jours) ; reprenez l'unité du champ"],
+  [/^nombre:sens-incoherent$/, "ce nombre existe dans les données, mais pas avec ce sens : un écart à la référence se cite depuis le champ ecart_…, une valeur depuis le champ valeur ; ne recalculez rien"],
+  [/^nombre:absent-des-donnees$/, "ce nombre ne figure pas dans les données : n'écrivez que des valeurs présentes (ou leur arrondi), sans différence, ratio ni conversion"],
+  [/^nombre:transformation-non-admise$/, "aucune conversion (mois, semaines) ni ratio (« x fois plus ») : citez la valeur dans son unité"],
+  [/^catnat:/, "citez les jours de sols secs projetés et la sécheresse reconnue en catastrophe naturelle dans deux phrases séparées, sans lien entre elles"],
+  [/^interdit:psychologie-collective$/, "ne prêtez ni attention, ni perception, ni attente aux habitants ou aux lecteurs : décrivez les données"],
+  [/^format:/, "respectez le format : un titre puis exactement trois blocs « ## »"],
+];
+
+/** Les violations, dites au modèle pour sa seconde tentative : la règle, la phrase, et quoi corriger. */
 export function describeViolations(v: Violation[]): string[] {
-  return v.map((x) => `${x.rule} : ${x.excerpt.length > 180 ? `${x.excerpt.slice(0, 177)}…` : x.excerpt}`);
+  return v.map((x) => {
+    const extrait = x.excerpt.length > 180 ? `${x.excerpt.slice(0, 177)}…` : x.excerpt;
+    const consigne = CONSIGNES.find(([re]) => re.test(x.rule))?.[1];
+    return consigne ? `${x.rule} : ${extrait} → ${consigne}` : `${x.rule} : ${extrait}`;
+  });
 }

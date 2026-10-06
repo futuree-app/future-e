@@ -149,6 +149,8 @@ export default async function RapportQuartierPage(
   if (snapshot) {
     for (const h of HORIZONS) {
       const hit = cachedByKey.get(synthesisCacheKey(snapshot.hash, h));
+      // FUT-76 : `readSyntheses` ne rend déjà que les lectures d'origine modèle ; le composant vérifie
+      // encore que le texte n'est pas la lecture immédiate. Un repli n'arrive jamais ici comme enrichi.
       if (hit) initialEnriched[h] = hit.text;
     }
   }

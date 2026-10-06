@@ -52,6 +52,8 @@ export async function GET(req: NextRequest) {
   if ("error" in r) return r.error;
   const stored = await r.deps.store.readSynthesis(synthesisCacheKey(r.snapshot.hash, r.horizon), new Date());
   if (!stored) return NextResponse.json({ status: "absent" });
+  // FUT-76 : un échec enregistré n'est jamais « ready ». La lecture immédiate reste la seule.
+  if (stored.status === "failed") return NextResponse.json({ status: "unavailable" });
   return NextResponse.json(stored.status === "ready" ? { status: "ready", text: stored.text, origin: stored.origin } : { status: "pending" });
 }
 
@@ -71,6 +73,10 @@ export async function POST(req: NextRequest) {
   const stored = await r.deps.store.readSynthesis(synthesisCacheKey(r.snapshot.hash, r.horizon), new Date());
   if (stored?.status === "ready") return NextResponse.json({ status: "ready", text: stored.text, origin: stored.origin });
   if (stored?.status === "pending") return NextResponse.json({ status: "pending" });
+  // UN ÉCHEC RÉCENT NE RELANCE RIEN (FUT-76) : ni génération, ni consommation de la limite par adresse.
+  if (stored?.status === "failed" && stored.retryAt && stored.retryAt.getTime() > Date.now()) {
+    return NextResponse.json({ status: "unavailable", reason: "deferred" });
+  }
 
   // LA LIMITE PAR ADRESSE, seulement quand une génération pourrait vraiment partir. Le budget, lui, se
   // réserve ensuite, avant CHAQUE appel au modèle (cf. produceSynthesis).
