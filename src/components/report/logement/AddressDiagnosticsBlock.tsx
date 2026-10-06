@@ -76,9 +76,11 @@ function Repartition({ ctx }: { ctx: AddressDpeContext }) {
 }
 
 export function AddressDiagnosticsBlock({
-  candidates, dossierId, busy = false, onPick, onNotInList, onPickParNumero,
+  candidates, listeIncomplete = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero,
 }: {
   candidates: DpeRecord[];
+  /** FUT-65 : un des deux jeux ADEME n'a pas répondu. Le compte ci-dessous est un minimum. */
+  listeIncomplete?: boolean;
   dossierId: string;
   busy?: boolean;
   onPick: (d: DpeRecord) => void;
@@ -96,6 +98,13 @@ export function AddressDiagnosticsBlock({
       <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
         {addressContextLead(ctx)}
       </p>
+      {/* FUT-65 : « N diagnostics sont enregistrés » se lirait comme un total. Il ne l'est pas ici. */}
+      {listeIncomplete && (
+        <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+          La base ADEME n&apos;a répondu qu&apos;en partie lors de cette collecte : d&apos;autres diagnostics
+          peuvent être enregistrés à cette adresse.
+        </p>
+      )}
 
       <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} />
 

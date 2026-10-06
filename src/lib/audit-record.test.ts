@@ -116,7 +116,7 @@ test("T7 : les émissions suivent le même contrat, et le chargeur ne relit pas 
   // Chaque requête porte SA liste de colonnes : les valeurs pour l'adresse exacte, aucune pour le voisin.
   assert.match(chargeur, /\{ qs: `identifiant_ban:"\$\{banId\}"`, size: "20" \}, AUDIT_SELECT\)/);
   assert.match(chargeur, /\{ bbox, size: "20" \}, AUDIT_PROCHE_SELECT\)/);
-  assert.match(chargeur, /toAuditRecord\(rows, banId\)/);
+  assert.match(chargeur, /lectureAudit\(rows, banId\)/);
   assert.doesNotMatch(chargeur, /ep_conso_5_usages|emission_ges_5_usages/);
   // Le contrat du rapport Logement est celui-ci, et pas une copie.
   assert.match(readFileSync("src/lib/logement-report-types.ts", "utf8"), /audit\?: AuditRecord \| null;/);
@@ -147,7 +147,7 @@ test("T9 : un audit à moins de 50 m sans le même identifiant BAN n'est jamais 
   // Mélangé à l'audit de l'adresse, il est écarté même s'il est plus récent.
   assert.equal(toAuditRecord([...lignesVoisines, ...incident], BAN)!.n_audit, "A-SYNTHETIQUE-0001");
   // Sans audit exact, le module rend AUCUN audit, seulement un candidat.
-  const r = resultatAudit(null, candidatProche([voisin("A-V1", 0.0003)], POINT, BAN));
+  const r = resultatAudit({ status: "absent" }, candidatProche([voisin("A-V1", 0.0003)], POINT, BAN));
   assert.equal(r.audit, null);
   assert.equal(r.auditProche?.correspondance, "nearby_candidate");
 });
@@ -167,11 +167,12 @@ test("T10 : le candidat voisin est détecté, le plus proche, avec sa référenc
 test("T11 : quand un audit exact et un candidat voisin coexistent, l'exact gagne systématiquement", () => {
   const exact = toAuditRecord(incident, BAN)!;
   const proche = candidatProche([voisin("A-PRES", 0.0001)], POINT, BAN)!;
-  assert.deepEqual(resultatAudit(exact, proche), { audit: exact, auditProche: null });
+  assert.deepEqual(resultatAudit({ status: "present", audit: exact }, proche), { audit: exact, auditProche: null, auditStatus: "present" });
   // La route ne cherche un voisin que sans audit exact, et passe par la même règle.
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
   // FUT-13 : la route est parallèle, la recherche du voisin reste CHAÎNÉE derrière l'audit exact.
-  assert.match(route, /const auditProcheP = auditExactP\.then\(\(exact\) =>\s*exact\s*\?\s*null/);
+  // FUT-65 : le voisin n'est cherché que sur une absence ÉTABLIE (`voisinAutorise`), jamais sur une panne.
+  assert.match(route, /const auditProcheP = auditExactP\.then\(\(exact\) =>\s*voisinAutorise\(exact\)\s*\?\s*getNearbyAuditCandidate/);
   assert.match(route, /resultatAudit\(auditExact, auditProche\)/);
 });
 

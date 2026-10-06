@@ -196,7 +196,8 @@ export default function LogementModule({
         // `pending` restauré (donc un retrait volontaire) rouvre la sélection sans rien attribuer :
         // `RUNTIME_DPE_STATUS` le rend déjà en `selection_required`.
       } else {
-        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
+        // FUT-65 : une liste incomplète (base ADEME en panne partielle) n'attribue jamais seule.
+        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
         if (attribution.status === "not_found") {
           setDpeStatus("not_found");
         } else if (attribution.status === "auto_confirmed") {
@@ -359,7 +360,11 @@ export default function LogementModule({
     // Le payload ne les retient QUE si rien n'est attribué (cf. `buildSynthesisPayload`) : dès
     // qu'un diagnostic est confirmé, il devient le sujet et les autres n'ont plus rien à dire.
     dpeCandidates,
+    dpeCandidatesStatus: result?.dpeCandidatesStatus,
   };
+  // FUT-65 : la base des diagnostics n'a pas répondu et n'a rien rendu. Une liste vide ne prouve alors
+  // rien, et aucun écran ne doit la lire comme « aucun diagnostic à cette adresse ».
+  const dpeNonVerifiable = result?.dpeCandidatesStatus === "unavailable" && dpeCandidates.length === 0;
   const georisques = result?.georisques?.parcel ?? result?.georisques?.address;
   // Les risques du bâti au grain point (cavités, mouvements de terrain) et le résidu communal sont
   // désormais structurés côté serveur (`pointHazards`), plus l'ancienne ligne « autres risques »
@@ -396,7 +401,8 @@ export default function LogementModule({
         confortEteInsuffisant: thermalEvidence.indicator === "insuffisant",
         // L'adresse porte des diagnostics et aucun n'est attribué : il y a un document à réclamer.
         // Distinct de « aucun diagnostic à cette adresse », où il n'y a rien à demander.
-        diagnosticNonAttribue: !dpe && dpeCandidates.length > 0,
+        // Liste non établie (base en panne, rien rendu) : `undefined`, jamais `false` (cf. decision-fact).
+        diagnosticNonAttribue: dpeNonVerifiable ? undefined : !dpe && dpeCandidates.length > 0,
         rga: coverage.rga.coverage, expositionBati: expositionArgileNotable(coverage.rga.label),
         pprn: coverage.pprn.coverage, zoneReglementee: coverage.pprn.count > 0, pprnLabel: coverage.pprn.label,
         cavites: coverage.cavites.coverage, caviteProche: coverage.cavites.count > 0,
@@ -559,7 +565,10 @@ export default function LogementModule({
               dpeStatus={dpeStatus}
               dpe={dpe}
               audit={result.audit}
+              auditStatus={result.auditStatus}
               candidates={dpeCandidates}
+              dpeNonVerifiable={dpeNonVerifiable}
+              listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}
               dossierId={dossier?.id ?? ""}
               busy={dpeBusy}
               erreur={dpeError}
@@ -577,6 +586,7 @@ export default function LogementModule({
               evidence={thermalEvidence}
               communeName={communeName}
               dpeYear={dpeYear}
+              dpeNonVerifiable={dpeNonVerifiable}
             />
 
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
@@ -698,6 +708,7 @@ const NOM_SOURCE: Record<string, string> = {
   parcelle: "cadastre", altitude: "altitude", zfe: "zones à faibles émissions", friches: "friches (Cartofriches)",
   donnees_communales: "données communales", sinistralite: "sinistralité", georisques_commune: "Géorisques (commune)",
   georisques_point: "Géorisques (adresse)", patrimoine: "servitudes patrimoniales",
+  audit_energetique: "audit énergétique ADEME", diagnostics_dpe: "diagnostics de performance énergétique ADEME",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

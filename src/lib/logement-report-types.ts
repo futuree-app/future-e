@@ -4,7 +4,7 @@
 // (dérive = erreur tsc) et le client le lit. Les sous-formes Géorisques/ONRN sont volontairement
 // un SOUS-ENSEMBLE de ce que les libs renvoient : le client ne consomme que ces champs.
 
-import type { AuditCandidatProche, AuditRecord } from "./audit-record.ts";
+import type { AuditCandidatProche, AuditRecord, AuditStatus } from "./audit-record.ts";
 import type { IssueActualisation, VersionMeta } from "./logement-report-version.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
@@ -26,9 +26,20 @@ export type LogementReport = {
   altitude?: number | null;
   parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
   dpeCandidates?: DpeRecord[];
+  /**
+   * CE QU'A ÉTABLI LA RECHERCHE DES DIAGNOSTICS DE L'ADRESSE (FUT-65). `unavailable` : la base ADEME
+   * n'a pas répondu (ou un seul de ses deux jeux), donc une liste vide ne prouve rien.
+   * `undefined` : rapport écrit avant FUT-65, on ne sait pas, et ce n'est JAMAIS lu comme `absent`.
+   */
+  dpeCandidatesStatus?: AuditStatus;
   banFeatureType?: string | null;
   // FUT-59 : la forme de `audit-record.ts`, valeurs PAR M² (kWh EP/m²/an) et objet audité (logement ou immeuble).
   audit?: AuditRecord | null;
+  /**
+   * CE QU'A ÉTABLI LA RECHERCHE DE L'AUDIT EXACT (FUT-65), distinct de `audit === null` qui ne dit pas
+   * pourquoi. `undefined` : rapport écrit avant FUT-65, ni absent ni indisponible, inconnu.
+   */
+  auditStatus?: AuditStatus;
   // FUT-59 : un audit VOISIN, non attribué (référence et distance, aucune valeur). Jamais lu par l'écran
   // Énergie : conservé pour qu'une preuve future (parcelle, bâtiment) puisse confirmer l'attribution.
   auditProche?: AuditCandidatProche | null;

@@ -12,11 +12,11 @@ import {
 import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/lib/point-hazards";
 import { getAltitude } from "@/lib/ign";
 import { fetchHeritageProtections } from "@/lib/gpu";
-import { getDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
+import { lookupDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
-import { resultatAudit } from "@/lib/audit-record";
+import { resultatAudit, voisinAutorise, type AuditLookup } from "@/lib/audit-record";
 import { getCartofrichesNearPoint, CARTOFRICHES_RAYON_RECHERCHE_M } from "@/lib/cartofriches";
 import { getCommuneFullData } from "@/lib/commune-data";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
@@ -44,18 +44,28 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address.latitude,
     ).catch(() => null);
 
-    const dpeCandidatesP = address.id
-      ? getDpeCandidatesByBanId(address.id).catch(() => [])
-      : getDpeByCoordinates(address.latitude, address.longitude).then((d) => (d ? [d] : [])).catch(() => []);
+    // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
+    // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
+    const dpeLookupP = address.id
+      ? lookupDpeCandidatesByBanId(address.id).catch(() => ({ status: "unavailable" as const, candidates: [] }))
+      : getDpeByCoordinates(address.latitude, address.longitude)
+          .then((d) => ({ status: d ? "present" as const : "absent" as const, candidates: d ? [d] : [] }))
+          .catch(() => ({ status: "unavailable" as const, candidates: [] }));
     // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
     // donne un audit exploitable.
-    const auditExactP = address.id ? getAuditByBanId(address.id).catch(() => null) : Promise.resolve(null);
-    // Sans audit exact, et seulement alors, un audit VOISIN peut être signalé comme candidat : une
-    // référence et une distance, jamais une valeur. L'exact gagne toujours (`resultatAudit`).
+    // FUT-65 : la recherche rend ce qu'elle a ÉTABLI (présent / absent / non vérifiable), jamais `null`
+    // pour une panne. Sans identifiant BAN, aucun audit n'est attribuable (FUT-59) : l'absence d'audit
+    // ATTRIBUABLE est établie par construction.
+    const auditExactP: Promise<AuditLookup> = address.id
+      ? getAuditByBanId(address.id).catch((): AuditLookup => ({ status: "unavailable" }))
+      : Promise.resolve({ status: "absent" });
+    // Sur une absence ÉTABLIE, et seulement alors, un audit VOISIN peut être signalé comme candidat :
+    // une référence et une distance, jamais une valeur. Une recherche exacte en panne ne dit pas qu'il
+    // n'y a pas d'audit : on ne cherche pas de voisin (`voisinAutorise`). L'exact gagne toujours.
     const auditProcheP = auditExactP.then((exact) =>
-      exact
-        ? null
-        : getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null),
+      voisinAutorise(exact)
+        ? getNearbyAuditCandidate(address.latitude, address.longitude, address.id ?? null).catch(() => null)
+        : null,
     );
 
     const georisquesAddressP = process.env.GEORISQUES_API_TOKEN
@@ -67,7 +77,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeCandidates, auditExact, auditProche, georisquesAddress, georisquesParcel] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -92,8 +102,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeCandidatesP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
-    const { audit, auditProche: candidat } = resultatAudit(auditExact, auditProche);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
+    const { audit, auditProche: candidat, auditStatus } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
     // communal (aléas GASPAR sans source fine). Les labels GASPAR au point donnent le signalement
@@ -113,9 +123,11 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       address,
       parcel,
       altitude,
-      dpeCandidates,
+      dpeCandidates: dpeLookup.candidates,
+      dpeCandidatesStatus: dpeLookup.status,
       banFeatureType,
       audit,
+      auditStatus,
       auditProche: candidat,
       zfe,
       // IREP DÉBRANCHÉ LE 29/07/2026 — l'appel, pas la source. Les rejets industriels déclarés

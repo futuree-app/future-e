@@ -73,8 +73,11 @@ test("T4 : chaque source autrefois sans délai abandonne au lieu d'attendre ind�
 
   sourceMuette();
   await rejetteVite(getZfeForPoint(48.86, 2.31), "ZFE");
+  // FUT-65 : l'audit ne lève plus, il dit « non vérifiable », et le dit vite.
   sourceMuette();
-  await rejetteVite(getAuditByBanId("99999_test_00001"), "audit");
+  const t1 = Date.now();
+  assert.deepEqual(await getAuditByBanId("99999_test_00001"), { status: "unavailable" });
+  assert.ok(Date.now() - t1 < 2_000, `audit : ${Date.now() - t1} ms`);
   sourceMuette();
   await rejetteVite(getCartofrichesNearPoint(48.86, 2.31, 1000), "Cartofriches");
   // Les données communales rattrapent déjà leurs erreurs : elles ne lèvent pas, elles rendent vite ce
@@ -89,18 +92,20 @@ test("T4 : la route rattrape chaque source, donc un abandon devient une absence,
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
   for (const appel of [
     "getZfeForPoint(address.latitude, address.longitude).catch(() => null)",
-    "getAuditByBanId(address.id).catch(() => null)",
+    "getAuditByBanId(address.id).catch((): AuditLookup => ({ status: \"unavailable\" }))",
     "CARTOFRICHES_RAYON_RECHERCHE_M).catch(() => null)",
     "{ lat: address.latitude, lon: address.longitude }).catch(() => null)",
   ]) assert.ok(route.includes(appel), appel);
 });
 
 // ── T5 : source en erreur ───────────────────────────────────────────────────────────────────────────
-test("T5 : une source qui répond 500 rend une absence, sans lever", async () => {
+test("T5 : une source qui répond 500 n'est jamais lue comme une absence", async () => {
   const { getAuditByBanId } = await import("./audit.ts");
   const { getCartofrichesNearPoint } = await import("./cartofriches.ts");
+  // FUT-65 : ce test figeait l'inverse (« un 500 rend une absence »). Un 500 dit que l'audit n'a pas pu
+  // être vérifié, pas qu'il n'existe pas.
   sourceRepond(500, { error: "boom" });
-  assert.equal(await getAuditByBanId("99999_test_00001"), null);
+  assert.deepEqual(await getAuditByBanId("99999_test_00001"), { status: "unavailable" });
   // Une panne de Cartofriches ou de la ZFE n'est plus « aucune friche » ni « hors ZFE » : elle lève, et la
   // route la rend null (« non vérifiable »).
   const { getZfeForPoint } = await import("./zfe.ts");

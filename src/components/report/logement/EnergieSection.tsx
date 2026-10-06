@@ -31,14 +31,20 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 }
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, candidates, dossierId, busy = false, erreur = null,
+  dpeStatus, dpe, audit, auditStatus, candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
   onPick, onNotInList, onReselect, onPickParNumero,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
   audit: LogementReport["audit"];
+  /** FUT-65 : `unavailable` dit que l'audit n'a pas pu être vérifié ; `undefined` (rapport ancien) ne dit rien. */
+  auditStatus?: LogementReport["auditStatus"];
   /** Tous les diagnostics rattachés à l'adresse, attribués ou non. */
   candidates: DpeRecord[];
+  /** FUT-65 : la base des diagnostics n'a pas répondu et n'a rien rendu. La liste vide ne prouve rien. */
+  dpeNonVerifiable?: boolean;
+  /** FUT-65 : un des deux jeux ADEME n'a pas répondu. La liste montrée n'est pas exhaustive. */
+  listeDpeIncomplete?: boolean;
   /** Le dossier lu, dont la saisie par numéro a besoin pour rapprocher l'adresse trouvée. */
   dossierId: string;
   /** Une écriture de sélection est en cours : les gestes attendent sa réponse. */
@@ -109,6 +115,7 @@ export function EnergieSection({
           ) : candidates.length > 0 ? (
             <AddressDiagnosticsBlock
               candidates={candidates}
+              listeIncomplete={listeDpeIncomplete}
               dossierId={dossierId}
               busy={busy}
               onPick={onPick}
@@ -120,11 +127,19 @@ export function EnergieSection({
                « aucun de ces diagnostics » à cliquer pour l'atteindre. C'est l'état où la saisie
                compte le plus, et c'était celui d'où elle était absente. */
             <div style={{ display: "grid", gap: 16 }}>
-              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-                Aucun diagnostic de performance énergétique n&apos;est rattaché à cette adresse dans
-                la base ouverte. Cela ne veut pas dire qu&apos;aucun n&apos;existe : il peut ne pas y
-                avoir été versé, ou y être enregistré à une entrée voisine.
-              </p>
+              {/* FUT-65 : une panne de la base n'est pas une absence de diagnostic. */}
+              {dpeNonVerifiable ? (
+                <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                  La base des diagnostics de performance énergétique (ADEME) n&apos;a pas répondu lors
+                  de cette collecte : les diagnostics de cette adresse n&apos;ont pas pu être vérifiés.
+                </p>
+              ) : (
+                <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                  Aucun diagnostic de performance énergétique n&apos;est rattaché à cette adresse dans
+                  la base ouverte. Cela ne veut pas dire qu&apos;aucun n&apos;existe : il peut ne pas y
+                  avoir été versé, ou y être enregistré à une entrée voisine.
+                </p>
+              )}
               <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
                 <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
                   Si vous avez le document du diagnostic, son numéro le retrouve où qu&apos;il soit
@@ -176,6 +191,13 @@ export function EnergieSection({
           {dpe.type_batiment && <Block label="Type" value={dpe.type_batiment} />}
         </div>
 
+        {/* FUT-65 : la base des audits n'a pas répondu. On ne sait pas s'il en existe un : on le dit, une
+            fois, là où l'audit se serait affiché. Absent ou rapport ancien : rien, comme avant. */}
+        {auditStatus === "unavailable" && (
+          <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+            Audit énergétique non vérifiable pour le moment : la base ADEME n&apos;a pas répondu lors de cette collecte.
+          </p>
+        )}
         {/* Un audit ne s'affiche que s'il est rattaché par l'identifiant BAN de l'adresse (FUT-59). */}
         {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (
           <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
