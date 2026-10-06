@@ -1,5 +1,5 @@
 import React from "react";
-import { BPE_WALK_RADIUS_M, adresseDansLEspace, libelleCourant, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, adresseDansLEspace, libelleCourant, libelleLigneEspaceVert, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
@@ -59,12 +59,13 @@ function greenSpaceLabel(kind: GreenKind | undefined): string {
  *
  * Sans nom, le type reprend la vedette et la ligne du dessous porte distance et surface.
  */
-function LigneEspaceVert({ espace, role }: { espace: EspaceVert; role: string }) {
+function LigneEspaceVert({ espace, rang }: { espace: EspaceVert; rang: "proche" | "grand" }) {
   const type = greenSpaceLabel(espace.kind);
   const surface = espace.areaM2 ? fmtSurface(espace.areaM2) : null;
+  const role = libelleLigneEspaceVert(espace, rang);
   // 0 veut dire « dedans » (cf. `EspaceVert.distanceMeters`) : « env. 0 m » le racontait comme un
-  // espace voisin. Le nom ou le type est juste au-dessus, d'où le pronom.
-  const distance = adresseDansLEspace(espace) ? "l'adresse s'y trouve" : `env. ${fmtDist(espace.distanceMeters)}`;
+  // espace voisin. Dedans, le libellé le dit déjà, et la ligne ne porte aucune distance.
+  const distance = adresseDansLEspace(espace) ? null : `env. ${fmtDist(espace.distanceMeters)}`;
   return (
     <div>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 2 }}>
@@ -225,15 +226,12 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                     <span style={{ color: "var(--fg-4)", fontSize: 14 }}>Espaces verts : donnée momentanément indisponible.</span>
                   ) : s.osm.nearestMappedGreenSpace ? (
                     <div style={{ display: "grid", gap: 12 }}>
-                      <LigneEspaceVert espace={s.osm.nearestMappedGreenSpace} role="Le plus proche" />
+                      <LigneEspaceVert espace={s.osm.nearestMappedGreenSpace} rang="proche" />
                       {/* LA SECONDE LIGNE N'APPARAÎT QUE QUAND ELLE APPREND QUELQUE CHOSE : trois
                           adresses sur quatre n'en ont pas, et c'est le comportement voulu. Absente
                           aussi des snapshots figés avant le 20/09/2026. */}
                       {s.osm.largerGreenSpaceNearby && (
-                        <LigneEspaceVert
-                          espace={s.osm.largerGreenSpaceNearby}
-                          role="Un grand espace vert à proximité"
-                        />
+                        <LigneEspaceVert espace={s.osm.largerGreenSpaceNearby} rang="grand" />
                       )}
                     </div>
                   ) : (

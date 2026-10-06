@@ -17,7 +17,7 @@ import type { DpeRecord } from "./dpe-attribution.ts";
 //       comme depuis celle du dossier (`calcul-voisinage.ts`), sans jamais dégrader une partie
 //       déjà obtenue (`fusionnerRafraichissement`).
 //   g : les grandes forêts et les grands parcs cartographiés en RELATION entrent dans le voisinage
-//       (FUT-15, 06/10/2026), et « 0 m » devient « l'adresse s'y trouve ». Bumper la seule
+//       (FUT-15, 06/10/2026), et « 0 m » devient « l'adresse est dans un espace vert ». Bumper la seule
 //       `OSM_QUERY_VERSION` aurait rechargé les tuiles sans toucher aucun dossier : un voisinage figé
 //       aurait continué d'annoncer un petit bois « à 300 m » à une adresse située dans la forêt.
 export const SOURCES_VERSION = "face3-2026-07-08g";

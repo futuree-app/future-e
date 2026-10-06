@@ -220,6 +220,22 @@ export function adresseDansLEspace(espace: Pick<EspaceVert, "distanceMeters">): 
   return espace.distanceMeters === 0;
 }
 
+/**
+ * LE LIBELLÉ D'UNE LIGNE D'ESPACE VERT, qui dit d'abord OÙ est l'adresse par rapport à lui.
+ *
+ * « Un grand espace vert à proximité » au-dessus d'une adresse située dans le bois de Boulogne se
+ * contredisait. Dedans, c'est le libellé qui le dit, et la ligne ne porte plus de distance.
+ */
+export function libelleLigneEspaceVert(
+  espace: Pick<EspaceVert, "distanceMeters">,
+  rang: "proche" | "grand",
+): string {
+  if (adresseDansLEspace(espace)) {
+    return rang === "grand" ? "L'adresse est dans un grand espace vert" : "L'adresse est dans un espace vert";
+  }
+  return rang === "grand" ? "Un grand espace vert à proximité" : "Le plus proche";
+}
+
 export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
 
 export type OsmProximity = {
