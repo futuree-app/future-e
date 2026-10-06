@@ -106,3 +106,27 @@ test("AUCUNE FORMULE DE COMPENSATION, dans aucune branche", () => {
     assert.doesNotMatch(r!.limite, interdits);
   }
 });
+
+// ── FUT-15 : 0 veut dire « dedans » ─────────────────────────────────────────────────────────────
+
+test("DEDANS N'EST PAS « À 0 MÈTRES » : l'adresse est dite dans l'espace, accordé au genre", () => {
+  const foret = lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert("forest", 0))!;
+  assert.match(foret.texte, /L'adresse est dans une forêt cartographiée\.$/);
+  assert.doesNotMatch(foret.texte, /0 mètre/);
+  const bois = lireChaleurEtVegetal({ iuhi: 4, level: "present" }, vert("wood", 0))!;
+  assert.match(bois.texte, /L'adresse est dans un bois cartographié\.$/);
+  const pelouse = lireChaleurEtVegetal({ iuhi: 4, level: "present" }, vert("grass", 0))!;
+  assert.match(pelouse.texte, /dans une surface enherbée cartographiée\./);
+});
+
+test("dedans : l'accessibilité reste une inconnue, la phrase sur la mesure de distance disparaît", () => {
+  const r = lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert("park", 0))!;
+  assert.doesNotMatch(r.texte, /accès|accessible/i);
+  assert.match(r.limite, /accessibilité/);
+  assert.doesNotMatch(r.limite, /vol d'oiseau/);
+});
+
+test("à 1 m, l'adresse reste dehors : la distance est dite", () => {
+  const r = lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert("park", 1))!;
+  assert.match(r.texte, /un parc, à 1 mètre de l'adresse/);
+});

@@ -16,7 +16,11 @@ import type { DpeRecord } from "./dpe-attribution.ts";
 //       version antérieure est servi tel quel et recalculé en arrière-plan, depuis la page Autour
 //       comme depuis celle du dossier (`calcul-voisinage.ts`), sans jamais dégrader une partie
 //       déjà obtenue (`fusionnerRafraichissement`).
-export const SOURCES_VERSION = "face3-2026-07-08f";
+//   g : les grandes forêts et les grands parcs cartographiés en RELATION entrent dans le voisinage
+//       (FUT-15, 06/10/2026), et « 0 m » devient « l'adresse est dans un espace vert ». Bumper la seule
+//       `OSM_QUERY_VERSION` aurait rechargé les tuiles sans toucher aucun dossier : un voisinage figé
+//       aurait continué d'annoncer un petit bois « à 300 m » à une adresse située dans la forêt.
+export const SOURCES_VERSION = "face3-2026-07-08g";
 
 // Projection persistée de l'état runtime du choix DPE (cf. spec §6). `pending` tant que rien
 // de définitif ; les deux statuts « confirmés » figent un DPE daté.

@@ -43,7 +43,7 @@ export function distancePointToPolylineM(p: LngLat, line: LngLat[]): number {
   return min;
 }
 
-function pointInRing(p: LngLat, ring: LngLat[]): boolean {
+export function pointInRing(p: LngLat, ring: LngLat[]): boolean {
   // Ray casting sur coordonnées projetées autour de p (p = origine -> (0,0)).
   const pts = ring.map((v) => toXY(p, v));
   let inside = false;
@@ -77,12 +77,76 @@ export function ringAreaM2(ring: LngLat[]): number {
   return Math.abs(somme) / 2;
 }
 
+/**
+ * L'ANNEAU EST-IL FERMÉ ? Par les COORDONNÉES de ses extrémités, jamais par l'identité des objets.
+ *
+ * L'ancienne comparaison `ring[0] === ring[ring.length - 1]` était toujours fausse : le parseur
+ * reconstruit chaque sommet, donc le premier et le dernier sont deux objets distincts même quand
+ * ils désignent le même point. Sans effet sur une distance (le segment ajouté était dégénéré), mais
+ * l'assemblage des relations OSM repose sur ce test : là, une fausse réponse fabriquerait ou
+ * refuserait un anneau à tort.
+ */
+export function isClosedRing(ring: LngLat[]): boolean {
+  if (ring.length < 2) return false;
+  const a = ring[0];
+  const b = ring[ring.length - 1];
+  return a.lat === b.lat && a.lon === b.lon;
+}
+
+/** La distance au CONTOUR seul, que le point soit dedans ou dehors. */
+function distanceAuContourM(p: LngLat, ring: LngLat[]): number {
+  return distancePointToPolylineM(p, isClosedRing(ring) ? ring : [...ring, ring[0]]);
+}
+
 export function distancePointToPolygonM(p: LngLat, ring: LngLat[]): number {
   if (ring.length < 3) return distancePointToPolylineM(p, ring);
   if (pointInRing(p, ring)) return 0;
-  const closed = ring[0] === ring[ring.length - 1] ? ring : [...ring, ring[0]];
-  return distancePointToPolylineM(p, closed);
+  return distanceAuContourM(p, ring);
 }
+
+/**
+ * UN MORCEAU DE MULTIPOLYGONE : un anneau extérieur et les trous qu'il contient.
+ *
+ * Les trous sont RATTACHÉS à leur anneau extérieur, pas mis en commun. Une clairière dans la forêt
+ * est un trou de la forêt ; un bosquet au milieu de cette clairière, cartographié comme un second
+ * anneau extérieur, est de nouveau de la forêt. Seul le rattachement permet de répondre juste dans
+ * les deux cas.
+ */
+export type PolygoneAvecTrous = { outer: LngLat[]; inners: LngLat[][] };
+
+/** Le point est-il DANS la surface : dans un extérieur, et dans aucun des trous de cet extérieur ? */
+export function pointInMultiPolygon(p: LngLat, polygones: PolygoneAvecTrous[]): boolean {
+  return polygones.some((m) => pointInRing(p, m.outer) && !m.inners.some((t) => pointInRing(p, t)));
+}
+
+/**
+ * LA DISTANCE D'UN POINT À UN MULTIPOLYGONE : 0 s'il est dans la surface, sinon la distance au
+ * contour le plus proche, extérieur OU trou. Un point au milieu d'une clairière est à la distance
+ * du bord de la clairière, pas à zéro, et pas à la distance du bord extérieur de la forêt.
+ *
+ * Jamais de centroïde ni de sommet de substitution : le calcul porte sur les segments.
+ */
+export function distancePointToMultiPolygonM(p: LngLat, polygones: PolygoneAvecTrous[]): number {
+  if (polygones.length === 0) return Infinity;
+  if (pointInMultiPolygon(p, polygones)) return 0;
+  let min = Infinity;
+  for (const m of polygones) {
+    min = Math.min(min, distanceAuContourM(p, m.outer));
+    for (const t of m.inners) min = Math.min(min, distanceAuContourM(p, t));
+  }
+  return min;
+}
+
+/** La surface d'un multipolygone : la somme des extérieurs, moins la somme des trous. */
+export function multiPolygonAreaM2(polygones: PolygoneAvecTrous[]): number {
+  let somme = 0;
+  for (const m of polygones) {
+    somme += ringAreaM2(m.outer);
+    for (const t of m.inners) somme -= ringAreaM2(t);
+  }
+  return Math.max(0, somme);
+}
+
 
 /**
  * LA SEULE CONVERSION MÈTRES -> DEGRÉS DU MODULE. Toute fenêtre géographique passe par ici.

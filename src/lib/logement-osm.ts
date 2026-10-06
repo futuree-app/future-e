@@ -1,12 +1,18 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { haversineM, distancePointToPolylineM, distancePointToPolygonM, expandBBoxM, type LngLat, ringAreaM2 } from "./geo-distance.ts";
+import {
+  haversineM, distancePointToPolylineM, distancePointToPolygonM, distancePointToMultiPolygonM, expandBBoxM,
+  isClosedRing, multiPolygonAreaM2, pointInRing, ringAreaM2, type LngLat, type PolygoneAvecTrous,
+} from "./geo-distance.ts";
 import { cellKey, cellBBox } from "./geo-grid.ts";
 import type { OsmProximity, GreenKind } from "./logement-autour-types.ts";
 
+// v4 : les espaces verts portés par une RELATION multipolygone sont demandés et assemblés (FUT-15),
+// et `access=private|no` les écarte. Une cellule mise en cache sous v3 ignore les grandes forêts et
+// les grands parcs cartographiés en relation : ce bump les fait re-collecter à la demande.
 // v3 : l'emprise de collecte était tronquée en longitude (cf. tileFetchBBox) ; les cellules mises en
 // cache sous v2 sont incomplètes à l'est et à l'ouest, ce bump les fait re-collecter à la demande.
 // v2 : on conserve le type d'espace vert (greenKind) ; bump = re-fetch des cellules à la demande.
-export const OSM_QUERY_VERSION = "osm-v3-2026-08-03";
+export const OSM_QUERY_VERSION = "osm-v4-2026-10-06";
 export const OSM_BBOX_RADIUS_M = 1500;
 export const OSM_CELL_DEG = 0.005; // ~500 m ; à valider (Paris/Lyon, ville moyenne, rural boisé)
 
@@ -17,17 +23,24 @@ const MIRRORS = [
 ];
 
 // OsmGeom reste local (seul logement-osm.ts le manipule) ; OsmProximity vient des types partagés.
-export type OsmGeom = {
-  kind: "line" | "polygon" | "node";
+type OsmGeomCommun = {
   role: "noisy" | "green";
   subtype: "motorway" | "trunk" | "railway" | "green";
   greenKind?: GreenKind; // renseigné seulement pour role === "green"
   /** L'identité OSM de l'objet. Sert à ne pas proposer deux fois le même lieu. */
   osmId?: number;
+  /**
+   * Le TYPE de l'identité, absent pour un way. Un way 123 et une relation 123 sont deux objets
+   * distincts : comparer les seuls numéros confondrait deux lieux différents.
+   */
+  osmType?: "relation";
   /** Le nom cartographié, quand il existe. « Parc Adèle Charruyer » vaut mieux que « Parc ». */
   name?: string;
-  pts: LngLat[];
 };
+export type OsmGeom =
+  | (OsmGeomCommun & { kind: "line" | "polygon" | "node"; pts: LngLat[] })
+  /** Une relation multipolygone assemblée : ses anneaux fermés, chaque trou rattaché à son extérieur. */
+  | (OsmGeomCommun & { kind: "multipolygon"; polygons: PolygoneAvecTrous[] });
 
 function overpassQuery(s: number, w: number, n: number, e: number): string {
   const bb = `(${s},${w},${n},${e})`;
@@ -38,20 +51,152 @@ function overpassQuery(s: number, w: number, n: number, e: number): string {
     `way["leisure"="park"]${bb};` +
     `way["landuse"~"^(forest|grass)$"]${bb};` +
     `way["natural"="wood"]${bb};` +
+    // LES MÊMES TAGS VERTS, PORTÉS PAR UNE RELATION (FUT-15). Une grande forêt ou un grand parc est
+    // souvent une relation multipolygone, dont les ways membres ne portent aucun tag : sans ces
+    // lignes, l'objet n'existait pas pour le produit, et une adresse située DEDANS se voyait
+    // annoncer l'espace vert suivant, à plusieurs centaines de mètres. Le bruit n'est pas concerné.
+    `relation["type"="multipolygon"]["leisure"="park"]${bb};` +
+    `relation["type"="multipolygon"]["landuse"~"^(forest|grass)$"]${bb};` +
+    `relation["type"="multipolygon"]["natural"="wood"]${bb};` +
     ");out geom;"
   );
 }
 
+type OverpassMembre = { type: string; ref?: number; role?: string; geometry?: Array<LngLat | null> };
+type OverpassElement = {
+  type: string; id?: number; tags?: Record<string, string>; geometry?: LngLat[]; members?: OverpassMembre[];
+};
+
+function greenKindDe(t: Record<string, string>): GreenKind | null {
+  return t.leisure === "park" ? "park"
+    : t.natural === "wood" ? "wood"
+    : t.landuse === "forest" ? "forest"
+    : t.landuse === "grass" ? "grass"
+    : null; // `recreation_ground` n'est plus collecté : souvent minéral, cf. GreenKind
+}
+
+/**
+ * UN ESPACE DÉCLARÉ FERMÉ AU PUBLIC N'EST PAS PROPOSÉ (décision du porteur, 03/08/2026).
+ *
+ * `access=private` et `access=no` sont des affirmations positives du contributeur : on s'en sert
+ * pour ÉCARTER, jamais l'inverse. Un espace sans tag `access` n'est pas public, il est non renseigné,
+ * et le texte rendu dit déjà que l'accessibilité n'est pas documentée.
+ */
+function estDeclareFerme(t: Record<string, string>): boolean {
+  return t.access === "private" || t.access === "no";
+}
+
+const memeSommet = (a: LngLat, b: LngLat) => a.lat === b.lat && a.lon === b.lon;
+
+/**
+ * RECOLLE DES SEGMENTS EN ANNEAUX FERMÉS, ou rend `null` si l'un d'eux ne se referme pas.
+ *
+ * Overpass ne garantit ni l'ordre des membres ni leur sens : on part d'un segment et on cherche,
+ * parmi les autres, celui qui commence OU finit là où il s'arrête, retourné au besoin, jusqu'à
+ * revenir au point de départ. Le raccord se fait sur un sommet IDENTIQUE, jamais sur le plus proche.
+ *
+ * AUCUN ANNEAU N'EST FABRIQUÉ. Si une extrémité ne trouve pas de suite, l'anneau est incomplet
+ * (membre manquant, relation cassée) : relier les deux bouts dessinerait une frontière qu'aucun
+ * contributeur n'a tracée, et décider « dedans » ou « dehors » sur cette frontière serait inventer.
+ */
+export function assemblerAnneaux(segments: LngLat[][]): LngLat[][] | null {
+  const restants = segments.filter((seg) => seg.length >= 2);
+  const anneaux: LngLat[][] = [];
+  while (restants.length > 0) {
+    const anneau = [...restants.shift()!];
+    while (!isClosedRing(anneau)) {
+      const fin = anneau[anneau.length - 1];
+      const i = restants.findIndex((seg) => memeSommet(seg[0], fin) || memeSommet(seg[seg.length - 1], fin));
+      if (i < 0) return null;
+      const [seg] = restants.splice(i, 1);
+      const dansLeSens = memeSommet(seg[0], fin) ? seg : [...seg].reverse();
+      anneau.push(...dansLeSens.slice(1));
+    }
+    // Fermé mais sans surface (aller-retour sur un même segment, triangle aplati) : ce n'est pas
+    // un anneau, et le garder ferait passer un trait pour une emprise.
+    if (anneau.length < 4 || ringAreaM2(anneau) === 0) return null;
+    anneaux.push(anneau);
+  }
+  return anneaux;
+}
+
+/**
+ * ASSEMBLE UNE RELATION MULTIPOLYGONE, ou rend `null` quand sa géométrie n'est pas exploitable.
+ *
+ * LE CONTRAT EST CELUI DU REJET ENTIER. Un seul anneau qui ne se referme pas, un sommet manquant,
+ * un trou qu'aucun extérieur ne contient : la relation est écartée, comme avant FUT-15. Garder les
+ * anneaux valides seuls dessinerait une forêt amputée, et une adresse située dans la partie perdue
+ * s'entendrait dire qu'elle est dehors, avec l'autorité d'une géométrie vérifiée.
+ *
+ * Les membres sans rôle `outer` ou `inner` sont ignorés : un rôle vide est ambigu, et si sa
+ * géométrie était nécessaire, l'anneau ne se refermera pas et la relation sera écartée.
+ */
+export function assemblerMultipolygone(membres: OverpassMembre[]): PolygoneAvecTrous[] | null {
+  const segmentsDe = (role: "outer" | "inner"): LngLat[][] | null => {
+    const out: LngLat[][] = [];
+    for (const m of membres) {
+      if (m.type !== "way" || m.role !== role) continue;
+      const g = m.geometry;
+      if (!g || g.length < 2 || g.some((p) => p == null || typeof p.lat !== "number" || typeof p.lon !== "number")) {
+        return null;
+      }
+      out.push((g as LngLat[]).map((p) => ({ lat: p.lat, lon: p.lon })));
+    }
+    return out;
+  };
+  const segOuter = segmentsDe("outer");
+  const segInner = segmentsDe("inner");
+  if (!segOuter || !segInner || segOuter.length === 0) return null;
+  const outers = assemblerAnneaux(segOuter);
+  const inners = assemblerAnneaux(segInner);
+  if (!outers || !inners) return null;
+
+  const polygones: PolygoneAvecTrous[] = outers.map((outer) => ({ outer, inners: [] }));
+  for (const trou of inners) {
+    // Le trou appartient au PLUS PETIT extérieur qui le contient (un bosquet dans une clairière
+    // est un extérieur logé dans un trou d'un autre). Contenir = au moins un sommet du trou
+    // strictement dedans : un trou qui touche son extérieur partage des sommets avec lui.
+    const hotes = polygones.filter((m) => trou.some((p) => pointInRing(p, m.outer)));
+    if (hotes.length === 0) return null;
+    hotes.reduce((a, b) => (ringAreaM2(b.outer) < ringAreaM2(a.outer) ? b : a)).inners.push(trou);
+  }
+  return polygones;
+}
+
 export function parseOverpass(elements: unknown[]): OsmGeom[] {
   const out: OsmGeom[] = [];
-  for (const el of elements as Array<{
-    type: string; id?: number; tags?: Record<string, string>; geometry?: LngLat[];
-  }>) {
+  const relations: OsmGeom[] = [];
+  const els = elements as OverpassElement[];
+
+  // LES RELATIONS D'ABORD, pour savoir quels ways elles portent. Un way extérieur d'une relation
+  // retenue qui porte AUSSI un tag vert (ancien balisage) remonterait comme un second objet, et le
+  // même espace serait compté deux fois. Un way intérieur (une clairière enherbée dans la forêt)
+  // est un autre lieu : il reste.
+  const membresExterieurs = new Set<number>();
+  for (const el of els) {
+    if (el.type !== "relation" || !el.members) continue;
+    const t = el.tags ?? {};
+    if (t.type !== "multipolygon" || estDeclareFerme(t)) continue;
+    const greenKind = greenKindDe(t);
+    if (!greenKind) continue;
+    const polygons = assemblerMultipolygone(el.members);
+    if (!polygons) continue;
+    for (const m of el.members) {
+      if (m.type === "way" && m.role === "outer" && typeof m.ref === "number") membresExterieurs.add(m.ref);
+    }
+    const nom = (t.name ?? "").trim();
+    relations.push({
+      kind: "multipolygon", role: "green", subtype: "green", greenKind, polygons,
+      ...(typeof el.id === "number" ? { osmId: el.id, osmType: "relation" as const } : {}),
+      ...(nom ? { name: nom } : {}),
+    });
+  }
+
+  for (const el of els) {
     if (el.type !== "way" || !el.geometry || el.geometry.length === 0) continue;
     const t = el.tags ?? {};
     const pts = el.geometry.map((p) => ({ lat: p.lat, lon: p.lon }));
-    const closed =
-      pts.length > 2 && pts[0].lat === pts[pts.length - 1].lat && pts[0].lon === pts[pts.length - 1].lon;
+    const closed = pts.length > 2 && isClosedRing(pts);
     const hw = t.highway ?? "";
     if (/^motorway/.test(hw)) {
       out.push({ kind: "line", role: "noisy", subtype: "motorway", pts });
@@ -60,23 +205,28 @@ export function parseOverpass(elements: unknown[]): OsmGeom[] {
     } else if (t.railway === "rail") {
       out.push({ kind: "line", role: "noisy", subtype: "railway", pts });
     } else {
-      const greenKind: GreenKind | null =
-        t.leisure === "park" ? "park"
-        : t.natural === "wood" ? "wood"
-        : t.landuse === "forest" ? "forest"
-        : t.landuse === "grass" ? "grass"
-        : null; // `recreation_ground` n'est plus collecté : souvent minéral, cf. GreenKind
-      if (greenKind) {
-        const nom = (t.name ?? "").trim();
-        out.push({
-          kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts,
-          ...(typeof el.id === "number" ? { osmId: el.id } : {}),
-          ...(nom ? { name: nom } : {}),
-        });
-      }
+      const greenKind = greenKindDe(t);
+      if (!greenKind || estDeclareFerme(t)) continue;
+      if (typeof el.id === "number" && membresExterieurs.has(el.id)) continue;
+      const nom = (t.name ?? "").trim();
+      out.push({
+        kind: closed ? "polygon" : "line", role: "green", subtype: "green", greenKind, pts,
+        ...(typeof el.id === "number" ? { osmId: el.id } : {}),
+        ...(nom ? { name: nom } : {}),
+      });
     }
   }
-  return out;
+  // LES RELATIONS EN DERNIER. À distance égale, le premier rencontré reste « le plus proche » : une
+  // adresse dans un square lui-même dans une forêt garde le square, et la forêt peut alors venir en
+  // seconde ligne comme grand espace, au lieu de masquer le square.
+  return [...out, ...relations];
+}
+
+/** La surface mesurable d'une géométrie verte, ou `undefined` si elle n'est pas fermée. */
+function aireM2(g: OsmGeom): number | undefined {
+  if (g.kind === "polygon") return ringAreaM2(g.pts);
+  if (g.kind === "multipolygon") return multiPolygonAreaM2(g.polygons);
+  return undefined;
 }
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -118,8 +268,9 @@ const AIRE_MIN_M2: Record<GreenKind, number> = {
  */
 function estUnVraiEspaceVert(g: OsmGeom): boolean {
   if (!g.greenKind) return true;
-  if (g.kind !== "polygon") return g.greenKind !== "grass";
-  return ringAreaM2(g.pts) >= AIRE_MIN_M2[g.greenKind];
+  const aire = aireM2(g);
+  if (aire === undefined) return g.greenKind !== "grass";
+  return aire >= AIRE_MIN_M2[g.greenKind];
 }
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -158,14 +309,24 @@ const GRAND_ESPACE_FACTEUR = 10;
  */
 function estUnAutreLieu(candidat: OsmGeom, proche: OsmGeom): boolean {
   if (candidat === proche) return false;
-  if (candidat.osmId !== undefined && candidat.osmId === proche.osmId) return false;
+  if (candidat.osmId !== undefined && candidat.osmId === proche.osmId && candidat.osmType === proche.osmType) return false;
   if (candidat.name && proche.name && candidat.name === proche.name) return false;
   return true;
 }
 
+/**
+ * ZÉRO VEUT DIRE DEDANS, ET SEULEMENT DEDANS. La distance vaut exactement 0 quand l'adresse est
+ * dans l'emprise ; un point extérieur à 40 cm du bord s'arrondirait aussi à 0 et serait raconté
+ * « dans la forêt ». On le borne donc à 1 m, ce qui laisse à l'écran une règle sans ambiguïté
+ * (cf. `EspaceVert.distanceMeters`).
+ */
+function distanceAffichee(d: number): number {
+  return d === 0 ? 0 : Math.max(1, Math.round(d));
+}
+
 function decrire(g: OsmGeom, d: number, aire: number | undefined) {
   return {
-    distanceMeters: Math.round(d),
+    distanceMeters: distanceAffichee(d),
     ...(g.greenKind ? { kind: g.greenKind } : {}),
     ...(aire !== undefined ? { areaM2: aire } : {}),
     ...(g.name ? { name: g.name } : {}),
@@ -193,11 +354,13 @@ function grandEspace(
 
 export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadiusM: number): OsmProximity {
   const distTo = (g: OsmGeom): number =>
-    g.kind === "polygon"
-      ? distancePointToPolygonM(center, g.pts)
-      : g.kind === "line"
-        ? distancePointToPolylineM(center, g.pts)
-        : haversineM(center, g.pts[0]);
+    g.kind === "multipolygon"
+      ? distancePointToMultiPolygonM(center, g.polygons)
+      : g.kind === "polygon"
+        ? distancePointToPolygonM(center, g.pts)
+        : g.kind === "line"
+          ? distancePointToPolylineM(center, g.pts)
+          : haversineM(center, g.pts[0]);
   const noisy = new Map<"motorway" | "trunk" | "railway", number>();
   let proche: { g: OsmGeom; d: number; aire?: number } | null = null;
   const recevables: { g: OsmGeom; d: number; aire: number }[] = [];
@@ -209,7 +372,8 @@ export function computeOsmProximity(center: LngLat, geoms: OsmGeom[], bboxRadius
       const cur = noisy.get(st);
       if (cur === undefined || d < cur) noisy.set(st, d);
     } else if (estUnVraiEspaceVert(g)) {
-      const aire = g.kind === "polygon" ? Math.round(ringAreaM2(g.pts)) : undefined;
+      const brute = aireM2(g);
+      const aire = brute === undefined ? undefined : Math.round(brute);
       if (proche === null || d < proche.d) proche = { g, d, aire };
       if (aire !== undefined && d <= GRAND_ESPACE_RAYON_M) recevables.push({ g, d, aire });
     }
