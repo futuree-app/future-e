@@ -8,7 +8,8 @@ import { projectForSynthesis } from "./synthesis-contract.ts";
 import { produceSynthesis } from "./synthesis-pipeline.ts";
 import { ensureTerritoireSynthesis, type EnsureDeps } from "./synthesis-ensure.ts";
 import { synthesisCacheKey } from "./synthesis-cache.ts";
-import type { StoredSynthesis, TerritoireStore } from "../server/territoire-facts-store.ts";
+import type { TerritoireStore } from "../server/territoire-facts-store.ts";
+import { memoryStore as memoryStoreDe } from "./__fixtures__/memory-store.ts";
 import { auditSyntheses, chatelaillonInputs } from "./__fixtures__/chatelaillon.ts";
 
 const T0 = "2026-09-28T00:00:00.000Z";
@@ -98,31 +99,7 @@ test("clé : un changement de faits change la clé, pas une nouvelle lecture à 
 
 // ── ensure : cache, réservation, budget ─────────────────────────────────────────────────────
 
-function memoryStore() {
-  const rows = new Map<string, { status: "pending" | "ready"; text?: string; origin?: string; lease?: number }>();
-  const store: TerritoireStore = {
-    async persistSnapshot() { return true; },
-    async readSnapshot() { return SNAP; },
-    async readSynthesis(key, now): Promise<StoredSynthesis | null> {
-      const r = rows.get(key);
-      if (!r) return null;
-      if (r.status === "ready") return { status: "ready", text: r.text!, origin: r.origin as "model" };
-      return (r.lease ?? 0) > now.getTime() ? { status: "pending" } : null;
-    },
-    async readSyntheses() { return new Map(); },
-    async claim(row, now) {
-      const r = rows.get(row.key);
-      if (!r || (r.status === "pending" && (r.lease ?? 0) < now.getTime())) {
-        rows.set(row.key, { status: "pending", lease: now.getTime() + 150_000 });
-        return true;
-      }
-      return false;
-    },
-    async complete(key, r) { rows.set(key, { status: "ready", text: r.text, origin: r.origin }); },
-    async release(key) { if (rows.get(key)?.status === "pending") rows.delete(key); },
-  };
-  return { store, rows };
-}
+const memoryStore = () => memoryStoreDe(SNAP);
 
 function deps(store: TerritoireStore, generate: (s: string, u: string) => Promise<string>, budget = true): EnsureDeps {
   return { store, reserveBudget: async () => budget, generate };
@@ -154,13 +131,13 @@ test("génération en cours : un second appel rend « pending » et ne paie pas 
   assert.equal(calls, 1);
 });
 
-test("budget refusé : la clé est libérée, aucun appel", async () => {
+test("budget refusé : aucun appel, un échec daté (FUT-76 : plus de clé libérée retentée à chaque visite)", async () => {
   const { store, rows } = memoryStore();
   let calls = 0;
   const r = await ensureTerritoireSynthesis(SNAP, "gwl20", deps(store, async () => { calls++; return BONNE; }, false));
-  assert.equal(r.status, "unavailable");
+  assert.equal(r.status === "unavailable" && r.reason, "budget");
   assert.equal(calls, 0);
-  assert.equal(rows.size, 0);
+  assert.equal([...rows.values()][0].origin, "deterministic");
 });
 
 test("au plus 2 appels au modèle par nouvelle clé, même quand tout est refusé", async () => {
@@ -168,7 +145,8 @@ test("au plus 2 appels au modèle par nouvelle clé, même quand tout est refus�
   let calls = 0;
   const r = await ensureTerritoireSynthesis(SNAP, "gwl20", deps(store, async () => { calls++; return MAUVAISE; }));
   assert.equal(calls, 2);
-  assert.equal(r.status === "ready" && r.origin, "deterministic");
+  // FUT-76 : deux refus ne sont plus jamais « ready ». Rien d'enrichi n'est servi.
+  assert.equal(r.status === "unavailable" && r.reason, "rejected");
 });
 
 // ── La synthèse Territoire ne reçoit plus AUCUN contexte de lecteur ─────────────────────────

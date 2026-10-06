@@ -12,18 +12,20 @@ import { checkSynthesis, describeViolations, type Violation } from "./synthesis-
 import { deterministicSynthesis } from "./synthesis-deterministe.ts";
 import { synthesisUserMessage, type HorizonKey } from "./synthesis-contract.ts";
 
-export type SynthesisOrigin = "model" | "model_retry" | "deterministic";
+import type { SynthesisOrigin } from "./synthesis-origin.ts";
+export { isEnrichedOrigin, type EnrichedOrigin, type SynthesisOrigin } from "./synthesis-origin.ts";
 
 export type SynthesisResult = {
   text: string;
+  /** `deterministic` : RIEN D'ENRICHI n'a été produit, le texte est la lecture immédiate (FUT-76). */
   origin: SynthesisOrigin;
   /** Les motifs de refus, par tentative : le journal demandé par D8, pour améliorer les conventions. */
   rejections: { attempt: number; violations: Violation[] }[];
   modelCalls: number;
   /**
-   * Faux quand le MODÈLE était indisponible : on sert la synthèse déterministe, mais on ne la fige pas
-   * sous la clé, sinon une panne passagère priverait durablement la commune de sa lecture enrichie.
-   * Vrai après deux refus : la même entrée reproduirait les mêmes refus, inutile de repayer.
+   * Faux quand le MODÈLE ou le BUDGET était indisponible, vrai sinon. Depuis FUT-76, aucun repli
+   * déterministe n'est plus figé : `ensureTerritoireSynthesis` l'enregistre comme un échec daté, retenté
+   * après un délai (court pour une panne, long après deux refus). Conservé pour le journal et les tests.
    */
   cacheable: boolean;
   modelError?: string;
