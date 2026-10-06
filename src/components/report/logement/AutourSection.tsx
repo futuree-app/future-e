@@ -1,5 +1,5 @@
 import React from "react";
-import { BPE_WALK_RADIUS_M, libelleCourant, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, adresseDansLEspace, libelleCourant, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
@@ -62,7 +62,9 @@ function greenSpaceLabel(kind: GreenKind | undefined): string {
 function LigneEspaceVert({ espace, role }: { espace: EspaceVert; role: string }) {
   const type = greenSpaceLabel(espace.kind);
   const surface = espace.areaM2 ? fmtSurface(espace.areaM2) : null;
-  const distance = `env. ${fmtDist(espace.distanceMeters)}`;
+  // 0 veut dire « dedans » (cf. `EspaceVert.distanceMeters`) : « env. 0 m » le racontait comme un
+  // espace voisin. Le nom ou le type est juste au-dessus, d'où le pronom.
+  const distance = adresseDansLEspace(espace) ? "l'adresse s'y trouve" : `env. ${fmtDist(espace.distanceMeters)}`;
   return (
     <div>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 2 }}>

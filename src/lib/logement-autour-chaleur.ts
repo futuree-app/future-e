@@ -21,7 +21,7 @@
 // impose que l'échelle réelle s'affiche toujours. D'où « votre secteur » d'un côté et « à N mètres »
 // de l'autre, dans toutes les branches.
 
-import type { GreenKind, IcuSnapshot, OsmProximity } from "./logement-autour-types.ts";
+import { adresseDansLEspace, type GreenKind, type IcuSnapshot, type OsmProximity } from "./logement-autour-types.ts";
 
 export type ChaleurVegetal = {
   /** La phrase composée, ou null quand il n'y a rien à relier. */
@@ -69,10 +69,17 @@ export function lireChaleurEtVegetal(
   const nature = vert.kind ? NATURE[vert.kind] : null;
   const nom = nature?.nom ?? "un espace";
   const metres = Math.round(vert.distanceMeters);
+  const unite = metres > 1 ? "mètres" : "mètre"; // plancher à 1 m depuis FUT-15 : « à 1 mètre »
+  const dedans = adresseDansLEspace(vert);
 
-  const texte = nature?.vegetal === false
-    ? `${secteur}. L'espace cartographié le plus proche est ${nom}, à ${metres} mètres de l'adresse.`
-    : `${secteur}. Le premier espace végétalisé cartographié est ${nom}, à ${metres} mètres de l'adresse.`;
+  // DEDANS N'EST PAS « À 0 MÈTRES » (FUT-15). La phrase dit où est l'adresse, sans rien ajouter :
+  // être dans une forêt cartographiée ne dit ni l'ombre, ni l'accès, ni la densité du couvert.
+  const cartographie = nom.startsWith("une ") ? "cartographiée" : "cartographié";
+  const texte = dedans
+    ? `${secteur}. L'adresse est dans ${nom} ${cartographie}.`
+    : nature?.vegetal === false
+    ? `${secteur}. L'espace cartographié le plus proche est ${nom}, à ${metres} ${unite} de l'adresse.`
+    : `${secteur}. Le premier espace végétalisé cartographié est ${nom}, à ${metres} ${unite} de l'adresse.`;
 
   // L'ACCESSIBILITÉ EST INCONNUE, ET IL FAUT LE DIRE. La distance est mesurée du point au BORD du
   // polygone, à vol d'oiseau (`distancePointToPolygonM`) : un bois privé, clôturé ou séparé par une
@@ -86,6 +93,9 @@ export function lireChaleurEtVegetal(
 
   return {
     texte,
-    limite: `${inconnues} La distance est mesurée à vol d'oiseau jusqu'à la limite de l'espace, pas jusqu'à une entrée.`,
+    // Sans distance affichée, la phrase sur la manière de la mesurer n'a plus d'objet.
+    limite: dedans
+      ? inconnues
+      : `${inconnues} La distance est mesurée à vol d'oiseau jusqu'à la limite de l'espace, pas jusqu'à une entrée.`,
   };
 }

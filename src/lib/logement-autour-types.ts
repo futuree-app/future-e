@@ -203,12 +203,22 @@ export function avecArticle(libelle: string): string {
 // libellé manquant afficherait un vide à leur place.
 /** Un espace vert cartographié : ce qu'il est, où il est, et sa taille quand elle est mesurable. */
 export type EspaceVert = {
+  /**
+   * ZÉRO VEUT DIRE « L'ADRESSE EST DANS L'EMPRISE » (FUT-15). Un point extérieur est toujours rendu
+   * à au moins 1 m (`logement-osm.ts`), donc 0 n'est jamais un arrondi. Ne jamais l'afficher
+   * comme une distance : passer par `adresseDansLEspace`.
+   */
   distanceMeters: number;
   kind?: GreenKind;
   areaM2?: number;
   /** Le nom cartographié. Absent sur la plupart des petites surfaces, présent sur les grandes. */
   name?: string;
 };
+
+/** L'adresse est-elle DANS cet espace (et non à une distance de lui) ? Seule lecture de la valeur 0. */
+export function adresseDansLEspace(espace: Pick<EspaceVert, "distanceMeters">): boolean {
+  return espace.distanceMeters === 0;
+}
 
 export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
 
