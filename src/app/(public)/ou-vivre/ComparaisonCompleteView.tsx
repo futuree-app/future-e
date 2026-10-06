@@ -2,6 +2,7 @@
 
 import type { ComparaisonComplete, MatchResult } from "@/lib/comparateur-vie";
 import { ThemeMatrix } from "@/app/(public)/comparateur/ThemeMatrix";
+import { motCardinal } from "@/lib/comparaison-cardinal";
 
 // Comparaison complète (Pack Décision) : matrice d'arbitrages, 7 thèmes stables, palier
 // incarné absolu + avantage relatif au trio. Aucun chiffre, aucune jauge. Le trio reste
@@ -104,8 +105,15 @@ export function ComparaisonCompleteView({ data, trio, onBack }: Props) {
           className="font-[var(--weight-title)] text-[length:var(--text-title)] leading-[1.12] tracking-[-0.6px] text-label max-w-[760px]"
           style={{ fontFamily: "var(--font-serif)" }}
         >
-          Vous les avez retenus tous les {trio.length >= 3 ? "trois" : "deux"}.{" "}
-          <span className="italic text-accent">Voici, critère par critère, ce qui penche et ce qui se vaut.</span>
+          {/* FUT-32 : un pack rejoué peut ne plus trouver qu'une commune ; elle ne se compare alors à rien. */}
+          {motCardinal(trio.length) ? (
+            <>
+              Vous les avez retenus tous les {motCardinal(trio.length)}.{" "}
+              <span className="italic text-accent">Voici, critère par critère, ce qui penche et ce qui se vaut.</span>
+            </>
+          ) : (
+            <>Une seule commune répond encore à ce projet : il n&apos;y a rien à mettre en regard.</>
+          )}
         </h2>
       </div>
 

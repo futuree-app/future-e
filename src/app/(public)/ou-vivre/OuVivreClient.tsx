@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { motCardinal, packReplayProposable } from "@/lib/comparaison-cardinal";
 import { RepriseRecherche } from "@/components/report/RepriseRecherche";
 import posthog from "posthog-js";
 import type { ParsedProject, MatchOutcome, MatchResult } from "@/lib/comparateur-vie";
@@ -854,15 +855,19 @@ export function OuVivreClient() {
     }
   };
 
-  const canPack = top.length >= 2;
+  // FUT-32 : le Pack proposé ici REJOUE le projet, ce que la page et le paiement n'acceptent qu'à trois
+  // communes. À une ou deux, le bouton menait à une redirection vers cette page : il n'est plus proposé.
+  const canPack = packReplayProposable(top.length);
 
   // Pack Décision : dépose le projet en mémoire (lu par la page de conviction) et
   // navigue vers la comparaison approfondie payante. Remplace l'ancienne vue
   // intermédiaire « Ce qui les distingue » : ses infos (identité, correspondance,
   // compromis) vivent désormais directement sur les cartes de résultats.
   const onPackDecision = () => {
-    if (!outcome?.results?.length) return;
-    const trio = topCards(outcome.results);
+    const trio = topCards(outcome?.results);
+    // Le bouton caché n'est pas un invariant : invoquée hors trio, la fonction ne fait rien (aucune
+    // écriture, aucun événement, aucune navigation). Le paiement reste l'ultime garde.
+    if (!packReplayProposable(trio.length)) return;
     try {
       if (parsed) window.localStorage.setItem("futuree:projet:parsed", JSON.stringify(parsed));
       window.localStorage.setItem("futuree:projet:label", submittedText.slice(0, 200));
@@ -1166,8 +1171,15 @@ export function OuVivreClient() {
               Les territoires à regarder.
             </h2>
             <p className="text-[14px] leading-[1.6] text-muted mb-6">
-              Les trois pourraient convenir.{" "}
-              <span className="italic text-accent">Mais ils ne racontent pas la même histoire.</span>
+              {/* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */}
+              {motCardinal(top.length) ? (
+                <>
+                  {motCardinal(top.length) === "trois" ? "Les trois" : "Les deux"} pourraient convenir.{" "}
+                  <span className="italic text-accent">Mais ils ne racontent pas la même histoire.</span>
+                </>
+              ) : (
+                <>Un seul territoire répond à ce que vous avez demandé.</>
+              )}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {top.map((r, i) => (

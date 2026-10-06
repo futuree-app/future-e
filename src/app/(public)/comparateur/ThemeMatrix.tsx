@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { ComparaisonCellule, ComparaisonLigne, ComparaisonTheme, MatchResult } from "@/lib/comparateur-vie";
+import { motCardinal } from "@/lib/comparaison-cardinal";
 
 // Rendu d'UN thème de la matrice d'arbitrages : en-tête de colonnes (communes nommées) +
 // une ligne par dimension (palier absolu, « Avantage X » / « À égalité », cellule leader en
@@ -127,7 +128,8 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
             {dispo[0].palier}
             {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
           </span>
-          <span className="text-[length:var(--text-dense)] text-muted">· les {n >= 3 ? "trois" : "deux"} territoires se valent</span>
+          {/* FUT-32 : le cardinal réel ; une matrice n'existe qu'à deux ou trois communes. */}
+          {motCardinal(n) && <span className="text-[length:var(--text-dense)] text-muted">· les {motCardinal(n)} territoires se valent</span>}
         </div>
       ) : (
         trio.map((r) => {
