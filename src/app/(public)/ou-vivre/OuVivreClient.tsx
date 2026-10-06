@@ -49,7 +49,9 @@ const FREE_ASK = 2;
 // résultats, réhydraté au montage, avec un TTL court : on restaure le retour de
 // paywall, on ne ressuscite pas une session d'il y a deux jours.
 const SESSION_KEY = "futuree:ouvivre:session";
-const SESSION_VERSION = 3;
+// v4 (FUT-36) : les sessions v3 peuvent porter « qui attire » (identité, synthèse) ; on les laisse
+// tomber plutôt que de réafficher une causalité retirée.
+const SESSION_VERSION = 4;
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 h
 
 type SessionSnapshot = {

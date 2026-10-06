@@ -123,3 +123,12 @@ test("D8. le prompt de synthèse interdit la causalité et ne la donne plus en e
   assert.doesNotMatch(prompt, /attire de nouveaux arrivants/);
   assert.match(prompt, /n'écrivez jamais qu'un territoire « attire », qu'il est « attractif » ni qu'il a une\n« attractivité » : une part d'arrivants récents ne dit pas pourquoi ils sont venus ;/);
 });
+
+test("D9. les sessions locales d'Où vivre antérieures à FUT-36 ne sont plus restaurées", () => {
+  const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
+  assert.match(client, /const SESSION_VERSION = 4;/);
+  // Le mécanisme est inchangé : une version différente n'est pas restaurée.
+  assert.match(client, /if \(s\.v !== SESSION_VERSION\) return null;/);
+  assert.match(client, /const SESSION_KEY = "futuree:ouvivre:session";/);
+  assert.match(client, /const SESSION_TTL_MS = 2 \* 60 \* 60 \* 1000;/);
+});
