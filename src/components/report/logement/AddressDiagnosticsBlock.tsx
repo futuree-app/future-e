@@ -7,7 +7,7 @@ import {
 } from "@/lib/dpe-address-context";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
-import { compterIdentifiables, listeRepliee, phraseBornes, phraseIdentifiables } from "@/lib/dpe-selection-vue";
+import { PHRASE_DPE_IMMEUBLE, compterIdentifiables, listeRepliee, phraseBornes, phraseIdentifiables } from "@/lib/dpe-selection-vue";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -65,7 +65,7 @@ function Ligne({ label, children }: { label: string; children: React.ReactNode }
 
 const BOUTON_PRINCIPAL: React.CSSProperties = {
   justifySelf: "start", padding: "11px 18px", minHeight: 44, fontSize: 14.5, fontWeight: 500,
-  borderRadius: 10, cursor: "pointer", background: "var(--bg-elev-2)",
+  borderRadius: 10, cursor: "pointer", backgroundColor: "var(--bg-elev-2)",
   border: "1px solid var(--accent-dim, #7a6e60)", color: "var(--fg-hi)",
 };
 
@@ -143,8 +143,7 @@ export function AddressDiagnosticsBlock({
           choisir sa ligne avant d'apprendre qu'elle décrit le bâtiment commun. Sa ligne le dit aussi. */}
       {ctx.hasCollective && (
         <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-          L&apos;un de ces diagnostics porte sur l&apos;immeuble entier. Il décrit le bâtiment
-          commun, et pas la performance d&apos;un logement en particulier.
+          {PHRASE_DPE_IMMEUBLE}
         </p>
       )}
 

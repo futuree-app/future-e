@@ -199,3 +199,13 @@ export function vueSectionDpe(args: {
   if (candidats > 0) return "a_choisir";
   return baseMuette ? "non_verifie" : "aucun";
 }
+
+/**
+ * LE DIAGNOSTIC D'IMMEUBLE, DIT POUR CE QU'IL APPORTE (FUT-68). L'ancienne phrase (« Il décrit le
+ * bâtiment commun, et pas la performance d'un logement en particulier ») était exacte, mais ne disait
+ * pas quoi en faire. Celle-ci dit les deux choses à retenir : c'est une information sur le BÂTIMENT,
+ * et elle ne REMPLACE PAS le diagnostic du logement, y compris quand celui-ci est introuvable.
+ * Son rôle dans le dossier relève de FUT-74, pas de cet écran.
+ */
+export const PHRASE_DPE_IMMEUBLE =
+  "Un diagnostic concerne l'immeuble entier. Il donne une indication sur la performance du bâtiment, mais ne remplace pas le DPE de ce logement.";

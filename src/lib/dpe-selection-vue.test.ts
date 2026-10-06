@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  APERCU_CANDIDATS, champsVariables, compterIdentifiables, decouperListe, ligneCandidat, listeRepliee,
+  APERCU_CANDIDATS, PHRASE_DPE_IMMEUBLE, champsVariables, compterIdentifiables, decouperListe, ligneCandidat, listeRepliee,
   phraseAttribution, phraseBornes, phraseIdentifiables, vueSectionDpe,
 } from "./dpe-selection-vue.ts";
 import { dpeAttributionStatus, type DpeRecord } from "./dpe-attribution.ts";
@@ -224,4 +224,12 @@ test("moteur inchangé : 34 candidats demandent une sélection, la liste reçue 
   const maison = dpe({ type_batiment: "maison", complement: null });
   assert.equal(dpeAttributionStatus([maison], "housenumber").status, "auto_confirmed");
   assert.equal(dpeAttributionStatus([maison], "housenumber", false).status, "selection_required");
+});
+
+test("DPE d'immeuble : une information sur le bâtiment, qui ne remplace pas celui du logement", () => {
+  assert.equal(
+    PHRASE_DPE_IMMEUBLE,
+    "Un diagnostic concerne l'immeuble entier. Il donne une indication sur la performance du bâtiment, mais ne remplace pas le DPE de ce logement.",
+  );
+  assert.doesNotMatch(PHRASE_DPE_IMMEUBLE, /à défaut|faute de|en l'absence|à la place|utilis/i);
 });
