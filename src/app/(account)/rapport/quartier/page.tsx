@@ -17,6 +17,7 @@ import { ModuleTracker } from "@/components/ModuleTracker";
 import { resolveReadableTerritory, TERRITORY_SELECT, canAccessTerritory } from "@/lib/active-territory";
 import { AskFutureInlineMount } from "@/components/AskFutureInlineMount";
 import { TerritoryYearsBand } from "@/components/report/TerritoryYearsBand";
+import { codeGaspar, villeGaspar } from "@/lib/georisques-flags";
 import { deriveTerritoryMood } from "@/lib/territory-mood";
 import { readLatestDataSnapshot } from "@/lib/server/decision-artifact-store";
 import { buildTerritoryIdentity, buildTerritoryCards } from "@/lib/territory-identity";
@@ -86,6 +87,9 @@ export default async function RapportQuartierPage(
 
   const georisques = screen?.georisques ?? null;
   const catnat = screen?.catnat ?? null;
+  // FUT-69 : GASPAR ne publie Paris, Lyon et Marseille qu'à la ville. Sur la page d'un arrondissement,
+  // la carte et la ligne des années portent le compte de toute la ville, et le disent.
+  const catnatVille = inseeCode && inseeCode !== codeGaspar(inseeCode) ? villeGaspar(inseeCode) : null;
   const littoral = screen?.littoral ?? null;
   const scenarios = screen?.scenarios ?? null;
   const territoire = screen?.territoire ?? null;
@@ -283,7 +287,7 @@ export default async function RapportQuartierPage(
             GASPAR a répondu : une bande vide = « commune épargnée », jamais « panne ». */}
         {communeName && catnat && (
           <div className="mt-12">
-            <TerritoryYearsBand communeName={displayName} years={catnat.years} />
+            <TerritoryYearsBand communeName={displayName} years={catnat.years} ville={catnatVille} />
           </div>
         )}
 
@@ -300,7 +304,7 @@ export default async function RapportQuartierPage(
           >
             Les grands signaux du territoire
           </h2>
-          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} climatType={territoryMood.type} />
+          <QuartierAside registres={registres} communeName={displayName} scenarios={scenarios} georisques={georisques} territoire={territoire} vigieau={vigieau} drought={drought} catnat={catnat} catnatInondation={catnatInondation} catnatMisAJour={catnatMisAJour} catnatVille={catnatVille} littoral={littoral} demographie={territoryCards?.demographie ?? null} couvertNaturel={territoryCards?.couvertNaturel ?? null} saisonnalitePct={saisonnalitePct} logementVacancePct={logementVacancePct} eloignementServicesPct={null} era5={era5} climatType={territoryMood.type} />
         </section>
 
         {/* Une question ? — AskFuture inline (uniquement pour comptes payants) :

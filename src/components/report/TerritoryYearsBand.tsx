@@ -21,6 +21,7 @@
 import { useEffect, useRef } from "react";
 import { deCommune } from "@/lib/typography";
 import type { CatnatBandFamily } from "@/lib/georisques";
+import { legendeAnneesCatnat } from "@/lib/catnat-memoire";
 
 const FAMILIES: Record<CatnatBandFamily, { color: string; label: string }> = {
   inondation: { color: "#60a5fa", label: "Inondation / submersion" },
@@ -35,41 +36,18 @@ const H = 187;
 const PADX = 8;
 const YSTART = 1982;
 
-// Distribution nationale des années marquées par commune depuis 1982, calculée
-// sur le fichier GASPAR national du 2026-06-29 (247 701 arrêtés, 34 969
-// communes, 99 % touchées au moins une fois) : médiane 4, p90 = 10.
-const NATIONAL_MEDIAN_YEARS = 4;
-const NATIONAL_P90_YEARS = 10;
-
-const NUMBER_WORDS = [
-  "Aucune", "Une", "Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit",
-  "Neuf", "Dix", "Onze", "Douze", "Treize", "Quatorze", "Quinze", "Seize",
-];
-
-// Phrase-légende déterministe : des comptes situés dans la distribution
-// nationale, jamais un jugement.
-function buildCaption(markedYears: number[], endYear: number): string {
-  const n = markedYears.length;
-  const span = `depuis ${YSTART}`;
-  const median = `La commune française médiane en compte ${NUMBER_WORDS[NATIONAL_MEDIAN_YEARS].toLowerCase()}.`;
-  if (n === 0) return `Aucune année ne se détache ${span}. C'est rare : la commune française médiane en compte ${NUMBER_WORDS[NATIONAL_MEDIAN_YEARS].toLowerCase()}.`;
-  if (n === 1) return `Une seule année se détache ${span} : ${markedYears[0]}. C'est rare : la commune française médiane en compte ${NUMBER_WORDS[NATIONAL_MEDIAN_YEARS].toLowerCase()}.`;
-  const count = n < NUMBER_WORDS.length ? NUMBER_WORDS[n].toLowerCase() : String(n);
-  const head = `${count[0].toUpperCase()}${count.slice(1)} années se détachent ${span}`;
-  // Resserrement : plus d'années marquées sur les 15 dernières années qu'avant.
-  const recent = markedYears.filter((y) => y > endYear - 15).length;
-  const tight = n >= 4 && recent > n - recent ? ", de plus en plus rapprochées" : "";
-  if (n >= NATIONAL_P90_YEARS)
-    return `${head}${tight}. Une commune française sur dix dépasse ${NUMBER_WORDS[NATIONAL_P90_YEARS].toLowerCase()} années.`;
-  return `${head}${tight}. ${median}`;
-}
-
+// FUT-69 : la légende vient de `catnat-memoire.ts` (pure, testée). Elle disait « N années se
+// détachent », « de plus en plus rapprochées », et ne donnait le repère national qu'à certaines
+// communes ; elle dit ce qui est compté, et le repère passe en ligne secondaire, le même pour toutes.
 export function TerritoryYearsBand({
   communeName,
   years,
+  ville = null,
 }: {
   communeName: string;
   years: { year: number; family: CatnatBandFamily }[];
+  /** FUT-69 : « Paris » pour un arrondissement, dont GASPAR ne publie que la ville. */
+  ville?: string | null;
 }) {
   const rootRef = useRef<HTMLElement>(null);
 
@@ -78,6 +56,7 @@ export function TerritoryYearsBand({
   const byYear = new Map(years.filter((y) => y.year >= YSTART).map((y) => [y.year, y.family]));
   const markedYears = [...byYear.keys()].sort((a, b) => a - b);
   const familiesPresent = FAMILY_ORDER.filter((f) => [...byYear.values()].includes(f));
+  const legende = legendeAnneesCatnat(markedYears, endYear, ville);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -213,8 +192,11 @@ export function TerritoryYearsBand({
         </svg>
       </div>
       <figcaption>
-        <p className="text-[length:var(--text-dense)] text-muted mt-2 mb-1.5 ml-0.5">
-          {buildCaption(markedYears, endYear)}
+        <p className="text-[length:var(--text-dense)] text-muted mt-2 mb-1 ml-0.5">
+          {legende.principale}
+        </p>
+        <p className="text-[12px] text-ghost mb-1.5 ml-0.5">
+          {legende.repere}
         </p>
         {familiesPresent.length > 0 && (
           <div className="flex flex-wrap gap-x-[18px] gap-y-1.5 ml-0.5 font-mono text-[10px] tracking-[0.06em] uppercase" style={{ color: "#6b7388" }}>
