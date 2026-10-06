@@ -225,6 +225,41 @@ export async function getDpeCandidatesByBanId(banId: string): Promise<DpeRecord[
     .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
 }
 
+// LA RECHERCHE DU MODULE LOGEMENT, PAYANT (FUT-65). Mêmes lignes que `getDpeCandidatesByBanId`, et ce
+// qu'elle a ÉTABLI. `fetchLines` rend `[]` sur une erreur HTTP, et la route rattrapait le reste en
+// `[]` : une panne ADEME s'affichait « Aucun diagnostic de performance énergétique n'est rattaché à
+// cette adresse ». Même doctrine que `probeDpeByBanId` ci-dessous : l'absence n'est affirmée que si
+// les DEUX jeux ont répondu. Si l'un tombe, les diagnostics de l'autre restent montrés, mais la liste
+// n'est pas complète : `unavailable`.
+//
+// Bornée à 8 s, comme les autres sources du module (FUT-13) : `fetchLines` n'a pas de délai.
+// `getDpeCandidatesByBanId` reste tel quel pour ses autres appelants.
+export async function lookupDpeCandidatesByBanId(
+  banId: string,
+): Promise<{ status: "present" | "absent" | "unavailable"; candidates: DpeRecord[] }> {
+  const collected: DpeRecord[] = [];
+  let sawFailure = false;
+  for (const dataset of [DS.existant, DS.neuf]) {
+    const url = new URL(`${dataset}/lines`);
+    url.searchParams.set("qs", `identifiant_ban:"${banId}"`);
+    url.searchParams.set("size", "30");
+    url.searchParams.set("sort", "-date_etablissement_dpe");
+    url.searchParams.set("select", SELECT_LOGEMENT);
+    try {
+      const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
+      if (!res.ok) { sawFailure = true; continue; }
+      const json = (await res.json()) as { results?: unknown };
+      if (!Array.isArray(json?.results)) { sawFailure = true; continue; }
+      collected.push(...(json.results as ApiRecord[]).map(toRecord));
+    } catch {
+      sawFailure = true; // délai dépassé, réseau, réponse illisible
+    }
+  }
+  const candidates = dedupeAndCollapseDpe(collected)
+    .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
+  return { status: sawFailure ? "unavailable" : candidates.length > 0 ? "present" : "absent", candidates };
+}
+
 // Sonde de QUALIFICATION : dit si un diagnostic EXACT existe à cet identifiant BAN, et distingue
 // l'absence de la panne. `fetchLines` rend `[]` dans les deux cas, ce qui ferait annoncer « aucun
 // diagnostic » pendant un incident ADEME, alors que l'invariant central de la qualification est

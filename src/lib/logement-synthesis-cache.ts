@@ -19,6 +19,9 @@ import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 export const SYNTHESIS_PROMPT_VERSION = "v10"; // v10 : les diagnostics de l'adresse entrent dans le payload quand AUCUN n'est attribué, et la lecture doit alors nommer le document à réclamer plutôt que de s'arrêter à « non qualifiée ». Bump = régénération voulue. // v9 : couverture des dimensions dans le payload, et clôture BORNÉE — le calme ne peut plus être affirmé sur « l'adresse » quand une dimension n'a pas pu être lue. Bump = régénération voulue : toutes les synthèses écrites sous v8 sur une adresse sans diagnostic concluent au calme en confondant « rien trouvé » et « rien cherchable ». // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
+// FUT-65 (06/10/2026), SANS BUMP, volontairement : une consigne s'ajoute au prompt pour un état du payload
+// qui n'existait pas (`diagnostics_adresse: { source_indisponible: true }`). Aucun payload existant ne
+// change, donc aucune synthèse en cache ne devient fausse ; un bump les régénérerait toutes pour rien.
 
 // Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
 // collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
@@ -87,6 +90,8 @@ export type SynthesisData = {
    * tirer la moindre caractéristique de ce logement-ci.
    */
   dpeCandidates?: DpeRecord[] | null;
+  /** FUT-65 : `unavailable` = la base n'a pas répondu ; une liste vide ne prouve alors pas l'absence. */
+  dpeCandidatesStatus?: "present" | "absent" | "unavailable";
   // irep / cartofriches / posture : volontairement ignorés. Les deux premiers ne sont interprétés par
   // aucun fait aujourd'hui (cf. le registre des sources dormantes) ; la posture n'est pas un fait.
   // autour : retiré en v8 — il appartient au module Autour de l'adresse (cf. en-tête).
@@ -114,10 +119,10 @@ const DPE_CONFIRMED = (s: string | null | undefined) =>
 // coupler, et inventer un troisième mot pour la même idée serait la dette qu'on cherche à éviter.
 // Un même concept, un même mot, deux domaines qui restent indépendants.
 //
-// PAS DE TROISIÈME ÉTAT ICI. Les sondes distinguent bien `none` d'`unavailable` une couche plus
-// bas, mais une panne de source empêche le rapport entier de se rendre : elle n'atteint jamais
-// cette fonction. Le jour où une source pourra manquer sur un rapport rendu, l'état s'ajoutera ici
-// et la clôture devra le nommer autrement (« momentanément indisponible », jamais « absent »).
+// PAS DE TROISIÈME ÉTAT ICI. Depuis FUT-13, une source peut manquer sur un rapport rendu : une panne
+// de la base des diagnostics laisse `energie` en « unexamined », ce qui borne déjà la clôture. Ce
+// que la panne ne doit pas devenir, « l'adresse n'en porte aucun », est porté par
+// `diagnostics_adresse: { source_indisponible: true }` (FUT-65), pas par un troisième état ici.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 export type DimensionCoverage = "examined" | "unexamined";
 
@@ -261,7 +266,9 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
     diagnostics_adresse: (() => {
       if (dpe) return null;
       const ctx = buildAddressDpeContext(data.dpeCandidates ?? []);
-      if (!ctx) return null;
+      // FUT-65 : base en panne et rien rendu. `null` voudrait dire « l'adresse n'en porte aucun »
+      // (cf. le prompt) : on dit qu'on ne sait pas. Les autres cas gardent leur payload, donc leur hash.
+      if (!ctx) return data.dpeCandidatesStatus === "unavailable" ? { source_indisponible: true } : null;
       return {
         total: ctx.total,
         ecart_classes: ctx.spread ? `${ctx.spread.min} à ${ctx.spread.max}` : null,

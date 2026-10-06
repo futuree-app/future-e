@@ -98,6 +98,10 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   if (r.georisques?.commune == null) absentes.push("georisques_commune");
   if (r.georisques?.address == null) absentes.push("georisques_point");
   if (r.heritage == null || r.heritage.sourceStatus === "unavailable") absentes.push("patrimoine");
+  // FUT-65 : seulement sur une panne ÉTABLIE. Une absence confirmée n'est pas une source muette, et un
+  // rapport antérieur (statut `undefined`) ne s'invente pas une panne.
+  if (r.auditStatus === "unavailable") absentes.push("audit_energetique");
+  if (r.dpeCandidatesStatus === "unavailable") absentes.push("diagnostics_dpe");
   return absentes;
 }
 

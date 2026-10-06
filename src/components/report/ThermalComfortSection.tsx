@@ -83,11 +83,13 @@ function ClimateFuture({ communeName, level }: { communeName: string; level: The
 }
 
 export function ThermalComfortSection({
-  evidence, communeName, dpeYear,
+  evidence, communeName, dpeYear, dpeNonVerifiable = false,
 }: {
   evidence: ThermalEvidence;
   communeName: string;
   dpeYear: string | null;
+  /** FUT-65 : la base des diagnostics n'a pas répondu. « Rien n'a été retrouvé » serait faux. */
+  dpeNonVerifiable?: boolean;
   territoireHref?: string;
 }) {
   const { level, indicator, methodWording, factors, drawerFields } = evidence;
@@ -144,7 +146,9 @@ export function ThermalComfortSection({
             </p>
             <Drawer summary="Pourquoi cette information manque-t-elle ?">
               <p style={{ margin: 0 }}>
-                Aucun diagnostic de performance énergétique attribuable à cette adresse, ou suffisamment renseigné, n&apos;a été retrouvé dans les données publiques. Ce n&apos;est pas une anomalie : la couverture des DPE reste partielle.
+                {dpeNonVerifiable
+                  ? "La base des diagnostics de performance énergétique (ADEME) n'a pas répondu lors de cette collecte : aucun diagnostic n'a pu être lu pour cette adresse."
+                  : <>Aucun diagnostic de performance énergétique attribuable à cette adresse, ou suffisamment renseigné, n&apos;a été retrouvé dans les données publiques. Ce n&apos;est pas une anomalie : la couverture des DPE reste partielle.</>}
               </p>
             </Drawer>
           </>

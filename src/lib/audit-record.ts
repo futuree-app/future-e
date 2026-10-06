@@ -219,9 +219,40 @@ export function candidatProche(
   return meilleur;
 }
 
-/** Ce que rend le module Logement : l'audit exact s'il existe, sinon (et seulement sinon) un candidat voisin. */
+/**
+ * CE QU'A ÉTABLI LA RECHERCHE DE L'AUDIT EXACT (FUT-65). Trois états, parce qu'une panne n'est pas une
+ * absence : la base ADEME qui répond 500, dépasse son délai ou rend une réponse illisible ne dit RIEN de
+ * l'existence d'un audit à cette adresse. Avant FUT-65, ces trois cas rendaient `[]`, donc `null`, donc
+ * « aucun audit exact », et la route partait chercher un voisin sur la foi d'une absence jamais établie.
+ *
+ * Même doctrine que `probeDpeByBanId` (`found / none / unavailable`) ; les mots sont ceux du rapport.
+ */
+export type AuditStatus = "present" | "absent" | "unavailable";
+export type AuditLookup =
+  | { status: "present"; audit: AuditRecord }
+  | { status: "absent" }
+  | { status: "unavailable" };
+
+/** Les lignes rendues par la source → l'état établi. `null` : la source n'a pas répondu exploitablement. */
+export function lectureAudit(rows: AuditApiRow[] | null, banId: string): AuditLookup {
+  if (rows == null) return { status: "unavailable" };
+  const audit = toAuditRecord(rows, banId);
+  return audit ? { status: "present", audit } : { status: "absent" };
+}
+
+/**
+ * LE VOISIN N'EST CHERCHÉ QUE SUR UNE ABSENCE ÉTABLIE. Présent : l'exact gagne, rien à chercher.
+ * Indisponible : on ne sait pas si un audit exact existe, et signaler un voisin laisserait entendre
+ * qu'il n'y en a pas.
+ */
+export function voisinAutorise(exact: AuditLookup): boolean {
+  return exact.status === "absent";
+}
+
+/** Ce que rend le module Logement : l'audit exact s'il existe, sinon (et seulement sur absence établie) un candidat voisin. */
 export function resultatAudit(
-  exact: AuditRecord | null, proche: AuditCandidatProche | null,
-): { audit: AuditRecord | null; auditProche: AuditCandidatProche | null } {
-  return exact ? { audit: exact, auditProche: null } : { audit: null, auditProche: proche };
+  exact: AuditLookup, proche: AuditCandidatProche | null,
+): { audit: AuditRecord | null; auditProche: AuditCandidatProche | null; auditStatus: AuditStatus } {
+  if (exact.status === "present") return { audit: exact.audit, auditProche: null, auditStatus: "present" };
+  return { audit: null, auditProche: voisinAutorise(exact) ? proche : null, auditStatus: exact.status };
 }

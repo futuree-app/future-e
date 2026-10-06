@@ -322,6 +322,9 @@ pour situer celui-ci dans la fourchette.
 Quand \`diagnostics_adresse\` est absent, l'adresse n'en porte aucun : vous ne dites pas qu'il y en
 a ailleurs, et vous n'inventez pas de document à réclamer.
 
+Quand \`diagnostics_adresse\` vaut \`{ source_indisponible: true }\`, la base des diagnostics n'a pas
+répondu : vous ne dites ni qu'il en existe à cette adresse, ni qu'il n'en existe pas.
+
 CE QUE VOUS N'AVEZ PAS PU LIRE BORNE CE QUE VOUS POUVEZ CONCLURE
 Le payload porte un objet \`couverture\`. Chaque dimension y vaut « examined » (une source a
 répondu pour cette adresse, même si sa réponse est qu'il n'y a rien) ou « unexamined » (rien n'a

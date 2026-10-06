@@ -18,11 +18,15 @@ export async function GET(
   void insee; // insee kept in path for potential future commune-level aggregation
 
   try {
-    const data = await getAuditByBanId(banId);
-    if (!data) {
+    const lookup = await getAuditByBanId(banId);
+    // Une panne de la source n'est pas « aucun audit » (FUT-65) : 503, jamais 404.
+    if (lookup.status === "unavailable") {
+      return NextResponse.json({ error: "Audit source unavailable." }, { status: 503 });
+    }
+    if (lookup.status === "absent") {
       return NextResponse.json({ error: "No audit found for this address." }, { status: 404 });
     }
-    return NextResponse.json(data, {
+    return NextResponse.json(lookup.audit, {
       headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" },
     });
   } catch (err) {
