@@ -323,7 +323,9 @@ Quand \`diagnostics_adresse\` est absent, l'adresse n'en porte aucun : vous ne d
 a ailleurs, et vous n'inventez pas de document à réclamer.
 
 Quand \`diagnostics_adresse\` vaut \`{ source_indisponible: true }\`, la base des diagnostics n'a pas
-répondu : vous ne dites ni qu'il en existe à cette adresse, ni qu'il n'en existe pas.
+répondu : vous ne dites ni qu'il en existe à cette adresse, ni qu'il n'en existe pas. Quand il porte
+\`liste_incomplete: true\`, la base n'a répondu qu'en partie : \`total\` est un minimum, ne le présentez
+pas comme le nombre de diagnostics de l'adresse.
 
 CE QUE VOUS N'AVEZ PAS PU LIRE BORNE CE QUE VOUS POUVEZ CONCLURE
 Le payload porte un objet \`couverture\`. Chaque dimension y vaut « examined » (une source a

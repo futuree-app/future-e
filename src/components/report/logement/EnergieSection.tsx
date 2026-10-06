@@ -31,7 +31,7 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 }
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, auditStatus, candidates, dpeNonVerifiable = false, dossierId, busy = false, erreur = null,
+  dpeStatus, dpe, audit, auditStatus, candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
   onPick, onNotInList, onReselect, onPickParNumero,
 }: {
   dpeStatus: DpeUiStatus;
@@ -43,6 +43,8 @@ export function EnergieSection({
   candidates: DpeRecord[];
   /** FUT-65 : la base des diagnostics n'a pas répondu et n'a rien rendu. La liste vide ne prouve rien. */
   dpeNonVerifiable?: boolean;
+  /** FUT-65 : un des deux jeux ADEME n'a pas répondu. La liste montrée n'est pas exhaustive. */
+  listeDpeIncomplete?: boolean;
   /** Le dossier lu, dont la saisie par numéro a besoin pour rapprocher l'adresse trouvée. */
   dossierId: string;
   /** Une écriture de sélection est en cours : les gestes attendent sa réponse. */
@@ -113,6 +115,7 @@ export function EnergieSection({
           ) : candidates.length > 0 ? (
             <AddressDiagnosticsBlock
               candidates={candidates}
+              listeIncomplete={listeDpeIncomplete}
               dossierId={dossierId}
               busy={busy}
               onPick={onPick}

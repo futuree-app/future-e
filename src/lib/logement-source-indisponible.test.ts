@@ -9,7 +9,7 @@ import {
   consulterOuActualiser, issueActualisation, jsonCanonique, sourcesAbsentes,
   type Dependances, type VersionLogement,
 } from "./logement-report-version.ts";
-import { buildFactHash, buildSynthesisPayload, type SynthesisData } from "./logement-synthesis-cache.ts";
+import { buildFactHash, buildSynthesisPayload, SYNTHESIS_PROMPT_VERSION, SYNTHESIS_PROMPT_VERSION_FUT65, type SynthesisData } from "./logement-synthesis-cache.ts";
 import type { LogementReport } from "./logement-report-types.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -274,4 +274,47 @@ test("Synthèse : une base des diagnostics en panne ne devient jamais « l'adres
   assert.doesNotMatch(JSON.stringify(Object.keys(buildSynthesisPayload(base))), /audit/i);
   const prompt = readFileSync("src/app/api/synthesize-logement/route.ts", "utf8");
   assert.match(prompt, /vaut \\`\{ source_indisponible: true \}\\`, la base des diagnostics n'a pas\nrépondu : vous ne dites ni qu'il en existe à cette adresse, ni qu'il n'en existe pas\./);
+});
+
+// ── Revue du 06/10 : une liste de diagnostics INCOMPLÈTE n'est ni attribuée seule, ni dite exhaustive ──
+test("P1 : un candidat unique sur une liste incomplète n'est jamais attribué automatiquement", async () => {
+  const { dpeAttributionStatus } = await import("./dpe-attribution.ts");
+  const maison = { id_dpe: "2475E0000000X", type_batiment: "maison", etiquette_dpe: "D" } as never;
+  assert.equal(dpeAttributionStatus([maison], "housenumber").status, "auto_confirmed", "liste complète : inchangé");
+  assert.equal(dpeAttributionStatus([maison], "housenumber", false).status, "selection_required");
+  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(module, /dpeAttributionStatus\(candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
+});
+
+test("P2 : l'écran ne présente pas une liste incomplète comme le total de l'adresse", () => {
+  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(module, /listeDpeIncomplete=\{result\.dpeCandidatesStatus === "unavailable" && dpeCandidates\.length > 0\}/);
+  assert.match(readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8"), /listeIncomplete=\{listeDpeIncomplete\}/);
+  const bloc = readFileSync("src/components/report/logement/AddressDiagnosticsBlock.tsx", "utf8");
+  assert.match(bloc, /\{listeIncomplete && \(\s*<p[^>]*>\s*La base ADEME n&apos;a répondu qu&apos;en partie/);
+});
+
+test("P3 : la synthèse reçoit un minimum, pas un total, et seuls ces payloads changent", () => {
+  const candidat = { ...LIGNE_DPE, id_dpe: "2475E0000000X", type_batiment: "appartement" } as never;
+  const base: SynthesisData = { address: rapport().address, dpeSelectionStatus: "pending", selectedDpe: null, dpeCandidates: [candidat] };
+  const partiel = buildSynthesisPayload({ ...base, dpeCandidatesStatus: "unavailable" }).diagnostics_adresse as Record<string, unknown>;
+  assert.equal(partiel.liste_incomplete, true);
+  assert.equal(partiel.total, 1);
+  assert.equal("liste_incomplete" in (buildSynthesisPayload({ ...base, dpeCandidatesStatus: "present" }).diagnostics_adresse as object), false);
+  assert.equal(buildFactHash({ ...base, dpeCandidatesStatus: "present" }), buildFactHash(base));
+  assert.notEqual(buildFactHash({ ...base, dpeCandidatesStatus: "unavailable" }), buildFactHash(base));
+  assert.match(readFileSync("src/app/api/synthesize-logement/route.ts", "utf8"), /\\`total\\` est un minimum, ne le présentez\npas comme le nombre de diagnostics de l'adresse\./);
+});
+
+test("P4 : la consigne FUT-65 est tracée par un tampon ciblé, sans régénérer les autres synthèses", () => {
+  const candidat = { ...LIGNE_DPE, id_dpe: "2475E0000000X", type_batiment: "appartement" } as never;
+  const base: SynthesisData = { address: rapport().address, dpeSelectionStatus: "pending", selectedDpe: null, dpeCandidates: [] };
+  assert.equal(SYNTHESIS_PROMPT_VERSION, "v10", "aucun bump global");
+  assert.equal(SYNTHESIS_PROMPT_VERSION_FUT65, "v10.1");
+  assert.match(buildFactHash({ ...base, dpeCandidatesStatus: "unavailable" }), /^syn:v10\.1:/);
+  assert.match(buildFactHash({ ...base, dpeCandidates: [candidat], dpeCandidatesStatus: "unavailable" }), /^syn:v10\.1:/);
+  for (const statut of [undefined, "absent", "present"] as const) {
+    assert.match(buildFactHash({ ...base, dpeCandidatesStatus: statut }), /^syn:v10:/, String(statut));
+    assert.match(buildFactHash({ ...base, dpeCandidates: [candidat], dpeCandidatesStatus: statut }), /^syn:v10:/, String(statut));
+  }
 });

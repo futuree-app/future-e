@@ -19,9 +19,22 @@ import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 export const SYNTHESIS_PROMPT_VERSION = "v10"; // v10 : les diagnostics de l'adresse entrent dans le payload quand AUCUN n'est attribué, et la lecture doit alors nommer le document à réclamer plutôt que de s'arrêter à « non qualifiée ». Bump = régénération voulue. // v9 : couverture des dimensions dans le payload, et clôture BORNÉE — le calme ne peut plus être affirmé sur « l'adresse » quand une dimension n'a pas pu être lue. Bump = régénération voulue : toutes les synthèses écrites sous v8 sur une adresse sans diagnostic concluent au calme en confondant « rien trouvé » et « rien cherchable ». // v8 : sortie de l'« autour » — la lecture Logement s'arrête aux murs et à ce à quoi l'adresse est exposée ; l'entourage (équipements, espace vert, îlot de chaleur) est passé au module Autour de l'adresse, donc il quitte le payload ET le prompt. Bump = régénération de toutes les synthèses existantes, voulue : les anciennes commentent un entourage que la page n'affiche plus. // v7 : passe langage non-expert renforcée — le vocabulaire d'expert n'apparaît JAMAIS même glosé (« retrait-gonflement des argiles », « inertie », « conditions conventionnelles », « représentativité » interdits), test de la mère. // v6 : croisement Logement × Territoire — le climat projeté (gwl20/2050) éclaire une caractéristique du bâti sans jamais en être le sujet ni changer le diagnostic (il change le POIDS) ; poids narratif (le climat ne prend jamais l'enjeu principal, la sinistralité communale n'est jamais couronnée). MARQUEE-ONLY en v1 (notable rendu silencieux : répétition de charnière observée 8/8 à fréquence notable). Axe chaleur seul (sécheresse différée). Passe Editorial v2.
-// FUT-65 (06/10/2026), SANS BUMP, volontairement : une consigne s'ajoute au prompt pour un état du payload
-// qui n'existait pas (`diagnostics_adresse: { source_indisponible: true }`). Aucun payload existant ne
-// change, donc aucune synthèse en cache ne devient fausse ; un bump les régénérerait toutes pour rien.
+//
+// JOURNAL DES RÉVISIONS SANS BUMP. La version préfixe l'empreinte stockée avec chaque synthèse : c'est
+// sa clé de cache ET sa seule trace de provenance. Un bump rend toutes les synthèses caduques. Une
+// consigne qui ne concerne qu'un état NOUVEAU du payload se trace donc par un tampon CIBLÉ (cf.
+// `versionDuPrompt`) : seules les synthèses écrites sous cette consigne le portent.
+// - 06/10/2026, FUT-60 : « arrêtés » → « reconnaissances » dans la consigne CatNat, payload renommé.
+//   Antérieur au tampon ciblé : resté `v10`, les payloads concernés ont changé d'empreinte.
+// - 06/10/2026, FUT-65 : `v10.1`. Consignes pour `diagnostics_adresse.source_indisponible` (base des
+//   diagnostics en panne) et `diagnostics_adresse.liste_incomplete` (panne partielle).
+export const SYNTHESIS_PROMPT_VERSION_FUT65 = "v10.1";
+
+/** La version du prompt dont relève CE payload : `v10.1` s'il porte un état introduit par FUT-65. */
+export function versionDuPrompt(payload: Record<string, unknown>): string {
+  const d = payload.diagnostics_adresse as { source_indisponible?: boolean; liste_incomplete?: boolean } | null | undefined;
+  return d?.source_indisponible || d?.liste_incomplete ? SYNTHESIS_PROMPT_VERSION_FUT65 : SYNTHESIS_PROMPT_VERSION;
+}
 
 // Empreinte de CACHE déterministe (FNV-1a 32 bits), PAS un mécanisme de sécurité. Le risque de
 // collision est négligeable à cette échelle ; l'intégrité des faits sera assurée par la
@@ -43,7 +56,8 @@ function fnv1a(str: string): string {
 // sans l'« autour », et couplait par erreur la version des sources Face 3 (bump Face 3 =
 // invalidation surprise de toutes les synthèses).
 export function buildFactHash(data: SynthesisData): string {
-  return `syn:${SYNTHESIS_PROMPT_VERSION}:${fnv1a(stableStringify(buildSynthesisPayload(data)))}`;
+  const payload = buildSynthesisPayload(data);
+  return `syn:${versionDuPrompt(payload)}:${fnv1a(stableStringify(payload))}`;
 }
 
 // Signal climat projeté (gwl20 / 2050), curé et PRÉ-DIGÉRÉ en intensité qualitative : le modèle
@@ -273,6 +287,9 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
         total: ctx.total,
         ecart_classes: ctx.spread ? `${ctx.spread.min} à ${ctx.spread.max}` : null,
         immeuble_entier: ctx.hasCollective,
+        // FUT-65 : un des deux jeux n'a pas répondu, `total` est un minimum. Absent sinon : les
+        // payloads d'une liste complète, donc leurs empreintes, ne changent pas.
+        ...(data.dpeCandidatesStatus === "unavailable" ? { liste_incomplete: true } : {}),
       };
     })(),
     // CE QUI A PU ÊTRE LU, ET CE QUI NE L'A PAS ÉTÉ. Entre dans le payload donc dans le hash :

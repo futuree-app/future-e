@@ -196,7 +196,8 @@ export default function LogementModule({
         // `pending` restauré (donc un retrait volontaire) rouvre la sélection sans rien attribuer :
         // `RUNTIME_DPE_STATUS` le rend déjà en `selection_required`.
       } else {
-        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null);
+        // FUT-65 : une liste incomplète (base ADEME en panne partielle) n'attribue jamais seule.
+        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
         if (attribution.status === "not_found") {
           setDpeStatus("not_found");
         } else if (attribution.status === "auto_confirmed") {
@@ -567,6 +568,7 @@ export default function LogementModule({
               auditStatus={result.auditStatus}
               candidates={dpeCandidates}
               dpeNonVerifiable={dpeNonVerifiable}
+              listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}
               dossierId={dossier?.id ?? ""}
               busy={dpeBusy}
               erreur={dpeError}

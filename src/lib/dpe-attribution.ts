@@ -73,13 +73,19 @@ const isMaison = (t: string | null): boolean => (t ?? "").toLowerCase().includes
 // Convergence forte = SEUL cas d'attribution automatique : 1 candidat, maison individuelle,
 // adresse BAN précise (housenumber), classe présente. Tout le reste demande confirmation,
 // y compris un candidat unique en collectif.
+//
+// « UN SEUL CANDIDAT » SUPPOSE UNE LISTE COMPLÈTE (FUT-65). Quand l'un des deux jeux ADEME n'a pas
+// répondu, le candidat unique est seulement le seul qu'on a VU : un autre diagnostic peut exister dans
+// le jeu tombé. Sur une liste incomplète, on demande donc toujours confirmation.
 export function dpeAttributionStatus(
   candidates: DpeRecord[],
   banFeatureType: string | null,
+  listeComplete = true,
 ): DpeAttribution {
   if (candidates.length === 0) return { status: "not_found" };
   const one = candidates[0];
   const strongConvergence =
+    listeComplete &&
     candidates.length === 1 &&
     isMaison(one.type_batiment) &&
     banFeatureType === "housenumber" &&
