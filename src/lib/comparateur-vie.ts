@@ -236,7 +236,7 @@ export type MatchResult = {
   // Finalisée après assemblage (assignDecouverte). cf. spec (2e force).
   decouverte: string | null;
   // Évolution démographique (NARRATIF, hors score/tri). Récit plus riche que la reason :
-  // distingue « gagne et attire », « gagne sans renouvellement », « stable mais renouvellement »,
+  // distingue « gagne, arrivants récents élevés », « gagne sans renouvellement », « stable mais renouvellement »,
   // « perd ». Surfacé en synthèse UNIQUEMENT si croissance_demographique est demandée (même
   // frontière que climatInondation). null = pas de donnée. cf. RECIT_DEMOGRAPHIE.
   demographie: string | null;
@@ -1081,7 +1081,9 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   if (doux) push("Pour des hivers parmi les plus doux du pays.");
   // Traits de caractère (départagent deux communes de même géographie).
   if (etudianteForte) push("Pour une ville étudiante à taille humaine.");
-  if (croissanceForte) push("Pour s'installer dans un territoire qui attire.");
+  // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
+  // phrase dit le fait observé, sans lui prêter de cause.
+  if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");
   if (vieLocaleForte && (taille === "petite" || taille === "moyenne")) push("Pour une petite ville qui reste vraiment vivante.");
   if ((natureForte || calmeForte) && petit) push("Pour un cadre rural préservé, loin de l'agitation.");
   if (calmeForte) push("Pour un quotidien au calme, loin de l'agitation.");
@@ -1817,8 +1819,12 @@ export function buildComparaisonComplete(
 
 // Narratif « nouveaux arrivants » (HORS score) : phrase descriptive, jamais normative.
 // Mappe c.demographie.recit -> phrase (cf. populate-demographie.py RECIT_LABEL).
+//
+// FUT-36 : « attire de nouveaux arrivants » affirmait une cause qu'aucune mesure n'établit. Le code
+// `gagne_attire` veut dire : croissance ET part d'arrivants récents dans le tercile haut national.
+// La phrase reprend mot pour mot celle que FUT-6 a posée côté Territoire (`DEMOGRAPHY_PHRASE`).
 export const RECIT_DEMOGRAPHIE: Record<string, string> = {
-  gagne_attire: "gagne des habitants et attire de nouveaux arrivants",
+  gagne_attire: "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
   gagne_sans_renouv: "gagne des habitants sans fort renouvellement récent",
   stable_renouv: "population stable, mais renouvellement résidentiel marqué",
   stable: "population globalement stable",
