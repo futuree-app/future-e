@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { buildTerritoireSnapshot } from "./facts.ts";
 import { withHash } from "../facts/hash.ts";
-import { ensureTerritoireSynthesis, RETRY_APRES_PANNE_MS, RETRY_APRES_REFUS_MS, type EnsureDeps } from "./synthesis-ensure.ts";
+import { ensureTerritoireSynthesis, prochainRenouvellementBudget, RETRY_APRES_PANNE_MS, RETRY_APRES_REFUS_MS, type EnsureDeps } from "./synthesis-ensure.ts";
 import { synthesisCacheKey } from "./synthesis-cache.ts";
 import { displayReducer, eventFromAnswer, initialDisplay, offersEnriched } from "./synthesis-display.ts";
 import { checkAssertions, checkNumbers, describeViolations, distinctionExplicite } from "./synthesis-checks.ts";
@@ -109,14 +109,28 @@ test("5. erreur du modèle : indisponible, nouvelle tentative permise dans une h
   assert.equal(r.status === "unavailable" && r.retryAt?.getTime(), h.now().getTime() + RETRY_APRES_PANNE_MS);
 });
 
-test("6. budget refusé : aucun appel, indisponible, nouvelle tentative permise dans une heure", async () => {
-  const h = horloge();
+test("6. budget refusé : aucun appel, nouvelle tentative au renouvellement du budget (minuit UTC suivant)", async () => {
+  const h = horloge(Date.parse("2026-10-06T12:00:00Z"));
   const { store } = memoryStore(SNAP);
   const d = deps(store, async () => BONNE, { budget: false, now: h.now });
   const r = await ensureTerritoireSynthesis(SNAP, "gwl20", d);
   assert.equal(r.status === "unavailable" && r.reason, "budget");
   assert.equal(d.appels(), 0);
-  assert.equal(r.status === "unavailable" && r.retryAt?.getTime(), h.now().getTime() + RETRY_APRES_PANNE_MS);
+  assert.equal(r.status === "unavailable" && r.retryAt?.toISOString(), "2026-10-07T00:00:00.000Z");
+  // Pas toutes les heures : une heure plus tard, toujours différé, toujours zéro appel.
+  h.avance(RETRY_APRES_PANNE_MS + 1);
+  assert.equal((await ensureTerritoireSynthesis(SNAP, "gwl20", d)).status === "unavailable", true);
+  assert.equal(d.appels(), 0);
+  // Au renouvellement, la tentative repart.
+  h.avance(Date.parse("2026-10-07T00:00:01Z") - h.now().getTime());
+  const apres = await ensureTerritoireSynthesis(SNAP, "gwl20", deps(store, async () => BONNE, { now: h.now }));
+  assert.equal(apres.status === "ready" && apres.origin, "model");
+});
+
+test("6 bis. le renouvellement du budget est toujours dans les 24 h, au jour UTC suivant", () => {
+  assert.equal(prochainRenouvellementBudget(new Date("2026-10-06T00:00:00Z")).toISOString(), "2026-10-07T00:00:00.000Z");
+  assert.equal(prochainRenouvellementBudget(new Date("2026-10-06T23:59:59Z")).toISOString(), "2026-10-07T00:00:00.000Z");
+  assert.equal(prochainRenouvellementBudget(new Date("2026-12-31T18:00:00Z")).toISOString(), "2027-01-01T00:00:00.000Z");
 });
 
 // ── 7 et 8 : les caches existants ───────────────────────────────────────────────────────────────

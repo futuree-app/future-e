@@ -30,13 +30,21 @@ export type EnsureResult =
   | { status: "unavailable"; reason: "store" | "budget" | "model" | "rejected" | "deferred"; retryAt?: Date };
 
 /**
- * DÉLAIS AVANT UNE NOUVELLE TENTATIVE (conventions FUT-76, à discuter). Deux refus des contrôles sur la
- * même entrée ont toutes les chances de se reproduire à l'identique : un jour. Une panne du modèle ou un
- * budget épuisé sont passagers : une heure. Dans les deux cas, au plus DEUX appels au modèle par clé et
- * par délai, quelle que soit la fréquentation de la page.
+ * DÉLAIS AVANT UNE NOUVELLE TENTATIVE (FUT-76, validés par le porteur le 06/10/2026). Dans tous les cas,
+ * au plus DEUX appels au modèle par clé et par délai, quelle que soit la fréquentation de la page.
+ *   - deux refus des contrôles : la même entrée reproduirait vraisemblablement les mêmes refus → 24 h ;
+ *   - modèle ou réseau en panne : passager → 1 h ;
+ *   - budget refusé : rien ne change avant le RENOUVELLEMENT du budget, qui est journalier et compté
+ *     par jour UTC (`garde-appels-modele.ts`, clé `toISOString().slice(0, 10)`) → minuit UTC suivant.
+ *     Retenter toutes les heures ne ferait que redemander un budget qu'on sait épuisé.
  */
 export const RETRY_APRES_REFUS_MS = 24 * 3600_000;
 export const RETRY_APRES_PANNE_MS = 3600_000;
+
+/** Le prochain renouvellement du budget journalier : minuit UTC suivant. */
+export function prochainRenouvellementBudget(now: Date): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+}
 
 export type EnsureDeps = {
   store: TerritoireStore;
@@ -101,7 +109,9 @@ export async function ensureTerritoireSynthesis(
     // RIEN D'ENRICHI À SERVIR : deux refus, modèle en panne ou budget épuisé. La page garde la lecture
     // immédiate ; l'échec est daté, et la clé ne se retente qu'après le délai.
     const reason = result.budgetRefused ? "budget" : result.modelError !== undefined ? "model" : "rejected";
-    const retryAt = new Date(now().getTime() + (reason === "rejected" ? RETRY_APRES_REFUS_MS : RETRY_APRES_PANNE_MS));
+    const t = now();
+    const retryAt = reason === "budget" ? prochainRenouvellementBudget(t)
+      : new Date(t.getTime() + (reason === "rejected" ? RETRY_APRES_REFUS_MS : RETRY_APRES_PANNE_MS));
     await deps.store.fail(key, {
       text: result.text, rejections: result.rejections, modelCalls: result.modelCalls, generationMs, retryAt,
     });
