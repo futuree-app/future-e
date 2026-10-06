@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
-import { CATNAT_DEPUIS, libelleCatnatInondation, type CatnatInondation } from "@/lib/decision/catnat-evidence";
-import { resumeCatnat } from "@/lib/georisques-flags";
+import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
+import { arriveeDepuisPastille, faceMemoireCatastrophes } from "@/lib/catnat-memoire";
 import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
@@ -63,6 +63,12 @@ type Factor = {
    * Une carte peut porter plusieurs phénomènes ; le tableau les liste tous.
    */
   targets?: EvidenceTargetKey[];
+  /**
+   * FUT-69 : ce que change l'arrivée par l'ancre de cette carte (lien « Preuve » du dossier). Le volet
+   * s'ouvre, avec ces ajustements CONTEXTUELS (ligne mise en évidence, éventuel écart). Absent : la carte
+   * ne s'ouvre pas seule. Le volet ordinaire n'en garde aucune trace.
+   */
+  arrivee?: Pick<CardDetail, "surligner" | "note" | "noteLabel">;
 };
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
@@ -93,6 +99,8 @@ type SharedProps = {
    * serait le défaut symétrique de celui qu'on vient de corriger.
    */
   catnatMisAJour?: CatnatInondation | null;
+  /** FUT-69 : « Paris » pour un arrondissement, dont GASPAR ne publie que la ville. `null` ailleurs. */
+  catnatVille?: string | null;
   littoral?: LittoralSummary | null;
   // Bloc 4 : trajectoire de population + couvert naturel + saisonnalité (données riches).
   demographie?: DemographieCardData | null;
@@ -334,6 +342,7 @@ function buildFactors(
   eloignementServicesPct?: number | null,
   era5?: Era5Trend | null,
   climatType?: TerritoryType | null,
+  catnatVille?: string | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
   const gwlData = scenarios?.[horizonKey]?.v ?? null;
@@ -827,27 +836,27 @@ function buildFactors(
 
   // Carte CatNat (GASPAR) — ajoutée seulement quand l'appelant fournit la donnée
   // (QuartierAside). Histoire vécue : nombre de reconnaissances depuis l'origine.
+  //
+  // FUT-69 : LA FACE NE MET PLUS L'INONDATION EN AVANT. Elle disait « Tous risques · N » puis « Dont N
+  // liées aux inondations » dès que l'index portait ce compte, même là où la sécheresse dominait. Le
+  // texte vit dans `catnat-memoire.ts` (pur, testé) : le total, puis la répartition selon la règle
+  // partagée (`resumeCatnat`), neutre sans dominante. Le volet non plus ne privilégie aucun aléa :
+  // l'inondation y est une ligne de la répartition. Arriver par la pastille inondation du dossier ouvre
+  // le volet et met cette ligne en évidence, pour cette entrée seulement (`arrivee`).
   if (catnat !== undefined) {
     const hasCatnat = !!catnat && catnat.total > 0;
-    // FUT-60 : un relevé qui RÉPOND sans aucune ligne n'est pas une panne. La carte disait « Le relevé
-    // de tous les risques n'a pas répondu » d'une commune qui n'a simplement aucune reconnaissance.
-    const releveVide = !!catnat && catnat.total === 0;
-    const headline = hasCatnat
-      // FUT-60 : « depuis 1982 », comme la ligne « Dont … inondation depuis 1982 » qu'elle surplombe.
-      // Les deux comptent la même histoire (tout GASPAR, depuis l'origine du régime) ; « depuis 1983 »
-      // (première reconnaissance) au-dessus de « depuis 1982 » laissait lire deux périodes. L'année de
-      // la première reconnaissance reste dans le volet.
-      // FUT-60 : le relevé compte des LIGNES GASPAR (un arrêté × un phénomène × un événement), pas des
-      // arrêtés distincts (Paris : 20 lignes, 16 arrêtés). Le mot suit la donnée.
-      ? `${catnat!.total} reconnaissance${catnat!.total > 1 ? "s" : ""} depuis ${CATNAT_DEPUIS}`
-      : "—";
+    const face = faceMemoireCatastrophes({
+      catnat: catnat ?? null, catnatInondation: catnatInondation ?? null,
+      catnatMisAJour: catnatMisAJour ?? null, ville: catnatVille ?? null,
+    });
     const detail: CardDetail | undefined = hasCatnat
       ? {
           eyebrow: "Histoire du territoire",
           title: "Mémoire des catastrophes",
-          headline,
-          subhead: catnat!.summary ?? undefined,
+          headline: face.val,
+          subhead: face.sub,
           accent: "var(--blue)",
+          // La ventilation réelle, tous aléas, triée par fréquence : c'est elle qui dit ce qui domine.
           breakdown: catnat!.byRisk.map((rk) => ({
             label: rk.label,
             value: String(rk.count),
@@ -862,85 +871,26 @@ function buildFactors(
             ...(catnat!.firstYear ? [{ label: "Première reconnaissance", value: String(catnat!.firstYear) }] : []),
             ...(catnat!.lastYear ? [{ label: "Dernière reconnaissance", value: String(catnat!.lastYear) }] : []),
           ],
-          why: "Les arrêtés de catastrophe naturelle racontent l'histoire vécue du territoire : ils montrent quels aléas ont déjà marqué la commune, et à quelle fréquence.",
-          whyLabel: "Ce que cela raconte",
+          why: "Une reconnaissance de catastrophe naturelle est un acte administratif, qui ouvre l'indemnisation après un épisode. Ce compte dit quels aléas ont été reconnus dans la commune depuis 1982 ; il ne mesure pas une probabilité, et il ne dit pas qu'un logement précis a été sinistré.",
+          whyLabel: "Ce que ce compte dit",
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
           sources: "Géorisques · base GASPAR (reconnaissances de catastrophe naturelle)",
         }
       : undefined;
-    // La répartition remonte sur la FACE quand aucun compte inondation ne l'occupe. FUT-60 : elle
-    // disait « Surtout X » dès qu'un aléa existait ; elle suit désormais la règle partagée
-    // (`resumeCatnat`, dominante à 55 %), la même que la synthèse.
-    const dominantSub = hasCatnat
-      ? resumeCatnat(catnat!.byRisk, catnat!.total)?.replace(/\.$/, "") ?? undefined
-      : undefined;
-    // ── DEUX OBSERVATIONS, DEUX LIGNES QUI SE DISENT (revue du 11/08/2026) ────────────────────
-    // Le total tous risques vient du relevé DIRECT sur GASPAR, depuis la première reconnaissance
-    // réelle de la commune. Le compte d'arrêtés inondation vient de l'INDEX, depuis l'origine du
-    // régime, et c'est lui que la preuve du dossier annonce. Les afficher sans les distinguer
-    // laissait croire à un seul chiffre qui aurait changé de valeur entre deux lignes.
-    //
-    // « Dont » dit la relation, et la phrase de l'objet partagé reste INCLUSE mot pour mot : le
-    // lecteur arrivé par la pastille retrouve exactement son texte, dans une ligne qui explique en
-    // plus ce dont il s'agit.
-    const totalTousRisques = hasCatnat ? `Tous risques · ${headline}` : headline;
-    const ligneInondation = catnatInondation
-      ? `Dont ${libelleCatnatInondation(catnatInondation)}`
-      : null;
-    // L'ÉCART SE DIT, il ne remplace pas. Le chiffre de la face est celui du dossier figé, parce que
-    // c'est lui que la preuve annonce ; si l'index en compte un autre, le lecteur doit l'apprendre
-    // plutôt que de découvrir un jour que son dossier était en retard.
-    //
-    // « L'INDEX ACTUELLEMENT CHARGÉ », ET NON « DEPUIS VOTRE ANALYSE » (revue du 11/08/2026). La
-    // seconde formule affirmait une CHRONOLOGIE que rien ne démontre : on ne compare que deux
-    // comptes, et l'index ne porte ni date de génération ni identité de jeu. Une restauration de
-    // sauvegarde ou un changement de convention se serait présenté comme une actualité.
-    const ligneMisAJour = catnatMisAJour
-      ? `L'index actuellement chargé indique ${libelleCatnatInondation(catnatMisAJour)}`
-      : null;
     factors.push({
       label: "Mémoire des catastrophes",
       // La preuve du dossier qui compte les arrêtés vise CETTE carte, et non celle du zonage
       // inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
       targets: ["risk.catnat"],
-      // LA CARTE N'EST « MISSING » QUE SI ELLE NE SAIT RIEN. Elle l'était dès que le relevé direct
-      // manquait, alors que le compte local pouvait s'afficher juste dessous : un statut mixte, la
-      // face grisée sous une valeur lisible.
-      // EN PANNE DU RELEVÉ DIRECT, la phrase se tient SEULE : « Dont » n'aurait plus de référent,
-      // le total ne s'affichant pas. Le compte local reste vrai, il devient la face de la carte.
-      val: hasCatnat
-        ? totalTousRisques
-        : releveVide
-          ? `Aucune reconnaissance depuis ${CATNAT_DEPUIS}`
-          : (catnatInondation ? libelleCatnatInondation(catnatInondation) : headline),
-      // ── LE LECTEUR ARRIVE AVEC UN CHIFFRE EN TÊTE, IL DOIT LE RETROUVER ICI ─────────────────
-      // La pastille du dossier annonce « 7 arrêtés inondation depuis 1982 » ; cette carte ouvrait
-      // sur son total TOUS RISQUES relevé en direct (« 23 arrêtés depuis 1987 »), et le compte
-      // inondation dormait dans la ventilation d'un volet fermé. Le sous-titre porte donc la phrase
-      // de l'objet partagé, mot pour mot : elle est écrite dans `catnat-evidence`, jamais ici.
-      //
-      // La répartition dominante descend dans le volet quand ce compte existe : elle reste utile,
-      // elle n'est pas ce que le lecteur vient chercher.
-      sub: [
-        hasCatnat
-          ? (ligneInondation ?? dominantSub)
-          : releveVide
-            ? undefined
-            : (catnatInondation ? "Le relevé de tous les risques n'a pas répondu" : dominantSub),
-        ligneMisAJour,
-      ].filter(Boolean).join(" · ") || undefined,
+      // Seule la pastille inondation du dossier vise cette carte (`materiality-rules`) : y arriver,
+      // c'est arriver par l'inondation. Le volet s'ouvre sur sa ligne, mise en évidence.
+      arrivee: arriveeDepuisPastille(catnat ?? null, catnatInondation ?? null) ?? undefined,
+      val: face.val,
+      sub: face.sub,
       col: "var(--blue)",
       src: "Géorisques · GASPAR · reconnaissances CatNat",
-      missing: !hasCatnat && !releveVide && !catnatInondation,
-      detail: detail
-        ? {
-            ...detail,
-            facts: [
-              ...(ligneMisAJour ? [{ label: "Écart avec l'index courant", value: ligneMisAJour }] : []),
-              ...(detail.facts ?? []),
-            ],
-          }
-        : detail,
+      missing: face.missing,
+      detail,
     });
   }
 
@@ -1178,10 +1128,23 @@ const REGISTER_TONE: Record<RegisterKey, string> = {
   verifications: "var(--reg-controle)",
 };
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null, catnatVille ?? null);
+
+  // FUT-69 : ARRIVÉE PAR LA PASTILLE DU DOSSIER. Une carte qui porte son chiffre dans le volet
+  // (`arrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte
+  // annoncé sans avoir à le chercher. Une fois, au montage ; le hash ne se relit pas ensuite.
+  useEffect(() => {
+    const ancre = window.location.hash.slice(1);
+    if (!ancre) return;
+    const cible = factors.find((f) => f.arrivee && f.detail && f.targets?.some((t) => evidenceAnchorId(t) === ancre));
+    // Lecture du hash au montage, côté client seulement : pas de rendu en cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (cible?.detail) setOpenDetail({ ...cible.detail, ...cible.arrivee });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Regroupement par thème : le décor (territoire) d'abord, puis le climat, puis
   // les risques. Le code couleur suit le thème, pas la carte individuelle.

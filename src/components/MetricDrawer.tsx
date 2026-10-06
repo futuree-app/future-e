@@ -23,6 +23,12 @@ export type CardDetail = {
   /** `bar` (0→1) dessine une barre de proportion sous la ligne : la donnée se voit, pas juste se lit.
    *  `muted` grise la barre (horizon au-delà de celui choisi par l'utilisateur : du contexte, pas le focus). */
   breakdown?: { label: string; value: string; bar?: number; muted?: boolean }[];
+  /**
+   * Le libellé d'une ligne de la répartition à mettre en évidence. Posé SEULEMENT par une arrivée
+   * ciblée (lien « Preuve » du dossier), jamais par la carte elle-même : le contexte d'entrée oriente
+   * l'attention, il n'ajoute pas de contenu privilégié à la carte (FUT-69).
+   */
+  surligner?: string;
   facts?: { label: string; value: string }[];
   /** Micro-frise temporelle (sparkline) : une colonne par période, hauteur ∝ count. */
   timeline?: { label: string; count: number }[];
@@ -95,7 +101,14 @@ export function MetricDrawer({
             <p className="metric-drawer-label">{detail.breakdownLabel ?? "Répartition"}</p>
             <ul className="metric-drawer-rows">
               {detail.breakdown.map((r) => (
-                <li key={r.label}>
+                <li
+                  key={r.label}
+                  data-cible={r.label === detail.surligner ? "true" : undefined}
+                  aria-current={r.label === detail.surligner ? "true" : undefined}
+                  style={r.label === detail.surligner
+                    ? { background: `color-mix(in srgb, ${accent} 14%, transparent)`, borderRadius: 8, padding: "6px 8px", margin: "0 -8px" }
+                    : undefined}
+                >
                   <div className="metric-drawer-row-head">
                     <span>{r.label}</span>
                     <span className="metric-drawer-val">{r.value}</span>

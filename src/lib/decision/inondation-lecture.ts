@@ -64,10 +64,26 @@ export type ConstatInondation = {
   source: string;
   /** Cette source porte-t-elle un signal (zonage, arrêté, indemnisation) ? Gouverne l'affichage. */
   signal: boolean;
+  /**
+   * FUT-69 : le FAIT seul, en une phrase, pour le premier niveau. Les définitions (ce qu'est un zonage,
+   * une reconnaissance, un échantillon) restent dans `enonce`, rendu dans « Voir les sources et les
+   * limites ».
+   */
+  court: string;
 };
+
+/** FUT-69 : le premier niveau, rangé par ÉCHELLE (l'adresse, puis la commune), jamais par source. */
+export type GroupeLectureInondation = { titre: string; lignes: string[] };
 
 export type LectureInondation = {
   constats: ConstatInondation[];
+  /** FUT-69 : « À cette adresse », puis « À l'échelle de la commune ». Un groupe vide n'existe pas. */
+  groupes: GroupeLectureInondation[];
+  /**
+   * FUT-69 : pourquoi ces lectures ne disent pas la même chose, en trois phrases au plus. Ne dit
+   * JAMAIS qu'elles « ne se contredisent pas » (arbitrage porteur du 17/08/2026, cf. `reconcilie`).
+   */
+  pourquoi: string;
   /** La phrase qui ordonne les lectures et refuse de conclure. Toujours présente. */
   reconciliation: string;
   /** Ce que l'ensemble ne dit pas. Toujours présente. */
@@ -132,12 +148,17 @@ function constatZonage(z: ZonageInondationPoint): ConstatInondation | null {
     return {
       ...base, signal: true,
       enonce: `Un plan de prévention du risque inondation réglemente ce point${noms}.`,
+      court: `Un plan de prévention des inondations réglemente ce point${noms}.`,
     };
   }
   // LES DEUX ABSENCES DISENT CE QU'UN ZONAGE EST, sans quoi « aucun » se lit « rien à craindre ».
   // Un zonage encadre la construction ; il ne mesure pas ce qui peut arriver au lieu.
   return {
     ...base, signal: false,
+    court:
+      z.kind === "zonage_autre"
+        ? "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+        : "Aucun plan de prévention des inondations ne réglemente ce point.",
     enonce:
       z.kind === "zonage_autre"
         ? "Aucun plan de prévention du risque inondation ne réglemente ce point. D'autres plans de prévention s'y appliquent, pour d'autres phénomènes. Un zonage encadre la construction, il ne mesure pas ce que le lieu peut connaître."
@@ -153,6 +174,10 @@ function constatCatnat(c: CatnatInondation | null): ConstatInondation | null {
     periode: `depuis ${c.depuis}`,
     source: sourceCatnatInondation(c),
     signal: c.count > 0,
+    court:
+      c.count > 0
+        ? `${phraseConstatCatnatInondation(c)}.`
+        : `Aucune reconnaissance de catastrophe naturelle inondation n'est comptée depuis ${c.depuis}.`,
     // LA PHRASE DU COMPTE N'EST PAS ÉCRITE ICI. Elle vient de l'objet partagé, celui que la pastille
     // du dossier et la carte « Mémoire des catastrophes » affichent déjà.
     enonce:
@@ -177,18 +202,21 @@ function constatOnrn(o: PerilState): ConstatInondation | null {
     return {
       ...base, signal: true,
       enonce: `Sur ${ONRN_PERIODE}, des sinistres d'inondation indemnisés sont recensés dans cette commune.`,
+      court: `Des sinistres d'inondation indemnisés sont recensés sur ${ONRN_PERIODE}, dans un échantillon de contrats assurés.`,
     };
   }
   if (o.kind === "faible_repr") {
     return {
       ...base, signal: true,
       enonce: `Sur ${ONRN_PERIODE}, des sinistres d'inondation indemnisés sont recensés dans cette commune, mais trop peu de biens y sont assurés dans l'échantillon pour en tirer une fréquence.`,
+      court: `Des sinistres d'inondation indemnisés sont recensés sur ${ONRN_PERIODE}, sur trop peu de contrats assurés pour en tirer une fréquence.`,
     };
   }
   // L'ABSENCE, ET SES DEUX BORNES INSÉPARABLES : la période, et le fait que c'est un échantillon.
   return {
     ...base, signal: false,
     enonce: `Sur ${ONRN_PERIODE}, aucun sinistre d'inondation indemnisé n'est recensé dans l'échantillon de contrats de cette commune.`,
+    court: `Aucun sinistre d'inondation indemnisé dans l'échantillon de contrats assurés, sur ${ONRN_PERIODE}.`,
   };
 }
 
@@ -230,6 +258,42 @@ function reconcilie(constats: ConstatInondation[], catnat: CatnatInondation | nu
   return phrase;
 }
 
+/**
+ * FUT-69 : LE PREMIER NIVEAU, LISIBLE EN QUELQUES SECONDES. La phrase longue (`reconcilie`) et la limite
+ * restent, dans « Voir les sources et les limites ». Ici : ce que chaque échelle mesure, ce qu'une
+ * absence de plan ne dit pas, et ce qu'aucune lecture ne dit du logement. Les bornes de l'absence ONRN
+ * restent au premier niveau : elles ne se séparent jamais de l'absence (garantie 3).
+ */
+function pourquoiDe(constats: ConstatInondation[], onrn: PerilState): string {
+  const zonage = constats.find((c) => c.cle === "zonage_point");
+  const catnat = constats.some((c) => c.cle === "catnat_commune");
+  const assurance = constats.some((c) => c.cle === "onrn_assurance");
+  const communal = catnat && assurance ? "les reconnaissances et les indemnisations" : catnat ? "les reconnaissances" : "les indemnisations";
+  const phrases: string[] = [];
+  phrases.push(
+    zonage
+      ? (catnat || assurance
+        ? `Le zonage est une règle d'urbanisme au point de l'adresse ; ${communal} retracent des épisodes passés, à l'échelle de la commune.`
+        : "Le zonage est une règle d'urbanisme au point de l'adresse.")
+      : "Les reconnaissances sont des actes administratifs, les indemnisations un échantillon de contrats assurés : toutes deux retracent des épisodes passés, à l'échelle de la commune.",
+  );
+  if (zonage && !zonage.signal) phrases.push("L'absence de plan ne signifie pas une absence de risque.");
+  if (onrn.kind === "aucun") {
+    phrases.push("L'absence de sinistre dans cet échantillon ne permet pas de conclure à l'absence d'événement ou de risque.");
+  }
+  phrases.push("Aucune de ces lectures ne dit si ce logement a déjà été sinistré.");
+  return phrases.join(" ");
+}
+
+function groupesDe(constats: ConstatInondation[]): GroupeLectureInondation[] {
+  const adresse = constats.filter((c) => c.cle === "zonage_point").map((c) => c.court);
+  const commune = constats.filter((c) => c.cle !== "zonage_point").map((c) => c.court);
+  return [
+    ...(adresse.length ? [{ titre: "À cette adresse", lignes: adresse }] : []),
+    ...(commune.length ? [{ titre: "À l'échelle de la commune", lignes: commune }] : []),
+  ];
+}
+
 function limiteDe(constats: ConstatInondation[]): string {
   const communal = constats.some((c) => c.cle !== "zonage_point");
   const point = constats.some((c) => c.cle === "zonage_point");
@@ -260,6 +324,8 @@ export function construireLectureInondation(e: EntreeLectureInondation): Lecture
   if (!constats.some((c) => c.signal)) return null;
   return {
     constats,
+    groupes: groupesDe(constats),
+    pourquoi: pourquoiDe(constats, e.onrn),
     reconciliation: reconcilie(constats, e.catnat, e.onrn),
     limite: limiteDe(constats),
   };
