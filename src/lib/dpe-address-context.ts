@@ -34,7 +34,7 @@ function isResidential(t: string | null): boolean {
 }
 
 /** Un diagnostic à l'échelle de l'IMMEUBLE, qui concerne le bâtiment et non un logement. */
-function isCollective(m: string | null): boolean {
+export function isCollective(m: string | null): boolean {
   return (m ?? "").toLowerCase().includes("immeuble");
 }
 
