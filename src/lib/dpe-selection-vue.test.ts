@@ -3,11 +3,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   APERCU_CANDIDATS, PHRASE_DPE_IMMEUBLE, champsVariables, compterIdentifiables, decouperListe, ligneCandidat, listeRepliee,
-  phraseAttribution, phraseBornes, phraseIdentifiables, vueSectionDpe,
+  phraseAttribution, phraseIdentifiables, phrasesOuvertureRepliee, SAISIE_NUMERO, vueSectionDpe,
 } from "./dpe-selection-vue.ts";
 import { dpeAttributionStatus, type DpeRecord } from "./dpe-attribution.ts";
 import { sortCandidates } from "./dpe-candidate-match.ts";
-import { buildAddressDpeContext } from "./dpe-address-context.ts";
 
 function dpe(over: Partial<DpeRecord> = {}): DpeRecord {
   return {
@@ -147,20 +146,27 @@ test("le libellé accessible dit le geste ET la ligne", () => {
 
 // ── Premier niveau d'une liste repliée ───────────────────────────────────────────────────────────
 
-test("le résumé dit combien peuvent être reconnus, et les bornes, jamais une moyenne", () => {
+test("le compte des diagnostics reconnaissables, dit dans la liste ouverte", () => {
   assert.equal(compterIdentifiables(IMMEUBLE_34), 31);
   assert.equal(phraseIdentifiables(31, 34), "31 sur 34 portent un identifiant de logement ou un étage.");
   assert.equal(phraseIdentifiables(34, 34), "Chacun porte un identifiant de logement ou un étage.");
   assert.match(phraseIdentifiables(0, 34), /ne peuvent pas être reconnus/);
   assert.match(phraseIdentifiables(0, 1), /^Il ne porte/);
-  const ctx = buildAddressDpeContext(IMMEUBLE_34)!;
-  assert.equal(phraseBornes(ctx), "Classes observées de C à F, réalisés entre 2023 et 2025.");
-  assert.doesNotMatch(phraseBornes(ctx)!, /moyen/i);
 });
 
-test("bornes absentes : pas de phrase vide", () => {
-  const ctx = buildAddressDpeContext([dpe({ etiquette_dpe: null, date_dpe: null })])!;
-  assert.equal(phraseBornes(ctx), null);
+test("ouverture d'une liste repliée : combien, et pourquoi le lecteur doit aider ; ni classes, ni années, ni ratio", () => {
+  const o = phrasesOuvertureRepliee(34);
+  assert.equal(o.titre, "34 diagnostics sont enregistrés à cette adresse.");
+  assert.equal(o.aide, "futur•e ne peut pas savoir lequel correspond à ce logement sans votre aide.");
+  const tout = `${o.titre} ${o.aide}`;
+  assert.doesNotMatch(tout, /classe|20\d\d|sur 34|31/);
+});
+
+test("saisie par numéro : une question, une consigne, et le cas de l'entrée voisine dans l'aide seulement", () => {
+  assert.equal(SAISIE_NUMERO.question, "Vous avez le numéro du DPE ?");
+  assert.equal(SAISIE_NUMERO.consigne, "Saisissez-le pour retrouver précisément le diagnostic.");
+  assert.match(SAISIE_NUMERO.aide, /autre entrée du même bâtiment/);
+  assert.doesNotMatch(`${SAISIE_NUMERO.question} ${SAISIE_NUMERO.consigne}`, /entrée|voisin|^Il /);
 });
 
 // ── Ce que l'écran affirme ───────────────────────────────────────────────────────────────────────
@@ -178,14 +184,14 @@ test("choix manuel : la phrase dit qui a choisi", () => {
 });
 
 test("aucune phrase de présentation n'affirme une correspondance certaine", () => {
-  const ctx = buildAddressDpeContext(IMMEUBLE_34)!;
+  const o = phrasesOuvertureRepliee(34);
   const textes = [
     phraseAttribution("auto_confirmed"), phraseAttribution("confirmed"),
-    phraseIdentifiables(31, 34), phraseBornes(ctx)!,
+    phraseIdentifiables(31, 34), o.titre, o.aide, SAISIE_NUMERO.consigne, SAISIE_NUMERO.aide,
     ...IMMEUBLE_34.map((c) => ligneCandidat(c, champsVariables(IMMEUBLE_34)).libelleAccessible),
   ];
   for (const t of textes) {
-    assert.doesNotMatch(t, /\b(votre|le vôtre|probablement|sans doute|correspond à votre)\b/i, t);
+    assert.doesNotMatch(t, /votre (logement|diagnostic|DPE)|le vôtre|probablement|sans doute/i, t);
   }
 });
 

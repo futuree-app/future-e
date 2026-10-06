@@ -7,7 +7,7 @@ import {
 } from "@/lib/dpe-address-context";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
-import { PHRASE_DPE_IMMEUBLE, compterIdentifiables, listeRepliee, phraseBornes, phraseIdentifiables } from "@/lib/dpe-selection-vue";
+import { PHRASE_DPE_IMMEUBLE, SAISIE_NUMERO, listeRepliee, phrasesOuvertureRepliee } from "@/lib/dpe-selection-vue";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -34,9 +34,10 @@ import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 //
 // AU-DELÀ DE SIX DIAGNOSTICS, LA LISTE SE REPLIE DE NOUVEAU (FUT-68, 06/10/2026), mais pas comme en
 // juillet. Le tiroir d'alors cachait le SEUL geste de l'écran tout en bas ; ici, le premier niveau dit
-// pourquoi le doute existe (combien de diagnostics, combien peuvent être reconnus, leurs bornes) et
-// pose les trois réponses possibles juste dessous : identifier son logement, n'en reconnaître aucun,
-// apporter le numéro du document. À 34 diagnostics, la page ne s'ouvre plus sur 34 lignes, et le refus
+// combien de diagnostics existent et que futur•e a besoin du lecteur pour savoir lequel est le bon,
+// puis pose les trois réponses possibles : identifier son logement, n'en reconnaître aucun, apporter
+// le numéro du document. Ni classes, ni années, ni « 31 sur 34 » à ce niveau : ils n'aident pas à
+// reconnaître un logement, et la classe y redevenait un critère de choix. À 34 diagnostics, la page ne s'ouvre plus sur 34 lignes, et le refus
 // n'arrive plus au bout d'une liste. Jusqu'à six, rien ne change : la liste reste la question.
 // Seuil d'écran, documenté dans `dpe-selection-vue.ts`.
 //
@@ -109,28 +110,32 @@ export function AddressDiagnosticsBlock({
   onPickParNumero: (d: DpeRecord) => void;
 }) {
   const [ouvert, setOuvert] = useState(false);
+  const [saisieOuverte, setSaisieOuverte] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
   if (!ctx) return null;
   const dense = listeLongue(ctx.total);
   const repliee = listeRepliee(ctx.total);
-  const bornes = repliee ? phraseBornes(ctx) : null;
+  const ouverture = phrasesOuvertureRepliee(ctx.total);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
       {/* La phrase POSE LA QUESTION, et la liste (ou, repliée, le geste qui l'ouvre) y répond juste
           dessous. Le sélecteur portait sa propre introduction, presque mot pour mot celle-ci : elle a
           disparu avec le tiroir. */}
-      <div style={{ display: "grid", gap: 6 }}>
+      {repliee ? (
+        <div style={{ display: "grid", gap: 6 }}>
+          <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+            {ouverture.titre}
+          </p>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+            {ouverture.aide}
+          </p>
+        </div>
+      ) : (
         <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
           {addressContextLead(ctx)}
         </p>
-        {repliee && (
-          <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-            {phraseIdentifiables(compterIdentifiables(candidates), ctx.total)}
-            {bornes ? ` ${bornes}` : ""}
-          </p>
-        )}
-      </div>
+      )}
       {/* FUT-65 : « N diagnostics sont enregistrés » se lirait comme un total. Il ne l'est pas ici. */}
       {listeIncomplete && (
         <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
@@ -168,7 +173,6 @@ export function AddressDiagnosticsBlock({
                 onNotInList={onNotInList}
                 busy={busy}
                 afficherRefus={false}
-                afficherIdentifiables={false}
               />
             </div>
           )}
@@ -177,34 +181,41 @@ export function AddressDiagnosticsBlock({
         <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} busy={busy} />
       )}
 
-      {/* LE GESTE UTILE, ET IL NE DEMANDE RIEN AU LECTEUR QU'IL NE SACHE. Le numéro à treize
-          caractères identifie un diagnostic sans ambiguïté, et celui qui vend ou qui loue l'a.
-
-          DEUX DÉFAUTS CORRIGÉS LE 20/08/2026. La phrase empilait deux compléments avant son verbe
-          (« Le numéro …, que porte le document remis avec le dossier de diagnostic technique, lève
-          cette incertitude ») : elle part maintenant du lecteur et de ce qu'il a en main. Et son
-          « vous pouvez le coller ci-dessous » DÉSIGNAIT UN CHAMP QUI N'EXISTAIT PAS, le sélecteur
-          n'affichant sa recherche qu'au-delà de trois diagnostics. Elle ne renvoie plus à un champ
-          que lorsqu'il est là. */}
-      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
-        <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-          Si vous avez le document du diagnostic, il porte un numéro qui lève le doute. Il retrouve
-          aussi les diagnostics enregistrés à une entrée voisine de la vôtre,{" "}
-          {repliee ? "qui ne figurent pas parmi ceux de cette adresse." : "que la liste ci-dessus ne montre pas."}
-        </p>
-        <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
+      {/* LE NUMÉRO DU DOCUMENT, le seul geste qui ne demande pas de deviner. Il était introduit par
+          « Si vous avez le document…, il porte un numéro qui lève le doute. Il retrouve aussi… » :
+          un « il » ambigu, et un cas technique (l'entrée voisine) expliqué avant l'action. C'est
+          maintenant une question, et le cas technique vit dans l'aide du champ (FUT-68).
+          Liste repliée : la question est un geste qui déplie le champ, pour que le premier niveau
+          se limite à « identifier », « aucun » et « j'ai le numéro ». */}
+      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
+        {repliee && !saisieOuverte ? (
+          <button type="button" onClick={() => setSaisieOuverte(true)} disabled={busy} style={{ ...LIEN, color: "var(--fg-2)" }}>
+            {SAISIE_NUMERO.question}
+          </button>
+        ) : (
+          <>
+            <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+              {SAISIE_NUMERO.question}{" "}
+              <span style={{ color: "var(--fg-2)" }}>{SAISIE_NUMERO.consigne}</span>
+            </p>
+            <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
+            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+              {SAISIE_NUMERO.aide}
+            </p>
+          </>
+        )}
       </div>
 
       {/* CE QUE LA BASE DIT DE L'ADRESSE, en contexte de la liste et jamais à sa place. Aucune
           valeur n'est prêtée au logement : chaque chiffre décrit l'adresse. C'est aussi pour ça
           qu'aucune moyenne n'est affichée (cf. `dpe-address-context.ts`) : une moyenne se lit comme
-          LA réponse, une répartition se lit comme de la dispersion. Liste repliée : l'écart des
-          classes et les années sont déjà dans le résumé du premier niveau, ils ne se répètent pas. */}
+          LA réponse, une répartition se lit comme de la dispersion. Elle vient APRÈS les gestes :
+          les classes n'aident pas à reconnaître un logement. */}
       {dense && (
         <div style={{ display: "grid", gap: 12, paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
           <Repartition ctx={ctx} />
 
-          {ctx.spread && !repliee && (
+          {ctx.spread && (
             <Ligne label="Écart des classes">
               de {ctx.spread.min} à {ctx.spread.max}
             </Ligne>
@@ -218,7 +229,7 @@ export function AddressDiagnosticsBlock({
             </Ligne>
           )}
 
-          {ctx.years && !repliee && (
+          {ctx.years && (
             <Ligne label="Réalisés entre">
               {ctx.years.min === ctx.years.max ? ctx.years.min : `${ctx.years.min} et ${ctx.years.max}`}
             </Ligne>

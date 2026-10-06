@@ -36,7 +36,7 @@ const LIEN: React.CSSProperties = {
 };
 
 export function DpeSelector({
-  candidates, onPick, onNotInList, busy = false, afficherRefus = true, afficherIdentifiables = true,
+  candidates, onPick, onNotInList, busy = false, afficherRefus = true,
 }: {
   candidates: DpeRecord[];
   onPick: (d: DpeRecord) => void;
@@ -44,8 +44,6 @@ export function DpeSelector({
   busy?: boolean;
   /** `false` quand le refus est déjà offert au-dessus de la liste (liste repliée) : il ne se répète pas. */
   afficherRefus?: boolean;
-  /** `false` quand le résumé de l'adresse, au-dessus, le dit déjà. */
-  afficherIdentifiables?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [toutVoir, setToutVoir] = useState(false);
@@ -71,11 +69,9 @@ export function DpeSelector({
               borderRadius: 10, color: "var(--fg-1)",
             }}
           />
-          {afficherIdentifiables && (
-            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: "7px 0 0" }}>
-              {phraseIdentifiables(compterIdentifiables(candidates), candidates.length)}
-            </p>
-          )}
+          <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: "7px 0 0" }}>
+            {phraseIdentifiables(compterIdentifiables(candidates), candidates.length)}
+          </p>
         </div>
       )}
 

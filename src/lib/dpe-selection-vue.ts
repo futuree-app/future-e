@@ -16,7 +16,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
-import { isCollective, type AddressDpeContext } from "./dpe-address-context.ts";
+import { isCollective } from "./dpe-address-context.ts";
 import { candidateIdentifier, isUnidentifiable, matchesQuery, meaningfulFloor } from "./dpe-candidate-match.ts";
 
 /**
@@ -145,21 +145,31 @@ export function phraseIdentifiables(identifiables: number, total: number): strin
 }
 
 /**
- * LE RÉSUMÉ DE L'ADRESSE AU PREMIER NIVEAU d'une liste repliée : les bornes, jamais une moyenne
- * (cf. `dpe-address-context.ts`), et seulement celles qui existent.
+ * L'OUVERTURE D'UNE LISTE REPLIÉE : combien, et pourquoi le lecteur doit aider. Rien d'autre.
+ *
+ * Le premier niveau portait aussi « 31 sur 34 portent un identifiant » et « classes observées de C à
+ * F, réalisés entre 2023 et 2025 » : un calcul à faire, et la classe remise au centre d'un écran
+ * dont le geste est de RECONNAÎTRE un logement. La liste ouverte montre elle-même ce que chaque
+ * diagnostic porte ; les bornes restent dans le bloc secondaire, sous les gestes.
  */
-export function phraseBornes(ctx: AddressDpeContext): string | null {
-  const parts: string[] = [];
-  if (ctx.spread) parts.push(`classes observées de ${ctx.spread.min} à ${ctx.spread.max}`);
-  if (ctx.years) {
-    parts.push(ctx.years.min === ctx.years.max
-      ? `réalisés en ${ctx.years.min}`
-      : `réalisés entre ${ctx.years.min} et ${ctx.years.max}`);
-  }
-  if (parts.length === 0) return null;
-  const s = parts.join(", ");
-  return `${s.charAt(0).toUpperCase()}${s.slice(1)}.`;
+export function phrasesOuvertureRepliee(total: number): { titre: string; aide: string } {
+  return {
+    titre: `${total} diagnostics sont enregistrés à cette adresse.`,
+    aide: "futur•e ne peut pas savoir lequel correspond à ce logement sans votre aide.",
+  };
 }
+
+/**
+ * LA SAISIE PAR NUMÉRO, dite comme une question et non comme une explication. L'ancienne phrase
+ * (« Il retrouve aussi les diagnostics enregistrés à une entrée voisine… ») avait un « il » ambigu
+ * et expliquait un cas technique avant l'action. Ce cas vit désormais dans l'aide du champ, et il
+ * est exact : `dpe-rapprochement.ts` accepte le niveau « bâtiment » (même numéro, même voie).
+ */
+export const SAISIE_NUMERO = {
+  question: "Vous avez le numéro du DPE ?",
+  consigne: "Saisissez-le pour retrouver précisément le diagnostic.",
+  aide: "La recherche par numéro peut aussi retrouver un diagnostic enregistré sous une autre entrée du même bâtiment.",
+} as const;
 
 /**
  * CE QUE L'ÉCRAN DIT D'UNE ATTRIBUTION, À LA MESURE DE CE QUE LE MOTEUR SAIT.
