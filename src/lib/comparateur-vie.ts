@@ -39,6 +39,7 @@ import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
 import { centraliteRang } from "@/lib/centralite-services";
+import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1525,7 +1526,9 @@ function buildSpatialContext(cols: (IndexCommune | null)[]): string | null {
   const pts = cols.filter((c): c is IndexCommune => c != null);
   if (pts.length < 2) return null;
   const n = pts.length;
-  const nMot = n >= 3 ? "Trois" : "Deux";
+  const mot = motCardinal(n);
+  if (mot == null) return null;
+  const nMot = mot === "trois" ? "Trois" : "Deux";
 
   // Écart du groupe = distance maximale entre deux communes.
   let span = 0;
@@ -1562,10 +1565,13 @@ export function buildComparaisonComplete(
   byInsee: Map<string, IndexCommune>,
 ): ComparaisonComplete {
   const trio = picks.slice(0, 3);
+  // FUT-32 : UNE COMMUNE NE SE COMPARE À RIEN. Avec un seul résultat, cette fonction écrivait « Les deux
+  // territoires sont très proches sur l'ensemble des thèmes » : chaque thème « se ressemblait » forcément.
+  // Elle rend désormais une comparaison VIDE (aucun résumé, aucun thème, aucun cardinal), jamais une
+  // comparaison d'une commune avec elle-même.
+  const nMot = motCardinal(trio.length);
+  if (nMot == null) return { resume: [], arbitrage: null, spatialContext: null, divergence: null, themes: [] };
   const cols = trio.map((r) => byInsee.get(r.insee) ?? null);
-  // Cardinal-agnostique : le « trio » peut être 2 ou 3 communes (mode choix). Le mot qui
-  // dénombre les territoires dans les phrases de synthèse suit le cardinal réel.
-  const nMot = trio.length >= 3 ? "trois" : "deux";
 
   // subScore par dimension, aligné sur le trio (null = donnée absente pour la commune)
   const rawByDim = new Map<string, (number | null)[]>();

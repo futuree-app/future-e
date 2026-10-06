@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cardinalPackValide } from "@/lib/comparaison-cardinal";
 import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { getPostHogClient } from "@/lib/posthog-server";
@@ -207,8 +208,8 @@ export async function POST(request: Request) {
         }))
         .filter((t: { insee: string }) => t.insee)
         .slice(0, 3);
-      // choix : 2 ou 3 communes ; replay : exactement 3.
-      const okCount = packMode === "choix" ? packTrio.length >= 2 : packTrio.length === 3;
+      // choix : 2 ou 3 communes ; replay : exactement 3 (règle testée dans comparaison-cardinal.test.ts).
+      const okCount = cardinalPackValide(packMode, packTrio.length);
       if (!okCount) {
         return NextResponse.json(
           { error: packMode === "choix" ? "2 à 3 communes requises." : "Trio de 3 communes requis." },
