@@ -5,6 +5,7 @@ import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
 import { formatKwhEpM2, libelleObjet } from "@/lib/audit-record";
+import { phraseAttribution, vueSectionDpe } from "@/lib/dpe-selection-vue";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
 // diagnostic confirmé) et audit énergétique s'il existe. La lecture thermique riche (confort d'été)
@@ -67,9 +68,10 @@ export function EnergieSection({
   // Deux états quand rien n'est attribué. Soit l'adresse porte des diagnostics, et ils se lisent
   // comme un CONTEXTE D'ADRESSE, jamais comme une caractéristique de ce logement-ci. Soit elle
   // n'en porte aucun, et on le dit sans prétendre qu'il n'en existe pas.
-  const nonAttribue = dpeStatus === "selection_required" || dpeStatus === "rejected" || !dpe;
+  // La vue se décide dans `vueSectionDpe` (pur, testé) : ses cinq états ne se confondent jamais.
+  const vue = vueSectionDpe({ statut: dpeStatus, dpeRetenu: dpe != null, candidats: candidates.length, baseMuette: dpeNonVerifiable });
 
-  if (nonAttribue) {
+  if (vue !== "attribue" || !dpe) {
     const saisie = (
       <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
     );
@@ -85,7 +87,7 @@ export function EnergieSection({
               avec un compte tiers.
 
               L'état porte donc maintenant sa propre réponse, un recours, et une sortie. */}
-          {dpeStatus === "rejected" ? (
+          {vue === "refuse" ? (
             <div style={{ display: "grid", gap: 16 }}>
               <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
                 {candidates.length === 1
@@ -112,7 +114,7 @@ export function EnergieSection({
                 {candidates.length > 0 ? "Revoir les diagnostics de cette adresse" : "Revenir sur cette réponse"}
               </button>
             </div>
-          ) : candidates.length > 0 ? (
+          ) : vue === "a_choisir" ? (
             <AddressDiagnosticsBlock
               candidates={candidates}
               listeIncomplete={listeDpeIncomplete}
@@ -174,9 +176,9 @@ export function EnergieSection({
             pas être une erreur de clic. C'est pourtant le seul geste de cet écran qui en produise,
             puisque les lignes d'un immeuble se ressemblent. */}
         <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
-          {dpeStatus === "auto_confirmed"
-            ? "Un DPE a été retrouvé pour cette adresse. "
-            : "Vous avez désigné ce diagnostic parmi ceux de cette adresse. "}
+          {/* FUT-68 : la phrase nomme le critère de l'attribution automatique, sans jamais dire
+              « votre diagnostic » (cf. `phraseAttribution`). */}
+          {phraseAttribution(dpeStatus === "auto_confirmed" ? "auto_confirmed" : "confirmed")}
           <LienReprise
             busy={busy}
             onClick={onReselect}

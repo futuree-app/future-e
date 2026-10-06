@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import {
   addressContextLead, buildAddressDpeContext, type AddressDpeContext,
 } from "@/lib/dpe-address-context";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
+import { PHRASE_DPE_IMMEUBLE, SAISIE_NUMERO, listeRepliee, phrasesOuvertureRepliee } from "@/lib/dpe-selection-vue";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -30,6 +32,15 @@ import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 // elle montre une DISPERSION. Le seuil est celui de `listeLongue`, partagé avec le champ de
 // recherche du sélecteur.
 //
+// AU-DELÀ DE SIX DIAGNOSTICS, LA LISTE SE REPLIE DE NOUVEAU (FUT-68, 06/10/2026), mais pas comme en
+// juillet. Le tiroir d'alors cachait le SEUL geste de l'écran tout en bas ; ici, le premier niveau dit
+// combien de diagnostics existent et que futur•e a besoin du lecteur pour savoir lequel est le bon,
+// puis pose les trois réponses possibles : identifier son logement, n'en reconnaître aucun, apporter
+// le numéro du document. Ni classes, ni années, ni « 31 sur 34 » à ce niveau : ils n'aident pas à
+// reconnaître un logement, et la classe y redevenait un critère de choix. À 34 diagnostics, la page ne s'ouvre plus sur 34 lignes, et le refus
+// n'arrive plus au bout d'une liste. Jusqu'à six, rien ne change : la liste reste la question.
+// Seuil d'écran, documenté dans `dpe-selection-vue.ts`.
+//
 // AUCUNE VALEUR N'EST PRÊTÉE AU LOGEMENT. Chaque chiffre décrit l'adresse. C'est aussi pour ça
 // qu'aucune moyenne n'est affichée (cf. `dpe-address-context.ts`) : une moyenne se lit comme LA
 // réponse, une répartition se lit comme de la dispersion.
@@ -52,6 +63,17 @@ function Ligne({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+const BOUTON_PRINCIPAL: React.CSSProperties = {
+  justifySelf: "start", padding: "11px 18px", minHeight: 44, fontSize: 14.5, fontWeight: 500,
+  borderRadius: 10, cursor: "pointer", backgroundColor: "var(--bg-elev-2)",
+  border: "1px solid var(--accent-dim, #7a6e60)", color: "var(--fg-hi)",
+};
+
+const LIEN: React.CSSProperties = {
+  justifySelf: "start", fontSize: 13, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline",
+  background: "none", border: "none", cursor: "pointer", padding: "6px 0", textAlign: "left",
+};
 
 function Repartition({ ctx }: { ctx: AddressDpeContext }) {
   if (ctx.distribution.length === 0) return null;
@@ -87,17 +109,32 @@ export function AddressDiagnosticsBlock({
   onNotInList: () => void;
   onPickParNumero: (d: DpeRecord) => void;
 }) {
+  const [ouvert, setOuvert] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
   if (!ctx) return null;
   const dense = listeLongue(ctx.total);
+  const repliee = listeRepliee(ctx.total);
+  const ouverture = phrasesOuvertureRepliee(ctx.total);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
-      {/* La phrase POSE LA QUESTION, et la liste y répond juste dessous. Le sélecteur portait sa
-          propre introduction, presque mot pour mot celle-ci : elle a disparu avec le tiroir. */}
-      <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
-        {addressContextLead(ctx)}
-      </p>
+      {/* La phrase POSE LA QUESTION, et la liste (ou, repliée, le geste qui l'ouvre) y répond juste
+          dessous. Le sélecteur portait sa propre introduction, presque mot pour mot celle-ci : elle a
+          disparu avec le tiroir. */}
+      {repliee ? (
+        <div style={{ display: "grid", gap: 6 }}>
+          <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+            {ouverture.titre}
+          </p>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+            {ouverture.aide}
+          </p>
+        </div>
+      ) : (
+        <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+          {addressContextLead(ctx)}
+        </p>
+      )}
       {/* FUT-65 : « N diagnostics sont enregistrés » se lirait comme un total. Il ne l'est pas ici. */}
       {listeIncomplete && (
         <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
@@ -106,37 +143,64 @@ export function AddressDiagnosticsBlock({
         </p>
       )}
 
-      <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} />
-
-      {/* LE GESTE UTILE, ET IL NE DEMANDE RIEN AU LECTEUR QU'IL NE SACHE. Le numéro à treize
-          caractères identifie un diagnostic sans ambiguïté, et celui qui vend ou qui loue l'a.
-
-          DEUX DÉFAUTS CORRIGÉS LE 20/08/2026. La phrase empilait deux compléments avant son verbe
-          (« Le numéro …, que porte le document remis avec le dossier de diagnostic technique, lève
-          cette incertitude ») : elle part maintenant du lecteur et de ce qu'il a en main. Et son
-          « vous pouvez le coller ci-dessous » DÉSIGNAIT UN CHAMP QUI N'EXISTAIT PAS, le sélecteur
-          n'affichant sa recherche qu'au-delà de trois diagnostics. Elle ne renvoie plus à un champ
-          que lorsqu'il est là. */}
-      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
-        <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-          Si vous avez le document du diagnostic, il porte un numéro qui lève le doute. Il retrouve
-          aussi les diagnostics enregistrés à une entrée voisine de la vôtre, que la liste ci-dessus
-          ne montre pas.
-        </p>
-        <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
-      </div>
-
+      {/* LE DIAGNOSTIC D'IMMEUBLE EST NOMMÉ AVANT LA LISTE (FUT-68). Il venait après elle : on pouvait
+          choisir sa ligne avant d'apprendre qu'elle décrit le bâtiment commun. Sa ligne le dit aussi. */}
       {ctx.hasCollective && (
         <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-          L&apos;un de ces diagnostics porte sur l&apos;immeuble entier. Il décrit le bâtiment
-          commun, et pas la performance d&apos;un logement en particulier.
+          {PHRASE_DPE_IMMEUBLE}
         </p>
       )}
+
+      {repliee ? (
+        <div style={{ display: "grid", gap: 10 }}>
+          {!ouvert && (
+            <button type="button" onClick={() => setOuvert(true)} disabled={busy} style={BOUTON_PRINCIPAL}>
+              Identifier mon logement
+            </button>
+          )}
+          {/* LE REFUS AU PREMIER NIVEAU, jamais au bout de la liste : ne reconnaître aucune ligne
+              est une réponse aussi légitime que d'en choisir une, et la plus utile à la qualité du
+              dossier quand le bon diagnostic n'a pas été versé. */}
+          <button type="button" onClick={onNotInList} disabled={busy} style={LIEN}>
+            Aucun de ces diagnostics n&apos;est celui de ce logement
+          </button>
+          {ouvert && (
+            <div style={{ paddingTop: 6 }}>
+              <DpeSelector
+                candidates={candidates}
+                onPick={onPick}
+                onNotInList={onNotInList}
+                busy={busy}
+                afficherRefus={false}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} busy={busy} />
+      )}
+
+      {/* LE NUMÉRO DU DOCUMENT, le seul geste qui ne demande pas de deviner. Il était introduit par
+          « Si vous avez le document…, il porte un numéro qui lève le doute. Il retrouve aussi… » :
+          un « il » ambigu, et un cas technique (l'entrée voisine) expliqué avant l'action. C'est
+          maintenant une question, et le cas technique vit dans l'aide du champ (FUT-68).
+          LE CHAMP RESTE VISIBLE, y compris liste repliée : c'est le chemin le plus fiable pour
+          désigner un diagnostic, et le cacher derrière un clic le reléguait (décision du 06/10). */}
+      <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
+        <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+          {SAISIE_NUMERO.question}
+        </p>
+        <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
+        <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+          {SAISIE_NUMERO.aide}
+        </p>
+      </div>
 
       {/* CE QUE LA BASE DIT DE L'ADRESSE, en contexte de la liste et jamais à sa place. Aucune
           valeur n'est prêtée au logement : chaque chiffre décrit l'adresse. C'est aussi pour ça
           qu'aucune moyenne n'est affichée (cf. `dpe-address-context.ts`) : une moyenne se lit comme
-          LA réponse, une répartition se lit comme de la dispersion. */}
+          LA réponse, une répartition se lit comme de la dispersion. Elle vient APRÈS les gestes :
+          les classes n'aident pas à reconnaître un logement. */}
       {dense && (
         <div style={{ display: "grid", gap: 12, paddingTop: 14, borderTop: "1px solid var(--border-1)" }}>
           <Repartition ctx={ctx} />
