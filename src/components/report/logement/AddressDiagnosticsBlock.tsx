@@ -110,7 +110,6 @@ export function AddressDiagnosticsBlock({
   onPickParNumero: (d: DpeRecord) => void;
 }) {
   const [ouvert, setOuvert] = useState(false);
-  const [saisieOuverte, setSaisieOuverte] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
   if (!ctx) return null;
   const dense = listeLongue(ctx.total);
@@ -185,25 +184,16 @@ export function AddressDiagnosticsBlock({
           « Si vous avez le document…, il porte un numéro qui lève le doute. Il retrouve aussi… » :
           un « il » ambigu, et un cas technique (l'entrée voisine) expliqué avant l'action. C'est
           maintenant une question, et le cas technique vit dans l'aide du champ (FUT-68).
-          Liste repliée : la question est un geste qui déplie le champ, pour que le premier niveau
-          se limite à « identifier », « aucun » et « j'ai le numéro ». */}
+          LE CHAMP RESTE VISIBLE, y compris liste repliée : c'est le chemin le plus fiable pour
+          désigner un diagnostic, et le cacher derrière un clic le reléguait (décision du 06/10). */}
       <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
-        {repliee && !saisieOuverte ? (
-          <button type="button" onClick={() => setSaisieOuverte(true)} disabled={busy} style={{ ...LIEN, color: "var(--fg-2)" }}>
-            {SAISIE_NUMERO.question}
-          </button>
-        ) : (
-          <>
-            <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
-              {SAISIE_NUMERO.question}{" "}
-              <span style={{ color: "var(--fg-2)" }}>{SAISIE_NUMERO.consigne}</span>
-            </p>
-            <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
-            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
-              {SAISIE_NUMERO.aide}
-            </p>
-          </>
-        )}
+        <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+          {SAISIE_NUMERO.question}
+        </p>
+        <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
+        <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+          {SAISIE_NUMERO.aide}
+        </p>
       </div>
 
       {/* CE QUE LA BASE DIT DE L'ADRESSE, en contexte de la liste et jamais à sa place. Aucune

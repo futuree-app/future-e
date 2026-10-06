@@ -167,7 +167,6 @@ export function phrasesOuvertureRepliee(total: number): { titre: string; aide: s
  */
 export const SAISIE_NUMERO = {
   question: "Vous avez le numéro du DPE ?",
-  consigne: "Saisissez-le pour retrouver précisément le diagnostic.",
   aide: "La recherche par numéro peut aussi retrouver un diagnostic enregistré sous une autre entrée du même bâtiment.",
 } as const;
 

@@ -162,11 +162,10 @@ test("ouverture d'une liste repliée : combien, et pourquoi le lecteur doit aide
   assert.doesNotMatch(tout, /classe|20\d\d|sur 34|31/);
 });
 
-test("saisie par numéro : une question, une consigne, et le cas de l'entrée voisine dans l'aide seulement", () => {
+test("saisie par numéro : une question, et le cas de l'entrée voisine dans l'aide seulement", () => {
   assert.equal(SAISIE_NUMERO.question, "Vous avez le numéro du DPE ?");
-  assert.equal(SAISIE_NUMERO.consigne, "Saisissez-le pour retrouver précisément le diagnostic.");
   assert.match(SAISIE_NUMERO.aide, /autre entrée du même bâtiment/);
-  assert.doesNotMatch(`${SAISIE_NUMERO.question} ${SAISIE_NUMERO.consigne}`, /entrée|voisin|^Il /);
+  assert.doesNotMatch(SAISIE_NUMERO.question, /entrée|voisin|^Il /);
 });
 
 // ── Ce que l'écran affirme ───────────────────────────────────────────────────────────────────────
@@ -187,7 +186,7 @@ test("aucune phrase de présentation n'affirme une correspondance certaine", () 
   const o = phrasesOuvertureRepliee(34);
   const textes = [
     phraseAttribution("auto_confirmed"), phraseAttribution("confirmed"),
-    phraseIdentifiables(31, 34), o.titre, o.aide, SAISIE_NUMERO.consigne, SAISIE_NUMERO.aide,
+    phraseIdentifiables(31, 34), o.titre, o.aide, SAISIE_NUMERO.question, SAISIE_NUMERO.aide,
     ...IMMEUBLE_34.map((c) => ligneCandidat(c, champsVariables(IMMEUBLE_34)).libelleAccessible),
   ];
   for (const t of textes) {
