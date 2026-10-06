@@ -7,7 +7,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { faceMemoireCatastrophes, legendeAnneesCatnat, REPERE_NATIONAL } from "./catnat-memoire.ts";
+import { arriveeDepuisPastille, faceMemoireCatastrophes, legendeAnneesCatnat, LIGNE_INONDATION, REPERE_NATIONAL } from "./catnat-memoire.ts";
 import { construireLectureInondation, type LectureInondation, type ZonageInondationPoint } from "./decision/inondation-lecture.ts";
 import { catnatInondationDepuisCompte, libelleCatnatInondation } from "./decision/catnat-evidence.ts";
 import type { PerilState } from "./onrn-sinistralite.ts";
@@ -50,18 +50,42 @@ test("M3. une dominante n'apparaît que selon la règle existante (55 %, FUT-60)
   assert.doesNotMatch(faceMemoireCatastrophes({ catnat: presque, catnatInondation: null, catnatMisAJour: null, ville: null }).sub ?? "", /^Surtout/);
 });
 
-test("M4. la ventilation réelle reste dans le volet, et le compte de la pastille y est mot pour mot", () => {
-  const f = faceMemoireCatastrophes({ catnat: SECHERESSE_DOMINE, catnatInondation: INONDATION_INDEX, catnatMisAJour: null, ville: null });
-  const pastille = libelleCatnatInondation(INONDATION_INDEX);
-  assert.ok(f.noteInondation!.includes(pastille), "le lecteur arrivé par la pastille retrouve son texte");
+test("M4. ouverture normale : la ventilation complète, et aucun aléa n'a d'encart à lui", () => {
   const carte = code("src/components/report/QuartierClimatData.tsx");
+  // La répartition réelle, tous aléas, l'inondation comprise quand elle existe.
   contient(carte, /breakdown: catnat!\.byRisk\.map\(\(rk\) => \(\{/, "carte");
-  contient(carte, /note: face\.noteInondation, noteLabel: "Le compte inondation du dossier"/, "carte");
-  // Arrivée par la pastille : le volet s'ouvre, sinon le chiffre annoncé serait caché.
-  contient(carte, /targets: \["risk\.catnat"\],\s*ouvrirALArrivee: true,/, "carte");
-  contient(carte, /f\.ouvrirALArrivee && f\.detail && f\.targets\?\.some\(\(t\) => evidenceAnchorId\(t\) === ancre\)/, "carte");
-  // Plus aucune ligne « Tous risques » ni « Dont … » sur la face.
-  neContientPas(carte, /Tous risques ·/, "carte");
+  // Plus d'encart permanent : le volet de la carte ne pose ni note ni ligne mise en évidence.
+  const volet = carte.slice(carte.indexOf("const detail: CardDetail | undefined = hasCatnat"), carte.indexOf("factors.push({\n      label: \"Mémoire des catastrophes\""));
+  assert.ok(volet.length > 300, "volet trouvé");
+  neContientPas(volet, /note:|noteLabel|surligner|Dont |compte inondation/, "volet ordinaire");
+  neContientPas(carte, /Tous risques ·|Le compte inondation du dossier/, "carte");
+  // La face non plus ne porte aucun compte inondation quand le relevé direct a répondu.
+  const f = faceMemoireCatastrophes({ catnat: SECHERESSE_DOMINE, catnatInondation: INONDATION_INDEX, catnatMisAJour: catnatInondationDepuisCompte(21, "17300"), ville: null });
+  assert.doesNotMatch(`${f.val} ${f.sub}`, /inondation|Dont/i);
+});
+
+test("M4b. arrivée par la pastille inondation : le volet s'ouvre sur la ligne « Inondations », sans doublon", () => {
+  // Même compte des deux côtés (même groupe `simplifyCatnatRisk`) : la ligne suffit, aucune phrase ajoutée.
+  assert.deepEqual(arriveeDepuisPastille(SECHERESSE_DOMINE, INONDATION_INDEX), { surligner: LIGNE_INONDATION });
+  assert.equal(SECHERESSE_DOMINE.byRisk.find((r) => r.label === LIGNE_INONDATION)!.count, INONDATION_INDEX.count);
+  // Comptes différents (dossier figé avant une mise à jour) : une phrase dit l'écart, avec le texte de la pastille.
+  const ecart = arriveeDepuisPastille(SECHERESSE_DOMINE, catnatInondationDepuisCompte(18, "17300"))!;
+  assert.equal(ecart.surligner, LIGNE_INONDATION);
+  assert.ok(ecart.note!.includes(libelleCatnatInondation(catnatInondationDepuisCompte(18, "17300")!)), "le texte de la pastille, mot pour mot");
+  assert.match(ecart.note!, /en compte 20 aujourd'hui/);
+  // Sans compte inondation ou sans relevé : pas d'arrivée ciblée.
+  assert.equal(arriveeDepuisPastille(SECHERESSE_DOMINE, null), null);
+  assert.equal(arriveeDepuisPastille(null, INONDATION_INDEX), null);
+  const carte = code("src/components/report/QuartierClimatData.tsx");
+  contient(carte, /targets: \["risk\.catnat"\],[\s\S]{0,300}arrivee: arriveeDepuisPastille\(catnat \?\? null, catnatInondation \?\? null\) \?\? undefined,/, "carte");
+  contient(carte, /f\.arrivee && f\.detail && f\.targets\?\.some\(\(t\) => evidenceAnchorId\(t\) === ancre\)/, "carte");
+  // Le contexte s'applique à CETTE ouverture : il est fusionné dans l'état ouvert, pas dans le volet de la carte.
+  contient(carte, /setOpenDetail\(\{ \.\.\.cible\.detail, \.\.\.cible\.arrivee \}\)/, "carte");
+  const volet = code("src/components/MetricDrawer.tsx");
+  contient(volet, /data-cible=\{r\.label === detail\.surligner \? "true" : undefined\}/, "MetricDrawer");
+  // Seule la pastille inondation vise cette carte : arriver par son ancre, c'est arriver par l'inondation.
+  const regles = code("src/lib/decision/materiality-rules.ts");
+  assert.equal((regles.match(/targetKey: "risk\.catnat"/g) ?? []).length, 1);
 });
 
 test("M5. relevé direct en panne : le compte inondation est la seule donnée, et le dit", () => {
@@ -76,7 +100,7 @@ test("M6. Paris, Lyon, Marseille : le compte de la ville se dit à l'échelle de
   const paris = { total: 20, byRisk: [{ label: "Inondations", count: 16 }, { label: "Sécheresse des sols", count: 4 }] };
   const f = faceMemoireCatastrophes({ catnat: paris, catnatInondation: catnatInondationDepuisCompte(16, "75111"), catnatMisAJour: null, ville: "Paris" });
   assert.equal(f.sub, "Surtout inondations · À l'échelle de Paris");
-  assert.match(f.noteInondation!, /16 reconnaissances liées aux inondations depuis 1982, à l'échelle de Paris\./);
+  assert.deepEqual(arriveeDepuisPastille(paris, catnatInondationDepuisCompte(16, "75111")), { surligner: LIGNE_INONDATION });
   assert.match(legendeAnneesCatnat([1999, 2016], 2026, "Paris").principale, /depuis 1982, à l'échelle de Paris,/);
   const page = lire("src/app/(account)/rapport/quartier/page.tsx");
   contient(page, /const catnatVille = inseeCode && inseeCode !== codeGaspar\(inseeCode\) \? villeGaspar\(inseeCode\) : null;/, "page");
@@ -197,11 +221,14 @@ test("R5. Paris : le compte de la ville garde son grain dans la réconciliation"
 
 // ── Non-régression FUT-60 ────────────────────────────────────────────────────────────────────────
 test("N1. FUT-60 : l'unité reste la reconnaissance, la borne reste 1982", () => {
-  const textes = [
-    faceMemoireCatastrophes({ catnat: SECHERESSE_DOMINE, catnatInondation: INONDATION_INDEX, catnatMisAJour: catnatInondationDepuisCompte(21, "17300"), ville: null }),
-  ].flatMap((f) => [f.val, f.sub ?? "", f.noteInondation ?? ""]).join(" ");
+  const normal = faceMemoireCatastrophes({ catnat: SECHERESSE_DOMINE, catnatInondation: INONDATION_INDEX, catnatMisAJour: catnatInondationDepuisCompte(21, "17300"), ville: null });
+  const panne = faceMemoireCatastrophes({ catnat: null, catnatInondation: INONDATION_INDEX, catnatMisAJour: catnatInondationDepuisCompte(21, "17300"), ville: null });
+  const textes = [normal, panne].flatMap((f) => [f.val, f.sub ?? ""]).join(" ");
   assert.doesNotMatch(textes, /arrêté/i);
   assert.match(textes, /depuis 1982/);
-  assert.match(textes, /L'index actuellement chargé indique 21 reconnaissances liées aux inondations depuis 1982\./);
+  // Dans le cas où l'inondation EST la face (relevé direct en panne), l'écart avec l'index se dit encore.
+  assert.match(panne.sub!, /L'index actuellement chargé indique 21 reconnaissances liées aux inondations depuis 1982/);
+  // Le total et la répartition ne changent pas.
+  assert.equal(normal.val, "50 reconnaissances depuis 1982");
   assert.doesNotMatch(premierNiveau(construireLectureInondation({ zonage: { kind: "aucun_zonage" }, catnat: INONDATION_INDEX, onrn: { kind: "aucun" } })!), /arrêté/i);
 });

@@ -8,7 +8,8 @@
 //     inondations », pour toute commune dont l'index portait un compte inondation : l'inondation passait
 //     au premier plan même là où la sécheresse dominait. La face dit maintenant le total, puis la
 //     répartition selon la règle EXISTANTE (`resumeCatnat`, dominante à 55 %, FUT-60), qui reste neutre
-//     quand aucune dominante n'existe. Le compte inondation descend dans le volet, mot pour mot.
+//     quand aucune dominante n'existe. Le volet non plus ne privilégie aucun aléa : l'inondation y est
+//     une ligne de la répartition, comme les autres (`arriveeDepuisPastille` ne sert qu'à l'entrée).
 //  2. La légende disait « 28 années se détachent », « de plus en plus rapprochées » : des images, et
 //     une importance que rien ne mesure. Elle dit ce qui est compté.
 //  3. Le repère national (« une commune française sur dix dépasse dix années ») était au premier niveau
@@ -32,11 +33,6 @@ export type FaceMemoire = {
   sub: string | undefined;
   /** La carte ne sait rien. */
   missing: boolean;
-  /**
-   * Le compte inondation de l'index, MOT POUR MOT la phrase de la pastille du dossier (`catnat-evidence`),
-   * pour l'encart du volet. `null` s'il n'y a rien à y mettre.
-   */
-  noteInondation: string | null;
 };
 
 export function faceMemoireCatastrophes(e: {
@@ -59,9 +55,6 @@ export function faceMemoireCatastrophes(e: {
       val: `${total} reconnaissance${total > 1 ? "s" : ""} depuis ${CATNAT_DEPUIS}`,
       sub: [repartition, ville ? `À l'échelle de ${ville}` : null].filter(Boolean).join(" · ") || undefined,
       missing: false,
-      noteInondation: catnatInondation
-        ? [`Dont ${libelleCatnatInondation(catnatInondation)}.`, misAJour].filter(Boolean).join(" ")
-        : misAJour,
     };
   }
   if (catnat && total === 0) {
@@ -70,7 +63,6 @@ export function faceMemoireCatastrophes(e: {
       val: `Aucune reconnaissance depuis ${CATNAT_DEPUIS}${echelle(ville)}`,
       sub: misAJour ?? undefined,
       missing: false,
-      noteInondation: null,
     };
   }
   // RELEVÉ DIRECT EN PANNE. Le compte inondation de l'index est alors la SEULE donnée : il devient la
@@ -80,10 +72,36 @@ export function faceMemoireCatastrophes(e: {
       val: libelleCatnatInondation(catnatInondation),
       sub: ["Le relevé de tous les risques n'a pas répondu", misAJour?.replace(/\.$/, "")].filter(Boolean).join(" · "),
       missing: false,
-      noteInondation: null,
     };
   }
-  return { val: "—", sub: misAJour ?? undefined, missing: true, noteInondation: null };
+  return { val: "—", sub: misAJour ?? undefined, missing: true };
+}
+
+// ── L'arrivée par la pastille inondation du dossier ─────────────────────────────────────────────
+
+/** Le libellé du groupe inondation dans la répartition (`simplifyCatnatRisk`), celui que l'index compte. */
+export const LIGNE_INONDATION = "Inondations";
+
+/**
+ * CE QUE CHANGE L'ARRIVÉE PAR LA PASTILLE INONDATION DU DOSSIER, et rien d'autre (FUT-69). Le volet
+ * s'ouvre et met en évidence la ligne « Inondations » de la répartition : c'est le même compte (même
+ * groupe `simplifyCatnatRisk`, même unité, cf. `gaspar-catnat-collecte.ts`), donc le lecteur y retrouve
+ * son chiffre. Une phrase s'ajoute SEULEMENT si les deux nombres diffèrent (dossier figé avant une mise
+ * à jour, relevé direct plus récent) : sans elle, le lecteur lirait un autre chiffre que le sien sans
+ * savoir pourquoi. Hors de cette entrée, rien de tout cela n'existe.
+ */
+export function arriveeDepuisPastille(
+  catnat: ReleveCatnat | null,
+  catnatInondation: CatnatInondation | null,
+): { surligner?: string; note?: string; noteLabel?: string } | null {
+  if (!catnat || !catnat.total || !catnatInondation) return null;
+  const ligne = catnat.byRisk.find((r) => r.label === LIGNE_INONDATION) ?? null;
+  if (ligne && ligne.count === catnatInondation.count) return { surligner: LIGNE_INONDATION };
+  return {
+    ...(ligne ? { surligner: LIGNE_INONDATION } : {}),
+    note: `Votre dossier cite ${libelleCatnatInondation(catnatInondation)}. Le relevé direct de cette carte en compte ${ligne ? ligne.count : "aucune"} aujourd'hui : les deux n'ont pas été établis à la même date.`,
+    noteLabel: "Le chiffre de votre dossier",
+  };
 }
 
 // ── La ligne des années ──────────────────────────────────────────────────────────────────────

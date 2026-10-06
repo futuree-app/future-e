@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { evidenceAnchorId, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
-import { faceMemoireCatastrophes } from "@/lib/catnat-memoire";
+import { arriveeDepuisPastille, faceMemoireCatastrophes } from "@/lib/catnat-memoire";
 import { registerForCard, type RegisterKey } from "@/lib/decision/evidence-registers";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import { MetricDrawer, type CardDetail } from "@/components/MetricDrawer";
@@ -64,10 +64,11 @@ type Factor = {
    */
   targets?: EvidenceTargetKey[];
   /**
-   * FUT-69 : ouvrir le volet quand le lecteur arrive par l'ancre de cette carte (lien « Preuve » du
-   * dossier). Le chiffre que la pastille annonce vit dans le volet ; sans cela, il ne le retrouverait pas.
+   * FUT-69 : ce que change l'arrivée par l'ancre de cette carte (lien « Preuve » du dossier). Le volet
+   * s'ouvre, avec ces ajustements CONTEXTUELS (ligne mise en évidence, éventuel écart). Absent : la carte
+   * ne s'ouvre pas seule. Le volet ordinaire n'en garde aucune trace.
    */
-  ouvrirALArrivee?: boolean;
+  arrivee?: Pick<CardDetail, "surligner" | "note" | "noteLabel">;
 };
 
 type Drought = NonNullable<EaufranceSummary["drought"]>;
@@ -839,8 +840,9 @@ function buildFactors(
   // FUT-69 : LA FACE NE MET PLUS L'INONDATION EN AVANT. Elle disait « Tous risques · N » puis « Dont N
   // liées aux inondations » dès que l'index portait ce compte, même là où la sécheresse dominait. Le
   // texte vit dans `catnat-memoire.ts` (pur, testé) : le total, puis la répartition selon la règle
-  // partagée (`resumeCatnat`), neutre sans dominante. Le compte inondation que la pastille du dossier
-  // annonce descend dans le volet, mot pour mot, et le volet s'ouvre quand on arrive par la pastille.
+  // partagée (`resumeCatnat`), neutre sans dominante. Le volet non plus ne privilégie aucun aléa :
+  // l'inondation y est une ligne de la répartition. Arriver par la pastille inondation du dossier ouvre
+  // le volet et met cette ligne en évidence, pour cette entrée seulement (`arrivee`).
   if (catnat !== undefined) {
     const hasCatnat = !!catnat && catnat.total > 0;
     const face = faceMemoireCatastrophes({
@@ -871,7 +873,6 @@ function buildFactors(
           ],
           why: "Une reconnaissance de catastrophe naturelle est un acte administratif, qui ouvre l'indemnisation après un épisode. Ce compte dit quels aléas ont été reconnus dans la commune depuis 1982 ; il ne mesure pas une probabilité, et il ne dit pas qu'un logement précis a été sinistré.",
           whyLabel: "Ce que ce compte dit",
-          ...(face.noteInondation ? { note: face.noteInondation, noteLabel: "Le compte inondation du dossier" } : {}),
           askPrefill: "Que racontent les arrêtés de catastrophe naturelle de ma commune ?",
           sources: "Géorisques · base GASPAR (reconnaissances de catastrophe naturelle)",
         }
@@ -881,13 +882,14 @@ function buildFactors(
       // La preuve du dossier qui compte les arrêtés vise CETTE carte, et non celle du zonage
       // inondation, qui ne dit rien des arrêtés (cf. materiality-rules, règle inondation).
       targets: ["risk.catnat"],
-      ouvrirALArrivee: true,
+      // Seule la pastille inondation du dossier vise cette carte (`materiality-rules`) : y arriver,
+      // c'est arriver par l'inondation. Le volet s'ouvre sur sa ligne, mise en évidence.
+      arrivee: arriveeDepuisPastille(catnat ?? null, catnatInondation ?? null) ?? undefined,
       val: face.val,
       sub: face.sub,
       col: "var(--blue)",
       src: "Géorisques · GASPAR · reconnaissances CatNat",
       missing: face.missing,
-      // L'écart avec l'index courant est dans l'encart inondation du volet (`noteInondation`).
       detail,
     });
   }
@@ -1132,15 +1134,15 @@ export function QuartierAside({ registres, communeName, scenarios, georisques, t
   const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null, catnatVille ?? null);
 
   // FUT-69 : ARRIVÉE PAR LA PASTILLE DU DOSSIER. Une carte qui porte son chiffre dans le volet
-  // (`ouvrirALArrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte
+  // (`arrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte
   // annoncé sans avoir à le chercher. Une fois, au montage ; le hash ne se relit pas ensuite.
   useEffect(() => {
     const ancre = window.location.hash.slice(1);
     if (!ancre) return;
-    const cible = factors.find((f) => f.ouvrirALArrivee && f.detail && f.targets?.some((t) => evidenceAnchorId(t) === ancre));
+    const cible = factors.find((f) => f.arrivee && f.detail && f.targets?.some((t) => evidenceAnchorId(t) === ancre));
     // Lecture du hash au montage, côté client seulement : pas de rendu en cascade.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (cible?.detail) setOpenDetail(cible.detail);
+    if (cible?.detail) setOpenDetail({ ...cible.detail, ...cible.arrivee });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
