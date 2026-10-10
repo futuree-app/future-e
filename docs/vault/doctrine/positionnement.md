@@ -9,11 +9,57 @@ futur•e **n'est pas un site sur les risques**. C'est un site sur les **choix d
 qui utilise les risques pour éclairer ces choix. La promesse centrale est la
 **compatibilité territoriale à long terme** : choisir où construire sa vie.
 
-Le différenciant (le moat) est la prise en compte des **nuisances et risques invisibles**
-que les comparateurs immobiliers ou services ignorent : chaleur future, inondation,
-qualité de l'air, bruit, sites industriels à risque, pression agricole. Le climat reste
-une composante centrale, mais plus le seul sujet : le moteur est passé de « moteur climat
-enrichi » à **moteur de compatibilité territoriale**.
+Le climat, les risques et les nuisances invisibles restent une matière centrale du
+produit, mais **la donnée elle-même n'est plus le moat**. DPE, DVF, Géorisques, cadastre,
+PLU, BDNB, transports, pollution et services deviennent progressivement des commodités
+accessibles dans de nombreuses fiches concurrentes.
+
+Le moat de futur•e repose désormais sur quatre couches cumulatives :
+
+### 1. Projet personnel
+
+Répondre à la question : **« Est-ce que cet endroit convient à ce que cette personne
+essaie réellement de faire ? »**
+
+La valeur ne vient pas du nombre de critères, mais du rattachement explicite des faits au
+Projet, à ses conditions sans compromis, à ses préférences et à ce qui reste hors mesure.
+
+### 2. Composition
+
+Transformer plusieurs faits de grains différents en une lecture décisionnelle sans score
+opaque.
+
+Exemple de chaîne cible :
+
+`nuits chaudes en hausse → ventilation nocturne importante pour ce Projet → bruit réel
+inconnu → vérification nécessaire avant de conclure`.
+
+Le différenciant est le raisonnement entre Territoire, Autour et Logement, pas la
+juxtaposition des couches.
+
+### 3. Incertitude actionnable
+
+Quand futur•e ne sait pas conclure, il ne comble pas le trou par une note. Il indique
+**ce qui manque, pourquoi cela compte et comment le vérifier avant de s'engager**.
+
+L'inconnue utile devient ainsi une partie du produit :
+
+`fait / projection → inconnue déterminante → vérification → réponse attribuée → lecture
+réévaluée`.
+
+### 4. Continuité de la décision
+
+futur•e doit accompagner une décision qui évolue dans le temps :
+
+`recherche → shortlist → dossier → visite → nouvelle information → réévaluation →
+compromis / abandon`.
+
+La mémoire des candidats, des versions, des vérifications et des changements peut devenir
+plus différenciante qu'un rapport statique.
+
+**Conséquence durable :** toute nouvelle donnée doit être évaluée selon sa capacité à
+renforcer au moins un de ces quatre moats. Une source supplémentaire qui enrichit seulement
+une fiche technique n'est pas, à elle seule, une priorité produit.
 
 ## Pourquoi cette règle
 
