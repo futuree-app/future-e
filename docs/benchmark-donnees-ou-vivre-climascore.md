@@ -221,35 +221,50 @@ Sources :
 
 ## 6. Aucadastre
 
-Aucadastre expose une API publique et un MCP. Les sources explicitement confirmées aujourd'hui sont :
+Aucadastre est désormais l'un des concurrents les plus faciles à rétro-ingénier : sa fiche data.gouv.fr, son API JSON sans clé et son MCP publient une liste précise des registres consommés.
 
+Sources confirmées :
 - Base Adresse Nationale ;
-- plan cadastral informatisé ;
+- Plan cadastral informatisé ;
 - Géoportail de l'urbanisme ;
-- Géorisques ;
-- DVF ;
+- GASPAR et Géorisques ;
+- DVF + DVF géolocalisé ;
 - DPE ADEME ;
 - Sitadel ;
-- IGN ;
-- PVGIS ;
-- ARCEP.
+- BD TOPO ;
+- RGE ALTI ;
+- Annuaire de l'Éducation nationale ;
+- Sirene ;
+- fichiers des locaux et parcelles des **personnes morales** (DGFiP) ;
+- **RNIC** (Registre national d'immatriculation des copropriétés) ;
+- bases statistiques **SSMSI** de délinquance enregistrée ;
+- Carte des loyers ;
+- zonage A/B/C ;
+- **RNB** ;
+- contrôle sanitaire de l'eau distribuée / Hub'Eau.
 
-L'API renvoie notamment parcelle, zonage et destinations autorisées, servitudes, risques, terrain, permis, ventes, diagnostics, environnement ; au niveau commune : marché, document d'urbanisme, zonage A/B/C, fibre, risques et eau.
+L'API `/street/{id}` expose parcelle et feuille, parcelles autour, zone PLU et document opposable, prescriptions et servitudes, risques, ventes, DPE, bâti, permis, relief/ensoleillement, écoles et établissements avec SIREN. Les endpoints commune et parcelle complètent cette lecture.
 
-| Écart | futur•e | Verdict |
+| Donnée / branchement | futur•e | Verdict |
 |---|---|---|
-| Zonage PLU + destinations autorisées | servitudes GPU mais pas PLU complet | ❌ |
-| Fibre ARCEP | sondée seulement | ❌ |
-| PVGIS | absent | ❌ |
-| Terrain IGN plus riche que l'altitude simple | altitude NGF active | 🟡 |
-| Permis Sitadel | actif | ✅ |
-| DVF / DPE / Géorisques / cadastre | actifs | ✅ |
+| Zonage PLU + document opposable + prescriptions | servitudes GPU partielles, pas PLU complet | ❌ **vrai trou** |
+| RNB comme identité bâtiment | audit/sonde, pas actif | ❌ **vrai trou** |
+| RNIC copropriété | absent | ❌ **vrai trou achat** |
+| BD TOPO bâti / environnement | usage ponctuel seulement | 🟡 |
+| RGE ALTI / relief | altitude NGF au point | 🟡 |
+| Annuaire Éducation | BPE écoles | 🟡 autre profondeur |
+| SSMSI délinquance | sondé, non actif | ❌ arbitrage éditorial |
+| Fichiers fonciers personnes morales | absent | ❌ mais hors cœur B2C |
+| Zonage A/B/C | non actif | ❌ faible valeur directe |
+| Eau distribuée | Hub'Eau actif | ✅ |
+| Carte des loyers / DVF / DPE / Géorisques / cadastre / Sitadel | actifs | ✅ |
 
-**Important :** RNIC, RNB ou SSMSI ne sont pas comptés ici comme branchements confirmés faute de preuve dans le registre public actuel.
+**Point notable :** Aucadastre ne se contente donc pas du cadastre/PLU. Sa stack est très proche d'une fiche technique nationale exhaustive et inclut deux trous structurants de futur•e : **RNB/RNIC**.
 
 Sources :
 - https://aucadastre.fr/api
-- https://aucadastre.fr/mentions-legales
+- https://www.data.gouv.fr/reuses/aucadastre-une-adresse-tous-les-faits-publics-du-terrain
+- https://www.data.gouv.fr/dataservices/api-aucadastre-une-adresse-francaise-tous-les-faits-publics-du-terrain-en-json
 
 ---
 
@@ -276,20 +291,22 @@ Source :
 
 ## 8. Score Adresse
 
-| Donnée | Source annoncée | futur•e | Verdict |
-|---|---|---|---|
-| Prix réels | DVF | actif | ✅ |
-| DPE | ADEME | actif | ✅ |
-| Risques | Géorisques | actif | ✅ |
-| Géocodage | BAN | actif | ✅ |
-| Fiche bâtiment | BDNB | non actif | ❌ |
-| PLU | GPU / données PLU | servitudes seulement | ❌ |
-| Références locatives | données locatives / INSEE selon page | carte des loyers | ✅ / 🟡 |
+Les pages publiques actuelles sont **incohérentes sur le nombre de sources** : la page « À propos » annonce « 7 sources officielles » mais n'en nomme publiquement que quatre dans le contenu récupéré ; « Comment ça marche » parle de trois bases puis en liste également quatre. Le benchmark ne retient donc que les branchements explicitement nommés.
 
-La « marge de négociation », le rendement locatif ou les montants de travaux sont des **dérivés**. Ils ne doivent pas être comptés comme nouvelles sources sans documentation supplémentaire.
+| Donnée | Source confirmée | Grain / usage annoncé | futur•e | Verdict |
+|---|---|---|---|---|
+| Prix réels | DVF | rayon / ventes comparables | actif | ✅ |
+| DPE | ADEME | cascade adresse exacte → bâtiment → rue → commune | attribution stricte + commune | ✅ famille commune ; méthode différente |
+| Risques | Géorisques | adresse / PPR / radon / ICPE | actif | ✅ |
+| Géocodage | BAN | adresse → coordonnées | actif | ✅ |
 
-Source :
-- https://score-adresse.fr/
+**BDNB, PLU et cadastre ne sont pas comptés comme branchements confirmés** dans l'état actuel des pages méthodologiques publiques. S'ils apparaissent ailleurs dans l'interface, il faut une preuve technique ou une source publiée avant de les ajouter au benchmark.
+
+Le score /100, le « score de négociation » et les éventuelles marges en euros sont des **dérivés** à partir des sources ci-dessus, pas des datasets supplémentaires.
+
+Sources :
+- https://score-adresse.fr/a-propos
+- https://score-adresse.fr/comment-ca-marche
 
 ---
 
@@ -468,7 +485,7 @@ Bat-ADAPT est un benchmark de méthode : exposition climatique + sensibilité du
 | **BDNB / attributs factuels bâtiment** | ClimaScore, Domky, Parcelle Info, EcoBuilding, Score Adresse | audit seulement | **Très fort** |
 | **RNB comme identité bâtiment stable** | Avertine, Parcelle Info / écosystème BDNB | sonde réalisée, pas actif | **Très fort** |
 | **PLU complet : zone + prescriptions + destinations** | Domky, Avertine, Parcelle Info, Aucadastre, Score Adresse, TOISE | servitudes seulement | **Très fort** |
-| **RNIC copropriété** | Avertine | absent | **Fort et très achat** |
+| **RNIC copropriété** | Avertine, Aucadastre | absent | **Fort et très achat** |
 | **Bruit réglementaire CBS / PEB** | Où Vivre, Domky, MAIF, CityScan | OSM/structurel seulement | **Fort** |
 | **Nappes : remontée + piézométrie/ADES** | ClimaScore, Domky, EcoBuilding | hydrologie oui, nappes non | **Fort** |
 | **BDIFF feux observés** | Où Vivre, ClimaScore, écosystème risques | roadmap seulement | **Fort / faible effort probable** |
