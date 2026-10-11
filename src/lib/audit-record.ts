@@ -190,7 +190,9 @@ export function formatSurfaceM2(v: number): string {
 export type EtapeParcours = { libelle: string; scenario: AuditScenario };
 /** `cle` : la catégorie de la source, unique par parcours (clé de rendu) ; `titre` : ce que lit le lecteur. */
 export type ParcoursAudit = { cle: string; titre: string; etapes: EtapeParcours[] };
-export type LectureAudit = { depart: AuditScenario | null; parcours: ParcoursAudit[] };
+/** `autresDeparts` : les lignes d'état initial au-delà de la première. Elles restent visibles, à part :
+ *  un état avant travaux n'est jamais un parcours de travaux (revue FUT-67). */
+export type LectureAudit = { depart: AuditScenario | null; autresDeparts: AuditScenario[]; parcours: ParcoursAudit[] };
 
 const sansAccents = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/["«»]/g, "").trim();
 const estEtatInitial = (s: AuditScenario) => /etat initial/.test(sansAccents(`${s.categorie ?? ""} ${s.etape ?? ""}`));
@@ -225,11 +227,12 @@ function titreParcours(categorie: string): { titre: string; ordre: number; genre
 
 export function parcoursAudit(scenarios: AuditScenario[]): LectureAudit {
   // Le point de départ est LA première ligne d'état initial. Une éventuelle seconde ligne n'est pas
-  // perdue : elle reste dans son groupe, comme toute autre ligne de la source.
-  const depart = scenarios.find(estEtatInitial) ?? null;
+  // perdue, ni comptée comme un parcours : elle est rendue à part, comme un autre état avant travaux.
+  const initiaux = scenarios.filter(estEtatInitial);
+  const depart = initiaux[0] ?? null;
   const groupes = new Map<string, AuditScenario[]>();
   for (const s of scenarios) {
-    if (s === depart) continue;
+    if (estEtatInitial(s)) continue;
     const cle = s.categorie ?? "Parcours non précisé par la source";
     groupes.set(cle, [...(groupes.get(cle) ?? []), s]);
   }
@@ -257,6 +260,7 @@ export function parcoursAudit(scenarios: AuditScenario[]): LectureAudit {
   for (const p of parcours) vus.set(p.titre, (vus.get(p.titre) ?? 0) + 1);
   return {
     depart,
+    autresDeparts: initiaux.slice(1),
     parcours: parcours.map(({ cle, titre, etapes }) => ({
       cle,
       titre: (vus.get(titre) ?? 0) > 1 ? `${titre} · ${cle.replace(/["«»]/g, "").trim()}` : titre,

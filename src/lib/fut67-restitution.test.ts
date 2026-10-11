@@ -44,7 +44,7 @@ test("A1. l'audit se lit comme un point de départ et des parcours ordonnés", (
 
 test("A2. rien n'est perdu ni inventé : chaque ligne de la source se retrouve une fois, sans classe ni coût", () => {
   const l = parcoursAudit(PARIS);
-  const rendues = [l.depart!, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
+  const rendues = [l.depart!, ...l.autresDeparts, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
   assert.equal(rendues.length, PARIS.length);
   assert.deepEqual(new Set(rendues), new Set(PARIS), "les mêmes objets, pas des copies réinterprétées");
   const texte = JSON.stringify(l.parcours.map((p) => [p.titre, p.etapes.map((e) => e.libelle)]));
@@ -67,7 +67,7 @@ test("A3. variantes, intermédiaires multiples, catégories inconnues et absence
   assert.deepEqual(l.parcours[0]!.etapes.map((e) => e.scenario.conso_ep_m2), [150, 120, 90]);
   assert.deepEqual(l.parcours[0]!.etapes.map((e) => e.libelle), ["Étape 1", "Étape 2", "Étape 3"]);
   assert.equal(l.parcours[2]!.etapes[0]!.libelle, "état projeté", "une étape inconnue garde le libellé de la source");
-  assert.deepEqual(parcoursAudit([]), { depart: null, parcours: [] });
+  assert.deepEqual(parcoursAudit([]), { depart: null, autresDeparts: [], parcours: [] });
 });
 
 test("A4. l'écran rend les parcours, plus jamais les libellés bruts de la source", () => {
@@ -151,10 +151,15 @@ test("R3. deux catégories qui donnent le même titre restent deux parcours, ave
   neContientPas(ecran, /key=\{p\.titre\}|key=\{`\$\{p\.titre\}/, "EnergieSection");
 });
 
-test("R4. une seconde ligne d'état initial n'est pas perdue", () => {
+test("R4. une seconde ligne d'état initial n'est pas perdue, et ne compte pas comme un parcours", () => {
   const doubles = [sc("état initial", "état initial", 500), sc("état initial", "état initial", 480), sc('scénario en une étape "principal"', "étape finale", 60)];
   const l = parcoursAudit(doubles);
   assert.equal(l.depart?.conso_ep_m2, 500);
-  const rendues = [l.depart!, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
+  assert.deepEqual(l.autresDeparts.map((s) => s.conso_ep_m2), [480]);
+  // Un seul parcours de travaux : l'en-tête « N parcours de travaux » ne compte que des travaux.
+  assert.deepEqual(l.parcours.map((p) => p.titre), ["Rénovation en une seule fois"]);
+  const rendues = [l.depart!, ...l.autresDeparts, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
   assert.deepEqual(new Set(rendues), new Set(doubles));
+  const ecran = code("src/components/report/logement/EnergieSection.tsx");
+  contient(ecran, /lecture\.autresDeparts\.map\(/, "EnergieSection");
 });

@@ -223,6 +223,15 @@ export function EnergieSection({
                 </span>
               </div>
             )}
+            {/* Revue FUT-67 : un autre état initial donné par la source reste visible, hors des parcours. */}
+            {lecture.autresDeparts.map((s, i) => s.conso_ep_m2 != null && (
+              <div key={`depart-${i}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                <span style={{ fontSize: 13, color: "var(--fg-3)" }}>Autre état avant travaux donné par l&apos;audit</span>
+                <span style={{ fontSize: 13, color: "var(--fg-2)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                  {formatKwhEpM2(s.conso_ep_m2)}
+                </span>
+              </div>
+            ))}
             {lecture.parcours.map((p) => (
               <div key={p.cle} style={{ padding: "12px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "grid", gap: 8 }}>
                 <div style={{ fontSize: 14, color: "var(--fg-hi)", fontWeight: 500 }}>{p.titre}</div>
