@@ -39,6 +39,7 @@ import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 import { Logo } from "@/components/Logo";
 import { EchelleNavigator } from "@/components/report/EchelleNavigator";
+import { presentationDuDossier } from "@/components/releve/activation";
 
 // LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
@@ -303,9 +304,19 @@ export default async function RapportPage() {
     fullReport, project: userProject, commune: communeName,
   });
 
+  // FUT-92 · `overflow-hidden` FAIT DE CETTE RACINE UN CONTENEUR DE DÉFILEMENT, qui ne défile jamais :
+  // tout élément `sticky` en dessous (la navigation principale, la colonne d'appui du dossier) colle
+  // alors à elle et part avec la page. `overflow-clip` coupe ce qui déborde exactement de la même
+  // façon, sans créer de conteneur de défilement.
+  //   - Seulement à partir de `lg`, là où la colonne d'appui existe : sur mobile, rien ne doit flotter
+  //     au-dessus du verdict ou des preuves, et la page garde sa racine actuelle.
+  //   - Seulement avec le relevé : la présentation classique garde sa racine, et donc son
+  //     comportement, tant que `DECISION_RELEVE` n'est pas activé.
+  const debordement = presentationDuDossier(undefined) === "releve" ? "overflow-hidden lg:overflow-clip" : "overflow-hidden";
+
   return (
     <div
-      className="min-h-screen bg-canvas text-label relative overflow-hidden"
+      className={`min-h-screen bg-canvas text-label relative ${debordement}`}
       style={{ fontFamily: "var(--font-sans)" }}
     >
       {/* Orbs */}
@@ -453,8 +464,8 @@ export default async function RapportPage() {
                       espacement="mt-6"
                       titre={TITRE_VERDICT}
                       supportingPane={renderEchelleNavigator()}
+                      controles={<ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />}
                     />
-                    <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
                   </>
                 }
               >
@@ -498,8 +509,8 @@ export default async function RapportPage() {
                   espacement="mt-6"
                   titre={TITRE_VERDICT}
                   supportingPane={renderEchelleNavigator()}
+                  controles={<ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />}
                 />
-                <ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />
                 {/* La lecture s'est arrêtée à la commune, et elle vient de finir. Le repère du haut
                     porte la même destination, mais il précède la lecture : celui-ci la suit. */}
                 <TrackedAddressCta commune={displayName} inseeCode={inseeCode} />

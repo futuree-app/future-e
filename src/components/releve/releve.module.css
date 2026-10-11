@@ -414,9 +414,28 @@
 .sommaireJeton:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
 .sommaireTrait { width: 3px; height: 12px; flex: none; }
 
-/* D'où viennent ces constats : l'emblème compté, à côté de sa lecture. */
-.echellesDuDossier { display: grid; gap: 20px; align-items: center; padding: 40px 0 8px; }
-@media (min-width: 760px) { .echellesDuDossier { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding: 48px 0 16px; } }
+/* D'où viennent ces constats : l'emblème compté, à côté de sa lecture, sur grand écran ; trois lignes
+   compactes en dessous de 1024 px, où le repère de navigation occupe déjà toute la largeur (FUT-92).
+   Le seuil est celui de la colonne d'appui (`lg`) : l'emblème compté ne réapparaît qu'une fois le
+   repère rangé dans sa colonne, jamais empilé sous lui. */
+.echellesDuDossier { display: grid; gap: 20px; align-items: center; padding: 28px 0 4px; }
+@media (min-width: 1024px) { .echellesDuDossier { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding: 48px 0 16px; } }
+.decompteLarge { display: none !important; }
+.decompteCompact { display: grid; gap: 10px; }
+@media (min-width: 1024px) { .decompteLarge { display: grid !important; } .decompteCompact { display: none; } }
+.listeCompacte { list-style: none; margin: 0; padding: 0; display: grid; }
+.ligneCompacte {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; align-items: baseline;
+  padding: 9px 0; border-top: 1px solid var(--r-filet);
+  font-size: 15px; line-height: 1.45;
+}
+.ligneCompacte:first-child { border-top: 0; padding-top: 2px; }
+.reperEchelle { color: var(--r-encre); transform: translateY(2px); }
+/* Le nom à gauche, l'état à droite ; sur une ligne trop étroite, l'état passe dessous. */
+.texteCompact { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 16px; min-width: 0; }
+.nomCompact { font-weight: 600; color: var(--r-texte); }
+.etatCompact { color: var(--r-meta); }
+.ligneCompacte[data-etat="constats"] .etatCompact { color: var(--r-encre); font-variant-numeric: tabular-nums; }
 .ligneEchelle {
   display: grid; grid-template-columns: 22px 40px minmax(0, 1fr); align-items: baseline; gap: 8px;
   padding: 9px 0 !important;
@@ -482,3 +501,30 @@
 .sommaireJetons { display: flex; flex-wrap: wrap; gap: 6px; }
 /* Les titres de la balance dans la colonne du hub (plus étroite que la page du prototype). */
 .titreBalance { font-size: clamp(20px, 2vw, 24px); }
+
+/* ── FUT-92 · le repère des échelles accompagne la lecture ─────────────────────────────── */
+
+/* LA COLONNE D'APPUI COLLE SOUS LA NAVIGATION PRINCIPALE (64 px, plus un blanc de 24 px) tant que sa
+   zone de grille défile. Cette zone couvre la conclusion, la minute ET la liste complète des
+   contrôles : le repère s'arrête de lui-même au dernier contrôle, sans script ni calcul de position.
+   Il suppose qu'aucun ancêtre ne soit un conteneur de défilement (`overflow: hidden`) : la racine de
+   `/rapport` passe en `overflow: clip` avec le relevé, à partir de cette même largeur. */
+@media (min-width: 1024px) {
+  /* LA NAVIGATION PRINCIPALE COLLE AUSSI, DÉSORMAIS (la racine ne la retient plus) : un élément
+     atteint au clavier en remontant, ou par une ancre, ne doit pas finir sous elle. La page qui
+     porte le relevé réserve donc sa hauteur au défilement (64 px, plus 16 px d'air). Les cartes
+     gardent au total le dégagement de 96 px qu'elles avaient (80 + 16). */
+  :global(html):has(.releveSection) { scroll-padding-top: 80px; }
+  .entree { scroll-margin-top: 16px; }
+  .repere { position: sticky; top: 88px; }
+  /* LE REPÈRE NE PREND JAMAIS TOUTE LA HAUTEUR. Le dessin (224 px à l'origine) se réduit avec la
+     hauteur de la fenêtre, jusqu'à 132 px : la liste des trois échelles, qui porte seule les liens
+     accessibles, reste entière. */
+  .repere svg { width: clamp(132px, calc(100vh - 500px), 224px); }
+}
+/* Une fenêtre trop basse pour tenir le repère entier sous la navigation : il ne colle plus, il
+   reste à sa place en haut du dossier, comme avant. Mieux vaut un repère qu'on retrouve en remontant
+   qu'un repère dont le bas serait inaccessible. */
+@media (min-width: 1024px) and (max-height: 539px) {
+  .repere { position: static; }
+}

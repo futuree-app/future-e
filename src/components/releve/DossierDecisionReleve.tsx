@@ -21,6 +21,7 @@ import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { conditionPorteeParLeBloc, ancresRendues, controlesParEchelle } from "@/lib/decision/dossier-view";
 import { dateFr } from "@/lib/decision/autour-permis";
+import type { Echelle } from "@/lib/decision/echelles";
 import { bindOrphans } from "@/lib/typography";
 import { lireDossier, lireCarteDuDossier, lectureDesEchelles, texteEtatEchelle, type SectionLue } from "./lecture-dossier";
 import { EntreeReleve, teinteSection, teinteEntree } from "./EntreeReleve";
@@ -41,6 +42,8 @@ export type DossierDecisionReleveProps = {
   espacement?: string;
   titre?: NiveauTitre;
   supportingPane?: ReactNode;
+  /** FUT-92 : la liste complète des contrôles, dans la même grille que la minute (cf. `DossierDecisionSection`). */
+  controles?: ReactNode;
 };
 
 /** Le sommaire : des comptes de cartes de la minute, pas une note. Aucune somme, barre ni pourcentage (ADR-0001). */
@@ -105,9 +108,30 @@ function SectionReleve({ section, provenance, conditions }: { section: SectionLu
   );
 }
 
+/**
+ * LE PETIT REPÈRE D'UNE ÉCHELLE dans le décompte compact : la forme de l'emblème (cercle, carré,
+ * losange) avec le trait de son état, comme dans `EmblemeEchelles`. Plein : des constats affichés ;
+ * fin : examinée sans constat affiché ; pointillé : non examinée. Décoratif : la ligne le dit en toutes
+ * lettres à côté.
+ */
+function ReperEchelle({ forme, etat }: { forme: Echelle; etat: EtatTrace }) {
+  const trait = etat === "constats"
+    ? { stroke: "currentColor", strokeWidth: 1.5 }
+    : etat === "examinee"
+      ? { stroke: "var(--r-discret)", strokeWidth: 1 }
+      : { stroke: "var(--r-discret)", strokeWidth: 1, strokeDasharray: "2 2.2" };
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden focusable="false" className={s.reperEchelle}>
+      {forme === "territoire" ? <circle cx="7" cy="7" r="6" fill="none" {...trait} />
+        : forme === "quartier" ? <rect x="1.5" y="1.5" width="11" height="11" rx="1.5" fill="none" {...trait} />
+          : <rect x="3" y="3" width="8" height="8" rx="0.8" transform="rotate(45 7 7)" fill="none" {...trait} />}
+    </svg>
+  );
+}
+
 export function DossierDecisionReleve({
   dossier, logement, logementStatus = "none", insee, scopeKey, provenance, projetAChange, voisinageAChange,
-  generatedAt, espacement = "mt-14", titre, supportingPane,
+  generatedAt, espacement = "mt-14", titre, supportingPane, controles,
 }: DossierDecisionReleveProps) {
   const structured = dossier.conclusionState !== "project_not_structured";
   const lecture = lireDossier(dossier);
@@ -185,20 +209,30 @@ export function DossierDecisionReleve({
           </Plaque>
         </div>
 
+        {/* LE REPÈRE ACCOMPAGNE LA LECTURE (FUT-92). Sur grand écran, il colle sous la navigation
+            principale tant que sa zone de grille défile, c'est-à-dire jusqu'au dernier contrôle : la
+            liste complète est rendue dans cette même grille (`controles`), et pas à côté. Il ne peut
+            donc ni recouvrir le pied de page, ni déborder sur ce qui suit le dossier. Sur mobile, il
+            reste à sa place, entre la conclusion et le décompte, sans rien de flottant. */}
         {supportingPane ? (
-          <div className="mt-6 mb-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mt-0 lg:mb-0">{supportingPane}</div>
+          <div className={`mt-6 mb-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mt-0 lg:mb-0 ${s.repere}`}>{supportingPane}</div>
         ) : null}
 
         <div className={supportingPane ? "lg:col-start-1 lg:row-start-2" : ""}>
-          {/* ── D'où viennent ces constats : le périmètre du dossier, jamais le nombre de cartes ── */}
+          {/* ── D'où viennent ces constats : le périmètre du dossier, jamais le nombre de cartes ──
+              UNE SEULE ILLUSTRATION POUR NAVIGUER (FUT-92). Sous 1024 px, le repère des échelles est
+              juste au-dessus, à pleine largeur : un second grand dessin cercle, carré, losange y
+              répétait le premier. Le décompte y devient trois lignes, dont le petit repère garde le
+              trait de l'emblème (plein, fin, pointillé). Sur grand écran, le repère est dans sa
+              colonne, et l'emblème compté reste ici, à côté de sa lecture. */}
           <section className={s.echellesDuDossier} aria-label="Les échelles où ces constats ont été établis" id="mouvement-echelles">
-            <div style={{ maxWidth: 200, width: "100%", justifySelf: "center" }}>
+            <div className={s.decompteLarge} style={{ maxWidth: 200, width: "100%", justifySelf: "center" }}>
               <EmblemeEchelles
                 etiquette={`D'où viennent ces constats : ${echelles.map((e) => { const t = texteEtatEchelle(e); return `${t.nom}, ${t.phrase.toLowerCase()}`; }).join(" ; ")}`}
                 etats={{ commune: trace(0), secteur: trace(1), batiment: trace(2) }}
               />
             </div>
-            <div className={s.pile} style={{ gap: 10, alignContent: "center" }}>
+            <div className={`${s.pile} ${s.decompteLarge}`} style={{ gap: 10, alignContent: "center" }}>
               <p className={s.etiquette}>D&apos;où viennent ces constats</p>
               <ul className={s.liste}>
                 {echelles.map((e) => {
@@ -213,6 +247,24 @@ export function DossierDecisionReleve({
                       <span className={s.pileSerree}>
                         <span className={s.etiquette} style={{ color: plein ? "var(--r-texte)" : "var(--r-meta)" }}>{t.nom}</span>
                         <span className={s.dense} style={{ color: plein ? undefined : "var(--r-meta)" }}>{t.phrase}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className={s.decompteCompact}>
+              <p className={s.etiquette}>D&apos;où viennent ces constats</p>
+              <ul className={s.listeCompacte}>
+                {echelles.map((e, i) => {
+                  const t = texteEtatEchelle(e);
+                  const etat = trace(i);
+                  return (
+                    <li key={e.echelle} className={s.ligneCompacte} data-etat={etat}>
+                      <ReperEchelle forme={e.echelle} etat={etat} />
+                      <span className={s.texteCompact}>
+                        <span className={s.nomCompact}>{t.nom}</span>{" "}
+                        <span className={s.etatCompact}>{t.etatCourt}</span>
                       </span>
                     </li>
                   );
@@ -264,6 +316,8 @@ export function DossierDecisionReleve({
               <span aria-hidden className={s.mono} style={{ color: "var(--r-encre)" }}>→</span>
             </Link>
           ) : null}
+
+          {controles}
         </div>
       </div>
     </section>

@@ -154,7 +154,7 @@ test("E1. la bascule se fait AVANT le rendu classique et transmet toutes les pro
   const bascule = src.indexOf('presentationDuDossier(presentation) === "releve"');
   assert.ok(bascule > 0 && bascule < src.indexOf("const structured"), "bascule avant le corps classique");
   const appel = src.slice(bascule, src.indexOf("/>", bascule));
-  for (const p of ["dossier", "logement", "logementStatus", "insee", "scopeKey", "provenance", "projetAChange", "voisinageAChange", "generatedAt", "espacement", "titre", "supportingPane"]) {
+  for (const p of ["dossier", "logement", "logementStatus", "insee", "scopeKey", "provenance", "projetAChange", "voisinageAChange", "generatedAt", "espacement", "titre", "supportingPane", "controles"]) {
     assert.match(appel, new RegExp(`\\b${p}=\\{${p}\\}`), `prop ${p} transmise`);
   }
   assert.match(code("src/components/report/ControlesDuDossier.tsx"), /presentationDuDossier\(presentation\) === "releve"\) return <ControlesReleve dossier=\{dossier\} provenance=\{provenance\} \/>/);
