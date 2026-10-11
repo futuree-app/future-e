@@ -917,7 +917,112 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
   };
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UN ÉCART RETENU N'EST JAMAIS PASSÉ SOUS SILENCE PAR LE VERDICT (FUT-54, 11/10/2026).
+//
+// Vu sur Paris 7e : « Signaux favorables · Sur ce qui a pu être examiné, Paris 7e va dans le sens de ce
+// que vous avez demandé », et juste dessous « Ce qui correspond moins bien : une métropole ».
+//
+// LA DÉCISION ÉTAIT JUSTE, LA PRÉSENTATION LA TRAHISSAIT. Un SEUL écart secondaire (priorité de poids 2)
+// ne déclenche pas l'arbitrage (`criteria-registry` : un écart structurant, ou deux secondaires), et
+// c'est voulu : un écart secondaire face à plusieurs correspondances est une réserve reconnue, pas une
+// tension entre plusieurs attentes. Mais les branches `favorable`, `minor_reserves` et `major_reserves`
+// ne lisaient jamais les écarts : leur titre promettait une correspondance que la carte suivante
+// nuançait. La branche `neutral` avait été corrigée pour ce cas (« on ne nie plus ce qu'on montre »),
+// les trois autres non.
+//
+// LA RÈGLE, pour ces trois orientations, dès qu'un écart est ÉMIS (`mismatchTotal > 0`, donc un seul
+// écart secondaire par construction de l'orientation) :
+//   - un verdict qui PRÉSENTE UNE CORRESPONDANCE (ton positif, ou libellé favorable) prend un héros qui
+//     dit les deux côtés : « X répond à vos attentes pour <A> et <B>, mais moins bien pour <écart>. »
+//     quand les faits et la mesure le permettent, sinon « X répond à N de vos priorités, et moins bien à
+//     une autre : <écart>. » avec les correspondances au détail. Le libellé garde la couverture
+//     (« Correspondance avec un écart » / « Lecture partielle, avec un écart »), le ton devient neutre.
+//     L'orientation ne change pas : rien ne se compense, un écart secondaire ne devient pas un arbitrage ;
+//   - un verdict déjà centré sur une réserve (« à nuancer », « à confirmer », « partielle ») garde son
+//     héros : le détail ajoute l'écart, qu'il ne disait pas.
+// Le sujet vient des cartes affichées (`mismatchCandidates`, compositions comprises), sous la double
+// gate de `nameIssues` ; s'il ne tient pas, la phrase reste vraie sans le nommer.
+const LIBELLES_DE_CORRESPONDANCE = new Set(["Bonne correspondance", "Correspondance favorable", "Signaux favorables"]);
+
 function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
+  const v = verdictBrut(input, controles);
+  return avecEcartReconnu(v, input);
+}
+
+function avecEcartReconnu(v: VerdictBuild, input: ConclusionPlanInput): VerdictBuild {
+  const concerne = input.orientation === "favorable" || input.orientation === "minor_reserves" || input.orientation === "major_reserves";
+  if (!concerne || input.mismatchTotal <= 0) return v;
+  const nom = input.communeNom;
+  const candidats = mismatchCandidates(input.shownFacts, input.shownCompositions);
+  // Une cause commune ne s'énumère pas avec des priorités (cf. la branche d'arbitrage) : on préfère un
+  // écart simple ; seule, une cause commune ne se nomme pas ici (« une autre » serait faux).
+  const ecart = candidats.find((c) => !c.causeCommune) ?? null;
+  const presenteUneCorrespondance = v.tone === "positive" || LIBELLES_DE_CORRESPONDANCE.has(v.label);
+  if (presenteUneCorrespondance) {
+    // LE LIBELLÉ GARDE LA COUVERTURE (revue du 11/10/2026). « Signaux favorables » disait une lecture
+    // PARTIELLE : la remplacer par un libellé de correspondance aurait effacé ce que FUT-45 a imposé de
+    // dire. Orientation, écart et couverture se lisent ensemble dans le libellé.
+    const label = trouConnu(input) ? "Lecture partielle, avec un écart" : "Correspondance avec un écart";
+    // Le détail de repli (« Une partie de vos priorités va dans ce sens ») redirait le héros : il dit
+    // plutôt ce que l'écart implique, sans le compenser. Un détail porteur (lecture incomplète,
+    // constats à contrôler) reste tel quel.
+    const repli = v.detail === vontDansCeSens(input, vocabulaire(input.posture));
+    const suite = repli ? "Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas." : v.detail;
+
+    // AUCUNE CORRESPONDANCE N'EST FABRIQUÉE. Les orientations concernées supposent un critère favorable ;
+    // si une entrée incohérente arrivait sans aucun, le héros dit l'écart seul, sans annoncer de priorité
+    // satisfaite (il n'y a plus de `Math.max(favorableCount, 1)`).
+    if (input.favorableCount <= 0) {
+      const seul = ecart ? `${nom} répond moins bien à une de vos priorités : ${ecart.subject}.` : `${nom} répond moins bien à une de vos priorités.`;
+      return { label, tone: "neutral", headline: (ecart ? nameIssues(seul, [ecart], "mismatches") : null) ?? POSTURE(seul), detail: suite };
+    }
+
+    // LES DEUX CÔTÉS, QUAND ILS TIENNENT. Les correspondances nommées sont les alignements STRUCTURANTS
+    // affichés (même pool que `herosPositif`), et seulement s'ils couvrent TOUT le compte favorable :
+    // nommer deux priorités sur trois laisserait croire que ce sont les seules. Le héros ne dépasse pas
+    // la mesure (130 caractères) ; sinon il garde l'écart, et les correspondances passent au détail.
+    const positifs = alignmentCandidates(input.shownFacts).filter((c) => c.materialityTier === "structuring");
+    const nommables = positifs.length > 0 && positifs.length <= HEADLINE_MAX_ISSUES && positifs.length === input.favorableCount;
+    if (ecart && nommables) {
+      const texte = `${nom} répond à vos attentes pour ${joinFr(positifs.map((c) => c.subject))}, mais moins bien pour ${ecart.subject}.`;
+      if (texte.length <= HEADLINE_MAX_CHARS) {
+        return {
+          label, tone: "neutral",
+          headline: {
+            kind: "named_issues", text: texte,
+            consumedFactIds: [...positifs.map((c) => c.factId), ...(ecart.role === "composition" ? (ecart.absorbedFactIds ?? []) : [ecart.factId])],
+            consumedCompositionIds: ecart.role === "composition" ? [ecart.factId] : [],
+            consumedFrom: "mismatches",
+          },
+          detail: suite,
+        };
+      }
+    }
+    const compte = input.favorableCount;
+    const tete = compte === 1 ? `${nom} répond à l'une de vos priorités` : `${nom} répond à ${enLettres(compte)} de vos priorités`;
+    const named = ecart ? nameIssues(`${tete}, et moins bien à une autre : ${ecart.subject}.`, [ecart], "mismatches") : null;
+    // Les correspondances, quand le héros n'a pas pu les nommer : au détail, pour qu'on n'ait pas à
+    // descendre les chercher. Seulement si elles couvrent tout le compte, pour la même raison.
+    const correspondances = nommables
+      ? `${capitalize(joinFr(positifs.map((c) => c.subject)))} ${positifs.length > 1 ? "répondent" : "répond"} à ce que vous avez demandé. `
+      : "";
+    return {
+      label, tone: "neutral",
+      headline: named ?? POSTURE(`${tete}, et moins bien à une autre.`),
+      detail: `${correspondances}${suite}`,
+    };
+  }
+  // « Par ailleurs » deux fois de suite se lisait comme une liste sans relief : quand le détail vient de
+  // nommer ce qui correspond (« Par ailleurs, l'accès aux soins répond bien… »), l'écart s'y oppose.
+  const lien = v.detail.includes("Par ailleurs") ? "En revanche" : "Par ailleurs";
+  const phrase = ecart
+    ? ` ${lien}, ${nom} répond moins bien à une de vos priorités : ${ecart.subject}.`
+    : ` ${lien}, ${nom} répond moins bien à une de vos priorités.`;
+  return { ...v, detail: `${v.detail}${phrase}` };
+}
+
+function verdictBrut(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
   const nom = input.communeNom;
   const a = aCommune(nom);
   const voc = vocabulaire(input.posture);
