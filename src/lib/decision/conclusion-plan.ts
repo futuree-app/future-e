@@ -917,7 +917,71 @@ function verdictConditionOuverte(input: ConclusionPlanInput, nom: string, a: str
   };
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UN ÉCART RETENU N'EST JAMAIS PASSÉ SOUS SILENCE PAR LE VERDICT (FUT-54, 11/10/2026).
+//
+// Vu sur Paris 7e : « Signaux favorables · Sur ce qui a pu être examiné, Paris 7e va dans le sens de ce
+// que vous avez demandé », et juste dessous « Ce qui correspond moins bien : une métropole ».
+//
+// LA DÉCISION ÉTAIT JUSTE, LA PRÉSENTATION LA TRAHISSAIT. Un SEUL écart secondaire (priorité de poids 2)
+// ne déclenche pas l'arbitrage (`criteria-registry` : un écart structurant, ou deux secondaires), et
+// c'est voulu : un écart secondaire face à plusieurs correspondances est une réserve reconnue, pas une
+// tension entre plusieurs attentes. Mais les branches `favorable`, `minor_reserves` et `major_reserves`
+// ne lisaient jamais les écarts : leur titre promettait une correspondance que la carte suivante
+// nuançait. La branche `neutral` avait été corrigée pour ce cas (« on ne nie plus ce qu'on montre »),
+// les trois autres non.
+//
+// LA RÈGLE, pour ces trois orientations, dès qu'un écart est ÉMIS (`mismatchTotal > 0`, donc un seul
+// écart secondaire par construction de l'orientation) :
+//   - un verdict qui PRÉSENTE UNE CORRESPONDANCE (ton positif, ou libellé favorable) prend un héros qui
+//     dit les deux : « X répond à N de vos priorités, et moins bien à une autre : <sujet>. » Le libellé
+//     devient « Favorable, avec un écart », le ton neutre. L'orientation, elle, ne change pas : rien ne
+//     se compense, et un écart secondaire ne devient pas un arbitrage ;
+//   - un verdict déjà centré sur une réserve (« à nuancer », « à confirmer », « partielle ») garde son
+//     héros : le détail ajoute l'écart, qu'il ne disait pas.
+// Le sujet vient des cartes affichées (`mismatchCandidates`, compositions comprises), sous la double
+// gate de `nameIssues` ; s'il ne tient pas, la phrase reste vraie sans le nommer.
+const LIBELLES_DE_CORRESPONDANCE = new Set(["Bonne correspondance", "Correspondance favorable", "Signaux favorables"]);
+
 function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
+  const v = verdictBrut(input, controles);
+  return avecEcartReconnu(v, input);
+}
+
+function avecEcartReconnu(v: VerdictBuild, input: ConclusionPlanInput): VerdictBuild {
+  const concerne = input.orientation === "favorable" || input.orientation === "minor_reserves" || input.orientation === "major_reserves";
+  if (!concerne || input.mismatchTotal <= 0) return v;
+  const nom = input.communeNom;
+  const candidats = mismatchCandidates(input.shownFacts, input.shownCompositions);
+  // Une cause commune ne s'énumère pas avec des priorités (cf. la branche d'arbitrage) : on préfère un
+  // écart simple ; seule, une cause commune ne se nomme pas ici (« une autre » serait faux).
+  const ecart = candidats.find((c) => !c.causeCommune) ?? null;
+  const presenteUneCorrespondance = v.tone === "positive" || LIBELLES_DE_CORRESPONDANCE.has(v.label);
+  if (presenteUneCorrespondance) {
+    const compte = Math.max(input.favorableCount, 1);
+    const tete = compte === 1 ? `${nom} répond à l'une de vos priorités` : `${nom} répond à ${enLettres(compte)} de vos priorités`;
+    const named = ecart ? nameIssues(`${tete}, et moins bien à une autre : ${ecart.subject}.`, [ecart], "mismatches") : null;
+    // Le détail de repli (« Une partie de vos priorités va dans ce sens ») redirait le héros : il dit
+    // plutôt ce que l'écart implique, sans le compenser. Un détail porteur (lecture incomplète,
+    // constats à contrôler) reste tel quel.
+    const repli = v.detail === vontDansCeSens(input, vocabulaire(input.posture));
+    return {
+      label: "Favorable, avec un écart",
+      tone: "neutral",
+      headline: named ?? POSTURE(`${tete}, et moins bien à une autre.`),
+      detail: repli ? "Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas." : v.detail,
+    };
+  }
+  // « Par ailleurs » deux fois de suite se lisait comme une liste sans relief : quand le détail vient de
+  // nommer ce qui correspond (« Par ailleurs, l'accès aux soins répond bien… »), l'écart s'y oppose.
+  const lien = v.detail.includes("Par ailleurs") ? "En revanche" : "Par ailleurs";
+  const phrase = ecart
+    ? ` ${lien}, ${nom} répond moins bien à une de vos priorités : ${ecart.subject}.`
+    : ` ${lien}, ${nom} répond moins bien à une de vos priorités.`;
+  return { ...v, detail: `${v.detail}${phrase}` };
+}
+
+function verdictBrut(input: ConclusionPlanInput, controles: PerimetreControles): VerdictBuild {
   const nom = input.communeNom;
   const a = aCommune(nom);
   const voc = vocabulaire(input.posture);
