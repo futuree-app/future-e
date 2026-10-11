@@ -305,11 +305,11 @@ test("câblage : un bien acheté sans projet s'affiche factuel, sans repli perso
 
 test("câblage : le bandeau « lien modifié » existe aussi dans Le relevé, avec la même priorité", () => {
   const s = lire("src/components/report/DossierDecisionSection.tsx");
-  const releve = s.slice(s.indexOf("const lienSeul"), s.indexOf("const structured ="));
-  assert.match(releve, /const lienSeul = Boolean\(contexteAChange && !projetAChange && insee\);/);
-  assert.match(releve, /<AnalyseAncienProjet insee=\{insee\} scopeKey=\{scopeKey\} raison="lien" \/>/);
-  assert.match(releve, /if \(lienSeul\) voisinageAChange = false;/);
-  assert.ok(releve.indexOf("{bandeauLienReleve}") < releve.indexOf("<DossierDecisionReleve"));
+  const bascule = s.slice(s.indexOf('presentationDuDossier(presentation) === "releve"'), s.indexOf("const structured ="));
+  assert.match(bascule, /contexteAChange=\{contexteAChange\}/);
+  const r = lire("src/components/releve/DossierDecisionReleve.tsx");
+  assert.match(r, /\(projetAChange \|\| contexteAChange \|\| voisinageAChange\) && insee/);
+  assert.match(r, /raison=\{projetAChange \? "projet" : contexteAChange \? "lien" : "voisinage"\}/);
 });
 
 // ═══ GARDE-FOU DES TESTS D'INTÉGRATION ═════════════════════════════════════════════════════════

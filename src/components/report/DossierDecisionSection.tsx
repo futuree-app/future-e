@@ -172,30 +172,15 @@ export function DossierDecisionSection({
    */
   controles?: ReactNode;
 }) {
-  // FUT-10 · LE LIEN AVEC LE BIEN A CHANGÉ : même bandeau, même priorité (projet > lien > voisinage)
-  // dans Le relevé que dans la présentation classique. Posé juste AU-DESSUS du relevé, pour ne pas
-  // toucher `DossierDecisionReleve`, en cours de modification par FUT-92. Adaptation à faire à
-  // l'intégration de FUT-92 : passer `contexteAChange` au relevé, l'ajouter à sa condition et à sa
-  // raison (`projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"`), puis retirer ce bloc.
-  const lienSeul = Boolean(contexteAChange && !projetAChange && insee);
-  const bandeauLienReleve = lienSeul ? (
-    <div className={espacement}>
-      <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison="lien" />
-    </div>
-  ) : null;
   if (presentationDuDossier(presentation) === "releve") {
-    // Le lien prime sur le voisinage : le relevé ne doit pas afficher un second bandeau en dessous.
-    if (lienSeul) voisinageAChange = false;
     return (
-      <>
-      {bandeauLienReleve}
       <DossierDecisionReleve
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
         provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
+        contexteAChange={contexteAChange}
         generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
         controles={controles}
       />
-      </>
     );
   }
   const structured = dossier.conclusionState !== "project_not_structured";

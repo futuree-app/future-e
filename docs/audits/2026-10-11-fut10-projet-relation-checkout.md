@@ -336,11 +336,7 @@ Données achetées (`dossier_intents`, verrouillées) et données modifiables (`
 
 ### F.5 Le relevé (FUT-91) et FUT-92
 
-Le bandeau « lien modifié » s'affiche aussi dans Le relevé, posé juste au-dessus par `DossierDecisionSection`, avec la même priorité (projet > lien > voisinage). `DossierDecisionReleve`, modifié par FUT-92, n'est pas touché.
-
-**Adaptation à faire à l'intégration de FUT-92** : passer `contexteAChange` au relevé, l'ajouter à sa condition et à sa raison, puis retirer le bloc `bandeauLienReleve`.
-
-Une fusion d'essai locale (`git merge-tree`) de FUT-10 avec `origin/feat/fut-92-navigation-sticky` ne produit aucun conflit ; le résultat compile et passe 2 509 tests.
+FUT-92 a été fusionné dans `main` pendant cette revue (9cd6a34c), et la branche FUT-10 l'a intégré sans conflit. Le terminal B n'avait aucune modification en cours. L'adaptation est donc faite à sa vraie place : `DossierDecisionReleve` reçoit `contexteAChange` et applique la même priorité qu'en présentation classique (projet > lien > voisinage). Le bloc provisoire posé au-dessus du relevé est retiré. Le test FUT-91 qui figeait l'ancienne condition du bandeau évolue en conséquence. La navigation sticky et les animations ne sont pas touchées.
 
 ### F.6 Tests d'intégration : ce qui existe, ce qui a tourné
 
