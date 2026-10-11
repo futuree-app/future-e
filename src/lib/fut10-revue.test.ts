@@ -76,9 +76,9 @@ test("A. scénario : payé sans projet, projet créé dans un autre onglet, puis
   // 4. Et le webhook ne va même pas lire le compte : la décision est prise avant toute requête.
   const webhook = lire("src/app/api/stripe/webhook/route.ts");
   const planif = webhook.slice(webhook.indexOf("function planifierArtefact("), webhook.indexOf("const supabaseAdmin"));
-  const garde = planif.indexOf('if (livraison.etat === "absent") return;');
+  const garde = planif.indexOf('if (achat.etat === "absent") return;');
   assert.ok(garde > 0 && garde < planif.indexOf("after("), "l'absence se décide avant `after`");
-  assert.ok(planif.indexOf('.from("user_profiles")') > planif.indexOf('if (livraison.etat === "historique")'),
+  assert.ok(planif.indexOf('.from("user_profiles")') > planif.indexOf('if (achat.etat === "historique")'),
     "le compte n'est lu que pour une intention historique");
 });
 

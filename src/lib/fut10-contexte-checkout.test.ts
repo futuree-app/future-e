@@ -398,9 +398,9 @@ test("le webhook recopie le contexte dans l'upsert QUI CRÉE le dossier, et gén
   const webhook = lire("src/app/api/stripe/webhook/route.ts");
   const upsert = webhook.slice(webhook.indexOf('.from("address_dossiers")\n      .upsert('), webhook.indexOf("if (insertError) throw insertError;"));
   assert.match(upsert, /\.\.\.colonnesDossierDepuisIntention\(intent\),[\s\S]*onConflict: "stripe_payment_intent_id", ignoreDuplicates: true/);
-  assert.match(webhook, /savedDpe: null,\s*\}, projetPourLivraison\(intent\)\);/);
+  assert.match(webhook, /savedDpe: null,\s*\}, contexteDAchat\(intent\)\);/);
   // Projet absent : toujours aucun artefact, donc aucun faux dossier personnalisé.
-  assert.match(webhook, /if \(!project\) return;/);
+  assert.match(webhook, /if \(!contexte\.genere\) return;/);
   // L'artefact est planifié APRÈS l'upsert.
   assert.ok(webhook.indexOf("planifierArtefact(intent.user_id") > webhook.indexOf("if (insertError) throw insertError;"));
 });

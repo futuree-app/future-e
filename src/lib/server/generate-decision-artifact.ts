@@ -37,6 +37,13 @@ type Cible =
       dossierId: string;
       address: ResolvedAddress;
       savedDpe: DpeRecord | null;
+      /**
+       * FUT-10 : la relation et l'objectif À UTILISER, quand l'appelant les connaît mieux que la ligne du
+       * dossier : ceux de l'ACHAT pour une première livraison, ceux de la VERSION SERVIE pour une
+       * succession automatique (`contexte-livraison.ts`). Absente, la ligne du dossier fait foi (mise à
+       * jour explicite, dossier historique). `null` explicite : relation inconnue.
+       */
+      relationImposee?: RelationAuLieu | null;
     };
 
 export type GenerationOutcome =
@@ -146,7 +153,10 @@ export async function generateDecisionArtifact(
     const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
-    const relations = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
+    const lues = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
+    const relations = cible.kind === "adresse" && cible.relationImposee !== undefined
+      ? { ...lues, adresse: cible.relationImposee }
+      : lues;
     const commune = await buildCommuneDossier(insee, project, {
       hasAddress: cible.kind === "adresse",
       citycode: cible.kind === "adresse" ? cible.address.citycode : null,

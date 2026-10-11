@@ -15,8 +15,9 @@ import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
 import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
 import { after } from "next/server";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
-import { normalizeUserProject, type UserProject } from "@/lib/user-project";
-import { colonnesDossierDepuisIntention, projetPourLivraison, type ProjetLivraison } from "@/lib/dossier-contexte-checkout";
+import { normalizeUserProject } from "@/lib/user-project";
+import { colonnesDossierDepuisIntention } from "@/lib/dossier-contexte-checkout";
+import { contexteDAchat, contexteDeGeneration, type ContexteDAchat } from "@/lib/contexte-livraison";
 import { verrouillerIntention } from "@/lib/verrou-intention-dossier";
 import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import {
@@ -42,26 +43,25 @@ export const runtime = "nodejs";
  * est donc un défaut à rattraper, jamais une raison de refuser une livraison encaissée.
  *
  * ── LE PROJET VIENT DE LA BASE, JAMAIS DES MÉTADONNÉES STRIPE ────────────────────────────────
- * Depuis FUT-10, un dossier d'adresse suit ce que le PAIEMENT a fixé (`projetPourLivraison`) :
- *   - projet confirmé : le snapshot relu en base au checkout, jamais le projet du compte. S'il a changé
- *     depuis, le dossier vendu répond au projet confirmé, et le bandeau « votre projet a changé »
- *     propose la mise à jour ;
- *   - absence confirmée : le lecteur a payé sans projet, et l'écran lui a dit que le dossier serait
- *     factuel. Aucun projet n'est lu, même créé entre-temps dans un autre onglet : pas d'artefact ;
- *   - historique (intention antérieure, territoire de 14 €) : relecture du projet du compte, comme avant.
+ * Depuis FUT-10, la PREMIÈRE LIVRAISON d'un dossier d'adresse suit ce que le PAIEMENT a fixé
+ * (`contexteDAchat`, `contexteDeGeneration`) : le projet confirmé au checkout ET la relation / l'objectif
+ * déclarés à ce moment-là, relus dans l'intention verrouillée, jamais dans le compte ni dans la ligne
+ * modifiable du dossier. Un achat sans projet ne produit aucun artefact : le dossier reste factuel
+ * jusqu'à une demande explicite. Un achat historique (intention antérieure, territoire de 14 €) relit le
+ * projet du compte, comme avant. Le rattrapage de la page applique la même règle (`DossierAvecLogement`).
  */
 function planifierArtefact(
   userId: string,
   cible: Parameters<typeof generateDecisionArtifact>[3],
-  livraison: ProjetLivraison = { etat: "historique" },
+  achat: ContexteDAchat = { etat: "historique" },
 ): void {
   // L'absence confirmée se décide ICI, avant toute lecture : aucune requête ne va chercher un projet
   // que le lecteur n'a pas confirmé pour cette vente.
-  if (livraison.etat === "absent") return;
+  if (achat.etat === "absent") return;
   after(async () => {
     try {
-      let project: UserProject | null = livraison.etat === "confirme" ? livraison.projet : null;
-      if (livraison.etat === "historique") {
+      let project = achat.etat === "confirme" ? achat.projet : null;
+      if (achat.etat === "historique") {
         const { data: profile } = await supabaseAdmin
           .from("user_profiles")
           .select("user_project")
@@ -71,10 +71,15 @@ function planifierArtefact(
           (profile as { user_project?: unknown } | null)?.user_project ?? null,
         );
       }
-      // SANS PROJET, PAS D'ARTEFACT. Le dossier de décision se construit à partir du projet : le
-      // figer sans lui produirait une version vide, qui vaudrait moins que l'assemblage vivant du
-      // jour où le lecteur aura enfin renseigné son projet.
-      if (!project) return;
+      const contexte = contexteDeGeneration({
+        operation: "premiere_livraison", achat, courant: { projet: project, relation: null },
+      });
+      // SANS PROJET, PAS D'ARTEFACT (inchangé pour les achats historiques).
+      if (!contexte.genere) return;
+      project = contexte.projet;
+      if (achat.etat === "confirme" && cible.kind === "adresse") {
+        cible = { ...cible, relationImposee: contexte.relation };
+      }
       const r = await generateDecisionArtifact(supabaseAdmin, userId, project, cible);
       if (r.status === "failed") console.error("[artefact] génération échouée", { userId, cible, r });
     } catch (error) {
@@ -346,7 +351,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         // dossier figé porte donc l'état du bien SANS diagnostic sélectionné, ce qui est exact au
         // moment de la vente. Le jour où le choix du DPE précédera le paiement, il entrera ici.
         savedDpe: null,
-      }, projetPourLivraison(intent));
+      }, contexteDAchat(intent));
     }
 
     await supabaseAdmin.from("payments").upsert(
