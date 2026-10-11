@@ -16,13 +16,15 @@ import { DecisionChecklist } from "@/components/report/logement/DecisionChecklis
 import { FamilyHeading, Block } from "@/components/report/logement/kit";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { EchelleVisual } from "@/components/report/EchelleVisual";
-import { RAPPORT_TEMOIN, DPE_TEMOIN, FAITS_TEMOIN, PROJET_TEMOIN, COMMUNE_TEMOIN, lecturesTemoin } from "@/components/prototypes/fut87/fixture-logement";
+import { PROJET_TEMOIN, casDeLogement, casDepuisUrl, lecturesDe } from "@/components/prototypes/fut87/fixture-logement";
 
-export default function AvantLogement() {
+export default async function AvantLogement({ searchParams }: { searchParams: Promise<{ cas?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const r = RAPPORT_TEMOIN;
-  const l = lecturesTemoin();
-  const g = r.georisques?.address;
+  const cas = casDeLogement(casDepuisUrl((await searchParams).cas));
+  const r = cas.rapport;
+  const l = lecturesDe(cas);
+  const g = r.georisques?.parcel ?? r.georisques?.address;
+  const dpeAnnee = cas.dpe?.date_dpe?.slice(0, 4) ?? null;
   return (
     <>
       <Navbar />
@@ -38,28 +40,31 @@ export default function AvantLogement() {
           <EchelleVisual active="logement" />
         </section>
         <section style={{ padding: "24px 0 96px", display: "grid", gap: 40 }}>
-          <PropertyPassport address={r.address} parcel={r.parcel} dpe={DPE_TEMOIN} />
+          <PropertyPassport address={r.address} parcel={r.parcel} dpe={cas.dpe} />
           <div style={{ display: "grid", gap: 36 }}>
             <FamilyHeading color="var(--accent)">Le logement lui-même</FamilyHeading>
-            <EnergieAvant dpe={DPE_TEMOIN} audit={r.audit} auditStatus={r.auditStatus} candidates={r.dpeCandidates ?? []} />
-            <ThermalComfortSection evidence={l.confort} communeName={COMMUNE_TEMOIN} dpeYear="2024" />
+            <EnergieAvant dpe={cas.dpe} audit={r.audit} auditStatus={r.auditStatus} candidates={r.dpeCandidates ?? []} />
+            <ThermalComfortSection evidence={l.confort} communeName={cas.commune} dpeYear={dpeAnnee} />
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
-            <ReportSection eyebrow="Risques du bâti">
-              <GlassCard>
-                <div style={{ display: "grid", gap: 16 }}>
-                  <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
-                    <Block label="Sismicité" value="Faible" />
-                    <Block label="Retrait-gonflement des argiles" value={g?.rga?.label ?? "—"} />
+            {/* Même condition d'affichage que `LogementModule` : le bloc disparaît sans donnée. */}
+            {g?.seismic?.label || g?.rga?.label ? (
+              <ReportSection eyebrow="Risques du bâti">
+                <GlassCard>
+                  <div style={{ display: "grid", gap: 16 }}>
+                    <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>Ce que les bases publiques recensent sur l&apos;exposition du bâti à cette adresse.</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 14 }}>
+                      {g?.seismic?.label ? <Block label="Sismicité" value={g.seismic.label} /> : null}
+                      {g?.rga?.label ? <Block label="Retrait-gonflement des argiles" value={g.rga.label} /> : null}
+                    </div>
                   </div>
-                </div>
-              </GlassCard>
-            </ReportSection>
-            <RegulatoryStatusBlock georisques={r.georisques} heritage={r.heritage ?? null} />
+                </GlassCard>
+              </ReportSection>
+            ) : null}
+            {r.georisques ? <RegulatoryStatusBlock georisques={r.georisques} heritage={r.heritage ?? null} /> : null}
             {l.inondation ? <InondationLectureBlock lecture={l.inondation} /> : null}
-            <SinistraliteBlock sinistralite={r.sinistralite!} commune={COMMUNE_TEMOIN} lectureInondationRendue={Boolean(l.inondation)} />
+            {r.sinistralite ? <SinistraliteBlock sinistralite={r.sinistralite} commune={cas.commune} lectureInondationRendue={Boolean(l.inondation)} /> : null}
           </div>
-          <DecisionChecklist facts={FAITS_TEMOIN} project={PROJET_TEMOIN} />
+          <DecisionChecklist facts={cas.faits} project={PROJET_TEMOIN} />
         </section>
       </div>
     </>

@@ -13,10 +13,7 @@
 import Link from "next/link";
 import { carteCompte, NUITS, MACHINE_A_SOUS_DRIAS, type Indicators } from "@/lib/accueil/recits";
 import { HORIZONS } from "@/lib/horizons";
-import {
-  CERCLE_TERRITOIRE, CARRE_AUTOUR, LOSANGE_LOGEMENT, ECHELLE_VIEWBOX, ECHELLE_CENTRE,
-} from "@/components/report/echelle-geometry";
-import { releve as s, Surtitre, Plaque, RegleDuTemps, Marge, GlypheGrain, type GrainCle } from "./primitives";
+import { releve as s, Surtitre, Plaque, RegleDuTemps, Marge, GlypheGrain, EmblemeEchelles, type GrainCle } from "./primitives";
 
 // La trajectoire de Marseille (maille du 1er arrondissement), valeurs figées et vérifiées contre
 // `public/data_climat.json` par `recits.test.ts`. Le texte de chaque palier vient de `carteCompte`.
@@ -27,42 +24,6 @@ function trajectoireMarseille() {
   const paliers = HORIZONS.map((h) => ({ h, carte: carteCompte(NUITS, ind, h.annee), valeur: brut[h.key].NORTR_yr }));
   const valeurRef = ref?.valeur ? Number.parseInt(ref.valeur, 10) : null;
   return { ref, valeurRef, paliers, source: ref?.source ?? "DRIAS · Météo-France" };
-}
-
-function Emblème() {
-  // Les formes exactes du repère du hub (`echelle-geometry.ts`), agrandies, en trait seul. Les
-  // légendes sont des renvois de planche : un trait, un nom, un grain.
-  const V = ECHELLE_VIEWBOX;
-  const c = ECHELLE_CENTRE;
-  const marge = 70;
-  return (
-    <figure style={{ margin: 0 }} aria-label="Les trois échelles du dossier : la commune contient le secteur, qui contient le bâtiment">
-      <svg viewBox={`${-marge} ${-16} ${V + marge * 2} ${V + 32}`} style={{ width: "100%", height: "auto", display: "block", color: "var(--r-encre)" }} aria-hidden focusable="false">
-        {/* Graduations de la commune : douze repères, comme une rose de relevé. */}
-        {Array.from({ length: 48 }, (_, i) => {
-          const a = (i / 48) * Math.PI * 2;
-          const r1 = CERCLE_TERRITOIRE.r + 4;
-          const r2 = CERCLE_TERRITOIRE.r + (i % 4 === 0 ? 11 : 7);
-          return <line key={i} x1={c + Math.cos(a) * r1} y1={c + Math.sin(a) * r1} x2={c + Math.cos(a) * r2} y2={c + Math.sin(a) * r2} stroke="var(--r-discret)" strokeWidth={0.6} />;
-        })}
-        <circle {...CERCLE_TERRITOIRE} fill="none" stroke="currentColor" strokeWidth={1.1} />
-        <rect {...CARRE_AUTOUR} fill="none" stroke="currentColor" strokeWidth={1.1} />
-        <rect {...LOSANGE_LOGEMENT} fill="none" stroke="currentColor" strokeWidth={1.3} />
-        <circle cx={c} cy={c} r={2.2} fill="currentColor" />
-        {/* Renvois de planche */}
-        <g stroke="var(--r-discret)" strokeWidth={0.6} fill="none">
-          <polyline points={`${c + 68},${c - 68} ${c + 96},${c - 98} ${V + marge - 6},${c - 98}`} />
-          <polyline points={`${c + 54},${c + 30} ${V + 14},${c + 30} ${V + marge - 6},${c + 30}`} />
-          <polyline points={`${c - 22},${c + 22} ${c - 64},${c + 118} ${-marge + 6},${c + 118}`} />
-        </g>
-        <g fontFamily="var(--font-mono)" fontSize={8.5} fill="var(--r-meta)">
-          <text x={V + marge - 6} y={c - 103} textAnchor="end">1 · la commune</text>
-          <text x={V + marge - 6} y={c + 25} textAnchor="end">2 · le secteur</text>
-          <text x={-marge + 6} y={c + 113}>3 · le bâtiment</text>
-        </g>
-      </svg>
-    </figure>
-  );
 }
 
 const PORTES: { grain: GrainCle; usage: string; action: string; href: string }[] = [
@@ -111,7 +72,10 @@ export function AccueilReleve() {
           </nav>
         </div>
         <div style={{ alignSelf: "center", maxWidth: 520, width: "100%", justifySelf: "center" }}>
-          <Emblème />
+          <EmblemeEchelles
+            etiquette="Les trois échelles du dossier : la commune contient le secteur, qui contient le bâtiment"
+            renvois={["1 · la commune", "2 · le secteur", "3 · le bâtiment"]}
+          />
         </div>
       </section>
 
@@ -134,6 +98,7 @@ export function AccueilReleve() {
             { type: "grain", grain: "commune", libelle: "maille du 1er arrondissement" },
             { type: "valeur", libelle: "Unité", valeur: "nuits par an à 20 °C ou plus" },
             { type: "source", texte: "Sous chaque horizon : le réchauffement correspondant en France (TRACC)" },
+            { type: "source", texte: "Chaque horizon est une projection distincte ; la référence est une moyenne sur trente ans. Rien n'est tracé entre deux jalons." },
             ...t.paliers.map((p) => ({ type: "valeur" as const, libelle: p.h.annee, valeur: `${p.carte?.comparaison ?? ""}` })),
             { type: "source", texte: `${t.source}, projections DRIAS-TRACC` },
           ]} />

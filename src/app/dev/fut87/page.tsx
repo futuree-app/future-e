@@ -6,8 +6,8 @@ import { releve as s, Surtitre, GlypheGrain } from "@/components/prototypes/fut8
 const PAGES = [
   { href: "/dev/fut87/directions", titre: "Les trois directions", note: "Atlas, édition, strates, et la combinaison retenue, rendues sur le même contenu." },
   { href: "/dev/fut87/accueil", titre: "Prototype 1 · Accueil", note: "Avant : l'accueil actuel (/)." , avant: "/" },
-  { href: "/dev/fut87/decision", titre: "Prototype 2 · Ma décision", note: "Dossier réel du moteur (Nîmes, projet de test). Paramètres insee, prefs, adresse comme /dev/dossier.", avant: "/dev/fut87/avant/decision" },
-  { href: "/dev/fut87/logement", titre: "Prototype 3 · Logement", note: "Logement témoin anonymisé, lu par les fonctions de production.", avant: "/dev/fut87/avant/logement" },
+  { href: "/dev/fut87/decision", titre: "Prototype 2 · Ma décision", note: "Dossier réel du moteur (Nîmes, projet de test). Paramètres insee, prefs, adresse et confirmer comme /dev/dossier. Cinq cas en tête de page : référence, condition sans compromis, nombreuses réserves, titre long, correspondance sans réserve.", avant: "/dev/fut87/avant/decision" },
+  { href: "/dev/fut87/logement", titre: "Prototype 3 · Logement", note: "Logement témoin anonymisé, lu par les fonctions de production. Cinq cas : référence, sans diagnostic, appartement avec audit de l'immeuble, sources sans réponse, adresse très longue.", avant: "/dev/fut87/avant/logement" },
 ];
 
 export default function IndexFut87() {

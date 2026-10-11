@@ -21,6 +21,7 @@ import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../../../li
 import { hydrateHardConstraints } from "../../../lib/hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../../../lib/hard-constraints-resolve.ts";
 import { lireDossier, type LectureDecision } from "./lecture-dossier.ts";
+import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
 
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
 const entree = (over: Partial<IndexCommune> = {}): IndexCommune => ({
@@ -124,6 +125,103 @@ test("L3. le verdict est celui du plan, mot pour mot, sections dans l'ordre de l
   }
   // Au moins un cas porte des cartes : sinon L1 et L2 ne prouveraient rien.
   assert.ok(CAS.some(({ d }) => lireDossier(d).sections.some((s) => s.entrees.length > 0)));
+});
+
+// ── Provenance : chaque preuve garde son lien, sa cible, son grain et sa date (revue V2) ──────────
+
+type Ref = import("../../../lib/decision/decision-fact.ts").EvidenceRef;
+const cloner = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
+const toutesLesPreuves = (e: import("./lecture-dossier.ts").EntreeLue) =>
+  [...e.preuves, ...e.sources, ...e.cotes.flatMap((c) => [...c.preuves, ...c.sources])];
+const memePreuve = (r: Ref) => (p: import("./lecture-dossier.ts").PreuveLue) =>
+  p.libelle === r.label && (p.valeur ?? null) === (r.observedValue ?? null) && p.grain === r.grain
+  && (p.href ?? null) === (r.href ?? null) && (p.cible ?? null) === (r.targetKey ?? null) && (p.date ?? null) === (r.observedAt ?? null);
+
+/** Les références qu'une carte porte elle-même (pas celles de ses faits absorbés). */
+function refsDeCarte(c: DossierCard): Ref[] {
+  if (c.kind === "fact") return c.fact.role === "compromise" ? c.fact.sides.flatMap((x) => x.evidence) : c.fact.evidence;
+  const k = c.composition;
+  return k.kind === "tradeoff" ? [...k.favorableSide.evidence, ...k.unfavorableSide.evidence]
+    : k.kind === "grouped_verification" ? k.items.flatMap((x) => x.evidence)
+      : k.kind === "mismatch_with_action" ? k.evidence : k.sharedEvidence;
+}
+
+function verifierProvenance(nom: string, d: Dossier) {
+  const l = lireDossier(d);
+  let vues = 0;
+  for (const s of sectionsDeLaMinute(d)) {
+    const lue = l.sections.find((x) => x.cle === s.key)!;
+    s.cards.forEach((c, i) => {
+      const e = lue.entrees[i]!;
+      for (const r of refsDeCarte(c)) {
+        vues++;
+        assert.ok(toutesLesPreuves(e).some(memePreuve(r)), `${nom} : la preuve « ${r.label} » (${r.grain}, ${r.href ?? "sans lien"}) a perdu une partie de sa provenance`);
+        assert.ok(e.grains.includes(r.grain), `${nom} : le grain ${r.grain} de « ${r.label} » manque à la carte`);
+      }
+    });
+  }
+  return vues;
+}
+
+test("L4. chaque preuve de la minute survit entière : libellé, valeur, grain, lien, cible, date", () => {
+  let vues = 0;
+  for (const { nom, d } of CAS) vues += verifierProvenance(nom, d);
+  assert.ok(vues >= 3, `${vues} preuves vérifiées`);
+});
+
+test("L5. preuves mixtes : une carte qui mêle commune, secteur et adresse garde ses trois grains et ses liens", () => {
+  const cas = CAS.find(({ d }) => sectionsDeLaMinute(d).some((s) => s.cards.some((c) => c.kind === "fact")))!;
+  const d = cloner(cas.d);
+  const cible = sectionsDeLaMinute(d).flatMap((s) => s.cards).find((c) => c.kind === "fact")! as Extract<DossierCard, { kind: "fact" }>;
+  // La carte est retrouvée dans le dossier cloné, puis enrichie de deux preuves d'autres grains.
+  const fait = d.sections.flatMap((s) => s.cards).find((c) => c.kind === "fact" && c.fact.id === cible.fact.id) as Extract<DossierCard, { kind: "fact" }>;
+  const refs = (fait.fact.role === "compromise" ? fait.fact.sides[0].evidence : fait.fact.evidence) as Ref[];
+  refs.push(
+    { factId: "temoin.secteur", module: "territoire", label: "Source témoin du secteur", grain: "secteur", href: "/rapport/autour#temoin", observedAt: "2026-10-01T00:00:00.000Z" },
+    { factId: "temoin.adresse", module: "logement", label: "Mesure témoin à l'adresse", observedValue: "12 m", grain: "adresse", sourceMode: "live_fetch" },
+  );
+  verifierProvenance("preuves mixtes", d);
+  const e = lireDossier(d).sections.flatMap((s) => s.entrees).find((x) => x.ancre === dossierAnchorId(cible.fact.id))!;
+  assert.ok(e.grains.includes("secteur") && e.grains.includes("adresse"), `grains lus : ${e.grains.join(", ")}`);
+  const source = e.sources.find((p) => p.libelle === "Source témoin du secteur")!;
+  assert.equal(source.href, "/rapport/autour#temoin", "le lien d'une source sans valeur est conservé");
+  assert.equal(source.date, "2026-10-01T00:00:00.000Z", "sa date aussi");
+  assert.equal(e.preuves.find((p) => p.libelle === "Mesure témoin à l'adresse")?.mode, "live_fetch");
+});
+
+test("L6. une composition porte les grains de ses faits absorbés, et ce que sa face ne raconte pas reste lisible", () => {
+  const cas = CAS.find(({ d }) => sectionsDeLaMinute(d).some((s) => s.cards.some((c) => c.kind === "fact")))!;
+  const d = cloner(cas.d);
+  const absorbe = cloner(d.sections.flatMap((s) => s.cards).find((c) => c.kind === "fact")! as Extract<DossierCard, { kind: "fact" }>).fact;
+  absorbe.id = "temoin:absorbe";
+  (absorbe.role === "compromise" ? absorbe.sides[0].evidence : absorbe.evidence).push({ factId: "temoin.bati", module: "logement", label: "Diagnostic témoin", grain: "adresse", href: "/rapport/logement#dpe" });
+  d.absorbedFacts = [...d.absorbedFacts, absorbe];
+  const composition = {
+    id: "temoin:composition", kind: "shared_evidence", patternId: "territory-size-multiple-consequences",
+    title: "Composition témoin", summary: "Résumé témoin.", headlineCause: "Cause témoin.",
+    sharedEvidence: [{ factId: "temoin.commune", module: "territoire", label: "État témoin", observedValue: "village", grain: "commune" }],
+    consequences: [], absorbedFactIds: [absorbe.id], referencedRuleIds: [], materialityTier: "secondary", displaySection: "mismatches",
+  };
+  const section = d.sections.find((s) => sectionsDeLaMinute(d).some((m) => m.key === s.key))!;
+  section.cards.push({ kind: "composition", composition } as unknown as DossierCard);
+  d.narrativePlan.minute = [...d.narrativePlan.minute, composition.id];
+  const e = lireDossier(d).sections.flatMap((s) => s.entrees).find((x) => x.sujet === "Composition témoin")!;
+  assert.ok(e.grains[0] === "commune" && e.grains.includes("adresse"), `le grain de la composition ET celui du fait absorbé (lus : ${e.grains.join(", ")})`);
+  // Aucune conséquence ne nomme ce fait : la face ne le raconte pas, il reste dans le détail, lien compris.
+  assert.equal(e.detailles.length, 1);
+  assert.ok(e.detailles[0]!.sources.some((p) => p.href === "/rapport/logement#dpe"));
+});
+
+// ── Rigueur des dessins ───────────────────────────────────────────────────────────────────────
+
+test("D1. la règle du temps pose des jalons et ne trace jamais de ligne entre deux horizons", () => {
+  const src = readFileSync("src/components/prototypes/fut87/primitives.tsx", "utf8");
+  const debut = src.indexOf("export function RegleDuTemps(");
+  // La fonction suivante du fichier borne le découpage, quelle qu'elle soit.
+  const regle = src.slice(debut, src.indexOf("\nexport function ", debut + 1));
+  assert.ok(regle.length > 200, "fonction trouvée");
+  const code = regle.split("\n").filter((l) => !l.trim().startsWith("//") && !l.trim().startsWith("*")).join("\n");
+  for (const interdit of [/<polyline/, /<path/, /points=\{/]) assert.doesNotMatch(code, interdit, `la règle du temps ne relie pas ses jalons (${interdit})`);
 });
 
 // ── Isolation : les prototypes n'existent pas en production ───────────────────────────────────

@@ -6,15 +6,44 @@
 // recalculé, aucune priorité inventée. Les contradictions éventuelles du moteur (titre favorable
 // au-dessus d'écarts, FUT-54) restent donc visibles telles quelles : leur correction relève du
 // moteur, pas de la direction artistique.
-import type { Dossier, DossierCard, DossierSection, DecisionFact, EvidenceRef, VerificationActionType } from "../../../lib/decision/decision-fact.ts";
+//
+// LA PROVENANCE NE SE SIMPLIFIE PAS (revue V2, 11/10/2026). La V1 réduisait une preuve sans valeur
+// observée à son libellé : son lien, sa cible, son grain et sa date disparaissaient. Et un constat
+// prenait le grain de sa PREMIÈRE preuve, alors qu'une composition peut mêler la commune et
+// l'adresse. Désormais chaque `EvidenceRef` des cartes de la minute survit entière, avec ou sans
+// valeur, et un constat porte TOUS ses grains, dans l'ordre où ses preuves les citent.
+import type {
+  Dossier, DossierCard, DossierSection, DecisionFact, EvidenceRef, VerificationActionType,
+} from "../../../lib/decision/decision-fact.ts";
+import type { EvidenceTargetKey } from "../../../lib/decision/evidence-targets.ts";
+import type { CompositionSide } from "../../../lib/decision/fact-composition.ts";
 import type { ConclusionNarrativePlan } from "../../../lib/decision/conclusion-plan.ts";
-import { sectionsDeLaMinute, sectionHorsPriorites, sectionMixte, carteHorsPriorites, conditionPorteeParLeBloc } from "../../../lib/decision/dossier-view.ts";
+import {
+  sectionsDeLaMinute, sectionHorsPriorites, sectionMixte, carteHorsPriorites, conditionPorteeParLeBloc,
+  factsNonNarresParLaFace,
+} from "../../../lib/decision/dossier-view.ts";
 import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
 
 export type GrainLu = EvidenceRef["grain"];
-export type PreuveLue = { libelle: string; valeur?: string; grain: GrainLu; href?: string; date?: string };
+
+/** Une preuve, telle que le moteur l'a émise : rien n'est retiré, seuls les noms changent. */
+export type PreuveLue = {
+  libelle: string;
+  /** La valeur observée. Absente : la preuve est une SOURCE nommée, pas une mesure. */
+  valeur?: string;
+  grain: GrainLu;
+  href?: string;
+  /** La cible de navigation de la preuve (`evidenceHref` en fait un lien vers la carte visée). */
+  cible?: EvidenceTargetKey;
+  /** La date d'observation de la source (snapshot ou lecture directe). */
+  date?: string;
+  mode?: EvidenceRef["sourceMode"];
+};
 export type GesteLu = { libelle: string; type?: VerificationActionType; detail?: string };
-export type CoteLu = { libelle: string; enonce: string; nuance?: string; statut?: string; preuves: PreuveLue[]; geste?: GesteLu };
+export type CoteLu = {
+  libelle: string; enonce: string; nuance?: string; statut?: string;
+  preuves: PreuveLue[]; sources: PreuveLue[]; geste?: GesteLu;
+};
 
 /**
  * LE FONDEMENT DESSINABLE d'un fait, quand le moteur en porte un. Ce sont les nombres mêmes qui ont
@@ -35,10 +64,12 @@ export type EntreeLue = {
   statut?: string;
   enonce: string;
   nuance?: string;
-  grain: GrainLu | null;
+  /** Tous les grains des preuves de la carte, dédoublonnés, dans l'ordre où elles les citent. */
+  grains: GrainLu[];
+  /** Les preuves portant une valeur observée. */
   preuves: PreuveLue[];
-  /** Les sources nommées sans valeur observée (« Source : … »), rendues en marge. */
-  sources: string[];
+  /** Les preuves sans valeur : des sources nommées, avec leur lien, leur grain et leur date. */
+  sources: PreuveLue[];
   geste?: GesteLu;
   cotes: CoteLu[];
   /** Ce que la carte de production plie dans « Données et limites ». */
@@ -46,6 +77,11 @@ export type EntreeLue = {
   /** Le fait ne répond à aucune priorité déclarée (constat apporté par futur•e). */
   horsPriorites: boolean;
   fondement?: FondementLu;
+  /**
+   * Les faits absorbés par une composition et que sa face ne raconte pas
+   * (`factsNonNarresParLaFace`) : la production les liste dans un dépliable, le prototype aussi.
+   */
+  detailles: EntreeLue[];
 };
 
 export type SectionLue = {
@@ -88,28 +124,31 @@ const preuve = (e: EvidenceRef): PreuveLue => ({
   ...(e.observedValue ? { valeur: e.observedValue } : {}),
   grain: e.grain,
   ...(e.href ? { href: e.href } : {}),
+  ...(e.targetKey ? { cible: e.targetKey } : {}),
   ...(e.observedAt ? { date: e.observedAt } : {}),
+  ...(e.sourceMode ? { mode: e.sourceMode } : {}),
 });
 
-/** Les preuves AVEC valeur observée vont en marge comme preuves ; les autres deviennent des sources nommées. */
-function trier(refs: EvidenceRef[]): { preuves: PreuveLue[]; sources: string[] } {
+/**
+ * Sépare les preuves chiffrées des sources nommées, SANS RIEN PERDRE : deux références ne fusionnent
+ * que si elles sont identiques sur tout ce que le lecteur peut voir ou suivre (libellé, valeur,
+ * grain, lien, date).
+ */
+function trier(refs: EvidenceRef[]): { preuves: PreuveLue[]; sources: PreuveLue[] } {
   const vues = new Set<string>();
   const preuves: PreuveLue[] = [];
-  const sources: string[] = [];
+  const sources: PreuveLue[] = [];
   for (const e of refs) {
-    if (e.observedValue) {
-      const cle = `${e.label}|${e.observedValue}`;
-      if (vues.has(cle)) continue;
-      vues.add(cle);
-      preuves.push(preuve(e));
-    } else if (!sources.includes(e.label)) {
-      sources.push(e.label);
-    }
+    const cle = [e.label, e.observedValue ?? "", e.grain, e.href ?? "", e.targetKey ?? "", e.observedAt ?? ""].join("|");
+    if (vues.has(cle)) continue;
+    vues.add(cle);
+    (e.observedValue ? preuves : sources).push(preuve(e));
   }
   return { preuves, sources };
 }
 
-const premierGrain = (refs: EvidenceRef[]): GrainLu | null => refs[0]?.grain ?? null;
+const grainsDe = (refs: EvidenceRef[]): GrainLu[] => [...new Set(refs.map((e) => e.grain))];
+const refsDuFait = (f: DecisionFact): EvidenceRef[] => (f.role === "compromise" ? f.sides.flatMap((x) => x.evidence) : f.evidence);
 
 function geste(a: { label: string; type?: VerificationActionType; detail?: string } | undefined): GesteLu | undefined {
   return a ? { libelle: a.label, ...(a.type ? { type: a.type } : {}), ...(a.detail ? { detail: a.detail } : {}) } : undefined;
@@ -129,7 +168,7 @@ function fondementDe(f: DecisionFact): FondementLu | undefined {
 }
 
 function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
-  const refs = f.role === "compromise" ? f.sides.flatMap((x) => x.evidence) : f.evidence;
+  const refs = refsDuFait(f);
   const { preuves, sources } = trier(refs);
   const action = f.role === "verification" || f.role === "unknown" || f.role === "condition_check" ? f.action : undefined;
   const limites: string[] = [];
@@ -143,6 +182,7 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
   // UNE CORRESPONDANCE SE LIT EN DEUX LIGNES, comme en production : la priorité, puis la phrase de
   // rang que la règle a écrite (`faceStatement`). L'énoncé autonome (`statement`) n'y est pas montré.
   const enonce = f.role === "alignment" ? f.faceStatement : f.statement;
+  const fondement = fondementDe(f);
   return {
     ancre: dossierAnchorId(f.id),
     nature: f.role,
@@ -150,16 +190,17 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
     ...(statut ? { statut } : {}),
     enonce,
     ...(nuance ? { nuance } : {}),
-    grain: premierGrain(refs),
+    grains: grainsDe(refs),
     preuves,
     sources,
     ...(action ? { geste: geste(action) } : {}),
     cotes: f.role === "compromise"
-      ? f.sides.map((x) => ({ libelle: "", enonce: x.statement, preuves: trier(x.evidence).preuves }))
+      ? f.sides.map((x) => ({ libelle: "", enonce: x.statement, ...trier(x.evidence) }))
       : [],
     limites,
     horsPriorites,
-    ...(fondementDe(f) ? { fondement: fondementDe(f)! } : {}),
+    ...(fondement ? { fondement } : {}),
+    detailles: [],
   };
 }
 
@@ -167,42 +208,42 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
   if (card.kind === "fact") return lireFait(card.fact, horsPriorites(card));
   const c = card.composition;
   const absorbes = dossier.absorbedFacts.filter((f) => c.absorbedFactIds.includes(f.id));
-  const grainAbsorbe = absorbes[0] ? premierGrain(absorbes[0].role === "compromise" ? absorbes[0].sides.flatMap((x) => x.evidence) : absorbes[0].evidence) : null;
-  const base = { ancre: dossierAnchorId(c.id), nature: c.kind, sujet: c.title, horsPriorites: horsPriorites(card) };
+  const detailles = factsNonNarresParLaFace(c, absorbes).map((f) => lireFait(f, false));
+  // Les grains d'une composition : ceux de ses propres preuves, puis ceux des faits qu'elle absorbe.
+  const refsPropres: EvidenceRef[] =
+    c.kind === "tradeoff" ? [...c.favorableSide.evidence, ...c.unfavorableSide.evidence]
+      : c.kind === "grouped_verification" ? c.items.flatMap((x) => x.evidence)
+        : c.kind === "mismatch_with_action" ? c.evidence
+          : c.sharedEvidence;
+  const grains = grainsDe([...refsPropres, ...absorbes.flatMap(refsDuFait)]);
+  const base = { ancre: dossierAnchorId(c.id), nature: c.kind, sujet: c.title, horsPriorites: horsPriorites(card), grains, detailles };
+  const cote = (x: CompositionSide): CoteLu => ({
+    libelle: x.label, enonce: x.statement, ...trier(x.evidence),
+    ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
+    ...(x.action ? { geste: geste(x.action) } : {}),
+  });
   if (c.kind === "tradeoff") {
-    const cote = (x: typeof c.favorableSide): CoteLu => ({
-      libelle: x.label, enonce: x.statement, preuves: trier(x.evidence).preuves,
-      ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
-      ...(x.action ? { geste: geste(x.action) } : {}),
-    });
-    return { ...base, enonce: c.summary, grain: grainAbsorbe, preuves: [], sources: [], cotes: [cote(c.favorableSide), cote(c.unfavorableSide)], limites: [] };
+    return { ...base, enonce: c.summary, preuves: [], sources: [], cotes: [cote(c.favorableSide), cote(c.unfavorableSide)], limites: [] };
   }
   if (c.kind === "grouped_verification") {
     return {
-      ...base, enonce: c.summary, grain: grainAbsorbe, preuves: [], sources: [],
-      cotes: c.items.map((x) => ({
-        libelle: x.label, enonce: x.statement, preuves: trier(x.evidence).preuves,
-        ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
-        ...(x.action ? { geste: geste(x.action) } : {}),
-      })),
+      ...base, enonce: c.summary, preuves: [], sources: [], cotes: c.items.map(cote),
       limites: c.items.flatMap((x) => (x.action?.detail ? [x.action.detail] : [])),
     };
   }
   if (c.kind === "mismatch_with_action") {
-    const { preuves, sources } = trier(c.evidence);
     const f0 = absorbes.map(fondementDe).find(Boolean);
     return {
-      ...(f0 ? { fondement: f0 } : {}),
       ...base, enonce: c.summary, ...(c.limitation ? { nuance: c.limitation } : {}),
-      grain: premierGrain(c.evidence) ?? grainAbsorbe, preuves, sources, geste: geste(c.action), cotes: [],
+      ...trier(c.evidence), geste: geste(c.action), cotes: [],
       limites: c.action.detail ? [c.action.detail] : [],
+      ...(f0 ? { fondement: f0 } : {}),
     };
   }
   // shared_evidence : un état observé, plusieurs conséquences sur les priorités du lecteur.
-  const { preuves, sources } = trier(c.sharedEvidence);
   return {
-    ...base, enonce: c.summary, grain: premierGrain(c.sharedEvidence) ?? grainAbsorbe, preuves, sources,
-    cotes: c.consequences.map((x) => ({ libelle: "", enonce: x.statement, ...(x.limitation ? { nuance: x.limitation } : {}), preuves: [] })),
+    ...base, enonce: c.summary, ...trier(c.sharedEvidence),
+    cotes: c.consequences.map((x) => ({ libelle: "", enonce: x.statement, ...(x.limitation ? { nuance: x.limitation } : {}), preuves: [], sources: [] })),
     limites: [],
   };
 }
@@ -220,6 +261,7 @@ export function lireDossier(dossier: Dossier): LectureDecision {
         gestes: control.actions.map((a) => ({ libelle: a.label, ancre: dossierAnchorId(a.anchorId) })),
       }
     : null;
+  const detail = bloc("verdict") ?? plan.verdict.detail;
   return {
     commune: plan.communeNom,
     portee: plan.scope,
@@ -227,11 +269,11 @@ export function lireDossier(dossier: Dossier): LectureDecision {
       etiquette: plan.verdictLabel,
       ton: plan.verdictTone,
       titre: plan.verdict.headline.text,
-      ...((bloc("verdict") ?? plan.verdict.detail) ? { detail: bloc("verdict") ?? plan.verdict.detail } : {}),
+      ...(detail ? { detail } : {}),
     },
     ...(bloc("unexamined_hard_constraints") ? { conditionNonExaminee: bloc("unexamined_hard_constraints")! } : {}),
     ...(bloc("uncovered_priorities") ? { nonCouvert: bloc("uncovered_priorities")! } : {}),
-    preuvesDuVerdict: condition ? trier(condition.evidence).preuves : [],
+    preuvesDuVerdict: condition ? [...trier(condition.evidence).preuves, ...trier(condition.evidence).sources] : [],
     priorites,
     sections: sectionsDeLaMinute(dossier).map((s) => ({
       cle: s.key,

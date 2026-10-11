@@ -9,11 +9,11 @@ import type { DpeRecord } from "@/lib/dpe-attribution";
 const rien = () => {};
 
 export function EnergieAvant({ dpe, audit, auditStatus, candidates }: {
-  dpe: DpeRecord; audit: LogementReport["audit"]; auditStatus: LogementReport["auditStatus"]; candidates: DpeRecord[];
+  dpe: DpeRecord | null; audit: LogementReport["audit"]; auditStatus: LogementReport["auditStatus"]; candidates: DpeRecord[];
 }) {
   return (
     <EnergieSection
-      dpeStatus="confirmed" dpe={dpe} audit={audit} auditStatus={auditStatus} candidates={candidates} dossierId=""
+      dpeStatus={dpe ? "confirmed" : "not_found"} dpe={dpe} audit={audit} auditStatus={auditStatus} candidates={candidates} dossierId=""
       onPick={rien} onNotInList={rien} onReselect={rien} onPickParNumero={rien}
     />
   );

@@ -15,6 +15,9 @@
 // par les fixtures, et ne les reformulent pas.
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
+import {
+  CERCLE_TERRITOIRE, CARRE_AUTOUR, LOSANGE_LOGEMENT, ECHELLE_VIEWBOX, ECHELLE_CENTRE,
+} from "@/components/report/echelle-geometry";
 import s from "./releve.module.css";
 
 export { s as releve };
@@ -88,26 +91,46 @@ export function Surtitre({ numero, children, id }: { numero?: string; children: 
 
 export type ElementDeMarge =
   | { type: "grain"; grain: GrainCle; libelle?: string }
-  | { type: "valeur"; libelle?: string; valeur: string; href?: string }
-  | { type: "source"; texte: string }
+  | { type: "valeur"; libelle?: string; valeur: string; href?: string; date?: string; grain?: GrainCle }
+  | { type: "source"; texte: string; href?: string; date?: string; grain?: GrainCle }
   | { type: "date"; texte: string };
 
-export function Marge({ elements, etiquette = "Preuve" }: { elements: ElementDeMarge[]; etiquette?: string }) {
+/**
+ * LA MARGE DE PREUVE. Grain, valeur observée, source, date : ce qui fonde l'affirmation d'à côté.
+ * Une valeur ou une source qui porte son propre grain (carte à grains mêlés) le dit par son glyphe ;
+ * un lien reste un lien, qu'il y ait une valeur ou non (revue V2). `enLigne` : sous un texte, sans
+ * filet vertical (côtés d'une composition, preuves du verdict).
+ */
+export function Marge({ elements, etiquette = "Preuve", enLigne = false }: { elements: ElementDeMarge[]; etiquette?: string; enLigne?: boolean }) {
   if (elements.length === 0) return <div aria-hidden />;
   return (
-    <aside className={s.marge} aria-label={etiquette}>
+    <aside className={enLigne ? `${s.marge} ${s.margeEnLigne}` : s.marge} aria-label={etiquette}>
       {elements.map((e, i) => {
         if (e.type === "grain") return <Grain key={i} grain={e.grain}>{e.libelle}</Grain>;
+        if (e.type === "date") return <span key={i}>{e.texte}</span>;
+        const glyphe = e.grain ? <span className={s.margeGlyphe}><GlypheGrain grain={e.grain} taille={10} /></span> : null;
         if (e.type === "valeur") {
           const v = <span className={s.margeValeur}>{e.valeur}</span>;
           return (
-            <span key={i}>
-              {e.libelle ? <>{e.libelle} · </> : null}
-              {e.href ? <Link href={e.href}>{v}</Link> : v}
+            <span key={i} className={s.margeLigne}>
+              {glyphe}
+              <span>
+                {e.libelle ? <>{e.libelle} · </> : null}
+                {e.href ? <Link href={e.href}>{v}</Link> : v}
+                {e.date ? <span className={s.margeDate}> · {e.date}</span> : null}
+              </span>
             </span>
           );
         }
-        return <span key={i}>{e.texte}</span>;
+        return (
+          <span key={i} className={s.margeLigne}>
+            {glyphe}
+            <span>
+              {e.href ? <Link href={e.href}>{e.texte}</Link> : e.texte}
+              {e.date ? <span className={s.margeDate}> · {e.date}</span> : null}
+            </span>
+          </span>
+        );
       })}
     </aside>
   );
@@ -184,21 +207,28 @@ const FIN = 2105;
  * construction d'un bâtiment, un diagnostic, les horizons 2030 / 2050 / 2100. L'échelle est
  * linéaire, donc honnête : 2100 est loin, et la règle le montre. « Aujourd'hui » est marqué d'un
  * pointillé. Aucune animation (DESIGN.md § 6.4).
+ *
+ * DES JALONS, JAMAIS UNE COURBE (revue V2). Une valeur à 2030, 2050 ou 2100 est une projection à
+ * un palier de réchauffement, la référence est une moyenne sur trente ans : aucune n'est un point
+ * d'une série annuelle. La V1 les reliait par une ligne, qui laissait croire que la trajectoire
+ * entre deux horizons était connue. Chaque valeur est désormais un jalon isolé (une tige depuis
+ * l'axe, un repère carré à sa hauteur), et rien n'est tracé entre deux jalons.
  */
 export function RegleDuTemps({
   jalons, aujourdhui = 2026, hauteurValeurs, etiquette,
 }: {
   jalons: JalonTemps[];
   aujourdhui?: number;
-  /** Si fourni, trace la trajectoire des valeurs numériques (même unité), de bas en haut. */
+  /** Si fourni, pose chaque valeur numérique à sa hauteur (même unité), sans les relier. */
   hauteurValeurs?: { min: number; max: number; valeurs: Record<number, number> };
   etiquette: string;
 }) {
-  // Hauteurs en pixels réels : le SVG est étiré en largeur seulement (`preserveAspectRatio="none"`),
-  // et tous les traits gardent 1 px grâce à `vector-effect`. Les textes sont du HTML posé par-dessus.
   // LE DÉBUT SUIT LA DONNÉE : un bâtiment de 1890 ne sort pas du cadre. Jamais après 1975, pour que
   // la référence climatique (1976-2005) et le présent gardent leur place.
   const DEBUT = Math.min(1975, Math.floor((Math.min(...jalons.map((j) => j.annee)) - 6) / 10) * 10);
+  // Hauteurs en pixels réels : le SVG est étiré en largeur seulement (`preserveAspectRatio="none"`),
+  // et tous les traits gardent 1 px grâce à `vector-effect`. Les textes et les repères sont du HTML
+  // posé par-dessus, pour garder leur dessin à toute largeur.
   const L = 1000;
   const H = hauteurValeurs ? 168 : 64;
   const yAxe = H - 2;
@@ -211,12 +241,22 @@ export function RegleDuTemps({
   };
   const centre = (j: JalonTemps) => (j.jusqua ? (j.annee + j.jusqua) / 2 : j.annee);
   const valeurDe = (j: JalonTemps) => hauteurValeurs?.valeurs[j.annee];
-  const points = jalons
-    .filter((j) => valeurDe(j) != null)
-    .map((j) => `${x(centre(j))},${y(valeurDe(j)!)}`);
   const pose = (p: number): CSSProperties => (p > 80
     ? { right: `${100 - p}%`, transform: "translateX(6px)", textAlign: "right" }
     : { left: `${p}%`, transform: "translateX(-6px)", textAlign: "left" });
+  // DEUX JALONS PROCHES NE SE CHEVAUCHENT PAS (revue V2, cas « immeuble » : diagnostic 2023 et audit
+  // 2024 s'écrivaient l'un sur l'autre). Un libellé trop près du précédent descend d'une ligne.
+  const ECART_MIN = 14; // en % de la largeur : un libellé de deux mots en mono
+  const rangs = new Map<number, number>();
+  const dernierParRang: number[] = [];
+  [...jalons].sort((a, b) => centre(a) - centre(b)).forEach((j) => {
+    const p = pct(centre(j));
+    let rang = 0;
+    while (dernierParRang[rang] != null && p - dernierParRang[rang]! < ECART_MIN) rang++;
+    dernierParRang[rang] = p;
+    rangs.set(j.annee, rang);
+  });
+  const nbRangs = Math.max(1, ...[...rangs.values()].map((r) => r + 1));
   return (
     <figure style={{ margin: 0 }} aria-label={etiquette}>
       <div style={{ position: "relative", height: H }}>
@@ -226,23 +266,27 @@ export function RegleDuTemps({
             <line key={a} className={s.regleTic} x1={x(a)} x2={x(a)} y1={yAxe - 5} y2={yAxe} strokeWidth={1} vectorEffect="non-scaling-stroke" />
           ))}
           <line className={s.regleAujourdhui} x1={x(aujourdhui)} x2={x(aujourdhui)} y1={4} y2={yAxe} strokeWidth={1} vectorEffect="non-scaling-stroke" />
-          {points.length > 1 ? (
-            <polyline className={s.regleTrace} points={points.join(" ")} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
-          ) : null}
           {jalons.map((j) => {
             const v = valeurDe(j);
-            const cy = v != null ? y(v) : yAxe;
+            const cy = v != null ? y(v) : yAxe - 18;
             return j.jusqua ? (
               <rect key={j.annee} className={s.regleBande} x={x(j.annee)} width={x(j.jusqua) - x(j.annee)} y={cy - 3} height={6} vectorEffect="non-scaling-stroke" />
             ) : (
-              <line key={j.annee} className={s.regleTic} x1={x(j.annee)} x2={x(j.annee)} y1={v != null ? cy : yAxe - 18} y2={yAxe} strokeWidth={1} strokeDasharray={v != null ? "2 3" : undefined} vectorEffect="non-scaling-stroke" />
+              <line key={j.annee} className={s.regleTic} x1={x(j.annee)} x2={x(j.annee)} y1={cy} y2={yAxe} strokeWidth={1} vectorEffect="non-scaling-stroke" />
             );
           })}
         </svg>
+        {/* Le repère carré de chaque horizon, à la hauteur de sa valeur : un point, pas un sommet de courbe. */}
+        {jalons.filter((j) => !j.jusqua && valeurDe(j) != null).map((j) => (
+          <span key={`repere-${j.annee}`} aria-hidden style={{
+            position: "absolute", left: `${pct(j.annee)}%`, top: y(valeurDe(j)!) - 4,
+            width: 8, height: 8, marginLeft: -4, background: "var(--r-encre)",
+          }} />
+        ))}
         {jalons.map((j) => (j.valeur ? (
           <span key={j.annee} className={s.chiffre} style={{
             position: "absolute", fontSize: 19, whiteSpace: "nowrap",
-            top: Math.max(0, (valeurDe(j) != null ? y(valeurDe(j)!) : yAxe - 18) - 30),
+            top: Math.max(0, (valeurDe(j) != null ? y(valeurDe(j)!) : yAxe - 18) - 32),
             ...pose(pct(centre(j))),
           }}>
             {j.valeur}
@@ -252,10 +296,10 @@ export function RegleDuTemps({
           aujourd&apos;hui
         </span>
       </div>
-      <figcaption style={{ position: "relative", height: 40, marginTop: 8 }}>
+      <figcaption style={{ position: "relative", height: 40 * nbRangs, marginTop: 8 }}>
         {jalons.map((j) => (
           <span key={j.annee} className={s.mono} style={{
-            position: "absolute", top: 0, fontSize: 11, color: "var(--r-meta)", whiteSpace: "nowrap", lineHeight: 1.4,
+            position: "absolute", top: 40 * (rangs.get(j.annee) ?? 0), fontSize: 11, color: "var(--r-meta)", whiteSpace: "nowrap", lineHeight: 1.4,
             ...pose(pct(centre(j))),
           }}>
             {j.jusqua ? `${j.annee}–${j.jusqua}` : j.annee}
@@ -264,6 +308,57 @@ export function RegleDuTemps({
           </span>
         ))}
       </figcaption>
+    </figure>
+  );
+}
+
+// ── L'emblème des trois échelles ─────────────────────────────────────────────────────────────
+
+/**
+ * L'EMBLÈME, EN GRAND. Les formes exactes du repère du hub (`echelle-geometry.ts`), en trait seul,
+ * avec trois renvois de planche : un trait, un texte. L'accueil y écrit le nom des échelles, le
+ * dossier le nombre de constats lus à chacune. Le dessin ne représente jamais le lieu lui-même.
+ */
+export function EmblemeEchelles({ renvois, etiquette, actives }: {
+  /** Les trois textes de renvoi : commune, secteur, bâtiment. Absents : l'emblème seul, sans renvois. */
+  renvois?: [string, string, string];
+  etiquette: string;
+  /** Les échelles à tracer en plein ; les autres en trait discret. Toutes par défaut. */
+  actives?: { commune: boolean; secteur: boolean; batiment: boolean };
+}) {
+  const V = ECHELLE_VIEWBOX;
+  const c = ECHELLE_CENTRE;
+  const marge = renvois ? 70 : 16;
+  const trait = (on: boolean | undefined) => (on === false ? "var(--r-filet-fort)" : "currentColor");
+  return (
+    <figure style={{ margin: 0 }} aria-label={etiquette}>
+      <svg viewBox={`${-marge} ${-16} ${V + marge * 2} ${V + 32}`} style={{ width: "100%", height: "auto", display: "block", color: "var(--r-encre)" }} aria-hidden focusable="false">
+        {/* Graduations de la commune : 48 repères, un sur quatre plus long, comme une rose de relevé. */}
+        {Array.from({ length: 48 }, (_, i) => {
+          const a = (i / 48) * Math.PI * 2;
+          const r1 = CERCLE_TERRITOIRE.r + 4;
+          const r2 = CERCLE_TERRITOIRE.r + (i % 4 === 0 ? 11 : 7);
+          return <line key={i} x1={c + Math.cos(a) * r1} y1={c + Math.sin(a) * r1} x2={c + Math.cos(a) * r2} y2={c + Math.sin(a) * r2} stroke="var(--r-discret)" strokeWidth={0.6} />;
+        })}
+        <circle {...CERCLE_TERRITOIRE} fill="none" stroke={trait(actives?.commune)} strokeWidth={1.1} />
+        <rect {...CARRE_AUTOUR} fill="none" stroke={trait(actives?.secteur)} strokeWidth={1.1} />
+        <rect {...LOSANGE_LOGEMENT} fill="none" stroke={trait(actives?.batiment)} strokeWidth={1.3} />
+        <circle cx={c} cy={c} r={2.2} fill="currentColor" />
+        {renvois ? (
+          <>
+            <g stroke="var(--r-discret)" strokeWidth={0.6} fill="none">
+              <polyline points={`${c + 68},${c - 68} ${c + 96},${c - 98} ${V + marge - 6},${c - 98}`} />
+              <polyline points={`${c + 54},${c + 30} ${V + 14},${c + 30} ${V + marge - 6},${c + 30}`} />
+              <polyline points={`${c - 22},${c + 22} ${c - 64},${c + 118} ${-marge + 6},${c + 118}`} />
+            </g>
+            <g fontFamily="var(--font-mono)" fontSize={8.5} fill="var(--r-meta)">
+              <text x={V + marge - 6} y={c - 103} textAnchor="end">{renvois[0]}</text>
+              <text x={V + marge - 6} y={c + 25} textAnchor="end">{renvois[1]}</text>
+              <text x={-marge + 6} y={c + 113}>{renvois[2]}</text>
+            </g>
+          </>
+        ) : null}
+      </svg>
     </figure>
   );
 }

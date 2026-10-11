@@ -64,15 +64,22 @@
 @media (min-width: 900px) {
   .ligne { grid-template-columns: minmax(0, 1fr) var(--r-marge); gap: var(--r-gouttiere); }
 }
+/* La marge : 12 px sur grand écran, 13 px sur mobile (revue V2 : 11,5 px se lisait mal sous chaque
+   information). Les sources sont en `--fg-3`, plus lisibles que le gris de métadonnée. */
 .marge {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   align-content: start;
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  line-height: 1.5;
-  color: var(--r-meta);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--r-discret);
 }
+@media (max-width: 899px) { .marge { font-size: 13px; } }
+.margeEnLigne { border: 0 !important; padding: 0 !important; }
+.margeLigne { display: flex; gap: 7px; align-items: baseline; }
+.margeGlyphe { flex: none; color: var(--r-discret); }
+.margeDate { color: var(--r-meta); }
 @media (max-width: 899px) {
   .marge { border-top: 1px dashed var(--r-filet-fort); padding-top: 8px; }
 }
@@ -223,8 +230,8 @@
   align-items: baseline;
   gap: 7px;
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--r-meta);
+  font-size: 12px;
+  color: var(--r-discret);
 }
 .grain svg { flex: none; color: var(--r-discret); transform: translateY(1px); }
 
@@ -236,7 +243,6 @@
 .regle .regleAxe { stroke: var(--r-filet-fort); }
 .regle .regleTic { stroke: var(--r-discret); }
 .regle .regleAujourdhui { stroke: var(--r-encre); stroke-dasharray: 2 3; }
-.regle .regleTrace { stroke: var(--r-encre); fill: none; }
 .regle .regleBande { fill: var(--r-trame); stroke: var(--r-filet-fort); }
 
 /* ── Coupe des trois échelles (navigation interne) ───────────────────────────────────────── */
@@ -373,3 +379,64 @@
 .etapeAuditValeur { grid-area: valeur; text-align: right; }
 .legendeDpe { display: flex; justify-content: space-between; gap: 8px; font-size: 10.5px; white-space: nowrap; }
 @media (max-width: 480px) { .legendeDpeMilieu { display: none; } }
+
+
+/* ── V2 · Ma décision : premier écran, rythme, échelles ─────────────────────────────────── */
+
+.enTeteDossier { padding: 32px 0 22px; display: grid; gap: 12px; }
+@media (min-width: 640px) { .enTeteDossier { padding: 40px 0 28px; } }
+.projetCourt { display: block; }
+.projetLong { display: none; }
+@media (min-width: 900px) { .projetCourt { display: none; } .projetLong { display: block; } }
+
+/* Le verdict : plus petit sur mobile, pour que le sommaire et le geste prioritaire entrent dans le
+   premier écran ; plein format au-delà. */
+.verdict { font-size: clamp(27px, 3.6vw, 46px); line-height: 1.08; }
+.verdictDetail { font-size: 16px; }
+@media (min-width: 640px) { .verdictDetail { font-size: 18px; } }
+
+.sommaireCompact { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (min-width: 900px) { .sommaireCompact { display: none; } }
+.sommaireMarge { display: none !important; }
+@media (min-width: 900px) { .sommaireMarge { display: grid !important; } }
+.sommaireJeton {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 9px;
+  border: 1px solid var(--r-filet-fort);
+  border-radius: var(--r-rayon);
+  font-size: 13px; line-height: 1.3;
+  color: var(--r-texte);
+  text-decoration: none;
+}
+.sommaireJeton:hover { border-color: var(--r-discret); }
+.sommaireJeton:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.sommaireTrait { width: 3px; height: 12px; flex: none; }
+
+/* D'où viennent ces constats : l'emblème compté, à côté de sa lecture. */
+.echellesDuDossier { display: grid; gap: 20px; align-items: center; padding: 40px 0 8px; }
+@media (min-width: 760px) { .echellesDuDossier { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding: 48px 0 16px; } }
+.ligneEchelle {
+  display: grid; grid-template-columns: 22px 40px minmax(0, 1fr); align-items: baseline; gap: 8px;
+  padding: 9px 0 !important;
+}
+
+/* La bande : un mouvement posé sur un fond pleine largeur, pour casser la suite de filets. */
+.bande {
+  position: relative;
+  border-top: 0;
+  background: var(--r-plaque);
+  box-shadow: 0 0 0 100vmax var(--r-plaque);
+  clip-path: inset(0 -100vmax);
+  margin: 40px 0;
+}
+
+.cote { padding: 12px 0 0 14px !important; border-top: 0 !important; border-left: 1px solid var(--r-filet-fort); }
+
+/* Le titre-adresse : une adresse réelle peut faire deux lignes de plus que le cas témoin (revue V2,
+   cas « titre-long »). Taille réduite, césure des mots trop longs, aucun débordement. */
+.titreAdresse { font-size: clamp(26px, 3.2vw, 42px); line-height: 1.1; overflow-wrap: anywhere; hyphens: auto; }
+
+/* Le sélecteur de cas des prototypes. */
+.cas { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 12px 0 0; font-family: var(--font-mono); font-size: 12px; }
+.cas a { color: var(--r-discret); }
+.cas a[aria-current="page"] { color: var(--r-encre); text-decoration-color: var(--r-encre); }

@@ -1,10 +1,16 @@
-// FUT-87 · LE LOGEMENT TÉMOIN DES PROTOTYPES. FIXTURE ANONYMISÉE, DEV UNIQUEMENT.
+// FUT-87 · LES LOGEMENTS TÉMOINS DES PROTOTYPES. FIXTURES ANONYMISÉES, DEV UNIQUEMENT.
 //
-// Un bien FICTIF : adresse, commune, parcelle et numéros sont inventés et ne désignent rien. Les
-// valeurs énergétiques sont celles d'un audit réglementaire PUBLIC (base ouverte ADEME), détachées de
-// leur adresse : quatre étapes d'un parcours par étapes et une rénovation en une fois, les mêmes que
-// la fixture de `fut67-restitution.test.ts`. Le reste (zonage, sinistralité, arrêtés) reprend la forme
-// exacte des réponses des sources, sans désigner un lieu réel.
+// Des biens FICTIFS : adresses, communes, parcelles et numéros sont inventés et ne désignent rien. Les
+// valeurs énergétiques du cas de référence sont celles d'un audit réglementaire PUBLIC (base ouverte
+// ADEME), détachées de leur adresse, les mêmes que la fixture de `fut67-restitution.test.ts`. Le reste
+// (zonage, sinistralité, arrêtés) reprend la forme exacte des réponses des sources.
+//
+// CINQ CAS (revue V2) : un design se juge aussi sur les situations qui ne le mettent pas en valeur.
+//   - `temoin`            : diagnostic, audit par étapes, zonage, patrimoine, sinistralité ;
+//   - `sans-dpe`          : aucun diagnostic rattaché, donc ni classe, ni audit, ni confort d'été ;
+//   - `immeuble`          : un appartement, diagnostic généré à l'immeuble, audit de l'immeuble entier ;
+//   - `sources-absentes`  : Géorisques, servitudes, sinistralité et base des audits n'ont pas répondu ;
+//   - `titre-long`        : le cas de référence avec une adresse de résidence très longue.
 //
 // Les lectures dérivées passent par les fonctions de PRODUCTION (`construireLectureInondation`,
 // `pointsAVerifier`, `deriveThermalEvidence`, `parcoursAudit`) : le prototype et la page « avant »
@@ -12,16 +18,27 @@
 import type { LogementReport } from "../../../lib/logement-report-types.ts";
 import type { DpeRecord } from "../../../lib/dpe-attribution.ts";
 import type { LogementFacts } from "../../../lib/decision/decision-fact.ts";
-import { catnatInondationDepuisCompte } from "../../../lib/decision/catnat-evidence.ts";
 import type { UserProject } from "../../../lib/user-project.ts";
+import { catnatInondationDepuisCompte } from "../../../lib/decision/catnat-evidence.ts";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "../../../lib/decision/inondation-lecture.ts";
 import { pointsAVerifier, introPointsAVerifier } from "../../../lib/decision/logement-verifications.ts";
 import { deriveThermalEvidence } from "../../../lib/thermal-evidence.ts";
 import { parcoursAudit } from "../../../lib/audit-record.ts";
 
-export const COMMUNE_TEMOIN = "Commune témoin";
+export const CAS_LOGEMENT = ["temoin", "sans-dpe", "immeuble", "sources-absentes", "titre-long"] as const;
+export type CasLogement = (typeof CAS_LOGEMENT)[number];
 
-export const DPE_TEMOIN: DpeRecord = {
+export const LIBELLE_CAS: Record<CasLogement, string> = {
+  temoin: "Cas de référence",
+  "sans-dpe": "Sans diagnostic",
+  immeuble: "Appartement, audit de l'immeuble",
+  "sources-absentes": "Sources sans réponse",
+  "titre-long": "Adresse très longue",
+};
+
+const COMMUNE = "Commune témoin";
+
+const DPE_MAISON: DpeRecord = {
   id_dpe: "0000E0000000X",
   date_dpe: "2024-03-18",
   id_ban: null,
@@ -47,13 +64,42 @@ export const DPE_TEMOIN: DpeRecord = {
   methode_dpe: "dpe 3CL 2021 méthode logement individuel",
 };
 
+const DPE_APPARTEMENT: DpeRecord = {
+  ...DPE_MAISON,
+  id_dpe: "0000E0000000Y",
+  date_dpe: "2023-11-07",
+  etiquette_dpe: "E",
+  etiquette_ges: "E",
+  conso_ep_m2: 286.4,
+  emission_ges_m2: 52.3,
+  surface_m2: 61.5,
+  annee_construction: 1972,
+  type_batiment: "appartement",
+  confort_ete: "moyen",
+  traversant: null,
+  protection_solaire: null,
+  ventilation: "VMC simple flux autoréglable",
+  inertie: "Lourde",
+  methode_dpe: "dpe 3CL 2021 méthode immeuble",
+};
+
 const sc = (categorie: string, etape: string, conso: number, ges: number) =>
   ({ categorie, etape, travaux: null, conso_ep_m2: conso, emission_ges_m2: ges });
 
-export const RAPPORT_TEMOIN: LogementReport = {
-  address: { id: null, label: "Adresse témoin, 00000 Commune témoin", city: COMMUNE_TEMOIN, citycode: null, postcode: "00000", latitude: 0, longitude: 0 },
-  parcel: { parcelCode: "00000-000-AB-0000", nomCommune: COMMUNE_TEMOIN, contenance: 412 },
-  dpeCandidates: [DPE_TEMOIN],
+const PLAN_INONDATION = {
+  gasparId: null,
+  plan: "Plan de prévention du risque inondation de la vallée témoin",
+  hazardModel: "PPRN-I",
+  zoneRegExists: true,
+  updatedAt: "2023-06-01",
+  zones: [{ regimeCode: "03", regime: "Prescriptions", zoneCode: "B1", zoneName: "Zone bleue" }],
+  topRegimeRank: 2,
+};
+
+const RAPPORT_TEMOIN: LogementReport = {
+  address: { id: null, label: "Adresse témoin, 00000 Commune témoin", city: COMMUNE, citycode: null, postcode: "00000", latitude: 0, longitude: 0 },
+  parcel: { parcelCode: "00000-000-AB-0000", nomCommune: COMMUNE, contenance: 412 },
+  dpeCandidates: [DPE_MAISON],
   dpeCandidatesStatus: "present",
   audit: {
     correspondance: "exact_address",
@@ -74,16 +120,8 @@ export const RAPPORT_TEMOIN: LogementReport = {
   georisques: {
     address: {
       risks: { labels: ["Inondation", "Retrait-gonflement des sols argileux", "Séisme"] },
-      pprn: { labels: ["Plan de prévention du risque inondation de la vallée témoin"] },
-      regulatoryPlans: [{
-        gasparId: null,
-        plan: "Plan de prévention du risque inondation de la vallée témoin",
-        hazardModel: "PPRN-I",
-        zoneRegExists: true,
-        updatedAt: "2023-06-01",
-        zones: [{ regimeCode: "03", regime: "Prescriptions", zoneCode: "B1", zoneName: "Zone bleue" }],
-        topRegimeRank: 2,
-      }],
+      pprn: { labels: [PLAN_INONDATION.plan] },
+      regulatoryPlans: [PLAN_INONDATION],
       rga: { code: "2", label: "Exposition moyenne" },
       seismic: { code: "2", label: "Faible" },
     },
@@ -95,13 +133,11 @@ export const RAPPORT_TEMOIN: LogementReport = {
   },
 };
 
-export const CATNAT_TEMOIN = catnatInondationDepuisCompte(3);
-
-export const FAITS_TEMOIN: LogementFacts = {
+const FAITS_TEMOIN: LogementFacts = {
   dpe: "passoire",
   dpeLabel: "G",
   rga: "present", expositionBati: true,
-  pprn: "present", zoneReglementee: true, pprnLabel: "Plan de prévention du risque inondation de la vallée témoin",
+  pprn: "present", zoneReglementee: true, pprnLabel: PLAN_INONDATION.plan,
   cavites: "none", caviteProche: false,
   patrimoine: "present", perimetrePatrimonial: true,
   sinistralite: "present", sinistraliteActive: true,
@@ -114,20 +150,108 @@ export const PROJET_TEMOIN = {
   parsed: { reformulation: "projet de test", hardConstraints: {}, preferences: [] },
 } as unknown as UserProject;
 
-/** Les lectures que la production dérive de ces données, par ses propres fonctions. */
-export function lecturesTemoin() {
-  const plans = RAPPORT_TEMOIN.georisques?.address?.regulatoryPlans ?? [];
-  return {
-    inondation: construireLectureInondation({
-      zonage: zonageInondationDepuisPlans(plans),
-      catnat: CATNAT_TEMOIN,
-      onrn: RAPPORT_TEMOIN.sinistralite!.inondation,
-    }),
-    points: pointsAVerifier(FAITS_TEMOIN, PROJET_TEMOIN),
-    introPoints: introPointsAVerifier(PROJET_TEMOIN),
-    confort: deriveThermalEvidence(DPE_TEMOIN),
-    audit: parcoursAudit(RAPPORT_TEMOIN.audit!.scenarios),
+export type CasDeLogement = {
+  cle: CasLogement;
+  commune: string;
+  rapport: LogementReport;
+  dpe: DpeRecord | null;
+  faits: LogementFacts;
+  catnat: ReturnType<typeof catnatInondationDepuisCompte>;
+  /** La base des diagnostics n'a pas répondu (FUT-65) : distinct de « aucun diagnostic ». */
+  dpeNonVerifiable: boolean;
+};
+
+export function casDeLogement(cle: CasLogement = "temoin"): CasDeLogement {
+  const base: CasDeLogement = {
+    cle, commune: COMMUNE, rapport: RAPPORT_TEMOIN, dpe: DPE_MAISON, faits: FAITS_TEMOIN,
+    catnat: catnatInondationDepuisCompte(3), dpeNonVerifiable: false,
   };
+  switch (cle) {
+    case "temoin":
+      return base;
+    case "titre-long": {
+      const label = "Résidence Les Terrasses du Grand Large, bâtiment C, escalier 4, 1250 avenue du Maréchal-de-Lattre-de-Tassigny, 00000 Commune-témoin-sur-Mer";
+      return {
+        ...base,
+        rapport: { ...RAPPORT_TEMOIN, address: { ...RAPPORT_TEMOIN.address!, label } },
+        faits: { ...FAITS_TEMOIN, addressLabel: label },
+      };
+    }
+    case "sans-dpe":
+      return {
+        ...base, dpe: null,
+        rapport: { ...RAPPORT_TEMOIN, dpeCandidates: [], dpeCandidatesStatus: "absent", audit: null, auditStatus: "absent" },
+        faits: { ...FAITS_TEMOIN, dpe: "absent", dpeLabel: null, confortEteInsuffisant: false },
+      };
+    case "immeuble":
+      return {
+        ...base, dpe: DPE_APPARTEMENT,
+        rapport: {
+          ...RAPPORT_TEMOIN,
+          address: { ...RAPPORT_TEMOIN.address!, label: "Adresse témoin, appartement 3B, 00000 Commune témoin" },
+          dpeCandidates: [DPE_APPARTEMENT],
+          heritage: { items: [], sourceStatus: "ok" },
+          audit: {
+            correspondance: "exact_address",
+            n_audit: "A0000000000001",
+            date_audit: "2024-02-12",
+            classe_dpe_actuel: "E",
+            adresse: "Adresse témoin",
+            objet: { grain: "immeuble", surface_m2: 1840 },
+            scenarios: [
+              sc("état initial", "état initial", 271.2, 49.8),
+              sc('scénario en une étape "principal"', "étape finale", 96.4, 12.6),
+            ],
+          },
+        },
+        faits: { ...FAITS_TEMOIN, dpe: "energivore", dpeLabel: "E", patrimoine: "none", perimetrePatrimonial: false, confortEteInsuffisant: false, addressLabel: "Adresse témoin, appartement 3B, 00000 Commune témoin" },
+      };
+    case "sources-absentes":
+      return {
+        ...base,
+        rapport: {
+          ...RAPPORT_TEMOIN,
+          audit: null, auditStatus: "unavailable",
+          georisques: {},
+          heritage: { items: [], sourceStatus: "unavailable" },
+          sinistralite: { secheresse: { kind: "indispo" }, inondation: { kind: "indispo" } },
+        },
+        catnat: null,
+        faits: {
+          ...FAITS_TEMOIN,
+          rga: "unavailable", expositionBati: false,
+          pprn: "unavailable", zoneReglementee: false, pprnLabel: null,
+          cavites: "unavailable", caviteProche: false,
+          patrimoine: "unavailable", perimetrePatrimonial: false,
+          sinistralite: "unavailable", sinistraliteActive: false,
+        },
+      };
+  }
+}
+
+/** Les lectures que la production dérive de ces données, par ses propres fonctions. */
+export function lecturesDe(c: CasDeLogement) {
+  const g = c.rapport.georisques?.parcel ?? c.rapport.georisques?.address;
+  return {
+    inondation: c.rapport.sinistralite
+      ? construireLectureInondation({
+          zonage: zonageInondationDepuisPlans(g ? (g.regulatoryPlans ?? []) : null),
+          catnat: c.catnat,
+          onrn: c.rapport.sinistralite.inondation,
+        })
+      : null,
+    points: pointsAVerifier(c.faits, PROJET_TEMOIN),
+    introPoints: introPointsAVerifier(PROJET_TEMOIN),
+    confort: deriveThermalEvidence(c.dpe),
+    audit: c.rapport.audit && c.rapport.audit.correspondance === "exact_address" && c.rapport.audit.scenarios.length > 0
+      ? parcoursAudit(c.rapport.audit.scenarios)
+      : null,
+  };
+}
+
+/** Lit le cas demandé dans l'URL ; un nom inconnu retombe sur le cas de référence. */
+export function casDepuisUrl(brut: string | undefined): CasLogement {
+  return (CAS_LOGEMENT as readonly string[]).includes(brut ?? "") ? (brut as CasLogement) : "temoin";
 }
 
 // Libellés en clair des tranches ONRN : copie de `SinistraliteSection.tsx` (constantes privées du

@@ -18,11 +18,11 @@ const TITRE_VERDICT = {
   classe: "text-[length:clamp(23px,2.9vw,36px)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
-export default async function AvantDecision({ searchParams }: { searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string }> }) {
+export default async function AvantDecision({ searchParams }: { searchParams: Promise<{ insee?: string; prefs?: string; adresse?: string; confirmer?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
   const sp = await searchParams;
   const insee = (sp.insee ?? DEFAUT.insee).trim();
-  const { projet } = projetDeTest(sp.prefs ?? DEFAUT.prefs);
+  const { projet } = projetDeTest(sp.prefs ?? DEFAUT.prefs, sp.confirmer ?? "");
   const resultat = await buildCommuneDossier(insee, projet, { hasAddress: sp.adresse !== "0" });
   if (!resultat) notFound();
   return (
