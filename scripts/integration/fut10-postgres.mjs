@@ -23,6 +23,7 @@ import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { enregistrerIntention, verrouillerIntention } from "../../src/lib/verrou-intention-dossier.ts";
 import { colonnesIntention, colonnesDossierDepuisIntention, projetPourLivraison } from "../../src/lib/dossier-contexte-checkout.ts";
+import { contexteDAchat } from "../../src/lib/contexte-livraison.ts";
 
 const modPath = process.env.PGLITE_MODULE;
 if (!modPath) {
@@ -42,15 +43,17 @@ async function base() {
   await db.exec(`
     create role authenticated nologin; create role anon nologin; create role service_role nologin bypassrls;
     create schema auth; create table auth.users (id uuid primary key);
+    create function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
     create table public.address_dossiers (
       id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id),
       ban_id text not null, insee text not null, address_label text not null,
       posture text default 'residence', stripe_payment_intent_id text unique, amount_paid_cents int,
-      purchased_at timestamptz
+      purchased_at timestamptz, access_revoked_at timestamptz
     );
     insert into auth.users values ('00000000-0000-0000-0000-00000000000a'), ('00000000-0000-0000-0000-00000000000b');
   `);
   await db.exec(sql("26_dossier_intents.sql"));
+  await db.exec(sql("28_decision_artifact.sql"));
   // DES LIGNES ANCIENNES, écrites AVANT les migrations 36 et 37 : elles doivent rester valides.
   await db.exec(`
     insert into public.dossier_intents (stripe_payment_intent_id, user_id, ban_id, insee, address_label, latitude, longitude, amount_due_cents)
@@ -61,7 +64,7 @@ async function base() {
   await db.exec(sql("36_relation_au_lieu_adresse.sql"));
   await db.exec(sql("37_contexte_checkout_dossier.sql"));
   await db.exec(sql("38_purge_dossier_intents.sql"));
-  await db.exec(`grant all on public.dossier_intents, public.address_dossiers to service_role;`);
+  await db.exec(`grant all on public.dossier_intents, public.address_dossiers, public.decision_artifact to service_role;`);
   return db;
 }
 
@@ -210,6 +213,8 @@ await cas("droits : authenticated et anon n'accèdent ni à la table ni à la pu
     await db.exec(`set role ${role}`);
     await assert.rejects(db.query(`select * from public.dossier_intents`), /permission denied/);
     await assert.rejects(db.query(`select * from public.purger_dossier_intents()`), /permission denied/);
+    await assert.rejects(db.query(`select * from public.intentions_a_reconcilier()`), /permission denied/);
+    await assert.rejects(db.query(`select public.etat_livraison_intention('x')`), /permission denied/);
     await db.exec(`reset role`);
   }
   await db.exec(`set role service_role`);
@@ -217,30 +222,72 @@ await cas("droits : authenticated et anon n'accèdent ni à la table ni à la pu
   await db.exec(`reset role`);
 });
 
-await cas("purge : abandonnées et engagées anciennes supprimées, livrées gardées sans projet, récentes intactes, idempotente", async () => {
+await cas("purge : abandonnée supprimée ; paiement engagé sans dossier, dossier sans artefact, artefact failed signalés et gardés ; artefact ready → projet effacé ; récentes intactes ; idempotente", async () => {
   const db = await base();
   const vieux = "2026-08-01T00:00:00Z";
-  const ins = (pi, extra = "") => db.query(`insert into public.dossier_intents (stripe_payment_intent_id, user_id, ban_id, insee, address_label, latitude, longitude, amount_due_cents, created_at${extra ? "," + extra.split("=")[0] : ""})
-    values ($1, '${A}', 'b', '1', 'x', 1, 1, 1, $2${extra ? ", " + extra.split("=")[1] : ""})`, [pi, pi.includes("recent") ? NOW.toISOString() : vieux]);
-  await ins("pi_abandon0001");
-  await ins("pi_engagee0001", `context_locked_at='${vieux}'`);
-  await ins("pi_recent00001");
-  await db.query(`insert into public.dossier_intents (stripe_payment_intent_id, user_id, ban_id, insee, address_label, latitude, longitude, amount_due_cents, created_at, project_state, project_snapshot)
-    values ('pi_livre000001', '${A}', 'b', '1', 'x', 1, 1, 1, '${vieux}', 'confirmed', $1)`, [JSON.stringify(PROJET)]);
-  await db.query(`insert into public.address_dossiers (user_id, ban_id, insee, address_label, stripe_payment_intent_id) values ('${A}', 'b', '1', 'x', 'pi_livre000001')`);
+  const intention = (pi, { verrou = null, etat = null, snapshot = null, quand = vieux } = {}) => db.query(
+    `insert into public.dossier_intents (stripe_payment_intent_id, user_id, ban_id, insee, address_label, latitude, longitude, amount_due_cents, created_at, context_locked_at, project_state, project_snapshot)
+     values ($1, '${A}', 'b', '1', 'x', 1, 1, 1, $2, $3, $4, $5)`, [pi, quand, verrou, etat, snapshot ? JSON.stringify(snapshot) : null]);
+  const dossier = async (pi, revoque = false) => (await db.query(
+    `insert into public.address_dossiers (user_id, ban_id, insee, address_label, stripe_payment_intent_id, access_revoked_at) values ('${A}', 'b', '44109', 'x', $1, $2) returning id`,
+    [pi, revoque ? vieux : null])).rows[0].id;
+  const artefact = (id, status, version = 1) => db.query(
+    `insert into public.decision_artifact (user_id, insee_code, scope_key, version, status, payload) values ('${A}', '44109', $1, $2, $3, $4)`,
+    [`logement:${id}`, version, status, status === "ready" ? JSON.stringify({ ok: true }) : null]);
+
+  await intention("pi_abandon0001");                                                        // 1. abandonnée
+  await intention("pi_recent00001", { quand: NOW.toISOString() });                          // 5. récente
+  await intention("pi_engage00001", { verrou: vieux, etat: "confirmed", snapshot: PROJET }); // 2. payé ? sans dossier
+  await intention("pi_sansart0001", { verrou: vieux, etat: "confirmed", snapshot: PROJET }); // 3. dossier sans artefact
+  await dossier("pi_sansart0001");
+  await intention("pi_failed00001", { verrou: vieux, etat: "confirmed", snapshot: PROJET }); // 3. artefact failed seulement
+  await artefact(await dossier("pi_failed00001"), "failed");
+  await intention("pi_ready000001", { verrou: vieux, etat: "confirmed", snapshot: PROJET }); // 4. failed puis ready
+  const idReady = await dossier("pi_ready000001");
+  await artefact(idReady, "failed", 1);
+  await artefact(idReady, "ready", 2);
+  await intention("pi_absent00001", { verrou: vieux, etat: "absent" });                      // 4. achat sans projet
+  await dossier("pi_absent00001");
+  await intention("pi_revoque0001", { verrou: vieux, etat: "confirmed", snapshot: PROJET }); // 4. dossier révoqué
+  await dossier("pi_revoque0001", true);
+  // Un artefact ready d'un AUTRE dossier à la même adresse ne vaut pas livraison de celui-ci.
+  await intention("pi_voisin00001", { verrou: vieux, etat: "confirmed", snapshot: PROJET });
+  await dossier("pi_voisin00001");
+
+  const etat = async (pi) => (await db.query(`select public.etat_livraison_intention($1) e`, [pi])).rows[0].e;
+  assert.equal(await etat("pi_engage00001"), "paiement_engage_sans_dossier");
+  assert.equal(await etat("pi_sansart0001"), "livraison_inachevee");
+  assert.equal(await etat("pi_failed00001"), "livraison_inachevee");
+  assert.equal(await etat("pi_ready000001"), "livree");
+  assert.equal(await etat("pi_voisin00001"), "livraison_inachevee");
+
   const r = (await db.query(`select * from public.purger_dossier_intents($1)`, [NOW.toISOString()])).rows[0];
-  // L'intention ancienne de la base (pi_ancien0001) a un dossier : gardée, sans snapshot à effacer.
-  assert.deepEqual(r, { supprimees_abandonnees: 1, supprimees_engagees: 1, projets_effaces: 1 });
+  assert.deepEqual(r, { supprimees_abandonnees: 1, projets_effaces: 2, a_reconcilier: 1, livraisons_inachevees: 3 });
   const restantes = (await db.query(`select stripe_payment_intent_id from public.dossier_intents order by 1`)).rows.map((x) => x.stripe_payment_intent_id);
-  assert.deepEqual(restantes, ["pi_ancien0001", "pi_livre000001", "pi_recent00001"]);
-  const livre = (await db.query(`select project_state, project_snapshot from public.dossier_intents where stripe_payment_intent_id = 'pi_livre000001'`)).rows[0];
-  assert.equal(livre.project_state, "confirmed");
-  assert.equal(livre.project_snapshot.purge, true);
-  assert.equal(livre.project_snapshot.rawText, undefined);
-  assert.deepEqual(projetPourLivraison(livre), { etat: "absent" });
+  assert.ok(!restantes.includes("pi_abandon0001"));
+  for (const pi of ["pi_engage00001", "pi_sansart0001", "pi_failed00001", "pi_ready000001", "pi_recent00001", "pi_absent00001", "pi_ancien0001"]) {
+    assert.ok(restantes.includes(pi), pi);
+  }
+  // Le snapshot indispensable au rattrapage est intact ; celui d'une livraison faite est effacé.
+  const snap = async (pi) => (await db.query(`select project_snapshot from public.dossier_intents where stripe_payment_intent_id = $1`, [pi])).rows[0].project_snapshot;
+  for (const pi of ["pi_engage00001", "pi_sansart0001", "pi_failed00001", "pi_voisin00001"]) assert.equal((await snap(pi)).rawText, "Calme.", pi);
+  for (const pi of ["pi_ready000001", "pi_revoque0001"]) {
+    assert.equal((await snap(pi)).purge, true, pi);
+    assert.equal((await snap(pi)).rawText, undefined, pi);
+  }
+  // Et la livraison inachevée reste rattrapable avec le projet PAYÉ.
+  const intentInachevee = (await db.query(`select * from public.dossier_intents where stripe_payment_intent_id = 'pi_failed00001'`)).rows[0];
+  assert.equal(contexteDAchat(intentInachevee).etat, "confirme");
+  assert.equal(contexteDAchat(intentInachevee).projet.rawText, "Calme.");
+  // La liste à réconcilier ne porte aucune donnée personnelle.
+  const liste = (await db.query(`select * from public.intentions_a_reconcilier($1)`, [NOW.toISOString()])).rows;
+  assert.deepEqual(liste.map((x) => x.etat).sort(), ["livraison_inachevee", "livraison_inachevee", "livraison_inachevee", "paiement_engage_sans_dossier"]);
+  assert.deepEqual(Object.keys(liste[0]).sort(), ["created_at", "etat", "stripe_payment_intent_id"]);
+  // Idempotente.
   assert.deepEqual((await db.query(`select * from public.purger_dossier_intents($1)`, [NOW.toISOString()])).rows[0],
-    { supprimees_abandonnees: 0, supprimees_engagees: 0, projets_effaces: 0 });
+    { supprimees_abandonnees: 0, projets_effaces: 0, a_reconcilier: 1, livraisons_inachevees: 3 });
   await assert.rejects(db.query(`select * from public.purger_dossier_intents($1, interval '1 day')`, [NOW.toISOString()]), /trop court/);
+  await assert.rejects(db.query(`select * from public.purger_dossier_intents($1, interval '30 days', interval '1 hour')`, [NOW.toISOString()]), /trop court/);
 });
 
 await cas("retours arrière : 38 puis 37 s'appliquent, la base revient à son schéma antérieur", async () => {
