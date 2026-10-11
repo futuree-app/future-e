@@ -47,16 +47,19 @@ il se serait arrêté à la fin de la minute, avant la liste complète des contr
 - Le seuil est celui de la colonne d'appui : l'emblème compté ne réapparaît qu'une fois le repère rangé
   dans sa colonne, jamais empilé sous lui (donc aussi sur tablette).
 
-**Desktop garde l'emblème compté**, à côté de sa lecture : il dit l'état des trois échelles (plein, fin,
-pointillé), ce que le repère de navigation ne dit pas. Le remplacer par les trois lignes compactes partout
-est un changement d'une ligne de CSS, si tu le préfères après revue.
+**Arbitrage final du porteur (12/10) : un seul grand emblème également sur ordinateur.**
+Le second dessin compté est retiré à toutes les largeurs ; « D'où viennent ces constats » utilise
+partout les trois lignes compactes et les états distincts, sans perdre les décomptes. Le repère
+« Explorer le dossier » reste la seule illustration grand format. Les captures desktop ci-dessous
+ont été prises **avant** cet arbitrage final ; elles documentent bien le sticky, mais pas le décompte
+compact final. Contrôle de rendu final desktop à refaire avant activation du drapeau.
 
 ## 3. Fichiers
 
 | Fichier | Changement |
 | --- | --- |
 | `src/components/report/DossierDecisionSection.tsx` | Emplacement `controles` ; en classique, `<>{section}{controles}</>` (même DOM) |
-| `src/components/releve/DossierDecisionReleve.tsx` | Liste dans la grille, colonne d'appui `.repere`, décompte large ou compact, `ReperEchelle` |
+| `src/components/releve/DossierDecisionReleve.tsx` | Liste dans la grille, colonne d'appui `.repere`, décompte compact unique, `ReperEchelle` |
 | `src/components/releve/releve.module.css` | Collage, fenêtre basse, `scroll-padding-top`, décompte compact |
 | `src/components/releve/lecture-dossier.ts` | `texteEtatEchelle` gagne `etatCourt` (même règle, trois états) |
 | `src/app/(account)/rapport/page.tsx` | Racine `overflow-hidden lg:overflow-clip` avec le relevé ; liste passée en `controles` (2 lignes) |
@@ -107,7 +110,7 @@ aucun débordement, aucune erreur console liée au lot.
 - **Relevé**, comparé à `main` sur 4 cas : mêmes liens (ensemble et nombre), mêmes destinations du repère,
   même provenance (`?preuve=` présent sur les mêmes 8 liens d'un artefact), mêmes cartes, même texte des
   contrôles, mêmes nombres par échelle, aucun identifiant en double.
-- **Accessibilité** : l'arbre d'accessibilité n'expose qu'un décompte par largeur (c'est ce contrôle qui a
+- **Accessibilité** : l'arbre d'accessibilité n'expose qu'un décompte (testé avant le dernier arbitrage CSS) (c'est ce contrôle qui a
   trouvé le seul bogue du lot, § 7) ; les trois liens du repère restent la voie sémantique, les formes du
   dessin restent hors du parcours Tab. Clavier : ordre conclusion, repère, décompte, minute, contrôles ;
   aucun élément focalisé masqué par la navigation, en avançant comme en reculant. Ancres du sommaire : la
