@@ -8,12 +8,14 @@
 // Structure DOM IDENTIQUE que les blocs soient déterministes ou générés : la substitution sous
 // Suspense ne doit pas faire sauter la page. Aucun LLM ici.
 import type React from "react";
+import type { ReactNode } from "react";
 import type { ConclusionNarrativePlan, VerdictTone } from "@/lib/decision/conclusion-plan";
 import type { RenderedBlock } from "@/lib/decision/conclusion-validate";
 import type { EvidenceRef } from "@/lib/decision/decision-fact";
 import { Chip } from "@/components/report/DecisionFactRenderParts";
 import { PriorityControlActions } from "@/components/report/PriorityControlActions";
 import { bindOrphans } from "@/lib/typography";
+import r from "@/components/releve/releve.module.css";
 
 // CE QUE LA CONDITION NON REMPLIE APPORTE EN PLUS DU TEXTE : sa preuve, et la limite du constat.
 // Quand une seule condition est en cause, le bloc de tête la porte ENTIÈREMENT et la section
@@ -68,8 +70,18 @@ const TITRE_DEFAUT: NiveauTitre = {
   classe: "text-[length:var(--text-section)] font-[var(--weight-section)] tracking-[-0.4px]",
 };
 
+/**
+ * LA PRÉSENTATION, ET RIEN D'AUTRE (FUT-91). `releve` rend le même bloc dans la plaque du relevé :
+ * mêmes données (plan, blocs déterministes OU enrichis, condition, gestes), même titre jamais généré,
+ * même `PriorityControlActions`. Seuls l'ordre de lecture et le dessin changent : les gestes
+ * prioritaires montent avant l'explication, et `apresTitre` accueille le sommaire du dossier.
+ * `ConclusionRedigee` transmet ces deux props sans rien changer à sa logique de génération.
+ */
+export type PresentationConclusion = { variante?: "classique" | "releve"; apresTitre?: ReactNode };
+
 export function ConclusionBlock({
   plan, blocks, condition: conditionEvidence = null, renderedIds = [], titre = TITRE_DEFAUT,
+  variante = "classique", apresTitre,
 }: {
   plan: ConclusionNarrativePlan;
   blocks: RenderedBlock[];
@@ -78,7 +90,12 @@ export function ConclusionBlock({
   // Les cartes rendues sous ce bloc, pour n'activer un renvoi que vers ce qui existe (cf.
   // PriorityControlActions). Vide par défaut : sans elles, les démarches restent du texte.
   renderedIds?: string[];
-}) {
+} & PresentationConclusion) {
+  if (variante === "releve") {
+    return (
+      <ConclusionPlaque plan={plan} blocks={blocks} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} apresTitre={apresTitre} />
+    );
+  }
   const color = TONE_COLOR[plan.verdictTone];
   const byKey = new Map(blocks.map((b) => [b.key, b]));
   // Le bloc `verdict` porte le DÉTAIL ; le headline vit sur le plan (jamais confié au modèle).
@@ -199,6 +216,77 @@ export function ConclusionBlock({
       {nonCouvert ? (
         <p className="mt-4 text-[13px] leading-[1.5] text-ghost">{nonCouvert}</p>
       ) : null}
+    </div>
+  );
+}
+
+// ── FUT-91 · la plaque du relevé ─────────────────────────────────────────────────────────────
+//
+// Les mêmes règles que le bloc classique, ligne pour ligne : détail = bloc `verdict` (enrichi ou non),
+// condition non examinée en registre « non su », gestes seulement hors verdict critique, preuve de la
+// condition portée par le bloc, priorités non couvertes. Le cadre (la plaque elle-même) est posé par
+// l'appelant : ce bloc ne rend que son contenu.
+function ConclusionPlaque({
+  plan, blocks, condition: conditionEvidence, renderedIds, titre, apresTitre,
+}: {
+  plan: ConclusionNarrativePlan;
+  blocks: RenderedBlock[];
+  condition: ConditionEvidence | null;
+  renderedIds: string[];
+  titre: NiveauTitre;
+  apresTitre?: ReactNode;
+}) {
+  const color = TONE_COLOR[plan.verdictTone];
+  const byKey = new Map(blocks.map((b) => [b.key, b]));
+  const detail = byKey.get("verdict")?.text ?? plan.verdict.detail;
+  const condition = byKey.get("unexamined_hard_constraints");
+  const nonCouvert = byKey.get("uncovered_priorities")?.text;
+  const control = plan.priorityControl;
+  const suiteDuHeros = plan.verdict.headline.consumedFrom === "reserves";
+  const showControl = control != null && control.actions.length > 0 && plan.verdictTone !== "critical";
+  const T = titre.niveau;
+  return (
+    <div className={r.pile} style={{ gap: 16 }}>
+      <div className={r.rangee} style={{ justifyContent: "space-between" }}>
+        <p className={r.etiquette} style={{ color, display: "flex", alignItems: "center", gap: 8 }}>
+          <span aria-hidden style={{ width: 8, height: 8, background: color, display: "inline-block" }} />
+          {plan.verdictLabel}
+        </p>
+        <span className={r.mono} style={{ fontSize: 11.5, color: "var(--r-meta)" }}>{SCOPE_LABEL[plan.scope]}</span>
+      </div>
+      {/* LE HÉROS : déterministe, mot pour mot, jamais généré. Les petits mots et la ponctuation haute
+          restent liés (un « : » ne commence jamais une ligne). */}
+      <T className={`${r.display} ${r.verdict}`}>{bindOrphans(plan.verdict.headline.text)}</T>
+      {apresTitre}
+      {showControl ? (
+        <div className={r.pileSerree}>
+          <p className={r.etiquette} style={{ color: "var(--reg-controle)" }}>{suiteDuHeros ? "À contrôler ensuite" : "À contrôler en priorité"}</p>
+          <PriorityControlActions actions={control!.actions} renderedIds={renderedIds} ordre={suiteDuHeros ? "ensuite" : "priorite"} />
+        </div>
+      ) : null}
+      {/* Le détail : le bloc « verdict », enrichi quand la lecture rédigée existe, sinon le repli. */}
+      {detail ? <p className={`${r.chapo} ${r.verdictDetail}`}>{detail}</p> : null}
+      {condition ? (
+        <div className={r.pileSerree}>
+          <p className={`${r.registre} ${r.etiquette}`} style={{ "--r-teinte": "var(--reg-non-su)" } as React.CSSProperties}>
+            <span>{condition.sourceIds.length > 1 ? "Conditions à vérifier" : "Condition à vérifier"}</span>
+          </p>
+          <p className={r.dense}>{condition.text}</p>
+        </div>
+      ) : null}
+      {conditionEvidence ? (
+        <div className={r.pileSerree}>
+          {conditionEvidence.limitation ? <p className={r.nuance}>{conditionEvidence.limitation}</p> : null}
+          {conditionEvidence.evidence.length > 0 ? (
+            <div className={r.rangee} style={{ gap: "6px 16px" }}>
+              {conditionEvidence.evidence.map((e, i) => (
+                <Chip key={i} label={e.href && e.observedValue ? "Preuve" : e.label} value={e.observedValue} href={e.href} color={color} />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {nonCouvert ? <p className={r.nuance}>{nonCouvert}</p> : null}
     </div>
   );
 }

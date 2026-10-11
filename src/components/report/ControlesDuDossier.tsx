@@ -24,36 +24,16 @@ import { controlesParEchelle, phraseVerificationsNonRealisees } from "@/lib/deci
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { bindOrphans } from "@/lib/typography";
+import { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
+export { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
 import styles from "./ControlesDuDossier.module.css";
+import { ControlesReleve } from "@/components/releve/ControlesReleve";
+import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
 
 // La couleur des contrôles, la même que leur section dans la minute : une même nature de constat se
 // peint pareil d'un bout à l'autre de la page.
 const COULEUR = "var(--info)";
 const COULEUR_NON_SU = "var(--reg-non-su)";
-
-function sujetDeCarte(card: DossierCard): string {
-  if (card.kind === "fact") return card.fact.topic;
-  if ("headlineSubject" in card.composition) return card.composition.headlineSubject;
-  return card.composition.title;
-}
-
-function sujetsDuGroupe(cards: DossierCard[]): string {
-  const vus = new Set<string>();
-  const sujets: string[] = [];
-
-  for (const card of cards) {
-    const sujet = sujetDeCarte(card).trim();
-    const cle = sujet.toLocaleLowerCase("fr");
-    if (!sujet || vus.has(cle)) continue;
-    vus.add(cle);
-    sujets.push(sujet);
-  }
-
-  const apercu = sujets.slice(0, 2).join(" · ");
-  if (!apercu) return "Contrôles établis par nos sources";
-  const libelle = sujets.length > 2 ? `${apercu} · …` : apercu;
-  return libelle.charAt(0).toLocaleUpperCase("fr") + libelle.slice(1);
-}
 
 export function ControlesDuDossier(
   {
@@ -62,8 +42,10 @@ export function ControlesDuDossier(
      *  émettent (cf. `evidenceHref`). Absente sur un dossier assemblé à l'instant : il n'y a alors
      *  aucune version figée à désigner. */
     provenance,
-  }: { dossier: Dossier; provenance?: string },
+    presentation,
+  }: { dossier: Dossier; provenance?: string; /** FUT-91, cf. `DossierDecisionSection`. */ presentation?: PresentationDossier },
 ) {
+  if (presentationDuDossier(presentation) === "releve") return <ControlesReleve dossier={dossier} provenance={provenance} />;
   const groupes = controlesParEchelle(dossier);
   // CE QUE NOS SOURCES N'ONT PAS PU LIRE : une ligne, pas une rubrique (cf. `phraseVerificationsNonRealisees`).
   const nonRealisees = phraseVerificationsNonRealisees(dossier);
