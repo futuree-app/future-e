@@ -2,6 +2,7 @@ import type { LogementReport } from "@/lib/logement-report-types";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 import { DpeBadge } from "./kit";
+import { formatSurfaceM2 } from "@/lib/audit-record";
 
 // Passeport du bien : pendant du passeport territorial, au grain adresse. Surface
 // teintée à l'accent du module, adresse en grand (Instrument Serif), DPE en sceau.
@@ -17,11 +18,11 @@ export function PropertyPassport({
   const tint = "#c8b89a";
   const dpeLetter = dpe?.etiquette_dpe ?? null;
   const fields: { label: string; value: string }[] = [];
-  if (dpe?.surface_m2) fields.push({ label: "Surface", value: `${dpe.surface_m2} m²` });
+  if (dpe?.surface_m2) fields.push({ label: "Surface", value: formatSurfaceM2(dpe.surface_m2) });
   if (dpe?.annee_construction) fields.push({ label: "Construction", value: String(dpe.annee_construction) });
   if (dpe?.type_batiment) fields.push({ label: "Type de bâti", value: dpe.type_batiment });
   if (parcel?.parcelCode)
-    fields.push({ label: "Parcelle", value: parcel.contenance ? `${parcel.parcelCode} · ${parcel.contenance} m²` : parcel.parcelCode });
+    fields.push({ label: "Parcelle", value: parcel.contenance ? `${parcel.parcelCode} · ${formatSurfaceM2(parcel.contenance)}` : parcel.parcelCode });
 
   return (
     // Scène 3D : pendant du passeport territorial. Se déplie au chargement, puis

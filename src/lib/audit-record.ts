@@ -169,6 +169,76 @@ export function formatKwhEpM2(v: number): string {
   return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/ /g, " ")} kWh EP/m²/an`;
 }
 
+/** Des émissions par m², au dixième, à la française (même contrat que `formatKwhEpM2`). */
+export function formatGesM2(v: number): string {
+  return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/\u202f/g, "\u00a0")} kg CO₂/m²/an`;
+}
+
+/** Une surface, au dixième au plus, à la française : « 194,7 m² », « 2 877 m² ». Jamais « 194.7 ». */
+export function formatSurfaceM2(v: number): string {
+  return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/\u202f/g, "\u00a0")} m²`;
+}
+
+// ── FUT-67 : LES SCÉNARIOS D'AUDIT LUS COMME DES PARCOURS DE TRAVAUX ──────────────────────────────
+// L'écran listait les lignes de la source telles quelles (« scénario multi étapes "principal" » /
+// « étape intermédiaire 1 »), dans l'ordre de l'API : l'état initial arrivait en dernier, l'étape
+// intermédiaire avant la première, et « 5 scénarios » comptait des LIGNES. Un audit réglementaire porte
+// en réalité un état de départ et un ou deux parcours (par étapes, ou en une fois), chacun fait
+// d'étapes ordonnées. Cette fonction ne fait que ranger et nommer : aucune classe déduite (une classe
+// DPE dépend aussi des émissions), aucun coût, aucun gain annoncé (FUT-62 décidera de leur lecture).
+
+export type EtapeParcours = { libelle: string; scenario: AuditScenario };
+export type ParcoursAudit = { titre: string; etapes: EtapeParcours[] };
+export type LectureAudit = { depart: AuditScenario | null; parcours: ParcoursAudit[] };
+
+const sansAccents = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/["«»]/g, "").trim();
+const estEtatInitial = (s: AuditScenario) => /etat initial/.test(sansAccents(`${s.categorie ?? ""} ${s.etape ?? ""}`));
+
+function rangEtape(etape: string): number {
+  const e = sansAccents(etape);
+  if (/premiere/.test(e)) return 1;
+  const inter = /intermediaire\s*(\d+)?/.exec(e);
+  if (inter) return 1 + Number(inter[1] ?? 1);
+  if (/finale/.test(e)) return 1_000;
+  return 500;
+}
+
+function titreParcours(categorie: string): { titre: string; ordre: number } {
+  const c = sansAccents(categorie);
+  const variante = /complementaire/.test(c) ? " (variante)" : "";
+  if (/multi|plusieurs/.test(c)) return { titre: `Rénovation par étapes${variante}`, ordre: variante ? 3 : 1 };
+  if (/une etape|une seule/.test(c)) return { titre: `Rénovation en une seule fois${variante}`, ordre: variante ? 4 : 2 };
+  const brut = categorie.replace(/["«»]/g, "").trim();
+  return { titre: brut.charAt(0).toUpperCase() + brut.slice(1), ordre: 5 };
+}
+
+export function parcoursAudit(scenarios: AuditScenario[]): LectureAudit {
+  const depart = scenarios.find(estEtatInitial) ?? null;
+  const groupes = new Map<string, AuditScenario[]>();
+  for (const s of scenarios) {
+    if (estEtatInitial(s)) continue;
+    const cle = s.categorie ?? "Parcours non précisé par la source";
+    groupes.set(cle, [...(groupes.get(cle) ?? []), s]);
+  }
+  const parcours = [...groupes.entries()].map(([categorie, lignes]) => {
+    const { titre, ordre } = titreParcours(categorie);
+    const triees = [...lignes].sort((a, b) => rangEtape(a.etape ?? "") - rangEtape(b.etape ?? ""));
+    const plusieurs = triees.length > 1;
+    const etapes = triees.map((s, i) => {
+      const e = sansAccents(s.etape ?? "");
+      const libelle = /finale/.test(e)
+        ? (plusieurs ? "Étape finale" : "Après travaux")
+        : /premiere|intermediaire/.test(e)
+          ? `Étape ${i + 1}`
+          : (s.etape ?? "Étape non précisée");
+      return { libelle, scenario: s };
+    });
+    return { titre, etapes, ordre };
+  });
+  parcours.sort((a, b) => a.ordre - b.ordre);
+  return { depart, parcours: parcours.map(({ titre, etapes }) => ({ titre, etapes })) };
+}
+
 /** La phrase qui dit sur quoi porte l'audit. */
 export function libelleObjet(objet: AuditObjet): string {
   if (!objet) return "Objet audité non précisé par la source";

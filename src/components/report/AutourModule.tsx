@@ -226,6 +226,10 @@ export default function AutourModule({
           {/* L'adresse ne se saisit plus ici : elle est fixée à la création du dossier. Analyser
               un autre bien passe par un autre dossier, ce qui est exactement la règle que
               l'identité en uuid rend possible (deux appartements d'un même immeuble coexistent). */}
+          {/* FUT-67 : l'encadré n'existe que s'il a quelque chose à dire (analyse en cours, erreur). Il
+              restait affiché autour du seul lien « Analyser un autre bien », vestige du formulaire de
+              saisie : une grande carte vide en tête du module. */}
+          {(loading || error) && (
           <div className="glass rounded-xl p-8" style={{ borderTop: "2px solid var(--green)" }}>
             {loading && (
               <div style={{ fontSize: 12.5, color: "var(--fg-4)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -238,28 +242,54 @@ export default function AutourModule({
                 {error}
               </div>
             )}
-
-            {!loading && !error && (
-              <Link
-                href="/rapport/dossiers"
-                className="inline-flex items-center gap-2 text-[length:var(--text-dense)] text-muted no-underline"
-              >
-                Analyser un autre bien
-              </Link>
-            )}
           </div>
+          )}
+
+          {!loading && !error && (
+            <Link
+              href="/rapport/dossiers"
+              className="inline-flex items-center gap-2 text-[length:var(--text-dense)] text-muted no-underline"
+            >
+              Analyser un autre bien
+            </Link>
+          )}
         </section>
 
         {autour && (
           <section style={{ padding: "40px 0 96px", display: "grid", gap: 36 }}>
-            {analyzed && (
-              <div style={{ display: "grid", gap: 4 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fg-4)" }}>
-                  Adresse analysée
-                </span>
-                <span style={{ fontSize: 16, color: "var(--fg-hi)" }}>{analyzed.label}</span>
-              </div>
-            )}
+            {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré (`buildAutourConclusion`).
+                FUT-67 : EN TÊTE, et non plus après les faits. Le lecteur d'un dossier payé doit saisir
+                l'essentiel avant le détail ; la conclusion était rendue tout en bas, sous cinq blocs.
+                Les faits qu'elle résume suivent juste dessous.
+
+                LA PHRASE SUR LES AUTORISATIONS (`mouvement`) N'EST PAS ICI : elle s'appuie sur le
+                « Registre national des autorisations d'urbanisme, consulté le … » et doit se lire
+                sous lui. Elle est rendue DANS le bloc « Ce qui est autorisé autour », juste après la
+                date de consultation. Sans ce bloc (registre non consulté), elle ne s'affiche pas. */}
+            {(() => {
+              const c = buildAutourConclusion(autour);
+              if (!c) return null;
+              return (
+                <ReportSection eyebrow="Ce que ce secteur met à portée" tone="green">
+                  <GlassCard>
+                    <div style={{ display: "grid", gap: 14 }}>
+                      <p style={{ fontSize: 15.5, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
+                        {c.lead}
+                      </p>
+                      {c.absences.map((a) => (
+                        <p key={a} style={{ fontSize: 14.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                          {a}
+                        </p>
+                      ))}
+                      <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.55, margin: 0, paddingTop: 4, borderTop: "1px solid var(--border-1)" }}>
+                        {c.limite}
+                      </p>
+                    </div>
+                  </GlassCard>
+                </ReportSection>
+              );
+            })()}
+
 
             {/* Note informative si l'adresse est hors de la commune de résidence (commune
                 débloquée, cf. 4.5). Même règle que dans le module Logement. */}
@@ -357,52 +387,19 @@ export default function AutourModule({
                           {p.consultation}
                         </p>
                       )}
+                      {/* La phrase d'ensemble sur les autorisations, sous la date qui la borne (cf. en tête). */}
+                      {(() => {
+                        const mouvement = buildAutourConclusion(autour)?.mouvement;
+                        return mouvement ? (
+                          <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{mouvement}</p>
+                        ) : null;
+                      })()}
                     </div>
                   </GlassCard>
                 </ReportSection>
               );
             })()}
 
-            {/* CE QU'IL FAUT EN RETENIR, assemblé des faits, jamais généré. Le module rendait des
-                nombres et s'arrêtait ; il rend maintenant la configuration que ces nombres
-                décrivent. Placé APRÈS les faits et AVANT le renvoi : une conclusion se lit quand
-                on a vu ce qu'elle résume.
-
-                L'INVARIANT DE RENDU : `mouvement` peut porter l'année de DÉPÔT du dossier, jamais
-                la date de CONSULTATION du registre, qui est celle qui borne l'état observé. Il
-                s'appuie pour cela sur le « Registre national des autorisations d'urbanisme,
-                consulté le … » du bloc des permis, rendu juste au-dessus. Cette phrase ne doit
-                jamais être affichée sur une surface qui ne porte pas cette date quelque part :
-                reprise seule dans un PDF, un partage ou une synthèse, elle ferait lire au présent
-                une possibilité constatée des années plus tôt. */}
-            {(() => {
-              const c = buildAutourConclusion(autour);
-              if (!c) return null;
-              return (
-                <ReportSection eyebrow="Ce que ce secteur met à portée" tone="green">
-                  <GlassCard>
-                    <div style={{ display: "grid", gap: 14 }}>
-                      <p style={{ fontSize: 15.5, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
-                        {c.lead}
-                      </p>
-                      {c.mouvement && (
-                        <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>
-                          {c.mouvement}
-                        </p>
-                      )}
-                      {c.absences.map((a) => (
-                        <p key={a} style={{ fontSize: 14.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-                          {a}
-                        </p>
-                      ))}
-                      <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.55, margin: 0, paddingTop: 4, borderTop: "1px solid var(--border-1)" }}>
-                        {c.limite}
-                      </p>
-                    </div>
-                  </GlassCard>
-                </ReportSection>
-              );
-            })()}
 
             <ReportSection eyebrow="Poursuivre" tone="neutral">
               <GlassCard>

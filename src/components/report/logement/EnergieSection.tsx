@@ -4,7 +4,8 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
-import { formatKwhEpM2, libelleObjet } from "@/lib/audit-record";
+import { formatGesM2, formatKwhEpM2, libelleObjet, parcoursAudit } from "@/lib/audit-record";
+import { dateFr } from "@/lib/decision/autour-permis";
 import { phraseAttribution, vueSectionDpe } from "@/lib/dpe-selection-vue";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
@@ -166,7 +167,7 @@ export function EnergieSection({
               Étiquette {dpe.etiquette_dpe ?? "—"}, {DPE_LABELS[dpe.etiquette_dpe ?? ""] ?? "Donnée indisponible"}
             </div>
             <div style={{ fontSize: 12, color: "var(--fg-4)", marginTop: 4 }}>
-              GES {dpe.etiquette_ges ?? "—"} · DPE du {dpe.date_dpe?.slice(0, 10) ?? "—"}
+              GES {dpe.etiquette_ges ?? "—"} · DPE du {(dpe.date_dpe ? dateFr(dpe.date_dpe) : null) ?? "—"}
             </div>
           </div>
         </div>
@@ -189,7 +190,7 @@ export function EnergieSection({
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
           {dpe.conso_ep_m2 != null && <Block label="Consommation" value={formatKwhEpM2(dpe.conso_ep_m2)} />}
-          {dpe.emission_ges_m2 != null && <Block label="Émissions GES" value={`${dpe.emission_ges_m2} kg CO₂/m²/an`} />}
+          {dpe.emission_ges_m2 != null && <Block label="Émissions GES" value={formatGesM2(dpe.emission_ges_m2)} />}
           {dpe.type_batiment && <Block label="Type" value={dpe.type_batiment} />}
         </div>
 
@@ -201,30 +202,51 @@ export function EnergieSection({
           </p>
         )}
         {/* Un audit ne s'affiche que s'il est rattaché par l'identifiant BAN de l'adresse (FUT-59). */}
-        {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (
-          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 10 }}>
+        {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (() => {
+          // FUT-67 : les lignes de la source rangées en parcours (cf. `parcoursAudit`) : un point de
+          // départ, puis chaque parcours de travaux avec ses étapes dans l'ordre. Rien n'est ajouté à
+          // la source : ni classe déduite, ni coût, ni gain.
+          const lecture = parcoursAudit(audit.scenarios);
+          return (
+          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Audit énergétique · {audit.scenarios.length} scénarios
+              Audit énergétique{lecture.parcours.length > 0 ? ` · ${lecture.parcours.length} parcours de travaux` : ""}
             </div>
             {/* FUT-59 : l'objet audité, lu dans les surfaces de la source. Un audit trouvé par
                 l'adresse peut porter sur l'immeuble entier : il ne passe pas pour celui du logement. */}
             <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>{libelleObjet(audit.objet)}</p>
-            {audit.scenarios.map((s, i) => (
-              <div key={i} style={{ padding: "10px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  {s.categorie && <div style={{ fontSize: 13, color: "var(--fg-1)" }}>{s.categorie}</div>}
-                  {s.etape && <div style={{ fontSize: 11, color: "var(--fg-4)", marginTop: 2 }}>{s.etape}</div>}
-                </div>
-                {/* Valeur PAR M² (source `ep_conso_5_usages_m2`). Avant FUT-59 : le total annuel, sous l'unité par m². */}
-                {s.conso_ep_m2 != null && (
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--fg-3)", whiteSpace: "nowrap" }}>
-                    {formatKwhEpM2(s.conso_ep_m2)}
-                  </span>
-                )}
+            {lecture.depart?.conso_ep_m2 != null && (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                <span style={{ fontSize: 14, color: "var(--fg-2)" }}>Point de départ, avant travaux</span>
+                <span style={{ fontSize: 14, color: "var(--fg-1)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                  {formatKwhEpM2(lecture.depart.conso_ep_m2)}
+                </span>
+              </div>
+            )}
+            {lecture.parcours.map((p) => (
+              <div key={p.titre} style={{ padding: "12px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "grid", gap: 8 }}>
+                <div style={{ fontSize: 14, color: "var(--fg-hi)", fontWeight: 500 }}>{p.titre}</div>
+                <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
+                  {p.etapes.map(({ libelle, scenario: s }) => (
+                    <li key={`${p.titre}-${libelle}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                      <span style={{ fontSize: 13, color: "var(--fg-2)" }}>{libelle}</span>
+                      {/* Valeur PAR M² (source `ep_conso_5_usages_m2`). Avant FUT-59 : le total annuel, sous l'unité par m². */}
+                      {s.conso_ep_m2 != null && (
+                        <span style={{ fontSize: 13, color: "var(--fg-1)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                          {formatKwhEpM2(s.conso_ep_m2)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
               </div>
             ))}
+            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
+              Consommations estimées par l&apos;auditeur après chaque étape, en énergie primaire. Le coût des travaux et l&apos;étiquette visée ne figurent pas ici.
+            </p>
           </div>
-        )}
+          );
+        })()}
       </div>
       </GlassCard>
     </ReportSection>
