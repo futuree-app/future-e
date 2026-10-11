@@ -31,7 +31,10 @@ test("bucketDuProjet : `location` est une INTENTION, l'occupant en place est `re
   const habite = { echelle: "adresse", relation: "lives_here" } as const;
   assert.equal(bucketDuProjet({ intent: "location" }), "location");
   assert.equal(bucketDuProjet({}, habite), "reside");
-  assert.equal(bucketDuProjet({ intent: "location" }, habite), "location");
+  // Décision du 11/10/2026 : « j'y habite » DÉCLARÉ À L'ADRESSE prime sur l'intention globale.
+  assert.equal(bucketDuProjet({ intent: "location" }, habite), "reside");
+  // L'intention garde la main sur la résidence COMMUNALE (on loue ou achète souvent dans sa ville).
+  assert.equal(bucketDuProjet({ intent: "location" }, { echelle: "commune", relation: "current_residence", origine: "inferred" }), "location");
   assert.equal(bucketDuProjet({}), "neutre");
   assert.equal(bucketDuProjet({ posture: "habitant" } as { intent?: string | null }), "neutre");
 });

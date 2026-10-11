@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import {
-  envisageLeLieu, habiteLeLieu, patchRelationAdresse, relationDeLAdresse, relationDeLaCommune, voixDuLecteur,
+  enregistrerRelationAdresse, envisageLeLieu, habiteLeLieu, patchRelationAdresse, relationDeLAdresse, relationDeLaCommune, voixDuLecteur,
   type RelationAuLieu,
 } from "./relation-au-lieu.ts";
 import { assembleDossier } from "./decision/decision-assembler.ts";
@@ -104,7 +104,8 @@ test("5. le projet est inchangé : ni lu pour la relation, ni modifié par elle"
   // La route qui enregistre une relation n'écrit rien d'autre que la ligne du dossier.
   const route = readFileSync("src/app/api/dossier/relation/route.ts", "utf8");
   assert.doesNotMatch(route, /user_project|user_profiles|projet-ecriture|ecrireProjet|report_context/);
-  assert.match(route, /updateOwnedAddressDossier\(user\.id, dossier\.id, patch\)/);
+  assert.match(route, /ecrire: \(id, patch\) => updateOwnedAddressDossier\(user\.id, id, patch\)/);
+  assert.match(route, /lireDossier: \(id\) => getDossier\(supabase, user\.id, id\)/);
 });
 
 test("6. une recherche « Où vivre » n'écrit aucune relation au lieu", () => {
@@ -166,11 +167,53 @@ test("9. habite, envisage, étudie, découvre, inconnu : chacun sa formulation",
   assert.equal(envisageLeLieu(ETUDIE) && envisageLeLieu(ENVISAGE_COMMUNE), true);
 });
 
-test("9 bis. l'intention passe avant la relation : le locataire qui achète son logement reçoit les contrôles d'achat", () => {
+test("9 bis. « j'y habite » déclaré À L'ADRESSE prime sur l'intention globale (décision du 11/10/2026)", () => {
+  // J'habite La Rochelle, mon projet est d'acheter à Nantes. Mon logement actuel ne se lit pas comme
+  // un bien à acheter.
   const acheteur = projet({ intent: "achat" });
-  assert.equal(voixDuLecteur(acheteur.intent, HABITE), "engagement");
-  assert.equal(bucketDuProjet(acheteur, HABITE), "achat");
+  assert.equal(voixDuLecteur(acheteur.intent, HABITE), "habitant");
+  assert.equal(bucketDuProjet(acheteur, HABITE), "reside");
+  assert.equal(assembleDossier(RUN, acheteur, "commune+adresse", "La Rochelle", [], HABITE).sections.find((s) => s.key === "verifications")!.title, "À connaître et à surveiller");
+  // À l'échelle de la COMMUNE, l'intention garde la main : on achète souvent dans sa propre ville.
   assert.equal(titreVerif(acheteur, VIT_COMMUNE), "À contrôler avant de vous engager");
+  assert.equal(bucketDuProjet(acheteur, VIT_COMMUNE), "achat");
+});
+
+test("9 bis (deux lieux). La Rochelle habitée, Nantes à l'achat : chaque bien a sa voix", () => {
+  const acheteur = projet({ intent: "achat" });
+  const laRochelle = relationDeLAdresse({ place_relation: "lives_here" });
+  const nantesEtudie = relationDeLAdresse({ place_relation: "studying" });
+  const nantesInconnu = relationDeLAdresse({ place_relation: null });
+  assert.deepEqual(
+    [laRochelle, nantesEtudie, nantesInconnu].map((r) => [voixDuLecteur(acheteur.intent, r), bucketDuProjet(acheteur, r)]),
+    [["habitant", "reside"], ["engagement", "achat"], ["engagement", "achat"]],
+  );
+  assert.notDeepEqual(pointsAVerifier(LOGEMENT, acheteur, laRochelle), pointsAVerifier(LOGEMENT, acheteur, nantesEtudie));
+});
+
+test("9 bis (limite documentée). Le locataire qui achète le logement qu'il occupe et déclare « j'y habite »", () => {
+  // Il habite ET envisage d'acheter : deux informations, dont seule la première existe à FUT-26. Il
+  // reçoit aujourd'hui la voix d'un habitant ; FUT-10 séparera l'objectif de l'analyse de ce bien.
+  // Ce test fige la limite pour qu'elle ne passe pas pour un comportement voulu le jour où on la lève.
+  const locataireAcheteur = projet({ posture: "habitant", intent: "achat" });
+  assert.equal(bucketDuProjet(locataireAcheteur, HABITE), "reside");
+  // Sans relation déclarée au bien, l'intention s'applique, comme avant FUT-26.
+  assert.equal(bucketDuProjet(locataireAcheteur, null), "achat");
+});
+
+test("1 bis. commune DÉDUITE « j'envisage » : aucune voix d'engagement sans confirmation", () => {
+  const p = projet();
+  const deduite: RelationAuLieu = { echelle: "commune", relation: "considering_living", origine: "inferred" };
+  assert.equal(voixDuLecteur(p.intent, deduite), "neutre");
+  assert.equal(titreVerif(p, deduite), "À contrôler");
+  // Confirmée par la personne, elle dit un engagement.
+  assert.equal(voixDuLecteur(p.intent, ENVISAGE_COMMUNE), "engagement");
+  assert.equal(titreVerif(p, ENVISAGE_COMMUNE), "À contrôler avant de vous engager");
+  // La résidence DÉDUITE de la commune de résidence déclarée garde la voix d'habitant.
+  assert.equal(voixDuLecteur(p.intent, VIT_COMMUNE), "habitant");
+  assert.equal(titreVerif(p, VIT_COMMUNE), "À connaître et à surveiller");
+  // Et la relation produite par `resolveRelation` pour une commune non habitée est bien « déduite ».
+  assert.deepEqual(relationDeLaCommune({ relation: "considering_living", source: "inferred" }), deduite);
 });
 
 test("9 ter. la relation à la commune garde son origine (déduite ou confirmée)", () => {
@@ -195,9 +238,85 @@ test("10 bis. pour un acheteur déclaré, la conclusion est identique avec ou sa
   // L'empreinte de la conclusion rédigée est celle du plan : s'il ne change pas, rien n'est régénéré.
   const acheteur = projet({ intent: "achat" });
   const sans = assembleDossier(RUN, acheteur, "commune", "Nantes", [], null);
-  for (const r of [ENVISAGE_COMMUNE, ETUDIE, VIT_COMMUNE, HABITE]) {
+  for (const r of [ENVISAGE_COMMUNE, ETUDIE, VIT_COMMUNE]) {
     const avec = assembleDossier(RUN, acheteur, "commune", "Nantes", [], r);
     assert.deepEqual(avec.narrativePlan, sans.narrativePlan);
     assert.deepEqual(avec.sections.map((s) => s.title), sans.sections.map((s) => s.title));
   }
+  // Seul « j'y habite » déclaré à l'adresse change la voix d'un acheteur, et c'est voulu (9 bis).
+  assert.notDeepEqual(
+    assembleDossier(RUN, acheteur, "commune", "Nantes", [], HABITE).sections.map((s) => s.title),
+    sans.sections.map((s) => s.title),
+  );
+});
+
+// ── La route PATCH, avec un stockage SIMULÉ injecté ─────────────────────────────────────────────
+// Ces tests vérifient la logique de la route. Ils ne remplacent PAS des tests contre Supabase : la
+// RLS et les filtres réels (`getDossier`, `updateOwnedAddressDossier`) sont simulés ici.
+
+function stockageSimule(lecteur: string) {
+  const dossiers = new Map([
+    ["d-moi", { id: "d-moi", user_id: "moi", revoque: false, place_relation: null as string | null }],
+    ["d-autre", { id: "d-autre", user_id: "autre", revoque: false, place_relation: null as string | null }],
+    ["d-revoque", { id: "d-revoque", user_id: "moi", revoque: true, place_relation: null as string | null }],
+  ]);
+  const ecritures: string[] = [];
+  const visible = (id: string) => {
+    const d = dossiers.get(id);
+    return d && d.user_id === lecteur && !d.revoque ? d : null;
+  };
+  return {
+    dossiers, ecritures,
+    deps: {
+      now: NOW,
+      lireDossier: async (id: string) => visible(id),
+      ecrire: async (id: string, patch: { place_relation: string | null }) => {
+        const d = visible(id);
+        if (!d) return null;
+        ecritures.push(id);
+        d.place_relation = patch.place_relation;
+        return { place_relation: d.place_relation };
+      },
+    },
+  };
+}
+
+test("route : le propriétaire déclare, change puis efface la relation de son bien", async () => {
+  const s = stockageSimule("moi");
+  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "lives_here" }, s.deps), { status: 200, body: { ok: true, relation: "lives_here" } });
+  assert.equal(s.dossiers.get("d-moi")!.place_relation, "lives_here");
+  assert.equal((await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "studying" }, s.deps)).body.relation, "studying");
+  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: null }, s.deps), { status: 200, body: { ok: true, relation: null } });
+  assert.equal(s.dossiers.get("d-moi")!.place_relation, null);
+});
+
+test("route : le dossier d'un autre utilisateur est refusé, et rien n'est écrit", async () => {
+  const s = stockageSimule("moi");
+  const r = await enregistrerRelationAdresse({ dossierId: "d-autre", relation: "lives_here" }, s.deps);
+  assert.deepEqual(r, { status: 403, body: { error: "DOSSIER_NOT_ACCESSIBLE" } });
+  assert.deepEqual(s.ecritures, []);
+  assert.equal(s.dossiers.get("d-autre")!.place_relation, null);
+});
+
+test("route : un dossier révoqué est refusé, et rien n'est écrit", async () => {
+  const s = stockageSimule("moi");
+  assert.equal((await enregistrerRelationAdresse({ dossierId: "d-revoque", relation: "studying" }, s.deps)).status, 403);
+  assert.deepEqual(s.ecritures, []);
+});
+
+test("route : une écriture refusée APRÈS la lecture (révocation entre-temps) est un refus, pas un succès", async () => {
+  const s = stockageSimule("moi");
+  const deps = { ...s.deps, ecrire: async () => null };
+  assert.equal((await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "studying" }, deps)).status, 403);
+});
+
+test("route : valeur invalide ou dossier manquant → 400, sans lecture ni écriture", async () => {
+  const s = stockageSimule("moi");
+  let lectures = 0;
+  const deps = { ...s.deps, lireDossier: async (id: string) => { lectures++; return s.deps.lireDossier(id); } };
+  for (const body of [{ dossierId: "d-moi", relation: "residence" }, { dossierId: "d-moi" }, { relation: "lives_here" }, { dossierId: "", relation: "lives_here" }, null, "texte"]) {
+    assert.equal((await enregistrerRelationAdresse(body, deps)).status, 400, JSON.stringify(body));
+  }
+  assert.equal(lectures, 0);
+  assert.deepEqual(s.ecritures, []);
 });

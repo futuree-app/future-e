@@ -1,4 +1,4 @@
-import { habiteLeLieu, type RelationAuLieu } from "../relation-au-lieu.ts";
+import { habiteCeBienDeclare, habiteLeLieu, type RelationAuLieu } from "../relation-au-lieu.ts";
 // LES GESTES DU MODULE LOGEMENT — SOURCE UNIQUE. Lib PURE (aucune I/O, aucun `node:`) : elle est lue
 // par les règles du moteur de décision (`logement-rules.ts`), qui alimentent aussi bien le dossier
 // que la liste « à vérifier » du module (`logement-verifications.ts`).
@@ -47,12 +47,16 @@ export type Bucket = "neutre" | "achat" | "reside" | "location";
  * `reside` NE VIENT PLUS DE L'OBJECTIF DU PROJET (FUT-26). « J'y habite déjà » dit pourquoi la personne
  * utilise futur•e, pas qu'elle habite CE lieu-ci : elle le recevait pour une adresse étudiée dans une
  * autre ville. Seule une relation CONNUE au lieu (`habiteLeLieu`) donne les gestes de qui y vit.
- * L'intention passe avant, comme avant : le locataire qui achète son logement reçoit les gestes d'achat.
+ * L'intention passe avant la résidence COMMUNALE ; « j'y habite » déclaré À L'ADRESSE passe avant
+ * l'intention (cf. `voixDuLecteur`, qui porte l'ordre complet et sa limite).
  */
 export function bucketDuProjet(
   p: { intent?: string | null },
   relation: RelationAuLieu | null | undefined = null,
 ): Bucket {
+  // « J'y habite » DÉCLARÉ À L'ADRESSE prime sur l'intention globale (décision du 11/10/2026) : même
+  // ordre que la voix du dossier, cf. `voixDuLecteur` et sa limite connue, laissée à FUT-10.
+  if (habiteCeBienDeclare(relation)) return "reside";
   if (p.intent === "achat") return "achat";
   if (p.intent === "location") return "location";
   if (habiteLeLieu(relation)) return "reside";

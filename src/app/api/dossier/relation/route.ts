@@ -2,7 +2,7 @@ import "server-only";
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
-import { patchRelationAdresse } from "@/lib/relation-au-lieu";
+import { enregistrerRelationAdresse } from "@/lib/relation-au-lieu";
 
 export const dynamic = "force-dynamic";
 
@@ -20,17 +20,14 @@ export const dynamic = "force-dynamic";
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 export async function PATCH(request: Request) {
-  const body = (await request.json().catch(() => null)) as { dossierId?: unknown; relation?: unknown } | null;
-  const dossierId = typeof body?.dossierId === "string" ? body.dossierId : null;
-  if (!dossierId) return Response.json({ error: "dossierId requis" }, { status: 400 });
-  const patch = patchRelationAdresse(body?.relation, new Date());
-  if (!patch) return Response.json({ error: "relation invalide" }, { status: 400 });
-
+  const body = await request.json().catch(() => null);
   const { supabase, user } = await requireCurrentUser();
-  const dossier = await getDossier(supabase, user.id, dossierId);
-  if (!dossier) return Response.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
-
-  const ecrit = await updateOwnedAddressDossier(user.id, dossier.id, patch);
-  if (!ecrit) return Response.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
-  return Response.json({ ok: true, relation: ecrit.place_relation ?? null });
+  // La logique vit dans `enregistrerRelationAdresse` (testée avec un stockage simulé) ; la route ne
+  // fait que brancher le vrai stockage, sous l'identité du lecteur.
+  const r = await enregistrerRelationAdresse(body, {
+    now: new Date(),
+    lireDossier: (id) => getDossier(supabase, user.id, id),
+    ecrire: (id, patch) => updateOwnedAddressDossier(user.id, id, patch),
+  });
+  return Response.json(r.body, { status: r.status });
 }

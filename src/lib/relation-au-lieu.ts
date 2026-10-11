@@ -82,17 +82,47 @@ export function envisageLeLieu(r: RelationAuLieu | null | undefined): boolean {
  *   - `habitant`   : il y vit (relation connue) → « à connaître et à surveiller » ;
  *   - `neutre`     : on ne sait pas → ni l'un ni l'autre n'est supposé.
  *
- * L'INTENTION PASSE AVANT LA RELATION, comme dans les gestes depuis le 19/08/2026 : le locataire qui
- * achète le logement où il vit est un cas réel, et ses contrôles sont ceux d'un acheteur.
+ * L'ORDRE, DU PLUS SPÉCIFIQUE AU PLUS GÉNÉRAL (décisions du porteur, 11/10/2026) :
+ *   1. « j'y habite » DÉCLARÉ À L'ADRESSE prime sur l'intention GLOBALE du projet. Une intention
+ *      d'acheter à Nantes ne fait pas parler du logement occupé à La Rochelle comme d'un bien à acheter ;
+ *   2. l'intention (achat, location) : elle vaut pour tout lieu dont on ne sait rien de plus précis, et
+ *      prime sur la résidence COMMUNALE (on achète souvent dans sa propre ville) ;
+ *   3. la résidence communale, déclarée ou DÉDUITE de la commune de résidence que la personne a
+ *      elle-même renseignée : une déduction solide, qui garde la voix d'habitant ;
+ *   4. « j'envisage d'y vivre » : CONFIRMÉE seulement. Déduite, elle ne dit que « ce n'est pas votre
+ *      commune » : quelqu'un qui consulte une commune pour s'informer n'est pas en train de s'engager ;
+ *      « j'étudie ce bien », toujours déclaré, compte aussi ;
+ *   5. sinon, neutre.
+ *
+ * LIMITE CONNUE, laissée à FUT-10 : le locataire qui ACHÈTE le logement qu'il occupe et déclare
+ * « j'y habite » reçoit la voix d'un habitant, pas celle d'un acheteur. Il habite ET envisage
+ * d'acheter : ce sont deux informations, la relation effective au bien et l'objectif de l'analyse de
+ * ce bien, et seule la première existe aujourd'hui. Une intention propre à l'adresse pourra primer sur
+ * l'intention globale sans effacer le fait qu'il y habite.
  */
 export type Voix = "engagement" | "habitant" | "neutre";
 
+/** « J'y habite », déclaré à l'ADRESSE : la seule relation qui prime sur l'intention globale. */
+function habiteCeBien(r: RelationAuLieu | null | undefined): boolean {
+  return r?.echelle === "adresse" && r.relation === "lives_here";
+}
+
+/** Une relation qui dit l'engagement : « j'étudie ce bien », ou « j'envisage d'y vivre » CONFIRMÉE. */
+function envisageDeclare(r: RelationAuLieu | null | undefined): boolean {
+  if (!r) return false;
+  return r.echelle === "adresse" ? r.relation === "studying" : r.relation === "considering_living" && r.origine === "confirmed_by_user";
+}
+
 export function voixDuLecteur(intent: string | null | undefined, r: RelationAuLieu | null | undefined): Voix {
+  if (habiteCeBien(r)) return "habitant";
   if (intent === "achat" || intent === "location") return "engagement";
   if (habiteLeLieu(r)) return "habitant";
-  if (envisageLeLieu(r)) return "engagement";
+  if (envisageDeclare(r)) return "engagement";
   return "neutre";
 }
+
+/** « J'y habite » déclaré à l'adresse prime-t-il sur l'intention globale ? Partagé avec les gestes. */
+export const habiteCeBienDeclare = habiteCeBien;
 
 /**
  * LA MODIFICATION EXPLICITE d'une relation à l'adresse, traduite en colonnes. `null` en entrée efface
@@ -106,4 +136,34 @@ export function patchRelationAdresse(
   if (relation === null) return { place_relation: null, place_relation_set_at: null };
   if (!isAddressRelation(relation)) return null;
   return { place_relation: relation, place_relation_set_at: now.toISOString() };
+}
+
+/**
+ * L'ENREGISTREMENT D'UNE RELATION À L'ADRESSE, dépendances injectées (route `PATCH /api/dossier/relation`).
+ *
+ * Extrait de la route pour être testé sans base : `lireDossier` rend le dossier SEULEMENT s'il
+ * appartient au lecteur et n'est pas révoqué (en vrai : `getDossier`, sous RLS) ; `ecrire` rend
+ * `null` sur un refus (en vrai : `updateOwnedAddressDossier`, filtré par utilisateur et révocation).
+ * Ces tests vérifient NOTRE logique ; ils ne remplacent pas un test des politiques Supabase (RLS).
+ *
+ * Rien d'autre n'est écrit que la ligne du dossier : aucune dépendance ne permet de toucher au projet.
+ */
+export async function enregistrerRelationAdresse(
+  body: unknown,
+  deps: {
+    now: Date;
+    lireDossier: (dossierId: string) => Promise<{ id: string } | null>;
+    ecrire: (dossierId: string, patch: { place_relation: AddressRelation | null; place_relation_set_at: string | null }) => Promise<{ place_relation?: unknown } | null>;
+  },
+): Promise<{ status: 200 | 400 | 403; body: Record<string, unknown> }> {
+  const b = (body ?? {}) as { dossierId?: unknown; relation?: unknown };
+  const dossierId = typeof b.dossierId === "string" && b.dossierId.length > 0 ? b.dossierId : null;
+  if (!dossierId) return { status: 400, body: { error: "dossierId requis" } };
+  const patch = patchRelationAdresse(b.relation, deps.now);
+  if (!patch) return { status: 400, body: { error: "relation invalide" } };
+  const dossier = await deps.lireDossier(dossierId);
+  if (!dossier) return { status: 403, body: { error: "DOSSIER_NOT_ACCESSIBLE" } };
+  const ecrit = await deps.ecrire(dossier.id, patch);
+  if (!ecrit) return { status: 403, body: { error: "DOSSIER_NOT_ACCESSIBLE" } };
+  return { status: 200, body: { ok: true, relation: isAddressRelation(ecrit.place_relation) ? ecrit.place_relation : null } };
 }
