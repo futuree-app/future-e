@@ -26,7 +26,7 @@ import { bindOrphans } from "@/lib/typography";
 import { lireDossier, lireCarteDuDossier, lectureDesEchelles, texteEtatEchelle, type SectionLue } from "./lecture-dossier";
 import { EntreeReleve, teinteSection, teinteEntree } from "./EntreeReleve";
 import {
-  releve as s, Surtitre, Registre, Plaque, Grain, EmblemeEchelles, type EtatTrace, type GrainCle,
+  releve as s, Surtitre, Registre, Plaque, Grain, type EtatTrace,
 } from "./primitives";
 
 export type DossierDecisionReleveProps = {
@@ -61,8 +61,6 @@ function Sommaire({ sections }: { sections: SectionLue[] }) {
     </nav>
   );
 }
-
-const GLYPHE: Record<string, GrainCle> = { territoire: "commune", quartier: "secteur", logement: "batiment" };
 
 type ConditionOuverte = { cle: string; libelle: string; cause: "a_confirmer" | "ne_pas_mesurer" | "donnee_absente" };
 
@@ -165,7 +163,7 @@ export function DossierDecisionReleve({
   const sectionConditions = sections.some((x) => x.cle === "incompatibilities");
 
   // Les cartes de la liste complète des contrôles, rendue sous cette section (`ControlesDuDossier`) :
-  // elles sont affichées sur la page, l'emblème les compte (sans doublon avec la minute).
+  // elles sont affichées sur la page, le décompte les compte (sans doublon avec la minute).
   const echelles = lectureDesEchelles(lecture, controlesParEchelle(dossier).flatMap((g) => g.cards.map((c) => lireCarteDuDossier(dossier, c))));
   const trace = (i: number): EtatTrace => {
     const e = echelles[i]!;
@@ -219,40 +217,9 @@ export function DossierDecisionReleve({
         ) : null}
 
         <div className={supportingPane ? "lg:col-start-1 lg:row-start-2" : ""}>
-          {/* ── D'où viennent ces constats : le périmètre du dossier, jamais le nombre de cartes ──
-              UNE SEULE ILLUSTRATION POUR NAVIGUER (FUT-92). Sous 1024 px, le repère des échelles est
-              juste au-dessus, à pleine largeur : un second grand dessin cercle, carré, losange y
-              répétait le premier. Le décompte y devient trois lignes, dont le petit repère garde le
-              trait de l'emblème (plein, fin, pointillé). Sur grand écran, le repère est dans sa
-              colonne, et l'emblème compté reste ici, à côté de sa lecture. */}
+          {/* D'où viennent ces constats : un décompte compact à toutes les largeurs.
+              Le grand emblème des échelles existe déjà dans « Explorer le dossier ». */}
           <section className={s.echellesDuDossier} aria-label="Les échelles où ces constats ont été établis" id="mouvement-echelles">
-            <div className={s.decompteLarge} style={{ maxWidth: 200, width: "100%", justifySelf: "center" }}>
-              <EmblemeEchelles
-                etiquette={`D'où viennent ces constats : ${echelles.map((e) => { const t = texteEtatEchelle(e); return `${t.nom}, ${t.phrase.toLowerCase()}`; }).join(" ; ")}`}
-                etats={{ commune: trace(0), secteur: trace(1), batiment: trace(2) }}
-              />
-            </div>
-            <div className={`${s.pile} ${s.decompteLarge}`} style={{ gap: 10, alignContent: "center" }}>
-              <p className={s.etiquette}>D&apos;où viennent ces constats</p>
-              <ul className={s.liste}>
-                {echelles.map((e) => {
-                  const t = texteEtatEchelle(e);
-                  const plein = e.etat === "examinee" && e.constats > 0;
-                  return (
-                    <li key={e.echelle} className={s.ligneEchelle}>
-                      <span style={{ color: plein ? "var(--r-encre)" : "var(--r-meta)" }}><Grain grain={GLYPHE[e.echelle]!}>{""}</Grain></span>
-                      {t.valeur != null ? (
-                        <span className={s.chiffre} style={{ fontSize: 24, color: plein ? "var(--r-encre)" : "var(--r-meta)" }}>{t.valeur}</span>
-                      ) : <span aria-hidden />}
-                      <span className={s.pileSerree}>
-                        <span className={s.etiquette} style={{ color: plein ? "var(--r-texte)" : "var(--r-meta)" }}>{t.nom}</span>
-                        <span className={s.dense} style={{ color: plein ? undefined : "var(--r-meta)" }}>{t.phrase}</span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
             <div className={s.decompteCompact}>
               <p className={s.etiquette}>D&apos;où viennent ces constats</p>
               <ul className={s.listeCompacte}>
