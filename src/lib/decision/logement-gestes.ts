@@ -1,4 +1,4 @@
-import { habiteCeBienDeclare, habiteLeLieu, type RelationAuLieu } from "../relation-au-lieu.ts";
+import { habiteCeBienDeclare, habiteLeLieu, objectifDeLAnalyse, type RelationAuLieu } from "../relation-au-lieu.ts";
 // LES GESTES DU MODULE LOGEMENT — SOURCE UNIQUE. Lib PURE (aucune I/O, aucun `node:`) : elle est lue
 // par les règles du moteur de décision (`logement-rules.ts`), qui alimentent aussi bien le dossier
 // que la liste « à vérifier » du module (`logement-verifications.ts`).
@@ -56,6 +56,13 @@ export function bucketDuProjet(
 ): Bucket {
   // « J'y habite » DÉCLARÉ À L'ADRESSE prime sur l'intention globale (décision du 11/10/2026) : même
   // ordre que la voix du dossier, cf. `voixDuLecteur` et sa limite connue, laissée à FUT-10.
+  // FUT-10 : l'objectif DÉCLARÉ pour ce bien passe avant tout, sans effacer la relation (même ordre
+  // que `voixDuLecteur`). Le locataire qui achète son logement reçoit les gestes d'achat.
+  const objectif = objectifDeLAnalyse(relation);
+  if (objectif === "buy") return "achat";
+  if (objectif === "rent") return "location";
+  if (objectif === "understand") return relation?.echelle === "adresse" && relation.relation === "studying" ? "neutre" : "reside";
+  if (objectif === "other") return habiteCeBienDeclare(relation) ? "reside" : "neutre";
   if (habiteCeBienDeclare(relation)) return "reside";
   if (p.intent === "achat") return "achat";
   if (p.intent === "location") return "location";
