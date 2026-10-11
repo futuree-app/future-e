@@ -169,6 +169,106 @@ export function formatKwhEpM2(v: number): string {
   return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/ /g, " ")} kWh EP/m²/an`;
 }
 
+/** Des émissions par m², au dixième, à la française (même contrat que `formatKwhEpM2`). */
+export function formatGesM2(v: number): string {
+  return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/\u202f/g, "\u00a0")} kg CO₂/m²/an`;
+}
+
+/** Une surface, au dixième au plus, à la française : « 194,7 m² », « 2 877 m² ». Jamais « 194.7 ». */
+export function formatSurfaceM2(v: number): string {
+  return `${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 }).replace(/\u202f/g, "\u00a0")} m²`;
+}
+
+// ── FUT-67 : LES SCÉNARIOS D'AUDIT LUS COMME DES PARCOURS DE TRAVAUX ──────────────────────────────
+// L'écran listait les lignes de la source telles quelles (« scénario multi étapes "principal" » /
+// « étape intermédiaire 1 »), dans l'ordre de l'API : l'état initial arrivait en dernier, l'étape
+// intermédiaire avant la première, et « 5 scénarios » comptait des LIGNES. Un audit réglementaire porte
+// en réalité un état de départ et un ou deux parcours (par étapes, ou en une fois), chacun fait
+// d'étapes ordonnées. Cette fonction ne fait que ranger et nommer : aucune classe déduite (une classe
+// DPE dépend aussi des émissions), aucun coût, aucun gain annoncé (FUT-62 décidera de leur lecture).
+
+export type EtapeParcours = { libelle: string; scenario: AuditScenario };
+/** `cle` : la catégorie de la source, unique par parcours (clé de rendu) ; `titre` : ce que lit le lecteur. */
+export type ParcoursAudit = { cle: string; titre: string; etapes: EtapeParcours[] };
+/** `autresDeparts` : les lignes d'état initial au-delà de la première. Elles restent visibles, à part :
+ *  un état avant travaux n'est jamais un parcours de travaux (revue FUT-67). */
+export type LectureAudit = { depart: AuditScenario | null; autresDeparts: AuditScenario[]; parcours: ParcoursAudit[] };
+
+const sansAccents = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/["«»]/g, "").trim();
+const estEtatInitial = (s: AuditScenario) => /etat initial/.test(sansAccents(`${s.categorie ?? ""} ${s.etape ?? ""}`));
+
+/**
+ * LE NUMÉRO D'ÉTAPE EST CELUI DE LA SOURCE, jamais une position recalculée (revue FUT-67) : « étape
+ * première » = 1, « étape intermédiaire N » = N + 1. Une étape absente de la source laisse un trou
+ * visible (« Étape 2 », « Étape finale ») au lieu d'être masquée par une renumérotation.
+ */
+function numeroEtape(etape: string): number | null {
+  const e = sansAccents(etape);
+  if (/premiere/.test(e)) return 1;
+  const inter = /intermediaire\s*(\d+)?/.exec(e);
+  if (inter) return 1 + Number(inter[1] ?? 1);
+  return null;
+}
+function rangEtape(etape: string): number {
+  const n = numeroEtape(etape);
+  if (n != null) return n;
+  return /finale/.test(sansAccents(etape)) ? 1_000 : 500;
+}
+
+type Genre = "etapes" | "une_fois" | "autre";
+function titreParcours(categorie: string): { titre: string; ordre: number; genre: Genre } {
+  const c = sansAccents(categorie);
+  const variante = /complementaire/.test(c) ? " (variante)" : "";
+  if (/multi|plusieurs/.test(c)) return { titre: `Rénovation par étapes${variante}`, ordre: variante ? 3 : 1, genre: "etapes" };
+  if (/une etape|une seule/.test(c)) return { titre: `Rénovation en une seule fois${variante}`, ordre: variante ? 4 : 2, genre: "une_fois" };
+  const brut = categorie.replace(/["«»]/g, "").trim();
+  return { titre: brut.charAt(0).toUpperCase() + brut.slice(1), ordre: 5, genre: "autre" };
+}
+
+export function parcoursAudit(scenarios: AuditScenario[]): LectureAudit {
+  // Le point de départ est LA première ligne d'état initial. Une éventuelle seconde ligne n'est pas
+  // perdue, ni comptée comme un parcours : elle est rendue à part, comme un autre état avant travaux.
+  const initiaux = scenarios.filter(estEtatInitial);
+  const depart = initiaux[0] ?? null;
+  const groupes = new Map<string, AuditScenario[]>();
+  for (const s of scenarios) {
+    if (estEtatInitial(s)) continue;
+    const cle = s.categorie ?? "Parcours non précisé par la source";
+    groupes.set(cle, [...(groupes.get(cle) ?? []), s]);
+  }
+  const parcours = [...groupes.entries()].map(([categorie, lignes]) => {
+    const { titre, ordre, genre } = titreParcours(categorie);
+    const triees = [...lignes].sort((a, b) => rangEtape(a.etape ?? "") - rangEtape(b.etape ?? ""));
+    const etapes = triees.map((s) => {
+      const e = sansAccents(s.etape ?? "");
+      const n = numeroEtape(s.etape ?? "");
+      // « Après travaux » seulement pour une rénovation en une fois : un parcours par étapes dont la
+      // source ne donne que la fin reste « Étape finale », jamais déguisé en rénovation d'un coup.
+      const libelle = /finale/.test(e)
+        ? (genre === "une_fois" ? "Après travaux" : "Étape finale")
+        : n != null
+          ? `Étape ${n}`
+          : (s.etape ?? "Étape non précisée");
+      return { libelle, scenario: s };
+    });
+    return { cle: categorie, titre, etapes, ordre };
+  });
+  parcours.sort((a, b) => a.ordre - b.ordre);
+  // DEUX CATÉGORIES, DEUX TITRES. Si deux catégories de la source donnent le même titre lisible, le
+  // libellé de la source les distingue : la simplification ne fusionne jamais deux parcours à l'œil.
+  const vus = new Map<string, number>();
+  for (const p of parcours) vus.set(p.titre, (vus.get(p.titre) ?? 0) + 1);
+  return {
+    depart,
+    autresDeparts: initiaux.slice(1),
+    parcours: parcours.map(({ cle, titre, etapes }) => ({
+      cle,
+      titre: (vus.get(titre) ?? 0) > 1 ? `${titre} · ${cle.replace(/["«»]/g, "").trim()}` : titre,
+      etapes,
+    })),
+  };
+}
+
 /** La phrase qui dit sur quoi porte l'audit. */
 export function libelleObjet(objet: AuditObjet): string {
   if (!objet) return "Objet audité non précisé par la source";
