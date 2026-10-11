@@ -13,7 +13,7 @@
 import Link from "next/link";
 import { carteCompte, NUITS, MACHINE_A_SOUS_DRIAS, type Indicators } from "@/lib/accueil/recits";
 import { HORIZONS } from "@/lib/horizons";
-import { releve as s, Surtitre, Plaque, RegleDuTemps, Marge, GlypheGrain, EmblemeEchelles, type GrainCle } from "./primitives";
+import { releve as s, Surtitre, Plaque, RegleDuTemps, Marge, GlypheGrain, EmblemeEchelles, type GrainCle } from "@/components/releve/primitives";
 
 // La trajectoire de Marseille (maille du 1er arrondissement), valeurs figées et vérifiées contre
 // `public/data_climat.json` par `recits.test.ts`. Le texte de chaque palier vient de `carteCompte`.

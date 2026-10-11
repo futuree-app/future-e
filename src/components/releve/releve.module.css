@@ -11,7 +11,10 @@
    docs/audits/2026-10-11-fut87-direction-artistique.md.
    ════════════════════════════════════════════════════════════════════════════════════════════ */
 
-.releve {
+/* `.releve` : une PAGE entière (prototypes) ; `.releveSection` : une section insérée dans une page
+   existante (le vrai hub Ma décision, FUT-91), qui hérite du fond et de la hauteur de sa page. Les
+   deux portent les mêmes jetons. */
+.releve, .releveSection {
   /* Fonds : on garde le noir profond de la DA ; la « feuille » est le même fond, la plaque un cran
      au-dessus. Aucun verre translucide ni halo dans le prototype. */
   --r-fond: var(--bg);
@@ -39,11 +42,10 @@
   --r-large: 118;
   --r-semi: 88;
 
-  background: var(--r-fond);
   color: var(--r-texte);
   font-family: var(--font-sans);
-  min-height: 100vh;
 }
+.releve { background: var(--r-fond); min-height: 100vh; }
 
 /* ── Conteneur et grille à marge ────────────────────────────────────────────────────────── */
 
@@ -440,3 +442,43 @@
 .cas { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 12px 0 0; font-family: var(--font-mono); font-size: 12px; }
 .cas a { color: var(--r-discret); }
 .cas a[aria-current="page"] { color: var(--r-encre); text-decoration-color: var(--r-encre); }
+
+
+/* ── FUT-91 · le relevé dans le vrai hub ────────────────────────────────────────────────── */
+
+/* La bande DANS une colonne : le hub de production a une colonne d'appui à droite, que la bande
+   pleine largeur du prototype recouvrirait. Elle reste donc dans sa colonne, en léger retrait. */
+.bandeColonne {
+  background: var(--r-plaque);
+  border-radius: var(--r-rayon);
+  padding: 32px 20px;
+  margin: 32px 0;
+}
+@media (min-width: 640px) { .bandeColonne { padding: 40px 32px; } }
+
+/* Les bandeaux d'état du dossier (adresse en cours, adresse indisponible) : un trait de registre
+   devant une phrase, sans carte. */
+.etatDossier { display: flex; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--r-filet); margin-bottom: 18px; }
+.etatDossier::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--r-teinte, var(--reg-non-su)); }
+
+/* Les groupes de contrôles : un registre par échelle, replié. */
+.groupe { border-top: 1px solid var(--r-filet-fort); }
+.groupe:last-child { border-bottom: 1px solid var(--r-filet-fort); }
+.groupe > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline; padding: 16px 4px; }
+.groupe > summary::-webkit-details-marker { display: none; }
+.groupe > summary:hover { background: var(--bg-elev); }
+.groupe > summary:focus-visible { outline: 2px solid var(--r-encre); outline-offset: -2px; }
+.groupe[open] > summary .groupeSigne { transform: rotate(45deg); }
+.groupeSigne { font-family: var(--font-mono); color: var(--r-discret); }
+@media (prefers-reduced-motion: no-preference) { .groupeSigne { transition: transform 160ms ease; } }
+.groupeCorps { padding: 4px 0 24px; }
+
+/* Une carte du dossier : l'ancre des gestes prioritaires y arrive (focus programmatique, sans contour). */
+.entree { scroll-margin-top: 96px; }
+.entree:focus { outline: none; }
+/* Les deux côtés d'un arbitrage, en regard sur grand écran (comme `TradeoffFaceoff`). */
+@media (min-width: 760px) { .cotesEnRegard { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; } }
+/* Le sommaire en jetons, à toutes les largeurs dans le vrai hub (la colonne droite y porte la navigation). */
+.sommaireJetons { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Les titres de la balance dans la colonne du hub (plus étroite que la page du prototype). */
+.titreBalance { font-size: clamp(20px, 2vw, 24px); }

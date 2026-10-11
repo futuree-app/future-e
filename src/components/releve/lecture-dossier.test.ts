@@ -10,18 +10,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { mapCommuneToModuleFacts } from "../../../lib/decision/module-facts-map.ts";
-import { runRules } from "../../../lib/decision/materiality-rules.ts";
-import { assembleDossier } from "../../../lib/decision/decision-assembler.ts";
-import { sectionsDeLaMinute } from "../../../lib/decision/dossier-view.ts";
-import type { IndexCommune } from "../../../lib/comparateur-vie.ts";
-import type { UserProject } from "../../../lib/user-project.ts";
-import type { Dossier, DossierCard } from "../../../lib/decision/decision-fact.ts";
-import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../../../lib/hard-constraints.ts";
-import { hydrateHardConstraints } from "../../../lib/hard-constraints-hydrate.ts";
-import type { PlaceDirectory } from "../../../lib/hard-constraints-resolve.ts";
+import { mapCommuneToModuleFacts } from "../../lib/decision/module-facts-map.ts";
+import { runRules } from "../../lib/decision/materiality-rules.ts";
+import { assembleDossier } from "../../lib/decision/decision-assembler.ts";
+import { sectionsDeLaMinute } from "../../lib/decision/dossier-view.ts";
+import type { IndexCommune } from "../../lib/comparateur-vie.ts";
+import type { UserProject } from "../../lib/user-project.ts";
+import type { Dossier, DossierCard } from "../../lib/decision/decision-fact.ts";
+import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../../lib/hard-constraints.ts";
+import { hydrateHardConstraints } from "../../lib/hard-constraints-hydrate.ts";
+import type { PlaceDirectory } from "../../lib/hard-constraints-resolve.ts";
 import { lireDossier, lectureDesEchelles, perimetreDuDossier, texteEtatEchelle, type LectureDecision } from "./lecture-dossier.ts";
-import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
+import { dossierAnchorId } from "../../lib/decision/dossier-anchors.ts";
 
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
 const entree = (over: Partial<IndexCommune> = {}): IndexCommune => ({
@@ -129,7 +129,7 @@ test("L3. le verdict est celui du plan, mot pour mot, sections dans l'ordre de l
 
 // ── Provenance : chaque preuve garde son lien, sa cible, son grain et sa date (revue V2) ──────────
 
-type Ref = import("../../../lib/decision/decision-fact.ts").EvidenceRef;
+type Ref = import("../../lib/decision/decision-fact.ts").EvidenceRef;
 const cloner = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 const toutesLesPreuves = (e: import("./lecture-dossier.ts").EntreeLue) =>
   [...e.preuves, ...e.sources, ...e.cotes.flatMap((c) => [...c.preuves, ...c.sources])];
@@ -286,7 +286,7 @@ test("P4. les constats se comptent par échelle de lecture du moteur : une proxi
 // ── Rigueur des dessins ───────────────────────────────────────────────────────────────────────
 
 test("D1. la règle du temps pose des jalons et ne trace jamais de ligne entre deux horizons", () => {
-  const src = readFileSync("src/components/prototypes/fut87/primitives.tsx", "utf8");
+  const src = readFileSync("src/components/releve/primitives.tsx", "utf8");
   const debut = src.indexOf("export function RegleDuTemps(");
   // La fonction suivante du fichier borne le découpage, quelle qu'elle soit.
   const regle = src.slice(debut, src.indexOf("\nexport function ", debut + 1));
@@ -306,19 +306,20 @@ function pages(dir: string): string[] {
 }
 
 test("I1. chaque page et le gabarit des prototypes renvoient une 404 en production, côté serveur", () => {
-  const fichiers = pages(RACINE_PROTO);
-  assert.ok(fichiers.length >= 6, `${fichiers.length} fichiers`);
+  // Les prototypes FUT-87 et le banc FUT-91 : gabarit et pages, côté serveur.
+  const fichiers = [...pages(RACINE_PROTO), ...pages("src/app/dev/fut91")];
+  assert.ok(fichiers.length >= 8, `${fichiers.length} fichiers`);
   for (const f of fichiers) {
     const src = readFileSync(f, "utf8");
     assert.ok(!/^\s*["']use client["']/m.test(src), `${f} : composant serveur`);
     assert.ok(/if \(process\.env\.NODE_ENV === "production"\) notFound\(\);/.test(src), `${f} : garde de production absente`);
   }
-  assert.match(readFileSync(join(RACINE_PROTO, "layout.tsx"), "utf8"), /robots: \{ index: false, follow: false \}/);
+  for (const r of [RACINE_PROTO, "src/app/dev/fut91"]) assert.match(readFileSync(join(r, "layout.tsx"), "utf8"), /robots: \{ index: false, follow: false \}/);
 });
 
 test("I2. aucune donnée personnelle ni adresse réelle dans les fixtures et prototypes", () => {
-  const dossierProto = "src/components/prototypes/fut87";
-  const tout = [...readdirSync(dossierProto).map((n) => join(dossierProto, n)), ...pages(RACINE_PROTO)]
+  const dossiers = ["src/components/prototypes/fut87", "src/components/releve"];
+  const tout = [...dossiers.flatMap((d) => readdirSync(d).map((n) => join(d, n))), ...pages(RACINE_PROTO)]
     .filter((f) => statSync(f).isFile() && !f.endsWith(".test.ts"))
     .map((f) => readFileSync(f, "utf8"))
     .join("\n");

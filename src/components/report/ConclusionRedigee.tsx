@@ -23,7 +23,7 @@ import {
 } from "@/lib/decision/conclusion-hash";
 import { readNarrative, saveNarrative, pruneNarratives } from "@/lib/server/decision-narrative-store";
 import { requireCurrentUser } from "@/lib/user-account";
-import { ConclusionBlock, planToBlocks, type ConditionEvidence, type NiveauTitre } from "@/components/report/ConclusionBlock";
+import { ConclusionBlock, planToBlocks, type ConditionEvidence, type NiveauTitre, type PresentationConclusion } from "@/components/report/ConclusionBlock";
 
 // Défaut sûr à la livraison : « ne dépense pas ». Tant que le flag est absent, le déterministe EST
 // le produit, et ce repli-là est digne (ConclusionBlock rend le plan complet, sans texte généré).
@@ -42,8 +42,8 @@ const transportSchema = z.object({ blocks: z.array(z.unknown()) });
 
 
 export async function ConclusionRedigee({
-  plan, insee, scopeKey, condition = null, renderedIds = [], titre,
-}: {
+  plan, insee, scopeKey, condition = null, renderedIds = [], titre, variante, apresTitre,
+}: PresentationConclusion & {
   plan: ConclusionNarrativePlan;
   insee: string;
   scopeKey: string;
@@ -56,7 +56,7 @@ export async function ConclusionRedigee({
   /** Le niveau et la taille du titre du verdict, propagés jusqu'au bloc. Voir ConclusionBlock. */
   titre?: NiveauTitre;
 }) {
-  const deterministe = <ConclusionBlock plan={plan} blocks={planToBlocks(plan)} condition={condition} renderedIds={renderedIds} titre={titre} />;
+  const deterministe = <ConclusionBlock plan={plan} blocks={planToBlocks(plan)} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
 
   // 1. Le PREFETCH ne doit jamais déclencher une génération. Next précharge les routes liées par
   //    <Link> avant tout clic : sans cette garde, un simple survol coûterait un appel Sonnet. On teste
@@ -85,7 +85,7 @@ export async function ConclusionRedigee({
   }
   if (cached) {
     const { blocks } = validateGeneratedBlocks(plan, cached);
-    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
   }
 
   // 4. Génération. Le verdict n'est pas dans les registres confiés : il part en contexte seul.
@@ -148,9 +148,9 @@ export async function ConclusionRedigee({
     );
     await pruneNarratives(supabase, user.id, insee, scopeKey, 3);
     const { blocks: canonicalBlocks } = validateGeneratedBlocks(plan, canonical);
-    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} condition={condition} renderedIds={renderedIds} titre={titre} />;
+    return <ConclusionBlock plan={plan} blocks={canonicalBlocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
   } catch (error) {
     console.error("[dossier-narrative] persistance échouée", { insee, scopeKey, error });
-    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} />;
+    return <ConclusionBlock plan={plan} blocks={blocks} condition={condition} renderedIds={renderedIds} titre={titre} variante={variante} apresTitre={apresTitre} />;
   }
 }

@@ -25,6 +25,8 @@ import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { bindOrphans } from "@/lib/typography";
 import styles from "./ControlesDuDossier.module.css";
+import { ControlesReleve } from "@/components/releve/ControlesReleve";
+import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
 
 // La couleur des contrôles, la même que leur section dans la minute : une même nature de constat se
 // peint pareil d'un bout à l'autre de la page.
@@ -37,7 +39,7 @@ function sujetDeCarte(card: DossierCard): string {
   return card.composition.title;
 }
 
-function sujetsDuGroupe(cards: DossierCard[]): string {
+export function sujetsDuGroupe(cards: DossierCard[]): string {
   const vus = new Set<string>();
   const sujets: string[] = [];
 
@@ -62,8 +64,10 @@ export function ControlesDuDossier(
      *  émettent (cf. `evidenceHref`). Absente sur un dossier assemblé à l'instant : il n'y a alors
      *  aucune version figée à désigner. */
     provenance,
-  }: { dossier: Dossier; provenance?: string },
+    presentation,
+  }: { dossier: Dossier; provenance?: string; /** FUT-91, cf. `DossierDecisionSection`. */ presentation?: PresentationDossier },
 ) {
+  if (presentationDuDossier(presentation) === "releve") return <ControlesReleve dossier={dossier} provenance={provenance} />;
   const groupes = controlesParEchelle(dossier);
   // CE QUE NOS SOURCES N'ONT PAS PU LIRE : une ligne, pas une rubrique (cf. `phraseVerificationsNonRealisees`).
   const nonRealisees = phraseVerificationsNonRealisees(dossier);

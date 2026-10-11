@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { AccueilReleve } from "@/components/prototypes/fut87/AccueilReleve";
-import { releve as s, BandeauPrototype } from "@/components/prototypes/fut87/primitives";
+import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
 
 export default function PrototypeAccueil() {
   if (process.env.NODE_ENV === "production") notFound();

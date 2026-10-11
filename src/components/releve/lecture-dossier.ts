@@ -14,16 +14,16 @@
 // valeur, et un constat porte TOUS ses grains, dans l'ordre où ses preuves les citent.
 import type {
   Dossier, DossierCard, DossierSection, DecisionFact, EvidenceRef, VerificationActionType,
-} from "../../../lib/decision/decision-fact.ts";
-import type { EvidenceTargetKey } from "../../../lib/decision/evidence-targets.ts";
-import type { CompositionSide } from "../../../lib/decision/fact-composition.ts";
-import type { ConclusionNarrativePlan } from "../../../lib/decision/conclusion-plan.ts";
+} from "../../lib/decision/decision-fact.ts";
+import type { EvidenceTargetKey } from "../../lib/decision/evidence-targets.ts";
+import type { CompositionSide } from "../../lib/decision/fact-composition.ts";
+import type { ConclusionNarrativePlan } from "../../lib/decision/conclusion-plan.ts";
 import {
   sectionsDeLaMinute, sectionHorsPriorites, sectionMixte, carteHorsPriorites, conditionPorteeParLeBloc,
   factsNonNarresParLaFace,
-} from "../../../lib/decision/dossier-view.ts";
-import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
-import { echelleDeLaPreuve, ORDRE_ECHELLES, NOM_ECHELLE, type Echelle } from "../../../lib/decision/echelles.ts";
+} from "../../lib/decision/dossier-view.ts";
+import { dossierAnchorId } from "../../lib/decision/dossier-anchors.ts";
+import { echelleDeLaPreuve, ORDRE_ECHELLES, NOM_ECHELLE, type Echelle } from "../../lib/decision/echelles.ts";
 
 export type GrainLu = EvidenceRef["grain"];
 
@@ -79,8 +79,12 @@ export type EntreeLue = {
   sources: PreuveLue[];
   geste?: GesteLu;
   cotes: CoteLu[];
-  /** Ce que la carte de production plie dans « Données et limites ». */
+  /** Ce que la carte de production plie dans « Données et limites » (les deux zones, dans l'ordre). */
   limites: string[];
+  /** Zone « À vérifier » de `MethodDetails` : le détail du geste. */
+  aVerifier: string[];
+  /** Zone « Méthode du signal » de `MethodDetails` : convention de signalement, sens retenu, raison. */
+  methode: string[];
   /** Le fait ne répond à aucune priorité déclarée (constat apporté par futur•e). */
   horsPriorites: boolean;
   fondement?: FondementLu;
@@ -125,8 +129,12 @@ export type EtatEchelle =
  * examinée avec le nombre de cartes affichées qui la touchent (zéro compris). Une carte compte à
  * chaque échelle qu'elle touche ; rien n'est sommé ni pondéré.
  */
-export function lectureDesEchelles(l: LectureDecision): EtatEchelle[] {
-  const entrees = l.sections.flatMap((x) => x.entrees);
+export function lectureDesEchelles(l: LectureDecision, autresAffichees: EntreeLue[] = []): EtatEchelle[] {
+  // LA MINUTE N'EST PAS LA PAGE (FUT-91). Le hub affiche aussi la liste complète des contrôles : une
+  // échelle dont seuls des contrôles hors minute existent n'est pas « sans constat affiché ». Les
+  // cartes présentes aux deux endroits ne comptent qu'une fois (même ancre).
+  const vues = new Set<string>();
+  const entrees = [...l.sections.flatMap((x) => x.entrees), ...autresAffichees].filter((e) => !vues.has(e.ancre) && Boolean(vues.add(e.ancre)));
   return ORDRE_ECHELLES.map((echelle) => (l.perimetre[echelle]
     ? { echelle, etat: "examinee" as const, constats: entrees.filter((e) => e.echelles.includes(echelle)).length }
     : { echelle, etat: "non_examinee" as const }));
@@ -235,11 +243,12 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
   const refs = refsDuFait(f);
   const { preuves, sources } = trier(refs);
   const action = f.role === "verification" || f.role === "unknown" || f.role === "condition_check" ? f.action : undefined;
-  const limites: string[] = [];
-  if (action?.detail) limites.push(action.detail);
-  if (f.role === "verification" && f.signalConvention) limites.push(f.signalConvention);
-  if ((f.role === "condition_check" || f.role === "condition_met" || f.role === "incompatibility") && f.senseRetenu) limites.push(f.senseRetenu);
-  if (f.role === "condition_check" && f.whyNotDecided) limites.push(f.whyNotDecided);
+  const aVerifier: string[] = action?.detail ? [action.detail] : [];
+  const methode: string[] = [];
+  if (f.role === "verification" && f.signalConvention) methode.push(f.signalConvention);
+  if ((f.role === "condition_check" || f.role === "condition_met" || f.role === "incompatibility") && f.senseRetenu) methode.push(f.senseRetenu);
+  if (f.role === "condition_check" && f.whyNotDecided) methode.push(f.whyNotDecided);
+  const limites = [...aVerifier, ...methode];
   const sujet = "headlineSubject" in f && typeof f.headlineSubject === "string" ? f.headlineSubject : undefined;
   const statut = "status" in f && typeof f.status === "string" ? f.status : undefined;
   const nuance = (f.role === "incompatibility" || f.role === "verification" || f.role === "mismatch") ? f.limitation : undefined;
@@ -263,10 +272,24 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
       ? f.sides.map((x) => ({ libelle: "", enonce: x.statement, ...trier(x.evidence) }))
       : [],
     limites,
+    aVerifier,
+    methode,
     horsPriorites,
     ...(fondement ? { fondement } : {}),
     detailles: [],
   };
+}
+
+/** Les deux zones de « Données et limites », comme `MethodDetails` les sépare. */
+function zones(aVerifier: string[], methode: string[]) {
+  return { aVerifier, methode, limites: [...aVerifier, ...methode] };
+}
+/** Pour une composition à côtés : la règle de `compositionChecks` et `compositionConventions`. */
+function zonesDesCotes(cotes: CompositionSide[]) {
+  return zones(
+    cotes.map((x) => x.action?.detail).filter((d): d is string => Boolean(d)),
+    cotes.map((x) => x.signalConvention).filter((d): d is string => Boolean(d)),
+  );
 }
 
 function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: DossierCard) => boolean): EntreeLue {
@@ -289,12 +312,12 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
     ...(x.action ? { geste: geste(x.action) } : {}),
   });
   if (c.kind === "tradeoff") {
-    return { ...base, enonce: c.summary, preuves: [], sources: [], cotes: [cote(c.favorableSide), cote(c.unfavorableSide)], limites: [] };
+    return { ...base, enonce: c.summary, preuves: [], sources: [], cotes: [cote(c.favorableSide), cote(c.unfavorableSide)], ...zonesDesCotes([c.favorableSide, c.unfavorableSide]) };
   }
   if (c.kind === "grouped_verification") {
     return {
       ...base, enonce: c.summary, preuves: [], sources: [], cotes: c.items.map(cote),
-      limites: c.items.flatMap((x) => (x.action?.detail ? [x.action.detail] : [])),
+      ...zonesDesCotes(c.items),
     };
   }
   if (c.kind === "mismatch_with_action") {
@@ -302,7 +325,7 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
     return {
       ...base, enonce: c.summary, ...(c.limitation ? { nuance: c.limitation } : {}),
       ...trier(c.evidence), geste: geste(c.action), cotes: [],
-      limites: c.action.detail ? [c.action.detail] : [],
+      ...zones(c.action.detail ? [c.action.detail] : [], []),
       ...(f0 ? { fondement: f0 } : {}),
     };
   }
@@ -310,8 +333,17 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
   return {
     ...base, enonce: c.summary, ...trier(c.sharedEvidence),
     cotes: c.consequences.map((x) => ({ libelle: "", enonce: x.statement, ...(x.limitation ? { nuance: x.limitation } : {}), preuves: [], sources: [] })),
-    limites: [],
+    ...zones([], []),
   };
+}
+
+/**
+ * UNE CARTE, hors de la minute : la liste complète des contrôles (`controlesParEchelle`) en a besoin.
+ * Même lecture que dans `lireDossier`, sans le signalement « au-delà de vos priorités », que la
+ * production ne pose pas dans cette liste.
+ */
+export function lireCarteDuDossier(dossier: Dossier, card: DossierCard): EntreeLue {
+  return lireCarte(dossier, card, () => false);
 }
 
 export function lireDossier(dossier: Dossier): LectureDecision {
