@@ -130,3 +130,40 @@ La déclaration se fait depuis le hub (« Ce bien »), par `PATCH /api/dossier/r
 `supabase/37_contexte_checkout_dossier.sql` (additive, colonnes nullables, aucune ligne existante touchée) et son retour arrière `37_contexte_checkout_dossier_down.sql`.
 
 **La migration doit être appliquée AVANT le déploiement du code** : `create-payment-intent` écrit les nouvelles colonnes, et une base sans elles ferait échouer l'écriture de l'intention, donc refuser tout paiement de dossier (comportement voulu : on ne vend pas un dossier dont le contexte serait perdu). Non appliquée en production dans ce lot.
+
+## D. Ce qui a été vérifié, et ce qui ne l'a pas été
+
+### Tests automatiques
+
+| Vérification | Résultat |
+|---|---|
+| `node --test src/lib/fut10-contexte-checkout.test.ts` (nouveau) | 34 / 34 |
+| `node --test src/lib/fut26-relation-au-lieu.test.ts` (3 attentes mises à jour : la lecture porte l'objectif) | 23 / 23 |
+| Suite complète (194 fichiers de test) | 2 436 / 2 436 |
+| `tsc --noEmit` | aucune erreur |
+| ESLint sur les fichiers modifiés | aucune erreur (le dépôt en compte 42 ailleurs, inchangés) |
+| `next build --webpack` | réussi |
+
+Ce que couvre le nouveau fichier : modèle (habitant, locataire acheteur, acheteur ailleurs, deux adresses, inconnus, intention globale contre objectif, réponses contradictoires, suggestion qui ne coche rien) ; projet (création sans intention déduite ni condition, conservation, modification, conflit) ; validation et colonnes avant Stripe ; câblage de la route de paiement et du webhook (sur la source) ; chaîne paiement → dossier sur une base simulée (création, réponses corrigées, rejeu, abandon, deux achats à la même adresse, intention ancienne, projet modifié avant génération) ; artefact et signalement ; sécurité de la route (patch partiel, autre compte, révoqué, valeurs invalides) ; données anciennes ; migration.
+
+**Limites des tests** : aucun environnement Supabase de test n'existe. La RLS, les contraintes `check` de la migration 37 et l'upsert réel ne sont pas exécutés : ils sont simulés ou lus sur la source. Aucun paiement n'a été tenté, ni réel ni en mode test.
+
+### Contrôles visuels
+
+Faits sur une page de maquette temporaire (retirée, jamais commitée), sans session : la route de paiement répond donc « Connexion requise » avant tout appel à Stripe, ce qui permet aussi de voir l'état d'erreur. Captures anonymisées (adresse fictive) dans `docs/audits/2026-10-11-fut10-captures/`.
+
+- 1280, 390 et 360 px : aucun débordement horizontal. À 360 px, le « ? » des questions partait seul à la ligne : corrigé par une espace insécable.
+- Aucune demande de PaymentIntent tant que l'étape des questions est affichée ; les réponses partent avec la première demande.
+- Corriger ses réponses : la réponse précédente est conservée, la même clé d'idempotence est renvoyée, la dernière réponse est transmise.
+- Rechargement : les deux réponses fermées reviennent (`sessionStorage`), jamais le texte libre.
+- Clavier : tabulation par groupe (Tab entre, flèches choisissent, Espace coche), focus visible ; les deux boutons d'action sont atteignables.
+- En développement, React rejoue les effets : deux demandes identiques partent par montage (même clé, donc même PaymentIntent côté Stripe). Une seule part en production.
+- **Thème clair : non vérifiable sur ce parcours.** La page de paiement (comme `/dossier`) pose `bg-canvas`, figé à `#060812` quel que soit le thème. Défaut antérieur à FUT-10, laissé à FUT-87.
+
+### Décisions restant ouvertes
+
+1. **Vocabulaire d'un projet créé au checkout** : posture « J'étudie ce lieu » par défaut (comme « Je cherche où vivre » pour la reprise d'une recherche). Un habitant qui crée son projet ici lira « votre projet » plutôt que « ce que vous avez demandé » jusqu'à ce qu'il change son objectif dans « Votre projet ».
+2. **Gestes d'achat pour un occupant** : le locataire acheteur reçoit la table `achat` telle quelle, dont un détail dit « dès la première visite ». Une variante « achat par l'occupant » demanderait de réécrire des textes approuvés : hors lot.
+3. **Purge** : la rétention reste manuelle (SQL en commentaire des migrations 26 et 37). Une tâche planifiée serait plus sûre.
+4. **Bloc « Ce bien »** : posé sur le hub, dans le style existant ; à habiller avec la direction artistique de FUT-87.
+5. **Événement PostHog** `address_checkout_context_set` : les contrôles visuels en local en ont émis quelques-uns vers le projet PostHog configuré dans `.env.local`.

@@ -55,7 +55,7 @@ export function bucketDuProjet(
   relation: RelationAuLieu | null | undefined = null,
 ): Bucket {
   // « J'y habite » DÉCLARÉ À L'ADRESSE prime sur l'intention globale (décision du 11/10/2026) : même
-  // ordre que la voix du dossier, cf. `voixDuLecteur` et sa limite connue, laissée à FUT-10.
+  // ordre que la voix du dossier, cf. `voixDuLecteur`. FUT-10 place l'objectif de l'analyse avant lui.
   // FUT-10 : l'objectif DÉCLARÉ pour ce bien passe avant tout, sans effacer la relation (même ordre
   // que `voixDuLecteur`). Le locataire qui achète son logement reçoit les gestes d'achat.
   const objectif = objectifDeLAnalyse(relation);

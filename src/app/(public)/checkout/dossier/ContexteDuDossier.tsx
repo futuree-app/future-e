@@ -88,7 +88,7 @@ export function ContexteDuDossier({
 
   return (
     <div style={{ display: "grid", gap: 28 }}>
-      <Question legende="Pourquoi examinez-vous ce logement ?">
+      <Question legende="Pourquoi examinez-vous ce logement ?">
         <div className="flex flex-wrap gap-2">
           {(Object.keys(OBJECTIF_LIBELLE) as AddressObjective[]).map((o) => (
             <Puce key={o} name="objectif" value={o} checked={objectif === o} onChange={() => setObjectif(o)}>
@@ -98,7 +98,7 @@ export function ContexteDuDossier({
         </div>
       </Question>
 
-      <Question legende="Quel est votre lien actuel avec ce bien ?">
+      <Question legende="Quel est votre lien actuel avec ce bien ?">
         <div className="flex flex-wrap gap-2">
           {(Object.keys(RELATION_LIBELLE) as ChoixRelation[]).map((r) => (
             <Puce key={r} name="relation" value={r} checked={relation === r} onChange={() => setRelation(r)}>
@@ -111,7 +111,7 @@ export function ContexteDuDossier({
         )}
       </Question>
 
-      <Question legende="Qu'est-ce qui compte le plus pour vous ?">
+      <Question legende="Qu'est-ce qui compte le plus pour vous ?">
         {reformulation ? (
           <>
             <blockquote className="m-0 mb-3 rounded-lg border border-[var(--border-1)] bg-[var(--bg-elev)] px-4 py-3 text-[14.5px] leading-relaxed text-label">
