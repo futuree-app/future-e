@@ -19,7 +19,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import { Fragment } from "react";
-import type { Dossier } from "@/lib/decision/decision-fact";
+import type { Dossier, DossierCard } from "@/lib/decision/decision-fact";
 import { controlesParEchelle, phraseVerificationsNonRealisees } from "@/lib/decision/dossier-view";
 import { FactBody, EvidenceRow, MethodDetails, factSources, factChecks } from "@/components/report/DecisionFactRenderParts";
 import { FactCompositionCard } from "@/components/report/FactCompositionCard";
