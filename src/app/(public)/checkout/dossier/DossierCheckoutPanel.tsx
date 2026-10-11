@@ -6,7 +6,9 @@ import posthog from "posthog-js";
 import { PaymentWrapper } from "@/components/PaymentWrapper";
 import type { UserProject } from "@/lib/user-project";
 import { isAddressObjective, type AddressObjective } from "@/lib/relation-au-lieu";
-import { recapitulatif, relationDuChoix, type ChoixRelation } from "@/lib/dossier-contexte-ecran";
+import {
+  boutonPasser, recapitulatif, relationDuChoix, syntheseDuProjet, type ChoixRelation,
+} from "@/lib/dossier-contexte-ecran";
 import { enregistrerProjet } from "@/lib/projet-sauvegarde-client";
 import { ContexteDuDossier, type ChoixProjet } from "./ContexteDuDossier";
 
@@ -23,8 +25,11 @@ import { ContexteDuDossier, type ChoixProjet } from "./ContexteDuDossier";
 // avec les mêmes paramètres Stripe (les réponses n'y figurent pas) : Stripe rend le MÊME PaymentIntent,
 // et seule l'intention est mise à jour. Aucun paiement superflu.
 //
-// RIEN N'EST OBLIGATOIRE. « Continuer sans répondre » est un choix affiché, et l'étape de paiement dit
-// alors ce que le dossier ne pourra pas faire.
+// RIEN N'EST OBLIGATOIRE. Passer est un choix affiché, dont le libellé dépend d'un projet existant
+// (`boutonPasser`), et l'étape de paiement dit alors ce que le dossier ne pourra pas faire.
+//
+// LE VERROU (revue FUT-10) : juste avant la confirmation Stripe, le serveur fige les réponses de ce
+// paiement. Elles ne se corrigent plus ensuite, et l'écran cesse de le proposer.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 // Les deux réponses FERMÉES survivent à un rechargement, par adresse et dans cet onglet seulement.
@@ -52,6 +57,7 @@ export function DossierCheckoutPanel({
   userEmail,
   checkoutAttemptId,
   projet,
+  conditionsConfirmees = [],
 }: {
   address: Address;
   quote: {
@@ -66,6 +72,8 @@ export function DossierCheckoutPanel({
   checkoutAttemptId: string;
   /** Le projet du compte, lu par la page serveur. `null` : aucun projet. */
   projet: UserProject | null;
+  /** Les conditions sans compromis CONFIRMÉES du projet, en langage du lecteur (préparées par le serveur). */
+  conditionsConfirmees?: string[];
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -84,6 +92,16 @@ export function DossierCheckoutPanel({
   const [enregistrement, setEnregistrement] = useState(false);
   const [erreurProjet, setErreurProjet] = useState<string | null>(null);
   const [prioritesIncomprises, setPrioritesIncomprises] = useState(false);
+  // Posé quand le serveur a verrouillé les réponses, juste avant la confirmation Stripe : elles ne se
+  // corrigent plus pour CE paiement (le serveur le refuserait de toute façon).
+  const [contexteVerrouille, setContexteVerrouille] = useState(false);
+  // Les conditions confirmées ne valent que pour le projet que la page a lu : un projet réécrit ici
+  // peut les avoir rendues caduques, et l'écran ne les affirme plus.
+  const synthese = syntheseDuProjet(
+    projetCourant,
+    projetCourant?.updatedAt === projet?.updatedAt ? conditionsConfirmees : [],
+  );
+  const passer = boutonPasser(Boolean(reformulation));
 
   // Le brouillon est relu APRÈS le montage : la page est rendue côté serveur, où `sessionStorage`
   // n'existe pas, et le lire pendant le rendu ferait diverger l'hydratation.
@@ -153,17 +171,20 @@ export function DossierCheckoutPanel({
     setEtape("paiement");
   }
 
-  function continuerSansRepondre() {
+  // PASSER garde le projet tel qu'il est (un texte en cours de modification n'est pas écrit) et ne
+  // déclare rien pour ce logement : ni objectif, ni lien. Rien n'est supposé à la place du lecteur.
+  function passerSansPreciser() {
     setObjectif(null);
     setRelation(null);
     setErreurProjet(null);
+    setChoixProjet("garder");
     passerAuPaiement(null, null);
   }
 
   const recap = recapitulatif({
     objectif, relation,
-    priorites: projetCourant?.parsed?.reformulation ?? projetCourant?.rawText ?? null,
-    projetExiste: Boolean(projetCourant), prioritesIncomprises,
+    priorites: reformulation,
+    prioritesIncomprises,
   });
 
   // Le code passe par l'URL : la page est un composant serveur, c'est elle qui le résout, et un
@@ -243,25 +264,17 @@ export function DossierCheckoutPanel({
       )}
 
       {etape === "questions" ? (
-        <section aria-labelledby="contexte-titre" className="border-t border-[var(--border-1)] pt-6">
-          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-2">
+        <div className="border-t border-[var(--border-1)] pt-6">
+          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost mb-3">
             Avant le paiement
-          </p>
-          <h2 id="contexte-titre" className="text-[19px] text-label leading-snug mb-2" style={{ fontFamily: "var(--font-serif)" }}>
-            Ce qui compte pour votre décision
-          </h2>
-          <p className="text-[14px] text-muted leading-relaxed mb-7">
-            Vos réponses permettent de distinguer ce que les données disent du logement de ce qui
-            compte réellement pour votre décision. Aucune n&apos;est obligatoire.
           </p>
 
           <ContexteDuDossier
-            objectif={objectif} setObjectif={setObjectif}
-            relation={relation} setRelation={setRelation}
-            reformulation={reformulation}
+            synthese={synthese}
             choixProjet={choixProjet} setChoixProjet={setChoixProjet}
             texte={texte} setTexte={setTexte}
-            projetSansTexte={Boolean(projetCourant) && !reformulation}
+            objectif={objectif} setObjectif={setObjectif}
+            relation={relation} setRelation={setRelation}
           />
 
           {erreurProjet && (
@@ -273,33 +286,44 @@ export function DossierCheckoutPanel({
               type="button"
               onClick={continuer}
               disabled={enregistrement}
+              aria-busy={enregistrement}
               className="rounded-lg bg-accent px-6 py-3 text-[14px] font-medium text-[#12172a] disabled:opacity-60"
             >
               {enregistrement ? "Enregistrement de votre projet…" : "Continuer vers le paiement"}
             </button>
             <button
               type="button"
-              onClick={continuerSansRepondre}
+              onClick={passerSansPreciser}
               disabled={enregistrement}
+              aria-describedby={passer.consequence ? "passer-consequence" : undefined}
               className="text-[13.5px] text-muted underline underline-offset-2 decoration-[var(--border-2)] hover:text-label disabled:opacity-60"
             >
-              Continuer sans répondre
+              {passer.libelle}
             </button>
           </div>
-        </section>
+          {passer.consequence && (
+            <p id="passer-consequence" className="mt-3 text-[12.5px] text-ghost leading-relaxed">
+              {passer.consequence}
+            </p>
+          )}
+        </div>
       ) : (
         <>
-          {/* CE QUE LE DOSSIER UTILISERA, juste au-dessus du paiement, et corrigeable. */}
+          {/* CE QUE LE DOSSIER PRENDRA EN COMPTE, et ce qu'il en fera, juste au-dessus du paiement. */}
           <div className="mb-6 rounded-xl border border-[var(--border-2)] bg-[var(--bg-elev)] px-5 py-4">
             <div className="flex flex-wrap items-baseline justify-between gap-3 mb-3">
-              <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-ghost">Votre dossier</p>
-              <button
-                type="button"
-                onClick={() => setEtape("questions")}
-                className="text-[13px] text-accent underline underline-offset-2 decoration-accent/40"
-              >
-                Modifier mes réponses
-              </button>
+              <p className="text-[15px] text-label m-0" style={{ fontFamily: "var(--font-serif)" }}>{recap.titre}</p>
+              {contexteVerrouille ? (
+                <p className="text-[12.5px] text-ghost m-0">Vos réponses sont fixées pour ce paiement.</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEtape("questions")}
+                  className="text-[13px] text-accent underline underline-offset-2 decoration-accent/40"
+                >
+                  Modifier mes réponses
+                </button>
+              )}
             </div>
             <dl className="m-0" style={{ display: "grid", gap: 8 }}>
               {recap.lignes.map((l) => (
@@ -309,8 +333,11 @@ export function DossierCheckoutPanel({
                 </div>
               ))}
             </dl>
+            {recap.usage && (
+              <p className="mt-4 text-[13px] text-muted leading-relaxed">{recap.usage}</p>
+            )}
             {recap.limite && (
-              <p className="mt-4 text-[13.5px] text-muted leading-relaxed">{recap.limite}</p>
+              <p className="mt-3 text-[13.5px] text-muted leading-relaxed">{recap.limite}</p>
             )}
           </div>
 
@@ -336,6 +363,9 @@ export function DossierCheckoutPanel({
           relation: relationDuChoix(relation),
           projetVu: { existe: Boolean(projetCourant), updatedAt: projetCourant?.updatedAt ?? null },
         }}
+        // Le serveur verrouille les réponses juste avant la confirmation : sans verrou, pas de paiement.
+        verrouillerContexte
+        onContexteVerrouille={() => setContexteVerrouille(true)}
       />
         </>
       )}

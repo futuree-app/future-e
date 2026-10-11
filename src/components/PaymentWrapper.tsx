@@ -5,6 +5,7 @@ import posthog from "posthog-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
 import { PaymentForm } from "@/components/PaymentForm";
+import { paymentIntentDuSecret } from "@/lib/verrou-intention-dossier";
 
 // L'identité de mesure du navigateur, transmise au serveur pour qu'il émette SOUS LA MÊME
 // PERSONNE. Sans elle, les événements de paiement appartiennent à quelqu'un d'autre que le
@@ -52,6 +53,12 @@ type PaymentWrapperProps = {
    * rendre le `clientSecret` ; elles ne partent jamais chez Stripe.
    */
   dossierContext?: unknown;
+  /**
+   * Dossier d'adresse (FUT-10) : verrouiller les réponses côté serveur juste avant la confirmation
+   * Stripe. `onContexteVerrouille` prévient l'écran, qui cesse alors de proposer leur correction.
+   */
+  verrouillerContexte?: boolean;
+  onContexteVerrouille?: () => void;
 };
 
 export function PaymentWrapper({
@@ -67,6 +74,8 @@ export function PaymentWrapper({
   checkoutAttemptId,
   promoCode,
   dossierContext,
+  verrouillerContexte,
+  onContexteVerrouille,
 }: PaymentWrapperProps) {
   // `requestBody` sert aussi de `requestKey` au useEffect : toutes les valeurs ci-dessous sont
   // stables pour un rendu de page (le distinct_id l'est pour une session), donc le PaymentIntent
@@ -290,6 +299,25 @@ export function PaymentWrapper({
         returnUrl={returnUrl}
         onSubmit={onSubmit}
         billing={billing}
+        avantConfirmation={verrouillerContexte
+          ? async () => {
+              const paymentIntentId = paymentIntentDuSecret(clientSecret);
+              try {
+                const res = await fetch("/api/dossier/intention/verrouiller", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ paymentIntentId }),
+                });
+                if (!res.ok) throw new Error(String(res.status));
+              } catch {
+                // AUCUN PAIEMENT SANS VERROU : mieux vaut un clic de plus qu'un dossier livré avec
+                // d'autres réponses que celles du paiement.
+                return "Le paiement n'a pas pu être préparé. Votre carte n'a pas été débitée : réessayez.";
+              }
+              onContexteVerrouille?.();
+              return null;
+            }
+          : undefined}
       />
     </Elements>
   );

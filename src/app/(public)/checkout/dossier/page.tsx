@@ -11,6 +11,7 @@ import { resolvePromo, promoExists } from "@/lib/promo-code";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
 import { normalizeUserProject } from "@/lib/user-project";
+import { vueCriteres } from "@/lib/decision/projet-criteres-vue";
 import { CeQueLeDossierExamine } from "@/components/CeQueLeDossierExamine";
 import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
 
@@ -78,6 +79,9 @@ export default async function DossierCheckoutPage({
     .eq("user_id", user.id)
     .maybeSingle();
   const projet = normalizeUserProject((profil as { user_project?: unknown } | null)?.user_project ?? null);
+  // Les conditions sans compromis CONFIRMÉES, dites dans les mots du lecteur. Une condition seulement
+  // suggérée (mot fort non confirmé) n'apparaît pas : le silence ne vaut jamais confirmation.
+  const conditionsConfirmees = vueCriteres(projet).filter((c) => c.etat === "condition").map((c) => c.titre);
 
   // LE CODE EST RÉSOLU CÔTÉ SERVEUR, ici comme au moment de créer le paiement. Cette page ne fait
   // qu'AFFICHER : la route de paiement le résout à nouveau, sur la même table, donc un code
@@ -128,6 +132,7 @@ export default async function DossierCheckoutPage({
           userEmail={user.email}
           checkoutAttemptId={crypto.randomUUID()}
           projet={projet}
+          conditionsConfirmees={conditionsConfirmees}
         />
       </div>
     </div>

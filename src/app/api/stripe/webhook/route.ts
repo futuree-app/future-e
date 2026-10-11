@@ -16,7 +16,9 @@ import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
 import { after } from "next/server";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { normalizeUserProject, type UserProject } from "@/lib/user-project";
-import { colonnesDossierDepuisIntention, projetConfirmeAuCheckout } from "@/lib/dossier-contexte-checkout";
+import { colonnesDossierDepuisIntention, projetPourLivraison, type ProjetLivraison } from "@/lib/dossier-contexte-checkout";
+import { verrouillerIntention } from "@/lib/verrou-intention-dossier";
+import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import {
   renderPurchaseConfirmationEmail,
   TRANSACTIONAL_EMAIL_FROM,
@@ -40,22 +42,26 @@ export const runtime = "nodejs";
  * est donc un défaut à rattraper, jamais une raison de refuser une livraison encaissée.
  *
  * ── LE PROJET VIENT DE LA BASE, JAMAIS DES MÉTADONNÉES STRIPE ────────────────────────────────
- * Depuis FUT-10, un dossier d'adresse est généré avec le projet que le lecteur a CONFIRMÉ au checkout
- * (`dossier_intents.project_snapshot`, relu en base par la route de paiement et vérifié contre ce que
- * l'écran a montré). S'il a modifié son projet entre le paiement et la génération, le dossier vendu
- * répond à celui qu'il avait confirmé, et le bandeau « votre projet a changé » lui propose la mise à
- * jour. Sans projet confirmé (intention antérieure, territoire seul, aucun projet au checkout), on
- * relit le projet canonique, comme avant.
+ * Depuis FUT-10, un dossier d'adresse suit ce que le PAIEMENT a fixé (`projetPourLivraison`) :
+ *   - projet confirmé : le snapshot relu en base au checkout, jamais le projet du compte. S'il a changé
+ *     depuis, le dossier vendu répond au projet confirmé, et le bandeau « votre projet a changé »
+ *     propose la mise à jour ;
+ *   - absence confirmée : le lecteur a payé sans projet, et l'écran lui a dit que le dossier serait
+ *     factuel. Aucun projet n'est lu, même créé entre-temps dans un autre onglet : pas d'artefact ;
+ *   - historique (intention antérieure, territoire de 14 €) : relecture du projet du compte, comme avant.
  */
 function planifierArtefact(
   userId: string,
   cible: Parameters<typeof generateDecisionArtifact>[3],
-  projetConfirme: UserProject | null = null,
+  livraison: ProjetLivraison = { etat: "historique" },
 ): void {
+  // L'absence confirmée se décide ICI, avant toute lecture : aucune requête ne va chercher un projet
+  // que le lecteur n'a pas confirmé pour cette vente.
+  if (livraison.etat === "absent") return;
   after(async () => {
     try {
-      let project = projetConfirme;
-      if (!project) {
+      let project: UserProject | null = livraison.etat === "confirme" ? livraison.projet : null;
+      if (livraison.etat === "historique") {
         const { data: profile } = await supabaseAdmin
           .from("user_profiles")
           .select("user_project")
@@ -237,6 +243,12 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   // portent pas. Le droit d'ouvrir ce dossier EST l'existence de la ligne créée ici.
   // ════════════════════════════════════════════════════════════════════════════
   if (productType === "address-dossier") {
+    // LE CONTEXTE EST VERROUILLÉ AVANT D'ÊTRE LU (revue FUT-10). Le navigateur l'a normalement verrouillé
+    // juste avant de confirmer ; ce second verrou est le filet d'un client qui aurait sauté l'étape. À
+    // partir d'ici, aucune requête de la route de paiement ne peut plus le modifier, et un rejeu de ce
+    // webhook relira exactement la même ligne. Une intention introuvable est traitée juste après.
+    await verrouillerIntention(storeIntentionsSupabase(supabaseAdmin), paymentIntent.id, null, new Date());
+
     const { data: intent } = await supabaseAdmin
       .from("dossier_intents")
       .select("*")
@@ -334,7 +346,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         // dossier figé porte donc l'état du bien SANS diagnostic sélectionné, ce qui est exact au
         // moment de la vente. Le jour où le choix du DPE précédera le paiement, il entrera ici.
         savedDpe: null,
-      }, projetConfirmeAuCheckout(intent));
+      }, projetPourLivraison(intent));
     }
 
     await supabaseAdmin.from("payments").upsert(

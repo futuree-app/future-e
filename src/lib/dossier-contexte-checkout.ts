@@ -92,6 +92,19 @@ export function projetVuEstACour(vu: ProjetVu | null, canonique: UserProject | n
  * Toutes les clés sont TOUJOURS présentes, même nulles : une base sans la migration 37 doit faire
  * échouer l'écriture (donc refuser le paiement), plutôt que d'ouvrir un achat dont le contexte se perdrait.
  */
+/**
+ * CE QUE LE LECTEUR A CONFIRMÉ DU PROJET au paiement (correction du 11/10/2026, revue FUT-10) :
+ *   - `confirmed` : un projet lui a été montré, il est figé ;
+ *   - `absent`    : aucun projet n'existait, il a continué sans ;
+ *   - `null`      : le navigateur n'a rien dit (client antérieur) : compatibilité historique.
+ *
+ * Sans cet état, `project_snapshot = null` voulait dire deux choses : « ancien checkout » et « le
+ * lecteur a continué sans projet ». Le webhook relisait alors le compte dans les deux cas, et un projet
+ * créé dans un autre onglet entre le paiement et la génération entrait dans un dossier vendu comme
+ * factuel. L'état rend les trois cas distincts en base, contrainte SQL comprise (migration 37).
+ */
+export type EtatProjetCheckout = "confirmed" | "absent";
+
 export function colonnesIntention(
   ctx: ContexteCheckout, projetCanonique: UserProject | null, now: Date,
 ): {
@@ -99,13 +112,19 @@ export function colonnesIntention(
   place_objective: AddressObjective | null;
   place_context_declared_at: string | null;
   project_snapshot: UserProject | null;
+  project_state: EtatProjetCheckout | null;
 } {
   const declare = ctx.relation != null || ctx.objectif != null;
+  // `projetVuEstACour` a déjà refusé le cas « montré mais disparu » : un projet confirmé existe ici.
+  const etat: EtatProjetCheckout | null = ctx.projetVu == null
+    ? null
+    : ctx.projetVu.existe && projetCanonique ? "confirmed" : "absent";
   return {
     place_relation: ctx.relation,
     place_objective: ctx.objectif,
     place_context_declared_at: declare ? now.toISOString() : null,
-    project_snapshot: ctx.projetVu?.existe ? projetCanonique : null,
+    project_snapshot: etat === "confirmed" ? projetCanonique : null,
+    project_state: etat,
   };
 }
 
@@ -122,7 +141,11 @@ export function colonnesDossierDepuisIntention(intent: Record<string, unknown>):
   place_objective?: AddressObjective;
   place_objective_set_at?: string | null;
 } {
-  const quand = typeof intent.place_context_declared_at === "string" ? intent.place_context_declared_at : null;
+  // Une chaîne par PostgREST, un `Date` par un pilote Postgres direct : les deux disent la même date.
+  // Une valeur illisible vaut `null`, jamais une date fabriquée.
+  const brut = intent.place_context_declared_at;
+  const date = brut instanceof Date ? brut : typeof brut === "string" ? new Date(brut) : null;
+  const quand = date && !Number.isNaN(date.getTime()) ? date.toISOString() : null;
   return {
     ...(isAddressRelation(intent.place_relation)
       ? { place_relation: intent.place_relation, place_relation_set_at: quand } : {}),
@@ -132,9 +155,29 @@ export function colonnesDossierDepuisIntention(intent: Record<string, unknown>):
 }
 
 /**
- * LE PROJET À FIGER DANS L'ARTEFACT : celui confirmé au checkout s'il a été figé, sinon `null` (et la
- * génération relit le projet canonique, comme avant FUT-10). Un snapshot illisible vaut absence.
+ * LE PROJET DU DOSSIER LIVRÉ, tel que le paiement l'a fixé.
+ *
+ *   - `confirme`   : générer avec CE projet, jamais avec celui du compte ;
+ *   - `absent`     : le lecteur a payé sans projet ; aucun projet n'est lu, même si le compte en a reçu
+ *                    un depuis (le dossier vendu est factuel, et c'est ce qu'il a confirmé) ;
+ *   - `historique` : intention antérieure à FUT-10 : relecture du projet du compte, comme avant.
+ *
+ * Un projet `confirmed` illisible (corrompu, ou effacé par la purge) vaut `absent`, JAMAIS une relecture
+ * du compte : un contexte non confirmé ne doit pas pouvoir entrer dans une analyse payée.
  */
-export function projetConfirmeAuCheckout(intent: Record<string, unknown> | null | undefined): UserProject | null {
-  return normalizeUserProject(intent?.project_snapshot ?? null);
+export type ProjetLivraison =
+  | { etat: "confirme"; projet: UserProject }
+  | { etat: "absent" }
+  | { etat: "historique" };
+
+export function projetPourLivraison(intent: Record<string, unknown> | null | undefined): ProjetLivraison {
+  const etat = intent?.project_state;
+  if (etat === "confirmed") {
+    const projet = normalizeUserProject(intent?.project_snapshot ?? null);
+    return projet ? { etat: "confirme", projet } : { etat: "absent" };
+  }
+  // Seule l'ABSENCE de colonne ou de valeur dit « intention historique ». Toute autre valeur, même
+  // inattendue, est traitée comme une absence confirmée : on ne relit jamais le compte par défaut.
+  if (etat === undefined || etat === null) return { etat: "historique" };
+  return { etat: "absent" };
 }

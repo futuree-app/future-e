@@ -14,7 +14,8 @@ import { assembleDossier } from "./decision/decision-assembler.ts";
 import { buildDecisionArtifact, parseDecisionArtifact } from "./decision/decision-artifact.ts";
 import { projetAChangeMateriellement } from "./decision/projet-materiel.ts";
 import {
-  colonnesDossierDepuisIntention, colonnesIntention, lireContexteCheckout, projetConfirmeAuCheckout, projetVuEstACour,
+  colonnesDossierDepuisIntention, colonnesIntention, lireContexteCheckout, projetPourLivraison, projetVuEstACour,
+  type ProjetLivraison,
   type ContexteCheckout,
 } from "./dossier-contexte-checkout.ts";
 import { noteDuCouple, recapitulatif, relationDuChoix } from "./dossier-contexte-ecran.ts";
@@ -235,14 +236,14 @@ test("colonnes de l'intention : date serveur seulement sur déclaration, projet 
   const ctx = (c: Partial<ContexteCheckout>): ContexteCheckout => ({ relation: null, objectif: null, projetVu: null, ...c });
   const p = projet();
   assert.deepEqual(colonnesIntention(ctx({}), p, NOW), {
-    place_relation: null, place_objective: null, place_context_declared_at: null, project_snapshot: null,
+    place_relation: null, place_objective: null, place_context_declared_at: null, project_snapshot: null, project_state: null,
   });
   const c = colonnesIntention(ctx({ relation: "lives_here", objectif: "buy", projetVu: { existe: true, updatedAt: p.updatedAt } }), p, NOW);
   assert.equal(c.place_context_declared_at, NOW.toISOString());
   assert.equal(c.project_snapshot, p);
   // Toutes les clés toujours présentes : une base sans la migration 37 refuse l'écriture, donc le paiement.
   assert.deepEqual(Object.keys(colonnesIntention(ctx({}), null, NOW)).sort(),
-    ["place_context_declared_at", "place_objective", "place_relation", "project_snapshot"]);
+    ["place_context_declared_at", "place_objective", "place_relation", "project_snapshot", "project_state"]);
 });
 
 test("la route de paiement valide et range le contexte AVANT le PaymentIntent, jamais chez Stripe", () => {
@@ -258,9 +259,9 @@ test("la route de paiement valide et range le contexte AVANT le PaymentIntent, j
   // (`packProjetLabel` est le libellé du Pack, produit distinct, inchangé.)
   assert.doesNotMatch(metadata, /place_|objectif|relation|project_snapshot|projetVu|user_project|rawText|reformulation|dossierContext|colonnesContexte/i);
   // Le contexte est dans le MÊME upsert que l'adresse, et son échec bloque le formulaire.
-  const upsert = route.slice(route.indexOf('from("dossier_intents").upsert('), route.indexOf("SANS INTENTION"));
-  assert.match(upsert, /ban_id: dossierIntent\.banId[\s\S]*\.\.\.colonnesContexte/);
-  assert.match(route, /if \(intentError\) \{[\s\S]{0,200}status: 500/);
+  const ecriture = route.slice(route.indexOf("enregistrerIntention(storeIntentionsSupabase(), {"), route.indexOf("SANS INTENTION"));
+  assert.match(ecriture, /ban_id: dossierIntent\.banId[\s\S]*\.\.\.colonnesContexte/);
+  assert.match(route, /catch \(intentError\) \{[\s\S]{0,600}status: 500/);
   // Aucun texte ni projet dans la mesure : des booléens.
   assert.match(route, /context_relation_declared: colonnesContexte\.place_relation != null/);
 });
@@ -292,7 +293,7 @@ function baseSimulee() {
       intents.set(pi, { stripe_payment_intent_id: pi, ...adresse, ...colonnesIntention(ctx, canonique, now) });
     },
     // webhook : relit l'intention, puis upsert(ignoreDuplicates) ; rend `created`.
-    webhook(pi: string): { created: boolean; projet: UserProject | null } {
+    webhook(pi: string): { created: boolean; livraison: ProjetLivraison } {
       const intent = intents.get(pi);
       if (!intent) throw new Error(`dossier_intents introuvable pour ${pi}`);
       const existe = [...dossiers.values()].some((d) => d.stripe_payment_intent_id === pi);
@@ -301,7 +302,7 @@ function baseSimulee() {
           id: `d${n}`, ban_id: intent.ban_id, stripe_payment_intent_id: pi, ...colonnesDossierDepuisIntention(intent),
         });
       }
-      return { created: !existe, projet: projetConfirmeAuCheckout(intent) };
+      return { created: !existe, livraison: projetPourLivraison(intent) };
     },
   };
 }
@@ -322,7 +323,7 @@ test("de la réponse au dossier : relation et objectif recopiés à la création
   // L'artefact lira exactement ce contexte.
   assert.deepEqual(relationDeLAdresse(d), bien("lives_here", "buy"));
   // Relu sous sa forme normalisée (la version du schéma est estampillée à la lecture).
-  assert.deepEqual(r.projet, { ...p, schemaVersion: 3 });
+  assert.deepEqual(r.livraison, { etat: "confirme", projet: { ...p, schemaVersion: 3 } });
 });
 
 test("réponses corrigées avant de payer : même PaymentIntent, dernière version livrée", () => {
@@ -376,8 +377,8 @@ test("deux achats indépendants à la même adresse : deux dossiers, deux contex
 test("intention antérieure à FUT-10 : l'upsert du dossier est exactement celui d'avant", () => {
   assert.deepEqual(colonnesDossierDepuisIntention({ ban_id: "x", insee: "44109" }), {});
   assert.deepEqual(colonnesDossierDepuisIntention({ place_relation: "residence", place_objective: "investir" }), {});
-  assert.equal(projetConfirmeAuCheckout({ ban_id: "x" }), null);
-  assert.equal(projetConfirmeAuCheckout({ project_snapshot: { illisible: true } }), null);
+  assert.deepEqual(projetPourLivraison({ ban_id: "x" }), { etat: "historique" });
+  assert.deepEqual(projetPourLivraison({ project_state: null, project_snapshot: null }), { etat: "historique" });
 });
 
 test("projet modifié entre le paiement et la génération : le dossier répond au projet confirmé, et le dit", () => {
@@ -385,7 +386,9 @@ test("projet modifié entre le paiement et la génération : le dossier répond 
   const confirme = projet({ parsed: { reformulation: "Calme", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] } as unknown as UserProject["parsed"] });
   b.ecrireIntention("pi_1", ADRESSE, { relation: null, objectif: "buy", projetVu: { existe: true, updatedAt: confirme.updatedAt } }, confirme, NOW);
   const modifieEnsuite = projet({ updatedAt: "2026-10-11T12:01:00.000Z" });
-  const { projet: utilise } = b.webhook("pi_1");
+  const { livraison } = b.webhook("pi_1");
+  assert.equal(livraison.etat, "confirme");
+  const utilise = livraison.etat === "confirme" ? livraison.projet : null;
   assert.deepEqual(utilise, { ...confirme, schemaVersion: 3 });
   // L'artefact fige `confirme` ; le bandeau existant détecte l'écart avec le projet courant.
   assert.equal(projetAChangeMateriellement(utilise, modifieEnsuite), true);
@@ -395,7 +398,7 @@ test("le webhook recopie le contexte dans l'upsert QUI CRÉE le dossier, et gén
   const webhook = lire("src/app/api/stripe/webhook/route.ts");
   const upsert = webhook.slice(webhook.indexOf('.from("address_dossiers")\n      .upsert('), webhook.indexOf("if (insertError) throw insertError;"));
   assert.match(upsert, /\.\.\.colonnesDossierDepuisIntention\(intent\),[\s\S]*onConflict: "stripe_payment_intent_id", ignoreDuplicates: true/);
-  assert.match(webhook, /savedDpe: null,\s*\}, projetConfirmeAuCheckout\(intent\)\);/);
+  assert.match(webhook, /savedDpe: null,\s*\}, projetPourLivraison\(intent\)\);/);
   // Projet absent : toujours aucun artefact, donc aucun faux dossier personnalisé.
   assert.match(webhook, /if \(!project\) return;/);
   // L'artefact est planifié APRÈS l'upsert.
@@ -403,15 +406,18 @@ test("le webhook recopie le contexte dans l'upsert QUI CRÉE le dossier, et gén
 });
 
 test("projet absent : l'écran ne promet aucune personnalisation, et le dossier ne montre pas de verdict", () => {
-  const r = recapitulatif({ objectif: "buy", relation: "lives_here", priorites: null, projetExiste: false, prioritesIncomprises: false });
+  const r = recapitulatif({ objectif: "buy", relation: "lives_here", priorites: null, prioritesIncomprises: false });
   assert.match(r.limite!, /sans pouvoir juger s'il correspond à vos priorités/);
-  assert.equal(r.lignes.find((l) => l.libelle === "Ce qui compte")!.valeur, "Rien de décrit");
+  assert.equal(r.lignes.find((l) => l.libelle === "Votre projet")!.valeur, "Aucun projet décrit");
+  // Sans projet, aucune phrase ne promet de rapprochement avec des priorités.
+  assert.equal(r.usage, null);
+  assert.equal(r.titre, "Votre dossier");
   for (const l of r.lignes) assert.doesNotMatch(l.valeur, /personnalis/i);
   assert.doesNotMatch(r.limite!, /personnalisé/);
-  const avec = recapitulatif({ objectif: null, relation: null, priorites: "Calme", projetExiste: true, prioritesIncomprises: false });
+  const avec = recapitulatif({ objectif: null, relation: null, priorites: "Calme", prioritesIncomprises: false });
   assert.equal(avec.limite, null);
-  assert.equal(avec.lignes[0].valeur, "Raison non précisée");
-  assert.match(recapitulatif({ objectif: null, relation: null, priorites: "x", projetExiste: true, prioritesIncomprises: true }).limite!, /pas pu en extraire vos priorités/);
+  assert.equal(avec.lignes.find((l) => l.libelle === "Votre objectif")!.valeur, "non précisé");
+  assert.match(recapitulatif({ objectif: null, relation: null, priorites: "x", prioritesIncomprises: true }).limite!, /pas pu en extraire vos priorités/);
   // Sans projet, le hub invite à le décrire au lieu d'afficher un verdict (inchangé).
   assert.match(lire("src/lib/decision/premier-ecran.ts"), /if \(!input\.project\) \{[\s\S]*kind: "invite"/);
 });
@@ -533,7 +539,9 @@ test("migration 37 : additive, contraintes de valeurs, aucune ligne existante to
   assert.match(sql, /alter table public\.dossier_intents/);
   assert.match(sql, /place_objective is null or place_objective in \('buy', 'rent', 'understand', 'other'\)/);
   assert.match(sql, /place_relation is null or place_relation in \('lives_here', 'studying'\)/);
-  assert.doesNotMatch(sql, /\bupdate\b|\binsert\b|\bdelete\b|\bdrop\b|default '|not null/i);
+  // Aucune donnée touchée ; le seul `drop` est celui, idempotent, de la contrainte que la migration pose.
+  assert.doesNotMatch(sql, /\bupdate\b|\binsert\b|\bdelete\b|drop column|drop table|default '|add column[^,;]*not null|set not null/i);
+  assert.match(sql, /drop constraint if exists dossier_intents_project_state_snapshot/);
   // `dossier_intents` reste sans policy : aucune n'est créée ici.
   assert.doesNotMatch(sql, /create policy|grant /i);
   const down = lire("supabase/37_contexte_checkout_dossier_down.sql");

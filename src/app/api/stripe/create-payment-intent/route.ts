@@ -14,6 +14,8 @@ import { normalizeBuyerName } from "@/lib/invoice";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
 import { colonnesIntention, lireContexteCheckout, projetVuEstACour } from "@/lib/dossier-contexte-checkout";
+import { enregistrerIntention, statutStripeModifiable } from "@/lib/verrou-intention-dossier";
+import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import { normalizeUserProject, type UserProject } from "@/lib/user-project";
 
 export const runtime = "nodejs";
@@ -316,13 +318,19 @@ export async function POST(request: Request) {
     );
 
     if (isDossier && dossierIntent) {
-      const { createClient: createAdminClient } = await import("@supabase/supabase-js");
-      const admin = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      );
-      const { error: intentError } = await admin.from("dossier_intents").upsert(
-        {
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      // L'INTENTION ET SON CONTEXTE, SOUS VERROU (revue FUT-10).
+      //
+      // Première demande pour ce PaymentIntent : l'intention est créée. Demande suivante (réponses
+      // corrigées, même clé d'idempotence, donc même PaymentIntent) : elle est mise à jour SEULEMENT si
+      // la confirmation n'est pas engagée, condition portée par la requête SQL elle-même
+      // (`context_locked_at is null`) et vérifiée d'abord auprès de Stripe. Sinon RIEN n'est écrit et
+      // le formulaire n'est pas rendu : on ne paie jamais avec des réponses qui ne seraient pas celles
+      // livrées. Cf. `verrou-intention-dossier.ts`.
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      let resultat: Awaited<ReturnType<typeof enregistrerIntention>>;
+      try {
+        resultat = await enregistrerIntention(storeIntentionsSupabase(), {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user.id,
           ban_id: dossierIntent.banId,
@@ -334,23 +342,32 @@ export async function POST(request: Request) {
           longitude: dossierIntent.longitude,
           amount_due_cents: dossierAmountCents,
           territory_deduction_cents: dossierIntent.deductionCents,
-          // FUT-10 : relation, objectif, date de déclaration, projet figé. Dans le MÊME upsert que
-          // l'adresse : une intention ne peut pas exister sans son contexte. Revenir aux questions
-          // puis repasser au paiement rend le même PaymentIntent (même clé, mêmes paramètres Stripe) :
-          // cet upsert remplace alors les réponses, et c'est la dernière version qui sera livrée.
+          // FUT-10 : relation, objectif, date de déclaration, état et snapshot du projet. Dans la MÊME
+          // écriture que l'adresse : une intention n'existe jamais sans son contexte.
           ...colonnesContexte,
-        },
-        { onConflict: "stripe_payment_intent_id" },
-      );
-
-      // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
-      // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant
-      // que la carte ne soit débitée.
-      if (intentError) {
-        console.error("[create-payment-intent] dossier_intents", intentError.message);
+        }, {
+          // La réponse idempotente de Stripe rejoue l'objet du jour de la CRÉATION, statut compris :
+          // seul un `retrieve` dit où en est vraiment le paiement.
+          paiementEncoreModifiable: async () =>
+            statutStripeModifiable((await stripe.paymentIntents.retrieve(paymentIntent.id)).status),
+        });
+      } catch (intentError) {
+        // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
+        // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant
+        // que la carte ne soit débitée. Le message seul : jamais la ligne, qui porte le projet.
+        console.error("[create-payment-intent] dossier_intents", intentError instanceof Error ? intentError.message : "échec");
         return NextResponse.json(
           { error: "Préparation du dossier impossible." },
           { status: 500 },
+        );
+      }
+      if (resultat === "verrouillee") {
+        return NextResponse.json(
+          {
+            error: "Un paiement est déjà engagé avec vos réponses précédentes. Rechargez la page pour recommencer avec les nouvelles.",
+            code: "CONTEXT_LOCKED",
+          },
+          { status: 409 },
         );
       }
     }
