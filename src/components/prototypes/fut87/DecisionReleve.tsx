@@ -203,8 +203,9 @@ export function DecisionReleve({
             <h1 className={s.display} style={{ fontSize: "clamp(30px, 3.6vw, 46px)" }}>{lecture.verdict.titre}</h1>
             {lecture.verdict.detail ? <p className={s.chapo}>{lecture.verdict.detail}</p> : null}
             {lecture.conditionNonExaminee ? (
-              <div style={{ borderLeft: "3px solid var(--reg-non-su)", paddingLeft: 14 }} className={s.pileSerree}>
-                <p className={s.etiquette}>Condition à vérifier</p>
+              <div className={s.pileSerree}>
+                {/* Le trait de registre se pose devant le libellé, jamais sur tout le bloc. */}
+                <Registre teinte="var(--reg-non-su)" className={s.etiquette}>Condition à vérifier</Registre>
                 <p className={s.dense}>{lecture.conditionNonExaminee}</p>
               </div>
             ) : null}
