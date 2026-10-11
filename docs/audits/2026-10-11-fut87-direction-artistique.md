@@ -1,8 +1,32 @@
 # FUT-87 · Directions artistiques, recommandation, design system et migration
 
-Date : 11 octobre 2026 · Statut : **proposition, en attente de validation du porteur.**
-Rien de ce document n'est appliqué au site public. Les prototypes vivent sous `/dev/fut87` (404 en
-production) ; l'audit qui les fonde est `2026-10-11-fut87-audit-visuel.md`.
+Date : 11 octobre 2026 · Statut : **direction de travail validée par le porteur (revue du 11/10) ;
+version achevée et migration non validées.** Rien de ce document n'est appliqué au site public. Les
+prototypes vivent sous `/dev/fut87` (404 en production) ; l'audit qui les fonde est
+`2026-10-11-fut87-audit-visuel.md`. La V2 (§ 0) répond à la revue du porteur.
+
+## 0. V2 · Ce que la revue a changé
+
+La revue a validé l'architecture éditoriale, la marge de preuve, les glyphes et les visualisations issues
+des données, et demandé une passe de maturation avant toute migration. Ce qui a été fait :
+
+| Point de la revue | Réponse V2 | Vérification |
+| --- | --- | --- |
+| **Trajectoire dessinée comme une série continue** (`RegleDuTemps` reliait les jalons par une ligne) | Chaque horizon est un jalon isolé : une tige depuis l'axe, un repère carré, sa valeur. La référence 1976-2005 reste une bande. Aucun trait entre deux jalons, et la marge le dit. | Test D1 : la fonction ne contient ni `polyline`, ni `path`, ni `points` ; une ligne réintroduite fait échouer le test. |
+| **Provenance des preuves** (une preuve sans valeur perdait lien, cible, grain et date ; une carte prenait le grain de sa première preuve) | `lireDossier` garde chaque `EvidenceRef` entière, avec ou sans valeur ; une carte porte **tous** ses grains ; une composition reprend les grains de ses faits absorbés, et ce que sa face ne raconte pas reste lisible dans un dépliable, comme en production. En marge, une source sans valeur reste un lien, et chaque preuve d'une carte à grains mêlés porte son propre glyphe. | Tests L4 (toutes les preuves de la minute, champ par champ), L5 (carte mêlant commune, secteur et adresse, lien et date d'une source sans valeur), L6 (composition et fait absorbé d'un autre grain). Deux mutations (liens retirés, premier grain seulement) font échouer L4 à L6. |
+| **Mobile trop dense, sommaire hors du premier écran** | Sommaire en jetons juste sous le verdict ; gestes prioritaires avant l'explication ; projet replié en une ligne ; titre du verdict de 27 px sur mobile. | Mesuré sur quatre dossiers (référence, condition, nombreuses réserves, titre long) : titre, sommaire et gestes finissent entre 466 et 620 px à 390 × 844, et à 647 px au plus à 360 × 740, barre de navigation comprise et bandeau du prototype exclu. |
+| **Marge de preuve trop petite** | 12 px sur grand écran, 13 px sur mobile (11,5 px en V1) ; sources en `--fg-3` au lieu du gris de métadonnée. | Captures `*-390.jpg`. |
+| **Dossier trop austère, monotonie de lignes** | Trois densités alternées : la plaque (éditoriale) ; deux moments visuels, l'emblème compté « D'où viennent ces constats » et la bande teintée de la balance (Ma décision) ou de l'audit (Logement) ; le registre des contrôles (sobre). | Captures `decision-apres-1440.jpg`, `logement-apres-1440.jpg`. |
+| **Situations défavorables** | Cinq cas Logement (référence, sans diagnostic, immeuble, sources sans réponse, titre long) et cinq cas Ma décision (référence, condition sans compromis, nombreuses réserves, titre long, correspondance sans réserve), sélectionnables en tête de page. Les absences reprennent les phrases de production ; deux formulations nouvelles sont signalées dans le code (patrimoine non vérifié, mémoire des sinistres non lue). | Captures `cas-*.jpg`. Les cas ont révélé trois défauts, corrigés : libellés de la règle du temps superposés (diagnostic 2023 et audit 2024), « : » orphelin en début de ligne dans le verdict, rouge d'incompatibilité au sommaire d'une section de conditions sans blocage. |
+| **Orange** | Absent des données et de la navigation du dossier ; présent dans l'identité (point du logo, porte principale et bouton d'action de l'accueil). Dans le dossier, il ne reste que là où la production le met : le ton « arbitrage » du verdict, qui est le registre compromis. | Revue visuelle des captures. |
+| **Git** | Les quatre commits FUT-87 ont été rebasés sur `main` (après FUT-67 #44 et FUT-26 #45), sans rejouer FUT-67 ; #44 contient FUT-67 à l'identique. | `git log origin/main..` ne contient que des commits FUT-87. |
+
+**Défaut du moteur trouvé en testant les cas** (hors périmètre FUT-87, non corrigé ici) : à Nîmes, faire de
+« des étés plus frais » une condition sans compromis (`confirmer=faible_chaleur`) fait échouer l'assemblage
+du dossier : « fait absorbé inexistant : 30189:climat-chaleur (30189:composition-confort-ete) ». Le harnais
+de production `/dev/dossier` reproduit l'erreur à l'identique. Un lecteur qui confirmerait cette condition
+sur une commune chaude verrait vraisemblablement son dossier échouer. À traiter avec FUT-54 ou en ticket
+propre. Le cas « condition sans compromis » du prototype utilise donc la proximité de la mer.
 
 ## Cadre
 
@@ -89,7 +113,8 @@ décision devient la plaque du verdict. Ces trois formes viennent du produit lui
 - Le grain se reconnaît d'un coup d'œil à la forme, sans lire « à l'échelle de la commune ».
 - Le rang et le seuil climatique se **voient** (règle de rang, barres à seuil), avec les nombres
   mêmes qui ont décidé du constat (`basis` du moteur).
-- Le verdict, les gestes prioritaires et le sommaire du dossier tiennent dans le premier écran.
+- Le verdict, le sommaire et les gestes prioritaires tiennent dans le premier écran, mobile compris
+  (mesure au § 0 ; la V1 l'affirmait à tort pour le mobile, où le sommaire arrivait sous l'explication).
 - La balance « correspond / correspond moins bien » est face à face.
 
 **Pourquoi elle restera crédible.** Elle n'emprunte rien aux effets de l'année (verre, halos, dégradés,
@@ -125,7 +150,7 @@ JetBrains Mono seulement là où l'alignement compte.
 | Surtitre | Archivo `wdth` 88, 600, 13,5 px, **casse normale** + numéro mono | nomme un mouvement ; remplace les capitales mono |
 | Étiquette | Archivo `wdth` 88, 600, 12,5 px | statut, libellé de champ |
 | Chiffre | Archivo `wdth` 125, 500, tabulaire, 30 à 44 px + unité mono | valeur mise en avant |
-| Marge | JetBrains Mono 11,5 px, casse normale | grain, preuve, source, date |
+| Marge | JetBrains Mono 12 px (13 px sur mobile), casse normale, sources en `--fg-3` | grain, preuve, source, date |
 
 La serif n'est pas réintroduite (amendement du 01/08 : registre faux pour un instrument de mesure). La
 mono n'est plus jamais en capitales espacées.
@@ -164,7 +189,7 @@ mono n'est plus jamais en capitales espacées.
 | Vérification | geste à glyphe d'action, registre numéroté | `ActionCue`, `DecisionChecklist` |
 | Preuve | `Marge` (grain, valeur, source, date) | `Chip` « PREUVE · … » |
 | Méthodologie | `details` « Données et limites » | `MethodDetails` |
-| Visualisation | `RegleDuTemps`, `RegleDeRang`, `Seuils`, échelle DPE, barres d'audit | (absent) |
+| Visualisation | `RegleDuTemps` (jalons, jamais de courbe), `RegleDeRang`, `Seuils`, échelle DPE, barres d'audit, `EmblemeEchelles` compté | (absent) |
 | Navigation entre échelles | `CoupeEchelles`, `GlypheGrain` | cartes de modules colorées |
 
 ## 4. Les prototypes
@@ -210,7 +235,8 @@ code, et vérifié sur le build : les sept routes répondent 404 sous `next star
 ## 6. Accessibilité et responsive (vérifié sur les prototypes)
 
 - 1440, 390 et 360 px : aucun défilement horizontal (mesuré). Sous 900 px la marge passe sous le texte ;
-  sous 640 px les barres d'audit passent sous leur libellé.
+  sous 640 px les barres d'audit passent sous leur libellé. Deux jalons proches de la règle du temps
+  passent sur deux lignes de libellés.
 - Contrastes : uniquement des jetons déjà mesurés (≥ 4,5:1 pour le texte, `--ghost` à 4,69:1 sur la plaque).
 - Clavier : liens, portes, coupe des échelles et « Données et limites » sont focusables, contour 2 px
   `--fg-hi`. Les ancres des gestes prioritaires visent les faits (`tabIndex=-1`, `scroll-margin`).
@@ -218,11 +244,15 @@ code, et vérifié sur le build : les sept routes répondent 404 sous `next star
 - Aucune animation (FUT-75 viendra après la validation).
 - Non vérifié : lecteur d'écran réel, thème clair des prototypes, Safari.
 
-## 7. Points à arbitrer par le porteur
+## 7. Arbitrages du porteur (revue du 11/10/2026)
 
-1. **Valider « Le relevé »** comme direction, ou demander une autre combinaison.
-2. **Le papier clair** : la planche B est la plus forte en lecture longue. Le système du relevé fonctionne
-   aussi en thème clair (jetons existants) ; en faire le thème par défaut du **dossier imprimable** ou de
-   l'export PDF est une piste qui ne touche pas la DA sombre de l'interface.
-3. **L'accent orange** reste partagé avec le registre « compromis » (`DESIGN.md` § 11, point 1). Le
-   prototype le retire du dossier, sauf pour ce registre.
+1. **« Le relevé »** : validé comme direction de travail, pas comme version achevée. Une passe de
+   maturation (la V2) précède toute migration.
+2. **Le papier clair** : retenu pour le dossier imprimable et l'export PDF, en chantier distinct, après la
+   stabilisation de l'interface interactive.
+3. **L'orange** : gardé, discret, dans l'identité (logo, actions de l'accueil) ; retiré de tout élément
+   de donnée où il se confondrait avec un statut ou le registre compromis. Couleur de marque et couleur de
+   jugement restent séparées.
+
+**Ordre de migration demandé** : Ma décision, puis Logement, progressivement ; pas l'accueil en premier
+(il dépend de FUT-50). Ma décision consomme la sortie du moteur : la migration attend la fusion de FUT-54.

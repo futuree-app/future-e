@@ -1,6 +1,6 @@
 # FUT-87 · Audit visuel du produit réel
 
-Date : 11 octobre 2026 · Branche : `feat/fut-87-direction-artistique` (issue de `feat/fut-67-dossier-premium`, non fusionnée)
+Date : 11 octobre 2026 · Branche : `feat/fut-87-direction-artistique`, rebasée sur `main` après la fusion de FUT-67 (#44) et FUT-26 (#45)
 Suite : `2026-10-11-fut87-direction-artistique.md` (directions, recommandation, design system, migration).
 Captures : `docs/audits/fut87-captures/` (planches avant / après, desktop et mobile).
 
