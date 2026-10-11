@@ -202,3 +202,14 @@ test("E5. aucune couleur codée en dur dans le relevé de production", () => {
     assert.doesNotMatch(code(`src/components/releve/${f}`), /#[0-9a-fA-F]{3,8}\b/, f);
   }
 });
+
+
+test("E6. les deux vues réutilisent un helper pur, sans cycle entre composants", () => {
+  const classique = code("src/components/report/ControlesDuDossier.tsx");
+  const releve = code("src/components/releve/ControlesReleve.tsx");
+  const partage = code("src/lib/decision/controles-sujets.ts");
+  assert.match(classique, /import \{ sujetsDuGroupe \} from "@\/lib\/decision\/controles-sujets"/);
+  assert.match(releve, /import \{ sujetsDuGroupe \} from "@\/lib\/decision\/controles-sujets"/);
+  assert.doesNotMatch(releve, /from "@\/components\/report\/ControlesDuDossier"/);
+  assert.match(partage, /function sujetsDuGroupe\(/);
+});
