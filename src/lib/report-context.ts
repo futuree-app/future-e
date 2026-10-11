@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { CommuneRelation, CommuneRelationSource } from "./relation-au-lieu.ts";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Contexte de lecture d'un rapport : la RELATION du lecteur à une commune.
@@ -15,13 +16,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // résidence).
 // ════════════════════════════════════════════════════════════════════════════
 
-export type Relation =
-  | "current_residence"
-  | "considering_living"
-  | "information_only"
-  | "unknown";
-
-export type RelationSource = "inferred" | "confirmed_by_user";
+// Les types vivent dans `relation-au-lieu.ts` (FUT-26), qui porte aussi la relation à l'ADRESSE et la
+// voix que le moteur en tire. Ce module garde l'accès à la table `report_context`.
+export type Relation = CommuneRelation;
+export type RelationSource = CommuneRelationSource;
 
 export type ReportContextRow = {
   insee: string;

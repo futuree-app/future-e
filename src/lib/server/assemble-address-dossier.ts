@@ -16,6 +16,7 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
 import { buildAutourFacts } from "@/lib/decision/autour-facts";
+import type { RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // L'ASSEMBLAGE DU DOSSIER AU GRAIN ADRESSE.
@@ -64,6 +65,12 @@ export async function assembleAddressDossier(input: {
    * l'entourage n'a pas encore été calculé, et les règles se taisent alors.
    */
   snapshotAutour?: Face3Snapshot | null;
+  /**
+   * LA RELATION DÉCLARÉE À CE BIEN (FUT-26), lue sur `address_dossiers.place_relation`. À ce grain,
+   * SEULE cette relation compte : celle de la commune n'est jamais héritée (on peut habiter La
+   * Rochelle et y étudier un second logement). Absente = inconnue, jamais « j'y habite ».
+   */
+  relation?: RelationAuLieu | null;
 }): Promise<AddressDossierResult> {
   const { address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour } = input;
   // La même lecture que le dossier communal (FUT-7) : `hard` en vient déjà, le projet doit suivre.
@@ -78,6 +85,8 @@ export async function assembleAddressDossier(input: {
       .catch(() => null);
     const facts: ModuleFacts = {
       ...communeFacts, hasAddress: true, logement, secteur: buildSecteurFacts(car),
+      // La relation de la COMMUNE ne passe pas à l'adresse : elle est remplacée, même par une inconnue.
+      relationAuLieu: input.relation ?? { echelle: "adresse", relation: null },
       // LE REGISTRE ENTRE DANS LE MOTEUR. Aucune I/O : la donnée est déjà gelée dans le snapshot du
       // dossier. `undefined` quand elle est absente, pour que la règle distingue « non consulté »
       // de « rien trouvé ».
@@ -100,7 +109,7 @@ export async function assembleAddressDossier(input: {
     });
     const run = runRules(facts, project, hardAtAddress);
     return {
-      dossier: assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project)),
+      dossier: assembleDossier(run, project, "commune+adresse", facts.nom, composeFacts(run, facts, project), facts.relationAuLieu ?? null),
       status: "done",
       scope: scopeKey,
       verificationsIndisponibles: verificationsMateriellesIndisponibles(logement),

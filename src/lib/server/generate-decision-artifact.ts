@@ -13,6 +13,8 @@ import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
+import { getReportContext, resolveRelation } from "@/lib/report-context";
+import { relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, À LA DÉLIVRANCE.
@@ -87,6 +89,32 @@ async function lireSnapshotGele(
 }
 
 /**
+ * LA RELATION DU LECTEUR AU LIEU FIGÉ (FUT-26), lue ici plutôt que reçue de l'appelant, pour la même
+ * raison que le voisinage : quatre chemins génèrent un artefact (webhook, rattrapage de /rapport,
+ * actualisation, dossier d'adresse), et un appelant qui l'oublierait figerait une autre voix que
+ * celle de l'écran.
+ *
+ *   - commune : `report_context` et la commune de résidence déclarée, via `resolveRelation` ;
+ *   - adresse : `address_dossiers.place_relation`, SEULE (celle de la commune ne s'hérite pas).
+ *
+ * Une lecture qui échoue rend une relation INCONNUE : la voix devient neutre, jamais celle d'un habitant.
+ */
+async function lireRelationsAuLieu(
+  sb: SupabaseClient, userId: string, insee: string, dossierId: string | null,
+): Promise<{ commune: RelationAuLieu | null; adresse: RelationAuLieu | null }> {
+  const [profil, contexte, dossier] = await Promise.all([
+    sb.from("user_profiles").select("home_insee_code").eq("user_id", userId).maybeSingle().then((r) => r.data, () => null),
+    getReportContext(sb, userId, insee).catch(() => null),
+    dossierId
+      ? sb.from("address_dossiers").select("place_relation").eq("id", dossierId).maybeSingle().then((r) => r.data, () => null)
+      : Promise.resolve(null),
+  ]);
+  const home = (profil as { home_insee_code?: string | null } | null)?.home_insee_code ?? null;
+  const commune = relationDeLaCommune(resolveRelation(home != null && communeParent(home) === insee, contexte));
+  return { commune, adresse: dossierId ? relationDeLAdresse(dossier as { place_relation?: unknown } | null) : null };
+}
+
+/**
  * `version` : la place à réserver. Elle vaut 1 pour un premier figement (webhook, rattrapage d'un
  * dossier antérieur). Elle vaut la suivante quand une version PRÊTE existe et qu'une pièce apportée
  * par le lecteur l'a périmée : la précédente reste en base, et `readLatestArtifact` sert la plus
@@ -116,9 +144,11 @@ export async function generateDecisionArtifact(
     const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
+    const relations = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
     const commune = await buildCommuneDossier(insee, project, {
       hasAddress: cible.kind === "adresse",
       citycode: cible.kind === "adresse" ? cible.address.citycode : null,
+      relation: relations.commune,
     });
     if (!commune) {
       await failArtifact(sb, userId, insee, scopeKey, version);
@@ -165,6 +195,7 @@ export async function generateDecisionArtifact(
       // montrait l'équipement de santé recensé à l'adresse et l'artefact figé dans la foulée ne
       // le contenait pas : le lecteur voyait le constat une fois, puis plus jamais.
       snapshotAutour,
+      relation: relations.adresse,
     });
 
     // ON N'ENREGISTRE JAMAIS UN REPLI COMME LA VERSION VENDUE.

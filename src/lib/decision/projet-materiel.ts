@@ -20,7 +20,8 @@ import { effectiveProject } from "./effective-value.ts";
 //
 // ── CE QUI COMPTE, ET RIEN D'AUTRE ───────────────────────────────────────────────────────────
 // Ce que le moteur LIT pour conclure :
-//   - `posture` : elle gouverne le bucket des gestes (`bucketDuProjet`) et la voix du verdict ;
+//   - `posture` (l'objectif) : elle gouverne le vocabulaire du verdict (« votre projet » / « ce que vous
+//     avez demandé »). Les gestes et le ton « vous y habitez » viennent de la RELATION AU LIEU (FUT-26) ;
 //   - `intent` : achat ou location changent les gestes proposés ;
 //   - les CONTRAINTES DURES : elles peuvent rendre un lieu incompatible ;
 //   - les PRÉFÉRENCES et leur POIDS : elles décident quelles règles s'expriment, et leur matérialité.

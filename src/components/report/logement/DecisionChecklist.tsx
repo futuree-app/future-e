@@ -2,6 +2,7 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { pointsAVerifier, introPointsAVerifier } from "@/lib/decision/logement-verifications";
 import type { LogementFacts } from "@/lib/decision/decision-fact";
 import type { UserProject } from "@/lib/user-project";
+import type { RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // Beat 5 — « À vérifier avant de décider ». Sortie d'engagement du module : chaque point est un
 // geste, jamais un champ. Aucun compteur, aucune coche verte / croix rouge (pas de score de
@@ -14,13 +15,14 @@ import type { UserProject } from "@/lib/user-project";
 // LE PROJET VIENT DU COMPTE (12/08/2026), plus d'une sonde locale qui reposait la question à chaque
 // visite sans rien persister. Sans projet, `bucketDuProjet` rend `neutre` et cette liste sert sa
 // version neutre : aucune posture n'est devinée.
-export function DecisionChecklist({ facts, project }: { facts: LogementFacts; project: UserProject | null }) {
-  const items = pointsAVerifier(facts, project);
+// FUT-26 : la relation déclarée À CE BIEN règle les gestes « vous y habitez », plus l'objectif du projet.
+export function DecisionChecklist({ facts, project, relation = null }: { facts: LogementFacts; project: UserProject | null; relation?: RelationAuLieu | null }) {
+  const items = pointsAVerifier(facts, project, relation);
   return (
     <ReportSection eyebrow="À vérifier avant de décider" tone="accent">
       <GlassCard>
         <div style={{ display: "grid", gap: 14 }}>
-          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>{introPointsAVerifier(project)}</p>
+          <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.65, margin: 0 }}>{introPointsAVerifier(project, relation)}</p>
           {items.length === 0 ? (
             <p style={{ fontSize: 14, color: "var(--fg-3)", lineHeight: 1.65, margin: 0 }}>
               Cette lecture ne fait remonter aucun point particulier à vérifier pour ce logement.

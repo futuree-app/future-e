@@ -5,6 +5,7 @@
 // L'ASSEMBLAGE A QUITTÉ CE FICHIER le 05/08/2026, pour `server/assemble-address-dossier.ts` : le
 // webhook Stripe doit produire le même dossier hors de toute page, et un pipeline qui n'existe que
 // dans le corps d'un composant ne se rejoue pas. Ce composant ne fait plus que demander et rendre.
+import type { RelationAuLieu } from "@/lib/relation-au-lieu";
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import {
@@ -26,7 +27,7 @@ import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types"
 import type { ReactNode } from "react";
 
 export async function DossierAvecLogement({
-  project, address, savedDpe, selectionDpeChangeeLe, permis, snapshotAutour, communeFacts, communeDossier, logementLink, insee,
+  project, address, savedDpe, selectionDpeChangeeLe, permis, snapshotAutour, relationAdresse, communeFacts, communeDossier, logementLink, insee,
   scopeKey, hard, userId, espacement, titre, supportingPane,
 }: {
   project: UserProject;
@@ -75,6 +76,8 @@ export async function DossierAvecLogement({
   titre?: NiveauTitre;
   /** Navigation secondaire rendue à droite du dossier sur desktop. */
   supportingPane?: ReactNode;
+  /** FUT-26 : la relation déclarée à ce bien (`place_relation`). Absente = inconnue. */
+  relationAdresse?: RelationAuLieu | null;
 }) {
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -99,6 +102,7 @@ export async function DossierAvecLogement({
     ? null
     : await assembleAddressDossier({
         project, address, savedDpe, communeFacts, communeDossier, hard, scopeKey, permis, snapshotAutour,
+        relation: relationAdresse ?? null,
       });
   // LE RATTRAPAGE, comme pour le territoire : un dossier d'adresse acheté avant ce lot n'aurait
   // jamais d'artefact. Il n'est tenté que si l'assemblage a ABOUTI : figer un repli communal comme

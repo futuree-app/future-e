@@ -8,6 +8,7 @@
 // filtre. Trois règles vivaient ici (mer, taille, département), et l'une d'elles jugeait la taille sur
 // la population COMMUNALE quand le comparateur la jugeait sur l'AGGLOMÉRATION : deux moteurs, deux
 // verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
+import { voixDuLecteur } from "../relation-au-lieu.ts";
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
   CompromiseFact, VerificationFact, MismatchFact, EvidenceRef,
@@ -137,7 +138,9 @@ const ruleInondation: DecisionRule = {
     if (!preferenceSurfaced(p, "faible_risque_inondation")) {
       return { ruleId: RULE_INOND, projectKeys: ["faible_risque_inondation"], outcome: "not_surfaced", facts: [], reason: "exposition notable, non matérialisée à ce poids" };
     }
-    const habitant = p.posture === "habitant";
+    // FUT-26 : la voix vient de la relation au lieu évalué (et de l'intention), plus de l'objectif.
+    const voix = voixDuLecteur(p.intent, f.relationAuLieu);
+    const habitant = voix === "habitant";
     const catnat = catnatInondationDepuisCompte(f.catnatInondation, f.insee);
     const catnatCtx = catnat ? ` La commune a connu ${phraseConstatCatnatInondation(catnat)} (comptage administratif, pas une probabilité).` : "";
     // LA PREUVE EST OPPOSABLE, jamais un score interne : « 100/100 » se lisait comme une probabilité ou
@@ -198,7 +201,9 @@ const ruleInondation: DecisionRule = {
       role: "verification", materialityTier: "structuring", topic: "l'exposition à l'inondation",
       statement: (habitant
         ? "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes."
-        : "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager.") + catnatCtx,
+        : voix === "engagement"
+          ? "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager."
+          : "L'exposition de la commune à l'inondation ressort élevée. L'état des risques précise ce qu'il en est à une adresse donnée.") + catnatCtx,
       limitation: "Cette exposition est lue à l'échelle de la commune, pas de l'adresse.",
       evidence,
       action: habitant

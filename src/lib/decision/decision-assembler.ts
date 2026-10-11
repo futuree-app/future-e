@@ -1,5 +1,6 @@
 // Assembleur PUR : états de conclusion HONNÊTES (périmètre communal, deux vides distincts,
 // project_not_structured), couverture nommée, hiérarchie plafonnée. Aucun LLM.
+import { voixDuLecteur, type RelationAuLieu, type Voix } from "../relation-au-lieu.ts";
 import { hcRestreint } from "./effective-value.ts";
 import type {
   DecisionFact, Dossier, DossierSection, DossierCard, ConclusionState, RunResult, EvidenceRef, MaterialityTier,
@@ -34,12 +35,24 @@ import { buildConclusionPlan } from "./conclusion-plan.ts";
 // de ce que le MOTEUR a établi, pas du produit. Les permis autour de l'adresse, les abords et la
 // conclusion Autour produisent des constats hors moteur, et un titre qui promettrait l'exhaustivité
 // se tromperait sur ce qu'il montre.
-function labels(project: UserProject): { engage: string; verifTitle: string; controlesTitle: string } {
-  if (project.posture === "habitant") {
+//
+// LA VOIX VIENT DE LA RELATION AU LIEU, PLUS DE L'OBJECTIF (FUT-26). « J'y habite déjà » faisait
+// titrer « À connaître et à surveiller » le dossier d'une adresse étudiée dans une autre ville. La
+// voix (`voixDuLecteur`) ne parle à un habitant que sur une relation CONNUE ; sans elle, ni « vous y
+// habitez » ni « avant de vous engager » n'est supposé.
+function labels(voix: Voix): { engage: string; verifTitle: string; controlesTitle: string } {
+  if (voix === "habitant") {
     return {
       engage: "comprendre et surveiller",
       verifTitle: "À connaître et à surveiller",
       controlesTitle: "Tous les points à connaître et à surveiller",
+    };
+  }
+  if (voix === "neutre") {
+    return {
+      engage: "décider",
+      verifTitle: "À contrôler",
+      controlesTitle: "Tous les contrôles établis pour ce dossier",
     };
   }
   return {
@@ -112,7 +125,11 @@ export function assembleDossier(
   // Le NOM de la commune : le dossier parle de Toulouse, pas de « ce lieu ».
   communeNom: string,
   compositions: FactComposition[] = [],
+  // LA RELATION DU LECTEUR AU LIEU ÉVALUÉ (FUT-26). `null` = inconnue : voix neutre ou celle de
+  // l'intention, jamais celle d'un habitant. Les orchestrateurs la passent depuis `facts.relationAuLieu`.
+  relation: RelationAuLieu | null = null,
 ): Dossier {
+  const voix = voixDuLecteur(project.intent, relation);
   assertCompositionsValid(run, compositions);
   // AVANT LES CAPS (spec §6) : un fait absorbé quitte sa section ; il reste dans le dossier interne
   // (couverture, orientation, preuves) et au dépliable de sa composition.
@@ -128,7 +145,7 @@ export function assembleDossier(
   // L'état de conclusion se juge sur les faits ÉMIS : une absorption est de la présentation, jamais un
   // adoucissement de l'état.
   const state = conclusionState(run.facts, project);
-  const l = labels(project);
+  const l = labels(voix);
   const candidates: DossierSection[] = [
     // « CONDITION », pas « contrainte » : c'est le mot du lexique tranché, celui que l'étiquette du
     // verdict (« Condition non respectée ») et le bloc des non examinées (« Condition à vérifier »)
@@ -194,6 +211,7 @@ export function assembleDossier(
     communeNom,
     conclusionState: state,
     posture: project.posture,
+    voix,
     shownFacts: shown,
     shownCompositions: shownComps,
     uncovered,

@@ -23,6 +23,7 @@ import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySe
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
+import { relationDeLAdresse } from "@/lib/relation-au-lieu";
 import type { UserProject } from "@/lib/user-project";
 import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
 import type { LogementFacts } from "@/lib/decision/decision-fact";
@@ -678,7 +679,7 @@ export default function LogementModule({
             {/* Sans la couverture par famille (réponse d'erreur de la route), il n'y a pas de
                 faits à évaluer : le bloc disparaît, plutôt que d'annoncer « aucun point à
                 vérifier » sur la foi d'une absence de données. */}
-            {logementFacts && <DecisionChecklist facts={logementFacts} project={project} />}
+            {logementFacts && <DecisionChecklist facts={logementFacts} project={project} relation={relationDeLAdresse(dossier)} />}
           </div>
 
           {/* La sortie d'engagement du module = le beat 5 « À vérifier avant de décider »

@@ -1,6 +1,7 @@
 // Contrats du dossier de décision (slice 1, v2). Types PURS.
 // DecisionFact = union discriminée : le TYPE impose la doctrine (un unknown a un impact,
 // un compromise a deux côtés avec preuve, une verification a une action).
+import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject, CriterionRef } from "../user-project.ts";
 import type { CapabilityReason, EvaluationGrain } from "./capability.ts";
@@ -379,6 +380,14 @@ export type LogementFacts = {
 // `merCentreKm` est NULLABLE, comme dans CommuneAttributes : le forcer à `number` obligerait ses
 // appelants à inventer une valeur, et une distance inconnue deviendrait une commune littorale.
 export type ModuleFacts = CommuneAttributes & {
+  /**
+   * LA RELATION DU LECTEUR AU LIEU ÉVALUÉ (FUT-26). Ce n'est PAS un fait du lieu, et aucune règle ne
+   * l'affiche comme tel : elle ne règle que la VOIX (habitant, avant engagement, neutre) et les gestes.
+   * Elle voyage ici comme `hasAddress`, autre donnée du contexte de lecture, parce que toutes les
+   * règles reçoivent ces faits. Absente ou `null` = inconnue : jamais un ton d'habitant.
+   * Échelle commune : `report_context`. Échelle adresse : `address_dossiers.place_relation`, seule.
+   */
+  relationAuLieu?: RelationAuLieu | null;
   catnatInondation: number | null;
   // LES RISQUES DÉCLARÉS PAR L'ÉTAT (GASPAR / Géorisques), au grain commune. Distincts des indicateurs
   // PROJETÉS (DRIAS) : ceux-ci disent une trajectoire météorologique, celui-là dit ce que l'autorité a

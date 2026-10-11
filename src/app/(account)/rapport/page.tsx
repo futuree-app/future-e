@@ -21,6 +21,7 @@ import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
+import { relationDeLAdresse, relationDeLaCommune } from "@/lib/relation-au-lieu";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
@@ -181,11 +182,23 @@ export default async function RapportPage() {
   const codeLecture = inseeCode
     ? codeDeLectureLocal(claims, inseeCode, logementForCommune?.insee ?? null)
     : null;
+  // LA RELATION AU LIEU SE LIT ICI DEPUIS LE 12/08/2026, parce que c'est ici qu'on la modifie
+  // désormais. Elle reste attachée à la COMMUNE (table `report_context`), et non au projet :
+  // quelqu'un peut habiter Lorient et envisager La Rochelle. On affiche la valeur EFFECTIVE
+  // (`resolveRelation`), celle que la synthèse utilisera, plutôt qu'une valeur déclarée qui n'existe
+  // peut-être pas encore.
+  //
+  // LUE AVANT LE DOSSIER DEPUIS FUT-26 : le moteur en tire la voix du dossier commune (habitant, avant
+  // engagement, neutre), à la place de l'objectif du projet qui la réglait jusqu'ici.
+  const contexteLecture = fullReport && inseeCode
+    ? resolveRelation(territory.isResidence, await getReportContext(supabase, user.id, inseeCode))
+    : null;
   const communeResult =
     fullReport && inseeCode && userProject
       ? await buildCommuneDossier(inseeCode, userProject, {
           hasAddress: Boolean(logementForCommune),
           citycode: codeLecture,
+          relation: contexteLecture ? relationDeLaCommune(contexteLecture) : null,
         })
       : null;
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
@@ -283,14 +296,6 @@ export default async function RapportPage() {
     />
   );
 
-  // LA RELATION AU LIEU SE LIT ICI DEPUIS LE 12/08/2026, parce que c'est ici qu'on la modifie
-  // désormais. Elle reste attachée à la COMMUNE (table `report_context`), et non au projet :
-  // quelqu'un peut habiter Lorient et envisager La Rochelle. On affiche la valeur EFFECTIVE
-  // (`resolveRelation`), celle que la synthèse utilisera, plutôt qu'une valeur déclarée qui n'existe
-  // peut-être pas encore.
-  const contexteLecture = fullReport && inseeCode
-    ? resolveRelation(territory.isResidence, await getReportContext(supabase, user.id, inseeCode))
-    : null;
 
   // LE CONTENU DU HAUT DE PAGE, décidé par une fonction pure et testée (quatre états). La page ne
   // rejoue pas la règle : elle la consomme.
@@ -460,6 +465,8 @@ export default async function RapportPage() {
                   selectionDpeChangeeLe={logementForCommune.dpe_selection_at}
                   permis={logementForCommune.snapshot?.permis ?? null}
                   snapshotAutour={logementForCommune.snapshot ?? null}
+                  // FUT-26 : la relation DÉCLARÉE à ce bien, seule ; celle de la commune ne s'hérite pas.
+                  relationAdresse={relationDeLAdresse(logementForCommune)}
                   communeFacts={communeResult.moduleFacts}
                   communeDossier={dossier}
                   logementLink={dossierLogementLink}

@@ -26,6 +26,7 @@
 // Pure, testée sous `node --test`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
+import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import { LOGEMENT_RULES } from "./logement-rules.ts";
 import { gesteEnPhrase, bucketDuProjet } from "./logement-gestes.ts";
 import type { HardEvaluation, LogementFacts, ModuleFacts, VerificationFact } from "./decision-fact.ts";
@@ -78,8 +79,11 @@ function faitsMinimaux(logement: LogementFacts): ModuleFacts {
  */
 export function pointsAVerifier(
   logement: LogementFacts, project: UserProject | null,
+  // FUT-26 : la relation DÉCLARÉE à ce bien (`place_relation`). Absente = inconnue : les gestes de qui
+  // y habite ne sont jamais supposés, même quand l'objectif du projet est « j'y habite déjà ».
+  relation: RelationAuLieu | null = null,
 ): PointAVerifier[] {
-  const facts = faitsMinimaux(logement);
+  const facts = { ...faitsMinimaux(logement), relationAuLieu: relation };
   // Sans projet, rien n'est deviné : `bucketDuProjet` rend `neutre` et les règles servent leur
   // version neutre. Une posture par défaut orienterait une checklist d'achat vers un résident.
   // `posture: null` n'est pas une valeur du type persisté (`UserProject` exige une posture) : c'est
@@ -115,9 +119,9 @@ export function pointsAVerifier(
 }
 
 /** L'intro de la liste. Elle change avec la posture, jamais avec le nombre de points. */
-export function introPointsAVerifier(project: UserProject | null): string {
+export function introPointsAVerifier(project: UserProject | null, relation: RelationAuLieu | null = null): string {
   // `neutre` est le seul cas où l'on ne sait rien : on le dit, sans deviner une posture.
-  return bucketDuProjet(project ?? {}) !== "neutre"
+  return bucketDuProjet(project ?? {}, relation) !== "neutre"
     ? "Voici les points que la lecture de ce logement fait remonter, à documenter selon votre projet."
     : "Ces points viennent de la lecture du logement. Votre projet permettra de les rendre plus précis.";
 }
