@@ -10,6 +10,7 @@ import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { urlRechercheBan } from "@/lib/geocodeur-ban";
 import type { Dossier } from "@/lib/decision/decision-fact";
+import type { UserProject } from "@/lib/user-project";
 import { DEFAUT, projetDeTest } from "./projet-de-test";
 
 async function geocoder(lieu: string): Promise<ResolvedAddress | null> {
@@ -27,6 +28,8 @@ async function geocoder(lieu: string): Promise<ResolvedAddress | null> {
 export type DossierDeTest = {
   dossier: Dossier;
   insee: string;
+  /** Le projet de test (FUT-92 : l'en-tête et la carte projet du gabarit de `/rapport`). */
+  projet: UserProject;
   libelles: string[];
   adresse: ResolvedAddress | null;
   /** `unavailable` : la lecture d'adresse a échoué, le dossier communal fait office (production). */
@@ -39,11 +42,11 @@ export async function dossierDeTest(sp: { insee?: string; prefs?: string; adress
   const insee = (adresse?.citycode ?? sp.insee ?? DEFAUT.insee).trim();
   const communal = await buildCommuneDossier(insee, projet, { hasAddress: Boolean(adresse) || sp.adresse !== "0", citycode: adresse?.citycode ?? null });
   if (!communal) return null;
-  if (!adresse) return { dossier: communal.dossier, insee, libelles, adresse: null, statutAdresse: null };
+  if (!adresse) return { dossier: communal.dossier, insee, projet, libelles, adresse: null, statutAdresse: null };
   const r = await assembleAddressDossier({
     project: projet, address: adresse, savedDpe: null,
     communeFacts: communal.moduleFacts, communeDossier: communal.dossier, hard: communal.hard,
     scopeKey: "dev-test", permis: null, snapshotAutour: null, relation: null,
   });
-  return { dossier: r.dossier, insee, libelles, adresse, statutAdresse: r.status };
+  return { dossier: r.dossier, insee, projet, libelles, adresse, statutAdresse: r.status };
 }
