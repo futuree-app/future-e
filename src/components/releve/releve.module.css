@@ -414,15 +414,11 @@
 .sommaireJeton:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
 .sommaireTrait { width: 3px; height: 12px; flex: none; }
 
-/* D'où viennent ces constats : l'emblème compté, à côté de sa lecture, sur grand écran ; trois lignes
-   compactes en dessous de 1024 px, où le repère de navigation occupe déjà toute la largeur (FUT-92).
-   Le seuil est celui de la colonne d'appui (`lg`) : l'emblème compté ne réapparaît qu'une fois le
-   repère rangé dans sa colonne, jamais empilé sous lui. */
-.echellesDuDossier { display: grid; gap: 20px; align-items: center; padding: 28px 0 4px; }
-@media (min-width: 1024px) { .echellesDuDossier { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding: 48px 0 16px; } }
-.decompteLarge { display: none !important; }
+/* Décompte des constats : les trois échelles restent lisibles sans doubler le grand emblème
+   déjà présent dans « Explorer le dossier », y compris lorsque ce panneau est sticky. */
+.echellesDuDossier { padding: 28px 0 4px; }
+@media (min-width: 1024px) { .echellesDuDossier { padding: 32px 0 16px; } }
 .decompteCompact { display: grid; gap: 10px; }
-@media (min-width: 1024px) { .decompteLarge { display: grid !important; } .decompteCompact { display: none; } }
 .listeCompacte { list-style: none; margin: 0; padding: 0; display: grid; }
 .ligneCompacte {
   display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; align-items: baseline;
