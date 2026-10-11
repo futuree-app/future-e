@@ -7,10 +7,12 @@ l'hôtel de ville de Nîmes, projet de test. Aucune capture du vrai `/rapport`. 
 
 ## Ordinateur
 
+**Important :** captures et vidéo desktop prises avant l'ultime décision de supprimer le second grand emblème aussi sur ordinateur. Elles restent valables pour le comportement sticky et les contrôles, mais **ne représentent pas encore le décompte desktop final** (trois lignes compactes). Une nouvelle capture doit confirmer le rendu avant activation publique.
+
 | Fichier | Ce qu'il montre |
 | --- | --- |
 | `desktop-avant-1440-balance.jpg` | Avant : à la balance, le repère et la navigation principale sont partis avec la page |
-| `desktop-apres-1440-1-haut.jpg` | Haut du dossier : repère dans sa colonne, emblème compté à côté de sa lecture |
+| `desktop-apres-1440-1-haut.jpg` | Capture antérieure au dernier arbitrage : repère et ancien deuxième emblème compté (supprimé du code depuis) |
 | `desktop-apres-1440-2-balance.jpg` | Balance : le repère est resté sous la navigation |
 | `desktop-apres-1440-3-controles.jpg` | Milieu des contrôles détaillés (dépliés) : toujours là |
 | `desktop-apres-1440-4-fin.jpg` | Dernier contrôle : toujours là |
