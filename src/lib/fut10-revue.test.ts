@@ -252,7 +252,7 @@ test("B. câblage : verrou AVANT la confirmation Stripe, au webhook AVANT la lec
   assert.match(verrou, /if \(!user\) return Response\.json\(\{ error: "AUTH_REQUIRED" \}, \{ status: 401 \}\)/);
   assert.match(verrou, /verrouillerIntention\(storeIntentionsSupabase\(\), body\.paymentIntentId, user\.id, new Date\(\)\)/);
   // Le stockage réel porte la condition dans la requête, pas dans une lecture préalable.
-  const store = lire("src/lib/server/intention-dossier-store.ts");
+  const store = lire("src/lib/intention-dossier-store-supabase.ts");
   assert.equal((store.match(/\.is\("context_locked_at", null\)/g) ?? []).length, 2);
 });
 

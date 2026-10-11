@@ -311,3 +311,46 @@ test("câblage : le bandeau « lien modifié » existe aussi dans Le relevé, av
   assert.match(releve, /if \(lienSeul\) voisinageAChange = false;/);
   assert.ok(releve.indexOf("{bandeauLienReleve}") < releve.indexOf("<DossierDecisionReleve"));
 });
+
+// ═══ GARDE-FOU DES TESTS D'INTÉGRATION ═════════════════════════════════════════════════════════
+
+test("garde-fou : refuse la production et les vraies clés, accepte un environnement factice local, n'affiche aucun secret", async () => {
+  const { diagnostiquer } = await import("../../scripts/integration/garde-environnement.mjs");
+  const isole = {
+    STRIPE_SECRET_KEY: "sk_test_SECRET1", NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_x", STRIPE_WEBHOOK_SECRET: "whsec_SECRET2",
+    NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_SERVICE_ROLE_KEY: "SECRET3",
+    RESEND_API_KEY: "re_factice_fut10", NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: "phc_factice_fut10", NEXT_PUBLIC_POSTHOG_HOST: "http://127.0.0.1:9",
+  };
+  const ok = diagnostiquer(isole, new Set());
+  assert.equal(ok.ok, true);
+  assert.doesNotMatch(JSON.stringify(ok), /SECRET|127\.0\.0\.1:54321/);
+  const refProd = "abcdefghijklmnopqrst";
+  const cas = [
+    { STRIPE_SECRET_KEY: "sk_live_x" },
+    { STRIPE_SECRET_KEY: "rk_live_x" },
+    { NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_live_x" },
+    { NEXT_PUBLIC_SUPABASE_URL: `https://${refProd}.supabase.co` },
+    { NEXT_PUBLIC_SUPABASE_URL: `https://${refProd}.supabase.co`, FUT10_SUPABASE_REF_TEST: refProd },
+    { NEXT_PUBLIC_SUPABASE_URL: "https://zzzzzzzzzzzzzzzzzzzz.supabase.co" },
+    { RESEND_API_KEY: "re_vraie" },
+    { RESEND_API_KEY: undefined },
+    { NEXT_PUBLIC_POSTHOG_HOST: "https://eu.i.posthog.com" },
+    { DOSSIER_NARRATIVE: "true" },
+  ];
+  for (const c of cas) assert.equal(diagnostiquer({ ...isole, ...c }, new Set([refProd])).ok, false, JSON.stringify(c));
+  // Un projet distant explicitement déclaré de test, et absent des fichiers de production, est accepté.
+  assert.equal(diagnostiquer({ ...isole, NEXT_PUBLIC_SUPABASE_URL: "https://yyyyyyyyyyyyyyyyyyyy.supabase.co", FUT10_SUPABASE_REF_TEST: "yyyyyyyyyyyyyyyyyyyy" }, new Set([refProd])).ok, true);
+});
+
+test("schéma de test : seules deux adaptations, dites, et aucun fichier de supabase/ modifié", async () => {
+  const { migrationsDeTest, OMIS } = await import("../../scripts/integration/schema-de-test.mjs");
+  const m = migrationsDeTest() as { fichier: string; sql: string }[];
+  assert.deepEqual([...OMIS], ["02_init_qna.sql"]);
+  assert.equal(m.at(-1)!.fichier, "38_purge_dossier_intents.sql");
+  assert.ok(m.findIndex((x) => x.fichier.startsWith("37_")) < m.findIndex((x) => x.fichier.startsWith("38_")));
+  assert.ok(m.every((x) => !x.fichier.includes("_down")));
+  const m25 = m.find((x) => x.fichier === "25_address_dossiers.sql")!;
+  assert.match(m25.sql, /if false then -- contrôle de production neutralisé/);
+  assert.match(lire("supabase/25_address_dossiers.sql"), /if n <> 24 then/);
+  for (const x of m) if (x.fichier !== "25_address_dossiers.sql") assert.equal(x.sql, lire(`supabase/${x.fichier}`));
+});

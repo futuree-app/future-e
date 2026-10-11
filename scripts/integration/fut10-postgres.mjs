@@ -24,6 +24,7 @@ import assert from "node:assert/strict";
 import { enregistrerIntention, verrouillerIntention } from "../../src/lib/verrou-intention-dossier.ts";
 import { colonnesIntention, colonnesDossierDepuisIntention, projetPourLivraison } from "../../src/lib/dossier-contexte-checkout.ts";
 import { contexteDAchat } from "../../src/lib/contexte-livraison.ts";
+import { PREAMBULE, migrationsDeTest } from "./schema-de-test.mjs";
 
 const modPath = process.env.PGLITE_MODULE;
 if (!modPath) {
@@ -302,6 +303,28 @@ await cas("retours arrière : 38 puis 37 s'appliquent, la base revient à son sc
   // Et la migration se rejoue sur la base revenue en arrière (idempotence des `if not exists`).
   await db.exec(sql("37_contexte_checkout_dossier.sql"));
   await db.exec(sql("37_contexte_checkout_dossier.sql"));
+});
+
+await cas("schéma complet : les migrations 01 → 38 s'appliquent dans l'ordre sur une base vierge (adaptations de test dites)", async () => {
+  const db = new PGlite();
+  await db.exec(PREAMBULE);
+  for (const { fichier, sql: contenu } of migrationsDeTest()) {
+    try { await db.exec(contenu); } catch (e) { throw new Error(`${fichier} : ${e.message.split("\n")[0]}`); }
+  }
+  const colonnes = async (t) => (await db.query(`select column_name from information_schema.columns where table_schema = 'public' and table_name = $1`, [t])).rows.map((x) => x.column_name);
+  const intents = await colonnes("dossier_intents");
+  for (const c of ["place_relation", "place_objective", "place_context_declared_at", "project_snapshot", "project_state", "context_locked_at"]) assert.ok(intents.includes(c), c);
+  const dossiers = await colonnes("address_dossiers");
+  for (const c of ["place_relation", "place_relation_set_at", "place_objective", "place_objective_set_at", "access_revoked_at", "stripe_payment_intent_id"]) assert.ok(dossiers.includes(c), c);
+  // Les politiques : dossier_intents n'en a aucune (service role seul) ; address_dossiers et decision_artifact en ont.
+  const politiques = async (t) => (await db.query(`select policyname from pg_policies where schemaname = 'public' and tablename = $1`, [t])).rows.length;
+  assert.equal(await politiques("dossier_intents"), 0);
+  assert.ok(await politiques("address_dossiers") > 0);
+  assert.ok(await politiques("decision_artifact") > 0);
+  const rls = (await db.query(`select relname, relrowsecurity from pg_class where relname in ('dossier_intents', 'address_dossiers', 'decision_artifact') order by 1`)).rows;
+  assert.ok(rls.every((r) => r.relrowsecurity), JSON.stringify(rls));
+  const fonctions = (await db.query(`select proname from pg_proc where proname in ('purger_dossier_intents', 'intentions_a_reconcilier', 'etat_livraison_intention') order by 1`)).rows.map((x) => x.proname);
+  assert.deepEqual(fonctions, ["etat_livraison_intention", "intentions_a_reconcilier", "purger_dossier_intents"]);
 });
 
 console.log(resultats.join("\n"));
