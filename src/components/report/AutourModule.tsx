@@ -388,7 +388,9 @@ export default function AutourModule({
                         </p>
                       )}
                       {/* La phrase d'ensemble sur les autorisations, sous la date qui la borne (cf. en tête). */}
-                      {(() => {
+                      {/* Revue FUT-67 : sans date de consultation affichée (illisible ou absente), la phrase
+                          ne s'affiche pas : elle n'aurait plus ce qui la borne dans le temps. */}
+                      {p.consultation && (() => {
                         const mouvement = buildAutourConclusion(autour)?.mouvement;
                         return mouvement ? (
                           <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{mouvement}</p>

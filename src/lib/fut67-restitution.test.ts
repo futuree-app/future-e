@@ -110,9 +110,51 @@ test("U1. Autour : l'essentiel d'abord, la phrase sur les autorisations sous la 
   const consultation = blocPermis.indexOf("{p.consultation}");
   const mouvement = blocPermis.indexOf("buildAutourConclusion(autour)?.mouvement");
   assert.ok(consultation > 0 && mouvement > consultation, "le mouvement suit la date de consultation");
+  // Revue : la phrase dépend de la date AFFICHÉE. Sans date lisible, elle ne s'affiche pas.
+  contient(blocPermis, /\{p\.consultation && \(\(\) => \{\s*const mouvement = buildAutourConclusion\(autour\)\?\.mouvement;/, "bloc des permis");
   const blocConclusion = m.slice(conclusion, m.indexOf("</ReportSection>", conclusion));
   neContientPas(blocConclusion, /c\.mouvement/, "conclusion en tête");
   // L'adresse n'est plus répétée, et l'encadré vide autour du seul lien a disparu.
   neContientPas(m, /Adresse analysée/, "AutourModule");
   contient(m, /\{\(loading \|\| error\) && \(\s*<div className="glass rounded-xl p-8"/, "AutourModule");
+});
+
+// ── Revue corrective : la simplification ne déforme jamais la structure de l'audit ──────────────────
+test("R1. une étape absente de la source laisse un trou, elle ne renumérote pas les suivantes", () => {
+  const l = parcoursAudit([
+    sc('scénario multi étapes "principal"', "étape finale", 53),
+    sc('scénario multi étapes "principal"', "étape intermédiaire 1", 115.1), // « étape première » absente
+  ]);
+  assert.deepEqual(l.parcours[0]!.etapes.map((e) => e.libelle), ["Étape 2", "Étape finale"]);
+});
+
+test("R2. un parcours par étapes réduit à sa fin reste « Étape finale », jamais une rénovation d'un coup", () => {
+  const l = parcoursAudit([sc('scénario multi étapes "principal"', "étape finale", 53), sc('scénario en une étape "principal"', "étape finale", 60)]);
+  assert.deepEqual(l.parcours.map((p) => [p.titre, p.etapes[0]!.libelle]), [
+    ["Rénovation par étapes", "Étape finale"],
+    ["Rénovation en une seule fois", "Après travaux"],
+  ]);
+});
+
+test("R3. deux catégories qui donnent le même titre restent deux parcours, avec deux clés et deux titres", () => {
+  const l = parcoursAudit([
+    sc('scénario multi étapes "principal"', "étape finale", 53),
+    sc("scénario en plusieurs étapes", "étape finale", 70),
+  ]);
+  assert.equal(l.parcours.length, 2);
+  assert.equal(new Set(l.parcours.map((p) => p.cle)).size, 2, "clés de rendu uniques");
+  assert.equal(new Set(l.parcours.map((p) => p.titre)).size, 2, "titres lisibles distincts");
+  for (const p of l.parcours) assert.match(p.titre, /^Rénovation par étapes · /);
+  const ecran = code("src/components/report/logement/EnergieSection.tsx");
+  contient(ecran, /<div key=\{p\.cle\}/, "EnergieSection");
+  contient(ecran, /<li key=\{`\$\{p\.cle\}-\$\{i\}`\}/, "EnergieSection");
+  neContientPas(ecran, /key=\{p\.titre\}|key=\{`\$\{p\.titre\}/, "EnergieSection");
+});
+
+test("R4. une seconde ligne d'état initial n'est pas perdue", () => {
+  const doubles = [sc("état initial", "état initial", 500), sc("état initial", "état initial", 480), sc('scénario en une étape "principal"', "étape finale", 60)];
+  const l = parcoursAudit(doubles);
+  assert.equal(l.depart?.conso_ep_m2, 500);
+  const rendues = [l.depart!, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
+  assert.deepEqual(new Set(rendues), new Set(doubles));
 });

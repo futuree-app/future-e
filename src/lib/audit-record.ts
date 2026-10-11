@@ -188,55 +188,81 @@ export function formatSurfaceM2(v: number): string {
 // DPE dépend aussi des émissions), aucun coût, aucun gain annoncé (FUT-62 décidera de leur lecture).
 
 export type EtapeParcours = { libelle: string; scenario: AuditScenario };
-export type ParcoursAudit = { titre: string; etapes: EtapeParcours[] };
+/** `cle` : la catégorie de la source, unique par parcours (clé de rendu) ; `titre` : ce que lit le lecteur. */
+export type ParcoursAudit = { cle: string; titre: string; etapes: EtapeParcours[] };
 export type LectureAudit = { depart: AuditScenario | null; parcours: ParcoursAudit[] };
 
 const sansAccents = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/["«»]/g, "").trim();
 const estEtatInitial = (s: AuditScenario) => /etat initial/.test(sansAccents(`${s.categorie ?? ""} ${s.etape ?? ""}`));
 
-function rangEtape(etape: string): number {
+/**
+ * LE NUMÉRO D'ÉTAPE EST CELUI DE LA SOURCE, jamais une position recalculée (revue FUT-67) : « étape
+ * première » = 1, « étape intermédiaire N » = N + 1. Une étape absente de la source laisse un trou
+ * visible (« Étape 2 », « Étape finale ») au lieu d'être masquée par une renumérotation.
+ */
+function numeroEtape(etape: string): number | null {
   const e = sansAccents(etape);
   if (/premiere/.test(e)) return 1;
   const inter = /intermediaire\s*(\d+)?/.exec(e);
   if (inter) return 1 + Number(inter[1] ?? 1);
-  if (/finale/.test(e)) return 1_000;
-  return 500;
+  return null;
+}
+function rangEtape(etape: string): number {
+  const n = numeroEtape(etape);
+  if (n != null) return n;
+  return /finale/.test(sansAccents(etape)) ? 1_000 : 500;
 }
 
-function titreParcours(categorie: string): { titre: string; ordre: number } {
+type Genre = "etapes" | "une_fois" | "autre";
+function titreParcours(categorie: string): { titre: string; ordre: number; genre: Genre } {
   const c = sansAccents(categorie);
   const variante = /complementaire/.test(c) ? " (variante)" : "";
-  if (/multi|plusieurs/.test(c)) return { titre: `Rénovation par étapes${variante}`, ordre: variante ? 3 : 1 };
-  if (/une etape|une seule/.test(c)) return { titre: `Rénovation en une seule fois${variante}`, ordre: variante ? 4 : 2 };
+  if (/multi|plusieurs/.test(c)) return { titre: `Rénovation par étapes${variante}`, ordre: variante ? 3 : 1, genre: "etapes" };
+  if (/une etape|une seule/.test(c)) return { titre: `Rénovation en une seule fois${variante}`, ordre: variante ? 4 : 2, genre: "une_fois" };
   const brut = categorie.replace(/["«»]/g, "").trim();
-  return { titre: brut.charAt(0).toUpperCase() + brut.slice(1), ordre: 5 };
+  return { titre: brut.charAt(0).toUpperCase() + brut.slice(1), ordre: 5, genre: "autre" };
 }
 
 export function parcoursAudit(scenarios: AuditScenario[]): LectureAudit {
+  // Le point de départ est LA première ligne d'état initial. Une éventuelle seconde ligne n'est pas
+  // perdue : elle reste dans son groupe, comme toute autre ligne de la source.
   const depart = scenarios.find(estEtatInitial) ?? null;
   const groupes = new Map<string, AuditScenario[]>();
   for (const s of scenarios) {
-    if (estEtatInitial(s)) continue;
+    if (s === depart) continue;
     const cle = s.categorie ?? "Parcours non précisé par la source";
     groupes.set(cle, [...(groupes.get(cle) ?? []), s]);
   }
   const parcours = [...groupes.entries()].map(([categorie, lignes]) => {
-    const { titre, ordre } = titreParcours(categorie);
+    const { titre, ordre, genre } = titreParcours(categorie);
     const triees = [...lignes].sort((a, b) => rangEtape(a.etape ?? "") - rangEtape(b.etape ?? ""));
-    const plusieurs = triees.length > 1;
-    const etapes = triees.map((s, i) => {
+    const etapes = triees.map((s) => {
       const e = sansAccents(s.etape ?? "");
+      const n = numeroEtape(s.etape ?? "");
+      // « Après travaux » seulement pour une rénovation en une fois : un parcours par étapes dont la
+      // source ne donne que la fin reste « Étape finale », jamais déguisé en rénovation d'un coup.
       const libelle = /finale/.test(e)
-        ? (plusieurs ? "Étape finale" : "Après travaux")
-        : /premiere|intermediaire/.test(e)
-          ? `Étape ${i + 1}`
+        ? (genre === "une_fois" ? "Après travaux" : "Étape finale")
+        : n != null
+          ? `Étape ${n}`
           : (s.etape ?? "Étape non précisée");
       return { libelle, scenario: s };
     });
-    return { titre, etapes, ordre };
+    return { cle: categorie, titre, etapes, ordre };
   });
   parcours.sort((a, b) => a.ordre - b.ordre);
-  return { depart, parcours: parcours.map(({ titre, etapes }) => ({ titre, etapes })) };
+  // DEUX CATÉGORIES, DEUX TITRES. Si deux catégories de la source donnent le même titre lisible, le
+  // libellé de la source les distingue : la simplification ne fusionne jamais deux parcours à l'œil.
+  const vus = new Map<string, number>();
+  for (const p of parcours) vus.set(p.titre, (vus.get(p.titre) ?? 0) + 1);
+  return {
+    depart,
+    parcours: parcours.map(({ cle, titre, etapes }) => ({
+      cle,
+      titre: (vus.get(titre) ?? 0) > 1 ? `${titre} · ${cle.replace(/["«»]/g, "").trim()}` : titre,
+      etapes,
+    })),
+  };
 }
 
 /** La phrase qui dit sur quoi porte l'audit. */

@@ -224,11 +224,11 @@ export function EnergieSection({
               </div>
             )}
             {lecture.parcours.map((p) => (
-              <div key={p.titre} style={{ padding: "12px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "grid", gap: 8 }}>
+              <div key={p.cle} style={{ padding: "12px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "grid", gap: 8 }}>
                 <div style={{ fontSize: 14, color: "var(--fg-hi)", fontWeight: 500 }}>{p.titre}</div>
                 <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
-                  {p.etapes.map(({ libelle, scenario: s }) => (
-                    <li key={`${p.titre}-${libelle}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                  {p.etapes.map(({ libelle, scenario: s }, i) => (
+                    <li key={`${p.cle}-${i}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
                       <span style={{ fontSize: 13, color: "var(--fg-2)" }}>{libelle}</span>
                       {/* Valeur PAR M² (source `ep_conso_5_usages_m2`). Avant FUT-59 : le total annuel, sous l'unité par m². */}
                       {s.conso_ep_m2 != null && (
