@@ -26,10 +26,14 @@ const LOCATION = Object.entries(GESTES)
 
 test("bucketDuProjet : `location` est une INTENTION, l'occupant en place est `reside`", () => {
   // L'invariant de ce fichier n'a de sens que si le bucket sépare bien les deux situations.
+  // FUT-26 : l'occupant est celui dont la RELATION AU LIEU le dit, plus celui dont l'objectif est
+  // « j'y habite déjà » (qui peut étudier un bien ailleurs).
+  const habite = { echelle: "adresse", relation: "lives_here" } as const;
   assert.equal(bucketDuProjet({ intent: "location" }), "location");
-  assert.equal(bucketDuProjet({ posture: "habitant" }), "reside");
-  assert.equal(bucketDuProjet({ intent: "location", posture: "habitant" }), "location");
+  assert.equal(bucketDuProjet({}, habite), "reside");
+  assert.equal(bucketDuProjet({ intent: "location" }, habite), "location");
   assert.equal(bucketDuProjet({}), "neutre");
+  assert.equal(bucketDuProjet({ posture: "habitant" } as { intent?: string | null }), "neutre");
 });
 
 test("UNE ACTION `location` NE PRÉSUPPOSE JAMAIS UN BAIL EN COURS", () => {

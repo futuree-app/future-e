@@ -111,9 +111,13 @@ test("conditions : aucune n'est retirée de sa section, la minute reste plafonn�
   assert.ok(d.narrativePlan.minute.length <= 4);
 });
 
-test("titre vérifications adapté à la posture habitant", () => {
-  const d = assembleDossier(run([verif()]), project(NO_HC, { posture: "habitant" }), "commune", "Toulouse");
+test("titre vérifications adapté à qui HABITE le lieu (relation connue, FUT-26)", () => {
+  const vit = { echelle: "commune", relation: "current_residence", origine: "confirmed_by_user" } as const;
+  const d = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse", [], vit);
   assert.match(d.sections.find((s) => s.key === "verifications")!.title, /surveiller/i);
+  // L'objectif « j'y habite déjà » seul ne dit pas qu'on habite CE lieu : plus de ton d'habitant.
+  const objectifSeul = assembleDossier(run([verif()]), project(NO_HC, { posture: "habitant" }), "commune", "Toulouse");
+  assert.doesNotMatch(objectifSeul.sections.find((s) => s.key === "verifications")!.title, /surveiller/i);
 });
 
 test("conclusionBasis porte ruleIds et preuves", () => {
@@ -151,10 +155,14 @@ test("un titre de section porte UNE idée, et dit ce que le lecteur en fait", ()
   // et c'était le seul des cinq dans ce cas. Le statut est passé sous le titre, en toutes lettres
   // (SECTION_INTRO) ; le titre garde l'action. « Contrôler » reste le verbe des constats établis,
   // « vérifier » celui du non-examiné.
-  const d = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse");
+  // FUT-26 : « avant de vous engager » suppose une intention ou une relation qui le dit. Sans rien de
+  // connu, le titre ne suppose rien.
+  const d = assembleDossier(run([verif()]), project(NO_HC, { intent: "achat" }), "commune", "Toulouse");
   assert.equal(d.sections.find((s) => s.key === "verifications")!.title, "À contrôler avant de vous engager");
+  const inconnu = assembleDossier(run([verif()]), project(NO_HC), "commune", "Toulouse");
+  assert.equal(inconnu.sections.find((s) => s.key === "verifications")!.title, "À contrôler");
   // Aucun titre ne doit empiler deux propositions : la virgule est le signe qui le trahit.
-  for (const s of d.sections) {
+  for (const s of [...d.sections, ...inconnu.sections]) {
     assert.doesNotMatch(s.title, /,/, `le titre « ${s.title} » porte deux idées`);
     assert.ok(s.title.length <= 40, `« ${s.title} » : ${s.title.length} caractères`);
   }
@@ -219,8 +227,9 @@ test("aucun contrôle : aucun groupe, donc aucune surface", () => {
 });
 
 test("le titre de la liste complète suit la posture, comme celui de la section", () => {
+  const vit = { echelle: "commune", relation: "current_residence", origine: "inferred" } as const;
   const engage = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune", "Toulouse");
-  const habitant = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC, { posture: "habitant" }), "commune", "Toulouse");
+  const habitant = assembleDossier(run([verif()], ["nearSea"]), project(WITH_HC), "commune", "Toulouse", [], vit);
   assert.match(engage.controlesTitle, /contrôles/);
   assert.match(habitant.controlesTitle, /surveiller/);
   // Le verbe du titre de la liste et celui de la section de la minute ne peuvent pas diverger.

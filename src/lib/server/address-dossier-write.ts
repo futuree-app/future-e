@@ -18,6 +18,8 @@ export type AddressDossierPatch = Partial<
   Pick<
     AddressDossierRow,
     | "posture"
+    | "place_relation"
+    | "place_relation_set_at"
     | "snapshot"
     | "dpe_selection_status"
     | "selected_dpe_id"

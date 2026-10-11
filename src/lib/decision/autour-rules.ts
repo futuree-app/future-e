@@ -326,7 +326,7 @@ const accesSoinsRule: DecisionRule = {
         }
       : null;
 
-    const geste = (estMedecin ? GESTE_MEDECIN : GESTE_PHARMACIE)[bucketDuProjet(p)];
+    const geste = (estMedecin ? GESTE_MEDECIN : GESTE_PHARMACIE)[bucketDuProjet(p, f.relationAuLieu)];
     const fact: VerificationFact = {
       id: `${f.insee}:autour-acces-soins`,
       ruleId: RULE_SANTE,

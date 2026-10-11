@@ -5,10 +5,12 @@ import type { DecisionRule, VerificationFact, UnknownFact, EvidenceRef, RuleEval
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 
 import { GESTES, bucketDuProjet, type Bucket, type ActionCopy } from "./logement-gestes.ts";
+import type { RelationAuLieu } from "../relation-au-lieu.ts";
 
 // La dérivation vit dans `logement-gestes.ts` : une règle de territoire peut proposer un geste à
 // faire dans le logement (le radon), donc elle en a besoin aussi.
-const bucket = bucketDuProjet;
+// FUT-26 : la relation au lieu voyage dans les faits (`f.relationAuLieu`), jamais dans le projet.
+const bucket = (p: { intent?: string | null }, f: { relationAuLieu?: RelationAuLieu | null }) => bucketDuProjet(p, f.relationAuLieu);
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE LABEL D'UNE PREUVE DIT D'OÙ VIENT LA DONNÉE, JAMAIS CE QU'ON EXAMINE.
@@ -144,7 +146,7 @@ function coverageRule(cfg: {
     evaluate: (f, p): RuleEvaluation => {
       const l = f.logement;
       if (!l) return na(cfg.id);
-      const b = bucket(p);
+      const b = bucket(p, f);
       if (cfg.buckets && !cfg.buckets.includes(b)) return na(cfg.id);
       const cov = cfg.coverage(l);
       if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
@@ -167,7 +169,7 @@ const ruleDpe: DecisionRule = {
     const cls = l.dpeLabel ? `${l.dpeLabel}, ${desc}` : desc;
     const evidence = ev("logement.dpe", SOURCES.ademe, "persisted_snapshot", "adresse", l.dpeLabel ? `DPE ${l.dpeLabel}` : undefined, "housing.energy_label");
     const dpeStatus = l.dpeLabel ? `DPE ${l.dpeLabel}` : (l.dpe === "passoire" ? "Passoire énergétique" : "Logement énergivore");
-    return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", GESTES.energie[bucket(p)], dpeStatus));
+    return out("dpe-faible", logementVerification("dpe-faible", evidence, "structuring", "l'étiquette énergétique du logement", `À cette adresse, le diagnostic choisi classe ce logement ${cls}.`, "demander_confirmation", GESTES.energie[bucket(p, f)], dpeStatus));
   },
 };
 
@@ -188,7 +190,7 @@ const ruleConfortEte: DecisionRule = {
   evaluate: (l, p): RuleEvaluation => {
     const f = l.logement;
     if (!f?.confortEteInsuffisant) return na("confort-ete");
-    const b = bucket(p);
+    const b = bucket(p, l); // ici `l` porte les faits du module, `f` le logement
     const copy = GESTES.confort[b];
     return out("confort-ete", logementVerification(
       "confort-ete",
@@ -225,7 +227,7 @@ const ruleDiagnosticNonAttribue: DecisionRule = {
       "le diagnostic énergétique de ce logement",
       "À cette adresse, des diagnostics énergétiques existent, mais aucun n'a pu être rattaché à ce logement.",
       "obtenir_document",
-      GESTES.diagnostic_adresse[bucket(p)],
+      GESTES.diagnostic_adresse[bucket(p, f)],
       "Diagnostic non attribué",
       "Un diagnostic généré à l'immeuble ne décrit pas un logement en particulier.",
     ));

@@ -165,6 +165,25 @@ test("minor_reserves + alignment structuring : le positif prime dans le héros, 
   assert.match(p.verdict.detail, /^Deux constats restent néanmoins à contrôler avant de vous engager\.$/);
 });
 
+test("FUT-26 : le verbe des constats suit la VOIX du lieu (relation + intention), plus l'objectif", () => {
+  const entree = (over: Partial<ConclusionPlanInput>) => baseInput({
+    orientation: "minor_reserves", coverage: "complete", favorableCount: 2, reservesShown: 2, majorReserveCount: 0,
+    shownFacts: [
+      alignmentFact("a1", "structuring", "acces_soins", "l'accès aux soins"),
+      alignmentFact("a2", "structuring", "vie_locale", "la vie locale"),
+      verification("v1", "secondary"), verification("v2", "secondary"),
+    ],
+    ...over,
+  });
+  assert.match(buildConclusionPlan(entree({ voix: "engagement" })).verdict.detail, /^Deux constats restent néanmoins à contrôler avant de vous engager\.$/);
+  assert.match(buildConclusionPlan(entree({ voix: "habitant" })).verdict.detail, /^Deux constats restent néanmoins à surveiller\.$/);
+  assert.match(buildConclusionPlan(entree({ voix: "neutre" })).verdict.detail, /^Deux constats restent néanmoins à contrôler\.$/);
+  // L'objectif « j'y habite déjà » ne règle plus le verbe : sans voix habitante, pas de « surveiller ».
+  assert.doesNotMatch(buildConclusionPlan(entree({ posture: "habitant", voix: "neutre" })).verdict.detail, /surveiller/);
+  // La voix n'entre pas dans le plan produit : l'empreinte d'une conclusion ne bouge que si son texte bouge.
+  assert.equal("voix" in buildConclusionPlan(entree({ voix: "habitant" })), false);
+});
+
 test("minor_reserves SANS alignment structuring : le héros garde la réserve (repli inchangé)", () => {
   const p = buildConclusionPlan(baseInput({
     orientation: "minor_reserves", coverage: "complete", favorableCount: 1, reservesShown: 1, hasFavorable: true,

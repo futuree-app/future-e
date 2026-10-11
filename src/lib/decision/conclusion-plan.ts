@@ -11,6 +11,7 @@
 // `priorityControl`, déterministe, porté par le plan (voir son type), rendu entre 2 et 3.
 // Une contrainte dure non examinée et une préférence non couverte sont deux absences de couverture.
 // Elles ne partagent JAMAIS le même bloc.
+import type { Voix } from "../relation-au-lieu.ts";
 import type { DecisionFact, ConclusionState, MaterialityTier, UncoveredConstraint } from "./decision-fact.ts";
 import type { FactComposition } from "./fact-composition.ts";
 import type { ProjectPosture } from "../user-project.ts";
@@ -153,7 +154,16 @@ export type ConclusionPlanInput = {
   // contraintes : on nomme, on ne catégorise pas.
   communeNom: string;
   conclusionState: ConclusionState;
+  /** L'OBJECTIF du projet : il règle le vocabulaire (« votre projet » / « ce que vous avez demandé »). */
   posture: ProjectPosture;
+  /**
+   * LA VOIX POUR CE LIEU (FUT-26), tirée de l'intention et de la relation au lieu évalué : elle règle
+   * le verbe des constats (« à surveiller », « à contrôler avant de vous engager », « à contrôler »).
+   * Elle ne vient plus de l'objectif : « j'y habite déjà » ne dit pas qu'on habite CE lieu-ci.
+   * L'assembleur la passe toujours ; absente (appelants historiques, outils de développement), elle
+   * vaut `engagement`, l'ancien défaut non habitant, qui ne suppose jamais un habitant.
+   */
+  voix?: Voix;
   shownFacts: DecisionFact[]; // les faits réellement affichés, après plafonnement des sections
   // Les compositions AFFICHÉES. REQUIS, jamais optionnel : un optionnel créerait un troisième état
   // entre « aucune composition » et « champ oublié par l'appelant ».
@@ -1180,7 +1190,8 @@ function verdictPresentation(input: ConclusionPlanInput, controles: PerimetreCon
       // trouvait pas. La règle existait depuis le 01/08 (`PerimetreControles` : deux nombres, jamais
       // un seul) ; cette branche, écrite à part, ne s'en servait pas.
       const r = controles.visibles;
-      const engage = input.posture === "habitant" ? "à surveiller" : "à contrôler avant de vous engager";
+      const voix = input.voix ?? "engagement";
+      const engage = voix === "habitant" ? "à surveiller" : voix === "engagement" ? "à contrôler avant de vous engager" : "à contrôler";
       const ici = r > 1
         ? `${capitalize(enLettres(r))} constats restent néanmoins ${engage}.`
         : r === 1

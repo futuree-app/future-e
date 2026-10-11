@@ -2,6 +2,7 @@
 // donc non testable en node --test). Le mapping pur vit dans module-facts-map.ts (testé). Aucune
 // valeur de repli : subScore garde déjà les absences, on ne les enveloppe pas d'un try/catch (une
 // erreur inattendue doit exploser, ce n'est pas une « donnée indisponible »).
+import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import {
   getCommuneEntry, subScore, PREFERENCE_KEYS, placeDirectory, tailleVilleResolvedOf, type IndexCommune,
 } from "../comparateur-vie.ts";
@@ -237,17 +238,21 @@ export async function buildCommuneDossier(
   // `citycode` : le code que le géocodeur a donné à l'adresse analysée, quand il y en a une. Il n'est
   // PAS redondant avec `insee` pour Paris, Lyon et Marseille, où il porte l'arrondissement — seule
   // maille à laquelle certaines sources (le radon) répondent, et à laquelle leur valeur varie.
-  opts?: { hasAddress?: boolean; citycode?: string | null },
+  //
+  // `relation` : la relation du lecteur À LA COMMUNE (FUT-26), lue dans `report_context`. Absente =
+  // inconnue : aucun ton d'habitant n'est supposé. Elle n'entre jamais dans le projet.
+  opts?: { hasAddress?: boolean; citycode?: string | null; relation?: RelationAuLieu | null },
 ): Promise<{ moduleFacts: ModuleFacts; dossier: Dossier; hard: EvaluationContext } | null> {
-  const facts = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false, citycode: opts?.citycode });
-  if (!facts) return null;
+  const loaded = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false, citycode: opts?.citycode });
+  if (!loaded) return null;
+  const facts: ModuleFacts = { ...loaded, relationAuLieu: opts?.relation ?? null };
   project = await projetDeLecture(project);
   const hard = await buildHardContext(project, facts);
   // moduleFacts retournés pour que l'augmentation Logement reparte du MÊME socle (pas de reload).
   const run = runRules(facts, project, hard);
   return {
     moduleFacts: facts,
-    dossier: assembleDossier(run, project, "commune", facts.nom, composeFacts(run, facts, project)),
+    dossier: assembleDossier(run, project, "commune", facts.nom, composeFacts(run, facts, project), facts.relationAuLieu ?? null),
     hard,
   };
 }

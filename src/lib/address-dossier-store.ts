@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
+import type { AddressRelation } from "./relation-au-lieu.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 // bump = invalidation de tous les snapshots Autour.
@@ -49,7 +50,19 @@ export type AddressDossierRow = {
   latitude: number;
   longitude: number;
   parcel_code: string | null;
+  /**
+   * OBSOLÈTE (FUT-26). Valait « residence » par défaut, écrite en dur par la page Autour : elle ne dit
+   * rien du lecteur. Ni lue, ni recopiée dans `place_relation`. Voir `relationDeLAdresse`.
+   */
   posture: Posture;
+  /**
+   * LA RELATION DÉCLARÉE à ce bien (FUT-26, migration 36) : `lives_here` | `studying`, ou `null` =
+   * inconnue. Optionnelle dans le type : une base sans la migration 36 ne renvoie pas la colonne, et
+   * l'absence se lit comme inconnue (`relationDeLAdresse`), jamais comme « j'y habite ».
+   */
+  place_relation?: AddressRelation | null;
+  /** La date de la déclaration. `null` tant que rien n'a été déclaré. */
+  place_relation_set_at?: string | null;
   snapshot: Face3Snapshot | null;
   dpe_selection_status: DpeSelectionStatus;
   selected_dpe_id: string | null;

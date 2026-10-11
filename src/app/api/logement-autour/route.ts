@@ -5,7 +5,6 @@ import { calculerVoisinage, rafraichirVoisinageSiPerime, voisinagePerime } from 
 import { buildAutourResponse } from "@/lib/server/autour-response";
 import { getDossier, needsRecompute, SOURCES_VERSION } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
-import type { Posture } from "@/lib/logement-autour-types";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +15,12 @@ export const dynamic = "force-dynamic";
 // déplacer un dossier payé sur une autre adresse.
 type Body = {
   dossierId: string;
-  posture?: Posture;
+  /**
+   * IGNORÉ depuis FUT-26. Le client l'envoyait « residence » en dur à chaque ouverture, et la route
+   * l'écrivait : une relation que personne n'avait déclarée. La relation au bien se déclare par
+   * `/api/dossier/relation` (`place_relation`) ; cette route ne l'écrit plus, ni aucune posture.
+   */
+  posture?: unknown;
 };
 
 export async function POST(req: Request) {
@@ -35,15 +39,9 @@ export async function POST(req: Request) {
   }
 
   const center = { lat: existing.latitude, lon: existing.longitude };
-  const posture: Posture = body.posture === "prospection" ? "prospection" : "residence";
   // `existing.snapshot` est nullable en base (ligne écrite avant le calcul) : on l'exige
   // explicitement plutôt que de le forcer — sans lui, il n'y a rien à renvoyer, donc on recalcule.
   if (existing?.snapshot && !needsRecompute(existing, center, SOURCES_VERSION)) {
-    // La posture peut avoir changé (sonde ProjectProbe) sans invalider le calcul.
-    if (existing.posture !== posture) {
-      await updateOwnedAddressDossier(user.id, existing.id, { posture });
-    }
-
     // LE RATTRAPAGE DES PERMIS, UNE SEULE FOIS PAR DOSSIER.
     //
     // Le registre des autorisations est arrivé le 01/08/2026 : tous les snapshots antérieurs
@@ -105,7 +103,7 @@ export async function POST(req: Request) {
   // Le patch ne porte QUE ce que ce module produit. L'identité de l'adresse et la parcelle ne
   // sont plus dans la portée d'écriture : la question « ne jamais dégrader la parcelle », qui
   // occupait ce site, ne se pose plus, puisque ce module ne peut plus y toucher.
-  await updateOwnedAddressDossier(user.id, existing.id, { posture, snapshot });
+  await updateOwnedAddressDossier(user.id, existing.id, { snapshot });
 
   return Response.json(
     await buildAutourResponse({ snapshot, lat: center.lat, lon: center.lon, insee: existing.insee }),

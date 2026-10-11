@@ -90,15 +90,17 @@ test("les libellés d'action tiennent leur contrat, dans les quatre postures", (
     patrimoine: "present", perimetrePatrimonial: true,
     sinistralite: "present", sinistraliteActive: true,
   });
-  const POSTURES: Partial<UserProject>[] = [
-    {},                                                  // neutre
-    { intent: "achat" },                                 // achat
-    { intent: "location" },                              // location
-    { posture: "habitant" },                             // réside
+  // FUT-26 : « réside » vient de la RELATION au bien (`lives_here`), plus de l'objectif du projet.
+  const HABITE = { echelle: "adresse", relation: "lives_here" } as const;
+  const POSTURES: [Partial<UserProject>, typeof HABITE | null][] = [
+    [{}, null],                                          // neutre
+    [{ intent: "achat" }, null],                         // achat
+    [{ intent: "location" }, null],                      // location
+    [{}, HABITE],                                        // réside
   ];
   const vus: string[] = [];
-  for (const over of POSTURES) {
-    for (const f of runRules(facts(tout), project(over), HARD).facts) {
+  for (const [over, relation] of POSTURES) {
+    for (const f of runRules({ ...facts(tout), relationAuLieu: relation }, project(over), HARD).facts) {
       if (!f.ruleId.startsWith("logement.")) continue;
       const a = (f as { action?: { label: string; detail?: string } }).action;
       if (!a) continue;

@@ -73,7 +73,7 @@ const radonRule: DecisionRule = {
       evidence: [evidence],
       action: {
         type: "verifier_sur_place",
-        ...GESTES.radon[bucketDuProjet(p)],
+        ...GESTES.radon[bucketDuProjet(p, f.relationAuLieu)],
       },
     };
     return { ruleId: RULE_RADON, projectKeys: [], outcome: "verification", facts: [fact], reason: "potentiel de catégorie 3" };

@@ -76,12 +76,21 @@ test("règle compromis : rien si une seule dimension déclarée", () => {
 });
 
 test("règle inondation : vérification si exposition notable, texte acheteur", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] }, { intent: "achat" });
   const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
   const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
   assert.ok(f && f.role === "verification");
   assert.ok(f.action.label.length > 0);
   assert.match(f.statement, /avant de vous engager/);
+  assert.match(f.statement, /1982/);
+});
+
+test("règle inondation : relation et intention inconnues -> ni acheteur ni habitant (FUT-26)", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
+  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(f && f.role === "verification");
+  assert.doesNotMatch(f.statement, /avant de vous engager|surveiller/);
   assert.match(f.statement, /1982/);
 });
 
@@ -142,13 +151,19 @@ test("règle inondation : une seule preuve chiffrée, opposable, et qui VISE la 
   assert.equal(sans.evidence[0]!.observedValue, undefined, "le rang est interne, il ne s'affiche pas");
 });
 
-test("règle inondation : posture habitant -> comprendre/surveiller, pas s'engager", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] }, { posture: "habitant" });
-  const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
+test("règle inondation : qui HABITE la commune -> comprendre/surveiller, pas s'engager (FUT-26)", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
+  const vit = { echelle: "commune", relation: "current_residence", origine: "confirmed_by_user" } as const;
+  const r = run(facts({ inondationRisque: 80, catnatInondation: 6, relationAuLieu: vit }), p);
   const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
   assert.ok(f && f.role === "verification");
   assert.doesNotMatch(f.statement, /avant de vous engager/);
   assert.match(f.statement, /surveiller/i);
+  // L'objectif « j'y habite déjà », sans relation à CE lieu, ne parle plus à un habitant.
+  const objectifSeul = run(facts({ inondationRisque: 80, catnatInondation: 6 }), { ...p, posture: "habitant" });
+  const g = objectifSeul.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  assert.ok(g && g.role === "verification");
+  assert.doesNotMatch(g.statement, /surveiller/i);
 });
 
 test("règle inondation : exposition inconnue -> aucun fait", () => {
