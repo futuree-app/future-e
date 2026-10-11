@@ -65,7 +65,7 @@ const TAILLE = ecart("eviter_grandes_villes", "une ville à taille humaine");
 test("A. un seul écart secondaire face à des correspondances : l'orientation reste favorable (pas d'arbitrage)", () => {
   const d = dossier(PARIS, [{ f: SOINS, outcome: "satisfied" }, { f: VIE, outcome: "satisfied" }, { f: TAILLE, outcome: "mismatch" }]);
   assert.equal(d.criteria.orientation, "favorable");
-  assert.equal(d.narrativePlan.verdict.label, "Favorable, avec un écart");
+  assert.equal(d.narrativePlan.verdict.label, "Correspondance avec un écart");
 });
 
 test("A. deux écarts secondaires, ou un écart structurant (priorité de poids 3) : arbitrage", () => {
@@ -86,7 +86,9 @@ test("B. Paris 7e : le héros dit les correspondances ET l'écart, que la carte 
   const v = d.narrativePlan.verdict;
   assert.equal(v.headline.text, "Paris 7e Arrondissement répond à deux de vos priorités, et moins bien à une autre : une ville à taille humaine.");
   assert.equal(d.narrativePlan.verdictTone, "neutral");
-  assert.equal(v.detail, "Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas.");
+  // Les deux côtés ne tiennent pas dans 130 caractères avec « Paris 7e Arrondissement » (135) : le héros
+  // garde l'écart, et les correspondances sont NOMMÉES au détail, pour ne pas avoir à descendre.
+  assert.equal(v.detail, "L'accès aux soins et la vie locale répondent à ce que vous avez demandé. Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas.");
   // L'écart nommé est bien celui de la carte « Ce qui correspond moins bien », et il est consommé.
   const carte = d.sections.find((s) => s.key === "mismatches")!.cards.map((c) => (c.kind === "fact" ? c.fact.id : c.composition.id));
   assert.ok(carte.includes(TAILLE.id));
@@ -143,7 +145,7 @@ test("D. incompatibilité établie : elle passe avant tout, même avec des corre
   };
   const d = assembleDossier(run, p, "commune", "Paris 7e Arrondissement");
   assert.equal(d.criteria.orientation, "incompatible");
-  assert.notEqual(d.narrativePlan.verdict.label, "Favorable, avec un écart");
+  assert.doesNotMatch(d.narrativePlan.verdict.label, /avec un écart/);
 });
 
 // ── E. Absence de données : un critère non examiné n'est jamais favorable ──────────────────────────
@@ -157,8 +159,10 @@ test("E. un critère resté sans lecture ne compte pas comme favorable, et la le
   const d = assembleDossier(run, p, "commune", "Paris 7e Arrondissement");
   assert.equal(d.criteria.coverage, "partial");
   const v = d.narrativePlan.verdict;
-  assert.equal(v.label, "Favorable, avec un écart");
-  assert.match(v.headline.text, /répond à l'une de vos priorités, et moins bien à une autre/);
+  // FUT-45 : le libellé garde la couverture. Une lecture partielle ne se présente pas comme une
+  // correspondance établie, même avec l'écart dit.
+  assert.equal(v.label, "Lecture partielle, avec un écart");
+  assert.match(v.headline.text, /répond à vos attentes pour l'accès aux soins, mais moins bien pour une ville à taille humaine\.$|répond à l'une de vos priorités, et moins bien à une autre/);
   assert.match(v.detail, /La lecture reste incomplète/);
 });
 
@@ -182,7 +186,7 @@ const TRADEOFF: FactComposition = {
 
 test("F. l'écart absorbé dans une composition est nommé par son sujet, et ses faits sont consommés", () => {
   const p = buildConclusionPlan(base({ shownCompositions: [TRADEOFF] }));
-  assert.equal(p.verdict.label, "Favorable, avec un écart");
+  assert.equal(p.verdict.label, "Correspondance avec un écart");
   assert.match(p.verdict.headline.text, /moins bien à une autre : l'exposition aux fortes chaleurs\.$/);
   assert.deepEqual(p.verdict.headline.consumedFactIds, ["f-ch"]);
   assert.deepEqual(p.verdict.headline.consumedCompositionIds, [TRADEOFF.id]);
@@ -205,7 +209,7 @@ test("G. sans écart, le verdict favorable est inchangé", () => {
   assert.equal(d.narrativePlan.verdict.headline.text, "Paris 7e Arrondissement répond à deux de vos priorités : l'accès aux soins et la vie locale.");
   // Et un mismatch de poids 1, qui ne produit AUCUN fait, ne touche pas le verdict (il n'est pas retenu).
   const p = buildConclusionPlan(base({ mismatchTotal: 0, mismatchShown: 0 }));
-  assert.notEqual(p.verdict.label, "Favorable, avec un écart");
+  assert.doesNotMatch(p.verdict.label, /avec un écart/);
 });
 
 test("G. un verdict déjà centré sur une réserve garde son héros, et le détail ajoute l'écart sans « Par ailleurs » répété", () => {
@@ -215,7 +219,7 @@ test("G. un verdict déjà centré sur une réserve garde son héros, et le dét
   ]);
   assert.equal(d.criteria.orientation, "major_reserves");
   const v = d.narrativePlan.verdict;
-  assert.doesNotMatch(v.label, /Favorable, avec un écart/);
+  assert.doesNotMatch(v.label, /avec un écart/);
   assert.match(v.detail, /répond moins bien à une de vos priorités : une ville à taille humaine\./);
   assert.ok((v.detail.match(/Par ailleurs/g) ?? []).length <= 1, v.detail);
 });
@@ -226,4 +230,48 @@ test("H. FUT-26 intact : commune explorée sans engagement, « j'y habite » à 
   assert.equal(voixDuLecteur(null, { echelle: "commune", relation: "considering_living", origine: "inferred" }), "neutre");
   assert.equal(voixDuLecteur("achat", { echelle: "adresse", relation: "lives_here" }), "habitant");
   assert.equal(bucketDuProjet({ intent: "achat" }, { echelle: "adresse", relation: "lives_here" }), "reside");
+});
+
+// ── Revue du 11/10/2026 : les deux côtés, la couverture, aucune correspondance fabriquée ─────────────
+
+test("Revue. quand ils tiennent, le héros nomme les correspondances ET l'écart (Nantes)", () => {
+  const run: RunResult = { facts: [SOINS, VIE, TAILLE], evaluations: [ev(SOINS, "satisfied"), ev(VIE, "satisfied"), ev(TAILLE, "mismatch")] };
+  const d = assembleDossier(run, PARIS, "commune", "Nantes");
+  const v = d.narrativePlan.verdict;
+  assert.equal(v.headline.text, "Nantes répond à vos attentes pour l'accès aux soins et la vie locale, mais moins bien pour une ville à taille humaine.");
+  assert.ok(v.headline.text.length <= 130);
+  assert.deepEqual([...v.headline.consumedFactIds].sort(), [SOINS.id, TAILLE.id, VIE.id].sort());
+  // Le héros a tout dit : le détail ne répète pas les correspondances.
+  assert.equal(v.detail, "Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas.");
+});
+
+test("Revue. une correspondance non nommable (compte supérieur aux faits affichés) n'est pas nommée à moitié", () => {
+  // Trois critères favorables, deux alignements affichés : nommer deux sur trois laisserait croire que ce
+  // sont les seuls. Le héros garde le compte, et le détail ne nomme rien de partiel.
+  const p = buildConclusionPlan(base({ communeNom: "Nantes", favorableCount: 3, shownFacts: [SOINS, VIE, TAILLE] }));
+  assert.equal(p.verdict.headline.text, "Nantes répond à trois de vos priorités, et moins bien à une autre : une ville à taille humaine.");
+  assert.doesNotMatch(p.verdict.detail, /répondent à ce que vous avez demandé/);
+});
+
+test("Revue. couverture complète ou partielle : le libellé le dit", () => {
+  assert.equal(buildConclusionPlan(base({ shownFacts: [SOINS, VIE, TAILLE] })).verdict.label, "Correspondance avec un écart");
+  const partielle = buildConclusionPlan(base({ coverage: "partial", unexaminedCount: 1, shownFacts: [SOINS, VIE, TAILLE] }));
+  assert.equal(partielle.verdict.label, "Lecture partielle, avec un écart");
+  assert.match(partielle.verdict.detail, /La lecture reste incomplète/);
+});
+
+test("Revue. sans aucun critère favorable, aucune correspondance n'est annoncée (plus de Math.max)", () => {
+  const p = buildConclusionPlan(base({ favorableCount: 0, hasFavorable: false, shownFacts: [TAILLE] }));
+  assert.doesNotMatch(p.verdict.headline.text, /répond à (l'une|une|deux|trois|vos attentes)/);
+  assert.equal(p.verdict.headline.text, "Antibes répond moins bien à une de vos priorités : une ville à taille humaine.");
+});
+
+test("Revue. le détail enrichi d'une réserve majeure reste une phrase courte, une seule fois", () => {
+  const d = dossier(projet([["acces_soins", 3], ["eviter_grandes_villes", 2], ["faible_risque_inondation", 3]]), [
+    { f: SOINS, outcome: "satisfied" }, { f: TAILLE, outcome: "mismatch" },
+    { f: { ...verif("faible_risque_inondation", "structuring"), projectKey: "faible_risque_inondation" } as DecisionFact, outcome: "verification" },
+  ]);
+  const ajout = d.narrativePlan.verdict.detail.match(/(En revanche|Par ailleurs), [^.]*moins bien[^.]*\./g) ?? [];
+  assert.equal(ajout.length, 1);
+  assert.ok(ajout[0]!.length <= 130, ajout[0]);
 });

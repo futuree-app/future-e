@@ -9,7 +9,8 @@ Banc `/dev/dossier` (dossier de décision réel, sans appel au modèle), Paris 7
 | | Libellé | Héros |
 |---|---|---|
 | **Avant** (`main`) | Correspondance favorable | « Paris 7e Arrondissement répond à deux de vos priorités : l'accès aux soins et la vie locale. » |
-| **Après** | Favorable, avec un écart | « Paris 7e Arrondissement répond à deux de vos priorités, et moins bien à une autre : une ville à taille humaine. » |
+| **Après** | Correspondance avec un écart | « Paris 7e Arrondissement répond à deux de vos priorités, et moins bien à une autre : une ville à taille humaine. » ; détail : « L'accès aux soins et la vie locale répondent à ce que vous avez demandé. Cet écart reste à peser… » |
+| **Après**, Nantes (le héros à deux côtés tient) | Correspondance avec un écart | « Nantes répond à vos attentes pour l'accès aux soins et la vie locale, mais moins bien pour une ville à taille humaine. » |
 
 Juste dessous, dans les deux cas : « Ce qui correspond moins bien : une métropole ». FUT-67 avait vu la variante « Signaux favorables » de la même branche (couverture partielle).
 
@@ -42,7 +43,7 @@ Chemin : Projet → Critères → Évaluations → Orientation → Verdict → C
 | Situation | Ce que produit le moteur | Verdict |
 |---|---|---|
 | 1. Favorable, sans écart | `favorable` | inchangé : « Correspondance favorable » / « Bonne correspondance » |
-| 2. Favorable avec un écart secondaire | `favorable` (ou `minor_reserves` positif) | **« Favorable, avec un écart »**, héros qui dit les deux, ton neutre |
+| 2. Favorable avec un écart secondaire | `favorable` (ou `minor_reserves` positif) | **« Correspondance avec un écart »** (couverture complète) ou **« Lecture partielle, avec un écart »** (partielle), héros qui dit les deux côtés, ton neutre |
 | 3. Arbitrage réel (deux écarts secondaires, ou un structurant) | `arbitration` | inchangé : l'écart nommé, puis les correspondances |
 | 4. Priorité forte (poids 3) moins bien satisfaite | écart structurant → `arbitration` | inchangé, l'écart nommé en tête |
 | 5. Condition sans compromis contredite | `incompatible` | inchangé, prioritaire |
@@ -51,7 +52,12 @@ Chemin : Projet → Critères → Évaluations → Orientation → Verdict → C
 
 **Règle implémentée** (`avecEcartReconnu`, appliquée à la sortie de `verdictPresentation`), pour les orientations `favorable`, `minor_reserves` et `major_reserves`, dès que `mismatchTotal > 0` :
 
-- si le verdict **présente une correspondance** (ton positif, ou libellé « Bonne correspondance », « Correspondance favorable », « Signaux favorables ») : libellé « Favorable, avec un écart », ton neutre, héros « {lieu} répond à N de vos priorités, et moins bien à une autre : {sujet}. » ; le détail de repli (« Une partie de vos priorités va dans ce sens ») devient « Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas. » ; un détail porteur (lecture incomplète, constats à contrôler) reste ;
+- si le verdict **présente une correspondance** (ton positif, ou libellé « Bonne correspondance », « Correspondance favorable », « Signaux favorables ») :
+  - **libellé qui garde la couverture** (revue du 11/10) : « Correspondance avec un écart » si la lecture est complète, « Lecture partielle, avec un écart » sinon (FUT-45) ; ton neutre ;
+  - **héros à deux côtés quand il tient** : « {lieu} répond à vos attentes pour {A} et {B}, mais moins bien pour {écart}. », si les correspondances nommées (alignements structurants affichés, deux au plus) couvrent **tout** le compte favorable et si la phrase tient en 130 caractères ;
+  - **sinon** : « {lieu} répond à N de vos priorités, et moins bien à une autre : {écart}. », et les correspondances sont nommées **au détail** quand elles couvrent tout le compte (« L'accès aux soins et la vie locale répondent à ce que vous avez demandé. ») ;
+  - **aucune correspondance fabriquée** : sans critère favorable (entrée incohérente), le héros dit l'écart seul (« {lieu} répond moins bien à une de vos priorités : {écart}. ») ; plus de `Math.max(favorableCount, 1)` ;
+  - le détail de repli (« Une partie de vos priorités va dans ce sens ») devient « Cet écart reste à peser face à ce qui correspond : futur•e ne le compense pas. » ; un détail porteur (lecture incomplète, constats à contrôler) reste ;
 - si le verdict est **déjà centré sur une réserve** (« à nuancer », « à confirmer », « partielle ») : le héros reste, le détail ajoute l'écart (« En revanche, … » après un « Par ailleurs » existant).
 
 Le sujet vient des cartes affichées (`mismatchCandidates`, compositions comprises) sous la double gate de `nameIssues` (deux sujets, 130 caractères). Une cause commune (`shared_evidence`) ne se nomme pas comme « une autre » priorité : la phrase reste vraie sans sujet. L'orientation n'est pas modifiée.
@@ -61,11 +67,11 @@ Le sujet vient des cartes affichées (`mismatchCandidates`, compositions compris
 | Commune · priorités | Orientation | Verdict après |
 |---|---|---|
 | Paris 7e · soins 3, vie locale 3 | favorable | Correspondance favorable (inchangé) |
-| Paris 7e · soins 3, vie locale 3, éviter grandes villes 2 | favorable | Favorable, avec un écart |
-| Paris 7e · … + calme 2 | favorable | Favorable, avec un écart (trois priorités) |
+| Paris 7e · soins 3, vie locale 3, éviter grandes villes 2 | favorable | Correspondance avec un écart (correspondances au détail : 135 caractères à deux côtés) |
+| Paris 7e · … + calme 2 | favorable | Correspondance avec un écart (trois priorités) |
 | Paris 7e · éviter grandes villes **3** | arbitration | Arbitrage (inchangé) |
-| Nantes · soins 3, vie locale 3, éviter grandes villes 2 | favorable | Favorable, avec un écart |
-| La Rochelle · mer 3, vie locale 2, éviter grandes villes 2 | favorable | Favorable, avec un écart |
+| Nantes · soins 3, vie locale 3, éviter grandes villes 2 | favorable | Correspondance avec un écart, héros à deux côtés |
+| La Rochelle · mer 3, vie locale 2, éviter grandes villes 2 | favorable | Correspondance avec un écart |
 | Nantes · soins 3, inondation 3, éviter grandes villes 2 | major_reserves | À nuancer ; le détail dit l'écart |
 | Nantes / La Rochelle · mer confirmée sans compromis | condition_to_confirm | Condition ouverte (inchangé) |
 | Lège-Cap-Ferret · feu 3, vie locale 2 | arbitration | Arbitrage (inchangé) |
@@ -74,9 +80,9 @@ Dossier d'adresse : même enrobage (scope `commune+adresse`), couvert par les te
 
 ## 5. Tests
 
-`src/lib/decision/fut54-verdict-ecart.test.ts` (12 tests) : orientation, cohérence titre / libellé / ton / détail, invariant sur cinq configurations, priorité forte, incompatibilité, critère non examiné, compositions absorbées et cause commune, stabilité sans écart, réserve centrale, relation au lieu (FUT-26).
+`src/lib/decision/fut54-verdict-ecart.test.ts` (17 tests, dont 5 issus de la revue : héros à deux côtés, correspondances jamais nommées à moitié, libellé de couverture, aucune correspondance fabriquée, longueur de l'ajout aux réserves) : orientation, cohérence titre / libellé / ton / détail, invariant sur cinq configurations, priorité forte, incompatibilité, critère non examiné, compositions absorbées et cause commune, stabilité sans écart, réserve centrale, relation au lieu (FUT-26).
 
-Régressions volontairement réintroduites : le `conclusion-plan.ts` de `main` fait échouer 7 tests ; nommer une cause commune, 1 ; « Par ailleurs » répété, 1.
+Régressions volontairement réintroduites : le `conclusion-plan.ts` de `main` fait échouer 7 tests ; nommer une cause commune, 1 ; « Par ailleurs » répété, 1 ; retour du `Math.max`, 1 ; correspondances nommées à moitié, 1 ; libellé de couverture effacé, 2.
 
 ## 6. Artefacts de décision et synthèses
 
@@ -94,6 +100,7 @@ La conclusion rédigée (`ConclusionRedigee`) a pour empreinte le plan : un doss
 ## 7. Limites et décisions ouvertes
 
 - **Les artefacts déjà prêts gardent l'ancien verdict.** Les corriger exigerait une nouvelle version que le lecteur n'a pas demandée. À trancher : signaler sur ces dossiers qu'une lecture plus récente existe, sans les réécrire ?
-- **Le héros ne nomme plus les correspondances** quand il dit l'écart (contrainte de 130 caractères) ; elles restent dans la carte juste dessous.
+- **Le héros à deux côtés dépend de la longueur** : un nom de commune long (« Paris 7e Arrondissement ») le fait passer à la variante « N de vos priorités », correspondances au détail. Le contrat ne fixe aucune longueur au détail ; l'ajout aux réserves est une phrase courte, testée sous 130 caractères.
+- **« Une version plus récente peut être réalisée »** : l'idée d'une indication discrète sur les artefacts prêts relève du versionnement des rapports, pas de FUT-54.
 - **Un écart de poids 1** ne produit aucun fait : il n'entre ni dans les cartes ni dans le verdict, par construction des règles. Inchangé.
-- **Le libellé « Favorable, avec un écart »** est une convention éditoriale, à relire avec FUT-87 pour la hiérarchie visuelle.
+- **Les libellés « Correspondance avec un écart » / « Lecture partielle, avec un écart »** sont des conventions éditoriales, à relire avec FUT-87 pour la hiérarchie visuelle.
