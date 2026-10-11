@@ -148,16 +148,7 @@ export function Ligne({ children, marge, id }: { children: ReactNode; marge?: Re
 // ── Registre ─────────────────────────────────────────────────────────────────────────────────
 
 /** La teinte d'un registre : celle de la charte, en jeton. Une teinte inconnue tombe sur le non su. */
-export const TEINTE_REGISTRE: Record<string, string> = {
-  incompatibilities: "var(--reg-incompatibilite)",
-  alignments: "var(--reg-alignement)",
-  mismatches: "var(--reg-ecart)",
-  compromises: "var(--reg-compromis)",
-  unknowns: "var(--reg-non-su)",
-  verifications: "var(--reg-controle)",
-  condition_check: "var(--reg-controle)",
-  condition_met: "var(--reg-alignement)",
-};
+export { TEINTE_REGISTRE } from "./marge";
 
 export function Registre({ teinte, children, as: T = "p", className }: { teinte?: string; children: ReactNode; as?: "p" | "h2" | "h3" | "h4"; className?: string }) {
   return (

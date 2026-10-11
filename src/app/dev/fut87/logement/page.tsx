@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { LogementReleve } from "@/components/prototypes/fut87/LogementReleve";
-import { releve as s, BandeauPrototype } from "@/components/prototypes/fut87/primitives";
+import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
 import { CAS_LOGEMENT, LIBELLE_CAS, casDeLogement, casDepuisUrl } from "@/components/prototypes/fut87/fixture-logement";
 
 export default async function PrototypeLogement({ searchParams }: { searchParams: Promise<{ cas?: string }> }) {

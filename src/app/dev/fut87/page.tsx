@@ -1,7 +1,7 @@
 // FUT-87 · INDEX DES PROTOTYPES DE DIRECTION ARTISTIQUE. DEV UNIQUEMENT : 404 en production.
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { releve as s, Surtitre, GlypheGrain } from "@/components/prototypes/fut87/primitives";
+import { releve as s, Surtitre, GlypheGrain } from "@/components/releve/primitives";
 
 const PAGES = [
   { href: "/dev/fut87/directions", titre: "Les trois directions", note: "Atlas, édition, strates, et la combinaison retenue, rendues sur le même contenu." },

@@ -13,6 +13,8 @@ import { FactCompositionCard } from "@/components/report/FactCompositionCard";
 import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { dateFr } from "@/lib/decision/autour-permis";
+import { DossierDecisionReleve } from "@/components/releve/DossierDecisionReleve";
+import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
 
 // LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
 // dossier est l'un des six registres nommés par la charte, et porte sa teinte.
@@ -96,7 +98,13 @@ export function DossierDecisionSection({
   espacement = "mt-14",
   titre,
   supportingPane,
+  presentation,
 }: {
+  /**
+   * FUT-91 : la présentation « Le relevé ». Absente, elle suit le drapeau serveur `DECISION_RELEVE`
+   * (éteint par défaut). Mêmes props, mêmes états, même conclusion : seule la composition change.
+   */
+  presentation?: PresentationDossier;
   dossier: Dossier;
   /**
    * La date de génération de l'artefact, quand le dossier affiché en vient un.
@@ -148,6 +156,15 @@ export function DossierDecisionSection({
    */
   supportingPane?: ReactNode;
 }) {
+  if (presentationDuDossier(presentation) === "releve") {
+    return (
+      <DossierDecisionReleve
+        dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
+        provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
+        generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
+      />
+    );
+  }
   const structured = dossier.conclusionState !== "project_not_structured";
 
   // Une condition non remplie se LIT UNE FOIS : quand le bloc de tête la porte déjà entièrement, sa

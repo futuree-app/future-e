@@ -20,7 +20,7 @@ import { dateFr } from "@/lib/decision/autour-permis";
 import {
   releve as s, Surtitre, Ligne, Marge, Plaque, RegleDuTemps, CoupeEchelles, Grain, Chiffre, Registre,
   type ElementDeMarge, type JalonTemps,
-} from "./primitives";
+} from "@/components/releve/primitives";
 import { ONRN_COUT, ONRN_FREQ, lecturesDe, type CasDeLogement } from "./fixture-logement";
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G"] as const;

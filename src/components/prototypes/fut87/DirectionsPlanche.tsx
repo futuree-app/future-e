@@ -5,7 +5,7 @@
 // test du prototype 2). Ce qui varie : la composition, la typographie, les surfaces, le traitement de
 // la donnée et de la source. C'est la seule façon honnête de comparer des directions : à contenu égal.
 import type { CSSProperties, ReactNode } from "react";
-import { releve as s, GlypheGrain } from "./primitives";
+import { releve as s, GlypheGrain } from "@/components/releve/primitives";
 
 const VERDICT = "Nîmes répond moins bien à une de vos priorités : des étés supportables.";
 const DETAIL = "L'accès aux soins et la vie locale répondent en revanche à votre projet. La décision se joue entre ces correspondances et l'écart relevé.";
