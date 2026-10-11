@@ -80,8 +80,8 @@ export default async function BancFut91({ searchParams }: { searchParams: Promis
           espacement="mt-8"
           titre={TITRE_VERDICT}
           supportingPane={pane}
+          controles={<ControlesDuDossier presentation={vue} dossier={t.dossier} provenance={artefact ? "artefact-de-test" : undefined} />}
         />
-        <ControlesDuDossier presentation={vue} dossier={t.dossier} provenance={artefact ? "artefact-de-test" : undefined} />
         {sp.enrichi === "long" ? (
           // UN DÉTAIL ENRICHI PLUS LONG QUE LE REPLI, sans appel au modèle : le texte du repli répété
           // trois fois, marqué comme généré. Il éprouve la plaque, il ne prétend pas être une lecture.

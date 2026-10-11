@@ -99,6 +99,7 @@ export function DossierDecisionSection({
   espacement = "mt-14",
   titre,
   supportingPane,
+  controles,
   presentation,
 }: {
   /**
@@ -162,6 +163,14 @@ export function DossierDecisionSection({
    * calque positionné au-dessus du contenu. Sur mobile, il se place entre le verdict et ses détails.
    */
   supportingPane?: ReactNode;
+  /**
+   * FUT-92 : la liste complète des contrôles (`ControlesDuDossier`), rendue PAR CETTE SECTION au lieu
+   * d'être posée à côté par l'appelant. En présentation classique, rien ne change : elle suit la
+   * section, exactement comme quand l'appelant la rendait. Dans le relevé, elle entre dans la même
+   * grille que la minute, si bien que la colonne d'appui couvre toute la lecture et peut y rester
+   * collée jusqu'au dernier contrôle.
+   */
+  controles?: ReactNode;
 }) {
   // FUT-10 · LE LIEN AVEC LE BIEN A CHANGÉ : même bandeau, même priorité (projet > lien > voisinage)
   // dans Le relevé que dans la présentation classique. Posé juste AU-DESSUS du relevé, pour ne pas
@@ -184,6 +193,7 @@ export function DossierDecisionSection({
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
         provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
         generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
+        controles={controles}
       />
       </>
     );
@@ -217,7 +227,7 @@ export function DossierDecisionSection({
   const conditionsSansCarte = (dossier.criteria.openConditions ?? []).filter((c) => c.cause !== "a_confirmer");
   const sectionConditions = sections.some((s) => s.key === "incompatibilities");
 
-  return (
+  const section = (
     <section className={espacement} id="dossier-decision">
       {/* LARGEUR DE LECTURE : QUESTION OUVERTE. Une colonne de 860 px a été essayée puis retirée :
           la page entière fait 1044 px utiles, et rien d'autre ne partageait cette largeur, si bien que
@@ -510,6 +520,8 @@ export function DossierDecisionSection({
       </div>
     </section>
   );
+  // La liste des contrôles suit la section, comme quand l'appelant la posait juste après : même DOM.
+  return <>{section}{controles}</>;
 }
 
 // UNE CONDITION SANS LECTURE : son nom, son état, une phrase. Aucun geste : nous n'en connaissons pas.

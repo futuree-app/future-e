@@ -151,12 +151,16 @@ const OU: Record<Echelle, string> = {
  *   - non examinée : AUCUN nombre. Écrire « 0 » dirait qu'on a regardé et rien trouvé ;
  *   - examinée, aucun constat affiché : « 0 », et la phrase le dit, sans en faire une absence de risque ;
  *   - examinée, n constats : le nombre de cartes affichées qui la touchent.
+ *
+ * `etatCourt` (FUT-92) : la même information pour le décompte compact, où le nom de l'échelle
+ * précède déjà l'état. Les trois formulations restent distinctes, et zéro garde son « examiné ».
  */
-export function texteEtatEchelle(e: EtatEchelle): { nom: string; valeur: string | null; phrase: string } {
+export function texteEtatEchelle(e: EtatEchelle): { nom: string; valeur: string | null; phrase: string; etatCourt: string } {
   const nom = NOM_ECHELLE[e.echelle];
-  if (e.etat === "non_examinee") return { nom, valeur: null, phrase: "Non examiné dans cette lecture" };
-  if (e.constats === 0) return { nom, valeur: "0", phrase: `Examiné, aucun constat affiché ${OU[e.echelle]}` };
-  return { nom, valeur: String(e.constats), phrase: `${e.constats === 1 ? "1 constat" : `${e.constats} constats`} ${OU[e.echelle]}` };
+  if (e.etat === "non_examinee") return { nom, valeur: null, phrase: "Non examiné dans cette lecture", etatCourt: "non examiné dans cette lecture" };
+  const compte = e.constats === 1 ? "1 constat" : `${e.constats} constats`;
+  if (e.constats === 0) return { nom, valeur: "0", phrase: `Examiné, aucun constat affiché ${OU[e.echelle]}`, etatCourt: "examiné, aucun constat affiché" };
+  return { nom, valeur: String(e.constats), phrase: `${compte} ${OU[e.echelle]}`, etatCourt: compte };
 }
 
 export type LectureDecision = {
