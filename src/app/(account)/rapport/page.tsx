@@ -21,8 +21,9 @@ import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
-import { relationDeLAdresse, relationDeLaCommune } from "@/lib/relation-au-lieu";
+import { isAddressRelation, objectifDeLAnalyse, relationDeLAdresse, relationDeLaCommune } from "@/lib/relation-au-lieu";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
+import { LienAvecCeBien } from "@/components/report/LienAvecCeBien";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import {
@@ -619,6 +620,21 @@ export default async function RapportPage() {
               : null}
           />
         </div>
+
+        {/* ── Ce bien (FUT-10) : pourquoi on l'examine, et le lien qu'on a avec lui. Juste sous le
+            projet, parce que les deux répondent à la même question (« qu'a compris futur•e ? ») sans
+            se confondre : le projet vaut partout, ceci ne vaut que pour ce bien. ── */}
+        {fullReport && logementForCommune ? (
+          <div className="mt-6">
+            <LienAvecCeBien
+              key={logementForCommune.id}
+              dossierId={logementForCommune.id}
+              adresse={logementForCommune.address_label}
+              relationInitiale={isAddressRelation(logementForCommune.place_relation) ? logementForCommune.place_relation : null}
+              objectifInitial={objectifDeLAnalyse(relationDeLAdresse(logementForCommune))}
+            />
+          </div>
+        ) : null}
 
         {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (

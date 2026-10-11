@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineM, type LngLat } from "./geo-distance.ts";
 import type { Posture, Face3Snapshot } from "./logement-autour-types.ts";
-import type { AddressRelation } from "./relation-au-lieu.ts";
+import type { AddressObjective, AddressRelation } from "./relation-au-lieu.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
 // bump = invalidation de tous les snapshots Autour.
@@ -63,6 +63,12 @@ export type AddressDossierRow = {
   place_relation?: AddressRelation | null;
   /** La date de la déclaration. `null` tant que rien n'a été déclaré. */
   place_relation_set_at?: string | null;
+  /**
+   * L'OBJECTIF DÉCLARÉ de l'analyse de ce bien (FUT-10, migration 37) : `buy` | `rent` | `understand`
+   * | `other`, ou `null` = non dit. Optionnel pour la même raison que la relation.
+   */
+  place_objective?: AddressObjective | null;
+  place_objective_set_at?: string | null;
   snapshot: Face3Snapshot | null;
   dpe_selection_status: DpeSelectionStatus;
   selected_dpe_id: string | null;

@@ -14,7 +14,7 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { getReportContext, resolveRelation } from "@/lib/report-context";
-import { relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
+import { contexteDuBien, relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, À LA DÉLIVRANCE.
@@ -95,7 +95,9 @@ async function lireSnapshotGele(
  * celle de l'écran.
  *
  *   - commune : `report_context` et la commune de résidence déclarée, via `resolveRelation` ;
- *   - adresse : `address_dossiers.place_relation`, SEULE (celle de la commune ne s'hérite pas).
+ *   - adresse : `address_dossiers.place_relation` et `place_objective` (FUT-10), SEULS (celle de la
+ *     commune ne s'hérite pas). Lus par `*` : nommer `place_objective` ferait échouer toute la lecture
+ *     sur une base sans la migration 37, et la relation déjà déclarée serait perdue avec lui.
  *
  * Une lecture qui échoue rend une relation INCONNUE : la voix devient neutre, jamais celle d'un habitant.
  */
@@ -106,12 +108,12 @@ async function lireRelationsAuLieu(
     sb.from("user_profiles").select("home_insee_code").eq("user_id", userId).maybeSingle().then((r) => r.data, () => null),
     getReportContext(sb, userId, insee).catch(() => null),
     dossierId
-      ? sb.from("address_dossiers").select("place_relation").eq("id", dossierId).maybeSingle().then((r) => r.data, () => null)
+      ? sb.from("address_dossiers").select("*").eq("id", dossierId).maybeSingle().then((r) => r.data, () => null)
       : Promise.resolve(null),
   ]);
   const home = (profil as { home_insee_code?: string | null } | null)?.home_insee_code ?? null;
   const commune = relationDeLaCommune(resolveRelation(home != null && communeParent(home) === insee, contexte));
-  return { commune, adresse: dossierId ? relationDeLAdresse(dossier as { place_relation?: unknown } | null) : null };
+  return { commune, adresse: dossierId ? relationDeLAdresse(dossier as { place_relation?: unknown; place_objective?: unknown } | null) : null };
 }
 
 /**
@@ -232,8 +234,10 @@ export async function generateDecisionArtifact(
       };
     }
 
+    // FUT-10 : la version fige le contexte du bien qu'elle a lu, pour pouvoir dire plus tard qu'il a changé.
     const artefact = buildDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
+      contexteDuBien(relations.adresse),
     );
     await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
     return { status: "ready" };

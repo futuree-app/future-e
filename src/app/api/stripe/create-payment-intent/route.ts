@@ -13,6 +13,8 @@ import { resolvePromo } from "@/lib/promo-code";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
+import { colonnesIntention, lireContexteCheckout, projetVuEstACour } from "@/lib/dossier-contexte-checkout";
+import { normalizeUserProject, type UserProject } from "@/lib/user-project";
 
 export const runtime = "nodejs";
 
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
   try {
     const {
       productType, targetInsee, targetCommune, source, rank, pack,
-      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode,
+      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode, dossierContext,
     } = await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
@@ -129,12 +131,48 @@ export async function POST(request: Request) {
       banId: string; insee: string; label: string; city: string | null;
       postcode: string | null; latitude: number; longitude: number; deductionCents: number;
     } | null = null;
+    // FUT-10 : les colonnes de contexte de l'intention (relation, objectif, date serveur, projet figé).
+    let colonnesContexte: ReturnType<typeof colonnesIntention> | null = null;
 
     if (isDossier) {
       const sel = validateSelectedBanAddress(address);
       if (!sel) {
         return NextResponse.json({ error: "Adresse invalide." }, { status: 400 });
       }
+
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      // LE CONTEXTE DÉCLARÉ (FUT-10), VALIDÉ AVANT TOUT PAIEMENT.
+      //
+      // Une valeur hors liste est un refus, pas un `null` : le lecteur paierait un dossier dont sa
+      // réponse aurait disparu. Le PROJET est relu ici, en base, jamais reçu du navigateur ; et il
+      // doit être celui que l'écran a montré. S'il a changé entre-temps (autre onglet), on refuse :
+      // le lecteur ne confirme jamais un projet qu'il n'a pas vu. Rien de tout cela ne part dans les
+      // métadonnées Stripe : il ne vit que dans `dossier_intents`, réservée au service role.
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      const contexte = lireContexteCheckout(dossierContext);
+      if (!contexte.ok) {
+        return NextResponse.json({ error: "Réponses invalides." }, { status: 400 });
+      }
+      let projetCanonique: UserProject | null = null;
+      if (contexte.value.projetVu) {
+        const { data: profil, error: profilError } = await supabase
+          .from("user_profiles")
+          .select("user_project")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profilError) {
+          console.error("[create-payment-intent] lecture du projet impossible");
+          return NextResponse.json({ error: "Préparation du dossier impossible." }, { status: 500 });
+        }
+        projetCanonique = normalizeUserProject((profil as { user_project?: unknown } | null)?.user_project ?? null);
+        if (!projetVuEstACour(contexte.value.projetVu, projetCanonique)) {
+          return NextResponse.json(
+            { error: "Votre projet a changé entre-temps. Rechargez la page pour le relire.", code: "PROJECT_CHANGED" },
+            { status: 409 },
+          );
+        }
+      }
+      colonnesContexte = colonnesIntention(contexte.value, projetCanonique, new Date());
 
       // LA BAN A LE DERNIER MOT sur le type ET sur les coordonnées. Le checkout est rare et c'est
       // là que l'argent bouge : la qualification, à haut volume et sans conséquence financière,
@@ -296,6 +334,11 @@ export async function POST(request: Request) {
           longitude: dossierIntent.longitude,
           amount_due_cents: dossierAmountCents,
           territory_deduction_cents: dossierIntent.deductionCents,
+          // FUT-10 : relation, objectif, date de déclaration, projet figé. Dans le MÊME upsert que
+          // l'adresse : une intention ne peut pas exister sans son contexte. Revenir aux questions
+          // puis repasser au paiement rend le même PaymentIntent (même clé, mêmes paramètres Stripe) :
+          // cet upsert remplace alors les réponses, et c'est la dernière version qui sera livrée.
+          ...colonnesContexte,
         },
         { onConflict: "stripe_payment_intent_id" },
       );
@@ -348,6 +391,14 @@ export async function POST(request: Request) {
         amount: isDossier ? dossierAmountCents / 100 : priceConfig.amountEur,
         currency: "eur",
         user_id: user.id,
+        // FUT-10 : SI le lecteur a répondu, jamais CE qu'il a répondu (ni texte, ni projet).
+        ...(colonnesContexte
+          ? {
+              context_relation_declared: colonnesContexte.place_relation != null,
+              context_objective_declared: colonnesContexte.place_objective != null,
+              context_project_confirmed: colonnesContexte.project_snapshot != null,
+            }
+          : {}),
       },
     });
     await posthog.shutdown();

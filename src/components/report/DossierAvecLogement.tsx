@@ -5,7 +5,8 @@
 // L'ASSEMBLAGE A QUITTÉ CE FICHIER le 05/08/2026, pour `server/assemble-address-dossier.ts` : le
 // webhook Stripe doit produire le même dossier hors de toute page, et un pipeline qui n'existe que
 // dans le corps d'un composant ne se rejoue pas. Ce composant ne fait plus que demander et rendre.
-import type { RelationAuLieu } from "@/lib/relation-au-lieu";
+import { contexteAChangeMateriellement, type RelationAuLieu } from "@/lib/relation-au-lieu";
+import { bucketDuProjet } from "@/lib/decision/logement-gestes";
 import { assembleAddressDossier } from "@/lib/server/assemble-address-dossier";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import {
@@ -159,6 +160,15 @@ export async function DossierAvecLogement({
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={espacement} titre={titre}
         supportingPane={supportingPane}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
+        // FUT-10 : le lien déclaré avec ce bien a changé depuis la version SERVIE. Comparé avec
+        // l'intention du projet figé dans cette version : c'est elle qui a produit la voix affichée.
+        // Une version antérieure à FUT-10 ne porte pas de contexte, et on se tait.
+        contexteAChange={servi.source === "artefact" && contexteAChangeMateriellement(
+          stocke?.artifact?.contexteDuBien ?? null,
+          relationAdresse ?? null,
+          stocke?.artifact?.projectSnapshot?.intent ?? null,
+          bucketDuProjet,
+        )}
         // UN VOISINAGE RAFRAÎCHI APRÈS LA VERSION SERVIE : la décision peut être mise à jour, jamais
         // réécrite seule. Seulement quand on sert une version FIGÉE : un assemblage vivant utilise
         // déjà le voisinage courant.

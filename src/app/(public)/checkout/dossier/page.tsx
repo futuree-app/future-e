@@ -10,6 +10,7 @@ import { quoteForDossier } from "@/lib/dossier-pricing";
 import { resolvePromo, promoExists } from "@/lib/promo-code";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
+import { normalizeUserProject } from "@/lib/user-project";
 import { CeQueLeDossierExamine } from "@/components/CeQueLeDossierExamine";
 import { DossierCheckoutPanel } from "./DossierCheckoutPanel";
 
@@ -68,6 +69,16 @@ export default async function DossierCheckoutPage({
 
   const paid = await hasPaidTerritory(supabase, user.id, communeParent(canonical.citycode));
 
+  // LE PROJET DU COMPTE, lu ici pour être RÉUTILISÉ avant le paiement (FUT-10) : on montre ce qui est
+  // déjà connu au lieu de le redemander. Sous RLS, la ligne du lecteur seul. Une lecture en échec vaut
+  // « aucun projet » à l'écran ; la route de paiement relira de toute façon le projet en base.
+  const { data: profil } = await supabase
+    .from("user_profiles")
+    .select("user_project")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const projet = normalizeUserProject((profil as { user_project?: unknown } | null)?.user_project ?? null);
+
   // LE CODE EST RÉSOLU CÔTÉ SERVEUR, ici comme au moment de créer le paiement. Cette page ne fait
   // qu'AFFICHER : la route de paiement le résout à nouveau, sur la même table, donc un code
   // fabriqué dans l'URL ne changerait rien à ce qui est encaissé.
@@ -116,6 +127,7 @@ export default async function DossierCheckoutPage({
           promoExpired={promoExpired}
           userEmail={user.email}
           checkoutAttemptId={crypto.randomUUID()}
+          projet={projet}
         />
       </div>
     </div>

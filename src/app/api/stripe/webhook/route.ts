@@ -15,7 +15,8 @@ import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
 import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
 import { after } from "next/server";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
-import { normalizeUserProject } from "@/lib/user-project";
+import { normalizeUserProject, type UserProject } from "@/lib/user-project";
+import { colonnesDossierDepuisIntention, projetConfirmeAuCheckout } from "@/lib/dossier-contexte-checkout";
 import {
   renderPurchaseConfirmationEmail,
   TRANSACTIONAL_EMAIL_FROM,
@@ -38,25 +39,32 @@ export const runtime = "nodejs";
  * page retombe alors sur l'assemblage vivant, exactement comme avant ce lot. Une génération ratée
  * est donc un défaut à rattraper, jamais une raison de refuser une livraison encaissée.
  *
- * ── LE PROJET VIENT DE LA BASE, PAS DES MÉTADONNÉES STRIPE ───────────────────────────────────
- * C'est le projet TEL QU'IL EST À LA DÉLIVRANCE qui a produit la lecture achetée. Le recopier dans
- * les métadonnées à la création du PaymentIntent le figerait une minute trop tôt, avant un dernier
- * ajustement du wizard.
+ * ── LE PROJET VIENT DE LA BASE, JAMAIS DES MÉTADONNÉES STRIPE ────────────────────────────────
+ * Depuis FUT-10, un dossier d'adresse est généré avec le projet que le lecteur a CONFIRMÉ au checkout
+ * (`dossier_intents.project_snapshot`, relu en base par la route de paiement et vérifié contre ce que
+ * l'écran a montré). S'il a modifié son projet entre le paiement et la génération, le dossier vendu
+ * répond à celui qu'il avait confirmé, et le bandeau « votre projet a changé » lui propose la mise à
+ * jour. Sans projet confirmé (intention antérieure, territoire seul, aucun projet au checkout), on
+ * relit le projet canonique, comme avant.
  */
 function planifierArtefact(
   userId: string,
   cible: Parameters<typeof generateDecisionArtifact>[3],
+  projetConfirme: UserProject | null = null,
 ): void {
   after(async () => {
     try {
-      const { data: profile } = await supabaseAdmin
-        .from("user_profiles")
-        .select("user_project")
-        .eq("user_id", userId)
-        .maybeSingle();
-      const project = normalizeUserProject(
-        (profile as { user_project?: unknown } | null)?.user_project ?? null,
-      );
+      let project = projetConfirme;
+      if (!project) {
+        const { data: profile } = await supabaseAdmin
+          .from("user_profiles")
+          .select("user_project")
+          .eq("user_id", userId)
+          .maybeSingle();
+        project = normalizeUserProject(
+          (profile as { user_project?: unknown } | null)?.user_project ?? null,
+        );
+      }
       // SANS PROJET, PAS D'ARTEFACT. Le dossier de décision se construit à partir du projet : le
       // figer sans lui produirait une version vide, qui vaudrait moins que l'assemblage vivant du
       // jour où le lecteur aura enfin renseigné son projet.
@@ -280,6 +288,10 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
           // confirmé.
           amount_paid_cents: paymentIntent.amount,
           purchased_at: new Date().toISOString(),
+          // FUT-10 : la relation et l'objectif déclarés au checkout, avec la date de LEUR déclaration.
+          // Dans l'upsert QUI CRÉE la ligne : l'artefact, généré juste après, les trouve en base, et
+          // `ignoreDuplicates` garantit qu'un rejeu n'écrase jamais une relation modifiée depuis.
+          ...colonnesDossierDepuisIntention(intent),
         },
         { onConflict: "stripe_payment_intent_id", ignoreDuplicates: true },
       )
@@ -322,7 +334,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         // dossier figé porte donc l'état du bien SANS diagnostic sélectionné, ce qui est exact au
         // moment de la vente. Le jour où le choix du DPE précédera le paiement, il entrera ici.
         savedDpe: null,
-      });
+      }, projetConfirmeAuCheckout(intent));
     }
 
     await supabaseAdmin.from("payments").upsert(

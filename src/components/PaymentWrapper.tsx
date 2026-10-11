@@ -46,6 +46,12 @@ type PaymentWrapperProps = {
   checkoutAttemptId?: string;
   /** Intention de code de lancement. Le serveur le résout : le client ne fixe aucun montant. */
   promoCode?: string | null;
+  /**
+   * Dossier d'adresse (FUT-10) : les réponses déclarées AVANT le montage de ce composant, et la version
+   * du projet que l'écran a montrée. Le serveur les valide et les range dans `dossier_intents` avant de
+   * rendre le `clientSecret` ; elles ne partent jamais chez Stripe.
+   */
+  dossierContext?: unknown;
 };
 
 export function PaymentWrapper({
@@ -60,6 +66,7 @@ export function PaymentWrapper({
   address,
   checkoutAttemptId,
   promoCode,
+  dossierContext,
 }: PaymentWrapperProps) {
   // `requestBody` sert aussi de `requestKey` au useEffect : toutes les valeurs ci-dessous sont
   // stables pour un rendu de page (le distinct_id l'est pour une session), donc le PaymentIntent
@@ -75,6 +82,7 @@ export function PaymentWrapper({
     address,
     checkoutAttemptId,
     promoCode,
+    dossierContext,
     phDistinctId: clientDistinctId(),
   });
   const requestKey = requestBody;
