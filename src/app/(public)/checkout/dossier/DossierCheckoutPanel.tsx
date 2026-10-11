@@ -150,7 +150,9 @@ export function DossierCheckoutPanel({
       if (!r.ok) {
         setErreurProjet(r.conflit
           ? "Votre projet a changé entre-temps, dans un autre onglet. Rechargez la page pour le relire."
-          : "Votre projet n'a pas pu être enregistré. Réessayez, ou continuez sans le modifier.");
+          : reformulation
+            ? "Votre projet n'a pas pu être enregistré. Réessayez, ou continuez avec votre projet actuel."
+            : "Votre projet n'a pas pu être enregistré. Réessayez, ou continuez sans personnaliser votre dossier.");
         return;
       }
       setProjetCourant(r.project);

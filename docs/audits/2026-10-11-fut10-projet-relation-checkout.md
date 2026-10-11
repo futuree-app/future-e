@@ -103,7 +103,9 @@ Le même `upsert(ignoreDuplicates)` qui crée `address_dossiers` y recopie relat
 4. Le webhook génère l'artefact avec **ce** snapshot. L'artefact le fige déjà dans `projectSnapshot` (convention inchangée).
 5. Si le projet a changé entre-temps, le bandeau existant « Votre projet a changé depuis cette analyse » apparaît (`projetAChangeMateriellement`), avec la mise à jour explicite.
 
-Ce snapshot n'est pas une seconde source : personne ne l'édite, aucun écran ne le lit, il ne sert qu'à reproduire la lecture vendue. Absent (intentions antérieures, ou aucun projet confirmé), la génération relit le projet canonique, comme avant.
+Ce snapshot n'est pas une seconde source : personne ne l'édite, aucun écran ne le lit, il ne sert qu'à reproduire la lecture vendue.
+
+**Corrigé le 12/10 (voir E.1)** : la version initiale relisait le projet du compte quand le snapshot était vide, ce qui confondait « intention antérieure » et « le lecteur a continué sans projet ». `project_state` distingue désormais les trois cas.
 
 Alternatives écartées : l'empreinte seule (on saurait que le projet a changé, sans pouvoir reproduire celui confirmé) ; la référence de version (le projet n'a pas d'historique, `updatedAt` ne désigne rien qu'on puisse relire).
 
@@ -123,9 +125,9 @@ La déclaration se fait depuis le hub (« Ce bien »), par `PATCH /api/dossier/r
 - `dossier_intents` reste réservée au service role (aucune policy).
 - Aucun texte libre dans PostHog : l'événement de checkout ne porte que des booléens (réponse donnée ou non).
 - Aucun détail de projet dans les journaux.
-- Rétention : la purge manuelle documentée en migration 26 s'étend à `project_snapshot` (effacé au-delà de 30 jours, y compris pour les intentions payées : l'artefact en porte déjà la copie livrée).
+- Rétention : voir E.4 (migration 38, fonction de purge idempotente).
 
-### C.6 Migration 37 et ordre d'application
+### C.6 Migration 37 et ordre d'application (complété en E.5)
 
 `supabase/37_contexte_checkout_dossier.sql` (additive, colonnes nullables, aucune ligne existante touchée) et son retour arrière `37_contexte_checkout_dossier_down.sql`.
 
@@ -139,7 +141,7 @@ La déclaration se fait depuis le hub (« Ce bien »), par `PATCH /api/dossier/r
 |---|---|
 | `node --test src/lib/fut10-contexte-checkout.test.ts` (nouveau) | 34 / 34 |
 | `node --test src/lib/fut26-relation-au-lieu.test.ts` (3 attentes mises à jour : la lecture porte l'objectif) | 23 / 23 |
-| Suite complète (194 fichiers de test) | 2 436 / 2 436 |
+| Suite complète (194 fichiers de test, au 11/10) | 2 436 / 2 436 |
 | `tsc --noEmit` | aucune erreur |
 | ESLint sur les fichiers modifiés | aucune erreur (le dépôt en compte 42 ailleurs, inchangés) |
 | `next build --webpack` | réussi |
@@ -164,6 +166,119 @@ Faits sur une page de maquette temporaire (retirée, jamais commitée), sans ses
 
 1. **Vocabulaire d'un projet créé au checkout** : posture « J'étudie ce lieu » par défaut (comme « Je cherche où vivre » pour la reprise d'une recherche). Un habitant qui crée son projet ici lira « votre projet » plutôt que « ce que vous avez demandé » jusqu'à ce qu'il change son objectif dans « Votre projet ».
 2. **Gestes d'achat pour un occupant** : le locataire acheteur reçoit la table `achat` telle quelle, dont un détail dit « dès la première visite ». Une variante « achat par l'occupant » demanderait de réécrire des textes approuvés : hors lot.
-3. **Purge** : la rétention reste manuelle (SQL en commentaire des migrations 26 et 37). Une tâche planifiée serait plus sûre.
+3. **Purge** : traitée le 12/10 par la migration 38 (voir E.4), planification à décider.
 4. **Bloc « Ce bien »** : posé sur le hub, dans le style existant ; à habiller avec la direction artistique de FUT-87.
 5. **Événement PostHog** `address_checkout_context_set` : les contrôles visuels en local en ont émis quelques-uns vers le projet PostHog configuré dans `.env.local`.
+
+
+## E. Revue du 11-12/10/2026 : finalisation
+
+Branche remise à jour avec `main` (FUT-87, FUT-91) par une fusion sans conflit ; les trois commits FUT-10 sont conservés.
+
+### E.1 Correction A : un projet absent reste absent
+
+**Cause.** `project_snapshot = null` voulait dire deux choses : intention antérieure à FUT-10, ou lecteur qui a payé sans projet. Le webhook relisait `user_profiles.user_project` dans les deux cas. Un projet créé dans un autre onglet entre le paiement et le webhook entrait donc dans un dossier présenté au lecteur comme factuel.
+
+**Correction.** `dossier_intents.project_state` :
+
+| Valeur | Sens | Snapshot (contrainte SQL) | Livraison (`projetPourLivraison`) |
+|---|---|---|---|
+| `confirmed` | un projet a été montré et gardé | obligatoire | ce snapshot, jamais le compte |
+| `absent` | aucun projet, le lecteur a continué | interdit | aucun projet, aucun artefact |
+| `NULL` | intention antérieure, ou client sans contexte | — | relecture du compte (historique) |
+
+Un snapshot `confirmed` illisible (corrompu ou purgé) vaut `absent`, jamais une relecture. Dans le webhook, l'absence se décide avant `after()` : aucune requête ne lit le projet du compte.
+
+**Décision à valider par le porteur.** Après un achat sans projet, le dossier livré est factuel (aucun artefact). Si le lecteur décrit ensuite son projet, comme l'écran le lui propose, le dossier se lit avec lui et une version datée de ce moment est figée par le rattrapage existant. C'est un geste postérieur et daté, jamais confondu avec la vente. Si le porteur préfère qu'un dossier acheté sans projet le reste jusqu'à une mise à jour explicite, il faudra conditionner le rattrapage de `DossierAvecLogement` (fichier actuellement modifié par FUT-92, donc non touché ici).
+
+### E.2 Correction B : le contexte se verrouille à la confirmation
+
+**Cause.** La route de paiement réutilise le PaymentIntent (même clé d'idempotence) et réécrivait `dossier_intents` sans condition. Une requête partie d'un autre onglet après la confirmation pouvait remplacer les réponses et le snapshot d'une vente engagée. Contrôler le statut Stripe avant d'écrire n'aurait pas suffi : la réponse idempotente de Stripe rejoue l'objet du jour de la création (statut compris), et une lecture suivie d'une écriture laisse une fenêtre.
+
+**Invariant.** Une fois la confirmation engagée, relation, objectif, état et snapshot du projet ne changent plus.
+
+**Mécanisme** (`src/lib/verrou-intention-dossier.ts`) :
+1. Colonne `context_locked_at`, posée par **une** instruction conditionnelle (`update … where context_locked_at is null`).
+2. Toute écriture de contexte porte la même condition dans la requête. Postgres réévalue la condition après avoir pris le verrou de ligne : verrou et écriture s'ordonnent, aucune écriture ne passe après le verrou.
+3. Le navigateur verrouille **juste avant** `stripe.confirmPayment` (`POST /api/dossier/intention/verrouiller`) ; en cas d'échec, la confirmation n'est pas envoyée.
+4. Le webhook verrouille **avant** de lire l'intention (filet pour un client qui aurait sauté l'étape 3) ; un rejeu relit la même ligne.
+5. La route de paiement, avant de mettre à jour une intention existante, interroge Stripe (`retrieve`) : statut hors `requires_payment_method` / `requires_confirmation`, elle verrouille et refuse (409 `CONTEXT_LOCKED`), sans rendre de formulaire.
+
+**Scénarios de concurrence**
+
+| Scénario | Résultat |
+|---|---|
+| Réponses corrigées avant de payer | même PaymentIntent, intention mise à jour |
+| Correction envoyée après le verrou (autre onglet) | rien n'est écrit, 409, pas de formulaire |
+| Confirmation engagée sans verrou (client modifié), puis correction | `retrieve` voit le statut engagé : verrou posé, rien n'est écrit |
+| Correction et verrou simultanés | l'une passe entière avant l'autre ; jamais d'écriture après le verrou |
+| Webhook rejoué | verrou déjà posé, même ligne lue, `ignoreDuplicates` : aucun second dossier, aucune réécriture |
+| Carte refusée après le verrou, nouvelle carte | même intention, mêmes réponses (verrouillées) |
+| Carte refusée, le lecteur veut changer ses réponses | 409 ; un rechargement ouvre une tentative neuve (nouveau PaymentIntent) |
+| Code promotionnel appliqué | nouvelle tentative (comportement existant), nouvelle intention non verrouillée |
+
+**Fenêtre résiduelle.** Un client qui ne passe pas par notre formulaire, confirme lui-même puis envoie une correction entre la confirmation et le `retrieve` peut encore modifier ses propres réponses avant que le webhook ne verrouille. Seul le titulaire du compte peut le faire, sur sa propre vente.
+
+### E.3 Passe éditoriale
+
+- Le projet passe en premier. Sans projet : « Un lieu ne se résume pas à ses données. », une phrase sur ce que les priorités changent, le champ, puis deux exemples illustratifs (« Vivre sans voiture », « Rester au frais l'été »), sans chiffre, sans adresse, sans verdict. Avec projet : « Votre projet est déjà renseigné. », puis ce que futur•e en connaît (intention, priorités, conditions **confirmées** seulement), avec « Garder ce projet » choisi par défaut.
+- Puis « Et pour ce logement » : objectif et lien, deux questions distinctes. Les choix de l'objectif passent à la deuxième personne.
+- Boutons : « Continuer sans préciser davantage » quand un projet existe ; « Continuer sans personnaliser mon dossier » sinon, avec sa conséquence en une ligne.
+- Récapitulatif : « Votre dossier prendra en compte » (projet, objectif, situation), puis ce que futur•e en fera, sans promesse : rapprocher des informations documentées, et signaler une priorité non mesurée.
+- Les erreurs d'enregistrement du projet disent quoi faire selon qu'un projet existe déjà.
+
+### E.4 Rétention (migration 38)
+
+`public.purger_dossier_intents(p_maintenant, p_delai = 30 jours)`, réservée au service role, idempotente, rend ce qu'elle a fait :
+
+| État | Traitement passé le délai |
+|---|---|
+| Abandonnée (pas de dossier, pas de verrou) | supprimée |
+| Paiement engagé sans dossier (verrou posé) | supprimée : Stripe ne rejoue un webhook que 3 jours |
+| Plus jeune que le délai | intacte |
+| Dossier livré | ligne gardée, `project_snapshot` remplacé par un marqueur sans donnée |
+
+Un délai inférieur à 7 jours est refusé. Planification proposée, **non appliquée** : `select cron.schedule('purge-dossier-intents', '17 3 * * *', $$select * from public.purger_dossier_intents()$$);`
+
+### E.5 Migrations et déploiement
+
+Ordre, sur une base de test puis en production, **après revue et avant le déploiement du code** :
+1. `supabase/37_contexte_checkout_dossier.sql` (colonnes, contraintes) ;
+2. `supabase/38_purge_dossier_intents.sql` (fonction) ;
+3. déployer le code ;
+4. plus tard, si souhaité, planifier la purge.
+
+Retours arrière : `38_…_down.sql` puis `37_…_down.sql` (les contextes déclarés sont perdus). Sans la migration 37, la route de paiement échoue à écrire l'intention et ne rend aucun formulaire : aucun dossier ne peut être vendu avec un contexte perdu.
+
+### E.6 Ce qui a été réellement exécuté
+
+| Vérification | Résultat |
+|---|---|
+| `fut10-revue.test.ts` (bugs A et B, 200 entrelacements concurrents simulés, textes, FUT-54) | 22 / 22 |
+| `fut10-contexte-checkout.test.ts` | 34 / 34 |
+| Suite complète | 2 484 / 2 484 |
+| Intégration Postgres (PGlite 0.5.8, vraies migrations 26/36/37/38) | 9 / 9 |
+| TypeScript, ESLint (fichiers touchés), `next build --webpack` | sans erreur |
+| Intégration Stripe en mode test (`scripts/integration/fut10-stripe-test.mjs`) | **non exécutée** : la clé de test du CLI Stripe a expiré le 05/09/2026 |
+| Webhook réel (`stripe listen`), base Supabase de test | **non exécutés** : aucun environnement de test disponible |
+
+L'intégration Postgres a trouvé un vrai défaut, corrigé : un pilote Postgres rend les dates comme objets `Date`, et la date de déclaration recopiée au dossier était alors perdue (PostgREST rend des chaînes, la production n'était pas touchée).
+
+Elle ne couvre ni PostgREST / supabase-js, ni la vraie concurrence (une seule connexion), ni le schéma complet de production (`auth.users` et `address_dossiers` minimaux).
+
+### E.7 Contrôles visuels
+
+Captures « avant » : `docs/audits/2026-10-11-fut10-captures/`. Captures « après » : `docs/audits/2026-10-12-fut10-captures-apres/`, sur les vrais composants montés dans une maquette temporaire retirée. Parseur, profil et paiement étaient interceptés : aucun appel au modèle, aucun appel à Stripe.
+
+- 1280, 390, 360 px : aucun débordement.
+- Aucun PaymentIntent avant la fin des questions ou le choix de passer.
+- État de chargement (« Enregistrement de votre projet… ») et erreur d'enregistrement : aucun PaymentIntent demandé.
+- Clavier : prix → projet → objectif → lien → boutons, flèches dans chaque groupe, focus visible.
+- Thème clair toujours non vérifiable sur cette page (`bg-canvas` figé), défaut antérieur.
+
+### E.8 Risques résiduels et prérequis
+
+1. **Mode « Le relevé » (`DECISION_RELEVE`, éteint par défaut).** `DossierDecisionReleve` ne reçoit pas encore le signal « lien modifié » : avec le drapeau allumé, une relation changée après l'achat ne serait pas signalée. Le fichier est en cours de modification par FUT-92 : à brancher à l'intégration (une prop, et la raison `"lien"` déjà gérée par `AnalyseAncienProjet`).
+2. Intégration Stripe et Supabase réelles non exécutées : à faire sur des environnements de test avant la mise en production (`! stripe login`, puis le script ; projet Supabase de test avec les migrations 37 et 38).
+3. Le verrou ajoute un appel réseau avant la confirmation : s'il échoue, le paiement est bloqué (message affiché, carte non débitée).
+4. Décision E.1 (personnalisation d'un dossier acheté sans projet, après coup) à confirmer.
