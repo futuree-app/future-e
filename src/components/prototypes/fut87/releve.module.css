@@ -1,0 +1,442 @@
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   FUT-87 · PROTOTYPE DE DIRECTION ARTISTIQUE « LE RELEVÉ ». DEV UNIQUEMENT.
+
+   Feuille ISOLÉE (module CSS) : rien ici ne touche le site public. Les jetons sont posés sur la
+   racine `.releve` et dérivent des jetons existants (`design-tokens.css`) : la palette close, les
+   six registres et les deux thèmes restent la source. Ce qui change, c'est la COMPOSITION :
+   une grille à marge de preuve, des filets plutôt que des cartes, un seul plan élevé par
+   mouvement, trois glyphes de grain, une règle du temps, et l'axe de largeur d'Archivo.
+
+   Doctrine : DESIGN.md (§ 2 charpente, § 3 donnée, § 5 couleur, § 7 échelles) et la proposition
+   docs/audits/2026-10-11-fut87-direction-artistique.md.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.releve {
+  /* Fonds : on garde le noir profond de la DA ; la « feuille » est le même fond, la plaque un cran
+     au-dessus. Aucun verre translucide ni halo dans le prototype. */
+  --r-fond: var(--bg);
+  --r-plaque: var(--bg-deep);
+  --r-plaque-bord: var(--border-2);
+
+  /* Texte : cinq niveaux existants, trois rôles. */
+  --r-encre: var(--fg-hi);
+  --r-texte: var(--fg-2);
+  --r-discret: var(--fg-3);
+  --r-meta: var(--ghost);
+
+  /* Filets : la séparation par défaut (DESIGN.md § 2.3). */
+  --r-filet: var(--border-1);
+  --r-filet-fort: var(--border-2);
+  --r-trame: color-mix(in srgb, var(--fg-hi) 4%, transparent);
+
+  /* Géométrie : rayons courts (documentaire), une grille à marge, un pas de 8. */
+  --r-rayon: 3px;
+  --r-marge: 232px;
+  --r-gouttiere: 48px;
+  --r-pas: 8px;
+
+  /* Largeurs d'Archivo (axe `wdth` du fichier variable déjà servi : 62 à 125). */
+  --r-large: 118;
+  --r-semi: 88;
+
+  background: var(--r-fond);
+  color: var(--r-texte);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+/* ── Conteneur et grille à marge ────────────────────────────────────────────────────────── */
+
+.feuille {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+@media (min-width: 640px) { .feuille { padding: 0 28px; } }
+
+/* Une ligne de relevé : le texte à gauche, sa preuve dans la marge, alignées sur la même ligne
+   de départ. Sous 900 px, la marge passe SOUS le texte, derrière un filet pointillé. */
+.ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+@media (min-width: 900px) {
+  .ligne { grid-template-columns: minmax(0, 1fr) var(--r-marge); gap: var(--r-gouttiere); }
+}
+/* La marge : 12 px sur grand écran, 13 px sur mobile (revue V2 : 11,5 px se lisait mal sous chaque
+   information). Les sources sont en `--fg-3`, plus lisibles que le gris de métadonnée. */
+.marge {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--r-discret);
+}
+@media (max-width: 899px) { .marge { font-size: 13px; } }
+.margeEnLigne { border: 0 !important; padding: 0 !important; }
+.margeLigne { display: flex; gap: 7px; align-items: baseline; }
+.margeGlyphe { flex: none; color: var(--r-discret); }
+.margeDate { color: var(--r-meta); }
+@media (max-width: 899px) {
+  .marge { border-top: 1px dashed var(--r-filet-fort); padding-top: 8px; }
+}
+@media (min-width: 900px) {
+  .marge { border-left: 1px solid var(--r-filet); padding-left: 16px; }
+}
+.marge a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--r-filet-fort); }
+.marge a:hover { color: var(--r-encre); }
+.margeValeur { color: var(--r-encre); font-variant-numeric: tabular-nums; }
+
+/* ── Typographie ─────────────────────────────────────────────────────────────────────────── */
+
+.display {
+  font-variation-settings: "wdth" var(--r-large);
+  font-weight: 500;
+  font-size: clamp(34px, 4.4vw, 58px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--r-encre);
+  text-wrap: balance;
+  margin: 0;
+}
+.titre {
+  font-variation-settings: "wdth" 108;
+  font-weight: 600;
+  font-size: clamp(23px, 2.5vw, 31px);
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+  color: var(--r-encre);
+  text-wrap: balance;
+  margin: 0;
+}
+.sousTitre {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.35;
+  color: var(--r-encre);
+  margin: 0;
+}
+.chapo { font-size: 18px; line-height: 1.55; color: var(--r-texte); margin: 0; }
+.corps { font-size: 16px; line-height: 1.62; color: var(--r-texte); margin: 0; }
+.dense { font-size: 14.5px; line-height: 1.58; color: var(--r-texte); margin: 0; }
+.nuance { font-size: 13.5px; line-height: 1.55; color: var(--r-discret); margin: 0; }
+.encre { color: var(--r-encre); }
+
+/* Le surtitre : Archivo semi-condensée, en casse normale, précédé d'un numéro mono. Il remplace
+   les capitales mono espacées (379 occurrences dans le produit). */
+.surtitre {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-variation-settings: "wdth" var(--r-semi);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+  color: var(--r-discret);
+  margin: 0;
+}
+.numero {
+  font-family: var(--font-mono);
+  font-variation-settings: normal;
+  font-weight: 500;
+  font-size: 11.5px;
+  color: var(--r-meta);
+  font-variant-numeric: tabular-nums;
+}
+.etiquette {
+  font-variation-settings: "wdth" var(--r-semi);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  color: var(--r-discret);
+}
+
+/* Les chiffres : grands en Archivo élargie (tabulaire), petits en mono. */
+.chiffre {
+  font-variation-settings: "wdth" 125;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--r-encre);
+  white-space: nowrap;
+}
+.unite {
+  font-family: var(--font-mono);
+  font-variation-settings: normal;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: var(--r-discret);
+  margin-left: 6px;
+}
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ── Sections et filets ──────────────────────────────────────────────────────────────────── */
+
+.mouvement { padding: 56px 0; border-top: 1px solid var(--r-filet); }
+.mouvementSerre { padding: 40px 0; border-top: 1px solid var(--r-filet); }
+.enTeteMouvement { display: grid; gap: 10px; margin-bottom: 28px; }
+.liste { list-style: none; margin: 0; padding: 0; display: grid; }
+.liste > li { padding: 22px 0; border-top: 1px solid var(--r-filet); }
+.liste > li:first-child { border-top: 0; padding-top: 0; }
+
+/* Le trait de registre : 3 px, à gauche du SUJET seulement, jamais sur toute la carte. */
+.registre {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.registre::before {
+  content: "";
+  flex: none;
+  width: 3px;
+  height: 0.95em;
+  transform: translateY(0.12em);
+  background: var(--r-teinte, var(--r-meta));
+}
+.teinte { color: var(--r-teinte, var(--r-discret)); }
+
+/* ── La plaque : la seule surface élevée d'un mouvement ──────────────────────────────────── */
+
+.plaque {
+  position: relative;
+  background: var(--r-plaque);
+  border: 1px solid var(--r-plaque-bord);
+  border-radius: var(--r-rayon);
+  padding: 28px 22px;
+}
+@media (min-width: 640px) { .plaque { padding: 40px 44px; } }
+/* Repères de coupe aux quatre coins : la marque d'une planche de relevé. Décor, mais un seul par
+   écran, et il ne porte aucune donnée. */
+.plaque::before, .plaque::after {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: var(--r-discret);
+  border-style: solid;
+  pointer-events: none;
+}
+.plaque::before { top: -7px; left: -7px; border-width: 1px 0 0 1px; }
+.plaque::after { bottom: -7px; right: -7px; border-width: 0 1px 1px 0; }
+
+/* ── Glyphes de grain ────────────────────────────────────────────────────────────────────── */
+
+.grain {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--r-discret);
+}
+.grain svg { flex: none; color: var(--r-discret); transform: translateY(1px); }
+
+/* ── Règle du temps ──────────────────────────────────────────────────────────────────────── */
+
+.regle { width: 100%; height: auto; display: block; overflow: visible; }
+.regle text { font-family: var(--font-mono); font-size: 11px; fill: var(--r-meta); }
+.regle .regleValeur { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 600; font-size: 15px; fill: var(--r-encre); }
+.regle .regleAxe { stroke: var(--r-filet-fort); }
+.regle .regleTic { stroke: var(--r-discret); }
+.regle .regleAujourdhui { stroke: var(--r-encre); stroke-dasharray: 2 3; }
+.regle .regleBande { fill: var(--r-trame); stroke: var(--r-filet-fort); }
+
+/* ── Coupe des trois échelles (navigation interne) ───────────────────────────────────────── */
+
+.coupe {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid var(--r-filet-fort);
+  border-bottom: 1px solid var(--r-filet-fort);
+}
+@media (min-width: 760px) { .coupe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.coupeCase {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
+  padding: 18px 16px;
+  text-decoration: none;
+  color: var(--r-texte);
+  border-top: 1px solid var(--r-filet);
+}
+.coupeCase:first-child { border-top: 0; }
+@media (min-width: 760px) {
+  .coupeCase { border-top: 0; border-left: 1px solid var(--r-filet); }
+  .coupeCase:first-child { border-left: 0; }
+}
+.coupeCase:hover { background: var(--bg-elev); }
+.coupeCase[aria-current="page"] { background: var(--bg-elev-2); box-shadow: inset 0 2px 0 var(--r-encre); }
+.coupeCase:focus-visible, .lien:focus-visible, .bouton:focus-visible, .porte:focus-visible, .marge a:focus-visible {
+  outline: 2px solid var(--r-encre);
+  outline-offset: 2px;
+}
+
+/* ── Liens et boutons ────────────────────────────────────────────────────────────────────── */
+
+.lien { color: var(--r-encre); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); }
+.lien:hover { text-decoration-color: var(--r-encre); }
+.bouton {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 20px;
+  border-radius: var(--r-rayon);
+  font-weight: 600; font-size: 15px;
+  text-decoration: none;
+  border: 1px solid var(--r-filet-fort);
+  color: var(--r-encre);
+  background: transparent;
+}
+.bouton:hover { border-color: var(--r-encre); }
+.boutonMarque { background: var(--orange); border-color: var(--orange); color: var(--bg); }
+.boutonMarque:hover { background: var(--orange-soft); border-color: var(--orange-soft); }
+
+/* ── Blocs utilitaires ───────────────────────────────────────────────────────────────────── */
+
+.deux { display: grid; gap: 40px; }
+@media (min-width: 900px) { .deux { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; } .deux > * + * { border-left: 1px solid var(--r-filet); padding-left: 40px; } .deux > *:first-child { padding-right: 40px; } }
+.pile { display: grid; gap: 12px; }
+.pileSerree { display: grid; gap: 6px; }
+.rangee { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
+.details summary { cursor: pointer; list-style: none; font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 13px; color: var(--r-discret); }
+.details summary::-webkit-details-marker { display: none; }
+.details summary::before { content: "+ "; font-family: var(--font-mono); }
+.details[open] summary::before { content: "− "; }
+.details summary:hover { color: var(--r-encre); }
+.details summary:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+
+.bandeauProto {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--r-meta);
+  border-bottom: 1px dashed var(--r-filet-fort);
+  padding: 8px 0;
+}
+.bandeauProto a { color: var(--r-discret); }
+
+/* Échelle DPE : sept cases, la lettre du logement portée par la POSITION (§ 3.6), la couleur
+   réglementaire ne fait que confirmer. */
+.echelleDpe { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.caseDpe {
+  height: 30px;
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 13px;
+  color: var(--bg);
+  border-radius: 2px;
+  opacity: 0.32;
+}
+.caseDpeActive { opacity: 1; height: 44px; font-size: 18px; outline: 2px solid var(--r-encre); outline-offset: 2px; align-self: end; }
+
+/* Barres de parcours d'audit : longueur proportionnelle à la consommation de la source. */
+.barre { height: 10px; background: var(--r-filet-fort); border-radius: 1px; }
+.barrePleine { height: 10px; background: var(--r-encre); border-radius: 1px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .coupeCase, .bouton, .lien { transition: background-color 160ms ease, border-color 160ms ease, text-decoration-color 160ms ease; }
+}
+
+/* ── Accueil ─────────────────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 960px) {
+  .heroAccueil { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; min-height: min(78vh, 720px); }
+}
+/* Une porte : un usage, son action, une flèche. Deux portes de même rang, séparées par un filet. */
+.porte {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--r-filet-fort);
+  text-decoration: none;
+  color: var(--r-texte);
+}
+.porte:hover { background: var(--bg-elev); }
+.porte:first-child .etiquette { color: var(--orange-ink); }
+.trois { display: grid; gap: 40px; }
+@media (min-width: 900px) {
+  .trois { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+  .trois > * { padding: 0 28px; border-left: 1px solid var(--r-filet); }
+  .trois > *:first-child { padding-left: 0; border-left: 0; }
+}
+
+/* Une étape d'audit : libellé, piste, valeur. Sous 640 px, la piste passe sous le libellé et prend
+   toute la largeur : une barre réduite à zéro ne dirait plus rien. */
+.etapeAudit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "libelle valeur" "piste piste";
+  gap: 6px 16px;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .etapeAudit { grid-template-columns: minmax(96px, 168px) minmax(0, 1fr) 128px; grid-template-areas: "libelle piste valeur"; }
+}
+.etapeAuditLibelle { grid-area: libelle; }
+.etapeAuditPiste { grid-area: piste; position: relative; height: 14px; }
+.etapeAuditValeur { grid-area: valeur; text-align: right; }
+.legendeDpe { display: flex; justify-content: space-between; gap: 8px; font-size: 10.5px; white-space: nowrap; }
+@media (max-width: 480px) { .legendeDpeMilieu { display: none; } }
+
+
+/* ── V2 · Ma décision : premier écran, rythme, échelles ─────────────────────────────────── */
+
+.enTeteDossier { padding: 32px 0 22px; display: grid; gap: 12px; }
+@media (min-width: 640px) { .enTeteDossier { padding: 40px 0 28px; } }
+.projetCourt { display: block; }
+.projetLong { display: none; }
+@media (min-width: 900px) { .projetCourt { display: none; } .projetLong { display: block; } }
+
+/* Le verdict : plus petit sur mobile, pour que le sommaire et le geste prioritaire entrent dans le
+   premier écran ; plein format au-delà. */
+.verdict { font-size: clamp(27px, 3.6vw, 46px); line-height: 1.08; }
+.verdictDetail { font-size: 16px; }
+@media (min-width: 640px) { .verdictDetail { font-size: 18px; } }
+
+.sommaireCompact { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (min-width: 900px) { .sommaireCompact { display: none; } }
+.sommaireMarge { display: none !important; }
+@media (min-width: 900px) { .sommaireMarge { display: grid !important; } }
+.sommaireJeton {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 9px;
+  border: 1px solid var(--r-filet-fort);
+  border-radius: var(--r-rayon);
+  font-size: 13px; line-height: 1.3;
+  color: var(--r-texte);
+  text-decoration: none;
+}
+.sommaireJeton:hover { border-color: var(--r-discret); }
+.sommaireJeton:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.sommaireTrait { width: 3px; height: 12px; flex: none; }
+
+/* D'où viennent ces constats : l'emblème compté, à côté de sa lecture. */
+.echellesDuDossier { display: grid; gap: 20px; align-items: center; padding: 40px 0 8px; }
+@media (min-width: 760px) { .echellesDuDossier { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding: 48px 0 16px; } }
+.ligneEchelle {
+  display: grid; grid-template-columns: 22px 40px minmax(0, 1fr); align-items: baseline; gap: 8px;
+  padding: 9px 0 !important;
+}
+
+/* La bande : un mouvement posé sur un fond pleine largeur, pour casser la suite de filets. */
+.bande {
+  position: relative;
+  border-top: 0;
+  background: var(--r-plaque);
+  box-shadow: 0 0 0 100vmax var(--r-plaque);
+  clip-path: inset(0 -100vmax);
+  margin: 40px 0;
+}
+
+.cote { padding: 12px 0 0 14px !important; border-top: 0 !important; border-left: 1px solid var(--r-filet-fort); }
+
+/* Le titre-adresse : une adresse réelle peut faire deux lignes de plus que le cas témoin (revue V2,
+   cas « titre-long »). Taille réduite, césure des mots trop longs, aucun débordement. */
+.titreAdresse { font-size: clamp(26px, 3.2vw, 42px); line-height: 1.1; overflow-wrap: anywhere; hyphens: auto; }
+
+/* Le sélecteur de cas des prototypes. */
+.cas { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 12px 0 0; font-family: var(--font-mono); font-size: 12px; }
+.cas a { color: var(--r-discret); }
+.cas a[aria-current="page"] { color: var(--r-encre); text-decoration-color: var(--r-encre); }
