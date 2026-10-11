@@ -106,29 +106,26 @@ test("N6. le décompte compact garde les trois états, et zéro n'est jamais une
   const formes = new Set([non.etatCourt, zero.etatCourt, un.etatCourt]);
   assert.equal(formes.size, 3, "trois formulations distinctes");
   for (const t of [non, zero, un, cinq]) assert.doesNotMatch(`${t.etatCourt} ${t.phrase}`, /risque|sûr|sans danger|rassur/i);
-  // L'étiquette de l'emblème, le décompte large et le compact lisent le même tableau `echelles` :
-  // mêmes nombres, mêmes états, aux trois endroits.
+  // Le décompte unique utilise la projection canonique des échelles et un seul calcul.
   const src = code("src/components/releve/DossierDecisionReleve.tsx");
-  assert.equal((src.match(/echelles\.map\(\(e(, i)?\) => \{\s*const t = texteEtatEchelle\(e\);/g) ?? []).length, 3);
+  assert.equal((src.match(/echelles\.map\(\(e(, i)?\) => \{\s*const t = texteEtatEchelle\(e\);/g) ?? []).length, 1);
   assert.equal((src.match(/lectureDesEchelles\(/g) ?? []).length, 1, "un seul calcul du décompte");
   assert.match(src, /data-etat=\{etat\}/);
   assert.match(src, /<ReperEchelle forme=\{e\.echelle\} etat=\{etat\} \/>/);
 });
 
-test("N7. une seule illustration pour naviguer sous 1024 px", () => {
+test("N7. un seul grand emblème, décompte en trois lignes sur mobile et desktop", () => {
   const src = code("src/components/releve/DossierDecisionReleve.tsx");
-  const decompte = src.slice(src.indexOf('id="mouvement-echelles"'), src.indexOf("</section>", src.indexOf('id="mouvement-echelles"')));
-  assert.match(decompte, /<div className=\{s\.decompteLarge\}[^>]*>\s*<EmblemeEchelles/, "l'emblème compté est réservé au grand écran");
-  assert.equal((decompte.match(/<EmblemeEchelles/g) ?? []).length, 1);
-  assert.match(css, /\.decompteLarge \{ display: none !important; \}/);
-  assert.match(dansMedia("@media (min-width: 1024px)", ".decompteLarge") ?? "", /display: grid !important/);
-  assert.match(dansMedia("@media (min-width: 1024px)", ".decompteCompact") ?? "", /display: none/);
-  // La règle de base doit PRÉCÉDER le bloc lg : à spécificité égale, la dernière gagne, et le décompte
-  // compact s'affichait sous le grand sur ordinateur (trouvé par l'arbre d'accessibilité).
-  const base = css.indexOf(".decompteCompact { display: grid");
-  const lg = css.indexOf(".decompteCompact { display: none; }");
-  assert.ok(base >= 0 && base < lg, "règle de base avant la règle grand écran");
-  // Le seuil est celui de la colonne d'appui (`lg` = 1024 px) : l'emblème compté ne réapparaît jamais
-  // empilé sous le repère.
-  assert.doesNotMatch(css, /@media \(min-width: 760px\) \{ \.echellesDuDossier/);
+  const debut = src.indexOf('id="mouvement-echelles"');
+  const fin = src.indexOf("</section>", debut);
+  assert.ok(debut >= 0 && fin > debut);
+  const decompte = src.slice(debut, fin);
+  assert.doesNotMatch(decompte, /<EmblemeEchelles/, "pas de grand emblème répété dans le décompte");
+  assert.doesNotMatch(decompte, /decompteLarge/, "pas de variante graphique cachée");
+  assert.match(decompte, /<div className=\{s\.decompteCompact\}>/);
+  assert.match(decompte, /<ReperEchelle forme=\{e\.echelle\} etat=\{etat\} \/>/);
+  assert.equal((decompte.match(/echelles\.map\(/g) ?? []).length, 1, "un seul décompte rendu");
+  assert.match(css, /\.decompteCompact \{ display: grid; gap: 10px; \}/);
+  assert.doesNotMatch(css, /\.decompteLarge|decompteCompact \{ display: none/, "pas de variante masquée selon le breakpoint");
+  assert.doesNotMatch(css, /\.echellesDuDossier \{ grid-template-columns:/, "aucune colonne réservée au second emblème");
 });
