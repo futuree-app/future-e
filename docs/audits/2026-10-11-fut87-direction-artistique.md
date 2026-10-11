@@ -16,10 +16,30 @@ des données, et demandé une passe de maturation avant toute migration. Ce qui 
 | **Provenance des preuves** (une preuve sans valeur perdait lien, cible, grain et date ; une carte prenait le grain de sa première preuve) | `lireDossier` garde chaque `EvidenceRef` entière, avec ou sans valeur ; une carte porte **tous** ses grains ; une composition reprend les grains de ses faits absorbés, et ce que sa face ne raconte pas reste lisible dans un dépliable, comme en production. En marge, une source sans valeur reste un lien, et chaque preuve d'une carte à grains mêlés porte son propre glyphe. | Tests L4 (toutes les preuves de la minute, champ par champ), L5 (carte mêlant commune, secteur et adresse, lien et date d'une source sans valeur), L6 (composition et fait absorbé d'un autre grain). Deux mutations (liens retirés, premier grain seulement) font échouer L4 à L6. |
 | **Mobile trop dense, sommaire hors du premier écran** | Sommaire en jetons juste sous le verdict ; gestes prioritaires avant l'explication ; projet replié en une ligne ; titre du verdict de 27 px sur mobile. | Mesuré sur quatre dossiers (référence, condition, nombreuses réserves, titre long) : titre, sommaire et gestes finissent entre 466 et 620 px à 390 × 844, et à 647 px au plus à 360 × 740, barre de navigation comprise et bandeau du prototype exclu. |
 | **Marge de preuve trop petite** | 12 px sur grand écran, 13 px sur mobile (11,5 px en V1) ; sources en `--fg-3` au lieu du gris de métadonnée. | Captures `*-390.jpg`. |
-| **Dossier trop austère, monotonie de lignes** | Trois densités alternées : la plaque (éditoriale) ; deux moments visuels, l'emblème compté « D'où viennent ces constats » et la bande teintée de la balance (Ma décision) ou de l'audit (Logement) ; le registre des contrôles (sobre). | Captures `decision-apres-1440.jpg`, `logement-apres-1440.jpg`. |
+| **Dossier trop austère, monotonie de lignes** | Trois densités alternées : la plaque (éditoriale) ; deux moments visuels, l'emblème « D'où viennent ces constats » (état de chaque échelle, voir la correction ci-dessous) et la bande teintée de la balance (Ma décision) ou de l'audit (Logement) ; le registre des contrôles (sobre). | Captures `decision-apres-1440.jpg`, `logement-apres-1440.jpg`. |
 | **Situations défavorables** | Cinq cas Logement (référence, sans diagnostic, immeuble, sources sans réponse, titre long) et cinq cas Ma décision (référence, condition sans compromis, nombreuses réserves, titre long, correspondance sans réserve), sélectionnables en tête de page. Les absences reprennent les phrases de production ; deux formulations nouvelles sont signalées dans le code (patrimoine non vérifié, mémoire des sinistres non lue). | Captures `cas-*.jpg`. Les cas ont révélé trois défauts, corrigés : libellés de la règle du temps superposés (diagnostic 2023 et audit 2024), « : » orphelin en début de ligne dans le verdict, rouge d'incompatibilité au sommaire d'une section de conditions sans blocage. |
 | **Orange** | Absent des données et de la navigation du dossier ; présent dans l'identité (point du logo, porte principale et bouton d'action de l'accueil). Dans le dossier, il ne reste que là où la production le met : le ton « arbitrage » du verdict, qui est le registre compromis. | Revue visuelle des captures. |
 | **Git** | Les commits FUT-87 ont été rebasés sur `main` (FUT-67 #44, FUT-26 #45, puis FUT-54 #46), sans rejouer FUT-67 ; #44 contient FUT-67 à l'identique. Les prototypes « Ma décision » lisent donc la sortie du moteur corrigé par FUT-54. | `git log origin/main..` ne contient que des commits FUT-87, qui ne touchent que `src/components/prototypes/fut87/`, `src/app/dev/fut87/` et `docs/audits/`. Tests FUT-54 et FUT-87 au vert sur la nouvelle base, mesures mobiles identiques. |
+
+**Correction du 11/10/2026 · les échelles non examinées.** La V2 écrivait « 0 constat dans le secteur »
+et « 0 constat à l'adresse » sur un dossier uniquement communal, où ces échelles n'ont pas été lues : un
+lecteur pouvait y voir une absence de problème. Désormais :
+
+- les échelles examinées se déduisent du **périmètre du dossier** (`Dossier.scope`), jamais du nombre de
+  cartes : `commune` n'examine que le territoire ; `commune+adresse` (dossier relancé au point de
+  l'adresse par `assembleAddressDossier`) examine les trois ;
+- une échelle **non examinée** n'a aucun nombre : « Non examiné dans cette lecture », forme en pointillé ;
+- une échelle **examinée sans constat affiché** dit « 0 » et « Examiné, aucun constat affiché… », trait fin ;
+- les constats se comptent par **échelle de lecture du moteur** (`echelleDeLaPreuve`) : une distance
+  mesurée depuis l'adresse compte au quartier, pas au logement ;
+- le prototype assemble un vrai dossier d'adresse (`?lieu=`, bâtiment public géocodé par la BAN, fonction
+  de production en lecture seule) pour vérifier ce périmètre ;
+- tests P1 à P4 (dossier communal, dossier d'adresse avec zéro constat au logement, périmètre
+  indépendant des cartes, proximité comptée au quartier) ; trois mutations (tout examiné, périmètre par
+  les cartes, relation ignorée) les font échouer.
+
+Limite assumée : le `Dossier` ne dit pas si l'instantané du voisinage existait à l'assemblage. Distinguer
+un secteur partiellement examiné demanderait que le moteur l'expose ; ce lot ne touche pas au moteur.
 
 **Défaut du moteur trouvé en testant les cas** (hors périmètre FUT-87, non corrigé ici) : à Nîmes, faire de
 « des étés plus frais » une condition sans compromis (`confirmer=faible_chaleur`) fait échouer l'assemblage

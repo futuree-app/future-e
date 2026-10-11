@@ -20,6 +20,17 @@ et 360 px pour deux prototypes. Les pages « avant » sont nourries des **mêmes
 
 360 px : [Ma décision](decision-apres-360.jpg) · [Logement](logement-apres-360.jpg)
 
+## Échelles examinées et non examinées (correction du 11/10/2026)
+
+« D'où viennent ces constats » lit le **périmètre du dossier**, jamais le nombre de cartes.
+
+| Dossier | Bureau | Mobile |
+| --- | --- | --- |
+| Communal (Nîmes) : secteur et logement **non examinés**, aucun nombre, formes en pointillé | ![](echelles-communal-1440.png) | ![](echelles-communal-390.png) |
+| D'adresse réel (hôtel de ville de Nîmes, bâtiment public) : secteur et logement **examinés, aucun constat affiché**, « 0 » et trait fin | ![](echelles-adresse-1440.png) | ![](echelles-adresse-360.png) |
+
+Pages complètes du dossier d'adresse : [1440](cas-decision-adresse-1440.jpg) · [390](cas-decision-adresse-390.jpg) · [360](cas-decision-adresse-360.jpg)
+
 ## Cas défavorables (V2)
 
 | Cas | Capture |

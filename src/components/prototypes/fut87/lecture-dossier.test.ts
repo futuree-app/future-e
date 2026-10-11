@@ -20,7 +20,7 @@ import type { Dossier, DossierCard } from "../../../lib/decision/decision-fact.t
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../../../lib/hard-constraints.ts";
 import { hydrateHardConstraints } from "../../../lib/hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../../../lib/hard-constraints-resolve.ts";
-import { lireDossier, type LectureDecision } from "./lecture-dossier.ts";
+import { lireDossier, lectureDesEchelles, perimetreDuDossier, texteEtatEchelle, type LectureDecision } from "./lecture-dossier.ts";
 import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
 
 const DIR: PlaceDirectory = { byName: () => null, plmByName: () => null };
@@ -78,7 +78,7 @@ function textesDeLaLecture(l: LectureDecision): string[] {
   const out: string[] = [];
   const marche = (v: unknown, parent?: string) => {
     if (v == null) return;
-    if (typeof v === "string") { if (!["cle", "ancre", "nature", "grain", "href", "ton", "portee", "cause", "type"].includes(parent ?? "")) out.push(v); return; }
+    if (typeof v === "string") { if (!["cle", "ancre", "nature", "grain", "grains", "echelles", "href", "cible", "mode", "ton", "portee", "cause", "type"].includes(parent ?? "")) out.push(v); return; }
     if (Array.isArray(v)) { v.forEach((x) => marche(x, parent)); return; }
     if (typeof v === "object") for (const [k, x] of Object.entries(v)) marche(x, k);
   };
@@ -210,6 +210,77 @@ test("L6. une composition porte les grains de ses faits absorbés, et ce que sa 
   // Aucune conséquence ne nomme ce fait : la face ne le raconte pas, il reste dans le détail, lien compris.
   assert.equal(e.detailles.length, 1);
   assert.ok(e.detailles[0]!.sources.some((p) => p.href === "/rapport/logement#dpe"));
+});
+
+// ── Périmètre : une échelle non examinée n'a pas « zéro constat » (revue du 11/10/2026) ─────────
+
+/** Le même projet, assemblé au périmètre adresse : le moteur dit alors avoir lu les trois échelles. */
+function dossierAdresse(e: IndexCommune, p: UserProject): Dossier {
+  const mf = mapCommuneToModuleFacts(e, {}, { hasAddress: true, tailleVille: 1_050_000, tailleVilleSource: "urban_unit" });
+  return assembleDossier(runRules(mf, p, contexte(mf)), p, "commune+adresse", e.nom);
+}
+
+test("P1. dossier communal : le secteur et le logement sont NON EXAMINÉS, sans aucun nombre", () => {
+  for (const { nom, d } of CAS) {
+    assert.equal(d.scope, "commune", nom);
+    const etats = lectureDesEchelles(lireDossier(d));
+    assert.deepEqual(etats.map((e) => [e.echelle, e.etat]), [["territoire", "examinee"], ["quartier", "non_examinee"], ["logement", "non_examinee"]], nom);
+    for (const e of etats.filter((x) => x.etat === "non_examinee")) {
+      const t = texteEtatEchelle(e);
+      assert.equal(t.valeur, null, `${nom} : aucune valeur pour ${e.echelle}`);
+      assert.equal(t.phrase, "Non examiné dans cette lecture");
+      assert.doesNotMatch(t.phrase, /\b0\b|aucun constat/, "une échelle non examinée ne se dit jamais vide");
+    }
+  }
+});
+
+test("P2. dossier d'adresse : une échelle examinée SANS constat affiché dit « 0 » et qu'elle a été examinée", () => {
+  const d = dossierAdresse(entree(), projet([{ key: "eviter_grandes_villes", weight: 3 }]));
+  assert.equal(d.scope, "commune+adresse");
+  const l = lireDossier(d);
+  assert.deepEqual(l.perimetre, { territoire: true, quartier: true, logement: true });
+  const etats = lectureDesEchelles(l);
+  // Ce projet ne produit aucune carte au logement : le cas exact que la revue demande de couvrir.
+  const logement = etats.find((e) => e.echelle === "logement")!;
+  assert.equal(logement.etat, "examinee");
+  assert.ok(logement.etat === "examinee" && logement.constats === 0, "aucune carte du logement dans ce dossier");
+  const t = texteEtatEchelle(logement);
+  assert.equal(t.valeur, "0");
+  assert.match(t.phrase, /^Examiné, aucun constat affiché/);
+  assert.notEqual(t.phrase, "Non examiné dans cette lecture");
+});
+
+test("P3. le périmètre vient du dossier, jamais du nombre de cartes", () => {
+  // Même dossier communal, cartes retirées : les échelles non examinées le restent, et le territoire
+  // reste examiné avec zéro carte.
+  const vide = cloner(CAS[0]!.d);
+  vide.narrativePlan.minute = [];
+  const etats = lectureDesEchelles(lireDossier(vide));
+  assert.deepEqual(etats.map((e) => e.etat), ["examinee", "non_examinee", "non_examinee"]);
+  assert.equal(texteEtatEchelle(etats[0]!).valeur, "0");
+  // Et l'inverse : une carte qui cite une preuve du secteur ne rend pas le secteur « examiné » dans un
+  // dossier communal.
+  const avecSecteur = cloner(CAS[0]!.d);
+  const carte = avecSecteur.sections.flatMap((s) => s.cards).find((c) => c.kind === "fact" && sectionsDeLaMinute(avecSecteur).some((m) => m.cards.includes(c)));
+  assert.ok(carte && carte.kind === "fact" && carte.fact.role !== "compromise", "une carte de fait simple dans la minute");
+  (carte.fact as { evidence: Ref[] }).evidence.push({ factId: "temoin", module: "territoire", label: "Preuve témoin du secteur", grain: "secteur" });
+  assert.equal(lectureDesEchelles(lireDossier(avecSecteur))[1]!.etat, "non_examinee");
+  assert.deepEqual(perimetreDuDossier("commune"), { territoire: true, quartier: false, logement: false });
+  assert.deepEqual(perimetreDuDossier("commune+adresse"), { territoire: true, quartier: true, logement: true });
+});
+
+test("P4. les constats se comptent par échelle de lecture du moteur : une proximité mesurée à l'adresse est du quartier", () => {
+  const d = cloner(dossierAdresse(entree(), projet([{ key: "eviter_grandes_villes", weight: 3 }])));
+  const carte = sectionsDeLaMinute(d).flatMap((s) => s.cards).find((c) => c.kind === "fact");
+  assert.ok(carte && carte.kind === "fact", "une carte de fait dans la minute");
+  const fait = d.sections.flatMap((s) => s.cards).find((c) => c.kind === "fact" && c.fact.id === (carte as Extract<DossierCard, { kind: "fact" }>).fact.id) as Extract<DossierCard, { kind: "fact" }>;
+  const refs = fait.fact.role === "compromise" ? fait.fact.sides[0].evidence : fait.fact.evidence;
+  refs.splice(0, refs.length, { factId: "temoin.gare", module: "territoire", label: "Gare la plus proche", observedValue: "8 min", grain: "adresse", relation: "proximite" });
+  const etats = lectureDesEchelles(lireDossier(d));
+  const quartier = etats.find((e) => e.echelle === "quartier")!;
+  const logement = etats.find((e) => e.echelle === "logement")!;
+  assert.ok(quartier.etat === "examinee" && quartier.constats >= 1, "la distance depuis l'adresse compte au quartier");
+  assert.ok(logement.etat === "examinee" && logement.constats === 0, "et pas au logement");
 });
 
 // ── Rigueur des dessins ───────────────────────────────────────────────────────────────────────

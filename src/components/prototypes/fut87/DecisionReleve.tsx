@@ -24,10 +24,10 @@ import type { VerificationActionType } from "@/lib/decision/decision-fact";
 import { evidenceHref } from "@/lib/decision/evidence-targets";
 import { dateFr } from "@/lib/decision/autour-permis";
 import { bindOrphans } from "@/lib/typography";
-import type { LectureDecision, EntreeLue, SectionLue, PreuveLue, GrainLu } from "./lecture-dossier";
+import { lectureDesEchelles, texteEtatEchelle, type LectureDecision, type EntreeLue, type SectionLue, type PreuveLue, type GrainLu } from "./lecture-dossier";
 import {
   releve as s, Surtitre, Ligne, Marge, Registre, Plaque, CoupeEchelles, Grain, EmblemeEchelles,
-  TEINTE_REGISTRE, RegleDeRang, Seuils, type ElementDeMarge, type GrainCle,
+  TEINTE_REGISTRE, RegleDeRang, Seuils, type ElementDeMarge, type GrainCle, type EtatTrace,
 } from "./primitives";
 
 const TON: Record<LectureDecision["verdict"]["ton"], string> = {
@@ -215,7 +215,6 @@ function Sommaire({ sections, compact }: { sections: SectionLue[]; compact: bool
   );
 }
 
-const nConstats = (n: number) => (n === 0 ? "aucun constat" : n === 1 ? "1 constat" : `${n} constats`);
 
 export function DecisionReleve({
   lecture, projet, lienAvant,
@@ -236,14 +235,15 @@ export function DecisionReleve({
   const align = iAlign >= 0 ? sections[iAlign]! : null;
   const ecart = iEcart >= 0 ? sections[iEcart]! : null;
 
-  // D'OÙ VIENNENT CES CONSTATS. Une carte compte à chaque échelle qu'elle cite : la commune (et
-  // l'agglomération), le secteur, l'adresse. Rien n'est sommé ni pondéré.
-  const entrees = sections.flatMap((x) => x.entrees);
-  const parEchelle = {
-    commune: entrees.filter((e) => e.grains.some((g) => g === "commune" || g === "unite_urbaine")).length,
-    secteur: entrees.filter((e) => e.grains.includes("secteur")).length,
-    adresse: entrees.filter((e) => e.grains.includes("adresse")).length,
+  // D'OÙ VIENNENT CES CONSTATS (revue du 11/10/2026). L'état de chaque échelle vient du PÉRIMÈTRE du
+  // dossier (`lectureDesEchelles`) : une échelle que cette lecture n'a pas examinée ne reçoit aucun
+  // nombre, et « 0 » ne s'écrit que pour une échelle examinée sans constat affiché.
+  const echelles = lectureDesEchelles(lecture);
+  const trace = (i: number): EtatTrace => {
+    const e = echelles[i]!;
+    return e.etat === "non_examinee" ? "non_examinee" : e.constats > 0 ? "constats" : "examinee";
   };
+  const GLYPHE: Record<string, GrainCle> = { territoire: "commune", quartier: "secteur", logement: "batiment" };
 
   // LES NUMÉROS SONT CALCULÉS AVANT LE RENDU, dans l'ordre du document : un compteur incrémenté
   // pendant le rendu suivrait l'ordre d'appel des composants, pas celui de la page.
@@ -336,27 +336,34 @@ export function DecisionReleve({
       {/* ── 2. D'où viennent ces constats : l'emblème, compté ──────────────────────────── */}
       <section className={s.echellesDuDossier} aria-label="Les échelles où ces constats ont été établis">
         <div style={{ maxWidth: 220, width: "100%", justifySelf: "center" }}>
-          {/* Sans renvois : la liste d'à côté porte les nombres en lettres lisibles. L'emblème montre
-              quelles échelles ce dossier a réellement lues (trait plein) et lesquelles il n'a pas lues. */}
+          {/* Sans renvois : la liste d'à côté porte les états en toutes lettres. Trait plein : des
+              constats ; trait fin : examinée, rien d'affiché ; pointillé : non examinée ici. */}
           <EmblemeEchelles
-            etiquette={`Constats de ce dossier : ${nConstats(parEchelle.commune)} à l'échelle de la commune, ${nConstats(parEchelle.secteur)} dans le secteur, ${nConstats(parEchelle.adresse)} à l'adresse`}
-            actives={{ commune: parEchelle.commune > 0, secteur: parEchelle.secteur > 0, batiment: parEchelle.adresse > 0 }}
+            etiquette={`D'où viennent ces constats : ${echelles.map((e) => { const t = texteEtatEchelle(e); return `${t.nom}, ${t.phrase.toLowerCase()}`; }).join(" ; ")}`}
+            etats={{ commune: trace(0), secteur: trace(1), batiment: trace(2) }}
           />
         </div>
         <div className={s.pile} style={{ gap: 10, alignContent: "center" }}>
           <p className={s.etiquette}>D&apos;où viennent ces constats</p>
           <ul className={s.liste}>
-            {([
-              ["commune", parEchelle.commune, "à l'échelle de la commune"],
-              ["secteur", parEchelle.secteur, "dans le secteur autour de l'adresse"],
-              ["adresse", parEchelle.adresse, "à l'adresse et au bâtiment"],
-            ] as const).map(([g, n, lib]) => (
-              <li key={g} className={s.ligneEchelle}>
-                <span style={{ color: n ? "var(--r-encre)" : "var(--r-meta)" }}><Grain grain={g}>{""}</Grain></span>
-                <span className={s.chiffre} style={{ fontSize: 24, color: n ? "var(--r-encre)" : "var(--r-meta)" }}>{n}</span>
-                <span className={s.dense} style={{ color: n ? undefined : "var(--r-meta)" }}>{nConstats(n)} {lib}</span>
-              </li>
-            ))}
+            {echelles.map((e) => {
+              const t = texteEtatEchelle(e);
+              const plein = e.etat === "examinee" && e.constats > 0;
+              return (
+                <li key={e.echelle} className={s.ligneEchelle}>
+                  <span style={{ color: plein ? "var(--r-encre)" : "var(--r-meta)" }}><Grain grain={GLYPHE[e.echelle]!}>{""}</Grain></span>
+                  {t.valeur != null ? (
+                    <span className={s.chiffre} style={{ fontSize: 24, color: plein ? "var(--r-encre)" : "var(--r-meta)" }}>{t.valeur}</span>
+                  ) : (
+                    <span aria-hidden />
+                  )}
+                  <span className={s.pileSerree}>
+                    <span className={s.etiquette} style={{ color: plein ? "var(--r-texte)" : "var(--r-meta)" }}>{t.nom}</span>
+                    <span className={s.dense} style={{ color: plein ? undefined : "var(--r-meta)" }}>{t.phrase}</span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>

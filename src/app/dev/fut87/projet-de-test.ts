@@ -20,6 +20,9 @@ export const CAS_DECISION: { nom: string; requete: string }[] = [
   { nom: "Nombreuses réserves", requete: "insee=13201&prefs=faible_chaleur:3,faible_risque_inondation:3,calme_sonore:3,air_sain:3,faible_exposition_industrielle:3,nature:2,faible_risque_feu:2" },
   { nom: "Titre long", requete: "insee=33236&prefs=faible_risque_feu:3,vie_locale:2,proximite_mer:3,acces_soins:2,acces_transports:2" },
   { nom: "Correspondance sans réserve", requete: "insee=56260&prefs=proximite_mer:3,faible_chaleur:3" },
+  // Un DOSSIER D'ADRESSE réel, sur un bâtiment public (l'hôtel de ville de Nîmes) : le périmètre
+  // « commune + adresse » où secteur et logement sont examinés, avec ou sans constat.
+  { nom: "Dossier d'adresse (bâtiment public)", requete: `lieu=${encodeURIComponent("1 Place de l'Hôtel de Ville 30000 Nîmes")}&prefs=${DEFAUT.prefs}` },
 ];
 
 export function projetDeTest(prefsBrutes: string, confirmer = ""): { projet: UserProject; libelles: string[] } {

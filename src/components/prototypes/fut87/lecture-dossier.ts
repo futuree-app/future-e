@@ -23,6 +23,7 @@ import {
   factsNonNarresParLaFace,
 } from "../../../lib/decision/dossier-view.ts";
 import { dossierAnchorId } from "../../../lib/decision/dossier-anchors.ts";
+import { echelleDeLaPreuve, ORDRE_ECHELLES, NOM_ECHELLE, type Echelle } from "../../../lib/decision/echelles.ts";
 
 export type GrainLu = EvidenceRef["grain"];
 
@@ -66,6 +67,12 @@ export type EntreeLue = {
   nuance?: string;
   /** Tous les grains des preuves de la carte, dédoublonnés, dans l'ordre où elles les citent. */
   grains: GrainLu[];
+  /**
+   * Les échelles de lecture que la carte touche, selon la projection du moteur (`echelleDeLaPreuve`) :
+   * une distance mesurée depuis l'adresse décrit le quartier, pas le logement. Distinct de `grains`,
+   * qui dit l'ancre de chaque preuve.
+   */
+  echelles: Echelle[];
   /** Les preuves portant une valeur observée. */
   preuves: PreuveLue[];
   /** Les preuves sans valeur : des sources nommées, avec leur lien, leur grain et leur date. */
@@ -91,9 +98,64 @@ export type SectionLue = {
   entrees: EntreeLue[];
 };
 
+/**
+ * CE QUE CETTE LECTURE A EXAMINÉ, déduit du périmètre du dossier et jamais du nombre de cartes.
+ *
+ * Un dossier `commune` n'a lu que le territoire : le secteur et le logement n'y sont PAS examinés, et
+ * « zéro constat » y serait une affirmation fausse (revue du 11/10/2026). Un dossier `commune+adresse`
+ * a relancé le moteur au point de l'adresse (`assembleAddressDossier` : faits du logement, du secteur
+ * et du voisinage, contraintes recalculées depuis l'adresse) : les trois échelles y sont examinées, et
+ * une échelle sans carte y veut dire « examinée, aucun constat retenu ».
+ *
+ * Limite assumée : le `Dossier` ne dit pas si l'instantané du voisinage existait à l'assemblage.
+ * Distinguer « secteur examiné » de « secteur partiellement examiné » demanderait que le moteur
+ * l'expose ; ce lot ne touche pas au moteur.
+ */
+export type PerimetreLu = Record<Echelle, boolean>;
+export function perimetreDuDossier(scope: Dossier["scope"]): PerimetreLu {
+  return { territoire: true, quartier: scope === "commune+adresse", logement: scope === "commune+adresse" };
+}
+
+export type EtatEchelle =
+  | { echelle: Echelle; etat: "non_examinee" }
+  | { echelle: Echelle; etat: "examinee"; constats: number };
+
+/**
+ * L'ÉTAT DE CHAQUE ÉCHELLE pour « D'où viennent ces constats » : non examinée (aucun nombre), ou
+ * examinée avec le nombre de cartes affichées qui la touchent (zéro compris). Une carte compte à
+ * chaque échelle qu'elle touche ; rien n'est sommé ni pondéré.
+ */
+export function lectureDesEchelles(l: LectureDecision): EtatEchelle[] {
+  const entrees = l.sections.flatMap((x) => x.entrees);
+  return ORDRE_ECHELLES.map((echelle) => (l.perimetre[echelle]
+    ? { echelle, etat: "examinee" as const, constats: entrees.filter((e) => e.echelles.includes(echelle)).length }
+    : { echelle, etat: "non_examinee" as const }));
+}
+
+const OU: Record<Echelle, string> = {
+  territoire: "à l'échelle de la commune",
+  quartier: "dans le secteur autour de l'adresse",
+  logement: "au logement et à sa parcelle",
+};
+
+/**
+ * CE QUE LA LIGNE D'UNE ÉCHELLE DIT AU LECTEUR. Trois cas, et trois seulement :
+ *   - non examinée : AUCUN nombre. Écrire « 0 » dirait qu'on a regardé et rien trouvé ;
+ *   - examinée, aucun constat affiché : « 0 », et la phrase le dit, sans en faire une absence de risque ;
+ *   - examinée, n constats : le nombre de cartes affichées qui la touchent.
+ */
+export function texteEtatEchelle(e: EtatEchelle): { nom: string; valeur: string | null; phrase: string } {
+  const nom = NOM_ECHELLE[e.echelle];
+  if (e.etat === "non_examinee") return { nom, valeur: null, phrase: "Non examiné dans cette lecture" };
+  if (e.constats === 0) return { nom, valeur: "0", phrase: `Examiné, aucun constat affiché ${OU[e.echelle]}` };
+  return { nom, valeur: String(e.constats), phrase: `${e.constats === 1 ? "1 constat" : `${e.constats} constats`} ${OU[e.echelle]}` };
+}
+
 export type LectureDecision = {
   commune: string;
   portee: ConclusionNarrativePlan["scope"];
+  /** Les échelles que cette lecture a examinées (`perimetreDuDossier`). */
+  perimetre: PerimetreLu;
   verdict: {
     etiquette: string;
     ton: ConclusionNarrativePlan["verdictTone"];
@@ -148,6 +210,8 @@ function trier(refs: EvidenceRef[]): { preuves: PreuveLue[]; sources: PreuveLue[
 }
 
 const grainsDe = (refs: EvidenceRef[]): GrainLu[] => [...new Set(refs.map((e) => e.grain))];
+const echellesDe = (refs: EvidenceRef[]): Echelle[] =>
+  ORDRE_ECHELLES.filter((ech) => refs.some((e) => echelleDeLaPreuve(e) === ech));
 const refsDuFait = (f: DecisionFact): EvidenceRef[] => (f.role === "compromise" ? f.sides.flatMap((x) => x.evidence) : f.evidence);
 
 function geste(a: { label: string; type?: VerificationActionType; detail?: string } | undefined): GesteLu | undefined {
@@ -191,6 +255,7 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
     enonce,
     ...(nuance ? { nuance } : {}),
     grains: grainsDe(refs),
+    echelles: echellesDe(refs),
     preuves,
     sources,
     ...(action ? { geste: geste(action) } : {}),
@@ -215,8 +280,9 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
       : c.kind === "grouped_verification" ? c.items.flatMap((x) => x.evidence)
         : c.kind === "mismatch_with_action" ? c.evidence
           : c.sharedEvidence;
-  const grains = grainsDe([...refsPropres, ...absorbes.flatMap(refsDuFait)]);
-  const base = { ancre: dossierAnchorId(c.id), nature: c.kind, sujet: c.title, horsPriorites: horsPriorites(card), grains, detailles };
+  const toutes = [...refsPropres, ...absorbes.flatMap(refsDuFait)];
+  const grains = grainsDe(toutes);
+  const base = { ancre: dossierAnchorId(c.id), nature: c.kind, sujet: c.title, horsPriorites: horsPriorites(card), grains, echelles: echellesDe(toutes), detailles };
   const cote = (x: CompositionSide): CoteLu => ({
     libelle: x.label, enonce: x.statement, ...trier(x.evidence),
     ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
@@ -265,6 +331,7 @@ export function lireDossier(dossier: Dossier): LectureDecision {
   return {
     commune: plan.communeNom,
     portee: plan.scope,
+    perimetre: perimetreDuDossier(dossier.scope),
     verdict: {
       etiquette: plan.verdictLabel,
       ton: plan.verdictTone,

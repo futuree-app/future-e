@@ -319,17 +319,27 @@ export function RegleDuTemps({
  * avec trois renvois de planche : un trait, un texte. L'accueil y écrit le nom des échelles, le
  * dossier le nombre de constats lus à chacune. Le dessin ne représente jamais le lieu lui-même.
  */
-export function EmblemeEchelles({ renvois, etiquette, actives }: {
+export type EtatTrace = "constats" | "examinee" | "non_examinee";
+
+export function EmblemeEchelles({ renvois, etiquette, etats }: {
   /** Les trois textes de renvoi : commune, secteur, bâtiment. Absents : l'emblème seul, sans renvois. */
   renvois?: [string, string, string];
   etiquette: string;
-  /** Les échelles à tracer en plein ; les autres en trait discret. Toutes par défaut. */
-  actives?: { commune: boolean; secteur: boolean; batiment: boolean };
+  /**
+   * L'état de chaque forme. `constats` : trait plein ; `examinee` (examinée, aucun constat affiché) :
+   * trait fin et discret ; `non_examinee` : pointillé, la forme est là mais cette lecture ne l'a pas
+   * parcourue. Absent : les trois formes en trait plein (accueil).
+   */
+  etats?: { commune: EtatTrace; secteur: EtatTrace; batiment: EtatTrace };
 }) {
   const V = ECHELLE_VIEWBOX;
   const c = ECHELLE_CENTRE;
   const marge = renvois ? 70 : 16;
-  const trait = (on: boolean | undefined) => (on === false ? "var(--r-filet-fort)" : "currentColor");
+  const trace = (e: EtatTrace | undefined, epaisseur: number) => (
+    e === "non_examinee" ? { stroke: "var(--r-discret)", strokeWidth: 0.9, strokeDasharray: "3 4" }
+      : e === "examinee" ? { stroke: "var(--r-discret)", strokeWidth: 0.9 }
+        : { stroke: "currentColor", strokeWidth: epaisseur }
+  );
   return (
     <figure style={{ margin: 0 }} aria-label={etiquette}>
       <svg viewBox={`${-marge} ${-16} ${V + marge * 2} ${V + 32}`} style={{ width: "100%", height: "auto", display: "block", color: "var(--r-encre)" }} aria-hidden focusable="false">
@@ -340,9 +350,9 @@ export function EmblemeEchelles({ renvois, etiquette, actives }: {
           const r2 = CERCLE_TERRITOIRE.r + (i % 4 === 0 ? 11 : 7);
           return <line key={i} x1={c + Math.cos(a) * r1} y1={c + Math.sin(a) * r1} x2={c + Math.cos(a) * r2} y2={c + Math.sin(a) * r2} stroke="var(--r-discret)" strokeWidth={0.6} />;
         })}
-        <circle {...CERCLE_TERRITOIRE} fill="none" stroke={trait(actives?.commune)} strokeWidth={1.1} />
-        <rect {...CARRE_AUTOUR} fill="none" stroke={trait(actives?.secteur)} strokeWidth={1.1} />
-        <rect {...LOSANGE_LOGEMENT} fill="none" stroke={trait(actives?.batiment)} strokeWidth={1.3} />
+        <circle {...CERCLE_TERRITOIRE} fill="none" {...trace(etats?.commune, 1.1)} />
+        <rect {...CARRE_AUTOUR} fill="none" {...trace(etats?.secteur, 1.1)} />
+        <rect {...LOSANGE_LOGEMENT} fill="none" {...trace(etats?.batiment, 1.3)} />
         <circle cx={c} cy={c} r={2.2} fill="currentColor" />
         {renvois ? (
           <>
