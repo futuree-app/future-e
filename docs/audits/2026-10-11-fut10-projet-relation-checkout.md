@@ -282,3 +282,84 @@ Captures « avant » : `docs/audits/2026-10-11-fut10-captures/`. Captures « apr
 2. Intégration Stripe et Supabase réelles non exécutées : à faire sur des environnements de test avant la mise en production (`! stripe login`, puis le script ; projet Supabase de test avec les migrations 37 et 38).
 3. Le verrou ajoute un appel réseau avant la confirmation : s'il échoue, le paiement est bloqué (message affiché, carte non débitée).
 4. Décision E.1 (personnalisation d'un dossier acheté sans projet, après coup) à confirmer.
+
+## F. Dernière revue (12/10/2026) : fidélité de livraison, réconciliation, rétention
+
+### F.1 Les chemins qui produisent un artefact (audit)
+
+| Chemin | Avant cette revue | Après |
+|---|---|---|
+| Webhook (`planifierArtefact`) | projet confirmé ; relation relue sur `address_dossiers` (modifiable) | contexte d'achat complet (projet, relation, objectif) relu dans l'intention verrouillée, relation imposée |
+| Rattrapage `/rapport` (`DossierAvecLogement`) | **projet ET relation du jour** pour une première version | première livraison : contexte de l'achat ; jamais de figement sans contexte établi |
+| Succession après dépôt d'un DPE | projet du jour | contexte de la version servie (`projectSnapshot`, `contexteDuBien`) |
+| `POST /api/dossier/actualiser` | projet du jour, toujours | avec une version prête : contexte du jour (mise à jour) ; sans version prête : contexte de l'achat, sauf achat sans projet (lecture personnalisée demandée) |
+| Rattrapage du territoire (`/rapport`, scope `commune`) | projet du jour | inchangé : produit du territoire, hors du contrat d'achat d'une adresse |
+
+**Cause du mauvais projet** : `DossierAvecLogement` appelait `generateDecisionArtifact(sb, userId, project, …)` avec le projet chargé par la page (`user_profiles.user_project`), et le générateur relisait `address_dossiers.place_relation`. Après un échec au webhook, la version vendue se figeait avec ce que le compte contenait au moment de la réouverture.
+
+### F.2 Le contrat de livraison (`src/lib/contexte-livraison.ts`)
+
+| Opération | Quand | Contexte |
+|---|---|---|
+| Première livraison | aucune version `ready` pour ce dossier (webhook, rattrapage, reprise après échec, clic) | celui de l'achat (`dossier_intents`) |
+| Succession automatique | une version est servie et un DPE la périme | celui de la version servie |
+| Mise à jour explicite | une version est servie et le lecteur clique | celui du jour |
+
+Données achetées (`dossier_intents`, verrouillées) et données modifiables (`address_dossiers.place_relation` / `place_objective`) restent séparées. On retrouve l'intention par `address_dossiers.stripe_payment_intent_id` (`src/lib/server/contexte-achat.ts`, service role, filtré par compte). Aucune seconde source éditable du projet.
+
+**Reprise d'une première génération échouée** : le mécanisme existant réserve le numéro suivant (v1 `failed`, v2 `ready`). La v1 échouée reste en base et la v2 suit le contexte de l'achat. Trois tentatives automatiques au plus ; au-delà, la page sert une lecture provisoire.
+
+**Lecture provisoire** : tant qu'aucune version n'est figée, la page assemble la lecture avec le contexte de l'achat. Le socle communal est reconstruit avec ce projet s'il diffère du projet du jour. Elle n'est pas datée et porte l'avis : « Lecture provisoire, établie avec le projet et les réponses confirmés à votre achat. Sa version datée n'a pas encore pu être figée ; elle le sera avec ces mêmes informations. » Si le contexte d'achat est illisible (panne), la lecture utilise le contexte du jour, le dit, et rien n'est figé.
+
+### F.3 Achat sans projet
+
+- À l'achat : aucun artefact (rien d'inventé).
+- Le compte reçoit ensuite un projet : `/rapport` ne l'assemble pas pour ce bien. Il affiche `LectureFactuelleDuBien` (« Ce dossier a été ouvert sans projet. », ce que contient le dossier, ce qu'il ne fait pas), avant même le `Suspense`, pour que le repli communal personnalisé n'apparaisse pas.
+- « Lire ce bien avec mon projet » → `/api/dossier/actualiser` → une première version, datée du jour, avec le projet et la relation du jour.
+- Ensuite, au-dessus du verdict : « Ce bien a été acheté sans projet, le … Cette lecture personnalisée a été demandée ensuite, avec votre projet. »
+- Aucun artefact factuel historique n'est prétendu : il n'en a jamais existé.
+
+### F.4 Purge (migration 38 révisée)
+
+| État (`etat_livraison_intention`) | Traitement |
+|---|---|
+| `abandonnee_ou_en_cours` (aucun dossier, aucun verrou) | supprimée passé 30 jours |
+| `paiement_engage_sans_dossier` (verrou, aucun dossier) | **jamais supprimée** ; signalée passé 3 jours (`intentions_a_reconcilier`) |
+| `livraison_inachevee` (dossier, projet confirmé, aucune version `ready` pour CE dossier) | **snapshot gardé** ; signalée passé 3 jours |
+| `livree` (version `ready` pour ce dossier, dossier révoqué, achat sans projet, intention historique) | ligne gardée ; snapshot remplacé par un marqueur passé 30 jours |
+
+**Moment où la copie du projet peut être effacée** : quand une version `ready` existe pour ce dossier. Elle porte le projet livré (`projectSnapshot`) et le contexte du bien (`contexteDuBien`). La lecture vendue est alors reproductible sans l'intention, et les successions automatiques partent de cette version, jamais de l'intention.
+
+**Réconciliation** : pour chaque ligne de `intentions_a_reconcilier()`, vérifier le statut du PaymentIntent dans Stripe. S'il est `succeeded`, renvoyer l'événement (`stripe events resend`), le webhook crée le dossier. S'il est échoué ou annulé, la ligne peut être supprimée à la main.
+
+**Limite connue** : une intention jamais verrouillée est supprimée après 30 jours. Un paiement confirmé hors de notre formulaire, dont le webhook n'aurait jamais tourné (Stripe abandonne au bout de 3 jours), perdrait alors son intention.
+
+### F.5 Le relevé (FUT-91) et FUT-92
+
+Le bandeau « lien modifié » s'affiche aussi dans Le relevé, posé juste au-dessus par `DossierDecisionSection`, avec la même priorité (projet > lien > voisinage). `DossierDecisionReleve`, modifié par FUT-92, n'est pas touché.
+
+**Adaptation à faire à l'intégration de FUT-92** : passer `contexteAChange` au relevé, l'ajouter à sa condition et à sa raison, puis retirer le bloc `bandeauLienReleve`.
+
+Une fusion d'essai locale (`git merge-tree`) de FUT-10 avec `origin/feat/fut-92-navigation-sticky` ne produit aucun conflit ; le résultat compile et passe 2 509 tests.
+
+### F.6 Tests d'intégration : ce qui existe, ce qui a tourné
+
+| Script | Rôle | Exécuté |
+|---|---|---|
+| `scripts/integration/garde-environnement.mjs` | refuse tout environnement non isolé (catégories seulement, aucun secret) | oui : refuse l'environnement du poste (clés Stripe et projet Supabase de production, vraie clé Resend, PostHog réel, rédaction allumée) |
+| `scripts/integration/schema-de-test.mjs` | assemble 01 → 38 pour une base vierge (deux adaptations de test dites) | oui, dans PGlite |
+| `scripts/integration/fut10-postgres.mjs` | vraies migrations, contraintes, verrou, purge, droits, schéma complet | **oui, 10 / 10** (PGlite, une connexion) |
+| `scripts/integration/fut10-supabase-local.mjs` | supabase-js / PostgREST, deux connexions, politiques, upsert du webhook | **non** : Docker et le CLI Supabase absents |
+| `scripts/integration/fut10-stripe-test.mjs` | API Stripe en mode test, idempotence, statut réel | **non** : clé de test du CLI expirée (05/09/2026) |
+| `scripts/integration/fut10-bout-en-bout.mjs` | parcours complet, webhook signé, rejeu, refus après confirmation | **non** : prérequis ci-dessus |
+
+**Prérequis manquants** : Docker et le CLI Supabase (`supabase start`) ; une clé Stripe de test (`! stripe login`) ; un fichier d'environnement de test conforme au garde-fou ; `stripe listen` pour le secret de webhook. Procédure détaillée en tête de chaque script.
+
+### F.7 Mise en production (après revue)
+
+1. Sur un environnement de test : schéma de test, puis `fut10-supabase-local.mjs`, `fut10-stripe-test.mjs`, `fut10-bout-en-bout.mjs`.
+2. En production, dans l'ordre : `37_contexte_checkout_dossier.sql`, `38_purge_dossier_intents.sql`, **puis** déploiement du code.
+3. Vérifier `select * from public.intentions_a_reconcilier();` (doit être vide au départ).
+4. Plus tard, sur décision : planifier la purge (pg_cron, commande en tête de la migration 38).
+
+Retours arrière : déployer l'ancien code, puis `38_…_down.sql`, puis `37_…_down.sql` (les contextes déclarés sont perdus).
