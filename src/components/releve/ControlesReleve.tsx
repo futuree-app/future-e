@@ -8,7 +8,7 @@
 import type { Dossier } from "@/lib/decision/decision-fact";
 import { controlesParEchelle, phraseVerificationsNonRealisees } from "@/lib/decision/dossier-view";
 import { bindOrphans } from "@/lib/typography";
-import { sujetsDuGroupe } from "@/components/report/ControlesDuDossier";
+import { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
 import { lireCarteDuDossier } from "./lecture-dossier";
 import { EntreeReleve } from "./EntreeReleve";
 import { releve as s, Grain, type GrainCle } from "./primitives";
