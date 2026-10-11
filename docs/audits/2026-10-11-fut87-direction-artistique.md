@@ -19,12 +19,12 @@ des données, et demandé une passe de maturation avant toute migration. Ce qui 
 | **Dossier trop austère, monotonie de lignes** | Trois densités alternées : la plaque (éditoriale) ; deux moments visuels, l'emblème compté « D'où viennent ces constats » et la bande teintée de la balance (Ma décision) ou de l'audit (Logement) ; le registre des contrôles (sobre). | Captures `decision-apres-1440.jpg`, `logement-apres-1440.jpg`. |
 | **Situations défavorables** | Cinq cas Logement (référence, sans diagnostic, immeuble, sources sans réponse, titre long) et cinq cas Ma décision (référence, condition sans compromis, nombreuses réserves, titre long, correspondance sans réserve), sélectionnables en tête de page. Les absences reprennent les phrases de production ; deux formulations nouvelles sont signalées dans le code (patrimoine non vérifié, mémoire des sinistres non lue). | Captures `cas-*.jpg`. Les cas ont révélé trois défauts, corrigés : libellés de la règle du temps superposés (diagnostic 2023 et audit 2024), « : » orphelin en début de ligne dans le verdict, rouge d'incompatibilité au sommaire d'une section de conditions sans blocage. |
 | **Orange** | Absent des données et de la navigation du dossier ; présent dans l'identité (point du logo, porte principale et bouton d'action de l'accueil). Dans le dossier, il ne reste que là où la production le met : le ton « arbitrage » du verdict, qui est le registre compromis. | Revue visuelle des captures. |
-| **Git** | Les quatre commits FUT-87 ont été rebasés sur `main` (après FUT-67 #44 et FUT-26 #45), sans rejouer FUT-67 ; #44 contient FUT-67 à l'identique. | `git log origin/main..` ne contient que des commits FUT-87. |
+| **Git** | Les commits FUT-87 ont été rebasés sur `main` (FUT-67 #44, FUT-26 #45, puis FUT-54 #46), sans rejouer FUT-67 ; #44 contient FUT-67 à l'identique. Les prototypes « Ma décision » lisent donc la sortie du moteur corrigé par FUT-54. | `git log origin/main..` ne contient que des commits FUT-87, qui ne touchent que `src/components/prototypes/fut87/`, `src/app/dev/fut87/` et `docs/audits/`. Tests FUT-54 et FUT-87 au vert sur la nouvelle base, mesures mobiles identiques. |
 
 **Défaut du moteur trouvé en testant les cas** (hors périmètre FUT-87, non corrigé ici) : à Nîmes, faire de
 « des étés plus frais » une condition sans compromis (`confirmer=faible_chaleur`) fait échouer l'assemblage
 du dossier : « fait absorbé inexistant : 30189:climat-chaleur (30189:composition-confort-ete) ». Le harnais
-de production `/dev/dossier` reproduit l'erreur à l'identique. Un lecteur qui confirmerait cette condition
+de production `/dev/dossier` reproduit l'erreur à l'identique, avant comme après la fusion de FUT-54. Un lecteur qui confirmerait cette condition
 sur une commune chaude verrait vraisemblablement son dossier échouer. À traiter avec FUT-54 ou en ticket
 propre. Le cas « condition sans compromis » du prototype utilise donc la proximité de la mer.
 
