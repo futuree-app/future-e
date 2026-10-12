@@ -31,8 +31,16 @@ do $$ begin
   if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
   if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
 end $$;
-create schema if not exists auth;
-create table if not exists auth.users (id uuid primary key, email text, raw_user_meta_data jsonb);
+-- Sur Supabase hébergé, le rôle \`postgres\` n'a aucun droit d'écriture dans \`auth\`, même pour un
+-- « if not exists » qui ne créerait rien : on teste l'existence AVANT d'y toucher.
+do $$ begin
+  if not exists (select 1 from pg_namespace where nspname = 'auth') then
+    execute 'create schema auth';
+  end if;
+  if to_regclass('auth.users') is null then
+    execute 'create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb)';
+  end if;
+end $$;
 do $$ begin
   if not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'auth' and p.proname = 'uid') then
     execute 'create function auth.uid() returns uuid language sql stable as $f$ select null::uuid $f$';

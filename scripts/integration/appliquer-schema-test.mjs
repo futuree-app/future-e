@@ -29,9 +29,18 @@ const migrations = migrationsDeTest();
 console.log(`Projet visé : ${ref} (référence de test déclarée).`);
 console.log(`Migrations : ${migrations.length} fichiers, de ${migrations[0].fichier} à ${migrations.at(-1).fichier} (02 omis, contrôle de la 25 neutralisé).`);
 
-const psql = (args, entree) => spawnSync("psql", [url, "-X", "-v", "ON_ERROR_STOP=1", ...args], { input: entree, encoding: "utf8" });
+// SSL EXIGÉ entre le poste et Supabase (`sslmode=require` : pas de connexion en clair, jamais de repli).
+// `FUT10_PSQL` désigne le binaire quand `psql` n'est pas dans le PATH (Homebrew : libpq n'y est pas lié).
+const PSQL = process.env.FUT10_PSQL || "psql";
+const psql = (args, entree) => spawnSync(PSQL, [url, "-X", "-v", "ON_ERROR_STOP=1", ...args], {
+  input: entree, encoding: "utf8", env: { ...process.env, PGSSLMODE: "require", PGCONNECT_TIMEOUT: "15" },
+});
 
 const sonde = psql(["-tA", "-c", "select to_regclass('public.address_dossiers') is not null"]);
+if (sonde.error) {
+  console.error(`psql introuvable (${PSQL}) : définir FUT10_PSQL. Rien n'est appliqué.`);
+  process.exit(2);
+}
 if (sonde.status !== 0) {
   console.error("Connexion impossible au projet de test (message de psql masqué : il peut contenir l'adresse).");
   process.exit(1);
