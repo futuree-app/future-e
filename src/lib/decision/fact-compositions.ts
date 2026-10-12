@@ -4,7 +4,7 @@
 // (invariant 5). Une composition réorganise ce qui aurait été visible séparément ; elle ne rend jamais
 // visible ce qui était silencieux (invariant 7). Le côté favorable n'est jamais re-dérivé : outcome
 // depuis l'évaluation existante, preuve par helper canonique, aucun seuil recalculé (invariant 9).
-import type { RunResult, RuleEvaluation, ModuleFacts, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
+import type { RunResult, RuleEvaluation, ModuleFacts, DecisionFact, EvidenceRef, VerificationFact, MismatchFact, MaterialityTier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { FactComposition, TradeoffComposition, SharedEvidenceComposition, GroupedVerificationComposition, MismatchWithActionComposition } from "./fact-composition.ts";
 import { RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE } from "./logement-rules.ts";
@@ -29,6 +29,16 @@ function joinFr(items: string[]): string {
 
 function evaluation(run: RunResult, ruleId: string): RuleEvaluation | null {
   return run.evaluations.find((e) => e.ruleId === ruleId) ?? null;
+}
+
+// LE FAIT ÉMIS, JAMAIS LA TRACE (FUT-90, 12/10/2026). `run.evaluations[].facts` est la trace de ce que la
+// règle a établi ; `run.facts` est ce que le dossier émet. Les deux divergent quand une préférence est
+// confirmée comme condition (FUT-7) : la carte « À confirmer » RÉUNIT le fait et le retire de `run.facts`,
+// la trace le garde (la couverture s'en sert). Une composition qui lisait la trace absorbait donc un fait
+// déjà réuni ailleurs, et assertCompositionsValid faisait échouer tout le dossier (Nîmes, 11/10/2026).
+// L'issue de la règle (`outcome`) se lit toujours dans l'évaluation ; le FAIT à composer, ici seulement.
+function emittedFact(run: RunResult, ruleId: string, role: DecisionFact["role"]): DecisionFact | undefined {
+  return run.facts.find((f) => f.ruleId === ruleId && f.role === role);
 }
 
 // LA PREUVE DU CÔTÉ SATISFAIT. Un satisfied n'émet aucun fait : sa preuve est construite ici, depuis la
@@ -57,9 +67,8 @@ function composeSeasonalClimateTradeoff(
   if (preferenceWeight(project, "faible_chaleur") < 2) return null;
   const douceur = evaluation(run, RULE_DOUCEUR);
   if (!douceur || douceur.outcome !== "satisfied") return null;
-  const chaleur = evaluation(run, RULE_CHALEUR);
   // Lot D : la chaleur défavorable sur priorité déclarée est désormais un MISMATCH (plus une verification).
-  const chaleurFact = (chaleur?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
+  const chaleurFact = emittedFact(run, RULE_CHALEUR, "mismatch") as MismatchFact | undefined;
   if (!chaleurFact) return null;
   const favorableEvidence = buildWinterMildnessEvidence(facts);
   if (!favorableEvidence) return null; // invariant 9 : preuve non fabricable = patron non déclenché
@@ -105,9 +114,9 @@ function composeClimateComfort(
   run: RunResult, facts: ModuleFacts, project: UserProject,
 ): MismatchWithActionComposition | null {
   if (preferenceWeight(project, "faible_chaleur") < 2) return null;
-  const chaleur = evaluation(run, RULE_CHALEUR);
-  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
-  const chaleurFact = (chaleur?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
+  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché,
+  // ni un mismatch déjà réuni dans une carte condition (FUT-90).
+  const chaleurFact = emittedFact(run, RULE_CHALEUR, "mismatch") as MismatchFact | undefined;
   if (!chaleurFact) return null;
 
   return {
@@ -139,9 +148,9 @@ function composeWildfireExposure(
   // tranché ce qui mérite une carte, et le geste doit accompagner la carte partout où elle apparaît —
   // y compris à poids 1, où un risque recensé reste visible (cf. ruleFeu). Un test `>= 2` recopiait ici
   // une décision prise là-bas, et il aurait privé de son geste exactement la carte la plus discrète.
-  const feu = evaluation(run, RULE_FEU);
-  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché.
-  const feuFact = (feu?.facts ?? []).find((f) => f.role === "mismatch") as MismatchFact | undefined;
+  // Seul un mismatch RÉELLEMENT émis se compose : un poids 1 (silencieux, aucun fait) n'est jamais repêché,
+  // ni un mismatch déjà réuni dans une carte condition (FUT-90).
+  const feuFact = emittedFact(run, RULE_FEU, "mismatch") as MismatchFact | undefined;
   if (!feuFact) return null;
 
   return {
@@ -242,8 +251,8 @@ const PPR_SECHERESSE = /sécheresse|argile|tassement/i;
 function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): GroupedVerificationComposition | null {
   // GATE : les deux faits RÉELLEMENT émis (les règles logement portent déjà posture et couverture),
   // et un PPR dont le libellé atteste la nature sécheresse/argiles. Libellé absent = invérifiable = rien.
-  const argiles = (evaluation(run, RULE_EXPOSITION_BATI)?.facts ?? []).find((f) => f.role === "verification") as VerificationFact | undefined;
-  const ppr = (evaluation(run, RULE_ZONE_REGLEMENTEE)?.facts ?? []).find((f) => f.role === "verification") as VerificationFact | undefined;
+  const argiles = emittedFact(run, RULE_EXPOSITION_BATI, "verification") as VerificationFact | undefined;
+  const ppr = emittedFact(run, RULE_ZONE_REGLEMENTEE, "verification") as VerificationFact | undefined;
   if (!argiles || !ppr) return null;
   const label = facts.logement?.pprnLabel;
   if (!label || !PPR_SECHERESSE.test(label)) return null;
