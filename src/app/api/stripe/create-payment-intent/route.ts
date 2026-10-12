@@ -430,6 +430,20 @@ export async function POST(request: Request) {
       billing: { name: buyerName, email: user.email ?? null },
     });
   } catch (error) {
+    // UNE TENTATIVE DÉPASSÉE N'EST PAS UNE PANNE (FUT-10, constaté en test de bout en bout). La clé
+    // d'idempotence d'une tentative n'accepte que les paramètres de sa première requête. Quand le montant
+    // a changé depuis (le dossier acheté entre-temps ouvre la déduction territoire, un code a expiré),
+    // Stripe refuse : rien n'a été écrit, ni chez Stripe ni dans `dossier_intents`. Le lecteur doit
+    // recommencer avec une tentative neuve, ce que fait un rechargement de la page.
+    if ((error as { type?: string } | null)?.type === "StripeIdempotencyError") {
+      return NextResponse.json(
+        {
+          error: "Cette tentative de paiement n'est plus valable. Rechargez la page pour recommencer.",
+          code: "CHECKOUT_STALE",
+        },
+        { status: 409 },
+      );
+    }
     console.error("[stripe/create-payment-intent]", error);
 
     return NextResponse.json(

@@ -441,3 +441,8 @@ test("échec simulé du parcours dégradé : jamais en production, jamais sans l
   assert.equal(echecSimuleDeTest("adresse", 1, { NODE_ENV: "development" }), false);
   assert.match(lire("src/lib/server/generate-decision-artifact.ts"), /if \(echecSimuleDeTest\(cible\.kind, version\)\) \{\s*await failArtifact/);
 });
+
+test("une tentative dont le montant a changé est refusée en 409, sans écriture (constaté en bout en bout)", () => {
+  const r = lire("src/app/api/stripe/create-payment-intent/route.ts");
+  assert.match(r, /type === "StripeIdempotencyError"\) \{\s*return NextResponse\.json\([\s\S]{0,250}code: "CHECKOUT_STALE"[\s\S]{0,40}status: 409/);
+});

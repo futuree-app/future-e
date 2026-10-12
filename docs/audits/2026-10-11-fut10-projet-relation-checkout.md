@@ -406,3 +406,29 @@ Ce qui ne l'empêche pas : un paiement confirmé **hors de notre formulaire** (a
 - Le garde-fou contrôle aussi qu'une clé Supabase au format JWT appartient bien au projet déclaré, et que l'URL Postgres désigne le projet de test.
 - `appliquer-schema-test.mjs` : sans `--confirmer <référence>`, il affiche le plan et ne fait rien ; il refuse une base qui n'est pas vierge.
 - `fut10-supabase-local.mjs` est renommé `fut10-supabase-integration.mjs` (projet de test ou instance locale).
+
+## H. Validation réelle (12/10/2026) : Stripe en mode test et projet Supabase `future-e-test`
+
+Environnement : `.env.fut10-test` (ignoré par Git), garde-fou au vert (13 / 13). Application locale lancée depuis le worktree FUT-10 sur le port 3010, et non 3000 : ce port était occupé par un serveur d'un autre worktree, probablement en configuration de production. Aucun événement ne lui a été relayé. `stripe listen` tournait avec la clé de l'environnement de test : le profil par défaut du CLI vise un autre compte.
+
+| Test | Nature | Résultat |
+|---|---|---|
+| `appliquer-schema-test.mjs --confirmer` | réel, projet de test | migrations 01 → 38 appliquées ; tables, colonnes, contraintes, fonctions, index, RLS, déclencheurs et droits vérifiés |
+| `fut10-supabase-integration.mjs` | réel (supabase-js, PostgREST, deux connexions) | 4 / 4 |
+| `fut10-stripe-test.mjs` | réel, Stripe mode test | réussi ; la réponse idempotente rejoue bien `requires_payment_method` après confirmation, d'où le `retrieve` |
+| `fut10-bout-en-bout.mjs --parcours nominal` | réel (seule la carte est de test) | 6 / 6 étapes, sortie 0 |
+| `fut10-bout-en-bout.mjs --parcours degrade` | réel, avec échec injecté de la v1 | 7 / 7 étapes, sortie 0 |
+
+Preuves relues en base et dans Stripe, indépendamment des scripts :
+- PaymentIntent `succeeded`, `livemode: false`, 3 900 centimes encaissés ;
+- dossier `lives_here` / `buy`, date de déclaration posée, intention verrouillée, `project_state = confirmed`, projet A ;
+- nominal : v1 `ready`, projet figé A, `contexteDuBien = {relation: lives_here, objectif: buy}`, alors que le compte porte B ;
+- dégradé : v1 `failed`, v2 `ready` avec A et le même contexte, alors que le compte porte B ; un seul dossier ;
+- rejeu du vrai événement, signé : aucun second dossier, aucune régénération.
+
+Défauts trouvés et corrigés pendant la validation :
+1. Après l'achat, renvoyer une tentative de paiement faisait une erreur 500 : le montant change (déduction territoire) et Stripe refuse la clé d'idempotence. C'est désormais un 409 `CHECKOUT_STALE`, sans aucune écriture.
+2. Supabase hébergé refuse toute écriture dans `auth`, même un `create table if not exists` : le préambule du schéma de test teste l'existence avant.
+3. Sans `GEORISQUES_API_TOKEN`, l'application n'interroge pas Géorisques et la première génération échoue, à raison. Le jeton (lecture de données publiques) est renseigné dans l'environnement de test.
+
+Nettoyage : 6 utilisateurs de test supprimés (et leurs lignes par cascade) ; le projet de test est revenu à 0 utilisateur, 0 dossier, 0 intention, 0 artefact. Les objets Stripe de test restent dans le compte de test.

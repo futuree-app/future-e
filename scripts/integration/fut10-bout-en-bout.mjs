@@ -66,7 +66,8 @@ const f = ban.features[0].properties;
 const url = `${APP}/checkout/dossier?banId=${encodeURIComponent(f.id)}&label=${encodeURIComponent(f.label)}&insee=${encodeURIComponent(f.citycode)}`;
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true });
-const page = await browser.newPage();
+const contexteNavigateur = await browser.newContext();
+const page = await contexteNavigateur.newPage();
 const corpsPaiement = [];
 page.on("request", (r) => { if (r.url().includes("/api/stripe/create-payment-intent")) corpsPaiement.push(r.postData()); });
 
@@ -115,12 +116,18 @@ try {
 
   // ── 4. Modification après confirmation : refusée ───────────────────────────────────────────
   const premier = JSON.parse(corpsPaiement.at(-1));
-  const tentative = await page.evaluate(async (corps) => {
+  // Un onglet stable de la même session : la page de remerciement redirige d'elle-même.
+  const onglet = await contexteNavigateur.newPage();
+  await onglet.goto(`${APP}/dossier`);
+  const tentative = await onglet.evaluate(async (corps) => {
     const r = await fetch("/api/stripe/create-payment-intent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corps) });
     return { status: r.status, corps: await r.json() };
   }, { ...premier, dossierContext: { ...premier.dossierContext, objectif: "rent" } });
-  assert.equal(tentative.status, 409);
-  assert.equal(tentative.corps.code, "CONTEXT_LOCKED");
+  // Deux refus possibles, tous deux sans écriture : CONTEXT_LOCKED (verrou) ou CHECKOUT_STALE (le montant
+  // a changé depuis la première requête de cette tentative, la clé d'idempotence la refuse chez Stripe).
+  assert.equal(tentative.status, 409, `réponse ${tentative.status}`);
+  assert.ok(["CONTEXT_LOCKED", "CHECKOUT_STALE"].includes(tentative.corps.code), tentative.corps.code);
+  console.log(`  refus reçu : ${tentative.corps.code}`);
   const { data: intentApres } = await admin.from("dossier_intents").select("place_objective").eq("stripe_payment_intent_id", dossier.stripe_payment_intent_id).single();
   assert.equal(intentApres.place_objective, "buy");
   etape("modification après confirmation refusée (409), intention intacte");
