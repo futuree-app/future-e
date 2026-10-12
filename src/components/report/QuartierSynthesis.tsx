@@ -20,7 +20,7 @@ import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/territoire/screen";
 import {
-  displayReducer, eventFromAnswer, initialDisplay, ligneEtatLecture,
+  displayReducer, eventFromAnswer, initialDisplay, ligneEtatLecture, cleDemande,
   type DisplayEvent, type DisplayState, type SynthesisAnswer,
 } from "@/lib/territoire/synthesis-display";
 
@@ -95,21 +95,11 @@ export default function QuartierSynthesis({
   // ─── Lecture enrichie : demandée une fois par horizon, jamais streamée ──────────────────
   const statusRef = useRef(state.status);
   useEffect(() => { statusRef.current = state.status; });
-  // FUT-75 : le temps réellement écoulé depuis la demande, relu tous les 5 s pendant la préparation.
-  // Il n'est dit qu'au-delà de 10 s (`ligneEtatLecture`) : un repère pour l'attente longue, pas un chronomètre.
-  const debutRef = useRef(0);
-  const [ecoule, setEcoule] = useState(0);
-  useEffect(() => {
-    if (state.status !== "preparing" || state.shown !== "deterministic") return;
-    const t = setInterval(() => setEcoule(Date.now() - debutRef.current), 5000);
-    return () => clearInterval(t);
-  }, [state.status, state.shown, horizon]);
   useEffect(() => {
     if (!snapshotHash || !inseeCode || statusRef.current !== "preparing") return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const startedAt = Date.now();
-    debutRef.current = startedAt;
     const h = horizon;
 
     // FUT-76 : `ready` ne suffit pas. L'événement se décide dans `eventFromAnswer` (pur, testé) : un
@@ -248,36 +238,20 @@ export default function QuartierSynthesis({
         {/* FUT-75 · UNE SEULE LIGNE D'ÉTAT, QUI CHANGE DE FONCTION. Elle dit la préparation (sans
             pourcentage ni temps restant), devient la proposition quand une lecture validée attend, puis
             le retour à la lecture immédiate. Jamais d'écran d'attente : la lecture affichée se suffit. */}
-        {(() => {
-          const ligne = snapshotHash || state.shown === "enriched" ? ligneEtatLecture(state, ecoule) : null;
-          if (!ligne) return null;
-          const actionnable = ligne.type === "proposition" || ligne.type === "retour";
-          return (
-            <div className="lecture-etat" aria-live="polite">
-              {actionnable ? (
-                <button
-                  // MÊME BOUTON pour « l'afficher » et « revenir » : le focus clavier reste en place.
-                  key="action"
-                  type="button"
-                  className="lecture-etat-bouton"
-                  onClick={() => {
-                    if (ligne.type === "retour") { dispatch({ horizon, event: { type: "showDeterministic" } }); return; }
-                    dispatch({ horizon, event: { type: "showEnriched" } });
-                    posthog?.capture("quartier_ai_summary_opened", { commune: communeName, insee_code: inseeCode, horizon });
-                  }}
-                >
-                  <span aria-hidden className="lecture-etat-repere" data-pret={ligne.type === "proposition" || undefined} />
-                  {ligne.texte}
-                </button>
-              ) : (
-                <p key={ligne.type} className="lecture-etat-texte">
-                  <span aria-hidden className="lecture-etat-repere" />
-                  {ligne.texte}
-                </p>
-              )}
-            </div>
-          );
-        })()}
+        {snapshotHash || state.shown === "enriched" ? (
+          <div className="lecture-etat" aria-live="polite">
+            {/* La clé est la DEMANDE en cours : un autre horizon remonte la ligne, son attente repart de zéro. */}
+            <LigneEtatDemande
+              key={cleDemande(horizon, snapshotHash, inseeCode)}
+              state={state}
+              onAction={(type) => {
+                if (type === "retour") { dispatch({ horizon, event: { type: "showDeterministic" } }); return; }
+                dispatch({ horizon, event: { type: "showEnriched" } });
+                posthog?.capture("quartier_ai_summary_opened", { commune: communeName, insee_code: inseeCode, horizon });
+              }}
+            />
+          </div>
+        ) : null}
 
         {sources.length > 0 && (
           <p className="mt-6 font-mono text-[10px] tracking-[0.1em] uppercase text-ghost">
@@ -316,6 +290,7 @@ export default function QuartierSynthesis({
         }
         @media (prefers-reduced-motion: reduce) {
           .quartier-synthesis-text, .lecture-etat-texte, .lecture-etat-bouton { animation: none; }
+          .lecture-etat-bouton:active { transform: none; }
         }
         .quartier-horizon-nav {
           display: flex;
@@ -410,4 +385,39 @@ function parseSynthesis(raw: string): ParsedSynthesis {
     blocks.push({ caption, text: body });
   }
   return { title, blocks };
+}
+
+/**
+ * FUT-75 · LA LIGNE D'ÉTAT D'UNE DEMANDE. Une seule ligne qui change de fonction : la préparation (sans
+ * pourcentage ni temps restant), la proposition quand une lecture validée attend, puis le retour à la
+ * lecture immédiate. Elle est montée sous la clé de la demande (`cleDemande`) : le temps d'attente
+ * qu'elle dit est celui de CETTE demande, compté depuis son départ, jamais hérité d'un autre horizon.
+ */
+function LigneEtatDemande({ state, onAction }: { state: DisplayState; onAction: (type: "proposition" | "retour") => void }) {
+  const enPreparation = state.status === "preparing" && state.shown === "deterministic";
+  const [ecoule, setEcoule] = useState(0);
+  useEffect(() => {
+    if (!enPreparation) return;
+    const debut = Date.now();
+    const t = setInterval(() => setEcoule(Date.now() - debut), 5000);
+    return () => clearInterval(t);
+  }, [enPreparation]);
+  const ligne = ligneEtatLecture(state, ecoule);
+  if (!ligne) return null;
+  if (ligne.type === "proposition" || ligne.type === "retour") {
+    const type = ligne.type;
+    return (
+      // MÊME BOUTON pour « l'afficher » et « revenir » : le focus clavier reste en place.
+      <button key="action" type="button" className="lecture-etat-bouton" onClick={() => onAction(type)}>
+        <span aria-hidden className="lecture-etat-repere" data-pret={type === "proposition" || undefined} />
+        {ligne.texte}
+      </button>
+    );
+  }
+  return (
+    <p key={ligne.type} className="lecture-etat-texte">
+      <span aria-hidden className="lecture-etat-repere" />
+      {ligne.texte}
+    </p>
+  );
 }

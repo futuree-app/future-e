@@ -165,3 +165,20 @@ Captures à vraie largeur (1440 et 390 px) : `q4-carte-ouverte`, `q5-preparation
    qu'à l'activation de la nouvelle présentation.
 4. **Mesures en mode développement** : à confirmer sur un build de production et un vrai téléphone modeste.
 5. **Décision produit** : la même ligne d'état pour la lecture enrichie du hub (`ConclusionRedigee`).
+
+## 11. Finition après revue (12/10/2026)
+
+**Q5, attente héritée d'un autre horizon.** Le temps écoulé vivait dans `QuartierSynthesis` : après 30 s
+d'attente sur 2050, un passage à 2100 pouvait afficher « depuis 30 s » pour une demande qui venait de
+partir, jusqu'au tick suivant. Il vit désormais dans `LigneEtatDemande`, montée sous la clé de la demande
+(`cleDemande` : horizon, instantané, commune) : chaque demande repart de zéro. Test L5, et contrôle
+navigateur à horloge simulée : 2050 après 31 s « depuis 30 s » ; 2100 aussitôt, puis 2050, puis
+2030 → 2100 → 2050 : aucune durée ; 11 s après la nouvelle demande : « depuis 10 s ».
+
+**Mouvement réduit.** `--m-geste` tombe aussi à zéro, avec toutes les durées, et `--m-ressort` devient
+`linear(0, 1)` (aucun dépassement). L'enfoncement des boutons et le glissé du contenu de Q4 sont
+neutralisés. Le test G2 vérifie chaque jeton de durée déclaré, pas une liste écrite à la main.
+
+**Contrôles.** Suite 2446/2446, TypeScript, lint (42, identiques à `main`), build Webpack. Q4 et Q5 dans
+les vrais composants, mouvement normal et réduit : titre immobile, focus conservé, `aria-live` en place.
+Aucun fichier commun avec FUT-10 (`97c258de`), fusion simulée sans conflit. Q1 reste non raccordé.

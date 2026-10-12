@@ -440,5 +440,10 @@
   --m-ressort: linear(0, 0.045, 0.152, 0.287, 0.427, 0.559, 0.675, 0.772, 0.849, 0.907, 0.95, 0.98, 1, 1.012, 1.018, 1.02, 1.019, 1.018, 1.015, 1.012, 1.01, 1.007, 1.005, 1.003, 1.002, 1.001, 1.001, 1);
 }
 @media (prefers-reduced-motion: reduce) {
-  :root { --m-pression: 0ms; --m-bascule: 0ms; --m-etat: 0ms; --m-ressort-duree: 0ms; }
+  /* Toutes les durées tombent à zéro (la teinte change encore, sans transition), et le ressort perd son
+     dépassement : un jeton employé plus tard pour un déplacement ne peut pas en réintroduire un. */
+  :root {
+    --m-pression: 0ms; --m-geste: 0ms; --m-bascule: 0ms; --m-etat: 0ms; --m-ressort-duree: 0ms;
+    --m-ressort: linear(0, 1);
+  }
 }

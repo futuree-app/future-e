@@ -327,6 +327,7 @@
 .detailsFluide[open] summary::before { transform: rotate(45deg); }
 .detailsFluide > :not(summary) { opacity: 0; transform: translateY(-4px); transition: opacity var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve); }
 .detailsFluide[open] > :not(summary) { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .detailsFluide > :not(summary) { transform: none; } }
 
 .bandeauProto {
   font-family: var(--font-mono);

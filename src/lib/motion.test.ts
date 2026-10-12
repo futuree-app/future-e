@@ -18,8 +18,18 @@ test("G1. les jetons --m-* portent les valeurs de motion.ts", () => {
 });
 
 test("G2. mouvement réduit : déplacements et ressorts à zéro, pour tout le site", () => {
-  const reduit = jetons.slice(jetons.indexOf("@media (prefers-reduced-motion: reduce) {\n  :root { --m-"));
-  for (const v of ["--m-pression: 0ms", "--m-bascule: 0ms", "--m-etat: 0ms", "--m-ressort-duree: 0ms"]) assert.ok(reduit.includes(v), v);
+  const reduit = jetons.slice(jetons.indexOf("@media (prefers-reduced-motion: reduce)", jetons.indexOf("LE MOUVEMENT (FUT-75)")));
+  // TOUS les jetons de durée déclarés tombent à zéro, y compris --m-geste : aucun n'est oublié.
+  const durees = [...jetons.matchAll(/(--m-[a-z-]+): \d+ms;/g)].map((m) => m[1]);
+  assert.ok(durees.length >= 5);
+  for (const v of durees) assert.ok(reduit.includes(`${v}: 0ms`), `${v} à zéro en mouvement réduit`);
+  // Le ressort perd son dépassement.
+  assert.ok(reduit.includes("--m-ressort: linear(0, 1);"));
+  // Les déplacements d'appui et d'apparition sont neutralisés là où ils existent.
+  const quartier = readFileSync("src/components/report/QuartierSynthesis.tsx", "utf8");
+  assert.match(quartier, /prefers-reduced-motion: reduce\)[^]*?\.lecture-etat-bouton:active \{ transform: none; \}/);
+  assert.match(readFileSync("src/components/interaction/bouton-action.module.css", "utf8"), /prefers-reduced-motion: reduce\)[^]*?\.bouton:active:not\(\[aria-disabled\]\) \{ transform: none; \}/);
+  assert.match(releve, /prefers-reduced-motion: reduce\) \{ \.detailsFluide > :not\(summary\) \{ transform: none; \} \}/);
 });
 
 test("Q4. « Données et limites » : toujours un <details> natif, ouvert en continuité, sans toucher au rendu classique", () => {

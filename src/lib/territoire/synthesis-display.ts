@@ -58,6 +58,15 @@ export function displayReducer(s: DisplayState, e: DisplayEvent): DisplayState {
 }
 
 /**
+ * L'IDENTITÉ D'UNE DEMANDE de lecture enrichie : l'horizon, l'instantané des faits, la commune. Le
+ * composant relance sa demande quand l'une change ; la ligne d'état est montée sous cette clé, si bien
+ * que son temps d'attente repart de zéro avec chaque demande et n'est jamais hérité d'une autre.
+ */
+export function cleDemande(horizon: string, snapshotHash: string | null | undefined, inseeCode: string | null | undefined): string {
+  return `${horizon}|${snapshotHash ?? ""}|${inseeCode ?? ""}`;
+}
+
+/**
  * FUT-75 · LA LIGNE D'ÉTAT DE LA LECTURE ENRICHIE : un seul élément qui change de fonction.
  *   preparation   ce qui se passe, et seulement au-delà de 10 s depuis combien de temps (par pas de 5 s :
  *                 un repère, pas un chronomètre). Jamais de pourcentage ni de temps restant ;
