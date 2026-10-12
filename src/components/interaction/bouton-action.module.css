@@ -13,7 +13,11 @@
   position: absolute; inset: 0; z-index: -1; border-radius: 6px; background: var(--fg-hi); border: 1px solid var(--fg-hi);
   transition: border-radius var(--m-etat) var(--m-releve), background-color var(--m-etat) var(--m-releve), border-color var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve);
 }
-.bouton:hover:not([aria-disabled]) .fond { background: var(--fg-2); }
+/* Le survol ne vaut que là où l'appui agit et où le texte est sombre (repos, échec) : après un clic, la
+   souris reste sur le bouton, et un fond clair sous le texte clair de la confirmation la rendrait illisible. */
+.bouton[data-etat="repos"]:hover .fond, .bouton[data-etat="echec"]:hover .fond { background: var(--fg-2); }
+.bouton[data-etat="ailleurs"]:hover .fond { border-color: var(--fg-3); }
+.bouton[data-etat="succes"] { cursor: default; }
 .bouton[data-etat="attente"] { color: var(--fg-hi); cursor: progress; }
 .bouton[data-etat="attente"] .fond { border-radius: 24px; background: var(--bg-elev-2); border-color: var(--border-2); transform: scaleX(0.94); }
 .bouton[data-etat="succes"] { color: var(--fg-hi); }

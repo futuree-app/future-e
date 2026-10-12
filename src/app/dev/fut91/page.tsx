@@ -6,7 +6,8 @@
 //   vue=classique|releve      la présentation (défaut : releve)
 //   etat=none|pending|done|unavailable   `logementStatus`
 //   artefact=1                date de génération et provenance d'un artefact figé
-//   projet=1 / voisinage=1    analyse répondant à un projet ou un voisinage qui a changé
+//   projet=1 / lien=1 / voisinage=1   analyse répondant à un projet, un lien avec le bien (FUT-10) ou un
+//                             voisinage qui a changé
 //   pane=1                    la colonne d'appui (navigateur des échelles), comme sur /rapport
 //   enrichi=long              une plaque supplémentaire avec un détail enrichi plus long que le repli
 // Plus `insee`, `prefs`, `confirmer`, `lieu` (adresse publique) comme `/dev/dossier`.
@@ -31,7 +32,7 @@ const TITRE_VERDICT = {
   classe: "text-[length:clamp(23px,2.9vw,36px)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
-type Params = { insee?: string; prefs?: string; adresse?: string; confirmer?: string; lieu?: string; vue?: string; etat?: string; artefact?: string; projet?: string; voisinage?: string; pane?: string; enrichi?: string };
+type Params = { insee?: string; prefs?: string; adresse?: string; confirmer?: string; lieu?: string; vue?: string; etat?: string; artefact?: string; projet?: string; lien?: string; voisinage?: string; pane?: string; enrichi?: string };
 
 export default async function BancFut91({ searchParams }: { searchParams: Promise<Params> }) {
   if (process.env.NODE_ENV === "production") notFound();
@@ -52,12 +53,13 @@ export default async function BancFut91({ searchParams }: { searchParams: Promis
       <Navbar />
       <BandeauPrototype>
         Banc FUT-91 · {vue === "releve" ? "Le relevé" : "présentation classique"} · {t.adresse ? `dossier d'adresse (${t.adresse.label})${t.statutAdresse === "unavailable" ? ", repli communal" : ""}` : `dossier communal ${t.insee}`} · état {etat}
-        {artefact ? " · artefact daté" : ""}{sp.projet === "1" ? " · projet changé" : ""}{sp.voisinage === "1" ? " · voisinage changé" : ""}
+        {artefact ? " · artefact daté" : ""}{sp.projet === "1" ? " · projet changé" : ""}{sp.lien === "1" ? " · lien changé" : ""}{sp.voisinage === "1" ? " · voisinage changé" : ""}
         <nav aria-label="Réglages" className={s.cas}>
           <Link href={lien({ vue: vue === "releve" ? "classique" : "releve" })}>voir en {vue === "releve" ? "classique" : "relevé"}</Link>
           {(["none", "pending", "done", "unavailable"] as const).map((e) => <Link key={e} href={lien({ etat: e })} aria-current={e === etat ? "page" : undefined}>{e}</Link>)}
           <Link href={lien({ artefact: artefact ? "" : "1" })}>{artefact ? "sans artefact" : "artefact"}</Link>
           <Link href={lien({ projet: sp.projet === "1" ? "" : "1" })}>projet changé</Link>
+          <Link href={lien({ lien: sp.lien === "1" ? "" : "1" })}>lien changé</Link>
           <Link href={lien({ voisinage: sp.voisinage === "1" ? "" : "1" })}>voisinage changé</Link>
           <Link href={lien({ pane: sp.pane === "1" ? "" : "1" })}>colonne d&apos;appui</Link>
           <Link href={lien({ enrichi: sp.enrichi ? "" : "long" })}>texte enrichi long</Link>
@@ -76,6 +78,7 @@ export default async function BancFut91({ searchParams }: { searchParams: Promis
           generatedAt={artefact ? "2026-09-21T10:00:00.000Z" : null}
           provenance={artefact ? "artefact-de-test" : undefined}
           projetAChange={sp.projet === "1"}
+          contexteAChange={sp.lien === "1"}
           voisinageAChange={sp.voisinage === "1"}
           espacement="mt-8"
           titre={TITRE_VERDICT}
