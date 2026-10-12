@@ -1,0 +1,125 @@
+/* FUT-75 · LE GESTE DU RELEVÉ. DEV UNIQUEMENT (prototypes `/dev/fut75`).
+
+   Les jetons du mouvement, alignés sur `motion.ts` (DUREES, COURBES) : les deux bougent ensemble.
+   Trois modes, portés par `data-mouvement` sur le conteneur d'un prototype :
+     anime   le langage complet ;
+     reduit  aucun déplacement ; seuls des fondus de 120 ms au plus (préférence système, ou simulée) ;
+     aucun   l'état final, sans aucune transition (la « version sans animation »).
+   Seules des propriétés composées par le navigateur s'animent : transform, opacity,
+   stroke-dashoffset. Aucune propriété de mise en page. */
+
+.atelier {
+  --m-micro: 120ms;
+  --m-etat: 240ms;
+  --m-trace: 520ms;
+  --m-plafond: 900ms;
+  --m-releve: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --m-sortie: cubic-bezier(0.4, 0, 1, 1);
+}
+.atelier[data-mouvement="reduit"] { --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; }
+.atelier[data-mouvement="aucun"] { --m-micro: 0ms; --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; }
+.atelier[data-mouvement="aucun"] *, .atelier[data-mouvement="aucun"] *::before, .atelier[data-mouvement="aucun"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .atelier:not([data-mouvement="anime"]) { --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; }
+}
+
+/* ── Le banc ─────────────────────────────────────────────────────────────────────────────── */
+
+.prototype { padding: 56px 0; border-top: 1px solid var(--r-filet); display: grid; gap: 24px; }
+.reglages { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; font-family: var(--font-mono); font-size: 12px; color: var(--r-discret); }
+.reglages fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.reglages legend { float: left; margin-right: 8px; color: var(--r-meta); }
+.choix {
+  font: inherit; color: var(--r-texte); background: transparent; cursor: pointer;
+  border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 5px 9px;
+}
+.choix[aria-pressed="true"], .choix[aria-checked="true"] { color: var(--r-encre); border-color: var(--r-encre); background: var(--bg-elev-2); }
+.choix:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.scene { display: grid; gap: 32px; }
+@media (min-width: 1024px) { .scene { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; } }
+.notes { display: grid; gap: 10px; font-size: 13.5px; line-height: 1.55; color: var(--r-discret); }
+.notes strong { color: var(--r-texte); font-weight: 600; }
+
+/* ── A · le repère animé ─────────────────────────────────────────────────────────────────── */
+
+.repere { display: grid; gap: 14px; }
+.repereVisuel { display: block; width: 100%; max-width: 224px; margin-inline: auto; overflow: visible; }
+.repereVisuel[data-variante="recul"] { overflow: hidden; }
+.forme { fill: transparent; stroke: var(--fg-3); vector-effect: non-scaling-stroke; transition: stroke var(--m-micro) ease, stroke-width var(--m-micro) ease; }
+.forme[data-actif="true"] { stroke: var(--fg-hi); }
+.forme[data-etat="non_examinee"] { stroke-dasharray: 3 4; }
+.trameGroupe { transition: opacity var(--m-etat) ease; }
+.trameTrait { fill: none; stroke: var(--fg-3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tramePoint { fill: var(--fg-3); }
+/* Le recul : tout le dessin s'agrandit autour du centre ; les traits gardent leur épaisseur. */
+.dessin { transform-box: view-box; transform-origin: 50% 50%; transition: transform var(--m-etat) var(--m-releve); }
+/* Le réticule : quatre coins qui viennent se poser sur le périmètre choisi. */
+.coin { fill: none; stroke: var(--r-encre); stroke-width: 1.4; vector-effect: non-scaling-stroke; transition: transform var(--m-etat) var(--m-releve), opacity var(--m-micro) ease; }
+.coin[data-repos="true"] { stroke: var(--r-discret); }
+/* Le nom du périmètre, détouré du fond (halo cartographique) : il reste lisible par-dessus un contour. */
+.legendeReticule { font-family: var(--font-mono); font-size: 9px; fill: var(--r-texte); paint-order: stroke; stroke: var(--r-fond); stroke-width: 4px; stroke-linejoin: round; transition: transform var(--m-etat) var(--m-releve), opacity var(--m-micro) ease; }
+.destinations { list-style: none; margin: 0; padding: 0; display: grid; }
+.destination {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px; align-items: center;
+  padding: 9px 4px; border-top: 1px solid var(--r-filet); color: var(--r-texte); text-decoration: none;
+  transition: background-color var(--m-micro) ease;
+}
+.destination:hover, .destination[data-actif="true"] { background: var(--bg-elev); }
+.destination:focus-visible { outline: 2px solid var(--fg-hi); outline-offset: 3px; }
+.legendeSchema { font-family: var(--font-mono); font-size: 11px; color: var(--r-meta); text-align: center; }
+
+/* ── B · la règle des horizons ───────────────────────────────────────────────────────────── */
+
+.horizons { display: grid; gap: 20px; }
+.radios { display: inline-flex; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); padding: 3px; gap: 3px; width: fit-content; position: relative; }
+.radio {
+  position: relative; z-index: 1; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em;
+  color: var(--r-discret); background: transparent; border: 0; border-radius: 2px; padding: 8px 14px; cursor: pointer;
+  width: 72px; transition: color var(--m-micro) ease;
+}
+.radio[aria-checked="true"] { color: var(--r-encre); }
+.radio:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+/* L'onglet actif est un repère qui glisse sous les libellés (transform seulement). */
+.radioRepere { position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 2px; background: var(--bg-elev-3); box-shadow: inset 0 -2px 0 var(--r-encre); width: 72px; transition: transform var(--m-etat) var(--m-releve); }
+.lecture { display: grid; gap: 4px; min-height: 76px; }
+.lectureValeur { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.fondu { animation: fondu var(--m-micro) ease both; }
+@keyframes fondu { from { opacity: 0; } to { opacity: 1; } }
+.graphique { position: relative; }
+.graphique svg { display: block; width: 100%; overflow: visible; }
+.axe { stroke: var(--r-filet-fort); vector-effect: non-scaling-stroke; }
+.tige { stroke: var(--r-discret); vector-effect: non-scaling-stroke; transition: stroke var(--m-micro) ease; }
+.tige[data-choisi="true"] { stroke: var(--r-encre); }
+.seuil { stroke: var(--r-encre); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; opacity: 0.7; }
+.referenceBande { fill: var(--r-trame); stroke: var(--r-filet-fort); vector-effect: non-scaling-stroke; }
+.curseur { transition: transform var(--m-etat) var(--m-releve); }
+.curseurTrait { stroke: var(--r-encre); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.trace { transition: opacity var(--m-etat) ease; }
+.etiquetteSvg { font-family: var(--font-mono); font-size: 11px; fill: var(--r-meta); }
+.valeurSvg { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 600; font-size: 13px; fill: var(--r-discret); transition: fill var(--m-micro) ease; }
+.valeurSvg[data-choisi="true"] { fill: var(--r-encre); }
+
+/* ── C · le chemin de la décision ────────────────────────────────────────────────────────── */
+
+.chemin { display: grid; gap: 28px; }
+.etapes { position: relative; display: grid; padding-left: 52px; }
+.rail { position: absolute; left: 0; top: 0; width: 48px; height: 100%; overflow: visible; pointer-events: none; }
+.voie { fill: none; stroke: var(--r-discret); stroke-width: 1.2; vector-effect: non-scaling-stroke; transition: stroke var(--m-micro) ease, opacity var(--m-micro) ease; }
+.voie[data-eclairee="true"] { stroke: var(--r-encre); }
+.voie[data-nature="limite"] { stroke-dasharray: 3 4; }
+.etape { position: relative; padding: 18px 0; border-top: 1px solid var(--r-filet); display: grid; gap: 8px; transition: opacity var(--m-micro) ease; }
+.etape:first-child { border-top: 0; padding-top: 4px; }
+.etape[data-eclairee="false"] { opacity: 0.62; }
+.etape[data-courante="true"] .etapeNom { color: var(--r-encre); }
+.etapeNom { display: flex; gap: 10px; align-items: baseline; font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 13px; color: var(--r-discret); margin: 0; }
+.etapeNumero { font-family: var(--font-mono); font-size: 11px; color: var(--r-meta); }
+/* Le titre d'étape reçoit le focus quand on parcourt le chemin : un repère discret à gauche, pas un cadre. */
+.etapeNom:focus { outline: none; }
+.etapeNom:focus-visible { outline: none; box-shadow: -10px 0 0 -8px var(--r-encre); text-decoration: underline; text-decoration-color: var(--r-encre); text-underline-offset: 4px; }
+.borne { position: absolute; left: -52px; top: 0; width: 48px; height: 100%; }
+.pas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.conclusionAncre { transition: box-shadow var(--m-etat) var(--m-releve); }
+.conclusionAncre[data-eclairee="true"] { box-shadow: 0 0 0 1px var(--r-encre); }
