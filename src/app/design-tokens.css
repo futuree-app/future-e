@@ -424,3 +424,21 @@
   --dur-base:    200ms;
   --dur-slow:    300ms;
 }
+
+/* ── LE MOUVEMENT (FUT-75) ─────────────────────────────────────────────────────────────────────
+   Grammaire commune : `src/lib/motion.ts` (mêmes valeurs, alignées par test). Le repère bouge, la
+   donnée reste : ces jetons n'animent jamais une valeur. En mouvement réduit, déplacements et ressorts
+   tombent à zéro ; seule la teinte peut encore changer. */
+:root {
+  --m-pression: 90ms;
+  --m-geste: 120ms;
+  --m-bascule: 180ms;
+  --m-etat: 240ms;
+  --m-ressort-duree: 200ms;
+  --m-releve: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --m-sortie: cubic-bezier(0.4, 0, 1, 1);
+  --m-ressort: linear(0, 0.045, 0.152, 0.287, 0.427, 0.559, 0.675, 0.772, 0.849, 0.907, 0.95, 0.98, 1, 1.012, 1.018, 1.02, 1.019, 1.018, 1.015, 1.012, 1.01, 1.007, 1.005, 1.003, 1.002, 1.001, 1.001, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-pression: 0ms; --m-bascule: 0ms; --m-etat: 0ms; --m-ressort-duree: 0ms; }
+}

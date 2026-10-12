@@ -1,0 +1,38 @@
+/* FUT-75 · LE BOUTON D'ACTION ENGAGÉE. Jetons --m-* (design-tokens.css) : en mouvement réduit, aucune
+   transformation, l'emblème d'attente reste immobile ; seules les teintes changent. */
+.bloc { display: grid; gap: 10px; justify-items: start; }
+.bouton {
+  position: relative; isolation: isolate; min-width: 248px; min-height: 46px; padding: 0 20px; cursor: pointer;
+  border: 0; background: transparent; color: var(--bg); font: inherit; font-weight: 600; font-size: 14.5px;
+  transition: transform var(--m-pression) ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.bouton:active:not([aria-disabled]) { transform: scale(0.97); transition: transform var(--m-ressort-duree) var(--m-ressort); }
+.bouton:focus-visible { outline: 2px solid var(--fg-hi); outline-offset: 3px; border-radius: 8px; }
+/* Le fond EST le bouton : il change de rayon, de teinte et de contour, sans jamais être remplacé. */
+.fond {
+  position: absolute; inset: 0; z-index: -1; border-radius: 6px; background: var(--fg-hi); border: 1px solid var(--fg-hi);
+  transition: border-radius var(--m-etat) var(--m-releve), background-color var(--m-etat) var(--m-releve), border-color var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve);
+}
+.bouton:hover:not([aria-disabled]) .fond { background: var(--fg-2); }
+.bouton[data-etat="attente"] { color: var(--fg-hi); cursor: progress; }
+.bouton[data-etat="attente"] .fond { border-radius: 24px; background: var(--bg-elev-2); border-color: var(--border-2); transform: scaleX(0.94); }
+.bouton[data-etat="succes"] { color: var(--fg-hi); }
+.bouton[data-etat="succes"] .fond { background: var(--reg-alignement-surface); border-color: var(--reg-alignement); }
+.bouton[data-etat="echec"] .fond { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-tint); }
+.bouton[data-etat="ailleurs"] { color: var(--fg-hi); }
+.bouton[data-etat="ailleurs"] .fond { background: var(--bg-elev-2); border-color: var(--reg-controle); }
+.contenu { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; animation: bascule var(--m-bascule) var(--m-releve) both; }
+@keyframes bascule { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+.embleme { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.embleme circle, .embleme rect { stroke-dasharray: 1 1; animation: tracer 1800ms var(--m-releve) infinite; }
+.embleme rect:nth-of-type(1) { animation-delay: 200ms; }
+.embleme rect:nth-of-type(2) { animation-delay: 400ms; }
+@keyframes tracer { 0% { stroke-dashoffset: 1; } 45%, 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; } }
+.coche { fill: none; stroke: var(--reg-alignement); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; animation: cocher 260ms var(--m-releve) 60ms both; }
+@keyframes cocher { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.compteRendu { font-size: 13px; line-height: 1.5; color: var(--fg-3); margin: 0; min-height: 1.5em; }
+@media (prefers-reduced-motion: reduce) {
+  .contenu, .coche { animation: none; }
+  .embleme circle, .embleme rect { animation: none; stroke-dasharray: none; }
+  .bouton:active:not([aria-disabled]) { transform: none; }
+}
