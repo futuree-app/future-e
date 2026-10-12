@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BoutonAction, type LibellesAction } from "@/components/interaction/BoutonAction";
+import {
+  compteRenduAction, gesteAppui, issueDepuisReponse, LECTURE_CONFIRMATION_MS, suivantAction,
+  type EtatAction, type IssueAction,
+} from "@/lib/interaction/etat-action";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « CETTE ANALYSE RÉPOND AU PROJET QUE VOUS AVIEZ. »
@@ -24,36 +29,78 @@ import { useRouter } from "next/navigation";
 // Le voisinage se rafraîchit désormais en arrière-plan. Quand il est plus récent que la version
 // servie, la même mise à jour est proposée, pour une autre raison : ce n'est pas le lecteur qui a
 // changé, c'est ce que futur•e sait de son adresse. La version figée ne bouge pas pour autant.
+
+// ── LE GESTE (FUT-93, prototype Q1 de FUT-75) ────────────────────────────────────────────────
+// Un seul bouton qui se transforme : il s'enfonce à la pression, devient l'attente (l'emblème ne
+// paraît qu'après 300 ms), puis la confirmation ou l'échec. L'état n'avance que par la réponse
+// RÉELLE de la route (`issueDepuisReponse`, `suivantAction`) : « en_cours » n'est jamais un succès,
+// et « Analyse mise à jour » ne s'affiche qu'avec une version annoncée `abouti`. L'analyse affichée
+// ne bouge pas pendant l'attente ni après un échec ; la page ne la remplace qu'après la confirmation.
+const LIBELLES: LibellesAction = {
+  repos: "Mettre à jour l'analyse",
+  attente: "Mise à jour en cours",
+  succes: "Analyse mise à jour",
+  echec: "Réessayer la mise à jour",
+  ailleurs: "Relire la page",
+};
+
 export function AnalyseAncienProjet(
   { insee, scopeKey, raison = "projet" }: { insee: string; scopeKey: string; raison?: "projet" | "lien" | "voisinage" },
 ) {
-  const [etat, setEtat] = useState<"repos" | "encours" | "ailleurs" | "echec">("repos");
+  const [etat, setEtat] = useState<EtatAction>("repos");
+  const [issue, setIssue] = useState<IssueAction | null>(null);
   const router = useRouter();
 
+  // UNE RÉPONSE NE VAUT QUE POUR LE DOSSIER QUI L'A DEMANDÉE. Si la portée change, ou si le bloc
+  // disparaît, avant la réponse, celle-ci est ignorée : rien ne se confirme sur un autre dossier.
+  const cle = `${insee}|${scopeKey}`;
+  const [clePrecedente, setClePrecedente] = useState(cle);
+  if (clePrecedente !== cle) {
+    setClePrecedente(cle);
+    setEtat("repos");
+    setIssue(null);
+  }
+  const cleCourante = useRef(cle);
+  const enVol = useRef(false);
+  const minuterie = useRef<number | null>(null);
+  useEffect(() => { cleCourante.current = cle; }, [cle]);
+  useEffect(() => () => {
+    cleCourante.current = "";
+    if (minuterie.current) window.clearTimeout(minuterie.current);
+  }, []);
+
   const mettreAJour = async () => {
-    setEtat("encours");
+    const geste = gesteAppui(etat);
+    // Double clic, ou appui pendant la confirmation : une seule demande à la fois.
+    if (geste === "ignorer" || enVol.current) return;
+    // Une mise à jour tourne déjà : on relit la page, on ne relance pas une génération.
+    if (geste === "relire") { startTransition(() => router.refresh()); return; }
+    enVol.current = true;
+    const demande = cle;
+    setIssue(null);
+    setEtat((e) => suivantAction(e, { type: "appui" }));
+    let i: IssueAction;
     try {
       const res = await fetch("/api/dossier/actualiser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ insee, scopeKey }),
       });
-      if (!res.ok) throw new Error(String(res.status));
-      // UNE GÉNÉRATION DÉJÀ EN COURS N'EST PAS UNE GÉNÉRATION ABOUTIE (revue du 12/08/2026). La
-      // route répondait `ok` dans les deux cas, et le rechargement réaffichait le même bandeau sans
-      // rien expliquer : le lecteur cliquait, la page revenait identique.
-      const corps = (await res.json().catch(() => null)) as { statut?: string } | null;
-      if (corps?.statut === "en_cours") {
-        setEtat("ailleurs");
-        return;
-      }
-      // La génération a abouti : on relit la page, qui servira la version nouvelle.
-      router.refresh();
-      setEtat("repos");
+      // UNE GÉNÉRATION DÉJÀ EN COURS N'EST PAS UNE GÉNÉRATION ABOUTIE (revue du 12/08/2026).
+      i = issueDepuisReponse({ ok: res.ok, status: res.status, corps: await res.json().catch(() => null) });
     } catch {
       // ON NE PROMET PAS QUE ÇA MARCHERA LA PROCHAINE FOIS. L'ancienne version reste affichée, et
       // c'est le comportement juste : elle est la décision vendue, pas un pis-aller.
-      setEtat("echec");
+      i = { type: "echec", motif: "reseau" };
+    }
+    enVol.current = false;
+    if (cleCourante.current !== demande) return;
+    setIssue(i);
+    setEtat((e) => suivantAction(e, { type: "issue", issue: i }));
+    // La version nouvelle existe : la confirmation se lit, puis la page la sert. Le bloc reste confirmé
+    // jusqu'à ce que la page relue le retire (le dossier n'a alors plus de raison de le proposer).
+    if (i.type === "livree") {
+      minuterie.current = window.setTimeout(() => startTransition(() => router.refresh()), LECTURE_CONFIRMATION_MS);
     }
   };
 
@@ -71,23 +118,11 @@ export function AnalyseAncienProjet(
             ? <>Vous avez modifié votre lien avec ce bien ou la raison de votre analyse. Ce que vous lisez repose sur ce que vous aviez déclaré au moment de cette analyse.</>
             : <>Une version plus récente de futur•e est disponible pour ce dossier. Ce que vous lisez reste l&apos;analyse telle qu&apos;elle a été établie.</>}
       </p>
-      <button
-        onClick={mettreAJour}
-        disabled={etat === "encours"}
-        className="text-[13px] px-3.5 py-2 rounded-lg border border-[var(--border-1)] bg-transparent text-label hover:border-[var(--border-2)] transition-colors disabled:opacity-60"
-      >
-        {etat === "encours" ? "Mise à jour…" : "Mettre à jour l'analyse"}
-      </button>
-      {etat === "ailleurs" && (
-        <p className="text-[12.5px] text-muted w-full">
-          Une mise à jour est déjà en cours. Rechargez la page dans un instant.
-        </p>
-      )}
-      {etat === "echec" && (
-        <p className="text-[12.5px] text-muted w-full">
-          La mise à jour n&apos;a pas abouti. L&apos;analyse ci-dessous reste celle de votre achat.
-        </p>
-      )}
+      <BoutonAction etat={etat} onAppui={mettreAJour} libelles={LIBELLES} />
+      {/* Toujours présent, vide au repos : une région annoncée doit exister avant que son texte change. */}
+      <p className="text-[12.5px] text-muted w-full empty:-mt-2" aria-live="polite">
+        {compteRenduAction(etat, issue)}
+      </p>
     </div>
   );
 }

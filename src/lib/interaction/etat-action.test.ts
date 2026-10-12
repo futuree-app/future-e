@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { appuiAccepte, issueDepuisReponse, suivantAction, type EtatAction, type IssueAction } from "./etat-action.ts";
+import { appuiAccepte, compteRenduAction, gesteAppui, issueDepuisReponse, suivantAction, type EtatAction, type IssueAction } from "./etat-action.ts";
 
 const ETATS: EtatAction[] = ["repos", "attente", "succes", "echec", "ailleurs"];
 
@@ -40,6 +40,49 @@ test("A3. double clic : un seul appui accepté pendant l'attente ; l'échec perm
   assert.match(src, /onClick=\{\(\) => \{ if \(!enAttente\) onAppui\(\); \}\}/);
   assert.doesNotMatch(src, /fetch\(|setTimeout\([^)]*succes/, "le composant n'appelle rien et ne fabrique aucun succès");
   assert.match(src, /aria-busy=\{enAttente\}/);
-  // Pas encore raccordé à la production (FUT-10 réécrit AnalyseAncienProjet).
-  assert.doesNotMatch(readFileSync("src/components/report/AnalyseAncienProjet.tsx", "utf8"), /BoutonAction/);
+});
+
+test("A4. l'appui selon l'état : une seule demande, et « déjà en cours » relit la page sans relancer", () => {
+  assert.equal(gesteAppui("repos"), "envoyer");
+  assert.equal(gesteAppui("echec"), "envoyer");
+  assert.equal(gesteAppui("attente"), "ignorer", "double clic");
+  assert.equal(gesteAppui("succes"), "ignorer", "appui pendant la confirmation");
+  assert.equal(gesteAppui("ailleurs"), "relire", "une seconde demande lancerait une génération de plus");
+});
+
+test("A5. le compte rendu : rien d'annoncé sans issue réelle, l'analyse affichée reste dite", () => {
+  assert.equal(compteRenduAction("repos", null), "");
+  assert.match(compteRenduAction("attente", null), /reste lisible/);
+  assert.equal(compteRenduAction("succes", null), "", "pas de confirmation sans version livrée");
+  assert.equal(compteRenduAction("succes", { type: "en_cours" }), "");
+  assert.match(compteRenduAction("succes", { type: "livree", version: 3 }), /nouvelle version est prête/);
+  assert.match(compteRenduAction("echec", { type: "echec", motif: "projet_manquant" }), /décrivez-le.*reste inchangée/);
+  assert.match(compteRenduAction("echec", { type: "echec", motif: "reseau" }), /connexion.*reste inchangée/);
+  assert.match(compteRenduAction("ailleurs", { type: "en_cours" }), /déjà en cours/);
+  for (const e of ETATS) for (const i of [null, { type: "en_cours" } as IssueAction]) {
+    assert.doesNotMatch(compteRenduAction(e, i), /%|restant|secondes/, "ni pourcentage ni temps restant");
+  }
+});
+
+test("A6. raccordé au vrai bouton : réponse réelle, trois raisons, rechargement seulement après livraison", () => {
+  const src = readFileSync("src/components/report/AnalyseAncienProjet.tsx", "utf8");
+  assert.match(src, /<BoutonAction etat=\{etat\} onAppui=\{mettreAJour\} libelles=\{LIBELLES\} \/>/);
+  assert.match(src, /issueDepuisReponse\(\{ ok: res\.ok, status: res\.status, corps:/);
+  assert.match(src, /setEtat\(\(e\) => suivantAction\(e, \{ type: "issue", issue: i \}\)\)/);
+  // Les trois raisons de FUT-10 : projet, lien avec le bien, voisinage.
+  assert.match(src, /raison\?: "projet" \| "lien" \| "voisinage"/);
+  assert.match(src, /Votre projet a changé depuis cette analyse/);
+  assert.match(src, /Vous avez modifié votre lien avec ce bien/);
+  assert.match(src, /Une version plus récente de futur•e est disponible/);
+  // La page ne relit la nouvelle version qu'après une livraison, ou sur demande quand une autre tourne.
+  const refresh = [...src.matchAll(/router\.refresh\(\)/g)].length;
+  assert.equal(refresh, 2);
+  assert.match(src, /if \(i\.type === "livree"\) \{\n\s+minuterie\.current = window\.setTimeout\(\(\) => startTransition\(\(\) => router\.refresh\(\)\)/);
+  assert.match(src, /if \(geste === "relire"\) \{ startTransition\(\(\) => router\.refresh\(\)\); return; \}/);
+  // Une réponse arrivée pour un autre dossier, ou après le démontage, ne confirme rien.
+  assert.match(src, /if \(cleCourante\.current !== demande\) return;/);
+  // La région annoncée existe avant que son texte change.
+  assert.match(src, /aria-live="polite"/);
+  // Aucune présentation n'est activée ici : le composant est le même dans les deux rendus.
+  assert.doesNotMatch(src, /DECISION_RELEVE/);
 });

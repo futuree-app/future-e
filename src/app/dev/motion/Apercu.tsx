@@ -47,8 +47,8 @@ export function Apercu() {
   return (
     <div style={{ display: "grid", gap: 56 }}>
       <section id="q1" style={{ display: "grid", gap: 16 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg-hi)", margin: 0 }}>Q1 · Mettre à jour l&apos;analyse (composant prêt, non raccordé)</h2>
-        <p style={{ margin: 0, color: "var(--fg-3)", fontSize: 14, lineHeight: 1.55 }}>Le vrai composant `BoutonAction`, piloté par les règles de production et le contrat réel de la route `actualiser`, rejoué sans rien écrire. Son raccordement à `AnalyseAncienProjet` attend la fusion de FUT-10.</p>
+        <h2 style={{ fontSize: 22, fontWeight: 600, color: "var(--fg-hi)", margin: 0 }}>Q1 · Mettre à jour l&apos;analyse (raccordé dans AnalyseAncienProjet, FUT-93)</h2>
+        <p style={{ margin: 0, color: "var(--fg-3)", fontSize: 14, lineHeight: 1.55 }}>Le vrai composant `BoutonAction`, piloté par les règles de production et le contrat réel de la route `actualiser`, rejoué sans rien écrire. Le même composant sert « Mettre à jour l'analyse » dans le rapport.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px" }}>
           <Choix titre="Réponse" valeurs={ISSUES} courant={issue} choisir={setIssue} />
           <Choix titre="Délai" valeurs={DELAIS} courant={delai} choisir={setDelai} />
