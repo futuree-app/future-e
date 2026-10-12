@@ -1,0 +1,42 @@
+/* FUT-75 · LES PASSAGES VIEW TRANSITIONS DE L'ATELIER. DEV UNIQUEMENT (importé par `/dev/fut75/layout`).
+
+   Feuille GLOBALE, et c'est voulu : les pseudo-éléments `::view-transition-*` vivent sur la racine du
+   document, hors de tout composant. Dans un module CSS, Webpack les refuse (sélecteurs non « purs ») et
+   Turbopack renomme les @keyframes qu'ils appellent, si bien que l'animation n'est jamais appliquée.
+   Seuls les noms `fut75-*` sont touchés, et seulement quand une transition est lancée par l'atelier. */
+
+/* Les passages View Transitions (dev uniquement) : la scène se renouvelle, les éléments nommés se transforment. */
+::view-transition-group(*) { animation-duration: 340ms; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+::view-transition-old(fut75-scene) { animation: 140ms cubic-bezier(0.4, 0, 1, 1) both vtSortie; }
+::view-transition-new(fut75-scene) { animation: 320ms cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both vtEntree; }
+/* Pas de flou ici : flouter l'image d'une scène entière coûte cher sur un appareil lent (mesuré). Le
+   flou court reste réservé aux petits éléments qui basculent (`.bascule`). */
+@keyframes vtSortie { to { opacity: 0; } }
+@keyframes vtEntree { from { opacity: 0; transform: translateY(10px); } }
+
+html[data-sens="avant"]::view-transition-old(fut75-vue) { animation: 160ms cubic-bezier(0.4, 0, 1, 1) both vueSortieGauche; }
+html[data-sens="avant"]::view-transition-new(fut75-vue) { animation: 320ms cubic-bezier(0.2, 0.7, 0.2, 1) 40ms both vueEntreeDroite; }
+html[data-sens="arriere"]::view-transition-old(fut75-vue) { animation: 160ms cubic-bezier(0.4, 0, 1, 1) both vueSortieDroite; }
+html[data-sens="arriere"]::view-transition-new(fut75-vue) { animation: 320ms cubic-bezier(0.2, 0.7, 0.2, 1) 40ms both vueEntreeGauche; }
+@keyframes vueSortieGauche { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes vueSortieDroite { to { opacity: 0; transform: translateX(24px); } }
+@keyframes vueEntreeDroite { from { opacity: 0; transform: translateX(32px); } }
+@keyframes vueEntreeGauche { from { opacity: 0; transform: translateX(-32px); } }
+
+/* LA PORTÉE (`vues.ts`, `avecContinuite`) : les noms ne valent que pendant la transition de leur composant,
+   et la racine n'est pas photographiée. */
+html[data-vt] { view-transition-name: none; }
+html[data-vt="c1"] [data-vt-nom="fut75-scene"] { view-transition-name: fut75-scene; }
+html[data-vt="c1"] [data-vt-nom="fut75-priorite"] { view-transition-name: fut75-priorite; }
+html[data-vt="c1"] [data-vt-nom="fut75-jours"] { view-transition-name: fut75-jours; }
+html[data-vt="c1"] [data-vt-nom="fut75-nuits"] { view-transition-name: fut75-nuits; }
+html[data-vt="c2"] [data-vt-nom="fut75-conclusion"] { view-transition-name: fut75-conclusion; }
+html[data-vt="q3"] [data-vt-nom="fut75-commune-30189"] { view-transition-name: fut75-commune-30189; }
+html[data-vt="q3"] [data-vt-nom="fut75-commune-35238"] { view-transition-name: fut75-commune-35238; }
+html[data-vt="q3"] [data-vt-nom="fut75-commune-67482"] { view-transition-name: fut75-commune-67482; }
+html[data-vt="q3"] [data-vt-nom="fut75-commune-29019"] { view-transition-name: fut75-commune-29019; }
+html[data-vt="q3"] [data-vt-nom="fut75-commune-74010"] { view-transition-name: fut75-commune-74010; }
+html[data-vt="q5"] [data-vt-nom="fut75-lecture"] { view-transition-name: fut75-lecture; }
+html[data-vt="q5"] [data-vt-nom="fut75-ligne-etat"] { view-transition-name: fut75-ligne-etat; }
+html[data-vt="q6"] [data-vt-nom="fut75-vue"] { view-transition-name: fut75-vue; }
+html[data-vt="q6"] [data-vt-nom="fut75-vue-glyphe"] { view-transition-name: fut75-vue-glyphe; }

@@ -38,7 +38,7 @@ const AUJOURDHUI = 2026;
 const HORIZON_DU_DOSSIER: CleHorizon = "gwl20";
 const arrondi = (v: number) => Math.round(v);
 
-function useLargeur<T extends HTMLElement>() {
+export function useLargeur<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [l, setL] = useState(640);
   useLayoutEffect(() => {

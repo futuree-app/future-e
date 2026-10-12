@@ -10,15 +10,15 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
 import { Banc, type ReglagesBanc } from "@/components/prototypes/fut75/Banc";
-import { cheminConfortEte, COMMUNES_HORIZONS, etatsDuRepere, mesuresHorizons } from "./donnees";
+import { apercuParEchelle, cheminConfortEte, COMMUNES_HORIZONS, etatsDuRepere, mesuresHorizons } from "./donnees";
 
 export const dynamic = "force-dynamic";
 
 export default async function AtelierFut75({ searchParams }: { searchParams: Promise<ReglagesBanc> }) {
   if (process.env.NODE_ENV === "production") notFound();
   const sp = await searchParams;
-  const [adresse, commune, chemin, ...horizons] = await Promise.all([
-    etatsDuRepere("adresse"), etatsDuRepere("commune"), cheminConfortEte(),
+  const [adresse, commune, chemin, apercu, ...horizons] = await Promise.all([
+    etatsDuRepere("adresse"), etatsDuRepere("commune"), cheminConfortEte(), apercuParEchelle(),
     ...COMMUNES_HORIZONS.map(async (c) => ({ ...c, mesures: await mesuresHorizons(c.insee) })),
   ]);
   return (
@@ -36,7 +36,7 @@ export default async function AtelierFut75({ searchParams }: { searchParams: Pro
             temps et le chemin d&apos;une décision, sans qu&apos;aucune valeur ne s&apos;anime.
           </p>
         </header>
-        <Banc initial={sp} repere={{ adresse, commune }} horizons={horizons} chemin={chemin} />
+        <Banc initial={sp} repere={{ adresse, commune }} horizons={horizons} chemin={chemin} apercu={apercu} />
       </div>
     </main>
   );

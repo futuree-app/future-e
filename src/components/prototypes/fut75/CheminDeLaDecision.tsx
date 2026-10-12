@@ -30,7 +30,12 @@ export type DonneesChemin = {
   constat: { sujet: string; enonce: string };
   projet: { libelle: string; poids: number; poidsMax: number };
   fait: { enonce: string; grain: string; preuves: { libelle: string; valeur?: string; href?: string; date?: string }[] };
-  convention: { horizon: number; mesures: { nom: string; valeur: number; seuil: number; unite: string; franchi: boolean }[]; methode: string[] };
+  convention: {
+    horizon: number;
+    /** `reference` : la moyenne 1976-2005 reconstruite par la même règle que le moteur (`reconstructReference`). */
+    mesures: { cle: string; nom: string; valeur: number; seuil: number; unite: string; franchi: boolean; reference: number | null }[];
+    methode: string[];
+  };
   limite: string;
   geste: { libelle: string; aVerifier: string[] };
 };

@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import "./transitions.css";
 
 export const metadata: Metadata = { title: "Atelier FUT-75 · futur•e", robots: { index: false, follow: false } };
 

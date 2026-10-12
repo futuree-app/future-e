@@ -15,9 +15,17 @@
   --m-plafond: 900ms;
   --m-releve: cubic-bezier(0.2, 0.7, 0.2, 1);
   --m-sortie: cubic-bezier(0.4, 0, 1, 1);
+  /* Deuxième itération : les niveaux geste / état / structure (motion.ts, NIVEAUX et DUREES_V2). */
+  --m-pression: 90ms;
+  --m-ressort-duree: 280ms;
+  --m-bascule: 180ms;
+  --m-deploiement: 300ms;
+  --m-devoilement: 420ms;
+  /* Le micro-ressort (motion.ts, `ressortLineaire()`), réservé aux commandes. */
+  --m-ressort: linear(0, 0.045, 0.152, 0.287, 0.427, 0.559, 0.675, 0.772, 0.849, 0.907, 0.95, 0.98, 1, 1.012, 1.018, 1.02, 1.019, 1.018, 1.015, 1.012, 1.01, 1.007, 1.005, 1.003, 1.002, 1.001, 1.001, 1);
 }
-.atelier[data-mouvement="reduit"] { --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; }
-.atelier[data-mouvement="aucun"] { --m-micro: 0ms; --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; }
+.atelier[data-mouvement="reduit"] { --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; --m-ressort-duree: 0ms; --m-deploiement: 0ms; --m-devoilement: 0ms; --m-pression: 0ms; }
+.atelier[data-mouvement="aucun"] { --m-micro: 0ms; --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; --m-ressort-duree: 0ms; --m-deploiement: 0ms; --m-devoilement: 0ms; --m-pression: 0ms; --m-bascule: 0ms; }
 .atelier[data-mouvement="aucun"] *, .atelier[data-mouvement="aucun"] *::before, .atelier[data-mouvement="aucun"] *::after {
   transition: none !important;
   animation: none !important;
@@ -57,7 +65,9 @@
 /* Le recul : tout le dessin s'agrandit autour du centre ; les traits gardent leur épaisseur. */
 .dessin { transform-box: view-box; transform-origin: 50% 50%; transition: transform var(--m-etat) var(--m-releve); }
 /* Le réticule : quatre coins qui viennent se poser sur le périmètre choisi. */
-.coin { fill: none; stroke: var(--r-encre); stroke-width: 1.4; vector-effect: non-scaling-stroke; transition: transform var(--m-etat) var(--m-releve), opacity var(--m-micro) ease; }
+.coin { fill: none; stroke: var(--r-encre); stroke-width: 1.4; vector-effect: non-scaling-stroke; transition: transform var(--m-ressort-duree) var(--m-ressort), opacity var(--m-micro) ease; }
+/* La croisée de visée : elle naît du centre (scale), n'existe qu'au pointage ou au focus. */
+.croisee { stroke: var(--r-encre); stroke-width: 1; vector-effect: non-scaling-stroke; transform-box: view-box; transform-origin: 50% 50%; transition: transform var(--m-ressort-duree) var(--m-ressort), opacity var(--m-micro) ease; }
 .coin[data-repos="true"] { stroke: var(--r-discret); }
 /* Le nom du périmètre, détouré du fond (halo cartographique) : il reste lisible par-dessus un contour. */
 .legendeReticule { font-family: var(--font-mono); font-size: 9px; fill: var(--r-texte); paint-order: stroke; stroke: var(--r-fond); stroke-width: 4px; stroke-linejoin: round; transition: transform var(--m-etat) var(--m-releve), opacity var(--m-micro) ease; }
@@ -123,3 +133,313 @@
 .pas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .conclusionAncre { transition: box-shadow var(--m-etat) var(--m-releve); }
 .conclusionAncre[data-eclairee="true"] { box-shadow: 0 0 0 1px var(--r-encre); }
+
+/* ══ DEUXIÈME ITÉRATION ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Le sélecteur élastique ─────────────────────────────────────────────────────────────────── */
+.selecteur { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--r-filet-fort); border-radius: 4px; padding: 3px; gap: 2px; background: var(--bg-deep); max-width: 100%; }
+.selecteurIndicateur {
+  position: absolute; inset: 3px; border-radius: 3px; pointer-events: none;
+  background: color-mix(in srgb, var(--sel-teinte) 16%, transparent);
+  box-shadow: inset 0 -2px 0 var(--sel-teinte);
+}
+.selecteurOption {
+  position: relative; z-index: 1; display: grid; justify-items: center; gap: 2px; cursor: pointer;
+  border: 0; background: transparent; color: var(--r-discret); border-radius: 3px;
+  transition: color var(--m-micro) ease, transform var(--m-pression) ease, background-color var(--m-micro) ease;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.selecteurOption:hover { color: var(--r-texte); background: color-mix(in srgb, var(--fg-hi) 4%, transparent); }
+.selecteurOption[aria-checked="true"] { color: var(--r-encre); }
+.selecteurOption:active { transform: scale(0.965); }
+.selecteurOption:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.selecteurGrand .selecteurOption { padding: 12px 18px; min-width: 92px; min-height: 56px; }
+.selecteurCompact .selecteurOption { padding: 7px 12px; min-height: 36px; }
+.selecteurLibelle { font-variation-settings: "wdth" 112; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.selecteurCompact .selecteurLibelle { font-size: 13.5px; font-variation-settings: "wdth" 100; }
+.selecteurSous { font-family: var(--font-mono); font-size: 11px; color: var(--r-meta); }
+.selecteurOption[aria-checked="true"] .selecteurSous { color: var(--sel-teinte); }
+@media (max-width: 420px) { .selecteurGrand .selecteurOption { min-width: 0; padding: 10px 8px; } .selecteurLibelle { font-size: 16px; } }
+
+/* ── La bascule : un contenu qui s'échange d'un bloc (flou court, fondu, léger recadrage) ───────── */
+.bascule { animation: bascule var(--m-bascule) var(--m-releve) both; }
+@keyframes bascule { from { opacity: 0; filter: blur(3px); transform: scale(0.97); } to { opacity: 1; filter: blur(0); transform: none; } }
+.atelier[data-mouvement="reduit"] .bascule { animation: fondu var(--m-micro) ease both; }
+
+/* ── B1 · éditoriale ───────────────────────────────────────────────────────────────────────── */
+.editorial { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+.heros { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 28px; align-items: end; }
+.herosChiffre { min-width: 2.2ch; }
+.chiffreGeant {
+  display: block; font-variation-settings: "wdth" 125; font-weight: 600; font-variant-numeric: tabular-nums lining-nums;
+  font-size: clamp(88px, 13vw, 168px); line-height: 0.82; letter-spacing: -0.045em; color: var(--red);
+}
+.herosTexte { display: grid; gap: 6px; padding-bottom: 6px; }
+.herosUnite { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(18px, 2vw, 24px); line-height: 1.15; color: var(--r-encre); margin: 0; }
+.herosContexte { font-size: 15px; color: var(--r-texte); margin: 0; }
+.herosEcart { font-size: 15px; color: var(--r-discret); margin: 0; }
+.herosEcart strong { color: var(--r-encre); font-weight: 600; }
+.herosDossier { font-family: var(--font-mono); font-size: 11.5px; color: var(--r-meta); margin: 0; }
+.chaleur { color: var(--red); }
+@media (max-width: 560px) { .heros { grid-template-columns: 1fr; } .herosTexte { padding-bottom: 0; } }
+
+.figureGrille { margin: 0; display: grid; gap: 12px; }
+/* `contain` : un changement dans la grille ne recalcule ni ne repeint le reste de la page. */
+.grille { display: grid; grid-template-columns: repeat(var(--par-ligne), minmax(0, 22px)); gap: 5px; contain: layout paint; }
+.case {
+  display: inline-block; aspect-ratio: 1; width: 100%; border-radius: 2px;
+  border: 1px solid var(--r-filet-fort); background: transparent; position: relative;
+  transition: background-color var(--m-etat) var(--m-releve), border-color var(--m-etat) var(--m-releve);
+}
+.case[data-etat="reference"] { background: var(--fg-3); border-color: var(--fg-3); }
+.case[data-etat="horizon"] { background: var(--red); border-color: var(--red); }
+.case[data-etat="baisse"] { border-style: dashed; border-color: var(--fg-3); }
+.case[data-change="a"] { animation: lisereA var(--m-devoilement) var(--m-releve) both; }
+.case[data-change="b"] { animation: lisereB var(--m-devoilement) var(--m-releve) both; }
+@keyframes lisereA { from { box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 55%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
+@keyframes lisereB { from { box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 55%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
+.case[data-seuil]::before { content: ""; position: absolute; left: -4px; top: -4px; bottom: -4px; width: 1px; background: var(--r-encre); opacity: 0.55; }
+.legendeGrille { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 12.5px; color: var(--r-discret); }
+.legendeGrille span { display: inline-flex; gap: 7px; align-items: center; }
+.legendeGrille i.case { width: 11px; height: 11px; }
+.legendeSeuil { display: inline-block; width: 1px; height: 13px; background: var(--r-encre); opacity: 0.55; }
+.legendeUnite { font-family: var(--font-mono); font-size: 11px; color: var(--r-meta); }
+.secondaire { display: grid; gap: 12px; padding-top: 20px; border-top: 1px solid var(--r-filet); }
+.secondaireTete { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.secondaireTexte { display: grid; gap: 2px; font-size: 14px; color: var(--r-discret); }
+.chiffreMoyen { font-variation-settings: "wdth" 125; font-weight: 600; font-size: clamp(44px, 6vw, 64px); line-height: 0.9; letter-spacing: -0.035em; color: var(--red); font-variant-numeric: tabular-nums; }
+.secondaire .grille { grid-template-columns: repeat(var(--par-ligne), minmax(0, 14px)); gap: 3px; }
+.noteHorizons { display: grid; gap: 8px; font-size: 13px; line-height: 1.55; color: var(--r-discret); }
+.noteHorizons strong { color: var(--r-texte); font-weight: 600; }
+
+/* ── B2 · instrument ───────────────────────────────────────────────────────────────────────── */
+/* `minmax(0, 1fr)` et `min-width: 0` : le graphique mesure sa colonne ; sans eux, la colonne prendrait
+   la largeur du graphique, et le graphique celle de la colonne (boucle qui débordait à 390 px). */
+.instrument { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+.instrumentTete { display: flex; flex-wrap: wrap; gap: 12px; }
+.lectureInstrument { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 22px; align-items: end; }
+.chiffreInstrument { font-variation-settings: "wdth" 125; font-weight: 600; font-size: clamp(64px, 9vw, 112px); line-height: 0.84; letter-spacing: -0.04em; color: var(--red); font-variant-numeric: tabular-nums; min-width: 2ch; }
+.lectureInstrumentTexte { display: grid; gap: 5px; padding-bottom: 4px; }
+.ecartFort { color: var(--r-encre); font-weight: 600; }
+.instrumentGraphique { display: grid; gap: 0; min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.instrumentGraphique svg { display: block; overflow: visible; }
+.instrumentSelecteur .selecteur { display: grid; width: 100%; }
+.barreReference { fill: color-mix(in srgb, var(--fg-3) 34%, transparent); stroke: var(--fg-3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.barreHorizon { fill: color-mix(in srgb, var(--fg-3) 55%, transparent); transition: fill var(--m-etat) var(--m-releve); }
+.barreHorizon[data-choisi="true"] { fill: var(--red); }
+.valeurBarre { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 600; font-size: 14px; fill: var(--r-discret); font-variant-numeric: tabular-nums; transition: fill var(--m-micro) ease; }
+.valeurBarre[data-choisi="true"] { fill: var(--r-encre); }
+.seuilInstrument { stroke: var(--r-discret); stroke-dasharray: 2 5; stroke-width: 1; opacity: 0.8; }
+.rappel { fill: none; stroke: var(--r-filet-fort); stroke-width: 1; transition: stroke var(--m-etat) var(--m-releve); }
+.rappel[data-choisi="true"] { stroke: var(--red); stroke-width: 1.5; }
+.cote { stroke: var(--red); stroke-width: 1.4; }
+.coteRappel { stroke: var(--red); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.6; }
+.coteTexte { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 700; font-size: 15px; fill: var(--red); }
+@media (max-width: 560px) { .lectureInstrument { grid-template-columns: 1fr; } }
+
+/* ── C · deuxième itération : éléments communs ──────────────────────────────────────────────── */
+.trait { display: inline-block; width: 3px; height: 0.95em; transform: translateY(0.12em); margin-right: 10px; }
+.devoileSurtitre { font-variation-settings: "wdth" 88; font-weight: 600; font-size: 13.5px; color: var(--r-discret); margin: 0; }
+.poids { display: inline-flex; gap: 4px; margin-left: 10px; vertical-align: middle; }
+.poids i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--reg-ecart); }
+.poids i[data-plein] { background: var(--reg-ecart); }
+.losangeGeste { display: inline-block; width: 12px; height: 12px; border: 1.6px solid currentColor; transform: rotate(45deg); margin: 0 14px 0 3px; flex: none; }
+.sceneGeste { display: flex; align-items: center; font-variation-settings: "wdth" 104; font-weight: 600; font-size: clamp(18px, 2.2vw, 22px); line-height: 1.3; color: var(--r-encre); margin: 0; }
+.boutonScene {
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--r-encre); background: transparent; cursor: pointer;
+  border: 1px solid var(--r-filet-fort); border-radius: 4px; padding: 10px 16px; min-height: 44px; justify-self: start;
+  transition: background-color var(--m-micro) ease, border-color var(--m-micro) ease, transform var(--m-pression) ease;
+}
+.boutonScene:hover:not(:disabled) { background: var(--bg-elev-2); border-color: var(--r-discret); }
+.boutonScene:active:not(:disabled) { transform: scale(0.97); }
+.boutonScene:disabled { opacity: 0.4; cursor: default; }
+.boutonScene:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.boutonScenePrincipal { background: var(--r-encre); color: var(--r-fond); border-color: var(--r-encre); }
+.boutonScenePrincipal:hover:not(:disabled) { background: var(--fg-2); border-color: var(--fg-2); }
+
+/* ── C1 · le dévoilement éditorial ─────────────────────────────────────────────────────────── */
+.devoile { display: grid; gap: 22px; }
+.devoileTete { display: grid; gap: 8px; }
+.devoileVerdict { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.15; letter-spacing: -0.01em; color: var(--r-encre); margin: 0; }
+.scene75 { border: 1px solid var(--r-plaque-bord); border-radius: 4px; background: var(--r-plaque); padding: 22px; display: grid; gap: 22px; }
+@media (min-width: 640px) { .scene75 { padding: 32px 36px; } }
+.progression { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.progressionPas { display: grid; gap: 8px; text-align: left; background: transparent; border: 0; padding: 4px 0; cursor: pointer; color: var(--r-meta); font: inherit; }
+.progressionBarre { height: 3px; border-radius: 2px; background: var(--r-filet-fort); position: relative; overflow: hidden; }
+.progressionBarre::after { content: ""; position: absolute; inset: 0; background: var(--reg-ecart); transform: scaleX(0); transform-origin: left; transition: transform var(--m-devoilement) var(--m-releve); }
+.progressionPas[data-fait] .progressionBarre::after, .progressionPas[aria-current="step"] .progressionBarre::after { transform: scaleX(1); }
+.progressionPas[aria-current="step"] { color: var(--r-encre); }
+.progressionPas:hover { color: var(--r-texte); }
+.progressionPas:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 3px; }
+.progressionTexte { font-size: 12.5px; line-height: 1.3; }
+@media (max-width: 640px) { .progressionTexte { display: none; } }
+.sceneCorps { min-height: 300px; display: grid; align-content: start; gap: 18px; }
+@media (max-width: 640px) { .sceneCorps { min-height: 360px; } }
+.sceneTitre { font-family: var(--font-mono); font-size: 12px; color: var(--r-meta); margin: 0; outline: none; }
+.sceneContenu { display: grid; gap: 18px; align-content: start; }
+.prioriteGrande { font-variation-settings: "wdth" 112; font-weight: 600; font-size: clamp(38px, 6.4vw, 72px); line-height: 1; letter-spacing: -0.03em; color: var(--r-encre); width: fit-content; }
+.scenePoids { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 15px; color: var(--r-texte); margin: 0; }
+.scenePoids .poids { margin: 0 8px 0 0; }
+.chiffresScene { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px 40px; }
+.chiffreScene { display: grid; gap: 4px; width: fit-content; }
+.chiffreSceneValeur { font-variation-settings: "wdth" 125; font-weight: 600; font-size: clamp(72px, 10vw, 128px); line-height: 0.85; letter-spacing: -0.045em; color: var(--red); font-variant-numeric: tabular-nums; }
+.chiffreSceneUnite { font-variation-settings: "wdth" 108; font-weight: 600; font-size: 17px; color: var(--r-encre); }
+.chiffreSceneRef { font-size: 14px; color: var(--r-discret); }
+.sceneNote { font-size: 13px; line-height: 1.55; color: var(--r-discret); margin: 0; }
+.sceneNote a, .coucheSource a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--r-filet-fort); }
+.sceneVerdict { display: flex; gap: 16px; font-variation-settings: "wdth" 110; font-weight: 600; font-size: clamp(28px, 4.2vw, 46px); line-height: 1.08; letter-spacing: -0.02em; color: var(--r-encre); margin: 0; }
+.traitVertical { flex: none; width: 4px; border-radius: 2px; }
+.parceQue { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.parceQueMot { font-family: var(--font-mono); font-size: 12px; color: var(--r-meta); }
+.etiquetteFondement { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 11px; border: 1px solid var(--r-filet-fort); border-radius: 999px; font-size: 14px; color: var(--r-texte); background: var(--bg-deep); width: fit-content; }
+.sceneTexte { font-size: 16px; line-height: 1.6; color: var(--r-texte); margin: 0; }
+.sceneLimite { font-size: 14px; line-height: 1.55; color: var(--r-discret); border-left: 1px dashed var(--r-discret); padding-left: 12px; margin: 0; }
+.sceneCommandes { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+
+/* ── C2 · la révélation dans la carte ──────────────────────────────────────────────────────── */
+.carteCouches { border: 1px solid var(--r-plaque-bord); border-radius: 4px; background: var(--r-plaque); padding: 26px; display: grid; gap: 28px; }
+@media (min-width: 640px) { .carteCouches { padding: 34px 40px; } }
+.carteCouches[data-deplie="true"] .carteVerdict { font-size: clamp(30px, 4.4vw, 52px); }
+.carteConclusion { display: grid; gap: 18px; align-content: start; }
+.carteVerdict { position: relative; font-variation-settings: "wdth" 110; font-weight: 600; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; padding-left: 18px; transition: color var(--m-etat) var(--m-releve); }
+.carteRegistre { position: absolute; left: 0; top: 0.12em; bottom: 0.08em; width: 4px; border-radius: 2px; background: var(--reg-ecart); transform-origin: top; transition: transform var(--m-etat) var(--m-releve); }
+/* Les strates : quatre colonnes sur grand écran, deux sur tablette, une sur mobile. Chacune ouvre sur un
+   filet épais : on lit une coupe, des fondations sous la conclusion. */
+.couches { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) { .couches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .couches { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.couche { display: grid; gap: 10px; align-content: start; padding-top: 14px; border-top: 2px solid var(--r-filet-fort); transition: opacity var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve); }
+.couche[data-visible="false"] { opacity: 0; transform: translateY(8px); }
+.couche[data-limite] { border-top-style: dashed; }
+.coucheNom { font-family: var(--font-mono); font-size: 11.5px; color: var(--r-meta); margin: 0; }
+.couchePrincipal { font-variation-settings: "wdth" 108; font-weight: 600; font-size: 20px; line-height: 1.2; color: var(--r-encre); margin: 0; display: grid; gap: 10px; }
+.couchePrincipal .poids { margin: 0; }
+.coucheChiffres { display: grid; gap: 10px; }
+.coucheChiffre { display: grid; gap: 4px; font-size: 13.5px; line-height: 1.4; color: var(--r-discret); }
+.coucheChiffre strong { font-variation-settings: "wdth" 125; font-weight: 600; font-size: 44px; line-height: 0.9; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.coucheSource { font-size: 12.5px; color: var(--r-discret); margin: 0; }
+.coucheSeuil { display: grid; gap: 6px; }
+.coucheSeuilPiste { position: relative; height: 8px; border-radius: 2px; background: var(--r-filet); }
+.coucheSeuilValeur { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--red); }
+.coucheSeuilTrait { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--r-encre); box-shadow: 0 0 0 2px var(--r-plaque); }
+.coucheSeuilTexte { font-family: var(--font-mono); font-size: 11.5px; color: var(--r-discret); white-space: nowrap; }
+.coucheTexte { font-size: 15px; line-height: 1.55; color: var(--r-texte); margin: 0; }
+
+/* ══ INTERACTIONS DU QUOTIDIEN ══════════════════════════════════════════════════════════════════ */
+
+/* ── Q1 · le bouton d'action ────────────────────────────────────────────────────────────────── */
+.actionBloc { display: grid; gap: 12px; justify-items: start; }
+.boutonAction {
+  position: relative; isolation: isolate; min-width: 268px; min-height: 48px; padding: 0 22px; cursor: pointer;
+  border: 0; background: transparent; color: var(--r-fond); font: inherit; font-weight: 600; font-size: 15px;
+  transition: transform var(--m-pression) ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.boutonAction:active { transform: scale(0.97); transition: transform var(--m-ressort-duree) var(--m-ressort); }
+.boutonAction:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 3px; border-radius: 8px; }
+/* Le fond EST le bouton : il change de rayon, de teinte et de contour, sans jamais être remplacé. */
+.boutonActionFond {
+  position: absolute; inset: 0; z-index: -1; border-radius: 6px; background: var(--r-encre); border: 1px solid var(--r-encre);
+  transition: border-radius var(--m-etat) var(--m-releve), background-color var(--m-etat) var(--m-releve), border-color var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve);
+}
+.boutonAction:hover .boutonActionFond { background: var(--fg-2); }
+.boutonAction[data-etat="attente"] { color: var(--r-encre); cursor: progress; }
+.boutonAction[data-etat="attente"] .boutonActionFond { border-radius: 24px; background: var(--bg-elev-2); border-color: var(--r-filet-fort); transform: scaleX(0.94); }
+.boutonAction[data-etat="succes"] { color: var(--r-encre); }
+.boutonAction[data-etat="succes"] .boutonActionFond { background: color-mix(in srgb, var(--reg-alignement) 16%, var(--bg-deep)); border-color: var(--reg-alignement); }
+.boutonAction[data-etat="echec"] .boutonActionFond { background: var(--r-encre); border-color: var(--red); box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 40%, transparent); }
+.boutonAction[data-etat="ailleurs"] { color: var(--r-encre); }
+.boutonAction[data-etat="ailleurs"] .boutonActionFond { background: var(--bg-elev-2); border-color: var(--reg-controle); }
+.boutonActionContenu { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+.emblemeAttente { flex: none; fill: none; stroke: var(--r-encre); stroke-width: 1.5; stroke-linejoin: round; }
+.emblemeAttente circle, .emblemeAttente rect { stroke-dasharray: 1 1; animation: tracerBoucle 1800ms var(--m-releve) infinite; }
+.emblemeAttente rect:nth-of-type(1) { animation-delay: 200ms; }
+.emblemeAttente rect:nth-of-type(2) { animation-delay: 400ms; }
+@keyframes tracerBoucle { 0% { stroke-dashoffset: 1; } 45%, 70% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; } }
+.atelier[data-mouvement="reduit"] .emblemeAttente circle, .atelier[data-mouvement="reduit"] .emblemeAttente rect { animation: none; stroke-dasharray: none; }
+.coche { fill: none; stroke: var(--reg-alignement); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; animation: cocher 280ms var(--m-releve) 60ms both; }
+@keyframes cocher { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.actionCompteRendu { font-size: 13.5px; line-height: 1.5; color: var(--r-discret); margin: 0; min-height: 3em; }
+.actionCompteRendu[data-etat="succes"] { color: var(--r-texte); }
+.actionCompteRendu[data-etat="echec"] { color: var(--r-texte); }
+
+/* ── Q2 · sélections ────────────────────────────────────────────────────────────────────────── */
+.selectionsGrille { display: grid; gap: 22px; }
+.selectionsLigne { display: grid; gap: 8px; justify-items: start; }
+
+/* ── Q3 · communes à comparer ──────────────────────────────────────────────────────────────── */
+.selectionCommune { display: grid; gap: 18px; }
+.listeCommunes { list-style: none; margin: 0; padding: 0; display: grid; }
+.ligneCommune { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--r-filet); transition: background-color var(--m-micro) ease; }
+.ligneCommune[data-pris] .nomCommune { color: var(--r-discret); }
+.nomCommune { display: grid; font-size: 16px; font-weight: 600; color: var(--r-encre); transition: color var(--m-etat) ease; }
+.depCommune { font-size: 12.5px; font-weight: 400; color: var(--r-meta); }
+.boutonComparer {
+  font: inherit; font-size: 13.5px; font-weight: 600; min-height: 40px; padding: 0 14px; cursor: pointer; border-radius: 999px;
+  border: 1px solid var(--r-filet-fort); background: transparent; color: var(--r-encre);
+  transition: background-color var(--m-micro) ease, border-color var(--m-micro) ease, transform var(--m-pression) ease, color var(--m-micro) ease;
+}
+.boutonComparer:hover { border-color: var(--accent); }
+.boutonComparer:active { transform: scale(0.95); }
+.boutonComparer[aria-pressed="true"] { color: var(--r-discret); border-style: dashed; }
+.boutonComparer:focus-visible, .jeton:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.plateau { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--r-filet-fort); border-radius: 6px; background: var(--bg-deep); min-height: 64px; }
+.plateauCompte { font-size: 13.5px; color: var(--r-discret); }
+.plateauCompte strong { display: inline-block; font-variation-settings: "wdth" 120; font-size: 22px; color: var(--accent); margin-right: 4px; }
+.ressortPose { animation: pose var(--m-ressort-duree) var(--m-ressort) both; }
+@keyframes pose { from { transform: scale(0.6); opacity: 0.4; } to { transform: none; opacity: 1; } }
+.plateauJetons { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.jeton { font: inherit; font-size: 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--accent); color: var(--r-encre); background: color-mix(in srgb, var(--accent) 14%, transparent); cursor: pointer; }
+.jeton span { color: var(--r-discret); }
+.plateauLimite { flex-basis: 100%; font-size: 13px; color: var(--r-texte); }
+
+/* ── Q4 · la carte qui déploie ses preuves ─────────────────────────────────────────────────── */
+.cartePreuves { display: grid; gap: 12px; padding: 22px 0; border-top: 1px solid var(--r-filet); }
+.cartePreuvesEnonce { font-size: 16px; line-height: 1.6; color: var(--r-texte); margin: 0; }
+.deploiement { display: inline-flex; gap: 10px; align-items: center; justify-self: start; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--r-discret); background: transparent; border: 0; padding: 8px 0; cursor: pointer; min-height: 40px; }
+.deploiement:hover { color: var(--r-encre); }
+.deploiement:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+.deploiementSigne { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--r-filet-fort); border-radius: 50%; font-family: var(--font-mono); transition: transform var(--m-ressort-duree) var(--m-ressort), border-color var(--m-micro) ease; }
+.deploiement[aria-expanded="true"] .deploiementSigne { transform: rotate(135deg); border-color: var(--r-encre); }
+/* La hauteur suit le contenu sans mesure : la grille passe de 0fr à 1fr. */
+.zoneDeployee { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--m-deploiement) var(--m-releve); }
+.zoneDeployee[data-ouvert="true"] { grid-template-rows: 1fr; }
+.zoneDeployeeInterieur { overflow: hidden; min-height: 0; }
+.zoneDeployeeContenu { display: grid; gap: 14px; padding: 6px 0 4px 14px; border-left: 1px solid var(--r-filet-fort); opacity: 0; transform: translateY(-6px); transition: opacity var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve); }
+.zoneDeployee[data-ouvert="true"] .zoneDeployeeContenu { opacity: 1; transform: none; transition-delay: 60ms; }
+.listePreuves { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; color: var(--r-texte); }
+.listePreuves li { display: grid; gap: 2px; }
+.listePreuves a { color: var(--r-encre); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--r-filet-fort); }
+.suiteCarte { font-size: 13px; color: var(--r-meta); margin: 0; padding-top: 12px; border-top: 1px dashed var(--r-filet); }
+
+/* ── Q5 · la lecture enrichie ──────────────────────────────────────────────────────────────── */
+.lectureBloc { display: grid; gap: 14px; }
+.lectureCadre { display: grid; gap: 10px; padding: 20px 22px; border: 1px solid var(--r-filet-fort); border-radius: 6px; background: var(--bg-deep); }
+.lectureTexte { font-size: 16.5px; line-height: 1.7; color: var(--r-texte); margin: 0; }
+.ligneEtat { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13.5px; color: var(--r-discret); }
+.ligneEtat[data-etat="echec"] { color: var(--r-texte); }
+.ligneEtatTexte { line-height: 1.45; }
+/* Un repère FIXE, pas un battement : l'attente se dit en mots et en secondes. */
+.repereEtat { flex: none; width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--reg-controle); transform: rotate(45deg); }
+.repereEtat[data-pret] { background: var(--reg-controle); }
+.propositionLecture { display: inline-flex; gap: 10px; align-items: center; font: inherit; font-size: 14px; font-weight: 600; color: var(--r-encre); background: transparent; border: 1px solid var(--reg-controle); border-radius: 999px; padding: 9px 16px; min-height: 44px; cursor: pointer; transition: background-color var(--m-micro) ease, transform var(--m-pression) ease; animation: bascule var(--m-bascule) var(--m-releve) both; }
+.propositionLecture:hover { background: color-mix(in srgb, var(--reg-controle) 12%, transparent); }
+.propositionLecture:active { transform: scale(0.97); }
+.propositionLecture:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+
+/* ── Q6 · les vues ─────────────────────────────────────────────────────────────────────────── */
+.vues { display: grid; gap: 16px; }
+.vueCadre { display: grid; gap: 16px; padding: 22px; border: 1px solid var(--r-filet-fort); border-radius: 6px; background: var(--bg-deep); min-height: 360px; align-content: start; }
+.vueTete { display: flex; gap: 14px; align-items: center; }
+.vueGlyphe { flex: none; fill: none; stroke: var(--r-encre); stroke-width: 1.6; }
+.vueCartes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.vueCarte { display: grid; gap: 5px; padding: 12px 10px; margin: 0 -10px; border-top: 1px solid var(--r-filet); border-radius: 4px; outline: none; }
+.vueCarte[data-arrivee] { animation: arrivee 900ms var(--m-releve) 200ms both; }
+@keyframes arrivee { from { box-shadow: inset 0 0 0 2px var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); } to { box-shadow: inset 0 0 0 2px transparent; background: transparent; } }
+
+/* ── La section « interactions du quotidien » ──────────────────────────────────────────────── */
+.comparaison { display: grid; gap: 28px; }
+@media (min-width: 1024px) { .comparaison { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } }
+.colonneAncien, .colonneNouveau { display: grid; gap: 14px; align-content: start; }
+.colonneAncien { padding: 18px; border: 1px dashed var(--r-filet-fort); border-radius: 6px; }
+.etiquetteColonne { font-family: var(--font-mono); font-size: 11.5px; color: var(--r-meta); margin: 0; }

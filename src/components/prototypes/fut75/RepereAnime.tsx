@@ -163,8 +163,18 @@ export function RepereAnime({
         </g>
         {variante === "reticule" ? (
           <g>
-            {coins.map((c) => (
-              <path key={c.cle} className={m.coin} d={c.d} data-repos={actif === null} style={{ transform: `translate(${c.x}px, ${c.y}px)`, opacity: actif === null ? 0.55 : 1 }} />
+            {/* LA CROISÉE DE VISÉE (2e itération) : deux traits fins se tracent du centre vers les bords du
+                périmètre visé, et disparaissent au repos. Elle dit « ici, à cette finesse », sans zoomer. */}
+            <g aria-hidden>
+              {/* Pleine boîte, ramenée au périmètre par `scale` : la longueur suit le cadre sans saut. */}
+              <line className={m.croisee} x1={8} x2={ECHELLE_VIEWBOX - 8} y1={ECHELLE_CENTRE} y2={ECHELLE_CENTRE}
+                style={{ transform: `scaleX(${actif === null ? 0 : (cadre.w - 12) / (ECHELLE_VIEWBOX - 16)})`, opacity: actif === null ? 0 : 0.5 }} />
+              <line className={m.croisee} x1={ECHELLE_CENTRE} x2={ECHELLE_CENTRE} y1={8} y2={ECHELLE_VIEWBOX - 8}
+                style={{ transform: `scaleY(${actif === null ? 0 : (cadre.h - 12) / (ECHELLE_VIEWBOX - 16)})`, opacity: actif === null ? 0 : 0.5 }} />
+            </g>
+            {coins.map((c, k) => (
+              // Les coins se posent l'un après l'autre (18 ms d'écart) : le cadre « accroche » le périmètre.
+              <path key={c.cle} className={m.coin} d={c.d} data-repos={actif === null} style={{ transform: `translate(${c.x}px, ${c.y}px)`, opacity: actif === null ? 0.55 : 1, transitionDelay: `${k * 18}ms` }} />
             ))}
             <text className={m.legendeReticule} x={0} y={0} style={{ transform: `translate(${cadre.x + 14}px, ${Math.max(9, cadre.y - 5)}px)`, opacity: choisie ? 1 : 0 }}>
               {choisie ? `${choisie.rank} · ${choisie.grain}` : ""}

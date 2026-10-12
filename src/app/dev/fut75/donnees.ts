@@ -64,6 +64,9 @@ export async function cheminConfortEte(): Promise<DonneesChemin | null> {
   if (!e || e.fondement?.type !== "seuils") return null;
   const section = lecture.sections.find((s) => s.entrees.some((x) => x.ancre === e.ancre));
   const pref = t.projet.parsed?.preferences?.find((p) => p.key === "faible_chaleur");
+  // La référence de chaque mesure, par la même reconstruction que le moteur (DRIAS, médiane des écarts).
+  const horizons = await mesuresHorizons(t.insee);
+  const reference = (cle: string) => horizons?.find((h) => h.cle === (cle === "days_over_35" ? "joursTresChauds" : cle === "tropical_nights" ? "nuitsTropicales" : ""))?.reference ?? null;
   return {
     commune: lecture.commune,
     verdict: { etiquette: lecture.verdict.etiquette, titre: lecture.verdict.titre },
@@ -76,10 +79,30 @@ export async function cheminConfortEte(): Promise<DonneesChemin | null> {
     },
     convention: {
       horizon: e.fondement.horizon,
-      mesures: e.fondement.mesures.map((ms) => ({ nom: NOM_MESURE[ms.cle]?.nom ?? ms.cle, unite: NOM_MESURE[ms.cle]?.unite ?? "", valeur: ms.valeur, seuil: ms.seuil, franchi: ms.defavorable })),
+      mesures: e.fondement.mesures.map((ms) => ({ cle: ms.cle, nom: NOM_MESURE[ms.cle]?.nom ?? ms.cle, unite: NOM_MESURE[ms.cle]?.unite ?? "", valeur: ms.valeur, seuil: ms.seuil, franchi: ms.defavorable, reference: reference(ms.cle) })),
       methode: e.methode,
     },
     limite: e.nuance ?? "",
     geste: { libelle: e.geste?.libelle ?? "", aVerifier: e.aVerifier },
   };
+}
+
+export type ApercuEchelle = { ancre: string; sujet: string; enonce: string; preuve?: string }[];
+
+/**
+ * Les cartes du dossier d'adresse public, rangées par échelle (projection du moteur, `echelles`), pour la
+ * démonstration de navigation entre vues : la minute puis la liste complète, sans doublon.
+ */
+export async function apercuParEchelle(): Promise<Record<"territoire" | "quartier" | "logement", ApercuEchelle> | null> {
+  const t = await dossierDeTest({ lieu: LIEU_PUBLIC, prefs: DEFAUT.prefs });
+  if (!t) return null;
+  const lecture = lireDossier(t.dossier);
+  const toutes = [...lecture.sections.flatMap((s) => s.entrees), ...controlesParEchelle(t.dossier).flatMap((g) => g.cards.map((c) => lireCarteDuDossier(t.dossier, c)))];
+  const vues = new Set<string>();
+  const uniques = toutes.filter((e) => !vues.has(e.ancre) && Boolean(vues.add(e.ancre)));
+  const de = (ech: "territoire" | "quartier" | "logement") => uniques.filter((e) => e.echelles.includes(ech)).slice(0, 4).map((e) => ({
+    ancre: e.ancre, sujet: e.sujet ?? e.statut ?? "Constat", enonce: e.enonce,
+    ...(e.preuves[0]?.valeur ? { preuve: `${e.preuves[0].libelle} : ${e.preuves[0].valeur}` } : {}),
+  }));
+  return { territoire: de("territoire"), quartier: de("quartier"), logement: de("logement") };
 }

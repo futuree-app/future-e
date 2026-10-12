@@ -40,6 +40,51 @@ export const COURBES = {
   sortie: "cubic-bezier(0.4, 0, 1, 1)",
 } as const;
 
+// ── Trois niveaux de mouvement (deuxième itération) ────────────────────────────────────────────
+//
+// La première itération n'avait qu'une règle pour tout. L'usage réel en demande trois, qui ne se
+// mélangent pas :
+//   geste      la réaction IMMÉDIATE à la main du lecteur (pression, pointage, focus) : 90 à 160 ms.
+//              Seul niveau qui admet un micro-ressort (dépassement ≤ 2 %), et seulement sur une
+//              COMMANDE (bouton, indicateur d'onglet, poignée). Jamais sur une donnée.
+//   etat       la continuité entre deux présentations d'un même élément (bouton qui devient
+//              chargement, carte qui se déploie, contenu qui s'échange) : 180 à 320 ms, courbe
+//              `releve`. Un contenu qui s'échange passe par un flou court (≤ 3 px) et un fondu.
+//   structure  la compréhension d'ensemble (navigation, dévoilement, tracé) : 400 à 900 ms, toujours
+//              déclenchée par le lecteur ou jouée une seule fois, jamais en boucle.
+// Ce qui ne change pas : AUCUNE DONNÉE NE S'ANIME, quel que soit le niveau.
+export const NIVEAUX = {
+  geste: { min: 90, max: 160, ressort: true },
+  etat: { min: 180, max: 320, ressort: false },
+  structure: { min: 400, max: 900, ressort: false },
+} as const;
+export type Niveau = keyof typeof NIVEAUX;
+
+/** Les durées propres à la deuxième itération (millisecondes), dans leurs niveaux. */
+export const DUREES_V2 = { pression: 90, ressort: 280, bascule: 180, deploiement: 300, devoilement: 420 } as const;
+
+/**
+ * LE MICRO-RESSORT, EN FORME FERMÉE. Un oscillateur amorti (`amortissement` < 1) échantillonné en
+ * `points` valeurs, rendu en fonction CSS `linear()` : aucune bibliothèque, aucune boucle par image.
+ * Avec l'amortissement par défaut (0,78), le dépassement vaut environ 2 % : la commande « se pose »,
+ * elle ne rebondit pas.
+ */
+export function ressortLineaire(amortissement = 0.78, points = 28): string {
+  const z = amortissement;
+  const wd = Math.sqrt(1 - z * z);
+  // Pulsation choisie pour que la courbe soit stabilisée (écart < 0,1 %) à t = 1.
+  const w = Math.log(1000) / z;
+  const x = (t: number) => 1 - Math.exp(-z * w * t) * (Math.cos(w * wd * t) + (z / wd) * Math.sin(w * wd * t));
+  const v = Array.from({ length: points }, (_, i) => (i === points - 1 ? 1 : x(i / (points - 1))));
+  return `linear(${v.map((n) => Number(n.toFixed(3))).join(", ")})`;
+}
+
+/** Le dépassement maximal d'une courbe `linear()` (pour les tests et la documentation). */
+export function depassement(courbe: string): number {
+  const v = courbe.replace(/^linear\(|\)$/g, "").split(",").map((s) => Number.parseFloat(s));
+  return Math.max(0, Math.max(...v) - 1);
+}
+
 // ── Modes ──────────────────────────────────────────────────────────────────────────────────────
 
 /** `anime` : le langage complet. `reduit` : préférence système, aucun déplacement, changements d'état
@@ -156,6 +201,21 @@ export function horizonVoisin(courant: CleHorizon, touche: string): CleHorizon |
   if (touche === "Home") return ORDRE_HORIZONS[0]!;
   if (touche === "End") return ORDRE_HORIZONS[n - 1]!;
   return null;
+}
+
+/**
+ * LA GRILLE D'UNITÉS DE B1 : un carré vaut un jour (ou une nuit). Chaque carré est `reference` (déjà vrai
+ * en 1976-2005), `horizon` (en plus à l'horizon choisi), `baisse` (un jour de référence qui ne s'y
+ * retrouve plus) ou `vide`. Les valeurs sont arrondies à l'unité, jamais fractionnées en carrés partiels ;
+ * `change` marque les carrés dont l'état a changé depuis l'horizon précédent (ils s'éclairent un instant,
+ * TOUS EN MÊME TEMPS : aucun décompte carré par carré).
+ */
+export function casesGrille(valeur: number, reference: number, precedente: number | null, capacite: number): { etat: "reference" | "horizon" | "baisse" | "vide"; change: boolean }[] {
+  const v = Math.round(valeur); const ref = Math.round(reference); const p = precedente == null ? null : Math.round(precedente);
+  return Array.from({ length: capacite }, (_, i) => ({
+    etat: i < v ? (i < ref ? "reference" : "horizon") : i < ref ? "baisse" : "vide",
+    change: p != null && (i < v) !== (i < p),
+  }));
 }
 
 // ── Prototype C : du fait à la décision ────────────────────────────────────────────────────────

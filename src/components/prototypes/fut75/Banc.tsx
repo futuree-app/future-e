@@ -5,10 +5,16 @@
 // Pour chaque prototype : ses variantes, trois modes (animé, mouvement réduit, sans animation), un état
 // imposable (initial ou final d'une interaction) et un bouton pour rejouer. L'état de départ peut venir
 // de l'URL (`?a=reticule&am=reduit…`), pour que chaque capture et chaque vidéo soient reproductibles.
-import { memo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { memo, useCallback, useState, useSyncExternalStore, type ReactNode } from "react";
 import { RepereAnime as RepereAnimeBrut, type VarianteRepere } from "./RepereAnime";
 import { RegleDesHorizons as RegleDesHorizonsBrut, type MesureHorizon, type VarianteHorizons } from "./RegleDesHorizons";
-import { CheminDeLaDecision as CheminDeLaDecisionBrut, type DonneesChemin, type VarianteChemin } from "./CheminDeLaDecision";
+import { CheminDeLaDecision as CheminDeLaDecisionBrut, type DonneesChemin } from "./CheminDeLaDecision";
+import { HorizonsEditorial } from "./HorizonsEditorial";
+import { HorizonsInstrument } from "./HorizonsInstrument";
+import { ConstatDevoile } from "./ConstatDevoile";
+import { ConstatCouches } from "./ConstatCouches";
+import { Quotidien } from "./quotidien/Quotidien";
+import type { Apercu } from "./quotidien/TransitionVues";
 
 // Chaque prototype ne se recalcule que si SES réglages changent : rejouer A ne refait ni B ni C.
 const RepereAnime = memo(RepereAnimeBrut);
@@ -73,8 +79,9 @@ function Prototype({ id, lettre, titre, intro, reglages, scene, notes, mode }: {
   );
 }
 
-export function Banc({ initial, repere, horizons, chemin }: {
+export function Banc({ initial, repere, horizons, chemin, apercu }: {
   initial: ReglagesBanc;
+  apercu: Apercu | null;
   repere: { adresse: Record<FormeEchelle, EtatForme> | null; commune: Record<FormeEchelle, EtatForme> | null };
   horizons: { insee: string; nom: string; mesures: MesureHorizon[] | null }[];
   chemin: DonneesChemin | null;
@@ -84,15 +91,16 @@ export function Banc({ initial, repere, horizons, chemin }: {
   const [ae, setAe] = useState<"repos" | FormeEchelle>(un(initial.ae, ["repos", "territoire", "autour", "logement"] as const, "repos"));
   const [ap, setAp] = useState<"adresse" | "commune">(un(initial.ap, ["adresse", "commune"] as const, "adresse"));
   const [rejeuA, setRejeuA] = useState(0);
-  const [b, setB] = useState<VarianteHorizons>(un(initial.b, ["regle", "trace"] as const, "trace"));
+  // Deuxième itération : B1 éditoriale et B2 instrument ; la v1 reste au banc pour comparer.
+  const [b, setB] = useState<VarianteHorizons | "editoriale" | "instrument">(un(initial.b, ["regle", "trace", "editoriale", "instrument"] as const, "editoriale"));
   const [bm, setBm] = useState<ChoixMode>(un(initial.bm, LISTE_MODES, "systeme"));
   const [bc, setBc] = useState(horizons.some((h) => h.insee === initial.bc) ? initial.bc! : horizons[0]?.insee ?? "");
   const bh = un(initial.bh, ["gwl15", "gwl20", "gwl30"] as const, "gwl20") as CleHorizon;
-  const [c, setC] = useState<VarianteChemin>(un(initial.c, ["trait", "pas", "statique"] as const, "pas"));
+  const [c, setC] = useState<"trait" | "pas" | "statique" | "devoile" | "couches">(un(initial.c, ["trait", "pas", "statique", "devoile", "couches"] as const, "devoile"));
   const [cm, setCm] = useState<ChoixMode>(un(initial.cm, LISTE_MODES, "systeme"));
   const [ce, setCe] = useState<number | null>(initial.ce != null && /^-?\d$/.test(initial.ce) ? Number(initial.ce) : null);
   const reduit = usePrefereReduit();
-  const effectif = (c: ChoixMode): ModeMouvement => resoudreMode(c === "systeme" ? null : c, reduit);
+  const effectif = useCallback((c: ChoixMode): ModeMouvement => resoudreMode(c === "systeme" ? null : c, reduit), [reduit]);
   const etats = repere[ap];
   const commune = horizons.find((h) => h.insee === bc);
 
@@ -124,41 +132,49 @@ export function Banc({ initial, repere, horizons, chemin }: {
 
       <Prototype
         id="prototype-b" lettre="B" titre="Explorer le temps" mode={effectif(bm)}
-        intro={<>Les trois horizons documentés de deux mesures de chaleur, sur les médianes DRIAS-TRACC d&apos;une commune publique. Choisir un horizon déplace le repère ; aucune valeur ne défile, aucun trait ne relie deux horizons.</>}
+        intro={<>Deux nouvelles directions (B1 éditoriale, B2 instrument) face à la v1. Valeurs réelles DRIAS-TRACC (médiane de 17 modèles) de trois communes publiques ; la chaleur porte sa teinte de palette (<code>--red</code>). Aucun nombre ne défile, aucun trait ne relie deux horizons.</>}
         reglages={<>
-          <Choix legende="Variante" courant={b} choisir={setB} valeurs={[{ cle: "regle", nom: "B1 · curseur" }, { cle: "trace", nom: "B2 · curseur et trace" }]} />
+          <Choix legende="Variante" courant={b} choisir={setB} valeurs={[{ cle: "editoriale", nom: "B1 · éditoriale" }, { cle: "instrument", nom: "B2 · instrument" }, { cle: "regle", nom: "v1 · curseur" }, { cle: "trace", nom: "v1 · trace" }]} />
           <Choix legende="Mouvement" courant={bm} choisir={setBm} valeurs={MODES} />
           <Choix legende="Commune" courant={bc} choisir={setBc} valeurs={horizons.map((h) => ({ cle: h.insee, nom: h.nom }))} />
         </>}
-        scene={commune?.mesures ? (
-          <RegleDesHorizons key={`${bc}-${b}-${bh}`} commune={commune.nom} mesures={commune.mesures} variante={b} mode={effectif(bm)} force={bh === "gwl20" ? undefined : bh}
+        scene={commune?.mesures && b === "editoriale" ? (
+          <HorizonsEditorial key={`${bc}-${bh}`} commune={commune.nom} mesures={commune.mesures} mode={effectif(bm)} initial={bh} />
+        ) : commune?.mesures && b === "instrument" ? (
+          <HorizonsInstrument key={`${bc}-${bh}`} commune={commune.nom} mesures={commune.mesures} mode={effectif(bm)} initial={bh} />
+        ) : commune?.mesures ? (
+          <RegleDesHorizons key={`${bc}-${b}-${bh}`} commune={commune.nom} mesures={commune.mesures} variante={b as VarianteHorizons} mode={effectif(bm)} force={bh === "gwl20" ? undefined : bh}
             source={SOURCE_DRIAS} />
         ) : <p className="text-muted">Données DRIAS indisponibles pour cette commune.</p>}
         notes={<>
-          <p><strong>Ce que le mouvement dit.</strong> On se déplace dans le temps, et la distance parcourue est honnête : 2030 et 2050 sont proches, 2100 est loin.</p>
-          <p><strong>Ce qu&apos;il ne dit pas.</strong> Rien entre deux jalons : pendant le trajet, le curseur ne lit aucune valeur, et la lecture change d&apos;un bloc, par un fondu de 120 ms.</p>
-          <p><strong>B2.</strong> L&apos;horizon quitté laisse un repère pâle, et la lecture le cite en toutes lettres, avec sa propre valeur : on compare sans tracer de pente.</p>
-          <p>Clavier : flèches, Début et Fin dans le groupe d&apos;horizons.</p>
+          <p><strong>B1 · éditoriale.</strong> Un chiffre très grand, l'écart à 1976-2005 en toutes lettres, et une grille où un carré vaut un jour : on compte, on ne déduit pas. Au changement d'horizon, le chiffre bascule d'un bloc et les carrés qui changent s'éclairent un instant.</p>
+          <p><strong>B2 · instrument.</strong> La règle du temps porte des barres isolées à leur année et une cote qui mesure l'écart à la référence ; le sélecteur est relié aux barres par des lignes de rappel.</p>
+          <p><strong>Commun.</strong> Le sélecteur élastique (micro-ressort, c'est une commande) ; la note qui distingue niveau de réchauffement et année ; le seuil, convention de futur•e, en trait discret.</p>
+          <p>Clavier : flèches, Début et Fin dans chaque groupe.</p>
         </>}
       />
 
       <Prototype
         id="prototype-c" lettre="C" titre="Du fait à la décision" mode={effectif(cm)}
-        intro={<>Le chemin réel d&apos;un constat du moteur (composition « confort d&apos;été »), sur un dossier d&apos;adresse public. Trois fondements convergent vers la conclusion, puis s&apos;en séparent vers ce que la donnée ne dit pas et ce qu&apos;il reste à vérifier.</>}
+        intro={<>Deux nouvelles variantes sans rail ni organigramme (C1 dévoilement, C2 couches) face à la v1, sur le chemin réel de la composition « confort d&apos;été » d&apos;un dossier d&apos;adresse public. La conclusion est toujours lisible avant tout geste.</>}
         reglages={<>
-          <Choix legende="Variante" courant={c} choisir={(v) => { setC(v); setCe(null); }} valeurs={[{ cle: "pas", nom: "C1 · pas à pas" }, { cle: "trait", nom: "C2 · d'un trait" }, { cle: "statique", nom: "C3 · statique" }]} />
+          <Choix legende="Variante" courant={c} choisir={(v) => { setC(v); setCe(null); }} valeurs={[{ cle: "devoile", nom: "C1 · dévoilement" }, { cle: "couches", nom: "C2 · couches" }, { cle: "pas", nom: "v1 · pas à pas" }, { cle: "trait", nom: "v1 · d'un trait" }, { cle: "statique", nom: "v1 · statique" }]} />
           <Choix legende="Mouvement" courant={cm} choisir={setCm} valeurs={MODES} />
           <Choix legende="État" courant={ce == null ? "libre" : String(ce)} choisir={(v) => setCe(v === "libre" ? null : Number(v))}
             valeurs={[{ cle: "libre", nom: "libre" }, { cle: "-1", nom: "initial" }, { cle: "5", nom: "final" }]} />
         </>}
-        scene={chemin ? <CheminDeLaDecision key={c} donnees={chemin} variante={c} mode={effectif(cm)} forceEtape={ce} /> : <p className="text-muted">Le dossier de test ne porte pas de composition « confort d&apos;été ».</p>}
+        scene={!chemin ? <p className="text-muted">Le dossier de test ne porte pas de composition « confort d&apos;été ».</p>
+          : c === "devoile" ? <ConstatDevoile key={`d-${ce}`} donnees={chemin} mode={effectif(cm)} initial={ce != null && ce >= 0 ? Math.min(3, ce) : 0} />
+            : c === "couches" ? <ConstatCouches key={`c-${ce}`} donnees={chemin} mode={effectif(cm)} initial={ce != null && ce > 0} />
+              : <CheminDeLaDecision key={c} donnees={chemin} variante={c} mode={effectif(cm)} forceEtape={ce} />}
         notes={<>
-          <p><strong>Ce que le mouvement dit.</strong> Pourquoi ces informations sont rapprochées : une priorité déclarée, une projection et une convention mènent ensemble à la conclusion.</p>
-          <p><strong>Ce qu&apos;il ne dit pas.</strong> La conclusion n&apos;est pas calculée sous vos yeux : elle est en tête, lisible avant tout geste. Le rail retrace un chemin qui existe déjà.</p>
-          <p><strong>Le bâtiment.</strong> Le moteur ne relie aucune donnée du logement à la chaleur : le bâtiment n&apos;apparaît qu&apos;à l&apos;étape 6, comme ce qu&apos;il reste à vérifier.</p>
-          <p>Clavier (C1) : flèches haut et bas pour parcourir ; le focus suit l&apos;étape.</p>
+          <p><strong>C1 · dévoilement.</strong> Quatre scènes dans un même espace : ce que vous recherchez, ce que la donnée établit, ce que futur•e en conclut, ce qui reste à vérifier. La priorité et les chiffres se transforment en fondements de la conclusion (View Transitions).</p>
+          <p><strong>C2 · couches.</strong> Une carte, deux compositions : repliée, la conclusion seule ; dépliée, la conclusion grandit au-dessus de quatre strates qui arrivent une à une.</p>
+          <p><strong>Ce qu&apos;elles s&apos;interdisent.</strong> Rien n&apos;est « calculé » sous vos yeux ; le bâtiment n&apos;apparaît qu&apos;au geste, parce que le moteur ne relie aucune donnée du logement à la chaleur.</p>
+          <p>Clavier (C1) : flèches gauche et droite ; le focus suit la scène.</p>
         </>}
       />
+      <Quotidien chemin={chemin} apercu={apercu} effectif={effectif} />
     </>
   );
 }

@@ -43,7 +43,7 @@ test("M2. les modes : réduit ne déplace rien, sans animation ne joue rien, l'e
     assert.equal(duree(cle, "anime"), DUREES[cle]);
   }
   // La feuille applique la même règle : en réduit, les durées de déplacement tombent à zéro.
-  assert.match(css, /\.atelier\[data-mouvement="reduit"\] \{ --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms; \}/);
+  assert.match(css, /\.atelier\[data-mouvement="reduit"\] \{ --m-etat: 0ms; --m-trace: 0ms; --m-plafond: 0ms;[^}]*--m-ressort-duree: 0ms;[^}]*\}/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /\.atelier\[data-mouvement="aucun"\] \*[^{]*\{\s*transition: none !important;\s*animation: none !important;/);
 });
@@ -152,7 +152,9 @@ test("M9. le chemin suit l'ordre du moteur, et le verdict reste en tête", () =>
 
 test("M10. aucune donnée ne s'anime : seules des propriétés de repère sont animées", () => {
   const animees = [...css.matchAll(/transition:\s*([^;]+);/g)].flatMap((m) => m[1]!.split(",").map((x) => x.trim().split(/\s+/)[0]!));
-  const permises = new Set(["transform", "opacity", "stroke", "stroke-width", "fill", "color", "background-color", "box-shadow", "none"]);
+  // 2e itération : le rayon et le contour d'un bouton qui change d'état, la hauteur d'une zone qui se
+  // déploie (`grid-template-rows`). Aucune de ces propriétés ne porte une donnée.
+  const permises = new Set(["transform", "opacity", "stroke", "stroke-width", "fill", "color", "background-color", "box-shadow", "border-radius", "border-color", "grid-template-rows", "none"]);
   for (const p of animees) assert.ok(permises.has(p), `propriété animée : ${p}`);
   // Les animations en script ne touchent qu'au tracé (dashoffset) et à l'opacité.
   for (const f of ["RepereAnime.tsx", "CheminDeLaDecision.tsx"]) {
