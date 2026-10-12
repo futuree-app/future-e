@@ -260,6 +260,9 @@ export default async function RapportPage() {
   // L'identité de l'artefact servi, portée par les liens « Preuve » du dossier communal. Absente
   // quand le dossier est assemblé à l'instant : il n'y a alors aucune version figée à désigner.
   const provenanceCommune = servi.source === "artefact" ? "commune" : undefined;
+  // FUT-93 : le NUMÉRO de la version communale servie. « Mettre à jour l'analyse » ne dit la nouvelle
+  // version affichée que lorsque la page la sert réellement (pas sur la foi d'un rafraîchissement).
+  const versionServieCommune = servi.source === "artefact" ? (artefactCommune?.servedVersion ?? null) : null;
   // L'ANALYSE RÉPOND-ELLE ENCORE AU PROJET DU LECTEUR ? Comparaison SÉMANTIQUE avec le projet figé
   // dans l'artefact : les dates ne disent rien ici, `updatedAt` bougeant sur une faute de frappe.
   const projetCommuneAChange = projetAChangeMateriellement(
@@ -483,6 +486,7 @@ export default async function RapportPage() {
                       insee={inseeCode}
                       scopeKey="commune"
                       generatedAt={dossierGenereLe}
+                      versionServie={versionServieCommune}
                       provenance={provenanceCommune}
                       projetAChange={projetCommuneAChange}
                       espacement="mt-6"
@@ -528,6 +532,7 @@ export default async function RapportPage() {
                   insee={inseeCode}
                   scopeKey="commune"
                   generatedAt={dossierGenereLe}
+                  versionServie={versionServieCommune}
                   provenance={provenanceCommune}
                   projetAChange={projetCommuneAChange}
                   espacement="mt-6"

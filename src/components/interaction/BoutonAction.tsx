@@ -25,7 +25,7 @@ function EmblemeAttente() {
   );
 }
 
-export type LibellesAction = { repos: string; attente: string; succes: string; echec: string; ailleurs: string };
+export type LibellesAction = Record<EtatAction, string>;
 
 export function BoutonAction({ etat, onAppui, libelles, compteRendu }: {
   etat: EtatAction;
@@ -38,12 +38,16 @@ export function BoutonAction({ etat, onAppui, libelles, compteRendu }: {
   // L'indicateur n'apparaît qu'après 300 ms d'attente. Remis à zéro au rendu suivant toute sortie d'attente.
   const [indicateur, setIndicateur] = useState(false);
   useEffect(() => {
-    if (etat !== "attente") return;
+    if (etat !== "attente" && etat !== "affichage") return;
     const t = window.setTimeout(() => setIndicateur(true), DELAI_INDICATEUR);
     return () => { window.clearTimeout(t); setIndicateur(false); };
   }, [etat]);
-  const enAttente = etat === "attente";
+  // Deux attentes : la génération (`attente`), puis la lecture de la version prête (`affichage`). Avant
+  // l'indicateur, chacune garde le libellé de l'état qui la précède : rien ne clignote.
+  const enAttente = etat === "attente" || etat === "affichage";
   const visible = enAttente && indicateur;
+  const avantIndicateur = etat === "affichage" ? libelles.succes : libelles.repos;
+  const coche = etat === "succes" || etat === "affichee";
   return (
     <div className={m.bloc}>
       <button type="button" className={m.bouton} data-etat={etat} aria-busy={enAttente} aria-disabled={enAttente || undefined}
@@ -51,8 +55,8 @@ export function BoutonAction({ etat, onAppui, libelles, compteRendu }: {
         <span className={m.fond} aria-hidden />
         <span key={`${etat}-${visible}`} className={m.contenu}>
           {visible ? <EmblemeAttente /> : null}
-          {etat === "succes" ? <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden className={m.coche}><path d="M3 8.5 6.5 12 13 4.5" pathLength={1} /></svg> : null}
-          {enAttente ? (visible ? libelles.attente : libelles.repos) : libelles[etat]}
+          {coche ? <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden className={m.coche}><path d="M3 8.5 6.5 12 13 4.5" pathLength={1} /></svg> : null}
+          <span className={m.libelle}>{enAttente ? (visible ? libelles[etat] : avantIndicateur) : libelles[etat]}</span>
         </span>
       </button>
       {compteRendu ? <p className={m.compteRendu} data-etat={etat} aria-live="polite">{compteRendu}</p> : null}

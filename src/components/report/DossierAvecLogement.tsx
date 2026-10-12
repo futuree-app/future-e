@@ -227,6 +227,8 @@ export async function DossierAvecLogement({
       <DossierDecisionSection
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={avis ? "mt-4" : espacement} titre={titre}
+        // FUT-93 : le numéro de la version figée servie, seulement quand on sert une version figée.
+        versionServie={servi.source === "artefact" ? (stocke?.servedVersion ?? null) : null}
         supportingPane={supportingPane}
         projetAChange={projetAChangeMateriellement(stocke?.artifact?.projectSnapshot ?? null, project)}
         // FUT-10 : le lien déclaré avec ce bien a changé depuis la version SERVIE. Comparé avec
