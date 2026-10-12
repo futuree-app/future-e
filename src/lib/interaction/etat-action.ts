@@ -49,3 +49,31 @@ export const PHRASE_ECHEC: Record<MotifEchec, string> = {
   reseau: "La connexion a été interrompue avant la réponse.",
   autre: "La mise à jour n'a pas abouti.",
 };
+
+// ── RACCORDEMENT À « METTRE À JOUR L'ANALYSE » (FUT-93) ─────────────────────────────────────────
+
+/**
+ * Ce que fait un appui, selon l'état. Pendant l'attente, et pendant la confirmation qui précède le
+ * rechargement, rien. Quand une mise à jour tourne déjà ailleurs, l'appui RELIT la page au lieu de
+ * renvoyer une demande : une seconde demande, une fois la première finie, lancerait une génération
+ * de plus, payante, que personne n'a voulue.
+ */
+export type GesteAppui = "envoyer" | "relire" | "ignorer";
+export function gesteAppui(etat: EtatAction): GesteAppui {
+  if (etat === "attente" || etat === "succes") return "ignorer";
+  return etat === "ailleurs" ? "relire" : "envoyer";
+}
+
+/** Le délai pendant lequel la confirmation se lit avant que la page ne serve la nouvelle version. */
+export const LECTURE_CONFIRMATION_MS = 900;
+
+/** La phrase sous le bouton (annoncée aux lecteurs d'écran). L'analyse affichée ne change jamais d'ici là. */
+export function compteRenduAction(etat: EtatAction, issue: IssueAction | null): string {
+  switch (etat) {
+    case "attente": return "La nouvelle version se prépare. L'analyse ci-dessous reste lisible en attendant.";
+    case "succes": return issue?.type === "livree" ? "La nouvelle version est prête. La page l'affiche dans un instant." : "";
+    case "echec": return issue?.type === "echec" ? `${PHRASE_ECHEC[issue.motif]} L'analyse ci-dessous reste inchangée.` : "";
+    case "ailleurs": return "Une mise à jour de ce dossier est déjà en cours. Relisez la page dans un instant.";
+    case "repos": return "";
+  }
+}

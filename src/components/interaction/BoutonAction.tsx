@@ -9,7 +9,7 @@
 // avancer par des issues RÉELLES (`suivantAction`, `issueDepuisReponse`) : le composant ne peut pas
 // afficher un succès que le serveur n'a pas rendu.
 //
-// Raccordement à `AnalyseAncienProjet` : seulement après la fusion de FUT-10, qui réécrit ce composant.
+// Raccordé à `AnalyseAncienProjet` (FUT-93), qui lance la demande et fait avancer l'état.
 import { useEffect, useState, type ReactNode } from "react";
 import { DELAI_INDICATEUR } from "@/lib/motion";
 import type { EtatAction } from "@/lib/interaction/etat-action";
