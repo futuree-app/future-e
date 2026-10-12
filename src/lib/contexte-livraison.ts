@@ -31,27 +31,49 @@ import {
 } from "./relation-au-lieu.ts";
 import { projetPourLivraison } from "./dossier-contexte-checkout.ts";
 
-/** Ce que l'achat a fixé, relu dans `dossier_intents`. */
+/**
+ * Ce que l'achat a fixé, relu dans `dossier_intents`.
+ *
+ * L'HISTORIQUE SE PROUVE, IL NE SE DÉDUIT PAS D'UNE ABSENCE (FUT-10, dernière correction). Depuis le
+ * 30/07/2026, le seul écrivain de `address_dossiers.stripe_payment_intent_id` est le webhook, qui LÈVE
+ * quand l'intention manque (commit 472a5a7a, le même qui crée `dossier_intents`) ; les dossiers ouverts
+ * par l'administration n'ont pas de PaymentIntent. D'où :
+ *   - pas de PaymentIntent                        → `historique` (dossier administratif) ;
+ *   - produit sans adresse (territoire de 14 €)   → `historique` (aucune intention d'adresse n'existe) ;
+ *   - intention présente, sans `project_state`    → `historique` (checkout antérieur à FUT-10, PROUVÉ) ;
+ *   - PaymentIntent présent, intention introuvable → `indisponible` : une anomalie à réconcilier, jamais
+ *     une compatibilité. Le projet du compte ne la remplace pas ;
+ *   - projet confirmé effacé par la purge, ou illisible → `indisponible` : jamais confondu avec un achat
+ *     sans projet (la purge n'efface qu'après une version prête, la première livraison est donc faite).
+ */
 export type ContexteDAchat =
-  | { etat: "historique" }
+  | { etat: "historique"; raison: "sans_paiement" | "intention_anterieure" | "hors_adresse" }
   | { etat: "confirme"; projet: UserProject; relation: RelationAuLieu }
-  | { etat: "absent"; relation: RelationAuLieu };
+  | { etat: "absent"; relation: RelationAuLieu }
+  | { etat: "indisponible"; raison: "intention_introuvable" | "lecture_impossible" | "projet_efface" | "projet_illisible" };
 
 /**
- * L'intention d'un dossier acheté, réduite à ce que la livraison doit reproduire. `project_state`
- * est le discriminant : posé par tout checkout FUT-10, absent des intentions antérieures. Le projet
- * suit `projetPourLivraison` (un snapshot illisible vaut absence, jamais une relecture du compte) ; la
- * relation et l'objectif sont ceux DÉCLARÉS À L'ACHAT, `null` voulant dire « non dit à l'achat ».
+ * L'intention d'un dossier acheté, réduite à ce que la livraison doit reproduire. `aUnPaiement` : le
+ * dossier porte-t-il un `stripe_payment_intent_id` ? La relation et l'objectif sont ceux DÉCLARÉS À
+ * L'ACHAT, `null` voulant dire « non dit à l'achat ».
  */
-export function contexteDAchat(intent: Record<string, unknown> | null | undefined): ContexteDAchat {
-  if (!intent || intent.project_state == null) return { etat: "historique" };
+export function contexteDAchat(
+  intent: Record<string, unknown> | null | undefined,
+  opts: { aUnPaiement: boolean } = { aUnPaiement: true },
+): ContexteDAchat {
+  if (!opts.aUnPaiement) return { etat: "historique", raison: "sans_paiement" };
+  if (!intent) return { etat: "indisponible", raison: "intention_introuvable" };
+  if (intent.project_state == null) return { etat: "historique", raison: "intention_anterieure" };
   const relation: RelationAuLieu = {
     echelle: "adresse",
     relation: isAddressRelation(intent.place_relation) ? intent.place_relation : null,
     objectif: isAddressObjective(intent.place_objective) ? intent.place_objective : null,
   };
   const projet = projetPourLivraison(intent);
-  return projet.etat === "confirme" ? { etat: "confirme", projet: projet.projet, relation } : { etat: "absent", relation };
+  if (projet.etat === "confirme") return { etat: "confirme", projet: projet.projet, relation };
+  if (projet.etat === "absent") return { etat: "absent", relation };
+  if (projet.etat === "efface") return { etat: "indisponible", raison: "projet_efface" };
+  return { etat: "indisponible", raison: "projet_illisible" };
 }
 
 export type OperationDeGeneration = "premiere_livraison" | "succession_automatique" | "mise_a_jour_explicite";
@@ -64,7 +86,7 @@ export function operationDeGeneration(input: { versionPrete: boolean; demandeExp
 
 export type ContexteDeGeneration =
   | { genere: true; projet: UserProject; relation: RelationAuLieu | null; source: "achat" | "version_servie" | "courant" }
-  | { genere: false; raison: "achat_sans_projet" | "aucun_projet" };
+  | { genere: false; raison: "achat_sans_projet" | "aucun_projet" | "contexte_indisponible" };
 
 /**
  * LE CONTEXTE AVEC LEQUEL GÉNÉRER, ou le refus de générer.
@@ -104,6 +126,9 @@ export function contexteDeGeneration(input: {
   }
 
   // PREMIÈRE LIVRAISON
+  // Le contexte de la vente est introuvable : on ne fige RIEN, même sur un clic. Le projet du jour ne
+  // remplace jamais une intention d'achat manquante.
+  if (achat.etat === "indisponible") return { genere: false, raison: "contexte_indisponible" };
   if (achat.etat === "confirme") return { genere: true, projet: achat.projet, relation: achat.relation, source: "achat" };
   if (achat.etat === "absent") {
     if (!input.demandeExplicite) return { genere: false, raison: "achat_sans_projet" };
@@ -115,3 +140,19 @@ export function contexteDeGeneration(input: {
     ? { genere: true, projet: courant.projet, relation: courant.relation, source: "courant" }
     : { genere: false, raison: "aucun_projet" };
 }
+
+/**
+ * L'ÉCHEC SIMULÉ DU PARCOURS DÉGRADÉ (`scripts/integration/fut10-bout-en-bout.mjs`) : la toute première
+ * génération d'un dossier d'adresse échoue comme une vraie panne de source. Exige une variable explicite,
+ * et n'est jamais actif en production Next ni Vercel.
+ */
+export function echecSimuleDeTest(
+  kind: "commune" | "adresse", version: number, env: Record<string, string | undefined> = process.env,
+): boolean {
+  return env.FUT10_TEST_ECHEC_PREMIERE_GENERATION === "1"
+    && env.NODE_ENV !== "production"
+    && env.VERCEL_ENV !== "production"
+    && kind === "adresse"
+    && version === 1;
+}
+

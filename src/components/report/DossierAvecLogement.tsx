@@ -110,11 +110,13 @@ export async function DossierAvecLogement({
   //   - aucune version prête → PREMIÈRE LIVRAISON : le contexte de l'ACHAT (intention verrouillée) ;
   //   - version périmée par un diagnostic → SUCCESSION : le contexte de la VERSION SERVIE ;
   //   - la mise à jour explicite, elle, passe par `/api/dossier/actualiser`, jamais par ici.
-  // Une lecture impossible du contexte d'achat (`null`) : on assemble avec le contexte du jour, à
-  // titre PROVISOIRE et dit comme tel, et on ne fige RIEN.
+  // Un contexte d'achat INDISPONIBLE (intention introuvable, projet confirmé illisible, lecture en panne) :
+  // on assemble avec le contexte du jour, à titre PROVISOIRE, en disant qu'on ne peut pas confirmer ce
+  // qui a été acheté, et on ne fige RIEN. Le projet du jour ne remplace jamais une intention manquante.
   // ══════════════════════════════════════════════════════════════════════════════════════════
   const dossierId = scopeKey.replace(/^logement:/, "");
-  const achat = await lireContexteDAchat(userId, dossierId).catch(() => null);
+  const achat = await lireContexteDAchat(userId, dossierId)
+    .catch(() => ({ contexte: { etat: "indisponible" as const, raison: "lecture_impossible" as const }, acheteLe: null }));
   const contexte = achat
     ? contexteDeGeneration({
         operation: operationDeGeneration({ versionPrete: Boolean(stocke?.artifact), demandeExplicite: false }),
@@ -207,11 +209,13 @@ export async function DossierAvecLogement({
   //     faute de pouvoir le lire, celui du jour), et elle n'est pas datée ;
   //   - lecture DEMANDÉE APRÈS UN ACHAT SANS PROJET : la version servie a été produite à la demande du
   //     lecteur, après coup ; l'historique le dit, pour ne pas la faire passer pour celle de l'achat.
-  const avis = servi.source === "assemblage" && (achat === null || achat.contexte.etat === "confirme")
-    ? achat === null
-      ? "Lecture provisoire : la version figée de ce dossier n'a pas encore pu être établie. Elle le sera avec le projet et les réponses confirmés à votre achat."
-      : "Lecture provisoire, établie avec le projet et les réponses confirmés à votre achat. Sa version datée n'a pas encore pu être figée ; elle le sera avec ces mêmes informations."
-    : servi.source === "artefact" && achat?.contexte.etat === "absent"
+  //   - lecture INCERTAINE : le contexte de l'achat est indisponible. Rien n'est promis sur la version à
+  //     venir : on ne sait pas, à cet instant, avec quelles informations elle pourra être établie ;
+  const avis = servi.source === "assemblage" && achat.contexte.etat === "confirme"
+    ? "Lecture provisoire, établie avec le projet et les réponses confirmés à votre achat. Sa version datée n'a pas encore pu être figée ; elle le sera avec ces mêmes informations."
+    : servi.source === "assemblage" && achat.contexte.etat === "indisponible"
+      ? "La version de votre dossier n'a pas encore pu être établie, et nous ne pouvons pas confirmer pour l'instant les informations retenues lors de votre achat. La lecture affichée est provisoire : elle ne remplace pas votre analyse achetée."
+    : servi.source === "artefact" && achat.contexte.etat === "absent"
       ? `Ce bien a été acheté sans projet${achat.acheteLe && dateFr(achat.acheteLe) ? `, le ${dateFr(achat.acheteLe)}` : ""}. Cette lecture personnalisée a été demandée ensuite, avec votre projet.`
       : null;
 

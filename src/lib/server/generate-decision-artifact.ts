@@ -14,6 +14,7 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { getReportContext, resolveRelation } from "@/lib/report-context";
+import { echecSimuleDeTest } from "@/lib/contexte-livraison";
 import { contexteDuBien, relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -152,6 +153,15 @@ export async function generateDecisionArtifact(
     // s'arrête ici, sur la contrainte unique de la table.
     const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
+
+    // ÉCHEC SIMULÉ, RÉSERVÉ AU TEST DE BOUT EN BOUT (FUT-10, parcours dégradé). La première tentative d'un
+    // dossier d'adresse échoue exactement comme une vraie panne de source (place prise, statut `failed`),
+    // pour prouver que la reprise suit le contexte de l'achat. Jamais actif en production : il exige une
+    // variable explicite ET un environnement qui n'est ni la production Next, ni la production Vercel.
+    if (echecSimuleDeTest(cible.kind, version)) {
+      await failArtifact(sb, userId, insee, scopeKey, version);
+      return { status: "failed", reason: "échec simulé (test de bout en bout)" };
+    }
 
     const lues = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
     const relations = cible.kind === "adresse" && cible.relationImposee !== undefined

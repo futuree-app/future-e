@@ -28,8 +28,9 @@ import { PREAMBULE, migrationsDeTest } from "./schema-de-test.mjs";
 
 const modPath = process.env.PGLITE_MODULE;
 if (!modPath) {
+  // Sortie 3 : NON exécuté. Jamais un faux feu vert.
   console.log("PGLITE_MODULE absent : intégration Postgres NON exécutée (voir l'en-tête du script).");
-  process.exit(0);
+  process.exit(3);
 }
 const { PGlite } = await import(modPath);
 const sql = (f) => readFileSync(new URL(`../../supabase/${f}`, import.meta.url), "utf8");
@@ -276,6 +277,10 @@ await cas("purge : abandonnée supprimée ; paiement engagé sans dossier, dossi
     assert.equal((await snap(pi)).purge, true, pi);
     assert.equal((await snap(pi)).rawText, undefined, pi);
   }
+  // Purgé après livraison : jamais confondu avec un achat sans projet, ni relu dans le compte.
+  const purgee = (await db.query(`select * from public.dossier_intents where stripe_payment_intent_id = 'pi_ready000001'`)).rows[0];
+  assert.deepEqual(projetPourLivraison(purgee), { etat: "efface" });
+  assert.deepEqual(contexteDAchat(purgee), { etat: "indisponible", raison: "projet_efface" });
   // Et la livraison inachevée reste rattrapable avec le projet PAYÉ.
   const intentInachevee = (await db.query(`select * from public.dossier_intents where stripe_payment_intent_id = 'pi_failed00001'`)).rows[0];
   assert.equal(contexteDAchat(intentInachevee).etat, "confirme");
@@ -289,6 +294,20 @@ await cas("purge : abandonnée supprimée ; paiement engagé sans dossier, dossi
     { supprimees_abandonnees: 0, projets_effaces: 0, a_reconcilier: 1, livraisons_inachevees: 3 });
   await assert.rejects(db.query(`select * from public.purger_dossier_intents($1, interval '1 day')`, [NOW.toISOString()]), /trop court/);
   await assert.rejects(db.query(`select * from public.purger_dossier_intents($1, interval '30 days', interval '1 hour')`, [NOW.toISOString()]), /trop court/);
+});
+
+await cas("dossier payé dont l'intention est introuvable : signalé, et jamais traité comme historique", async () => {
+  const db = await base();
+  await db.query(`insert into public.address_dossiers (user_id, ban_id, insee, address_label, stripe_payment_intent_id) values ('${A}', 'b', '1', 'x', 'pi_orphelin001')`);
+  const liste = (await db.query(`select stripe_payment_intent_id from public.dossiers_sans_intention()`)).rows.map((x) => x.stripe_payment_intent_id);
+  assert.deepEqual(liste, ["pi_orphelin001"]);
+  assert.deepEqual(contexteDAchat(null, { aUnPaiement: true }), { etat: "indisponible", raison: "intention_introuvable" });
+  // L'intention historique (présente, sans project_state) reste une compatibilité prouvée.
+  const ancien = (await db.query(`select * from public.dossier_intents where stripe_payment_intent_id = 'pi_ancien0001'`)).rows[0];
+  assert.deepEqual(contexteDAchat(ancien), { etat: "historique", raison: "intention_anterieure" });
+  await db.exec(`set role authenticated`);
+  await assert.rejects(db.query(`select * from public.dossiers_sans_intention()`), /permission denied/);
+  await db.exec(`reset role`);
 });
 
 await cas("retours arrière : 38 puis 37 s'appliquent, la base revient à son schéma antérieur", async () => {
@@ -323,8 +342,8 @@ await cas("schéma complet : les migrations 01 → 38 s'appliquent dans l'ordre 
   assert.ok(await politiques("decision_artifact") > 0);
   const rls = (await db.query(`select relname, relrowsecurity from pg_class where relname in ('dossier_intents', 'address_dossiers', 'decision_artifact') order by 1`)).rows;
   assert.ok(rls.every((r) => r.relrowsecurity), JSON.stringify(rls));
-  const fonctions = (await db.query(`select proname from pg_proc where proname in ('purger_dossier_intents', 'intentions_a_reconcilier', 'etat_livraison_intention') order by 1`)).rows.map((x) => x.proname);
-  assert.deepEqual(fonctions, ["etat_livraison_intention", "intentions_a_reconcilier", "purger_dossier_intents"]);
+  const fonctions = (await db.query(`select proname from pg_proc where proname in ('purger_dossier_intents', 'intentions_a_reconcilier', 'etat_livraison_intention', 'dossiers_sans_intention') order by 1`)).rows.map((x) => x.proname);
+  assert.deepEqual(fonctions, ["dossiers_sans_intention", "etat_livraison_intention", "intentions_a_reconcilier", "purger_dossier_intents"]);
 });
 
 console.log(resultats.join("\n"));

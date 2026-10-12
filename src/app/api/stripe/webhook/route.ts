@@ -53,11 +53,16 @@ export const runtime = "nodejs";
 function planifierArtefact(
   userId: string,
   cible: Parameters<typeof generateDecisionArtifact>[3],
-  achat: ContexteDAchat = { etat: "historique" },
+  achat: ContexteDAchat = { etat: "historique", raison: "hors_adresse" },
 ): void {
   // L'absence confirmée se décide ICI, avant toute lecture : aucune requête ne va chercher un projet
   // que le lecteur n'a pas confirmé pour cette vente.
   if (achat.etat === "absent") return;
+  // Un projet confirmé illisible : rien n'est figé, et l'anomalie se voit (le rattrapage refusera aussi).
+  if (achat.etat === "indisponible") {
+    console.error("[artefact] contexte d'achat indisponible, aucune version figée", { userId, raison: achat.raison });
+    return;
+  }
   after(async () => {
     try {
       let project = achat.etat === "confirme" ? achat.projet : null;

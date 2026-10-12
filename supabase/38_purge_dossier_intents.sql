@@ -131,6 +131,27 @@ as $$
    order by i.created_at;
 $$;
 
+-- L'ANOMALIE INVERSE : un dossier PAYÉ (PaymentIntent présent) dont l'intention est introuvable. Le seul
+-- écrivain de ce PaymentIntent est le webhook, qui exige l'intention : ce cas ne devrait jamais exister.
+-- Le code n'en fige aucune version (contexte d'achat `indisponible`) ; cette liste dit lesquels examiner.
+create or replace function public.dossiers_sans_intention()
+returns table (dossier_id uuid, stripe_payment_intent_id text, purchased_at timestamptz)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select d.id, d.stripe_payment_intent_id, d.purchased_at
+    from public.address_dossiers d
+   where d.stripe_payment_intent_id is not null
+     and not exists (select 1 from public.dossier_intents i
+                      where i.stripe_payment_intent_id = d.stripe_payment_intent_id)
+   order by d.purchased_at;
+$$;
+
+revoke all on function public.dossiers_sans_intention() from public, authenticated, anon;
+grant execute on function public.dossiers_sans_intention() to service_role;
+
 revoke all on function public.etat_livraison_intention(text) from public, authenticated, anon;
 revoke all on function public.purger_dossier_intents(timestamptz, interval, interval) from public, authenticated, anon;
 revoke all on function public.intentions_a_reconcilier(timestamptz, interval) from public, authenticated, anon;

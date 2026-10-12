@@ -1,19 +1,15 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
-// FUT-10 · INTÉGRATION SUPABASE RÉELLE (PostgREST + supabase-js), SUR UNE INSTANCE ISOLÉE.
+// FUT-10 · INTÉGRATION SUPABASE RÉELLE (PostgREST + supabase-js), SUR LE PROJET DE TEST (OU UNE INSTANCE LOCALE).
 //
 // Ce que PGlite ne prouve pas, et que ce script prouve : le stockage RÉEL (`intention-dossier-store-supabase.ts`,
 // exactement le code du serveur) à travers PostgREST, deux CONNEXIONS distinctes qui se disputent la
 // même intention, les politiques d'accès vues par un vrai utilisateur authentifié, et l'idempotence de
 // l'upsert du webhook via supabase-js.
 //
-// PRÉREQUIS (rien de cela n'existe sur le poste au 12/10/2026 : Docker et le CLI Supabase manquent) :
-//   1. Docker et le CLI Supabase : `supabase start` (instance locale, jamais `--linked`) ;
-//   2. le schéma de test : node scripts/integration/schema-de-test.mjs > /tmp/schema.sql
-//      psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f /tmp/schema.sql
-//   3. l'environnement de test (jamais `.env.local`) : NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321,
-//      SUPABASE_SERVICE_ROLE_KEY et NEXT_PUBLIC_SUPABASE_ANON_KEY donnés par `supabase status`, plus les
-//      valeurs factices exigées par le garde-fou (Stripe test, re_factice…, phc_factice…) ;
-//   4. node scripts/integration/fut10-supabase-local.mjs
+// PRÉREQUIS : le projet Supabase de TEST (`future-e-test`), avec le schéma appliqué par
+// `appliquer-schema-test.mjs`, et l'environnement de test chargé (`.env.fut10-test`, jamais `.env.local`) :
+//   set -a; . ./.env.fut10-test; set +a; node scripts/integration/fut10-supabase-integration.mjs
+// Une instance locale (`supabase start`) convient aussi. Sortie 2 si l'environnement n'est pas isolé.
 //
 // INTERDIT : `supabase db reset --linked`, `supabase db push` vers la production, ou toute exécution avec
 // l'environnement de production. Le garde-fou refuse de démarrer dans ces cas.
@@ -30,7 +26,7 @@ exigerEnvironnementIsole();
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const nouveauClient = (cle) => createClient(URL_, cle, { auth: { persistSession: false, autoRefreshToken: false } });
 // DEUX clients, donc deux connexions HTTP vers PostgREST, donc deux connexions Postgres.
 const connexionA = nouveauClient(SERVICE);

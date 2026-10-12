@@ -9,10 +9,11 @@
 // Puis confirme le paiement avec la carte de test `pm_card_visa` et vérifie que le statut final n'est
 // plus modifiable (`statutStripeModifiable`).
 //
-// SÉCURITÉ : refuse de tourner avec autre chose qu'une clé `sk_test_`. Aucun paiement réel possible.
+// SÉCURITÉ : le garde-fou refuse toute clé qui n'est pas `sk_test_` (sortie 2 : NON exécuté, jamais un
+// faux feu vert). Aucun paiement réel possible.
 //
 // Lancement :
-//   STRIPE_TEST_SECRET_KEY=sk_test_… node scripts/integration/fut10-stripe-test.mjs
+//   node scripts/integration/fut10-stripe-test.mjs   (environnement de test chargé ; sortie 2 s'il n'est pas isolé)
 // Webhook de bout en bout (application locale lancée avec des clés de TEST et une base de TEST) :
 //   stripe listen --forward-to localhost:3000/api/stripe/webhook
 //   stripe trigger payment_intent.succeeded   # ne porte pas de dossier_intents : rejet attendu (500, rejoué)
@@ -21,11 +22,10 @@ import Stripe from "stripe";
 import assert from "node:assert/strict";
 import { statutStripeModifiable } from "../../src/lib/verrou-intention-dossier.ts";
 
-const cle = process.env.STRIPE_TEST_SECRET_KEY ?? "";
-if (!cle.startsWith("sk_test_")) {
-  console.log("STRIPE_TEST_SECRET_KEY absente ou non test : intégration Stripe NON exécutée.");
-  process.exit(0);
-}
+// La même clé que l'application de test (STRIPE_SECRET_KEY), et le même garde-fou que les autres scripts.
+import { exigerEnvironnementIsole } from "./garde-environnement.mjs";
+exigerEnvironnementIsole();
+const cle = process.env.STRIPE_SECRET_KEY ?? "";
 const stripe = new Stripe(cle);
 const tentative = `fut10-integration-${Date.now()}`;
 const params = {
@@ -36,6 +36,7 @@ const params = {
 const a = await stripe.paymentIntents.create(params, { idempotencyKey: `dossier_test_${tentative}` });
 const b = await stripe.paymentIntents.create(params, { idempotencyKey: `dossier_test_${tentative}` });
 assert.equal(b.id, a.id, "même clé, mêmes paramètres : même PaymentIntent");
+assert.equal(a.livemode, false, "mode test");
 assert.equal(statutStripeModifiable(a.status), true);
 // Aucune donnée de projet ni de relation dans les métadonnées.
 assert.deepEqual(Object.keys(a.metadata).sort(), ["checkoutAttemptId", "productType"]);

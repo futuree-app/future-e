@@ -160,24 +160,29 @@ export function colonnesDossierDepuisIntention(intent: Record<string, unknown>):
  *   - `confirme`   : générer avec CE projet, jamais avec celui du compte ;
  *   - `absent`     : le lecteur a payé sans projet ; aucun projet n'est lu, même si le compte en a reçu
  *                    un depuis (le dossier vendu est factuel, et c'est ce qu'il a confirmé) ;
+ *   - `efface`     : projet confirmé, puis effacé par la purge (marqueur `purge`) : la première version
+ *                    était déjà prête, mais l'intention ne sait plus le reproduire ;
+ *   - `illisible`  : projet confirmé que la lecture refuse (corruption) ;
  *   - `historique` : intention antérieure à FUT-10 : relecture du projet du compte, comme avant.
  *
- * Un projet `confirmed` illisible (corrompu, ou effacé par la purge) vaut `absent`, JAMAIS une relecture
- * du compte : un contexte non confirmé ne doit pas pouvoir entrer dans une analyse payée.
+ * `efface` et `illisible` ne valent JAMAIS `absent` (un achat sans projet n'a rien à voir) ni une
+ * relecture du compte : un contexte non confirmé ne doit pas pouvoir entrer dans une analyse payée.
  */
 export type ProjetLivraison =
   | { etat: "confirme"; projet: UserProject }
   | { etat: "absent" }
+  | { etat: "efface" }
+  | { etat: "illisible" }
   | { etat: "historique" };
 
 export function projetPourLivraison(intent: Record<string, unknown> | null | undefined): ProjetLivraison {
   const etat = intent?.project_state;
-  if (etat === "confirmed") {
-    const projet = normalizeUserProject(intent?.project_snapshot ?? null);
-    return projet ? { etat: "confirme", projet } : { etat: "absent" };
-  }
-  // Seule l'ABSENCE de colonne ou de valeur dit « intention historique ». Toute autre valeur, même
-  // inattendue, est traitée comme une absence confirmée : on ne relit jamais le compte par défaut.
+  // Seule l'ABSENCE de colonne ou de valeur dit « intention historique ».
   if (etat === undefined || etat === null) return { etat: "historique" };
-  return { etat: "absent" };
+  if (etat === "absent") return { etat: "absent" };
+  if (etat !== "confirmed") return { etat: "illisible" };
+  const snapshot = intent?.project_snapshot;
+  if (snapshot && typeof snapshot === "object" && (snapshot as Record<string, unknown>).purge === true) return { etat: "efface" };
+  const projet = normalizeUserProject(snapshot ?? null);
+  return projet ? { etat: "confirme", projet } : { etat: "illisible" };
 }

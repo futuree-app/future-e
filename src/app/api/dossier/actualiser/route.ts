@@ -103,15 +103,17 @@ export async function POST(request: Request) {
   let projet = projetCourant;
   let relationImposee: RelationAuLieu | null | undefined = undefined;
   if (dossier) {
-    const achat = await lireContexteDAchat(user.id, dossier.id).catch(() => null);
-    // Sans le contexte de l'achat, on ne devine pas : la génération attendra.
-    if (!achat) return Response.json({ error: "PURCHASE_CONTEXT_UNAVAILABLE" }, { status: 503 });
+    const achat = await lireContexteDAchat(user.id, dossier.id);
     const contexte = contexteDeGeneration({
       operation: operationDeGeneration({ versionPrete: Boolean(existant?.artifact), demandeExplicite: true }),
       demandeExplicite: true,
       achat: achat.contexte,
       courant: { projet: projetCourant, relation: relationDeLAdresse(dossier) },
     });
+    // Sans le contexte de l'achat, on ne devine pas : aucune première version n'est figée, même sur un clic.
+    if (!contexte.genere && contexte.raison === "contexte_indisponible") {
+      return Response.json({ error: "PURCHASE_CONTEXT_UNAVAILABLE" }, { status: 503 });
+    }
     if (!contexte.genere) return Response.json({ error: "PROJECT_MISSING" }, { status: 409 });
     projet = contexte.projet;
     if (contexte.source !== "courant") relationImposee = contexte.relation;

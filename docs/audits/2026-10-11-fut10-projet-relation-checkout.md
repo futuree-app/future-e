@@ -345,7 +345,7 @@ FUT-92 a été fusionné dans `main` pendant cette revue (9cd6a34c), et la branc
 | `scripts/integration/garde-environnement.mjs` | refuse tout environnement non isolé (catégories seulement, aucun secret) | oui : refuse l'environnement du poste (clés Stripe et projet Supabase de production, vraie clé Resend, PostHog réel, rédaction allumée) |
 | `scripts/integration/schema-de-test.mjs` | assemble 01 → 38 pour une base vierge (deux adaptations de test dites) | oui, dans PGlite |
 | `scripts/integration/fut10-postgres.mjs` | vraies migrations, contraintes, verrou, purge, droits, schéma complet | **oui, 10 / 10** (PGlite, une connexion) |
-| `scripts/integration/fut10-supabase-local.mjs` | supabase-js / PostgREST, deux connexions, politiques, upsert du webhook | **non** : Docker et le CLI Supabase absents |
+| `scripts/integration/fut10-supabase-integration.mjs` | supabase-js / PostgREST, deux connexions, politiques, upsert du webhook | **non** : Docker et le CLI Supabase absents |
 | `scripts/integration/fut10-stripe-test.mjs` | API Stripe en mode test, idempotence, statut réel | **non** : clé de test du CLI expirée (05/09/2026) |
 | `scripts/integration/fut10-bout-en-bout.mjs` | parcours complet, webhook signé, rejeu, refus après confirmation | **non** : prérequis ci-dessus |
 
@@ -353,9 +353,56 @@ FUT-92 a été fusionné dans `main` pendant cette revue (9cd6a34c), et la branc
 
 ### F.7 Mise en production (après revue)
 
-1. Sur un environnement de test : schéma de test, puis `fut10-supabase-local.mjs`, `fut10-stripe-test.mjs`, `fut10-bout-en-bout.mjs`.
+1. Sur un environnement de test : schéma de test, puis `fut10-supabase-integration.mjs`, `fut10-stripe-test.mjs`, `fut10-bout-en-bout.mjs`.
 2. En production, dans l'ordre : `37_contexte_checkout_dossier.sql`, `38_purge_dossier_intents.sql`, **puis** déploiement du code.
 3. Vérifier `select * from public.intentions_a_reconcilier();` (doit être vide au départ).
 4. Plus tard, sur décision : planifier la purge (pg_cron, commande en tête de la migration 38).
 
 Retours arrière : déployer l'ancien code, puis `38_…_down.sql`, puis `37_…_down.sql` (les contextes déclarés sont perdus).
+
+## G. Dernières corrections (12/10/2026) et validation sur le projet Supabase de test
+
+### G.1 Correction A : une intention d'achat manquante n'est jamais un achat historique
+
+Constat vérifié dans l'historique : depuis le 30/07/2026 (commit 472a5a7a, qui crée à la fois `dossier_intents` et la création des dossiers par le webhook), **le seul écrivain** de `address_dossiers.stripe_payment_intent_id` est le webhook. Il lève une erreur quand l'intention manque. Les dossiers ouverts par l'administration ont un PaymentIntent nul.
+
+| Situation | Contexte d'achat | Effet |
+|---|---|---|
+| Dossier sans PaymentIntent (administration) | `historique / sans_paiement` | contexte du jour (compatibilité) |
+| Intention présente, sans `project_state` | `historique / intention_anterieure` (prouvé) | contexte du jour (compatibilité) |
+| PaymentIntent présent, intention introuvable | `indisponible / intention_introuvable` | **aucune version figée**, même sur un clic ; anomalie journalisée et listée par `dossiers_sans_intention()` |
+| Projet confirmé effacé par la purge | `indisponible / projet_efface` | jamais confondu avec un achat sans projet ; la purge n'agit qu'après une version prête, dont les successions partent |
+| Projet confirmé illisible | `indisponible / projet_illisible` | aucune version figée |
+| Lecture impossible (panne) | `indisponible / lecture_impossible` | idem |
+
+### G.2 Correction B : la lecture provisoire incertaine
+
+Quand le contexte d'achat est indisponible, la lecture assemblée avec le contexte du jour porte : « La version de votre dossier n'a pas encore pu être établie, et nous ne pouvons pas confirmer pour l'instant les informations retenues lors de votre achat. La lecture affichée est provisoire : elle ne remplace pas votre analyse achetée. » Rien n'est figé, et rien n'est promis sur la version à venir. Les autres cas sont inchangés : contexte acheté retrouvé (lecture provisoire avec lui), achat sans projet (lecture factuelle), historique prouvé.
+
+### G.3 Correction C : un test de bout en bout qui ne peut plus réussir à tort
+
+`fut10-bout-en-bout.mjs --parcours nominal` exige un artefact `ready` avec le projet, la relation et l'objectif de l'achat ; un `failed` le fait échouer (sortie 1). `--parcours degrade` exige l'échec de la v1, aucune version tenue pour livrée, le contexte conservé, puis un rattrapage prêt avec le projet de l'achat alors que le compte porte un autre projet.
+
+Composants **réels** : Stripe en mode test (PaymentIntent, confirmation, webhook signé par `stripe listen`), le projet Supabase de test (authentification, tables, politiques), l'application locale (routes, moteur, sources publiques). **Remplacés** : la carte (`4242…`, mode test) ; dans le parcours dégradé, l'échec de la première génération, injecté par `FUT10_TEST_ECHEC_PREMIERE_GENERATION=1`. Ce point d'injection est inactif sans cette variable, en production Next (`NODE_ENV`) et en production Vercel (`VERCEL_ENV`).
+
+**Rejeu** : `stripe events resend` vise les endpoints enregistrés dans le tableau de bord, pas forcément l'écoute éphémère de `stripe listen`. Le script rejoue donc lui-même le **vrai** événement (relu dans l'API Stripe), signé avec le secret du webhook, vers l'application.
+
+**Sorties** : 0 seulement si tout a été vérifié, 1 sur une assertion fausse, 2 si l'environnement n'est pas isolé, 3 si un prérequis manque (PGlite). Aucun script ne donne plus de faux feu vert.
+
+### G.4 Purge : une vente confirmée hors du formulaire peut-elle perdre son intention ?
+
+Une intention non verrouillée et sans dossier est supprimée au bout de 30 jours. Ce qui l'empêche de concerner une vente :
+- notre formulaire verrouille **avant** de confirmer, et ne confirme pas si le verrou échoue ;
+- le webhook verrouille dès son arrivée, avant toute autre opération : une vente dont le webhook a seulement atteint le serveur est verrouillée, donc jamais supprimée (elle passe en `paiement_engage_sans_dossier`, signalée).
+
+Ce qui ne l'empêche pas : un paiement confirmé **hors de notre formulaire** (appel direct à Stripe avec le secret client) dont le webhook n'aurait **jamais** atteint le serveur. Stripe abandonne au bout de 3 jours en production, et personne n'aurait réconcilié pendant 30 jours. L'intention serait supprimée, la vente resterait encaissée sans dossier ni adresse.
+
+**Proposition, avant toute activation du cron** : une étape de réconciliation Stripe préalable. Pour chaque intention candidate à la suppression, relire le PaymentIntent dans Stripe ; supprimer seulement si son statut est `requires_payment_method` ou `canceled` (ou s'il est introuvable), sinon rejouer l'événement. SQL ne peut pas interroger Stripe : cette étape vit dans un script d'administration, à écrire au moment où la purge sera planifiée. **Le cron reste désactivé.**
+
+### G.5 Projet Supabase de test et environnement isolé
+
+- Projet de test : `future-e-test` (`atvknbgahcuovcyqapfx`). Production interdite en dur dans le garde-fou (`xkewgsccadjmondzmjxj`), en plus des projets trouvés dans les `.env` de production du poste.
+- `.env.fut10-test` (ignoré par Git, droits 600) : redéclare **chaque** variable de `.env.local`, au besoin vide. Sans cela, `next dev` reprendrait sa valeur de production. Le garde-fou le vérifie.
+- Le garde-fou contrôle aussi qu'une clé Supabase au format JWT appartient bien au projet déclaré, et que l'URL Postgres désigne le projet de test.
+- `appliquer-schema-test.mjs` : sans `--confirmer <référence>`, il affiche le plan et ne fait rien ; il refuse une base qui n'est pas vierge.
+- `fut10-supabase-local.mjs` est renommé `fut10-supabase-integration.mjs` (projet de test ou instance locale).

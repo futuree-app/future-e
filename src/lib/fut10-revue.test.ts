@@ -57,10 +57,11 @@ test("A. la livraison suit l'état confirmé, jamais le projet du compte", () =>
     { etat: "confirme", projet: { ...p, schemaVersion: 3 } });
   assert.deepEqual(projetPourLivraison({ project_state: "absent", project_snapshot: null }), { etat: "absent" });
   assert.deepEqual(projetPourLivraison({ ban_id: "x" }), { etat: "historique" });
-  // Un snapshot confirmé mais illisible (corrompu, ou purgé) ne déclenche JAMAIS une relecture du compte.
-  assert.deepEqual(projetPourLivraison({ project_state: "confirmed", project_snapshot: { purge: true } }), { etat: "absent" });
-  // Une valeur inattendue non plus.
-  assert.deepEqual(projetPourLivraison({ project_state: "peut-etre" }), { etat: "absent" });
+  // Un snapshot confirmé puis purgé, ou illisible, ne déclenche JAMAIS une relecture du compte, et ne se
+  // confond pas avec un achat sans projet.
+  assert.deepEqual(projetPourLivraison({ project_state: "confirmed", project_snapshot: { purge: true, purged_at: "x" } }), { etat: "efface" });
+  assert.deepEqual(projetPourLivraison({ project_state: "confirmed", project_snapshot: { illisible: true } }), { etat: "illisible" });
+  assert.deepEqual(projetPourLivraison({ project_state: "peut-etre" }), { etat: "illisible" });
 });
 
 test("A. scénario : payé sans projet, projet créé dans un autre onglet, puis webhook → dossier factuel", () => {

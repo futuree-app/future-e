@@ -5,7 +5,7 @@
 // `supabase db reset` ne les applique PAS. Ce script les assemble, dans l'ordre (01 → 38, sans les
 // `_down`), en un seul fichier SQL à rejouer sur une base VIERGE de test :
 //   node scripts/integration/schema-de-test.mjs > /tmp/schema-de-test.sql
-//   psql "$URL_POSTGRES_LOCALE" -v ON_ERROR_STOP=1 -f /tmp/schema-de-test.sql
+//   (application sur le projet de test : `appliquer-schema-test.mjs`, qui exige le garde-fou et une confirmation)
 //
 // DEUX ADAPTATIONS, RÉSERVÉES AUX TESTS ET DITES ICI :
 //   1. `25_address_dossiers.sql` refuse de tourner s'il ne trouve pas les 24 lignes que la production
@@ -16,7 +16,7 @@
 //      FUT-10 ; elle est omise.
 // Aucun fichier de `supabase/` n'est modifié. Ne JAMAIS appliquer cette sortie à la production.
 //
-// Sur une instance Supabase locale (`supabase start`), le schéma `auth`, `auth.uid()` et les rôles
+// Sur un projet Supabase (hébergé ou local), le schéma `auth`, `auth.uid()` et les rôles
 // existent déjà : le préambule ci-dessous ne les crée que s'ils manquent (cas de PGlite ou d'un
 // Postgres nu).
 // ════════════════════════════════════════════════════════════════════════════════════════════

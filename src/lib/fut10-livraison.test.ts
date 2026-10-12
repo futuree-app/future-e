@@ -45,12 +45,13 @@ function monde(opts: { projetAuCheckout: UserProject | null; relation?: AddressR
   const intent = JSON.parse(JSON.stringify({ stripe_payment_intent_id: "pi_1", context_locked_at: NOW.toISOString(), ...colonnes })) as Record<string, unknown>;
   const w = {
     compte: { projet: opts.projetAuCheckout as UserProject | null },
-    intent,
+    intent: intent as Record<string, unknown> | null,
+    aUnPaiement: true,
     dossier: null as null | Record<string, unknown>,
     versions: [] as Version[],
     get servie(): Version | null { return [...w.versions].reverse().find((v) => v.status === "ready") ?? null; },
     relationCourante(): RelationAuLieu { return relationDeLAdresse(w.dossier); },
-    achat(): ContexteDAchat { return contexteDAchat(w.intent); },
+    achat(): ContexteDAchat { return contexteDAchat(w.intent, { aUnPaiement: w.aUnPaiement }); },
     /** Une génération : réserve le numéro suivant, échoue ou fige le contexte reçu. */
     generer(c: ReturnType<typeof contexteDeGeneration>, echec: boolean) {
       if (!c.genere) return;
@@ -62,7 +63,7 @@ function monde(opts: { projetAuCheckout: UserProject | null; relation?: AddressR
     /** Le webhook : upsert(ignoreDuplicates) du dossier, puis première livraison si créé. */
     webhook(echec = false) {
       const created = w.dossier === null;
-      if (created) w.dossier = { id: "d1", ...colonnesDossierDepuisIntention(w.intent) };
+      if (created) w.dossier = { id: "d1", ...colonnesDossierDepuisIntention(w.intent ?? {}) };
       if (!created) return;
       const achat = w.achat();
       const courant = achat.etat === "historique" ? w.compte.projet : null;
@@ -169,7 +170,7 @@ test("intention antérieure sans project_state : le contexte du jour, comme avan
   w.compte.projet = B;
   w.webhook(true);
   w.rattrapage();
-  assert.deepEqual(w.achat(), { etat: "historique" });
+  assert.deepEqual(w.achat(), { etat: "historique", raison: "intention_anterieure" });
   assert.equal(w.servie!.projet!.rawText, B.rawText);
 });
 
@@ -271,7 +272,7 @@ test("achat sans projet, puis « Lire ce bien avec mon projet » : une lecture d
 
 test("câblage : le rattrapage de la page lit le contexte d'achat, n'en devine aucun, et impose la relation", () => {
   const f = lire("src/components/report/DossierAvecLogement.tsx");
-  assert.match(f, /const achat = await lireContexteDAchat\(userId, dossierId\)\.catch\(\(\) => null\);/);
+  assert.match(f, /const achat = await lireContexteDAchat\(userId, dossierId\)\s*\.catch\(\(\) => \(\{ contexte: \{ etat: "indisponible" as const, raison: "lecture_impossible" as const \}/);
   assert.match(f, /operation: operationDeGeneration\(\{ versionPrete: Boolean\(stocke\?\.artifact\), demandeExplicite: false \}\)/);
   // On ne fige qu'avec un contexte établi : jamais avec le projet du jour par défaut.
   assert.match(f, /assemble\?\.status === "done" && contexte\?\.genere\) \{/);
@@ -286,7 +287,7 @@ test("câblage : le rattrapage de la page lit le contexte d'achat, n'en devine a
 test("câblage : l'actualisation distingue première livraison et mise à jour, et refuse sans contexte d'achat", () => {
   const r = lire("src/app/api/dossier/actualiser/route.ts");
   assert.match(r, /operation: operationDeGeneration\(\{ versionPrete: Boolean\(existant\?\.artifact\), demandeExplicite: true \}\)/);
-  assert.match(r, /if \(!achat\) return Response\.json\(\{ error: "PURCHASE_CONTEXT_UNAVAILABLE" \}, \{ status: 503 \}\);/);
+  assert.match(r, /contexte\.raison === "contexte_indisponible"\) \{\s*return Response\.json\(\{ error: "PURCHASE_CONTEXT_UNAVAILABLE" \}, \{ status: 503 \}\);/);
   assert.match(r, /generateDecisionArtifact\(supabase, user\.id, projet, cible, version\)/);
 });
 
@@ -312,13 +313,74 @@ test("câblage : le bandeau « lien modifié » existe aussi dans Le relevé, av
   assert.match(r, /raison=\{projetAChange \? "projet" : contexteAChange \? "lien" : "voisinage"\}/);
 });
 
+// ═══ CORRECTION A : UNE INTENTION D'ACHAT MANQUANTE N'EST JAMAIS UN ACHAT HISTORIQUE ═════════════
+
+test("dossier payé dont l'intention est introuvable : rattrapage différé refusé, même sur un clic, jamais avec le projet du jour", () => {
+  const w = monde({ projetAuCheckout: A, objectif: "buy" });
+  w.webhook(true);
+  w.intent = null; // l'intention a disparu (suppression manuelle, incident)
+  w.compte.projet = B;
+  assert.deepEqual(w.achat(), { etat: "indisponible", raison: "intention_introuvable" });
+  w.rattrapage();
+  w.rattrapage();
+  w.actualiser();
+  assert.deepEqual(w.versions.map((v) => v.status), ["failed"]);
+  assert.deepEqual(contexteDeGeneration({ operation: "premiere_livraison", demandeExplicite: true, achat: w.achat(), courant: { projet: B, relation: null } }),
+    { genere: false, raison: "contexte_indisponible" });
+});
+
+test("plusieurs dossiers : l'intention manquante de l'un ne contamine pas les autres", () => {
+  const sain = monde({ projetAuCheckout: A, relation: "lives_here", objectif: "understand" });
+  const orphelin = monde({ projetAuCheckout: A, relation: "studying", objectif: "buy" });
+  sain.webhook(true); orphelin.webhook(true);
+  orphelin.intent = null;
+  sain.compte.projet = B; orphelin.compte.projet = B;
+  sain.rattrapage(); orphelin.rattrapage();
+  assert.equal(sain.servie!.projet!.rawText, A.rawText);
+  assert.equal(orphelin.servie, null);
+});
+
+test("seuls deux cas sont historiques : dossier sans paiement, intention antérieure présente", () => {
+  assert.deepEqual(contexteDAchat(null, { aUnPaiement: false }), { etat: "historique", raison: "sans_paiement" });
+  assert.deepEqual(contexteDAchat({ project_state: null, ban_id: "x" }), { etat: "historique", raison: "intention_anterieure" });
+  assert.deepEqual(contexteDAchat(null), { etat: "indisponible", raison: "intention_introuvable" });
+  assert.deepEqual(contexteDAchat(undefined, { aUnPaiement: true }), { etat: "indisponible", raison: "intention_introuvable" });
+});
+
+test("après purge : un projet confirmé effacé n'est ni un achat sans projet, ni une relecture du compte", () => {
+  const purgee = { project_state: "confirmed", project_snapshot: { purge: true, purged_at: "2026-11-15T03:17:00Z" }, place_relation: "lives_here", place_objective: "buy" };
+  assert.deepEqual(contexteDAchat(purgee), { etat: "indisponible", raison: "projet_efface" });
+  // La version prête existe (la purge l'exige) : une succession part d'elle, jamais de l'intention.
+  const c = contexteDeGeneration({
+    operation: "succession_automatique", achat: contexteDAchat(purgee),
+    versionServie: { projet: A, contexteDuBien: { relation: "lives_here", objectif: "buy" } },
+    courant: { projet: B, relation: null },
+  });
+  assert.ok(c.genere && c.projet.rawText === A.rawText && c.source === "version_servie");
+  // Et l'avis « acheté sans projet » ne peut pas s'afficher pour lui (il exige `absent`).
+  assert.match(lire("src/components/report/DossierAvecLogement.tsx"), /servi\.source === "artefact" && achat\.contexte\.etat === "absent"/);
+});
+
+test("lecture provisoire : deux textes, et celui de l'incertitude ne promet rien", () => {
+  const f = lire("src/components/report/DossierAvecLogement.tsx");
+  assert.match(f, /servi\.source === "assemblage" && achat\.contexte\.etat === "confirme"\s*\? "Lecture provisoire, établie avec le projet et les réponses confirmés à votre achat\./);
+  const incertain = f.match(/achat\.contexte\.etat === "indisponible"\s*\? "([^"]+)"/)![1];
+  assert.match(incertain, /ne pouvons pas confirmer/);
+  assert.match(incertain, /ne remplace pas votre analyse achetée/);
+  assert.doesNotMatch(incertain, /elle le sera|confirmés à votre achat|—/);
+  // Le lecteur serveur ne rend plus jamais « historique » pour un PaymentIntent sans intention.
+  const r = lire("src/lib/server/contexte-achat.ts");
+  assert.match(r, /contexteDAchat\(intent as Record<string, unknown> \| null, \{ aUnPaiement: true \}\)/);
+  assert.doesNotMatch(r, /return \{ contexte: \{ etat: "historique" \}/);
+});
+
 // ═══ GARDE-FOU DES TESTS D'INTÉGRATION ═════════════════════════════════════════════════════════
 
 test("garde-fou : refuse la production et les vraies clés, accepte un environnement factice local, n'affiche aucun secret", async () => {
   const { diagnostiquer } = await import("../../scripts/integration/garde-environnement.mjs");
   const isole = {
     STRIPE_SECRET_KEY: "sk_test_SECRET1", NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_x", STRIPE_WEBHOOK_SECRET: "whsec_SECRET2",
-    NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_SERVICE_ROLE_KEY: "SECRET3",
+    NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_SERVICE_ROLE_KEY: "SECRET3", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_x",
     RESEND_API_KEY: "re_factice_fut10", NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: "phc_factice_fut10", NEXT_PUBLIC_POSTHOG_HOST: "http://127.0.0.1:9",
   };
   const ok = diagnostiquer(isole, new Set());
@@ -339,7 +401,20 @@ test("garde-fou : refuse la production et les vraies clés, accepte un environne
   ];
   for (const c of cas) assert.equal(diagnostiquer({ ...isole, ...c }, new Set([refProd])).ok, false, JSON.stringify(c));
   // Un projet distant explicitement déclaré de test, et absent des fichiers de production, est accepté.
-  assert.equal(diagnostiquer({ ...isole, NEXT_PUBLIC_SUPABASE_URL: "https://yyyyyyyyyyyyyyyyyyyy.supabase.co", FUT10_SUPABASE_REF_TEST: "yyyyyyyyyyyyyyyyyyyy" }, new Set([refProd])).ok, true);
+  const test = { ...isole, NEXT_PUBLIC_SUPABASE_URL: "https://atvknbgahcuovcyqapfx.supabase.co", FUT10_SUPABASE_REF_TEST: "atvknbgahcuovcyqapfx" };
+  assert.equal(diagnostiquer(test, new Set([refProd])).ok, true);
+  // La production connue est refusée en dur, même déclarée « de test » et absente des fichiers du poste.
+  assert.equal(diagnostiquer({ ...isole, NEXT_PUBLIC_SUPABASE_URL: "https://xkewgsccadjmondzmjxj.supabase.co", FUT10_SUPABASE_REF_TEST: "xkewgsccadjmondzmjxj" }).ok, false);
+  // Une clé JWT d'un autre projet (ou de la production) collée avec l'URL de test est refusée.
+  const jwt = (ref: string) => `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ ref, role: "service_role" })).toString("base64url")}.signature`;
+  assert.equal(diagnostiquer({ ...test, SUPABASE_SERVICE_ROLE_KEY: jwt("atvknbgahcuovcyqapfx") }).ok, true);
+  assert.equal(diagnostiquer({ ...test, SUPABASE_SERVICE_ROLE_KEY: jwt("xkewgsccadjmondzmjxj") }).ok, false);
+  assert.equal(diagnostiquer({ ...test, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: jwt("zzzzzzzzzzzzzzzzzzzz") }).ok, false);
+  assert.equal(diagnostiquer({ ...test, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: undefined }).ok, false);
+  // L'URL Postgres du schéma de test : le projet déclaré seulement.
+  assert.equal(diagnostiquer({ ...test, FUT10_TEST_DATABASE_URL: "postgresql://u:p@db.atvknbgahcuovcyqapfx.supabase.co:5432/postgres" }).ok, true);
+  assert.equal(diagnostiquer({ ...test, FUT10_TEST_DATABASE_URL: "postgresql://u:p@db.xkewgsccadjmondzmjxj.supabase.co:5432/postgres" }).ok, false);
+  assert.doesNotMatch(JSON.stringify(diagnostiquer({ ...test, FUT10_TEST_DATABASE_URL: "postgresql://u:MOTDEPASSE@db.atvknbgahcuovcyqapfx.supabase.co:5432/postgres" })), /MOTDEPASSE/);
 });
 
 test("schéma de test : seules deux adaptations, dites, et aucun fichier de supabase/ modifié", async () => {
@@ -353,4 +428,16 @@ test("schéma de test : seules deux adaptations, dites, et aucun fichier de supa
   assert.match(m25.sql, /if false then -- contrôle de production neutralisé/);
   assert.match(lire("supabase/25_address_dossiers.sql"), /if n <> 24 then/);
   for (const x of m) if (x.fichier !== "25_address_dossiers.sql") assert.equal(x.sql, lire(`supabase/${x.fichier}`));
+});
+
+test("échec simulé du parcours dégradé : jamais en production, jamais sans la variable, seulement la v1 d'une adresse", async () => {
+  const { echecSimuleDeTest } = await import("./contexte-livraison.ts");
+  const dev = { FUT10_TEST_ECHEC_PREMIERE_GENERATION: "1", NODE_ENV: "development" };
+  assert.equal(echecSimuleDeTest("adresse", 1, dev), true);
+  assert.equal(echecSimuleDeTest("adresse", 2, dev), false);
+  assert.equal(echecSimuleDeTest("commune", 1, dev), false);
+  assert.equal(echecSimuleDeTest("adresse", 1, { ...dev, NODE_ENV: "production" }), false);
+  assert.equal(echecSimuleDeTest("adresse", 1, { ...dev, VERCEL_ENV: "production" }), false);
+  assert.equal(echecSimuleDeTest("adresse", 1, { NODE_ENV: "development" }), false);
+  assert.match(lire("src/lib/server/generate-decision-artifact.ts"), /if \(echecSimuleDeTest\(cible\.kind, version\)\) \{\s*await failArtifact/);
 });
