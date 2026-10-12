@@ -37,7 +37,7 @@ export function Geste({ libelle, type }: { libelle: string; type?: VerificationA
 function DonneesEtLimites({ e, provenance }: { e: EntreeLue; provenance?: string }) {
   if (e.aVerifier.length + e.methode.length + e.detailles.length === 0) return null;
   return (
-    <details className={s.details}>
+    <details className={`${s.details} ${s.detailsFluide}`}>
       <summary>
         {e.detailles.length > 0
           ? `Données, limites et ${e.detailles.length > 1 ? `les ${e.detailles.length} constats détaillés` : "le constat détaillé"}`

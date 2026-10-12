@@ -15,12 +15,12 @@
 // La logique d'affichage est pure et testée : src/lib/territoire/synthesis-display.ts.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useHorizon, HORIZON_META, type HorizonKey } from "@/hooks/useHorizon";
 import type { QuartierSourceKey } from "@/lib/territoire/screen";
 import {
-  displayReducer, eventFromAnswer, initialDisplay, offersEnriched,
+  displayReducer, eventFromAnswer, initialDisplay, ligneEtatLecture, cleDemande,
   type DisplayEvent, type DisplayState, type SynthesisAnswer,
 } from "@/lib/territoire/synthesis-display";
 
@@ -235,27 +235,23 @@ export default function QuartierSynthesis({
           ))}
         </div>
 
-        {/* Un signal discret, jamais un écran d'attente : la lecture affichée se suffit à elle-même. */}
-        {state.shown === "deterministic" && state.status === "preparing" && snapshotHash && (
-          <p className="mt-6 text-[12px] text-ghost inline-flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-info/70 animate-pulse" />
-            Une lecture enrichie se prépare…
-          </p>
-        )}
-        {offersEnriched(state) && (
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => {
+        {/* FUT-75 · UNE SEULE LIGNE D'ÉTAT, QUI CHANGE DE FONCTION. Elle dit la préparation (sans
+            pourcentage ni temps restant), devient la proposition quand une lecture validée attend, puis
+            le retour à la lecture immédiate. Jamais d'écran d'attente : la lecture affichée se suffit. */}
+        {snapshotHash || state.shown === "enriched" ? (
+          <div className="lecture-etat" aria-live="polite">
+            {/* La clé est la DEMANDE en cours : un autre horizon remonte la ligne, son attente repart de zéro. */}
+            <LigneEtatDemande
+              key={cleDemande(horizon, snapshotHash, inseeCode)}
+              state={state}
+              onAction={(type) => {
+                if (type === "retour") { dispatch({ horizon, event: { type: "showDeterministic" } }); return; }
                 dispatch({ horizon, event: { type: "showEnriched" } });
                 posthog?.capture("quartier_ai_summary_opened", { commune: communeName, insee_code: inseeCode, horizon });
               }}
-              className="quartier-regen-btn"
-            >
-              Lecture enrichie disponible · l&apos;afficher
-            </button>
+            />
           </div>
-        )}
+        ) : null}
 
         {sources.length > 0 && (
           <p className="mt-6 font-mono text-[10px] tracking-[0.1em] uppercase text-ghost">
@@ -265,32 +261,36 @@ export default function QuartierSynthesis({
       </div>
 
       <style>{`
-        .quartier-regen-btn {
-          padding: 9px 16px;
-          background: rgba(96, 165, 250, 0.12);
-          border: 1px solid rgba(96, 165, 250, 0.35);
-          border-radius: 8px;
-          color: #60a5fa;
-          font-size: 13px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.15s;
-          font-family: inherit;
-          white-space: nowrap;
+        /* FUT-75 · grammaire commune (jetons --m-*, design-tokens.css). Le contenu s'échange d'un bloc
+           (fondu et flou court), la ligne d'état change de fonction sans saut, rien ne pulse. */
+        .lecture-etat { margin-top: 24px; min-height: 40px; display: flex; align-items: center; }
+        .lecture-etat-texte, .lecture-etat-bouton {
+          display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; line-height: 1.45;
+          animation: lecture-bascule var(--m-bascule) var(--m-releve) both;
         }
-        .quartier-regen-btn:hover {
-          background: rgba(96, 165, 250, 0.2);
-          border-color: rgba(96, 165, 250, 0.6);
+        .lecture-etat-texte { color: var(--ghost); margin: 0; }
+        .lecture-etat-bouton {
+          font-family: inherit; font-weight: 500; color: var(--fg-hi); cursor: pointer; min-height: 40px;
+          padding: 8px 15px; border-radius: 999px; background: transparent;
+          border: 1px solid var(--reg-controle);
+          transition: background-color var(--m-geste) ease, transform var(--m-pression) ease;
+          touch-action: manipulation;
         }
+        .lecture-etat-bouton:hover { background: var(--reg-controle-surface); }
+        .lecture-etat-bouton:active { transform: scale(0.97); transition: transform var(--m-ressort-duree) var(--m-ressort); }
+        .lecture-etat-bouton:focus-visible { outline: 2px solid var(--fg-hi); outline-offset: 2px; }
+        .lecture-etat-repere { flex: none; width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--reg-controle); transform: rotate(45deg); }
+        .lecture-etat-repere[data-pret] { background: var(--reg-controle); }
         .quartier-synthesis-text {
-          animation: futuree-fade-in 0.6s ease both;
+          animation: lecture-bascule var(--m-bascule) var(--m-releve) both;
         }
-        @keyframes futuree-fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        @keyframes lecture-bascule {
+          from { opacity: 0; filter: blur(2px); }
+          to { opacity: 1; filter: none; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .quartier-synthesis-text { animation: none; }
+          .quartier-synthesis-text, .lecture-etat-texte, .lecture-etat-bouton { animation: none; }
+          .lecture-etat-bouton:active { transform: none; }
         }
         .quartier-horizon-nav {
           display: flex;
@@ -385,4 +385,39 @@ function parseSynthesis(raw: string): ParsedSynthesis {
     blocks.push({ caption, text: body });
   }
   return { title, blocks };
+}
+
+/**
+ * FUT-75 · LA LIGNE D'ÉTAT D'UNE DEMANDE. Une seule ligne qui change de fonction : la préparation (sans
+ * pourcentage ni temps restant), la proposition quand une lecture validée attend, puis le retour à la
+ * lecture immédiate. Elle est montée sous la clé de la demande (`cleDemande`) : le temps d'attente
+ * qu'elle dit est celui de CETTE demande, compté depuis son départ, jamais hérité d'un autre horizon.
+ */
+function LigneEtatDemande({ state, onAction }: { state: DisplayState; onAction: (type: "proposition" | "retour") => void }) {
+  const enPreparation = state.status === "preparing" && state.shown === "deterministic";
+  const [ecoule, setEcoule] = useState(0);
+  useEffect(() => {
+    if (!enPreparation) return;
+    const debut = Date.now();
+    const t = setInterval(() => setEcoule(Date.now() - debut), 5000);
+    return () => clearInterval(t);
+  }, [enPreparation]);
+  const ligne = ligneEtatLecture(state, ecoule);
+  if (!ligne) return null;
+  if (ligne.type === "proposition" || ligne.type === "retour") {
+    const type = ligne.type;
+    return (
+      // MÊME BOUTON pour « l'afficher » et « revenir » : le focus clavier reste en place.
+      <button key="action" type="button" className="lecture-etat-bouton" onClick={() => onAction(type)}>
+        <span aria-hidden className="lecture-etat-repere" data-pret={type === "proposition" || undefined} />
+        {ligne.texte}
+      </button>
+    );
+  }
+  return (
+    <p key={ligne.type} className="lecture-etat-texte">
+      <span aria-hidden className="lecture-etat-repere" />
+      {ligne.texte}
+    </p>
+  );
 }

@@ -309,6 +309,26 @@
 .details summary:hover { color: var(--r-encre); }
 .details summary:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
 
+/* FUT-75 · « DONNÉES ET LIMITES » S'OUVRE EN CONTINUITÉ. Toujours un `<details>` natif (clavier, lecteur
+   d'écran, recherche dans la page) ; la zone passe de zéro à sa hauteur, le contenu arrive de 4 px, le
+   signe tourne d'un huitième de tour sur le micro-ressort. Le titre et la commande ne bougent pas.
+   Amélioration progressive : sans `::details-content` ni `interpolate-size`, l'ouverture reste instantanée,
+   comme avant. Jetons `--m-*` : en mouvement réduit, tout est immédiat. */
+.detailsFluide { interpolate-size: allow-keywords; }
+.detailsFluide::details-content {
+  block-size: 0; overflow-y: clip;
+  transition: block-size var(--m-etat) var(--m-releve), content-visibility var(--m-etat) allow-discrete;
+}
+.detailsFluide[open]::details-content { block-size: auto; }
+.detailsFluide summary::before, .detailsFluide[open] summary::before {
+  content: "+"; display: inline-block; width: 1ch; margin-right: 0.6ch; text-align: center;
+  transition: transform var(--m-ressort-duree) var(--m-ressort);
+}
+.detailsFluide[open] summary::before { transform: rotate(45deg); }
+.detailsFluide > :not(summary) { opacity: 0; transform: translateY(-4px); transition: opacity var(--m-etat) var(--m-releve), transform var(--m-etat) var(--m-releve); }
+.detailsFluide[open] > :not(summary) { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .detailsFluide > :not(summary) { transform: none; } }
+
 .bandeauProto {
   font-family: var(--font-mono);
   font-size: 11.5px;
