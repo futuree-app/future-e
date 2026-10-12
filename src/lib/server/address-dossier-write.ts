@@ -20,6 +20,8 @@ export type AddressDossierPatch = Partial<
     | "posture"
     | "place_relation"
     | "place_relation_set_at"
+    | "place_objective"
+    | "place_objective_set_at"
     | "snapshot"
     | "dpe_selection_status"
     | "selected_dpe_id"

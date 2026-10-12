@@ -24,6 +24,8 @@ Le moteur reçoit la relation du lieu évalué (`ModuleFacts.relationAuLieu`) et
 
 Le locataire qui **achète le logement qu'il occupe** et déclare « j'y habite » reçoit la voix d'un habitant, pas celle d'un acheteur. Il habite **et** envisage d'acheter : ce sont deux informations, et seule la première existe aujourd'hui. Le test `9 bis (limite documentée)` fige ce comportement pour qu'il ne passe pas pour voulu.
 
+**Levée par FUT-10** : l'objectif de l'analyse (`place_objective`), déclaré pour ce bien, prime sur la relation sans l'effacer. Sans objectif déclaré, la limite subsiste telle quelle.
+
 ## Le contrat pour FUT-10
 
 ### 1. Deux informations distinctes, à l'adresse
@@ -62,6 +64,8 @@ Aujourd'hui, modifier la relation (`PATCH /api/dossier/relation`) **ne périme p
 | C. Rien | Divergence silencieuse | Contraire à la doctrine : à écarter |
 
 À trancher dans FUT-10.
+
+**Tranché par FUT-10 (11/10/2026)** : option B, avec la mise à jour explicite de A. La modification est enregistrée, la version vendue reste, l'écart est signalé s'il change la voix ou les gestes, et la version suivante se demande (`/api/dossier/actualiser`). Voir `docs/audits/2026-10-11-fut10-projet-relation-checkout.md`, C.4.
 
 ## À l'intégration de FUT-67
 

@@ -38,6 +38,8 @@ export type DossierDecisionReleveProps = {
   scopeKey: string;
   provenance?: string;
   projetAChange?: boolean;
+  /** FUT-10 : le lien déclaré avec le bien a changé depuis la version servie (même bandeau qu'en classique). */
+  contexteAChange?: boolean;
   voisinageAChange?: boolean;
   espacement?: string;
   titre?: NiveauTitre;
@@ -128,7 +130,7 @@ function ReperEchelle({ forme, etat }: { forme: Echelle; etat: EtatTrace }) {
 }
 
 export function DossierDecisionReleve({
-  dossier, logement, logementStatus = "none", insee, scopeKey, provenance, projetAChange, voisinageAChange,
+  dossier, logement, logementStatus = "none", insee, scopeKey, provenance, projetAChange, voisinageAChange, contexteAChange,
   generatedAt, espacement = "mt-14", titre, supportingPane, controles,
 }: DossierDecisionReleveProps) {
   const structured = dossier.conclusionState !== "project_not_structured";
@@ -181,8 +183,9 @@ export function DossierDecisionReleve({
           {generatedAt && dateFr(generatedAt) ? (
             <p className={s.mono} style={{ fontSize: 11.5, color: "var(--r-meta)", marginBottom: 14 }}>Analyse générée le {dateFr(generatedAt)}</p>
           ) : null}
-          {(projetAChange || voisinageAChange) && insee ? (
-            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison={projetAChange ? "projet" : "voisinage"} />
+          {/* Même priorité qu'en présentation classique : projet, puis lien avec le bien (FUT-10), puis voisinage. */}
+          {(projetAChange || contexteAChange || voisinageAChange) && insee ? (
+            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"} />
           ) : null}
           {/* Les deux états de l'analyse d'adresse, avec les phrases de production. `unavailable` n'est
               jamais présenté comme une adresse lue : l'emblème garde alors le périmètre communal. */}

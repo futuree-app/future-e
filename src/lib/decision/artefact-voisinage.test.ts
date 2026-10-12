@@ -132,5 +132,7 @@ test("le signal ne vaut que pour une version FIGÉE, et le projet prime", () => 
   const avec = readFileSync("src/components/report/DossierAvecLogement.tsx", "utf8");
   assert.match(avec, /voisinageAChange=\{servi\.source === "artefact"\s*&& voisinagePlusRecentQueLaVersion\(servi\.generatedAt, snapshotAutour\?\.computedAt\)\}/);
   const section = readFileSync("src/components/report/DossierDecisionSection.tsx", "utf8");
-  assert.match(section, /raison=\{projetAChange \? "projet" : "voisinage"\}/);
+  // FUT-10 : le lien déclaré avec le bien s'intercale (une déclaration du lecteur, comme le projet),
+  // et le voisinage reste la raison de dernier rang.
+  assert.match(section, /raison=\{projetAChange \? "projet" : contexteAChange \? "lien" : "voisinage"\}/);
 });

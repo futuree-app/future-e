@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 // servie, la même mise à jour est proposée, pour une autre raison : ce n'est pas le lecteur qui a
 // changé, c'est ce que futur•e sait de son adresse. La version figée ne bouge pas pour autant.
 export function AnalyseAncienProjet(
-  { insee, scopeKey, raison = "projet" }: { insee: string; scopeKey: string; raison?: "projet" | "voisinage" },
+  { insee, scopeKey, raison = "projet" }: { insee: string; scopeKey: string; raison?: "projet" | "lien" | "voisinage" },
 ) {
   const [etat, setEtat] = useState<"repos" | "encours" | "ailleurs" | "echec">("repos");
   const router = useRouter();
@@ -65,7 +65,11 @@ export function AnalyseAncienProjet(
       <p className="text-[13px] text-muted flex-1 min-w-[260px]">
         {raison === "projet"
           ? <>Votre projet a changé depuis cette analyse. Ce que vous lisez répond au projet que vous aviez au moment de l&apos;achat.</>
-          : <>Une version plus récente de futur•e est disponible pour ce dossier. Ce que vous lisez reste l&apos;analyse telle qu&apos;elle a été établie.</>}
+          : raison === "lien"
+            // FUT-10 : la relation ou l'objectif déclarés pour ce bien ont changé. La version affichée
+            // reste datée et consultable ; la suivante se demande.
+            ? <>Vous avez modifié votre lien avec ce bien ou la raison de votre analyse. Ce que vous lisez repose sur ce que vous aviez déclaré au moment de cette analyse.</>
+            : <>Une version plus récente de futur•e est disponible pour ce dossier. Ce que vous lisez reste l&apos;analyse telle qu&apos;elle a été établie.</>}
       </p>
       <button
         onClick={mettreAJour}

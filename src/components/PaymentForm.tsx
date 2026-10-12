@@ -18,9 +18,15 @@ type PaymentFormProps = {
    * libre de facturer à un autre nom, et le serveur garde la main sur ce qui part sur la facture.
    */
   billing?: { name: string | null; email: string | null } | null;
+  /**
+   * Appelé APRÈS la validation des champs et AVANT `stripe.confirmPayment`. Rend un message d'erreur pour
+   * empêcher la confirmation, ou `null` pour la laisser partir. Le dossier d'adresse y verrouille ses
+   * réponses (FUT-10) : sans verrou posé, aucun paiement n'est engagé.
+   */
+  avantConfirmation?: () => Promise<string | null>;
 };
 
-export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billing }: PaymentFormProps) {
+export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billing, avantConfirmation }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -55,6 +61,15 @@ export function PaymentForm({ onSuccess, submitLabel, returnUrl, onSubmit, billi
       setError(submitError.message ?? "Une erreur est survenue.");
       setLoading(false);
       return;
+    }
+
+    if (avantConfirmation) {
+      const refus = await avantConfirmation();
+      if (refus) {
+        setError(refus);
+        setLoading(false);
+        return;
+      }
     }
 
     // STRIPE EXIGE UNE URL ABSOLUE. Un chemin relatif fait échouer la confirmation avec

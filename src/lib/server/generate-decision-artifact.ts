@@ -14,7 +14,8 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot } from "@/lib/logement-autour-types";
 import { getReportContext, resolveRelation } from "@/lib/report-context";
-import { relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
+import { echecSimuleDeTest } from "@/lib/contexte-livraison";
+import { contexteDuBien, relationDeLAdresse, relationDeLaCommune, type RelationAuLieu } from "@/lib/relation-au-lieu";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA GÉNÉRATION DE L'ARTEFACT DE DÉCISION, À LA DÉLIVRANCE.
@@ -37,6 +38,13 @@ type Cible =
       dossierId: string;
       address: ResolvedAddress;
       savedDpe: DpeRecord | null;
+      /**
+       * FUT-10 : la relation et l'objectif À UTILISER, quand l'appelant les connaît mieux que la ligne du
+       * dossier : ceux de l'ACHAT pour une première livraison, ceux de la VERSION SERVIE pour une
+       * succession automatique (`contexte-livraison.ts`). Absente, la ligne du dossier fait foi (mise à
+       * jour explicite, dossier historique). `null` explicite : relation inconnue.
+       */
+      relationImposee?: RelationAuLieu | null;
     };
 
 export type GenerationOutcome =
@@ -95,7 +103,9 @@ async function lireSnapshotGele(
  * celle de l'écran.
  *
  *   - commune : `report_context` et la commune de résidence déclarée, via `resolveRelation` ;
- *   - adresse : `address_dossiers.place_relation`, SEULE (celle de la commune ne s'hérite pas).
+ *   - adresse : `address_dossiers.place_relation` et `place_objective` (FUT-10), SEULS (celle de la
+ *     commune ne s'hérite pas). Lus par `*` : nommer `place_objective` ferait échouer toute la lecture
+ *     sur une base sans la migration 37, et la relation déjà déclarée serait perdue avec lui.
  *
  * Une lecture qui échoue rend une relation INCONNUE : la voix devient neutre, jamais celle d'un habitant.
  */
@@ -106,12 +116,12 @@ async function lireRelationsAuLieu(
     sb.from("user_profiles").select("home_insee_code").eq("user_id", userId).maybeSingle().then((r) => r.data, () => null),
     getReportContext(sb, userId, insee).catch(() => null),
     dossierId
-      ? sb.from("address_dossiers").select("place_relation").eq("id", dossierId).maybeSingle().then((r) => r.data, () => null)
+      ? sb.from("address_dossiers").select("*").eq("id", dossierId).maybeSingle().then((r) => r.data, () => null)
       : Promise.resolve(null),
   ]);
   const home = (profil as { home_insee_code?: string | null } | null)?.home_insee_code ?? null;
   const commune = relationDeLaCommune(resolveRelation(home != null && communeParent(home) === insee, contexte));
-  return { commune, adresse: dossierId ? relationDeLAdresse(dossier as { place_relation?: unknown } | null) : null };
+  return { commune, adresse: dossierId ? relationDeLAdresse(dossier as { place_relation?: unknown; place_objective?: unknown } | null) : null };
 }
 
 /**
@@ -144,7 +154,19 @@ export async function generateDecisionArtifact(
     const reserve = await claimArtifactSlot(sb, userId, insee, scopeKey, version);
     if (!reserve) return { status: "skipped", reason: "artefact déjà réservé pour cette version" };
 
-    const relations = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
+    // ÉCHEC SIMULÉ, RÉSERVÉ AU TEST DE BOUT EN BOUT (FUT-10, parcours dégradé). La première tentative d'un
+    // dossier d'adresse échoue exactement comme une vraie panne de source (place prise, statut `failed`),
+    // pour prouver que la reprise suit le contexte de l'achat. Jamais actif en production : il exige une
+    // variable explicite ET un environnement qui n'est ni la production Next, ni la production Vercel.
+    if (echecSimuleDeTest(cible.kind, version)) {
+      await failArtifact(sb, userId, insee, scopeKey, version);
+      return { status: "failed", reason: "échec simulé (test de bout en bout)" };
+    }
+
+    const lues = await lireRelationsAuLieu(sb, userId, insee, cible.kind === "adresse" ? cible.dossierId : null);
+    const relations = cible.kind === "adresse" && cible.relationImposee !== undefined
+      ? { ...lues, adresse: cible.relationImposee }
+      : lues;
     const commune = await buildCommuneDossier(insee, project, {
       hasAddress: cible.kind === "adresse",
       citycode: cible.kind === "adresse" ? cible.address.citycode : null,
@@ -232,8 +254,10 @@ export async function generateDecisionArtifact(
       };
     }
 
+    // FUT-10 : la version fige le contexte du bien qu'elle a lu, pour pouvoir dire plus tard qu'il a changé.
     const artefact = buildDecisionArtifact(
       vue.dossier, project, new Date().toISOString(), PRODUCT_CONVENTIONS_VERSION, dataSnapshot,
+      contexteDuBien(relations.adresse),
     );
     await completeArtifact(sb, userId, insee, scopeKey, artefact, version);
     return { status: "ready" };

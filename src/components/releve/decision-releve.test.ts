@@ -154,7 +154,7 @@ test("E1. la bascule se fait AVANT le rendu classique et transmet toutes les pro
   const bascule = src.indexOf('presentationDuDossier(presentation) === "releve"');
   assert.ok(bascule > 0 && bascule < src.indexOf("const structured"), "bascule avant le corps classique");
   const appel = src.slice(bascule, src.indexOf("/>", bascule));
-  for (const p of ["dossier", "logement", "logementStatus", "insee", "scopeKey", "provenance", "projetAChange", "voisinageAChange", "generatedAt", "espacement", "titre", "supportingPane", "controles"]) {
+  for (const p of ["dossier", "logement", "logementStatus", "insee", "scopeKey", "provenance", "projetAChange", "voisinageAChange", "contexteAChange", "generatedAt", "espacement", "titre", "supportingPane", "controles"]) {
     assert.match(appel, new RegExp(`\\b${p}=\\{${p}\\}`), `prop ${p} transmise`);
   }
   assert.match(code("src/components/report/ControlesDuDossier.tsx"), /presentationDuDossier\(presentation\) === "releve"\) return <ControlesReleve dossier=\{dossier\} provenance=\{provenance\} \/>/);
@@ -180,8 +180,9 @@ test("E3. le relevé ne génère rien, ne resélectionne rien, et garde les éta
   // La date n'existe que pour un artefact, jamais « aujourd'hui ».
   assert.match(src, /generatedAt && dateFr\(generatedAt\)/);
   assert.doesNotMatch(src, /new Date\(\)/);
-  assert.match(src, /\(projetAChange \|\| voisinageAChange\) && insee/);
-  assert.match(src, /raison=\{projetAChange \? "projet" : "voisinage"\}/);
+  // FUT-10 : le lien déclaré avec le bien s'intercale entre le projet et le voisinage, comme en classique.
+  assert.match(src, /\(projetAChange \|\| contexteAChange \|\| voisinageAChange\) && insee/);
+  assert.match(src, /raison=\{projetAChange \? "projet" : contexteAChange \? "lien" : "voisinage"\}/);
   assert.match(src, /logementStatus === "unavailable"/);
   assert.match(src, /renderedIds = ancresRendues\(dossier\)/);
   assert.match(src, /conditionPorteeParLeBloc\(dossier\)/);

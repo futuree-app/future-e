@@ -6,7 +6,7 @@ import { RepriseRecherche } from "./RepriseRecherche";
 import { CriteresDuProjet } from "./CriteresDuProjet";
 import type { CritereVue } from "@/lib/decision/projet-criteres-vue";
 import type { UserProject, ProjectPosture, ProjectIntent } from "@/lib/user-project";
-import { doitReparser, parsedASauvegarder } from "@/lib/decision/projet-edition";
+import { enregistrerProjet } from "@/lib/projet-sauvegarde-client";
 // `import type` et rien d'autre : `lib/report-context.ts` est `server-only`, et une importation de
 // valeur depuis ce composant client casserait le build. Les types, eux, sont effacés à la compilation.
 import type { Relation, RelationSource } from "@/lib/report-context";
@@ -173,64 +173,25 @@ export function ProjectSummaryCard({
 
     // ON NE REPARSE QUE SI LE TEXTE A CHANGÉ, et la règle vit dans `projet-edition.ts`, où elle est
     // testée. Sans elle, changer la seule intention un jour de panne du parseur enregistrait le
-    // projet sans ses priorités : le dossier retombait en « projet non structuré » alors que le
-    // lecteur n'avait pas touché à son texte.
-    // Un texte vide n'a rien à faire parser : on épargne l'appel, et surtout on ne présente pas un
-    // retrait volontaire comme un échec d'analyse.
-    const reparse = raw.length > 0 && doitReparser(raw, project);
-    let parsedRecu: UserProject["parsed"] | null = null;
-    if (reparse) {
-      try {
-        const r = await fetch("/api/comparateur-vie/parse", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: raw }),
-        });
-        const data = r.ok ? ((await r.json()) as { parsed?: unknown }) : null;
-        parsedRecu = data?.parsed && typeof data.parsed === "object"
-          ? (data.parsed as UserProject["parsed"])
-          : null;
-      } catch {
-        parsedRecu = null;
-      }
-    }
-    const { parsed, avertir } = parsedASauvegarder({
-      reparse, parsedRecu, projet: project, texteVide: raw.length === 0,
-    });
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          field: "user_project",
-          value: { posture, intent, rawText: raw.length > 0 ? raw : null, parsed },
-        }),
-      });
-      if (!res.ok) {
-        setError("Enregistrement impossible pour le moment. Réessayez.");
-        setBusy(false);
-        return;
-      }
-      const data = (await res.json()) as { project?: UserProject };
-      if (!data.project) {
-        setError("Enregistrement impossible pour le moment. Réessayez.");
-        setBusy(false);
-        return;
-      }
-      setProject(data.project); // uniquement le projet confirmé par le serveur
-      setEditing(false);
-      // L'AVERTISSEMENT SURVIT À LA FERMETURE DE L'ÉDITEUR : il concerne ce qui vient d'être
-      // enregistré, et il se lit sur la carte fermée. Le poser avant l'appel l'aurait rendu
-      // prématuré ; le poser dans `error` l'aurait fait disparaître avec l'éditeur.
-      if (avertir) {
-        setAvertissement("Votre texte est enregistré. Nous n'avons pas pu en extraire vos priorités : rouvrez l'éditeur et enregistrez à nouveau pour une analyse complète.");
-      }
-      router.refresh(); // régénère le dossier de décision (rendu serveur) avec le projet à jour
-    } catch {
-      setError("Enregistrement impossible pour le moment. Réessayez.");
+    // projet sans ses priorités. La séquence entière (reparse, choix du `parsed`, écriture) est
+    // partagée avec le checkout du dossier : `enregistrerProjet` (FUT-10).
+    const r = await enregistrerProjet({ texte: raw, posture, intent, projet: project });
+    if (!r.ok) {
+      setError(r.conflit
+        ? "Votre projet a changé entre-temps. Rechargez la page."
+        : "Enregistrement impossible pour le moment. Réessayez.");
       setBusy(false);
       return;
     }
+    setProject(r.project); // uniquement le projet confirmé par le serveur
+    setEditing(false);
+    // L'AVERTISSEMENT SURVIT À LA FERMETURE DE L'ÉDITEUR : il concerne ce qui vient d'être
+    // enregistré, et il se lit sur la carte fermée. Le poser avant l'appel l'aurait rendu
+    // prématuré ; le poser dans `error` l'aurait fait disparaître avec l'éditeur.
+    if (r.avertir) {
+      setAvertissement("Votre texte est enregistré. Nous n'avons pas pu en extraire vos priorités : rouvrez l'éditeur et enregistrez à nouveau pour une analyse complète.");
+    }
+    router.refresh(); // régénère le dossier de décision (rendu serveur) avec le projet à jour
     setBusy(false);
   }
 

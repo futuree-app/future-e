@@ -93,6 +93,7 @@ export function DossierDecisionSection({
   scopeKey,
   provenance,
   projetAChange,
+  contexteAChange,
   voisinageAChange,
   generatedAt,
   espacement = "mt-14",
@@ -135,6 +136,12 @@ export function DossierDecisionSection({
    * jamais seul, l'analyse achetée répondant à une autre question.
    */
   projetAChange?: boolean;
+  /**
+   * FUT-10 : le lien déclaré avec CE bien (relation, objectif de l'analyse) a changé depuis cette
+   * version, d'une façon qui change la voix ou les gestes (`contexteAChangeMateriellement`). Même
+   * geste que pour le projet : on le dit, on propose la mise à jour, on ne recalcule jamais seul.
+   */
+  contexteAChange?: boolean;
   /** Le voisinage a été rafraîchi après la version servie (cf. `voisinagePlusRecentQueLaVersion`). */
   voisinageAChange?: boolean;
   /**
@@ -170,6 +177,7 @@ export function DossierDecisionSection({
       <DossierDecisionReleve
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
         provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
+        contexteAChange={contexteAChange}
         generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
         controles={controles}
       />
@@ -245,8 +253,13 @@ export function DossierDecisionSection({
               réponse d'alors. */}
           {/* LE PROJET PRIME : s'il a changé, c'est la raison que le lecteur doit lire, et la mise à
               jour prendra de toute façon le voisinage courant. */}
-          {(projetAChange || voisinageAChange) && insee ? (
-            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison={projetAChange ? "projet" : "voisinage"} />
+          {/* Puis le lien avec le bien (FUT-10) : une déclaration du lecteur, comme le projet. */}
+          {(projetAChange || contexteAChange || voisinageAChange) && insee ? (
+            <AnalyseAncienProjet
+              insee={insee}
+              scopeKey={scopeKey}
+              raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"}
+            />
           ) : null}
 
           {logementStatus === "pending" ? (

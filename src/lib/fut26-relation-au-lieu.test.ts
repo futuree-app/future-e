@@ -13,9 +13,10 @@ import type { DecisionFact, LogementFacts, RunResult } from "./decision/decision
 import type { UserProject } from "./user-project.ts";
 
 const NOW = new Date("2026-10-11T12:00:00.000Z");
-const HABITE: RelationAuLieu = { echelle: "adresse", relation: "lives_here" };
-const ETUDIE: RelationAuLieu = { echelle: "adresse", relation: "studying" };
-const ADRESSE_INCONNUE: RelationAuLieu = { echelle: "adresse", relation: null };
+// FUT-10 : la lecture d'une ligne porte aussi l'objectif de l'analyse (`null` = non dit).
+const HABITE: RelationAuLieu = { echelle: "adresse", relation: "lives_here", objectif: null };
+const ETUDIE: RelationAuLieu = { echelle: "adresse", relation: "studying", objectif: null };
+const ADRESSE_INCONNUE: RelationAuLieu = { echelle: "adresse", relation: null, objectif: null };
 const VIT_COMMUNE: RelationAuLieu = { echelle: "commune", relation: "current_residence", origine: "inferred" };
 const ENVISAGE_COMMUNE: RelationAuLieu = { echelle: "commune", relation: "considering_living", origine: "confirmed_by_user" };
 const DECOUVRE_COMMUNE: RelationAuLieu = { echelle: "commune", relation: "information_only", origine: "confirmed_by_user" };
@@ -230,8 +231,12 @@ test("10. un dossier acheté avec artefact figé est servi sans repasser par le 
   // Le dossier d'adresse : l'assemblage (donc la nouvelle voix) n'est demandé que sans artefact prêt.
   const avecLogement = readFileSync("src/components/report/DossierAvecLogement.tsx", "utf8");
   assert.match(avecLogement, /const assemble = stocke\?\.artifact && !perime\s*\? null\s*: await assembleAddressDossier/);
-  // L'artefact ne dépend pas de la relation : il porte le dossier figé le jour de sa génération.
-  assert.doesNotMatch(readFileSync("src/lib/decision/decision-artifact.ts", "utf8"), /relation-au-lieu|relationAuLieu/);
+  // L'artefact ne se RELIT jamais à travers la relation : il porte le dossier figé le jour de sa
+  // génération. Depuis FUT-10, il fige aussi le contexte du bien qu'il a lu (`contexteDuBien`), mais
+  // seulement pour signaler un écart : ni `relationAuLieu` ni la voix n'y sont recalculées.
+  const artefact = readFileSync("src/lib/decision/decision-artifact.ts", "utf8");
+  assert.doesNotMatch(artefact, /relationAuLieu|voixDuLecteur|bucketDuProjet/);
+  assert.match(artefact, /import type \{ ContexteDuBien \} from "\.\.\/relation-au-lieu\.ts"/);
 });
 
 test("10 bis. pour un acheteur déclaré, la conclusion est identique avec ou sans relation (aucune régénération)", () => {
@@ -283,10 +288,10 @@ function stockageSimule(lecteur: string) {
 
 test("route : le propriétaire déclare, change puis efface la relation de son bien", async () => {
   const s = stockageSimule("moi");
-  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "lives_here" }, s.deps), { status: 200, body: { ok: true, relation: "lives_here" } });
+  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "lives_here" }, s.deps), { status: 200, body: { ok: true, relation: "lives_here", objectif: null } });
   assert.equal(s.dossiers.get("d-moi")!.place_relation, "lives_here");
   assert.equal((await enregistrerRelationAdresse({ dossierId: "d-moi", relation: "studying" }, s.deps)).body.relation, "studying");
-  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: null }, s.deps), { status: 200, body: { ok: true, relation: null } });
+  assert.deepEqual(await enregistrerRelationAdresse({ dossierId: "d-moi", relation: null }, s.deps), { status: 200, body: { ok: true, relation: null, objectif: null } });
   assert.equal(s.dossiers.get("d-moi")!.place_relation, null);
 });
 

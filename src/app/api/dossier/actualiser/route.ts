@@ -7,6 +7,9 @@ import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifac
 import { getDossier } from "@/lib/address-dossier-store";
 import { canAccessTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
+import { lireContexteDAchat } from "@/lib/server/contexte-achat";
+import { contexteDeGeneration, operationDeGeneration } from "@/lib/contexte-livraison";
+import { relationDeLAdresse, type RelationAuLieu } from "@/lib/relation-au-lieu";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -87,12 +90,37 @@ export async function POST(request: Request) {
     .select("user_project")
     .eq("user_id", user.id)
     .maybeSingle();
-  const project = normalizeUserProject((profile as { user_project?: unknown } | null)?.user_project ?? null);
-  // SANS PROJET, RIEN À METTRE À JOUR : le dossier de décision se construit à partir de lui, et une
-  // version produite sans projet vaudrait moins que celle qu'on remplacerait.
-  if (!project) return Response.json({ error: "PROJECT_MISSING" }, { status: 409 });
+  const projetCourant = normalizeUserProject((profile as { user_project?: unknown } | null)?.user_project ?? null);
 
   const existant = await readLatestArtifact(supabase, user.id, insee, scopeKey).catch(() => null);
+
+  // ── QUELLE OPÉRATION, QUEL CONTEXTE (FUT-10, dernière revue) ─────────────────────────────────
+  // Avec une version prête, ce clic est une MISE À JOUR : le contexte du jour, version n+1 datée.
+  // Sans version prête, c'est encore la PREMIÈRE LIVRAISON d'un dossier acheté : elle reste fidèle au
+  // contexte de l'achat, même sur un clic. Une seule exception, voulue par le porteur : l'achat SANS
+  // projet, pour lequel ce clic (« Lire ce bien avec mon projet ») est précisément la demande d'une
+  // lecture personnalisée, avec le projet du jour. Cf. `contexte-livraison.ts`.
+  let projet = projetCourant;
+  let relationImposee: RelationAuLieu | null | undefined = undefined;
+  if (dossier) {
+    const achat = await lireContexteDAchat(user.id, dossier.id);
+    const contexte = contexteDeGeneration({
+      operation: operationDeGeneration({ versionPrete: Boolean(existant?.artifact), demandeExplicite: true }),
+      demandeExplicite: true,
+      achat: achat.contexte,
+      courant: { projet: projetCourant, relation: relationDeLAdresse(dossier) },
+    });
+    // Sans le contexte de l'achat, on ne devine pas : aucune première version n'est figée, même sur un clic.
+    if (!contexte.genere && contexte.raison === "contexte_indisponible") {
+      return Response.json({ error: "PURCHASE_CONTEXT_UNAVAILABLE" }, { status: 503 });
+    }
+    if (!contexte.genere) return Response.json({ error: "PROJECT_MISSING" }, { status: 409 });
+    projet = contexte.projet;
+    if (contexte.source !== "courant") relationImposee = contexte.relation;
+  }
+  // SANS PROJET, RIEN À METTRE À JOUR : le dossier de décision se construit à partir de lui, et une
+  // version produite sans projet vaudrait moins que celle qu'on remplacerait.
+  if (!projet) return Response.json({ error: "PROJECT_MISSING" }, { status: 409 });
   // ── ATTENDRE N'EST PAS ABOUTIR, ÉCHOUER N'EST PAS ATTENDRE (revue du 12/08/2026) ────────────
   // Ces deux cas étaient confondus : une v2 en échec faisait répondre « déjà en cours », et aucune
   // v3 ne naissait jamais. Le lecteur cliquait indéfiniment sur un bouton qui répondait `ok`.
@@ -112,10 +140,11 @@ export async function POST(request: Request) {
           latitude: dossier.latitude, longitude: dossier.longitude,
         },
         savedDpe: dossier.selected_dpe_snapshot,
+        relationImposee,
       }
     : { kind: "commune" as const, insee };
 
-  const r = await generateDecisionArtifact(supabase, user.id, project, cible, version);
+  const r = await generateDecisionArtifact(supabase, user.id, projet, cible, version);
   if (r.status === "failed") {
     // LA VERSION PRÉCÉDENTE RESTE SERVIE. `readLatestArtifact` ne rend que la dernière version
     // SERVABLE : une v2 marquée en échec ne masque pas la v1 sur laquelle le lecteur a décidé.

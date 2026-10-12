@@ -21,8 +21,12 @@ import { Suspense } from "react";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { DossierDecisionSection } from "@/components/report/DossierDecisionSection";
 import { ControlesDuDossier } from "@/components/report/ControlesDuDossier";
-import { relationDeLAdresse, relationDeLaCommune } from "@/lib/relation-au-lieu";
+import { isAddressRelation, objectifDeLAnalyse, relationDeLAdresse, relationDeLaCommune } from "@/lib/relation-au-lieu";
 import { DossierAvecLogement } from "@/components/report/DossierAvecLogement";
+import { LienAvecCeBien } from "@/components/report/LienAvecCeBien";
+import { LectureFactuelleDuBien } from "@/components/report/LectureFactuelleDuBien";
+import { lireContexteDAchat } from "@/lib/server/contexte-achat";
+import { dateFr } from "@/lib/decision/autour-permis";
 import { listDossiers } from "@/lib/address-dossier-store";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
 import {
@@ -282,6 +286,18 @@ export default async function RapportPage() {
     ? { id: logementForCommune.ban_id, label: logementForCommune.address_label, city: logementForCommune.city, citycode: logementForCommune.insee, postcode: logementForCommune.postcode, latitude: logementForCommune.latitude, longitude: logementForCommune.longitude }
     : null;
 
+  // UN BIEN ACHETÉ SANS PROJET RESTE FACTUEL (FUT-10, décision du porteur). Tant qu'aucune lecture
+  // personnalisée n'a été DEMANDÉE pour lui, la page ne l'assemble pas avec le projet du compte, même
+  // si le lecteur en a créé un depuis : elle dit ce que le dossier contient, et propose le geste.
+  // Décidé ICI, avant le Suspense, pour que le repli communal (construit avec le projet du jour) ne
+  // s'affiche pas, même un instant, à la place d'une lecture que le lecteur n'a pas demandée.
+  const achatDuBien = fullReport && logementForCommune && userProject
+    ? await lireContexteDAchat(user.id, logementForCommune.id).catch(() => null)
+    : null;
+  const lectureFactuelle = achatDuBien?.contexte.etat === "absent" && inseeCode && logementForCommune
+    ? !(await readLatestArtifact(supabase, user.id, inseeCode, `logement:${logementForCommune.id}`).catch(() => null))?.artifact
+    : false;
+
   // UN SEUL REPÈRE, AUX TROIS POINTS DU STREAMING. Le fallback communal, le dossier augmenté et le
   // dossier de commune seule doivent rendre exactement la même navigation, à la même place. Une
   // fabrique évite qu'une branche oublie un href ou une donnée de suivi en évoluant.
@@ -445,7 +461,15 @@ export default async function RapportPage() {
 
         {/* ── Le dossier de décision (payant, grain commune) ── */}
         {dossier && communeResult && inseeCode ? (
-          dossierAddress && logementForCommune ? (
+          dossierAddress && logementForCommune && lectureFactuelle ? (
+              <LectureFactuelleDuBien
+                insee={inseeCode}
+                scopeKey={`logement:${logementForCommune.id}`}
+                adresse={logementForCommune.address_label}
+                acheteLe={achatDuBien?.acheteLe ? dateFr(achatDuBien.acheteLe) : null}
+                supportingPane={renderEchelleNavigator()}
+              />
+            ) : dossierAddress && logementForCommune ? (
               <Suspense
                 fallback={
                   // Le repli porte la liste lui aussi : son verdict annonce déjà des constats
@@ -630,6 +654,21 @@ export default async function RapportPage() {
               : null}
           />
         </div>
+
+        {/* ── Ce bien (FUT-10) : pourquoi on l'examine, et le lien qu'on a avec lui. Juste sous le
+            projet, parce que les deux répondent à la même question (« qu'a compris futur•e ? ») sans
+            se confondre : le projet vaut partout, ceci ne vaut que pour ce bien. ── */}
+        {fullReport && logementForCommune ? (
+          <div className="mt-6">
+            <LienAvecCeBien
+              key={logementForCommune.id}
+              dossierId={logementForCommune.id}
+              adresse={logementForCommune.address_label}
+              relationInitiale={isAddressRelation(logementForCommune.place_relation) ? logementForCommune.place_relation : null}
+              objectifInitial={objectifDeLAnalyse(relationDeLAdresse(logementForCommune))}
+            />
+          </div>
+        ) : null}
 
         {/* ── Vue gratuite : la première lecture post-wizard ── */}
         {!fullReport && (

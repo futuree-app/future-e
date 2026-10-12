@@ -19,6 +19,7 @@ import { z } from "zod";
 import type { Dossier } from "./decision-fact.ts";
 import type { CatnatInondation } from "./catnat-evidence.ts";
 import type { UserProject } from "../user-project.ts";
+import type { ContexteDuBien } from "../relation-au-lieu.ts";
 
 /**
  * LA VERSION DU MOTEUR, qu'un artefact porte pour dire avec quelles règles il a été produit.
@@ -70,6 +71,16 @@ export type DecisionArtifactV1 = {
    * jamais comme une erreur.
    */
   dataSnapshot?: DataSnapshot;
+  /**
+   * LE CONTEXTE DU BIEN QUE CETTE VERSION A LU (FUT-10) : la relation et l'objectif déclarés au moment
+   * de la génération. Sans lui, une relation modifiée après l'achat laissait l'écran servir une voix
+   * ancienne sans rien dire. Il sert UNIQUEMENT à signaler l'écart (`contexteAChangeMateriellement`) :
+   * le dossier figé ne se relit jamais à travers lui.
+   *
+   * OPTIONNEL, et absent des versions antérieures : sans lui, on se tait plutôt que d'annoncer un écart
+   * qu'on n'a pas établi. Absent aussi des artefacts de commune, qui n'ont pas de bien.
+   */
+  contexteDuBien?: ContexteDuBien;
 };
 
 /** Ce que l'artefact fige EN PLUS de sa prose. Une entrée par donnée réaffichée ailleurs. */
@@ -140,12 +151,22 @@ const dataSnapshotSchema = z.object({
   }).optional(),
 });
 
+// Même règle que le snapshot de données : illisible, il TOMBE seul (on se tait alors sur l'écart).
+const contexteDuBienSchema = z.object({
+  relation: z.enum(["lives_here", "studying"]).nullable(),
+  objectif: z.enum(["buy", "rent", "understand", "other"]).nullable(),
+});
+
 export function parseDecisionArtifact(value: unknown): DecisionArtifactV1 | null {
   const parsed = artifactSchema.safeParse(value);
   if (!parsed.success) return null;
   // Le cast est SÛR ici et seulement ici : la forme structurelle est vérifiée juste au-dessus, et
   // les champs non validés sont ceux que le rendu traite déjà comme optionnels.
-  const artefact = parsed.data as unknown as DecisionArtifactV1;
+  // Le schéma principal retire les clés qu'il ne connaît pas : le contexte du bien est relu à part.
+  const lu = parsed.data as unknown as DecisionArtifactV1;
+  const contexteBrut = (value as { contexteDuBien?: unknown })?.contexteDuBien;
+  const contexte = contexteBrut === undefined ? null : contexteDuBienSchema.safeParse(contexteBrut);
+  const artefact: DecisionArtifactV1 = contexte?.success ? { ...lu, contexteDuBien: contexte.data } : lu;
 
   // Le snapshot, en seconde passe. Illisible, il TOMBE ; il n'emporte pas la décision avec lui.
   const brut = (value as { dataSnapshot?: unknown })?.dataSnapshot;
@@ -162,6 +183,7 @@ export function parseDecisionArtifact(value: unknown): DecisionArtifactV1 | null
 export function buildDecisionArtifact(
   dossier: Dossier, projectSnapshot: UserProject, generatedAt: string, conventionsVersion: string,
   dataSnapshot?: DataSnapshot,
+  contexteDuBien?: ContexteDuBien | null,
 ): DecisionArtifactV1 {
   return {
     schemaVersion: 1,
@@ -173,6 +195,9 @@ export function buildDecisionArtifact(
     // `undefined` plutôt qu'un objet vide : `stableStringify` refuse `undefined`, et un
     // `dataSnapshot: {}` ferait croire, à la relecture, qu'on a figé quelque chose.
     ...(dataSnapshot && Object.keys(dataSnapshot).length > 0 ? { dataSnapshot } : {}),
+    // Les valeurs `null` sont écrites telles quelles : « inconnu au moment de la version » est un
+    // contexte, et c'est lui qu'il faudra comparer si le lecteur déclare ensuite quelque chose.
+    ...(contexteDuBien ? { contexteDuBien: { relation: contexteDuBien.relation, objectif: contexteDuBien.objectif } } : {}),
   };
 }
 

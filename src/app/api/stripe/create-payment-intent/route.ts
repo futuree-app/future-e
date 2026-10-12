@@ -13,6 +13,10 @@ import { resolvePromo } from "@/lib/promo-code";
 import { normalizeBuyerName } from "@/lib/invoice";
 import { hasPaidTerritory } from "@/lib/active-territory";
 import { communeParent } from "@/lib/plm";
+import { colonnesIntention, lireContexteCheckout, projetVuEstACour } from "@/lib/dossier-contexte-checkout";
+import { enregistrerIntention, statutStripeModifiable } from "@/lib/verrou-intention-dossier";
+import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
+import { normalizeUserProject, type UserProject } from "@/lib/user-project";
 
 export const runtime = "nodejs";
 
@@ -35,7 +39,7 @@ export async function POST(request: Request) {
   try {
     const {
       productType, targetInsee, targetCommune, source, rank, pack,
-      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode,
+      phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode, dossierContext,
     } = await request.json();
 
     if (typeof productType !== "string" || productType.trim().length === 0) {
@@ -129,12 +133,48 @@ export async function POST(request: Request) {
       banId: string; insee: string; label: string; city: string | null;
       postcode: string | null; latitude: number; longitude: number; deductionCents: number;
     } | null = null;
+    // FUT-10 : les colonnes de contexte de l'intention (relation, objectif, date serveur, projet figé).
+    let colonnesContexte: ReturnType<typeof colonnesIntention> | null = null;
 
     if (isDossier) {
       const sel = validateSelectedBanAddress(address);
       if (!sel) {
         return NextResponse.json({ error: "Adresse invalide." }, { status: 400 });
       }
+
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      // LE CONTEXTE DÉCLARÉ (FUT-10), VALIDÉ AVANT TOUT PAIEMENT.
+      //
+      // Une valeur hors liste est un refus, pas un `null` : le lecteur paierait un dossier dont sa
+      // réponse aurait disparu. Le PROJET est relu ici, en base, jamais reçu du navigateur ; et il
+      // doit être celui que l'écran a montré. S'il a changé entre-temps (autre onglet), on refuse :
+      // le lecteur ne confirme jamais un projet qu'il n'a pas vu. Rien de tout cela ne part dans les
+      // métadonnées Stripe : il ne vit que dans `dossier_intents`, réservée au service role.
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      const contexte = lireContexteCheckout(dossierContext);
+      if (!contexte.ok) {
+        return NextResponse.json({ error: "Réponses invalides." }, { status: 400 });
+      }
+      let projetCanonique: UserProject | null = null;
+      if (contexte.value.projetVu) {
+        const { data: profil, error: profilError } = await supabase
+          .from("user_profiles")
+          .select("user_project")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profilError) {
+          console.error("[create-payment-intent] lecture du projet impossible");
+          return NextResponse.json({ error: "Préparation du dossier impossible." }, { status: 500 });
+        }
+        projetCanonique = normalizeUserProject((profil as { user_project?: unknown } | null)?.user_project ?? null);
+        if (!projetVuEstACour(contexte.value.projetVu, projetCanonique)) {
+          return NextResponse.json(
+            { error: "Votre projet a changé entre-temps. Rechargez la page pour le relire.", code: "PROJECT_CHANGED" },
+            { status: 409 },
+          );
+        }
+      }
+      colonnesContexte = colonnesIntention(contexte.value, projetCanonique, new Date());
 
       // LA BAN A LE DERNIER MOT sur le type ET sur les coordonnées. Le checkout est rare et c'est
       // là que l'argent bouge : la qualification, à haut volume et sans conséquence financière,
@@ -278,13 +318,19 @@ export async function POST(request: Request) {
     );
 
     if (isDossier && dossierIntent) {
-      const { createClient: createAdminClient } = await import("@supabase/supabase-js");
-      const admin = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      );
-      const { error: intentError } = await admin.from("dossier_intents").upsert(
-        {
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      // L'INTENTION ET SON CONTEXTE, SOUS VERROU (revue FUT-10).
+      //
+      // Première demande pour ce PaymentIntent : l'intention est créée. Demande suivante (réponses
+      // corrigées, même clé d'idempotence, donc même PaymentIntent) : elle est mise à jour SEULEMENT si
+      // la confirmation n'est pas engagée, condition portée par la requête SQL elle-même
+      // (`context_locked_at is null`) et vérifiée d'abord auprès de Stripe. Sinon RIEN n'est écrit et
+      // le formulaire n'est pas rendu : on ne paie jamais avec des réponses qui ne seraient pas celles
+      // livrées. Cf. `verrou-intention-dossier.ts`.
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      let resultat: Awaited<ReturnType<typeof enregistrerIntention>>;
+      try {
+        resultat = await enregistrerIntention(storeIntentionsSupabase(), {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user.id,
           ban_id: dossierIntent.banId,
@@ -296,18 +342,32 @@ export async function POST(request: Request) {
           longitude: dossierIntent.longitude,
           amount_due_cents: dossierAmountCents,
           territory_deduction_cents: dossierIntent.deductionCents,
-        },
-        { onConflict: "stripe_payment_intent_id" },
-      );
-
-      // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
-      // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant
-      // que la carte ne soit débitée.
-      if (intentError) {
-        console.error("[create-payment-intent] dossier_intents", intentError.message);
+          // FUT-10 : relation, objectif, date de déclaration, état et snapshot du projet. Dans la MÊME
+          // écriture que l'adresse : une intention n'existe jamais sans son contexte.
+          ...colonnesContexte,
+        }, {
+          // La réponse idempotente de Stripe rejoue l'objet du jour de la CRÉATION, statut compris :
+          // seul un `retrieve` dit où en est vraiment le paiement.
+          paiementEncoreModifiable: async () =>
+            statutStripeModifiable((await stripe.paymentIntents.retrieve(paymentIntent.id)).status),
+        });
+      } catch (intentError) {
+        // SANS INTENTION, LE WEBHOOK NE POURRA PAS CRÉER LE DOSSIER. Rendre le `clientSecret` ici
+        // reviendrait à ouvrir un paiement dont la livraison est déjà impossible. On échoue avant
+        // que la carte ne soit débitée. Le message seul : jamais la ligne, qui porte le projet.
+        console.error("[create-payment-intent] dossier_intents", intentError instanceof Error ? intentError.message : "échec");
         return NextResponse.json(
           { error: "Préparation du dossier impossible." },
           { status: 500 },
+        );
+      }
+      if (resultat === "verrouillee") {
+        return NextResponse.json(
+          {
+            error: "Un paiement est déjà engagé avec vos réponses précédentes. Rechargez la page pour recommencer avec les nouvelles.",
+            code: "CONTEXT_LOCKED",
+          },
+          { status: 409 },
         );
       }
     }
@@ -348,6 +408,14 @@ export async function POST(request: Request) {
         amount: isDossier ? dossierAmountCents / 100 : priceConfig.amountEur,
         currency: "eur",
         user_id: user.id,
+        // FUT-10 : SI le lecteur a répondu, jamais CE qu'il a répondu (ni texte, ni projet).
+        ...(colonnesContexte
+          ? {
+              context_relation_declared: colonnesContexte.place_relation != null,
+              context_objective_declared: colonnesContexte.place_objective != null,
+              context_project_confirmed: colonnesContexte.project_snapshot != null,
+            }
+          : {}),
       },
     });
     await posthog.shutdown();
@@ -362,6 +430,20 @@ export async function POST(request: Request) {
       billing: { name: buyerName, email: user.email ?? null },
     });
   } catch (error) {
+    // UNE TENTATIVE DÉPASSÉE N'EST PAS UNE PANNE (FUT-10, constaté en test de bout en bout). La clé
+    // d'idempotence d'une tentative n'accepte que les paramètres de sa première requête. Quand le montant
+    // a changé depuis (le dossier acheté entre-temps ouvre la déduction territoire, un code a expiré),
+    // Stripe refuse : rien n'a été écrit, ni chez Stripe ni dans `dossier_intents`. Le lecteur doit
+    // recommencer avec une tentative neuve, ce que fait un rechargement de la page.
+    if ((error as { type?: string } | null)?.type === "StripeIdempotencyError") {
+      return NextResponse.json(
+        {
+          error: "Cette tentative de paiement n'est plus valable. Rechargez la page pour recommencer.",
+          code: "CHECKOUT_STALE",
+        },
+        { status: 409 },
+      );
+    }
     console.error("[stripe/create-payment-intent]", error);
 
     return NextResponse.json(
