@@ -55,3 +55,56 @@ il ne fait pas partie du prototype.
 | `images/c2-trait-final.jpg` | `?c=trait&ce=5&cm=aucun` |
 | `images/c3-statique.jpg` | `?c=statique&cm=aucun` |
 | `images/c1-mobile-390-etape-4.jpg` | `?c=pas&ce=3&cm=aucun`, 390 px |
+
+---
+
+# Deuxième itération (12/10/2026)
+
+Compte rendu : `docs/audits/2026-10-12-fut75-motion-iteration2.md`. Réglages d'URL supplémentaires :
+`b=editoriale|instrument` (v1 : `regle`, `trace`), `c=devoile|couches` (v1 : `pas`, `trait`, `statique`) ;
+`ce` = scène de C1 (0 à 3) ou C2 déplié (`1`). La section « Interactions du quotidien » est en bas de
+l'atelier (ancres `#q1` à `#q6`), chaque proposition face à son comportement actuel.
+
+## Comparaisons v1 / v2 (`iteration2/comparaisons/`)
+
+| Fichier | À gauche | À droite |
+| --- | --- | --- |
+| `b-v1-vs-b1.jpg` | B v1, curseur, 2050 | B1 éditoriale, 2050 |
+| `b-v1-vs-b2.jpg` | B v1, curseur, 2050 | B2 instrument, 2050 |
+| `c-v1-vs-c1.jpg` | C v1, pas à pas, final | C1 dévoilement, scène 3 |
+| `c-v1-vs-c2.jpg` | C v1, pas à pas, final | C2 couches, dépliée |
+| `a-v1-vs-v2.jpg` | A réticule v1, Autour | A réticule peaufiné (coins décalés, croisée de visée) |
+
+## Vidéos (`iteration2/videos/`, temps réel, interactions réelles)
+
+| Fichier | Ce qu'on y voit |
+| --- | --- |
+| `a-ordinateur.mp4` | A peaufiné : ouverture, coins qui s'accrochent, croisée de visée, pointages rapides |
+| `b1-ordinateur.mp4`, `b1-mobile.mp4` | B1 : survol qui penche, 2030 / 2100 / 2050, clavier, changements rapides, Rennes |
+| `b2-ordinateur.mp4`, `b2-mobile.mp4` | B2 : barres, cote, lignes de rappel, nuits tropicales, Rennes |
+| `c1-ordinateur.mp4`, `c1-mobile.mp4` | C1 : quatre scènes, fondements qui changent de fonction, retour, clavier |
+| `c2-ordinateur.mp4`, `c2-mobile.mp4` | C2 : couches une à une, repli, déplier puis replier aussitôt |
+| `q1-ordinateur.mp4`, `q1-mobile.mp4` | Q1 : succès daté, échec, réponse rapide sans clignotement, « déjà en cours », comportement actuel |
+| `q2-ordinateur.mp4`, `q2-mobile.mp4` | Q2 : horizon, échelle, mesure ; HorizonSwitch de production pour comparer |
+| `q3-ordinateur.mp4`, `q3-mobile.mp4` | Q3 : trois communes, limite dite, retrait d'un jeton |
+| `q4-ordinateur.mp4`, `q4-mobile.mp4` | Q4 : la carte s'agrandit, le titre reste ; `<details>` actuel |
+| `q5-ordinateur.mp4`, `q5-mobile.mp4` | Q5 : préparation (secondes écoulées), proposition, échange, retour, échec |
+| `q6-ordinateur.mp4`, `q6-mobile.mp4` | Q6 : vues qui arrivent du bon côté, glyphe qui se transforme, retour vers une preuve |
+
+## Images (`iteration2/images/`, états finaux sans animation)
+
+| Fichier | URL ou état |
+| --- | --- |
+| `v2-a-reticule-autour.jpg`, `v2-a-reticule-logement.jpg` | `?a=reticule&ae=autour&am=aucun` (et `logement`) |
+| `v2-b1-editoriale-2030.jpg`, `-2050`, `-2100` | `?b=editoriale&bh=gwl15&bm=aucun` (`gwl20`, `gwl30`) |
+| `v2-b1-editoriale-rennes-2100.jpg` | `?b=editoriale&bc=35238&bh=gwl30&bm=aucun` |
+| `v2-b1-mobile-390-2050.jpg` | `?b=editoriale&bm=aucun`, 390 px |
+| `v2-b2-instrument-2050.jpg`, `-2100.jpg` | `?b=instrument&bm=aucun` (`&bh=gwl30`) |
+| `v2-b2-instrument-strasbourg-2030.jpg` | `?b=instrument&bc=67482&bh=gwl15&bm=aucun` |
+| `v2-b2-mobile-390-2050.jpg` | `?b=instrument&bm=aucun`, 390 px |
+| `v2-c1-devoilement-1.jpg` à `-4.jpg` | `?c=devoile&cm=aucun&ce=0` à `3` |
+| `v2-c1-mobile-390-2.jpg` | `?c=devoile&cm=aucun&ce=1`, 390 px |
+| `v2-c2-couches-repliee.jpg`, `-depliee.jpg` | `?c=couches&cm=aucun` (`&ce=1`) |
+| `v2-c2-mobile-390-depliee.jpg` | `?c=couches&cm=aucun&ce=1`, 390 px |
+| `v2-q1-ordinateur.jpg` à `v2-q6-ordinateur.jpg` | sections `#q1` à `#q6`, au repos |
+| `v2-q1-mobile-390.jpg` à `v2-q6-mobile-390.jpg` | idem, 390 px |
