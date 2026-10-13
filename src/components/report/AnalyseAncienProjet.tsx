@@ -200,6 +200,8 @@ export function AnalyseAncienProjet(
     // réussi qu'à la version servie (voir `etatVisible`).
     if (i.type === "livree") {
       setSuivi({ attendue: i.version, tentatives: 0, rechargee: false });
+      // La version attendue est aussi confiée à `AnnonceVersion`, qui l'annoncera une fois servie.
+      ecrireStockage(cleMemoireAffichage(cle), JSON.stringify({ cle, attendue: i.version, rechargee: false, le: Date.now() }));
       minuterie.current = window.setTimeout(() => setEtat((e) => suivantAction(e, { type: "lecture" })), LECTURE_CONFIRMATION_MS);
     }
   };
