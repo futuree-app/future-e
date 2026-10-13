@@ -83,3 +83,17 @@ Autre commune : produire d'abord sa fiche (`outil/fiche_mobilite.py`), puis pass
 - Une IRIS de moins de 300 actifs (Mireuil Château d'Eau) est affichée sans traitement particulier : précision de quelques points, comme les autres ; la note le rappelle.
 - Les SVG chargent Archivo depuis Google Fonts ; hors ligne, ils retombent sur Helvetica Neue / Arial (largeurs proches, mise en page vérifiée avec Archivo).
 - Les positions des libellés de La Rochelle sont réglées à la main pour ces contours ; elles ne se transposent pas à une autre commune.
+
+## Niort (79191) · article de la rédaction autonome, essai 2 édité
+
+Dossier `visuels/79191/` : carte par secteur et graphique selon le lieu de travail, large et mobile, clair et sombre, SVG et PNG ; tableau accessible des secteurs ; `legendes.html` (légendes et textes alternatifs, lus par `/dev/article-niort`). Le tableau du scénario carburant est un tableau Markdown dans l'article.
+
+- **Carte** : classes de 45 à 95 % (`--classes 0.45`). Libellés des sept secteurs cités (`LIBELLES_79191`) : Centre et Saint-Liguaire-Nantes au centre de leur secteur, les voisins du Centre reportés dans les marges libres avec trait de rappel sans croisement, Surimeau-Antes Cholette accroché à un point intérieur (son centroïde tombe hors du secteur en croissant).
+- **Graphique** : trois barres lues dans la fiche (`mobpro.voiture_selon_destination`) : Niort 65 %, Chauray, Aiffres ou Bessines 85 %, ailleurs 87 %. Même présentation que La Rochelle ; seule la source des valeurs change (`groupes_barres`). Pas de carte de situation.
+- Vérifié : les SVG de La Rochelle régénérés après ces changements sont identiques octet pour octet aux fichiers versionnés.
+
+```sh
+python visuels/generer_visuels.py --insee 79191 --fiche fiches/79191/fiche.json \
+  --contours <checkout>/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_79191.json \
+  --classes 0.45 --communes "" --out visuels/79191
+```

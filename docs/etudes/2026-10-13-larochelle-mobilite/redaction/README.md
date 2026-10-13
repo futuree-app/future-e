@@ -47,6 +47,8 @@ Pour Niort, la fiche du 13/10/2026 existe déjà : seule l'étape 2 a été lanc
 
 Essais conservés dans `79191/essais/` (sortie brute + constat). Essai 1 (13/10/2026) : faits propres à Niort et exclusions respectées, mais une section par famille de données et des formulations au-delà des données ; consignes resserrées ensuite (une question principale, écriture sélective, formulations exactes).
 
+Essai 2 (13/10/2026) : retenu pour la prévisualisation. Version éditée `79191/article.md` (corrections ciblées et correspondance dans `79191/correspondance-faits.md`), visuels dans `../visuels/79191/`, prévisualisation locale `/dev/article-niort` (captures dans `79191/captures/`).
+
 Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié par les résultats de Niort (proche de La Rochelle ou non, mais pas recopié), qu'elle sait proposer un format court ou de ne pas publier, et que la correspondance tient sans retouche. Préparer le test ne démontre rien : seule la copie rendue le dira.
 
 ## Ce qui est automatisé, ce qui reste manuel

@@ -118,6 +118,20 @@ LIBELLES_17300 = {
     "173001002": (0.42, 0.97, "end", ["Les Minimes Université"]),
     "173000902": (1.0, 0.84, "end", ["Villeneuve des", "Salines Ouest"]),
 }
+# Niort (13/10/2026) : les sept secteurs cités dans l'article. Le centre est petit et dense : les secteurs voisins du
+# Centre sont reportés dans les marges libres (bas gauche, bas droite) avec trait de rappel, sans croisement. Le centroïde
+# de Surimeau-Antes Cholette tombe hors du secteur (forme en croissant) : 5e élément = point d'accroche forcé, en
+# fraction du cadre (point représentatif shapely). None = libellé au centre du secteur.
+LIBELLES_79191 = {
+    "791910101": None,
+    "791910501": None,
+    "791910601": (0.74, 0.03, "start", ["Surimeau-Antes", "Cholette"], (0.587, 0.209)),
+    "791910404": (0.30, 0.80, "end", ["Clou Bouchet Sud"]),
+    "791910401": (0.30, 0.92, "end", ["Clou Bouchet Nord"]),
+    "791910102": (0.74, 0.84, "start", ["Gare"]),
+    "791910103": (0.72, 0.95, "start", ["Hôpital"]),
+}
+LIBELLES = {"17300": LIBELLES_17300, "79191": LIBELLES_79191}
 
 
 def carte(a, mobile):
@@ -165,8 +179,8 @@ def carte(a, mobile):
         lab = f["properties"]["nom_iris"] + (f" : {pct(r['voiture'])}" if cls == "habitat" else " : secteur d'activité, exclu" if cls == "non_res" else " : sans donnée")
         body.append(f'<path d="{d}" fill="{fill}" stroke="{SURFACE}" stroke-width="1.4"{extra} fill-rule="evenodd"><title>{esc(lab)}</title></path>')
     # Libellés
-    if a.insee == "17300" and not a.libelles:
-        codes = LIBELLES_17300
+    if a.insee in LIBELLES and not a.libelles:
+        codes = LIBELLES[a.insee]
     else:
         codes = {c: None for c in (a.libelles or "").split(",") if c}
     lh = 15 * fs
@@ -177,7 +191,9 @@ def carte(a, mobile):
         if pos is None:
             lx, ly, anchor, lines = cx, cy, "middle", [r["nom"]]
         else:
-            fx, fy, anchor, lines = pos
+            fx, fy, anchor, lines = pos[:4]
+            if len(pos) == 5:
+                cx, cy = mx0 + pos[4][0] * mw, my0 + pos[4][1] * mh
             lx, ly = mx0 + fx * mw, my0 + fy * mh
             # trait de rappel : du centre du secteur au bord du bloc de texte le plus proche (haut ou bas)
             ey = ly + len(lines) * lh + 5 if ly < cy else ly - lh * 0.95
@@ -341,18 +357,35 @@ def tableau(fiche, out, insee):
 
 
 # ── 2. Barres ───────────────────────────────────────────────────────────────────────────────
+def groupes_barres(a):
+    """La Rochelle : les quatre communes nommées de l'article (resultats/incertitudes_mobpro.csv). Autre commune : les
+    trois groupes de la fiche (`mobpro.voiture_selon_destination`), dont la liste exacte des communes voisines."""
+    if a.insee == "17300":
+        vals = {}
+        for r in csv.DictReader(open(a.incertitudes)):
+            vals[r["indicateur"]] = float(r["p"])
+        return "La Rochelle", [("Travaille à La Rochelle", vals["Rochelais travaillant à La Rochelle : voiture"]),
+                               ("Travaille à Aytré, Lagord, Périgny ou Puilboreau", vals["Rochelais travaillant à Périgny/Aytré/Lagord/Puilboreau : voiture"])]
+    fiche = json.load(open(a.fiche))
+    nom = fiche["commune"]["nom"]; vois = list(fiche["commune"]["voisines"].values())
+    V = next(f for f in fiche["faits"] if f["id"] == "mobpro.voiture_selon_destination")["valeur"]
+    ou = liste_fr(vois).replace(" et ", " ou ")
+    return nom, [(f"Travaille à {nom}", V["meme_commune"]["p"]), (f"Travaille à {ou}", V["communes_voisines"]["p"]),
+                 (f"Travaille ailleurs (hors de {nom}, {liste_fr(vois)})", V["ailleurs"]["p"])]
+
+
 def barres(a, mobile):
-    vals = {}
-    for r in csv.DictReader(open(a.incertitudes)):
-        vals[r["indicateur"]] = float(r["p"])
-    v_ici = vals["Rochelais travaillant à La Rochelle : voiture"]
-    v_vois = vals["Rochelais travaillant à Périgny/Aytré/Lagord/Puilboreau : voiture"]
+    nom, groupes = groupes_barres(a)
     # Version large : 600 px, pour tenir À CÔTÉ de la carte des communes (300 px) dans une colonne de 920 px.
     W = 640 if mobile else 600
     fs = 1.45 if mobile else 1.0
-    titre = "Habiter La Rochelle, travailler ici ou dans une commune voisine"
-    sous = "Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à La Rochelle, en 2022."
-    note = "Deux groupes distincts de résidents ; l'écart décrit des pratiques. Source : INSEE, recensement 2022."
+    if a.insee == "17300":
+        titre = "Habiter La Rochelle, travailler ici ou dans une commune voisine"
+        note = "Deux groupes distincts de résidents ; l'écart décrit des pratiques. Source : INSEE, recensement 2022."
+    else:
+        titre = f"Habiter {nom}, travailler ici ou ailleurs"
+        note = "Groupes distincts de résidents ; les écarts décrivent des pratiques. Source : INSEE, recensement 2022."
+    sous = f"Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à {nom}, en 2022."
     b = []
     y = 40 * fs
     for l in wrap(titre, 34 if mobile else 46):
@@ -361,7 +394,6 @@ def barres(a, mobile):
     for l in wrap(sous, 52 if mobile else 72):
         b.append(text(24, y, l, round(14 * fs), 400, INK2)); y += 19 * fs
     y += 22 * fs
-    groupes = [("Travaille à La Rochelle", v_ici), ("Travaille à Aytré, Lagord, Périgny ou Puilboreau", v_vois)]
     x0 = 24; xw = W - 48 - (70 * fs)  # place pour la valeur à droite de la barre
     bh = round(30 * fs)
     # Graduations 0 à 100 %
@@ -391,18 +423,26 @@ def barres(a, mobile):
     for l in wrap(note, 60 if mobile else 84):
         b.append(text(24, y, l, round(12.5 * fs), 400, INK3)); y += 17 * fs
     H = math.ceil(y + 6)
-    alt = (f"Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, "
-           f"{pct(v_ici)} de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre "
-           f"{pct(v_vois)} de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts ; "
-           f"l'écart décrit des pratiques, pas un effet causal. Source : INSEE, recensement 2022.")
-    return svg_doc(W, H, "\n".join(grid) + "\n" + "\n".join(b), titre, alt), W, H, (v_ici, v_vois), alt
+    if a.insee == "17300":
+        (_, v_ici), (_, v_vois) = groupes
+        alt = (f"Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, "
+               f"{pct(v_ici)} de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre "
+               f"{pct(v_vois)} de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts ; "
+               f"l'écart décrit des pratiques, pas un effet causal. Source : INSEE, recensement 2022.")
+    else:
+        alt = (f"Graphique en {len(groupes)} barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à {nom}, part qui va "
+               f"travailler principalement en voiture : " + " ; ".join(f"{lab.replace('Travaille', 'travaillant')}, {pct(v)}" for lab, v in groupes)
+               + ". Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022.")
+    return svg_doc(W, H, "\n".join(grid) + "\n" + "\n".join(b), titre, alt), W, H, tuple(v for _, v in groupes), alt
 
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--insee", default="17300"); p.add_argument("--fiche", required=True); p.add_argument("--contours", required=True)
-    p.add_argument("--incertitudes", required=True); p.add_argument("--out", required=True)
+    p.add_argument("--incertitudes", default="", help="La Rochelle seulement (barres) ; une autre commune lit la fiche")
+    p.add_argument("--out", required=True)
     p.add_argument("--libelles", default=""); p.add_argument("--sans-png", action="store_true")
+    p.add_argument("--sans-barres", action="store_true", help="ne pas produire le graphique selon le lieu de travail")
     p.add_argument("--classes", default="", help="borne basse de la première classe, en part (ex. 0.45 : classes de 10 points "
                    "de 45 à 95 %%). Défaut 0.25 (La Rochelle)")
     p.add_argument("--communes", default=None, help="codes INSEE des communes du graphique à situer (défaut pour 17300 : "
@@ -425,13 +465,15 @@ def main():
             f = os.path.join(a.out, f"carte_communes_{a.insee}{suf}.svg"); open(f, "w").write(svg)
             if not a.sans_png:
                 render_png(f, W, H)
-        if a.insee == "17300":
+        if a.insee == "17300" or not a.sans_barres:
             svg, W, H, vals, alt_b = barres(a, mobile)
-            f = os.path.join(a.out, f"barres_lieu_travail{suf}.svg"); open(f, "w").write(svg)
+            base = "barres_lieu_travail" if a.insee == "17300" else f"barres_lieu_travail_{a.insee}"
+            f = os.path.join(a.out, f"{base}{suf}.svg"); open(f, "w").write(svg)
             if not a.sans_png:
                 render_png(f, W, H)
     tableau(fiche, a.out, a.insee)
-    print(json.dumps({"carte": stats, "barres": vals if a.insee == "17300" else None, "alt_carte": alt_carte(fiche)}, ensure_ascii=False, indent=1))
+    print(json.dumps({"carte": stats, "barres": None if a.sans_barres else vals, "alt_carte": alt_carte(fiche),
+                      "alt_barres": None if a.sans_barres else alt_b}, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":
