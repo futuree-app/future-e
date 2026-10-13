@@ -1,6 +1,6 @@
 # Part de la voiture pour aller travailler, par secteur (IRIS) · La Rochelle
 
-Actifs occupés de 15 ans ou plus résidant dans le secteur, mode principal déclaré. Secteurs classés par ordre alphabétique (ce n'est pas un classement). Valeurs arrondies au point ; estimations par sondage, écarts de quelques points non significatifs. Source : INSEE, recensement 2022, base infracommunale Activité des résidents.
+Actifs occupés de 15 ans ou plus résidant dans le secteur, mode principal déclaré. Secteurs classés par ordre alphabétique (ce n'est pas un classement). Valeurs arrondies au point ; estimations par sondage, petits écarts entre secteurs à ne pas surinterpréter. Source : INSEE, recensement 2022, base infracommunale Activité des résidents.
 
 | Secteur (IRIS, libellé INSEE) | Part de la voiture |
 |---|---|

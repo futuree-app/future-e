@@ -28,7 +28,7 @@ Avoir une voiture ne veut pas dire la prendre chaque matin. Parmi les actifs don
 
 Dans les trois secteurs statistiques du centre (Centre Préfecture, Centre Mairie, Centre Marché), moins de 30 % des actifs vont travailler en voiture. À Laleu, à La Pallice, à Mireuil Est ou à Villeneuve-les-Salines Ouest, ils sont près de 70 %.
 
-À Mireuil Est, presque toutes les adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 mètres, et des bus passent fréquemment à proximité le matin. 68 % des actifs du secteur vont pourtant travailler en voiture.
+À Mireuil Est, presque toutes les adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 mètres à vol d'oiseau, et des bus passent fréquemment à proximité le matin. 68 % des actifs du secteur vont pourtant travailler en voiture.
 
 Au centre, la question se pose autrement. Un ménage rochelais sur quatre n'a pas de voiture, et dans les secteurs de l'hypercentre, seuls 14 à 17 % des ménages disposent d'une place de stationnement réservée. Lors d'une visite, la place pour la voiture se regarde comme la cave ou le balcon.
 
@@ -51,13 +51,13 @@ La Rochelle attire aussi des actifs qui habitent loin. Sur environ 50 600 person
 
 ## Et pour une adresse précise ?
 
-Devant une annonce, il reste à savoir ce qu'il y a autour du logement et combien de temps prendra le trajet vers le travail. Le dossier d'adresse futur•e rassemble les équipements les plus proches, la part des ménages du secteur qui ont une voiture, et une estimation du temps, en voiture ou à pied, vers le lieu que vous indiquez.
+Devant une annonce, il reste à savoir ce qu'il y a autour du logement. Le dossier d'adresse futur•e rassemble les équipements les plus proches et la part des ménages du secteur qui ont une voiture, comparée à celle de la commune.
 
 ---
 
 ### Méthode et sources
 
-Pratiques domicile-travail : INSEE, recensement de la population 2022 (fichier détail des mobilités professionnelles ; base infracommunale « Activité des résidents » pour les secteurs). Actifs occupés de 15 ans ou plus, mode de transport principal pour aller travailler, y compris ceux qui ne se déplacent pas. Estimations par sondage : les écarts de quelques points entre secteurs ne sont pas significatifs. Les secteurs sont les IRIS de l'INSEE ; leurs noms ne correspondent pas toujours aux quartiers d'usage. « Taille comparable » : communes de 25 000 à 80 000 actifs occupés résidents. Unité urbaine : INSEE, 2020. Les parts par secteur sont une analyse de cette étude ; le dossier d'adresse ne les reprend pas.
+Pratiques domicile-travail : INSEE, recensement de la population 2022 (fichier détail des mobilités professionnelles ; base infracommunale « Activité des résidents » pour les secteurs). Actifs occupés de 15 ans ou plus, mode de transport principal pour aller travailler, y compris ceux qui ne se déplacent pas. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés. Les secteurs sont les IRIS de l'INSEE ; leurs noms ne correspondent pas toujours aux quartiers d'usage. « Taille comparable » : communes de 25 000 à 80 000 actifs occupés résidents. Unité urbaine : INSEE, 2020. Les parts par secteur sont une analyse de cette étude ; le dossier d'adresse ne les reprend pas.
 
 Ménages et voiture, stationnement : INSEE, recensement 2022, base infracommunale « Logement » ; parts de ménages.
 

@@ -21,7 +21,7 @@
   "generee_le": "2026-10-13T10:41:34Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-13T12:36:29Z",
+ "dossier_genere_le": "2026-10-13T13:17:30Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -40,6 +40,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -65,6 +66,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -90,6 +92,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -115,6 +118,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -140,6 +144,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -165,6 +170,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -190,6 +196,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024)."
@@ -213,6 +220,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -238,6 +246,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -263,6 +272,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -285,6 +295,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -309,6 +320,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Parts d'ACTIFS, pas de ménages.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -335,6 +347,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Parts d'ACTIFS, pas de ménages.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -361,6 +374,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Parts d'ACTIFS, pas de ménages.",
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
@@ -387,6 +401,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -411,6 +426,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -435,6 +451,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -459,6 +476,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -483,6 +501,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -507,6 +526,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -531,6 +551,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -555,6 +576,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -579,6 +601,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -603,6 +626,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -627,6 +651,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -651,6 +676,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -672,6 +698,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -694,6 +721,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -719,6 +747,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -744,6 +773,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -766,6 +796,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -791,6 +822,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -816,6 +848,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -838,6 +871,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -863,6 +897,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -888,6 +923,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
     "Pratiques du recensement 2022 (collectes 2020 à 2024).",
@@ -910,8 +946,9 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; ne commenter que des écarts > 10 points.",
+    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -930,8 +967,9 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; ne commenter que des écarts > 10 points.",
+    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -950,8 +988,9 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; ne commenter que des écarts > 10 points.",
+    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -970,6 +1009,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
    ],
@@ -989,6 +1029,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
    ],
@@ -1008,6 +1049,7 @@
    "millesime": "2022",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
     "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
    ],
@@ -1015,19 +1057,21 @@
   },
   {
    "id": "acces.79191.commerce_alim_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a un commerce alimentaire à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.75,
    "unite": "part",
    "affichage": "75 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1037,19 +1081,21 @@
   },
   {
    "id": "acces.79191.grande_surface_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a une grande surface à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.381,
    "unite": "part",
    "affichage": "38 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1059,19 +1105,21 @@
   },
   {
    "id": "acces.79191.pharmacie_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a une pharmacie à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.583,
    "unite": "part",
    "affichage": "58 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1081,19 +1129,21 @@
   },
   {
    "id": "acces.79191.medecin_generaliste_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a un médecin généraliste à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.617,
    "unite": "part",
    "affichage": "62 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1103,19 +1153,21 @@
   },
   {
    "id": "acces.79191.ecole_elementaire_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a une école élémentaire à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.661,
    "unite": "part",
    "affichage": "66 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1125,19 +1177,21 @@
   },
   {
    "id": "acces.79191.college_1km",
-   "fait": "Part des ménages (estimée) dont l'adresse a un collège à moins de 1 km",
+   "fait": "Part des adresses de Niort qui ont un collège à moins de 1 km (à vol d'oiseau)",
    "valeur": 0.834,
    "unite": "part",
    "affichage": "83 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1147,19 +1201,21 @@
   },
   {
    "id": "acces.79191.gare_2km",
-   "fait": "Part des ménages (estimée) dont l'adresse a une gare à moins de 2 km",
+   "fait": "Part des adresses de Niort qui ont une gare à moins de 2 km (à vol d'oiseau)",
    "valeur": 0.631,
    "unite": "part",
    "affichage": "63 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1169,19 +1225,21 @@
   },
   {
    "id": "acces.79191.panier_quotidien_500m",
-   "fait": "Part des ménages (estimée) dont l'adresse a à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m",
+   "fait": "Part des adresses de Niort qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
    "valeur": 0.448,
    "unite": "part",
    "affichage": "45 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "",
+   "usage": "oui",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1191,19 +1249,21 @@
   },
   {
    "id": "acces.79191.bus_8h_7_9h",
-   "fait": "Part des ménages (estimée) dont l'adresse a au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "fait": "Part des adresses de Niort qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
    "valeur": 0.746,
    "unite": "part",
    "affichage": "75 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
-   "statut": "fragile",
-   "motif_statut": "réseau de bus et jour de référence à vérifier par un humain",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1213,19 +1273,21 @@
   },
   {
    "id": "acces.79191.aucun_bus_7_9h",
-   "fait": "Part des ménages (estimée) dont l'adresse n'a aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "fait": "Part des adresses de Niort sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
    "valeur": 0.03,
    "unite": "part",
    "affichage": "3 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
-   "statut": "fragile",
-   "motif_statut": "réseau de bus et jour de référence à vérifier par un humain",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1235,19 +1297,21 @@
   },
   {
    "id": "acces.79191.bus_4h_20_22h",
-   "fait": "Part des ménages (estimée) dont l'adresse a au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "fait": "Part des adresses de Niort qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
    "valeur": 0.089,
    "unite": "part",
    "affichage": "9 %",
    "intervalle_95": null,
-   "population": "ménages de Niort, répartis sur les adresses BAN de leur secteur",
-   "denominateur": "tous les ménages de Niort",
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
    "perimetre": "adresses de Niort (79191)",
    "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
    "millesime": "BPE 2025, GTFS du jour 2026-10-13",
-   "statut": "fragile",
-   "motif_statut": "réseau de bus et jour de référence à vérifier par un humain",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
    "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
     "Proximité d'un équipement ≠ son usage.",
     "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
     "Point BPE = adresse de l'établissement, pas son entrée.",
@@ -1269,6 +1333,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1290,6 +1355,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1311,6 +1377,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1332,6 +1399,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1353,6 +1421,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1374,6 +1443,7 @@
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
    "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
@@ -1388,6 +1458,7 @@
    "nom": "Centre",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 2303,
    "voiture": 0.489,
@@ -1397,13 +1468,15 @@
    "menages_sans_voiture": 0.383,
    "menages_stationnement_reserve": 0.303,
    "panier_quotidien_500m": 0.998,
-   "bus_8h_7_9h": 1.0
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910401",
    "nom": "Clou Bouchet Nord",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 490,
    "voiture": 0.516,
@@ -1413,13 +1486,15 @@
    "menages_sans_voiture": 0.37,
    "menages_stationnement_reserve": 0.326,
    "panier_quotidien_500m": 0.797,
-   "bus_8h_7_9h": 1.0
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910103",
    "nom": "Hôpital",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 802,
    "voiture": 0.536,
@@ -1429,13 +1504,15 @@
    "menages_sans_voiture": 0.275,
    "menages_stationnement_reserve": 0.508,
    "panier_quotidien_500m": 0.962,
-   "bus_8h_7_9h": 0.793
+   "bus_8h_7_9h": 0.793,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910102",
    "nom": "Gare",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1193,
    "voiture": 0.537,
@@ -1445,13 +1522,15 @@
    "menages_sans_voiture": 0.334,
    "menages_stationnement_reserve": 0.428,
    "panier_quotidien_500m": 0.767,
-   "bus_8h_7_9h": 0.999
+   "bus_8h_7_9h": 0.999,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910404",
    "nom": "Clou Bouchet Sud",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 528,
    "voiture": 0.539,
@@ -1461,13 +1540,15 @@
    "menages_sans_voiture": 0.427,
    "menages_stationnement_reserve": 0.139,
    "panier_quotidien_500m": 0.87,
-   "bus_8h_7_9h": 0.917
+   "bus_8h_7_9h": 0.917,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910301",
    "nom": "Sud Ribray",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1604,
    "voiture": 0.634,
@@ -1477,13 +1558,15 @@
    "menages_sans_voiture": 0.144,
    "menages_stationnement_reserve": 0.665,
    "panier_quotidien_500m": 0.668,
-   "bus_8h_7_9h": 0.979
+   "bus_8h_7_9h": 0.979,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910201",
    "nom": "Nord Partie Inférieure",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1098,
    "voiture": 0.635,
@@ -1493,13 +1576,15 @@
    "menages_sans_voiture": 0.246,
    "menages_stationnement_reserve": 0.588,
    "panier_quotidien_500m": 0.461,
-   "bus_8h_7_9h": 0.999
+   "bus_8h_7_9h": 0.999,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910303",
    "nom": "Boucle Sèvre",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1578,
    "voiture": 0.649,
@@ -1509,13 +1594,15 @@
    "menages_sans_voiture": 0.222,
    "menages_stationnement_reserve": 0.686,
    "panier_quotidien_500m": 0.747,
-   "bus_8h_7_9h": 0.874
+   "bus_8h_7_9h": 0.874,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910505",
    "nom": "Zone d'Activités Technopole",
    "type": "activité",
    "statut": "absent",
+   "usage": "non",
    "motif": "secteur d'activité, exclu"
   },
   {
@@ -1523,6 +1610,7 @@
    "nom": "Nord Partie Supérieure",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1203,
    "voiture": 0.68,
@@ -1532,13 +1620,15 @@
    "menages_sans_voiture": 0.261,
    "menages_stationnement_reserve": 0.563,
    "panier_quotidien_500m": 0.495,
-   "bus_8h_7_9h": 0.774
+   "bus_8h_7_9h": 0.774,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910403",
    "nom": "Four Chabot Gavacherie",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 590,
    "voiture": 0.688,
@@ -1548,13 +1638,15 @@
    "menages_sans_voiture": 0.379,
    "menages_stationnement_reserve": 0.43,
    "panier_quotidien_500m": 0.37,
-   "bus_8h_7_9h": 0.888
+   "bus_8h_7_9h": 0.888,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910402",
    "nom": "Venise Verte",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 829,
    "voiture": 0.721,
@@ -1564,13 +1656,15 @@
    "menages_sans_voiture": 0.131,
    "menages_stationnement_reserve": 0.719,
    "panier_quotidien_500m": 0.412,
-   "bus_8h_7_9h": 0.732
+   "bus_8h_7_9h": 0.732,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910604",
    "nom": "Champclairot",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1335,
    "voiture": 0.725,
@@ -1580,13 +1674,15 @@
    "menages_sans_voiture": 0.122,
    "menages_stationnement_reserve": 0.731,
    "panier_quotidien_500m": 0.466,
-   "bus_8h_7_9h": 0.701
+   "bus_8h_7_9h": 0.701,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910302",
    "nom": "Saint-Florent",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1153,
    "voiture": 0.732,
@@ -1596,13 +1692,15 @@
    "menages_sans_voiture": 0.098,
    "menages_stationnement_reserve": 0.852,
    "panier_quotidien_500m": 0.297,
-   "bus_8h_7_9h": 0.484
+   "bus_8h_7_9h": 0.484,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910701",
    "nom": "Champommier",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 2191,
    "voiture": 0.773,
@@ -1612,13 +1710,15 @@
    "menages_sans_voiture": 0.087,
    "menages_stationnement_reserve": 0.777,
    "panier_quotidien_500m": 0.325,
-   "bus_8h_7_9h": 0.772
+   "bus_8h_7_9h": 0.772,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910602",
    "nom": "Justices-Brizeaux",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 985,
    "voiture": 0.78,
@@ -1628,13 +1728,15 @@
    "menages_sans_voiture": 0.08,
    "menages_stationnement_reserve": 0.76,
    "panier_quotidien_500m": 0.052,
-   "bus_8h_7_9h": 0.613
+   "bus_8h_7_9h": 0.613,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910702",
    "nom": "Goise",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 900,
    "voiture": 0.791,
@@ -1644,13 +1746,15 @@
    "menages_sans_voiture": 0.169,
    "menages_stationnement_reserve": 0.813,
    "panier_quotidien_500m": 0.042,
-   "bus_8h_7_9h": 0.602
+   "bus_8h_7_9h": 0.602,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910603",
    "nom": "Moulin à Vent-Souche",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 838,
    "voiture": 0.797,
@@ -1660,13 +1764,15 @@
    "menages_sans_voiture": 0.058,
    "menages_stationnement_reserve": 0.85,
    "panier_quotidien_500m": 0.0,
-   "bus_8h_7_9h": 0.573
+   "bus_8h_7_9h": 0.573,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910203",
    "nom": "Baticoop",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1103,
    "voiture": 0.801,
@@ -1676,13 +1782,15 @@
    "menages_sans_voiture": 0.161,
    "menages_stationnement_reserve": 0.76,
    "panier_quotidien_500m": 0.305,
-   "bus_8h_7_9h": 0.467
+   "bus_8h_7_9h": 0.467,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910503",
    "nom": "Sainte-Pezenne",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1142,
    "voiture": 0.807,
@@ -1692,13 +1800,15 @@
    "menages_sans_voiture": 0.069,
    "menages_stationnement_reserve": 0.763,
    "panier_quotidien_500m": 0.089,
-   "bus_8h_7_9h": 0.727
+   "bus_8h_7_9h": 0.727,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910502",
    "nom": "Coteau Saint-Hubert",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1355,
    "voiture": 0.821,
@@ -1708,13 +1818,15 @@
    "menages_sans_voiture": 0.071,
    "menages_stationnement_reserve": 0.857,
    "panier_quotidien_500m": 0.096,
-   "bus_8h_7_9h": 0.922
+   "bus_8h_7_9h": 0.922,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910605",
    "nom": "Zone d'Activités de Souche",
    "type": "activité",
    "statut": "absent",
+   "usage": "non",
    "motif": "secteur d'activité, exclu"
   },
   {
@@ -1722,6 +1834,7 @@
    "nom": "Zone d'Activités de Saint-Florent",
    "type": "activité",
    "statut": "absent",
+   "usage": "non",
    "motif": "secteur d'activité, exclu"
   },
   {
@@ -1729,6 +1842,7 @@
    "nom": "Saint-Liguaire-Nantes",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1136,
    "voiture": 0.861,
@@ -1738,13 +1852,15 @@
    "menages_sans_voiture": 0.033,
    "menages_stationnement_reserve": 0.858,
    "panier_quotidien_500m": 0.0,
-   "bus_8h_7_9h": 0.077
+   "bus_8h_7_9h": 0.077,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910601",
    "nom": "Surimeau-Antes Cholette",
    "type": "habitat",
    "statut": "utilisable",
+   "usage": "oui",
    "motif": "",
    "actifs": 1215,
    "voiture": 0.865,
@@ -1754,13 +1870,15 @@
    "menages_sans_voiture": 0.067,
    "menages_stationnement_reserve": 0.86,
    "panier_quotidien_500m": 0.0,
-   "bus_8h_7_9h": 0.016
+   "bus_8h_7_9h": 0.016,
+   "bus_8h_7_9h_statut": "en attente de validation"
   },
   {
    "code": "791910504",
    "nom": "Zone d'Activités de Saint-Liguaire",
    "type": "activité",
    "statut": "absent",
+   "usage": "non",
    "motif": "secteur d'activité, exclu"
   }
  ],
@@ -2172,8 +2290,9 @@
   }
  ],
  "verifications_humaines": [
-  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire.",
-  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers.",
-  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire."
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
  ]
 }

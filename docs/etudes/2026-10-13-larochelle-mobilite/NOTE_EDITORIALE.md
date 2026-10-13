@@ -37,7 +37,7 @@ Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un a
 - Pas de hiérarchie causale que les données ne mesurent pas (« compte plus que », « dépend d'abord de »).
 - Pas de transitions annoncées (« voici le résultat le plus utile »), de maximes de fin de section, d'antithèses d'emphase, ni de témoignages ou scènes inventés. Le texte doit rester concret après suppression de ses phrases d'accroche.
 - Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte.
-- La conclusion vers futur•e est courte et ne promet que ce que la matrice article / produit dit visible et admissible.
+- La conclusion vers futur•e est courte et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
 - Chaque chiffre doit apporter quelque chose au lecteur : on n'ajoute pas un fait parce qu'il est disponible.
 
 ## 3. Ce qui est propre à La Rochelle (ne pas transposer sans vérifier)
