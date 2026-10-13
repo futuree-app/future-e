@@ -43,14 +43,19 @@ NOW = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 # ── Sources : cache + journal ────────────────────────────────────────────────────────────────
 class Sources:
-    def __init__(self, cache):
-        self.cache = cache; os.makedirs(cache, exist_ok=True)
+    def __init__(self, cache, hors_ligne=False):
+        self.cache = cache; self.hors_ligne = hors_ligne; os.makedirs(cache, exist_ok=True)
         self.path = os.path.join(cache, "journal.json")
         self.j = json.load(open(self.path)) if os.path.exists(self.path) else {}
 
     def fetch(self, url, name, max_age_h=None):
         """Télécharge une fois ; `max_age_h` force le rafraîchissement des flux « latest »."""
         p = os.path.join(self.cache, name)
+        if self.hors_ligne:
+            # REPRODUCTION : on n'utilise QUE l'instantané. Un fichier absent est une erreur, jamais un téléchargement.
+            if not os.path.exists(p):
+                raise SystemExit(f"hors ligne : instantané absent du cache : {name}")
+            return p
         e = self.j.get(name)
         stale = e and max_age_h is not None and (
             dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(e["recupere_le"].replace("Z", "+00:00"))).total_seconds() > max_age_h * 3600
@@ -63,7 +68,8 @@ class Sources:
                         break
                     f.write(b)
             h = hashlib.sha256(open(p, "rb").read()).hexdigest()
-            self.j[name] = {"url": url, "recupere_le": NOW, "octets": os.path.getsize(p), "sha256": h}
+            quand = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # heure réelle du téléchargement
+            self.j[name] = {"url": url, "recupere_le": quand, "octets": os.path.getsize(p), "sha256": h}
             json.dump(self.j, open(self.path, "w"), indent=1, ensure_ascii=False)
         return p
 
@@ -99,7 +105,7 @@ def fragilite(lignes):
 
 # ── Contexte : commune, voisines ─────────────────────────────────────────────────────────────
 def contexte(a, src):
-    geo = get_json(URL["geo"].format(insee=a.insee))
+    geo = json.load(open(src.fetch(URL["geo"].format(insee=a.insee), f"geo_{a.insee}.json")))
     idx = {c["insee"]: c for c in json.load(gzip.open(a.index))["communes"]}
     me = idx.get(a.insee)
     if a.voisines:
@@ -524,8 +530,9 @@ def main():
     p.add_argument("--voisines", default=""); p.add_argument("--jour", default=dt.date.today().isoformat())
     p.add_argument("--gtfs", default="auto"); p.add_argument("--rayon-carburant", type=float, default=12)
     p.add_argument("--etapes", default="mobpro,iris,acces,carburant")
+    p.add_argument("--hors-ligne", action="store_true", help="n'utiliser que les instantanés du cache (aucun téléchargement)")
     a = p.parse_args()
-    src = Sources(a.cache); ctx = contexte(a, src); F, T = [], {}
+    src = Sources(a.cache, a.hors_ligne); ctx = contexte(a, src); F, T = [], {}
     for e in a.etapes.split(","):
         print(f"· {e}", file=sys.stderr)
         {"mobpro": etape_mobpro, "iris": etape_iris, "acces": etape_acces, "carburant": etape_carburant}[e](a, ctx, src, F, T)

@@ -18,7 +18,32 @@ But : qu'un prochain article local « se déplacer depuis [commune] » parte d'u
 | Autopartage, vélos en libre-service | **Exploration** (flux GBFS propres à chaque réseau, pas de découverte automatique) | `scripts/09` |
 | Scripts `01` à `12` | Trace de l'étude La Rochelle, codée en dur pour ces communes | `scripts/` |
 
-## 2. Lancer une fiche
+## 2. Reproduire à l'identique les preuves publiées (finalisation du 13/10/2026)
+
+**Instantanés conservés.** Les sources évolutives téléchargées le 13/10/2026 (BAN, GTFS Yélo et son index, prix des carburants dont l'instantané, GBFS, contours IRIS IGN, bases IRIS INSEE) sont archivées hors Git dans le checkout principal : `data/cache-etudes/2026-10-13-larochelle-mobilite/` (187 Mo, ignoré par un `.gitignore` local). `cache-outil/` est le cache de l'outil tel qu'il a produit la fiche ; `telechargements-initiaux/` contient ce que seuls les scripts d'exploration utilisaient. Empreintes complètes : `MANIFESTE_INSTANTANES.md` (copie versionnée du manifeste de l'archive). Les fichiers volumineux identiques entre les deux jeux (BAN, archives carburant, GTFS, base IRIS) n'y figurent qu'une fois : empreintes vérifiées égales.
+
+**Entrées locales déjà présentes** (non copiées, empreintes au manifeste) : `data/rp-mobpro-2022.parquet` (7 388 023 lignes) et `data/bpe25.parquet` ; `data/comparateur-index.json.gz` est versionné (identique sur `a25fa9fd` et sur cette branche).
+
+**Commande de reproduction** (aucun téléchargement : un instantané manquant arrête le calcul) :
+
+```sh
+python3 -m venv venv && venv/bin/pip install -r outil/requirements.txt   # Python 3.13.5
+cp -R <checkout>/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil cache
+venv/bin/python outil/fiche_mobilite.py --hors-ligne --insee 17300 \
+  --voisines 17200,17291,17028,17274,17094 --jour 2026-10-13 --out fiche --cache cache \
+  --mobpro <checkout>/data/rp-mobpro-2022.parquet --bpe <checkout>/data/bpe25.parquet \
+  --index <checkout>/data/comparateur-index.json.gz
+```
+
+**Résultat de la reproduction (une seule, 13/10/2026).** Environnement neuf (venv créé depuis `requirements.txt`) : préparation 20 s (dépendances) + copie des instantanés négligeable ; génération de la fiche 60 s. Les 11 faits et les 7 tableaux sont **identiques** à `fiches/17300/fiche.json` ; tous les contrôles automatiques sont verts ; aucun fichier n'a été ajouté au cache.
+
+**Recalculable aujourd'hui, mais pas à l'identique :**
+- Les réponses de geo.api.gouv.fr (nom, EPCI, centre de la commune) n'étaient pas mises en cache lors du calcul initial ; elles ont été capturées lors de la finalisation et sont signalées comme telles dans le journal. Donnée stable, sans effet sur les chiffres.
+- Les itinéraires (IGN, OSRM) et la requête Overpass des scripts `04`, `06`, `08` et `12` interrogent des services vivants : leurs réponses du 13/10 sont conservées dans `resultats/` (`controle_routage/*.json`, `velo_premiere_couronne.csv`, `km_routiers.json`, `coupures_osm.json`), mais une relance donnera d'autres valeurs si les graphes changent. Aucun de ces résultats n'est utilisé dans l'article.
+- Les scripts `01` à `12` (exploration) lisent les fichiers sous des chemins de session ; pour les relancer, leur passer les fichiers de l'archive.
+- MOBPRO : la page INSEE indique une édition d'octobre 2026. Un nouveau téléchargement pourrait ne pas être identique au fichier local (empreinte au manifeste) ; c'est le fichier local qui fait foi pour cette étude.
+
+## 3. Lancer une fiche pour une autre commune
 
 ```sh
 python outil/fiche_mobilite.py --insee 79191 --jour 2026-10-13 \
@@ -29,13 +54,13 @@ python outil/fiche_mobilite.py --insee 79191 --jour 2026-10-13 \
   [--voisines 79048,79003] [--gtfs auto|URL|aucun] [--rayon-carburant 12] [--etapes mobpro,iris,acces,carburant]
 ```
 
-- Python 3.11+ avec pandas, pyarrow, numpy, shapely, pyproj (hors venv du projet).
+- Python 3.11+ avec les versions de `outil/requirements.txt` (hors venv du projet). Ajouter `--hors-ligne` pour interdire tout téléchargement et ne lire que le cache.
 - Le cache est partagé entre communes : les archives carburant (≈ 60 Mo) ne sont parsées qu'une fois (`carburants_AAAA_AAAA.parquet`), les bases IRIS et la BAN d'un département une fois.
 - Durée constatée : 1 min 30 par commune avec cache chaud, 2 à 3 min à froid.
 - Sorties : `fiche.json` (faits structurés, tableaux, journal des sources), `fiche.md` (lecture humaine), `adresses.csv.gz` (une ligne par adresse, pour cartes).
 - Testée le 13/10/2026 sur La Rochelle (reproduit l'étude à l'identique) et Niort (réseau Tanlib trouvé automatiquement, voisines automatiques).
 
-## 3. Source par source
+## 4. Source par source
 
 | Source | Récupération par code INSEE ou coordonnées | Automatisable | Contrôles automatiques (dans la fiche) | Vérification humaine |
 |---|---|---|---|---|
@@ -49,7 +74,7 @@ python outil/fiche_mobilite.py --insee 79191 --jour 2026-10-13 \
 | Prix carburants | Stations à `--rayon-carburant` km du centre communal ; archives annuelles | Oui | Nombre de stations (≥ 8 sinon « FAIBLE ») ; même semaine un an plus tôt | Contexte de l'évolution (aucune cause n'est produite par l'outil) ; refaire l'extraction la veille de la publication |
 | Index futur•e | `data/comparateur-index.json.gz` : voisines (même unité urbaine, 6 plus peuplées), contrôle MOBPRO | Oui | Égalité MOBPRO | Les voisines automatiques peuvent manquer la commune de comparaison la plus utile au lecteur |
 
-## 4. Cas qui demandent toujours un humain
+## 5. Cas qui demandent toujours un humain
 
 1. **Le choix des communes comparées**, et sa raison écrite (l'outil prend l'unité urbaine par défaut).
 2. **Le réseau de transport** et le jour de référence.
@@ -58,7 +83,7 @@ python outil/fiche_mobilite.py --insee 79191 --jour 2026-10-13 \
 5. **Les libellés** (IRIS, lignes, gares) avant publication.
 6. **La date** : les flux « latest » (BAN, GTFS, prix) changent ; la fiche porte sa date de génération et le journal des sources (URL, date, empreinte SHA-256).
 
-## 5. Briques réutilisables au-delà de cet article
+## 6. Briques réutilisables au-delà de cet article
 
 - `Sources.fetch()` : cache, date de récupération et empreinte de chaque source.
 - `fait()` : schéma d'un fait (valeur, définition, source, millésime, maille, statut, présence dans le moteur, limites, contrôles, vérification humaine). Il peut servir à d'autres thèmes (chaleur, risques) sans changement.

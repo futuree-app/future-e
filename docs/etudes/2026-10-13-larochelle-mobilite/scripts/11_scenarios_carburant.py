@@ -1,34 +1,31 @@
 #!/usr/bin/env python3
-"""11_scenarios_carburant.py — Ce que la hausse OBSERVÉE du carburant (octobre 2025 → octobre 2026, stations à
-moins de 12 km de La Rochelle, cf. 07) coûte de plus par an pour UN trajet domicile-travail en voiture.
+"""11_scenarios_carburant.py — Scénarios de surcoût de CARBURANT pour un véhicule qui fait un trajet domicile-travail,
+à 5, 15 et 35 km aller. Les distances ne sont attribuées à aucune commune (kilométrages routiers non vérifiés, cf. 2.8).
 
-Formule : 2 × km aller × jours travaillés × (L/100 km ÷ 100) × écart de prix au litre.
-Hypothèses (modifiables, NON mesurées) : 200 jours de trajet/an (congés, télétravail partiel), consommation 6 L/100 km
-(fourchette 5 à 7,5). Kilomètres aller : fourchettes issues de 08 (trois calculs de route ; aucun n'est vérifié).
-Ce n'est PAS le coût de la voiture (achat, assurance, entretien, stationnement exclus), ni celui du ménage.
+Formule : km aller × 2 × jours de trajet par an × (L/100 km ÷ 100) × variation du prix au litre.
+Hypothèses (affichées, modifiables) : 200 jours de trajet par an ; 6 L/100 km (sensibilité 5 et 7,5) ;
+variation : +0,75 €/L gazole et +0,50 €/L SP95-E10, arrondis des deux contrôles de 07 et 13
+(différence des médianes : +0,734 et +0,498 ; médiane des écarts sur les mêmes stations : +0,747 et +0,520).
+Prix d'octobre 2026 pour le budget : médianes locales de la semaine du 5/10/2026 (2,288 et 2,129 €/L).
+Carburant seulement : ni achat, ni assurance, ni entretien, ni stationnement. Aucune mesure de la réaction
+des habitants : les pratiques (recensement 2022) et les prix (2025-2026) portent sur des périodes différentes.
 Usage : python 11_scenarios_carburant.py <resultats>"""
 import sys, os, json
 import pandas as pd
 OUT = sys.argv[1]
-loc = pd.read_csv(os.path.join(OUT, "carburants_hebdo_la_rochelle_12km.csv"), parse_dates=["semaine"])
-def med(c, wk):
-    return float(loc[(loc.carburant == c) & (loc.semaine == wk)]["median"].iloc[0])
-P = {c: {"oct_2025": med(c, "2025-10-06"), "oct_2026": med(c, "2026-10-05")} for c in ["Gazole", "E10"]}
-for c in P:
-    P[c]["ecart"] = round(P[c]["oct_2026"] - P[c]["oct_2025"], 3)
-TRAJETS = [("Première couronne (Lagord, Puilboreau)", 4, 6), ("Aytré, Périgny", 6, 11.5), ("Châtelaillon-Plage", 16, 23),
-           ("Marans", 23.5, 26), ("Rochefort", 33, 38), ("Surgères", 35.5, 45)]
 DAYS, CONS, CONS_LO, CONS_HI = 200, 6.0, 5.0, 7.5
+HAUSSE = {"Gazole": 0.75, "E10": 0.50}
+PRIX_OCT26 = {"Gazole": 2.288, "E10": 2.129}
 rows = []
-for lab, lo, hi in TRAJETS:
-    for c in ["Gazole", "E10"]:
-        L_lo = 2 * lo * DAYS * CONS / 100; L_hi = 2 * hi * DAYS * CONS / 100
-        rows.append({"trajet": lab, "km_aller": f"{lo}–{hi}", "carburant": c,
-                     "litres_an": f"{round(L_lo, -1):.0f}–{round(L_hi, -1):.0f}",
-                     "surcout_an_eur": f"{round(L_lo * P[c]['ecart'], -1):.0f}–{round(L_hi * P[c]['ecart'], -1):.0f}",
-                     "budget_carburant_oct2026_eur": f"{round(L_lo * P[c]['oct_2026'], -1):.0f}–{round(L_hi * P[c]['oct_2026'], -1):.0f}",
-                     "surcout_conso_5_a_7_5": f"{round(2*lo*DAYS*CONS_LO/100*P[c]['ecart'], -1):.0f}–{round(2*hi*DAYS*CONS_HI/100*P[c]['ecart'], -1):.0f}"})
+for km in (5, 15, 35):
+    for c in ("Gazole", "E10"):
+        L = 2 * km * DAYS * CONS / 100
+        rows.append({"km_aller": km, "carburant": c, "km_an": 2 * km * DAYS, "litres_an": round(L),
+                     "surcout_an_eur": round(L * HAUSSE[c], -1),
+                     "surcout_conso_5_a_7_5_eur": f"{round(2*km*DAYS*CONS_LO/100*HAUSSE[c], -1):.0f} à {round(2*km*DAYS*CONS_HI/100*HAUSSE[c], -1):.0f}",
+                     "budget_carburant_prix_oct2026_eur": round(L * PRIX_OCT26[c], -1)})
 df = pd.DataFrame(rows)
 df.to_csv(os.path.join(OUT, "scenarios_carburant.csv"), index=False)
-json.dump(P, open(os.path.join(OUT, "prix_reference.json"), "w"), indent=1)
-print(P); pd.set_option("display.width", 220); print(df.to_string(index=False))
+json.dump({"hypotheses": {"jours": DAYS, "l_100km": CONS, "hausse_eur_l": HAUSSE, "prix_oct2026": PRIX_OCT26}},
+          open(os.path.join(OUT, "prix_reference.json"), "w"), indent=1)
+print(df.to_string(index=False))

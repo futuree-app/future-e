@@ -2,7 +2,9 @@
 
 Étude du 13 octobre 2026. Révision examinée : `origin/main` = `a25fa9fd786f167859f68c4f81f528e50b5e5d8d` (FUT-90, 12/10/2026), dans un worktree détaché (`.claude/worktrees/etude-larochelle`). Le checkout principal (branche FUT-8, modifications en cours) n'a pas été touché. Aucun code moteur ou parcours modifié, aucune IA payante, aucune publication.
 
-Documents liés : `MATRICE_ARTICLE_PRODUIT.md` (ce que le produit restitue réellement, promesses admissibles) ; `REPRODUCTIBILITE.md` et `outil/fiche_mobilite.py` (fiche factuelle réexécutable par code INSEE, testée sur La Rochelle et Niort) ; `fiches/` (fiches générées).
+**Finalisé le 13/10/2026 : faits utilisables en section 7, bilan en section 8.**
+
+Documents liés : `MANIFESTE_INSTANTANES.md` (empreintes des sources archivées) ; `MATRICE_ARTICLE_PRODUIT.md` (ce que le produit restitue réellement, promesses admissibles) ; `REPRODUCTIBILITE.md` et `outil/fiche_mobilite.py` (fiche factuelle réexécutable par code INSEE, testée sur La Rochelle et Niort) ; `fiches/` (fiches générées).
 
 Statuts utilisés dans tout le document :
 - **[calculé]** : résultat effectivement calculé, script et source cités ;
@@ -14,21 +16,21 @@ Statuts utilisés dans tout le document :
 
 ## 0. Ce que j'ai appris d'utile pour l'article
 
-1. **Le lieu de travail pèse plus que l'adresse.** [calculé] Un Rochelais qui travaille à La Rochelle y va en voiture dans 44 % des cas. S'il travaille dans une commune limitrophe (Périgny, Aytré, Lagord, Puilboreau), c'est 72 % (intervalle 69 à 76 %). Mêmes habitants, même ville de résidence : la destination change tout. Le titre de travail pose la question à l'échelle de la ville ; les données la renvoient à l'échelle du trajet.
+1. **L'usage de la voiture varie fortement selon la commune où l'on travaille.** [calculé] Parmi les actifs qui habitent La Rochelle, ceux qui travaillent à La Rochelle déclarent la voiture comme mode principal dans 44 % des cas ; ceux qui travaillent dans une commune limitrophe (Périgny, Aytré, Lagord, Puilboreau), dans 72 % des cas, soit environ 28 points d'écart. Ce sont deux groupes distincts de résidents rochelais, distingués par leur commune de travail, et non les mêmes personnes observées dans deux situations. Le constat est une association : ces données ne mesurent pas ce qui, du lieu de travail, du quartier de résidence, de la profession ou des horaires, explique l'écart. [interprétation] Le titre de travail pose la question à l'échelle de la ville ; les données invitent à la poser aussi à l'échelle du trajet domicile-travail.
 
-2. **Posséder une voiture et s'en servir pour travailler sont deux choses distinctes.** [calculé] À La Rochelle, 40 % des actifs dont le ménage a au moins une voiture vont travailler autrement qu'en voiture. Chez les propriétaires rochelais, 96 % des actifs vivent dans un ménage motorisé, et pourtant 22 % vont travailler à vélo. Pour un acheteur, la question honnête est « faudra-t-il s'en servir tous les jours ? » plutôt que « peut-on vivre sans voiture ? ».
+2. **Posséder une voiture et s'en servir pour travailler sont deux choses distinctes.** [calculé] À La Rochelle, parmi les actifs dont le ménage a au moins une voiture, 40 % ne déclarent pas la voiture comme mode principal pour aller travailler : 17 % le vélo, 9 % la marche, 8 % les transports en commun, 2 % un deux-roues motorisé, et 5 % aucun déplacement (travail à domicile). Parmi les actifs dont le ménage est propriétaire de son logement, 96 % vivent dans un ménage qui a au moins une voiture, et 22 % vont travailler à vélo. Pour un acheteur, la question honnête est « faudra-t-il s'en servir tous les jours ? » plutôt que « peut-on vivre sans voiture ? ».
 
 3. **La Rochelle n'est pas un bloc : d'un quartier à l'autre, la part de la voiture va de 27 % à 71 %.** [calculé, IRIS INSEE 2022] Centre (Préfecture, Mairie, Marché) : 27 à 29 %. Laleu, La Pallice, Villeneuve-les-Salines Ouest : 69 à 71 %. C'est un écart plus grand qu'entre La Rochelle (53 %) et Puilboreau (83 %).
 
-4. **Les commerces et le bus à proximité ne distinguent presque pas les quartiers rochelais.** [calculé] Dans Mireuil Est, 99 % des adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau, et au moins 8 bus par heure à moins de 400 m entre 7 h et 9 h ; 67 % des actifs y vont pourtant travailler en voiture. [interprétation] La proximité des services, piste initiale de l'article, est nécessaire mais ne répond pas à la question posée. Ce qui sépare les quartiers dans nos données est leur position dans la ville (la distance à la gare, prise comme repère de centralité, est la variable la plus liée à l'usage de la voiture, corrélation de rang −0,64 sur 30 IRIS d'habitat).
+4. **Les commerces et le bus à proximité distinguent peu les quartiers rochelais.** [calculé] Dans Mireuil Est, 99 % des adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau, et au moins 8 passages de bus par heure à moins de 400 m entre 7 h et 9 h (toutes lignes et deux sens confondus) ; 67 % des actifs du quartier déclarent pourtant la voiture pour aller travailler. [interprétation] La proximité des services éclaire une partie du quotidien (courses, école, santé), mais elle ne suffit pas à expliquer les pratiques domicile-travail. Parmi les variables testées, celle qui varie le plus avec l'usage de la voiture est la position dans la ville (part des adresses à moins de 2 km de la gare, prise comme repère de centralité : corrélation de rang −0,64 sur 30 IRIS d'habitat). C'est une association entre quartiers, pas une explication.
 
-5. **La hausse du carburant est réelle et datée, mais elle ne pèse pas du même poids selon l'endroit où l'on habite.** [calculé, flux officiel prix-carburants] Autour de La Rochelle (19 stations à moins de 12 km), le gazole médian est passé d'environ 1,55 €/L (semaine du 6 octobre 2025) à 2,29 €/L (semaine du 5 octobre 2026), soit +0,73 €/L ; le SP95-E10 de 1,63 à 2,13 €/L (+0,50 €/L). La hausse démarre en mars 2026. Pour un trajet domicile-travail de première couronne (4 à 6 km), cela représente 70 à 110 € de plus par an au gazole ; depuis Rochefort ou Surgères (33 à 45 km), 580 à 790 €. [hypothèses de calcul explicites en 2.7]
+5. **La hausse du carburant est réelle et datée ; son poids dépend surtout de la distance parcourue.** [calculé, flux officiel prix-carburants] Dans les stations à moins de 12 km de La Rochelle, le gazole médian est passé d'environ 1,55 €/L (semaine du 6 octobre 2025) à 2,29 €/L (semaine du 5 octobre 2026), soit environ +0,75 €/L ; le SP95-E10 de 1,63 à 2,13 €/L, soit environ +0,50 €/L (contrôle sur les mêmes stations en 2.7). La hausse démarre en mars 2026. [scénario] Pour un véhicule qui fait 200 allers-retours par an en consommant 6 L/100 km, le surcoût de carburant est d'environ 90 € par an pour 5 km aller, 270 € pour 15 km et 630 € pour 35 km (gazole). [hypothèses en 2.7]
 
-6. **La dépendance automobile du bassin se joue à l'entrée de la ville.** [calculé] Sur ~50 600 actifs qui travaillent à La Rochelle, 40 % habitent hors de l'unité urbaine, et 90 % d'entre eux viennent en voiture. Ce sont eux que la hausse touche le plus. Pour un acheteur qui arbitre entre La Rochelle et une commune moins chère à 30 km, c'est là que se trouve l'information utile, et c'est aussi la porte naturelle vers le comparateur.
+6. **Une grande part de l'usage de la voiture vers La Rochelle vient de l'extérieur de l'unité urbaine.** [calculé] Sur ~50 600 actifs qui travaillent à La Rochelle, 40 % habitent hors de l'unité urbaine de La Rochelle (unité urbaine INSEE 2020 : 11 communes, à ne pas confondre avec l'agglomération intercommunale, qui en compte davantage), et 90 % d'entre eux déclarent la voiture comme mode principal. [interprétation] Leurs trajets sont plus longs que ceux des Rochelais : c'est sur ce type de trajet que la hausse du prix au litre pèse le plus (scénarios en 2.7). Pour un acheteur qui arbitre entre La Rochelle et une commune moins chère plus éloignée, c'est là que se trouve l'information utile, et c'est aussi la porte naturelle vers le comparateur.
 
 7. **La Rochelle est une ville de vélo plus qu'une ville sans voiture.** [calculé] 18 % des actifs y vont travailler à vélo, deuxième rang sur 82 communes de taille comparable (25 000 à 80 000 actifs occupés résidents), derrière Grenoble (23 %). Pour la part de la voiture, elle est au 41e rang sur 82 : au milieu. Les transports en commun pèsent 12 %.
 
-**Mon jugement sur l'angle.** L'accroche « hausse de l'essence » tient (le fait est avéré et sourcé), mais la question « est-ce possible de vivre à La Rochelle sans voiture ? » produit une réponse molle (« oui, en centre-ville, si on travaille en ville »). Les données racontent quelque chose de plus utile et de plus original : **à La Rochelle, la voiture dépend moins de la ville qu'on choisit que du quartier et, surtout, du lieu de travail ; et la hausse du carburant pèse dix fois plus sur ceux qui habitent à 30 km que sur ceux qui habitent la première couronne.** Je recommande de garder l'accroche carburant et de déplacer la question (section 4).
+**Mon jugement sur l'angle.** L'accroche « hausse de l'essence » tient (le fait est avéré et sourcé), mais la question « est-ce possible de vivre à La Rochelle sans voiture ? » produit une réponse molle (« oui, en centre-ville, si on travaille en ville »). Les données racontent quelque chose de plus utile : **à La Rochelle, l'usage de la voiture pour aller travailler varie nettement selon le quartier et selon la commune de travail ; et, à prix égal, le surcoût de carburant est proportionnel à la distance : environ sept fois plus élevé pour 35 km aller que pour 5 km.** Je recommande de garder l'accroche carburant et de déplacer la question (section 4). Les faits utilisables tels quels sont listés en section 7.
 
 ---
 
@@ -110,7 +112,7 @@ Depuis Rochefort et Surgères vers La Rochelle, 20 à 21 % des actifs prennent l
 
 ### 2.3 Posséder, utiliser, dépendre [calculé]
 
-La Rochelle, MOBPRO 2022.
+La Rochelle, MOBPRO 2022. Population : actifs occupés résidant à La Rochelle, classés selon le statut d'occupation du logement de leur ménage (propriétaire, locataire) ; « ménage sans voiture » = part de ces actifs dont le ménage n'a pas de voiture.
 
 | Groupe d'actifs | Voiture au travail | Vélo | Ménage sans voiture | Ménage à 2 voitures ou plus |
 |---|---|---|---|---|
@@ -120,9 +122,9 @@ La Rochelle, MOBPRO 2022.
 | Maison | 56 % | | 4 % | |
 | Appartement | 53 % | | 20 % | |
 
-- Parmi les actifs rochelais dont le ménage a au moins une voiture, **40 % (39 à 42) ne la prennent pas pour aller travailler**.
+- Parmi les actifs rochelais dont le ménage a au moins une voiture, **40 % (39 à 42) ne déclarent pas la voiture comme mode principal pour aller travailler** : vélo 17 %, marche 9 %, transports en commun 8 %, deux-roues motorisé 2 %, aucun déplacement 5 %.
 - Les actifs sans voiture au ménage vont travailler en TC (30 %), à vélo (24 %), à pied (23 %), et 15 % déclarent tout de même la voiture (covoiturage, véhicule de service : [hypothèse]).
-- [interprétation] Pour un acheteur, devenir propriétaire à La Rochelle va presque toujours avec une voiture au ménage (96 %), et pour près de la moitié avec deux. La dépendance quotidienne, elle, n'est pas plus forte que chez les locataires du privé. La question utile est « laquelle des deux voitures pourrait disparaître ? », ce qui renvoie au lieu de travail de chacun.
+- [interprétation] Pour un acheteur, les actifs dont le ménage est propriétaire vivent presque tous dans un ménage qui a une voiture (96 %), et près de la moitié dans un ménage qui en a deux. La dépendance quotidienne, elle, n'est pas plus forte que chez les locataires du privé. La question utile est « laquelle des deux voitures pourrait disparaître ? », ce qui renvoie au lieu de travail de chacun.
 - [interprétation] Les locataires HLM, plus souvent sans voiture, vont plus souvent travailler en voiture que les propriétaires. Lecture possible : ceux qui travaillent loin ou en horaires décalés n'ont pas le choix ; ce n'est pas démontré ici.
 
 ### 2.4 Les quartiers de La Rochelle [calculé]
@@ -153,9 +155,13 @@ Tableau complet (30 IRIS) : `resultats/iris_mobilite_2022.csv`.
 
 ### 2.5 Services et bus depuis chaque adresse [calculé]
 
-Script `03_acces_adresses.py`. Toutes les adresses BAN des 6 communes, pondérées par les ménages de leur IRIS. Distances à vol d'oiseau. Bus : courses distinctes des lignes régulières passant à moins de 400 m (mardi 13/10/2026). « Panier quotidien » = commerce alimentaire (supermarché, hypermarché, supérette, épicerie ou boulangerie) **et** pharmacie **et** école élémentaire à moins de 500 m.
+Script `03_acces_adresses.py`. Toutes les adresses BAN des 6 communes. Distances à vol d'oiseau. « Panier quotidien » = commerce alimentaire (supermarché, hypermarché, supérette, épicerie ou boulangerie) **et** pharmacie **et** école élémentaire à moins de 500 m.
 
-| Part des ménages (estimée) dont l'adresse a… | La Rochelle | Lagord | Puilboreau | Aytré | Périgny | Châtelaillon |
+**Ce que représentent ces pourcentages.** Chaque adresse reçoit le poids « ménages de son IRIS / nombre d'adresses de son IRIS ». À l'intérieur d'un IRIS, toutes les adresses pèsent donc autant : un immeuble de quarante logements compte comme une maison. Le résultat est une **part d'adresses**, dont seul le poids relatif des IRIS entre eux suit le nombre de ménages. Il ne faut pas l'écrire « part des ménages » ; la formulation fidèle est « part des adresses (pondérée par le nombre de ménages de chaque quartier) ». Dans les quartiers d'immeubles, où les ménages se concentrent sur peu d'adresses, l'écart avec une vraie part de ménages peut être important.
+
+**Ce que représentent les indicateurs de bus.** Pour chaque adresse : nombre de passages de bus distincts (courses) sur les lignes régulières (1 à 22, navette Cœur de ville, Passeur ; scolaires, nuit, dimanche et stade exclues) à tous les arrêts situés à moins de 400 m à vol d'oiseau, **toutes lignes et deux sens confondus**, divisé par le nombre d'heures. Une même course qui dessert plusieurs arrêts proches n'est comptée qu'une fois (union des identifiants de course, `03_acces_adresses.py`, fonction `courses_par_heure`). Horaires **théoriques** du GTFS Yélo, mardi 13 octobre 2026, 7 h à 9 h et 20 h à 22 h. Ce n'est ni la fréquence d'une ligne, ni une liaison utile vers un lieu de travail, ni un temps de trajet.
+
+| Part des adresses (pondérée par quartier) qui ont… | La Rochelle | Lagord | Puilboreau | Aytré | Périgny | Châtelaillon |
 |---|---|---|---|---|---|---|
 | un commerce alimentaire à 500 m | 92 % | 60 % | 78 % | 66 % | 70 % | 65 % |
 | une grande surface (super ou hyper) à 500 m | 50 % | 43 % | 21 % | 29 % | 2 % | 0 % |
@@ -163,19 +169,20 @@ Script `03_acces_adresses.py`. Toutes les adresses BAN des 6 communes, pondéré
 | un médecin généraliste à 500 m | 86 % | 50 % | 50 % | 39 % | 43 % | 63 % |
 | une école élémentaire à 500 m | 68 % | 45 % | 33 % | 43 % | 48 % | 52 % |
 | le panier quotidien complet à 500 m | 56 % | 31 % | 23 % | 26 % | 22 % | 34 % |
-| ≥ 8 bus/h à 400 m, 7 h à 9 h (deux sens) | 86 % | 45 % | 13 % | 61 % | 43 % | 17 % |
-| aucun bus régulier à 400 m, 7 h à 9 h | 2 % | 4 % | 12 % | 11 % | 2 % | 11 % |
-| ≥ 4 bus/h à 400 m, 20 h à 22 h | 76 % | 24 % | 16 % | 65 % | 18 % | 0 % |
+| ≥ 8 passages de bus/h à 400 m, 7 h à 9 h (toutes lignes, deux sens) | 86 % | 45 % | 13 % | 61 % | 43 % | 17 % |
+| aucun passage de bus régulier à 400 m, 7 h à 9 h | 2 % | 4 % | 12 % | 11 % | 2 % | 11 % |
+| ≥ 4 passages de bus/h à 400 m, 20 h à 22 h | 76 % | 24 % | 16 % | 65 % | 18 % | 0 % |
 | une gare à 2 km | 72 % | 52 % | 7 % | 91 % | 0 % | 91 % |
 | une station d'autopartage Citiz à 500 m | 62 % | 32 % | 32 % | 18 % | 22 % | 0 % |
 | une station de vélos Yélo à 500 m | 95 % | 72 % | 56 % | 70 % | 73 % | 42 % |
 
-- [interprétation] Puilboreau accueille la zone commerciale de Beaulieu, mais seulement 21 % de ses ménages ont une grande surface à 500 m : avoir des commerces sur sa commune ne veut pas dire les avoir à pied.
-- [interprétation] Le soir, l'écart se creuse : 76 % des ménages rochelais ont au moins 4 bus/h à proximité entre 20 h et 22 h, contre 16 à 24 % à Puilboreau, Périgny, Lagord.
+- [interprétation] Puilboreau accueille la zone commerciale de Beaulieu, mais seulement environ 20 % de ses adresses ont une grande surface à 500 m : avoir des commerces sur sa commune ne veut pas dire les avoir à pied.
+- [interprétation] Le soir, l'écart se creuse : environ trois adresses rochelaises sur quatre ont au moins 4 passages de bus par heure à proximité entre 20 h et 22 h, contre une sur six à une sur quatre à Puilboreau, Périgny, Lagord.
+- **Usage éditorial recommandé** : ces indicateurs demandent une explication de méthode longue pour un apport secondaire. Dans le récit, ne garder qu'un ou deux ordres de grandeur (Mireuil Est, Puilboreau) ; le tableau complet va en méthode.
 
 ### 2.6 Première couronne : l'écart Puilboreau [calculé, cause non établie]
 
-Vers La Rochelle, 20 % des actifs de Lagord et de Périgny et 19 % de ceux d'Aytré y vont à vélo, contre 7,5 % de ceux de Puilboreau (intervalles disjoints : 4 à 13 % contre 15 à 27 %).
+Vers La Rochelle, 20 % des actifs de Lagord et de Périgny et 19 % de ceux d'Aytré y vont à vélo, contre 7,5 % de ceux de Puilboreau. Les intervalles approximatifs de 2.9 ne se recouvrent pas (4 à 13 % contre 15 à 27 %), ce qui rend l'écart crédible sans en faire une preuve statistique formelle.
 
 Test d'une explication par la distance ou un détour (script `06_velo_premiere_couronne.py`, 25 adresses tirées par commune, itinéraire vélo OSRM sur OSM vers la place de Verdun) :
 
@@ -188,7 +195,7 @@ Test d'une explication par la distance ou un détour (script `06_velo_premiere_c
 
 [calculé] Puilboreau est plus proche du centre à vélo qu'Aytré ou Périgny, sans détour plus marqué. **La distance et le détour n'expliquent pas l'écart.**
 
-Second test, avec les géométries OSM que le dossier d'adresse utilise déjà (`src/lib/logement-osm.ts`, FUT-15 : autoroutes, voies rapides, voies ferrées ; script `12_coupures_osm.py`) : part des ménages dont la ligne droite vers la place de Verdun franchit une voie rapide. Lagord 74 %, Puilboreau 89 %, Périgny 100 %, Aytré 4 %. [calculé] La coupure ainsi mesurée ne distingue pas Puilboreau : Périgny, aussi coupé, compte autant de cyclistes que Lagord. L'indicateur ignore ponts, passerelles et passages inférieurs, qui sont justement ce qui rend une coupure franchissable : il ne clôt pas la question, il écarte l'explication la plus simple. [hypothèse] Qualité et sécurité perçue des itinéraires (traversée de la N11 / RN 137 et de la zone de Beaulieu), destinations différentes dans La Rochelle, profils des ménages. Le profil vélo OSRM ne mesure ni le trafic ni le confort. **À ne pas publier comme une cause ; peut être publié comme une question ouverte.**
+Second test, avec les géométries OSM que le dossier d'adresse utilise déjà (`src/lib/logement-osm.ts`, FUT-15 : autoroutes, voies rapides, voies ferrées ; script `12_coupures_osm.py`) : part des adresses (pondérée par quartier) dont la ligne droite vers la place de Verdun franchit une voie rapide. Lagord 74 %, Puilboreau 89 %, Périgny 100 %, Aytré 4 %. [calculé] La coupure ainsi mesurée ne distingue pas Puilboreau : Périgny, aussi coupé, compte autant de cyclistes que Lagord. L'indicateur ignore ponts, passerelles et passages inférieurs, qui sont justement ce qui rend une coupure franchissable : il ne clôt pas la question, il écarte l'explication la plus simple. [hypothèse] Qualité et sécurité perçue des itinéraires (traversée de la N11 / RN 137 et de la zone de Beaulieu), destinations différentes dans La Rochelle, profils des ménages. Le profil vélo OSRM ne mesure ni le trafic ni le confort. **À ne pas publier comme une cause ; peut être publié comme une question ouverte.**
 
 ### 2.7 Carburant : la hausse, et ce qu'elle coûte selon la distance [calculé + hypothèses]
 
@@ -205,20 +212,19 @@ Script `07_carburants.py` (médianes hebdomadaires du dernier prix déclaré par
 
 Instantané du 13/10/2026 (19 stations à moins de 12 km, prix mis à jour entre le 6 et le 13 octobre) : gazole 2,23 à 2,44 €/L (médiane 2,32) ; E10 1,99 à 2,28 €/L (médiane 2,15).
 
-Hypothèses du scénario (à afficher dans l'article, modifiables) : 200 jours de trajet par an, 6 L/100 km, hausse = écart local octobre 2025 → octobre 2026. Kilomètres : fourchette entre trois calculs de route IGN (aucun n'est vérifié, cf. 2.8).
+**Contrôle de la hausse (finalisation).** La série ci-dessus prend, chaque semaine, le dernier prix déclaré par chaque station dans la semaine, puis la médiane entre stations : une station qui ne déclare rien dans la semaine n'y figure pas, et un prix ancien n'est jamais reporté. Les deux semaines comparées réunissent 21 stations au gazole et 18 au SP95-E10. Contrôle sur les **mêmes stations** (`13_controle_prix_apparie.py`) : prix en vigueur aux dimanches 12/10/2025 et 11/10/2026, prix déclarés depuis plus de 7 jours écartés (une station affichait en octobre 2026 un prix vieux de 284 jours), écart médian station par station : **+0,75 €/L au gazole (20 stations, de +0,51 à +0,81) et +0,52 €/L au SP95-E10 (16 stations, de +0,27 à +0,55)**. Les deux méthodes concordent : on retient **environ +0,75 €/L (gazole) et +0,50 €/L (SP95-E10)**.
 
-| Trajet aller vers La Rochelle | km aller | Surcoût annuel, gazole | Surcoût annuel, E10 | Budget carburant annuel au prix d'octobre 2026, gazole |
-|---|---|---|---|---|
-| Lagord, Puilboreau | 4 à 6 | 70 à 110 € | 50 à 70 € | 220 à 330 € |
-| Aytré, Périgny | 6 à 11,5 | 110 à 200 € | 70 à 140 € | 330 à 630 € |
-| Châtelaillon-Plage | 16 à 23 | 280 à 410 € | 190 à 270 € | 880 à 1 260 € |
-| Marans | 23,5 à 26 | 410 à 460 € | 280 à 310 € | 1 290 à 1 430 € |
-| Rochefort | 33 à 38 | 580 à 670 € | 390 à 450 € | 1 810 à 2 090 € |
-| Surgères | 35,5 à 45 | 630 à 790 € | 420 à 540 € | 1 950 à 2 470 € |
+**Scénario publiable** (`11_scenarios_carburant.py`). Hypothèses : un véhicule qui fait le trajet domicile-travail aller-retour 200 jours par an, en consommant 6 L/100 km ; hausse de +0,75 €/L (gazole) ou +0,50 €/L (SP95-E10). Formule : km aller × 2 × 200 × 6 / 100 × hausse. Les distances ne sont attribuées à aucune commune : les kilométrages routiers par commune (`08_km_routiers.py`) ne sont pas vérifiés et sont **retirés de l'article**.
 
-Par voiture et par actif. Un couple biactif qui fait deux trajets double la ligne. Ce n'est ni le coût de la voiture (achat, assurance, entretien, stationnement), ni un budget de ménage.
+| Trajet aller | Km par an | Litres par an | Surcoût annuel, gazole | Surcoût annuel, SP95-E10 | Surcoût gazole si 5 à 7,5 L/100 km | Budget carburant annuel au prix d'octobre 2026 (gazole) |
+|---|---|---|---|---|---|---|
+| 5 km | 2 000 | 120 | ≈ 90 € | ≈ 60 € | 80 à 110 € | ≈ 270 € |
+| 15 km | 6 000 | 360 | ≈ 270 € | ≈ 180 € | 220 à 340 € | ≈ 820 € |
+| 35 km | 14 000 | 840 | ≈ 630 € | ≈ 420 € | 520 à 790 € | ≈ 1 920 € |
 
-- [interprétation] La hausse change peu le calcul pour un habitant de la première couronne ; elle devient un poste visible à partir de 20 km. Elle ne renverse pas à elle seule un écart de prix immobilier de l'ordre de 2 000 €/m² entre La Rochelle (4 470 €/m² maison, DVF 2021 à 2024) et Rochefort (2 350 €/m²), mais elle rend ce choix plus sensible à un prix qui varie : +0,73 €/L en un an. [prudence FUT-46] Ne pas mettre ces deux chiffres dans une même somme.
+À dire avec le tableau : c'est un scénario pour **un véhicule** qui fait **ce trajet** ; c'est le **carburant seulement** (ni achat, assurance, entretien ou stationnement), pas un coût de mobilité ni un budget de ménage ; un ménage à deux trajets additionne deux lignes ; la hausse passée ne dit rien des prix futurs. **Aucune réaction des habitants à la hausse n'est mesurée** : les pratiques viennent du recensement 2022, les prix de 2025-2026.
+
+- [interprétation] La hausse change peu le budget carburant d'un trajet de 5 km ; elle devient un poste visible quand le trajet dépasse une quinzaine de kilomètres. Elle ne renverse pas à elle seule un écart de prix immobilier de l'ordre de 2 000 €/m² entre La Rochelle (4 470 €/m² maison, DVF 2021 à 2024) et Rochefort (2 350 €/m²), mais elle rend ce choix plus sensible à un prix qui varie : environ +0,75 €/L en un an. [prudence FUT-46] Ne pas mettre ces deux chiffres dans une même somme.
 - Contexte non vérifié : une annonce gouvernementale du 12/10/2026 (cession de stocks stratégiques) circule sur des sites de suivi ; aucune source officielle consultée. Ne pas l'utiliser.
 - Les comportements mesurés par MOBPRO datent du recensement 2022 (collectes 2020 à 2024) : **avant la hausse**. On ne sait pas si elle a déjà changé les pratiques.
 
@@ -234,12 +240,12 @@ Par voiture et par actif. Un couple biactif qui fait deux trajets double la lign
 
 ### 2.9 Précision des chiffres MOBPRO
 
-Intervalles à 95 % approximatifs (`10_incertitude.py` : effet des poids de Kish, majoré de 50 % pour l'effet ménage ; ordre de grandeur, pas une variance officielle). Tableau complet : `resultats/incertitudes_mobpro.csv`.
+Intervalles à 95 % approximatifs (`10_incertitude.py` : effet des poids de Kish, majoré de 50 % pour l'effet ménage ; tableau complet : `resultats/incertitudes_mobpro.csv`). **Ce ne sont pas des marges d'erreur officielles de l'INSEE** : la majoration de 50 % est une hypothèse de prudence, le plan de sondage réel du recensement n'est pas reproduit. Ils servent à repérer les chiffres fragiles, pas à démontrer qu'un écart est statistiquement significatif. Dans l'article, on ne les cite pas ; on privilégie les grands écarts et des arrondis lisibles (« environ 44 % », « près de trois sur quatre »).
 
 - Chiffres communaux de La Rochelle : ± 1 à 1,5 point.
 - Flux Rochelais vers les communes limitrophes regroupées : ± 3,5 points.
 - Flux d'une commune de première couronne vers La Rochelle : ± 5 à 8 points. Suffisant pour comparer 8 % et 20 %, pas pour classer 19 % et 20 %.
-- IRIS : effectifs de 300 à 2 100 actifs estimés ; ne commenter que des écarts de plus de 10 points.
+- IRIS : effectifs de 300 à 2 100 actifs estimés. Règle de prudence éditoriale (pas une garantie statistique) : ne commenter que des écarts de plus de 10 points, et privilégier les extrêmes (27 % contre 71 %).
 
 ---
 
@@ -247,12 +253,12 @@ Intervalles à 95 % approximatifs (`10_incertitude.py` : effet des poids de Kish
 
 Classement : intérêt pour le lecteur (acheteur ou locataire qui connaît mal le secteur) × solidité.
 
-### Piste 1 · « La voiture dépend d'abord de l'endroit où l'on travaille » : solide, forte
+### Piste 1 · « L'usage de la voiture varie avec la commune où l'on travaille » : solide, forte
 
 - **Question du lecteur** : si j'habite ici, pourrai-je me passer de la voiture au quotidien ?
-- **Résultat** : 44 % de voiture pour un Rochelais qui travaille à La Rochelle, 72 % s'il travaille juste à côté. 40 % des actifs motorisés ne prennent pas la voiture pour travailler.
+- **Résultat** : parmi les actifs résidant à La Rochelle, 44 % de ceux qui travaillent à La Rochelle déclarent la voiture, 72 % de ceux qui travaillent dans une commune limitrophe (environ 28 points d'écart, deux groupes distincts). 40 % des actifs dont le ménage a une voiture ne déclarent pas la voiture comme mode principal.
 - **Intérêt** : déplace la question de la ville vers le trajet, et prépare naturellement « et pour mon adresse et mon lieu de travail ? ».
-- **Conclusion abusive à éviter** : « travailler à Périgny oblige à prendre la voiture » (ce sont des pratiques, pas des contraintes démontrées) ; extrapoler aux trajets non professionnels.
+- **Conclusion abusive à éviter** : « travailler à Périgny oblige à prendre la voiture » (ce sont des pratiques, pas des contraintes démontrées) ; « le lieu de travail compte plus que l'adresse » (aucune part respective n'est mesurée) ; extrapoler aux trajets non professionnels.
 - **Reste à vérifier** : rien de bloquant. Relire la définition dans le texte.
 
 ### Piste 2 · « D'un quartier à l'autre, la voiture passe de 27 % à 71 % » : solide, très visuelle
@@ -266,20 +272,20 @@ Classement : intérêt pour le lecteur (acheteur ou locataire qui connaît mal l
 ### Piste 3 · « La hausse du carburant ne pèse pas pareil à 5 km et à 35 km » : solide sur les prix, scénario hypothétique
 
 - **Question** : la hausse change-t-elle mon arbitrage entre La Rochelle et une commune moins chère ?
-- **Résultat** : +0,73 €/L de gazole en un an localement ; 70 à 110 €/an pour un trajet de première couronne, 580 à 790 € depuis Rochefort ou Surgères ; 40 % des emplois rochelais occupés par des actifs venus de plus loin, à 90 % en voiture.
+- **Résultat** : environ +0,75 €/L de gazole et +0,50 €/L de SP95-E10 en un an localement ; scénario gazole d'environ 90 € par an pour 5 km aller, 270 € pour 15 km, 630 € pour 35 km ; 40 % des emplois rochelais occupés par des actifs résidant hors de l'unité urbaine, à 90 % en voiture.
 - **Intérêt** : justifie l'accroche d'actualité avec un fait sourcé ; porte vers le **comparateur de communes**.
 - **Abus** : « la hausse va continuer » ; « habiter à Rochefort coûte X € de plus » (coût total inconnu) ; additionner prix immobilier et carburant ; présenter un kilométrage de moteur comme mesuré.
 - **Reste** : vérifier les kilomètres de 2 ou 3 trajets types sur une carte ; dater la publication et les prix.
 
 ### Piste 4 · « Posséder, utiliser, dépendre » chez les propriétaires : solide, utile, moins visuelle
 
-- **Résultat** : 96 % des actifs propriétaires ont une voiture au ménage, 47 % deux ; 22 % vont travailler à vélo ; 40 % des actifs motorisés ne la prennent pas pour travailler ; stationnement réservé pour 14 à 17 % des ménages de l'hypercentre.
+- **Résultat** : 96 % des actifs dont le ménage est propriétaire vivent dans un ménage qui a une voiture, 47 % dans un ménage qui en a deux ; 22 % vont travailler à vélo ; 40 % des actifs dont le ménage a une voiture ne la déclarent pas comme mode principal ; emplacement de stationnement réservé pour 14 à 17 % des ménages de l'hypercentre (base IRIS Logement, population : ménages).
 - **Intérêt** : parle directement à l'acheteur (deuxième voiture, place de parking).
 - **Abus** : « on peut vendre sa deuxième voiture » ; confondre ménages et actifs.
 
 ### Piste 5 · « Puilboreau, si proche et si peu cycliste » : résultat solide, explication ouverte
 
-- Écart réel et significatif, non expliqué par la distance ni le détour. Intéressant comme question posée au lecteur (« vérifiez l'itinéraire, pas la distance »), dangereux comme explication. Je ne la mettrais pas au centre de l'article.
+- Écart net (intervalles indicatifs qui ne se recouvrent pas), non expliqué par la distance, le détour ni les voies rapides à franchir. Intéressant comme question posée au lecteur (« vérifiez l'itinéraire, pas la distance »), dangereux comme explication. Je ne la mettrais pas au centre de l'article.
 
 Pistes examinées et écartées pour cet article :
 - **Chaleur, ombre** : les données climat de l'index sont communales (18 jours à plus de 30 °C par an à La Rochelle aujourd'hui) ; aucune donnée d'ombre sur les itinéraires dans le dépôt. Décoratif.
@@ -291,28 +297,28 @@ Pistes examinées et écartées pour cet article :
 
 ## 4. Angle recommandé pour l'article pilote
 
-**Question précise.** « Avec un gazole à 2,30 €, peut-on habiter La Rochelle sans dépendre de la voiture ? Ce qui compte vraiment : votre quartier et votre lieu de travail. »
+**Question précise.** « Avec un gazole à 2,30 €, peut-on habiter La Rochelle sans dépendre de la voiture ? Ce que changent le quartier et le lieu de travail. »
 
 Variante plus sobre : « Vivre à La Rochelle sans dépendre de la voiture : ce que changent le quartier et le lieu de travail ».
 
-**Découverte à mettre en avant.** À La Rochelle, la même population va travailler en voiture deux fois moins souvent quand l'emploi est dans la ville que quand il est dans la commune voisine, et la part de la voiture varie du simple au plus que double entre quartiers, alors que commerces et bus sont présents presque partout. La hausse du carburant, réelle, pèse surtout sur les trajets longs : c'est le choix entre La Rochelle et sa grande périphérie qu'elle rend plus sensible.
+**Découverte à mettre en avant.** Parmi les actifs qui habitent La Rochelle, 44 % de ceux qui travaillent à La Rochelle déclarent la voiture, contre 72 % de ceux qui travaillent dans une commune voisine ; et la part de la voiture va de 27 % à 71 % selon le quartier, alors que commerces et bus sont présents presque partout. Ce sont des associations, pas des causes mesurées. La hausse du carburant, réelle, pèse d'autant plus que le trajet est long : à prix égal, le surcoût est proportionnel aux kilomètres.
 
 **Déroulé (structure du modèle local).**
-1. Réponse courte : oui pour beaucoup de Rochelais, à trois conditions vérifiables (quartier, lieu de travail, deuxième voiture).
+1. Réponse courte : c'est déjà la pratique d'une partie des Rochelais ; elle varie nettement avec le quartier et la commune de travail, et se vérifie trajet par trajet.
 2. Fait d'actualité daté : courbe des prix (2.7).
 3. Constat 1 : le lieu de travail (graphique en barres, 2.2).
 4. Constat 2 : le quartier (carte IRIS, 2.4) et pourquoi « commerces à côté » ne suffit pas (2.5).
 5. Constat 3 : posséder ≠ utiliser, et la place de parking (2.3, 2.4).
-6. Compromis : scénario carburant par distance (2.7), sans coût total.
+6. Compromis : scénario carburant à 5, 15 et 35 km (2.7), sans coût total.
 7. Ce que l'échelle communale et l'IRIS ne disent pas : votre itinéraire, vos horaires, la sécurité à vélo, l'entrée réelle des commerces.
 8. Sources, dates, méthode.
 9. Invitations : « Et pour cette adresse, avec votre lieu de travail ? » (dossier d'adresse) ; « Comparer La Rochelle, Lagord et Rochefort pour le même projet » (comparateur).
 
 **Visuels.**
-- Barres : mode de transport des Rochelais selon le lieu de travail (La Rochelle / communes voisines / hors agglomération).
+- Barres : mode de transport des actifs résidant à La Rochelle selon leur commune de travail (La Rochelle / quatre communes limitrophes / autres communes). Et, en vue inverse, les actifs travaillant à La Rochelle selon leur résidence (La Rochelle / reste de l'unité urbaine / hors unité urbaine).
 - Carte choroplèthe IRIS de la part de la voiture, avec les trois places en repère.
-- Courbe hebdomadaire gazole et E10, La Rochelle et France, octobre 2025 à octobre 2026.
-- Tableau du scénario carburant avec ses hypothèses visibles.
+- Courbe hebdomadaire gazole et SP95-E10, stations à moins de 12 km de La Rochelle et France, octobre 2025 à octobre 2026.
+- Tableau du scénario carburant à 5, 15 et 35 km avec ses hypothèses visibles.
 - Petit tableau propriétaires / locataires.
 
 **Ce qu'on peut affirmer aujourd'hui.** Les chiffres MOBPRO 2022 (pratiques, domicile-travail, actifs), les bases IRIS 2022, la hausse des prix déclarés (flux officiel), les distances à vol d'oiseau aux équipements BPE 2025 et l'offre de bus théorique du GTFS d'octobre 2026, tous datés et sourcés.
@@ -356,6 +362,57 @@ C'est cohérent avec le critère de sortie de FUT-47 (question du ménage, donn�
 
 ---
 
+## 7. Faits utilisables pour la rédaction (version finalisée)
+
+Formulations à reprendre telles quelles ou presque. Toutes portent sur des **actifs occupés** et leurs **trajets domicile-travail** (INSEE, recensement 2022), sauf mention contraire. « La voiture » = mode principal déclaré ; le total inclut les actifs qui ne se déplacent pas pour travailler.
+
+| # | Fait | Population et source | Formulation conseillée |
+|---|---|---|---|
+| F1 | 53 % des actifs résidant à La Rochelle déclarent la voiture pour aller travailler, 18 % le vélo, 12 % les transports en commun, 11 % la marche | Actifs résidant à La Rochelle, MOBPRO 2022 | « Un peu plus de la moitié des actifs rochelais vont travailler en voiture ; près d'un sur cinq à vélo. » |
+| F2 | 2e part de vélo sur 82 communes de taille comparable, au milieu du classement pour la voiture | Communes de 25 000 à 80 000 actifs résidents, MOBPRO 2022 | « Une ville de vélo plus qu'une ville sans voiture. » |
+| F3 | 44 % de voiture parmi les Rochelais qui travaillent à La Rochelle, 72 % parmi ceux qui travaillent dans une des quatre communes limitrophes, soit environ 28 points d'écart | Deux groupes distincts d'actifs résidant à La Rochelle, MOBPRO 2022 | « Chez les Rochelais, l'usage de la voiture varie nettement avec la commune où l'on travaille. » Association, sans hiérarchie causale |
+| F4 | 40 % des actifs dont le ménage a au moins une voiture ne la déclarent pas comme mode principal (vélo 17 %, marche 9 %, TC 8 %, deux-roues motorisé 2 %, aucun déplacement 5 %) | Actifs résidant à La Rochelle, ménage motorisé, MOBPRO 2022 | « Avoir une voiture ne veut pas dire la prendre pour aller travailler. » |
+| F5 | 96 % des actifs dont le ménage est propriétaire vivent dans un ménage motorisé, 47 % dans un ménage à deux voitures ou plus ; 22 % vont travailler à vélo | Actifs résidant à La Rochelle, ménage propriétaire, MOBPRO 2022 | À citer sans « les propriétaires » au sens de ménages : ce sont des actifs |
+| F6 | Selon le quartier (IRIS), la part de la voiture va de 27 % (Centre Préfecture) à 71 % (Villeneuve-les-Salines Ouest) | Actifs, IRIS d'habitat, base IRIS 2022 | Citer les extrêmes et les grands écarts ; ne pas classer finement, ne pas expliquer |
+| F7 | Un quart des ménages rochelais n'a pas de voiture (26,5 %) ; dans l'hypercentre, 14 à 17 % des ménages disposent d'une place de stationnement réservée | **Ménages** (tous, retraités et étudiants compris), base IRIS Logement 2022 | Ne pas comparer directement aux parts d'actifs |
+| F8 | Sur ~50 600 actifs qui travaillent à La Rochelle, 40 % habitent hors de l'unité urbaine de La Rochelle ; 90 % d'entre eux déclarent la voiture | Actifs travaillant à La Rochelle, MOBPRO 2022 ; unité urbaine INSEE 2020 (11 communes) | Dire « hors de l'unité urbaine » (ou « au-delà de la ville et de sa proche couronne »), jamais « hors agglomération » |
+| F9 | Dans les stations à moins de 12 km de La Rochelle, gazole d'environ 1,55 à 2,29 €/L et SP95-E10 d'environ 1,63 à 2,13 €/L entre début octobre 2025 et début octobre 2026, soit environ +0,75 et +0,50 €/L ; la hausse démarre en mars 2026 | Prix déclarés au flux officiel prix-carburants.gouv.fr ; contrôle sur les mêmes stations | Daté et sourcé ; refaire l'extraction avant publication |
+| F10 | Scénario : environ 90 €, 270 € et 630 € de carburant en plus par an pour 5, 15 et 35 km aller (gazole ; 60, 180 et 420 € au SP95-E10) | Un véhicule, 200 allers-retours par an, 6 L/100 km | Toujours avec ses hypothèses, « carburant seulement », sans commune associée |
+| F11 | Exemple de quartier : à Mireuil Est, presque toutes les adresses ont commerce, pharmacie et école à moins de 500 m et des bus fréquents à proximité, et 67 % des actifs déclarent la voiture | Adresses BAN × BPE 2025 × GTFS (méthode en 2.5) ; actifs, base IRIS 2022 | « Les services à proximité éclairent une partie du quotidien, mais ne suffisent pas à expliquer les trajets vers le travail. » |
+
+**À garder en méthode, hors du récit principal** : le tableau d'accès par commune (2.5), les indicateurs de passages de bus, l'autopartage et les vélos en libre-service, les intervalles approximatifs (2.9).
+
+**Retiré de l'article** : kilomètres routiers et surcoûts attribués à des communes (Lagord, Rochefort, Surgères…) ; tout temps de trajet ; toute explication de l'écart Puilboreau et des écarts entre quartiers (question ouverte possible, sans cause) ; la comparaison carburant / prix immobilier sous forme de somme ; l'annonce gouvernementale non vérifiée sur le gazole.
+
+---
+
+## 8. Bilan de finalisation (13/10/2026)
+
+**Conservé** (preuve suffisante) : F1 à F8 ; la hausse des prix (F9), confirmée par deux méthodes concordantes ; l'exemple Mireuil Est (F11) ; les contrôles du mini-échantillon (2.8).
+
+**Corrigé** :
+- « deux fois moins souvent » → 44 % contre 72 %, environ 28 points ;
+- « même population » → deux groupes de résidents distingués par leur commune de travail ;
+- « le lieu de travail pèse plus que l'adresse », « la destination change tout », « ce qui compte vraiment » → constats d'association, sans hiérarchie causale ;
+- « les services ne répondent pas à la question » → ils éclairent une partie du quotidien, sans suffire à expliquer les trajets vers le travail ;
+- « hors agglomération » → « hors de l'unité urbaine » (périmètre réellement calculé) ;
+- « 40 % ne prennent pas la voiture » → « ne la déclarent pas comme mode principal », avec la part sans déplacement (5 %) et celle du deux-roues motorisé (2 %) ;
+- « actifs propriétaires » → actifs dont le ménage est propriétaire ;
+- « part des ménages » pour l'accès depuis les adresses → part des adresses pondérée par quartier (hypothèse : toutes les adresses d'un IRIS pèsent autant, un immeuble compte comme une maison) ;
+- « bus/h » → passages de bus toutes lignes et deux sens confondus, une course comptée une fois même si elle dessert plusieurs arrêts proches, horaires théoriques du mardi 13/10/2026 ;
+- hausse +0,73 / +0,50 €/L → environ +0,75 / +0,50 €/L, après contrôle sur les mêmes stations ;
+- intervalles et seuil de 10 points → présentés comme repères de prudence, pas comme précision officielle ni preuve de significativité.
+
+**Transformé en scénario** : surcoût carburant à 5, 15 et 35 km aller, hypothèses affichées.
+
+**Retiré** : surcoûts et kilométrages attribués à des communes ; temps de trajet ; explications causales des écarts.
+
+**Reproduction** : instantanés archivés hors Git avec manifeste d'empreintes ; outil doté d'un mode hors ligne ; une reproduction de la fiche La Rochelle dans un environnement neuf (20 s de préparation, 60 s de génération) donne des faits et tableaux **identiques** à la référence. Limites restantes : réponses des services d'itinéraire et d'Overpass non rejouables à l'identique (non utilisées dans l'article) ; geo.api capturé après coup ; parquet MOBPRO local (empreinte au manifeste) qui fait foi face à une éventuelle réédition INSEE.
+
+**Conclusion : prêt pour rédaction**, avec les faits F1 à F11 et les retraits listés en section 7. Avant publication : refaire l'extraction des prix carburant et relire les libellés d'IRIS cités.
+
+---
+
 ## Annexe A · Reproduction
 
 Scripts (dans `scripts/`, Python 3.13 avec pandas, pyarrow, numpy, shapely, pyproj ; exécutés hors du venv du projet) :
@@ -372,7 +429,9 @@ Scripts (dans `scripts/`, Python 3.13 avec pandas, pyarrow, numpy, shapely, pypr
 | `08_km_routiers.py` | API IGN | `km_routiers.json` |
 | `09_partage.py` | GBFS Citiz, GBFS VLS Yélo | `partage_resultats.json` |
 | `10_incertitude.py` | parquet MOBPRO, index | `incertitudes_mobpro.csv` |
-| `11_scenarios_carburant.py` | `carburants_hebdo_la_rochelle_12km.csv` | `scenarios_carburant.csv`, `prix_reference.json` |
+| `11_scenarios_carburant.py` | hypothèses écrites dans le script | `scenarios_carburant.csv`, `prix_reference.json` |
+| `12_coupures_osm.py` | `adresses_acces.csv.gz`, Overpass | `coupures_osm.json` |
+| `13_controle_prix_apparie.py` | `carburants_2025_2026.parquet` (cache de l'outil) | `controle_prix_apparie.json` |
 
 Sources et dates de récupération (13/10/2026, UTC) :
 - INSEE MOBPRO 2022 : parquet local (7 388 023 lignes, nombre identique à la page INSEE) ; dictionnaire `https://www.insee.fr/fr/statistiques/fichier/8589904/varmod_mobpro_2022.csv` (10:13).
@@ -384,4 +443,4 @@ Sources et dates de récupération (13/10/2026, UTC) :
 - GBFS : Citiz `https://backend.citiz.fr/public/provider/18/gbfs/v3.0/station_information.json` (10:29) ; VLS Yélo `https://www.data.gouv.fr/api/1/datasets/r/50482a12-2b65-4e04-8021-4b5081cb6605`.
 - Itinéraires : IGN Géoplateforme `/navigation/itineraire` et `/geocodage/search` ; OSRM `routing.openstreetmap.de` (10:22 à 10:35).
 
-Les téléchargements bruts sont restés hors du dépôt (répertoire temporaire de session) : relancer les URL ci-dessus pour reproduire. Les flux « latest » (BAN, GTFS, prix) évoluent : les résultats sont datés du 13/10/2026.
+Les téléchargements bruts sont archivés hors Git dans `data/cache-etudes/2026-10-13-larochelle-mobilite/` du checkout principal (cf. `REPRODUCTIBILITE.md`, section 2) ; les URL ci-dessus servent à recalculer avec des données plus récentes, pas à reproduire à l'identique. Les flux « latest » (BAN, GTFS, prix) évoluent : les résultats sont datés du 13/10/2026.
