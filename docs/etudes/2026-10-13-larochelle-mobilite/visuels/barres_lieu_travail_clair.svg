@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 328" width="1000" height="328" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 311" width="1000" height="311" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
 <title id="t">Habiter La Rochelle, travailler ici ou dans une commune voisine</title>
 <desc id="d">Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, 44 % de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre 72 % de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts ; l&#x27;écart décrit des pratiques, pas un effet causal. Source : INSEE, recensement 2022.</desc>
 <style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
-<rect width="1000" height="328" fill="#ffffff"/>
+<rect width="1000" height="311" fill="#ffffff"/>
 <line x1="24.0" y1="236.0" x2="24.0" y2="244.0" stroke="#d9d6cf" stroke-width="1"/>
 <text x="24.0" y="260.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">0 %</text>
 <line x1="244.5" y1="236.0" x2="244.5" y2="244.0" stroke="#d9d6cf" stroke-width="1"/>
@@ -31,6 +31,5 @@
 <line x1="906.0" y1="204.0" x2="906.0" y2="234.0" stroke="#d9d6cf" stroke-width="1"/>
 <rect x="24" y="204.0" width="637.7" height="30" rx="4" fill="#1c5cab"><title>Travaille à Aytré, Lagord, Périgny ou Puilboreau : 72.3 %</title></rect>
 <text x="671.7" y="225.6" font-size="20" font-weight="700" fill="#1a1d28" text-anchor="start">72 %</text>
-<text x="24.0" y="288.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">Deux groupes distincts de résidents. Cet écart décrit des pratiques ; il ne mesure pas l&#x27;effet causal du lieu de</text>
-<text x="24.0" y="305.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">travail. Source : INSEE, recensement 2022.</text>
+<text x="24.0" y="288.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">Deux groupes distincts de résidents ; l&#x27;écart décrit des pratiques. Source : INSEE, recensement 2022.</text>
 </svg>

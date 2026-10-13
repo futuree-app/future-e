@@ -23,10 +23,10 @@ FONT = "Archivo, 'Helvetica Neue', Arial, sans-serif"
 THEMES = {
     "clair": dict(INK="#1a1d28", INK2="#3d4456", INK3="#5b6373", RULE="#d9d6cf", SURFACE="#ffffff",
                   RAMP=["#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#0d366b"], NO_DATA="#eceae5", NON_RES="#d3d0c9",
-                  HATCH="#8f8b83", TRACK="#eef1f6", BAR="#1c5cab"),
+                  HATCH="#8f8b83", TRACK="#eef1f6", BAR="#1c5cab", ENC_CIBLE="#9a978f", ENC_VOISIN="#e6e3dc"),
     "sombre": dict(INK="#f6f4ef", INK2="#c6cfdb", INK3="#9ba3b4", RULE="#2a3246", SURFACE="#0d1322",
                    RAMP=["#1c5cab", "#2a78d6", "#5598e7", "#86b6ef", "#cde2fb"], NO_DATA="#1b2233", NON_RES="#2b3245",
-                   HATCH="#6b7488", TRACK="#1a2236", BAR="#5598e7"),
+                   HATCH="#6b7488", TRACK="#1a2236", BAR="#5598e7", ENC_CIBLE="#5d667a", ENC_VOISIN="#232b3d"),
 }
 CLASSES = [(0.25, 0.35), (0.35, 0.45), (0.45, 0.55), (0.55, 0.65), (0.65, 0.75)]
 
@@ -186,67 +186,120 @@ def carte(a, mobile):
             body.append(text(lx, ly + i * lh, l, round(13 * fs), 600, INK, anchor, halo=True))
         body.append(text(lx, ly + len(lines) * lh, val, round(13 * fs), 400, INK2, anchor, halo=True))
     # En-tête
-    titre = "Aller travailler en voiture : des pratiques différentes selon les secteurs"
+    titre = "Aller travailler en voiture, secteur par secteur"
     tl = wrap(titre, 34 if mobile else 80)
     y = 34 * fs if mobile else 40
     head = []
     for i, l in enumerate(tl):
         head.append(text(24, y + i * 27 * fs, l, round(22 * fs), 700, INK))
-    sub = f"{nom} · part des actifs occupés déclarant la voiture comme mode principal pour aller travailler, par IRIS"
+    sub = f"{nom} · part des actifs occupés qui vont travailler principalement en voiture, par secteur statistique (IRIS)"
     sy = y + len(tl) * 27 * fs - 2
-    for i, l in enumerate(wrap(sub, 52 if mobile else 130)):
+    sub_l = wrap(sub, 52 if mobile else 130)
+    for i, l in enumerate(sub_l):
         head.append(text(24, sy + i * 19 * fs, l, round(14 * fs), 400, INK2))
-    sub_lines = len(wrap(sub, 52 if mobile else 130))
-    top = sy + sub_lines * 19 * fs + 12
+    top = sy + len(sub_l) * 19 * fs + 12
     shift = top - my0
-    # Légende
+    map_bottom = my0 + shift + mh + (3 * 15 * fs if mobile else 30)  # place des libellés posés sous la carte
+    # Légende : n'affiche une catégorie que si elle est présente.
     leg = []
     lx0 = 24 if mobile else 650
-    ly0 = (my0 + mh + shift + 26 + 3 * 15 * fs) if mobile else my0 + shift + 10  # mobile : place des libellés sous la carte
+    ly0 = (map_bottom + 26) if mobile else my0 + shift + 10
     leg.append(text(lx0, ly0, "Part de la voiture", round(14 * fs), 600, INK))
     sw = round(18 * fs)
+    yy = ly0 + 14 * fs
     for i, (lo, hi) in enumerate(CLASSES):
-        yy = ly0 + 14 * fs + i * (sw + 8)
         leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="{RAMP[i]}"/>')
-        leg.append(text(lx0 + sw + 10, yy + sw * 0.75, f"{round(lo*100)} à moins de {round(hi*100)} %", round(13 * fs), 400, INK2))
-    yy = ly0 + 14 * fs + 5 * (sw + 8) + 10
-    leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="url(#hach)"/>')
-    leg.append(text(lx0 + sw + 10, yy + sw * 0.75, f"Secteur d'activité, exclu ({stats['non_res']})", round(13 * fs), 400, INK2))
-    yy += sw + 8
-    leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="{NO_DATA}" stroke="{HATCH}" stroke-dasharray="3 2"/>')
-    leg.append(text(lx0 + sw + 10, yy + sw * 0.75, f"Sans donnée exploitable ({stats['sans_donnee']})", round(13 * fs), 400, INK2))
-    # Notes
-    notes = [
-        "Définition : actifs occupés de 15 ans ou plus résidant dans le secteur, mode de transport principal "
-        "déclaré pour aller travailler. Pratiques observées : la carte ne mesure pas la possibilité, pour une "
-        "personne, de vivre sans voiture.",
-        "Les IRIS sont des secteurs statistiques de l'INSEE ; leurs noms ne correspondent pas toujours aux quartiers "
-        "usuels. Estimations par sondage : écarts de quelques points non significatifs.",
-        "Source : INSEE, recensement de la population 2022, base infracommunale Activité des résidents ; "
-        "contours IRIS IGN. Réalisation futur•e.",
-    ]
-    nw = 50 if mobile else 46
-    nx = 24 if mobile else 650
-    ny = (yy + sw + 34 * fs) if mobile else yy + sw + 30
+        leg.append(text(lx0 + sw + 10, yy + sw * 0.75, f"{round(lo*100)} à moins de {round(hi*100)} %", round(13 * fs), 400, INK2))
+        yy += sw + 8
+    yy += 6
+    if stats["non_res"]:
+        leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="url(#hach)"/>')
+        leg.append(text(lx0 + sw + 10, yy + sw * 0.75, "Secteur d'activité, exclu", round(13 * fs), 400, INK2))
+        yy += sw + 8
+    if stats["sans_donnee"]:
+        leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="{NO_DATA}" stroke="{HATCH}" stroke-dasharray="3 2"/>')
+        leg.append(text(lx0 + sw + 10, yy + sw * 0.75, "Sans donnée exploitable", round(13 * fs), 400, INK2))
+        yy += sw + 8
+    col_bottom = yy
+    # Encart de situation (contexte géographique, hors périmètre statistique de la carte)
+    enc = []
+    voisins = [c for c in (a.encart.split(",") if a.encart else []) if c]
+    if voisins:
+        ex0 = 24 if mobile else 650
+        ey0 = col_bottom + (28 * fs if mobile else 26)
+        ew = min(W - 48, 420) if mobile else 300
+        g, eh = encart(a, voisins, ex0, ey0, ew, fs)
+        enc.append(g)
+        col_bottom = ey0 + eh
+    # Pied : définition courte, source et millésime (le reste va dans la légende HTML associée)
+    foot = ["Actifs occupés de 15 ans ou plus résidant dans le secteur ; mode de transport principal déclaré pour aller travailler.",
+            "Source : INSEE, recensement de la population 2022 ; contours IRIS IGN. Réalisation futur•e."]
+    fy = (col_bottom + 30 * fs) if mobile else max(map_bottom, col_bottom) + 28
     nb = []
-    for n in notes:
-        for l in wrap(n, nw):
-            nb.append(text(nx, ny, l, round(12 * fs), 400, INK3)); ny += 16.5 * fs
-        ny += 8 * fs
-    H = max(my0 + shift + mh + 24, ny + 8) if not mobile else ny + 8
+    for n in foot:
+        for l in wrap(n, 56 if mobile else 130):
+            nb.append(text(24, fy, l, round(12 * fs), 400, INK3)); fy += 16.5 * fs
+    H = fy + 6
     mapg = f'<g transform="translate(0,{shift:.1f})">' + "\n".join(body) + "</g>"
-    svg = svg_doc(W, math.ceil(H), "\n".join(head) + "\n" + mapg + "\n" + "\n".join(leg) + "\n" + "\n".join(nb), titre, alt_carte(fiche))
+    svg = svg_doc(W, math.ceil(H), "\n".join(head) + "\n" + mapg + "\n" + "\n".join(leg) + "\n" + "\n".join(enc) + "\n" + "\n".join(nb), titre, alt_carte(fiche, voisins))
     return svg, W, math.ceil(H), stats, data, fiche
 
 
-def alt_carte(fiche):
+def encart(a, voisins, x0, y0, w, fs):
+    """Encart de situation : la commune cartographiée et les communes voisines NOMMÉES dans l'article, contours
+    communaux obtenus par fusion EXACTE des contours IRIS officiels IGN (aucun tracé approximatif). Traitement neutre,
+    hors de la rampe : ces communes ne sont pas « sans données », elles sont hors du périmètre statistique de la carte."""
+    from shapely.geometry import shape
+    from shapely.ops import unary_union
+    rep = os.path.dirname(a.contours)
+    communes = [a.insee] + voisins
+    geoms, noms = {}, {}
+    for c in communes:
+        f = os.path.join(rep, f"iris_ign_{c}.json")
+        if not os.path.exists(f):
+            raise SystemExit(f"encart : contours absents pour {c} ({f})")
+        feats = json.load(open(f))["features"]
+        geoms[c] = unary_union([shape(x["geometry"]) for x in feats]); noms[c] = feats[0]["properties"]["nom_commune"]
+    allb = [g.bounds for g in geoms.values()]
+    lon0, lat0, lon1, lat1 = min(b[0] for b in allb), min(b[1] for b in allb), max(b[2] for b in allb), max(b[3] for b in allb)
+    k = math.cos(math.radians((lat0 + lat1) / 2))
+    out = [text(x0, y0, "Situer les communes du graphique", round(14 * fs), 600, INK)]
+    sl = wrap("Aytré, Lagord, Périgny et Puilboreau ne sont pas colorées : elles sont hors du périmètre de cette carte.", 48 if fs > 1 else 44)
+    yy = y0 + 18 * fs
+    for l in sl:
+        out.append(text(x0, yy, l, round(12 * fs), 400, INK3)); yy += 15.5 * fs
+    top = yy + 2
+    s = w / ((lon1 - lon0) * k); h = (lat1 - lat0) * s
+    P = lambda lon, lat: (x0 + (lon - lon0) * k * s, top + (lat1 - lat) * s)
+    for c in communes:
+        g = geoms[c]
+        polys = list(g.geoms) if g.geom_type == "MultiPolygon" else [g]
+        d = ""
+        for poly in polys:
+            for ring in [poly.exterior] + list(poly.interiors):
+                d += "M" + "L".join(f"{px:.1f},{py:.1f}" for px, py in (P(*xy) for xy in ring.coords)) + "Z"
+        fill = ENC_CIBLE if c == a.insee else ENC_VOISIN
+        out.append(f'<path d="{d}" fill="{fill}" stroke="{SURFACE}" stroke-width="1.5" fill-rule="evenodd"><title>{esc(noms[c])}</title></path>')
+    for c in communes:
+        pt = geoms[c].representative_point() if c != a.insee else geoms[c].centroid
+        px, py = P(pt.x, pt.y)
+        if c == a.insee:
+            out.append(text(px, py - 2, noms[c], round(12.5 * fs), 700, INK, "middle", halo=True))
+            out.append(text(px, py + 13 * fs, "(carte ci-contre)" if fs == 1 else "(carte ci-dessus)", round(11 * fs), 400, INK2, "middle", halo=True))
+        else:
+            out.append(text(px, py + 4, noms[c], round(12 * fs), 600, INK2, "middle", halo=True))
+    return "\n".join(out), (top - y0) + h + 8
+
+
+def alt_carte(fiche, voisins=()):
     h = [r for r in fiche["tableaux"]["iris"] if r["TYP_IRIS"] == "H" and r["voiture"] == r["voiture"]]
     lo = min(h, key=lambda r: r["voiture"]); hi = max(h, key=lambda r: r["voiture"])
     return (f"Carte de {fiche['commune']['nom']} découpée en {len(h)} secteurs statistiques (IRIS) d'habitat, colorés selon "
             f"la part des actifs qui vont travailler principalement en voiture (cinq classes de bleu, de 25 à 75 %). Les secteurs du "
             f"centre ont les parts les plus basses (environ {pct(lo['voiture'])} pour {lo['nom']}) ; les plus élevées "
             f"dépassent 65 % (jusqu'à environ {pct(hi['voiture'])} pour {hi['nom']}). Un secteur d'activité est exclu. "
-            f"Source : INSEE, recensement 2022.")
+            + ("Un encart situe Aytré, Lagord, Périgny et Puilboreau autour de la commune, sans données : elles sont hors du périmètre de la carte. " if voisins else "")
+            + "Source : INSEE, recensement 2022.")
 
 
 def tableau(fiche, out, insee):
@@ -281,8 +334,7 @@ def barres(a, mobile):
     fs = 1.45 if mobile else 1.0
     titre = "Habiter La Rochelle, travailler ici ou dans une commune voisine"
     sous = "Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à La Rochelle."
-    note = ("Deux groupes distincts de résidents. Cet écart décrit des pratiques ; il ne mesure pas l'effet causal "
-            "du lieu de travail. Source : INSEE, recensement 2022.")
+    note = "Deux groupes distincts de résidents ; l'écart décrit des pratiques. Source : INSEE, recensement 2022."
     b = []
     y = 40 * fs
     for l in wrap(titre, 34 if mobile else 80):
@@ -332,7 +384,10 @@ def main():
     p.add_argument("--insee", default="17300"); p.add_argument("--fiche", required=True); p.add_argument("--contours", required=True)
     p.add_argument("--incertitudes", required=True); p.add_argument("--out", required=True)
     p.add_argument("--libelles", default=""); p.add_argument("--sans-png", action="store_true")
+    p.add_argument("--encart", default=None, help="codes INSEE des communes à situer (défaut pour 17300 : les quatre communes du graphique)")
     a = p.parse_args(); os.makedirs(a.out, exist_ok=True)
+    if a.encart is None:
+        a.encart = "17200,17291,17274,17028" if a.insee == "17300" else ""  # MÊME périmètre que le graphique (sans Châtelaillon)
     for theme, mobile in [(t, m) for t in THEMES for m in (False, True)]:
         set_theme(theme)
         suf = ("_mobile" if mobile else "") + f"_{theme}"
