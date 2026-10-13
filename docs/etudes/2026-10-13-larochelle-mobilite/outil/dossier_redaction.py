@@ -47,8 +47,8 @@ USAGE = {"utilisable": "oui", "fragile": "ordre de grandeur", "en attente de val
 STATUT_OCC = {"proprietaires": "propriétaires", "locataires_prive": "locataires du privé", "locataires_hlm": "locataires HLM"}
 # Limites de la fiche reformulées pour la rédaction (texte seulement, valeurs inchangées).
 LIMITES_REVUES = {"Exploitation complémentaire : précision de quelques points par IRIS ; ne commenter que des écarts > 10 points.":
-                  "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent "
-                  "pas être surinterprétés."}
+                  "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être "
+                  "surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire)."}
 VOL = " (à vol d'oiseau)"
 MOTIF_BUS = "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi"
 ADR_COMMUNE = ("toutes les adresses BAN de {nom}, chaque secteur (IRIS) pesant selon son nombre de ménages "
@@ -241,7 +241,8 @@ def main():
     # ── Carburant + scénario ──────────────────────────────────────────────────────────────────
     scen = []
     if "carburant.evolution" in F:
-        rayon = f"{F['carburant.evolution']['maille']} de {nom} (centre communal de geo.api.gouv.fr : {C.get('centre')})"
+        km = re.search(r"([\d,.]+) km", F["carburant.evolution"]["maille"]).group(1)
+        rayon = f"stations situées dans un rayon de {km} km (à vol d'oiseau) autour du centre de {nom} (centre communal de geo.api.gouv.fr : {C.get('centre')})"
         for c, v in F["carburant.evolution"]["valeur"].items():
             nomc = "gazole" if c == "Gazole" else "SP95-E10"
             s = "utilisable" if v["stations"] >= 8 else "fragile"
@@ -335,7 +336,7 @@ def rendu_md(d, sources_gtfs):
          "**Statut et usage.** La colonne « Usage » dit ce que l'on peut écrire :", "",
          "| Statut | Ce que cela veut dire | Usage |", "|---|---|---|",
          "| `utilisable` | donnée exploitable, population, source et périmètre identifiés | `oui` : à écrire tel quel (valeur arrondie de la colonne « Valeur ») |",
-         "| `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui d'un angle, avec la précision du motif |",
+         "| `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui de la réponse, avec la précision du motif |",
          "| `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |",
          "| `absent` | pas de donnée, ou secteur exclu | `non` |", "",
          "**Populations.** Trois populations distinctes, à ne pas mélanger : les **actifs** occupés (pratiques domicile-travail, fichier MOBPRO "
@@ -401,7 +402,9 @@ def rendu_md(d, sources_gtfs):
         keys = ["commerce_alim_500m", "pharmacie_500m", "ecole_elementaire_500m", "panier_quotidien_500m", "gare_2km"]
         L += ["", "## 6. Accès depuis les adresses, par commune", "",
               "Part des **adresses** BAN de chaque commune, distances à vol d'oiseau ; chaque secteur (IRIS) pèse selon son nombre de ménages "
-              "(poids d'une adresse = ménages de son IRIS / adresses de son IRIS). Ce n'est pas une part de ménages mesurée : écrire « des adresses ». "
+              "(poids d'une adresse = ménages de son IRIS / adresses de son IRIS). Ce n'est ni une part de ménages mesurée, ni une simple part des adresses : "
+              "l'écrire avec cette qualification (par exemple « des adresses, chaque secteur pesant selon son nombre de ménages »), ne pas la comparer telle quelle "
+              "aux parts par secteur (section 3, non pondérées), ou l'écarter si elle alourdit l'article. "
               "Identifiant : `acces.<insee>.<colonne>` (nom de colonne du tableau). Usage : `oui`. Les colonnes bus sont en attente de validation et ne sont pas données.", "",
               "| Commune (code) | " + " | ".join(keys) + " |", "|---" * (len(keys) + 1) + "|"]
         for c, v in d["acces_communes"].items():

@@ -21,7 +21,7 @@
   "generee_le": "2026-10-13T10:41:34Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-13T13:17:30Z",
+ "dossier_genere_le": "2026-10-13T14:00:13Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -948,7 +948,7 @@
    "motif_statut": "",
    "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -969,7 +969,7 @@
    "motif_statut": "",
    "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -990,7 +990,7 @@
    "motif_statut": "écart des valeurs arrondies",
    "usage": "oui",
    "limites": [
-    "Exploitation complémentaire : précision de quelques points par IRIS ; les petits écarts entre secteurs ne doivent pas être surinterprétés.",
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
     "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
    ],
    "fait_de_la_fiche": "iris.ecart_voiture"
@@ -1328,7 +1328,7 @@
    "intervalle_95": null,
    "population": "19 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
@@ -1350,7 +1350,7 @@
    "intervalle_95": null,
    "population": "19 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
@@ -1372,7 +1372,7 @@
    "intervalle_95": null,
    "population": "19 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
@@ -1394,7 +1394,7 @@
    "intervalle_95": null,
    "population": "14 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
@@ -1416,7 +1416,7 @@
    "intervalle_95": null,
    "population": "14 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
@@ -1438,7 +1438,7 @@
    "intervalle_95": null,
    "population": "14 stations déclarantes",
    "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
-   "perimetre": "stations à 12 km du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",

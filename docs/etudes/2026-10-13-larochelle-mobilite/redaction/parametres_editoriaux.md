@@ -2,7 +2,7 @@
 
 **Lecteur visé.** Une personne ou un ménage qui cherche un logement (achat ou location) dans la commune ou autour, et qui se demande quelle place la voiture prendra dans sa vie quotidienne. Elle ne connaît pas les sources statistiques. Elle veut savoir quoi regarder pendant ses recherches et ses visites.
 
-**Question à éclairer.** Depuis quel quartier, et pour quels trajets, peut-on vivre dans cette commune en utilisant moins la voiture ? Ce que les pratiques observées, les équipements proches et le coût du carburant disent de cette question, et ce qu'il reste à vérifier soi-même.
+**Question à éclairer.** Depuis quel quartier, et pour quels trajets, peut-on vivre dans cette commune en utilisant moins la voiture ? C'est le cadre commun. Chaque article en tire **une question principale**, celle que les données de la commune éclairent le mieux, et ne retient que les faits qui y répondent.
 
 ## Conditions obligatoires
 
@@ -13,7 +13,7 @@ Un fait ne peut entrer dans l'article que si les quatre conditions sont réunies
 3. **Statut et usage qui l'autorisent** : la colonne « Usage » du dossier dit `oui`, ou `ordre de grandeur` (alors seulement comme ordre de grandeur, avec sa précision). Un fait `en attente de validation` ou `absent` ne s'écrit pas, ni arrondi, ni sous une formule vague qui en tiendrait lieu.
 4. **Aucune promesse produit non validée** : la conclusion ne s'appuie que sur les capacités autorisées (dernière section).
 
-## Choisir le format et l'angle
+## Choisir la question et le format
 
 | Format | Quand | Longueur indicative |
 |---|---|---|
@@ -23,9 +23,9 @@ Un fait ne peut entrer dans l'article que si les quatre conditions sont réunies
 
 Les longueurs sont des indications, pas des objectifs : on ne remplit pas pour les atteindre. Une seule découverte forte peut suffire à un article complet. La méthode, en fin d'article, n'est pas comptée ; elle reste brève.
 
-L'angle se choisit d'après les faits du dossier, jamais d'après un autre article. Un angle proche de celui d'une autre commune est acceptable si les résultats de celle-ci le justifient ; recopier mécaniquement un récit ne l'est pas.
+La question se choisit d'après les faits du dossier, jamais d'après un autre article. Une question proche de celle d'une autre commune est acceptable si les résultats le justifient ; recopier mécaniquement un récit ou un plan ne l'est pas.
 
-Pour chaque angle retenu, expliquer brièvement (section A du rendu) :
+Pour la question retenue, expliquer brièvement (section A du rendu) :
 
 - ce que le résultat apprend au lecteur ;
 - son lien avec une recherche de logement ;
@@ -33,7 +33,7 @@ Pour chaque angle retenu, expliquer brièvement (section A du rendu) :
 
 ## Indices éditoriaux
 
-Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de La Rochelle. Les chiffres qui les accompagnent sont des **indices** : ils signalent qu'une piste mérite d'être regardée. Ils ne décident **ni** de l'angle **ni** de la publication. On peut retenir une autre piste étayée par le dossier ; on peut écarter une piste qui franchit l'indice mais n'apporte rien d'utile au lecteur.
+Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de La Rochelle. Les chiffres qui les accompagnent sont des **indices** : ils signalent qu'une piste mérite d'être regardée. Ils ne décident **ni** de la question **ni** de la publication, et la liste n'est pas un plan : les pistes ne deviennent pas chacune une section. On peut retenir une autre piste étayée par le dossier ; on peut écarter une piste qui franchit l'indice mais n'apporte rien d'utile au lecteur.
 
 1. **Écart entre quartiers.** Indice : une quinzaine de points ou plus entre la part de la voiture du secteur le plus bas et celle du plus haut, parmi les secteurs d'habitat utilisables. Les petits écarts entre deux secteurs ne doivent pas être surinterprétés.
 2. **Le lieu de travail.** Indice : une dizaine de points ou plus entre deux groupes de destination utilisables.
@@ -43,7 +43,7 @@ Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de 
 6. **Ceux qui viennent travailler dans la commune.** Indice : faits `qui_vient_travailler` utilisables. Décrire, sans déduire de kilomètres ni de coût.
 7. **Le coût du carburant selon la distance.** Indice : faits carburant utilisables. Le scénario pré-calculé suffit ; il ne s'attribue à aucun quartier ni à aucune commune. Les prix sont réextraits avant publication.
 
-**Entrée de l'article.** Deux possibilités, aucune obligatoire : un fait d'actualité (la hausse du carburant, si elle amène la question) ou une question durable de recherche résidentielle. Choisir celle qui sert le mieux l'angle retenu.
+**Entrée de l'article.** Deux possibilités, aucune obligatoire : un fait d'actualité (la hausse du carburant, si elle amène la question) ou une question durable de recherche résidentielle. Choisir celle qui sert le mieux la question retenue.
 
 **Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») sauf si un fait du dossier la donne ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
 
@@ -53,7 +53,7 @@ Un groupe de communes se présente **avec sa liste exacte** la première fois qu
 
 ## Visuels
 
-Proposer au plus trois visuels, choisis dans la section « Visuels disponibles ou réalisables » du dossier, chacun posé à côté du passage qu'il éclaire. Un visuel qui repose sur un fait non utilisable ne se propose pas. Une carte de situation n'accompagne que la comparaison de communes qu'elle situe, avec la même liste exacte.
+Proposer au plus trois visuels, choisis dans la section « Visuels disponibles ou réalisables » du dossier, chacun posé à côté du passage qu'il éclaire. Le visuel porte le détail que le texte n'énumère pas. Le texte n'annonce que les visuels retenus. Un visuel qui repose sur un fait non utilisable ne se propose pas. Une carte de situation n'accompagne que la comparaison de communes qu'elle situe, avec la même liste exacte.
 
 ## Capacités produit
 

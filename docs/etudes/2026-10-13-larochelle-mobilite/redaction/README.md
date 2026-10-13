@@ -45,6 +45,8 @@ Pour Niort, la fiche du 13/10/2026 existe déjà : seule l'étape 2 a été lanc
 2. Joindre deux fichiers et rien d'autre : `redaction/PROMPT_REDACTION.md` et `redaction/79191/dossier.md` (chemins depuis `docs/etudes/2026-10-13-larochelle-mobilite/`).
 3. Contrôler le rendu : chaque ligne de la correspondance renvoie à un identifiant de `79191/dossier.json` avec la même valeur ; aucun fait d'usage `non` (bus compris) ; chaque groupe de communes présenté avec sa liste à sa première apparition ; populations (actifs, ménages, adresses) justes ; conclusion sans temps de trajet.
 
+Essais conservés dans `79191/essais/` (sortie brute + constat). Essai 1 (13/10/2026) : faits propres à Niort et exclusions respectées, mais une section par famille de données et des formulations au-delà des données ; consignes resserrées ensuite (une question principale, écriture sélective, formulations exactes).
+
 Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié par les résultats de Niort (proche de La Rochelle ou non, mais pas recopié), qu'elle sait proposer un format court ou de ne pas publier, et que la correspondance tient sans retouche. Préparer le test ne démontre rien : seule la copie rendue le dira.
 
 ## Ce qui est automatisé, ce qui reste manuel
