@@ -1,0 +1,13 @@
+trajet,km_aller,carburant,litres_an,surcout_an_eur,budget_carburant_oct2026_eur,surcout_conso_5_a_7_5
+"Première couronne (Lagord, Puilboreau)",4–6,Gazole,100–140,70–110,220–330,60–130
+"Première couronne (Lagord, Puilboreau)",4–6,E10,100–140,50–70,200–310,40–90
+"Aytré, Périgny",6–11.5,Gazole,140–280,110–200,330–630,90–250
+"Aytré, Périgny",6–11.5,E10,140–280,70–140,310–590,60–170
+Châtelaillon-Plage,16–23,Gazole,380–550,280–410,880–1260,230–510
+Châtelaillon-Plage,16–23,E10,380–550,190–270,820–1180,160–340
+Marans,23.5–26,Gazole,560–620,410–460,1290–1430,340–570
+Marans,23.5–26,E10,560–620,280–310,1200–1330,230–390
+Rochefort,33–38,Gazole,790–910,580–670,1810–2090,480–840
+Rochefort,33–38,E10,790–910,390–450,1690–1940,330–570
+Surgères,35.5–45,Gazole,850–1080,630–790,1950–2470,520–990
+Surgères,35.5–45,E10,850–1080,420–540,1810–2300,350–670

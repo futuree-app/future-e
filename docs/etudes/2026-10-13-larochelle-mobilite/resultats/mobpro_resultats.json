@@ -1,0 +1,1893 @@
+{
+ "france": {
+  "modes": {
+   "pas_de_transport": 0.0411,
+   "marche": 0.0614,
+   "velo": 0.0346,
+   "deux_roues_mot": 0.0175,
+   "voiture": 0.6927,
+   "tc": 0.1527
+  }
+ },
+ "17300": {
+  "nom": "La Rochelle",
+  "actifs_occupes_ponderes": 30550,
+  "lignes": 9427,
+  "modes": {
+   "pas_de_transport": 0.0484,
+   "marche": 0.1052,
+   "velo": 0.1766,
+   "deux_roues_mot": 0.02,
+   "voiture": 0.5328,
+   "tc": 0.1171
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.5599,
+  "travaille_dans_sa_commune": 0.6992,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.0656,
+   "marche": 0.143,
+   "velo": 0.2204,
+   "deux_roues_mot": 0.0219,
+   "voiture": 0.4407,
+   "tc": 0.1085
+  },
+  "effectif_dans_commune": 21360,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0083,
+   "marche": 0.0174,
+   "velo": 0.0747,
+   "deux_roues_mot": 0.0156,
+   "voiture": 0.747,
+   "tc": 0.1369
+  },
+  "effectif_hors_commune": 9190,
+  "voit_du_menage": {
+   "0": 0.1339,
+   "1": 0.5356,
+   "2": 0.2731,
+   "3": 0.0399,
+   "Z": 0.0175
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.4022,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0446,
+   "marche": 0.2251,
+   "velo": 0.2392,
+   "deux_roues_mot": 0.0395,
+   "voiture": 0.1549,
+   "tc": 0.2967
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.6992
+   ],
+   [
+    "17274",
+    0.0469
+   ],
+   [
+    "17028",
+    0.0338
+   ],
+   [
+    "17200",
+    0.0207
+   ],
+   [
+    "17291",
+    0.0203
+   ],
+   [
+    "79191",
+    0.0165
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 11551,
+    "lignes": 3061,
+    "part_voiture": 0.543,
+    "part_velo": 0.2234,
+    "part_menage_sans_voiture": 0.0418,
+    "part_menage_2voit_plus": 0.4717,
+    "travaille_dans_commune": 0.6839
+   },
+   "locataires_prive": {
+    "effectif": 10803,
+    "lignes": 4006,
+    "part_voiture": 0.4932,
+    "part_velo": 0.1785,
+    "part_menage_sans_voiture": 0.2026,
+    "part_menage_2voit_plus": 0.2259,
+    "travaille_dans_commune": 0.6833
+   },
+   "locataires_hlm": {
+    "effectif": 7084,
+    "lignes": 2043,
+    "part_voiture": 0.6076,
+    "part_velo": 0.1086,
+    "part_menage_sans_voiture": 0.1938,
+    "part_menage_2voit_plus": 0.2102,
+    "travaille_dans_commune": 0.7399
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 12011,
+    "part_voiture": 0.5552,
+    "part_menage_sans_voiture": 0.0419
+   },
+   "appartement": {
+    "effectif": 17908,
+    "part_voiture": 0.5266,
+    "part_menage_sans_voiture": 0.1975
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 12773,
+   "part_voiture": 0.5316,
+   "part_menage_2voit_plus": 0.5354
+  }
+ },
+ "17200": {
+  "nom": "Lagord",
+  "actifs_occupes_ponderes": 2947,
+  "lignes": 607,
+  "modes": {
+   "pas_de_transport": 0.055,
+   "marche": 0.0429,
+   "velo": 0.1336,
+   "deux_roues_mot": 0.0165,
+   "voiture": 0.6811,
+   "tc": 0.0709
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.7208,
+  "travaille_dans_sa_commune": 0.2579,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.2071,
+   "marche": 0.1152,
+   "velo": 0.1343,
+   "deux_roues_mot": 0.0128,
+   "voiture": 0.5052,
+   "tc": 0.0256
+  },
+  "effectif_dans_commune": 760,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0022,
+   "marche": 0.0178,
+   "velo": 0.1333,
+   "deux_roues_mot": 0.0178,
+   "voiture": 0.7422,
+   "tc": 0.0867
+  },
+  "effectif_hors_commune": 2187,
+  "voit_du_menage": {
+   "0": 0.0379,
+   "1": 0.4022,
+   "2": 0.452,
+   "3": 0.1056,
+   "Z": 0.0023
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.299,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.087,
+   "marche": 0.2176,
+   "velo": 0.2607,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.2172,
+   "tc": 0.2174
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.404
+   ],
+   [
+    "17200",
+    0.2579
+   ],
+   [
+    "17274",
+    0.0594
+   ],
+   [
+    "17291",
+    0.0462
+   ],
+   [
+    "17028",
+    0.0445
+   ],
+   [
+    "17299",
+    0.0132
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1895,
+    "lignes": 390,
+    "part_voiture": 0.6795,
+    "part_velo": 0.1487,
+    "part_menage_sans_voiture": 0.0102,
+    "part_menage_2voit_plus": 0.6053,
+    "travaille_dans_commune": 0.2307
+   },
+   "locataires_prive": {
+    "effectif": 612,
+    "lignes": 126,
+    "part_voiture": 0.6746,
+    "part_velo": 0.1746,
+    "part_menage_sans_voiture": 0.1269,
+    "part_menage_2voit_plus": 0.4446,
+    "travaille_dans_commune": 0.2461
+   },
+   "locataires_hlm": {
+    "effectif": 301,
+    "lignes": 62,
+    "part_voiture": 0.8871,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0484,
+    "part_menage_2voit_plus": 0.4357,
+    "travaille_dans_commune": 0.2741
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 2284,
+    "part_voiture": 0.6894,
+    "part_menage_sans_voiture": 0.0276
+   },
+   "appartement": {
+    "effectif": 622,
+    "part_voiture": 0.6796,
+    "part_menage_sans_voiture": 0.0312
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1799,
+   "part_voiture": 0.6784,
+   "part_menage_2voit_plus": 0.7135
+  }
+ },
+ "17291": {
+  "nom": "Puilboreau",
+  "actifs_occupes_ponderes": 2485,
+  "lignes": 491,
+  "modes": {
+   "pas_de_transport": 0.0385,
+   "marche": 0.0243,
+   "velo": 0.0347,
+   "deux_roues_mot": 0.0185,
+   "voiture": 0.8253,
+   "tc": 0.0586
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.8584,
+  "travaille_dans_sa_commune": 0.2145,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.1692,
+   "marche": 0.103,
+   "velo": 0.0104,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.6598,
+   "tc": 0.0577
+  },
+  "effectif_dans_commune": 533,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0028,
+   "marche": 0.0028,
+   "velo": 0.0414,
+   "deux_roues_mot": 0.0236,
+   "voiture": 0.8705,
+   "tc": 0.0589
+  },
+  "effectif_hors_commune": 1952,
+  "voit_du_menage": {
+   "0": 0.0314,
+   "1": 0.3697,
+   "2": 0.5129,
+   "3": 0.07,
+   "Z": 0.0161
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.1465,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0,
+   "marche": 0.1315,
+   "velo": 0.0708,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.3937,
+   "tc": 0.4041
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.4331
+   ],
+   [
+    "17291",
+    0.2145
+   ],
+   [
+    "17274",
+    0.0631
+   ],
+   [
+    "17200",
+    0.0527
+   ],
+   [
+    "17028",
+    0.0508
+   ],
+   [
+    "17299",
+    0.0167
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1368,
+    "lignes": 272,
+    "part_voiture": 0.8518,
+    "part_velo": 0.0483,
+    "part_menage_sans_voiture": 0.0152,
+    "part_menage_2voit_plus": 0.6899,
+    "travaille_dans_commune": 0.1928
+   },
+   "locataires_prive": {
+    "effectif": 733,
+    "lignes": 143,
+    "part_voiture": 0.7996,
+    "part_velo": 0.0276,
+    "part_menage_sans_voiture": 0.0415,
+    "part_menage_2voit_plus": 0.462,
+    "travaille_dans_commune": 0.2347
+   },
+   "locataires_hlm": {
+    "effectif": 310,
+    "lignes": 61,
+    "part_voiture": 0.871,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0686,
+    "part_menage_2voit_plus": 0.4443,
+    "travaille_dans_commune": 0.17
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 1970,
+    "part_voiture": 0.8393,
+    "part_menage_sans_voiture": 0.0284
+   },
+   "appartement": {
+    "effectif": 474,
+    "part_voiture": 0.8366,
+    "part_menage_sans_voiture": 0.0465
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1398,
+   "part_voiture": 0.8649,
+   "part_menage_2voit_plus": 0.7682
+  }
+ },
+ "17028": {
+  "nom": "Aytré",
+  "actifs_occupes_ponderes": 4311,
+  "lignes": 861,
+  "modes": {
+   "pas_de_transport": 0.0348,
+   "marche": 0.0499,
+   "velo": 0.1278,
+   "deux_roues_mot": 0.0163,
+   "voiture": 0.6887,
+   "tc": 0.0825
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.7136,
+  "travaille_dans_sa_commune": 0.2683,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.1255,
+   "marche": 0.1645,
+   "velo": 0.1429,
+   "deux_roues_mot": 0.0043,
+   "voiture": 0.5022,
+   "tc": 0.0606
+  },
+  "effectif_dans_commune": 1157,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0016,
+   "marche": 0.0079,
+   "velo": 0.1222,
+   "deux_roues_mot": 0.0206,
+   "voiture": 0.7571,
+   "tc": 0.0905
+  },
+  "effectif_hors_commune": 3155,
+  "voit_du_menage": {
+   "0": 0.0743,
+   "1": 0.482,
+   "2": 0.3717,
+   "3": 0.0708,
+   "Z": 0.0012
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.2714,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0312,
+   "marche": 0.1094,
+   "velo": 0.2969,
+   "deux_roues_mot": 0.0312,
+   "voiture": 0.1875,
+   "tc": 0.3438
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.3798
+   ],
+   [
+    "17028",
+    0.2683
+   ],
+   [
+    "17274",
+    0.0732
+   ],
+   [
+    "17200",
+    0.0314
+   ],
+   [
+    "17291",
+    0.0267
+   ],
+   [
+    "17299",
+    0.0256
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1893,
+    "lignes": 378,
+    "part_voiture": 0.6958,
+    "part_velo": 0.1587,
+    "part_menage_sans_voiture": 0.0344,
+    "part_menage_2voit_plus": 0.5926,
+    "travaille_dans_commune": 0.2619
+   },
+   "locataires_prive": {
+    "effectif": 1718,
+    "lignes": 343,
+    "part_voiture": 0.6706,
+    "part_velo": 0.1137,
+    "part_menage_sans_voiture": 0.0991,
+    "part_menage_2voit_plus": 0.3615,
+    "travaille_dans_commune": 0.2741
+   },
+   "locataires_hlm": {
+    "effectif": 656,
+    "lignes": 131,
+    "part_voiture": 0.7099,
+    "part_velo": 0.084,
+    "part_menage_sans_voiture": 0.1298,
+    "part_menage_2voit_plus": 0.229,
+    "travaille_dans_commune": 0.2595
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 2414,
+    "part_voiture": 0.6784,
+    "part_menage_sans_voiture": 0.0415
+   },
+   "appartement": {
+    "effectif": 1888,
+    "part_voiture": 0.7029,
+    "part_menage_sans_voiture": 0.1167
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 2043,
+   "part_voiture": 0.6691,
+   "part_menage_2voit_plus": 0.6569
+  }
+ },
+ "17274": {
+  "nom": "Périgny",
+  "actifs_occupes_ponderes": 3982,
+  "lignes": 807,
+  "modes": {
+   "pas_de_transport": 0.0513,
+   "marche": 0.0196,
+   "velo": 0.1261,
+   "deux_roues_mot": 0.0148,
+   "voiture": 0.7192,
+   "tc": 0.0691
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.758,
+  "travaille_dans_sa_commune": 0.2738,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.1826,
+   "marche": 0.0447,
+   "velo": 0.1356,
+   "deux_roues_mot": 0.0222,
+   "voiture": 0.5637,
+   "tc": 0.0512
+  },
+  "effectif_dans_commune": 1090,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0018,
+   "marche": 0.0102,
+   "velo": 0.1225,
+   "deux_roues_mot": 0.0119,
+   "voiture": 0.7778,
+   "tc": 0.0759
+  },
+  "effectif_hors_commune": 2892,
+  "voit_du_menage": {
+   "0": 0.0291,
+   "1": 0.4323,
+   "2": 0.4286,
+   "3": 0.11,
+   "Z": 0.0
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.2717,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0445,
+   "marche": 0.0405,
+   "velo": 0.2104,
+   "deux_roues_mot": 0.081,
+   "voiture": 0.4131,
+   "tc": 0.2105
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.3611
+   ],
+   [
+    "17274",
+    0.2738
+   ],
+   [
+    "17028",
+    0.0596
+   ],
+   [
+    "17291",
+    0.0383
+   ],
+   [
+    "17200",
+    0.023
+   ],
+   [
+    "17299",
+    0.0227
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 2362,
+    "lignes": 476,
+    "part_voiture": 0.6896,
+    "part_velo": 0.156,
+    "part_menage_sans_voiture": 0.025,
+    "part_menage_2voit_plus": 0.6464,
+    "travaille_dans_commune": 0.2898
+   },
+   "locataires_prive": {
+    "effectif": 1049,
+    "lignes": 215,
+    "part_voiture": 0.7329,
+    "part_velo": 0.0937,
+    "part_menage_sans_voiture": 0.0273,
+    "part_menage_2voit_plus": 0.3925,
+    "travaille_dans_commune": 0.2275
+   },
+   "locataires_hlm": {
+    "effectif": 545,
+    "lignes": 111,
+    "part_voiture": 0.8265,
+    "part_velo": 0.0642,
+    "part_menage_sans_voiture": 0.0517,
+    "part_menage_2voit_plus": 0.35,
+    "travaille_dans_commune": 0.2871
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 2973,
+    "part_voiture": 0.7067,
+    "part_menage_sans_voiture": 0.0182
+   },
+   "appartement": {
+    "effectif": 985,
+    "part_voiture": 0.7691,
+    "part_menage_sans_voiture": 0.0578
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 2314,
+   "part_voiture": 0.6809,
+   "part_menage_2voit_plus": 0.7214
+  }
+ },
+ "17142": {
+  "nom": "Dompierre-sur-Mer",
+  "actifs_occupes_ponderes": 2480,
+  "lignes": 463,
+  "modes": {
+   "pas_de_transport": 0.0565,
+   "marche": 0.0214,
+   "velo": 0.0341,
+   "deux_roues_mot": 0.0132,
+   "voiture": 0.8509,
+   "tc": 0.0239
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.9019,
+  "travaille_dans_sa_commune": 0.1971,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.2868,
+   "marche": 0.1088,
+   "velo": 0.075,
+   "deux_roues_mot": 0.0115,
+   "voiture": 0.496,
+   "tc": 0.0219
+  },
+  "effectif_dans_commune": 489,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.024,
+   "deux_roues_mot": 0.0136,
+   "voiture": 0.938,
+   "tc": 0.0244
+  },
+  "effectif_hors_commune": 1991,
+  "voit_du_menage": {
+   "0": 0.0176,
+   "1": 0.2346,
+   "2": 0.5854,
+   "3": 0.1604,
+   "Z": 0.002
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.1431,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0,
+   "marche": 0.2458,
+   "velo": 0.0,
+   "deux_roues_mot": 0.1285,
+   "voiture": 0.5,
+   "tc": 0.1257
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.3844
+   ],
+   [
+    "17142",
+    0.1971
+   ],
+   [
+    "17274",
+    0.0783
+   ],
+   [
+    "17028",
+    0.0452
+   ],
+   [
+    "17291",
+    0.0365
+   ],
+   [
+    "17200",
+    0.0301
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 2011,
+    "lignes": 376,
+    "part_voiture": 0.8563,
+    "part_velo": 0.0367,
+    "part_menage_sans_voiture": 0.0027,
+    "part_menage_2voit_plus": 0.7952,
+    "travaille_dans_commune": 0.1818
+   },
+   "locataires_prive": {
+    "effectif": 406,
+    "lignes": 75,
+    "part_voiture": 0.8132,
+    "part_velo": 0.0264,
+    "part_menage_sans_voiture": 0.0938,
+    "part_menage_2voit_plus": 0.5283,
+    "travaille_dans_commune": 0.2519
+   },
+   "locataires_hlm": {
+    "effectif": 33,
+    "lignes": 6,
+    "part_voiture": 1.0,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.3308,
+    "travaille_dans_commune": 0.3346
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 2354,
+    "part_voiture": 0.8615,
+    "part_menage_sans_voiture": 0.0116
+   },
+   "appartement": {
+    "effectif": 121,
+    "part_voiture": 0.6393,
+    "part_menage_sans_voiture": 0.1332
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1697,
+   "part_voiture": 0.84,
+   "part_menage_2voit_plus": 0.8365
+  }
+ },
+ "17264": {
+  "nom": "Nieul-sur-Mer",
+  "actifs_occupes_ponderes": 2260,
+  "lignes": 452,
+  "modes": {
+   "pas_de_transport": 0.0464,
+   "marche": 0.0243,
+   "velo": 0.0575,
+   "deux_roues_mot": 0.0199,
+   "voiture": 0.7986,
+   "tc": 0.0533
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.8375,
+  "travaille_dans_sa_commune": 0.1902,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.244,
+   "marche": 0.116,
+   "velo": 0.0926,
+   "deux_roues_mot": 0.0117,
+   "voiture": 0.5243,
+   "tc": 0.0115
+  },
+  "effectif_dans_commune": 430,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0027,
+   "velo": 0.0493,
+   "deux_roues_mot": 0.0219,
+   "voiture": 0.863,
+   "tc": 0.0631
+  },
+  "effectif_hors_commune": 1831,
+  "voit_du_menage": {
+   "0": 0.0044,
+   "1": 0.3231,
+   "2": 0.5387,
+   "3": 0.1338,
+   "Z": 0.0
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.1979,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.5,
+   "marche": 0.0,
+   "velo": 0.5,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.0,
+   "tc": 0.0
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.4179
+   ],
+   [
+    "17264",
+    0.1902
+   ],
+   [
+    "17200",
+    0.0531
+   ],
+   [
+    "17291",
+    0.0507
+   ],
+   [
+    "17274",
+    0.0489
+   ],
+   [
+    "17028",
+    0.0442
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1512,
+    "lignes": 302,
+    "part_voiture": 0.8045,
+    "part_velo": 0.0695,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.7632,
+    "travaille_dans_commune": 0.1755
+   },
+   "locataires_prive": {
+    "effectif": 383,
+    "lignes": 77,
+    "part_voiture": 0.7923,
+    "part_velo": 0.0387,
+    "part_menage_sans_voiture": 0.0257,
+    "part_menage_2voit_plus": 0.5742,
+    "travaille_dans_commune": 0.2464
+   },
+   "locataires_hlm": {
+    "effectif": 320,
+    "lignes": 64,
+    "part_voiture": 0.8585,
+    "part_velo": 0.0316,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.4248,
+    "travaille_dans_commune": 0.1099
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 2043,
+    "part_voiture": 0.799,
+    "part_menage_sans_voiture": 0.0048
+   },
+   "appartement": {
+    "effectif": 218,
+    "part_voiture": 0.795,
+    "part_menage_sans_voiture": 0.0
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1361,
+   "part_voiture": 0.808,
+   "part_menage_2voit_plus": 0.8162
+  }
+ },
+ "17190": {
+  "nom": "L'Houmeau",
+  "actifs_occupes_ponderes": 1029,
+  "lignes": 207,
+  "modes": {
+   "pas_de_transport": 0.0483,
+   "marche": 0.0145,
+   "velo": 0.0821,
+   "deux_roues_mot": 0.0193,
+   "voiture": 0.7923,
+   "tc": 0.0435
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.8325,
+  "travaille_dans_sa_commune": 0.1304,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.3333,
+   "marche": 0.074,
+   "velo": 0.1111,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.4815,
+   "tc": 0.0
+  },
+  "effectif_dans_commune": 134,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0056,
+   "marche": 0.0056,
+   "velo": 0.0778,
+   "deux_roues_mot": 0.0222,
+   "voiture": 0.8389,
+   "tc": 0.05
+  },
+  "effectif_hors_commune": 895,
+  "voit_du_menage": {
+   "0": 0.0193,
+   "1": 0.3719,
+   "2": 0.4928,
+   "3": 0.1159,
+   "Z": 0.0
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.2118,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 1.0,
+   "tc": 0.0
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.4783
+   ],
+   [
+    "17190",
+    0.1304
+   ],
+   [
+    "17274",
+    0.0483
+   ],
+   [
+    "17200",
+    0.0435
+   ],
+   [
+    "17299",
+    0.029
+   ],
+   [
+    "17369",
+    0.029
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 701,
+    "lignes": 141,
+    "part_voiture": 0.7943,
+    "part_velo": 0.0851,
+    "part_menage_sans_voiture": 0.0142,
+    "part_menage_2voit_plus": 0.7305,
+    "travaille_dans_commune": 0.1418
+   },
+   "locataires_prive": {
+    "effectif": 244,
+    "lignes": 49,
+    "part_voiture": 0.7551,
+    "part_velo": 0.0612,
+    "part_menage_sans_voiture": 0.0408,
+    "part_menage_2voit_plus": 0.347,
+    "travaille_dans_commune": 0.102
+   },
+   "locataires_hlm": {
+    "effectif": 84,
+    "lignes": 17,
+    "part_voiture": 0.8823,
+    "part_velo": 0.1177,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.353,
+    "travaille_dans_commune": 0.1177
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 915,
+    "part_voiture": 0.788,
+    "part_menage_sans_voiture": 0.0217
+   },
+   "appartement": {
+    "effectif": 114,
+    "part_voiture": 0.8261,
+    "part_menage_sans_voiture": 0.0
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 631,
+   "part_voiture": 0.811,
+   "part_menage_2voit_plus": 0.8189
+  }
+ },
+ "17010": {
+  "nom": "Angoulins",
+  "actifs_occupes_ponderes": 1576,
+  "lignes": 312,
+  "modes": {
+   "pas_de_transport": 0.0408,
+   "marche": 0.0339,
+   "velo": 0.0454,
+   "deux_roues_mot": 0.0101,
+   "voiture": 0.8275,
+   "tc": 0.0424
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.8627,
+  "travaille_dans_sa_commune": 0.196,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.1746,
+   "marche": 0.1425,
+   "velo": 0.0815,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.6014,
+   "tc": 0.0
+  },
+  "effectif_dans_commune": 309,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0082,
+   "marche": 0.0074,
+   "velo": 0.0366,
+   "deux_roues_mot": 0.0126,
+   "voiture": 0.8826,
+   "tc": 0.0527
+  },
+  "effectif_hors_commune": 1267,
+  "voit_du_menage": {
+   "0": 0.0237,
+   "1": 0.355,
+   "2": 0.5466,
+   "3": 0.062,
+   "Z": 0.0127
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.1551,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.2866,
+   "deux_roues_mot": 0.1399,
+   "voiture": 0.4268,
+   "tc": 0.1467
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.3971
+   ],
+   [
+    "17010",
+    0.196
+   ],
+   [
+    "17028",
+    0.0614
+   ],
+   [
+    "17274",
+    0.0482
+   ],
+   [
+    "17299",
+    0.0433
+   ],
+   [
+    "17094",
+    0.0422
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 935,
+    "lignes": 186,
+    "part_voiture": 0.8613,
+    "part_velo": 0.0487,
+    "part_menage_sans_voiture": 0.0117,
+    "part_menage_2voit_plus": 0.7598,
+    "travaille_dans_commune": 0.2165
+   },
+   "locataires_prive": {
+    "effectif": 475,
+    "lignes": 93,
+    "part_voiture": 0.7851,
+    "part_velo": 0.0545,
+    "part_menage_sans_voiture": 0.0555,
+    "part_menage_2voit_plus": 0.4289,
+    "travaille_dans_commune": 0.1604
+   },
+   "locataires_hlm": {
+    "effectif": 111,
+    "lignes": 22,
+    "part_voiture": 0.8611,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.2329,
+    "travaille_dans_commune": 0.1859
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 1377,
+    "part_voiture": 0.8437,
+    "part_menage_sans_voiture": 0.0192
+   },
+   "appartement": {
+    "effectif": 163,
+    "part_voiture": 0.8061,
+    "part_menage_sans_voiture": 0.0672
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 920,
+   "part_voiture": 0.835,
+   "part_menage_2voit_plus": 0.8034
+  }
+ },
+ "17094": {
+  "nom": "Châtelaillon-Plage",
+  "actifs_occupes_ponderes": 2034,
+  "lignes": 418,
+  "modes": {
+   "pas_de_transport": 0.077,
+   "marche": 0.0596,
+   "velo": 0.0641,
+   "deux_roues_mot": 0.0144,
+   "voiture": 0.7188,
+   "tc": 0.0662
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.7787,
+  "travaille_dans_sa_commune": 0.3419,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.2109,
+   "marche": 0.1603,
+   "velo": 0.1311,
+   "deux_roues_mot": 0.0208,
+   "voiture": 0.4425,
+   "tc": 0.0345
+  },
+  "effectif_dans_commune": 695,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0074,
+   "marche": 0.0072,
+   "velo": 0.0292,
+   "deux_roues_mot": 0.0112,
+   "voiture": 0.8624,
+   "tc": 0.0827
+  },
+  "effectif_hors_commune": 1338,
+  "voit_du_menage": {
+   "0": 0.0371,
+   "1": 0.3948,
+   "2": 0.4532,
+   "3": 0.1101,
+   "Z": 0.0048
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.2596,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0623,
+   "marche": 0.1261,
+   "velo": 0.3754,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.1246,
+   "tc": 0.3115
+  },
+  "top_destinations": [
+   [
+    "17094",
+    0.3419
+   ],
+   [
+    "17300",
+    0.2271
+   ],
+   [
+    "17010",
+    0.0504
+   ],
+   [
+    "17299",
+    0.0499
+   ],
+   [
+    "17274",
+    0.0482
+   ],
+   [
+    "17028",
+    0.0459
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1117,
+    "lignes": 228,
+    "part_voiture": 0.7117,
+    "part_velo": 0.0562,
+    "part_menage_sans_voiture": 0.0213,
+    "part_menage_2voit_plus": 0.6888,
+    "travaille_dans_commune": 0.3246
+   },
+   "locataires_prive": {
+    "effectif": 636,
+    "lignes": 132,
+    "part_voiture": 0.7129,
+    "part_velo": 0.06,
+    "part_menage_sans_voiture": 0.0739,
+    "part_menage_2voit_plus": 0.4514,
+    "travaille_dans_commune": 0.3727
+   },
+   "locataires_hlm": {
+    "effectif": 224,
+    "lignes": 46,
+    "part_voiture": 0.8051,
+    "part_velo": 0.1314,
+    "part_menage_sans_voiture": 0.021,
+    "part_menage_2voit_plus": 0.4005,
+    "travaille_dans_commune": 0.279
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 1494,
+    "part_voiture": 0.7255,
+    "part_menage_sans_voiture": 0.019
+   },
+   "appartement": {
+    "effectif": 530,
+    "part_voiture": 0.6948,
+    "part_menage_sans_voiture": 0.0886
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1004,
+   "part_voiture": 0.7459,
+   "part_menage_2voit_plus": 0.8142
+  }
+ },
+ "17420": {
+  "nom": "Salles-sur-Mer",
+  "actifs_occupes_ponderes": 1014,
+  "lignes": 192,
+  "modes": {
+   "pas_de_transport": 0.026,
+   "marche": 0.0,
+   "velo": 0.0262,
+   "deux_roues_mot": 0.0156,
+   "voiture": 0.9164,
+   "tc": 0.0157
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.9409,
+  "travaille_dans_sa_commune": 0.1304,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.1997,
+   "marche": 0.0,
+   "velo": 0.1206,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.6797,
+   "tc": 0.0
+  },
+  "effectif_dans_commune": 132,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.012,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.9519,
+   "tc": 0.0181
+  },
+  "effectif_hors_commune": 882,
+  "voit_du_menage": {
+   "0": 0.0105,
+   "1": 0.2105,
+   "2": 0.6444,
+   "3": 0.1346,
+   "Z": 0.0
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.0845,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 1.0,
+   "tc": 0.0
+  },
+  "top_destinations": [
+   [
+    "17300",
+    0.3272
+   ],
+   [
+    "17420",
+    0.1304
+   ],
+   [
+    "17028",
+    0.1041
+   ],
+   [
+    "17274",
+    0.0678
+   ],
+   [
+    "17010",
+    0.0469
+   ],
+   [
+    "17200",
+    0.0415
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 755,
+    "lignes": 143,
+    "part_voiture": 0.8877,
+    "part_velo": 0.0352,
+    "part_menage_sans_voiture": 0.0141,
+    "part_menage_2voit_plus": 0.8094,
+    "travaille_dans_commune": 0.1263
+   },
+   "locataires_prive": {
+    "effectif": 233,
+    "lignes": 44,
+    "part_voiture": 1.0,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.7015,
+    "travaille_dans_commune": 0.0905
+   },
+   "locataires_hlm": {
+    "effectif": 5,
+    "lignes": 1,
+    "part_voiture": 1.0,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.0,
+    "part_menage_2voit_plus": 0.0,
+    "travaille_dans_commune": 0.0
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 1003,
+    "part_voiture": 0.9155,
+    "part_menage_sans_voiture": 0.0106
+   },
+   "appartement": {
+    "effectif": 11,
+    "part_voiture": 1.0,
+    "part_menage_sans_voiture": 0.0
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 733,
+   "part_voiture": 0.9205,
+   "part_menage_2voit_plus": 0.8839
+  }
+ },
+ "17299": {
+  "nom": "Rochefort",
+  "actifs_occupes_ponderes": 8210,
+  "lignes": 2548,
+  "modes": {
+   "pas_de_transport": 0.0446,
+   "marche": 0.1062,
+   "velo": 0.0789,
+   "deux_roues_mot": 0.0133,
+   "voiture": 0.6809,
+   "tc": 0.076
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.7127,
+  "travaille_dans_sa_commune": 0.6252,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.0662,
+   "marche": 0.1645,
+   "velo": 0.1152,
+   "deux_roues_mot": 0.0167,
+   "voiture": 0.5754,
+   "tc": 0.0619
+  },
+  "effectif_dans_commune": 5132,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0085,
+   "marche": 0.009,
+   "velo": 0.0183,
+   "deux_roues_mot": 0.0077,
+   "voiture": 0.8569,
+   "tc": 0.0995
+  },
+  "effectif_hors_commune": 3077,
+  "voit_du_menage": {
+   "0": 0.1018,
+   "1": 0.487,
+   "2": 0.3304,
+   "3": 0.0662,
+   "Z": 0.0145
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.2587,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0489,
+   "marche": 0.2601,
+   "velo": 0.1403,
+   "deux_roues_mot": 0.0351,
+   "voiture": 0.1994,
+   "tc": 0.3163
+  },
+  "top_destinations": [
+   [
+    "17299",
+    0.6252
+   ],
+   [
+    "17300",
+    0.0874
+   ],
+   [
+    "17449",
+    0.0342
+   ],
+   [
+    "17274",
+    0.0202
+   ],
+   [
+    "17028",
+    0.0173
+   ],
+   [
+    "17415",
+    0.0158
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 3519,
+    "lignes": 1046,
+    "part_voiture": 0.7239,
+    "part_velo": 0.0887,
+    "part_menage_sans_voiture": 0.0215,
+    "part_menage_2voit_plus": 0.5778,
+    "travaille_dans_commune": 0.6063
+   },
+   "locataires_prive": {
+    "effectif": 3063,
+    "lignes": 1001,
+    "part_voiture": 0.6553,
+    "part_velo": 0.067,
+    "part_menage_sans_voiture": 0.1675,
+    "part_menage_2voit_plus": 0.2568,
+    "travaille_dans_commune": 0.6205
+   },
+   "locataires_hlm": {
+    "effectif": 1279,
+    "lignes": 397,
+    "part_voiture": 0.6905,
+    "part_velo": 0.0453,
+    "part_menage_sans_voiture": 0.1775,
+    "part_menage_2voit_plus": 0.2833,
+    "travaille_dans_commune": 0.6557
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 4600,
+    "part_voiture": 0.7389,
+    "part_menage_sans_voiture": 0.0415
+   },
+   "appartement": {
+    "effectif": 3483,
+    "part_voiture": 0.6151,
+    "part_menage_sans_voiture": 0.1853
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 3161,
+   "part_voiture": 0.7473,
+   "part_menage_2voit_plus": 0.7134
+  }
+ },
+ "17434": {
+  "nom": "Surgères",
+  "actifs_occupes_ponderes": 2182,
+  "lignes": 436,
+  "modes": {
+   "pas_de_transport": 0.0344,
+   "marche": 0.0779,
+   "velo": 0.0318,
+   "deux_roues_mot": 0.007,
+   "voiture": 0.8025,
+   "tc": 0.0464
+  },
+  "part_voiture_parmi_ceux_qui_se_deplacent": 0.8311,
+  "travaille_dans_sa_commune": 0.4015,
+  "modes_dans_commune": {
+   "pas_de_transport": 0.0797,
+   "marche": 0.1825,
+   "velo": 0.0793,
+   "deux_roues_mot": 0.0058,
+   "voiture": 0.6353,
+   "tc": 0.0174
+  },
+  "effectif_dans_commune": 876,
+  "modes_hors_commune": {
+   "pas_de_transport": 0.0039,
+   "marche": 0.0077,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0077,
+   "voiture": 0.9147,
+   "tc": 0.0659
+  },
+  "effectif_hors_commune": 1306,
+  "voit_du_menage": {
+   "0": 0.0373,
+   "1": 0.4161,
+   "2": 0.4061,
+   "3": 0.1153,
+   "Z": 0.0252
+  },
+  "menage_motorise_mais_pas_en_voiture": 0.1709,
+  "sans_voiture_au_menage_modes": {
+   "pas_de_transport": 0.0632,
+   "marche": 0.3741,
+   "velo": 0.0,
+   "deux_roues_mot": 0.1865,
+   "voiture": 0.1254,
+   "tc": 0.2508
+  },
+  "top_destinations": [
+   [
+    "17434",
+    0.4015
+   ],
+   [
+    "17300",
+    0.1054
+   ],
+   [
+    "79191",
+    0.0666
+   ],
+   [
+    "17299",
+    0.0575
+   ],
+   [
+    "17274",
+    0.0433
+   ],
+   [
+    "17028",
+    0.0392
+   ]
+  ],
+  "par_statut_occupation": {
+   "proprietaires": {
+    "effectif": 1208,
+    "lignes": 242,
+    "part_voiture": 0.8093,
+    "part_velo": 0.0456,
+    "part_menage_sans_voiture": 0.0126,
+    "part_menage_2voit_plus": 0.6656,
+    "travaille_dans_commune": 0.4093
+   },
+   "locataires_prive": {
+    "effectif": 739,
+    "lignes": 147,
+    "part_voiture": 0.8374,
+    "part_velo": 0.0196,
+    "part_menage_sans_voiture": 0.0623,
+    "part_menage_2voit_plus": 0.3974,
+    "travaille_dans_commune": 0.3609
+   },
+   "locataires_hlm": {
+    "effectif": 139,
+    "lignes": 28,
+    "part_voiture": 0.6429,
+    "part_velo": 0.0,
+    "part_menage_sans_voiture": 0.144,
+    "part_menage_2voit_plus": 0.178,
+    "travaille_dans_commune": 0.4614
+   }
+  },
+  "par_type_logement": {
+   "maison": {
+    "effectif": 1736,
+    "part_voiture": 0.8159,
+    "part_menage_sans_voiture": 0.0176
+   },
+   "appartement": {
+    "effectif": 381,
+    "part_voiture": 0.7342,
+    "part_menage_sans_voiture": 0.1335
+   }
+  },
+  "couples_biactifs": {
+   "effectif": 1124,
+   "part_voiture": 0.7923,
+   "part_menage_2voit_plus": 0.762
+  }
+ },
+ "emplois_la_rochelle": {
+  "actifs_travaillant_a_LR": 50601,
+  "residant_a_LR": 0.4221,
+  "residant_ailleurs_dans_UU": 0.1809,
+  "residant_hors_UU": 0.397,
+  "modes_des_entrants": {
+   "pas_de_transport": 0.0035,
+   "marche": 0.006,
+   "velo": 0.0496,
+   "deux_roues_mot": 0.016,
+   "voiture": 0.863,
+   "tc": 0.0618
+  },
+  "top_origines": [
+   [
+    "17300",
+    0.4221
+   ],
+   [
+    "17028",
+    0.0324
+   ],
+   [
+    "17274",
+    0.0284
+   ],
+   [
+    "17200",
+    0.0235
+   ],
+   [
+    "17291",
+    0.0213
+   ],
+   [
+    "17414",
+    0.0189
+   ],
+   [
+    "17142",
+    0.0188
+   ],
+   [
+    "17264",
+    0.0187
+   ],
+   [
+    "17407",
+    0.0181
+   ],
+   [
+    "17299",
+    0.0142
+   ],
+   [
+    "17010",
+    0.0124
+   ],
+   [
+    "17190",
+    0.0097
+   ]
+  ]
+ },
+ "flux_vers_LR_par_origine": {
+  "Lagord": {
+   "effectif": 1191,
+   "lignes": 245,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0245,
+    "velo": 0.2,
+    "deux_roues_mot": 0.0327,
+    "voiture": 0.6408,
+    "tc": 0.102
+   }
+  },
+  "Puilboreau": {
+   "effectif": 1076,
+   "lignes": 213,
+   "modes": {
+    "pas_de_transport": 0.0051,
+    "marche": 0.0051,
+    "velo": 0.0751,
+    "deux_roues_mot": 0.0283,
+    "voiture": 0.8129,
+    "tc": 0.0734
+   }
+  },
+  "Aytré": {
+   "effectif": 1637,
+   "lignes": 327,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0061,
+    "velo": 0.1896,
+    "deux_roues_mot": 0.0336,
+    "voiture": 0.6697,
+    "tc": 0.1009
+   }
+  },
+  "Périgny": {
+   "effectif": 1438,
+   "lignes": 291,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.2016,
+    "deux_roues_mot": 0.0137,
+    "voiture": 0.7056,
+    "tc": 0.0791
+   }
+  },
+  "Dompierre-sur-Mer": {
+   "effectif": 953,
+   "lignes": 178,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0392,
+    "deux_roues_mot": 0.0112,
+    "voiture": 0.9382,
+    "tc": 0.0114
+   }
+  },
+  "Nieul-sur-Mer": {
+   "effectif": 945,
+   "lignes": 189,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0053,
+    "velo": 0.0798,
+    "deux_roues_mot": 0.0212,
+    "voiture": 0.8142,
+    "tc": 0.0796
+   }
+  },
+  "L'Houmeau": {
+   "effectif": 492,
+   "lignes": 99,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.1313,
+    "deux_roues_mot": 0.0303,
+    "voiture": 0.7879,
+    "tc": 0.0505
+   }
+  },
+  "Angoulins": {
+   "effectif": 626,
+   "lignes": 123,
+   "modes": {
+    "pas_de_transport": 0.0167,
+    "marche": 0.008,
+    "velo": 0.0247,
+    "deux_roues_mot": 0.0167,
+    "voiture": 0.8595,
+    "tc": 0.0745
+   }
+  },
+  "Châtelaillon-Plage": {
+   "effectif": 462,
+   "lignes": 95,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0104,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0323,
+    "voiture": 0.8423,
+    "tc": 0.1149
+   }
+  },
+  "Salles-sur-Mer": {
+   "effectif": 332,
+   "lignes": 63,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0318,
+    "voiture": 0.9522,
+    "tc": 0.0159
+   }
+  },
+  "Rochefort": {
+   "effectif": 718,
+   "lignes": 219,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0045,
+    "velo": 0.0081,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.7726,
+    "tc": 0.2149
+   }
+  },
+  "Surgères": {
+   "effectif": 230,
+   "lignes": 46,
+   "modes": {
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.8024,
+    "tc": 0.1976
+   }
+  }
+ },
+ "rochelais_par_destination": {
+  "LR": {
+   "part": 0.6992,
+   "modes": {
+    "pas_de_transport": 0.0656,
+    "marche": 0.143,
+    "velo": 0.2204,
+    "deux_roues_mot": 0.0219,
+    "voiture": 0.4407,
+    "tc": 0.1085
+   }
+  },
+  "autre_commune_UU": {
+   "part": 0.149,
+   "modes": {
+    "pas_de_transport": 0.0032,
+    "marche": 0.0163,
+    "velo": 0.1198,
+    "deux_roues_mot": 0.0189,
+    "voiture": 0.7497,
+    "tc": 0.092
+   }
+  },
+  "hors_UU": {
+   "part": 0.1518,
+   "modes": {
+    "pas_de_transport": 0.0133,
+    "marche": 0.0184,
+    "velo": 0.0305,
+    "deux_roues_mot": 0.0124,
+    "voiture": 0.7443,
+    "tc": 0.181
+   }
+  }
+ },
+ "rang_velo_parmi_communes_25k_80k_actifs": {
+  "n_communes": 82,
+  "rang_LR_velo": 2,
+  "rang_LR_voiture_plus_basse": 41,
+  "top_velo": [
+   [
+    "38185",
+    0.227,
+    0.323,
+    0.279,
+    0.13
+   ],
+   [
+    "17300",
+    0.177,
+    0.533,
+    0.117,
+    0.105
+   ],
+   [
+    "49007",
+    0.114,
+    0.538,
+    0.17,
+    0.126
+   ],
+   [
+    "93055",
+    0.112,
+    0.169,
+    0.589,
+    0.073
+   ],
+   [
+    "69266",
+    0.11,
+    0.328,
+    0.413,
+    0.107
+   ],
+   [
+    "73065",
+    0.103,
+    0.566,
+    0.136,
+    0.146
+   ],
+   [
+    "68066",
+    0.102,
+    0.619,
+    0.113,
+    0.114
+   ],
+   [
+    "37261",
+    0.097,
+    0.5,
+    0.235,
+    0.122
+   ]
+  ]
+ }
+}
