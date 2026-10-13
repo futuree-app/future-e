@@ -69,3 +69,23 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Relecture finale, publication | **Manuel** |
 | Capacités produit autorisées dans la conclusion | **Manuel** : décision du porteur ; repérée dans le code ≠ autorisée. Temps de trajet exclu tant que sa restitution n'est pas validée (FUT-98) |
 | Indices éditoriaux (`parametres_editoriaux.md`) | **Indices**, pas des règles : tirés du seul article pilote, ils signalent une piste sans décider de l'angle ni de la publication |
+
+## Articulation avec l'article général (13/10/2026)
+
+L'article général `/savoir/dependance-auto` (page publique existante, révisée sur cette branche) explique pourquoi certains territoires rendent la voiture difficile à remplacer, avec les seuls chiffres nationaux de l'Insee Première n° 1835. Les deux études locales y renvoient, et il renvoie vers elles.
+
+| Lien | État sur la branche | À la publication |
+|---|---|---|
+| La Rochelle → article général | `[notre article sur la dépendance automobile](/savoir/dependance-auto)`, fin de la section « Travailler à La Rochelle, ou juste à côté » | rien à changer (URL publique existante) |
+| Niort → article général | même phrase, fin de la section « Travailler à Niort ou ailleurs » | rien à changer |
+| Article général → La Rochelle | `/dev/article-larochelle`, section « Deux villes regardées de près », **affichée en développement seulement** (`etudesLocales` dans `page.tsx`) | remplacer par l'URL publique de l'étude |
+| Article général → Niort | `/dev/article-niort`, même section | remplacer par l'URL publique, puis retirer la condition `NODE_ENV` |
+
+Légendes des visuels allégées le même jour : l'image porte titre, millésime, définition et source ; la légende HTML n'ajoute que ce qui manque. Textes alternatifs et tableaux accessibles inchangés.
+
+### Avant publication (ne bloque pas la prévisualisation)
+
+- Prix du carburant : réextraction la veille et contrôle de la hausse sur les mêmes stations (La Rochelle et Niort).
+- Dossier d'adresse : vérifier sur un dossier réel que les équipements les plus proches, leur distance et, quand il y en a plusieurs, leur nombre à moins de 500 m s'affichent comme l'écrit la conclusion. Non vérifié : le module « Autour de cette adresse » n'est accessible que par le parcours payant. Lecture du code (`AutourSection.tsx`) : le nombre n'apparaît qu'à partir de deux lieux, et seulement pour les dossiers calculés depuis le 01/08/2026 ; la phrase de Niort a été ajustée en conséquence.
+- Niort : libellés d'IRIS cités comme noms de secteurs, intérêt du groupe Chauray, Aiffres, Bessines.
+- Article général : date « Mis à jour » à fixer au jour de publication ; liens vers les études à activer (tableau ci-dessus).

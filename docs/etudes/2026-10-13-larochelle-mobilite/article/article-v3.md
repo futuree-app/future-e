@@ -43,6 +43,8 @@ Ce sont deux groupes distincts : leurs métiers, leurs horaires et leurs quartie
 
 La Rochelle attire aussi des actifs qui habitent loin. Sur environ 50 600 personnes qui y travaillent, 40 % habitent hors de l'unité urbaine, l'agglomération de onze communes définie par l'INSEE. 90 % d'entre elles viennent en voiture.
 
+Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce que cela implique quand on cherche un logement : c'est le sujet de [notre article sur la dépendance automobile](/savoir/dependance-auto).
+
 ## Avant de visiter
 
 - **Le trajet de chaque emploi.** Depuis l'adresse, aux heures de départ et de retour : à pied, à vélo, en bus, en voiture.

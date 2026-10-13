@@ -20,6 +20,8 @@ export const css = `
   .apv p,.apv li{font-size:17px;line-height:1.7;color:var(--fg-2);}
   .apv p{margin:0 0 16px;}
   .apv strong{color:var(--fg-1);font-weight:600;}
+  .apv a{color:var(--fg-1);text-decoration:underline;text-decoration-color:var(--border-hi);text-underline-offset:3px;}
+  .apv a:hover{text-decoration-color:currentColor;}
   .apv ul{margin:0 0 16px;padding-left:22px;list-style:disc;}
   .apv li{margin:0 0 8px;}
   .apv hr{border:0;border-top:1px solid var(--border-1);margin:56px 0 28px;}
@@ -98,10 +100,14 @@ export function Visuel({ route, base, alt, largeur }: { route: string; base: str
 const insecables = (s: string) =>
   s.replace(/(\d) (\d{3})/g, "$1 $2").replace(/(\d) (%|€|km|mètres|kilomètres|litres)/g, "$1 $2").replace(/(\d) m(?=[\s.,;:)]|$)/g, "$1 m");
 
+// Gras `**…**` et liens `[texte](/chemin)` ; un lien n'ouvre pas de nouvel onglet (routes du site).
 function enLigne(s: string): ReactNode[] {
-  return insecables(s).split(/(\*\*[^*]+\*\*)/).map((part, i) =>
-    part.startsWith("**") ? <strong key={i}>{bindOrphans(part.slice(2, -2))}</strong> : bindOrphans(part),
-  );
+  return insecables(s).split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)\s]+\))/).map((part, i) => {
+    if (part.startsWith("**")) return <strong key={i}>{bindOrphans(part.slice(2, -2))}</strong>;
+    const lien = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
+    if (lien) return <a key={i} href={lien[2]}>{bindOrphans(lien[1])}</a>;
+    return bindOrphans(part);
+  });
 }
 
 function Tableau({ lignes }: { lignes: string[] }) {

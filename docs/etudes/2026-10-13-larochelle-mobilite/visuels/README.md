@@ -31,7 +31,7 @@ Chaque thème a **sa propre rampe**, validée sur **sa** surface (`validate_pale
 
 **Titre** (dans l'image) : Aller travailler en voiture, secteur par secteur (raccourci : deux lignes au lieu de trois en mobile)
 
-**Légende et texte alternatif** : `legendes.html` (version de référence, à reprendre dans l'article). La légende HTML porte le millésime, les noms INSEE des secteurs et la prudence sur les petits écarts.
+**Légende et texte alternatif** : `legendes.html` (version de référence, à reprendre dans l'article). L'image porte déjà titre, millésime, définition et source ; la légende HTML n'ajoute que ce qui manque (noms INSEE des secteurs, prudence sur les petits écarts), pour ne pas répéter l'image ni le texte (allégée le 13/10/2026). Les textes alternatifs restent complets : ils remplacent l'image.
 
 **Dans l'image** : millésime dans le sous-titre (« La Rochelle, 2022 »), définition courte (actifs occupés de 15 ans ou plus résidant dans le secteur, mode principal déclaré), source (INSEE, recensement 2022 ; contours IGN).
 

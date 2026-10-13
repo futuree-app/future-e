@@ -17,6 +17,9 @@ Document interne : ne figure pas dans l'article. Version courante : `article.md`
 | Lieu de travail | « Chez les Niortais » ; « l'écart de 20 points » | « Chez les actifs niortais » ; « les 20 points qui séparent les deux premiers » | Population (actifs, pas habitants) ; écart rattaché aux bons groupes (85 − 65, pas 87 − 65) |
 | Carburant | marqueur de visuel | tableau du scénario dans le texte | Le tableau est le visuel |
 | Méthode | « le trajet à pied réel est plus long » | « peut être nettement plus long » | Le dossier dit « peut être 1,3 à 6 fois plus longue » |
+| Équipements (13/10, articulation) | « c'est adresse par adresse qu'il faut regarder ce qui se trouve à portée. » | « …, en suivant le chemin réel plutôt que la distance à vol d'oiseau. » | Conseil tiré de la limite déjà écrite en méthode ; aucun chiffre ajouté |
+| Lieu de travail (13/10) | « …dès les premières annonces. » | « … ; le trajet, lui, se teste aux heures où on le fera. » puis renvoi vers `/savoir/dependance-auto` | Conseil de vérification, pas un constat ; renvoi vers l'article général |
+| Conclusion (13/10) | « …et leur nombre à moins de 500 m. » | « …et, quand il y en a plusieurs, leur nombre à moins de 500 m. » | Le module n'affiche le compte qu'à partir de deux lieux (`AutourSection.tsx`) ; à confirmer sur un dossier réel |
 
 ## Chiffres de la version éditée
 
@@ -64,3 +67,4 @@ Document interne : ne figure pas dans l'article. Version courante : `article.md`
 - Réextraire les prix du carburant la veille de la publication et contrôler la hausse sur les mêmes stations (chapeau, section 4, tableau).
 - Relire les libellés d'IRIS cités comme noms de secteurs.
 - Relire l'intérêt du groupe Chauray, Aiffres et Bessines (liste automatique de l'unité urbaine).
+- Vérifier sur un dossier d'adresse réel l'affichage promis par la conclusion (équipements, distance, nombre à moins de 500 m).

@@ -103,7 +103,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     slug: 'dependance-auto',
     title: 'Dépendance automobile',
     description:
-      "84 % des actifs ruraux utilisent leur voiture chaque jour. La transition énergétique frappe d'abord les territoires sans alternative.",
+      "Hors des pôles urbains, près de neuf actifs sur dix vont travailler en voiture. Pourquoi certains territoires la rendent difficile à remplacer.",
     category: 'Mobilité',
     accent: '#60a5fa',
     href: '/savoir/dependance-auto',

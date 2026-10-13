@@ -8,7 +8,7 @@ Parmi les actifs qui habitent Niort, 70 % vont travailler principalement en voit
 
 [CARTE : Aller travailler en voiture, secteur par secteur]
 
-Dans le secteur Centre, la quasi-totalité des adresses ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. La part est de 96 % dans le secteur Hôpital et de 87 % à Clou Bouchet Sud. À Saint-Liguaire-Nantes et à Surimeau-Antes Cholette, aucune adresse ne réunit les trois à cette distance, ce qui ne veut pas dire qu'aucun de ces équipements n'est proche. Pour une recherche de logement, le secteur donne donc un premier repère. Dans ces deux secteurs, c'est adresse par adresse qu'il faut regarder ce qui se trouve à portée.
+Dans le secteur Centre, la quasi-totalité des adresses ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. La part est de 96 % dans le secteur Hôpital et de 87 % à Clou Bouchet Sud. À Saint-Liguaire-Nantes et à Surimeau-Antes Cholette, aucune adresse ne réunit les trois à cette distance, ce qui ne veut pas dire qu'aucun de ces équipements n'est proche. Pour une recherche de logement, le secteur donne donc un premier repère. Dans ces deux secteurs, c'est adresse par adresse qu'il faut regarder ce qui se trouve à portée, en suivant le chemin réel plutôt que la distance à vol d'oiseau.
 
 ## Au Centre et à Clou Bouchet Sud, moins de voitures et moins de places
 
@@ -22,7 +22,9 @@ Pour un ménage qui garde une voiture, la place de stationnement n'y va pas de s
 
 [GRAPHIQUE : Habiter Niort, travailler ici ou ailleurs]
 
-Avoir une voiture ne dit pas non plus comment on se rend au travail. Parmi les actifs dont le ménage possède au moins une voiture, 25 % ne la déclarent pas comme mode principal pour aller travailler, travail à domicile compris. Pour qui a déjà un emploi, le lieu de travail est une donnée à poser à côté du secteur, dès les premières annonces.
+Avoir une voiture ne dit pas non plus comment on se rend au travail. Parmi les actifs dont le ménage possède au moins une voiture, 25 % ne la déclarent pas comme mode principal pour aller travailler, travail à domicile compris. Pour qui a déjà un emploi, le lieu de travail est une donnée à poser à côté du secteur, dès les premières annonces ; le trajet, lui, se teste aux heures où on le fera.
+
+Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce que cela implique quand on cherche un logement : c'est le sujet de [notre article sur la dépendance automobile](/savoir/dependance-auto).
 
 ## Ce que pèse la hausse du carburant
 
@@ -36,7 +38,7 @@ En un an, le prix médian du gazole a augmenté de 0,77 € le litre, celui du S
 
 ## Avant de visiter
 
-Pour une adresse précise, la question n'est plus le secteur mais la rue : quel commerce, quelle pharmacie, quelle école sont les plus proches ? futur•e indique les équipements les plus proches d'une adresse, avec leur distance à vol d'oiseau et leur nombre à moins de 500 m. Il montre aussi la part des ménages du secteur équipés d'une voiture, comparée à celle de la commune.
+Pour une adresse précise, la question n'est plus le secteur mais la rue : quel commerce, quelle pharmacie, quelle école sont les plus proches ? futur•e indique les équipements les plus proches d'une adresse, avec leur distance à vol d'oiseau et, quand il y en a plusieurs, leur nombre à moins de 500 m. Il montre aussi la part des ménages du secteur équipés d'une voiture, comparée à celle de la commune.
 
 ---
 
