@@ -14,14 +14,14 @@ Actifs occupés de 15 ans ou plus résidant dans le secteur, mode principal déc
 | Fétilly-La Trompette | 50 % |
 | La Genette Le Mail | 48 % |
 | La Genette Parcs | 45 % |
-| La Pallice | 68 % |
+| La Pallice | 69 % |
 | Lafond | 52 % |
 | Laleu | 69 % |
 | Le Prieuré | 57 % |
 | Les Minimes Port de Plaisance | 58 % |
 | Les Minimes Tasdon | 54 % |
 | Les Minimes Université | 46 % |
-| Mireuil Château d'Eau | 64 % |
+| Mireuil Château d'Eau | 65 % |
 | Mireuil Est | 68 % |
 | Mireuil Europe | 54 % |
 | Mireuil Ouest | 61 % |

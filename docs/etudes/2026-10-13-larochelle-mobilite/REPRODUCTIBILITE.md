@@ -92,3 +92,5 @@ python outil/fiche_mobilite.py --insee 79191 --jour 2026-10-13 \
 - `base_carburants()` : base locale des prix 2 ans, construite une fois.
 
 Ce qui n'est **pas** construit, volontairement : rédaction automatique, choix automatique d'un angle, publication, intégration au moteur.
+
+**Rédaction par commune (13/10/2026).** `outil/dossier_redaction.py` transforme une fiche en dossier d'entrée de rédaction autonome (faits atomiques à identifiant stable, statuts, périmètres nommés, faits absents, paramètres éditoriaux, voix) ; le prompt et la procédure sont dans `redaction/`. Le choix de l'angle reste celui du rédacteur.

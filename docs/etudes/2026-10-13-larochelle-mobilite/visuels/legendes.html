@@ -1,36 +1,41 @@
-<!-- Légendes HTML associées aux deux visuels de l'article mobilité La Rochelle.
-     Les précisions retirées des images (secteurs statistiques, pratiques observées, prudence sur les petits écarts,
-     groupes distincts) vivent ici. Le choix du fichier clair ou sombre suit le thème du site (cf. README). -->
+<!-- Légendes HTML des visuels de l'article mobilité La Rochelle (v3).
+     La carte des secteurs illustre la section des quartiers. Le graphique 44 % / 72 % et la carte de situation des
+     communes forment un seul bloc : côte à côte sur grand écran, l'un sous l'autre sur mobile (cf. README).
+     Le choix du fichier clair ou sombre suit le thème du site. -->
 
 <figure class="fig-carte">
   <picture>
     <source media="(max-width: 640px)" srcset="carte_iris_17300_mobile_sombre.png">
     <img src="carte_iris_17300_sombre.png" width="1000"
-         alt="Carte de La Rochelle découpée en 30 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture (cinq classes de bleu, de 25 à 75 %). Les secteurs du centre ont les parts les plus basses (environ 27 % pour Centre Préfecture) ; les plus élevées dépassent 65 % (jusqu'à environ 71 % pour Villeneuve des Salines Ouest). Un secteur d'activité est exclu. Un encart situe Aytré, Lagord, Périgny et Puilboreau autour de la commune, sans données : elles sont hors du périmètre de la carte. Source : INSEE, recensement 2022.">
+         alt="Carte de La Rochelle découpée en 30 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 25 à 75 %). Les secteurs du centre ont les parts les plus basses (environ 27 % pour Centre Préfecture) ; les plus élevées dépassent 65 % (jusqu'à environ 71 % pour Villeneuve des Salines Ouest). Un secteur d'activité est exclu. Source : INSEE, recensement 2022.">
   </picture>
   <figcaption>
-    Part des actifs occupés de 15 ans ou plus qui vont travailler principalement en voiture, par secteur statistique
-    de La Rochelle. Les IRIS sont des découpages de l'INSEE&nbsp;: leurs limites et leurs noms ne correspondent pas
-    toujours aux quartiers tels qu'on les nomme. La carte décrit les pratiques des habitants actuels&nbsp;; elle ne dit
-    pas ce que fera une personne qui s'installe dans le secteur. Valeurs estimées par sondage&nbsp;: ne pas
-    surinterpréter les petits écarts entre secteurs. L'encart situe les quatre communes du graphique suivant&nbsp;;
-    elles ne sont pas colorées parce qu'elles sont hors du périmètre de cette carte, pas faute de données.
-    Source&nbsp;: INSEE, recensement de la population 2022, base infracommunale «&nbsp;Activité des résidents&nbsp;»&nbsp;;
-    contours IRIS IGN.
+    Part des actifs occupés qui vont travailler principalement en voiture, par secteur statistique (IRIS) de
+    La&nbsp;Rochelle, en 2022. Les noms de secteurs sont ceux de l'INSEE. Estimations par sondage&nbsp;: les écarts de
+    quelques points ne sont pas significatifs. Source&nbsp;: INSEE, recensement de la population 2022&nbsp;; contours
+    IRIS IGN.
   </figcaption>
 </figure>
 
-<figure class="fig-barres">
-  <picture>
-    <source media="(max-width: 640px)" srcset="barres_lieu_travail_mobile_sombre.png">
-    <img src="barres_lieu_travail_sombre.png" width="1000"
-         alt="Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, 44 % de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre 72 % de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts ; l'écart décrit des pratiques, pas un effet causal. Source : INSEE, recensement 2022.">
-  </picture>
-  <figcaption>
-    Actifs occupés résidant à La Rochelle, selon leur commune de travail&nbsp;: La Rochelle, ou l'une des quatre
-    communes limitrophes situées sur l'encart de la carte. Ce sont deux groupes distincts de personnes&nbsp;: l'écart
-    décrit leurs pratiques, il ne mesure pas ce que changerait, pour une même personne, un emploi dans une autre
-    commune. Quartier de résidence, métier et horaires peuvent aussi jouer. Source&nbsp;: INSEE, recensement de la
-    population 2022, fichier détail des mobilités professionnelles.
-  </figcaption>
-</figure>
+<div class="bloc-communes">
+  <figure class="fig-barres">
+    <picture>
+      <source media="(max-width: 640px)" srcset="barres_lieu_travail_mobile_sombre.png">
+      <img src="barres_lieu_travail_sombre.png" width="600"
+           alt="Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle en 2022, 44 % de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre 72 % de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts de résidents. Source : INSEE, recensement 2022.">
+    </picture>
+  </figure>
+  <figure class="fig-communes">
+    <picture>
+      <source media="(max-width: 640px)" srcset="carte_communes_17300_mobile_sombre.png">
+      <img src="carte_communes_17300_sombre.png" width="300"
+           alt="Carte de situation : La Rochelle et les communes limitrophes Aytré, Lagord, Périgny et Puilboreau, nommées sur leurs contours. Aucune donnée n'y est représentée. Contours IGN.">
+    </picture>
+  </figure>
+  <p class="legende-bloc">
+    Actifs occupés résidant à La&nbsp;Rochelle, selon leur commune de travail&nbsp;: La&nbsp;Rochelle, ou l'une des
+    quatre communes limitrophes situées sur la carte. Deux groupes distincts de personnes&nbsp;; métier, horaires et
+    quartier diffèrent aussi. Source&nbsp;: INSEE, recensement de la population 2022, fichier détail des mobilités
+    professionnelles&nbsp;; contours IGN.
+  </p>
+</div>

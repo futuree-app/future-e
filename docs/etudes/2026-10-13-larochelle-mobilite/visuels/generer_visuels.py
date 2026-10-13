@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""generer_visuels.py — Les deux visuels de l'article pilote mobilité (carte par IRIS, barres selon le lieu de travail).
+"""generer_visuels.py — Les visuels de l'article pilote mobilité : carte par IRIS (section des quartiers), barres selon
+le lieu de travail et, à côté d'elles, carte de situation des communes comparées.
 
 Aucune donnée n'est recalculée : la carte lit la fiche validée (`fiches/<insee>/fiche.json`, tableau `iris`,
 INSEE RP 2022 base IRIS Activité des résidents) et les contours IRIS IGN archivés avec l'étude
@@ -7,7 +8,7 @@ INSEE RP 2022 base IRIS Activité des résidents) et les contours IRIS IGN archi
 `resultats/incertitudes_mobpro.csv` (MOBPRO 2022), valeurs exactes avant arrondi.
 
 Sorties dans --out : carte_iris_<insee>[_mobile]_<clair|sombre>.svg/.png, tableau_iris_<insee>.md/.html,
-barres_lieu_travail[_mobile]_<clair|sombre>.svg/.png. PNG rendus par Chrome sans interface (2x), police Archivo (Google Fonts) ;
+barres_lieu_travail[_mobile]_<clair|sombre>.svg/.png, carte_communes_<insee>[_mobile]_<clair|sombre>.svg/.png. PNG rendus par Chrome sans interface (2x), police Archivo (Google Fonts) ;
 les SVG retombent sur Helvetica Neue / Arial si Archivo est absente.
 
     python visuels/generer_visuels.py --insee 17300 --fiche fiches/17300/fiche.json \
@@ -15,6 +16,7 @@ les SVG retombent sur Helvetica Neue / Arial si Archivo est absente.
         --incertitudes resultats/incertitudes_mobpro.csv --out visuels
 """
 import argparse, csv, html, json, math, os, subprocess, sys
+from decimal import Decimal, ROUND_HALF_UP
 
 FONT = "Archivo, 'Helvetica Neue', Arial, sans-serif"
 # DEUX THÈMES, chacun avec SA rampe validée sur SA surface (skill dataviz, validate_palette.js --ordinal) :
@@ -41,7 +43,8 @@ GFONT = "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&d
 
 
 def pct(x):
-    return f"{round(x * 100):d} %"
+    # Arrondi au plus proche, 0,5 vers le haut, comme l'article (round() arrondit au pair : 68,5 → 68).
+    return f"{int(Decimal(repr(x * 100)).quantize(Decimal('1'), rounding=ROUND_HALF_UP))} %"
 
 
 def esc(s):
@@ -192,7 +195,7 @@ def carte(a, mobile):
     head = []
     for i, l in enumerate(tl):
         head.append(text(24, y + i * 27 * fs, l, round(22 * fs), 700, INK))
-    sub = f"{nom} · part des actifs occupés qui vont travailler principalement en voiture, par secteur statistique (IRIS)"
+    sub = f"{nom}, 2022 · part des actifs occupés qui vont travailler principalement en voiture, par secteur statistique (IRIS)"
     sy = y + len(tl) * 27 * fs - 2
     sub_l = wrap(sub, 52 if mobile else 130)
     for i, l in enumerate(sub_l):
@@ -221,16 +224,6 @@ def carte(a, mobile):
         leg.append(text(lx0 + sw + 10, yy + sw * 0.75, "Sans donnée exploitable", round(13 * fs), 400, INK2))
         yy += sw + 8
     col_bottom = yy
-    # Encart de situation (contexte géographique, hors périmètre statistique de la carte)
-    enc = []
-    voisins = [c for c in (a.encart.split(",") if a.encart else []) if c]
-    if voisins:
-        ex0 = 24 if mobile else 650
-        ey0 = col_bottom + (28 * fs if mobile else 26)
-        ew = min(W - 48, 420) if mobile else 300
-        g, eh = encart(a, voisins, ex0, ey0, ew, fs)
-        enc.append(g)
-        col_bottom = ey0 + eh
     # Pied : définition courte, source et millésime (le reste va dans la légende HTML associée)
     foot = ["Actifs occupés de 15 ans ou plus résidant dans le secteur ; mode de transport principal déclaré pour aller travailler.",
             "Source : INSEE, recensement de la population 2022 ; contours IRIS IGN. Réalisation futur•e."]
@@ -241,14 +234,33 @@ def carte(a, mobile):
             nb.append(text(24, fy, l, round(12 * fs), 400, INK3)); fy += 16.5 * fs
     H = fy + 6
     mapg = f'<g transform="translate(0,{shift:.1f})">' + "\n".join(body) + "</g>"
-    svg = svg_doc(W, math.ceil(H), "\n".join(head) + "\n" + mapg + "\n" + "\n".join(leg) + "\n" + "\n".join(enc) + "\n" + "\n".join(nb), titre, alt_carte(fiche, voisins))
+    svg = svg_doc(W, math.ceil(H), "\n".join(head) + "\n" + mapg + "\n" + "\n".join(leg) + "\n" + "\n".join(nb), titre, alt_carte(fiche))
     return svg, W, math.ceil(H), stats, data, fiche
 
 
-def encart(a, voisins, x0, y0, w, fs):
-    """Encart de situation : la commune cartographiée et les communes voisines NOMMÉES dans l'article, contours
-    communaux obtenus par fusion EXACTE des contours IRIS officiels IGN (aucun tracé approximatif). Traitement neutre,
-    hors de la rampe : ces communes ne sont pas « sans données », elles sont hors du périmètre statistique de la carte."""
+def liste_fr(noms):
+    return noms[0] if len(noms) == 1 else ", ".join(noms[:-1]) + " et " + noms[-1]
+
+
+def carte_communes(a, mobile):
+    """Carte de situation des communes comparées dans le graphique en barres, posée À CÔTÉ de lui (13/10/2026 :
+    extraite de la carte des IRIS, où elle servait d'encart). Mêmes géométries qu'avant : contours communaux obtenus
+    par fusion EXACTE des contours IRIS officiels IGN, aucun tracé approximatif. Traitement neutre, sans rampe :
+    la carte situe, elle ne mesure rien. Le périmètre est EXACTEMENT celui du graphique (--communes)."""
+    voisins = [c for c in a.communes.split(",") if c]
+    W = 640 if mobile else 300
+    fs = 1.45 if mobile else 1.0
+    g, h, noms = encart(a, voisins, 24 if mobile else 0, 0, W - 48 if mobile else W, fs, mobile)
+    H = math.ceil(h + (40 * fs if mobile else 26))
+    titre = "Situer les communes du graphique"
+    alt = (f"Carte de situation : {noms[a.insee]} et les communes limitrophes {liste_fr([noms[c] for c in voisins])}, "
+           f"nommées sur leurs contours. Aucune donnée n'y est représentée. Contours IGN.")
+    return svg_doc(W, H, g, titre, alt), W, H, alt
+
+
+def encart(a, voisins, x0, y0, w, fs, mobile=False):
+    """La commune étudiée et les communes NOMMÉES dans le graphique, contours communaux obtenus par fusion EXACTE des
+    contours IRIS officiels IGN (aucun tracé approximatif)."""
     from shapely.geometry import shape
     from shapely.ops import unary_union
     rep = os.path.dirname(a.contours)
@@ -263,12 +275,13 @@ def encart(a, voisins, x0, y0, w, fs):
     allb = [g.bounds for g in geoms.values()]
     lon0, lat0, lon1, lat1 = min(b[0] for b in allb), min(b[1] for b in allb), max(b[2] for b in allb), max(b[3] for b in allb)
     k = math.cos(math.radians((lat0 + lat1) / 2))
-    out = [text(x0, y0, "Situer les communes du graphique", round(14 * fs), 600, INK)]
-    sl = wrap("Aytré, Lagord, Périgny et Puilboreau ne sont pas colorées : elles sont hors du périmètre de cette carte.", 48 if fs > 1 else 44)
-    yy = y0 + 18 * fs
+    pad = 24 * fs if mobile else 22
+    out = [text(x0, y0 + pad + 14 * fs, "Situer les communes du graphique", round(15 * fs), 600, INK)]
+    sl = wrap(f"Les communes de la seconde barre, autour de {noms[a.insee].replace(" ", chr(160))}.", 46 if mobile else 40)
+    yy = y0 + pad + 34 * fs
     for l in sl:
-        out.append(text(x0, yy, l, round(12 * fs), 400, INK3)); yy += 15.5 * fs
-    top = yy + 2
+        out.append(text(x0, yy, l, round(12.5 * fs), 400, INK2)); yy += 16 * fs
+    top = yy + 10 * fs
     s = w / ((lon1 - lon0) * k); h = (lat1 - lat0) * s
     P = lambda lon, lat: (x0 + (lon - lon0) * k * s, top + (lat1 - lat) * s)
     for c in communes:
@@ -284,21 +297,25 @@ def encart(a, voisins, x0, y0, w, fs):
         pt = geoms[c].representative_point() if c != a.insee else geoms[c].centroid
         px, py = P(pt.x, pt.y)
         if c == a.insee:
-            out.append(text(px, py - 2, noms[c], round(12.5 * fs), 700, INK, "middle", halo=True))
-            out.append(text(px, py + 13 * fs, "(carte ci-contre)" if fs == 1 else "(carte ci-dessus)", round(11 * fs), 400, INK2, "middle", halo=True))
+            out.append(text(px, py + 4, noms[c], round((15 if mobile else 12.5) * fs), 700, INK, "middle", halo=True))
         else:
-            out.append(text(px, py + 4, noms[c], round(12 * fs), 600, INK2, "middle", halo=True))
-    return "\n".join(out), (top - y0) + h + 8
+            out.append(text(px, py + 4, noms[c], round((14.5 if mobile else 12) * fs), 600, INK2, "middle", halo=True))
+    yy = top + h + 20 * fs
+    out.append(text(x0, yy, "Contours IGN. Réalisation futur•e.", round(11.5 * fs), 400, INK3))
+    return "\n".join(out), (yy - y0), noms
 
 
-def alt_carte(fiche, voisins=()):
+def alt_carte(fiche):
     h = [r for r in fiche["tableaux"]["iris"] if r["TYP_IRIS"] == "H" and r["voiture"] == r["voiture"]]
     lo = min(h, key=lambda r: r["voiture"]); hi = max(h, key=lambda r: r["voiture"])
+    # Rien d'écrit en dur : bornes des classes, extrêmes et secteurs exclus viennent des données (une autre commune
+    # n'a ni les mêmes classes, ni forcément ses parts les plus basses au centre).
+    n_act = sum(1 for r in fiche["tableaux"]["iris"] if r["TYP_IRIS"] != "H")
     return (f"Carte de {fiche['commune']['nom']} découpée en {len(h)} secteurs statistiques (IRIS) d'habitat, colorés selon "
-            f"la part des actifs qui vont travailler principalement en voiture (cinq classes de bleu, de 25 à 75 %). Les secteurs du "
-            f"centre ont les parts les plus basses (environ {pct(lo['voiture'])} pour {lo['nom']}) ; les plus élevées "
-            f"dépassent 65 % (jusqu'à environ {pct(hi['voiture'])} pour {hi['nom']}). Un secteur d'activité est exclu. "
-            + ("Un encart situe Aytré, Lagord, Périgny et Puilboreau autour de la commune, sans données : elles sont hors du périmètre de la carte. " if voisins else "")
+            f"la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de "
+            f"{round(CLASSES[0][0] * 100)} à {round(CLASSES[-1][1] * 100)} %). La part la plus basse est d'environ "
+            f"{pct(lo['voiture'])} ({lo['nom']}), la plus élevée d'environ {pct(hi['voiture'])} ({hi['nom']}). "
+            + (f"{n_act} secteur{'s' if n_act > 1 else ''} d'activité exclu{'s' if n_act > 1 else ''}. " if n_act else "")
             + "Source : INSEE, recensement 2022.")
 
 
@@ -330,17 +347,18 @@ def barres(a, mobile):
         vals[r["indicateur"]] = float(r["p"])
     v_ici = vals["Rochelais travaillant à La Rochelle : voiture"]
     v_vois = vals["Rochelais travaillant à Périgny/Aytré/Lagord/Puilboreau : voiture"]
-    W = 640 if mobile else 1000
+    # Version large : 600 px, pour tenir À CÔTÉ de la carte des communes (300 px) dans une colonne de 920 px.
+    W = 640 if mobile else 600
     fs = 1.45 if mobile else 1.0
     titre = "Habiter La Rochelle, travailler ici ou dans une commune voisine"
-    sous = "Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à La Rochelle."
+    sous = "Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à La Rochelle, en 2022."
     note = "Deux groupes distincts de résidents ; l'écart décrit des pratiques. Source : INSEE, recensement 2022."
     b = []
     y = 40 * fs
-    for l in wrap(titre, 34 if mobile else 80):
+    for l in wrap(titre, 34 if mobile else 46):
         b.append(text(24, y, l, round(22 * fs), 700, INK)); y += 27 * fs
     y -= 4
-    for l in wrap(sous, 52 if mobile else 110):
+    for l in wrap(sous, 52 if mobile else 72):
         b.append(text(24, y, l, round(14 * fs), 400, INK2)); y += 19 * fs
     y += 22 * fs
     groupes = [("Travaille à La Rochelle", v_ici), ("Travaille à Aytré, Lagord, Périgny ou Puilboreau", v_vois)]
@@ -353,23 +371,24 @@ def barres(a, mobile):
         ticks.append((tx, t))
     top = y
     for lab, v in groupes:
-        for l in wrap(lab, 44 if mobile else 90):
+        # intitulé collé à SA barre, nettement séparé de la barre précédente
+        for i, l in enumerate(wrap(lab, 44 if mobile else 66)):
             b.append(text(x0, y, l, round(15 * fs), 600, INK)); y += 19 * fs
-        y += 4
+        y -= 9 * fs
         b.append(f'<rect x="{x0}" y="{y:.1f}" width="{xw:.1f}" height="{bh}" rx="4" fill="{TRACK}"/>')
         # graduations limitées à la piste de la barre : elles ne traversent pas les intitulés
         for tx, t in ticks[1:]:
             b.append(f'<line x1="{tx:.1f}" y1="{y:.1f}" x2="{tx:.1f}" y2="{y + bh:.1f}" stroke="{RULE}" stroke-width="1"/>')
         b.append(f'<rect x="{x0}" y="{y:.1f}" width="{v * xw:.1f}" height="{bh}" rx="4" fill="{BAR}"><title>{esc(lab)} : {v*100:.1f} %</title></rect>')
         b.append(text(x0 + v * xw + 10, y + bh * 0.72, pct(v), round(20 * fs), 700, INK))
-        y += bh + 24 * fs
-    bottom = y - 24 * fs + 4
+        y += bh + 38 * fs
+    bottom = y - 38 * fs + 4
     grid = []
     for tx, t in ticks:
         grid.append(f'<line x1="{tx:.1f}" y1="{bottom - 2:.1f}" x2="{tx:.1f}" y2="{bottom + 6:.1f}" stroke="{RULE}" stroke-width="1"/>')
         grid.append(text(tx, bottom + 22 * fs, f"{round(t*100)} %", round(12 * fs), 400, INK3, "middle"))
     y = bottom + 50 * fs
-    for l in wrap(note, 60 if mobile else 120):
+    for l in wrap(note, 60 if mobile else 84):
         b.append(text(24, y, l, round(12.5 * fs), 400, INK3)); y += 17 * fs
     H = math.ceil(y + 6)
     alt = (f"Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, "
@@ -384,10 +403,16 @@ def main():
     p.add_argument("--insee", default="17300"); p.add_argument("--fiche", required=True); p.add_argument("--contours", required=True)
     p.add_argument("--incertitudes", required=True); p.add_argument("--out", required=True)
     p.add_argument("--libelles", default=""); p.add_argument("--sans-png", action="store_true")
-    p.add_argument("--encart", default=None, help="codes INSEE des communes à situer (défaut pour 17300 : les quatre communes du graphique)")
+    p.add_argument("--classes", default="", help="borne basse de la première classe, en part (ex. 0.45 : classes de 10 points "
+                   "de 45 à 95 %%). Défaut 0.25 (La Rochelle)")
+    p.add_argument("--communes", default=None, help="codes INSEE des communes du graphique à situer (défaut pour 17300 : "
+                   "les quatre communes de la seconde barre). Produit carte_communes_<insee>_*. Vide : pas de carte de situation")
     a = p.parse_args(); os.makedirs(a.out, exist_ok=True)
-    if a.encart is None:
-        a.encart = "17200,17291,17274,17028" if a.insee == "17300" else ""  # MÊME périmètre que le graphique (sans Châtelaillon)
+    if a.classes:
+        lo = float(a.classes)
+        CLASSES[:] = [(round(lo + i / 10, 2), round(lo + (i + 1) / 10, 2)) for i in range(5)]
+    if a.communes is None:
+        a.communes = "17200,17291,17274,17028" if a.insee == "17300" else ""  # MÊME périmètre que le graphique (sans Châtelaillon)
     for theme, mobile in [(t, m) for t in THEMES for m in (False, True)]:
         set_theme(theme)
         suf = ("_mobile" if mobile else "") + f"_{theme}"
@@ -395,6 +420,11 @@ def main():
         f = os.path.join(a.out, f"carte_iris_{a.insee}{suf}.svg"); open(f, "w").write(svg)
         if not a.sans_png:
             render_png(f, W, H)
+        if a.communes:
+            svg, W, H, alt_c = carte_communes(a, mobile)
+            f = os.path.join(a.out, f"carte_communes_{a.insee}{suf}.svg"); open(f, "w").write(svg)
+            if not a.sans_png:
+                render_png(f, W, H)
         if a.insee == "17300":
             svg, W, H, vals, alt_b = barres(a, mobile)
             f = os.path.join(a.out, f"barres_lieu_travail{suf}.svg"); open(f, "w").write(svg)
