@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 328" width="1000" height="328" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<title id="t">Habiter La Rochelle, travailler ici ou dans une commune voisine</title>
+<desc id="d">Graphique en deux barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à La Rochelle, 44 % de ceux qui travaillent à La Rochelle vont travailler principalement en voiture, contre 72 % de ceux qui travaillent à Aytré, Lagord, Périgny ou Puilboreau. Deux groupes distincts ; l&#x27;écart décrit des pratiques, pas un effet causal. Source : INSEE, recensement 2022.</desc>
+<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
+<rect width="1000" height="328" fill="#0d1322"/>
+<line x1="24.0" y1="236.0" x2="24.0" y2="244.0" stroke="#2a3246" stroke-width="1"/>
+<text x="24.0" y="260.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">0 %</text>
+<line x1="244.5" y1="236.0" x2="244.5" y2="244.0" stroke="#2a3246" stroke-width="1"/>
+<text x="244.5" y="260.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">25 %</text>
+<line x1="465.0" y1="236.0" x2="465.0" y2="244.0" stroke="#2a3246" stroke-width="1"/>
+<text x="465.0" y="260.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">50 %</text>
+<line x1="685.5" y1="236.0" x2="685.5" y2="244.0" stroke="#2a3246" stroke-width="1"/>
+<text x="685.5" y="260.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">75 %</text>
+<line x1="906.0" y1="236.0" x2="906.0" y2="244.0" stroke="#2a3246" stroke-width="1"/>
+<text x="906.0" y="260.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">100 %</text>
+<text x="24.0" y="40.0" font-size="22" font-weight="700" fill="#f6f4ef" text-anchor="start">Habiter La Rochelle, travailler ici ou dans une commune voisine</text>
+<text x="24.0" y="63.0" font-size="14" font-weight="400" fill="#c6cfdb" text-anchor="start">Part utilisant principalement la voiture pour aller travailler, parmi les actifs résidant à La Rochelle.</text>
+<text x="24.0" y="104.0" font-size="15" font-weight="600" fill="#f6f4ef" text-anchor="start">Travaille à La Rochelle</text>
+<rect x="24" y="127.0" width="882.0" height="30" rx="4" fill="#1a2236"/>
+<line x1="244.5" y1="127.0" x2="244.5" y2="157.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="465.0" y1="127.0" x2="465.0" y2="157.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="685.5" y1="127.0" x2="685.5" y2="157.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="906.0" y1="127.0" x2="906.0" y2="157.0" stroke="#2a3246" stroke-width="1"/>
+<rect x="24" y="127.0" width="389.0" height="30" rx="4" fill="#5598e7"><title>Travaille à La Rochelle : 44.1 %</title></rect>
+<text x="423.0" y="148.6" font-size="20" font-weight="700" fill="#f6f4ef" text-anchor="start">44 %</text>
+<text x="24.0" y="181.0" font-size="15" font-weight="600" fill="#f6f4ef" text-anchor="start">Travaille à Aytré, Lagord, Périgny ou Puilboreau</text>
+<rect x="24" y="204.0" width="882.0" height="30" rx="4" fill="#1a2236"/>
+<line x1="244.5" y1="204.0" x2="244.5" y2="234.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="465.0" y1="204.0" x2="465.0" y2="234.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="685.5" y1="204.0" x2="685.5" y2="234.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="906.0" y1="204.0" x2="906.0" y2="234.0" stroke="#2a3246" stroke-width="1"/>
+<rect x="24" y="204.0" width="637.7" height="30" rx="4" fill="#5598e7"><title>Travaille à Aytré, Lagord, Périgny ou Puilboreau : 72.3 %</title></rect>
+<text x="671.7" y="225.6" font-size="20" font-weight="700" fill="#f6f4ef" text-anchor="start">72 %</text>
+<text x="24.0" y="288.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="start">Deux groupes distincts de résidents. Cet écart décrit des pratiques ; il ne mesure pas l&#x27;effet causal du lieu de</text>
+<text x="24.0" y="305.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="start">travail. Source : INSEE, recensement 2022.</text>
+</svg>
