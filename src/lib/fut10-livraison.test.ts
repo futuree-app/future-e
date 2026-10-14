@@ -291,6 +291,18 @@ test("câblage : l'actualisation distingue première livraison et mise à jour, 
   assert.match(r, /generateDecisionArtifact\(supabase, user\.id, projet, cible, version\)/);
 });
 
+test("câblage FUT-93 : la route ne regénère pas une version plus récente que celle de la page", () => {
+  const r = lire("src/app/api/dossier/actualiser/route.ts");
+  const garde = r.indexOf("versionDejaServie(existant, body?.versionLue)");
+  assert.ok(garde > 0, "la route doit lire la version que la page servait");
+  assert.ok(garde < r.indexOf("prochaineVersionAReserver(existant"), "la garde précède la réservation");
+  assert.ok(garde < r.indexOf("generateDecisionArtifact(supabase"), "la garde précède la génération");
+  assert.match(r, /if \(dejaServie !== null\) return Response\.json\(\{ ok: true, statut: "abouti", version: dejaServie \}\);/);
+  // Les deux appuis qui génèrent disent ce que leur page sert.
+  assert.match(lire("src/components/report/AnalyseAncienProjet.tsx"), /JSON\.stringify\(\{ insee, scopeKey, versionLue: versionServie \}\)/);
+  assert.match(lire("src/components/report/LectureFactuelleDuBien.tsx"), /JSON\.stringify\(\{ insee, scopeKey, versionLue: 0 \}\)/);
+});
+
 test("câblage : un bien acheté sans projet s'affiche factuel, sans repli personnalisé, avec le geste explicite", () => {
   const page = lire("src/app/(account)/rapport/page.tsx");
   const decision = page.indexOf("dossierAddress && logementForCommune && lectureFactuelle ? (");

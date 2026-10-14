@@ -19,7 +19,7 @@ import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import {
-  proprietesActivation, proprietesAffichage, type ControlOrdre,
+  premiereMesure, proprietesActivation, proprietesAffichage, signatureAffichage, type ControlOrdre,
 } from "@/lib/decision/priority-control-telemetry";
 
 function lowerFirst(s: string): string {
@@ -61,6 +61,9 @@ function mesurable(): boolean {
   return typeof window !== "undefined" && !window.location.pathname.startsWith("/dev/");
 }
 
+// Les affichages déjà mesurés dans ce document : la garde survit au remontage de la conclusion.
+const affichagesMesures = new Set<string>();
+
 export function PriorityControlActions({
   actions, renderedIds = [], ordre = "priorite",
 }: {
@@ -77,6 +80,9 @@ export function PriorityControlActions({
   useEffect(() => {
     if (vuRef.current || actions.length === 0 || !mesurable()) return;
     vuRef.current = true;
+    // FUT-93 : la conclusion est remontée à chaque relecture de la page ; une relecture n'est pas un
+    // nouvel affichage (voir `premiereMesure`).
+    if (!premiereMesure(affichagesMesures, signatureAffichage(window.location.pathname + window.location.search, actions, ordre))) return;
     const cliquables = actions.filter((a) => rendues.has(a.anchorId)).length;
     posthog.capture("priority_control_shown", proprietesAffichage(actions, ordre, cliquables));
     // `actions` est reconstruit à chaque rendu du serveur : le garde de première fois vit dans la ref,

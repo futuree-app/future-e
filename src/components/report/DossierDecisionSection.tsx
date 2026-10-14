@@ -15,6 +15,8 @@ import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { dateFr } from "@/lib/decision/autour-permis";
 import { DossierDecisionReleve } from "@/components/releve/DossierDecisionReleve";
 import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
+import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
+import { AnnonceVersion } from "@/components/report/AnnonceVersion";
 
 // LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
 // dossier est l'un des six registres nommés par la charte, et porte sa teinte.
@@ -254,6 +256,8 @@ export function DossierDecisionSection({
               Analyse générée le {dateFr(generatedAt)}
             </p>
           ) : null}
+          {/* FUT-93 : présente avant et après la mise à jour, pour que son annonce survive au bandeau. */}
+          <AnnonceVersion insee={insee} scopeKey={scopeKey} versionServie={versionServie} date={generatedAt ? (dateFr(generatedAt) || null) : null} />
 
           {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
               suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
@@ -288,7 +292,9 @@ export function DossierDecisionSection({
             <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
           ) : (
             <Suspense
-              key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}`}
+              // FUT-93 : une identité par rendu (voir `jeton-de-rendu.ts`). Sans elle, une relecture de la
+              // page peut ne jamais s'afficher ; la version servie reste lisible dans la clé.
+              key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}:${jetonDeRendu()}`}
               fallback={
                 <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
               }

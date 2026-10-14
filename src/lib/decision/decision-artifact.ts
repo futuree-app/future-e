@@ -351,6 +351,26 @@ export function prochaineVersionAReserver(etat: StoredArtifact | null, maintenan
 }
 
 /**
+ * UNE DEMANDE DÉJÀ SERVIE NE SE PAIE PAS DEUX FOIS (FUT-93, 14/10/2026).
+ *
+ * `prochaineVersionAReserver` protège une génération EN COURS, pas une génération TERMINÉE : une
+ * page restée en retard sur la version prête (composant remonté, état client perdu, onglet resté
+ * ouvert) reproposait « Mettre à jour l'analyse », et l'appui lançait une génération de plus que
+ * personne n'avait voulue. Le client dit donc quelle version sa page servait au moment de l'appui.
+ * Si une version PLUS RÉCENTE est déjà prête, on la rend sans générer.
+ *
+ * Une nouvelle génération légitime n'est pas touchée : un projet modifié APRÈS la dernière version
+ * est demandé depuis une page qui sert cette version, et l'appui porte son numéro.
+ *
+ * Sans numéro lisible (ancien client, page sans version figée), on ne présume rien : `null`.
+ */
+export function versionDejaServie(etat: StoredArtifact | null, versionLue: unknown): number | null {
+  if (typeof versionLue !== "number" || !Number.isInteger(versionLue) || versionLue < 0) return null;
+  const servie = etat?.servedVersion ?? null;
+  return servie !== null && servie > versionLue ? servie : null;
+}
+
+/**
  * COMBIEN DE TENTATIVES AUTOMATIQUES on accepte d'empiler au-dessus de la version servie.
  *
  * Un rattrapage lancé depuis un RENDU (le figement d'un dossier antérieur au lot, le recalcul après

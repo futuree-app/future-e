@@ -110,12 +110,25 @@ test("A7. la version servie descend jusqu'au bouton, et la conclusion suit la ve
   assert.match(section, /<AnalyseAncienProjet\s+insee=\{insee\}\s+scopeKey=\{scopeKey\}\s+versionServie=\{versionServie\}/);
   assert.match(section, /<DossierDecisionReleve[^>]*versionServie=\{versionServie\}/);
   assert.match(releve, /<AnalyseAncienProjet insee=\{insee\} scopeKey=\{scopeKey\} versionServie=\{versionServie\}/);
-  // La frontière de la conclusion rédigée change de clé avec la version servie (cause établie, voir le compte rendu).
-  for (const f of [section, releve]) assert.match(f, /<Suspense[\s\S]{0,40}key=\{`\$\{scopeKey\}:\$\{versionServie \?\? generatedAt \?\? "vivant"\}`\}/);
+  // La frontière de la conclusion rédigée change d'identité à chaque rendu (cause établie, voir le compte rendu).
+  for (const f of [section, releve]) assert.match(f, /<Suspense[\s\S]{0,260}key=\{`\$\{scopeKey\}:\$\{versionServie \?\? generatedAt \?\? "vivant"\}:\$\{jetonDeRendu\(\)\}`\}/);
+  // L'annonce persistante vit hors du bandeau, dans les deux présentations, avec la version servie.
+  for (const f of [section, releve]) assert.match(f, /<AnnonceVersion insee=\{insee\} scopeKey=\{scopeKey\} versionServie=\{versionServie\}/);
   // La version servie vient de l'artefact réellement servi, et seulement de lui.
   assert.match(logement, /versionServie=\{servi\.source === "artefact" \? \(stocke\?\.servedVersion \?\? null\) : null\}/);
   assert.match(rapport, /versionServieCommune = servi\.source === "artefact" \? \(artefactCommune\?\.servedVersion \?\? null\) : null/);
   assert.equal([...rapport.matchAll(/versionServie=\{versionServieCommune\}/g)].length, 2, "repli communal et dossier de commune seule");
+});
+
+test("A7 bis. l'annonce ne parle que sur la version servie, et la mémoire est posée à la livraison", () => {
+  const annonce = readFileSync("src/components/report/AnnonceVersion.tsx", "utf8");
+  assert.match(annonce, /const atteinte = memoire !== null && versionAtteinte\(memoire\.attendue, versionServie\);/);
+  assert.match(annonce, /role="status" aria-live="polite"/);
+  assert.match(annonce, /className="sr-only"/);
+  const q1 = readFileSync("src/components/report/AnalyseAncienProjet.tsx", "utf8");
+  assert.match(q1, /if \(i\.type === "livree"\) \{[\s\S]{0,400}ecrireStockage\(cleMemoireAffichage\(cle\), JSON\.stringify\(\{ cle, attendue: i\.version, rechargee: false/);
+  const jeton = readFileSync("src/lib/rendu/jeton-de-rendu.ts", "utf8");
+  assert.match(jeton, /randomUUID\(\)/);
 });
 
 test("A8. livrée n'est pas affichée : l'affichage ne se constate qu'à une version servie >= l'attendue", () => {

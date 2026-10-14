@@ -19,6 +19,8 @@ import type { Dossier } from "@/lib/decision/decision-fact";
 import { ConclusionBlock, planToBlocks, type NiveauTitre } from "@/components/report/ConclusionBlock";
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
+import { AnnonceVersion } from "@/components/report/AnnonceVersion";
+import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 import { conditionPorteeParLeBloc, ancresRendues, controlesParEchelle } from "@/lib/decision/dossier-view";
 import { dateFr } from "@/lib/decision/autour-permis";
 import type { Echelle } from "@/lib/decision/echelles";
@@ -185,6 +187,8 @@ export function DossierDecisionReleve({
           {generatedAt && dateFr(generatedAt) ? (
             <p className={s.mono} style={{ fontSize: 11.5, color: "var(--r-meta)", marginBottom: 14 }}>Analyse générée le {dateFr(generatedAt)}</p>
           ) : null}
+          {/* FUT-93 : présente avant et après la mise à jour, pour que son annonce survive au bandeau. */}
+          <AnnonceVersion insee={insee} scopeKey={scopeKey} versionServie={versionServie} date={generatedAt ? (dateFr(generatedAt) || null) : null} />
           {/* Même priorité qu'en présentation classique : projet, puis lien avec le bien (FUT-10), puis voisinage. */}
           {(projetAChange || contexteAChange || voisinageAChange) && insee ? (
             <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} versionServie={versionServie} raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"} />
@@ -203,11 +207,11 @@ export function DossierDecisionReleve({
           ) : null}
 
           {/* ── La plaque. En « pending », pas de génération : le dossier n'est pas final. ──
-              FUT-93 : la clé du `Suspense` suit la version servie, comme dans la présentation classique
-              (voir `DossierDecisionSection`). */}
+              FUT-93 : la clé du `Suspense` change à chaque rendu, comme dans la présentation classique
+              (voir `jeton-de-rendu.ts`). */}
           <Plaque etiquette="Conclusion du dossier">
             {logementStatus === "pending" ? deterministe : (
-              <Suspense key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}`} fallback={deterministe}>
+              <Suspense key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}:${jetonDeRendu()}`} fallback={deterministe}>
                 <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} {...presentation} />
               </Suspense>
             )}

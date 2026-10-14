@@ -76,3 +76,21 @@ export function proprietesActivation(
     type: typeDeGeste(action.label),
   };
 }
+
+/**
+ * UNE MESURE PAR AFFICHAGE DU DOSSIER, PAS PAR MONTAGE (FUT-93). La conclusion change d'identité à
+ * chaque rendu serveur (`jeton-de-rendu.ts`) : toute relecture de la page (un critère gardé, le lien
+ * avec le bien déclaré) remonte les démarches. Sans cette garde, chaque geste du lecteur compterait un
+ * affichage de plus, et le taux d'activation baisserait d'autant pour les lecteurs les plus actifs.
+ *
+ * La signature dit CE qui est affiché (page, ordre, cartes visées) : des démarches différentes après
+ * une relecture se mesurent. La mémoire vit le temps du document : un rechargement compte de nouveau.
+ */
+export function signatureAffichage(page: string, actions: { anchorId: string }[], ordre: ControlOrdre): string {
+  return `${page}|${ordre}|${actions.map((a) => a.anchorId).join(",")}`;
+}
+export function premiereMesure(dejaMesurees: Set<string>, signature: string): boolean {
+  if (dejaMesurees.has(signature)) return false;
+  dejaMesurees.add(signature);
+  return true;
+}
