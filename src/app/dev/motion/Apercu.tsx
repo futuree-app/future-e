@@ -55,7 +55,7 @@ export function Apercu() {
         </div>
         <div style={{ padding: "16px 18px", borderRadius: 12, border: "1px solid var(--border-1)", borderLeft: "2px solid var(--reg-non-su)", background: "var(--bg-elev)" }}>
           <BoutonAction etat={etat} onAppui={agir} compteRendu={compteRendu}
-            libelles={{ repos: "Mettre à jour l'analyse", attente: "Mise à jour en cours", succes: "Analyse mise à jour", echec: "Réessayer la mise à jour", ailleurs: "Mise à jour déjà en cours" }} />
+            libelles={{ repos: "Mettre à jour l'analyse", attente: "Mise à jour en cours", succes: "Nouvelle analyse prête", affichage: "Affichage de votre analyse…", affichee: "Nouvelle analyse affichée", non_affichee: "Afficher la nouvelle analyse", echec: "Réessayer la mise à jour", ailleurs: "Mise à jour déjà en cours" }} />
         </div>
       </section>
       <section id="q2" style={{ display: "grid", gap: 16 }}>

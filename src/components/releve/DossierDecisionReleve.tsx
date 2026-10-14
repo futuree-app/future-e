@@ -32,6 +32,8 @@ import {
 export type DossierDecisionReleveProps = {
   dossier: Dossier;
   generatedAt?: string | null;
+  /** FUT-93 : la version figée servie (voir `DossierDecisionSection`). */
+  versionServie?: number | null;
   logement?: { href: string; label: string } | null;
   logementStatus?: "none" | "pending" | "done" | "unavailable";
   insee: string;
@@ -131,7 +133,7 @@ function ReperEchelle({ forme, etat }: { forme: Echelle; etat: EtatTrace }) {
 
 export function DossierDecisionReleve({
   dossier, logement, logementStatus = "none", insee, scopeKey, provenance, projetAChange, voisinageAChange, contexteAChange,
-  generatedAt, espacement = "mt-14", titre, supportingPane, controles,
+  generatedAt, versionServie = null, espacement = "mt-14", titre, supportingPane, controles,
 }: DossierDecisionReleveProps) {
   const structured = dossier.conclusionState !== "project_not_structured";
   const lecture = lireDossier(dossier);
@@ -185,7 +187,7 @@ export function DossierDecisionReleve({
           ) : null}
           {/* Même priorité qu'en présentation classique : projet, puis lien avec le bien (FUT-10), puis voisinage. */}
           {(projetAChange || contexteAChange || voisinageAChange) && insee ? (
-            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"} />
+            <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} versionServie={versionServie} raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"} />
           ) : null}
           {/* Les deux états de l'analyse d'adresse, avec les phrases de production. `unavailable` n'est
               jamais présenté comme une adresse lue : l'emblème garde alors le périmètre communal. */}
@@ -200,10 +202,12 @@ export function DossierDecisionReleve({
             </p>
           ) : null}
 
-          {/* ── La plaque. En « pending », pas de génération : le dossier n'est pas final. ── */}
+          {/* ── La plaque. En « pending », pas de génération : le dossier n'est pas final. ──
+              FUT-93 : la clé du `Suspense` suit la version servie, comme dans la présentation classique
+              (voir `DossierDecisionSection`). */}
           <Plaque etiquette="Conclusion du dossier">
             {logementStatus === "pending" ? deterministe : (
-              <Suspense fallback={deterministe}>
+              <Suspense key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}`} fallback={deterministe}>
                 <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={scopeKey} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} {...presentation} />
               </Suspense>
             )}

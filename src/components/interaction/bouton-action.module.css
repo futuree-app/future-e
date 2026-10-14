@@ -1,7 +1,13 @@
 /* FUT-75 · LE BOUTON D'ACTION ENGAGÉE. Jetons --m-* (design-tokens.css) : en mouvement réduit, aucune
    transformation, l'emblème d'attente reste immobile ; seules les teintes changent. */
 .bloc { display: grid; gap: 10px; justify-items: start; }
+/* LE CENTRAGE VERTICAL EST TYPOGRAPHIQUE, PAS UN DÉCALAGE (FUT-93). La boîte de ligne réserve la place
+   des jambages (« j », « y ») : centrée telle quelle, elle laissait le corps du libellé 1,75 px trop haut
+   (mesuré sur capture). Le bouton centre en Flex, et le libellé rogne sa ligne entre la hauteur des
+   capitales et la ligne de base (`text-box`) : c'est ce corps-là qui se centre. Sans `text-box`
+   (Firefox), le centrage Flex de la ligne reste, à l'écart d'origine près. */
 .bouton {
+  display: inline-flex; align-items: center; justify-content: center;
   position: relative; isolation: isolate; min-width: 248px; min-height: 46px; padding: 0 20px; cursor: pointer;
   border: 0; background: transparent; color: var(--bg); font: inherit; font-weight: 600; font-size: 14.5px;
   transition: transform var(--m-pression) ease; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
@@ -16,16 +22,19 @@
 /* Le survol ne vaut que là où l'appui agit et où le texte est sombre (repos, échec) : après un clic, la
    souris reste sur le bouton, et un fond clair sous le texte clair de la confirmation la rendrait illisible. */
 .bouton[data-etat="repos"]:hover .fond, .bouton[data-etat="echec"]:hover .fond { background: var(--fg-2); }
-.bouton[data-etat="ailleurs"]:hover .fond { border-color: var(--fg-3); }
-.bouton[data-etat="succes"] { cursor: default; }
-.bouton[data-etat="attente"] { color: var(--fg-hi); cursor: progress; }
-.bouton[data-etat="attente"] .fond { border-radius: 24px; background: var(--bg-elev-2); border-color: var(--border-2); transform: scaleX(0.94); }
-.bouton[data-etat="succes"] { color: var(--fg-hi); }
-.bouton[data-etat="succes"] .fond { background: var(--reg-alignement-surface); border-color: var(--reg-alignement); }
+.bouton[data-etat="ailleurs"]:hover .fond, .bouton[data-etat="non_affichee"]:hover .fond { border-color: var(--fg-3); }
+.bouton[data-etat="succes"], .bouton[data-etat="affichee"] { cursor: default; }
+.bouton[data-etat="attente"], .bouton[data-etat="affichage"] { color: var(--fg-hi); cursor: progress; }
+.bouton[data-etat="attente"] .fond, .bouton[data-etat="affichage"] .fond { border-radius: 24px; background: var(--bg-elev-2); border-color: var(--border-2); transform: scaleX(0.94); }
+.bouton[data-etat="succes"], .bouton[data-etat="affichee"] { color: var(--fg-hi); }
+.bouton[data-etat="succes"] .fond, .bouton[data-etat="affichee"] .fond { background: var(--reg-alignement-surface); border-color: var(--reg-alignement); }
 .bouton[data-etat="echec"] .fond { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-tint); }
-.bouton[data-etat="ailleurs"] { color: var(--fg-hi); }
-.bouton[data-etat="ailleurs"] .fond { background: var(--bg-elev-2); border-color: var(--reg-controle); }
-.contenu { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; animation: bascule var(--m-bascule) var(--m-releve) both; }
+.bouton[data-etat="ailleurs"], .bouton[data-etat="non_affichee"] { color: var(--fg-hi); }
+.bouton[data-etat="ailleurs"] .fond, .bouton[data-etat="non_affichee"] .fond { background: var(--bg-elev-2); border-color: var(--reg-controle); }
+.contenu { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; line-height: 1.25; animation: bascule var(--m-bascule) var(--m-releve) both; }
+.libelle { display: block; text-box: trim-both cap alphabetic; }
+/* L'emblème et la coche sont des blocs centrés sur le même axe que le corps du libellé. */
+.embleme, .coche { display: block; }
 @keyframes bascule { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
 .embleme { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
 .embleme circle, .embleme rect { stroke-dasharray: 1 1; animation: tracer 1800ms var(--m-releve) infinite; }

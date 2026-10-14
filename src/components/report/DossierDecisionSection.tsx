@@ -96,6 +96,7 @@ export function DossierDecisionSection({
   contexteAChange,
   voisinageAChange,
   generatedAt,
+  versionServie = null,
   espacement = "mt-14",
   titre,
   supportingPane,
@@ -116,6 +117,12 @@ export function DossierDecisionSection({
    * n'a pas eu lieu. C'est précisément la confusion que ce lot supprime.
    */
   generatedAt?: string | null;
+  /**
+   * FUT-93 : LE NUMÉRO DE LA VERSION FIGÉE QUE CE RENDU SERT (`StoredArtifact.servedVersion`), pour
+   * cette `scopeKey`. Nul pour un dossier assemblé à l'instant. La mise à jour (`AnalyseAncienProjet`)
+   * ne dit « affichée » que lorsqu'il atteint la version que le serveur a annoncée.
+   */
+  versionServie?: number | null;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
   // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
@@ -178,7 +185,7 @@ export function DossierDecisionSection({
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
         provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
         contexteAChange={contexteAChange}
-        generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
+        generatedAt={generatedAt} versionServie={versionServie} espacement={espacement} titre={titre} supportingPane={supportingPane}
         controles={controles}
       />
     );
@@ -258,6 +265,7 @@ export function DossierDecisionSection({
             <AnalyseAncienProjet
               insee={insee}
               scopeKey={scopeKey}
+              versionServie={versionServie}
               raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"}
             />
           ) : null}
@@ -280,6 +288,7 @@ export function DossierDecisionSection({
             <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
           ) : (
             <Suspense
+              key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}`}
               fallback={
                 <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
               }

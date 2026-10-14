@@ -176,7 +176,8 @@ test("E3. le relevé ne génère rien, ne resélectionne rien, et garde les éta
   assert.doesNotMatch(src, /sectionsDeLaMinute|sectionsAffichees|\.cards\.slice|\.cards\.filter/, "aucune seconde sélection de faits");
   assert.match(src, /const lecture = lireDossier\(dossier\);/);
   // `pending` : déterministe, sans ConclusionRedigee (pas de second appel pendant l'analyse d'adresse).
-  assert.match(src, /logementStatus === "pending" \? deterministe : \(\s*<Suspense fallback=\{deterministe\}>\s*<ConclusionRedigee /);
+  // FUT-93 : la frontière porte une clé liée à la version servie ; repli et conclusion inchangés.
+  assert.match(src, /logementStatus === "pending" \? deterministe : \(\s*<Suspense key=\{`\$\{scopeKey\}:\$\{versionServie \?\? generatedAt \?\? "vivant"\}`\} fallback=\{deterministe\}>\s*<ConclusionRedigee /);
   // La date n'existe que pour un artefact, jamais « aujourd'hui ».
   assert.match(src, /generatedAt && dateFr\(generatedAt\)/);
   assert.doesNotMatch(src, /new Date\(\)/);
