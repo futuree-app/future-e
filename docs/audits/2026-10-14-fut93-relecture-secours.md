@@ -43,28 +43,42 @@ on constate si la relecture est affichée, et sinon on recharge une fois.
 - Q1 garde sa récupération (par version) : rien n'est dupliqué ni modifié. Moteur, prix, protection
   contre les doublons : intouchés.
 
-## 4. Résultats sur le banc
+## 4. Résultats sur le banc (code final, 15/10/2026)
 
-Vrais `CriteresDuProjet` et `LienAvecCeBien`, deux présentations ; journaux dans le compte rendu de session.
+Vrais `CriteresDuProjet` et `LienAvecCeBien`, deux présentations. Journaux hors dépôt (`.banc-fut93/`).
 
 | Scénario | Résultat |
 | --- | --- |
-| normal (section en 7 s), 1280 et 390 px | 24/24 : bandeau en 9,1 à 11,0 s, 0 rechargement, jeton validé 10 à 20 ms après la fin de la réponse |
-| lent (15 s), 1280 px | 8/8 : bandeau en 17 à 23 s, 0 rechargement (y compris au-delà de 20 s) |
-| très lent (26 s), 1280 px | 4/4 : bandeau en 28 à 30 s, 0 rechargement (avec un plafond de 45 s, alors en vigueur) |
+| normal (section en 7 s), 1280 et 390 px | 24 : 23 affichés en 8,5 à 10,3 s sans rechargement ; 1 blocage SPONTANÉ (Le relevé, critère), rattrapé par un rechargement à 31 s, bandeau à 31,1 s |
+| lent (15 s), 1280 px | 8/8 : bandeau en 16,5 à 17,5 s, 0 rechargement |
+| très lent (22 s, au-delà du délai de 20 s), 1280 px | 4/4 : bandeau en 23,5 à 24,3 s, 0 rechargement |
 | bloqué (clé de conclusion figée), 1280 et 390 px | 24/24 : 23 blocages rattrapés par UN rechargement vers 30 s, bandeau en 31 à 41 s ; 1 blocage non reproduit, 0 rechargement |
 
-Partout : une écriture, 0 appel de génération, même adresse, aucun second rechargement dans les 30 s
-suivantes. Défilement après secours (version finale, ancre) : l'élément lu reste à la même hauteur
-(écart 0 à 1 px).
+Partout : une écriture, **0 appel de génération**, même adresse, aucun second rechargement dans les
+30 s suivantes. Le jeton est validé 10 à 120 ms après la fin de la réponse du serveur.
 
-**Non rejoué sur le code final** : les séries normale, lente et très lente ont tourné AVANT l'ancre de
-lecture et le plafond de 30 s ; à rejouer (le scénario très lent passe à 22 s).
+**Le témoin ne bloque pas lui-même la relecture.** Comparaison contrôlée sur le même banc, 40 relectures
+de chaque côté : avec le témoin, 0 blocage ; sans, 0 blocage. Sur l'ensemble du code final : 1 blocage
+sur 64 relectures avec le témoin, contre 0 sur 40 sans (et 0 sur 115 lors de la revue du 14/10) : écart
+non significatif, compatible avec la course naturelle, déjà mesurée sur la frontière extérieure (3 sur
+50 dans Q1). La forme rejetée du témoin, elle, bloquait à chaque essai.
+
+**Le défilement.** Avec l'ancre, l'élément lu reste à la même hauteur à travers le rechargement (écart de
+0 à 1 px), dès le chargement de la page puis à l'arrivée de la section. Les déplacements de 102 et
+109 px observés à 390 px sur le geste du lien PRÉEXISTENT au secours : ils se produisent au moment du
+geste, à l'identique dans le scénario normal sans aucun rechargement (159 → 49 px), et le secours les
+conserve sans les aggraver.
+
+**Vérifications** : suite complète 2562 / 2562 (2555 sur `main` + 7), TypeScript, lint des fichiers
+modifiés, build Webpack. Lancée en même temps qu'une autre charge (TypeScript, Chrome du banc), la suite
+rapportait moins de tests (2515, 2528) sans échec : des fichiers entiers manquaient au rapport ; seule,
+elle les compte tous. Comportement du lanceur sous charge, sans lien avec ce correctif.
 
 ## 5. Risques résiduels
 
-- Blocage où la réponse ne se termine jamais : secours au plafond, 30 s d'attente pour le lecteur.
+- Blocage où la réponse ne se termine jamais : le secours attend son plafond, 30 s pour le lecteur.
 - Pendant le rechargement, la section du bien revient après environ 7 s (repli communal entre-temps).
-- Le témoin est chaotique par nature : un élément de page le bloquait ; seule sa forme actuelle (ne rend
-  rien, en tête de section) est mesurée sans blocage, sur le banc. À vérifier en production.
+- Le témoin n'est mesuré que sur le banc ; la production le confirmera.
 - Safari non mesuré. Les quatre autres gestes partagent le mécanisme, non rejoués un par un.
+- Le rechargement relit `/rapport` comme un rechargement manuel : les rattrapages automatiques déjà
+  prévus à l'ouverture d'un dossier s'y appliquent comme avant ; aucun appel à la génération demandée.
