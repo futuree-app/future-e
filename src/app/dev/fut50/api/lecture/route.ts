@@ -13,7 +13,7 @@ import { getGeorisquesSummary } from "@/lib/georisques";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
-import { carteCompte, CHALEUR, formatTemperature } from "@/lib/accueil/recits";
+import { carteCompte, CHALEUR, formatTemperature, formatCompte } from "@/lib/accueil/recits";
 import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil/faits";
 import { CLIMAT_REFERENCE_LABEL } from "@/lib/decision/climat-facts";
 import { aCommune } from "@/lib/typography";
@@ -51,7 +51,9 @@ async function entreesChaleur(insee: string): Promise<{ nom: string | null; e: E
     : null;
   const conditionCarte = d2?.dossier.sections.flatMap((s) => s.cards)
     .flatMap((c) => (c.kind === "fact" && c.fact.role === "condition_check" ? [c.fact] : []))[0];
-  const faitDrias = climat ? carteCompte(CHALEUR, indicatorsDepuisScenarios(climat.commune.s), "2050")?.fait ?? null : null;
+  const indicateurs = climat ? indicatorsDepuisScenarios(climat.commune.s) : null;
+  const faitDrias = indicateurs ? carteCompte(CHALEUR, indicateurs, "2050")?.fait ?? null : null;
+  const j35 = indicateurs ? construireFaitsCommune(d1.moduleFacts.nom, indicateurs, null).climat?.jours_au_dessus_de_35C : null;
   return {
     nom: d1.moduleFacts.nom,
     e: {
@@ -59,6 +61,7 @@ async function entreesChaleur(insee: string): Promise<{ nom: string | null; e: E
       ecart,
       phraseCondition: conditionCarte?.statement ?? null,
       faitDrias,
+      jours35: j35?.projete != null && j35.reference != null ? { projete: j35.projete, referenceTexte: formatCompte(j35.reference) } : null,
       gesteSansAdresse,
     },
   };
@@ -104,6 +107,7 @@ async function entreesHivers(insee: string): Promise<{ nom: string | null; e: En
       position: carte ? carte.statement.replace(/^Vous avez placé [^.]*\. /, "") : null,
       limite: carte && "limitation" in carte ? (carte.limitation ?? null) : null,
       temperatureReference: ref != null ? `Température moyenne de l'hiver : ${formatTemperature(ref)} ${CLIMAT_REFERENCE_LABEL}.` : null,
+      temperatureValeur: ref != null ? formatTemperature(ref) : null,
     },
   };
 }

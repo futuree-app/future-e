@@ -6,8 +6,11 @@
 //   B · commune    la commune confirmée (une coche se trace), les priorités facultatives, une invitation.
 //                  Toujours aucun résultat : rien d'une autre commune, aucun panneau vide.
 //   C · priorité   UNE lecture de la commune choisie : le fait (source, horizon, grain), ce qu'il implique pour
-//                  cette priorité, ce qu'il reste à vérifier, la suite. Sur ordinateur, elle occupe la colonne de
-//                  droite DEPUIS LE HAUT, au niveau du titre : tout tient dans le premier écran (revue du 15/10).
+//                  cette priorité, ce qu'il reste à vérifier, la suite.
+//
+// LE GESTE (revue du 15/10) : aux états A et B, le bloc de recherche est centré ; à l'état C, la grille du hero
+// s'ouvre en deux colonnes (420 ms, CSS seul, voir `c.module.css`) : le MÊME bloc glisse vers la gauche, sans être
+// recréé, et la lecture arrive dans la colonne qui s'ouvre. En mouvement réduit, le changement est immédiat.
 //
 // Décisions du 14/10/2026 (FUT-50) : le champ ne cherche que des COMMUNES, parce que l'aperçu gratuit ne lit
 // que des données communales ; l'adresse a sa propre porte vers `/dossier`, où le périmètre et le prix de
@@ -73,6 +76,10 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
   const zoneRef = useRef<HTMLDivElement>(null);
   const lectureRef = useRef<HTMLDivElement>(null);
   const idListe = useId();
+  // L'ouverture se joue une seule fois, à l'entrée dans l'état « priorité ». Pendant ce court moment, le conteneur
+  // porte la classe qui orchestre le déploiement ; changer ensuite de priorité ne la rejoue pas.
+  const [ouvertureFraiche, setOuvertureFraiche] = useState(false);
+  const etatPrecedent = useRef<"vierge" | "commune" | "priorite">("vierge");
 
   useEffect(() => {
     const q = saisie.trim();
@@ -173,14 +180,22 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
   }
 
   const etat: "vierge" | "commune" | "priorite" = !lieu ? "vierge" : focale ? "priorite" : "commune";
+  useEffect(() => {
+    const avant = etatPrecedent.current;
+    etatPrecedent.current = etat;
+    if (etat !== "priorite" || avant === "priorite") return;
+    setOuvertureFraiche(true);
+    const t = setTimeout(() => setOuvertureFraiche(false), 1000);
+    return () => clearTimeout(t);
+  }, [etat]);
   const lectureFocale = lieu && focale ? lectures[`${lieu.insee}|${focale}`] : undefined;
 
   return (
     <section className={c.hero} data-etat={etat} aria-labelledby="hero-c">
       <div className={c.heroGauche}>
         <div className={c.heroTete}>
-          <h1 id="hero-c" className={c.titre}>Regardez une commune avec ce qui compte pour vous.</h1>
-          <p className={c.sous}>{fr("Choisissez une commune, puis ce qui vous importe : futur•e vous montre ce que disent les données publiques, et ce qu'il reste à vérifier.")}</p>
+          <h1 id="hero-c" className={c.titre}>Une commune en tête ? Voyez-la à travers vos priorités.</h1>
+          <p className={c.sous}>{fr("Chaleur, hivers, taille de la ville, risques naturels : choisissez une priorité, et les données publiques de la commune prennent un sens, limites comprises.")}</p>
         </div>
 
         <div className={c.recherche} ref={zoneRef} id="lieu">
@@ -250,7 +265,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
         {lieu ? (
           <div className={c.priorites} key={`priorites-${lieu.insee}`}>
-            <p className={c.question} id="question-priorites">Qu&apos;est-ce qui compte pour vous ?</p>
+            <p className={c.question} id="question-priorites">À quoi tenez-vous ?</p>
             <ul className={c.pastilles} aria-labelledby="question-priorites">
               {pastilles.map((p, i) => (
                 <li key={p.cle} className={c.pastilleEntree} style={{ animationDelay: `${i * 40}ms` } as CSSProperties}>
@@ -261,7 +276,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
                 </li>
               ))}
             </ul>
-            <p className={c.aide}>{etat === "commune" ? "Choisissez-en une pour voir ce que disent les données. Rien n'est enregistré." : "Une ou plusieurs, facultatives. Rien n'est enregistré."}</p>
+            <p className={c.aide}>{etat === "commune" ? "Choisissez-en une : la lecture s'affiche aussitôt. Rien n'est enregistré." : "Une ou plusieurs, facultatives. Rien n'est enregistré."}</p>
           </div>
         ) : null}
 
@@ -273,15 +288,20 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
       </div>
 
       <div className={c.heroDroite} aria-live="polite" ref={lectureRef}>
-        {etat !== "priorite" || !lieu || !focale ? null
-          : lectureFocale === "chargement" || lectureFocale === undefined ? <Attente titre={`${libelleDe(focale)} · ${lieu.commune}`} />
-            : lectureFocale === "erreur" ? (
-              <div className={c.lecture} role="alert">
-                <p className={c.tempsTexte}>La lecture n&apos;a pas pu être chargée.</p>
-                <button type="button" className={c.bouton} onClick={() => charger(lieu, focale)}>Réessayer</button>
-              </div>
-            )
-              : <Lecture lecture={lectureFocale} onglets={choisies.length > 1 ? { choisies, focale, choisir: setFocale } : undefined} />}
+        {etat !== "priorite" || !lieu || !focale ? null : (
+          // L'OUVERTURE : ce conteneur naît à l'entrée dans l'état 3 et y reste ; il porte l'arrivée de la colonne.
+          // Changer de priorité ne remplace que son contenu.
+          <div className={`${c.ouverture} ${ouvertureFraiche ? c.ouvertureFraiche : ""}`}>
+            {lectureFocale === "chargement" || lectureFocale === undefined ? <Attente titre={`${libelleDe(focale)} · ${lieu.commune}`} />
+              : lectureFocale === "erreur" ? (
+                <div className={c.lecture} role="alert">
+                  <p className={c.tempsTexte}>La lecture n&apos;a pas pu être chargée.</p>
+                  <button type="button" className={c.bouton} onClick={() => charger(lieu, focale)}>Réessayer</button>
+                </div>
+              )
+                : <Lecture lecture={lectureFocale} onglets={choisies.length > 1 ? { choisies, focale, choisir: setFocale } : undefined} />}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -318,21 +338,31 @@ function Lecture({ lecture, onglets }: {
       <div className={c.lectureContenu} key={`${lecture.commune}-${lecture.cle}`}>
         {lecture.fait ? (
           <div className={c.temps}>
-            <h3 className={c.tempsTitre}>Ce que disent les données</h3>
-            <p className={c.tempsTexte}>{fr(lecture.fait.texte)}</p>
+            <h3 className={c.tempsTitre}>{lecture.fait.grain === "unite_urbaine" ? `Agglomération de ${lecture.commune}` : `À ${lecture.commune}`}</h3>
+            {lecture.fait.mesure ? (
+              // La valeur en grand, jamais seule : son unité et sa légende la suivent ; le fait complet reste lu
+              // par les lecteurs d'écran.
+              <div className={c.mesure}>
+                <p className={c.mesureValeur} aria-hidden>{lecture.fait.mesure.valeur}<span className={c.mesureUnite}>{lecture.fait.mesure.unite}</span></p>
+                <p className={c.mesureLegende} aria-hidden>{fr(lecture.fait.mesure.legende)}</p>
+                <p className={c.lectureSeule}>{lecture.fait.texte}</p>
+              </div>
+            ) : (
+              <p className={c.tempsTexte}>{fr(lecture.fait.texte)}</p>
+            )}
             <span className={c.source}>
               <GlypheGrain grain={lecture.fait.grain} taille={11} />{" "}
-              {lecture.fait.grain === "unite_urbaine" ? `agglomération de ${lecture.commune}` : `commune de ${lecture.commune}`} · {lecture.fait.source}
+              {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : "à l'échelle de la commune"} · {lecture.fait.source}
             </span>
           </div>
         ) : null}
         <div className={c.temps}>
-          <h3 className={c.tempsTitre}>Pour cette priorité</h3>
+          <h3 className={c.tempsTitre}>Pour votre priorité</h3>
           <span className={c.signal} style={{ "--r-teinte": TEINTE[lecture.pourVous.signal] } as CSSProperties}>{MOT_DU_SIGNAL[lecture.pourVous.signal]}</span>
           <p className={c.tempsTexte}>{fr(lecture.pourVous.texte)}</p>
         </div>
         <div className={c.temps}>
-          <h3 className={c.tempsTitre}>Ce qu&apos;il reste à vérifier</h3>
+          <h3 className={c.tempsTitre}>À vérifier</h3>
           <p className={c.tempsTexteDoux}>{fr(lecture.aVerifier)}</p>
         </div>
         <div className={c.suites}>

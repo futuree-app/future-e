@@ -22,14 +22,14 @@ export function Pourquoi() {
           <h2 id="pourquoi-c" className={c.sectionTitre}>Votre futur lieu de vie ne tient pas dans une annonce.</h2>
           {/* nouveau, une phrase (revue du 14/10) : ce qu'une annonce ne dit pas. Pas de second manifeste. */}
           <p className={c.pourquoiAccroche}>
-            {fr("Une annonce décrit un bien. Elle dit peu de choses de ce qui l'entoure, de ce que deviendra le lieu, et de ce qu'il faut vérifier avant de signer.")}
+            {fr("Une annonce décrit un bien. Rarement ses alentours, l'avenir du lieu, ou les vérifications à faire avant de signer.")}
           </p>
           {/* existant, mot pour mot : premier et troisième paragraphes de la section « Pourquoi futur•e ». */}
           <p className={c.pourquoiCorps}>
             {fr("Choisir où vivre est l’une des décisions les plus engageantes qui soient : des années de vie, une grande partie d’un patrimoine, parfois la santé d’une famille.")}
           </p>
           <p className={c.pourquoiCorps}>
-            {fr("futur•e rassemble ce qui est connu, rend visibles les angles morts et vous aide à savoir ce qu’il reste à vérifier avant de vous engager.")}
+            {fr("futur•e rassemble les données connues, éclaire les angles morts et vous aide à préparer les vérifications avant de vous engager.")}
           </p>
           <p className={c.triptyque}>
             Ce que nous savons. <span style={{ color: "var(--r-texte)" }}>Ce que cela change pour vous.</span>{" "}
@@ -50,9 +50,9 @@ export function Pourquoi() {
 const MARCHES: { grain: GrainCle; nom: string; echelle: string; texte: string }[] = [
   // Les trois descriptions sont celles de la constante MODULES de l'accueil actuel ; les listes d'items, qui
   // revenaient presque à l'identique dans les tarifs, sont retirées.
-  { grain: "commune", nom: "Territoire", echelle: "la commune", texte: "Ce qui structure la vie ici et ce qui la transforme : les services, la population, la nature, et la trajectoire du climat." },
-  { grain: "secteur", nom: "Autour de l'adresse", echelle: "le voisinage", texte: "Ce qui se trouve à proximité, ce qui manque, et ce qui distingue ce secteur du reste de la commune." },
-  { grain: "batiment", nom: "Logement", echelle: "le bâtiment", texte: "Ce que son diagnostic établit, ce à quoi son adresse l'expose, et ce qu'il reste à demander avant de signer." },
+  { grain: "commune", nom: "Territoire", echelle: "la commune", texte: "Services, population, nature et climat : le portrait d'une commune, et la façon dont elle change." },
+  { grain: "secteur", nom: "Autour de l'adresse", echelle: "le voisinage", texte: "Commerces, école, santé, transports, espaces verts : le quotidien à quelques minutes de la porte." },
+  { grain: "batiment", nom: "Logement", echelle: "le bâtiment", texte: "Diagnostic, exposition du bâti, sol de la parcelle : le bien lui-même, et les questions à poser avant de signer." },
 ];
 
 export function Echelles() {
@@ -61,7 +61,7 @@ export function Echelles() {
       <h2 id="echelles-c" className={c.sectionTitre}>Trois échelles, de la commune à vos murs.</h2>
       {/* existant : première phrase du chapô de la section « 3 modules ». */}
       <p className={c.sectionChapo} style={{ marginTop: 14 }}>
-        {fr("Une bonne commune ne fait pas un bon quartier, et un bon quartier ne fait pas un bon logement. Chaque échelle peut nuancer la précédente.")}
+        {fr("Une bonne commune ne fait pas un bon quartier, ni un bon quartier un bon logement. Chaque échelle peut nuancer la précédente.")}
       </p>
       <ol className={c.descente}>
         {MARCHES.map((m) => (
@@ -97,9 +97,9 @@ export function DossierAdresse({ maquette = false }: { maquette?: boolean }) {
   const planFort = PLANS.find((p) => p.id === "lecture")!;
   return (
     <section className={c.section} id="dossier-adresse" aria-labelledby="dossier-c">
-      <h2 id="dossier-c" className={c.sectionTitre}>Et à une adresse précise, qu&apos;est-ce que ça change ?</h2>
+      <h2 id="dossier-c" className={c.sectionTitre}>Et pour votre adresse ?</h2>
       <p className={c.sectionChapo} style={{ marginTop: 14 }}>
-        {fr("Le dossier d'adresse relie la commune, le voisinage et le logement à votre projet : ce qui correspond, ce qui coince, et ce qu'il faut vérifier avant de signer.")}
+        {fr("Le dossier d'adresse relie la commune, le voisinage et le logement à votre projet. Il dit où cela correspond, où cela coince, et quoi vérifier avant de signer.")}
       </p>
       <div className={c.dossierGrille}>
         <FilmDossier
@@ -251,7 +251,7 @@ export function Savoir() {
     <section className={c.section} id="savoir" aria-labelledby="savoir-c">
       <h2 id="savoir-c" className={c.sectionTitre}>Comprendre avant de choisir.</h2>
       <p className={c.sectionChapo} style={{ marginTop: 14 }}>
-        {fr("Des articles et des guides gratuits, fondés sur des données publiques, pour savoir quoi regarder dans votre décision.")}
+        {fr("Articles et guides gratuits, sourcés, pour savoir où porter le regard avant de décider.")}
       </p>
       <div className={c.articles}>
         {A_LA_UNE.map((a) => (

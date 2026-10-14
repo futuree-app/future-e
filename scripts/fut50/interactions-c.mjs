@@ -48,16 +48,16 @@ async function choisirCommune(page, texte, nom) {
 // ── Les trois états, trois largeurs ──────────────────────────────────────────────────────────
 for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740, 2]]) {
   const { ctx, page } = await ouvrir(largeur, hauteur, dpr);
-  await page.screenshot({ path: `${IMG}/c2-etat-a-vierge-${largeur}.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-etat-a-vierge-${largeur}.jpg`, type: "jpeg", quality: 78 });
   const vierge = await page.locator('[aria-live="polite"]').innerText();
   constats.push(`${largeur} état A : colonne de lecture ${vierge.trim() === "" ? "vide" : "NON VIDE"}`);
   await choisirCommune(page, "Nant", "Nantes");
-  await page.screenshot({ path: `${IMG}/c2-suggestions-${largeur}.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-suggestions-${largeur}.jpg`, type: "jpeg", quality: 78 });
   const options = await page.getByRole("option").allInnerTexts();
   constats.push(`${largeur} suggestions : ${options.length} communes (${options.map((o) => o.split("\n")[0]).join(", ")})`);
   await page.keyboard.press("Enter");
   await page.waitForTimeout(500);
-  await page.screenshot({ path: `${IMG}/c2-etat-b-commune-${largeur}.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-etat-b-commune-${largeur}.jpg`, type: "jpeg", quality: 78 });
   const b = await page.locator('[aria-live="polite"]').innerText();
   constats.push(`${largeur} état B : lecture ${b.trim() === "" ? "absente (attendu)" : "PRÉSENTE"}`);
   const t0 = Date.now();
@@ -66,7 +66,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   constats.push(`${largeur} état C (hivers) en ${Date.now() - t0} ms`);
   await page.waitForTimeout(300);
   if (largeur < 1000) await page.locator('[aria-live="polite"]').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: `${IMG}/c2-etat-c-priorite-${largeur}.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-etat-c-priorite-${largeur}.jpg`, type: "jpeg", quality: 78 });
   // Désélection : retour à l'état B, sans résultat.
   await page.getByRole("button", { name: "Avoir des hivers doux" }).click();
   await page.waitForTimeout(200);
@@ -74,6 +74,57 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   constats.push(`${largeur} désélection : lecture ${apres.trim() === "" ? "retirée" : "ENCORE AFFICHÉE"}`);
   const deborde = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   constats.push(`${largeur} débordement horizontal : ${deborde} px`);
+  await ctx.close();
+}
+
+
+// ── Le geste de l'état 3 : continuité, aucun saut, aucun décalage ─────────────────────────────
+{
+  const { ctx, page } = await ouvrir(1440, 900, 1);
+  await page.evaluate(() => {
+    window.__cls = 0;
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true });
+  });
+  await choisirCommune(page, "Nant", "Nantes");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
+  const champ = await page.$('[role="combobox"]');
+  const avant = await page.evaluate(() => {
+    const t = document.querySelector("h1").getBoundingClientRect();
+    const b = document.querySelector('[role="combobox"]').getBoundingClientRect();
+    return { titreHaut: Math.round(t.top), champGauche: Math.round(b.left) };
+  });
+  // Données préchauffées : la bande d'images montre le geste, pas le chargement.
+  await page.evaluate(() => fetch("/dev/fut50/api/lecture?insee=44109&cle=hivers&type=commune&commune=Nantes&libelle=Nantes"));
+  await page.getByRole("button", { name: "Avoir des hivers doux" }).click();
+  let ecoule = 0;
+  for (const t of [120, 300, 480, 700]) {
+    await page.waitForTimeout(t - ecoule);
+    ecoule = t;
+    await page.screenshot({ path: `${IMG}/c3-transition-${t}ms-1440.jpg`, type: "jpeg", quality: 70 });
+  }
+  await lecturePrete(page);
+  await page.waitForTimeout(600);
+  const apres = await page.evaluate(() => {
+    const t = document.querySelector("h1").getBoundingClientRect();
+    const b = document.querySelector('[role="combobox"]').getBoundingClientRect();
+    return { titreHaut: Math.round(t.top), champGauche: Math.round(b.left), focus: document.activeElement?.textContent?.trim() };
+  });
+  const memeChamp = await champ.evaluate((el) => el.isConnected && el === document.querySelector('[role="combobox"]'));
+  constats.push(`geste état 3 : titre ${avant.titreHaut} → ${apres.titreHaut} px (vertical), champ ${avant.champGauche} → ${apres.champGauche} px (horizontal), même champ : ${memeChamp}, focus sur « ${apres.focus} »`);
+  // Changement de priorité, puis désélection, puis retour à l'état initial.
+  await page.getByRole("button", { name: "Vivre dans une petite ville" }).click();
+  await lecturePrete(page);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${IMG}/c3-changement-priorite-1440.jpg`, type: "jpeg", quality: 78 });
+  for (const n of ["Vivre dans une petite ville", "Avoir des hivers doux"]) await page.getByRole("button", { name: n }).click();
+  await page.waitForTimeout(600);
+  const retourB = await page.evaluate(() => Math.round(document.querySelector('[role="combobox"]').getBoundingClientRect().left));
+  await page.getByRole("button", { name: "Changer de commune" }).click();
+  await page.waitForTimeout(600);
+  const retourA = await page.evaluate(() => ({ champ: Math.round(document.querySelector('[role="combobox"]').getBoundingClientRect().left), focus: document.activeElement?.getAttribute("role"), priorites: document.querySelectorAll("button[aria-pressed]").length }));
+  const cls = await page.evaluate(() => window.__cls);
+  constats.push(`retours : désélection → champ à ${retourB} px (centré) ; « Changer de commune » → champ à ${retourA.champ} px, focus ${retourA.focus}, ${retourA.priorites} priorité affichée ; décalage cumulé (CLS) ${cls.toFixed(3)}`);
   await ctx.close();
 }
 
@@ -90,7 +141,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   await lecturePrete(page);
   const t = (await page.locator('[aria-live="polite"]').innerText()).replace(/\s+/g, " ");
   constats.push(`changement de commune : ${/Annecy/.test(t) ? "LECTURE D'ANNECY ENCORE VISIBLE" : "seule la nouvelle commune est lue"} (${t.slice(0, 90)})`);
-  await page.screenshot({ path: `${IMG}/c2-changement-commune-1440.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-changement-commune-1440.jpg`, type: "jpeg", quality: 78 });
   await ctx.close();
 }
 
@@ -102,7 +153,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   await page.getByRole("button", { name: "Pouvoir vivre sans voiture" }).click();
   await lecturePrete(page);
   await page.waitForTimeout(300);
-  await page.screenshot({ path: `${IMG}/c2-composition-mobilite-1440.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-composition-mobilite-1440.jpg`, type: "jpeg", quality: 78 });
   await ctx.close();
 }
 
@@ -123,7 +174,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
   await page.waitForSelector('[aria-live="polite"] [role="alert"]', { timeout: 10000 });
-  await page.screenshot({ path: `${IMG}/c2-erreur-lecture-1440.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-erreur-lecture-1440.jpg`, type: "jpeg", quality: 78 });
   constats.push(`erreur de lecture : ${(await page.locator('[aria-live="polite"] [role="alert"]').innerText()).replace(/\s+/g, " ")}`);
   await ctx.close();
 }
@@ -159,12 +210,12 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
 // ── Storyboard et section Dossier Adresse ────────────────────────────────────────────────────
 for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
   const { ctx, page } = await ouvrir(largeur, hauteur, dpr, {}, `${base}/dev/fut50/storyboard`);
-  await page.screenshot({ path: `${IMG}/c2-storyboard-${largeur}-page.jpg`, type: "jpeg", quality: 78, fullPage: true });
+  await page.screenshot({ path: `${IMG}/c3-storyboard-${largeur}-page.jpg`, type: "jpeg", quality: 78, fullPage: true });
   await page.goto(`${URL_C}#dossier-adresse`, { waitUntil: "networkidle" });
   await sansDev(page);
   await page.locator("#dossier-adresse").scrollIntoViewIfNeeded();
   await page.evaluate(() => window.scrollBy(0, -20));
-  await page.screenshot({ path: `${IMG}/c2-section-dossier-${largeur}.jpg`, type: "jpeg", quality: 78 });
+  await page.screenshot({ path: `${IMG}/c3-section-dossier-${largeur}.jpg`, type: "jpeg", quality: 78 });
   await ctx.close();
 }
 
@@ -195,9 +246,9 @@ rmSync(tmp, { recursive: true, force: true });
   await page.waitForTimeout(1600);
   await ctx.close();
   const webm = readdirSync(tmp).find((f) => f.endsWith(".webm"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${tmp}/${webm}`, "-vf", "scale=1280:-2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart", `${VID}/c2-hero-commune-et-priorites.mp4`]);
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${tmp}/${webm}`, "-vf", "scale=1280:-2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart", `${VID}/c3-hero-adaptatif.mp4`]);
   rmSync(tmp, { recursive: true, force: true });
-  constats.push(`vidéo ${VID}/c2-hero-commune-et-priorites.mp4`);
+  constats.push(`vidéo ${VID}/c3-hero-adaptatif.mp4`);
 }
 
 await nav.close();

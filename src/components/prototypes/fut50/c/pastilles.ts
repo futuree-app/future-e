@@ -76,7 +76,17 @@ export type Signal = "defavorable" | "favorable" | "neutre" | "information" | "a
 export type LecturePastille = {
   cle: CleePastille;
   commune: string;
-  fait: { texte: string; source: string; grain: "commune" | "unite_urbaine" } | null;
+  fait: {
+    texte: string;
+    source: string;
+    grain: "commune" | "unite_urbaine";
+    /**
+     * LA DONNÉE PRINCIPALE, quand une mesure pertinente existe : affichée en grand, toujours avec son unité et sa
+     * légende (libellé, période, contexte). Absente quand le fait n'est pas une valeur unique : on ne force pas.
+     * Le texte complet reste celui du fait, lu par les lecteurs d'écran.
+     */
+    mesure?: { valeur: string; unite: string; legende: string };
+  } | null;
   pourVous: { signal: Signal; texte: string };
   aVerifier: string;
   /** Le prochain geste : toujours un vrai parcours. */
@@ -103,6 +113,8 @@ export type EntreesChaleur = {
   phraseCondition: string | null;
   /** Le fait DRIAS des jours au-dessus de 35 °C, écrit par l'accueil (`carteCompte`). */
   faitDrias: string | null;
+  /** Les mêmes jours, en nombres (DRIAS, horizon 2050 et référence reconstruite), pour la mesure. */
+  jours35?: { projete: number; referenceTexte: string } | null;
   /** Le geste du moteur sans adresse (`summerComfortAction(false)`). */
   gesteSansAdresse: string;
 };
@@ -137,7 +149,17 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
   if ((e.issue === "favorable" || e.issue === "indeterminate") && e.phraseCondition) {
     return {
       cle: "chaleur", commune: lieu.commune,
-      fait: e.faitDrias ? { texte: `Jours au-dessus de 35 °C : ${minusculeInitiale(e.faitDrias)}`, source: SOURCE_DRIAS, grain: "commune" } : null,
+      fait: e.faitDrias ? {
+        texte: `Jours au-dessus de 35 °C : ${minusculeInitiale(e.faitDrias)}`, source: SOURCE_DRIAS, grain: "commune",
+        // Un grand « 0 » se lirait comme une absence de chaleur : sous un jour par an, on garde la phrase.
+        ...(e.jours35 && e.jours35.projete >= 1 ? {
+          mesure: {
+            valeur: String(Math.round(e.jours35.projete)),
+            unite: Math.round(e.jours35.projete) > 1 ? "jours par an" : "jour par an",
+            legende: `au-dessus de 35 °C à l'horizon 2050 (+2,7 °C en France), contre ${e.jours35.referenceTexte} sur 1976-2005`,
+          },
+        } : {}),
+      } : null,
       pourVous: { signal: e.issue === "favorable" ? "favorable" : "neutre", texte: e.phraseCondition },
       aVerifier: `Cette lecture vaut pour la commune entière. ${e.gesteSansAdresse}.`,
       suite,
@@ -213,6 +235,7 @@ export function lireTaille(lieu: Lieu, e: EntreesTaille): LecturePastille {
     cle: "taille", commune: lieu.commune,
     fait: {
       texte: `Environ ${n(Math.round(e.population!))} habitants ${ou}.`,
+      mesure: { valeur: n(Math.round(e.population!)), unite: "habitants", legende: ou },
       source: e.source === "urban_unit" ? "INSEE · population de l'unité urbaine" : "INSEE · population communale",
       // Le grain suit la mesure : la taille d'une agglomération n'est pas lue à la commune.
       grain: e.source === "urban_unit" ? "unite_urbaine" : "commune",
@@ -231,6 +254,8 @@ export type EntreesHivers = {
   limite: string | null;
   /** La température moyenne de l'hiver sur 1976-2005, écrite par l'accueil (DRIAS). */
   temperatureReference: string | null;
+  /** La même valeur, formatée par l'accueil (« 5,8 °C »), pour la mesure. */
+  temperatureValeur?: string | null;
 };
 
 const LIMITE_HIVERS = "Cette position décrit la douceur hivernale (température moyenne de décembre à février) sur la période de référence 1976-2005. Les fortes chaleurs estivales, notamment futures, sont traitées à part.";
@@ -252,7 +277,16 @@ export function lireHivers(lieu: Lieu, e: EntreesHivers): LecturePastille {
   return {
     cle: "hivers", commune: lieu.commune,
     fait: e.temperatureReference
-      ? { texte: e.temperatureReference, source: "DRIAS · Météo-France, période de référence 1976-2005", grain: "commune" }
+      ? {
+          texte: e.temperatureReference, source: "DRIAS · Météo-France, période de référence 1976-2005", grain: "commune",
+          ...(e.temperatureValeur ? {
+            mesure: {
+              valeur: e.temperatureValeur.replace(/\s*°C$/, ""),
+              unite: "°C",
+              legende: "température moyenne de l'hiver (décembre à février), période de référence 1976-2005",
+            },
+          } : {}),
+        }
       : null,
     pourVous: { signal, texte },
     aVerifier: e.limite ?? LIMITE_HIVERS,

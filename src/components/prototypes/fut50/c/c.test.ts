@@ -194,3 +194,36 @@ test("la voix : ni tiret cadratin, ni point d'exclamation dans les textes de la 
     for (const m of src.matchAll(/"([^"]*[a-zéèàù][^"]*)"/g)) assert.doesNotMatch(m[1]!, /[a-zé] ?!$/, `${n} : point d'exclamation`);
   }
 });
+
+test("la mesure en grand : présente quand une valeur pertinente existe, jamais seule, jamais forcée", () => {
+  // Hivers : la température de référence, avec son unité et sa période.
+  const hiver = lireHivers(SETE, {
+    issue: "favorable", position: "Pour la douceur des hivers, Sète se situe parmi les 5 % de communes aux hivers les plus doux de France.",
+    limite: null, temperatureReference: "Température moyenne de l'hiver : 8,4 °C sur la période de référence 1976-2005.", temperatureValeur: "8,4 °C",
+  });
+  assert.deepEqual([hiver.fait?.mesure?.valeur, hiver.fait?.mesure?.unite], ["8,4", "°C"]);
+  assert.match(hiver.fait!.mesure!.legende, /hiver.*1976-2005/);
+  // Petite ville : la population, avec son périmètre.
+  const guéret = lireTaille({ ...SETE, commune: "Guéret" }, { issue: "favorable", phraseTaille: null, population: 13901, source: "urban_unit" });
+  assert.equal(guéret.fait?.mesure?.unite, "habitants");
+  assert.equal(guéret.fait?.mesure?.legende, "dans l'agglomération de Guéret");
+  // Chaleur favorable : les jours au-dessus de 35 °C, avec horizon et référence ; sous un jour, pas de grand « 0 ».
+  const base = { issue: "favorable" as const, ecart: null, phraseCondition: "À l'échelle de la commune, rien de défavorable n'apparaît pour des étés plus frais.", faitDrias: "4 jours par an à l'horizon 2050, contre moins d'une journée sur 1976-2005.", gesteSansAdresse: GESTE };
+  const nantes = lireChaleur(SETE, { ...base, jours35: { projete: 4.2, referenceTexte: "moins d'une journée" } });
+  assert.deepEqual([nantes.fait?.mesure?.valeur, nantes.fait?.mesure?.unite], ["4", "jours par an"]);
+  assert.match(nantes.fait!.mesure!.legende, /35 °C.*2050.*\+2,7 °C en France.*1976-2005/);
+  assert.equal(lireChaleur(SETE, { ...base, jours35: { projete: 0.4, referenceTexte: "aucune journée" } }).fait?.mesure, undefined);
+  // Chaleur défavorable et risques : une phrase, pas de chiffre extrait.
+  const ecart = lireChaleur(SETE, { issue: "mismatch", ecart: { constat: "Les nuits tropicales passeraient de 42 à 80.", titre: "Des étés plus difficiles à concilier avec votre projet", limite: null, geste: null }, phraseCondition: null, faitDrias: null, gesteSansAdresse: GESTE });
+  assert.equal(ecart.fait?.mesure, undefined);
+  assert.equal(lireRisques(SETE, ["Inondation"]).fait?.mesure, undefined);
+});
+
+test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l'état 3, rien en mouvement réduit", () => {
+  const css = readFileSync("src/components/prototypes/fut50/c/c.module.css", "utf8");
+  assert.match(css, /grid-template-columns: minmax\(0, 1fr\) minmax\(0, 0fr\);/, "états 1 et 2 : une seule colonne utile");
+  assert.match(css, /\.hero\[data-etat="priorite"\] \{ grid-template-columns: minmax\(0, 1fr\) minmax\(0, 0\.85fr\);/, "état 3 : deux colonnes");
+  assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.hero \{ transition: none; \}/);
+  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  assert.equal((hero.match(/role="combobox"/g) ?? []).length, 1, "un seul champ, jamais recréé");
+});
