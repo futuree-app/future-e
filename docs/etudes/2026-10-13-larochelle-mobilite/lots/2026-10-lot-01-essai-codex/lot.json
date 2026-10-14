@@ -1,0 +1,20 @@
+{
+ "nom": "2026-10-lot-01-essai-codex",
+ "objet": "Essai Codex (15/10/2026) : une seule rédaction d'Angers avec les consignes et le dossier exacts de la première rédaction Claude du lot 2026-10-lot-01 ; comparaison des premiers jets. Aucune relecture, correction ni publication.",
+ "reference": "étiquette git mobilite-lot-01-reference (lot 01 non modifié)",
+ "moteur": {
+  "outil": "codex",
+  "etapes": {
+   "redaction": {
+    "modele": "gpt-6.1-sol",
+    "effort": "high"
+   }
+  },
+  "remarque": "codex exec sur l'abonnement ChatGPT (auth_mode chatgpt, aucune clé API). Session vierge et éphémère, config utilisateur, règles, plugins, applications, mémoire et sous-agents désactivés, recherche web désactivée, lecture limitée au dossier de session (pièces en lecture seule), ni écriture ni réseau. Voir lancer_essai.py."
+ },
+ "execution_autorisee": {
+  "par": "porteur",
+  "le": "2026-10-15",
+  "perimetre": "une rédaction Codex d'Angers sur abonnement, sans clé API, sans publication"
+ }
+}

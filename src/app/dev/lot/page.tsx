@@ -47,7 +47,7 @@ export default async function IndexLots() {
         {vues.map((v) => (
           <section key={v.nom}>
             <h2>
-              {v.nom} · moteur {v.conf.moteur?.outil ?? "?"} · dépense {v.depenses.toFixed(2)} $ équivalent
+              {v.nom} · moteur {v.conf.moteur?.outil ?? "?"} · {v.depenses === null ? "dépense non mesurée" : `dépense ${v.depenses.toFixed(2)} $ équivalent`}
             </h2>
             {Object.entries(v.communes).map(async ([cle, c]) => {
               const insee = c.insee;

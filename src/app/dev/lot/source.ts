@@ -21,7 +21,7 @@ export type Commune = {
   anomalies_restantes?: { type?: string; categorie?: string; detail?: string; probleme?: string }[];
   versions?: Record<string, unknown>;
 };
-export type Lot = { nom: string; conf: { objet?: string; moteur?: { outil: string } }; communes: Record<string, Commune>; depenses: number };
+export type Lot = { nom: string; conf: { objet?: string; moteur?: { outil: string } }; communes: Record<string, Commune>; depenses: number | null };
 
 export const nomValide = (s: string) => /^[a-z0-9-]+$/i.test(s);
 
@@ -34,10 +34,11 @@ export async function lireLot(nom: string): Promise<Lot> {
   const dir = path.join(LOTS, nom);
   const conf = JSON.parse(await readFile(path.join(dir, "lot.json"), "utf8"));
   const etat = existsSync(path.join(dir, "etat.json")) ? JSON.parse(await readFile(path.join(dir, "etat.json"), "utf8")) : { communes: {} };
-  let depenses = 0;
-  if (existsSync(path.join(dir, "depenses.jsonl")))
+  // Sans depenses.jsonl (essai Codex : aucun équivalent API rapporté), la dépense est inconnue, pas nulle.
+  let depenses: number | null = existsSync(path.join(dir, "depenses.jsonl")) ? 0 : null;
+  if (depenses !== null)
     for (const l of (await readFile(path.join(dir, "depenses.jsonl"), "utf8")).split("\n").filter(Boolean))
-      depenses += JSON.parse(l).cout_usd_equivalent ?? 0;
+      depenses = (depenses ?? 0) + (JSON.parse(l).cout_usd_equivalent ?? 0);
   return { nom, conf, communes: etat.communes, depenses };
 }
 
