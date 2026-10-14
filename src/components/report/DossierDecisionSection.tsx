@@ -15,6 +15,8 @@ import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { dateFr } from "@/lib/decision/autour-permis";
 import { DossierDecisionReleve } from "@/components/releve/DossierDecisionReleve";
 import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
+import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
+import { AnnonceVersion } from "@/components/report/AnnonceVersion";
 
 // LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
 // dossier est l'un des six registres nommés par la charte, et porte sa teinte.
@@ -96,6 +98,7 @@ export function DossierDecisionSection({
   contexteAChange,
   voisinageAChange,
   generatedAt,
+  versionServie = null,
   espacement = "mt-14",
   titre,
   supportingPane,
@@ -116,6 +119,12 @@ export function DossierDecisionSection({
    * n'a pas eu lieu. C'est précisément la confusion que ce lot supprime.
    */
   generatedAt?: string | null;
+  /**
+   * FUT-93 : LE NUMÉRO DE LA VERSION FIGÉE QUE CE RENDU SERT (`StoredArtifact.servedVersion`), pour
+   * cette `scopeKey`. Nul pour un dossier assemblé à l'instant. La mise à jour (`AnalyseAncienProjet`)
+   * ne dit « affichée » que lorsqu'il atteint la version que le serveur a annoncée.
+   */
+  versionServie?: number | null;
   // Analyse logement déjà sauvegardée pour cette commune (adresse renseignée), ou null.
   logement?: { href: string; label: string } | null;
   // Slice 1.5 : état de l'augmentation adresse en couche de rendu (pas un état de l'assembleur).
@@ -178,7 +187,7 @@ export function DossierDecisionSection({
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
         provenance={provenance} projetAChange={projetAChange} voisinageAChange={voisinageAChange}
         contexteAChange={contexteAChange}
-        generatedAt={generatedAt} espacement={espacement} titre={titre} supportingPane={supportingPane}
+        generatedAt={generatedAt} versionServie={versionServie} espacement={espacement} titre={titre} supportingPane={supportingPane}
         controles={controles}
       />
     );
@@ -247,6 +256,8 @@ export function DossierDecisionSection({
               Analyse générée le {dateFr(generatedAt)}
             </p>
           ) : null}
+          {/* FUT-93 : présente avant et après la mise à jour, pour que son annonce survive au bandeau. */}
+          <AnnonceVersion insee={insee} scopeKey={scopeKey} versionServie={versionServie} date={generatedAt ? (dateFr(generatedAt) || null) : null} />
 
           {/* L'ANALYSE RÉPOND À UN PROJET QUI N'EST PLUS CELUI DU LECTEUR. Dire avant de montrer : la
               suite de l'écran s'interprète autrement selon qu'on lit une réponse actuelle ou une
@@ -258,6 +269,7 @@ export function DossierDecisionSection({
             <AnalyseAncienProjet
               insee={insee}
               scopeKey={scopeKey}
+              versionServie={versionServie}
               raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"}
             />
           ) : null}
@@ -280,6 +292,9 @@ export function DossierDecisionSection({
             <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
           ) : (
             <Suspense
+              // FUT-93 : une identité par rendu (voir `jeton-de-rendu.ts`). Sans elle, une relecture de la
+              // page peut ne jamais s'afficher ; la version servie reste lisible dans la clé.
+              key={`${scopeKey}:${versionServie ?? generatedAt ?? "vivant"}:${jetonDeRendu()}`}
               fallback={
                 <ConclusionBlock plan={dossier.narrativePlan} blocks={planToBlocks(dossier.narrativePlan)} condition={conditionEvidence} renderedIds={renderedIds} titre={titre} />
               }

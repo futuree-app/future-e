@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { GESTES } from "./logement-gestes.ts";
 import {
+  premiereMesure, signatureAffichage,
   sujetDuControle, typeDeGeste, proprietesAffichage, proprietesActivation,
 } from "./priority-control-telemetry.ts";
 
@@ -79,4 +80,25 @@ test("l'événement d'activation dit la position, jamais l'adresse", () => {
     { label: "Faites chiffrer les travaux d'amélioration", anchorId: "31555:logement.dpe-faible" }, 1, "ensuite",
   );
   assert.deepEqual(props, { ordre: "ensuite", position: 1, sujet: "logement.dpe-faible", type: "faire_faire" });
+});
+
+test("FUT-93 : une relecture qui remonte les démarches ne compte pas un second affichage", () => {
+  const vues = new Set<string>();
+  const actions = [{ anchorId: "31555:inondation" }, { anchorId: "31555:argiles" }];
+  const sig = signatureAffichage("/rapport?d=1", actions, "priorite");
+  assert.equal(premiereMesure(vues, sig), true, "premier montage : mesuré");
+  assert.equal(premiereMesure(vues, sig), false, "remontage après relecture : pas de doublon");
+  // Ce qui est affiché a changé : c'est un autre affichage, il se mesure.
+  assert.equal(premiereMesure(vues, signatureAffichage("/rapport?d=1", actions.slice(1), "priorite")), true);
+  assert.equal(premiereMesure(vues, signatureAffichage("/rapport?d=1", actions, "ensuite")), true);
+  assert.equal(premiereMesure(vues, signatureAffichage("/rapport?d=2", actions, "priorite")), true, "un autre dossier");
+});
+
+test("FUT-93 : le composant passe par la garde avant d'émettre l'affichage", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync(new URL("../../components/report/PriorityControlActions.tsx", import.meta.url), "utf8");
+  const garde = src.indexOf("premiereMesure(affichagesMesures");
+  const capture = src.indexOf('posthog.capture("priority_control_shown"');
+  assert.ok(garde > 0 && capture > garde, "la garde précède l'émission");
+  assert.match(src, /^const affichagesMesures = new Set<string>\(\);$/m, "la mémoire vit hors du composant, pas dans une ref");
 });

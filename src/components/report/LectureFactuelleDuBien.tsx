@@ -37,7 +37,8 @@ export function LectureFactuelleDuBien({
       const res = await fetch("/api/dossier/actualiser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ insee, scopeKey }),
+        // Cette lecture ne s'affiche que sans version prête : une version déjà livrée ne sera pas regénérée.
+        body: JSON.stringify({ insee, scopeKey, versionLue: 0 }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const corps = (await res.json().catch(() => null)) as { statut?: string } | null;

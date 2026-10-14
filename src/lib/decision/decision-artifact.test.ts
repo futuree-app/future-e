@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   parseDecisionArtifact, buildDecisionArtifact, artifactScopeKey, ENGINE_VERSION,
   dossierAServir, artefactPerimeParLeDpe,
-  etatArtefact, prochaineVersionAReserver, prochaineVersionAutomatique,
+  etatArtefact, prochaineVersionAReserver, prochaineVersionAutomatique, versionDejaServie,
 } from "./decision-artifact.ts";
 import type { Dossier } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
@@ -319,6 +319,34 @@ test("LE PREMIER ÉCHEC D'UN DOSSIER SANS AUCUNE VERSION SERVIE se retente", () 
   assert.equal(etat?.servedVersion, null);
   assert.equal(etat?.artifact, null, "c'est cette absence, et non celle de la ligne, qui déclenche la reprise");
   assert.equal(prochaineVersionAutomatique(etat, MAINTENANT), 2);
+});
+
+test("FUT-93 : une page EN RETARD sur la version prête ne relance pas de génération payante", () => {
+  // Le bandeau a été remonté, ou son état perdu, après la livraison de la v2 : la page sert encore la
+  // v1 et repropose « Mettre à jour l'analyse ». L'appui dit `versionLue: 1` ; la v2 est prête.
+  const v2Prete = etatArtefact([ligne(2, "ready", payloadValide("2026-08-12T11:00:00.000Z")), v1Prete()]);
+  assert.equal(v2Prete?.servedVersion, 2);
+  assert.equal(versionDejaServie(v2Prete, 1), 2, "la v2 prête doit être rendue, sans générer");
+  // Le bouton « Lire ce bien avec mon projet » ne s'affiche que sans version prête : il dit 0.
+  assert.equal(versionDejaServie(v2Prete, 0), 2);
+});
+
+test("FUT-93 : un projet modifié APRÈS la dernière version se regénère normalement", () => {
+  // La page sert la v2, le projet a changé depuis : l'appui dit `versionLue: 2`, rien n'est plus
+  // récent, la route réserve la v3.
+  const v2Prete = etatArtefact([ligne(2, "ready", payloadValide("2026-08-12T11:00:00.000Z")), v1Prete()]);
+  assert.equal(versionDejaServie(v2Prete, 2), null);
+  assert.equal(prochaineVersionAReserver(v2Prete, MAINTENANT), 3);
+  // Une v3 en échec ne compte pas : seule une version PRÊTE dispense de générer.
+  const v3Ratee = etatArtefact([ligne(3, "failed"), ligne(2, "ready", payloadValide("2026-08-12T11:00:00.000Z")), v1Prete()]);
+  assert.equal(versionDejaServie(v3Ratee, 2), null);
+  // Aucune version prête : la première livraison n'est jamais bloquée.
+  assert.equal(versionDejaServie(null, 0), null);
+  assert.equal(versionDejaServie(etatArtefact([ligne(1, "failed")]), 0), null);
+  // Sans numéro lisible (ancien client, page sans version figée), on ne présume rien.
+  for (const lue of [undefined, null, "1", 1.5, -1, Number.NaN]) {
+    assert.equal(versionDejaServie(v2Prete, lue), null, `numéro ${String(lue)} accepté`);
+  }
 });
 
 test("un PAYLOAD INVALIDE n'est pas une version servie", () => {

@@ -2,7 +2,7 @@ import "server-only";
 import { requireCurrentUser } from "@/lib/user-account";
 import { normalizeUserProject } from "@/lib/user-project";
 import { readLatestArtifact } from "@/lib/server/decision-artifact-store";
-import { prochaineVersionAReserver } from "@/lib/decision/decision-artifact";
+import { prochaineVersionAReserver, versionDejaServie } from "@/lib/decision/decision-artifact";
 import { generateDecisionArtifact } from "@/lib/server/generate-decision-artifact";
 import { getDossier } from "@/lib/address-dossier-store";
 import { canAccessTerritory } from "@/lib/active-territory";
@@ -57,7 +57,7 @@ function dossierIdDuScope(scopeKey: string): { ok: true; dossierId: string | nul
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { insee?: string; scopeKey?: string }
+    | { insee?: string; scopeKey?: string; versionLue?: unknown }
     | null;
   // L'IDENTITÉ D'UN ARTEFACT EST LA COMMUNE : un client qui enverrait `69383` doit lire et écrire la
   // même ligne que celui qui envoie `69123`, sans quoi la lecture et la génération se manqueraient.
@@ -127,6 +127,11 @@ export async function POST(request: Request) {
   // `prochaineVersionAReserver` ne rend `null` que pour une génération VRAIMENT en cours.
   // Une génération abandonnée (fonction tuée après la réservation) ne bloque pas éternellement : son
   // bail expire, et la tentative suivante prend le numéro d'après. Voir `BAIL_GENERATION_MS`.
+  // ── UNE DEMANDE DÉJÀ SERVIE NE SE PAIE PAS DEUX FOIS (FUT-93, 14/10/2026) ───────────────────
+  // La page qui a envoyé l'appui servait `versionLue`. Une version plus récente est déjà prête :
+  // c'est une page en retard, pas une demande nouvelle. On rend la version prête, sans générer.
+  const dejaServie = versionDejaServie(existant, body?.versionLue);
+  if (dejaServie !== null) return Response.json({ ok: true, statut: "abouti", version: dejaServie });
   const version = prochaineVersionAReserver(existant, new Date());
   if (version === null) return Response.json({ ok: true, statut: "en_cours" });
   const cible = dossier
