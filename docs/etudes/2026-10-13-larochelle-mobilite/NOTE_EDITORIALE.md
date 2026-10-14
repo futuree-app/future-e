@@ -17,9 +17,9 @@ Tirée de l'article pilote La Rochelle (13/10/2026). Ce n'est pas un plan d'arti
 
 ## 2. Voix générale de futur•e (vaut pour tous les sujets)
 
-- La voix est sérieuse, concrète et vivante. Une phrase marquante est permise quand elle dit quelque chose de juste (« la place pour la voiture se regarde comme la cave ou le balcon ») ; ce qui est proscrit, c'est le slogan automatique de fin de paragraphe.
+- La voix est sérieuse, concrète et vivante. Une phrase marquante est permise quand elle dit quelque chose de juste ; ce qui est proscrit, c'est le slogan automatique de fin de paragraphe. Un conseil pratique dit l'action à faire (« vérifiez dès l'annonce si une place est comprise »), sans comparaison qui la décore.
 - Partir d'une situation reconnaissable du lecteur (annonce, visite, trajet du matin, plein, horaires), puis faire avancer le récit par les données.
-- Deux entrées possibles, aucune obligatoire : un fait d'actualité, s'il amène la question que les données éclairent (sinon il reste un décor) ; ou une question durable de recherche résidentielle (« depuis ce quartier, pourra-t-on se passer de la voiture ? »).
+- Deux entrées possibles, aucune obligatoire : un fait d'actualité, s'il amène la question que les données éclairent (sinon il reste un décor) ; ou une question durable de recherche résidentielle (« depuis ce quartier, pourra-t-on moins prendre la voiture ? »).
 - Le millésime se dit clairement une fois dans le récit et figure sur chaque visuel ; ensuite, présent simple, sans « aujourd'hui » ni « habitants actuels ».
 - Décrire ce qui est mesuré : la proximité d'un équipement n'est pas son usage (« une école à moins de 500 mètres », pas « l'école se fait près de chez soi »).
 
@@ -27,7 +27,7 @@ Tirée de l'article pilote La Rochelle (13/10/2026). Ce n'est pas un plan d'arti
 
 Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un article qui s'excuse à chaque paragraphe prend une voix scolaire.
 
-- Garder une précision seulement si elle **change le sens** : « deux groupes distincts » sous une comparaison qui inviterait à une lecture causale, les hypothèses d'un scénario (consommation, nombre d'allers-retours, variation du prix).
+- Garder une précision seulement si elle **change le sens**, et la porter d'abord par une formulation exacte plutôt que par une phrase de prudence : nommer chaque groupe par ce qu'il est (« les actifs qui habitent et travaillent à Niort », « ceux qui travaillent à Chauray ») évite d'ajouter qu'il s'agit de groupes distincts ; cette limite va dans la méthode. Restent dans le récit les hypothèses d'un scénario (consommation, nombre d'allers-retours, variation du prix).
 - Définir une notion **une fois, au bon endroit**, sans la redéfinir ensuite.
 - Le détail technique (vol d'oiseau, sondage, seuils, millésimes des contours) va dans la méthode ou la légende, pas dans le récit.
 - Supprimer les évidences : un tableau intitulé « surcoût de carburant » n'a pas à énumérer ensuite l'assurance, l'entretien et le stationnement ; « sept fois plus de kilomètres coûtent sept fois plus » n'apprend rien.
@@ -36,8 +36,8 @@ Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un a
 - Décrire des pratiques, jamais des contraintes : aucun quartier n'« impose » un mode de vie ; ne jamais attribuer une pratique au seul quartier ; ne culpabiliser personne.
 - Pas de hiérarchie causale que les données ne mesurent pas (« compte plus que », « dépend d'abord de »).
 - Pas de transitions annoncées (« voici le résultat le plus utile »), de maximes de fin de section, d'antithèses d'emphase, ni de témoignages ou scènes inventés. Le texte doit rester concret après suppression de ses phrases d'accroche.
-- Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte.
-- La conclusion vers futur•e est courte et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
+- Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte. Un arrondi ne change pas le sens : une valeur proche de 100 % ou de 0 % s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun ».
+- La conclusion vers futur•e est courte : elle part du projet du lecteur et de l'intérêt d'examiner l'adresse dans son ensemble, sans inventaire de fonctionnalités, et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
 - Chaque chiffre doit apporter quelque chose au lecteur : on n'ajoute pas un fait parce qu'il est disponible.
 
 ## 3. Ce qui est propre à La Rochelle (ne pas transposer sans vérifier)

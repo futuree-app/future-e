@@ -71,7 +71,7 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Toute comparaison nationale (rang vélo, voiture) | **Absent** : non calculé par la fiche ; à ne pas écrire. Piste notée le 14/10/2026 : la produire dans le moteur déterministe, avec population, millésime et règle de comparaison explicites, avant de l'ouvrir à la rédaction |
 | Rédaction | **IA de rédaction** : prompt + dossier, en session vierge ; aucune génération lancée le 13/10/2026 |
 | Contrôle de la correspondance du brouillon | **Manuel** (lecture de `dossier.json`) ; pas de script de contrôle |
-| Relecture finale, publication | **Manuel** |
+| Relecture finale, publication | **Manuel**. Un identifiant de fait dans la correspondance ne suffit pas à valider une phrase : la relecture vérifie aussi la population réellement désignée (secteur de résidence ≠ commune de travail, actifs ≠ ménages ≠ adresses), les valeurs aux bornes (« tous », « aucun »), les conditions et périmètres des informations documentaires (lignes concernées, dates de validité, gratuité ≠ trajet faisable) et la fidélité du raisonnement |
 | Capacités produit autorisées dans la conclusion | **Manuel** : décision du porteur ; repérée dans le code ≠ autorisée. Temps de trajet exclu tant que sa restitution n'est pas validée (FUT-98) |
 | Indices éditoriaux (`parametres_editoriaux.md`) | **Indices**, pas des règles : tirés du seul article pilote, ils signalent une piste sans décider de l'angle ni de la publication |
 
@@ -89,6 +89,8 @@ L'article général `/savoir/dependance-auto` (page publique existante, révisé
 Légendes des visuels allégées le même jour : l'image porte titre, millésime, définition et source ; la légende HTML n'ajoute que ce qui manque. Textes alternatifs et tableaux accessibles inchangés.
 
 ### Avant publication (ne bloque pas la prévisualisation)
+
+- Relecture de chaque phrase chiffrée au-delà de son identifiant : population réellement désignée, valeur aux bornes, conditions documentaires, fidélité du raisonnement (voir le tableau ci-dessus).
 
 - Prix du carburant : réextraction la veille et contrôle de la hausse sur les mêmes stations (La Rochelle et Niort).
 - Dossier d'adresse : la conclusion de La Rochelle promet les équipements les plus proches et la part des ménages motorisés du secteur ; à vérifier sur un dossier réel (parcours payant, non consulté). Celle de Niort (14/10/2026) n'invite plus qu'à explorer l'adresse à partir de son projet : vérifier que le parcours part bien du projet de la personne.

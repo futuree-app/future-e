@@ -4,7 +4,7 @@
 
 ## Du Centre à Surimeau-Antes Cholette, de 49 % à 87 %
 
-Parmi les actifs qui habitent Niort, 70 % vont travailler principalement en voiture. Ce repère cache des secteurs très différents : la voiture est le mode principal de 49 % des actifs dans le secteur Centre, de 86 % à Saint-Liguaire-Nantes et de 87 % à Surimeau-Antes Cholette. La carte situe tous les autres.
+Parmi les actifs qui habitent Niort, 70 % vont travailler principalement en voiture. Ce repère cache des secteurs très différents : la voiture est le mode principal de 49 % des actifs qui habitent le secteur Centre, où qu'ils travaillent, de 86 % à Saint-Liguaire-Nantes et de 87 % à Surimeau-Antes Cholette. La carte situe tous les autres.
 
 [CARTE : Aller travailler en voiture, secteur par secteur]
 

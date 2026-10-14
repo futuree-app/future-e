@@ -48,6 +48,23 @@ Ajout d'un passage de deux paragraphes dans « Travailler à Niort ou ailleurs �
 
 Ce que le passage ne dit pas : qu'un trajet est faisable ou pratique, qu'une adresse est desservie, une fréquence, ou qu'on peut se passer d'une voiture.
 
+## Essai 3 (14/10/2026) : régressions et causes
+
+Essai archivé sans modification dans `essais/2026-10-14-essai-3.md` ; il ne remplace pas `article.md`. Les pièces reçues par l'autre session ne sont pas vérifiables : les causes ci-dessous sont établies dans les fichiers préparés (commit `dc441ccf`).
+
+| Régression de l'essai | Cause établie dans les entrées | Correction réutilisable |
+|---|---|---|
+| « toutes les adresses (100 %) » au Centre (valeur 0,998) | `dossier.md` affichait 100 % (arrondi à l'unité) ; la voix demandait « aucune précision qui laisserait croire à une mesure exacte » | `pct()` garde une décimale près des bornes (99,8 %) ; règle « tous / aucun = valeur exacte » dans l'en-tête du dossier, le prompt (règle 6) et la voix |
+| Écarts entre secteurs présentés comme ceux des actifs qui travaillent à Niort | Section 3 du dossier : « actifs occupés du secteur », sans dire « quelle que soit leur commune de travail » ni l'absence de croisement avec la section 4 | Populations explicites en sections 3 et 4 ; règle dans le prompt (règle 4) et les conditions obligatoires |
+| « Ce sont deux groupes de personnes distincts… » dans le récit | La voix citait « deux groupes distincts » comme précision à garder, alors que le prompt renvoie les limites en méthode | Voix : formulation exacte du groupe dans le récit, limite en méthode ; prompt aligné |
+| « au même titre que la surface ou l'étage » | Exemple de la voix : « la place pour la voiture se regarde comme la cave ou le balcon » (la même tournure revenait dans les essais 1 et 2) | Exemple retiré ; un conseil dit l'action à faire, sans comparaison |
+| Conclusion en inventaire (équipements les plus proches, nombre à 500 m, ménages motorisés) | Tableau des capacités : « Ce que l'on peut en dire » détaillait ces deux capacités, en contradiction avec « n'énumère pas de fonctionnalités » | Les deux capacités restent autorisées, en mention générale seulement ; la conclusion s'appuie sur l'examen de l'adresse à partir du projet |
+| Exemple d'entrée « pourra-t-on se passer de la voiture ? » (voix) | Contredit la priorité « utiliser moins sa voiture » | « pourra-t-on moins prendre la voiture ? » |
+
+Non attribué à une entrée : l'intertitre « 38 points d'écart » et la succession de pourcentages relèvent de la sélection des chiffres, déjà demandée par le prompt (démarche 4). Pas de nouvelle règle.
+
+Article édité, même jour : « 49 % des actifs qui habitent le secteur Centre, où qu'ils travaillent » (population explicite). Le passage Tanlib, déjà présent, est conservé tel quel : il cite les lignes urbaines 1 à 10, la date de validité des fiches, et sépare gratuité et faisabilité.
+
 ## Chiffres de la version éditée
 
 | Passage | Chiffre | Identifiant(s) | Valeur au dossier |
@@ -59,8 +76,8 @@ Ce que le passage ne dit pas : qu'un trajet est faisable ou pratique, qu'une adr
 | Chapeau | 2022 | millésime `mobpro.*`, `iris.*` | |
 | Intertitre 1 | 49 % ; 87 % | `iris.voiture.min` (791910101) ; `iris.voiture.max` (791910601) | 0,489 ; 0,865 |
 | Section 1 | 70 % | `mobpro.modes.voiture` | 0,701 |
-| Section 1 | 49 % ; 86 % ; 87 % | `iris.791910101.voiture` ; `iris.791910501.voiture` ; `iris.791910601.voiture` | 0,489 ; 0,861 ; 0,865 |
-| Section 1 bis (équipements) | quasi-totalité (Centre) ; 500 m | `iris.791910101.panier_500m` | 0,998 (adresses du secteur, non pondérées) |
+| Section 1 | 49 % (actifs qui habitent le secteur, où qu'ils travaillent) ; 86 % ; 87 % | `iris.791910101.voiture` ; `iris.791910501.voiture` ; `iris.791910601.voiture` | 0,489 ; 0,861 ; 0,865 |
+| Section 1 bis (équipements) | quasi-totalité (Centre) ; 500 m | `iris.791910101.panier_500m` | 0,998, affiché 99,8 % dans le dossier depuis le 14/10/2026 (adresses du secteur, non pondérées) |
 | Section 1 bis (équipements) | aucune adresse | `iris.791910501.panier_500m`, `iris.791910601.panier_500m` | 0,0 ; 0,0 |
 | Section 1 bis (équipements) | 87 % (Clou Bouchet Sud) | `iris.791910404.panier_500m` | 0,870 |
 | Section 2 | 30 % ; 65 % | `iris.791910101.stationnement_reserve` ; `iris.menages_commune.menages_stationnement_reserve` | 0,303 ; 0,648 |

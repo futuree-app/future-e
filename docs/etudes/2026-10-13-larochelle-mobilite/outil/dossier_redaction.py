@@ -92,7 +92,13 @@ def arrondi(x):
 
 
 def pct(p):
-    return f"{arrondi(p * 100)} %"
+    """Part en %, arrondie à l'unité. Aux bornes, l'arrondi ne doit pas fabriquer « toutes » ou « aucune » : une valeur
+    qui s'arrondirait à 0 % ou 100 % sans valoir exactement 0 ou 1 garde une décimale (0,998 → « 99,8 % »). Affichage
+    seulement : la valeur du JSON est inchangée."""
+    a = arrondi(p * 100)
+    if a in (0, 100) and p not in (0, 1):
+        return f"{Decimal(repr(p * 100)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)} %".replace(".", ",")
+    return f"{a} %"
 
 
 def statut_lignes(lignes):
@@ -374,6 +380,8 @@ def rendu_md(d, sources_gtfs):
          "| `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui de la réponse, avec la précision du motif |",
          "| `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |",
          "| `absent` | pas de donnée, ou secteur exclu | `non` |", "",
+         "**Valeurs aux bornes.** « 0 % » et « 100 % » sont des valeurs exactes : elles s'écrivent « aucun » ou « tous ». Une valeur proche d'une borne "
+         "est donnée au dixième (« 99,8 % », « 0,4 % ») : elle s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun », ni « 100 % » ou « 0 % ».", "",
          *(["Les **informations documentaires** (section 2 bis, identifiants `doc.*`) ne sont pas des résultats calculés : elles ont leur propre colonne Usage "
             "(`oui`, `avec ses conditions`, `non`).", ""] if d.get("complement_documentaire") else []),
          "**Populations.** Trois populations distinctes, à ne pas mélanger : les **actifs** occupés (pratiques domicile-travail, fichier MOBPRO "
@@ -418,7 +426,10 @@ def rendu_md(d, sources_gtfs):
         for f in doc["faits"]:
             L.append(f"| `{f['id']}` | {f['information']} | {f['source']} | {f['consulte_le']} | {f['validite']} | {f['perimetre']} | `{f['usage']}` | {f.get('consigne', '')} |")
     L += ["", "## 3. Secteurs (IRIS)", "",
-          "Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés du secteur. Ménages sans voiture, stationnement réservé : "
+          "Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés de 15 ans ou plus **qui habitent le secteur, quelle que soit "
+          "leur commune de travail** (la commune étudiée ou une autre). Ce tableau et celui de la section 4 (actifs de toute la commune, selon leur commune de travail) "
+          "ne se croisent pas : le dossier ne donne aucune part par secteur **et** commune de travail. On peut rapprocher les deux observations, pas attribuer "
+          "la part d'un secteur aux seuls actifs qui travaillent dans la commune, ni l'inverse. Ménages sans voiture, stationnement réservé : "
           "**ménages** (résidences principales) du secteur. Panier 500 m : part des **adresses** du secteur (chaque adresse compte pareil) qui ont à la fois un commerce "
           "alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. Les fréquences de bus par secteur sont en attente de validation : "
           "elles ne sont pas données. Identifiant d'une cellule : `iris.<code>.<colonne>`, colonne parmi `actifs`, `voiture`, `velo`, `tc`, `marche`, "
@@ -434,6 +445,7 @@ def rendu_md(d, sources_gtfs):
                  f"{P(s['menages_sans_voiture'])} | {P(s['menages_stationnement_reserve'])} | {P(s['panier_quotidien_500m'])} |")
     if d["destinations"]:
         L += ["", f"## 4. Mode selon la commune de travail (actifs résidant à {nom})", "",
+              f"Actifs qui habitent l'ensemble de {nom}, tous secteurs confondus, selon leur commune de travail ; aucune répartition par secteur de résidence (voir section 3). "
               "Chaque ligne est un groupe distinct de personnes. Identifiant : `destination.<insee>.<colonne>`, colonne parmi `part_des_actifs`, `voiture`, `velo`, `tc`, `marche`. Statut d'après le nombre de lignes d'échantillon.", "",
               "| Commune de travail (code) | Part des actifs résidents | Voiture | Vélo | TC | Marche | Lignes | Statut | Usage |", "|---|---:|---:|---:|---:|---:|---:|---|---|"]
         for r in d["destinations"]:

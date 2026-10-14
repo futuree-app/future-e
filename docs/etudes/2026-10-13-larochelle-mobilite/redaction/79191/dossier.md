@@ -1,6 +1,6 @@
 # Dossier d'entrée de rédaction · Niort (79191)
 
-Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T12:49:58Z par `outil/dossier_redaction.py`.
+Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T13:08:31Z par `outil/dossier_redaction.py`.
 
 Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifiant stable (colonne `id`) : c'est lui que cite la correspondance interne du brouillon. Un fait qui n'est pas ici n'existe pas pour l'article.
 
@@ -12,6 +12,8 @@ Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifi
 | `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui de la réponse, avec la précision du motif |
 | `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |
 | `absent` | pas de donnée, ou secteur exclu | `non` |
+
+**Valeurs aux bornes.** « 0 % » et « 100 % » sont des valeurs exactes : elles s'écrivent « aucun » ou « tous ». Une valeur proche d'une borne est donnée au dixième (« 99,8 % », « 0,4 % ») : elle s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun », ni « 100 % » ou « 0 % ».
 
 Les **informations documentaires** (section 2 bis, identifiants `doc.*`) ne sont pas des résultats calculés : elles ont leur propre colonne Usage (`oui`, `avec ses conditions`, `non`).
 
@@ -120,11 +122,11 @@ Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si
 
 ## 3. Secteurs (IRIS)
 
-Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés du secteur. Ménages sans voiture, stationnement réservé : **ménages** (résidences principales) du secteur. Panier 500 m : part des **adresses** du secteur (chaque adresse compte pareil) qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. Les fréquences de bus par secteur sont en attente de validation : elles ne sont pas données. Identifiant d'une cellule : `iris.<code>.<colonne>`, colonne parmi `actifs`, `voiture`, `velo`, `tc`, `marche`, `menages_sans_voiture`, `stationnement_reserve`, `panier_500m`. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés.
+Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés de 15 ans ou plus **qui habitent le secteur, quelle que soit leur commune de travail** (la commune étudiée ou une autre). Ce tableau et celui de la section 4 (actifs de toute la commune, selon leur commune de travail) ne se croisent pas : le dossier ne donne aucune part par secteur **et** commune de travail. On peut rapprocher les deux observations, pas attribuer la part d'un secteur aux seuls actifs qui travaillent dans la commune, ni l'inverse. Ménages sans voiture, stationnement réservé : **ménages** (résidences principales) du secteur. Panier 500 m : part des **adresses** du secteur (chaque adresse compte pareil) qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. Les fréquences de bus par secteur sont en attente de validation : elles ne sont pas données. Identifiant d'une cellule : `iris.<code>.<colonne>`, colonne parmi `actifs`, `voiture`, `velo`, `tc`, `marche`, `menages_sans_voiture`, `stationnement_reserve`, `panier_500m`. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés.
 
 | Code | Secteur | Statut | Usage | Actifs | Voiture | Vélo | TC | Marche | Ménages sans voiture | Stationnement réservé | Panier 500 m (adresses) |
 |---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 791910101 | Centre | utilisable | `oui` | 2303 | 49 % | 10 % | 15 % | 20 % | 38 % | 30 % | 100 % |
+| 791910101 | Centre | utilisable | `oui` | 2303 | 49 % | 10 % | 15 % | 20 % | 38 % | 30 % | 99,8 % |
 | 791910401 | Clou Bouchet Nord | utilisable | `oui` | 490 | 52 % | 11 % | 19 % | 16 % | 37 % | 33 % | 80 % |
 | 791910103 | Hôpital | utilisable | `oui` | 802 | 54 % | 9 % | 10 % | 26 % | 28 % | 51 % | 96 % |
 | 791910102 | Gare | utilisable | `oui` | 1193 | 54 % | 6 % | 14 % | 23 % | 33 % | 43 % | 77 % |
@@ -144,7 +146,7 @@ Part de la voiture, du vélo, des transports en commun et de la marche : **actif
 | 791910203 | Baticoop | utilisable | `oui` | 1103 | 80 % | 7 % | 4 % | 6 % | 16 % | 76 % | 31 % |
 | 791910503 | Sainte-Pezenne | utilisable | `oui` | 1142 | 81 % | 5 % | 6 % | 3 % | 7 % | 76 % | 9 % |
 | 791910502 | Coteau Saint-Hubert | utilisable | `oui` | 1355 | 82 % | 5 % | 4 % | 5 % | 7 % | 86 % | 10 % |
-| 791910501 | Saint-Liguaire-Nantes | utilisable | `oui` | 1136 | 86 % | 6 % | 5 % | 0 % | 3 % | 86 % | 0 % |
+| 791910501 | Saint-Liguaire-Nantes | utilisable | `oui` | 1136 | 86 % | 6 % | 5 % | 0,2 % | 3 % | 86 % | 0 % |
 | 791910601 | Surimeau-Antes Cholette | utilisable | `oui` | 1215 | 87 % | 4 % | 5 % | 1 % | 7 % | 86 % | 0 % |
 | 791910505 | Zone d'Activités Technopole | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
 | 791910605 | Zone d'Activités de Souche | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
@@ -153,12 +155,12 @@ Part de la voiture, du vélo, des transports en commun et de la marche : **actif
 
 ## 4. Mode selon la commune de travail (actifs résidant à Niort)
 
-Chaque ligne est un groupe distinct de personnes. Identifiant : `destination.<insee>.<colonne>`, colonne parmi `part_des_actifs`, `voiture`, `velo`, `tc`, `marche`. Statut d'après le nombre de lignes d'échantillon.
+Actifs qui habitent l'ensemble de Niort, tous secteurs confondus, selon leur commune de travail ; aucune répartition par secteur de résidence (voir section 3). Chaque ligne est un groupe distinct de personnes. Identifiant : `destination.<insee>.<colonne>`, colonne parmi `part_des_actifs`, `voiture`, `velo`, `tc`, `marche`. Statut d'après le nombre de lignes d'échantillon.
 
 | Commune de travail (code) | Part des actifs résidents | Voiture | Vélo | TC | Marche | Lignes | Statut | Usage |
 |---|---:|---:|---:|---:|---:|---:|---|---|
 | Niort (79191) | 75 % | 65 % | 9 % | 9 % | 13 % | 6148 | utilisable | `oui` |
-| Chauray (79081) | 7 % | 85 % | 2 % | 10 % | 0 % | 538 | utilisable | `oui` |
+| Chauray (79081) | 7 % | 85 % | 2 % | 10 % | 0,2 % | 538 | utilisable | `oui` |
 | La Crèche (79048) | 2 % | 94 % | 2 % | 4 % | 1 % | 151 | utilisable | `oui` |
 | Bessines (79034) | 1 % | 89 % | 3 % | 7 % | 0 % | 85 | fragile | `ordre de grandeur` |
 | Échiré (79109) | 1 % | 95 % | 0 % | 4 % | 1 % | 79 | fragile | `ordre de grandeur` |
@@ -256,7 +258,7 @@ Ne reprendre dans le rendu que celles qui concernent un fait utilisé.
 Un fait ne peut entrer dans l'article que si les quatre conditions sont réunies. Elles ne se négocient pas.
 
 1. **Donnée exploitable** : le fait figure dans le dossier, avec une valeur.
-2. **Population, source et périmètre identifiés** : on sait de qui l'on parle (actifs, ménages, adresses), d'où vient le chiffre et sur quel territoire exact.
+2. **Population, source et périmètre identifiés** : on sait de qui l'on parle (actifs, ménages, adresses), d'où vient le chiffre et sur quel territoire exact. La phrase désigne exactement cette population : les parts par secteur portent sur tous les actifs qui habitent le secteur, quelle que soit leur commune de travail ; aucun sous-groupe absent du dossier (secteur × commune de travail) ne s'écrit.
 3. **Statut et usage qui l'autorisent** : la colonne « Usage » du dossier dit `oui`, ou `ordre de grandeur` (alors seulement comme ordre de grandeur, avec sa précision). Un fait `en attente de validation` ou `absent` ne s'écrit pas, ni arrondi, ni sous une formule vague qui en tiendrait lieu.
 4. **Aucune promesse produit non validée** : la conclusion ne s'appuie que sur les capacités autorisées (dernière section).
 
@@ -308,8 +310,8 @@ Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 
 
 | Capacité | Repérée dans le code | Autorisée dans la conclusion | Ce que l'on peut en dire |
 |---|---|---|---|
-| Équipements autour d'une adresse | oui | **oui** | Les équipements les plus proches de l'adresse (distances à vol d'oiseau) et leur nombre à moins de 500 m |
-| Équipement automobile du secteur | oui | **oui** | La part des ménages équipés d'une voiture dans le secteur de l'adresse, comparée à la commune |
+| Équipements autour d'une adresse | oui | **oui** | Au plus une mention générale, dans l'examen de l'adresse (« ce qui se trouve à proximité ») ; pas de détail (distances, nombre à moins de 500 m) ni de liste |
+| Équipement automobile du secteur | oui | **oui** | Au plus une mention générale, dans l'examen de l'adresse (la place de la voiture dans le secteur) ; pas de détail ni de liste |
 | Examen d'une adresse à partir du projet de la personne | oui | **oui** (porteur, 14/10/2026) | Inviter à explorer l'adresse envisagée à partir de son projet (se rapprocher du travail, préparer une retraite, s'installer en famille…) ; nommer au besoin ce qui peut peser dans le choix (mobilité, chaleur de l'été, risques à l'adresse, services), sans détailler de fonctionnalité ni promettre un résultat |
 | Temps de trajet estimé vers un lieu déclaré (voiture ou marche) | oui | **non** : validation en attente | Rien : ne pas l'évoquer, même au conditionnel |
 | Position de la commune pour la part de la voiture domicile-travail | oui | **non** : pas validée pour une promesse | Rien |
@@ -317,15 +319,15 @@ Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 
 
 Interdits en toute circonstance : promettre un budget ou un coût de déplacement calculé, des horaires ou fréquences de bus à l'adresse, des temps de trajet (quel que soit le mode), ou les parts de la voiture par secteur de l'article (analyse de la rédaction, absente du dossier d'adresse).
 
-La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
+La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée dans son ensemble (capacité « Examen d'une adresse à partir du projet ») ; elle n'est jamais un inventaire des équipements ou de la motorisation ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
 
 ## 12. Voix futur•e
 
 *(Recopié de `NOTE_EDITORIALE.md`, section 2, à la génération du dossier.)*
 
-- La voix est sérieuse, concrète et vivante. Une phrase marquante est permise quand elle dit quelque chose de juste (« la place pour la voiture se regarde comme la cave ou le balcon ») ; ce qui est proscrit, c'est le slogan automatique de fin de paragraphe.
+- La voix est sérieuse, concrète et vivante. Une phrase marquante est permise quand elle dit quelque chose de juste ; ce qui est proscrit, c'est le slogan automatique de fin de paragraphe. Un conseil pratique dit l'action à faire (« vérifiez dès l'annonce si une place est comprise »), sans comparaison qui la décore.
 - Partir d'une situation reconnaissable du lecteur (annonce, visite, trajet du matin, plein, horaires), puis faire avancer le récit par les données.
-- Deux entrées possibles, aucune obligatoire : un fait d'actualité, s'il amène la question que les données éclairent (sinon il reste un décor) ; ou une question durable de recherche résidentielle (« depuis ce quartier, pourra-t-on se passer de la voiture ? »).
+- Deux entrées possibles, aucune obligatoire : un fait d'actualité, s'il amène la question que les données éclairent (sinon il reste un décor) ; ou une question durable de recherche résidentielle (« depuis ce quartier, pourra-t-on moins prendre la voiture ? »).
 - Le millésime se dit clairement une fois dans le récit et figure sur chaque visuel ; ensuite, présent simple, sans « aujourd'hui » ni « habitants actuels ».
 - Décrire ce qui est mesuré : la proximité d'un équipement n'est pas son usage (« une école à moins de 500 mètres », pas « l'école se fait près de chez soi »).
 
@@ -333,7 +335,7 @@ La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du pr
 
 Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un article qui s'excuse à chaque paragraphe prend une voix scolaire.
 
-- Garder une précision seulement si elle **change le sens** : « deux groupes distincts » sous une comparaison qui inviterait à une lecture causale, les hypothèses d'un scénario (consommation, nombre d'allers-retours, variation du prix).
+- Garder une précision seulement si elle **change le sens**, et la porter d'abord par une formulation exacte plutôt que par une phrase de prudence : nommer chaque groupe par ce qu'il est (« les actifs qui habitent et travaillent à Niort », « ceux qui travaillent à Chauray ») évite d'ajouter qu'il s'agit de groupes distincts ; cette limite va dans la méthode. Restent dans le récit les hypothèses d'un scénario (consommation, nombre d'allers-retours, variation du prix).
 - Définir une notion **une fois, au bon endroit**, sans la redéfinir ensuite.
 - Le détail technique (vol d'oiseau, sondage, seuils, millésimes des contours) va dans la méthode ou la légende, pas dans le récit.
 - Supprimer les évidences : un tableau intitulé « surcoût de carburant » n'a pas à énumérer ensuite l'assurance, l'entretien et le stationnement ; « sept fois plus de kilomètres coûtent sept fois plus » n'apprend rien.
@@ -342,7 +344,7 @@ Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un a
 - Décrire des pratiques, jamais des contraintes : aucun quartier n'« impose » un mode de vie ; ne jamais attribuer une pratique au seul quartier ; ne culpabiliser personne.
 - Pas de hiérarchie causale que les données ne mesurent pas (« compte plus que », « dépend d'abord de »).
 - Pas de transitions annoncées (« voici le résultat le plus utile »), de maximes de fin de section, d'antithèses d'emphase, ni de témoignages ou scènes inventés. Le texte doit rester concret après suppression de ses phrases d'accroche.
-- Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte.
-- La conclusion vers futur•e est courte et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
+- Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte. Un arrondi ne change pas le sens : une valeur proche de 100 % ou de 0 % s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun ».
+- La conclusion vers futur•e est courte : elle part du projet du lecteur et de l'intérêt d'examiner l'adresse dans son ensemble, sans inventaire de fonctionnalités, et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
 - Chaque chiffre doit apporter quelque chose au lecteur : on n'ajoute pas un fait parce qu'il est disponible.
 

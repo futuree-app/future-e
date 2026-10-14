@@ -9,7 +9,7 @@
 Un fait ne peut entrer dans l'article que si les quatre conditions sont réunies. Elles ne se négocient pas.
 
 1. **Donnée exploitable** : le fait figure dans le dossier, avec une valeur.
-2. **Population, source et périmètre identifiés** : on sait de qui l'on parle (actifs, ménages, adresses), d'où vient le chiffre et sur quel territoire exact.
+2. **Population, source et périmètre identifiés** : on sait de qui l'on parle (actifs, ménages, adresses), d'où vient le chiffre et sur quel territoire exact. La phrase désigne exactement cette population : les parts par secteur portent sur tous les actifs qui habitent le secteur, quelle que soit leur commune de travail ; aucun sous-groupe absent du dossier (secteur × commune de travail) ne s'écrit.
 3. **Statut et usage qui l'autorisent** : la colonne « Usage » du dossier dit `oui`, ou `ordre de grandeur` (alors seulement comme ordre de grandeur, avec sa précision). Un fait `en attente de validation` ou `absent` ne s'écrit pas, ni arrondi, ni sous une formule vague qui en tiendrait lieu.
 4. **Aucune promesse produit non validée** : la conclusion ne s'appuie que sur les capacités autorisées (dernière section).
 
@@ -61,8 +61,8 @@ Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 
 
 | Capacité | Repérée dans le code | Autorisée dans la conclusion | Ce que l'on peut en dire |
 |---|---|---|---|
-| Équipements autour d'une adresse | oui | **oui** | Les équipements les plus proches de l'adresse (distances à vol d'oiseau) et leur nombre à moins de 500 m |
-| Équipement automobile du secteur | oui | **oui** | La part des ménages équipés d'une voiture dans le secteur de l'adresse, comparée à la commune |
+| Équipements autour d'une adresse | oui | **oui** | Au plus une mention générale, dans l'examen de l'adresse (« ce qui se trouve à proximité ») ; pas de détail (distances, nombre à moins de 500 m) ni de liste |
+| Équipement automobile du secteur | oui | **oui** | Au plus une mention générale, dans l'examen de l'adresse (la place de la voiture dans le secteur) ; pas de détail ni de liste |
 | Examen d'une adresse à partir du projet de la personne | oui | **oui** (porteur, 14/10/2026) | Inviter à explorer l'adresse envisagée à partir de son projet (se rapprocher du travail, préparer une retraite, s'installer en famille…) ; nommer au besoin ce qui peut peser dans le choix (mobilité, chaleur de l'été, risques à l'adresse, services), sans détailler de fonctionnalité ni promettre un résultat |
 | Temps de trajet estimé vers un lieu déclaré (voiture ou marche) | oui | **non** : validation en attente | Rien : ne pas l'évoquer, même au conditionnel |
 | Position de la commune pour la part de la voiture domicile-travail | oui | **non** : pas validée pour une promesse | Rien |
@@ -70,4 +70,4 @@ Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 
 
 Interdits en toute circonstance : promettre un budget ou un coût de déplacement calculé, des horaires ou fréquences de bus à l'adresse, des temps de trajet (quel que soit le mode), ou les parts de la voiture par secteur de l'article (analyse de la rédaction, absente du dossier d'adresse).
 
-La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
+La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée dans son ensemble (capacité « Examen d'une adresse à partir du projet ») ; elle n'est jamais un inventaire des équipements ou de la motorisation ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
