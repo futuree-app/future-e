@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 import { createClient } from "@/lib/supabase/client";
 import {
   SESSION_RECHERCHE_KEY, lireRechercheSession, libelleReprise,
@@ -80,7 +81,7 @@ export function RepriseRecherche({ recherche: fournie, variante = "lien", classN
     const res = await demander(recherche, { mode: "enregistrer", vuUpdatedAt: apercu.remplace?.updatedAt ?? null }).catch(() => null);
     if (res?.ok) {
       setEtat("fait");
-      router.refresh();
+      relireLaPage(router);
       return;
     }
     setEtat("repos");

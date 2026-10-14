@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 
 type CommuneResult = { code: string; nom: string; codeDepartement: string };
 
@@ -54,7 +55,7 @@ export function CommuneSetupBanner() {
         const d = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(d.error ?? "Erreur de sauvegarde.");
       }
-      router.refresh();
+      relireLaPage(router);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de sauvegarde.");
       setSaving(false);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 import { RepriseRecherche } from "./RepriseRecherche";
 import { CriteresDuProjet } from "./CriteresDuProjet";
 import type { CritereVue } from "@/lib/decision/projet-criteres-vue";
@@ -155,7 +156,7 @@ export function ProjectSummaryCard({
     setRelationValeur(next);
     setRelationSource("confirmed_by_user");
     setRelationBusy(false);
-    router.refresh();
+    relireLaPage(router);
   }
 
   async function save() {
@@ -191,7 +192,7 @@ export function ProjectSummaryCard({
     if (r.avertir) {
       setAvertissement("Votre texte est enregistré. Nous n'avons pas pu en extraire vos priorités : rouvrez l'éditeur et enregistrez à nouveau pour une analyse complète.");
     }
-    router.refresh(); // régénère le dossier de décision (rendu serveur) avec le projet à jour
+    relireLaPage(router); // régénère le dossier de décision (rendu serveur) avec le projet à jour
     setBusy(false);
   }
 

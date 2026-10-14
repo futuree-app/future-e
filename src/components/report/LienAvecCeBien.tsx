@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 import type { AddressObjective, AddressRelation } from "@/lib/relation-au-lieu";
 import { OBJECTIF_LIBELLE, RELATION_LIBELLE, noteDuCouple } from "@/lib/dossier-contexte-ecran";
 
@@ -56,7 +57,7 @@ export function LienAvecCeBien({
       // Confirmé par le serveur, et seulement là : l'écran montre ce qui est enregistré.
       setRelation(corps.relation ?? null);
       setObjectif(corps.objectif ?? null);
-      router.refresh();
+      relireLaPage(router);
     } catch {
       setErreur("Enregistrement impossible pour le moment. Réessayez.");
     } finally {

@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // UN DOSSIER ACHETÉ SANS PROJET, QUAND LE COMPTE EN A UN DEPUIS (FUT-10, décision du porteur).
@@ -46,7 +47,7 @@ export function LectureFactuelleDuBien({
         setEtat("ailleurs");
         return;
       }
-      router.refresh();
+      relireLaPage(router);
       setEtat("repos");
     } catch {
       setEtat("echec");
