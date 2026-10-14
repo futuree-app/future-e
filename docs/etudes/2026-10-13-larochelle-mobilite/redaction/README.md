@@ -63,7 +63,7 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Relecture des libellés d'IRIS avant de les écrire comme noms de quartiers | **Manuel** |
 | Contrôle de la hausse du carburant sur les mêmes stations | **Manuel** (`scripts/13` a été écrit pour La Rochelle) ; réextraire les prix la veille de la publication |
 | Graphique selon la commune de travail et sa carte de situation | **Manuel** : `barres()` est écrite pour La Rochelle ; la carte de situation (`--communes`) n'a de sens qu'à côté de ce graphique |
-| Toute comparaison nationale (rang vélo, voiture) | **Absent** : non calculé par la fiche ; à ne pas écrire |
+| Toute comparaison nationale (rang vélo, voiture) | **Absent** : non calculé par la fiche ; à ne pas écrire. Piste notée le 14/10/2026 : la produire dans le moteur déterministe, avec population, millésime et règle de comparaison explicites, avant de l'ouvrir à la rédaction |
 | Rédaction | **IA de rédaction** : prompt + dossier, en session vierge ; aucune génération lancée le 13/10/2026 |
 | Contrôle de la correspondance du brouillon | **Manuel** (lecture de `dossier.json`) ; pas de script de contrôle |
 | Relecture finale, publication | **Manuel** |
@@ -86,6 +86,6 @@ Légendes des visuels allégées le même jour : l'image porte titre, millésime
 ### Avant publication (ne bloque pas la prévisualisation)
 
 - Prix du carburant : réextraction la veille et contrôle de la hausse sur les mêmes stations (La Rochelle et Niort).
-- Dossier d'adresse : vérifier sur un dossier réel que les équipements les plus proches, leur distance et, quand il y en a plusieurs, leur nombre à moins de 500 m s'affichent comme l'écrit la conclusion. Non vérifié : le module « Autour de cette adresse » n'est accessible que par le parcours payant. Lecture du code (`AutourSection.tsx`) : le nombre n'apparaît qu'à partir de deux lieux, et seulement pour les dossiers calculés depuis le 01/08/2026 ; la phrase de Niort a été ajustée en conséquence.
+- Dossier d'adresse : la conclusion de La Rochelle promet les équipements les plus proches et la part des ménages motorisés du secteur ; à vérifier sur un dossier réel (parcours payant, non consulté). Celle de Niort (14/10/2026) n'invite plus qu'à explorer l'adresse à partir de son projet : vérifier que le parcours part bien du projet de la personne.
 - Niort : libellés d'IRIS cités comme noms de secteurs, intérêt du groupe Chauray, Aiffres, Bessines.
 - Article général : date « Mis à jour » à fixer au jour de publication ; liens vers les études à activer (tableau ci-dessus).

@@ -45,7 +45,7 @@ Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de 
 
 **Entrée de l'article.** Deux possibilités, aucune obligatoire : un fait d'actualité (la hausse du carburant, si elle amène la question) ou une question durable de recherche résidentielle. Choisir celle qui sert le mieux la question retenue.
 
-**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») sauf si un fait du dossier la donne ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
+**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») sauf si un fait du dossier la donne (piste pour plus tard : une comparaison nationale ou avec des communes comparables viendra du moteur déterministe, avec population, millésime et règle de comparaison explicites ; elle n'existe pas encore) ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
 
 ## Groupes de communes
 
@@ -63,10 +63,11 @@ Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 
 |---|---|---|---|
 | Équipements autour d'une adresse | oui | **oui** | Les équipements les plus proches de l'adresse (distances à vol d'oiseau) et leur nombre à moins de 500 m |
 | Équipement automobile du secteur | oui | **oui** | La part des ménages équipés d'une voiture dans le secteur de l'adresse, comparée à la commune |
+| Examen d'une adresse à partir du projet de la personne | oui | **oui** (porteur, 14/10/2026) | Inviter à explorer l'adresse envisagée à partir de son projet (se rapprocher du travail, préparer une retraite, s'installer en famille…) ; nommer au besoin ce qui peut peser dans le choix (mobilité, chaleur de l'été, risques à l'adresse, services), sans détailler de fonctionnalité ni promettre un résultat |
 | Temps de trajet estimé vers un lieu déclaré (voiture ou marche) | oui | **non** : validation en attente | Rien : ne pas l'évoquer, même au conditionnel |
 | Position de la commune pour la part de la voiture domicile-travail | oui | **non** : pas validée pour une promesse | Rien |
 | Comparateur de communes | oui | **non** : pas validé pour une promesse | Rien |
 
 Interdits en toute circonstance : promettre un budget ou un coût de déplacement calculé, des horaires ou fréquences de bus à l'adresse, des temps de trajet (quel que soit le mode), ou les parts de la voiture par secteur de l'article (analyse de la rédaction, absente du dossier d'adresse).
 
-La conclusion vers futur•e est courte (deux ou trois phrases). Elle dit avec ses propres mots ce que permettent les seules capacités autorisées, sans recopier une phrase commerciale. L'offre n'est jamais le sujet de la phrase d'entrée : partir de ce que le lecteur veut vérifier.
+La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
