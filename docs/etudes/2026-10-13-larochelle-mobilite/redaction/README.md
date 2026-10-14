@@ -14,6 +14,7 @@ L'IA de rédaction sélectionne les faits, choisit un angle et écrit. Elle ne r
 | `parametres_editoriaux.md` | Lecteur, question, conditions obligatoires, indices éditoriaux (non décisionnels), capacités produit autorisées (recopiés dans chaque dossier) |
 | `<insee>/dossier.md` | Dossier d'entrée autonome : la seule matière de l'IA de rédaction |
 | `<insee>/dossier.json` | Les mêmes faits, pour vérifier la correspondance du brouillon à la machine |
+| `<insee>/complement-alternatives.md` | Facultatif, manuel : informations documentaires datées sur les alternatives (réseau de transport), distinctes des résultats calculés ; à joindre avec le dossier. Niort seulement (14/10/2026) |
 | `../outil/dossier_redaction.py` | Adaptateur léger : fiche → dossier. Ne calcule aucune donnée ; éclate, étiquette (statut et usage), pré-calcule écarts et scénario |
 
 Statuts et usage : `utilisable` → `oui` ; `fragile` (faible précision statistique) → `ordre de grandeur` ; `en attente de validation` (vérification humaine non faite : réseau de bus, jour de référence) → `non`, valeur retirée du `.md` ; `absent` → `non`. Accès aux équipements : parts d'**adresses** BAN à vol d'oiseau (à la commune, chaque secteur pèse selon son nombre de ménages), pas des parts de ménages.
@@ -87,5 +88,5 @@ Légendes des visuels allégées le même jour : l'image porte titre, millésime
 
 - Prix du carburant : réextraction la veille et contrôle de la hausse sur les mêmes stations (La Rochelle et Niort).
 - Dossier d'adresse : la conclusion de La Rochelle promet les équipements les plus proches et la part des ménages motorisés du secteur ; à vérifier sur un dossier réel (parcours payant, non consulté). Celle de Niort (14/10/2026) n'invite plus qu'à explorer l'adresse à partir de son projet : vérifier que le parcours part bien du projet de la personne.
-- Niort : libellés d'IRIS cités comme noms de secteurs, intérêt du groupe Chauray, Aiffres, Bessines.
+- Niort : libellés d'IRIS cités comme noms de secteurs, intérêt du groupe Chauray, Aiffres, Bessines ; pages Tanlib citées à recontrôler (complément du 14/10/2026).
 - Article général : date « Mis à jour » à fixer au jour de publication ; liens vers les études à activer (tableau ci-dessus).

@@ -26,7 +26,11 @@ Avoir des commerces à deux pas ne dit rien du trajet qu'il faudra faire chaque 
 
 [GRAPHIQUE : Habiter Niort, travailler ici ou ailleurs]
 
-Posséder une voiture ne veut pas dire la prendre pour aller travailler : parmi les actifs dont le ménage possède au moins une voiture, 25 % ne la déclarent pas comme mode principal, travail à domicile compris. Pour qui a déjà un emploi, le trajet depuis chaque adresse envisagée se teste aux heures où on le fera.
+Posséder une voiture ne veut pas dire la prendre pour aller travailler : parmi les actifs dont le ménage possède au moins une voiture, 25 % ne la déclarent pas comme mode principal, travail à domicile compris.
+
+Pour utiliser moins sa voiture, le bus peut prendre une partie de ces trajets. À Niort, le réseau Tanlib est gratuit pour tout le monde depuis 2017, sur les lignes urbaines comme sur les lignes périurbaines de l'agglomération. La gratuité règle la question du prix, pas celle du trajet : elle ne dit pas si une ligne passe près de l'adresse envisagée, ni si elle mène à votre travail aux heures qui vous conviennent. Les lignes urbaines 1 à 10 ne circulent ni le dimanche ni les jours fériés, et leurs horaires du samedi ou des vacances scolaires peuvent différer de ceux de la semaine.
+
+Pour qui a déjà un emploi, le trajet depuis chaque adresse envisagée se vérifie avec le calcul d'itinéraire de [tanlib.com](https://www.tanlib.com/itineraire-bus/), à l'heure du départ et à celle du retour. Faut-il changer de bus en route ? Que se passe-t-il si vous finissez tard ou travaillez le samedi ? Les fiches horaires des lignes urbaines sont en vigueur depuis le 1er septembre 2026.
 
 Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce que cela implique quand on cherche un logement : c'est le sujet de [notre article sur la dépendance automobile](/savoir/dependance-auto).
 
@@ -53,5 +57,6 @@ Se rapprocher de son travail, préparer sa retraite, s'installer en famille : se
 - **Ménages.** Toutes les résidences principales, retraités et étudiants compris.
 - **Équipements.** INSEE, Base permanente des équipements 2025, et Base adresse nationale. Parts d'adresses du secteur. Les distances sont à vol d'oiseau ; le trajet à pied réel peut être nettement plus long.
 - **Carburant.** prix-carburants.gouv.fr : médiane entre stations du dernier prix déclaré dans la semaine. Les semaines comparées sont celles du 6 octobre 2025 et du 5 octobre 2026. Les stations retenues sont dans un rayon de 12 km autour du centre de Niort. Le scénario compte le carburant seul, avec la hausse médiane arrondie à 5 centimes.
+- **Bus.** Site du réseau Tanlib (Niort Agglo), consulté le 14 octobre 2026 : page de la gratuité du réseau et fiches horaires des lignes urbaines 1 à 10, valables à partir du 1er septembre 2026. Ce sont des informations publiées par le réseau, pas des mesures de la desserte de chaque adresse.
 
-Étude futur•e, 13 octobre 2026.
+Étude futur•e du 13 octobre 2026, mise à jour le 14 octobre 2026.

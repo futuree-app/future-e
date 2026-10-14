@@ -1,6 +1,6 @@
 # Correspondance des chiffres de l'article Niort avec le dossier
 
-Document interne : ne figure pas dans l'article. Version courante : `article.md` (passe éditoriale du 14/10/2026), version éditée de l'essai 2 (`essais/2026-10-13-essai-2.md`). Identifiants et valeurs : `dossier.json` (même contenu que `dossier.md`, commit `ec131595`). Tous les faits cités ont l'usage `oui` ; aucun fait bus, fragile ou absent.
+Document interne : ne figure pas dans l'article. Version courante : `article.md` (passe éditoriale du 14/10/2026), version éditée de l'essai 2 (`essais/2026-10-13-essai-2.md`). Identifiants et valeurs : `dossier.json` (même contenu que `dossier.md`, commit `ec131595`). Tous les faits cités ont l'usage `oui` ; aucun fait bus calculé, fragile ou absent. Depuis le 14/10/2026, le passage sur le bus s'appuie sur le complément documentaire `complement-alternatives.md` (informations publiées par le réseau, distinctes des résultats calculés).
 
 ## Corrections apportées à l'essai 2
 
@@ -31,6 +31,22 @@ Document interne : ne figure pas dans l'article. Version courante : `article.md`
 | Lieu de travail | 75 %, 65 %, 85 %, 87 %, phrase sur les 20 points | liaison (commerces proches ≠ trajet de travail) ; 65 % et 85 % avec leurs populations ; 87 % laissé au graphique ; limite causale en méthode | Succession 70 / 75 / 65 difficile à lire ; pas d'attribution causale dans le corps |
 | Carburant | entrée directe sur les prix | « Pour ceux qui font ce trajet en voiture, la distance se paie aussi à la pompe. » | Raison du passage au carburant |
 | Conclusion | équipements et motorisation du secteur, déjà présentés | projet du lecteur (travail, retraite, famille), dimensions à regarder, invitation à explorer l'adresse envisagée | Ouvrir sur la décision personnelle ; aucune fonctionnalité énumérée ni résultat promis |
+
+## Complément du 14/10/2026 : alternatives à la voiture
+
+Ajout d'un passage de deux paragraphes dans « Travailler à Niort ou ailleurs », après la phrase sur les 25 %, et d'une ligne « Bus » en méthode. Aucun chiffre calculé ajouté ; titre, chapeau, autres sections et conclusion inchangés.
+
+| Passage | Information | Identifiant | Source |
+|---|---|---|---|
+| Section 3 | gratuit pour tout le monde depuis 2017 ; lignes urbaines et périurbaines | `doc.tanlib.gratuite` | tanlib.com, page « Réseau de bus 100 % gratuit » |
+| Section 3 | lignes urbaines 1 à 10 : ni dimanche ni jours fériés | `doc.tanlib.urbaines.jours` | fiches horaires `dl/ligne-1.pdf` à `dl/ligne-10.pdf` |
+| Section 3 | horaires du samedi ou des vacances « peuvent différer » | `doc.tanlib.fiches.periodes` | fiche de la ligne 1 (seule vérifiée, d'où « peuvent ») |
+| Section 3 | calcul d'itinéraire de tanlib.com | `doc.tanlib.verifier` | https://www.tanlib.com/itineraire-bus/ |
+| Section 3 | en vigueur depuis le 1er septembre 2026 | `doc.tanlib.urbaines.jours` (validité) | mention « Horaires valables à partir du 1er septembre 2026 » |
+| Méthode | consulté le 14 octobre 2026 | tout le complément | |
+| Pied | « Étude du 13 octobre 2026, mise à jour le 14 octobre 2026 » | | date de l'étude initiale conservée |
+
+Ce que le passage ne dit pas : qu'un trajet est faisable ou pratique, qu'une adresse est desservie, une fréquence, ou qu'on peut se passer d'une voiture.
 
 ## Chiffres de la version éditée
 
@@ -70,4 +86,5 @@ Document interne : ne figure pas dans l'article. Version courante : `article.md`
 
 - Réextraire les prix du carburant la veille de la publication et contrôler la hausse sur les mêmes stations (chapeau, section 4, tableau).
 - Relire les libellés d'IRIS cités comme noms de secteurs.
+- Recontrôler les pages Tanlib citées (gratuité, jours de circulation, validité des fiches) la veille de la publication.
 - Relire l'intérêt du groupe Chauray, Aiffres et Bessines (liste automatique de l'unité urbaine).
