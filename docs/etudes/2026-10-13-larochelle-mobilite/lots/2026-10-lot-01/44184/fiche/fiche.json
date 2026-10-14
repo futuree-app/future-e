@@ -1,0 +1,3537 @@
+{
+ "commune": {
+  "insee": "44184",
+  "nom": "Saint-Nazaire",
+  "dep": "44",
+  "epci": {
+   "code": "244400644",
+   "nom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)"
+  },
+  "centre": [
+   -2.2392,
+   47.2768
+  ],
+  "uu": "44601",
+  "voisines": {
+   "44055": "La Baule-Escoublac",
+   "44069": "Guérande",
+   "44154": "Saint-Brevin-les-Pins",
+   "44132": "Pornichet",
+   "44052": "Donges",
+   "44210": "Trignac"
+  }
+ },
+ "genere_le": "2026-10-14T14:26:12Z",
+ "jour_reference": "2026-10-13",
+ "outil": "docs/etudes/2026-10-13-larochelle-mobilite/outil/fiche_mobilite.py",
+ "faits": [
+  {
+   "id": "mobpro.modes",
+   "libelle": "Mode principal pour aller travailler",
+   "valeur": {
+    "pas_de_transport": {
+     "p": 0.03,
+     "bas": 0.026,
+     "haut": 0.035,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "marche": {
+     "p": 0.061,
+     "bas": 0.055,
+     "haut": 0.068,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "velo": {
+     "p": 0.083,
+     "bas": 0.076,
+     "haut": 0.091,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "deux_roues_mot": {
+     "p": 0.012,
+     "bas": 0.01,
+     "haut": 0.016,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "voiture": {
+     "p": 0.711,
+     "bas": 0.699,
+     "haut": 0.723,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "tc": {
+     "p": 0.102,
+     "bas": 0.094,
+     "haut": 0.11,
+     "lignes": 9198,
+     "n_eff": 5125
+    }
+   },
+   "definition": "Actifs occupés de 15 ans ou plus, mode principal pour aller travailler, pondéré IPONDI",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de résidence",
+   "statut": "calculé",
+   "dans_moteur": "part voiture seulement (index mobilite.part_voiture, affichée en rang)",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "controles": [
+    "Nombre de lignes du fichier = 7388023 : oui",
+    "Égal à l'index (part voiture 0.7111) : oui"
+   ],
+   "verification_humaine": null
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "libelle": "Actifs travaillant dans leur commune de résidence",
+   "valeur": {
+    "p": 0.654,
+    "bas": 0.641,
+    "haut": 0.667,
+    "lignes": 9198,
+    "n_eff": 5125
+   },
+   "definition": "Part des actifs occupés dont la commune de travail est la commune de résidence",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de résidence",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "controles": [],
+   "verification_humaine": null
+  },
+  {
+   "id": "mobpro.voiture_selon_destination",
+   "libelle": "Part de la voiture selon le lieu de travail",
+   "valeur": {
+    "meme_commune": {
+     "p": 0.64,
+     "bas": 0.624,
+     "haut": 0.656,
+     "lignes": 5996,
+     "n_eff": 3353
+    },
+    "communes_voisines": {
+     "p": 0.889,
+     "bas": 0.863,
+     "haut": 0.91,
+     "lignes": 1266,
+     "n_eff": 701
+    },
+    "ailleurs": {
+     "p": 0.845,
+     "bas": 0.827,
+     "haut": 0.861,
+     "lignes": 3202,
+     "n_eff": 1772
+    }
+   },
+   "definition": "Parmi les actifs résidents, part allant travailler en voiture, selon que la commune de travail est la commune de résidence, une voisine retenue, ou toute autre",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de résidence × commune de travail",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "controles": [
+    "Voisines retenues : La Baule-Escoublac, Guérande, Saint-Brevin-les-Pins, Pornichet, Donges, Trignac"
+   ],
+   "verification_humaine": "Le choix des voisines change le chiffre « communes voisines » : le relire."
+  },
+  {
+   "id": "mobpro.posseder_utiliser",
+   "libelle": "Possession au ménage et usage pour travailler",
+   "valeur": {
+    "actifs_menage_sans_voiture": {
+     "p": 0.093,
+     "bas": 0.085,
+     "haut": 0.101,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "actifs_menage_2_voitures_plus": {
+     "p": 0.445,
+     "bas": 0.431,
+     "haut": 0.458,
+     "lignes": 9198,
+     "n_eff": 5125
+    },
+    "menage_motorise_mais_pas_en_voiture": {
+     "p": 0.24,
+     "bas": 0.228,
+     "haut": 0.253,
+     "lignes": 8255,
+     "n_eff": 4618
+    }
+   },
+   "definition": "VOIT = voitures du ménage de l'actif. Parts d'ACTIFS, pas de ménages",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de résidence",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "controles": [],
+   "verification_humaine": null
+  },
+  {
+   "id": "mobpro.statut_occupation",
+   "libelle": "Selon le statut d'occupation du logement",
+   "valeur": {
+    "proprietaires": {
+     "voiture": {
+      "p": 0.744,
+      "bas": 0.726,
+      "haut": 0.76,
+      "lignes": 4236,
+      "n_eff": 2508
+     },
+     "velo": {
+      "p": 0.104,
+      "bas": 0.092,
+      "haut": 0.116,
+      "lignes": 4236,
+      "n_eff": 2508
+     },
+     "menage_sans_voiture": {
+      "p": 0.019,
+      "bas": 0.015,
+      "haut": 0.026,
+      "lignes": 4236,
+      "n_eff": 2508
+     },
+     "menage_2_voitures_plus": {
+      "p": 0.608,
+      "bas": 0.589,
+      "haut": 0.627,
+      "lignes": 4236,
+      "n_eff": 2508
+     }
+    },
+    "locataires_prive": {
+     "voiture": {
+      "p": 0.697,
+      "bas": 0.675,
+      "haut": 0.719,
+      "lignes": 3144,
+      "n_eff": 1634
+     },
+     "velo": {
+      "p": 0.066,
+      "bas": 0.055,
+      "haut": 0.08,
+      "lignes": 3144,
+      "n_eff": 1634
+     },
+     "menage_sans_voiture": {
+      "p": 0.145,
+      "bas": 0.129,
+      "haut": 0.163,
+      "lignes": 3144,
+      "n_eff": 1634
+     },
+     "menage_2_voitures_plus": {
+      "p": 0.286,
+      "bas": 0.265,
+      "haut": 0.309,
+      "lignes": 3144,
+      "n_eff": 1634
+     }
+    },
+    "locataires_hlm": {
+     "voiture": {
+      "p": 0.648,
+      "bas": 0.616,
+      "haut": 0.679,
+      "lignes": 1592,
+      "n_eff": 883
+     },
+     "velo": {
+      "p": 0.053,
+      "bas": 0.04,
+      "haut": 0.07,
+      "lignes": 1592,
+      "n_eff": 883
+     },
+     "menage_sans_voiture": {
+      "p": 0.22,
+      "bas": 0.194,
+      "haut": 0.249,
+      "lignes": 1592,
+      "n_eff": 883
+     },
+     "menage_2_voitures_plus": {
+      "p": 0.242,
+      "bas": 0.215,
+      "haut": 0.272,
+      "lignes": 1592,
+      "n_eff": 883
+     }
+    }
+   },
+   "definition": "STOCD : 10 propriétaire ; 21 et 23 locataire du privé (vide, meublé) ; 22 HLM",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de résidence",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "controles": [],
+   "verification_humaine": null
+  },
+  {
+   "id": "mobpro.qui_vient_travailler",
+   "libelle": "Actifs qui travaillent dans la commune, selon leur lieu de résidence",
+   "valeur": {
+    "actifs_travaillant_ici": 42119,
+    "habitent_la_commune": {
+     "part_des_emplois": 0.437,
+     "voiture": {
+      "p": 0.64,
+      "bas": 0.624,
+      "haut": 0.656,
+      "lignes": 5996,
+      "n_eff": 3353
+     },
+     "tc": {
+      "p": 0.096,
+      "bas": 0.086,
+      "haut": 0.106,
+      "lignes": 5996,
+      "n_eff": 3353
+     }
+    },
+    "reste_unite_urbaine": {
+     "part_des_emplois": 0.281,
+     "voiture": {
+      "p": 0.923,
+      "bas": 0.91,
+      "haut": 0.935,
+      "lignes": 3150,
+      "n_eff": 1802
+     },
+     "tc": {
+      "p": 0.036,
+      "bas": 0.028,
+      "haut": 0.045,
+      "lignes": 3150,
+      "n_eff": 1802
+     }
+    },
+    "hors_unite_urbaine": {
+     "part_des_emplois": 0.282,
+     "voiture": {
+      "p": 0.925,
+      "bas": 0.912,
+      "haut": 0.937,
+      "lignes": 2786,
+      "n_eff": 1678
+     },
+     "tc": {
+      "p": 0.06,
+      "bas": 0.05,
+      "haut": 0.072,
+      "lignes": 2786,
+      "n_eff": 1678
+     }
+    }
+   },
+   "definition": "Actifs occupés dont la commune de travail est la commune étudiée",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "maille": "commune de travail",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "controles": [],
+   "verification_humaine": null
+  },
+  {
+   "id": "iris.ecart_voiture",
+   "libelle": "Part de la voiture pour aller travailler, du quartier le moins au plus motorisé",
+   "valeur": {
+    "min": 0.56,
+    "iris_min": "Ville Port",
+    "max": 0.86,
+    "iris_max": "Immaculée Campagne",
+    "iris_habitat": 28
+   },
+   "definition": "C22_ACTOCC15P_VOIT / C22_ACTOCC15P, IRIS d'habitat (TYP_IRIS = H)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "maille": "IRIS",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Exploitation complémentaire : précision de quelques points par IRIS ; ne commenter que des écarts > 10 points.",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "controles": [
+    "IRIS de moins de 300 actifs : 0"
+   ],
+   "verification_humaine": "Relire les libellés d'IRIS avant de les citer comme noms de quartiers.",
+   "sources": [
+    {
+     "url": "https://www.insee.fr/fr/statistiques/fichier/8647006/base-ic-activite-residents-2022_csv.zip",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "f4aefb7fab425b9f"
+    },
+    {
+     "url": "https://www.insee.fr/fr/statistiques/fichier/8647012/base-ic-logement-2022_csv.zip",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "d8cf20698fed027e"
+    }
+   ]
+  },
+  {
+   "id": "iris.coherence_mobpro",
+   "libelle": "Contrôle : IRIS agrégés = fichier détail",
+   "valeur": {
+    "iris": 0.711,
+    "mobpro": 0.711
+   },
+   "definition": "Part voiture recalculée depuis la somme des IRIS, comparée au fichier détail",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "maille": "commune",
+   "statut": "contrôle",
+   "dans_moteur": "non",
+   "limites": [],
+   "controles": [
+    "Écart < 0,5 point : oui"
+   ],
+   "verification_humaine": null
+  },
+  {
+   "id": "iris.menages_commune",
+   "libelle": "Ménages de la commune et voiture",
+   "valeur": {
+    "menages_sans_voiture": 0.197,
+    "menages_2_voitures_plus": 0.254,
+    "menages_stationnement_reserve": 0.616
+   },
+   "definition": "Résidences principales : P22_RP_VOIT1P, P22_RP_VOIT2P, P22_RP_GARL (emplacement réservé au stationnement)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "maille": "commune",
+   "statut": "calculé",
+   "dans_moteur": "part ≥ 1 voiture à l'IRIS (data/iris-logement.json), affichée dans le dossier d'adresse",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "controles": [],
+   "verification_humaine": null,
+   "sources": [
+    {
+     "url": "https://www.insee.fr/fr/statistiques/fichier/8647006/base-ic-activite-residents-2022_csv.zip",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "f4aefb7fab425b9f"
+    },
+    {
+     "url": "https://www.insee.fr/fr/statistiques/fichier/8647012/base-ic-logement-2022_csv.zip",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "d8cf20698fed027e"
+    }
+   ]
+  },
+  {
+   "id": "acces.adresses",
+   "libelle": "Part des ménages (estimée) dont l'adresse a chaque service à proximité",
+   "valeur": {
+    "commerce_alim_500m": 0.826,
+    "grande_surface_500m": 0.378,
+    "pharmacie_500m": 0.688,
+    "medecin_generaliste_500m": 0.667,
+    "ecole_elementaire_500m": 0.767,
+    "college_1km": 0.729,
+    "gare_2km": 0.429,
+    "panier_quotidien_500m": 0.617,
+    "bus_8h_7_9h": 0.825,
+    "aucun_bus_7_9h": 0.05,
+    "bus_4h_20_22h": 0.736
+   },
+   "definition": "Distances À VOL D'OISEAU depuis chaque adresse BAN ; poids = ménages de l'IRIS / adresses de l'IRIS. Panier quotidien = commerce alimentaire, pharmacie et école élémentaire à 500 m. Bus = courses distinctes de lignes régulières à 400 m, deux sens confondus",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "maille": "adresse, agrégée à la commune et à l'IRIS",
+   "statut": "calculé",
+   "dans_moteur": "proximité BPE à UNE adresse (dossier, module Autour, 5 catégories, hypermarchés exclus) ; pas de fréquence de bus",
+   "limites": [
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "controles": [
+    "Adresses non rattachées à un IRIS : 0.0%",
+    "Jour de référence 2026-10-13 dans la validité GTFS ['20260714', '20270702']"
+   ],
+   "verification_humaine": "Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire.",
+   "gtfs": {
+    "choix": "auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s)",
+    "url": "https://www.data.gouv.fr/api/1/datasets/r/a1867718-7921-42a6-b672-c53b8c583aa3",
+    "validite": [
+     "20260714",
+     "20270702"
+    ],
+    "lignes_retenues": [
+     "13 La Baule / Pornichet / Saint-Nazaire",
+     "2 Herbignac - Saint-Lyphard - Guérande - Saint-Nazaire",
+     "305 SAINT-NAZAIRE Gare - BESNÉ Harrois",
+     "315 Pornic - Saint-Brévin-les-Pins - Saint-Nazaire",
+     "317 Saint-Brévin-les-Pins - Trignac - Saint-Nazaire",
+     "4 SAINT-ANDRÉ-DES-EAUX Chalands Fleuris - SAINT-NAZAIRE Le Plessis",
+     "5 SAINT-NAZAIRE Le Grand Pez - SAINT-NAZAIRE Penhoët",
+     "6 SAINT-NAZAIRE Océanis 2 - SAINT-NAZAIRE Voltaire-Landettes",
+     "7 SAINT-NAZAIRE Océanis 1 - SAINT-NAZAIRE Gare",
+     "8 LA CHAPELLE-DES-MARAIS Mayun - SAINT-NAZAIRE Gare",
+     "9 SAINT-NAZAIRE Gare - DONGES Gare",
+     "H1 SAINT-NAZAIRE Gavy - MONTOIR-DE-BRETAGNE L’Ormois",
+     "H2 SAINT-NAZAIRE Plage des Jaunais - TRIGNAC Les Forges",
+     "H3 SAINT-NAZAIRE Kerlédé - SAINT-NAZAIRE Petit Maroc",
+     "NBR SAINT-NAZAIRE Gare - SAINT-NAZAIRE Brais",
+     "NCV SAINT-NAZAIRE Hôtel de Ville - SAINT-NAZAIRE Parking du Théâtre",
+     "TER01 Nantes - Saint-Nazaire - Le Croisic"
+    ],
+    "lignes_ecartees": 122,
+    "a_relire_nom_scolaire_mais_frequente": [],
+    "courses_jour": 1182
+   }
+  },
+  {
+   "id": "carburant.evolution",
+   "libelle": "Prix médian à la pompe, stations à moins de 12 km",
+   "valeur": {
+    "Gazole": {
+     "semaine_ref": "2026-10-05",
+     "prix": 2.298,
+     "semaine_un_an_avant": "2025-10-06",
+     "prix_un_an_avant": 1.565,
+     "ecart": 0.733,
+     "stations": 13
+    },
+    "E10": {
+     "semaine_ref": "2026-10-05",
+     "prix": 2.144,
+     "semaine_un_an_avant": "2025-10-06",
+     "prix_un_an_avant": 1.637,
+     "ecart": 0.507,
+     "stations": 12
+    }
+   },
+   "definition": "Dernier prix déclaré par station dans la semaine, médiane entre stations",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "maille": "stations à 12 km du centre",
+   "statut": "calculé",
+   "dans_moteur": "non",
+   "limites": [
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "controles": [
+    "Stations dans le rayon : 16 (suffisant)"
+   ],
+   "verification_humaine": null,
+   "sources": [
+    {
+     "url": "https://donnees.roulez-eco.fr/opendata/annee/2025",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "383379223bd43f9d"
+    },
+    {
+     "url": "https://donnees.roulez-eco.fr/opendata/annee/2026",
+     "recupere_le": "2026-10-13T10:37:55Z",
+     "sha256": "cd999b23896161f8"
+    }
+   ]
+  }
+ ],
+ "tableaux": {
+  "modes_par_destination": [
+   {
+    "travail": "44184",
+    "nom": "Saint-Nazaire",
+    "lignes": 5996,
+    "fragilite": "ok",
+    "part_des_actifs": 0.654,
+    "pas_de_transport": 0.045,
+    "marche": 0.089,
+    "velo": 0.117,
+    "deux_roues_mot": 0.014,
+    "voiture": 0.64,
+    "tc": 0.096
+   },
+   {
+    "travail": "44103",
+    "nom": "Montoir-de-Bretagne",
+    "lignes": 689,
+    "fragilite": "ok",
+    "part_des_actifs": 0.072,
+    "pas_de_transport": 0.0,
+    "marche": 0.002,
+    "velo": 0.053,
+    "deux_roues_mot": 0.013,
+    "voiture": 0.857,
+    "tc": 0.076
+   },
+   {
+    "travail": "44210",
+    "nom": "Trignac",
+    "lignes": 295,
+    "fragilite": "ok",
+    "part_des_actifs": 0.034,
+    "pas_de_transport": 0.0,
+    "marche": 0.027,
+    "velo": 0.048,
+    "deux_roues_mot": 0.026,
+    "voiture": 0.757,
+    "tc": 0.142
+   },
+   {
+    "travail": "44109",
+    "nom": "Nantes",
+    "lignes": 287,
+    "fragilite": "ok",
+    "part_des_actifs": 0.032,
+    "pas_de_transport": 0.009,
+    "marche": 0.015,
+    "velo": 0.0,
+    "deux_roues_mot": 0.002,
+    "voiture": 0.554,
+    "tc": 0.421
+   },
+   {
+    "travail": "44069",
+    "nom": "Guérande",
+    "lignes": 271,
+    "fragilite": "ok",
+    "part_des_actifs": 0.03,
+    "pas_de_transport": 0.004,
+    "marche": 0.005,
+    "velo": 0.002,
+    "deux_roues_mot": 0.011,
+    "voiture": 0.925,
+    "tc": 0.053
+   },
+   {
+    "travail": "44055",
+    "nom": "La Baule-Escoublac",
+    "lignes": 233,
+    "fragilite": "ok",
+    "part_des_actifs": 0.025,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.017,
+    "voiture": 0.943,
+    "tc": 0.04
+   },
+   {
+    "travail": "44132",
+    "nom": "Pornichet",
+    "lignes": 203,
+    "fragilite": "ok",
+    "part_des_actifs": 0.021,
+    "pas_de_transport": 0.0,
+    "marche": 0.007,
+    "velo": 0.03,
+    "deux_roues_mot": 0.006,
+    "voiture": 0.933,
+    "tc": 0.024
+   },
+   {
+    "travail": "44052",
+    "nom": "Donges",
+    "lignes": 136,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.015,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.009,
+    "deux_roues_mot": 0.011,
+    "voiture": 0.893,
+    "tc": 0.087
+   },
+   {
+    "travail": "44154",
+    "nom": "Saint-Brevin-les-Pins",
+    "lignes": 128,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.013,
+    "pas_de_transport": 0.012,
+    "marche": 0.003,
+    "velo": 0.0,
+    "deux_roues_mot": 0.009,
+    "voiture": 0.962,
+    "tc": 0.014
+   },
+   {
+    "travail": "44162",
+    "nom": "Saint-Herblain",
+    "lignes": 70,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.007,
+    "pas_de_transport": 0.007,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.878,
+    "tc": 0.115
+   },
+   {
+    "travail": "44131",
+    "nom": "Pornic",
+    "lignes": 59,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.006,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 1.0,
+    "tc": 0.0
+   },
+   {
+    "travail": "44151",
+    "nom": "Saint-André-des-Eaux",
+    "lignes": 55,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.006,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.962,
+    "tc": 0.038
+   },
+   {
+    "travail": "44195",
+    "nom": "Savenay",
+    "lignes": 54,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.006,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.825,
+    "tc": 0.175
+   },
+   {
+    "travail": "44129",
+    "nom": "Pontchâteau",
+    "lignes": 49,
+    "fragilite": "fragile",
+    "part_des_actifs": 0.005,
+    "pas_de_transport": 0.0,
+    "marche": 0.0,
+    "velo": 0.0,
+    "deux_roues_mot": 0.0,
+    "voiture": 0.969,
+    "tc": 0.031
+   }
+  ],
+  "voisines": [
+   {
+    "insee": "44055",
+    "nom": "La Baule-Escoublac",
+    "voiture": 0.783,
+    "velo": 0.036,
+    "tc": 0.054,
+    "vers_commune_etudiee": {
+     "lignes": 412,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.943,
+      "bas": 0.903,
+      "haut": 0.967,
+      "lignes": 412,
+      "n_eff": 214
+     },
+     "velo": {
+      "p": 0.018,
+      "bas": 0.007,
+      "haut": 0.046,
+      "lignes": 412,
+      "n_eff": 214
+     }
+    }
+   },
+   {
+    "insee": "44069",
+    "nom": "Guérande",
+    "voiture": 0.832,
+    "velo": 0.032,
+    "tc": 0.026,
+    "vers_commune_etudiee": {
+     "lignes": 429,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.962,
+      "bas": 0.929,
+      "haut": 0.98,
+      "lignes": 429,
+      "n_eff": 230
+     },
+     "velo": {
+      "p": 0.006,
+      "bas": 0.001,
+      "haut": 0.027,
+      "lignes": 429,
+      "n_eff": 230
+     }
+    }
+   },
+   {
+    "insee": "44154",
+    "nom": "Saint-Brevin-les-Pins",
+    "voiture": 0.869,
+    "velo": 0.031,
+    "tc": 0.027,
+    "vers_commune_etudiee": {
+     "lignes": 443,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.956,
+      "bas": 0.923,
+      "haut": 0.975,
+      "lignes": 443,
+      "n_eff": 251
+     },
+     "velo": {
+      "p": 0.01,
+      "bas": 0.003,
+      "haut": 0.032,
+      "lignes": 443,
+      "n_eff": 251
+     }
+    }
+   },
+   {
+    "insee": "44132",
+    "nom": "Pornichet",
+    "voiture": 0.818,
+    "velo": 0.048,
+    "tc": 0.048,
+    "vers_commune_etudiee": {
+     "lignes": 521,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.906,
+      "bas": 0.865,
+      "haut": 0.936,
+      "lignes": 521,
+      "n_eff": 267
+     },
+     "velo": {
+      "p": 0.045,
+      "bas": 0.026,
+      "haut": 0.077,
+      "lignes": 521,
+      "n_eff": 267
+     }
+    }
+   },
+   {
+    "insee": "44052",
+    "nom": "Donges",
+    "voiture": 0.896,
+    "velo": 0.02,
+    "tc": 0.027,
+    "vers_commune_etudiee": {
+     "lignes": 211,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.943,
+      "bas": 0.892,
+      "haut": 0.971,
+      "lignes": 211,
+      "n_eff": 141
+     },
+     "velo": {
+      "p": 0.005,
+      "bas": 0.001,
+      "haut": 0.035,
+      "lignes": 211,
+      "n_eff": 141
+     }
+    }
+   },
+   {
+    "insee": "44210",
+    "nom": "Trignac",
+    "voiture": 0.867,
+    "velo": 0.026,
+    "tc": 0.047,
+    "vers_commune_etudiee": {
+     "lignes": 259,
+     "fragilite": "ok",
+     "voiture": {
+      "p": 0.876,
+      "bas": 0.819,
+      "haut": 0.917,
+      "lignes": 259,
+      "n_eff": 172
+     },
+     "velo": {
+      "p": 0.027,
+      "bas": 0.011,
+      "haut": 0.064,
+      "lignes": 259,
+      "n_eff": 172
+     }
+    }
+   }
+  ],
+  "iris": [
+   {
+    "IRIS": "441840102",
+    "COM": "44184",
+    "TYP_IRIS": "A",
+    "nom": "Le Port",
+    "actifs": 2.0,
+    "voiture": 0.0,
+    "velo": 0.0,
+    "marche": 0.0,
+    "tc": 1.0,
+    "aucun": 0.0,
+    "menages": 2.0,
+    "menages_sans_voiture": 1.0,
+    "menages_2_voitures_plus": 0.0,
+    "menages_stationnement_reserve": 0.0
+   },
+   {
+    "IRIS": "441840107",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Ville Port",
+    "actifs": 1040.0,
+    "voiture": 0.56,
+    "velo": 0.111,
+    "marche": 0.129,
+    "tc": 0.152,
+    "aucun": 0.031,
+    "menages": 1646.0,
+    "menages_sans_voiture": 0.263,
+    "menages_2_voitures_plus": 0.172,
+    "menages_stationnement_reserve": 0.428
+   },
+   {
+    "IRIS": "441840104",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Centre Halles",
+    "actifs": 878.0,
+    "voiture": 0.578,
+    "velo": 0.123,
+    "marche": 0.152,
+    "tc": 0.103,
+    "aucun": 0.023,
+    "menages": 1118.0,
+    "menages_sans_voiture": 0.273,
+    "menages_2_voitures_plus": 0.144,
+    "menages_stationnement_reserve": 0.318
+   },
+   {
+    "IRIS": "441840106",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Hôtel de ville",
+    "actifs": 1121.0,
+    "voiture": 0.585,
+    "velo": 0.099,
+    "marche": 0.096,
+    "tc": 0.167,
+    "aucun": 0.034,
+    "menages": 1553.0,
+    "menages_sans_voiture": 0.283,
+    "menages_2_voitures_plus": 0.152,
+    "menages_stationnement_reserve": 0.474
+   },
+   {
+    "IRIS": "441840111",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Gambetta",
+    "actifs": 988.0,
+    "voiture": 0.606,
+    "velo": 0.134,
+    "marche": 0.114,
+    "tc": 0.096,
+    "aucun": 0.035,
+    "menages": 1310.0,
+    "menages_sans_voiture": 0.298,
+    "menages_2_voitures_plus": 0.206,
+    "menages_stationnement_reserve": 0.513
+   },
+   {
+    "IRIS": "441840108",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Jardin des Plantes",
+    "actifs": 906.0,
+    "voiture": 0.614,
+    "velo": 0.144,
+    "marche": 0.115,
+    "tc": 0.067,
+    "aucun": 0.044,
+    "menages": 1259.0,
+    "menages_sans_voiture": 0.206,
+    "menages_2_voitures_plus": 0.235,
+    "menages_stationnement_reserve": 0.587
+   },
+   {
+    "IRIS": "441840103",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Herbins Gare",
+    "actifs": 1010.0,
+    "voiture": 0.616,
+    "velo": 0.098,
+    "marche": 0.077,
+    "tc": 0.17,
+    "aucun": 0.032,
+    "menages": 1244.0,
+    "menages_sans_voiture": 0.269,
+    "menages_2_voitures_plus": 0.185,
+    "menages_stationnement_reserve": 0.479
+   },
+   {
+    "IRIS": "441840122",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Bouletterie",
+    "actifs": 853.0,
+    "voiture": 0.625,
+    "velo": 0.062,
+    "marche": 0.045,
+    "tc": 0.241,
+    "aucun": 0.025,
+    "menages": 1164.0,
+    "menages_sans_voiture": 0.331,
+    "menages_2_voitures_plus": 0.136,
+    "menages_stationnement_reserve": 0.341
+   },
+   {
+    "IRIS": "441840119",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Chesnaie",
+    "actifs": 450.0,
+    "voiture": 0.63,
+    "velo": 0.059,
+    "marche": 0.072,
+    "tc": 0.177,
+    "aucun": 0.035,
+    "menages": 683.0,
+    "menages_sans_voiture": 0.346,
+    "menages_2_voitures_plus": 0.136,
+    "menages_stationnement_reserve": 0.405
+   },
+   {
+    "IRIS": "441840105",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Hyper Centre",
+    "actifs": 1190.0,
+    "voiture": 0.637,
+    "velo": 0.062,
+    "marche": 0.142,
+    "tc": 0.122,
+    "aucun": 0.036,
+    "menages": 1542.0,
+    "menages_sans_voiture": 0.227,
+    "menages_2_voitures_plus": 0.156,
+    "menages_stationnement_reserve": 0.48
+   },
+   {
+    "IRIS": "441840129",
+    "COM": "44184",
+    "TYP_IRIS": "A",
+    "nom": "Brais",
+    "actifs": 63.0,
+    "voiture": 0.638,
+    "velo": 0.047,
+    "marche": 0.117,
+    "tc": 0.089,
+    "aucun": 0.109,
+    "menages": 58.0,
+    "menages_sans_voiture": 0.045,
+    "menages_2_voitures_plus": 0.764,
+    "menages_stationnement_reserve": 0.908
+   },
+   {
+    "IRIS": "441840109",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Petit Caporal",
+    "actifs": 1329.0,
+    "voiture": 0.639,
+    "velo": 0.129,
+    "marche": 0.073,
+    "tc": 0.123,
+    "aucun": 0.036,
+    "menages": 1432.0,
+    "menages_sans_voiture": 0.188,
+    "menages_2_voitures_plus": 0.275,
+    "menages_stationnement_reserve": 0.549
+   },
+   {
+    "IRIS": "441840132",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Landettes-Avalix",
+    "actifs": 879.0,
+    "voiture": 0.688,
+    "velo": 0.041,
+    "marche": 0.036,
+    "tc": 0.138,
+    "aucun": 0.084,
+    "menages": 1203.0,
+    "menages_sans_voiture": 0.232,
+    "menages_2_voitures_plus": 0.247,
+    "menages_stationnement_reserve": 0.554
+   },
+   {
+    "IRIS": "441840101",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Méan Penhoët",
+    "actifs": 1591.0,
+    "voiture": 0.689,
+    "velo": 0.069,
+    "marche": 0.106,
+    "tc": 0.084,
+    "aucun": 0.043,
+    "menages": 1853.0,
+    "menages_sans_voiture": 0.191,
+    "menages_2_voitures_plus": 0.237,
+    "menages_stationnement_reserve": 0.505
+   },
+   {
+    "IRIS": "441840121",
+    "COM": "44184",
+    "TYP_IRIS": "A",
+    "nom": "Gavy Océanis",
+    "actifs": 508.0,
+    "voiture": 0.689,
+    "velo": 0.042,
+    "marche": 0.091,
+    "tc": 0.133,
+    "aucun": 0.039,
+    "menages": 769.0,
+    "menages_sans_voiture": 0.238,
+    "menages_2_voitures_plus": 0.126,
+    "menages_stationnement_reserve": 0.665
+   },
+   {
+    "IRIS": "441840113",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Parc Paysager",
+    "actifs": 1037.0,
+    "voiture": 0.693,
+    "velo": 0.133,
+    "marche": 0.045,
+    "tc": 0.082,
+    "aucun": 0.034,
+    "menages": 1482.0,
+    "menages_sans_voiture": 0.131,
+    "menages_2_voitures_plus": 0.215,
+    "menages_stationnement_reserve": 0.734
+   },
+   {
+    "IRIS": "441840116",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Québrais",
+    "actifs": 784.0,
+    "voiture": 0.706,
+    "velo": 0.084,
+    "marche": 0.041,
+    "tc": 0.124,
+    "aucun": 0.021,
+    "menages": 1037.0,
+    "menages_sans_voiture": 0.27,
+    "menages_2_voitures_plus": 0.27,
+    "menages_stationnement_reserve": 0.587
+   },
+   {
+    "IRIS": "441840125",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Porcé",
+    "actifs": 788.0,
+    "voiture": 0.718,
+    "velo": 0.1,
+    "marche": 0.043,
+    "tc": 0.094,
+    "aucun": 0.026,
+    "menages": 1259.0,
+    "menages_sans_voiture": 0.222,
+    "menages_2_voitures_plus": 0.189,
+    "menages_stationnement_reserve": 0.679
+   },
+   {
+    "IRIS": "441840115",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Prézégat-Berthauderie",
+    "actifs": 579.0,
+    "voiture": 0.729,
+    "velo": 0.044,
+    "marche": 0.046,
+    "tc": 0.154,
+    "aucun": 0.019,
+    "menages": 747.0,
+    "menages_sans_voiture": 0.285,
+    "menages_2_voitures_plus": 0.211,
+    "menages_stationnement_reserve": 0.408
+   },
+   {
+    "IRIS": "441840112",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Pertuischaud",
+    "actifs": 782.0,
+    "voiture": 0.737,
+    "velo": 0.075,
+    "marche": 0.027,
+    "tc": 0.124,
+    "aucun": 0.025,
+    "menages": 1261.0,
+    "menages_sans_voiture": 0.227,
+    "menages_2_voitures_plus": 0.162,
+    "menages_stationnement_reserve": 0.584
+   },
+   {
+    "IRIS": "441840124",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Trébale",
+    "actifs": 820.0,
+    "voiture": 0.743,
+    "velo": 0.063,
+    "marche": 0.02,
+    "tc": 0.14,
+    "aucun": 0.034,
+    "menages": 1209.0,
+    "menages_sans_voiture": 0.222,
+    "menages_2_voitures_plus": 0.206,
+    "menages_stationnement_reserve": 0.595
+   },
+   {
+    "IRIS": "441840110",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Cité Scolaire",
+    "actifs": 1131.0,
+    "voiture": 0.745,
+    "velo": 0.081,
+    "marche": 0.047,
+    "tc": 0.079,
+    "aucun": 0.017,
+    "menages": 1463.0,
+    "menages_sans_voiture": 0.247,
+    "menages_2_voitures_plus": 0.185,
+    "menages_stationnement_reserve": 0.584
+   },
+   {
+    "IRIS": "441840114",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Ville ès Martin",
+    "actifs": 977.0,
+    "voiture": 0.749,
+    "velo": 0.111,
+    "marche": 0.051,
+    "tc": 0.07,
+    "aucun": 0.01,
+    "menages": 1650.0,
+    "menages_sans_voiture": 0.146,
+    "menages_2_voitures_plus": 0.204,
+    "menages_stationnement_reserve": 0.792
+   },
+   {
+    "IRIS": "441840126",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Kerlédé",
+    "actifs": 688.0,
+    "voiture": 0.766,
+    "velo": 0.114,
+    "marche": 0.009,
+    "tc": 0.098,
+    "aucun": 0.013,
+    "menages": 1345.0,
+    "menages_sans_voiture": 0.146,
+    "menages_2_voitures_plus": 0.205,
+    "menages_stationnement_reserve": 0.669
+   },
+   {
+    "IRIS": "441840120",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Reton-Plaisance",
+    "actifs": 454.0,
+    "voiture": 0.78,
+    "velo": 0.068,
+    "marche": 0.033,
+    "tc": 0.092,
+    "aucun": 0.003,
+    "menages": 835.0,
+    "menages_sans_voiture": 0.203,
+    "menages_2_voitures_plus": 0.216,
+    "menages_stationnement_reserve": 0.565
+   },
+   {
+    "IRIS": "441840130",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Saint-Marc Ouest",
+    "actifs": 1246.0,
+    "voiture": 0.8,
+    "velo": 0.089,
+    "marche": 0.02,
+    "tc": 0.074,
+    "aucun": 0.013,
+    "menages": 1254.0,
+    "menages_sans_voiture": 0.068,
+    "menages_2_voitures_plus": 0.447,
+    "menages_stationnement_reserve": 0.916
+   },
+   {
+    "IRIS": "441840123",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Richarderie-Côte d'Amour",
+    "actifs": 496.0,
+    "voiture": 0.821,
+    "velo": 0.021,
+    "marche": 0.026,
+    "tc": 0.092,
+    "aucun": 0.018,
+    "menages": 975.0,
+    "menages_sans_voiture": 0.19,
+    "menages_2_voitures_plus": 0.264,
+    "menages_stationnement_reserve": 0.659
+   },
+   {
+    "IRIS": "441840131",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Saint-Marc Est",
+    "actifs": 1755.0,
+    "voiture": 0.822,
+    "velo": 0.064,
+    "marche": 0.028,
+    "tc": 0.043,
+    "aucun": 0.031,
+    "menages": 2268.0,
+    "menages_sans_voiture": 0.072,
+    "menages_2_voitures_plus": 0.438,
+    "menages_stationnement_reserve": 0.875
+   },
+   {
+    "IRIS": "441840117",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Villeneuve",
+    "actifs": 1265.0,
+    "voiture": 0.841,
+    "velo": 0.078,
+    "marche": 0.009,
+    "tc": 0.042,
+    "aucun": 0.018,
+    "menages": 1386.0,
+    "menages_sans_voiture": 0.084,
+    "menages_2_voitures_plus": 0.361,
+    "menages_stationnement_reserve": 0.839
+   },
+   {
+    "IRIS": "441840134",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Immaculée Bourg",
+    "actifs": 1505.0,
+    "voiture": 0.849,
+    "velo": 0.041,
+    "marche": 0.029,
+    "tc": 0.039,
+    "aucun": 0.022,
+    "menages": 1512.0,
+    "menages_sans_voiture": 0.071,
+    "menages_2_voitures_plus": 0.543,
+    "menages_stationnement_reserve": 0.843
+   },
+   {
+    "IRIS": "441840133",
+    "COM": "44184",
+    "TYP_IRIS": "H",
+    "nom": "Immaculée Campagne",
+    "actifs": 1022.0,
+    "voiture": 0.86,
+    "velo": 0.026,
+    "marche": 0.022,
+    "tc": 0.029,
+    "aucun": 0.051,
+    "menages": 1090.0,
+    "menages_sans_voiture": 0.037,
+    "menages_2_voitures_plus": 0.608,
+    "menages_stationnement_reserve": 0.877
+   }
+  ],
+  "communes_iris": [
+   {
+    "COM": "44052",
+    "actifs": 3850.0,
+    "voiture": 0.896,
+    "velo": 0.02,
+    "marche": 0.013,
+    "tc": 0.027,
+    "aucun": 0.03,
+    "menages": 3362.0,
+    "menages_sans_voiture": 0.071,
+    "menages_2_voitures_plus": 0.526,
+    "menages_stationnement_reserve": 0.78
+   },
+   {
+    "COM": "44055",
+    "actifs": 5562.0,
+    "voiture": 0.783,
+    "velo": 0.036,
+    "marche": 0.044,
+    "tc": 0.054,
+    "aucun": 0.066,
+    "menages": 9082.0,
+    "menages_sans_voiture": 0.112,
+    "menages_2_voitures_plus": 0.352,
+    "menages_stationnement_reserve": 0.809
+   },
+   {
+    "COM": "44069",
+    "actifs": 7015.0,
+    "voiture": 0.832,
+    "velo": 0.032,
+    "marche": 0.037,
+    "tc": 0.026,
+    "aucun": 0.059,
+    "menages": 7882.0,
+    "menages_sans_voiture": 0.063,
+    "menages_2_voitures_plus": 0.46,
+    "menages_stationnement_reserve": 0.828
+   },
+   {
+    "COM": "44132",
+    "actifs": 4526.0,
+    "voiture": 0.818,
+    "velo": 0.048,
+    "marche": 0.033,
+    "tc": 0.048,
+    "aucun": 0.042,
+    "menages": 6489.0,
+    "menages_sans_voiture": 0.102,
+    "menages_2_voitures_plus": 0.385,
+    "menages_stationnement_reserve": 0.85
+   },
+   {
+    "COM": "44154",
+    "actifs": 5536.0,
+    "voiture": 0.869,
+    "velo": 0.031,
+    "marche": 0.023,
+    "tc": 0.027,
+    "aucun": 0.035,
+    "menages": 7004.0,
+    "menages_sans_voiture": 0.087,
+    "menages_2_voitures_plus": 0.404,
+    "menages_stationnement_reserve": 0.805
+   },
+   {
+    "COM": "44184",
+    "actifs": 28139.0,
+    "voiture": 0.711,
+    "velo": 0.083,
+    "marche": 0.061,
+    "tc": 0.102,
+    "aucun": 0.03,
+    "menages": 37609.0,
+    "menages_sans_voiture": 0.197,
+    "menages_2_voitures_plus": 0.254,
+    "menages_stationnement_reserve": 0.616
+   },
+   {
+    "COM": "44210",
+    "actifs": 3380.0,
+    "voiture": 0.867,
+    "velo": 0.026,
+    "marche": 0.017,
+    "tc": 0.047,
+    "aucun": 0.023,
+    "menages": 3677.0,
+    "menages_sans_voiture": 0.116,
+    "menages_2_voitures_plus": 0.405,
+    "menages_stationnement_reserve": 0.743
+   }
+  ],
+  "acces_communes": {
+   "44184": {
+    "commerce_alim_500m": 0.826,
+    "grande_surface_500m": 0.378,
+    "pharmacie_500m": 0.688,
+    "medecin_generaliste_500m": 0.667,
+    "ecole_elementaire_500m": 0.767,
+    "college_1km": 0.729,
+    "gare_2km": 0.429,
+    "panier_quotidien_500m": 0.617,
+    "bus_8h_7_9h": 0.825,
+    "aucun_bus_7_9h": 0.05,
+    "bus_4h_20_22h": 0.736
+   },
+   "44055": {
+    "commerce_alim_500m": 0.509,
+    "grande_surface_500m": 0.144,
+    "pharmacie_500m": 0.425,
+    "medecin_generaliste_500m": 0.478,
+    "ecole_elementaire_500m": 0.351,
+    "college_1km": 0.375,
+    "gare_2km": 0.954,
+    "panier_quotidien_500m": 0.257,
+    "bus_8h_7_9h": 0.0,
+    "aucun_bus_7_9h": 0.63,
+    "bus_4h_20_22h": 0.0
+   },
+   "44069": {
+    "commerce_alim_500m": 0.387,
+    "grande_surface_500m": 0.196,
+    "pharmacie_500m": 0.325,
+    "medecin_generaliste_500m": 0.385,
+    "ecole_elementaire_500m": 0.339,
+    "college_1km": 0.452,
+    "gare_2km": 0.111,
+    "panier_quotidien_500m": 0.224,
+    "bus_8h_7_9h": 0.0,
+    "aucun_bus_7_9h": 0.811,
+    "bus_4h_20_22h": 0.0
+   },
+   "44154": {
+    "commerce_alim_500m": 0.452,
+    "grande_surface_500m": 0.236,
+    "pharmacie_500m": 0.35,
+    "medecin_generaliste_500m": 0.213,
+    "ecole_elementaire_500m": 0.216,
+    "college_1km": 0.329,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.065,
+    "bus_8h_7_9h": 0.0,
+    "aucun_bus_7_9h": 0.825,
+    "bus_4h_20_22h": 0.0
+   },
+   "44132": {
+    "commerce_alim_500m": 0.594,
+    "grande_surface_500m": 0.162,
+    "pharmacie_500m": 0.369,
+    "medecin_generaliste_500m": 0.506,
+    "ecole_elementaire_500m": 0.523,
+    "college_1km": 0.307,
+    "gare_2km": 0.415,
+    "panier_quotidien_500m": 0.263,
+    "bus_8h_7_9h": 0.002,
+    "aucun_bus_7_9h": 0.402,
+    "bus_4h_20_22h": 0.002
+   },
+   "44052": {
+    "commerce_alim_500m": 0.344,
+    "grande_surface_500m": 0.272,
+    "pharmacie_500m": 0.176,
+    "medecin_generaliste_500m": 0.256,
+    "ecole_elementaire_500m": 0.269,
+    "college_1km": 0.528,
+    "gare_2km": 0.386,
+    "panier_quotidien_500m": 0.175,
+    "bus_8h_7_9h": 0.011,
+    "aucun_bus_7_9h": 0.364,
+    "bus_4h_20_22h": 0.0
+   },
+   "44210": {
+    "commerce_alim_500m": 0.531,
+    "grande_surface_500m": 0.437,
+    "pharmacie_500m": 0.527,
+    "medecin_generaliste_500m": 0.264,
+    "ecole_elementaire_500m": 0.534,
+    "college_1km": 0.41,
+    "gare_2km": 0.773,
+    "panier_quotidien_500m": 0.304,
+    "bus_8h_7_9h": 0.66,
+    "aucun_bus_7_9h": 0.264,
+    "bus_4h_20_22h": 0.61
+   }
+  },
+  "acces_iris": {
+   "441840101": {
+    "commerce_alim_500m": 0.903,
+    "grande_surface_500m": 0.0,
+    "pharmacie_500m": 0.413,
+    "medecin_generaliste_500m": 0.033,
+    "ecole_elementaire_500m": 0.963,
+    "college_1km": 0.639,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.328,
+    "bus_8h_7_9h": 0.872,
+    "aucun_bus_7_9h": 0.001,
+    "bus_4h_20_22h": 0.861
+   },
+   "441840102": {
+    "commerce_alim_500m": 0.545,
+    "grande_surface_500m": 0.352,
+    "pharmacie_500m": 0.523,
+    "medecin_generaliste_500m": 0.216,
+    "ecole_elementaire_500m": 0.364,
+    "college_1km": 0.511,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.148,
+    "bus_8h_7_9h": 0.523,
+    "aucun_bus_7_9h": 0.239,
+    "bus_4h_20_22h": 0.602
+   },
+   "441840103": {
+    "commerce_alim_500m": 0.939,
+    "grande_surface_500m": 0.44,
+    "pharmacie_500m": 0.598,
+    "medecin_generaliste_500m": 0.49,
+    "ecole_elementaire_500m": 0.982,
+    "college_1km": 0.743,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.574,
+    "bus_8h_7_9h": 0.995,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.989
+   },
+   "441840104": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.988,
+    "pharmacie_500m": 1.0,
+    "medecin_generaliste_500m": 1.0,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 1.0,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840105": {
+    "commerce_alim_500m": 0.995,
+    "grande_surface_500m": 0.94,
+    "pharmacie_500m": 0.985,
+    "medecin_generaliste_500m": 0.878,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.984,
+    "bus_8h_7_9h": 0.999,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840106": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.454,
+    "pharmacie_500m": 0.963,
+    "medecin_generaliste_500m": 1.0,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.963,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.996
+   },
+   "441840107": {
+    "commerce_alim_500m": 0.967,
+    "grande_surface_500m": 0.75,
+    "pharmacie_500m": 0.974,
+    "medecin_generaliste_500m": 0.887,
+    "ecole_elementaire_500m": 0.869,
+    "college_1km": 0.843,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.843,
+    "bus_8h_7_9h": 0.871,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.94
+   },
+   "441840108": {
+    "commerce_alim_500m": 0.992,
+    "grande_surface_500m": 0.0,
+    "pharmacie_500m": 0.992,
+    "medecin_generaliste_500m": 0.839,
+    "ecole_elementaire_500m": 0.973,
+    "college_1km": 1.0,
+    "gare_2km": 0.854,
+    "panier_quotidien_500m": 0.958,
+    "bus_8h_7_9h": 0.766,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.402
+   },
+   "441840109": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.303,
+    "pharmacie_500m": 0.819,
+    "medecin_generaliste_500m": 0.812,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.819,
+    "bus_8h_7_9h": 0.892,
+    "aucun_bus_7_9h": 0.002,
+    "bus_4h_20_22h": 0.993
+   },
+   "441840110": {
+    "commerce_alim_500m": 0.984,
+    "grande_surface_500m": 0.792,
+    "pharmacie_500m": 0.615,
+    "medecin_generaliste_500m": 0.964,
+    "ecole_elementaire_500m": 0.865,
+    "college_1km": 1.0,
+    "gare_2km": 0.859,
+    "panier_quotidien_500m": 0.606,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840111": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.181,
+    "pharmacie_500m": 0.996,
+    "medecin_generaliste_500m": 0.993,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.996,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840112": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.975,
+    "pharmacie_500m": 0.99,
+    "medecin_generaliste_500m": 1.0,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.99,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840113": {
+    "commerce_alim_500m": 0.923,
+    "grande_surface_500m": 0.131,
+    "pharmacie_500m": 0.919,
+    "medecin_generaliste_500m": 1.0,
+    "ecole_elementaire_500m": 0.936,
+    "college_1km": 1.0,
+    "gare_2km": 0.005,
+    "panier_quotidien_500m": 0.849,
+    "bus_8h_7_9h": 0.772,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.388
+   },
+   "441840114": {
+    "commerce_alim_500m": 0.662,
+    "grande_surface_500m": 0.05,
+    "pharmacie_500m": 0.756,
+    "medecin_generaliste_500m": 0.562,
+    "ecole_elementaire_500m": 0.758,
+    "college_1km": 0.523,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.528,
+    "bus_8h_7_9h": 0.218,
+    "aucun_bus_7_9h": 0.006,
+    "bus_4h_20_22h": 0.218
+   },
+   "441840115": {
+    "commerce_alim_500m": 0.385,
+    "grande_surface_500m": 0.041,
+    "pharmacie_500m": 0.073,
+    "medecin_generaliste_500m": 0.006,
+    "ecole_elementaire_500m": 0.726,
+    "college_1km": 1.0,
+    "gare_2km": 1.0,
+    "panier_quotidien_500m": 0.048,
+    "bus_8h_7_9h": 0.968,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.949
+   },
+   "441840116": {
+    "commerce_alim_500m": 0.749,
+    "grande_surface_500m": 0.528,
+    "pharmacie_500m": 0.791,
+    "medecin_generaliste_500m": 0.314,
+    "ecole_elementaire_500m": 0.96,
+    "college_1km": 0.926,
+    "gare_2km": 0.94,
+    "panier_quotidien_500m": 0.734,
+    "bus_8h_7_9h": 0.892,
+    "aucun_bus_7_9h": 0.008,
+    "bus_4h_20_22h": 0.683
+   },
+   "441840117": {
+    "commerce_alim_500m": 0.808,
+    "grande_surface_500m": 0.187,
+    "pharmacie_500m": 0.741,
+    "medecin_generaliste_500m": 0.278,
+    "ecole_elementaire_500m": 0.332,
+    "college_1km": 0.294,
+    "gare_2km": 0.235,
+    "panier_quotidien_500m": 0.297,
+    "bus_8h_7_9h": 0.957,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.308
+   },
+   "441840119": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.0,
+    "pharmacie_500m": 1.0,
+    "medecin_generaliste_500m": 0.37,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 1.0,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840120": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.671,
+    "pharmacie_500m": 0.96,
+    "medecin_generaliste_500m": 0.852,
+    "ecole_elementaire_500m": 0.677,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.677,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840121": {
+    "commerce_alim_500m": 0.446,
+    "grande_surface_500m": 0.291,
+    "pharmacie_500m": 0.24,
+    "medecin_generaliste_500m": 0.529,
+    "ecole_elementaire_500m": 0.111,
+    "college_1km": 0.569,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.091,
+    "bus_8h_7_9h": 0.623,
+    "aucun_bus_7_9h": 0.217,
+    "bus_4h_20_22h": 0.62
+   },
+   "441840122": {
+    "commerce_alim_500m": 1.0,
+    "grande_surface_500m": 0.447,
+    "pharmacie_500m": 1.0,
+    "medecin_generaliste_500m": 0.721,
+    "ecole_elementaire_500m": 0.905,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.905,
+    "bus_8h_7_9h": 1.0,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 1.0
+   },
+   "441840123": {
+    "commerce_alim_500m": 0.924,
+    "grande_surface_500m": 0.317,
+    "pharmacie_500m": 0.818,
+    "medecin_generaliste_500m": 0.934,
+    "ecole_elementaire_500m": 0.948,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.773,
+    "bus_8h_7_9h": 0.866,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.847
+   },
+   "441840124": {
+    "commerce_alim_500m": 0.997,
+    "grande_surface_500m": 0.614,
+    "pharmacie_500m": 0.982,
+    "medecin_generaliste_500m": 0.863,
+    "ecole_elementaire_500m": 0.806,
+    "college_1km": 1.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.804,
+    "bus_8h_7_9h": 0.941,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.933
+   },
+   "441840125": {
+    "commerce_alim_500m": 0.708,
+    "grande_surface_500m": 0.698,
+    "pharmacie_500m": 0.534,
+    "medecin_generaliste_500m": 0.462,
+    "ecole_elementaire_500m": 0.918,
+    "college_1km": 0.922,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.519,
+    "bus_8h_7_9h": 0.961,
+    "aucun_bus_7_9h": 0.039,
+    "bus_4h_20_22h": 0.959
+   },
+   "441840126": {
+    "commerce_alim_500m": 0.995,
+    "grande_surface_500m": 0.667,
+    "pharmacie_500m": 1.0,
+    "medecin_generaliste_500m": 1.0,
+    "ecole_elementaire_500m": 1.0,
+    "college_1km": 0.44,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.995,
+    "bus_8h_7_9h": 0.971,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.971
+   },
+   "441840129": {
+    "commerce_alim_500m": 0.235,
+    "grande_surface_500m": 0.0,
+    "pharmacie_500m": 0.0,
+    "medecin_generaliste_500m": 0.0,
+    "ecole_elementaire_500m": 0.0,
+    "college_1km": 0.0,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.0,
+    "bus_8h_7_9h": 0.304,
+    "aucun_bus_7_9h": 0.072,
+    "bus_4h_20_22h": 0.0
+   },
+   "441840130": {
+    "commerce_alim_500m": 0.741,
+    "grande_surface_500m": 0.073,
+    "pharmacie_500m": 0.016,
+    "medecin_generaliste_500m": 0.433,
+    "ecole_elementaire_500m": 0.162,
+    "college_1km": 0.195,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.011,
+    "bus_8h_7_9h": 0.618,
+    "aucun_bus_7_9h": 0.104,
+    "bus_4h_20_22h": 0.618
+   },
+   "441840131": {
+    "commerce_alim_500m": 0.485,
+    "grande_surface_500m": 0.0,
+    "pharmacie_500m": 0.308,
+    "medecin_generaliste_500m": 0.665,
+    "ecole_elementaire_500m": 0.39,
+    "college_1km": 0.174,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.292,
+    "bus_8h_7_9h": 0.553,
+    "aucun_bus_7_9h": 0.066,
+    "bus_4h_20_22h": 0.552
+   },
+   "441840132": {
+    "commerce_alim_500m": 0.477,
+    "grande_surface_500m": 0.355,
+    "pharmacie_500m": 0.3,
+    "medecin_generaliste_500m": 0.396,
+    "ecole_elementaire_500m": 0.475,
+    "college_1km": 0.662,
+    "gare_2km": 0.0,
+    "panier_quotidien_500m": 0.294,
+    "bus_8h_7_9h": 0.996,
+    "aucun_bus_7_9h": 0.0,
+    "bus_4h_20_22h": 0.574
+   },
+   "441840133": {
+    "commerce_alim_500m": 0.118,
+    "grande_surface_500m": 0.01,
+    "pharmacie_500m": 0.05,
+    "medecin_generaliste_500m": 0.05,
+    "ecole_elementaire_500m": 0.021,
+    "college_1km": 0.025,
+    "gare_2km": 0.002,
+    "panier_quotidien_500m": 0.019,
+    "bus_8h_7_9h": 0.069,
+    "aucun_bus_7_9h": 0.827,
+    "bus_4h_20_22h": 0.02
+   },
+   "441840134": {
+    "commerce_alim_500m": 0.662,
+    "grande_surface_500m": 0.219,
+    "pharmacie_500m": 0.174,
+    "medecin_generaliste_500m": 0.609,
+    "ecole_elementaire_500m": 0.404,
+    "college_1km": 0.007,
+    "gare_2km": 0.029,
+    "panier_quotidien_500m": 0.036,
+    "bus_8h_7_9h": 0.534,
+    "aucun_bus_7_9h": 0.293,
+    "bus_4h_20_22h": 0.0
+   }
+  },
+  "carburants_hebdo": [
+   {
+    "carburant": "E10",
+    "semaine": "2024-12-30",
+    "median": 1.703,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-01-06",
+    "median": 1.712,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-01-13",
+    "median": 1.725,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-01-20",
+    "median": 1.7225000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-01-27",
+    "median": 1.7095,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-02-03",
+    "median": 1.7145000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-02-10",
+    "median": 1.719,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-02-17",
+    "median": 1.705,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-02-24",
+    "median": 1.6955,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-03-03",
+    "median": 1.6575,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-03-10",
+    "median": 1.6324999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-03-17",
+    "median": 1.634,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-03-24",
+    "median": 1.6760000000000002,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-03-31",
+    "median": 1.6825,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-04-07",
+    "median": 1.639,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-04-14",
+    "median": 1.627,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-04-21",
+    "median": 1.619,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-04-28",
+    "median": 1.616,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-05-05",
+    "median": 1.6030000000000002,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-05-12",
+    "median": 1.6265,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-05-19",
+    "median": 1.623,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-05-26",
+    "median": 1.623,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-06-02",
+    "median": 1.62,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-06-09",
+    "median": 1.6315,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-06-16",
+    "median": 1.6640000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-06-23",
+    "median": 1.649,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-06-30",
+    "median": 1.633,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-07-07",
+    "median": 1.6345,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-07-14",
+    "median": 1.629,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-07-21",
+    "median": 1.6215000000000002,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-07-28",
+    "median": 1.6324999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-08-04",
+    "median": 1.629,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-08-11",
+    "median": 1.615,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-08-18",
+    "median": 1.623,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-08-25",
+    "median": 1.6219999999999999,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-09-01",
+    "median": 1.6335,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-09-08",
+    "median": 1.6404999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-09-15",
+    "median": 1.644,
+    "count": 12
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-09-22",
+    "median": 1.645,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-09-29",
+    "median": 1.639,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-10-06",
+    "median": 1.637,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-10-13",
+    "median": 1.6315,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-10-20",
+    "median": 1.627,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-10-27",
+    "median": 1.629,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-11-03",
+    "median": 1.643,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-11-10",
+    "median": 1.658,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-11-17",
+    "median": 1.652,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-11-24",
+    "median": 1.627,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-12-01",
+    "median": 1.621,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-12-08",
+    "median": 1.6045,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-12-15",
+    "median": 1.585,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-12-22",
+    "median": 1.579,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2025-12-29",
+    "median": 1.5955,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-01-05",
+    "median": 1.609,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-01-12",
+    "median": 1.6195,
+    "count": 12
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-01-19",
+    "median": 1.622,
+    "count": 12
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-01-26",
+    "median": 1.6230000000000002,
+    "count": 10
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-02-02",
+    "median": 1.625,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-02-09",
+    "median": 1.634,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-02-16",
+    "median": 1.6385,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-02-23",
+    "median": 1.649,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-03-02",
+    "median": 1.763,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-03-09",
+    "median": 1.8325,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-03-16",
+    "median": 1.9415,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-03-23",
+    "median": 1.9405000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-03-30",
+    "median": 1.961,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-04-06",
+    "median": 1.932,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-04-13",
+    "median": 1.9115,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-04-20",
+    "median": 1.932,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-04-27",
+    "median": 1.99,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-05-04",
+    "median": 2.009,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-05-11",
+    "median": 1.99,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-05-18",
+    "median": 2.041,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-05-25",
+    "median": 1.99,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-06-01",
+    "median": 1.899,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-06-08",
+    "median": 1.889,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-06-15",
+    "median": 1.834,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-06-22",
+    "median": 1.8285,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-06-29",
+    "median": 1.857,
+    "count": 12
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-07-06",
+    "median": 1.8944999999999999,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-07-13",
+    "median": 1.981,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-07-20",
+    "median": 2.0065,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-07-27",
+    "median": 1.9875,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-08-03",
+    "median": 1.9165,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-08-10",
+    "median": 1.9515,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-08-17",
+    "median": 1.974,
+    "count": 15
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-08-24",
+    "median": 1.99,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-08-31",
+    "median": 2.099,
+    "count": 15
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-09-07",
+    "median": 2.1435,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-09-14",
+    "median": 2.167,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-09-21",
+    "median": 2.154,
+    "count": 13
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-09-28",
+    "median": 2.1515,
+    "count": 14
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-10-05",
+    "median": 2.1445,
+    "count": 12
+   },
+   {
+    "carburant": "E10",
+    "semaine": "2026-10-12",
+    "median": 2.15,
+    "count": 9
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2024-12-30",
+    "median": 1.629,
+    "count": 12
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-01-06",
+    "median": 1.655,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-01-13",
+    "median": 1.699,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-01-20",
+    "median": 1.682,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-01-27",
+    "median": 1.663,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-02-03",
+    "median": 1.657,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-02-10",
+    "median": 1.667,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-02-17",
+    "median": 1.669,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-02-24",
+    "median": 1.652,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-03-03",
+    "median": 1.621,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-03-10",
+    "median": 1.592,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-03-17",
+    "median": 1.5865,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-03-24",
+    "median": 1.595,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-03-31",
+    "median": 1.589,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-04-07",
+    "median": 1.5385,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-04-14",
+    "median": 1.519,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-04-21",
+    "median": 1.5099999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-04-28",
+    "median": 1.505,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-05-05",
+    "median": 1.499,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-05-12",
+    "median": 1.519,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-05-19",
+    "median": 1.509,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-05-26",
+    "median": 1.509,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-06-02",
+    "median": 1.511,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-06-09",
+    "median": 1.536,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-06-16",
+    "median": 1.6524999999999999,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-06-23",
+    "median": 1.599,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-06-30",
+    "median": 1.575,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-07-07",
+    "median": 1.616,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-07-14",
+    "median": 1.6150000000000002,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-07-21",
+    "median": 1.589,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-07-28",
+    "median": 1.599,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-08-04",
+    "median": 1.559,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-08-11",
+    "median": 1.544,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-08-18",
+    "median": 1.554,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-08-25",
+    "median": 1.549,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-09-01",
+    "median": 1.562,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-09-08",
+    "median": 1.569,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-09-15",
+    "median": 1.5755,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-09-22",
+    "median": 1.589,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-09-29",
+    "median": 1.576,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-10-06",
+    "median": 1.565,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-10-13",
+    "median": 1.5579999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-10-20",
+    "median": 1.5695000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-10-27",
+    "median": 1.606,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-11-03",
+    "median": 1.6365,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-11-10",
+    "median": 1.6364999999999998,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-11-17",
+    "median": 1.652,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-11-24",
+    "median": 1.61,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-12-01",
+    "median": 1.583,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-12-08",
+    "median": 1.554,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-12-15",
+    "median": 1.536,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-12-22",
+    "median": 1.529,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2025-12-29",
+    "median": 1.559,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-01-05",
+    "median": 1.5695000000000001,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-01-12",
+    "median": 1.592,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-01-19",
+    "median": 1.616,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-01-26",
+    "median": 1.625,
+    "count": 12
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-02-02",
+    "median": 1.619,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-02-09",
+    "median": 1.62,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-02-16",
+    "median": 1.649,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-02-23",
+    "median": 1.661,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-03-02",
+    "median": 1.99,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-03-09",
+    "median": 2.01,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-03-16",
+    "median": 2.09,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-03-23",
+    "median": 2.143,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-03-30",
+    "median": 2.251,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-04-06",
+    "median": 2.25,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-04-13",
+    "median": 2.079,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-04-20",
+    "median": 2.1375,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-04-27",
+    "median": 2.1334999999999997,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-05-04",
+    "median": 2.1559999999999997,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-05-11",
+    "median": 2.09,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-05-18",
+    "median": 2.09,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-05-25",
+    "median": 2.09,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-06-01",
+    "median": 1.964,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-06-08",
+    "median": 1.93,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-06-15",
+    "median": 1.8305,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-06-22",
+    "median": 1.807,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-06-29",
+    "median": 1.829,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-07-06",
+    "median": 1.9135,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-07-13",
+    "median": 2.0595,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-07-20",
+    "median": 2.1315,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-07-27",
+    "median": 2.1715,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-08-03",
+    "median": 2.0585,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-08-10",
+    "median": 2.149,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-08-17",
+    "median": 2.182,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-08-24",
+    "median": 2.145,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-08-31",
+    "median": 2.249,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-09-07",
+    "median": 2.277,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-09-14",
+    "median": 2.3975,
+    "count": 14
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-09-21",
+    "median": 2.378,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-09-28",
+    "median": 2.366,
+    "count": 15
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-10-05",
+    "median": 2.298,
+    "count": 13
+   },
+   {
+    "carburant": "Gazole",
+    "semaine": "2026-10-12",
+    "median": 2.297,
+    "count": 11
+   }
+  ]
+ },
+ "sources": {
+  "iris_activite_2022.zip": {
+   "url": "https://www.insee.fr/fr/statistiques/fichier/8647006/base-ic-activite-residents-2022_csv.zip",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 35900269,
+   "sha256": "f4aefb7fab425b9f7eb802e2afb475908bbf2186e0d88f542cf7a67fc70623cb"
+  },
+  "iris_logement_2022.zip": {
+   "url": "https://www.insee.fr/fr/statistiques/fichier/8647012/base-ic-logement-2022_csv.zip",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 27145386,
+   "sha256": "d8cf20698fed027ea7f738cee76025057a3569aa709716956e479099cee69f0e"
+  },
+  "ban_17.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-17.csv.gz",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 16077514,
+   "sha256": "f711a08c34a0a617bf09779f02298a96948678a0239c88715ac5fd62651155ff"
+  },
+  "iris_ign_17300.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17300'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 234876,
+   "sha256": "f96aac26a9f2c2cd43a6b23cce08befcba7e7cee61011bddf89bf84d62483add"
+  },
+  "iris_ign_17200.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17200'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 31796,
+   "sha256": "a20c17b9e5012385520f4e326eea84f86cd589cf002e4ea493184766199127ad"
+  },
+  "iris_ign_17291.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17291'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 10888,
+   "sha256": "225e12323304e73e69f83d893df021af0347c381b8a2307f8ebc6e22ca2d39b3"
+  },
+  "iris_ign_17028.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17028'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 54066,
+   "sha256": "857fd53111036338fb9ea0ca8b94b7aebbb3cdf1dd373615cc8cf3c1ed057d16"
+  },
+  "iris_ign_17274.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17274'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 30510,
+   "sha256": "85b838f5acf42508dc6315ac59e347536d8323cf868b2f29a28d96717ef75d97"
+  },
+  "iris_ign_17094.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='17094'",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 21434,
+   "sha256": "e445b030bb385c06ea0e4d18e65a0bd706ab526d3245b07d8c4130a923639298"
+  },
+  "tdg_gtfs.json": {
+   "url": "https://transport.data.gouv.fr/api/datasets?format=GTFS",
+   "recupere_le": "2026-10-14T14:12:25Z",
+   "octets": 2557038,
+   "sha256": "01d8125f7cb6254cfdd50b00906413e29e945ae1c2f3fa11662d3b0f948bd753"
+  },
+  "gtfs_241700434.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/030b9c31-4237-4355-a4d5-842861d225be",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 1639596,
+   "sha256": "c41f147daf055a7c03f0e47f55674869fd6bdaad79e310495e8535590d0feacb"
+  },
+  "carbu_2025.zip": {
+   "url": "https://donnees.roulez-eco.fr/opendata/annee/2025",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 31747153,
+   "sha256": "383379223bd43f9d28626e203b53fc01bb248e8f85dfe88e2bdd9830231345ad"
+  },
+  "carbu_2026.zip": {
+   "url": "https://donnees.roulez-eco.fr/opendata/annee/2026",
+   "recupere_le": "2026-10-13T10:37:55Z",
+   "octets": 29655352,
+   "sha256": "cd999b23896161f89c5c1f23fcb02afe6ea06320c5534d2ff9b9c03e588436e8"
+  },
+  "ban_79.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-79.csv.gz",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 7789999,
+   "sha256": "ff6ecc121929977a01ac5abf22bd25bafb4f428c4fc4f89e264986a7713f64f1"
+  },
+  "iris_ign_79191.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='79191'",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 223954,
+   "sha256": "55b859fc4e546a85fd51642039511efc3bed3eafb90cf456858df60883ffc4b0"
+  },
+  "iris_ign_79081.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='79081'",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 36732,
+   "sha256": "a52920954275acd4d12aaea7a6b193c74c450d059227a9a6744843df87f3b405"
+  },
+  "iris_ign_79003.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='79003'",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 26551,
+   "sha256": "bb700dceb0a69ec969d78fff8da332f07a9dacc1efd44371062e02b5534a3bee"
+  },
+  "iris_ign_79034.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='79034'",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 16894,
+   "sha256": "f184de5fef490730dfb7fda488f92c360461762b8128a08772366aef913374a4"
+  },
+  "gtfs_200041317.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/d724a6df-7dc4-4b2d-be15-fc8b1d52c8ea",
+   "recupere_le": "2026-10-13T10:41:34Z",
+   "octets": 990288,
+   "sha256": "013b37f32e814db09ac4a5bf128e8cc2c344a3d5d0040625b404bb9c4213b7fa"
+  },
+  "geo_17300.json": {
+   "url": "https://geo.api.gouv.fr/communes/17300?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-13T11:10:06Z",
+   "octets": 212,
+   "sha256": "68bcaec69ed13c6e6b0ddf0a58b12e4eb2521b22ea9b4704c0176351fb901525",
+   "note": "capturé lors de la finalisation (le calcul initial l'interrogeait en direct)"
+  },
+  "geo_79191.json": {
+   "url": "https://geo.api.gouv.fr/communes/79191?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-13T11:10:06Z",
+   "octets": 204,
+   "sha256": "3f744aebc09475c57d9f708087b201da1f462122b5937632781f38499459c875",
+   "note": "capturé lors de la finalisation (le calcul initial l'interrogeait en direct)"
+  },
+  "geo_86194.json": {
+   "url": "https://geo.api.gouv.fr/communes/86194?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-14T14:12:04Z",
+   "octets": 212,
+   "sha256": "a4654599e95f6c413625c6f5bca3112940b9b051779aeae2f7e03aa5ef91fc95"
+  },
+  "ban_86.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-86.csv.gz",
+   "recupere_le": "2026-10-14T14:12:16Z",
+   "octets": 6952085,
+   "sha256": "c98d04ed260c6ded6c542a108a1768279f95ba34cb8802755b16df9b68a0cbe8"
+  },
+  "iris_ign_86194.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86194'",
+   "recupere_le": "2026-10-14T14:12:19Z",
+   "octets": 278747,
+   "sha256": "0679fabb2240c9111f844999a7261f1cefeee3fb82eb5110f1cfa1e0e06fae54"
+  },
+  "iris_ign_86041.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86041'",
+   "recupere_le": "2026-10-14T14:12:20Z",
+   "octets": 44244,
+   "sha256": "8ac8b01e4166b2d691f1e1ed0760391a64713ff315aa2daeda3a8b139593cb08"
+  },
+  "iris_ign_86115.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86115'",
+   "recupere_le": "2026-10-14T14:12:20Z",
+   "octets": 92466,
+   "sha256": "95f39436347ca390b7d2fe9f411a0fb1c8dccf39cd21076a98dc798dfe48a1d2"
+  },
+  "iris_ign_86214.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86214'",
+   "recupere_le": "2026-10-14T14:12:21Z",
+   "octets": 58266,
+   "sha256": "4af7d3bf042f1d061f3cee6c49adbea1790c089e8c07d77bbb4e4e374a633612"
+  },
+  "iris_ign_86297.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86297'",
+   "recupere_le": "2026-10-14T14:12:21Z",
+   "octets": 31064,
+   "sha256": "cb8287f7a78f950df741d44837fed62f426ef3b64dafa4e9b267be9e19202b35"
+  },
+  "iris_ign_86158.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86158'",
+   "recupere_le": "2026-10-14T14:12:22Z",
+   "octets": 66310,
+   "sha256": "ff60c889b232e1cd89f6a1a5c31dc1abc0884477350101571dc7166c4ff71e23"
+  },
+  "iris_ign_86062.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='86062'",
+   "recupere_le": "2026-10-14T14:12:22Z",
+   "octets": 45983,
+   "sha256": "06258e69022c443cff71eaed8e601ad2763b1904ddfda5c63f658a716dbd9bc1"
+  },
+  "gtfs_200069854.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/82146378-f019-4048-aa16-7328081b0369",
+   "recupere_le": "2026-10-14T14:12:26Z",
+   "octets": 2555299,
+   "sha256": "58c85e2fe68a2df639150b6848b2403fd0cd1ef88c8ef248a868f5f59db1dfe4"
+  },
+  "geo_49007.json": {
+   "url": "https://geo.api.gouv.fr/communes/49007?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-14T14:24:23Z",
+   "octets": 218,
+   "sha256": "b8fce8cb6770df3aad0ed1e8c50ad9fd6246b60dc8a8e3a631f56cef97bf13a7"
+  },
+  "ban_49.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-49.csv.gz",
+   "recupere_le": "2026-10-14T14:24:36Z",
+   "octets": 14973517,
+   "sha256": "0c23bb3d9d7632eaf339ba800af45a6e5c1b77185241f9a9771fc0cf77642cd1"
+  },
+  "iris_ign_49007.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49007'",
+   "recupere_le": "2026-10-14T14:24:39Z",
+   "octets": 248330,
+   "sha256": "16baa5122154bcc47ae3b68103a1f2602665985c81aa5307b9bb0a76d1e84b05"
+  },
+  "iris_ign_49353.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49353'",
+   "recupere_le": "2026-10-14T14:24:40Z",
+   "octets": 41820,
+   "sha256": "aa01737b1412aedb8c78449cae8a4b531d9efa1c9441d3c3fb190fde98b4cd6a"
+  },
+  "iris_ign_49015.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49015'",
+   "recupere_le": "2026-10-14T14:24:43Z",
+   "octets": 58391,
+   "sha256": "df53a513dbe8ef1e2ccafe29542bb5920a34096434bf87699e002f92e2990957"
+  },
+  "iris_ign_49246.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49246'",
+   "recupere_le": "2026-10-14T14:24:43Z",
+   "octets": 47959,
+   "sha256": "a1c5018031976749afd40defbc31104cc9256ef6a5d802d63094e9bf4e5d0fe7"
+  },
+  "iris_ign_49267.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49267'",
+   "recupere_le": "2026-10-14T14:24:43Z",
+   "octets": 42807,
+   "sha256": "b98bdf085bcaec301ca2817229aea235d62fa55523689782263a3585d29e34f6"
+  },
+  "iris_ign_49323.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49323'",
+   "recupere_le": "2026-10-14T14:24:43Z",
+   "octets": 21108,
+   "sha256": "41734697a310514f4c8d1d89b92480b5afcc81f2a5183fc8910e82803d79450a"
+  },
+  "iris_ign_49035.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='49035'",
+   "recupere_le": "2026-10-14T14:24:44Z",
+   "octets": 29303,
+   "sha256": "64b1ced94ccfa43763693fe25717571765a1af2fb19624e710ef73a60fad416b"
+  },
+  "gtfs_244900015.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/32f30b64-33f7-43bb-9b6f-34c21c2f83a3",
+   "recupere_le": "2026-10-14T14:24:49Z",
+   "octets": 4394845,
+   "sha256": "d3a71bd0e0f088457720cae6b119d3cdc422ec25c50b8bb8951c2a2862647a53"
+  },
+  "geo_56121.json": {
+   "url": "https://geo.api.gouv.fr/communes/56121?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-14T14:25:07Z",
+   "octets": 217,
+   "sha256": "19285ab548684e0a8d092cee6cf3dbdf4997a146cf71d1552cd4769fe7c52867"
+  },
+  "ban_56.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-56.csv.gz",
+   "recupere_le": "2026-10-14T14:25:19Z",
+   "octets": 16540884,
+   "sha256": "e6c2f94265b357ddfa82ddbb622a869b2bcf5393b251c13a9303a85e8dffdfc6"
+  },
+  "iris_ign_56121.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56121'",
+   "recupere_le": "2026-10-14T14:25:24Z",
+   "octets": 140312,
+   "sha256": "315aa561df8c40de01967776304cbd7fe4be35d37e5209e4887fdc275d926a65"
+  },
+  "iris_ign_56098.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56098'",
+   "recupere_le": "2026-10-14T14:25:25Z",
+   "octets": 117152,
+   "sha256": "91ee729655c042b129dbe53e947820c02c4721eb7aedab314d63de0754dfda74"
+  },
+  "iris_ign_56162.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56162'",
+   "recupere_le": "2026-10-14T14:25:25Z",
+   "octets": 208529,
+   "sha256": "f331b46697a4d58461a19ca0b7a325ef72e02594e929b1d084ad58f9c869a007"
+  },
+  "iris_ign_56185.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56185'",
+   "recupere_le": "2026-10-14T14:25:26Z",
+   "octets": 81325,
+   "sha256": "7fbd9cbae20a9f94e5410108b1928cd35de96b5e57f05ae52e065a6ec8328d92"
+  },
+  "iris_ign_56107.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56107'",
+   "recupere_le": "2026-10-14T14:25:26Z",
+   "octets": 39743,
+   "sha256": "fa1ebd01ed196f4e0771bb50714a8e97c40b1c655dff1ed8d6a6c6297cca81c7"
+  },
+  "iris_ign_56036.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56036'",
+   "recupere_le": "2026-10-14T14:25:26Z",
+   "octets": 82941,
+   "sha256": "ea6e59f3d39b31d76e2ac1f3ca3391eeca672dfbf7c246ecba1d401a12d0ac5c"
+  },
+  "gtfs_200042174.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/c32dc40b-3538-4796-a6c6-fd239d6c1364",
+   "recupere_le": "2026-10-14T14:25:30Z",
+   "octets": 3555176,
+   "sha256": "a9bfdbea2698cee22967bd6db99a349da66dda0bc5a1555d7ccc5a5b99389bd4"
+  },
+  "geo_56260.json": {
+   "url": "https://geo.api.gouv.fr/communes/56260?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-14T14:25:43Z",
+   "octets": 235,
+   "sha256": "c7f8fb0c353e30c06ca0a1e7a84b9e3dc7681f217a15d05d7db3e26555568063"
+  },
+  "iris_ign_56260.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56260'",
+   "recupere_le": "2026-10-14T14:25:56Z",
+   "octets": 266757,
+   "sha256": "8aa13dd615666dbdb996fe20c05f491a30258c2098991363d4faab6e3be905d6"
+  },
+  "iris_ign_56206.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56206'",
+   "recupere_le": "2026-10-14T14:25:56Z",
+   "octets": 55305,
+   "sha256": "106d5e944489b47ca278223de4defa9c1d2503c0584cecb07b8f61ac47a787db"
+  },
+  "iris_ign_56243.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56243'",
+   "recupere_le": "2026-10-14T14:25:56Z",
+   "octets": 174491,
+   "sha256": "1fdc19c19af14774d443c639d433eff4a630e14f619b5487f4395d56dfea2355"
+  },
+  "iris_ign_56158.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='56158'",
+   "recupere_le": "2026-10-14T14:25:57Z",
+   "octets": 38732,
+   "sha256": "8d2f71d0a08509f9acad2a26dd4a39ac5d0924a6c21190aecde7fc85e9b6f39b"
+  },
+  "gtfs_200067932.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/565533c0-64ae-44d6-9dfa-169be5b805c6",
+   "recupere_le": "2026-10-14T14:26:00Z",
+   "octets": 6903283,
+   "sha256": "e14be94c33642949603b2c9f2579c586534d9274cef5de5b7b258fae2756c7fb"
+  },
+  "geo_44184.json": {
+   "url": "https://geo.api.gouv.fr/communes/44184?fields=nom,codeEpci,epci,codeDepartement,centre,population",
+   "recupere_le": "2026-10-14T14:26:12Z",
+   "octets": 252,
+   "sha256": "ebb0536ca3e77ce8d9a1800d8049a8c732800e8f84bf4bf8489df1967b3b3164"
+  },
+  "ban_44.csv.gz": {
+   "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-44.csv.gz",
+   "recupere_le": "2026-10-14T14:26:25Z",
+   "octets": 23554991,
+   "sha256": "4b303a8eb4532a8cb66ca97afd1465fe13c1b6277f179eafa1781209ce27163b"
+  },
+  "iris_ign_44184.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44184'",
+   "recupere_le": "2026-10-14T14:26:28Z",
+   "octets": 266460,
+   "sha256": "6e43bf8d7067b33f22fa8e4e0a72ce222614d3c47bf3468c7b3b4a50044dce68"
+  },
+  "iris_ign_44055.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44055'",
+   "recupere_le": "2026-10-14T14:26:29Z",
+   "octets": 87154,
+   "sha256": "cf4453d95699868ba925d5a6f4b44ef5a994ee362cb42a95777c1bf0df8d18b3"
+  },
+  "iris_ign_44069.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44069'",
+   "recupere_le": "2026-10-14T14:26:29Z",
+   "octets": 147253,
+   "sha256": "1d39285a012c6cfce8cba9003fc0cea7196aa026133261ddfc8664ac0b8af6de"
+  },
+  "iris_ign_44154.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44154'",
+   "recupere_le": "2026-10-14T14:26:30Z",
+   "octets": 86671,
+   "sha256": "5bfd9ed511d93563c38868ae6216d93184b1a4794604cfa3d84368b90906a8d1"
+  },
+  "iris_ign_44132.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44132'",
+   "recupere_le": "2026-10-14T14:26:30Z",
+   "octets": 69452,
+   "sha256": "6daa97f6b058d9fdda37c94a87b94c6a05421de41832e18448ba4b91a434b639"
+  },
+  "iris_ign_44052.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44052'",
+   "recupere_le": "2026-10-14T14:26:31Z",
+   "octets": 46337,
+   "sha256": "cb24690935de17e2872dbdc17e3cf16039fb4b1e69d76c6cb53b23ee4d5be0de"
+  },
+  "iris_ign_44210.json": {
+   "url": "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=STATISTICALUNITS.IRISGE:iris_ge&outputFormat=application/json&srsName=EPSG:4326&CQL_FILTER=code_insee='44210'",
+   "recupere_le": "2026-10-14T14:26:32Z",
+   "octets": 37590,
+   "sha256": "75bfad25e6baef8057bbab1fc14503cac7a6a9e42e7cc02bd6fd81f4d3550f07"
+  },
+  "gtfs_244400644.zip": {
+   "url": "https://www.data.gouv.fr/api/1/datasets/r/a1867718-7921-42a6-b672-c53b8c583aa3",
+   "recupere_le": "2026-10-14T14:26:38Z",
+   "octets": 2378961,
+   "sha256": "93ee9ac1e19149b09e318736dbdb56caa0247797f0e570bca7aadf0bdd368b02"
+  }
+ }
+}

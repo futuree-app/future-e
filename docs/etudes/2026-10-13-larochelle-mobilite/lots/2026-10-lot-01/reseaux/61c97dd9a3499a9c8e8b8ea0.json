@@ -1,0 +1,31 @@
+{
+ "id": "61c97dd9a3499a9c8e8b8ea0",
+ "titre": "Réseau urbain Izilo",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration",
+ "nom_commercial": "IZILO Mobilités",
+ "aom": "CA Lorient Agglomération",
+ "epci": {
+  "code": "200042174",
+  "nom": "CA Lorient Agglomération"
+ },
+ "mis_a_jour": "2026-09-18",
+ "agence": {
+  "agences": [
+   [
+    "IZILO",
+    "https://www.izilo.bzh/"
+   ]
+  ],
+  "retenue": [
+   "IZILO",
+   "https://www.izilo.bzh/"
+  ]
+ },
+ "sites_controles": [
+  [
+   "https://www.izilo.bzh/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}

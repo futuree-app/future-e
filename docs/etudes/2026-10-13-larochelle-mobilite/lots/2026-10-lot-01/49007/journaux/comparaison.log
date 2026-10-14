@@ -1,0 +1,4 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python outil/comparaison_voiture.py --insee 49007 --mobpro /Users/quentinbrache/Desktop/Futur·e/data/rp-mobpro-2022.parquet --index /Users/quentinbrache/Desktop/Futur·e/data/comparateur-index.json.gz --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/49007/fiche/comparaison_voiture.json
+
+✓ /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/49007/fiche/comparaison_voiture.json · Angers · groupe de 32 communes
+

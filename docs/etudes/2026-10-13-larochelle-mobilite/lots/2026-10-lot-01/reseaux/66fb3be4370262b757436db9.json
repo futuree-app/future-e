@@ -1,0 +1,39 @@
+{
+ "id": "66fb3be4370262b757436db9",
+ "titre": "Réseau urbain et scolaire Ycéo",
+ "page": "https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1",
+ "nom_commercial": "STRAN",
+ "aom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)",
+ "epci": {
+  "code": "244400644",
+  "nom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "Aléop TER",
+    "https://aleop.paysdelaloire.fr/"
+   ],
+   [
+    "Aléop en Loire-Atlantique",
+    "https://aleop.paysdelaloire.fr/loire-atlantique"
+   ],
+   [
+    "Lila Presqu'île",
+    "https://www.lilapresquile.fr/"
+   ],
+   [
+    "Ycéo",
+    "http://www.stran.fr/"
+   ],
+   [
+    "Ycéo",
+    "http://www.yceo-mobilite.fr/"
+   ]
+  ],
+  "retenue": null
+ },
+ "sites_controles": [],
+ "consulte_le": "2026-10-14"
+}

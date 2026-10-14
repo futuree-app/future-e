@@ -46,6 +46,10 @@ Si les voisines ont été choisies à la main (`--voisines` à l'étape 1), le d
 
 Pour Niort, la fiche du 13/10/2026 existe déjà : seule l'étape 2 a été lancée (dossier régénéré le 13/10/2026 après correction des consignes ; valeurs identiques à la fiche, seuls les faits bus passent « en attente de validation »). Régénéré le 14/10/2026 avec `79191/complement.json` : faits calculés identiques (`faits`, secteurs, scénario) ; s'ajoutent la section 2 bis (sept informations documentaires) et cinq informations écartées dans les absents. Les essais 1 et 2 avaient été écrits sans complément.
 
+## Production par lots (14/10/2026)
+
+Pour plusieurs communes sans intervention commune par commune : `../lots/README.md` (`outil/lot.py`, index local `/dev/lot`). Premier lot de dix communes préparé le 14/10/2026, génération en attente d'accord (`../lots/2026-10-lot-01/BUDGET.md`).
+
 ## Lancer le test (session vierge)
 
 1. Ouvrir une session sans historique, sans accès au dépôt.

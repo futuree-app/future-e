@@ -1,0 +1,31 @@
+{
+ "id": "6294d9e0a420a2eb83a6c3b6",
+ "titre": "Réseau urbain Choletbus",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus",
+ "nom_commercial": "Choletbus",
+ "aom": "CA Agglomération du Choletais",
+ "epci": {
+  "code": "200071678",
+  "nom": "CA Cholet Agglomération"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "Choletbus",
+    "http://www.choletbus.fr"
+   ]
+  ],
+  "retenue": [
+   "Choletbus",
+   "http://www.choletbus.fr"
+  ]
+ },
+ "sites_controles": [
+  [
+   "http://www.choletbus.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}

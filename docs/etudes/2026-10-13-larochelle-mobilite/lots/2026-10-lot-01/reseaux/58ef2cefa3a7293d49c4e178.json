@@ -1,0 +1,35 @@
+{
+ "id": "58ef2cefa3a7293d49c4e178",
+ "titre": "Réseau urbain Vitalis",
+ "page": "https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt",
+ "nom_commercial": "VITALIS",
+ "aom": "CU du Grand Poitiers",
+ "epci": {
+  "code": "200069854",
+  "nom": "CU du Grand Poitiers"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "FLEX'E-BUS (Grand Poitiers)",
+    "http://www.vitalis-poitiers.fr"
+   ],
+   [
+    "VITALIS (Grand Poitiers)",
+    "http://www.vitalis-poitiers.fr"
+   ]
+  ],
+  "retenue": [
+   "VITALIS (Grand Poitiers)",
+   "http://www.vitalis-poitiers.fr"
+  ]
+ },
+ "sites_controles": [
+  [
+   "http://www.vitalis-poitiers.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}

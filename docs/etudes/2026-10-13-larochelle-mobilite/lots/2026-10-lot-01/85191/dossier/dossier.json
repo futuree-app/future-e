@@ -1,0 +1,2717 @@
+{
+ "commune": {
+  "insee": "85191",
+  "nom": "La Roche-sur-Yon",
+  "departement": "85",
+  "epci": {
+   "code": "248500589",
+   "nom": "CA La Roche-sur-Yon - Agglomération"
+  },
+  "unite_urbaine": "85501",
+  "voisines": {},
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/85191/fiche/fiche.json",
+  "sha256": "ee67c3683bec7f7b924c1f8803400e6ee117eb7bfbed60a232af16994ba7822f",
+  "generee_le": "2026-10-14T14:27:26Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-14T14:31:38Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.027,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.023,
+    0.033
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.091,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.082,
+    0.1
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.064,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.056,
+    0.071
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.013,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.01,
+    0.017
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.744,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.731,
+    0.757
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.061,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.054,
+    0.069
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à La Roche-sur-Yon même",
+   "valeur": 0.688,
+   "unite": "part",
+   "affichage": "69 %",
+   "intervalle_95": [
+    0.673,
+    0.702
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "perimetre": "commune de résidence et de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à La Roche-sur-Yon",
+   "valeur": 0.669,
+   "unite": "part",
+   "affichage": "67 %",
+   "intervalle_95": [
+    0.652,
+    0.687
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon qui travaillent à La Roche-sur-Yon",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon qui travaillent à La Roche-sur-Yon",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de La Roche-sur-Yon",
+   "valeur": 0.909,
+   "unite": "part",
+   "affichage": "91 %",
+   "intervalle_95": [
+    0.892,
+    0.924
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon qui travaillent hors de La Roche-sur-Yon",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon qui travaillent hors de La Roche-sur-Yon",
+   "perimetre": "commune de travail : toute commune autre que La Roche-sur-Yon",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.058,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.052,
+    0.066
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.482,
+   "unite": "part",
+   "affichage": "48 %",
+   "intervalle_95": [
+    0.467,
+    0.498
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.217,
+   "unite": "part",
+   "affichage": "22 %",
+   "intervalle_95": [
+    0.204,
+    0.23
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.773,
+   "unite": "part",
+   "affichage": "77 %",
+   "intervalle_95": [
+    0.754,
+    0.791
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.077,
+   "unite": "part",
+   "affichage": "8 %",
+   "intervalle_95": [
+    0.066,
+    0.09
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.013,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.009,
+    0.018
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.669,
+   "unite": "part",
+   "affichage": "67 %",
+   "intervalle_95": [
+    0.648,
+    0.689
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, propriétaires de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.737,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.712,
+    0.76
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.052,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.041,
+    0.065
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.097,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.082,
+    0.114
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.345,
+   "unite": "part",
+   "affichage": "35 %",
+   "intervalle_95": [
+    0.319,
+    0.371
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.738,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.704,
+    0.768
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.036,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.025,
+    0.052
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.128,
+   "unite": "part",
+   "affichage": "13 %",
+   "intervalle_95": [
+    0.106,
+    0.155
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.254,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": [
+    0.223,
+    0.287
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à La Roche-sur-Yon, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à La Roche-sur-Yon",
+   "valeur": 45307,
+   "unite": "nombre",
+   "affichage": "environ 45 300",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à La Roche-sur-Yon, de ceux qui habitent La Roche-sur-Yon",
+   "valeur": 0.339,
+   "unite": "part",
+   "affichage": "34 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à La Roche-sur-Yon et habitent La Roche-sur-Yon",
+   "valeur": 0.669,
+   "unite": "part",
+   "affichage": "67 %",
+   "intervalle_95": [
+    0.652,
+    0.687
+   ],
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence et qui habitent La Roche-sur-Yon",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à La Roche-sur-Yon et habitent La Roche-sur-Yon",
+   "valeur": 0.062,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.053,
+    0.071
+   ],
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence et qui habitent La Roche-sur-Yon",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à La Roche-sur-Yon, de ceux qui habitent hors de l'unité urbaine INSEE 85501",
+   "valeur": 0.661,
+   "unite": "part",
+   "affichage": "66 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à La Roche-sur-Yon et habitent hors de l'unité urbaine INSEE 85501",
+   "valeur": 0.957,
+   "unite": "part",
+   "affichage": "96 %",
+   "intervalle_95": [
+    0.951,
+    0.963
+   ],
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 85501",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à La Roche-sur-Yon et habitent hors de l'unité urbaine INSEE 85501",
+   "valeur": 0.027,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.022,
+    0.032
+   ],
+   "population": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à La Roche-sur-Yon, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 85501",
+   "perimetre": "commune de travail : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Pentagone Sud-Ouest (IRIS 851910103)",
+   "valeur": 0.573,
+   "unite": "part",
+   "affichage": "57 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de La Roche-sur-Yon (85191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Zone Rurale-L'Annexe (IRIS 851911003)",
+   "valeur": 0.893,
+   "unite": "part",
+   "affichage": "89 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de La Roche-sur-Yon (85191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 32,
+   "unite": "points",
+   "affichage": "+32 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de La Roche-sur-Yon (85191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.158,
+   "unite": "part",
+   "affichage": "16 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de La Roche-sur-Yon",
+   "denominateur": "toutes les résidences principales de La Roche-sur-Yon",
+   "perimetre": "commune : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.283,
+   "unite": "part",
+   "affichage": "28 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de La Roche-sur-Yon",
+   "denominateur": "toutes les résidences principales de La Roche-sur-Yon",
+   "perimetre": "commune : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.705,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de La Roche-sur-Yon",
+   "denominateur": "toutes les résidences principales de La Roche-sur-Yon",
+   "perimetre": "commune : La Roche-sur-Yon (85191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.85191.commerce_alim_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.777,
+   "unite": "part",
+   "affichage": "78 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.grande_surface_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.288,
+   "unite": "part",
+   "affichage": "29 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.pharmacie_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.636,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.medecin_generaliste_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.536,
+   "unite": "part",
+   "affichage": "54 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.ecole_elementaire_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.702,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.college_1km",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.655,
+   "unite": "part",
+   "affichage": "66 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.gare_2km",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.699,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.panier_quotidien_500m",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.549,
+   "unite": "part",
+   "affichage": "55 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.bus_8h_7_9h",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.738,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.aucun_bus_7_9h",
+   "fait": "Part des adresses de La Roche-sur-Yon sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.038,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.85191.bus_4h_20_22h",
+   "fait": "Part des adresses de La Roche-sur-Yon qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.303,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de La Roche-sur-Yon",
+   "denominateur": "toutes les adresses BAN de La Roche-sur-Yon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de La Roche-sur-Yon (85191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Impulsyon » (https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.289,
+   "unite": "€/L",
+   "affichage": "2,29 €/L",
+   "intervalle_95": null,
+   "population": "10 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.544,
+   "unite": "€/L",
+   "affichage": "1,54 €/L",
+   "intervalle_95": null,
+   "population": "10 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.745,
+   "unite": "€/L",
+   "affichage": "0,74 €/L",
+   "intervalle_95": null,
+   "population": "10 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.129,
+   "unite": "€/L",
+   "affichage": "2,13 €/L",
+   "intervalle_95": null,
+   "population": "9 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.61,
+   "unite": "€/L",
+   "affichage": "1,61 €/L",
+   "intervalle_95": null,
+   "population": "9 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.519,
+   "unite": "€/L",
+   "affichage": "0,52 €/L",
+   "intervalle_95": null,
+   "population": "9 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de La Roche-sur-Yon (centre communal de geo.api.gouv.fr : [-1.4162, 46.6659])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "851910403",
+   "nom": "Z.A. Oudairies-Malboire",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "851910305",
+   "nom": "Z.I. Nord",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "851910702",
+   "nom": "Z.I. Sud",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "851910103",
+   "nom": "Pentagone Sud-Ouest",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 918,
+   "voiture": 0.573,
+   "velo": 0.059,
+   "tc": 0.097,
+   "marche": 0.219,
+   "menages_sans_voiture": 0.24,
+   "menages_stationnement_reserve": 0.495,
+   "panier_quotidien_500m": 0.604,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851911002",
+   "nom": "Z.I. Ajoncs",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "851910102",
+   "nom": "Les Halles",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 936,
+   "voiture": 0.612,
+   "velo": 0.052,
+   "tc": 0.072,
+   "marche": 0.231,
+   "menages_sans_voiture": 0.277,
+   "menages_stationnement_reserve": 0.437,
+   "panier_quotidien_500m": 0.987,
+   "bus_8h_7_9h": 0.997,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910201",
+   "nom": "Gare SNCF-Sacré-Cœur",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1061,
+   "voiture": 0.653,
+   "velo": 0.053,
+   "tc": 0.071,
+   "marche": 0.177,
+   "menages_sans_voiture": 0.145,
+   "menages_stationnement_reserve": 0.573,
+   "panier_quotidien_500m": 0.897,
+   "bus_8h_7_9h": 0.993,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910101",
+   "nom": "Pentagone Nord",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 834,
+   "voiture": 0.654,
+   "velo": 0.06,
+   "tc": 0.084,
+   "marche": 0.171,
+   "menages_sans_voiture": 0.303,
+   "menages_stationnement_reserve": 0.598,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910501",
+   "nom": "Liberté",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 949,
+   "voiture": 0.656,
+   "velo": 0.078,
+   "tc": 0.078,
+   "marche": 0.159,
+   "menages_sans_voiture": 0.203,
+   "menages_stationnement_reserve": 0.596,
+   "panier_quotidien_500m": 0.943,
+   "bus_8h_7_9h": 0.576,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910304",
+   "nom": "Pyramides-Jean Yole",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1016,
+   "voiture": 0.662,
+   "velo": 0.056,
+   "tc": 0.139,
+   "marche": 0.106,
+   "menages_sans_voiture": 0.305,
+   "menages_stationnement_reserve": 0.412,
+   "panier_quotidien_500m": 0.917,
+   "bus_8h_7_9h": 0.993,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910802",
+   "nom": "Gare SNCF",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2050,
+   "voiture": 0.714,
+   "velo": 0.111,
+   "tc": 0.045,
+   "marche": 0.083,
+   "menages_sans_voiture": 0.153,
+   "menages_stationnement_reserve": 0.741,
+   "panier_quotidien_500m": 0.537,
+   "bus_8h_7_9h": 0.976,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910402",
+   "nom": "Moulin Rouge-Oudairies",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1078,
+   "voiture": 0.728,
+   "velo": 0.068,
+   "tc": 0.047,
+   "marche": 0.082,
+   "menages_sans_voiture": 0.14,
+   "menages_stationnement_reserve": 0.869,
+   "panier_quotidien_500m": 0.445,
+   "bus_8h_7_9h": 0.732,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910502",
+   "nom": "La Vigne aux Roses",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 899,
+   "voiture": 0.743,
+   "velo": 0.062,
+   "tc": 0.074,
+   "marche": 0.097,
+   "menages_sans_voiture": 0.255,
+   "menages_stationnement_reserve": 0.357,
+   "panier_quotidien_500m": 0.94,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910601",
+   "nom": "Les Jaulnières",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 666,
+   "voiture": 0.747,
+   "velo": 0.085,
+   "tc": 0.09,
+   "marche": 0.021,
+   "menages_sans_voiture": 0.084,
+   "menages_stationnement_reserve": 0.873,
+   "panier_quotidien_500m": 0.521,
+   "bus_8h_7_9h": 0.71,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910302",
+   "nom": "Richelieu-Rivoli",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1110,
+   "voiture": 0.748,
+   "velo": 0.069,
+   "tc": 0.051,
+   "marche": 0.1,
+   "menages_sans_voiture": 0.232,
+   "menages_stationnement_reserve": 0.748,
+   "panier_quotidien_500m": 0.743,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910301",
+   "nom": "Les Robretières",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 562,
+   "voiture": 0.748,
+   "velo": 0.068,
+   "tc": 0.021,
+   "marche": 0.077,
+   "menages_sans_voiture": 0.118,
+   "menages_stationnement_reserve": 0.766,
+   "panier_quotidien_500m": 0.4,
+   "bus_8h_7_9h": 0.997,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910602",
+   "nom": "Z.A. Belle Place",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "851910801",
+   "nom": "Saint-André d'Ornay-Le Val d'Amboise",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1437,
+   "voiture": 0.794,
+   "velo": 0.067,
+   "tc": 0.051,
+   "marche": 0.05,
+   "menages_sans_voiture": 0.072,
+   "menages_stationnement_reserve": 0.871,
+   "panier_quotidien_500m": 0.343,
+   "bus_8h_7_9h": 0.419,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910303",
+   "nom": "Garenne",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 800,
+   "voiture": 0.797,
+   "velo": 0.029,
+   "tc": 0.052,
+   "marche": 0.089,
+   "menages_sans_voiture": 0.195,
+   "menages_stationnement_reserve": 0.422,
+   "panier_quotidien_500m": 0.969,
+   "bus_8h_7_9h": 0.997,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910901",
+   "nom": "Mon Repos-Terres Noires-Forges-Branly",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2224,
+   "voiture": 0.809,
+   "velo": 0.065,
+   "tc": 0.06,
+   "marche": 0.037,
+   "menages_sans_voiture": 0.121,
+   "menages_stationnement_reserve": 0.824,
+   "panier_quotidien_500m": 0.154,
+   "bus_8h_7_9h": 0.44,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910404",
+   "nom": "Le Bourg sous La Roche-Coteau",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1628,
+   "voiture": 0.819,
+   "velo": 0.059,
+   "tc": 0.035,
+   "marche": 0.041,
+   "menages_sans_voiture": 0.078,
+   "menages_stationnement_reserve": 0.858,
+   "panier_quotidien_500m": 0.452,
+   "bus_8h_7_9h": 0.496,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851910701",
+   "nom": "La Généraudière-L'Angelmière",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1206,
+   "voiture": 0.832,
+   "velo": 0.055,
+   "tc": 0.038,
+   "marche": 0.044,
+   "menages_sans_voiture": 0.074,
+   "menages_stationnement_reserve": 0.841,
+   "panier_quotidien_500m": 0.155,
+   "bus_8h_7_9h": 0.63,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851911004",
+   "nom": "La Courtaisière",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 763,
+   "voiture": 0.864,
+   "velo": 0.049,
+   "tc": 0.017,
+   "marche": 0.041,
+   "menages_sans_voiture": 0.092,
+   "menages_stationnement_reserve": 0.851,
+   "panier_quotidien_500m": 0.132,
+   "bus_8h_7_9h": 0.507,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "851911003",
+   "nom": "Zone Rurale-L'Annexe",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1404,
+   "voiture": 0.893,
+   "velo": 0.026,
+   "tc": 0.017,
+   "marche": 0.035,
+   "menages_sans_voiture": 0.038,
+   "menages_stationnement_reserve": 0.957,
+   "panier_quotidien_500m": 0.002,
+   "bus_8h_7_9h": 0.017,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "85191",
+   "nom": "La Roche-sur-Yon",
+   "lignes": 4800,
+   "fragilite": "ok",
+   "part_des_actifs": 0.688,
+   "pas_de_transport": 0.038,
+   "marche": 0.128,
+   "velo": 0.088,
+   "deux_roues_mot": 0.015,
+   "voiture": 0.669,
+   "tc": 0.062
+  },
+  {
+   "travail": "85084",
+   "nom": "Essarts-en-Bocage",
+   "lignes": 149,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.021,
+   "pas_de_transport": 0.0,
+   "marche": 0.002,
+   "velo": 0.0,
+   "deux_roues_mot": 0.002,
+   "voiture": 0.976,
+   "tc": 0.019
+  },
+  {
+   "travail": "85178",
+   "nom": "Le Poiré-sur-Vie",
+   "lignes": 155,
+   "fragilite": "ok",
+   "part_des_actifs": 0.021,
+   "pas_de_transport": 0.007,
+   "marche": 0.008,
+   "velo": 0.016,
+   "deux_roues_mot": 0.006,
+   "voiture": 0.935,
+   "tc": 0.029
+  },
+  {
+   "travail": "85194",
+   "nom": "Les Sables-d'Olonne",
+   "lignes": 142,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.02,
+   "pas_de_transport": 0.0,
+   "marche": 0.002,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.915,
+   "tc": 0.082
+  },
+  {
+   "travail": "85152",
+   "nom": "Les Achards",
+   "lignes": 108,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.016,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.038,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.941,
+   "tc": 0.021
+  },
+  {
+   "travail": "85155",
+   "nom": "Mouilleron-le-Captif",
+   "lignes": 121,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.016,
+   "pas_de_transport": 0.0,
+   "marche": 0.016,
+   "velo": 0.042,
+   "deux_roues_mot": 0.045,
+   "voiture": 0.883,
+   "tc": 0.014
+  },
+  {
+   "travail": "85003",
+   "nom": "Aizenay",
+   "lignes": 95,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.014,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.029,
+   "voiture": 0.971,
+   "tc": 0.0
+  },
+  {
+   "travail": "85019",
+   "nom": "Bellevigny",
+   "lignes": 98,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.013,
+   "pas_de_transport": 0.0,
+   "marche": 0.011,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.949,
+   "tc": 0.04
+  },
+  {
+   "travail": "44109",
+   "nom": "Nantes",
+   "lignes": 86,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.012,
+   "pas_de_transport": 0.0,
+   "marche": 0.04,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.499,
+   "tc": 0.461
+  },
+  {
+   "travail": "85089",
+   "nom": "La Ferrière",
+   "lignes": 79,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.012,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.051,
+   "voiture": 0.905,
+   "tc": 0.044
+  },
+  {
+   "travail": "85081",
+   "nom": "Dompierre-sur-Yon",
+   "lignes": 83,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.011,
+   "pas_de_transport": 0.0,
+   "marche": 0.013,
+   "velo": 0.025,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.949,
+   "tc": 0.012
+  },
+  {
+   "travail": "85146",
+   "nom": "Montaigu-Vendée",
+   "lignes": 64,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.01,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.944,
+   "tc": 0.056
+  },
+  {
+   "travail": "85046",
+   "nom": "La Chaize-le-Vicomte",
+   "lignes": 57,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.008,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.966,
+   "tc": 0.016
+  },
+  {
+   "travail": "85300",
+   "nom": "Venansault",
+   "lignes": 58,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.008,
+   "pas_de_transport": 0.0,
+   "marche": 0.005,
+   "velo": 0.0,
+   "deux_roues_mot": 0.019,
+   "voiture": 0.94,
+   "tc": 0.035
+  },
+  {
+   "travail": "85128",
+   "nom": "Luçon",
+   "lignes": 55,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.018,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.929,
+   "tc": 0.053
+  },
+  {
+   "travail": "85051",
+   "nom": "Chantonnay",
+   "lignes": 40,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.957,
+   "tc": 0.043
+  }
+ ],
+ "voisines": [],
+ "acces_communes": {
+  "85191": {
+   "commerce_alim_500m": 0.777,
+   "grande_surface_500m": 0.288,
+   "pharmacie_500m": 0.636,
+   "medecin_generaliste_500m": 0.536,
+   "ecole_elementaire_500m": 0.702,
+   "college_1km": 0.655,
+   "gare_2km": 0.699,
+   "panier_quotidien_500m": 0.549,
+   "bus_8h_7_9h": 0.738,
+   "aucun_bus_7_9h": 0.038,
+   "bus_4h_20_22h": 0.303
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 90
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 270
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 630
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 60
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 180
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 420
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit",
+   "raison": "seules les comparaisons calculées et documentées dans le dossier s'écrivent"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 85191 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/85191/fiche/fiche.json --contours <cache>/iris_ign_85191.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.55",
+   "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable automatiquement",
+   "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+   "commande": "generer_visuels.py (sans --sans-barres)",
+   "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "85191",
+  "consulte_le": "2026-10-14",
+  "origine": "automatique",
+  "sources_officielles": [
+   "https://transport.data.gouv.fr"
+  ],
+  "faits": [
+   {
+    "id": "doc.reseau.identite",
+    "information": "Le réseau de transport urbain publié pour l'intercommunalité CA La Roche-sur-Yon - Agglomération est « Impulsyon » (autorité organisatrice : CA La Roche sur Yon - Agglomération).",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Impulsyon » : https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon",
+    "consulte_le": "2026-10-14",
+    "validite": "jeu de données mis à jour le 2026-09-27",
+    "perimetre": "intercommunalité CA La Roche-sur-Yon - Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "site officiel du réseau",
+    "statut": "non vérifié",
+    "source": "https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon",
+    "consulte_le": "2026-10-14",
+    "note": "agences du GTFS sans correspondance univoque avec le nom du réseau : Agence par défaut (https://orchestra.ratpdev.com)"
+   },
+   {
+    "sujet": "tarification (gratuité, abonnements, exceptions)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "jours et périodes de circulation des lignes urbaines",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "vélo ou gare (seulement si directement utile au logement)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   }
+  ],
+  "ecartes": [],
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/85191/dossier/complement.json",
+  "sha256": "2cec5da7acaa177a5e30221c37222336be868cac67c16129865665c79e04571b"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "85191",
+   "nom": "La Roche-sur-Yon",
+   "role": "principale",
+   "actifs": 22342,
+   "lignes": 7034,
+   "voiture": 0.7443
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que La Roche-sur-Yon (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 11 171 à 44 683), avec au moins 150 lignes d'échantillon ; La Roche-sur-Yon exclue ; France métropolitaine",
+   "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    11171,
+    44683
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "3a21daa14fad5bb1"
+   }
+  },
+  "genere_le": "2026-10-14T14:27:53Z",
+  "disponible": true,
+  "groupe": {
+   "n": 85,
+   "mediane_voiture": 0.6818,
+   "communes": [
+    {
+     "insee": "47001",
+     "nom": "Agen",
+     "actifs": 13478,
+     "voiture": 0.642
+    },
+    {
+     "insee": "2A004",
+     "nom": "Ajaccio",
+     "actifs": 31282,
+     "voiture": 0.7559
+    },
+    {
+     "insee": "81004",
+     "nom": "Albi",
+     "actifs": 17834,
+     "voiture": 0.7026
+    },
+    {
+     "insee": "30007",
+     "nom": "Alès",
+     "actifs": 12771,
+     "voiture": 0.8295
+    },
+    {
+     "insee": "16015",
+     "nom": "Angoulême",
+     "actifs": 16572,
+     "voiture": 0.649
+    },
+    {
+     "insee": "74012",
+     "nom": "Annemasse",
+     "actifs": 16867,
+     "voiture": 0.4809
+    },
+    {
+     "insee": "13004",
+     "nom": "Arles",
+     "actifs": 19148,
+     "voiture": 0.7454
+    },
+    {
+     "insee": "62041",
+     "nom": "Arras",
+     "actifs": 16425,
+     "voiture": 0.6128
+    },
+    {
+     "insee": "89024",
+     "nom": "Auxerre",
+     "actifs": 13254,
+     "voiture": 0.6874
+    },
+    {
+     "insee": "84007",
+     "nom": "Avignon",
+     "actifs": 31281,
+     "voiture": 0.6473
+    },
+    {
+     "insee": "2B033",
+     "nom": "Bastia",
+     "actifs": 18177,
+     "voiture": 0.749
+    },
+    {
+     "insee": "64102",
+     "nom": "Bayonne",
+     "actifs": 24509,
+     "voiture": 0.6786
+    },
+    {
+     "insee": "60057",
+     "nom": "Beauvais",
+     "actifs": 20011,
+     "voiture": 0.6938
+    },
+    {
+     "insee": "90010",
+     "nom": "Belfort",
+     "actifs": 16728,
+     "voiture": 0.6285
+    },
+    {
+     "insee": "41018",
+     "nom": "Blois",
+     "actifs": 17025,
+     "voiture": 0.6567
+    },
+    {
+     "insee": "62160",
+     "nom": "Boulogne-sur-Mer",
+     "actifs": 14414,
+     "voiture": 0.6735
+    },
+    {
+     "insee": "01053",
+     "nom": "Bourg-en-Bresse",
+     "actifs": 15736,
+     "voiture": 0.6573
+    },
+    {
+     "insee": "18033",
+     "nom": "Bourges",
+     "actifs": 24724,
+     "voiture": 0.7284
+    },
+    {
+     "insee": "38053",
+     "nom": "Bourgoin-Jallieu",
+     "actifs": 12500,
+     "voiture": 0.7359
+    },
+    {
+     "insee": "19031",
+     "nom": "Brive-la-Gaillarde",
+     "actifs": 18097,
+     "voiture": 0.7385
+    },
+    {
+     "insee": "34032",
+     "nom": "Béziers",
+     "actifs": 24205,
+     "voiture": 0.7667
+    },
+    {
+     "insee": "14118",
+     "nom": "Caen",
+     "actifs": 43167,
+     "voiture": 0.5765
+    },
+    {
+     "insee": "62193",
+     "nom": "Calais",
+     "actifs": 23291,
+     "voiture": 0.7608
+    },
+    {
+     "insee": "59122",
+     "nom": "Cambrai",
+     "actifs": 11222,
+     "voiture": 0.7643
+    },
+    {
+     "insee": "11069",
+     "nom": "Carcassonne",
+     "actifs": 16509,
+     "voiture": 0.7395
+    },
+    {
+     "insee": "81065",
+     "nom": "Castres",
+     "actifs": 15487,
+     "voiture": 0.7658
+    },
+    {
+     "insee": "71076",
+     "nom": "Chalon-sur-Saône",
+     "actifs": 17261,
+     "voiture": 0.6612
+    },
+    {
+     "insee": "73065",
+     "nom": "Chambéry",
+     "actifs": 25185,
+     "voiture": 0.5657
+    },
+    {
+     "insee": "08105",
+     "nom": "Charleville-Mézières",
+     "actifs": 15228,
+     "voiture": 0.6508
+    },
+    {
+     "insee": "28085",
+     "nom": "Chartres",
+     "actifs": 16156,
+     "voiture": 0.5875
+    },
+    {
+     "insee": "50129",
+     "nom": "Cherbourg-en-Cotentin",
+     "actifs": 33130,
+     "voiture": 0.7047
+    },
+    {
+     "insee": "49099",
+     "nom": "Cholet",
+     "actifs": 22354,
+     "voiture": 0.782
+    },
+    {
+     "insee": "51108",
+     "nom": "Châlons-en-Champagne",
+     "actifs": 16714,
+     "voiture": 0.6911
+    },
+    {
+     "insee": "36044",
+     "nom": "Châteauroux",
+     "actifs": 15621,
+     "voiture": 0.7246
+    },
+    {
+     "insee": "68066",
+     "nom": "Colmar",
+     "actifs": 27853,
+     "voiture": 0.6192
+    },
+    {
+     "insee": "60159",
+     "nom": "Compiègne",
+     "actifs": 15264,
+     "voiture": 0.6341
+    },
+    {
+     "insee": "60175",
+     "nom": "Creil",
+     "actifs": 11237,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "59178",
+     "nom": "Douai",
+     "actifs": 13788,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "83050",
+     "nom": "Draguignan",
+     "actifs": 15388,
+     "voiture": 0.7907
+    },
+    {
+     "insee": "59183",
+     "nom": "Dunkerque",
+     "actifs": 31408,
+     "voiture": 0.6949
+    },
+    {
+     "insee": "83061",
+     "nom": "Fréjus",
+     "actifs": 22251,
+     "voiture": 0.8084
+    },
+    {
+     "insee": "05061",
+     "nom": "Gap",
+     "actifs": 16136,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "67180",
+     "nom": "Haguenau",
+     "actifs": 16998,
+     "voiture": 0.7048
+    },
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "actifs": 30550,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "53130",
+     "nom": "Laval",
+     "actifs": 19809,
+     "voiture": 0.6742
+    },
+    {
+     "insee": "85194",
+     "nom": "Les Sables-d'Olonne",
+     "actifs": 16149,
+     "voiture": 0.7804
+    },
+    {
+     "insee": "56121",
+     "nom": "Lorient",
+     "actifs": 22717,
+     "voiture": 0.6667
+    },
+    {
+     "insee": "77284",
+     "nom": "Meaux",
+     "actifs": 23761,
+     "voiture": 0.4646
+    },
+    {
+     "insee": "06083",
+     "nom": "Menton",
+     "actifs": 12633,
+     "voiture": 0.449
+    },
+    {
+     "insee": "40192",
+     "nom": "Mont-de-Marsan",
+     "actifs": 12607,
+     "voiture": 0.7567
+    },
+    {
+     "insee": "82121",
+     "nom": "Montauban",
+     "actifs": 24798,
+     "voiture": 0.7846
+    },
+    {
+     "insee": "03185",
+     "nom": "Montluçon",
+     "actifs": 11656,
+     "voiture": 0.6955
+    },
+    {
+     "insee": "26198",
+     "nom": "Montélimar",
+     "actifs": 15059,
+     "voiture": 0.7868
+    },
+    {
+     "insee": "68224",
+     "nom": "Mulhouse",
+     "actifs": 35491,
+     "voiture": 0.6112
+    },
+    {
+     "insee": "71270",
+     "nom": "Mâcon",
+     "actifs": 13117,
+     "voiture": 0.7119
+    },
+    {
+     "insee": "54395",
+     "nom": "Nancy",
+     "actifs": 43903,
+     "voiture": 0.4838
+    },
+    {
+     "insee": "11262",
+     "nom": "Narbonne",
+     "actifs": 19278,
+     "voiture": 0.7433
+    },
+    {
+     "insee": "58194",
+     "nom": "Nevers",
+     "actifs": 11413,
+     "voiture": 0.6716
+    },
+    {
+     "insee": "79191",
+     "nom": "Niort",
+     "actifs": 25863,
+     "voiture": 0.7011
+    },
+    {
+     "insee": "64445",
+     "nom": "Pau",
+     "actifs": 30140,
+     "voiture": 0.6678
+    },
+    {
+     "insee": "66136",
+     "nom": "Perpignan",
+     "actifs": 36885,
+     "voiture": 0.7311
+    },
+    {
+     "insee": "86194",
+     "nom": "Poitiers",
+     "actifs": 33952,
+     "voiture": 0.5927
+    },
+    {
+     "insee": "24322",
+     "nom": "Périgueux",
+     "actifs": 12102,
+     "voiture": 0.6055
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "actifs": 27007,
+     "voiture": 0.7802
+    },
+    {
+     "insee": "78517",
+     "nom": "Rambouillet",
+     "actifs": 12140,
+     "voiture": 0.4567
+    },
+    {
+     "insee": "42187",
+     "nom": "Roanne",
+     "actifs": 12297,
+     "voiture": 0.6643
+    },
+    {
+     "insee": "26281",
+     "nom": "Romans-sur-Isère",
+     "actifs": 12530,
+     "voiture": 0.7674
+    },
+    {
+     "insee": "22278",
+     "nom": "Saint-Brieuc",
+     "actifs": 17182,
+     "voiture": 0.6897
+    },
+    {
+     "insee": "35288",
+     "nom": "Saint-Malo",
+     "actifs": 17251,
+     "voiture": 0.6755
+    },
+    {
+     "insee": "44184",
+     "nom": "Saint-Nazaire",
+     "actifs": 28139,
+     "voiture": 0.7111
+    },
+    {
+     "insee": "02691",
+     "nom": "Saint-Quentin",
+     "actifs": 17220,
+     "voiture": 0.7042
+    },
+    {
+     "insee": "13103",
+     "nom": "Salon-de-Provence",
+     "actifs": 18741,
+     "voiture": 0.7669
+    },
+    {
+     "insee": "34301",
+     "nom": "Sète",
+     "actifs": 13916,
+     "voiture": 0.5967
+    },
+    {
+     "insee": "49301",
+     "nom": "Sèvremoine",
+     "actifs": 12348,
+     "voiture": 0.8804
+    },
+    {
+     "insee": "65440",
+     "nom": "Tarbes",
+     "actifs": 15277,
+     "voiture": 0.74
+    },
+    {
+     "insee": "57672",
+     "nom": "Thionville",
+     "actifs": 19332,
+     "voiture": 0.6725
+    },
+    {
+     "insee": "74281",
+     "nom": "Thonon-les-Bains",
+     "actifs": 16506,
+     "voiture": 0.6496
+    },
+    {
+     "insee": "10387",
+     "nom": "Troyes",
+     "actifs": 22143,
+     "voiture": 0.6432
+    },
+    {
+     "insee": "26362",
+     "nom": "Valence",
+     "actifs": 25309,
+     "voiture": 0.6173
+    },
+    {
+     "insee": "59606",
+     "nom": "Valenciennes",
+     "actifs": 16541,
+     "voiture": 0.6638
+    },
+    {
+     "insee": "56260",
+     "nom": "Vannes",
+     "actifs": 21270,
+     "voiture": 0.6754
+    },
+    {
+     "insee": "38544",
+     "nom": "Vienne",
+     "actifs": 13121,
+     "voiture": 0.6894
+    },
+    {
+     "insee": "88160",
+     "nom": "Épinal",
+     "actifs": 12068,
+     "voiture": 0.707
+    },
+    {
+     "insee": "91223",
+     "nom": "Étampes",
+     "actifs": 11264,
+     "voiture": 0.5379
+    },
+    {
+     "insee": "27229",
+     "nom": "Évreux",
+     "actifs": 17632,
+     "voiture": 0.6818
+    }
+   ]
+  },
+  "ecart_points": 6,
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/85191/fiche/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à La Roche-sur-Yon qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "74 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 85 communes du groupe (chaque commune compte une fois)",
+    "affichage": "68 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : La Roche-sur-Yon moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "+6 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "85",
+    "usage": "oui"
+   }
+  ]
+ }
+}

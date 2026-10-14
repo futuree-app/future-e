@@ -1,0 +1,31 @@
+{
+ "id": "5acb75f0c751df341652c886",
+ "titre": "Réseau urbain SETRAM",
+ "page": "https://transport.data.gouv.fr/datasets/gtfs-du-reseau-des-transports-bus-et-tramway-setram-circulant-sur-le-territoire-le-mans-metropole",
+ "nom_commercial": "SETRAM",
+ "aom": "CU Le Mans Métropole",
+ "epci": {
+  "code": "247200132",
+  "nom": "CU Le Mans Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "SETRAM",
+    "http://www.setram.fr"
+   ]
+  ],
+  "retenue": [
+   "SETRAM",
+   "http://www.setram.fr"
+  ]
+ },
+ "sites_controles": [
+  [
+   "http://www.setram.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}

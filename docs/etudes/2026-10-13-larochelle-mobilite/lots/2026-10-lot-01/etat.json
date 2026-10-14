@@ -1,0 +1,445 @@
+{
+ "communes": {
+  "86194": {
+   "nom": "Poitiers",
+   "insee": "86194",
+   "demande": "Poitiers",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:24:12Z",
+     "duree_s": 25.8,
+     "duree_calcul_s": 25.8
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:24:20Z",
+     "duree_s": 8.1,
+     "duree_calcul_s": 8.1
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:37Z",
+     "duree_s": 0.9
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:42Z",
+     "duree_s": 0.1,
+     "complement_sha": "607aed3f33e67a07",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "8b88cc65e4c00a2c"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "35 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 34.9
+  },
+  "49007": {
+   "nom": "Angers",
+   "insee": "49007",
+   "demande": "Angers",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:24:57Z",
+     "duree_s": 35.6,
+     "duree_calcul_s": 35.6
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:25:04Z",
+     "duree_s": 7.3,
+     "duree_calcul_s": 7.3
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:37Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:42Z",
+     "duree_s": 0.2,
+     "complement_sha": "db4a271e2b3e12c6",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "373f2690df9dca15"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "58 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 43.3
+  },
+  "56121": {
+   "nom": "Lorient",
+   "insee": "56121",
+   "demande": "Lorient",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:25:34Z",
+     "duree_s": 29.8,
+     "duree_calcul_s": 29.8
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:25:41Z",
+     "duree_s": 6.7,
+     "duree_calcul_s": 6.7
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:37Z",
+     "duree_s": 0.3
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:42Z",
+     "duree_s": 0.2,
+     "complement_sha": "851a6d6e3f960033",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "eb54e83122204f7b"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "23 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 37.0
+  },
+  "56260": {
+   "nom": "Vannes",
+   "insee": "56260",
+   "demande": "Vannes",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:26:04Z",
+     "duree_s": 22.8,
+     "duree_calcul_s": 22.8
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:26:11Z",
+     "duree_s": 6.7,
+     "duree_calcul_s": 6.7
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:37Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:42Z",
+     "duree_s": 0.2,
+     "complement_sha": "ab3805fbf47f6792",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "f5cee810c25d21a4"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "20 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 29.9
+  },
+  "44184": {
+   "nom": "Saint-Nazaire",
+   "insee": "44184",
+   "demande": "Saint-Nazaire (44)",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:26:45Z",
+     "duree_s": 33.4,
+     "duree_calcul_s": 33.4
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:26:52Z",
+     "duree_s": 7.6,
+     "duree_calcul_s": 7.6
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.2,
+     "complement_sha": "df3cf72c63c48e58",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "00f12fa797e8abcb"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "28 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 41.3
+  },
+  "49099": {
+   "nom": "Cholet",
+   "insee": "49099",
+   "demande": "Cholet",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:27:15Z",
+     "duree_s": 22.2,
+     "duree_calcul_s": 22.2
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:27:24Z",
+     "duree_s": 8.3,
+     "duree_calcul_s": 8.3
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:43Z",
+     "duree_s": 0.2,
+     "complement_sha": "eab42b3a37591895",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "86f0abf90a2c76f9"
+    }
+   },
+   "duree_preparation_s": 30.9,
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "21 secteurs d'habitat (IRIS)"
+   ]
+  },
+  "85191": {
+   "nom": "La Roche-sur-Yon",
+   "insee": "85191",
+   "demande": "La Roche-sur-Yon",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:27:46Z",
+     "duree_s": 22.0,
+     "duree_calcul_s": 22.0
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:27:53Z",
+     "duree_s": 7.0,
+     "duree_calcul_s": 7.0
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.2,
+     "complement_sha": "2cec5da7acaa177a",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "3ec33ac1600c109c"
+    }
+   },
+   "duree_preparation_s": 29.3,
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "19 secteurs d'habitat (IRIS)"
+   ]
+  },
+  "22278": {
+   "nom": "Saint-Brieuc",
+   "insee": "22278",
+   "demande": "Saint-Brieuc",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:28:20Z",
+     "duree_s": 26.3,
+     "duree_calcul_s": 26.3
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:28:27Z",
+     "duree_s": 6.8,
+     "duree_calcul_s": 6.8
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:38Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:43Z",
+     "duree_s": 0.2,
+     "complement_sha": "1a97c6d0035a3b4f",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "bbe6c71da42ff463"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "17 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 33.5
+  },
+  "37261": {
+   "nom": "Tours",
+   "insee": "37261",
+   "demande": "Tours",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:28:58Z",
+     "duree_s": 30.5,
+     "duree_calcul_s": 30.5
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:29:05Z",
+     "duree_s": 6.6,
+     "duree_calcul_s": 6.6
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:39Z",
+     "duree_s": 0.3
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:43Z",
+     "duree_s": 0.2,
+     "complement_sha": "3a5a12e114666b88",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "1dc93508ef109111"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "56 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 37.6
+  },
+  "72181": {
+   "nom": "Le Mans",
+   "insee": "72181",
+   "demande": "Le Mans",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "fin": "2026-10-14T14:29:44Z",
+     "duree_s": 38.5,
+     "duree_calcul_s": 38.5
+    },
+    "comparaison": {
+     "ok": true,
+     "fin": "2026-10-14T14:29:51Z",
+     "duree_s": 7.2,
+     "duree_calcul_s": 7.2
+    },
+    "complement": {
+     "ok": true,
+     "fin": "2026-10-14T14:31:39Z",
+     "duree_s": 0.3
+    },
+    "dossier": {
+     "ok": true,
+     "fin": "2026-10-14T14:30:44Z",
+     "duree_s": 0.2,
+     "complement_sha": "24b23de9071c38f7",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "569916159dd9c41b"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "63 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 46.2
+  }
+ },
+ "journal": []
+}

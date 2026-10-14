@@ -64,6 +64,16 @@ La recherche reste ciblée. Une heure est un **plafond**, pas un objectif ni un 
 
 Identifiants en `doc.*` : jamais confondus avec les faits calculés (`mobpro.*`, `iris.*`, `acces.*`…).
 
+## Statut des recherches et production par lots (14/10/2026)
+
+Champs ajoutés, facultatifs pour un complément écrit à la main :
+
+- `recherches` : une ligne par sujet cherché, avec un `statut` parmi `vérifié`, `non vérifié` (trouvé, non contrôlé), `introuvable` (cherché sans résultat), `inaccessible` (source hors d'atteinte), `non recherché`. Le dossier les affiche ; seul ce qui est `vérifié` s'écrit. **Une absence d'information ne devient jamais une absence de service.**
+- dans un fait : `statut_verification` (seul `vérifié` entre au dossier) et `justificatif` (`url`, `extrait` exact retrouvé sur la page).
+- `origine` : `automatique` (régénéré par `outil/lot.py`) ou autre (complément manuel, jamais écrasé).
+
+En production par lots (`lots/README.md`), le pré-complément automatique et gratuit identifie le réseau urbain de l'intercommunalité (transport.data.gouv.fr) et son site (GTFS `agency.txt`, retenu seulement si le nom de l'agence correspond au réseau et si le site répond). La collecte facultative par Claude Code lit seulement les domaines de ce site ; chaque extrait est recherché mot pour mot sur sa page, sinon l'information reste `non vérifié`. Les informations d'un réseau sont mutualisées dans `lots/<lot>/reseaux/` et rattachées aux communes avec le périmètre « réseau X ; application à chaque commune non établie ».
+
 ## Ce qui reste manuel par commune
 
 | Étape | Qui |

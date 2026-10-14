@@ -1,0 +1,31 @@
+{
+ "id": "5a6f2ae8c751df6d2358936b",
+ "titre": "Réseau urbain Kicéo",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-urbain-kiceo",
+ "nom_commercial": "Kicéo",
+ "aom": "CA Golfe du Morbihan - Vannes Agglomération",
+ "epci": {
+  "code": "200067932",
+  "nom": "CA Golfe du Morbihan - Vannes Agglomération"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "Kicéo",
+    "https://www.kiceo.fr/"
+   ]
+  ],
+  "retenue": [
+   "Kicéo",
+   "https://www.kiceo.fr/"
+  ]
+ },
+ "sites_controles": [
+  [
+   "https://www.kiceo.fr/",
+   "inaccessible (HTTPError)"
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}

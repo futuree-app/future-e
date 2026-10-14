@@ -1,0 +1,56 @@
+{
+ "nom": "2026-10-lot-01",
+ "objet": "Premier lot de test de la production par lots (dix communes), 14/10/2026. Aucune publication.",
+ "jour_reference": "2026-10-13",
+ "communes": [
+  "Poitiers",
+  "Angers",
+  "Lorient",
+  "Vannes",
+  "Saint-Nazaire (44)",
+  "Cholet",
+  "La Roche-sur-Yon",
+  "Saint-Brieuc",
+  "Tours",
+  "Le Mans"
+ ],
+ "note_communes": "Saint-Nazaire a trois homonymes dans l'index (30288, 44184, 66186) : département 44 précisé à la main le 14/10/2026, à confirmer par le porteur.",
+ "chemins": {
+  "python": "<checkout>/.venv-etudes/bin/python",
+  "mobpro": "<checkout>/data/rp-mobpro-2022.parquet",
+  "bpe": "<checkout>/data/bpe25.parquet",
+  "index": "<checkout>/data/comparateur-index.json.gz",
+  "cache": "<checkout>/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil"
+ },
+ "moteur": {
+  "outil": "claude-code",
+  "etapes": {
+   "redaction": {
+    "modele": "claude-opus-5-5",
+    "effort": "high",
+    "plafond_appel_usd": 3,
+    "delai_s": 1800
+   },
+   "relecture": {
+    "modele": "claude-opus-5-5",
+    "effort": "high",
+    "plafond_appel_usd": 2,
+    "delai_s": 1200
+   },
+   "correction": {
+    "modele": "claude-opus-5-5",
+    "effort": "medium",
+    "plafond_appel_usd": 3,
+    "delai_s": 1800
+   },
+   "collecte": {
+    "modele": "claude-sonnet-5-5",
+    "effort": "medium",
+    "plafond_appel_usd": 1.5,
+    "delai_s": 1200
+   }
+  },
+  "remarque": "Claude Code (claude -p) : session vierge par appel, dossier vide hors du dépôt, prompt système = consignes de la série, aucun outil (lecture web limitée aux domaines du réseau pour la collecte), réglages utilisateur, plugins, hooks et MCP non chargés, aucune session conservée. Coût reporté = équivalent API calculé par Claude Code ; avec un abonnement, il mesure la consommation du forfait, pas une facture. Codex : changer outil en « codex » et modele (collecte non disponible)."
+ },
+ "plafond_usd_equivalent": 0
+}

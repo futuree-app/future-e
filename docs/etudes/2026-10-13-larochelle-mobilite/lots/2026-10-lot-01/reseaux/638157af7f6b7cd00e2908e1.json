@@ -1,0 +1,31 @@
+{
+ "id": "638157af7f6b7cd00e2908e1",
+ "titre": "Réseau urbain et périurbain Fil Bleu",
+ "page": "https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt",
+ "nom_commercial": "Fil Bleu",
+ "aom": "Syndicat des Mobilités de Touraine",
+ "epci": {
+  "code": "243700754",
+  "nom": "Tours Métropole Val de Loire"
+ },
+ "mis_a_jour": "2026-09-27",
+ "agence": {
+  "agences": [
+   [
+    "Fil Bleu (Tours)",
+    "https://www.filbleu.fr"
+   ]
+  ],
+  "retenue": [
+   "Fil Bleu (Tours)",
+   "https://www.filbleu.fr"
+  ]
+ },
+ "sites_controles": [
+  [
+   "https://www.filbleu.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-14"
+}
