@@ -26,9 +26,10 @@ Captures : `docs/audits/fut50-accueil/images/c2-*.jpg`. Vidéo du hero : `docs/a
 | **B · commune** | Une coche se trace devant la commune, « Changer de commune », « Qu'est-ce qui compte pour vous ? », quatre priorités, « Choisissez-en une pour voir ce que disent les données. Rien n'est enregistré. » | aucun résultat, ni de cette commune, ni d'une autre ; aucun panneau vide | `c2-etat-b-commune-*` |
 | **C · priorité** | Une seule lecture de la commune choisie : « Ce que disent les données » (avec source, horizon et grain), « Pour cette priorité », « Ce qu'il reste à vérifier », puis « Examiner une adresse à … » et « Décrire tout mon projet » | une lecture d'une autre commune | `c2-etat-c-priorite-*` |
 
-**Composition sur ordinateur.**
-- Le titre occupe toute la largeur. Dessous, la recherche et les priorités sont à gauche.
-- La colonne de droite n'existe qu'à l'état C. Aux états A et B, elle reste vide : rien ne la remplit artificiellement.
+**Composition sur ordinateur (ajustée le 15/10 après revue).**
+- Deux colonnes dès le haut de page. À gauche : le titre (trois lignes), la recherche et les priorités. À droite : la lecture, qui commence **au niveau du titre**.
+- À l'état C, tout tient dans le premier écran en 1440 × 900, sans défiler : titre, commune, quatre priorités, lecture complète et son bouton.
+- Aux états A et B, la colonne de droite reste vide : aucun exemple ne la remplit.
 
 **Sur mobile**, le premier écran montre le titre, la promesse et le champ. La porte de l'adresse arrive juste en dessous.
 

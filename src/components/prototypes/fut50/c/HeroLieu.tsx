@@ -6,7 +6,8 @@
 //   B · commune    la commune confirmée (une coche se trace), les priorités facultatives, une invitation.
 //                  Toujours aucun résultat : rien d'une autre commune, aucun panneau vide.
 //   C · priorité   UNE lecture de la commune choisie : le fait (source, horizon, grain), ce qu'il implique pour
-//                  cette priorité, ce qu'il reste à vérifier, la suite.
+//                  cette priorité, ce qu'il reste à vérifier, la suite. Sur ordinateur, elle occupe la colonne de
+//                  droite DEPUIS LE HAUT, au niveau du titre : tout tient dans le premier écran (revue du 15/10).
 //
 // Décisions du 14/10/2026 (FUT-50) : le champ ne cherche que des COMMUNES, parce que l'aperçu gratuit ne lit
 // que des données communales ; l'adresse a sa propre porte vers `/dossier`, où le périmètre et le prix de
@@ -176,12 +177,12 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
   return (
     <section className={c.hero} data-etat={etat} aria-labelledby="hero-c">
-      <div className={c.heroTete}>
-        <h1 id="hero-c" className={c.titre}>Regardez une commune avec ce qui compte pour vous.</h1>
-        <p className={c.sous}>{fr("Choisissez une commune, puis ce qui vous importe : futur•e vous montre ce que disent les données publiques, et ce qu'il reste à vérifier.")}</p>
-      </div>
-
       <div className={c.heroGauche}>
+        <div className={c.heroTete}>
+          <h1 id="hero-c" className={c.titre}>Regardez une commune avec ce qui compte pour vous.</h1>
+          <p className={c.sous}>{fr("Choisissez une commune, puis ce qui vous importe : futur•e vous montre ce que disent les données publiques, et ce qu'il reste à vérifier.")}</p>
+        </div>
+
         <div className={c.recherche} ref={zoneRef} id="lieu">
           <label htmlFor="champ-commune" className={c.rechercheLabel}>Quelle commune vous intéresse ?</label>
           <div className={c.champ}>
