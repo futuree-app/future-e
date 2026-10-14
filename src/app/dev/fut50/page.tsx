@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { releve as s, Surtitre } from "@/components/releve/primitives";
 
 const DIRECTIONS = [
-  { href: "/dev/fut50/c", nom: "C · Un lieu, puis ce qui compte (accueil complet, version retenue pour revue)", these: "On commence par chercher un lieu, puis on coche ce qui compte. Chaque priorité affiche une seule lecture : ce que disent les données, ce que cela implique, ce qu'il reste à vérifier. La suite de l'accueil existant est recomposée, plus courte." },
+  { href: "/dev/fut50/c", nom: "C · Une commune, puis ce qui compte (accueil complet affiné, version retenue)", these: "On cherche une commune, puis on coche ce qui compte : une seule lecture à la fois (fait, implication, vérification). L'adresse a sa propre porte. Sous les trois échelles, la place du Dossier Adresse et son storyboard." },
   { href: "/dev/fut50/a", nom: "A · Le Projet d'abord", these: "On commence par ce que la personne cherche. Le premier écran montre le Projet comme un objet qui pose des questions à chaque lieu ; le deuxième laisse changer une priorité et voir la vraie lecture de Sète changer." },
   { href: "/dev/fut50/b", nom: "B · Une décision éclairée par les preuves", these: "On commence au moment où l'on s'engage pour un lieu. Le premier écran montre ce que l'on sait d'une commune avant de connaître le projet ; le deuxième déplie une ligne du dossier, puis révèle ce que le projet en fait." },
 ];

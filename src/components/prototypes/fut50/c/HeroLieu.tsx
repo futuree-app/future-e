@@ -1,72 +1,48 @@
 "use client";
-// FUT-50 · VERSION C · LE HERO : UN LIEU, PUIS CE QUI COMPTE. DEV UNIQUEMENT.
+// FUT-50 · VERSION C AFFINÉE · LE HERO EN TROIS ÉTATS. DEV UNIQUEMENT.
 //
-// Le premier geste est de chercher un lieu (commune ou adresse) ; le Projet vient ensuite, sous la forme de
-// quatre pastilles facultatives, sans compte et sans rien enregistrer. Chaque pastille affiche UNE lecture :
-// ce que disent les données, ce que cela implique pour cette priorité, ce qu'il reste à vérifier, et la suite.
+//   A · vierge     le titre, une promesse courte, un champ de COMMUNE, quelques communes à essayer, et une porte
+//                  séparée pour une adresse précise. Aucun résultat, aucun exemple.
+//   B · commune    la commune confirmée (une coche se trace), les priorités facultatives, une invitation.
+//                  Toujours aucun résultat : rien d'une autre commune, aucun panneau vide.
+//   C · priorité   UNE lecture de la commune choisie : le fait (source, horizon, grain), ce qu'il implique pour
+//                  cette priorité, ce qu'il reste à vérifier, la suite.
 //
-// Ce qui vient de l'accueil actuel (`FutureELanding.tsx`) : l'autocomplétion par le géocodeur officiel
-// (même service, même délai de 250 ms, même annulation), l'aide Paris / Lyon / Marseille. Ce qui change :
-// le champ accepte aussi une adresse, et l'interface dit honnêtement qu'une adresse n'est lue ici qu'à
-// l'échelle de sa commune.
-//
-// Avant toute recherche, la colonne de droite montre un EXEMPLE RÉEL, marqué comme tel (Sète, lecture du
-// moteur relevée et vérifiée, `cas-sete.ts`) : l'expérience est hybride et le dit.
+// Décisions du 14/10/2026 (FUT-50) : le champ ne cherche que des COMMUNES, parce que l'aperçu gratuit ne lit
+// que des données communales ; l'adresse a sa propre porte vers `/dossier`, où le périmètre et le prix de
+// l'analyse d'adresse sont expliqués. L'autocomplétion reprend celle de l'accueil actuel (géocodeur officiel,
+// `urlRechercheCommunes`, 250 ms, annulation, aide Paris / Lyon / Marseille). Aucune génération IA, aucun
+// Projet enregistré.
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { urlRechercheBan } from "@/lib/geocodeur-ban";
+import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import { GlypheGrain, TEINTE_REGISTRE } from "@/components/releve/primitives";
-import { CAS_SETE } from "../cas-sete";
 import { fr } from "../commun";
-import { PASTILLES, MOT_DU_SIGNAL, type CleePastille, type Lieu, type LecturePastille, type Signal } from "./pastilles";
+import { pastillesDe, libelleDe, MOT_DU_SIGNAL, type CleePastille, type Composition, type Lieu, type LecturePastille, type Signal } from "./pastilles";
 import c from "./c.module.css";
 
-// ── La recherche ──────────────────────────────────────────────────────────────────────────────
-
 type Suggestion = Lieu & { id: string; contexte: string };
+type FeatureBan = { properties: Record<string, string | undefined> };
 
-// Les trois communes « centrales » que les données ne connaissent que par arrondissement : même aide que
-// l'accueil actuel.
 const PLM: Record<string, { ville: string; exemple: string }> = {
   "75056": { ville: "Paris", exemple: "Paris 15e Arrondissement" },
   "69123": { ville: "Lyon", exemple: "Lyon 6e Arrondissement" },
   "13055": { ville: "Marseille", exemple: "Marseille 7e Arrondissement" },
 };
 
-type FeatureBan = { properties: Record<string, string | undefined> };
-
 function versSuggestion(f: FeatureBan): Suggestion | null {
   const p = f.properties;
-  if (!p.citycode || !p.city) return null;
-  const commune = p.type === "municipality";
-  if (!commune && p.type !== "housenumber" && p.type !== "street") return null;
-  return {
-    id: p.id ?? `${p.type}-${p.label}`,
-    type: commune ? "commune" : "adresse",
-    libelle: commune ? p.city : p.label ?? p.city,
-    commune: p.city,
-    insee: p.citycode,
-    contexte: commune ? (p.context ?? "") : `${p.postcode ?? ""} ${p.city}`.trim(),
-  };
+  const nom = p.city ?? p.name;
+  if (!p.citycode || !nom) return null;
+  return { id: p.id ?? p.citycode, type: "commune", libelle: nom, commune: nom, insee: p.citycode, contexte: [p.postcode, p.context].filter(Boolean).join(" · ") };
 }
 
-// Les exemples proposés à côté du champ : des communes réelles, aux lectures contrastées.
+// Des communes réelles, aux lectures contrastées, pour qui ne sait pas quoi chercher.
 const EXEMPLES: Lieu[] = [
-  { type: "commune", libelle: "Sète", commune: "Sète", insee: "34301" },
-  { type: "commune", libelle: "Lille", commune: "Lille", insee: "59350" },
+  { type: "commune", libelle: "Nantes", commune: "Nantes", insee: "44109" },
+  { type: "commune", libelle: "Annecy", commune: "Annecy", insee: "74010" },
   { type: "commune", libelle: "Guéret", commune: "Guéret", insee: "23096" },
 ];
-
-// ── La lecture d'exemple (Sète, moteur réel, relevé daté) ─────────────────────────────────────
-
-const EXEMPLE: LecturePastille = {
-  cle: "chaleur",
-  commune: CAS_SETE.commune,
-  fait: { texte: CAS_SETE.faits.nuits.constat, source: "DRIAS · Météo-France, horizon 2050 (+2,7 °C en France)", grain: "commune" },
-  pourVous: { signal: "defavorable", texte: CAS_SETE.faits.nuits.titreSiPriorite },
-  aVerifier: `${CAS_SETE.faits.nuits.limite} ${CAS_SETE.faits.nuits.geste}.`,
-  suite: { libelle: "Examiner une adresse à Sète", href: "/dossier" },
-};
 
 const TEINTE: Record<Signal, string> = {
   defavorable: TEINTE_REGISTRE.mismatches!,
@@ -77,13 +53,10 @@ const TEINTE: Record<Signal, string> = {
   indisponible: TEINTE_REGISTRE.unknowns!,
 };
 
-function libelleDe(cle: CleePastille) {
-  return PASTILLES.find((p) => p.cle === cle)!.libelle;
-}
+type EtatLecture = LecturePastille | "chargement" | "erreur";
 
-// ── Le composant ──────────────────────────────────────────────────────────────────────────────
-
-export function HeroLieu() {
+export function HeroLieu({ composition = "recommandee" }: { composition?: Composition }) {
+  const pastilles = pastillesDe(composition);
   const [saisie, setSaisie] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [ouvert, setOuvert] = useState(false);
@@ -94,13 +67,12 @@ export function HeroLieu() {
   const [lieu, setLieu] = useState<Lieu | null>(null);
   const [choisies, setChoisies] = useState<CleePastille[]>([]);
   const [focale, setFocale] = useState<CleePastille | null>(null);
-  const [lectures, setLectures] = useState<Record<string, LecturePastille | "chargement" | "erreur">>({});
+  const [lectures, setLectures] = useState<Record<string, EtatLecture>>({});
   const champRef = useRef<HTMLInputElement>(null);
-  const lectureRef = useRef<HTMLDivElement>(null);
   const zoneRef = useRef<HTMLDivElement>(null);
+  const lectureRef = useRef<HTMLDivElement>(null);
   const idListe = useId();
 
-  // L'autocomplétion : le géocodeur officiel, 250 ms après la frappe, la requête précédente annulée.
   useEffect(() => {
     const q = saisie.trim();
     if (lieu || q.length < 2) return;
@@ -109,7 +81,7 @@ export function HeroLieu() {
       setCherche(true);
       setErreurRecherche("");
       try {
-        const res = await fetch(urlRechercheBan({ q, limit: 7, autocomplete: 1 }), { signal: ctrl.signal });
+        const res = await fetch(urlRechercheCommunes(q, 6), { signal: ctrl.signal });
         if (!res.ok) throw new Error("géocodeur");
         const json = (await res.json()) as { features?: FeatureBan[] };
         const liste = (json.features ?? []).map(versSuggestion).filter((s): s is Suggestion => s != null);
@@ -125,7 +97,6 @@ export function HeroLieu() {
     return () => { ctrl.abort(); clearTimeout(t); };
   }, [saisie, lieu]);
 
-  // Un clic hors du champ referme la liste.
   useEffect(() => {
     const ferme = (e: MouseEvent) => { if (!zoneRef.current?.contains(e.target as Node)) setOuvert(false); };
     window.addEventListener("click", ferme);
@@ -134,9 +105,9 @@ export function HeroLieu() {
 
   function choisir(s: Lieu) {
     const plm = PLM[s.insee];
-    if (s.type === "commune" && plm) {
+    if (plm) {
       setSaisie(`${plm.ville} `);
-      setAidePlm(`${plm.ville} se lit par arrondissement. Précisez-le, par exemple « ${plm.exemple} », ou saisissez une adresse.`);
+      setAidePlm(`${plm.ville} se lit par arrondissement. Précisez-le, par exemple « ${plm.exemple} ».`);
       setOuvert(false);
       champRef.current?.focus();
       return;
@@ -146,12 +117,13 @@ export function HeroLieu() {
     setSaisie(s.libelle);
     setOuvert(false);
     setSuggestions([]);
-    // Les priorités choisies restent : elles portent sur ce qui compte, pas sur le lieu. Leur lecture se refait.
+    // Les priorités cochées portent sur ce qui compte, pas sur le lieu : elles restent, et leur lecture se refait
+    // pour la nouvelle commune. Aucune lecture de l'ancienne commune ne reste à l'écran.
     setLectures({});
     for (const cle of choisies) charger(s, cle);
   }
 
-  function changerDeLieu() {
+  function changerDeCommune() {
     setLieu(null);
     setSaisie("");
     setLectures({});
@@ -182,13 +154,12 @@ export function HeroLieu() {
     setChoisies([...choisies, cle]);
     setFocale(cle);
     if (lieu && !lectures[`${lieu.insee}|${cle}`]) charger(lieu, cle);
-    // Sur un écran étroit, la lecture s'affiche SOUS les pastilles : on l'amène doucement dans le champ de
-    // vision, seulement si elle n'y est pas déjà, et jamais en mouvement réduit.
+    // Écran étroit : la lecture s'affiche sous les priorités ; on l'amène doucement en vue si besoin, jamais en
+    // mouvement réduit.
     requestAnimationFrame(() => {
       const el = lectureRef.current;
       if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const r = el.getBoundingClientRect();
-      if (r.top > window.innerHeight - 120) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (el.getBoundingClientRect().top > window.innerHeight - 120) el.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
 
@@ -200,22 +171,23 @@ export function HeroLieu() {
     else if (e.key === "Escape") { setOuvert(false); }
   }
 
+  const etat: "vierge" | "commune" | "priorite" = !lieu ? "vierge" : focale ? "priorite" : "commune";
   const lectureFocale = lieu && focale ? lectures[`${lieu.insee}|${focale}`] : undefined;
 
   return (
-    <section className={c.hero} aria-labelledby="hero-c">
-      <div className={c.heroGauche}>
-        <h1 id="hero-c" className={c.titre}>Regardez un lieu avec ce qui compte pour vous.</h1>
-        <p className={c.sous}>
-          {fr("Cherchez une commune ou une adresse, puis choisissez ce qui vous importe. futur•e vous montre ce que disent les données publiques, et ce qu'il reste à vérifier.")}
-        </p>
+    <section className={c.hero} data-etat={etat} aria-labelledby="hero-c">
+      <div className={c.heroTete}>
+        <h1 id="hero-c" className={c.titre}>Regardez une commune avec ce qui compte pour vous.</h1>
+        <p className={c.sous}>{fr("Choisissez une commune, puis ce qui vous importe : futur•e vous montre ce que disent les données publiques, et ce qu'il reste à vérifier.")}</p>
+      </div>
 
+      <div className={c.heroGauche}>
         <div className={c.recherche} ref={zoneRef} id="lieu">
-          <label htmlFor="champ-lieu" className={c.rechercheLabel}>Quel lieu vous intéresse ?</label>
+          <label htmlFor="champ-commune" className={c.rechercheLabel}>Quelle commune vous intéresse ?</label>
           <div className={c.champ}>
             <svg className={c.champIcone} width="18" height="18" viewBox="0 0 18 18" aria-hidden><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.6" /><path d="M12.5 12.5 L16.5 16.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
             <input
-              id="champ-lieu"
+              id="champ-commune"
               ref={champRef}
               role="combobox"
               aria-expanded={ouvert}
@@ -223,7 +195,7 @@ export function HeroLieu() {
               aria-autocomplete="list"
               aria-activedescendant={ouvert && actif >= 0 ? `${idListe}-${actif}` : undefined}
               autoComplete="off"
-              placeholder="Ex. Sète, ou une adresse"
+              placeholder="Nom de la commune"
               value={saisie}
               onChange={(e) => { setSaisie(e.target.value); if (lieu) { setLieu(null); setLectures({}); } if (e.target.value.trim().length < 2) { setSuggestions([]); setOuvert(false); } }}
               onKeyDown={clavier}
@@ -232,7 +204,7 @@ export function HeroLieu() {
             {cherche ? <span className={c.chargement} aria-label="Recherche en cours" role="status" /> : null}
           </div>
           {ouvert && suggestions.length > 0 ? (
-            <ul id={idListe} role="listbox" className={c.suggestions} aria-label="Lieux trouvés">
+            <ul id={idListe} role="listbox" className={c.suggestions} aria-label="Communes trouvées">
               {suggestions.map((s, i) => (
                 <li
                   key={s.id}
@@ -243,21 +215,20 @@ export function HeroLieu() {
                   onMouseEnter={() => setActif(i)}
                   onMouseDown={(e) => { e.preventDefault(); choisir(s); }}
                 >
-                  <span aria-hidden style={{ color: "var(--r-discret)" }}><GlypheGrain grain={s.type === "commune" ? "commune" : "adresse"} taille={13} /></span>
+                  <span aria-hidden style={{ color: "var(--r-discret)" }}><GlypheGrain grain="commune" taille={13} /></span>
                   <span>{s.libelle}<span className={c.suggestionContexte}>{s.contexte}</span></span>
-                  <span className={c.suggestionType}>{s.type === "commune" ? "commune" : "adresse"}</span>
                 </li>
               ))}
             </ul>
           ) : null}
           {ouvert && !cherche && suggestions.length === 0 && saisie.trim().length >= 2 ? (
-            <p className={c.aide} role="status">Aucun lieu trouvé. Vérifiez l&apos;orthographe ou essayez le nom de la commune.</p>
+            <p className={c.aide} role="status">Aucune commune trouvée. Vérifiez l&apos;orthographe.</p>
           ) : null}
           {erreurRecherche ? <p className={c.aide} role="alert">{erreurRecherche}</p> : null}
           {aidePlm ? <p className={c.aide} role="status">{aidePlm}</p> : null}
-          {!lieu ? (
+          {etat === "vierge" ? (
             <p className={c.exemples}>
-              Ou essayez avec{" "}
+              Par exemple{" "}
               {EXEMPLES.map((e, i) => (
                 <span key={e.insee}>
                   <button type="button" className={c.lienTexte} onClick={() => choisir(e)}>{e.commune}</button>
@@ -269,74 +240,72 @@ export function HeroLieu() {
         </div>
 
         {lieu ? (
-          <div className={c.lieu} key={lieu.insee + lieu.libelle}>
+          <div className={c.lieu} key={lieu.insee}>
             <svg className={c.coche} width="20" height="20" viewBox="0 0 20 20" aria-hidden><path d="M4 10.5 L8.2 14.5 L16 6" fill="none" stroke="var(--reg-alignement)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             <span className={c.lieuNom}>{lieu.libelle}</span>
-            <span className={c.lieuType}>{lieu.type === "commune" ? "commune" : `adresse · lue ici à l'échelle de ${lieu.commune}`}</span>
-            <button type="button" className={c.lienTexte} onClick={changerDeLieu} style={{ fontSize: 15 }}>Changer de lieu</button>
+            <button type="button" className={c.lienTexte} onClick={changerDeCommune} style={{ fontSize: 15 }}>Changer de commune</button>
           </div>
         ) : null}
 
         {lieu ? (
-        <div style={{ display: "grid", gap: 12 }} key={`priorites-${lieu.insee}`}>
-          <p className={c.question} id="question-priorites">Qu&apos;est-ce qui compte pour vous ?</p>
-          <ul className={c.pastilles} aria-labelledby="question-priorites">
-            {PASTILLES.map((p, i) => (
-              <li key={p.cle} className={c.pastilleEntree} style={{ animationDelay: `${i * 40}ms` } as CSSProperties}>
-                <button type="button" className={c.pastille} aria-pressed={choisies.includes(p.cle)} onClick={() => basculer(p.cle)}>
-                  <span className={c.pastilleMarque} aria-hidden />
-                  {p.libelle}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p className={c.aide}>Une ou plusieurs, facultatives. Rien n&apos;est enregistré.</p>
-        </div>
+          <div className={c.priorites} key={`priorites-${lieu.insee}`}>
+            <p className={c.question} id="question-priorites">Qu&apos;est-ce qui compte pour vous ?</p>
+            <ul className={c.pastilles} aria-labelledby="question-priorites">
+              {pastilles.map((p, i) => (
+                <li key={p.cle} className={c.pastilleEntree} style={{ animationDelay: `${i * 40}ms` } as CSSProperties}>
+                  <button type="button" className={c.pastille} aria-pressed={choisies.includes(p.cle)} onClick={() => basculer(p.cle)}>
+                    <span className={c.pastilleMarque} aria-hidden />
+                    {p.libelle}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className={c.aide}>{etat === "commune" ? "Choisissez-en une pour voir ce que disent les données. Rien n'est enregistré." : "Une ou plusieurs, facultatives. Rien n'est enregistré."}</p>
+          </div>
         ) : null}
+
+        {/* LA PORTE DE L'ADRESSE : séparée, discrète, toujours là. Une adresse précise relève du dossier payant ;
+            son parcours explique le périmètre et le prix. */}
+        <p className={c.porteAdresse}>
+          Vous avez déjà une adresse précise ? <Link href="/dossier" className={c.lienFleche}>Examiner cette adresse</Link>
+        </p>
       </div>
 
-      <div aria-live="polite" ref={lectureRef} style={{ scrollMarginTop: 88 }}>
-        {!lieu || !focale ? (
-          <Lecture lecture={EXEMPLE} lieuLibelle={CAS_SETE.commune} exemple={!lieu} invitation={lieu ? `Choisissez une priorité pour voir ce que les données disent de ${lieu.commune}.` : null} />
-        ) : lectureFocale === "chargement" || lectureFocale === undefined ? (
-          <Squelette titre={`${libelleDe(focale)} · ${lieu.commune}`} />
-        ) : lectureFocale === "erreur" ? (
-          <div className={c.lecture}><p className={c.tempsTexte}>La lecture n&apos;a pas pu être chargée. Réessayez dans un instant.</p></div>
-        ) : (
-          <Lecture
-            lecture={lectureFocale}
-            lieuLibelle={lieu.type === "adresse" ? lieu.commune : lieu.libelle}
-            adresse={lieu.type === "adresse"}
-            onglets={choisies.length > 1 ? { choisies, focale, choisir: setFocale } : undefined}
-          />
-        )}
+      <div className={c.heroDroite} aria-live="polite" ref={lectureRef}>
+        {etat !== "priorite" || !lieu || !focale ? null
+          : lectureFocale === "chargement" || lectureFocale === undefined ? <Attente titre={`${libelleDe(focale)} · ${lieu.commune}`} />
+            : lectureFocale === "erreur" ? (
+              <div className={c.lecture} role="alert">
+                <p className={c.tempsTexte}>La lecture n&apos;a pas pu être chargée.</p>
+                <button type="button" className={c.bouton} onClick={() => charger(lieu, focale)}>Réessayer</button>
+              </div>
+            )
+              : <Lecture lecture={lectureFocale} onglets={choisies.length > 1 ? { choisies, focale, choisir: setFocale } : undefined} />}
       </div>
     </section>
   );
 }
 
-function Squelette({ titre }: { titre: string }) {
+function Attente({ titre }: { titre: string }) {
   return (
     <div className={c.lecture} aria-busy="true">
       <p className={c.lectureTitre}>{titre}</p>
       <p className={c.etatLecture} role="status">Lecture des données publiques de la commune.</p>
       <div className={c.squelette} aria-hidden>
-        {["92%", "78%", "60%", "84%", "48%"].map((w, i) => <div key={i} className={c.squeletteLigne} style={{ width: w }} />)}
+        {["92%", "78%", "60%"].map((w, i) => <div key={i} className={c.squeletteLigne} style={{ width: w }} />)}
       </div>
     </div>
   );
 }
 
-function Lecture({ lecture, lieuLibelle, exemple = false, adresse = false, invitation = null, onglets }: {
-  lecture: LecturePastille; lieuLibelle: string; exemple?: boolean; adresse?: boolean; invitation?: string | null;
+function Lecture({ lecture, onglets }: {
+  lecture: LecturePastille;
   onglets?: { choisies: CleePastille[]; focale: CleePastille; choisir: (c: CleePastille) => void };
 }) {
   return (
-    <article className={c.lecture} aria-label={exemple ? "Exemple réel de lecture" : "Lecture du lieu choisi"}>
-      {invitation ? <p className={c.tempsTexteDoux}>{invitation} En attendant, voici l&apos;exemple de Sète.</p> : null}
+    <article className={c.lecture} aria-label={`Lecture de ${lecture.commune}`}>
       <div className={c.lectureEntete}>
-        <h2 className={c.lectureTitre}>{libelleDe(lecture.cle)} · {lieuLibelle}</h2>
-        {exemple || invitation ? <span className={c.mention}>exemple réel</span> : null}
+        <h2 className={c.lectureTitre}>{libelleDe(lecture.cle)} · {lecture.commune}</h2>
       </div>
       {onglets ? (
         <div className={c.onglets} role="tablist" aria-label="Vos priorités choisies">
@@ -352,7 +321,7 @@ function Lecture({ lecture, lieuLibelle, exemple = false, adresse = false, invit
             <p className={c.tempsTexte}>{fr(lecture.fait.texte)}</p>
             <span className={c.source}>
               <GlypheGrain grain={lecture.fait.grain} taille={11} />{" "}
-              {lecture.fait.grain === "unite_urbaine" ? `agglomération de ${lecture.commune}` : adresse ? `commune de ${lecture.commune}` : "à l'échelle de la commune"} · {lecture.fait.source}
+              {lecture.fait.grain === "unite_urbaine" ? `agglomération de ${lecture.commune}` : `commune de ${lecture.commune}`} · {lecture.fait.source}
             </span>
           </div>
         ) : null}

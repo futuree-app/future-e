@@ -7,7 +7,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { PASTILLES, lireChaleur, lireTaille, lireRisques, lireAdresse, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
+import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
 import { CAS_SETE } from "../cas-sete.ts";
 
 const SETE: Lieu = { type: "commune", libelle: "Sète", commune: "Sète", insee: "34301" };
@@ -18,11 +18,47 @@ const aCommune = (n: string) => `à ${n}`;
 test("quatre pastilles au plus, aucune présélectionnée, libellés compréhensibles", () => {
   assert.ok(PASTILLES.length <= 4);
   assert.deepEqual(PASTILLES.map((p) => p.libelle), [
-    "Éviter les fortes chaleurs", "Vivre dans une ville à taille humaine", "Pouvoir vivre sans voiture", "Connaître les risques naturels",
+    "Éviter les fortes chaleurs", "Avoir des hivers doux", "Vivre dans une petite ville", "Connaître les risques naturels",
   ]);
+  assert.deepEqual(pastillesDe("mobilite").map((p) => p.cle), ["chaleur", "taille", "voiture", "risques"]);
   const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
   assert.match(hero, /useState<CleePastille\[\]>\(\[\]\)/, "aucune priorité présélectionnée");
   assert.doesNotMatch(hero, /\/qna|anthropic|generat/i, "aucune génération IA depuis le hero");
+});
+
+test("hero : le champ ne cherche que des COMMUNES, l'adresse a sa propre porte vers /dossier", () => {
+  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  assert.match(hero, /urlRechercheCommunes\(/);
+  assert.doesNotMatch(hero, /urlRechercheBan\(/, "aucune recherche d'adresse dans le champ principal");
+  assert.match(hero, /Vous avez déjà une adresse précise \? <Link href="\/dossier"/);
+});
+
+test("hero : aucun exemple d'une autre commune, aucun résultat avant le choix d'une priorité", () => {
+  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  assert.doesNotMatch(hero, /CAS_SETE|Sète/, "aucun exemple Sète dans le hero");
+  // La colonne de lecture ne rend rien hors de l'état « priorité ».
+  assert.match(hero, /etat !== "priorite" \|\| !lieu \|\| !focale \? null/);
+});
+
+test("section Dossier Adresse : absente de l'accueil public tant que le film réel n'existe pas", () => {
+  const src = readFileSync("src/components/prototypes/fut50/c/SectionsC.tsx", "utf8");
+  assert.match(src, /export const FILM_DOSSIER: Film \| null = null;/);
+  assert.match(src, /export const EXEMPLE_DOSSIER_URL: string \| null = null;/);
+  assert.match(src, /if \(!FILM_DOSSIER && !maquette\) return null;/);
+  // Dans le prototype, la maquette se déclare comme telle.
+  const plans = readFileSync("src/components/prototypes/fut50/c/PlansDossier.tsx", "utf8");
+  assert.match(plans, /maquette · sans données/);
+  assert.doesNotMatch(plans, /\d+ (jours|nuits|habitants|°C)/, "aucune valeur inventée dans les cadres");
+});
+
+test("le storyboard dure entre 18 et 22 secondes, plans continus", () => {
+  // PlansDossier contient du JSX, que `node --test` ne lit pas : on relit les durées dans la source.
+  const src = readFileSync("src/components/prototypes/fut50/c/PlansDossier.tsx", "utf8");
+  const bornes = [...src.matchAll(/debut: (\d+), fin: (\d+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+  assert.equal(bornes.length, 5);
+  for (let i = 1; i < bornes.length; i++) assert.equal(bornes[i]![0], bornes[i - 1]![1], "plans continus");
+  const duree = bornes[bornes.length - 1]![1];
+  assert.ok(duree >= 18 && duree <= 22, `${duree} s`);
 });
 
 test("chaleur DÉFAVORABLE : le constat du moteur, sa limite et son geste, mot pour mot", () => {
@@ -34,7 +70,7 @@ test("chaleur DÉFAVORABLE : le constat du moteur, sa limite et son geste, mot p
   const l = lireChaleur(SETE, e);
   assert.equal(l.pourVous.signal, "defavorable");
   assert.equal(l.fait?.texte, CAS_SETE.faits.nuits.constat);
-  assert.equal(l.pourVous.texte, "Des étés plus difficiles à concilier avec votre projet");
+  assert.equal(l.pourVous.texte, "Des étés plus difficiles à concilier avec cette priorité", "aucun « projet » supposé enregistré");
   assert.equal(l.aVerifier, `${CAS_SETE.faits.nuits.limite} ${CAS_SETE.faits.nuits.geste}.`);
   assert.equal(l.suite.href, "/dossier");
 });
@@ -58,15 +94,33 @@ test("chaleur ABSENTE : une absence n'est jamais une bonne nouvelle", () => {
   assert.notEqual(MOT_DU_SIGNAL[l.pourVous.signal], MOT_DU_SIGNAL.favorable);
 });
 
-test("taille : la phrase du moteur, la population, et une lecture par issue", () => {
-  const base = { phraseTaille: "Lille appartient à une métropole selon la population de son agglomération et la convention de taille utilisée par futur•e", population: 1058439, source: "urban_unit" as const };
-  const l = lireTaille({ ...SETE, commune: "Lille", insee: "59350", libelle: "Lille" }, { issue: "mismatch", ...base });
-  assert.equal(l.pourVous.signal, "defavorable");
-  assert.match(l.fait!.texte, /^Lille appartient à une métropole .* \(environ 1\s058\s439 habitants dans l'agglomération\)\.$/u);
-  assert.equal(l.fait!.grain, "unite_urbaine", "la taille d'une agglomération n'est pas présentée comme communale");
-  assert.equal(lireTaille(SETE, { issue: "favorable", ...base, source: "commune" }).fait!.grain, "commune");
-  assert.equal(lireTaille(SETE, { issue: "indeterminate", ...base }).pourVous.signal, "neutre");
+test("petite ville : la population dite simplement, la convention du moteur en clair, le bon grain", () => {
+  const base = { phraseTaille: null, population: 1058439, source: "urban_unit" as const };
+  const lille = lireTaille({ ...SETE, commune: "Lille", insee: "59350", libelle: "Lille" }, { issue: "mismatch", ...base });
+  assert.equal(lille.pourVous.signal, "defavorable");
+  assert.equal(lille.fait!.texte, `Environ ${(1058439).toLocaleString("fr-FR")} habitants dans l'agglomération de Lille.`);
+  assert.equal(lille.fait!.grain, "unite_urbaine", "la taille d'une agglomération n'est pas présentée comme communale");
+  assert.match(lille.pourVous.texte, /^Plus de 100.000 habitants : ce n'est pas une petite ville\.$/);
+  assert.match(lireTaille(SETE, { issue: "indeterminate", ...base, population: 94088 }).pourVous.texte, /^Entre 25.000 et 100.000 habitants/);
+  const village = lireTaille(SETE, { issue: "favorable", phraseTaille: null, population: 151, source: "commune" });
+  assert.equal(village.fait!.grain, "commune");
+  assert.match(village.pourVous.texte, /^Moins de 25.000 habitants/);
   assert.equal(lireTaille(SETE, { issue: "absent", phraseTaille: null, population: null, source: null }).pourVous.signal, "indisponible");
+});
+
+test("hivers doux : la position du moteur, la température de référence, la limite ; neutre sans carte", () => {
+  const nice = lireHivers(SETE, {
+    issue: "favorable",
+    position: "Pour la douceur des hivers, Sète se situe parmi les 5 % de communes aux hivers les plus doux de France.",
+    limite: "Cette position décrit la douceur hivernale (température moyenne de décembre à février) sur la période de référence 1976-2005. Les fortes chaleurs estivales, notamment futures, sont traitées à part.",
+    temperatureReference: "Température moyenne de l'hiver : 8,4 °C sur la période de référence 1976-2005.",
+  });
+  assert.equal(nice.pourVous.signal, "favorable");
+  assert.match(nice.aVerifier, /1976-2005/);
+  const neutre = lireHivers(SETE, { issue: "indeterminate", position: null, limite: null, temperatureReference: null });
+  assert.equal(neutre.pourVous.signal, "neutre");
+  assert.match(neutre.pourVous.texte, /ne se distingue ni parmi les communes les plus favorables, ni parmi les moins favorables/);
+  assert.equal(lireHivers(SETE, { issue: "absent", position: null, limite: null, temperatureReference: null }).pourVous.signal, "indisponible");
 });
 
 test("risques : une INFORMATION de la commune entière, et Géorisques muet n'est pas « aucun risque »", () => {
@@ -103,7 +157,7 @@ function routeExiste(href: string): boolean {
 }
 
 test("chaque lien de l'accueil C mène à une route qui existe", () => {
-  const fichiers = ["src/components/prototypes/fut50/c/SectionsC.tsx", "src/components/prototypes/fut50/c/HeroLieu.tsx", "src/components/prototypes/fut50/c/pastilles.ts"];
+  const fichiers = ["src/components/prototypes/fut50/c/SectionsC.tsx", "src/components/prototypes/fut50/c/HeroLieu.tsx", "src/components/prototypes/fut50/c/pastilles.ts", "src/app/dev/fut50/c/page.tsx"];
   const hrefs = new Set<string>();
   for (const f of fichiers) {
     const src = readFileSync(f, "utf8");
@@ -113,8 +167,12 @@ test("chaque lien de l'accueil C mène à une route qui existe", () => {
   for (const h of hrefs) assert.ok(routeExiste(h), `${h} : aucune route`);
 });
 
-test("l'ancre #savoir existe toujours (pieds de page de l'accueil et de /rapport)", () => {
-  assert.match(readFileSync("src/components/prototypes/fut50/c/SectionsC.tsx", "utf8"), /id="savoir"/);
+test("chaque ancre interne vise un identifiant présent dans la page, et #savoir existe toujours", () => {
+  const page = ["SectionsC.tsx", "HeroLieu.tsx"].map((f) => readFileSync(`src/components/prototypes/fut50/c/${f}`, "utf8")).join("\n");
+  const ancres = [...page.matchAll(/href(?:=|: )"#([a-z-]+)"/g)].map((m) => m[1]!);
+  assert.ok(ancres.length >= 2);
+  for (const a of ancres) assert.match(page, new RegExp(`id="${a}"`), `#${a} : aucune cible`);
+  assert.match(page, /id="savoir"/, "ancre des pieds de page de l'accueil et de /rapport");
 });
 
 test("aucune étude locale en préparation n'est affichée comme publiée", () => {

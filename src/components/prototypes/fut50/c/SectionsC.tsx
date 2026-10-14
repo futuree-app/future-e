@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { GlypheGrain, type GrainCle } from "@/components/releve/primitives";
 import { CookieSettingsLink } from "@/components/CookieSettingsLink";
+import { FilmDossier, type Film } from "./FilmDossier";
+import { PLANS, Cadre, DUREE_FILM } from "./PlansDossier";
 import { fr } from "../commun";
 import c from "./c.module.css";
 
@@ -18,6 +20,10 @@ export function Pourquoi() {
       <div className={c.pourquoi}>
         <div className={c.pourquoiTexte}>
           <h2 id="pourquoi-c" className={c.sectionTitre}>Votre futur lieu de vie ne tient pas dans une annonce.</h2>
+          {/* nouveau, une phrase (revue du 14/10) : ce qu'une annonce ne dit pas. Pas de second manifeste. */}
+          <p className={c.pourquoiAccroche}>
+            {fr("Une annonce décrit un bien. Elle dit peu de choses de ce qui l'entoure, de ce que deviendra le lieu, et de ce qu'il faut vérifier avant de signer.")}
+          </p>
           {/* existant, mot pour mot : premier et troisième paragraphes de la section « Pourquoi futur•e ». */}
           <p className={c.pourquoiCorps}>
             {fr("Choisir où vivre est l’une des décisions les plus engageantes qui soient : des années de vie, une grande partie d’un patrimoine, parfois la santé d’une famille.")}
@@ -73,6 +79,60 @@ export function Echelles() {
   );
 }
 
+// ── Le Dossier Adresse : ce que l'on obtient vraiment (nouveau, revue du 14/10/2026) ─────────────
+
+/**
+ * LE FILM DU DOSSIER. Nul tant que le dossier exemple réel de FUT-56 n'est pas validé. Dans le prototype, la
+ * section montre une MAQUETTE identifiée comme telle ; dans l'accueil public, elle restera ABSENTE tant que ce
+ * film n'existe pas (`AFFICHER_SANS_FILM` vaut faux hors prototype).
+ */
+export const FILM_DOSSIER: Film | null = null;
+
+/** Le lien « Voir un exemple de dossier » : nul jusqu'à la livraison de FUT-56 et de FUT-14. */
+export const EXEMPLE_DOSSIER_URL: string | null = null;
+
+export function DossierAdresse({ maquette = false }: { maquette?: boolean }) {
+  // Dans l'accueil public, pas de film validé = pas de section : aucune démonstration simulée.
+  if (!FILM_DOSSIER && !maquette) return null;
+  const planFort = PLANS.find((p) => p.id === "lecture")!;
+  return (
+    <section className={c.section} id="dossier-adresse" aria-labelledby="dossier-c">
+      <h2 id="dossier-c" className={c.sectionTitre}>Et à une adresse précise, qu&apos;est-ce que ça change ?</h2>
+      <p className={c.sectionChapo} style={{ marginTop: 14 }}>
+        {fr("Le dossier d'adresse relie la commune, le voisinage et le logement à votre projet : ce qui correspond, ce qui coince, et ce qu'il faut vérifier avant de signer.")}
+      </p>
+      <div className={c.dossierGrille}>
+        <FilmDossier
+          film={FILM_DOSSIER}
+          titre={`Un dossier d'adresse en ${DUREE_FILM} secondes`}
+          maquette={<Cadre plan={planFort} numero={3} avecTexte={false} />}
+        />
+        <div className={c.dossierEtapes}>
+          {/* Le message du film, lisible sans le regarder : ce sont aussi ses sous-titres. */}
+          <ol className={c.etapes}>
+            {PLANS.slice(0, 4).map((p, i) => (
+              <li key={p.id} className={c.etape}>
+                <span className={c.etapeNumero} aria-hidden>{i + 1}</span>
+                <span><strong>{p.titre}.</strong> {fr(p.message)}</span>
+              </li>
+            ))}
+          </ol>
+          <div className={c.suites}>
+            <Link href="/dossier" className={c.boutonMarque}>Ouvrir un dossier d’adresse · 39 € <span aria-hidden>→</span></Link>
+            {EXEMPLE_DOSSIER_URL ? <Link href={EXEMPLE_DOSSIER_URL} className={c.lienFleche}>Voir un exemple de dossier</Link> : null}
+          </div>
+          {maquette ? (
+            <p className={c.noteMaquette}>
+              Repère de conception, sans données : le film sera tourné sur le dossier exemple réel (FUT-56).{" "}
+              <Link href="/dev/fut50/storyboard" className={c.lienTexte}>Voir le storyboard complet</Link>
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Les offres (structure existante, formulations auditées) ──────────────────────────────────────
 
 export function Offres() {
@@ -93,11 +153,11 @@ export function Offres() {
               promettaient un questionnaire que le moteur ne lit pas entièrement (FUT-28). « Le climat déjà observé »
               était faux : l'accueil affiche des projections. « 3 pages Savoir » : elles sont toutes en accès libre. */}
           <ul className={c.offreListe}>
-            <li>Regarder un lieu avec vos priorités, ici même</li>
+            <li>Regarder une commune avec vos priorités, ici même</li>
             <li>Décrire votre projet et voir les territoires qui y répondent</li>
             <li>Les articles et les guides pratiques, en accès libre</li>
           </ul>
-          <a href="#lieu" className={c.bouton}>Chercher un lieu</a>
+          <a href="#lieu" className={c.bouton}>Chercher une commune</a>
         </article>
 
         <article className={c.offre} aria-labelledby="offre-territoire">
@@ -126,6 +186,7 @@ export function Offres() {
             <li>À rouvrir et compléter au fil de votre recherche, depuis votre compte</li>
           </ul>
           <Link href="/dossier" className={c.bouton}>Ouvrir un dossier d’adresse · 39 €</Link>
+          {EXEMPLE_DOSSIER_URL ? <Link href={EXEMPLE_DOSSIER_URL} className={c.lienFleche} style={{ fontSize: 15 }}>Voir un exemple de dossier</Link> : null}
         </article>
       </div>
 

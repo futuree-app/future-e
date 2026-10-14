@@ -13,15 +13,16 @@ import { getGeorisquesSummary } from "@/lib/georisques";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
-import { carteCompte, CHALEUR } from "@/lib/accueil/recits";
-import { indicatorsDepuisScenarios } from "@/lib/accueil/faits";
+import { carteCompte, CHALEUR, formatTemperature } from "@/lib/accueil/recits";
+import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil/faits";
+import { CLIMAT_REFERENCE_LABEL } from "@/lib/decision/climat-facts";
 import { aCommune } from "@/lib/typography";
 import { projetDeTest } from "@/app/dev/fut87/projet-de-test";
-import { lireChaleur, lireTaille, lireRisques, lireAdresse, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille } from "@/components/prototypes/fut50/c/pastilles";
+import { lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille, type EntreesHivers } from "@/components/prototypes/fut50/c/pastilles";
 
 export const dynamic = "force-dynamic";
 
-const CLES: CleePastille[] = ["chaleur", "taille", "voiture", "risques"];
+const CLES: CleePastille[] = ["chaleur", "hivers", "taille", "voiture", "risques"];
 
 async function entreesChaleur(insee: string): Promise<{ nom: string | null; e: EntreesChaleur }> {
   const simple = projetDeTest("faible_chaleur:2").projet;
@@ -81,6 +82,32 @@ async function entreesTaille(insee: string): Promise<{ nom: string | null; e: En
   };
 }
 
+async function entreesHivers(insee: string): Promise<{ nom: string | null; e: EntreesHivers }> {
+  const [d, climat] = await Promise.all([
+    buildCommuneDossier(insee, projetDeTest("douceur_climat:2").projet, { hasAddress: false }).catch(() => null),
+    getClimatDataCommune(insee).catch(() => null),
+  ]);
+  if (!d) return { nom: null, e: { issue: "absent", position: null, limite: null, temperatureReference: null } };
+  const critere = d.dossier.criteria.registry.find((c) => c.criterionKey === "douceur_climat");
+  const issue = critere?.coverage === "examined" ? critere.outcome : undefined;
+  const carte = d.dossier.sections.flatMap((s) => s.cards)
+    .flatMap((c) => (c.kind === "fact" && (c.fact.role === "alignment" || c.fact.role === "mismatch") && c.fact.projectKey === "douceur_climat" ? [c.fact] : []))[0];
+  const ref = climat
+    ? construireFaitsCommune(d.moduleFacts.nom, indicatorsDepuisScenarios(climat.commune.s), null).climat?.temperature_moyenne_hiver_C.reference ?? null
+    : null;
+  return {
+    nom: d.moduleFacts.nom,
+    e: {
+      issue: issue === "favorable" || issue === "mismatch" || issue === "indeterminate" ? issue : "absent",
+      // Le préambule d'un écart (« Vous avez placé … parmi vos priorités. ») n'a pas de sens ici : une pastille
+      // n'est pas un projet déclaré. Même règle que les conditions (`condition-rules.ts`, sansPreambule).
+      position: carte ? carte.statement.replace(/^Vous avez placé [^.]*\. /, "") : null,
+      limite: carte && "limitation" in carte ? (carte.limitation ?? null) : null,
+      temperatureReference: ref != null ? `Température moyenne de l'hiver : ${formatTemperature(ref)} ${CLIMAT_REFERENCE_LABEL}.` : null,
+    },
+  };
+}
+
 export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") return new NextResponse(null, { status: 404 });
   const u = new URL(req.url);
@@ -98,6 +125,9 @@ export async function GET(req: Request) {
   if (cle === "chaleur") {
     const { nom, e } = await entreesChaleur(insee);
     lecture = lireChaleur({ ...lieu, commune: nom ?? lieu.commune }, e);
+  } else if (cle === "hivers") {
+    const { nom, e } = await entreesHivers(insee);
+    lecture = lireHivers({ ...lieu, commune: nom ?? lieu.commune }, e);
   } else if (cle === "taille") {
     const { nom, e } = await entreesTaille(insee);
     lecture = lireTaille({ ...lieu, commune: nom ?? lieu.commune }, e);
