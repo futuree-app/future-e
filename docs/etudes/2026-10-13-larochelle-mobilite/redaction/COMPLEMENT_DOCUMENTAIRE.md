@@ -8,9 +8,11 @@ Le dossier de rédaction contient les faits **calculés** (`fiche_mobilite.py`).
 
 Question servie : **utiliser moins sa voiture** quand on choisit un logement. Le complément ne sert à conclure ni sur la deuxième voiture, ni sur la vie sans voiture, ni sur la faisabilité d'un trajet.
 
-## Procédure (une heure au plus par commune)
+## Procédure
 
-1. **Identifier les sources officielles** : site du réseau de transport (autorité organisatrice ou exploitant), site de l'intercommunalité. Pas de presse, de blog, de forum ni d'agrégateur.
+La recherche reste ciblée. Une heure est un **plafond**, pas un objectif ni un coût mesuré : on s'arrête dès que les informations utiles sont suffisamment établies, et ce qui demanderait plus va dans `ecartes`.
+
+1. **Identifier, pour chaque information, la source officielle compétente** : réseau de transport (autorité organisatrice ou exploitant), collectivité (commune, intercommunalité, département, région), opérateur ferroviaire, ou autre opérateur public pertinent. Pas de presse, de blog, de forum ni d'agrégateur.
 2. **Chercher, dans l'ordre, et s'arrêter là :**
    - tarification : réseau gratuit ou non, pour qui, sur quelles lignes, exceptions ;
    - jours de circulation des lignes urbaines (dimanche, jours fériés, samedi), avec la période de validité des horaires ;
@@ -24,7 +26,8 @@ Question servie : **utiliser moins sa voiture** quand on choisit un logement. Le
 
 ## Ce qu'on n'enregistre pas
 
-- **Aucun chiffre de fréquence, d'amplitude, de temps de trajet ou de desserte**, même lu dans une fiche horaire : c'est le rôle des faits bus calculés (GTFS), qui restent `en attente de validation` tant que leur vérification n'est pas faite. Le complément ne les remplace pas et ne les valide pas.
+- **Pas de chiffre non vérifié ni de généralisation.** Une fréquence ou une information de desserte s'enregistre seulement si une source officielle la donne **explicitement**, avec son périmètre exact : ligne ou service, sens si nécessaire, jours et période de validité (par exemple « ligne 1, du lundi au vendredi en période scolaire, selon la fiche valable à partir du 1er septembre 2026 »). On ne la recompte pas soi-même dans une grille horaire, on ne l'étend pas à d'autres lignes ni à l'ensemble du réseau.
+- Le complément ne remplace ni ne valide les faits bus calculés (GTFS) du dossier, qui restent `en attente de validation` tant que leur vérification n'est pas faite.
 - Pas d'inventaire des lignes.
 - Pas d'intuitions non prouvées : « le centre permet de vivre sans voiture », « la périphérie l'interdit », « ville compacte et peu pentue », affirmations sur les employeurs.
 - Pas d'information générale sur la commune (histoire, image, population) : elle ne sert pas la question.
@@ -65,7 +68,7 @@ Identifiants en `doc.*` : jamais confondus avec les faits calculés (`mobpro.*`,
 
 | Étape | Qui |
 |---|---|
-| Trouver les sources officielles et lire les pages | humain (ou assistant en session, sous contrôle) |
+| Trouver les sources officielles et lire les pages (recherche ciblée, plafond d'une heure) | humain (ou assistant en session, sous contrôle) |
 | Remplir `complement.json` et ses `ecartes` | humain |
 | Intégration au dossier, contrôle du format | **automatique** (`dossier_redaction.py` refuse un fait sans source, date, périmètre ou usage valide) |
 | Recontrôle des pages citées la veille de la publication | humain |

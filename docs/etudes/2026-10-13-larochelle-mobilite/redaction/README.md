@@ -63,7 +63,7 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Faits atomiques, identifiants, statuts, périmètres nommés, faits absents, scénario carburant | **Automatisé** (`dossier_redaction.py`) |
 | Carte par secteur et tableau accessible | **Semi-automatisé** : `visuels/generer_visuels.py --insee … --classes <borne>` (pour Niort, `--classes 0.45`) ; libellés des secteurs à poser à la main |
 | Choix des communes comparées et sa raison | **Manuel** (la fiche prend l'unité urbaine par défaut et n'enregistre pas l'origine de la liste) |
-| Complément documentaire (gratuité, jours de circulation, où vérifier un trajet) | **Manuel** : collecte sur les sites officiels selon `COMPLEMENT_DOCUMENTAIRE.md` (une heure au plus) ; contrôle du format et intégration au dossier **automatiques** ; pages citées à recontrôler avant publication |
+| Complément documentaire (gratuité, jours de circulation, où vérifier un trajet) | **Manuel** : collecte sur les sites officiels selon `COMPLEMENT_DOCUMENTAIRE.md` (recherche ciblée, plafond d'une heure, pas un objectif) ; contrôle du format et intégration au dossier **automatiques** ; pages citées à recontrôler avant publication |
 | Vérification du réseau de bus et du jour de référence | **Manuel** : tant qu'elle n'est pas faite, les faits « bus » sont `en attente de validation` (usage `non`) |
 | Relecture des libellés d'IRIS avant de les écrire comme noms de quartiers | **Manuel** |
 | Contrôle de la hausse du carburant sur les mêmes stations | **Manuel** (`scripts/13` a été écrit pour La Rochelle) ; réextraire les prix la veille de la publication |
