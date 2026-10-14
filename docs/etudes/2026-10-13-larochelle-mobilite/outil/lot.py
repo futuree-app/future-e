@@ -285,33 +285,80 @@ class PlafondAtteint(Exception):
     pass
 
 
+class LimiteUsage(Exception):
+    """Limite d'usage de l'abonnement atteinte : on arrête proprement, sans nouvelle tentative."""
+
+
+class AuthNonAbonnement(Exception):
+    """La session ne tourne pas sur l'abonnement claude.ai : arrêt immédiat du lot (aucune clé API, aucun autre fournisseur)."""
+
+
+# Variables qui feraient basculer Claude Code vers une clé API ou un autre fournisseur : retirées de chaque session.
+ENV_INTERDITES = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL", "CLAUDE_CODE_USE_BEDROCK",
+                  "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "ANTHROPIC_PROFILE", "OPENAI_API_KEY")
+
+
+def pieces_justificatives(lot, insee):
+    """Pièces référencées par le dossier, copiées en lecture seule dans la session : complément documentaire, repère de
+    comparaison, fiches des réseaux (extraits vérifiés). PAS la fiche brute ni dossier.json : ils contiennent les valeurs de
+    bus en attente de validation, qui ne doivent pas atteindre le rédacteur."""
+    P = []
+    for rel in ("dossier/complement.json", "fiche/comparaison_voiture.json"):
+        p = os.path.join(lot.dir, insee, rel)
+        if os.path.exists(p):
+            P.append(p)
+    comp = os.path.join(lot.dir, insee, "dossier", "complement.json")
+    if os.path.exists(comp):
+        src = " ".join(f["source"] for f in json.load(open(comp)).get("faits", []))
+        for fn in sorted(os.listdir(os.path.join(lot.dir, "reseaux"))) if os.path.isdir(os.path.join(lot.dir, "reseaux")) else []:
+            if fn.endswith(".json") and json.load(open(os.path.join(lot.dir, "reseaux", fn)))["page"] in src:
+                P.append(os.path.join(lot.dir, "reseaux", fn))
+    return P
+
+
 def depense_cumulee(lot):
     p = os.path.join(lot.dir, "depenses.jsonl")
     return sum(json.loads(l).get("cout_usd_equivalent") or 0 for l in open(p)) if os.path.exists(p) else 0.0
 
 
-def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domaines=None):
+def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domaines=None, pieces=()):
     """Un appel = une session vierge. Retourne le texte produit, ou None en simulation. `domaines` : seule la lecture de
     pages de ces domaines est autorisée (collecte) ; sinon aucun outil."""
     M = lot.conf["moteur"]; reglage = M["etapes"][etape_nom]
     d = d or lot.rep(insee, "generation"); os.makedirs(d, exist_ok=True)
     cle = sha(M["outil"], reglage, systeme, utilisateur, domaines)
     p_meta, p_sortie, p_marq = (os.path.join(d, f"{etape_nom}.json"), os.path.join(d, f"{etape_nom}.md"), os.path.join(d, f"{etape_nom}.en_cours"))
-    if os.path.exists(p_meta) and json.load(open(p_meta)).get("cle") == cle and os.path.exists(p_sortie):
-        return open(p_sortie).read()  # déjà fait avec les mêmes entrées : aucun nouvel appel
+    if os.path.exists(p_meta):
+        # Limite explicite : UN appel par commune et par étape (une collecte par réseau). Déjà fait, même avec des entrées
+        # modifiées depuis : on réutilise ; un appel échoué n'est pas retenté automatiquement.
+        if os.path.exists(p_sortie):
+            return open(p_sortie).read()
+        raise RuntimeError(f"« {etape_nom} » déjà tenté sans résultat ({json.load(open(p_meta)).get('motif', 'voir ' + p_meta)}) : pas de nouvelle tentative automatique")
     if os.path.exists(p_marq):
         raise RuntimeError(f"un appel « {etape_nom} » est parti sans réponse enregistrée ({open(p_marq).read().strip()}) : "
                            "vérifier à la main, puis supprimer le marqueur pour relancer")
-    plafond, par_appel = float(lot.conf["plafond_usd_equivalent"]), float(reglage.get("plafond_appel_usd", 3))
-    if executer and depense_cumulee(lot) + par_appel > plafond:
-        raise PlafondAtteint(f"plafond du lot ({plafond} $ équivalent) : {depense_cumulee(lot):.2f} $ déjà consommés")
+    par_appel = float(reglage.get("plafond_appel_usd", 3))
     tmp = tempfile.mkdtemp(prefix="futuree-lot-")  # dossier vide hors du dépôt : ni CLAUDE.md, ni mémoire, ni fichiers
     sys_p = os.path.join(tmp, "consignes.md"); open(sys_p, "w").write(systeme)
+    noms_pieces = []
+    if pieces:
+        os.makedirs(os.path.join(tmp, "pieces"))
+        for p in pieces:
+            q = os.path.join(tmp, "pieces", os.path.basename(p)); shutil.copy(p, q); os.chmod(q, 0o444); noms_pieces.append(os.path.basename(p))
+        utilisateur += ("\n\n---\n\nPièces justificatives référencées par le dossier, en lecture seule dans ./pieces/ : "
+                        + ", ".join(noms_pieces) + ". Tu peux les lire pour vérifier une source ; elles n'apportent aucun fait "
+                        "qui ne soit déjà dans le dossier, et ne t'autorisent ni recherche extérieure ni autre fichier.")
     if M["outil"] == "claude-code":
+        if domaines:
+            outils = ["--tools", "WebFetch", "--allowedTools", ",".join(f"WebFetch(domain:{x})" for x in domaines)]
+        elif pieces:
+            outils = ["--tools", "Read,Glob", "--allowedTools", "Read(./pieces/**),Glob(./pieces/**)",
+                      "--disallowedTools", "Read(//Users/**),Read(~/**),Glob(//Users/**)"]
+        else:
+            outils = ["--tools", ""]
         cmd = ["claude", "-p", "--model", reglage["modele"], "--effort", reglage.get("effort", "high"),
-               "--system-prompt-file", sys_p, "--strict-mcp-config", "--setting-sources", "project",
-               *(["--tools", "WebFetch", "--allowedTools", *[f"WebFetch(domain:{x})" for x in domaines]] if domaines else ["--tools", ""]),
-               "--no-session-persistence", "--output-format", "json", "--max-budget-usd", str(par_appel)]
+               "--system-prompt-file", sys_p, "--strict-mcp-config", "--setting-sources", "project", "--permission-mode", "dontAsk",
+               *outils, "--no-session-persistence", "--output-format", "stream-json", "--verbose", "--max-budget-usd", str(par_appel)]
     elif M["outil"] == "codex" and domaines:
         raise RuntimeError("collecte : seul Claude Code permet de limiter la lecture web à des domaines ; utiliser moteur claude-code")
     elif M["outil"] == "codex":
@@ -325,21 +372,40 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         shutil.rmtree(tmp)
         return None
     version = subprocess.run([cmd[0], "--version"], capture_output=True, text=True).stdout.strip()
+    env = {k: v for k, v in os.environ.items() if k not in ENV_INTERDITES}
     open(p_marq, "w").write(f"{maintenant()} clé {cle}")
     t0 = time.time()
-    r = subprocess.run(cmd, cwd=tmp, input=utilisateur, capture_output=True, text=True, timeout=int(reglage.get("delai_s", 1800)))
+    try:
+        r = subprocess.run(cmd, cwd=tmp, input=utilisateur, capture_output=True, text=True, env=env, timeout=int(reglage.get("delai_s", 1800)))
+    except subprocess.TimeoutExpired:
+        json.dump({"etape": etape_nom, "cle": cle, "motif": "délai dépassé", "debut": maintenant()}, open(p_meta, "w"), ensure_ascii=False)
+        os.remove(p_marq); shutil.rmtree(tmp, ignore_errors=True)
+        raise RuntimeError(f"« {etape_nom} » : délai dépassé ({reglage.get('delai_s', 1800)} s)")
     duree = round(time.time() - t0, 1)
     meta = {"etape": etape_nom, "cle": cle, "outil": M["outil"], "version_outil": version, "modele": reglage["modele"],
             "effort": reglage.get("effort"), "consignes_sha": sha(systeme), "entree_sha": sha(utilisateur), "debut": maintenant(),
             "duree_s": duree, "code_retour": r.returncode}
     texte, cout = None, None
     if M["outil"] == "claude-code":
-        try:
-            j = json.loads(r.stdout)
-            texte, cout = j.get("result"), j.get("total_cost_usd")
-            meta.update(session=j.get("session_id"), usage=j.get("usage"), cout_usd_equivalent=cout, est_erreur=j.get("is_error"),
-                        sous_type=j.get("subtype"), modele_effectif=list((j.get("modelUsage") or {}).keys()))
-        except json.JSONDecodeError:
+        ev = []
+        for l in r.stdout.splitlines():
+            try:
+                ev.append(json.loads(l))
+            except json.JSONDecodeError:
+                pass
+        init = next((e for e in ev if e.get("type") == "system" and e.get("subtype") == "init"), {})
+        res = next((e for e in reversed(ev) if e.get("type") == "result"), {})
+        appels = [{"outil": b.get("name"), "entree": json.dumps(b.get("input"), ensure_ascii=False)[:200]}
+                  for e in ev if e.get("type") == "assistant" for b in (e.get("message") or {}).get("content", []) if b.get("type") == "tool_use"]
+        refus = [e for e in ev if e.get("type") == "user" and "denied" in json.dumps(e).lower()]
+        texte, cout = res.get("result"), res.get("total_cost_usd")
+        meta.update(session=res.get("session_id"), usage=res.get("usage"), cout_usd_equivalent=cout, est_erreur=res.get("is_error"),
+                    sous_type=res.get("subtype"), modele_effectif=list((res.get("modelUsage") or {}).keys()), tours=res.get("num_turns"),
+                    contexte={"source_auth": init.get("apiKeySource"), "outils": init.get("tools"), "mcp": init.get("mcp_servers"),
+                              "modele": init.get("model"), "cwd": init.get("cwd"), "permissions": init.get("permissionMode"),
+                              "memoire_projet": init.get("memory_paths"), "plugins": init.get("plugins"), "pieces": noms_pieces},
+                    appels_outils=appels, refus=len(refus))
+        if not ev:
             meta["sortie_brute"] = (r.stdout + r.stderr)[-2000:]
     else:
         texte = open(out).read() if os.path.exists(out) else None
@@ -348,8 +414,17 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
     with open(os.path.join(lot.dir, "depenses.jsonl"), "a") as f:
         f.write(json.dumps({"date": maintenant(), "commune": insee, "etape": etape_nom, "outil": M["outil"], "modele": reglage["modele"],
                             "cout_usd_equivalent": cout, "duree_s": duree, "cle": cle}, ensure_ascii=False) + "\n")
+    brut = ((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", ""))).lower()
+    if M["outil"] == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
+        meta["motif"] = f"session hors abonnement (source d'authentification : {meta['contexte']['source_auth']})"
+    elif (not texte or meta.get("est_erreur")) and re.search(r"usage limit|rate limit|limit reached|reached your|quota|429|overloaded", brut):
+        meta["motif"] = "limite d'usage"
     json.dump(meta, open(p_meta, "w"), ensure_ascii=False, indent=1)
     os.remove(p_marq)
+    if meta.get("motif", "").startswith("session hors abonnement"):
+        raise AuthNonAbonnement(meta["motif"])
+    if meta.get("motif") == "limite d'usage":
+        raise LimiteUsage(f"« {etape_nom} » : {(texte or r.stderr or '')[:200]}")
     if not texte or r.returncode or meta.get("est_erreur"):
         raise RuntimeError(f"génération « {etape_nom} » sans texte exploitable (code {r.returncode}, {meta.get('sous_type')})")
     open(p_sortie, "w").write(texte)
@@ -393,12 +468,14 @@ def cmd_collecter(lot, a):
         doms = sorted({domaine(u) for u in sites} | {"www." + domaine(u) for u in sites})
         user = (f"Réseau : {R['nom_commercial']}\nAutorité organisatrice : {R['aom']}\nIntercommunalité : {R['epci'].get('nom')}\n"
                 f"Site officiel : {sites[0]}\nDate du jour : {dt.date.today().isoformat()}")
+        if a.executer and not lot.conf.get("execution_autorisee"):
+            sys.exit("execution_autorisee absent de lot.json : aucun appel")
         if not a.executer:
             print(f"SIMULATION · collecte {R['nom_commercial']} ({', '.join(doms)}) pour {len(communes)} commune(s)"); continue
         try:
             texte = generer(lot, communes[0], "collecte", syst, user, True, d=os.path.join(lot.dir, "reseaux", rid), domaines=doms)
-        except PlafondAtteint as e:
-            print(f"■ arrêt : {e}"); break
+        except (PlafondAtteint, LimiteUsage, AuthNonAbonnement) as e:
+            print(f"■ arrêt propre de la collecte : {e}"); break
         except Exception as e:
             print(f"✗ collecte {R['nom_commercial']} : {e}"); continue
         res = json_dans(texte)
@@ -464,13 +541,14 @@ def rediger_commune(lot, insee, executer, plan):
     if not executer:
         plan.append((insee, len(prompt) + len(dossier)))
         return
-    texte = generer(lot, insee, "redaction", prompt, f"Dossier de la commune (dossier.md) :\n\n{dossier}", True)
+    pj = pieces_justificatives(lot, insee)
+    texte = generer(lot, insee, "redaction", prompt, f"Dossier de la commune (dossier.md) :\n\n{dossier}", True, pieces=pj)
     C["statut"] = "rédigé"; lot.sauver()
     ctl = controle(lot, insee, "redaction.md")
     if ctl["nature"] == "non_publication":
         C.update(statut="prêt à relire", motif="recommandation de ne pas publier (section de décision)"); lot.sauver(); return
     rel = json_dans(generer(lot, insee, "relecture", relec,
-                            f"Dossier (dossier.md) :\n\n{dossier}\n\n---\n\nRendu de la rédaction :\n\n{texte}", True))
+                            f"Dossier (dossier.md) :\n\n{dossier}\n\n---\n\nRendu de la rédaction :\n\n{texte}", True, pieces=pj))
     json.dump(rel, open(os.path.join(lot.rep(insee, "generation"), "relecture.anomalies.json"), "w"), ensure_ascii=False, indent=1)
     bloq = [a for a in ctl["anomalies"] if a["gravite"] == "bloquante"] + [a for a in rel.get("anomalies", []) if a.get("gravite") == "bloquante"]
     final = "redaction.md"
@@ -488,6 +566,17 @@ def rediger_commune(lot, insee, executer, plan):
     C["statut"] = "prêt à relire"; lot.sauver()
 
 
+def cmd_controler(lot, a):
+    """Relance le contrôle déterministe (gratuit) sur les articles déjà produits et met à jour leur motif."""
+    for insee, C in lot.etat["communes"].items():
+        if C.get("article") and (not a.communes or insee in a.communes.split(",")):
+            r = controle(lot, insee, C["article"])
+            C["anomalies_restantes"] = r["anomalies"]
+            C["motif"] = (f"{r['bloquantes']} anomalie(s) déterministe(s)" if r["bloquantes"] else
+                          ("corrigé une fois ; vérifier la section E" if C["article"] == "correction.md" else ""))
+    lot.sauver(); vue(lot)
+
+
 def cmd_rediger(lot, a):
     verrou = os.path.join(lot.dir, ".verrou")
     try:
@@ -496,14 +585,14 @@ def cmd_rediger(lot, a):
         sys.exit(f"lot déjà en cours ({open(verrou).read()}) : attendre ou supprimer {verrou} si le lancement précédent est mort")
     plan = []
     try:
-        if a.executer and float(lot.conf.get("plafond_usd_equivalent", 0)) <= 0:
-            sys.exit("plafond_usd_equivalent absent ou nul dans lot.json : aucun appel")
+        if a.executer and not lot.conf.get("execution_autorisee"):
+            sys.exit("execution_autorisee absent de lot.json : aucun appel (accord du porteur requis)")
         for insee, C in lot.etat["communes"].items():
             if C.get("insee") and (not a.communes or insee in a.communes.split(",")):
                 try:
                     rediger_commune(lot, insee, a.executer, plan)
-                except PlafondAtteint as e:
-                    print(f"■ arrêt : {e}"); break
+                except (PlafondAtteint, LimiteUsage, AuthNonAbonnement) as e:
+                    C.update(motif=f"arrêt du lot : {str(e)[:300]}"); lot.sauver(); print(f"■ arrêt propre du lot : {e}"); break
                 except Exception as e:
                     C.update(motif=f"erreur : {str(e)[:300]}"); lot.sauver(); print(f"✗ {C['nom']} : {e}")
     finally:
@@ -513,8 +602,7 @@ def cmd_rediger(lot, a):
         print(f"SIMULATION · moteur {M['outil']} · {len(plan)} communes à rédiger · aucun appel lancé")
         for insee, n in plan:
             print(f"  {lot.c(insee)['nom']} ({insee}) : consignes + dossier ≈ {n // 1000} k caractères")
-        print("Lancer réellement : ajouter --executer (plafond lot.json : "
-              f"{lot.conf.get('plafond_usd_equivalent')} $ équivalent, {M['etapes']['redaction'].get('plafond_appel_usd')} $ par appel)")
+        print("Lancer réellement : ajouter --executer (limite : une rédaction, une relecture, au plus une correction par commune)")
     vue(lot)
 
 
@@ -523,18 +611,18 @@ def vue(lot):
     print(f"\n{'Commune':<22} {'INSEE':<6} {'État':<22} Préparation  Motif")
     for k, C in lot.etat["communes"].items():
         print(f"{C['nom']:<22} {str(C.get('insee') or '?'):<6} {C['statut']:<22} {str(C.get('duree_preparation_s', '')):>9} s  {C.get('motif', '')}")
-    print(f"Dépense cumulée (équivalent API, Claude Code) : {depense_cumulee(lot):.2f} $")
+    print(f"Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : {depense_cumulee(lot):.2f} $")
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("commande", choices=["preparer", "collecter", "rediger", "etat"]); p.add_argument("lot")
+    p.add_argument("commande", choices=["preparer", "collecter", "rediger", "controler", "etat"]); p.add_argument("lot")
     p.add_argument("--communes", default="", help="restreindre à ces codes INSEE ou noms (virgules)")
     p.add_argument("--refaire", default="", help="étapes à refaire même si réussies (fiche,comparaison,complement,dossier)")
     p.add_argument("--executer", action="store_true", help="rediger : lancer réellement les sessions Claude Code / Codex")
     a = p.parse_args()
     lot = Lot(a.lot)
-    {"preparer": cmd_preparer, "collecter": cmd_collecter, "rediger": cmd_rediger, "etat": lambda l, a: vue(l)}[a.commande](lot, a)
+    {"preparer": cmd_preparer, "collecter": cmd_collecter, "rediger": cmd_rediger, "controler": cmd_controler, "etat": lambda l, a: vue(l)}[a.commande](lot, a)
 
 
 if __name__ == "__main__":

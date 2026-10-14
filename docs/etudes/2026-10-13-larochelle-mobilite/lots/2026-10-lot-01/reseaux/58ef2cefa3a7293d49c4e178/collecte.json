@@ -1,0 +1,110 @@
+{
+ "etape": "collecte",
+ "cle": "f0f8b02f96faecd1",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "0d44c21226c03037",
+ "debut": "2026-10-14T14:42:04Z",
+ "duree_s": 41.7,
+ "code_retour": 0,
+ "session": "f421e066-4152-4a74-8ebb-c8b92d5deb69",
+ "usage": {
+  "input_tokens": 8,
+  "cache_creation_input_tokens": 4933,
+  "cache_read_input_tokens": 9752,
+  "output_tokens": 2452,
+  "output_tokens_details": {
+   "thinking_tokens": 50
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4933,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1612,
+    "cache_read_input_tokens": 4417,
+    "cache_creation_input_tokens": 516,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 516
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.0524091,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 6,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-2iwva6mf",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-2iwva6mf/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"http://www.vitalis-poitiers.fr\", \"prompt\": \"Tarification : le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Jours de circulation (dimanche, fériés, samedi), période de validit"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.vitalis-poitiers.fr/tarifs/\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Donne extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.vitalis-poitiers.fr/lignes-et-horaires/\", \"prompt\": \"Jours de circulation des lignes (dimanche, jours fériés, samedi), période de validité des horaires, fiches horaires, temps rée"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.vitalis-poitiers.fr/itineraires/\", \"prompt\": \"Cette page permet-elle de calculer un itinéraire ? Extrait exact mot pour mot décrivant la fonction.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.vitalis-poitiers.fr/lignes-et-horaires/\", \"prompt\": \"Recopie mot pour mot, en français, les phrases exactes sur : validité des horaires (dates), plan dimanches et jours fériés, lu"
+  }
+ ],
+ "refus": 0
+}

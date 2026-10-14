@@ -42,12 +42,43 @@ export default async function ArticleLot({ params }: { params: Promise<{ lot: st
     return texteHtml((await readFile(svg(b), "utf8")).match(/<desc[^>]*>([\s\S]*?)<\/desc>/)?.[1] ?? "").replace(/&#x27;/g, "'");
   };
   const carte = `carte_iris_${insee}`, barres = `barres_lieu_travail_${insee}`;
+  // Tableau du scénario carburant : construit à partir des lignes pré-calculées du dossier (aucune valeur saisie ici).
+  type Ligne = { carburant: string; km_aller: number; hausse_retenue_eur_l: number; surcout_an_eur: number };
+  const dj = JSON.parse(await readFile(path.join(LOTS, lot, insee, "dossier", "dossier.json"), "utf8"));
+  const scen: Ligne[] = dj.scenario_carburant?.lignes ?? [];
+  const euros = (x: number) => `${x.toFixed(2).replace(".", ",")} €`;
+  const carbus = [...new Set(scen.map((l) => l.carburant))];
+  const kms = [...new Set(scen.map((l) => l.km_aller))];
+  const val = (c: string, k: number) => scen.find((l) => l.carburant === c && l.km_aller === k);
   const altCarte = await alt(carte), altBarres = await alt(barres);
   return (
     <ArticleEtude
       md={md}
       bandeau={`Prévisualisation interne · lot ${lot} · ${c.statut} · non publiée`}
       visuel={(l, _s, k) => {
+        if (/sc[ée]nario|carburant|surco[ûu]t/i.test(l) && scen.length)
+          return {
+            noeud: (
+              <div key={k} className="apv-tableau">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Trajet aller</th>
+                      {carbus.map((c) => <th key={c} scope="col" className="num">Surcoût de carburant par an, {c} (+{euros(val(c, kms[0])!.hausse_retenue_eur_l)}/L)</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kms.map((km) => (
+                      <tr key={km}>
+                        <th scope="row">{km} km</th>
+                        {carbus.map((c) => <td key={c} className="num">environ {val(c, km)?.surcout_an_eur} €</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ),
+          };
         const quoi = /carte|secteur|quartier|iris/i.test(l) ? "carte" : /travail|graphique|barres/i.test(l) ? "barres" : null;
         const base = quoi === "carte" ? carte : quoi === "barres" ? barres : null;
         if (base && existsSync(path.join(vis, `${base}_sombre.png`)))

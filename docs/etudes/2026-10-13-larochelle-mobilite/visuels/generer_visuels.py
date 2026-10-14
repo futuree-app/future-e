@@ -189,9 +189,20 @@ def carte(a, mobile):
         codes = {}  # les repères remplacent les libellés : aucun placement manuel
         from shapely.geometry import shape
         geo = {f["properties"]["code_iris"]: shape(f["geometry"]) for f in feats}
+        r9, places = 10 * fs, []
         for i, code in enumerate(reperes, 1):
             pt = geo[code].representative_point()  # toujours DANS le secteur (formes en croissant comprises)
-            cx, cy = P(pt.x, pt.y); r9 = 10 * fs
+            ax, ay = P(pt.x, pt.y); cx, cy = ax, ay
+            # Anti-chevauchement : si le repère touche un repère déjà posé, on le décale sur une spirale autour de son
+            # point d'accroche, puis un trait fin le relie à son secteur (aucun placement manuel).
+            essai = 0
+            while any((cx - x) ** 2 + (cy - y) ** 2 < (2.15 * r9) ** 2 for x, y in places) and essai < 60:
+                essai += 1; ang = essai * 2.4; rad = r9 * (1.2 + 0.35 * essai)
+                cx, cy = ax + rad * math.cos(ang), ay + rad * math.sin(ang)
+            places.append((cx, cy))
+            if essai:
+                body.append(f'<line x1="{ax:.1f}" y1="{ay:.1f}" x2="{cx:.1f}" y2="{cy:.1f}" stroke="{INK}" stroke-width="1"/>'
+                            f'<circle cx="{ax:.1f}" cy="{ay:.1f}" r="2.4" fill="{INK}"/>')
             body.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r9:.1f}" fill="{SURFACE}" stroke="{INK}" stroke-width="1.4"/>')
             body.append(text(cx, cy + 4.6 * fs, str(i), round(12.5 * fs), 700, INK, "middle"))
     for code, pos in codes.items():

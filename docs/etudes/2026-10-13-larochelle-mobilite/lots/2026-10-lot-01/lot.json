@@ -14,7 +14,7 @@
   "Tours",
   "Le Mans"
  ],
- "note_communes": "Saint-Nazaire a trois homonymes dans l'index (30288, 44184, 66186) : département 44 précisé à la main le 14/10/2026, à confirmer par le porteur.",
+ "note_communes": "Saint-Nazaire : trois homonymes dans l'index (30288, 44184, 66186) ; Loire-Atlantique (44184) confirmée par le porteur le 14/10/2026.",
  "chemins": {
   "python": "<checkout>/.venv-etudes/bin/python",
   "mobpro": "<checkout>/data/rp-mobpro-2022.parquet",
@@ -50,7 +50,12 @@
     "delai_s": 1200
    }
   },
-  "remarque": "Claude Code (claude -p) : session vierge par appel, dossier vide hors du dépôt, prompt système = consignes de la série, aucun outil (lecture web limitée aux domaines du réseau pour la collecte), réglages utilisateur, plugins, hooks et MCP non chargés, aucune session conservée. Coût reporté = équivalent API calculé par Claude Code ; avec un abonnement, il mesure la consommation du forfait, pas une facture. Codex : changer outil en « codex » et modele (collecte non disponible)."
+  "remarque": "Claude Code (claude -p) : session vierge par appel, dossier vide hors du dépôt, prompt système = consignes de la série, aucun outil (lecture web limitée aux domaines du réseau pour la collecte), réglages utilisateur, plugins, hooks et MCP non chargés, aucune session conservée. Le coût « équivalent API » rapporté par Claude Code est un calcul local (jetons × tarif API) : information seulement, ni facture ni mesure du quota de l'abonnement. La limite appliquée est le nombre d'appels. Codex : changer outil en « codex » et modele (collecte non disponible)."
  },
- "plafond_usd_equivalent": 0
+ "execution_autorisee": {
+  "par": "porteur",
+  "le": "2026-10-14",
+  "perimetre": "premier lot de dix communes, Claude Code sur l'abonnement claude.ai, sans clé API ni autre fournisseur, sans publication"
+ },
+ "limites_appels": "une collecte par réseau, une rédaction, une relecture et au plus une correction par commune ; aucun nouvel essai automatique (outil/lot.py, generer)"
 }

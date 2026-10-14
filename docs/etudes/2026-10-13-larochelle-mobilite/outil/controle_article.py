@@ -90,8 +90,9 @@ def controler(d, txt):
         passage, chiffre, ids = cells[0], cells[1], cells[2]
         ecrits.append(chiffre)
         codes = re.findall(r"`([^`]+)`", ids)
+        definition = re.match(r"m[ée]thode|sources?", passage, re.I)  # périmètres, seuils et dates de la méthode : pas des valeurs
         if not codes:
-            if re.search(r"\d", chiffre) and not re.search(r"capacit|hypoth|définition|millésime|limite|source|population|périmètre|date|méthode", ids, re.I):
+            if re.search(r"\d", chiffre) and not definition and not re.search(r"capacit|hypoth|définition|millésime|limite|source|population|périmètre|date|méthode", ids, re.I):
                 A.append({"type": "identifiant_absent", "gravite": "bloquante", "passage": passage, "detail": f"« {chiffre} » sans identifiant"})
             continue
         vals = []
@@ -115,10 +116,11 @@ def controler(d, txt):
             vals += [x for x in v if x is not None]
         # Distances de définition (« 500 m », « rayon de 12 km ») : pas des valeurs, sauf pour le scénario carburant.
         ch = chiffre if any(c.startswith("scenario.") for c in dev) else re.sub(r"\d+(?:,\d+)?\s?(km|m|mètres|kilomètres|L/100)\b", "", norm(chiffre))
+        # Dates (« semaine du 6 octobre 2025 ») : des repères de période, pas des valeurs.
+        ch = re.sub(r"\d{1,2}(?:er)?\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(?:\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}", "", ch, flags=re.I)
         n = [x for x in nombres(ch) if not (1900 < x < 2100)]
         # Aux bornes, l'égalité doit être exacte : « 100 % » pour une valeur affichée 99,8 % est une erreur.
         ok = lambda x, y: (x == y) if x in (0, 100) and "%" in chiffre else (abs(x - y) <= 0.6 or abs(x - round(y)) < 0.01)
-        definition = re.match(r"m[ée]thode|sources?", passage, re.I)  # périmètres, seuils et dates de la méthode : pas des valeurs
         if n and vals and not definition and not any(ok(x, y) for x in n for y in vals):
             A.append({"type": "valeur", "gravite": "bloquante", "passage": passage,
                       "detail": f"« {chiffre} » ne correspond à aucune valeur du dossier pour {', '.join(codes)} ({', '.join(str(v) for v in vals[:6])})"})

@@ -1,0 +1,86 @@
+{
+ "etape": "correction",
+ "cle": "0e1c963e1ead60da",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "medium",
+ "consignes_sha": "ec2a42db105c2658",
+ "entree_sha": "62287834ac01a6dd",
+ "debut": "2026-10-14T14:47:03Z",
+ "duree_s": 87.2,
+ "code_retour": 0,
+ "session": "17f01e84-43c4-4d75-9b71-350502a275b4",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 43539,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 11390,
+  "output_tokens_details": {
+   "thinking_tokens": 2915
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 43539,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 11390,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 43539,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 43539
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.57612,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-2_h7z0_0",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-2-h7z0-0/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [],
+ "refus": 0
+}

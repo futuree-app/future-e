@@ -27,35 +27,112 @@
    "usage": "oui",
    "statut_verification": "vérifié",
    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.horaires.validite",
+   "information": "Le plan du secteur centre est valable du 30/08/2026 au 02/07/2027. La page présente cette période pour les plans et horaires de la saison.",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « PLAN DU SECTEUR CENTRE DU 30/08/2026 AU 02/07/2027 »)",
+   "consulte_le": "2026-10-14",
+   "validite": "du 30/08/2026 au 02/07/2027",
+   "perimetre": "réseau VITALIS ; Plan du secteur centre. Les autres plans et fiches ne sont pas vérifiés individuellement. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+    "extrait": "PLAN DU SECTEUR CENTRE DU 30/08/2026 AU 02/07/2027"
+   }
+  },
+  {
+   "id": "doc.jours.dimanche_feries",
+   "information": "Un plan du réseau est publié spécifiquement pour le dimanche et les jours fériés. Cela indique qu'un service existe ces jours-là. Les lignes concernées et les fréquences ne sont pas lues sur la page.",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « PLAN DU DIMANCHE ET DES JOURS FERIES DU 30/08/2026 AU 02/07/2027 »)",
+   "consulte_le": "2026-10-14",
+   "validite": "du 30/08/2026 au 02/07/2027",
+   "perimetre": "réseau VITALIS ; Réseau urbain, lignes précises non détaillées dans l'extrait. La page cite des lignes du dimanche (A à E selon la page, dont 2A et 2B « Pictavienne Dimanche »). ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+    "extrait": "PLAN DU DIMANCHE ET DES JOURS FERIES DU 30/08/2026 AU 02/07/2027"
+   }
+  },
+  {
+   "id": "doc.jours.lundi_samedi",
+   "information": "La page propose des plans distincts pour le lundi au samedi. Les lignes et horaires précis sont dans les PDF.",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « Consulter les plans du lundi au samedi »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau VITALIS ; Réseau, plans du lundi au samedi ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+    "extrait": "Consulter les plans du lundi au samedi"
+   }
+  },
+  {
+   "id": "doc.verifier.itineraire",
+   "information": "La page Itinéraires du site officiel sert à calculer un trajet. Le formulaire de calcul n'est pas visible dans le texte lu.",
+   "source": "https://www.vitalis-poitiers.fr/itineraires/ (extrait vérifié le 2026-10-14 : « Optimisez vos déplacements et trouvez le trajet qui vous convient ! »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau VITALIS ; Réseau Vitalis ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.vitalis-poitiers.fr/itineraires/",
+    "extrait": "Optimisez vos déplacements et trouvez le trajet qui vous convient !"
+   }
   }
  ],
  "recherches": [
   {
+   "sujet": "Tarification / gratuité",
+   "statut": "introuvable",
+   "source": "https://www.vitalis-poitiers.fr/tarifs/",
+   "consulte_le": "2026-10-14",
+   "note": "Les pages lues (accueil, tarifs) ne disent rien sur la gratuité. Le contenu de la page tarifs n'a pas été restitué. Ce n'est pas une preuve d'absence de gratuité. Page « tarifs réduits selon les revenus » non consultée : https://www.vitalis-poitiers.fr/news/les-tarifs-reduits-selon-les-revenus/"
+  },
+  {
+   "sujet": "Temps réel",
+   "statut": "introuvable",
+   "source": "https://www.vitalis-poitiers.fr",
+   "consulte_le": "2026-10-14",
+   "note": "L'accueil ne mentionne pas de temps réel. Une application mobile et le service Allobus (05 49 44 66 88) sont signalés. Les horaires par ligne n'ont pas été lus."
+  },
+  {
+   "sujet": "Fréquences par ligne",
+   "statut": "non vérifié",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+   "consulte_le": "2026-10-14",
+   "note": "Les fiches horaires sont des PDF non ouverts. Aucune fréquence n'est enregistrée."
+  },
+  {
+   "sujet": "Samedi : détail des lignes",
+   "statut": "non vérifié",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+   "consulte_le": "2026-10-14",
+   "note": "Seuls des plans du lundi au samedi sont cités, sans détail par ligne."
+  },
+  {
+   "sujet": "Les fiches horaires par ligne sont en PDF sur la page Lignes et horaires. Ce son",
+   "statut": "non vérifié",
+   "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/",
+   "consulte_le": "2026-10-14",
+   "note": "extrait introuvable sur la page"
+  },
+  {
    "sujet": "tarification (gratuité, abonnements, exceptions)",
-   "statut": "non recherché",
+   "statut": "introuvable",
    "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-  },
-  {
-   "sujet": "jours et périodes de circulation des lignes urbaines",
-   "statut": "non recherché",
-   "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-  },
-  {
-   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-   "statut": "non recherché",
-   "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   "consulte_le": "2026-10-14",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
   },
   {
    "sujet": "vélo ou gare (seulement si directement utile au logement)",
    "statut": "non recherché",
    "source": "",
-   "consulte_le": "",
+   "consulte_le": "2026-10-14",
    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
   }
  ],

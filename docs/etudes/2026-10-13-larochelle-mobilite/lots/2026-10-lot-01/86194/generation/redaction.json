@@ -1,0 +1,93 @@
+{
+ "etape": "redaction",
+ "cle": "891e0f20292818d6",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "high",
+ "consignes_sha": "7dc2ca0c244ec27a",
+ "entree_sha": "06df3222f4ce4715",
+ "debut": "2026-10-14T14:44:27Z",
+ "duree_s": 116.4,
+ "code_retour": 0,
+ "session": "a6756b2d-ef4e-42c7-8829-4d9d7b4496fb",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 40233,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 13271,
+  "output_tokens_details": {
+   "thinking_tokens": 6773
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 40233,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 13271,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 40233,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 40233
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.5872919999999999,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "Glob",
+   "Read"
+  ],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-zw6un_4n",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-zw6un-4n/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": [
+   "complement.json",
+   "comparaison_voiture.json",
+   "58ef2cefa3a7293d49c4e178.json"
+  ]
+ },
+ "appels_outils": [],
+ "refus": 0
+}

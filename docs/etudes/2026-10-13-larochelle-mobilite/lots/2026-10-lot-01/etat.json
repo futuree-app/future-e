@@ -4,7 +4,7 @@
    "nom": "Poitiers",
    "insee": "86194",
    "demande": "Poitiers",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -20,16 +20,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:31:37Z",
-     "duree_s": 0.9
+     "fin": "2026-10-14T14:42:07Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:30:42Z",
+     "fin": "2026-10-14T14:42:07Z",
      "duree_s": 0.1,
-     "complement_sha": "607aed3f33e67a07",
+     "complement_sha": "34d8b0d9947150a9",
      "duree_calcul_s": 0.1,
-     "dossier_sha": "8b88cc65e4c00a2c"
+     "dossier_sha": "d47faaea4b7f07d9"
     }
    },
    "manuel": [
@@ -42,7 +42,56 @@
    "notes": [
     "35 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 34.9
+   "duree_preparation_s": 34.9,
+   "versions": {
+    "prompt_redaction": "7dc2ca0c244ec27a",
+    "relecture": "0bc9cb7d9c41f9f2",
+    "correction": "ec2a42db105c2658",
+    "dossier": "d47faaea4b7f07d9",
+    "moteur": "claude-code",
+    "modeles": {
+     "redaction": "claude-opus-5-5",
+     "relecture": "claude-opus-5-5",
+     "correction": "claude-opus-5-5",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "barres_lieu_travail_86194_clair.png",
+     "barres_lieu_travail_86194_clair.svg",
+     "barres_lieu_travail_86194_mobile_clair.png",
+     "barres_lieu_travail_86194_mobile_clair.svg",
+     "barres_lieu_travail_86194_mobile_sombre.png",
+     "barres_lieu_travail_86194_mobile_sombre.svg",
+     "barres_lieu_travail_86194_sombre.png",
+     "barres_lieu_travail_86194_sombre.svg",
+     "carte_iris_86194_clair.png",
+     "carte_iris_86194_clair.svg",
+     "carte_iris_86194_mobile_clair.png",
+     "carte_iris_86194_mobile_clair.svg",
+     "carte_iris_86194_mobile_sombre.png",
+     "carte_iris_86194_mobile_sombre.svg",
+     "carte_iris_86194_sombre.png",
+     "carte_iris_86194_sombre.svg",
+     "tableau_iris_86194.html",
+     "tableau_iris_86194.md"
+    ],
+    "reperes": [
+     "861940104",
+     "861940103",
+     "861940803",
+     "861940105",
+     "861940106",
+     "861940404",
+     "861940503",
+     "861940605",
+     "861940101"
+    ]
+   }
   },
   "49007": {
    "nom": "Angers",

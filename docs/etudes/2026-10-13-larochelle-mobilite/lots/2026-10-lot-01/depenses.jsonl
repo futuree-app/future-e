@@ -1,0 +1,4 @@
+{"date": "2026-10-14T14:42:04Z", "commune": "86194", "etape": "collecte", "outil": "claude-code", "modele": "claude-sonnet-5-5", "cout_usd_equivalent": 0.0524091, "duree_s": 41.7, "cle": "f0f8b02f96faecd1"}
+{"date": "2026-10-14T14:44:27Z", "commune": "86194", "etape": "redaction", "outil": "claude-code", "modele": "claude-opus-5-5", "cout_usd_equivalent": 0.5872919999999999, "duree_s": 116.4, "cle": "891e0f20292818d6"}
+{"date": "2026-10-14T14:45:36Z", "commune": "86194", "etape": "relecture", "outil": "claude-code", "modele": "claude-opus-5-5", "cout_usd_equivalent": 0.4982416, "duree_s": 68.4, "cle": "2e8fcd10b876f5ed"}
+{"date": "2026-10-14T14:47:03Z", "commune": "86194", "etape": "correction", "outil": "claude-code", "modele": "claude-opus-5-5", "cout_usd_equivalent": 0.57612, "duree_s": 87.2, "cle": "0e1c963e1ead60da"}
