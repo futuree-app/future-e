@@ -30,6 +30,8 @@ import type { DpeRecord } from "@/lib/dpe";
 import type { UserProject } from "@/lib/user-project";
 import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types";
 import type { ReactNode } from "react";
+import { TemoinDeRendu } from "@/components/interaction/TemoinDeRendu";
+import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, selectionDpeChangeeLe, permis, snapshotAutour, relationAdresse, communeFacts, communeDossier, logementLink, insee,
@@ -221,6 +223,9 @@ export async function DossierAvecLogement({
 
   return (
     <>
+      {/* FUT-93 : DANS la section du bien, derrière la frontière exposée à la course, et EN TÊTE. Son
+          jeton n'est validé que si une relecture l'a été : `relireLaPage` le surveille. Il ne rend rien. */}
+      <TemoinDeRendu jeton={jetonDeRendu()} />
       {avis ? (
         <p className={`${espacement ?? "mt-14"} text-[13px] leading-relaxed text-muted glass rounded-xl px-4 py-3`}>{avis}</p>
       ) : null}

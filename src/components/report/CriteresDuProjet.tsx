@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { relireLaPage } from "@/components/interaction/relire-la-page";
 import type { CritereVue, OptionDePrecision, Portee } from "@/lib/decision/projet-criteres-vue";
 
 // LES CRITÈRES DU PROJET, UN PAR LIGNE (FUT-8, §8.1).
@@ -84,7 +85,7 @@ function LigneCritere({ c }: { c: CritereVue }) {
     }
     setConfirmation(false);
     setOption(null);
-    router.refresh();
+    relireLaPage(router);
   }
 
   function confirmer() {

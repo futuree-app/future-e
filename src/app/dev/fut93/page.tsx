@@ -28,6 +28,7 @@ import { CriteresDuProjet } from "@/components/report/CriteresDuProjet";
 import { LienAvecCeBien } from "@/components/report/LienAvecCeBien";
 import { vueCriteres, type CritereVue } from "@/lib/decision/projet-criteres-vue";
 import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
+import { TemoinDeRendu } from "@/components/interaction/TemoinDeRendu";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +106,8 @@ async function SectionDuBien({ sp, presentation }: { sp: Params; presentation: "
   const actions = sp.actions === "1";
   return (
     <>
+    {/* Comme `DossierAvecLogement` : le témoin que surveille `relireLaPage`, en tête de section. */}
+    <TemoinDeRendu jeton={jetonDeRendu()} />
     <Sonde version={v} jeton={jeton} />
     {sp.narration ? (
       <Suspense key={`narration:${jetonDeRendu()}`} fallback={<div data-banc="repli"><ConclusionBlock plan={t.dossier.narrativePlan} blocks={planToBlocks(t.dossier.narrativePlan)} /></div>}>
