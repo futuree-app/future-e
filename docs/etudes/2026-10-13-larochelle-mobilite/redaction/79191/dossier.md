@@ -1,6 +1,6 @@
 # Dossier d'entrée de rédaction · Niort (79191)
 
-Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T09:45:04Z par `outil/dossier_redaction.py`.
+Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T12:43:03Z par `outil/dossier_redaction.py`.
 
 Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifiant stable (colonne `id`) : c'est lui que cite la correspondance interne du brouillon. Un fait qui n'est pas ici n'existe pas pour l'article.
 
@@ -13,6 +13,8 @@ Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifi
 | `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |
 | `absent` | pas de donnée, ou secteur exclu | `non` |
 
+Les **informations documentaires** (section 2 bis, identifiants `doc.*`) ne sont pas des résultats calculés : elles ont leur propre colonne Usage (`oui`, `avec ses conditions`, `non`).
+
 **Populations.** Trois populations distinctes, à ne pas mélanger : les **actifs** occupés (pratiques domicile-travail, fichier MOBPRO et base IRIS Activité), les **ménages** (voiture, stationnement, base IRIS Logement), les **adresses** (proximité des équipements, Base adresse nationale). Une part d'adresses n'est pas une part de ménages ni d'habitants.
 
 ## 1. Périmètres exacts
@@ -21,7 +23,7 @@ Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifi
 - **Groupe de communes nommé** : Chauray (79081), Aiffres (79003) et Bessines (79034). Origine de cette liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3). Présenter ce groupe avec cette liste exacte la première fois qu'il apparaît ; ensuite « ces trois communes » suffit. Ce groupe n'est pas « toutes les communes limitrophes » ni « les communes voisines » en général.
 - **Unité urbaine INSEE** : code 79501 ; sa composition n'est pas dans la fiche.
 - **Secteurs** : IRIS de l'INSEE ; leurs noms ne sont pas toujours ceux des quartiers d'usage.
-- **Bus** : GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s)). Réseau et jour de référence non validés : tous les faits bus sont en attente de validation et ne s'écrivent pas.
+- **Bus** : GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s)). Réseau et jour de référence non validés : tous les faits bus sont en attente de validation et ne s'écrivent pas. Les informations publiées par le réseau (section 2 bis) ne les valident pas et n'en tiennent pas lieu.
 
 ## 2. Faits
 
@@ -99,6 +101,22 @@ Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifi
 - `iris.menages_commune.*` : Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO.
 - `acces.adresses.*` : Part d'adresses, pas de ménages ni d'habitants. Proximité d'un équipement ≠ son usage. Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance. Point BPE = adresse de l'établissement, pas son entrée. Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet.
 - `carburant.evolution.*` : Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil. Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas. Une hausse passée ne dit rien de l'avenir.
+
+## 2 bis. Informations documentaires (non calculées)
+
+Informations publiées par des sources officielles, recopiées à la main et datées (consultation : 2026-10-14 ; fichier `redaction/79191/complement.json`). Ce ne sont **pas** des résultats calculés : aucune fréquence, aucun temps de trajet, aucune desserte d'adresse n'en est tirée, et tu n'en tires aucun. Elles servent la question « utiliser moins sa voiture » ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité de se passer d'une deuxième voiture ou de vivre sans voiture.
+
+Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si elle est utile ; `avec ses conditions` = à n'écrire qu'avec toutes ses conditions (public, horaires, réservation), sinon à laisser ; `non` = ne pas écrire. La colonne « À ne pas en déduire » s'applique toujours.
+
+| id | Information | Source | Consulté le | Validité | Périmètre | Usage | À ne pas en déduire |
+|---|---|---|---|---|---|---|---|
+| `doc.tanlib.gratuite` | Le réseau de bus Tanlib est gratuit pour tout le monde depuis le 1er septembre 2017. La page liste comme gratuits : lignes urbaines 1 à 10, Navette Centre-Ville, Navette Colline Saint-André, Tanlib Express 1, 2 et 3, lignes périurbaines 20, 21, 22, 24, 25 et 26, lignes scolaires, services Flex (sur réservation), lignes régionales 144 à 149 « à l'intérieur des communes de la Communauté d'Agglomération du Niortais ». | tanlib.com, « Réseau de bus 100 % gratuit » : https://www.tanlib.com/a-reseau-de-bus-100-gratuit-7/ | 2026-10-14 | en vigueur à la consultation (depuis le 01/09/2017) | réseau Tanlib, communes de Niort Agglo | `oui` | La gratuité porte sur le prix, pas sur la desserte : elle ne dit ni qu'une ligne passe près d'une adresse, ni qu'un trajet est faisable ou pratique. |
+| `doc.tanlib.gratuite.regionales` | Sur les lignes régionales 144 à 149, la gratuité ne vaut qu'à l'intérieur de l'agglomération. La ligne 140E (La Rochelle – Niort) n'est pas dans la liste de la page. | même page que doc.tanlib.gratuite | 2026-10-14 | en vigueur à la consultation | lignes régionales | `avec ses conditions` |  |
+| `doc.tanlib.urbaines.jours` | Les fiches horaires des lignes urbaines 1 à 9 portent « Ne circule pas les dimanches et jours fériés » ; celle de la ligne 10, « Ne circule pas les week-end et jours fériés ». | fiches horaires PDF https://www.tanlib.com/dl/ligne-1.pdf à https://www.tanlib.com/dl/ligne-10.pdf (fichiers du 02/10/2026) | 2026-10-14 | « Horaires valables à partir du 1er septembre 2026 » (fiches 1 à 10) | lignes urbaines 1 à 10 ; navettes, Tanlib Express et lignes périurbaines non vérifiées | `oui` | Ne pas étendre aux navettes ni aux lignes périurbaines. |
+| `doc.tanlib.fiches.periodes` | La fiche de la ligne 1 donne des grilles distinctes du lundi au vendredi et du samedi ; certaines courses ne circulent qu'en période scolaire, d'autres qu'en vacances scolaires. Elle précise : « Horaires indicatifs. La circulation et ses aléas peuvent modifier les horaires. » | https://www.tanlib.com/dl/ligne-1.pdf | 2026-10-14 | à partir du 01/09/2026 | ligne 1 seulement : exemple de présentation, pas une règle vérifiée sur tout le réseau | `oui` | Pour le réseau, écrire au plus que les horaires du samedi ou des vacances « peuvent différer » ; aucun chiffre de fréquence. |
+| `doc.tanlib.verifier` | Pour vérifier un trajet : calcul d'itinéraire en bus sur tanlib.com, fiches horaires par ligne, horaires en temps réel par QR code aux arrêts et dans l'appli Tanlib. | https://www.tanlib.com/itineraire-bus/ ; https://www.tanlib.com/horaires-par-ligne/ ; fiche ligne 1 (encadré « Horaires temps réel ») | 2026-10-14 | non précisée | réseau Tanlib | `oui` |  |
+| `doc.tanlib.navette_gare_dimanche` | Navette du dimanche soir : départs de la gare de Niort le dimanche de 18 h à 21 h, vers les arrêts de la ville de Niort uniquement, horaires calés sur l'arrivée des trains ; gratuite et sans réservation. | « Flex Gares et Navette Gare Niort du dimanche soir » : https://www.tanlib.com/a-services-gares-1012/ | 2026-10-14 | en vigueur à la consultation | gare de Niort vers les arrêts de Niort | `avec ses conditions` |  |
+| `doc.tanlib.flex_actifs` | Service Flex Actifs : sur réservation, après une convention entre la personne, son employeur et Tanlib ; du lundi au vendredi de 4 h 45 à 23 h 30 (sauf jours fériés), vers les zones d'activités aux abords des arrêts Brèche et Hôpital ; l'arrêt Hôpital est aussi desservi le samedi et le dimanche pour le personnel hospitalier. | https://www.tanlib.com/a-service-flex-actifs-1014/ | 2026-10-14 | en vigueur à la consultation | personnes dont l'employeur a signé la convention | `avec ses conditions` | Ne rien dire des employeurs qui l'ont signée : la page ne le dit pas. |
 
 ## 3. Secteurs (IRIS)
 
@@ -200,6 +218,11 @@ Hypothèses (à écrire dans l'article) : 6 L/100 km, 200 allers-retours domicil
 - Usage réel des équipements (où l'on fait ses courses, où vont les enfants) : aucune source.
 - Réaction des habitants à la hausse du carburant : les pratiques datent de 2022, les prix de 2025-2026.
 - Contrôle de la hausse sur les mêmes stations : non fait par l'outil (scripts/13 pour La Rochelle).
+- Information documentaire non retenue : fréquences, amplitudes, premiers et derniers départs : lisibles dans les fiches, mais en tirer une fréquence serait un calcul non contrôlé ; relève des faits bus calculés, en attente de validation.
+- Information documentaire non retenue : jours de circulation des navettes Centre-Ville et Colline Saint-André, des Tanlib Express et des lignes périurbaines : non vérifiés (fiches non consultées).
+- Information documentaire non retenue : gratuité de la ligne 140E vers La Rochelle : évoquée dans une délibération de Niort Agglo d'avril 2025 ; arrêts concernés et état actuel non confirmés sur le site du réseau ; recherche disproportionnée.
+- Information documentaire non retenue : vélo (libre-service, location de vélos à assistance électrique, itinéraire vélo) : existence seule, sans information qui réponde à la question du logement.
+- Information documentaire non retenue : gare : rien d'utile au-delà de la navette du dimanche soir.
 
 ## 9. Visuels disponibles ou réalisables
 

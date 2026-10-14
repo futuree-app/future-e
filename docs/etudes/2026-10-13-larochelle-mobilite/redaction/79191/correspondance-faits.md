@@ -1,6 +1,6 @@
 # Correspondance des chiffres de l'article Niort avec le dossier
 
-Document interne : ne figure pas dans l'article. Version courante : `article.md` (passe éditoriale du 14/10/2026), version éditée de l'essai 2 (`essais/2026-10-13-essai-2.md`). Identifiants et valeurs : `dossier.json` (même contenu que `dossier.md`, commit `ec131595`). Tous les faits cités ont l'usage `oui` ; aucun fait bus calculé, fragile ou absent. Depuis le 14/10/2026, le passage sur le bus s'appuie sur le complément documentaire `complement-alternatives.md` (informations publiées par le réseau, distinctes des résultats calculés).
+Document interne : ne figure pas dans l'article. Version courante : `article.md` (passe éditoriale du 14/10/2026), version éditée de l'essai 2 (`essais/2026-10-13-essai-2.md`). Identifiants et valeurs : `dossier.json` (même contenu que `dossier.md`, commit `ec131595`). Tous les faits cités ont l'usage `oui` ; aucun fait bus calculé, fragile ou absent. Depuis le 14/10/2026, le passage sur le bus s'appuie sur le complément documentaire `complement.json`, intégré au dossier en section 2 bis (informations publiées par le réseau, distinctes des résultats calculés).
 
 ## Corrections apportées à l'essai 2
 

@@ -9,7 +9,10 @@ Ne calcule AUCUNE donnée nouvelle. Il relit `fiche.json` et :
   2. pré-calcule les seules opérations dont l'IA de rédaction aurait besoin (écarts en points, scénario de carburant à
      hypothèses fixes), pour qu'il n'ait jamais à calculer ;
   3. liste les faits ABSENTS de la fiche (pour qu'ils ne soient pas reconstitués de mémoire) ;
-  4. joint les paramètres éditoriaux (`redaction/parametres_editoriaux.md`) et la voix (section 2 de NOTE_EDITORIALE.md).
+  4. joint les paramètres éditoriaux (`redaction/parametres_editoriaux.md`) et la voix (section 2 de NOTE_EDITORIALE.md) ;
+  5. joint, s'il existe, le complément documentaire de la commune (`<out>/complement.json`, informations publiées par
+     des sources officielles, datées, NON calculées ; format et procédure : redaction/COMPLEMENT_DOCUMENTAIRE.md).
+     Le format est contrôlé : un fait sans source, date, périmètre ou usage valide arrête la génération.
 
 Statut :
   - MOBPRO : ≥ 150 lignes d'échantillon → utilisable ; 40 à 149 → fragile ; < 40 → absent (masqué). Seuils de la fiche.
@@ -25,6 +28,8 @@ chaque secteur compte selon son nombre de ménages. Ce n'est pas une part de mé
 
     python outil/dossier_redaction.py --fiche fiches/79191/fiche.json --out redaction/79191 \
         --origine-voisines "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées"
+
+Le complément entre dans la section « 2 bis » ; ses informations écartées rejoignent les faits absents (section 8).
 
 Sorties : dossier.md (à donner seul à l'IA de rédaction) et dossier.json (mêmes faits, pour un contrôle machine).
 """
@@ -53,6 +58,30 @@ VOL = " (à vol d'oiseau)"
 MOTIF_BUS = "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi"
 ADR_COMMUNE = ("toutes les adresses BAN de {nom}, chaque secteur (IRIS) pesant selon son nombre de ménages "
                "(poids d'une adresse = ménages de son IRIS / adresses de son IRIS)")
+USAGES_DOC = ("oui", "avec ses conditions", "non")
+CHAMPS_DOC = ("id", "information", "source", "consulte_le", "validite", "perimetre", "usage")
+
+
+def complement(chemin):
+    """Relit et contrôle le complément documentaire (format : redaction/COMPLEMENT_DOCUMENTAIRE.md). Ne calcule rien."""
+    if not chemin or not os.path.exists(chemin):
+        return None
+    brut = open(chemin, "rb").read(); c = json.loads(brut)
+    erreurs = []
+    for i, f in enumerate(c.get("faits", [])):
+        manque = [k for k in CHAMPS_DOC if not str(f.get(k, "")).strip()]
+        if manque: erreurs.append(f"fait {f.get('id', i)} : champ(s) vide(s) {', '.join(manque)}")
+        if not str(f.get("id", "")).startswith("doc."): erreurs.append(f"fait {f.get('id', i)} : l'identifiant doit commencer par « doc. »")
+        if f.get("usage") not in USAGES_DOC: erreurs.append(f"fait {f.get('id', i)} : usage « {f.get('usage')} » hors de {USAGES_DOC}")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(f.get("consulte_le", ""))): erreurs.append(f"fait {f.get('id', i)} : consulte_le au format AAAA-MM-JJ")
+    for e in c.get("ecartes", []):
+        if not (e.get("sujet") and e.get("raison")): erreurs.append(f"écarté sans sujet ou sans raison : {e}")
+    if erreurs:
+        raise SystemExit(f"{chemin} : complément documentaire invalide\n  " + "\n  ".join(erreurs))
+    c["chemin"] = chemin; c["sha256"] = hashlib.sha256(brut).hexdigest()
+    return c
+
+
 # Scénario de carburant : MÊMES hypothèses que l'article pilote (scripts/11_scenarios_carburant.py).
 JOURS, CONSO, KMS = 200, 6.0, (5, 15, 35)
 
@@ -95,6 +124,7 @@ def main():
     p.add_argument("--fiche", required=True); p.add_argument("--out", required=True)
     p.add_argument("--origine-voisines", default="non enregistrée dans la fiche : à préciser avant rédaction",
                    help="comment la liste des voisines a été choisie (la fiche ne le dit pas)")
+    p.add_argument("--complement", help="complément documentaire (défaut : <out>/complement.json s'il existe)")
     a = p.parse_args()
     brut = open(a.fiche, "rb").read(); fiche = json.loads(brut)
     C = fiche["commune"]; nom, insee = C["nom"], C["insee"]
@@ -306,6 +336,9 @@ def main():
         verifs.append("`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. "
                       "Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication.")
     sources_gtfs = F.get("acces.adresses", {}).get("source", "")
+    doc = complement(a.complement or os.path.join(a.out, "complement.json"))
+    if doc:
+        absents += [(f"Information documentaire non retenue : {e['sujet']}", e["raison"]) for e in doc.get("ecartes", [])]
 
     dossier = {"commune": {"insee": insee, "nom": nom, "departement": C.get("dep"), "epci": C.get("epci"), "unite_urbaine": C.get("uu"),
                            "voisines": vois, "origine_voisines": a.origine_voisines},
@@ -316,11 +349,13 @@ def main():
                "voisines": T.get("voisines") or [], "acces_communes": T.get("acces_communes") or {},
                "scenario_carburant": {"hypotheses": {"jours_trajet_an": JOURS, "litres_100km": CONSO, "km_aller": KMS,
                                                      "hausse": "hausse médiane de la fiche arrondie à 5 centimes"}, "lignes": scen},
-               "absents": [{"fait": x, "raison": y} for x, y in absents], "visuels": visuels, "verifications_humaines": verifs}
+               "absents": [{"fait": x, "raison": y} for x, y in absents], "visuels": visuels, "verifications_humaines": verifs,
+               "complement_documentaire": doc}
     os.makedirs(a.out, exist_ok=True)
     json.dump(dossier, open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1)
     open(os.path.join(a.out, "dossier.md"), "w").write(rendu_md(dossier, sources_gtfs))
-    print(f"✓ {a.out}/dossier.md, dossier.json · {len(faits)} faits, {len(secteurs)} secteurs, {len(absents)} absents")
+    print(f"✓ {a.out}/dossier.md, dossier.json · {len(faits)} faits, {len(secteurs)} secteurs, {len(absents)} absents"
+          + (f", {len(doc['faits'])} informations documentaires ({doc['chemin']})" if doc else ", sans complément documentaire"))
 
 
 NOMBRES = {2: "deux", 3: "trois", 4: "quatre", 5: "cinq", 6: "six"}
@@ -339,6 +374,8 @@ def rendu_md(d, sources_gtfs):
          "| `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui de la réponse, avec la précision du motif |",
          "| `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |",
          "| `absent` | pas de donnée, ou secteur exclu | `non` |", "",
+         *(["Les **informations documentaires** (section 2 bis, identifiants `doc.*`) ne sont pas des résultats calculés : elles ont leur propre colonne Usage "
+            "(`oui`, `avec ses conditions`, `non`).", ""] if d.get("complement_documentaire") else []),
          "**Populations.** Trois populations distinctes, à ne pas mélanger : les **actifs** occupés (pratiques domicile-travail, fichier MOBPRO "
          "et base IRIS Activité), les **ménages** (voiture, stationnement, base IRIS Logement), les **adresses** (proximité des équipements, "
          "Base adresse nationale). Une part d'adresses n'est pas une part de ménages ni d'habitants.", "",
@@ -350,7 +387,8 @@ def rendu_md(d, sources_gtfs):
          f"- **Unité urbaine INSEE** : code {C['unite_urbaine']} ; sa composition n'est pas dans la fiche.",
          f"- **Secteurs** : IRIS de l'INSEE ; leurs noms ne sont pas toujours ceux des quartiers d'usage.",
          f"- **Bus** : {sources_gtfs.split(';')[-1].strip() if sources_gtfs else 'n.d.'}. Réseau et jour de référence non validés : "
-         "tous les faits bus sont en attente de validation et ne s'écrivent pas.", ""]
+         "tous les faits bus sont en attente de validation et ne s'écrivent pas."
+         + (" Les informations publiées par le réseau (section 2 bis) ne les valident pas et n'en tiennent pas lieu." if d.get("complement_documentaire") else ""), ""]
     L += ["## 2. Faits", "",
           "| id | Fait | Valeur | Population / dénominateur | Périmètre | Source, millésime | Statut | Usage |", "|---|---|---|---|---|---|---|---|"]
     for f in d["faits"]:
@@ -367,6 +405,18 @@ def rendu_md(d, sources_gtfs):
                 vus[f["fait_de_la_fiche"]].append(l)
     for k, ls in vus.items():
         L.append(f"- `{k}.*` : " + " ".join(ls))
+    doc = d.get("complement_documentaire")
+    if doc:
+        L += ["", "## 2 bis. Informations documentaires (non calculées)", "",
+              f"Informations publiées par des sources officielles, recopiées à la main et datées (consultation : {doc['consulte_le']} ; fichier `{doc['chemin']}`). "
+              "Ce ne sont **pas** des résultats calculés : aucune fréquence, aucun temps de trajet, aucune desserte d'adresse n'en est tirée, et tu n'en tires aucun. "
+              "Elles servent la question « utiliser moins sa voiture » ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité "
+              "de se passer d'une deuxième voiture ou de vivre sans voiture.", "",
+              "Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si elle est utile ; `avec ses conditions` = à n'écrire qu'avec toutes "
+              "ses conditions (public, horaires, réservation), sinon à laisser ; `non` = ne pas écrire. La colonne « À ne pas en déduire » s'applique toujours.", "",
+              "| id | Information | Source | Consulté le | Validité | Périmètre | Usage | À ne pas en déduire |", "|---|---|---|---|---|---|---|---|"]
+        for f in doc["faits"]:
+            L.append(f"| `{f['id']}` | {f['information']} | {f['source']} | {f['consulte_le']} | {f['validite']} | {f['perimetre']} | `{f['usage']}` | {f.get('consigne', '')} |")
     L += ["", "## 3. Secteurs (IRIS)", "",
           "Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés du secteur. Ménages sans voiture, stationnement réservé : "
           "**ménages** (résidences principales) du secteur. Panier 500 m : part des **adresses** du secteur (chaque adresse compte pareil) qui ont à la fois un commerce "

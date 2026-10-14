@@ -14,7 +14,8 @@ L'IA de rédaction sélectionne les faits, choisit un angle et écrit. Elle ne r
 | `parametres_editoriaux.md` | Lecteur, question, conditions obligatoires, indices éditoriaux (non décisionnels), capacités produit autorisées (recopiés dans chaque dossier) |
 | `<insee>/dossier.md` | Dossier d'entrée autonome : la seule matière de l'IA de rédaction |
 | `<insee>/dossier.json` | Les mêmes faits, pour vérifier la correspondance du brouillon à la machine |
-| `<insee>/complement-alternatives.md` | Facultatif, manuel : informations documentaires datées sur les alternatives (réseau de transport), distinctes des résultats calculés ; à joindre avec le dossier. Niort seulement (14/10/2026) |
+| `COMPLEMENT_DOCUMENTAIRE.md` | Consignes communes du complément documentaire : informations recherchées, sources, format, usage, absences, procédure courte |
+| `<insee>/complement.json` | Complément documentaire d'une commune (manuel, facultatif) : informations publiées par des sources officielles, datées, non calculées. `dossier_redaction.py` le contrôle et l'intègre au dossier (section 2 bis) ; l'IA ne reçoit toujours qu'un fichier. Niort : 14/10/2026 |
 | `../outil/dossier_redaction.py` | Adaptateur léger : fiche → dossier. Ne calcule aucune donnée ; éclate, étiquette (statut et usage), pré-calcule écarts et scénario |
 
 Statuts et usage : `utilisable` → `oui` ; `fragile` (faible précision statistique) → `ordre de grandeur` ; `en attente de validation` (vérification humaine non faite : réseau de bus, jour de référence) → `non`, valeur retirée du `.md` ; `absent` → `non`. Accès aux équipements : parts d'**adresses** BAN à vol d'oiseau (à la commune, chaque secteur pèse selon son nombre de ménages), pas des parts de ménages.
@@ -33,12 +34,14 @@ python outil/fiche_mobilite.py --insee $INSEE --jour $(date +%F) --out fiches/$I
   --index <checkout>/data/comparateur-index.json.gz
 # 2. Dossier d'entrée de rédaction (instantané)
 python outil/dossier_redaction.py --fiche fiches/$INSEE/fiche.json --out redaction/$INSEE \
-  --origine-voisines "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées"
+  --origine-voisines "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+# 3. Facultatif, avant l'étape 2 : complément documentaire redaction/$INSEE/complement.json (COMPLEMENT_DOCUMENTAIRE.md),
+#    repris automatiquement par l'étape 2 s'il existe.
 ```
 
 Si les voisines ont été choisies à la main (`--voisines` à l'étape 1), le dire dans `--origine-voisines`, avec la raison.
 
-Pour Niort, la fiche du 13/10/2026 existe déjà : seule l'étape 2 a été lancée (dossier régénéré le 13/10/2026 après correction des consignes ; valeurs identiques à la fiche, seuls les faits bus passent « en attente de validation »).
+Pour Niort, la fiche du 13/10/2026 existe déjà : seule l'étape 2 a été lancée (dossier régénéré le 13/10/2026 après correction des consignes ; valeurs identiques à la fiche, seuls les faits bus passent « en attente de validation »). Régénéré le 14/10/2026 avec `79191/complement.json` : faits calculés identiques (`faits`, secteurs, scénario) ; s'ajoutent la section 2 bis (sept informations documentaires) et cinq informations écartées dans les absents. Les essais 1 et 2 avaient été écrits sans complément.
 
 ## Lancer le test (session vierge)
 
@@ -60,6 +63,7 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Faits atomiques, identifiants, statuts, périmètres nommés, faits absents, scénario carburant | **Automatisé** (`dossier_redaction.py`) |
 | Carte par secteur et tableau accessible | **Semi-automatisé** : `visuels/generer_visuels.py --insee … --classes <borne>` (pour Niort, `--classes 0.45`) ; libellés des secteurs à poser à la main |
 | Choix des communes comparées et sa raison | **Manuel** (la fiche prend l'unité urbaine par défaut et n'enregistre pas l'origine de la liste) |
+| Complément documentaire (gratuité, jours de circulation, où vérifier un trajet) | **Manuel** : collecte sur les sites officiels selon `COMPLEMENT_DOCUMENTAIRE.md` (une heure au plus) ; contrôle du format et intégration au dossier **automatiques** ; pages citées à recontrôler avant publication |
 | Vérification du réseau de bus et du jour de référence | **Manuel** : tant qu'elle n'est pas faite, les faits « bus » sont `en attente de validation` (usage `non`) |
 | Relecture des libellés d'IRIS avant de les écrire comme noms de quartiers | **Manuel** |
 | Contrôle de la hausse du carburant sur les mêmes stations | **Manuel** (`scripts/13` a été écrit pour La Rochelle) ; réextraire les prix la veille de la publication |
