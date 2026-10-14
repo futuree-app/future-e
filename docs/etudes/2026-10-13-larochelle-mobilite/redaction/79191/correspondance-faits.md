@@ -78,7 +78,7 @@ Trame commune avec La Rochelle. Nouvel ordre : carburant et distance (ex-section
 
 | Passage | Chiffre | Identifiant | Valeur |
 |---|---|---|---|
-| Secteurs, phrase sur les 70 % | « à peu près la médiane (68 %) … » | `comparaison.voiture.mediane_groupe` (et `comparaison.voiture.ecart`, +2 points, non écrit) | 0,6754 ; 76 communes (`fiches/79191/comparaison_voiture.json`) |
+| Secteurs, phrase sur les 70 % | « à peu près autant que dans les villes de taille proche (médiane : 68 %) », renvoi à la méthode | `comparaison.voiture.mediane_groupe` (et `comparaison.voiture.ecart`, +2 points, non écrit) | 0,6754 ; 76 communes (`fiches/79191/comparaison_voiture.json`) |
 | Méthode | 76 communes ; règle | `comparaison.voiture.groupe_n` ; règle de `outil/comparaison_voiture.py` | |
 
 « Ce repère cache » devient « Ce chiffre d'ensemble cache » (le mot « repère » désigne désormais la comparaison).

@@ -313,9 +313,9 @@ def main():
                  "affichage": f"{cmp['ecart_points']:+d} points", "usage": "oui"},
                 {"id": "comparaison.voiture.groupe_n", "fait": "Nombre de communes du groupe", "affichage": str(g["n"]), "usage": "oui"}]
     absents = [
-        (("Rang, palmarès ou toute comparaison avec d'autres communes autre que le repère de la section 4 bis" if cmp and cmp["disponible"]
+        (("Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit" if cmp and cmp["disponible"]
           else "Rang ou comparaison avec d'autres communes françaises (vélo, voiture, « taille comparable »)"),
-         ("seul ce repère est calculé, avec sa règle ; rien d'autre (vélo, rang, autre groupe)" if cmp and cmp["disponible"]
+         ("seules les comparaisons calculées et documentées dans le dossier s'écrivent" if cmp and cmp["disponible"]
           else (cmp["raison"] if cmp else "repère non calculé pour cette commune (outil/comparaison_voiture.py)"))),
         ("Population totale de la commune, nombre de ménages de la commune", "non exposés par la fiche"),
         ("Composition de l'unité urbaine (liste et nombre de communes)", "la fiche ne donne que son code"),
@@ -478,8 +478,9 @@ def rendu_md(d, sources_gtfs):
               f"Règle de sélection, fixée avant de regarder les résultats et identique pour toutes les communes : {cmp['regle']['texte']}. "
               f"Indicateur : {cmp['definition']['indicateur']} ; population : {cmp['definition']['population']} ; {cmp['definition']['source']}, {cmp['definition']['millesime']}. "
               f"Le rôle est une approximation ({cmp['regle']['approximation_role']}).", "",
-              "Comment l'écrire : nommer le groupe par sa règle (par exemple « les villes de taille proche qui sont, comme elle, la commune principale de leur "
-              "unité urbaine »), sans dire qu'elles sont comparables sur tous les plans. La médiane est celle des parts communales, chaque commune comptant "
+              "C'est la référence commune de la série pour comparer l'usage de la voiture. Comment l'écrire : dans le récit, la valeur locale et la médiane, avec un nom court "
+              "(« les villes de taille proche ») et un renvoi à la méthode, où la règle est donnée en entier ; jamais « comparables sur tous les plans ». "
+              "Le seuil de 150 lignes est un critère d'inclusion, pas une garantie de précision. La médiane est celle des parts communales, chaque commune comptant "
               "une fois : ce n'est pas la part de voiture de l'ensemble de leurs habitants. Pas de rang, pas de palmarès, pas de liste de villes dans l'article. "
               "Un écart de quelques points dit seulement que la commune est proche de la médiane ; s'il n'apporte rien à la question, le repère reste dehors.", "",
               "| id | Fait | Valeur | Usage |", "|---|---|---|---|"]

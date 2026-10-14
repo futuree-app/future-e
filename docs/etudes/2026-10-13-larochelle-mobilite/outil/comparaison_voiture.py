@@ -16,7 +16,8 @@ Règle de sélection (fixée le 14/10/2026 avant tout calcul de part de voiture 
      rôle. Ce n'est pas le statut INSEE de ville-centre (absent des données du dépôt) : c'est une approximation simple.
   3. Taille proche : actifs occupés résidents compris entre la moitié et le double de ceux de la commune étudiée
      (bornes incluses).
-  4. Précision : au moins 150 lignes d'échantillon dans la commune (seuil « utilisable » des faits MOBPRO de la fiche).
+  4. Critère d'inclusion : au moins 150 lignes d'échantillon dans la commune (seuil « utilisable » des faits MOBPRO de la
+     fiche). Ce n'est pas une garantie de précision statistique de la part communale.
   5. La commune étudiée est exclue de son groupe.
   6. Groupe de moins de 10 communes : repère INDISPONIBLE ; les critères ne sont pas élargis.
   Périmètre : France métropolitaine, Corse incluse (celui de l'index) ; DROM exclus.

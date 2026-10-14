@@ -16,7 +16,7 @@ Ce calcul vaut pour qui fait le trajet en voiture. Reste à savoir qui le fait :
 
 ## Du Centre à Surimeau-Antes Cholette, de 49 % à 87 %
 
-Parmi les actifs qui habitent Niort, 70 % vont travailler principalement en voiture, soit à peu près la médiane (68 %) des villes de taille proche qui sont, comme elle, la commune principale de leur agglomération. Ce chiffre d'ensemble cache des secteurs très différents : la voiture est le mode principal de 49 % des actifs qui habitent le secteur Centre, où qu'ils travaillent, de 86 % à Saint-Liguaire-Nantes et de 87 % à Surimeau-Antes Cholette. La carte situe tous les autres.
+Parmi les actifs qui habitent Niort, 70 % vont travailler principalement en voiture, à peu près autant que dans les villes de taille proche (médiane : 68 % ; groupe précisé dans « Méthode et sources »). Ce chiffre d'ensemble cache des secteurs très différents : la voiture est le mode principal de 49 % des actifs qui habitent le secteur Centre, où qu'ils travaillent, de 86 % à Saint-Liguaire-Nantes et de 87 % à Surimeau-Antes Cholette. La carte situe tous les autres.
 
 [CARTE : Aller travailler en voiture, secteur par secteur]
 
@@ -53,7 +53,7 @@ Se rapprocher de son travail, préparer sa retraite, s'installer en famille : se
 ### Méthode et sources
 
 - **Pratiques domicile-travail.** INSEE, recensement de la population 2022 (collectes 2020 à 2024). Le fichier détail Mobilités professionnelles sert pour la commune et les lieux de travail. Les bases infracommunales Activité des résidents et Logement servent pour les secteurs. Il s'agit du mode principal des actifs occupés de 15 ans ou plus, pour les seuls trajets domicile-travail. Ce sont des estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés. Les actifs comparés selon leur commune de travail forment des groupes distincts : l'écart décrit leurs pratiques, pas l'effet d'un changement d'emploi. Les parts par secteur portent sur tous les actifs qui y habitent, quelle que soit leur commune de travail ; secteurs et communes de travail ne sont pas croisés.
-- **Repère de comparaison.** Médiane des parts communales de 76 communes de France métropolitaine qui sont la commune principale de leur unité urbaine (la plus grande par le nombre d'actifs occupés résidents) et comptent de la moitié au double des actifs occupés de Niort, Niort exclue ; même source, même population. Chaque commune compte une fois : ce n'est pas la part de l'ensemble de leurs habitants.
+- **Repère de comparaison.** Médiane des parts communales de 76 communes de France métropolitaine qui sont la commune principale de leur unité urbaine (la plus grande par le nombre d'actifs occupés résidents) et comptent de la moitié au double des actifs occupés de Niort, avec au moins 150 réponses au recensement (critère d'inclusion), Niort exclue ; même source, même population. Chaque commune compte une fois : ce n'est pas la part de l'ensemble de leurs habitants.
 - **Secteurs.** Ce sont les IRIS de l'INSEE, dont les noms ne sont pas toujours ceux des quartiers d'usage. Seuls les secteurs d'habitat d'au moins 300 actifs sont retenus ; les zones d'activités sont exclues.
 - **Ménages.** Toutes les résidences principales, retraités et étudiants compris.
 - **Équipements.** INSEE, Base permanente des équipements 2025, et Base adresse nationale. Parts d'adresses du secteur. Les distances sont à vol d'oiseau ; le trajet à pied réel peut être nettement plus long.
