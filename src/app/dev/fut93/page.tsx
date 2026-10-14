@@ -5,6 +5,10 @@
 // la version servie. La route du banc (`api/actualiser`) écrit réellement la version suivante.
 //   vue=classique|releve   lent=ms   persiste=1 (le bandeau reste après la mise à jour)
 //   statut=pending   contenu=sonde   sansSuspense=1   (bissection du diagnostic, voir le compte rendu)
+//   actions=1   sous le dossier, les vrais `CriteresDuProjet` et `LienAvecCeBien` (requêtes redirigées vers
+//               `api/geste` par le script de test) : le bandeau du dossier dit ce que le geste a changé
+//   narration=ms   au-dessus du dossier, une conclusion « rédigée » simulée, différente de son repli et
+//                  servie `ms` après lui, sous la même clé par rendu que la vraie : mesure du clignotement
 // Les vrais composants de production (`DossierDecisionSection`, `AnalyseAncienProjet`, `BoutonAction`).
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -20,10 +24,14 @@ import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
 import { dossierDeTest } from "../fut87/dossier-de-test";
 import { etatBanc, versionServie } from "./etat";
 import { Sonde, SondeInterne } from "./Sonde";
+import { CriteresDuProjet } from "@/components/report/CriteresDuProjet";
+import { LienAvecCeBien } from "@/components/report/LienAvecCeBien";
+import { vueCriteres, type CritereVue } from "@/lib/decision/projet-criteres-vue";
+import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 
 export const dynamic = "force-dynamic";
 
-type Params = { vue?: string; lent?: string; persiste?: string; sansSuspense?: string; contenu?: string; statut?: string; interne?: string; repli?: string; apres?: string; sansBandeau?: string; cle?: string; apresPage?: string; lieu?: string; insee?: string; prefs?: string };
+type Params = { actions?: string; narration?: string; vue?: string; lent?: string; persiste?: string; sansSuspense?: string; contenu?: string; statut?: string; interne?: string; repli?: string; apres?: string; sansBandeau?: string; cle?: string; apresPage?: string; lieu?: string; insee?: string; prefs?: string };
 const SCOPE = "logement:banc-fut93";
 const dateDeVersion = (v: number) => new Date(Date.UTC(2026, 7, 11 + v, 10)).toISOString();
 
@@ -40,6 +48,20 @@ function ContenuInterne({ mode, dossier, insee }: { mode: string; dossier: Dossi
   if (mode === "sync") return <p>conclusion (sync)</p>;
   if (mode === "redigee") return <ConclusionRedigee plan={dossier.narrativePlan} insee={insee} scopeKey={SCOPE} />;
   return <ContenuAsynchrone mode={mode} dossier={dossier} />;
+}
+
+// La conclusion rédigée relue depuis le cache, simulée : même plan, textes plus longs, servie après le repli.
+async function NarrationSimulee({ ms, dossier }: { ms: number; dossier: Dossier }) {
+  await new Promise((r) => setTimeout(r, ms));
+  const blocks = planToBlocks(dossier.narrativePlan).map((b) => ({ ...b, text: `${b.text} ${b.text}`, generated: true }));
+  return <div data-banc="redigee"><ConclusionBlock plan={dossier.narrativePlan} blocks={blocks} /></div>;
+}
+
+// Le critère du banc : une préférence du projet de test, « inspirée de Brest » tant qu'elle n'est pas gardée.
+function critereDuBanc(criteres: CritereVue[], adopte: boolean): CritereVue[] {
+  const base = criteres[0];
+  if (!base) return [];
+  return [{ ...base, etat: adopte ? "compris" : "inspire", ancre: "Brest", adopte, motFort: null }];
 }
 
 async function SectionDuBien({ sp, presentation }: { sp: Params; presentation: "classique" | "releve" }) {
@@ -79,13 +101,20 @@ async function SectionDuBien({ sp, presentation }: { sp: Params; presentation: "
       </Suspense>
     </>
   );
+  const e = etatBanc();
+  const actions = sp.actions === "1";
   return (
     <>
     <Sonde version={v} jeton={jeton} />
+    {sp.narration ? (
+      <Suspense key={`narration:${jetonDeRendu()}`} fallback={<div data-banc="repli"><ConclusionBlock plan={t.dossier.narrativePlan} blocks={planToBlocks(t.dossier.narrativePlan)} /></div>}>
+        <NarrationSimulee ms={Number(sp.narration)} dossier={t.dossier} />
+      </Suspense>
+    ) : null}
     <DossierDecisionSection
       presentation={presentation} dossier={t.dossier} logementStatus={sp.statut === "pending" ? "pending" : "done"} insee={t.insee} scopeKey={SCOPE}
       generatedAt={dateDeVersion(v)} provenance={SCOPE} versionServie={v}
-      projetAChange={v === 1 || sp.persiste === "1"} espacement="mt-6"
+      projetAChange={actions ? e.critere === "adopte" : v === 1 || sp.persiste === "1"} contexteAChange={actions ? e.lien : false} espacement="mt-6"
     />
     </>
   );
@@ -115,6 +144,15 @@ export default async function BancFut93({ searchParams }: { searchParams: Promis
           <SectionDuBien sp={sp} presentation={vue} />
         </Suspense>}
         {/* La frontière EXTÉRIEURE suivie de contenu, comme sur `/rapport` (modules, liens) : `apresPage=grosN`. */}
+        {sp.actions === "1" ? (
+          <div id="banc-actions" className="mt-12 space-y-6">
+            <div className="glass rounded-2xl p-6 md:p-7">
+              <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-ghost mb-2">Votre projet</p>
+              <CriteresDuProjet criteres={critereDuBanc(vueCriteres(t.projet), etatBanc().critere === "adopte")} />
+            </div>
+            <LienAvecCeBien dossierId="banc-fut93" adresse="Le bien du banc" relationInitiale={null} objectifInitial={null} />
+          </div>
+        ) : null}
         {sp.apresPage?.startsWith("gros") ? <div>{Array.from({ length: Number(sp.apresPage.slice(4)) || 500 }, (_, i) => <p key={i}>suite {i} <span>de la page</span></p>)}</div> : null}
       </div>
     </main>
