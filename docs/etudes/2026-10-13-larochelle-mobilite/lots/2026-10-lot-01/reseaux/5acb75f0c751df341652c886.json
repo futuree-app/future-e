@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "SETRAM",
  "aom": "CU Le Mans Métropole",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "247200132",
   "nom": "CU Le Mans Métropole"

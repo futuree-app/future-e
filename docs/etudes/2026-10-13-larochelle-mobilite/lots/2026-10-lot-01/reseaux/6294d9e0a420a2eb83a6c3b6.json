@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "Choletbus",
  "aom": "CA Agglomération du Choletais",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "200071678",
   "nom": "CA Cholet Agglomération"

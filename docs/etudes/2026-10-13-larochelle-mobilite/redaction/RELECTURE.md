@@ -2,7 +2,7 @@
 
 À donner à une IA de relecture, distincte de celle qui a rédigé, avec trois pièces seulement : ce fichier, le dossier de la commune (`dossier.md`) et le rendu de la rédaction (sections A à D). Le contrôle déterministe (identifiants, valeurs, usages) est déjà fait : ne le refais pas.
 
-Tu cherches des **anomalies précises**, pas des préférences : une erreur, ou une ambiguïté qu'un lecteur ordinaire risque vraiment de mal comprendre. Tu ne réécris pas l'article. Une phrase que tu aurais tournée autrement n'est pas une anomalie. Un conseil pratique (« vérifiez le trajet sur le site du réseau ») n'est pas une promesse technique ; une liaison naturelle entre deux passages n'est pas un lien de cause.
+Tu cherches des **anomalies précises**, pas des préférences : une erreur, ou une ambiguïté qu'un lecteur ordinaire risque vraiment de mal comprendre. Tu ne réécris pas l'article. Une phrase que tu aurais tournée autrement n'est pas une anomalie. Un conseil pratique (« vérifiez le trajet sur le site du réseau ») n'est pas une promesse technique ; une liaison naturelle entre deux passages n'est pas un lien de cause. Un exemple omis n'est pas une anomalie : ne demande jamais de compléter une liste.
 
 ## Ce que tu examines
 

@@ -25,7 +25,10 @@ export const css = `
   .apv ul{margin:0 0 16px;padding-left:22px;list-style:disc;}
   .apv li{margin:0 0 8px;}
   .apv hr{border:0;border-top:1px solid var(--border-1);margin:56px 0 28px;}
-  .apv-methode p,.apv-methode li{font-size:14px;line-height:1.65;color:var(--fg-3);}
+  .apv-methode{margin-top:8px;}
+  .apv-methode h2,.apv-methode h3{font-family:var(--font-sans);font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--fg-3);margin:24px 0 8px;}
+  .apv-methode p,.apv-methode li{font-size:12.5px;line-height:1.55;color:var(--fg-4);margin-bottom:6px;}
+  .apv-methode strong{color:var(--fg-3);}
   .apv-tableau{overflow-x:auto;margin:4px 0 24px;}
   .apv table{border-collapse:collapse;width:100%;font-size:15px;}
   .apv th,.apv td{padding:9px 12px;border-bottom:1px solid var(--border-1);text-align:left;vertical-align:bottom;}
@@ -52,6 +55,7 @@ export const css = `
     .apv-page{padding:36px 16px 72px;}
     .apv .apv-chapeau{font-size:17.5px;}
     .apv p,.apv li{font-size:16.5px;}
+    .apv .apv-methode p,.apv .apv-methode li{font-size:12.5px;}
     .apv table{font-size:14px;}
     .apv th,.apv td{padding:8px 6px;}
     .apv-bloc-visuels .apv-communes{max-width:none;}
@@ -144,7 +148,10 @@ export function ArticleEtude({ md, bandeau, visuel }: { md: string; bandeau: str
     const k = `b${i}`;
     if (!l.trim()) continue;
     if (l.startsWith("# ")) blocs.push(<h1 key={k}>{bindOrphans(l.slice(2))}</h1>);
-    else if (l.startsWith("## ")) blocs.push(<h2 key={k}>{bindOrphans(insecables(l.slice(3)))}</h2>);
+    else if (l.startsWith("## ")) {
+      if (/^m[ée]thode/i.test(l.slice(3))) methode = true; // « ## Méthode » vaut « ### Méthode » : plus de chapeau après
+      blocs.push(<h2 key={k}>{bindOrphans(insecables(l.slice(3)))}</h2>);
+    }
     else if (l.startsWith("### ")) { methode = true; blocs.push(<h3 key={k}>{l.slice(4)}</h3>); }
     else if (l.trim() === "---") blocs.push(<hr key={k} />);
     else if (l.startsWith("[")) {
@@ -169,8 +176,15 @@ export function ArticleEtude({ md, bandeau, visuel }: { md: string; bandeau: str
     }
   }
 
-  // La méthode (après le filet) prend un corps plus petit.
-  const filet = blocs.findIndex((b) => (b as { type?: unknown })?.type === "hr");
+  // La méthode prend un corps plus petit et grisé : elle commence au filet, ou à défaut à l'intertitre « Méthode… ».
+  const titreMethode = (b: ReactNode) => {
+    const e = b as { type?: unknown; props?: { children?: unknown } };
+    return (e?.type === "h2" || e?.type === "h3") && /^m[ée]thode/i.test(String(e.props?.children ?? "").replace(/\u00a0/g, " "));
+  };
+  const iMethode = blocs.findIndex(titreMethode);
+  const iFilet = blocs.findIndex((b) => (b as { type?: unknown })?.type === "hr");
+  // L'intertitre « Méthode » prime : un filet placé plus haut dans l'article ne doit pas tout faire passer en méthode.
+  const filet = iMethode >= 0 ? iMethode - 1 : iFilet;
   return (
     <div className="apv">
       <style>{css}</style>

@@ -7,7 +7,7 @@
  "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
  "offre_tdg": "Impulsyon",
  "aom": "CA La Roche sur Yon - Agglomération",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "248500589",
   "nom": "CA La Roche-sur-Yon - Agglomération"

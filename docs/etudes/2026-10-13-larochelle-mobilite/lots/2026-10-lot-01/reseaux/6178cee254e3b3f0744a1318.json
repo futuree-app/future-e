@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "Irigo",
  "aom": "CU Angers Loire Métropole",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "244900015",
   "nom": "CU Angers Loire Métropole"

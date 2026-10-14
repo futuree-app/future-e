@@ -82,7 +82,8 @@ export default async function ArticleLot({ params }: { params: Promise<{ lot: st
         const quoi = /carte|secteur|quartier|iris/i.test(l) ? "carte" : /travail|graphique|barres/i.test(l) ? "barres" : null;
         const base = quoi === "carte" ? carte : quoi === "barres" ? barres : null;
         if (base && existsSync(path.join(vis, `${base}_sombre.png`)))
-          return { noeud: <figure key={k}><Png lot={lot} insee={insee} base={base} alt={quoi === "carte" ? altCarte : altBarres} /></figure> };
+          // Le graphique est dessiné pour 600 px : figure étroite, comme dans les articles pilotes (sinon il s'étire sur toute la colonne).
+          return { noeud: <figure key={k} className={quoi === "barres" ? "apv-etroite" : undefined}><Png lot={lot} insee={insee} base={base} alt={quoi === "carte" ? altCarte : altBarres} /></figure> };
         return { noeud: <p key={k} className="apv-legende">Visuel prévu, non produit : {l}</p> };
       }}
     />

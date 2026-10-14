@@ -17,7 +17,7 @@
   "generee_le": "2026-10-14T14:27:26Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:33Z",
+ "dossier_genere_le": "2026-10-14T23:20:44Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2088,7 +2088,7 @@
     "perimetre": "intercommunalité CA La Roche-sur-Yon - Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    }
   ],
   "recherches": [
@@ -2130,7 +2130,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/85191/dossier/complement.json",
-  "sha256": "d08dcc96dc4f95d2acd0e681ad1d0c66a1771a0d5d1b6821eb7f201c862a3e01"
+  "sha256": "09f8938b77327196eafb00ff7d8a047973741c21df0213baf84e0e496867cf0e"
  },
  "comparaison": {
   "commune": {

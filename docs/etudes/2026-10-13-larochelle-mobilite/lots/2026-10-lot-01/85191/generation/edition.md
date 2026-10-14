@@ -28,7 +28,7 @@
 
 # La Roche-sur-Yon : où la voiture pèse moins sur le trajet du travail
 
-**Autour de La Roche-sur-Yon, le litre de gazole coûte 0,74 € de plus qu'il y a un an. Quand on cherche un logement, la question devient concrète : depuis quel secteur, et pour quel emploi, peut-on moins dépendre de la voiture ? Les trajets des habitants donnent une réponse nette. Elle s'accompagne d'un point à vérifier dès l'annonce : la place de stationnement.**
+**Autour de La Roche-sur-Yon, le litre de gazole coûte 0,74 € de plus qu'il y a un an. Quand on cherche un logement, la question devient concrète : depuis quel secteur, et pour quel emploi, peut-on moins dépendre de la voiture ? Les trajets domicile-travail des actifs donnent une réponse nette. Elle s'accompagne d'un point à vérifier dès l'annonce : la place de stationnement.**
 
 ## Un plein qui a changé de prix
 
@@ -40,20 +40,7 @@ Le tableau ci-dessous chiffre le surcoût annuel selon la distance. Il suppose u
 
 ## Des secteurs où l'on marche pour aller travailler
 
-Au recensement de 2022, 74 % des actifs qui habitent La Roche-sur-Yon vont travailler principalement en voiture. La médiane des villes de taille proche est de 68 % (voir la méthode). Ce chiffre d'ensemble recouvre des écarts nets entre les secteurs statistiques de l'INSEE, dont les noms ne sont pas toujours ceux des quartiers.
-
-**Les secteurs où la voiture pèse le moins**
-- **Pentagone Sud-Ouest** : 57 % des actifs qui y habitent vont travailler principalement en voiture, et 22 % à pied.
-- **Les Halles** : 61 % en voiture, 23 % à pied. Sur toute la commune, la marche n'est le mode principal que de 9 % des actifs.
-
-**À l'autre bout**
-- **Zone Rurale-L'Annexe** : 89 % des actifs vont travailler en voiture. Trente-deux points séparent ce secteur de Pentagone Sud-Ouest.
-
-**Ailleurs, d'autres modes**
-- **Gare SNCF** (à ne pas confondre avec Gare SNCF-Sacré-Cœur) : le vélo est le mode principal de 11 % des actifs.
-- **Pyramides-Jean Yole** : les transports en commun sont le mode principal de 14 % des actifs.
-
-La carte permet de situer chaque secteur.
+Au recensement de 2022, 74 % des actifs qui habitent La Roche-sur-Yon vont travailler principalement en voiture. La médiane des villes de taille proche est de 68 % (voir la méthode). Ce chiffre d'ensemble recouvre des écarts nets entre les secteurs statistiques de l'INSEE, dont les noms ne sont pas toujours ceux des quartiers. Dans le secteur Pentagone Sud-Ouest, 57 % des actifs qui y habitent vont travailler principalement en voiture, et 22 % à pied ; à Zone Rurale-L'Annexe, 89 %. La carte situe les autres secteurs.
 
 [VISUEL : Carte de la part de la voiture par secteur (IRIS)]
 
@@ -72,30 +59,13 @@ Environ 45 300 actifs travaillent à La Roche-sur-Yon. Parmi eux, 66 % habitent 
 
 Le trajet du travail n'est qu'un des déplacements de la semaine. Pour les autres, les équipements proches donnent une autre lecture des secteurs. On retient ici un panier quotidien : un commerce alimentaire, une pharmacie et une école élémentaire, tous trois à moins de 500 m à vol d'oiseau.
 
-**Les secteurs où le panier est le plus souvent à portée**
-- Pentagone Nord : toutes les adresses l'ont.
-- Les Halles : la quasi-totalité des adresses.
-- Garenne : 97 % des adresses.
-- Liberté et La Vigne aux Roses : 94 %.
+Dans le secteur Pentagone Nord, toutes les adresses ont le panier quotidien à proximité ; à La Courtaisière, 13 % seulement.
 
-**Les secteurs où il l'est rarement**
-- La Courtaisière : 13 % des adresses.
-- Mon Repos-Terres Noires-Forges-Branly : 15 %.
-- La Généraudière-L'Angelmière : 16 %.
-- Zone Rurale-L'Annexe : presque aucune adresse.
-
-Garenne montre que les deux mesures ne disent pas la même chose. La quasi-totalité des adresses y a le panier quotidien à proximité. Pourtant, 80 % des actifs qui y habitent vont travailler principalement en voiture, l'une des parts les plus élevées de la ville. La proximité indique ce qui est à portée pour les courses ou l'école, pas le trajet du matin.
+Garenne montre que les deux mesures ne disent pas la même chose : 97 % des adresses y ont le panier quotidien à proximité, et 80 % des actifs qui y habitent vont travailler principalement en voiture, l'une des parts les plus élevées de la ville. La proximité indique ce qui est à portée pour les courses ou l'école, pas le trajet du matin.
 
 ## Ce qu'il faut vérifier à la visite
 
-Dans plusieurs secteurs, la place de stationnement est loin d'être la règle. Sur l'ensemble de la commune, 71 % des ménages disposent d'un emplacement réservé. Cette part tombe à :
-
-- 44 % des ménages à Les Halles ;
-- 42 % à Garenne ;
-- 41 % à Pyramides-Jean Yole ;
-- 36 % à La Vigne aux Roses.
-
-Dans ces mêmes secteurs, les ménages sans voiture sont plus fréquents. Ils représentent 31 % des ménages à Pyramides-Jean Yole et 28 % à Les Halles, contre 16 % sur la commune.
+Dans plusieurs secteurs, la place de stationnement est loin d'être la règle : 71 % des ménages de la commune disposent d'un emplacement réservé, mais 44 % seulement à Les Halles.
 
 Si vous gardez une voiture, vérifiez dès l'annonce si une place est comprise, et sinon où se garer près de l'immeuble. Si vous comptez sur le bus, le réseau de l'intercommunalité La Roche-sur-Yon - Agglomération s'appelle Impulsyon. Regardez quelles lignes passent près de l'adresse visée et à quelles heures, avant de signer.
 
@@ -152,13 +122,8 @@ Se rapprocher de son emploi, s'installer en famille, préparer sa retraite : ce 
 | Des secteurs… | 68 % | `comparaison.voiture.mediane_groupe` | oui |
 | Des secteurs… | 57 % | `iris.voiture.min` / `iris.851910103.voiture` | oui |
 | Des secteurs… | 22 % (à pied) | `iris.851910103.marche` | oui |
-| Des secteurs… | 61 % | `iris.851910102.voiture` | oui |
-| Des secteurs… | 23 % | `iris.851910102.marche` | oui |
-| Des secteurs… | 9 % | `mobpro.modes.marche` | oui |
 | Des secteurs… | 89 % | `iris.voiture.max` / `iris.851911003.voiture` | oui |
 | Des secteurs… | Trente-deux points | `ecart.iris.voiture.max_moins_min` | oui |
-| Des secteurs… | 11 % | `iris.851910802.velo` | oui |
-| Des secteurs… | 14 % | `iris.851910304.tc` | oui |
 | L'autre ligne… | 69 % | `mobpro.travaille_dans_commune` | oui |
 | L'autre ligne… | 67 % | `mobpro.voiture_selon_destination.meme_commune` | oui |
 | L'autre ligne… | 91 % | `mobpro.voiture_selon_destination.ailleurs` | oui |
@@ -170,20 +135,12 @@ Se rapprocher de son emploi, s'installer en famille, préparer sa retraite : ce 
 | Courses, école… | toutes les adresses (Pentagone Nord) | `iris.851910101.panier_500m` (100 %) | oui |
 | Courses, école… | quasi-totalité (Les Halles) | `iris.851910102.panier_500m` (99 %) | oui |
 | Courses, école… | 97 % | `iris.851910303.panier_500m` | oui |
-| Courses, école… | 94 % | `iris.851910501.panier_500m`, `iris.851910502.panier_500m` | oui |
 | Courses, école… | 13 % | `iris.851911004.panier_500m` | oui |
 | Courses, école… | 15 % | `iris.851910901.panier_500m` | oui |
-| Courses, école… | 16 % | `iris.851910701.panier_500m` | oui |
 | Courses, école… | presque aucune adresse | `iris.851911003.panier_500m` (0,2 %) | oui |
 | Courses, école… | 80 % | `iris.851910303.voiture` | oui |
 | Vérifier à la visite | 71 % | `iris.menages_commune.menages_stationnement_reserve` | oui |
 | Vérifier à la visite | 44 % | `iris.851910102.stationnement_reserve` | oui |
-| Vérifier à la visite | 42 % | `iris.851910303.stationnement_reserve` | oui |
-| Vérifier à la visite | 41 % | `iris.851910304.stationnement_reserve` | oui |
-| Vérifier à la visite | 36 % | `iris.851910502.stationnement_reserve` | oui |
-| Vérifier à la visite | 31 % | `iris.851910304.menages_sans_voiture` | oui |
-| Vérifier à la visite | 28 % | `iris.851910102.menages_sans_voiture` | oui |
-| Vérifier à la visite | 16 % | `iris.menages_commune.menages_sans_voiture` | oui |
 | Vérifier à la visite | Impulsyon (sans chiffre) | `doc.reseau.identite` | oui |
 | Méthode | 2022, 2020 à 2024 | millésime `mobpro.*` / `iris.*` | oui |
 | Méthode | 15 ans ou plus | population de `mobpro.modes.*` | oui |
@@ -235,3 +192,15 @@ Se rapprocher de son emploi, s'installer en famille, préparer sa retraite : ce 
 | Passage | Avant | Après | Raison |
 |---|---|---|---|
 | Votre projet, votre adresse | « Les services à proximité, l'équipement automobile des ménages du secteur, la chaleur de l'été ou les risques à l'adresse peuvent peser dans votre choix. » | « La mobilité, ce qui se trouve autour, la chaleur de l'été et les risques à l'adresse se regardent ensemble. » | Conclusion ramenée à l'examen de l'adresse dans son ensemble ; formule issue d'un exemple des consignes, retiré le 15/10/2026 |
+
+
+## F bis. Retouches du 15/10/2026 (2e passe, à la main)
+
+| Passage | Changement | Raison |
+|---|---|---|
+| Secteurs | listes réduites au contraste Pentagone Sud-Ouest / Zone Rurale-L'Annexe ; Les Halles, Gare SNCF, Pyramides-Jean Yole, 32 points et 9 % laissés à la carte | Détail porté par la carte |
+| Courses | listes de huit secteurs réduites à Pentagone Nord, La Courtaisière et Garenne ; « Pourtant » retiré devant les 80 % | Ne pas suggérer que la proximité devrait réduire la voiture pour le travail |
+| Stationnement | liste de quatre secteurs et ménages sans voiture réduits à Les Halles | Allègement |
+| Chapeau | « trajets des habitants » → « trajets domicile-travail des actifs » | Population exacte |
+
+Lignes de C retirées (chiffres disparus de l'article) : 61 %; 23 %; 9 %; 11 %; 14 %; 94 %; 16 %; 42 %; 41 %; 36 %; 31 %; 28 %; 16 %

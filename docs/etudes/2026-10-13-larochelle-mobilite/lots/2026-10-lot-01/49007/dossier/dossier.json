@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:24:22Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:32Z",
+ "dossier_genere_le": "2026-10-14T23:20:41Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -3373,7 +3373,7 @@
     "perimetre": "intercommunalité CU Angers Loire Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
@@ -3545,7 +3545,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/49007/dossier/complement.json",
-  "sha256": "d946affeada01399fc186258265a50c1e0be90ef70f826a503eb7476a6ae9dca"
+  "sha256": "abb152cf442f60b0ef2aa477669de3c159d7331065339c51a0572cc7691ec087"
  },
  "comparaison": {
   "commune": {

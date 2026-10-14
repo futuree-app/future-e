@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:28:29Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:33Z",
+ "dossier_genere_le": "2026-10-14T23:20:45Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -3309,7 +3309,7 @@
     "perimetre": "intercommunalité Tours Métropole Val de Loire ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
@@ -3397,7 +3397,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/37261/dossier/complement.json",
-  "sha256": "7a9c290390e9bc4eee27b79edb5edb3531dc375f69cf627586d5760bc540d9a2"
+  "sha256": "40acc39b70bb0ec62a5ae369be0e1af10fd8ef584a0a6775f6a4604a9a1e6205"
  },
  "comparaison": {
   "commune": {

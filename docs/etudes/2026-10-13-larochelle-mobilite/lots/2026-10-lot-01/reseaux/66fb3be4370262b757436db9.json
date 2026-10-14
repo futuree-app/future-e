@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "STRAN",
  "aom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "244400644",
   "nom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)"

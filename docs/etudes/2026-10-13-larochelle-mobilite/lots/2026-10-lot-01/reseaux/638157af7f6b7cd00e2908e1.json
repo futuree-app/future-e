@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "Fil Bleu",
  "aom": "Syndicat des Mobilités de Touraine",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "243700754",
   "nom": "Tours Métropole Val de Loire"

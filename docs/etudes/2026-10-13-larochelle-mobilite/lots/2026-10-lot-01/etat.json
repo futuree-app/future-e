@@ -20,16 +20,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:10Z",
+     "fin": "2026-10-14T23:20:41Z",
      "duree_s": 0.8
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:32Z",
+     "fin": "2026-10-14T23:20:41Z",
      "duree_s": 0.2,
-     "complement_sha": "386d3b4bd598c807",
+     "complement_sha": "73a544af4eaafc9d",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "307f1b4ff3601666"
+     "dossier_sha": "a3f5056a792eafd4"
     }
    },
    "manuel": [
@@ -113,16 +113,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:10Z",
+     "fin": "2026-10-14T23:20:41Z",
      "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:32Z",
+     "fin": "2026-10-14T23:20:41Z",
      "duree_s": 0.2,
-     "complement_sha": "d946affeada01399",
+     "complement_sha": "abb152cf442f60b0",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "ecb2409dc4aaa4af"
+     "dossier_sha": "4ba5a855bf72e347"
     }
    },
    "manuel": [
@@ -211,16 +211,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:11Z",
-     "duree_s": 0.2
+     "fin": "2026-10-14T23:20:42Z",
+     "duree_s": 0.3
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:32Z",
+     "fin": "2026-10-14T23:20:42Z",
      "duree_s": 0.2,
-     "complement_sha": "d08e504938176efe",
+     "complement_sha": "e08282d27512859b",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "4e5c0702a8c14e3b"
+     "dossier_sha": "6f03668d8f479e67"
     }
    },
    "manuel": [
@@ -233,7 +233,7 @@
    "notes": [
     "23 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 36.9,
+   "duree_preparation_s": 37.0,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -305,16 +305,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:11Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T23:20:42Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:32Z",
+     "fin": "2026-10-14T23:20:42Z",
      "duree_s": 0.2,
-     "complement_sha": "6dc2c46bbb7bc56b",
+     "complement_sha": "040f98492013f178",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "ed046a812eff5ae1"
+     "dossier_sha": "390340c3c2845011"
     }
    },
    "manuel": [
@@ -327,7 +327,7 @@
    "notes": [
     "20 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 29.8,
+   "duree_preparation_s": 29.9,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -392,16 +392,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:12Z",
+     "fin": "2026-10-14T23:20:43Z",
      "duree_s": 0.8
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:32Z",
+     "fin": "2026-10-14T23:20:43Z",
      "duree_s": 0.2,
-     "complement_sha": "c0a31ebaea84a0a4",
+     "complement_sha": "1747133b0ec8bef0",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "2e70de41548b316f"
+     "dossier_sha": "79a118b5b768a6d9"
     }
    },
    "manuel": [
@@ -487,16 +487,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:12Z",
+     "fin": "2026-10-14T23:20:43Z",
      "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:33Z",
+     "fin": "2026-10-14T23:20:44Z",
      "duree_s": 0.2,
-     "complement_sha": "5979c12949a2a814",
+     "complement_sha": "3131c20a7d9e31e7",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "3921562d57d48844"
+     "dossier_sha": "7c05168098023c94"
     }
    },
    "duree_preparation_s": 30.9,
@@ -527,7 +527,7 @@
    "incidents": [
     {
      "date": "2026-10-14T15:19:55Z",
-     "nature": "limite d'usage probable : appel refusé sans consommation"
+     "nature": "appel refusé sans consommation (cause à confirmer : message non conservé à l'époque ; quota probable, non confirmé)"
     }
    ],
    "anomalies_restantes": [],
@@ -577,19 +577,19 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:12Z",
+     "fin": "2026-10-14T23:20:44Z",
      "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:33Z",
-     "duree_s": 0.2,
-     "complement_sha": "d08dcc96dc4f95d2",
-     "duree_calcul_s": 0.2,
-     "dossier_sha": "5f812cd04a12bdb3"
+     "fin": "2026-10-14T23:20:44Z",
+     "duree_s": 0.1,
+     "complement_sha": "09f8938b77327196",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "448db129354f4e49"
     }
    },
-   "duree_preparation_s": 29.3,
+   "duree_preparation_s": 29.2,
    "manuel": [
     "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
     "relire les libellés d'IRIS cités comme noms de quartiers",
@@ -617,7 +617,7 @@
    "incidents": [
     {
      "date": "2026-10-14T15:19:57Z",
-     "nature": "limite d'usage probable : appel refusé sans consommation"
+     "nature": "appel refusé sans consommation (cause à confirmer : message non conservé à l'époque ; quota probable, non confirmé)"
     }
    ],
    "anomalies_restantes": [],
@@ -671,16 +671,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:12Z",
-     "duree_s": 0.2
+     "fin": "2026-10-14T23:20:44Z",
+     "duree_s": 0.3
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:33Z",
+     "fin": "2026-10-14T23:20:44Z",
      "duree_s": 0.2,
-     "complement_sha": "76ceae72ec5a6d69",
+     "complement_sha": "1aee9a51b4bc28c2",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "cd556c8b9c5b68b2"
+     "dossier_sha": "e315c0b5d0c7f871"
     }
    },
    "manuel": [
@@ -693,7 +693,7 @@
    "notes": [
     "17 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 33.5,
+   "duree_preparation_s": 33.6,
    "versions": {
     "prompt_redaction": "b98ab393d76a039f",
     "relecture": "9e6ec9c789bbfc8c",
@@ -707,15 +707,15 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "corrigé une fois ; vérifier la section E",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "incidents": [
     {
      "date": "2026-10-14T15:19:59Z",
-     "nature": "limite d'usage probable : appel refusé sans consommation"
+     "nature": "appel refusé sans consommation (cause à confirmer : message non conservé à l'époque ; quota probable, non confirmé)"
     }
    ],
    "anomalies_restantes": [],
-   "article": "correction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_22278_clair.png",
@@ -769,16 +769,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:13Z",
-     "duree_s": 0.2
+     "fin": "2026-10-14T23:20:45Z",
+     "duree_s": 0.3
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:33Z",
+     "fin": "2026-10-14T23:20:45Z",
      "duree_s": 0.2,
-     "complement_sha": "7a9c290390e9bc4e",
+     "complement_sha": "40acc39b70bb0ec6",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "8d34e7bf81e0b8f8"
+     "dossier_sha": "e97da104383b3d93"
     }
    },
    "manuel": [
@@ -791,7 +791,7 @@
    "notes": [
     "56 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 37.5,
+   "duree_preparation_s": 37.6,
    "versions": {
     "prompt_redaction": "b98ab393d76a039f",
     "relecture": "9e6ec9c789bbfc8c",
@@ -805,15 +805,15 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "corrigé une fois ; vérifier la section E",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "incidents": [
     {
      "date": "2026-10-14T15:20:01Z",
-     "nature": "limite d'usage probable : appel refusé sans consommation"
+     "nature": "appel refusé sans consommation (cause à confirmer : message non conservé à l'époque ; quota probable, non confirmé)"
     }
    ],
    "anomalies_restantes": [],
-   "article": "correction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_37261_clair.png",
@@ -874,16 +874,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T22:27:13Z",
-     "duree_s": 0.3
+     "fin": "2026-10-14T23:20:46Z",
+     "duree_s": 0.9
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T23:05:34Z",
+     "fin": "2026-10-14T23:20:46Z",
      "duree_s": 0.2,
-     "complement_sha": "8985d813a3da4c46",
+     "complement_sha": "b762ebb0c3a8ce99",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "2456b45be7f77f1a"
+     "dossier_sha": "cfa33a5bd62b7ebe"
     }
    },
    "manuel": [
@@ -896,7 +896,7 @@
    "notes": [
     "63 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 46.2,
+   "duree_preparation_s": 46.8,
    "versions": {
     "prompt_redaction": "b98ab393d76a039f",
     "relecture": "9e6ec9c789bbfc8c",
@@ -914,7 +914,7 @@
    "incidents": [
     {
      "date": "2026-10-14T15:20:03Z",
-     "nature": "limite d'usage probable : appel refusé sans consommation"
+     "nature": "appel refusé sans consommation (cause à confirmer : message non conservé à l'époque ; quota probable, non confirmé)"
     }
    ],
    "article": "edition.md",

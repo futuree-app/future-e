@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:23:50Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:32Z",
+ "dossier_genere_le": "2026-10-14T23:20:41Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2698,7 +2698,7 @@
     "perimetre": "intercommunalité CU du Grand Poitiers ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
@@ -2821,7 +2821,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/86194/dossier/complement.json",
-  "sha256": "386d3b4bd598c8079a160ccfefcfc49654e3ebbd63bae996f2dd8125b6255743"
+  "sha256": "73a544af4eaafc9d5ad1949b40cb7d9ca86d8091a7c7a5a7be2e881ae1e8f78b"
  },
  "comparaison": {
   "commune": {

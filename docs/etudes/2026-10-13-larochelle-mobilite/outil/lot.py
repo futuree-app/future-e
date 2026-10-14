@@ -25,7 +25,8 @@ import argparse, datetime as dt, gzip, hashlib, json, os, re, shutil, subprocess
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 ETUDE = os.path.dirname(ICI)
-ETATS = ("à préparer", "dossier prêt", "rédigé", "à corriger", "prêt à relire", "données insuffisantes", "suspendu par quota")
+ETATS = ("à préparer", "dossier prêt", "rédigé", "à corriger", "prêt à relire", "données insuffisantes", "suspendu par quota",
+         "suspendu : appel refusé, cause à confirmer")
 ORIGINE_VOISINES = "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
 
 
@@ -129,10 +130,11 @@ def sans_accents(s):
 
 
 def identite_reseau(x, epci, cache, jour):
-    """Identité d'un réseau : NOM COMMERCIAL, AUTORITÉ ORGANISATRICE et site, sans les confondre (l'exploitant n'est pas
-    établi par ces sources et n'est jamais nommé). Le nom n'est retenu que s'il est confirmé par deux sources : le champ
-    « offre » de transport.data.gouv.fr peut être périmé (Saint-Nazaire : « STRAN » alors que le jeu et le GTFS portent
-    « Ycéo »). Le site n'est retenu que s'il appartient à l'agence de ce nom et qu'il est le seul à répondre."""
+    """Identité d'un réseau : NOM COMMERCIAL, AUTORITÉ ORGANISATRICE et site, distincts de l'EXPLOITANT (non donné par ces
+    sources ; il peut être nommé si une source officielle le donne). Une source officielle actuelle et explicite suffit
+    (intitulé du jeu, ou agence du GTFS concordante) ; une seconde n'est cherchée qu'en cas d'ambiguïté ou de
+    contradiction : le champ « offre » de transport.data.gouv.fr peut être périmé (Saint-Nazaire : « STRAN » alors que le
+    jeu et le GTFS portent « Ycéo »). Le site n'est retenu que s'il appartient à l'agence de ce nom et qu'il est le seul à répondre."""
     import csv, io
     offre = (x.get("offers") or [{}])[0]
     aom = ", ".join(o["name"] for o in x.get("legal_owners", []) if o.get("type") == "aom") or offre.get("nom_aom") or epci.get("nom")
@@ -148,12 +150,17 @@ def identite_reseau(x, epci, cache, jour):
     noms_agences = {n for n, _ in agences if n and coeur(n)}
     confirme = [n for n in noms_agences if re.search(rf"\b{re.escape(coeur(n))}\b", titre)]
     o = offre.get("nom_commercial")
+    # Une source officielle actuelle et explicite suffit : l'intitulé du jeu publié par l'autorité (« Réseau urbain Vitalis »).
+    m_titre = re.match(r"^r[ée]seau (?:urbain|de transport|interurbain)?(?: et [\w-]+)?\s+(.+)$", x["title"].strip(), re.I)
+    nom_titre = m_titre.group(1).strip() if m_titre else None
     if len({coeur(n) for n in confirme}) == 1:
         nom = re.sub(r"\s*\(.*?\)", "", confirme[0]).strip()
         m = re.search(re.escape(nom), x["title"], re.I)  # graphie de l'intitulé officiel (« Irigo » plutôt que « IRIGO »)
         nom, preuve = (m.group(0) if m else nom), "intitulé du jeu de données et agence du GTFS"
     elif o and (re.search(rf"\b{re.escape(coeur(o))}\b", titre) or any(coeur(o) == coeur(n) for n in noms_agences)):
         nom, preuve = o, "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS"
+    elif nom_titre and not (o and coeur(o) != coeur(nom_titre) and any(coeur(o) == coeur(n) for n in noms_agences)):
+        nom, preuve = nom_titre, "intitulé du jeu de données publié pour l'autorité organisatrice"
     else:
         nom, preuve = None, f"sources discordantes : offre « {o} », jeu « {x['title']} », agences {sorted(noms_agences)}"
     urls = sorted({u for n, u in agences if u and nom and coeur(n) == coeur(nom)})
@@ -166,7 +173,7 @@ def identite_reseau(x, epci, cache, jour):
             controles.append((u, f"inaccessible ({type(e).__name__})", None))
     ok = sorted({fin for u, st, fin in controles if st == 200})
     return {"version": 2, "id": x["id"], "titre": x["title"], "page": x["page_url"], "nom_commercial": nom, "preuve_nom": preuve,
-            "offre_tdg": o, "aom": aom, "exploitant": "non établi par ces sources", "epci": epci,
+            "offre_tdg": o, "aom": aom, "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)", "epci": epci,
             "mis_a_jour": (x.get("updated") or "")[:10], "agence": {"agences": agences},
             "site": ok[0] if len(ok) == 1 else None, "sites_controles": [[u, st] for u, st, _ in controles], "consulte_le": jour}
 
@@ -201,7 +208,8 @@ def pre_complement(lot, insee, fiche):
                           "consulte_le": reseau["consulte_le"], "validite": f"jeu de données mis à jour le {reseau['mis_a_jour']}",
                           "perimetre": f"intercommunalité {epci.get('nom')} ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
                           "usage": "oui", "statut_verification": "vérifié",
-                          "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. "
+                          "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source "
+                                      "(le nommer seulement si une autre information du dossier le donne, comme exploitant). "
                                       "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."})
         else:
             recherches.append({"sujet": "nom commercial du réseau", "statut": "non vérifié", "source": reseau["page"],
@@ -325,6 +333,16 @@ ENV_INTERDITES = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_U
 
 
 MOTIF_QUOTA = "suspendu par quota"
+MOTIF_REFUS = "suspendu : appel refusé, cause à confirmer"
+
+
+def nature_refus(meta, texte=""):
+    """MOTIF_QUOTA si le message confirme une limite d'usage ; MOTIF_REFUS si l'appel a été refusé sans consommer de jeton
+    sans que le message le dise ; None sinon. Les deux suspendent le lot."""
+    t = (texte or "").lower()
+    if re.search(r"usage limit|rate limit|limit reached|reached your|hit your limit|you've hit|resets? (at|in)|quota|429|too many requests", t):
+        return MOTIF_QUOTA
+    return MOTIF_REFUS if est_refus_quota(meta, "") else None
 
 
 def est_refus_quota(meta, texte=""):
@@ -376,7 +394,7 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         # modifiées depuis : on réutilise ; un appel échoué n'est pas retenté automatiquement.
         if os.path.exists(p_sortie):
             return open(p_sortie).read()
-        if json.load(open(p_meta)).get("motif") == MOTIF_QUOTA:
+        if json.load(open(p_meta)).get("motif") in (MOTIF_QUOTA, MOTIF_REFUS):
             # Un appel refusé pour quota n'a rien consommé : ce n'est pas une tentative ; il est archivé et l'étape reprend.
             os.replace(p_meta, p_meta.replace(".json", f".quota-{int(time.time())}.json"))
         else:
@@ -466,14 +484,14 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         meta["message"] = ((texte or "") + " " + r.stderr)[:1000].strip()  # conservé pour diagnostiquer, jamais publié
     if M["outil"] == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
         meta["motif"] = f"session hors abonnement (source d'authentification : {meta['contexte']['source_auth']})"
-    elif (not texte or meta.get("est_erreur")) and est_refus_quota(meta, brut):
-        meta["motif"] = MOTIF_QUOTA
+    elif (not texte or meta.get("est_erreur")) and nature_refus(meta, brut):
+        meta["motif"] = nature_refus(meta, brut)
     json.dump(meta, open(p_meta, "w"), ensure_ascii=False, indent=1)
     os.remove(p_marq)
     if meta.get("motif", "").startswith("session hors abonnement"):
         raise AuthNonAbonnement(meta["motif"])
-    if meta.get("motif") == MOTIF_QUOTA:
-        raise LimiteUsage(f"« {etape_nom} » : {(texte or r.stderr or '')[:200]}")
+    if meta.get("motif") in (MOTIF_QUOTA, MOTIF_REFUS):
+        raise LimiteUsage(meta["motif"] + " · " + f"« {etape_nom} » : {(texte or r.stderr or '')[:200]}")
     if not texte or r.returncode or meta.get("est_erreur"):
         raise RuntimeError(f"génération « {etape_nom} » sans texte exploitable (code {r.returncode}, {meta.get('sous_type')})")
     open(p_sortie, "w").write(texte)
@@ -580,7 +598,7 @@ def visuels(lot, insee, texte):
 
 def rediger_commune(lot, insee, executer, plan):
     C = lot.c(insee)
-    if C["statut"] not in ("dossier prêt", "rédigé", "à corriger", MOTIF_QUOTA):
+    if C["statut"] not in ("dossier prêt", "rédigé", "à corriger", MOTIF_QUOTA, MOTIF_REFUS):
         return
     R = os.path.join(ETUDE, "redaction")
     dossier = open(os.path.join(lot.dir, insee, "dossier", "dossier.md")).read()
@@ -643,8 +661,10 @@ def cmd_rediger(lot, a):
                 try:
                     rediger_commune(lot, insee, a.executer, plan)
                 except LimiteUsage as e:
-                    # Quota : tout le lot s'arrête au premier refus ; les étapes faites restent, la reprise ne fera que le reste.
-                    C.update(statut=MOTIF_QUOTA, motif=f"{MOTIF_QUOTA} : {str(e)[:200]}"); lot.sauver(); print(f"■ lot suspendu par quota : {e}"); break
+                    # Refus sans consommation : tout le lot s'arrête au premier ; les étapes faites restent, la reprise ne fera que le reste.
+                    # « Quota » seulement si le message le confirme, sinon « cause à confirmer ».
+                    etat = MOTIF_QUOTA if str(e).startswith(MOTIF_QUOTA) else MOTIF_REFUS
+                    C.update(statut=etat, motif=str(e)[:250]); lot.sauver(); print(f"■ lot suspendu : {e}"); break
                 except (PlafondAtteint, AuthNonAbonnement) as e:
                     C.update(motif=f"arrêt du lot : {str(e)[:300]}"); lot.sauver(); print(f"■ arrêt propre du lot : {e}"); break
                 except Exception as e:

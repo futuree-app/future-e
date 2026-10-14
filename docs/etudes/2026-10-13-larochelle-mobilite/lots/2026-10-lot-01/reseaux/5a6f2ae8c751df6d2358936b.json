@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "Kicéo",
  "aom": "CA Golfe du Morbihan - Vannes Agglomération",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "200067932",
   "nom": "CA Golfe du Morbihan - Vannes Agglomération"

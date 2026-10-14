@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:27:56Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:33Z",
+ "dossier_genere_le": "2026-10-14T23:20:44Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2350,7 +2350,7 @@
     "perimetre": "intercommunalité CA Saint-Brieuc Armor Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
@@ -2445,7 +2445,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/22278/dossier/complement.json",
-  "sha256": "76ceae72ec5a6d695d0fc17cab6ad7047e65f24061f026730d1354a95cdf9362"
+  "sha256": "1aee9a51b4bc28c246fd0265f0c5a762f4a3974435fcfae69f23c381c944930e"
  },
  "comparaison": {
   "commune": {

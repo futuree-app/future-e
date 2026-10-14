@@ -2,7 +2,7 @@
 
 Tu reçois : ce fichier, le dossier de la commune (`dossier.md`), le rendu de la rédaction (sections A à D) et une liste d'anomalies (contrôle déterministe et relecture).
 
-Tu corriges **seulement** les passages visés par les anomalies `bloquante`, par la plus petite modification qui les rend exacts. Tu ne réécris rien d'autre : ni l'angle, ni le plan, ni les transitions, ni les phrases que personne n'a signalées. Les anomalies `a_revoir` ne se corrigent que si la correction tient en quelques mots.
+Tu corriges **seulement** les passages visés par les anomalies `bloquante`, par la plus petite modification qui les rend exacts. Supprimer un passage secondaire problématique est souvent la meilleure correction : n'ajoute pas de chiffres, d'exemples ni de précautions pour le compléter. Tu ne réécris rien d'autre : ni l'angle, ni le plan, ni les transitions, ni les phrases que personne n'a signalées. Les anomalies `a_revoir` ne se corrigent que si la correction tient en quelques mots.
 
 Toutes les règles du dossier restent valables : chiffres du dossier seulement, usage, populations exactes, conditions documentaires, aucune absence d'information transformée en absence de service.
 

@@ -21,7 +21,7 @@
   "generee_le": "2026-10-14T14:25:43Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T23:05:32Z",
+ "dossier_genere_le": "2026-10-14T23:20:42Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2374,7 +2374,7 @@
     "perimetre": "intercommunalité CA Golfe du Morbihan - Vannes Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    }
   ],
   "recherches": [
@@ -2416,7 +2416,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/56260/dossier/complement.json",
-  "sha256": "6dc2c46bbb7bc56be728e3c2090a632de59f3eb84f5113206030d51534aa4b19"
+  "sha256": "040f98492013f178c7c5990e1131f1cce64cbdc19479f69d979f57a32d462283"
  },
  "comparaison": {
   "commune": {

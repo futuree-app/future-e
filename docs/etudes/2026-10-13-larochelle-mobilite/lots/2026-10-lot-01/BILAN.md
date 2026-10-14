@@ -1,6 +1,6 @@
 # Bilan du lot 2026-10-lot-01 (dix communes)
 
-Arrêté le 15/10/2026. **Rien n'est publié ni fusionné.** « Prêt à relire » veut dire que les étapes automatiques sont finies, pas que l'article est validé : la relecture humaine reste la seule autorisation de publication.
+Arrêté le 15/10/2026 ; 2e passe ciblée (La Roche-sur-Yon, Tours, Saint-Brieuc) et rendu de la prévisualisation (méthode en petit et grisé, graphique à largeur limitée) le même jour. **Version de référence pour le prochain lot : étiquette git `mobilite-lot-01-reference`.** **Rien n'est publié ni fusionné.** « Prêt à relire » veut dire que les étapes automatiques sont finies, pas que l'article est validé : la relecture humaine reste la seule autorisation de publication.
 
 ## État des dix communes
 
@@ -14,9 +14,9 @@ Lecture : `http://localhost:3155/dev/lot` (serveur de développement), un lien �
 | Vannes | prêt à relire | `edition.md` | 1 | « à vol d'oiseau », chiffre isolé, exemples secondaires, annonce de mise à jour |
 | Saint-Nazaire | prêt à relire | `edition.md` | 1 | nom du réseau (Ycéo), surcoût, exemples, précaution, possession, réextraction, chapeau |
 | Cholet | prêt à relire | `correction.md` | 1 | aucune |
-| La Roche-sur-Yon | prêt à relire | `edition.md` | 1 | conclusion |
-| Saint-Brieuc | prêt à relire | `correction.md` | 1 | aucune |
-| Tours | prêt à relire | `correction.md` | 1 | aucune |
+| La Roche-sur-Yon | prêt à relire | `edition.md` | 1 | conclusion ; listes de secteurs réduites, « Pourtant » retiré (2e passe) |
+| Saint-Brieuc | prêt à relire | `edition.md` | 1 | listes et précautions allégées, « soit une hausse de 0,73 € » retiré (2e passe) |
+| Tours | prêt à relire | `edition.md` | 1 | exemples secondaires et flux entrants retirés (2e passe) |
 | Le Mans | prêt à relire | `edition.md` | 0 (aucune anomalie bloquante) | conclusion |
 
 Chaque retouche à la main est tracée dans la section F de `edition.md` (avant, après, raison) ; les versions générées (`redaction.md`, `correction.md`) sont conservées. Après tout cela, le contrôle déterministe ne relève aucune anomalie sur les dix articles.
@@ -38,18 +38,18 @@ Chaque retouche à la main est tracée dans la section F de `edition.md` (avant,
 ## Corrigé dans la chaîne, et ce qui reste propre à un article
 
 Dans la chaîne (`outil/`, `redaction/`), valable pour les lots suivants :
-- **Quota** : refus reconnu au message (désormais conservé) ou à sa signature (erreur sans aucun jeton) ; tout le lot est suspendu au premier refus, état « suspendu par quota » distinct d'une erreur ; un refus n'est pas compté comme tentative ; la reprise ne fait que les étapes manquantes. Vérifié sur les cinq réponses enregistrées le 14/10 (reconnues) et sur les quinze vrais appels (aucun pris pour un refus) ; aucun appel refusé provoqué.
-- **Identité des transports** : nom commercial, autorité organisatrice et site distingués ; le nom n'est retenu que confirmé par deux sources ; l'exploitant n'est jamais nommé ; collectes conservées.
+- **Refus d'appel** : tout appel refusé sans jeton suspend le lot ; il n'est appelé « quota » que si le message le confirme (message désormais conservé), sinon « appel refusé, cause à confirmer » — c'est le cas des cinq refus du 14/10, dont le message n'avait pas été gardé ; état distinct d'une erreur de rédaction ; un refus n'est pas compté comme tentative ; la reprise ne fait que les étapes manquantes. Vérifié sur les cinq réponses enregistrées le 14/10 (reconnues) et sur les quinze vrais appels (aucun pris pour un refus) ; aucun appel refusé provoqué.
+- **Identité des transports** : nom commercial, autorité organisatrice, site et exploitant distingués ; une source officielle actuelle et explicite suffit, une seconde n'est cherchée qu'en cas d'ambiguïté ou de contradiction (cas Ycéo / STRAN) ; l'exploitant peut être nommé si une source officielle le donne ; collectes conservées.
 - **Consignes internes** : la réextraction ne figure plus dans le statut des faits carburant, seulement dans les vérifications ; le prompt et la relecture excluent toute consigne de production du texte.
 - **Sélection** : la consigne existante dit désormais de retenir les exemples qui font avancer la question et de laisser le détail aux visuels ; aucun quota de chiffres.
+- **Correction et relecture** : la correction peut supprimer un passage secondaire plutôt que l'enrichir ; un exemple omis n'est pas une anomalie.
 - **Relecture calibrée** : erreur ou ambiguïté plausible pour un lecteur ordinaire ; un conseil pratique n'est pas une promesse, une liaison n'est pas une cause.
 - **Conclusion** : exemples de formulation retirés du tableau des capacités.
 - **Arrondis du carburant** : précaution dans les limites des faits carburant.
 - **Contrôle** : dates, méthode, identifiants nus, centimes.
 
 Propre à un article, à regarder en relecture :
-- **Titres** : Cholet et La Roche-sur-Yon portent le même titre (« … : où la voiture pèse moins sur le trajet du travail »).
-- **Cholet** : chapeau « environ 75 centimes » et prix 1,55 → 2,31 € dans le corps (relevé « à revoir », non corrigé).
+- Acceptés tels quels (porteur, 15/10) : titres de même construction (Cholet, La Roche-sur-Yon) ; « environ 75 centimes » à Cholet.
 - **Angers** : horaires du tram sans période de validité (la source ne la donne pas).
 - **Noms de secteurs** : libellés d'IRIS cités comme noms de quartiers, partout.
 

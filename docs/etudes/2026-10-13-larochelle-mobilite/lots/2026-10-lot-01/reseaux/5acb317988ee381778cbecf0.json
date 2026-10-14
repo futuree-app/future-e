@@ -7,7 +7,7 @@
  "preuve_nom": "intitulé du jeu de données et agence du GTFS",
  "offre_tdg": "TUB Saint Brieuc",
  "aom": "CA Saint-Brieuc Armor Agglomération",
- "exploitant": "non établi par ces sources",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
  "epci": {
   "code": "200069409",
   "nom": "CA Saint-Brieuc Armor Agglomération"
