@@ -42,3 +42,18 @@ Tours                  37261  dossier prêt                37.6 s  erreur : gén
 Le Mans                72181  dossier prêt                46.2 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
 Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 8.80 $
 == rédaction finie 2026-10-14T15:20:03Z
+== reprise 2026-10-14T22:35:43Z
+
+Commune                INSEE  État                   Préparation  Motif
+Poitiers               86194  prêt à relire               34.9 s  retouché à la main (section F) après une correction ; vérifier les sections E et F
+Angers                 49007  prêt à relire               43.3 s  retouché à la main (section F) après une correction ; vérifier les sections E et F
+Lorient                56121  prêt à relire               36.9 s  retouché à la main (section F) après une correction ; vérifier les sections E et F
+Vannes                 56260  prêt à relire               29.8 s  retouché à la main (section F) après une correction ; vérifier les sections E et F
+Saint-Nazaire          44184  prêt à relire               42.0 s  retouché à la main (section F) après une correction ; vérifier les sections E et F
+Cholet                 49099  prêt à relire               30.9 s  1 anomalie(s) déterministe(s) après la correction unique
+La Roche-sur-Yon       85191  prêt à relire               29.3 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Saint-Brieuc           22278  prêt à relire               33.6 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Tours                  37261  prêt à relire               37.5 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Le Mans                72181  prêt à relire               46.2 s  suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 16.86 $
+== fin reprise 2026-10-14T23:04:33Z

@@ -121,6 +121,8 @@ def controler(d, txt):
         # Dates (« semaine du 6 octobre 2025 ») : des repères de période, pas des valeurs.
         ch = re.sub(r"\d{1,2}(?:er)?\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(?:\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}", "", ch, flags=re.I)
         n = [x for x in nombres(ch) if not (1900 < x < 2100)]
+        if re.search(r"centimes?", ch):  # « 75 centimes » = 0,75 €
+            n += [x / 100 for x in n]
         # Aux bornes, l'égalité doit être exacte : « 100 % » pour une valeur affichée 99,8 % est une erreur.
         ok = lambda x, y: (x == y) if x in (0, 100) and "%" in chiffre else (abs(x - y) <= 0.6 or abs(x - round(y)) < 0.01)
         if n and vals and not definition and not any(ok(x, y) for x in n for y in vals):

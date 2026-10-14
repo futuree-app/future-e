@@ -623,7 +623,8 @@ def cmd_controler(lot, a):
             C["anomalies_restantes"] = r["anomalies"]
             C["motif"] = (f"{r['bloquantes']} anomalie(s) déterministe(s)" if r["bloquantes"] else
                           ("corrigé une fois ; vérifier la section E" if C["article"] == "correction.md" else
-                           "retouché à la main (section F) après une correction ; vérifier les sections E et F" if C["article"] == "edition.md" else ""))
+                           "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F" if C["article"] == "edition.md" else
+                           "aucune anomalie bloquante : pas de correction" if C["article"] == "redaction.md" else ""))
     lot.sauver(); vue(lot)
 
 

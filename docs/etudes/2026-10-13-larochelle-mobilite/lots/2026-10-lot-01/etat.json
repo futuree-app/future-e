@@ -25,11 +25,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:32Z",
      "duree_s": 0.2,
      "complement_sha": "386d3b4bd598c807",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "1dd3a8469cdb5172"
+     "dossier_sha": "307f1b4ff3601666"
     }
    },
    "manuel": [
@@ -57,7 +57,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "article": "edition.md",
    "visuels": {
     "visuels": [
@@ -118,11 +118,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:32Z",
      "duree_s": 0.2,
      "complement_sha": "d946affeada01399",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "706762667a55d103"
+     "dossier_sha": "ecb2409dc4aaa4af"
     }
    },
    "manuel": [
@@ -157,7 +157,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "article": "edition.md",
    "visuels": {
     "visuels": [
@@ -216,11 +216,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:32Z",
      "duree_s": 0.2,
      "complement_sha": "d08e504938176efe",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "e94957d55c07fadc"
+     "dossier_sha": "4e5c0702a8c14e3b"
     }
    },
    "manuel": [
@@ -248,7 +248,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "article": "edition.md",
    "visuels": {
     "visuels": [
@@ -310,11 +310,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:32Z",
      "duree_s": 0.2,
      "complement_sha": "6dc2c46bbb7bc56b",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "4c0fd4b0023921e3"
+     "dossier_sha": "ed046a812eff5ae1"
     }
    },
    "manuel": [
@@ -342,7 +342,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "article": "edition.md",
    "visuels": {
     "visuels": [
@@ -397,11 +397,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:32Z",
      "duree_s": 0.2,
      "complement_sha": "c0a31ebaea84a0a4",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "359db57e0a3bd6a9"
+     "dossier_sha": "2e70de41548b316f"
     }
    },
    "manuel": [
@@ -429,7 +429,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "article": "edition.md",
    "visuels": {
     "visuels": [
@@ -471,7 +471,7 @@
    "nom": "Cholet",
    "insee": "49099",
    "demande": "Cholet",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -492,11 +492,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:56Z",
+     "fin": "2026-10-14T23:05:33Z",
      "duree_s": 0.2,
      "complement_sha": "5979c12949a2a814",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "8ac50c887103037d"
+     "dossier_sha": "3921562d57d48844"
     }
    },
    "duree_preparation_s": 30.9,
@@ -511,10 +511,10 @@
     "21 secteurs d'habitat (IRIS)"
    ],
    "versions": {
-    "prompt_redaction": "7dc2ca0c244ec27a",
-    "relecture": "0bc9cb7d9c41f9f2",
+    "prompt_redaction": "b98ab393d76a039f",
+    "relecture": "9e6ec9c789bbfc8c",
     "correction": "ec2a42db105c2658",
-    "dossier": "99df091356c325f7",
+    "dossier": "8ac50c887103037d",
     "moteur": "claude-code",
     "modeles": {
      "redaction": "claude-opus-5-5",
@@ -523,19 +523,45 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
+   "motif": "corrigé une fois ; vérifier la section E",
    "incidents": [
     {
      "date": "2026-10-14T15:19:55Z",
      "nature": "limite d'usage probable : appel refusé sans consommation"
     }
-   ]
+   ],
+   "anomalies_restantes": [],
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_49099_clair.png",
+     "carte_iris_49099_clair.svg",
+     "carte_iris_49099_mobile_clair.png",
+     "carte_iris_49099_mobile_clair.svg",
+     "carte_iris_49099_mobile_sombre.png",
+     "carte_iris_49099_mobile_sombre.svg",
+     "carte_iris_49099_sombre.png",
+     "carte_iris_49099_sombre.svg",
+     "tableau_iris_49099.html",
+     "tableau_iris_49099.md"
+    ],
+    "reperes": [
+     "490990402",
+     "490990102",
+     "490990401",
+     "490990201",
+     "490990902",
+     "490990802",
+     "490990903",
+     "490990901"
+    ]
+   }
   },
   "85191": {
    "nom": "La Roche-sur-Yon",
    "insee": "85191",
    "demande": "La Roche-sur-Yon",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -556,11 +582,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:57Z",
+     "fin": "2026-10-14T23:05:33Z",
      "duree_s": 0.2,
      "complement_sha": "d08dcc96dc4f95d2",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "10ddf0eab48aba5c"
+     "dossier_sha": "5f812cd04a12bdb3"
     }
    },
    "duree_preparation_s": 29.3,
@@ -575,10 +601,10 @@
     "19 secteurs d'habitat (IRIS)"
    ],
    "versions": {
-    "prompt_redaction": "7dc2ca0c244ec27a",
-    "relecture": "0bc9cb7d9c41f9f2",
+    "prompt_redaction": "b98ab393d76a039f",
+    "relecture": "9e6ec9c789bbfc8c",
     "correction": "ec2a42db105c2658",
-    "dossier": "3ec33ac1600c109c",
+    "dossier": "10ddf0eab48aba5c",
     "moteur": "claude-code",
     "modeles": {
      "redaction": "claude-opus-5-5",
@@ -587,19 +613,49 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "incidents": [
     {
      "date": "2026-10-14T15:19:57Z",
      "nature": "limite d'usage probable : appel refusé sans consommation"
     }
-   ]
+   ],
+   "anomalies_restantes": [],
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_85191_clair.png",
+     "carte_iris_85191_clair.svg",
+     "carte_iris_85191_mobile_clair.png",
+     "carte_iris_85191_mobile_clair.svg",
+     "carte_iris_85191_mobile_sombre.png",
+     "carte_iris_85191_mobile_sombre.svg",
+     "carte_iris_85191_sombre.png",
+     "carte_iris_85191_sombre.svg",
+     "tableau_iris_85191.html",
+     "tableau_iris_85191.md"
+    ],
+    "reperes": [
+     "851910103",
+     "851910102",
+     "851910303",
+     "851911003",
+     "851910802",
+     "851910304",
+     "851910101",
+     "851910501",
+     "851910502",
+     "851911004",
+     "851910901",
+     "851910701"
+    ]
+   }
   },
   "22278": {
    "nom": "Saint-Brieuc",
    "insee": "22278",
    "demande": "Saint-Brieuc",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -620,11 +676,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:57Z",
-     "duree_s": 0.3,
+     "fin": "2026-10-14T23:05:33Z",
+     "duree_s": 0.2,
      "complement_sha": "76ceae72ec5a6d69",
-     "duree_calcul_s": 0.3,
-     "dossier_sha": "ae1a7deeca1679bd"
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "cd556c8b9c5b68b2"
     }
    },
    "manuel": [
@@ -637,12 +693,12 @@
    "notes": [
     "17 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 33.6,
+   "duree_preparation_s": 33.5,
    "versions": {
-    "prompt_redaction": "7dc2ca0c244ec27a",
-    "relecture": "0bc9cb7d9c41f9f2",
+    "prompt_redaction": "b98ab393d76a039f",
+    "relecture": "9e6ec9c789bbfc8c",
     "correction": "ec2a42db105c2658",
-    "dossier": "a92ba29b0e94833d",
+    "dossier": "ae1a7deeca1679bd",
     "moteur": "claude-code",
     "modeles": {
      "redaction": "claude-opus-5-5",
@@ -651,19 +707,53 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
+   "motif": "corrigé une fois ; vérifier la section E",
    "incidents": [
     {
      "date": "2026-10-14T15:19:59Z",
      "nature": "limite d'usage probable : appel refusé sans consommation"
     }
-   ]
+   ],
+   "anomalies_restantes": [],
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "barres_lieu_travail_22278_clair.png",
+     "barres_lieu_travail_22278_clair.svg",
+     "barres_lieu_travail_22278_mobile_clair.png",
+     "barres_lieu_travail_22278_mobile_clair.svg",
+     "barres_lieu_travail_22278_mobile_sombre.png",
+     "barres_lieu_travail_22278_mobile_sombre.svg",
+     "barres_lieu_travail_22278_sombre.png",
+     "barres_lieu_travail_22278_sombre.svg",
+     "carte_iris_22278_clair.png",
+     "carte_iris_22278_clair.svg",
+     "carte_iris_22278_mobile_clair.png",
+     "carte_iris_22278_mobile_clair.svg",
+     "carte_iris_22278_mobile_sombre.png",
+     "carte_iris_22278_mobile_sombre.svg",
+     "carte_iris_22278_sombre.png",
+     "carte_iris_22278_sombre.svg",
+     "tableau_iris_22278.html",
+     "tableau_iris_22278.md"
+    ],
+    "reperes": [
+     "222780107",
+     "222780120",
+     "222780108",
+     "222780105",
+     "222780119",
+     "222780102",
+     "222780112",
+     "222780116"
+    ]
+   }
   },
   "37261": {
    "nom": "Tours",
    "insee": "37261",
    "demande": "Tours",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -684,11 +774,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:57Z",
+     "fin": "2026-10-14T23:05:33Z",
      "duree_s": 0.2,
      "complement_sha": "7a9c290390e9bc4e",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "f52a0a432225c0ca"
+     "dossier_sha": "8d34e7bf81e0b8f8"
     }
    },
    "manuel": [
@@ -703,10 +793,10 @@
    ],
    "duree_preparation_s": 37.5,
    "versions": {
-    "prompt_redaction": "7dc2ca0c244ec27a",
-    "relecture": "0bc9cb7d9c41f9f2",
+    "prompt_redaction": "b98ab393d76a039f",
+    "relecture": "9e6ec9c789bbfc8c",
     "correction": "ec2a42db105c2658",
-    "dossier": "042ef9c0d187a1da",
+    "dossier": "f52a0a432225c0ca",
     "moteur": "claude-code",
     "modeles": {
      "redaction": "claude-opus-5-5",
@@ -715,19 +805,60 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
+   "motif": "corrigé une fois ; vérifier la section E",
    "incidents": [
     {
      "date": "2026-10-14T15:20:01Z",
      "nature": "limite d'usage probable : appel refusé sans consommation"
     }
-   ]
+   ],
+   "anomalies_restantes": [],
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "barres_lieu_travail_37261_clair.png",
+     "barres_lieu_travail_37261_clair.svg",
+     "barres_lieu_travail_37261_mobile_clair.png",
+     "barres_lieu_travail_37261_mobile_clair.svg",
+     "barres_lieu_travail_37261_mobile_sombre.png",
+     "barres_lieu_travail_37261_mobile_sombre.svg",
+     "barres_lieu_travail_37261_sombre.png",
+     "barres_lieu_travail_37261_sombre.svg",
+     "carte_iris_37261_clair.png",
+     "carte_iris_37261_clair.svg",
+     "carte_iris_37261_mobile_clair.png",
+     "carte_iris_37261_mobile_clair.svg",
+     "carte_iris_37261_mobile_sombre.png",
+     "carte_iris_37261_mobile_sombre.svg",
+     "carte_iris_37261_sombre.png",
+     "carte_iris_37261_sombre.svg",
+     "tableau_iris_37261.html",
+     "tableau_iris_37261.md"
+    ],
+    "reperes": [
+     "372610101",
+     "372611503",
+     "372611103",
+     "372611105",
+     "372610301",
+     "372610502",
+     "372611705",
+     "372611404",
+     "372610103",
+     "372610202",
+     "372611601",
+     "372611802",
+     "372611504",
+     "372611403",
+     "372610902"
+    ]
+   }
   },
   "72181": {
    "nom": "Le Mans",
    "insee": "72181",
    "demande": "Le Mans",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -748,11 +879,11 @@
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T22:27:57Z",
+     "fin": "2026-10-14T23:05:34Z",
      "duree_s": 0.2,
      "complement_sha": "8985d813a3da4c46",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "b9c1284afe562f21"
+     "dossier_sha": "2456b45be7f77f1a"
     }
    },
    "manuel": [
@@ -767,10 +898,10 @@
    ],
    "duree_preparation_s": 46.2,
    "versions": {
-    "prompt_redaction": "7dc2ca0c244ec27a",
-    "relecture": "0bc9cb7d9c41f9f2",
+    "prompt_redaction": "b98ab393d76a039f",
+    "relecture": "9e6ec9c789bbfc8c",
     "correction": "ec2a42db105c2658",
-    "dossier": "148c966f499a549c",
+    "dossier": "b9c1284afe562f21",
     "moteur": "claude-code",
     "modeles": {
      "redaction": "claude-opus-5-5",
@@ -779,13 +910,43 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "incidents": [
     {
      "date": "2026-10-14T15:20:03Z",
      "nature": "limite d'usage probable : appel refusé sans consommation"
     }
-   ]
+   ],
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_72181_clair.png",
+     "carte_iris_72181_clair.svg",
+     "carte_iris_72181_mobile_clair.png",
+     "carte_iris_72181_mobile_clair.svg",
+     "carte_iris_72181_mobile_sombre.png",
+     "carte_iris_72181_mobile_sombre.svg",
+     "carte_iris_72181_sombre.png",
+     "carte_iris_72181_sombre.svg",
+     "tableau_iris_72181.html",
+     "tableau_iris_72181.md"
+    ],
+    "reperes": [
+     "721810103",
+     "721810201",
+     "721810202",
+     "721812403",
+     "721810502",
+     "721810902",
+     "721810102",
+     "721811601",
+     "721811401",
+     "721811102",
+     "721811801",
+     "721810101"
+    ]
+   },
+   "anomalies_restantes": []
   }
  },
  "journal": []

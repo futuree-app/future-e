@@ -305,7 +305,9 @@ def main():
                 ajoute(f"carburant.{c.lower()}.{champ}", t, v[champ], "€/L", f"{v['stations']} stations déclarantes",
                        "médiane entre stations du dernier prix déclaré dans la semaine", rayon, "carburant.evolution", s,
                        "",  # la réextraction est une vérification de production (section 10), pas une information pour le lecteur
-                       limites_propres=["Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil."])
+                       limites_propres=["Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+                                        "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix "
+                                        "arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre."])
             hausse = arrondi(v["ecart"] * 20) / 20  # arrondie à 5 centimes, comme dans l'article pilote
             for km in KMS:
                 litres = 2 * km * JOURS * CONSO / 100

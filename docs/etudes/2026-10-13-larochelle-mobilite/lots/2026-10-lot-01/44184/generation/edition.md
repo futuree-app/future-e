@@ -28,7 +28,7 @@
 
 # Saint-Nazaire : où, et pour quel trajet, vivre avec moins de voiture
 
-**En un an, le litre de gazole a pris 0,73 € autour de Saint-Nazaire. Pour qui cherche un logement, la place de la voiture se pose donc avant même la première visite. Or les trajets des actifs de Saint-Nazaire varient fortement d'un secteur à l'autre, et selon la commune où ils travaillent.**
+**En un an, le prix du gazole a nettement augmenté autour de Saint-Nazaire. Pour qui cherche un logement, la place de la voiture se pose donc avant même la première visite. Or les trajets des actifs de Saint-Nazaire varient fortement d'un secteur à l'autre, et selon la commune où ils travaillent.**
 
 ## Le prix du plein, rapporté au trajet
 
@@ -99,7 +99,6 @@ Vous voulez peut-être vous rapprocher de votre travail, vous installer en famil
 
 | Passage | Chiffre écrit | Identifiant(s) | Usage |
 |---|---|---|---|
-| Chapeau | 0,73 € | `carburant.gazole.ecart` | oui |
 | Prix du plein | 12 km | périmètre de `carburant.gazole.prix` / `carburant.e10.prix` | oui |
 | Prix du plein | 1,56 € | `carburant.gazole.prix_un_an_avant` | oui |
 | Prix du plein | semaine du 6 octobre 2025 | `carburant.gazole.prix_un_an_avant` | oui |
@@ -205,6 +204,7 @@ Vous voulez peut-être vous rapprocher de votre travail, vous installer en famil
 
 | Passage | Avant | Après | Raison |
 |---|---|---|---|
+| Chapeau | « le litre de gazole a pris 0,73 € » | « le prix du gazole a nettement augmenté » | La hausse (calculée sur prix non arrondis) différait d'un centime de la différence des prix affichés plus bas |
 | Carburant | « coût annuel » | « surcoût annuel » | Le scénario chiffre un surcoût |
 | Vérifications, bus | réseau « STRAN » | « Ycéo », site yceo-mobilite.fr | Fait documentaire rectifié le 15/10/2026 : l'offre de transport.data.gouv.fr était périmée ; l'intitulé du jeu, l'agence du GTFS et le site officiel portent « Ycéo » |
 | Lieu de travail | 65 %, 25 points (intertitre et corps), 85 %, 7 % (Montoir), 55 % (Nantes, voiture) ; « le lieu de travail est souvent connu avant l'adresse » | 64 % et 89 % ; exemples Montoir-de-Bretagne (86 %) et Nantes (42 % en transports en commun) ; « Le graphique donne le détail » | Barres du graphique non répétées ; affirmation générale retirée |

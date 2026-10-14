@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:26:12Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T22:27:56Z",
+ "dossier_genere_le": "2026-10-14T23:05:32Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -1339,6 +1339,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
@@ -1361,6 +1362,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
@@ -1383,6 +1385,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
@@ -1405,6 +1408,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
@@ -1427,6 +1431,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
@@ -1449,6 +1454,7 @@
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
     "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
     "Une hausse passée ne dit rien de l'avenir."
    ],
