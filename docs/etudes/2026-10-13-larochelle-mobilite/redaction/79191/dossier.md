@@ -1,6 +1,6 @@
 # Dossier d'entrée de rédaction · Niort (79191)
 
-Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T13:34:19Z par `outil/dossier_redaction.py`.
+Fiche source : `fiches/79191/fiche.json` (générée le 2026-10-13T10:41:34Z, jour de référence 2026-10-13, sha256 `45ab568a0609c943`). Dossier généré le 2026-10-14T13:46:38Z par `outil/dossier_redaction.py`.
 
 Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifiant stable (colonne `id`) : c'est lui que cite la correspondance interne du brouillon. Un fait qui n'est pas ici n'existe pas pour l'article.
 
@@ -171,6 +171,21 @@ Actifs qui habitent l'ensemble de Niort, tous secteurs confondus, selon leur com
 | Melle (79174) | 1 % | 97 % | 0 % | 3 % | 0 % | 46 | fragile | `ordre de grandeur` |
 | Poitiers (86194) | 1 % | 49 % | 3 % | 39 % | 1 % | 44 | fragile | `ordre de grandeur` |
 
+## 4 bis. Repère de comparaison avec d'autres communes (calculé)
+
+Règle de sélection, fixée avant de regarder les résultats et identique pour toutes les communes : communes de même rôle que Niort (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 12 932 à 51 726), avec au moins 150 lignes d'échantillon ; Niort exclue ; France métropolitaine. Indicateur : part des actifs allant travailler principalement en voiture (TRANS = 5) ; population : actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI) ; INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 (collectes 2020 à 2024). Le rôle est une approximation (commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre).
+
+Comment l'écrire : nommer le groupe par sa règle (par exemple « les villes de taille proche qui sont, comme elle, la commune principale de leur unité urbaine »), sans dire qu'elles sont comparables sur tous les plans. La médiane est celle des parts communales, chaque commune comptant une fois : ce n'est pas la part de voiture de l'ensemble de leurs habitants. Pas de rang, pas de palmarès, pas de liste de villes dans l'article. Un écart de quelques points dit seulement que la commune est proche de la médiane ; s'il n'apporte rien à la question, le repère reste dehors.
+
+| id | Fait | Valeur | Usage |
+|---|---|---|---|
+| `comparaison.voiture.commune` | Part des actifs résidant à Niort qui vont travailler principalement en voiture (valeur comparée) | 70 % | `oui` |
+| `comparaison.voiture.mediane_groupe` | Médiane des parts de la voiture des 76 communes du groupe (chaque commune compte une fois) | 68 % | `oui` |
+| `comparaison.voiture.ecart` | Écart : Niort moins la médiane du groupe (valeurs arrondies) | +2 points | `oui` |
+| `comparaison.voiture.groupe_n` | Nombre de communes du groupe | 76 | `oui` |
+
+Communes du groupe (76, pour la vérification ; ne pas les citer) : Agen, Ajaccio, Albi, Amiens, Angoulême, Annemasse, Arles, Arras, Auxerre, Avignon, Bastia, Bayonne, Beauvais, Belfort, Besançon, Blois, Boulogne-sur-Mer, Bourg-en-Bresse, Bourges, Brive-la-Gaillarde, Béziers, Caen, Calais, Carcassonne, Castres, Chalon-sur-Saône, Chambéry, Charleville-Mézières, Chartres, Cherbourg-en-Cotentin, Cholet, Châlons-en-Champagne, Châteauroux, Colmar, Compiègne, Douai, Draguignan, Dunkerque, Fréjus, Gap, Haguenau, La Roche-sur-Yon, La Rochelle, Laval, Les Sables-d'Olonne, Limoges, Lorient, Meaux, Metz, Montauban, Montélimar, Mulhouse, Mâcon, Nancy, Narbonne, Orléans, Pau, Perpignan, Poitiers, Quimper, Rouen, Saint-Brieuc, Saint-Malo, Saint-Nazaire, Saint-Quentin, Salon-de-Provence, Sète, Tarbes, Thionville, Thonon-les-Bains, Troyes, Valence, Valenciennes, Vannes, Vienne, Évreux.
+
 ## 5. Les communes du groupe « voisines »
 
 Résidents de chaque commune (tous lieux de travail) et, parmi eux, ceux qui viennent travailler à Niort. Identifiant : `voisine.<insee>.<colonne>`, colonne parmi `voiture`, `velo`, `tc` (tous résidents) et `voiture_vers_commune` (venant travailler).
@@ -211,7 +226,7 @@ Hypothèses (à écrire dans l'article) : 6 L/100 km, 200 allers-retours domicil
 
 ## 8. Faits absents : ne pas les écrire, ne pas les reconstituer
 
-- Rang ou comparaison avec d'autres communes françaises (vélo, voiture, « taille comparable ») : agrégat national calculé une fois pour La Rochelle (scripts/01), hors de la fiche.
+- Rang, palmarès ou toute comparaison avec d'autres communes autre que le repère de la section 4 bis : seul ce repère est calculé, avec sa règle ; rien d'autre (vélo, rang, autre groupe).
 - Population totale de la commune, nombre de ménages de la commune : non exposés par la fiche.
 - Composition de l'unité urbaine (liste et nombre de communes) : la fiche ne donne que son code.
 - Part de la voiture pour un groupe de communes de travail autre que ceux listés : recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py).
@@ -304,7 +319,7 @@ Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de 
 
 **Entrée de l'article.** Voir le format de référence (étape 1) : la hausse du carburant si ses faits sont utilisables et qu'elle amène la question retenue, sinon une question durable de recherche résidentielle.
 
-**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») sauf si un fait du dossier la donne (piste pour plus tard : une comparaison nationale ou avec des communes comparables viendra du moteur déterministe, avec population, millésime et règle de comparaison explicites ; elle n'existe pas encore) ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
+**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») autre que le repère de comparaison du dossier (section 4 bis : médiane d'un groupe défini par une règle fixe, `outil/comparaison_voiture.py`), qui s'écrit avec le nom de sa règle, sans rang ni palmarès ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
 
 ### Groupes de communes
 

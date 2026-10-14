@@ -74,6 +74,15 @@ Trame commune avec La Rochelle. Nouvel ordre : carburant et distance (ex-section
 - Méthode : les parts par secteur portent sur tous les actifs qui y habitent ; secteurs et communes de travail ne sont pas croisés.
 - Aucun chiffre ajouté ni retiré hors la répétition carburant.
 
+## Repère de comparaison (14/10/2026)
+
+| Passage | Chiffre | Identifiant | Valeur |
+|---|---|---|---|
+| Secteurs, phrase sur les 70 % | « à peu près la médiane (68 %) … » | `comparaison.voiture.mediane_groupe` (et `comparaison.voiture.ecart`, +2 points, non écrit) | 0,6754 ; 76 communes (`fiches/79191/comparaison_voiture.json`) |
+| Méthode | 76 communes ; règle | `comparaison.voiture.groupe_n` ; règle de `outil/comparaison_voiture.py` | |
+
+« Ce repère cache » devient « Ce chiffre d'ensemble cache » (le mot « repère » désigne désormais la comparaison).
+
 ## Chiffres de la version éditée
 
 | Passage | Chiffre | Identifiant(s) | Valeur au dossier |

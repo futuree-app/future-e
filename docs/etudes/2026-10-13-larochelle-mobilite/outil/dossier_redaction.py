@@ -131,6 +131,7 @@ def main():
     p.add_argument("--origine-voisines", default="non enregistrée dans la fiche : à préciser avant rédaction",
                    help="comment la liste des voisines a été choisie (la fiche ne le dit pas)")
     p.add_argument("--complement", help="complément documentaire (défaut : <out>/complement.json s'il existe)")
+    p.add_argument("--comparaison", help="repère de comparaison (défaut : comparaison_voiture.json à côté de la fiche, s'il existe)")
     a = p.parse_args()
     brut = open(a.fiche, "rb").read(); fiche = json.loads(brut)
     C = fiche["commune"]; nom, insee = C["nom"], C["insee"]
@@ -295,8 +296,27 @@ def main():
                 scen.append({"id": f"scenario.carburant.{c.lower()}.{km}km", "carburant": nomc, "km_aller": km,
                              "hausse_retenue_eur_l": hausse, "surcout_an_eur": arrondi(litres * hausse / 10) * 10})
     # ── Faits absents (ne pas reconstituer) ───────────────────────────────────────────────────
+    cmp_path = a.comparaison or os.path.join(os.path.dirname(a.fiche), "comparaison_voiture.json")
+    cmp = json.load(open(cmp_path)) if os.path.exists(cmp_path) else None
+    if cmp:
+        if cmp["commune"]["insee"] != insee:
+            raise SystemExit(f"{cmp_path} : repère calculé pour {cmp['commune']['insee']}, pas pour {insee}")
+        cmp["chemin"] = cmp_path
+        if cmp["disponible"]:
+            g = cmp["groupe"]
+            cmp["faits"] = [
+                {"id": "comparaison.voiture.commune", "fait": f"Part des actifs résidant à {nom} qui vont travailler principalement en voiture (valeur comparée)",
+                 "affichage": pct(cmp["commune"]["voiture"]), "usage": "oui"},
+                {"id": "comparaison.voiture.mediane_groupe", "fait": f"Médiane des parts de la voiture des {g['n']} communes du groupe (chaque commune compte une fois)",
+                 "affichage": pct(g["mediane_voiture"]), "usage": "oui"},
+                {"id": "comparaison.voiture.ecart", "fait": f"Écart : {nom} moins la médiane du groupe (valeurs arrondies)",
+                 "affichage": f"{cmp['ecart_points']:+d} points", "usage": "oui"},
+                {"id": "comparaison.voiture.groupe_n", "fait": "Nombre de communes du groupe", "affichage": str(g["n"]), "usage": "oui"}]
     absents = [
-        ("Rang ou comparaison avec d'autres communes françaises (vélo, voiture, « taille comparable »)", "agrégat national calculé une fois pour La Rochelle (scripts/01), hors de la fiche"),
+        (("Rang, palmarès ou toute comparaison avec d'autres communes autre que le repère de la section 4 bis" if cmp and cmp["disponible"]
+          else "Rang ou comparaison avec d'autres communes françaises (vélo, voiture, « taille comparable »)"),
+         ("seul ce repère est calculé, avec sa règle ; rien d'autre (vélo, rang, autre groupe)" if cmp and cmp["disponible"]
+          else (cmp["raison"] if cmp else "repère non calculé pour cette commune (outil/comparaison_voiture.py)"))),
         ("Population totale de la commune, nombre de ménages de la commune", "non exposés par la fiche"),
         ("Composition de l'unité urbaine (liste et nombre de communes)", "la fiche ne donne que son code"),
         ("Part de la voiture pour un groupe de communes de travail autre que ceux listés", "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"),
@@ -356,7 +376,7 @@ def main():
                "scenario_carburant": {"hypotheses": {"jours_trajet_an": JOURS, "litres_100km": CONSO, "km_aller": KMS,
                                                      "hausse": "hausse médiane de la fiche arrondie à 5 centimes"}, "lignes": scen},
                "absents": [{"fait": x, "raison": y} for x, y in absents], "visuels": visuels, "verifications_humaines": verifs,
-               "complement_documentaire": doc}
+               "complement_documentaire": doc, "comparaison": cmp}
     os.makedirs(a.out, exist_ok=True)
     json.dump(dossier, open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1)
     open(os.path.join(a.out, "dossier.md"), "w").write(rendu_md(dossier, sources_gtfs))
@@ -451,6 +471,22 @@ def rendu_md(d, sources_gtfs):
         for r in d["destinations"]:
             st, m = statut_lignes(r["lignes"])
             L.append(f"| {r['nom']} ({r['travail']}) | {P(r['part_des_actifs'])} | {P(r['voiture'])} | {P(r['velo'])} | {P(r['tc'])} | {P(r['marche'])} | {r['lignes']} | {st} | `{USAGE[st]}` |")
+    cmp = d.get("comparaison")
+    if cmp and cmp["disponible"]:
+        g = cmp["groupe"]
+        L += ["", "## 4 bis. Repère de comparaison avec d'autres communes (calculé)", "",
+              f"Règle de sélection, fixée avant de regarder les résultats et identique pour toutes les communes : {cmp['regle']['texte']}. "
+              f"Indicateur : {cmp['definition']['indicateur']} ; population : {cmp['definition']['population']} ; {cmp['definition']['source']}, {cmp['definition']['millesime']}. "
+              f"Le rôle est une approximation ({cmp['regle']['approximation_role']}).", "",
+              "Comment l'écrire : nommer le groupe par sa règle (par exemple « les villes de taille proche qui sont, comme elle, la commune principale de leur "
+              "unité urbaine »), sans dire qu'elles sont comparables sur tous les plans. La médiane est celle des parts communales, chaque commune comptant "
+              "une fois : ce n'est pas la part de voiture de l'ensemble de leurs habitants. Pas de rang, pas de palmarès, pas de liste de villes dans l'article. "
+              "Un écart de quelques points dit seulement que la commune est proche de la médiane ; s'il n'apporte rien à la question, le repère reste dehors.", "",
+              "| id | Fait | Valeur | Usage |", "|---|---|---|---|"]
+        L += [f"| `{f['id']}` | {f['fait']} | {f['affichage']} | `{f['usage']}` |" for f in cmp["faits"]]
+        L += ["", f"Communes du groupe ({g['n']}, pour la vérification ; ne pas les citer) : " + ", ".join(x["nom"] for x in g["communes"]) + "."]
+    elif cmp:
+        L += ["", "## 4 bis. Repère de comparaison avec d'autres communes", "", f"Indisponible : {cmp['raison']}. Ne pas écrire de comparaison."]
     if d["voisines"]:
         L += ["", "## 5. Les communes du groupe « voisines »", "",
               f"Résidents de chaque commune (tous lieux de travail) et, parmi eux, ceux qui viennent travailler à {nom}. Identifiant : `voisine.<insee>.<colonne>`, colonne parmi `voiture`, `velo`, `tc` (tous résidents) et `voiture_vers_commune` (venant travailler).", "",

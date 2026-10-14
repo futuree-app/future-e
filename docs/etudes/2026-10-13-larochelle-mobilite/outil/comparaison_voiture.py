@@ -43,7 +43,7 @@ ROLES = {"principale": "commune principale de son unité urbaine (la plus grande
 
 
 def arrondi(x):
-    return int(Decimal(repr(x)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return int(Decimal(repr(float(x))).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
 def main():
@@ -63,7 +63,7 @@ def main():
     g["nom"] = [idx[c]["nom"] for c in g.index]
     g["uu"] = [None if idx[c].get("hors_uu") or not idx[c].get("uu") else idx[c]["uu"] for c in g.index]
     principale = g[g["uu"].notna()].groupby("uu")["actifs"].idxmax()
-    g["role"] = ["hors_uu" if u is None else ("principale" if principale[u] == c else "autre") for c, u in zip(g.index, g["uu"])]
+    g["role"] = ["hors_uu" if not isinstance(u, str) else ("principale" if principale[u] == c else "autre") for c, u in zip(g.index, g["uu"])]
 
     if a.insee not in g.index:
         raise SystemExit(f"{a.insee} absent de MOBPRO ou de l'index")
@@ -72,9 +72,10 @@ def main():
     grp = g[(g["role"] == me["role"]) & (g["actifs"] >= lo) & (g["actifs"] <= hi) & (g["lignes"] >= LIGNES_MIN) & (g.index != a.insee)]
     grp = grp.sort_values("nom")
 
+    mille = lambda x: f"{arrondi(x):,}".replace(",", "\u202f")
     regle = (f"communes de même rôle que {me['nom']} ({ROLES[me['role']]}), comptant de la moitié au double de ses actifs occupés "
-             f"résidents (de {arrondi(lo):,} à {arrondi(hi):,}), avec au moins {LIGNES_MIN} lignes d'échantillon ; {me['nom']} exclue ; "
-             "France métropolitaine").replace(",", " ")
+             f"résidents (de {mille(lo)} à {mille(hi)}), avec au moins {LIGNES_MIN} lignes d'échantillon ; {me['nom']} exclue ; "
+             "France métropolitaine")
     res = {"commune": {"insee": a.insee, "nom": me["nom"], "role": me["role"], "actifs": arrondi(me["actifs"]),
                        "lignes": int(me["lignes"]), "voiture": round(float(me["voiture"]), 4)},
            "definition": {"indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",

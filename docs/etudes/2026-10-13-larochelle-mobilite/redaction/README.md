@@ -32,6 +32,9 @@ INSEE=79191
 python outil/fiche_mobilite.py --insee $INSEE --jour $(date +%F) --out fiches/$INSEE --cache <cache partagé> \
   --mobpro <checkout>/data/rp-mobpro-2022.parquet --bpe <checkout>/data/bpe25.parquet \
   --index <checkout>/data/comparateur-index.json.gz
+# 1 bis. Repère de comparaison voiture (règle fixe, quelques secondes) ; à côté de la fiche, repris par l'étape 2
+python outil/comparaison_voiture.py --insee $INSEE --mobpro <checkout>/data/rp-mobpro-2022.parquet \
+  --index <checkout>/data/comparateur-index.json.gz --out fiches/$INSEE/comparaison_voiture.json
 # 2. Dossier d'entrée de rédaction (instantané)
 python outil/dossier_redaction.py --fiche fiches/$INSEE/fiche.json --out redaction/$INSEE \
   --origine-voisines "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
@@ -68,7 +71,7 @@ Ce que le test doit montrer : que l'IA de rédaction choisit un angle justifié 
 | Relecture des libellés d'IRIS avant de les écrire comme noms de quartiers | **Manuel** |
 | Contrôle de la hausse du carburant sur les mêmes stations | **Manuel** (`scripts/13` a été écrit pour La Rochelle) ; réextraire les prix la veille de la publication |
 | Graphique selon la commune de travail et sa carte de situation | **Manuel** : `barres()` est écrite pour La Rochelle ; la carte de situation (`--communes`) n'a de sens qu'à côté de ce graphique |
-| Toute comparaison nationale (rang vélo, voiture) | **Absent** : non calculé par la fiche ; à ne pas écrire. Piste notée le 14/10/2026 : la produire dans le moteur déterministe, avec population, millésime et règle de comparaison explicites, avant de l'ouvrir à la rédaction |
+| Repère de comparaison voiture (médiane d'un groupe de communes) | **Automatisé** (`outil/comparaison_voiture.py`, 14/10/2026) : règle fixe (même rôle dans l'unité urbaine, de la moitié au double des actifs occupés, ≥ 150 lignes, commune exclue, indisponible sous 10 communes) ; écrit `fiches/<insee>/comparaison_voiture.json`, repris par le dossier (section 4 bis). Aucun autre rang ni comparaison |
 | Rédaction | **IA de rédaction** : prompt + dossier, en session vierge ; aucune génération lancée le 13/10/2026 |
 | Contrôle de la correspondance du brouillon | **Manuel** (lecture de `dossier.json`) ; pas de script de contrôle |
 | Relecture finale, publication | **Manuel**. Un identifiant de fait dans la correspondance ne suffit pas à valider une phrase : la relecture vérifie aussi la population réellement désignée (secteur de résidence ≠ commune de travail, actifs ≠ ménages ≠ adresses), les valeurs aux bornes (« tous », « aucun »), les conditions et périmètres des informations documentaires (lignes concernées, dates de validité, gratuité ≠ trajet faisable) et la fidélité du raisonnement |

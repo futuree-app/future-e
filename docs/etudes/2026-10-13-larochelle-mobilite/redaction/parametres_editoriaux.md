@@ -55,7 +55,7 @@ Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de 
 
 **Entrée de l'article.** Voir le format de référence (étape 1) : la hausse du carburant si ses faits sont utilisables et qu'elle amène la question retenue, sinon une question durable de recherche résidentielle.
 
-**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») sauf si un fait du dossier la donne (piste pour plus tard : une comparaison nationale ou avec des communes comparables viendra du moteur déterministe, avec population, millésime et règle de comparaison explicites ; elle n'existe pas encore) ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
+**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») autre que le repère de comparaison du dossier (section 4 bis : médiane d'un groupe défini par une règle fixe, `outil/comparaison_voiture.py`), qui s'écrit avec le nom de sa règle, sans rang ni palmarès ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
 
 ## Groupes de communes
 
