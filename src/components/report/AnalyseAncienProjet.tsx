@@ -183,7 +183,8 @@ export function AnalyseAncienProjet(
       const res = await fetch("/api/dossier/actualiser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ insee, scopeKey }),
+        // La version que CETTE page sert : une version plus récente déjà prête ne sera pas regénérée.
+        body: JSON.stringify({ insee, scopeKey, versionLue: versionServie }),
       });
       // UNE GÉNÉRATION DÉJÀ EN COURS N'EST PAS UNE GÉNÉRATION ABOUTIE (revue du 12/08/2026).
       i = issueDepuisReponse({ ok: res.ok, status: res.status, corps: await res.json().catch(() => null) });

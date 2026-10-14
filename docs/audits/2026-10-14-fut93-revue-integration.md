@@ -89,3 +89,26 @@ de backlog non suivi et `supabase/.temp/` restent hors des commits.
 
 Vérifications : suite complète 2552 / 2552, TypeScript, lint (42 signalements préexistants, aucun dans
 les fichiers modifiés), build Webpack.
+
+## 5. Une page en retard ne relance plus de génération payante
+
+**Avant.** Côté serveur, `/api/dossier/actualiser` protégeait une génération EN COURS
+(`prochaineVersionAReserver` rend `null`, la contrainte unique refuse un doublon), pas une génération
+TERMINÉE : une page restée sur la v3 alors que la v4 était prête (bandeau remonté, état client perdu,
+onglet resté ouvert) reproposait « Mettre à jour l'analyse », et l'appui réservait une v5, payante.
+
+**Correctif.** Le client envoie `versionLue`, la version que sa page sert (`AnalyseAncienProjet` :
+`versionServie` ; `LectureFactuelleDuBien` : 0, puisqu'elle ne s'affiche que sans version prête). Si
+une version PRÊTE plus récente existe (`versionDejaServie`, `decision-artifact.ts`), la route la rend
+comme `abouti`, sans générer ; le client l'affiche comme une livraison. Un projet modifié APRÈS la
+dernière version est demandé depuis une page qui la sert : même numéro, la génération a lieu. Sans
+numéro lisible (ancien client en cache, dossier périmé servi par assemblage), comportement inchangé.
+
+**Tests.** `decision-artifact.test.ts` (page en retard : aucune génération ; projet modifié : v3
+réservée ; version en échec, absence de version et numéros illisibles : aucune présomption) et
+`fut10-livraison.test.ts` (la garde précède la réservation et la génération ; les deux appuis envoient
+leur version). Suite 2555 / 2555, TypeScript, lint des fichiers modifiés, build Webpack.
+
+**Limite.** Une page restée sur la v3 et dont le projet a changé APRÈS la v4 recevra d'abord la v4 ;
+le bandeau se reproposera alors sur la v4, et le second appui générera. Un clic de plus, aucune
+génération perdue.
