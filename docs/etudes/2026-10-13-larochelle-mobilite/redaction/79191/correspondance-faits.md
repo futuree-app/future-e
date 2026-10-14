@@ -65,6 +65,15 @@ Non attribué à une entrée : l'intertitre « 38 points d'écart » et la succe
 
 Article édité, même jour : « 49 % des actifs qui habitent le secteur Centre, où qu'ils travaillent » (population explicite). Le passage Tanlib, déjà présent, est conservé tel quel : il cite les lignes urbaines 1 à 10, la date de validité des fiches, et sépare gratuité et faisabilité.
 
+## Harmonisation du 14/10/2026 (série mobilité)
+
+Trame commune avec La Rochelle. Nouvel ordre : carburant et distance (ex-section 4, tableau en ouverture) ; secteurs (section 1) ; lieu de travail (section 3, avec les 25 %) ; « Et pour les courses, l'école ou la pharmacie ? » ; « Garder une voiture, prendre le bus » (stationnement de la section 2 et passage Tanlib, déplacé depuis la section 3) ; conclusion. Les identifiants du tableau ci-dessous valent toujours ; seuls les emplacements changent.
+
+- Carburant : hypothèses dites une fois avant le tableau ; l'exemple 15 km (270 € et 180 €) n'est plus répété dans la prose, il reste dans le tableau.
+- Transitions : « Le secteur n'est qu'une partie de la réponse » (secteurs → travail) ; « Le travail n'est qu'une partie des déplacements » (travail → équipements) ; « Vivre près des commerces n'empêche pas de garder une voiture » (équipements → stationnement).
+- Méthode : les parts par secteur portent sur tous les actifs qui y habitent ; secteurs et communes de travail ne sont pas croisés.
+- Aucun chiffre ajouté ni retiré hors la répétition carburant.
+
 ## Chiffres de la version éditée
 
 | Passage | Chiffre | Identifiant(s) | Valeur au dossier |

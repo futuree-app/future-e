@@ -1,24 +1,22 @@
 # Vivre à La Rochelle en utilisant moins la voiture : quels quartiers, quels trajets ?
 
-**En un an, le gazole a pris environ 75 centimes par litre autour de La Rochelle. Pour qui cherche un logement, le trajet vers le travail pèse un peu plus dans le budget. À La Rochelle, la place de la voiture change nettement d'un quartier à l'autre, et selon la commune où l'on travaille.**
+**Début octobre 2026, le gazole coûtait environ 75 centimes de plus par litre qu'un an plus tôt autour de La Rochelle. Pour qui cherche un logement, une question devient très concrète : combien de kilomètres chaque jour, et par quel moyen ? À La Rochelle, la place de la voiture change nettement d'un quartier à l'autre, et selon la commune où l'on travaille.**
 
 ## Ce que la hausse coûte, selon la distance
 
-Début octobre 2026, le gazole se vendait autour de 2,29 € le litre dans les stations à moins de 12 kilomètres du centre de La Rochelle, contre 1,55 € un an plus tôt. Le SP95-E10 est passé d'environ 1,63 € à 2,13 €.
+Dans les stations à moins de 12 kilomètres du centre de La Rochelle, le gazole est passé d'environ 1,55 € à 2,29 € le litre entre début octobre 2025 et début octobre 2026, le SP95‑E10 d'environ 1,63 € à 2,13 €. Le surcoût grandit avec la distance parcourue chaque jour. Le tableau suppose une voiture qui consomme 6 litres aux 100 kilomètres, 200 allers-retours domicile-travail par an et une hausse arrondie à 0,75 € par litre de gazole, 0,50 € pour le SP95‑E10.
 
-Pour une voiture qui consomme 6 litres aux 100 kilomètres et fait 200 allers-retours domicile-travail par an :
-
-| Trajet aller | Surcoût de carburant par an, gazole (+0,75 €/L) | Surcoût de carburant par an, SP95-E10 (+0,50 €/L) |
+| Trajet aller | Surcoût de carburant par an, gazole (+0,75 €/L) | Surcoût de carburant par an, SP95‑E10 (+0,50 €/L) |
 |---|---:|---:|
 | 5 km | environ 90 € | environ 60 € |
 | 15 km | environ 270 € | environ 180 € |
 | 35 km | environ 630 € | environ 420 € |
 
-Les pratiques décrites ensuite viennent du recensement de 2022, antérieur à cette hausse.
+Ce tableau ne concerne que les trajets faits en voiture. Qui les fait, et depuis quels quartiers ? Le recensement de 2022, antérieur à cette hausse, le montre.
 
 ## Une ville de vélo où la voiture reste majoritaire
 
-Parmi les actifs qui habitent La Rochelle, 53 % vont travailler principalement en voiture, 18 % à vélo, 12 % en transports en commun et 11 % à pied. Pour le vélo, c'est la deuxième part parmi 82 communes françaises de taille comparable, derrière Grenoble. Pour la voiture, La Rochelle se situe au milieu de ce groupe.
+Parmi les actifs qui habitent La Rochelle, 53 % vont travailler principalement en voiture et 18 % à vélo. Pour le vélo, c'est la deuxième part parmi 82 communes françaises de taille comparable, derrière Grenoble. Pour la voiture, La Rochelle se situe au milieu de ce groupe.
 
 Avoir une voiture ne veut pas dire la prendre chaque matin. Parmi les actifs dont le ménage en possède au moins une, 40 % ne la déclarent pas comme mode principal pour aller travailler ; 17 % y vont à vélo.
 
@@ -26,30 +24,33 @@ Avoir une voiture ne veut pas dire la prendre chaque matin. Parmi les actifs don
 
 [CARTE : Aller travailler en voiture, secteur par secteur]
 
-Dans les trois secteurs statistiques du centre (Centre Préfecture, Centre Mairie, Centre Marché), moins de 30 % des actifs vont travailler en voiture. À Laleu, à La Pallice, à Mireuil Est ou à Villeneuve-les-Salines Ouest, ils sont près de 70 %.
-
-À Mireuil Est, presque toutes les adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 mètres à vol d'oiseau, et des bus passent fréquemment à proximité le matin. 68 % des actifs du secteur vont pourtant travailler en voiture.
-
-Au centre, la question se pose autrement. Un ménage rochelais sur quatre n'a pas de voiture, et dans les secteurs de l'hypercentre, seuls 14 à 17 % des ménages disposent d'une place de stationnement réservée. Lors d'une visite, la place pour la voiture se regarde comme la cave ou le balcon.
+Dans les trois secteurs statistiques du centre (Centre Préfecture, Centre Mairie, Centre Marché), moins de 30 % des actifs qui y habitent vont travailler en voiture, où qu'ils travaillent. À Laleu, à La Pallice, à Mireuil Est ou à Villeneuve-les-Salines Ouest, ils sont près de 70 %.
 
 ## Travailler à La Rochelle, ou juste à côté
+
+Le quartier n'est qu'une partie de la réponse : le trajet dépend aussi de l'endroit où l'on travaille. Parmi les actifs qui habitent et travaillent à La Rochelle, 44 % vont travailler en voiture. Chez ceux qui habitent La Rochelle et travaillent dans l'une de quatre communes limitrophes, Aytré, Lagord, Périgny ou Puilboreau, la proportion monte à 72 %.
 
 [GRAPHIQUE : Habiter La Rochelle, travailler ici ou dans une commune voisine]
 [CARTE DES COMMUNES : Situer les communes du graphique]
 
-Parmi les actifs qui habitent La Rochelle, 44 % de ceux qui y travaillent aussi vont travailler en voiture. Chez ceux qui travaillent dans l'une de quatre communes limitrophes, Aytré, Lagord, Périgny ou Puilboreau, la proportion monte à 72 %.
-
-Ce sont deux groupes distincts : leurs métiers, leurs horaires et leurs quartiers diffèrent aussi. Pour un couple, cela fait deux trajets à regarder depuis la même adresse.
+Pour un couple, cela fait deux trajets à regarder depuis la même adresse.
 
 La Rochelle attire aussi des actifs qui habitent loin. Sur environ 50 600 personnes qui y travaillent, 40 % habitent hors de l'unité urbaine, l'agglomération de onze communes définie par l'INSEE. 90 % d'entre elles viennent en voiture.
 
-Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce que cela implique quand on cherche un logement : c'est le sujet de [notre article sur la dépendance automobile](/savoir/dependance-auto).
+## Et pour les courses, l'école ou la pharmacie ?
+
+Le trajet vers l'emploi n'est pas le seul de la journée. Pour choisir un logement, ce qui se trouve à quelques pas de chez soi compte aussi, où que l'on travaille.
+
+À Mireuil Est, presque toutes les adresses ont un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 mètres à vol d'oiseau, et des bus passent fréquemment à proximité le matin. 68 % des actifs du secteur vont pourtant travailler en voiture : avoir le quotidien à portée ne règle pas le trajet vers l'emploi.
 
 ## Avant de visiter
 
+Dans les secteurs de l'hypercentre, seuls 14 à 17 % des ménages disposent d'une place de stationnement réservée ; dans l'ensemble de la ville, un ménage sur quatre n'a pas de voiture. Si vous en gardez une, vérifiez dès l'annonce si une place est comprise.
+
 - **Le trajet de chaque emploi.** Depuis l'adresse, aux heures de départ et de retour : à pied, à vélo, en bus, en voiture.
-- **La place de la voiture.** Au centre, le stationnement ; ailleurs, les jours où elle restera indispensable.
 - **Vos kilomètres.** Reprenez le tableau du début avec votre distance et votre consommation.
+
+Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce que cela implique quand on cherche un logement : c'est le sujet de [notre article sur la dépendance automobile](/savoir/dependance-auto).
 
 ## Votre projet, votre adresse
 
@@ -59,7 +60,7 @@ Se rapprocher d'un emploi, s'installer à deux avec deux lieux de travail, prép
 
 ### Méthode et sources
 
-Pratiques domicile-travail : INSEE, recensement de la population 2022 (fichier détail des mobilités professionnelles ; base infracommunale « Activité des résidents » pour les secteurs). Actifs occupés de 15 ans ou plus, mode de transport principal pour aller travailler, y compris ceux qui ne se déplacent pas. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés. Les secteurs sont les IRIS de l'INSEE ; leurs noms ne correspondent pas toujours aux quartiers d'usage. « Taille comparable » : communes de 25 000 à 80 000 actifs occupés résidents. Unité urbaine : INSEE, 2020. Les parts par secteur sont une analyse de cette étude ; le dossier d'adresse ne les reprend pas.
+Pratiques domicile-travail : INSEE, recensement de la population 2022 (fichier détail des mobilités professionnelles ; base infracommunale « Activité des résidents » pour les secteurs). Actifs occupés de 15 ans ou plus, mode de transport principal pour aller travailler, y compris ceux qui ne se déplacent pas. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés. Les actifs comparés selon leur commune de travail forment des groupes distincts (métiers, horaires, quartiers) : l'écart décrit leurs pratiques, pas l'effet d'un changement d'emploi. Les parts par secteur portent sur tous les actifs qui y habitent, quelle que soit leur commune de travail ; secteurs et communes de travail ne sont pas croisés. Les secteurs sont les IRIS de l'INSEE ; leurs noms ne correspondent pas toujours aux quartiers d'usage. « Taille comparable » : communes de 25 000 à 80 000 actifs occupés résidents. Unité urbaine : INSEE, 2020. Les parts par secteur sont une analyse de cette étude ; le dossier d'adresse ne les reprend pas.
 
 Ménages et voiture, stationnement : INSEE, recensement 2022, base infracommunale « Logement » ; parts de ménages.
 
