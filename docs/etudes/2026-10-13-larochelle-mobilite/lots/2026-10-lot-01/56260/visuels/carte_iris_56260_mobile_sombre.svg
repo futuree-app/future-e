@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1476" width="640" height="1476" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1343" width="640" height="1343" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
 <title id="t">Aller travailler en voiture, secteur par secteur</title>
 <desc id="d">Carte de Vannes découpée en 20 secteurs statistiques (IRIS) d&#x27;habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 85 %). La part la plus basse est d&#x27;environ 38 % (Intra-Muros), la plus élevée d&#x27;environ 81 % (Ménimur 1). 9 secteurs d&#x27;activité exclus. Source : INSEE, recensement 2022.</desc>
 <style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
-<rect width="640" height="1476" fill="#0d1322"/>
+<rect width="640" height="1343" fill="#0d1322"/>
 <text x="24.0" y="49.3" font-size="32" font-weight="700" fill="#f6f4ef" text-anchor="start">Aller travailler en voiture,</text>
 <text x="24.0" y="88.4" font-size="32" font-weight="700" fill="#f6f4ef" text-anchor="start">secteur par secteur</text>
 <text x="24.0" y="125.6" font-size="20" font-weight="400" fill="#c6cfdb" text-anchor="start">Vannes, 2022 · part des actifs occupés qui vont</text>
@@ -42,20 +42,8 @@
 <text x="280.3" y="406.8" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">1</text>
 <circle cx="242.1" cy="285.3" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
 <text x="242.1" y="292.0" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">2</text>
-<line x1="255.1" y1="403.4" x2="238.5" y2="418.5" stroke="#f6f4ef" stroke-width="1"/><circle cx="255.1" cy="403.4" r="2.4" fill="#f6f4ef"/>
-<circle cx="238.5" cy="418.5" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="238.5" y="425.2" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">3</text>
-<line x1="310.0" y1="392.7" x2="312.4" y2="365.3" stroke="#f6f4ef" stroke-width="1"/><circle cx="310.0" cy="392.7" r="2.4" fill="#f6f4ef"/>
-<circle cx="312.4" cy="365.3" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="312.4" y="371.9" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">4</text>
-<circle cx="246.3" cy="475.6" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="246.3" y="482.2" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">5</text>
-<circle cx="272.4" cy="328.9" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="272.4" y="335.6" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">6</text>
 <circle cx="124.6" cy="411.0" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="124.6" y="417.6" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">7</text>
-<circle cx="207.5" cy="512.0" r="14.5" fill="#0d1322" stroke="#f6f4ef" stroke-width="1.4"/>
-<text x="207.5" y="518.6" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">8</text></g>
+<text x="124.6" y="417.6" font-size="18" font-weight="700" fill="#f6f4ef" text-anchor="middle">3</text></g>
 <text x="24.0" y="796.6" font-size="20" font-weight="600" fill="#f6f4ef" text-anchor="start">Part de la voiture</text>
 <rect x="24" y="816.9" width="26" height="26" rx="3" fill="#1c5cab"/>
 <text x="60.0" y="836.4" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">35 à moins de 45 %</text>
@@ -72,16 +60,11 @@
 <text x="24.0" y="1054.3" font-size="20" font-weight="600" fill="#f6f4ef" text-anchor="start">Secteurs repérés</text>
 <text x="24.0" y="1086.2" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">1. Intra-Muros : 38 %</text>
 <text x="24.0" y="1112.8" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">2. Ménimur 1 : 81 %</text>
-<text x="24.0" y="1139.5" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">3. Ouest Péri Centre Ville : 54 %</text>
-<text x="24.0" y="1166.1" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">4. Est Péri Centre Ville : 59 %</text>
-<text x="24.0" y="1192.8" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">5. Trussac : 64 %</text>
-<text x="24.0" y="1219.4" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">6. Kerouer-Nord Gare : 63 %</text>
-<text x="24.0" y="1246.1" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">7. Le Pargo-La Mare-Bois de Vincin :</text>
-<text x="24.0" y="1270.7" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">71 %</text>
-<text x="24.0" y="1297.4" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">8. Cliscouët : 76 %</text>
-<text x="24.0" y="1350.1" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">Actifs occupés de 15 ans ou plus résidant dans le</text>
-<text x="24.0" y="1374.1" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">secteur ; mode de transport principal déclaré pour aller</text>
-<text x="24.0" y="1398.0" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">travailler.</text>
-<text x="24.0" y="1421.9" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">Source : INSEE, recensement de la population 2022 ;</text>
-<text x="24.0" y="1445.8" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">contours IRIS IGN. Réalisation futur•e.</text>
+<text x="24.0" y="1139.5" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">3. Le Pargo-La Mare-Bois de Vincin :</text>
+<text x="24.0" y="1164.1" font-size="19" font-weight="400" fill="#c6cfdb" text-anchor="start">71 %</text>
+<text x="24.0" y="1216.9" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">Actifs occupés de 15 ans ou plus résidant dans le</text>
+<text x="24.0" y="1240.8" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">secteur ; mode de transport principal déclaré pour aller</text>
+<text x="24.0" y="1264.7" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">travailler.</text>
+<text x="24.0" y="1288.7" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">Source : INSEE, recensement de la population 2022 ;</text>
+<text x="24.0" y="1312.6" font-size="17" font-weight="400" fill="#9ba3b4" text-anchor="start">contours IRIS IGN. Réalisation futur•e.</text>
 </svg>

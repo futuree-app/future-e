@@ -1,9 +1,13 @@
 {
+ "version": 2,
  "id": "58ef2cefa3a7293d49c4e178",
  "titre": "Réseau urbain Vitalis",
  "page": "https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt",
- "nom_commercial": "VITALIS",
+ "nom_commercial": "Vitalis",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "VITALIS",
  "aom": "CU du Grand Poitiers",
+ "exploitant": "non établi par ces sources",
  "epci": {
   "code": "200069854",
   "nom": "CU du Grand Poitiers"
@@ -19,19 +23,16 @@
     "VITALIS (Grand Poitiers)",
     "http://www.vitalis-poitiers.fr"
    ]
-  ],
-  "retenue": [
-   "VITALIS (Grand Poitiers)",
-   "http://www.vitalis-poitiers.fr"
   ]
  },
+ "site": "https://www.vitalis-poitiers.fr/",
  "sites_controles": [
   [
    "http://www.vitalis-poitiers.fr",
    200
   ]
  ],
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "collecte": {
   "date": "2026-10-14",
   "faits": [

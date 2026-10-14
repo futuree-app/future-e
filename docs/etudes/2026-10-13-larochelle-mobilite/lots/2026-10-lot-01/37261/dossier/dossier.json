@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:28:29Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T14:55:59Z",
+ "dossier_genere_le": "2026-10-14T22:27:57Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -1335,7 +1335,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1357,7 +1357,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1379,7 +1379,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1401,7 +1401,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1423,7 +1423,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1445,7 +1445,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -3288,7 +3288,7 @@
  ],
  "complement_documentaire": {
   "commune": "37261",
-  "consulte_le": "2026-10-14",
+  "consulte_le": "2026-10-15",
   "origine": "automatique",
   "sources_officielles": [
    "https://transport.data.gouv.fr"
@@ -3296,20 +3296,20 @@
   "faits": [
    {
     "id": "doc.reseau.identite",
-    "information": "Le réseau de transport urbain publié pour l'intercommunalité Tours Métropole Val de Loire est « Fil Bleu » (autorité organisatrice : Syndicat des Mobilités de Touraine).",
-    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain et périurbain Fil Bleu » : https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt",
-    "consulte_le": "2026-10-14",
+    "information": "Le réseau de transport urbain de l'intercommunalité Tours Métropole Val de Loire s'appelle « Fil Bleu » ; son autorité organisatrice est Syndicat des Mobilités de Touraine.",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain et périurbain Fil Bleu » : https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
     "validite": "jeu de données mis à jour le 2026-09-27",
     "perimetre": "intercommunalité Tours Métropole Val de Loire ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
-    "information": "Le site indiqué par le réseau dans ses horaires publiés est https://www.filbleu.fr.",
-    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt ; site joint le 2026-10-14",
-    "consulte_le": "2026-10-14",
+    "information": "Le site du réseau Fil Bleu est https://www.filbleu.fr.",
+    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt ; site joint le 2026-10-15",
+    "consulte_le": "2026-10-15",
     "validite": "non précisée",
     "perimetre": "réseau Fil Bleu",
     "usage": "oui",
@@ -3391,7 +3391,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/37261/dossier/complement.json",
-  "sha256": "5c913b5cfd109fa804a1df0bd78baacd8a8c53d3449da7508a2b22b64bab5399"
+  "sha256": "7a9c290390e9bc4eee27b79edb5edb3531dc375f69cf627586d5760bc540d9a2"
  },
  "comparaison": {
   "commune": {

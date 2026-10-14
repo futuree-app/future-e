@@ -1,9 +1,13 @@
 {
+ "version": 2,
  "id": "6294d9e0a420a2eb83a6c3b6",
  "titre": "Réseau urbain Choletbus",
  "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus",
  "nom_commercial": "Choletbus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Choletbus",
  "aom": "CA Agglomération du Choletais",
+ "exploitant": "non établi par ces sources",
  "epci": {
   "code": "200071678",
   "nom": "CA Cholet Agglomération"
@@ -15,19 +19,16 @@
     "Choletbus",
     "http://www.choletbus.fr"
    ]
-  ],
-  "retenue": [
-   "Choletbus",
-   "http://www.choletbus.fr"
   ]
  },
+ "site": "https://www.choletbus.fr/",
  "sites_controles": [
   [
    "http://www.choletbus.fr",
    200
   ]
  ],
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "collecte": {
   "date": "2026-10-14",
   "faits": [

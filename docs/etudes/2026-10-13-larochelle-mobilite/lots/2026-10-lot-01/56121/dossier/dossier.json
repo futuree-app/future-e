@@ -23,7 +23,7 @@
   "generee_le": "2026-10-14T14:25:06Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T14:54:13Z",
+ "dossier_genere_le": "2026-10-14T22:27:56Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -1334,7 +1334,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1356,7 +1356,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1378,7 +1378,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1400,7 +1400,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1422,7 +1422,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1444,7 +1444,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -2390,7 +2390,7 @@
  ],
  "complement_documentaire": {
   "commune": "56121",
-  "consulte_le": "2026-10-14",
+  "consulte_le": "2026-10-15",
   "origine": "automatique",
   "sources_officielles": [
    "https://transport.data.gouv.fr"
@@ -2398,22 +2398,22 @@
   "faits": [
    {
     "id": "doc.reseau.identite",
-    "information": "Le réseau de transport urbain publié pour l'intercommunalité CA Lorient Agglomération est « IZILO Mobilités » (autorité organisatrice : CA Lorient Agglomération).",
-    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Izilo » : https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration",
-    "consulte_le": "2026-10-14",
+    "information": "Le réseau de transport urbain de l'intercommunalité CA Lorient Agglomération s'appelle « Izilo » ; son autorité organisatrice est CA Lorient Agglomération.",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Izilo » : https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
     "validite": "jeu de données mis à jour le 2026-09-18",
     "perimetre": "intercommunalité CA Lorient Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    },
    {
     "id": "doc.reseau.site",
-    "information": "Le site indiqué par le réseau dans ses horaires publiés est https://www.izilo.bzh/.",
-    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; site joint le 2026-10-14",
-    "consulte_le": "2026-10-14",
+    "information": "Le site du réseau Izilo est https://www.izilo.bzh/.",
+    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; site joint le 2026-10-15",
+    "consulte_le": "2026-10-15",
     "validite": "non précisée",
-    "perimetre": "réseau IZILO Mobilités",
+    "perimetre": "réseau Izilo",
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
@@ -2424,7 +2424,7 @@
     "source": "https://www.izilo.bzh/titres-et-tarifs/titres-abonnements (extrait vérifié le 2026-10-14 : « Les enfants de moins de 4 ans accompagnés voyagent gratuitement. »)",
     "consulte_le": "2026-10-14",
     "validite": "non précisée",
-    "perimetre": "réseau IZILO Mobilités ; Enfants de moins de 4 ans accompagnés, réseau IZILO (bus et bateaux) ; application à chaque commune non établie",
+    "perimetre": "réseau Izilo ; Enfants de moins de 4 ans accompagnés, réseau IZILO (bus et bateaux) ; application à chaque commune non établie",
     "usage": "avec ses conditions",
     "statut_verification": "vérifié",
     "justificatif": {
@@ -2438,7 +2438,7 @@
     "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Certains horaires sont soumis à la réservation. »)",
     "consulte_le": "2026-10-14",
     "validite": "non précisée",
-    "perimetre": "réseau IZILO Mobilités ; Ligne 35 ; application à chaque commune non établie",
+    "perimetre": "réseau Izilo ; Ligne 35 ; application à chaque commune non établie",
     "usage": "avec ses conditions",
     "statut_verification": "vérifié",
     "justificatif": {
@@ -2452,7 +2452,7 @@
     "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Du 29.06 au 30.08 : fonctionnement uniquement sur réservation »)",
     "consulte_le": "2026-10-14",
     "validite": "du 29.06 au 30.08, année non précisée",
-    "perimetre": "réseau IZILO Mobilités ; Lignes 102 et 103 ; application à chaque commune non établie",
+    "perimetre": "réseau Izilo ; Lignes 102 et 103 ; application à chaque commune non établie",
     "usage": "avec ses conditions",
     "statut_verification": "vérifié",
     "justificatif": {
@@ -2466,7 +2466,7 @@
     "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Editez ici votre trajet adapté »)",
     "consulte_le": "2026-10-14",
     "validite": "non précisée",
-    "perimetre": "réseau IZILO Mobilités ; Réseau IZILO ; application à chaque commune non établie",
+    "perimetre": "réseau Izilo ; Réseau IZILO ; application à chaque commune non établie",
     "usage": "oui",
     "statut_verification": "vérifié",
     "justificatif": {
@@ -2528,7 +2528,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/56121/dossier/complement.json",
-  "sha256": "fb0a4d904eb25c0c8d9d0b3db6e43da75b2268593beaf82e860724af80e19a13"
+  "sha256": "d08e504938176efe82795e840e89df50ab0bfe9806ec324968e3d027e1b939b5"
  },
  "comparaison": {
   "commune": {

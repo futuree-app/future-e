@@ -77,18 +77,18 @@
 <path d="M24.0,652.2L24.4,651.9L24.7,651.6L24.9,651.2L25.3,650.9L25.4,651.1L25.9,650.0L31.5,638.6L30.1,637.6L31.1,636.0L33.5,632.2L35.9,628.4L48.5,622.6L60.6,631.6L65.8,635.5L81.9,625.7L87.4,625.2L87.4,625.7L87.6,626.9L87.9,628.0L88.9,630.5L89.6,631.9L93.3,638.9L95.6,639.5L97.4,640.3L100.0,641.3L100.5,641.5L100.8,641.2L101.1,641.0L101.5,641.0L101.9,641.0L102.2,641.2L102.4,641.5L102.5,641.9L102.5,642.4L103.2,642.6L109.0,645.0L112.0,646.3L115.1,647.2L116.9,647.4L119.1,647.3L119.0,648.6L118.9,652.8L118.9,655.0L119.2,656.7L119.1,657.1L115.5,657.2L113.5,657.0L112.6,656.7L108.8,655.0L108.2,654.8L107.6,654.7L107.2,654.7L106.5,654.7L105.6,655.0L105.0,655.1L104.6,655.3L104.3,655.8L103.8,656.5L103.1,657.1L101.7,658.4L101.6,658.5L99.4,660.7L98.2,661.9L97.8,662.3L97.5,662.7L97.1,663.3L96.2,664.2L95.9,664.6L95.3,665.2L94.9,665.5L94.1,665.9L92.2,666.5L90.3,667.1L87.8,667.7L86.3,668.2L85.8,668.5L85.1,669.0L84.2,670.0L82.9,671.5L82.1,672.5L81.8,673.1L80.4,675.0L79.0,676.6L77.7,677.6L76.4,678.6L75.1,679.3L74.0,679.9L73.5,680.0L72.7,680.5L71.8,681.0L69.3,682.6L65.9,684.3L65.2,684.6L64.9,684.8L61.5,686.7L58.3,688.4L56.2,689.9L54.2,691.2L51.9,692.3L49.7,693.0L47.6,693.7L47.0,694.3L46.9,694.6L45.6,694.9L45.4,694.9L45.7,693.9L45.8,693.5L46.1,691.5L46.1,688.4L45.8,685.3L45.1,682.7L44.2,680.2L44.0,679.9L42.5,677.3L40.4,674.2L37.7,670.7L36.3,668.8L34.4,666.2L32.5,663.8L25.5,654.5L24.0,652.2Z" fill="#1c5cab" stroke="#ffffff" stroke-width="1.4" fill-rule="evenodd"><title>Mollière : 70 %</title></path>
 <circle cx="358.6" cy="573.5" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
 <text x="358.6" y="578.1" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">1</text>
-<circle cx="396.7" cy="555.0" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="396.7" y="559.6" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">2</text>
-<circle cx="376.2" cy="535.8" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="376.2" y="540.4" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">3</text>
-<circle cx="483.6" cy="483.2" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="483.6" y="487.8" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">4</text>
 <circle cx="500.3" cy="462.4" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="500.3" y="467.0" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">5</text>
+<text x="500.3" y="467.0" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">2</text>
+<circle cx="396.7" cy="555.0" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
+<text x="396.7" y="559.6" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">3</text>
 <circle cx="521.0" cy="422.0" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="521.0" y="426.6" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">6</text>
+<text x="521.0" y="426.6" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">4</text>
 <circle cx="317.4" cy="666.8" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
-<text x="317.4" y="671.4" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">7</text></g>
+<text x="317.4" y="671.4" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">5</text>
+<circle cx="376.2" cy="535.8" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
+<text x="376.2" y="540.4" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">6</text>
+<circle cx="483.6" cy="483.2" r="10.0" fill="#ffffff" stroke="#1a1d28" stroke-width="1.4"/>
+<text x="483.6" y="487.8" font-size="12" font-weight="700" fill="#1a1d28" text-anchor="middle">7</text></g>
 <text x="650.0" y="106.0" font-size="14" font-weight="600" fill="#1a1d28" text-anchor="start">Part de la voiture</text>
 <rect x="650" y="120.0" width="18" height="18" rx="3" fill="#86b6ef"/>
 <text x="678.0" y="133.5" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">25 à moins de 40 %</text>
@@ -106,12 +106,12 @@
 <text x="678.0" y="295.5" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">Sans donnée exploitable</text>
 <text x="650.0" y="330.0" font-size="14" font-weight="600" fill="#1a1d28" text-anchor="start">Secteurs repérés</text>
 <text x="650.0" y="352.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">1. Voltaire : 27 %</text>
-<text x="650.0" y="371.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">2. Ralliement : 32 %</text>
-<text x="650.0" y="390.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">3. Boisnet : 35 %</text>
-<text x="650.0" y="409.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">4. Brisepotière : 56 %</text>
-<text x="650.0" y="428.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">5. Henri Dunant : 53 %</text>
-<text x="650.0" y="447.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">6. Europe : 69 %</text>
-<text x="650.0" y="466.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">7. Vauban : 48 %</text>
+<text x="650.0" y="371.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">2. Henri Dunant : 53 %</text>
+<text x="650.0" y="390.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">3. Ralliement : 32 %</text>
+<text x="650.0" y="409.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">4. Europe : 69 %</text>
+<text x="650.0" y="428.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">5. Vauban : 48 %</text>
+<text x="650.0" y="447.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">6. Boisnet : 35 %</text>
+<text x="650.0" y="466.0" font-size="13" font-weight="400" fill="#3d4456" text-anchor="start">7. Brisepotière : 56 %</text>
 <text x="24.0" y="874.8" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">Actifs occupés de 15 ans ou plus résidant dans le secteur ; mode de transport principal déclaré pour aller travailler.</text>
 <text x="24.0" y="891.3" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">Source : INSEE, recensement de la population 2022 ; contours IRIS IGN. Réalisation futur•e.</text>
 </svg>

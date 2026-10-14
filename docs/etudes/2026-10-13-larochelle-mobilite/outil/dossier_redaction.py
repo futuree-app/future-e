@@ -304,7 +304,7 @@ def main():
                              ("ecart", f"Hausse du prix médian du {nomc} en un an")):
                 ajoute(f"carburant.{c.lower()}.{champ}", t, v[champ], "€/L", f"{v['stations']} stations déclarantes",
                        "médiane entre stations du dernier prix déclaré dans la semaine", rayon, "carburant.evolution", s,
-                       "réextraire la veille de la publication",
+                       "",  # la réextraction est une vérification de production (section 10), pas une information pour le lecteur
                        limites_propres=["Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil."])
             hausse = arrondi(v["ecart"] * 20) / 20  # arrondie à 5 centimes, comme dans l'article pilote
             for km in KMS:

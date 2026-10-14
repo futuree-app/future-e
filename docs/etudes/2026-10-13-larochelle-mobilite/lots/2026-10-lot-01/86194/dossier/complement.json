@@ -1,6 +1,6 @@
 {
  "commune": "86194",
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "origine": "automatique",
  "sources_officielles": [
   "https://transport.data.gouv.fr"
@@ -8,22 +8,22 @@
  "faits": [
   {
    "id": "doc.reseau.identite",
-   "information": "Le réseau de transport urbain publié pour l'intercommunalité CU du Grand Poitiers est « VITALIS » (autorité organisatrice : CU du Grand Poitiers).",
-   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Vitalis » : https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt",
-   "consulte_le": "2026-10-14",
+   "information": "Le réseau de transport urbain de l'intercommunalité CU du Grand Poitiers s'appelle « Vitalis » ; son autorité organisatrice est CU du Grand Poitiers.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Vitalis » : https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
    "validite": "jeu de données mis à jour le 2026-10-13",
    "perimetre": "intercommunalité CU du Grand Poitiers ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
    "usage": "oui",
    "statut_verification": "vérifié",
-   "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
   },
   {
    "id": "doc.reseau.site",
-   "information": "Le site indiqué par le réseau dans ses horaires publiés est http://www.vitalis-poitiers.fr.",
-   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt ; site joint le 2026-10-14",
-   "consulte_le": "2026-10-14",
+   "information": "Le site du réseau Vitalis est https://www.vitalis-poitiers.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/mobilite-offre-de-transport-du-reseau-bus-gtfs-gtfs-rt ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
    "validite": "non précisée",
-   "perimetre": "réseau VITALIS",
+   "perimetre": "réseau Vitalis",
    "usage": "oui",
    "statut_verification": "vérifié",
    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
@@ -34,7 +34,7 @@
    "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « PLAN DU SECTEUR CENTRE DU 30/08/2026 AU 02/07/2027 »)",
    "consulte_le": "2026-10-14",
    "validite": "du 30/08/2026 au 02/07/2027",
-   "perimetre": "réseau VITALIS ; Plan du secteur centre. Les autres plans et fiches ne sont pas vérifiés individuellement. ; application à chaque commune non établie",
+   "perimetre": "réseau Vitalis ; Plan du secteur centre. Les autres plans et fiches ne sont pas vérifiés individuellement. ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -48,7 +48,7 @@
    "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « PLAN DU DIMANCHE ET DES JOURS FERIES DU 30/08/2026 AU 02/07/2027 »)",
    "consulte_le": "2026-10-14",
    "validite": "du 30/08/2026 au 02/07/2027",
-   "perimetre": "réseau VITALIS ; Réseau urbain, lignes précises non détaillées dans l'extrait. La page cite des lignes du dimanche (A à E selon la page, dont 2A et 2B « Pictavienne Dimanche »). ; application à chaque commune non établie",
+   "perimetre": "réseau Vitalis ; Réseau urbain, lignes précises non détaillées dans l'extrait. La page cite des lignes du dimanche (A à E selon la page, dont 2A et 2B « Pictavienne Dimanche »). ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -62,7 +62,7 @@
    "source": "https://www.vitalis-poitiers.fr/lignes-et-horaires/ (extrait vérifié le 2026-10-14 : « Consulter les plans du lundi au samedi »)",
    "consulte_le": "2026-10-14",
    "validite": "non précisée",
-   "perimetre": "réseau VITALIS ; Réseau, plans du lundi au samedi ; application à chaque commune non établie",
+   "perimetre": "réseau Vitalis ; Réseau, plans du lundi au samedi ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -76,7 +76,7 @@
    "source": "https://www.vitalis-poitiers.fr/itineraires/ (extrait vérifié le 2026-10-14 : « Optimisez vos déplacements et trouvez le trajet qui vous convient ! »)",
    "consulte_le": "2026-10-14",
    "validite": "non précisée",
-   "perimetre": "réseau VITALIS ; Réseau Vitalis ; application à chaque commune non établie",
+   "perimetre": "réseau Vitalis ; Réseau Vitalis ; application à chaque commune non établie",
    "usage": "oui",
    "statut_verification": "vérifié",
    "justificatif": {

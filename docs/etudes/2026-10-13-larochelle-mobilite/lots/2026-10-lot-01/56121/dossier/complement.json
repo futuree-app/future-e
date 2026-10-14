@@ -1,6 +1,6 @@
 {
  "commune": "56121",
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "origine": "automatique",
  "sources_officielles": [
   "https://transport.data.gouv.fr"
@@ -8,22 +8,22 @@
  "faits": [
   {
    "id": "doc.reseau.identite",
-   "information": "Le réseau de transport urbain publié pour l'intercommunalité CA Lorient Agglomération est « IZILO Mobilités » (autorité organisatrice : CA Lorient Agglomération).",
-   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Izilo » : https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration",
-   "consulte_le": "2026-10-14",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA Lorient Agglomération s'appelle « Izilo » ; son autorité organisatrice est CA Lorient Agglomération.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Izilo » : https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
    "validite": "jeu de données mis à jour le 2026-09-18",
    "perimetre": "intercommunalité CA Lorient Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
    "usage": "oui",
    "statut_verification": "vérifié",
-   "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
   },
   {
    "id": "doc.reseau.site",
-   "information": "Le site indiqué par le réseau dans ses horaires publiés est https://www.izilo.bzh/.",
-   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; site joint le 2026-10-14",
-   "consulte_le": "2026-10-14",
+   "information": "Le site du réseau Izilo est https://www.izilo.bzh/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
    "validite": "non précisée",
-   "perimetre": "réseau IZILO Mobilités",
+   "perimetre": "réseau Izilo",
    "usage": "oui",
    "statut_verification": "vérifié",
    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
@@ -34,7 +34,7 @@
    "source": "https://www.izilo.bzh/titres-et-tarifs/titres-abonnements (extrait vérifié le 2026-10-14 : « Les enfants de moins de 4 ans accompagnés voyagent gratuitement. »)",
    "consulte_le": "2026-10-14",
    "validite": "non précisée",
-   "perimetre": "réseau IZILO Mobilités ; Enfants de moins de 4 ans accompagnés, réseau IZILO (bus et bateaux) ; application à chaque commune non établie",
+   "perimetre": "réseau Izilo ; Enfants de moins de 4 ans accompagnés, réseau IZILO (bus et bateaux) ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -48,7 +48,7 @@
    "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Certains horaires sont soumis à la réservation. »)",
    "consulte_le": "2026-10-14",
    "validite": "non précisée",
-   "perimetre": "réseau IZILO Mobilités ; Ligne 35 ; application à chaque commune non établie",
+   "perimetre": "réseau Izilo ; Ligne 35 ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -62,7 +62,7 @@
    "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Du 29.06 au 30.08 : fonctionnement uniquement sur réservation »)",
    "consulte_le": "2026-10-14",
    "validite": "du 29.06 au 30.08, année non précisée",
-   "perimetre": "réseau IZILO Mobilités ; Lignes 102 et 103 ; application à chaque commune non établie",
+   "perimetre": "réseau Izilo ; Lignes 102 et 103 ; application à chaque commune non établie",
    "usage": "avec ses conditions",
    "statut_verification": "vérifié",
    "justificatif": {
@@ -76,7 +76,7 @@
    "source": "https://www.izilo.bzh/se-deplacer/lignes-et-horaires (extrait vérifié le 2026-10-14 : « Editez ici votre trajet adapté »)",
    "consulte_le": "2026-10-14",
    "validite": "non précisée",
-   "perimetre": "réseau IZILO Mobilités ; Réseau IZILO ; application à chaque commune non établie",
+   "perimetre": "réseau Izilo ; Réseau IZILO ; application à chaque commune non établie",
    "usage": "oui",
    "statut_verification": "vérifié",
    "justificatif": {

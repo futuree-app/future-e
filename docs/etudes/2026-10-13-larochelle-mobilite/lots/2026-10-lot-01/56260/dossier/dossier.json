@@ -21,7 +21,7 @@
   "generee_le": "2026-10-14T14:25:43Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T14:30:42Z",
+ "dossier_genere_le": "2026-10-14T22:27:56Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -1332,7 +1332,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1354,7 +1354,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1376,7 +1376,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1398,7 +1398,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1420,7 +1420,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -1442,7 +1442,7 @@
    "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
    "millesime": "2025 à 2026-10-13",
    "statut": "utilisable",
-   "motif_statut": "réextraire la veille de la publication",
+   "motif_statut": "",
    "usage": "oui",
    "limites": [
     "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
@@ -2353,7 +2353,7 @@
  ],
  "complement_documentaire": {
   "commune": "56260",
-  "consulte_le": "2026-10-14",
+  "consulte_le": "2026-10-15",
   "origine": "automatique",
   "sources_officielles": [
    "https://transport.data.gouv.fr"
@@ -2361,14 +2361,14 @@
   "faits": [
    {
     "id": "doc.reseau.identite",
-    "information": "Le réseau de transport urbain publié pour l'intercommunalité CA Golfe du Morbihan - Vannes Agglomération est « Kicéo » (autorité organisatrice : CA Golfe du Morbihan - Vannes Agglomération).",
-    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Kicéo » : https://transport.data.gouv.fr/datasets/reseau-urbain-kiceo",
-    "consulte_le": "2026-10-14",
+    "information": "Le réseau de transport urbain de l'intercommunalité CA Golfe du Morbihan - Vannes Agglomération s'appelle « Kicéo » ; son autorité organisatrice est CA Golfe du Morbihan - Vannes Agglomération.",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Kicéo » : https://transport.data.gouv.fr/datasets/reseau-urbain-kiceo ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
     "validite": "jeu de données mis à jour le 2026-10-13",
     "perimetre": "intercommunalité CA Golfe du Morbihan - Vannes Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
     "usage": "oui",
     "statut_verification": "vérifié",
-    "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+    "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
    }
   ],
   "recherches": [
@@ -2376,7 +2376,7 @@
     "sujet": "site officiel du réseau",
     "statut": "inaccessible",
     "source": "https://transport.data.gouv.fr/datasets/reseau-urbain-kiceo",
-    "consulte_le": "2026-10-14",
+    "consulte_le": "2026-10-15",
     "note": "https://www.kiceo.fr/ : inaccessible (HTTPError)"
    },
    {
@@ -2410,7 +2410,7 @@
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/56260/dossier/complement.json",
-  "sha256": "ab3805fbf47f6792edcf04dcbd948b29c59332eebbe9d067e9b71a4b51bbddea"
+  "sha256": "6dc2c46bbb7bc56be728e3c2090a632de59f3eb84f5113206030d51534aa4b19"
  },
  "comparaison": {
   "commune": {

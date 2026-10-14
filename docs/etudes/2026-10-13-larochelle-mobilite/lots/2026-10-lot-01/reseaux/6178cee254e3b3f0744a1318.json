@@ -1,9 +1,13 @@
 {
+ "version": 2,
  "id": "6178cee254e3b3f0744a1318",
  "titre": "Réseau urbain Irigo",
  "page": "https://transport.data.gouv.fr/datasets/angers-loire-metropole-reseau-irigo-gtfs-gtfs-rt-siri",
  "nom_commercial": "Irigo",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Irigo",
  "aom": "CU Angers Loire Métropole",
+ "exploitant": "non établi par ces sources",
  "epci": {
   "code": "244900015",
   "nom": "CU Angers Loire Métropole"
@@ -15,19 +19,16 @@
     "IRIGO",
     "https://www.irigo.fr/"
    ]
-  ],
-  "retenue": [
-   "IRIGO",
-   "https://www.irigo.fr/"
   ]
  },
+ "site": "https://www.irigo.fr/",
  "sites_controles": [
   [
    "https://www.irigo.fr/",
    200
   ]
  ],
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "collecte": {
   "date": "2026-10-14",
   "faits": [

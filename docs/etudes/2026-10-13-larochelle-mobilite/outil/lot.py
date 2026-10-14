@@ -25,7 +25,7 @@ import argparse, datetime as dt, gzip, hashlib, json, os, re, shutil, subprocess
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 ETUDE = os.path.dirname(ICI)
-ETATS = ("à préparer", "dossier prêt", "rédigé", "à corriger", "prêt à relire", "données insuffisantes")
+ETATS = ("à préparer", "dossier prêt", "rédigé", "à corriger", "prêt à relire", "données insuffisantes", "suspendu par quota")
 ORIGINE_VOISINES = "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
 
 
@@ -128,6 +128,49 @@ def sans_accents(s):
     return re.sub(r"[^a-z0-9]+", " ", unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()).strip()
 
 
+def identite_reseau(x, epci, cache, jour):
+    """Identité d'un réseau : NOM COMMERCIAL, AUTORITÉ ORGANISATRICE et site, sans les confondre (l'exploitant n'est pas
+    établi par ces sources et n'est jamais nommé). Le nom n'est retenu que s'il est confirmé par deux sources : le champ
+    « offre » de transport.data.gouv.fr peut être périmé (Saint-Nazaire : « STRAN » alors que le jeu et le GTFS portent
+    « Ycéo »). Le site n'est retenu que s'il appartient à l'agence de ce nom et qu'il est le seul à répondre."""
+    import csv, io
+    offre = (x.get("offers") or [{}])[0]
+    aom = ", ".join(o["name"] for o in x.get("legal_owners", []) if o.get("type") == "aom") or offre.get("nom_aom") or epci.get("nom")
+    agences = []
+    z = os.path.join(cache, f"gtfs_{epci.get('code')}.zip")
+    if os.path.exists(z):
+        with zipfile.ZipFile(z) as f:
+            if "agency.txt" in f.namelist():
+                rows = list(csv.DictReader(io.TextIOWrapper(f.open("agency.txt"), encoding="utf-8-sig")))
+                agences = sorted({(r.get("agency_name", "").strip(), r.get("agency_url", "").strip()) for r in rows})
+    coeur = lambda n: sans_accents(re.sub(r"\(.*?\)", "", n))
+    titre = sans_accents(x["title"])
+    noms_agences = {n for n, _ in agences if n and coeur(n)}
+    confirme = [n for n in noms_agences if re.search(rf"\b{re.escape(coeur(n))}\b", titre)]
+    o = offre.get("nom_commercial")
+    if len({coeur(n) for n in confirme}) == 1:
+        nom = re.sub(r"\s*\(.*?\)", "", confirme[0]).strip()
+        m = re.search(re.escape(nom), x["title"], re.I)  # graphie de l'intitulé officiel (« Irigo » plutôt que « IRIGO »)
+        nom, preuve = (m.group(0) if m else nom), "intitulé du jeu de données et agence du GTFS"
+    elif o and (re.search(rf"\b{re.escape(coeur(o))}\b", titre) or any(coeur(o) == coeur(n) for n in noms_agences)):
+        nom, preuve = o, "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS"
+    else:
+        nom, preuve = None, f"sources discordantes : offre « {o} », jeu « {x['title']} », agences {sorted(noms_agences)}"
+    urls = sorted({u for n, u in agences if u and nom and coeur(n) == coeur(nom)})
+    controles = []
+    for u in urls[:4]:
+        try:
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "futur-e-lot/1.0"}), timeout=15) as r:
+                controles.append((u, r.status, r.geturl()))
+        except Exception as e:
+            controles.append((u, f"inaccessible ({type(e).__name__})", None))
+    ok = sorted({fin for u, st, fin in controles if st == 200})
+    return {"version": 2, "id": x["id"], "titre": x["title"], "page": x["page_url"], "nom_commercial": nom, "preuve_nom": preuve,
+            "offre_tdg": o, "aom": aom, "exploitant": "non établi par ces sources", "epci": epci,
+            "mis_a_jour": (x.get("updated") or "")[:10], "agence": {"agences": agences},
+            "site": ok[0] if len(ok) == 1 else None, "sites_controles": [[u, st] for u, st, _ in controles], "consulte_le": jour}
+
+
 def pre_complement(lot, insee, fiche):
     """Complément documentaire automatique et gratuit : identité du réseau urbain (transport.data.gouv.fr, Point d'accès
     national) et site déclaré dans ses horaires publiés (GTFS agency.txt). Mutualisé par réseau. Rien n'est attribué à la
@@ -143,46 +186,29 @@ def pre_complement(lot, insee, fiche):
         x = cand[0]
         p_res = os.path.join(lot.dir, "reseaux", f"{x['id']}.json")
         os.makedirs(os.path.dirname(p_res), exist_ok=True)
-        if os.path.exists(p_res):
-            reseau = json.load(open(p_res))
+        ancien = json.load(open(p_res)) if os.path.exists(p_res) else {}
+        if ancien.get("version") == 2:
+            reseau = ancien
         else:
-            offre = (x.get("offers") or [{}])[0]
-            aom = ", ".join(o["name"] for o in x.get("legal_owners", []) if o.get("type") == "aom") or offre.get("nom_aom") or epci.get("nom")
-            agence = {}
-            z = os.path.join(cache, f"gtfs_{epci.get('code')}.zip")
-            if os.path.exists(z):
-                with zipfile.ZipFile(z) as f:
-                    if "agency.txt" in f.namelist():
-                        import csv, io
-                        rows = list(csv.DictReader(io.TextIOWrapper(f.open("agency.txt"), encoding="utf-8-sig")))
-                        agence = {"agences": sorted({(r.get("agency_name", "").strip(), r.get("agency_url", "").strip()) for r in rows})}
-            # Un site n'est attribué au réseau que si le nom de l'agence correspond à son nom commercial : un GTFS peut
-            # mêler réseau régional, exploitant ou services voisins (une URL d'exploitant n'est pas le site du réseau).
-            nc = sans_accents(offre.get("nom_commercial") or x["title"])
-            corresp = [(n, u) for n, u in agence.get("agences", []) if u and n and (sans_accents(n) in nc or nc in sans_accents(n))]
-            agence["retenue"] = corresp[0] if len({u for _, u in corresp}) == 1 else None
-            accessibles = []
-            for u in ([agence["retenue"][1]] if agence["retenue"] else []):
-                try:
-                    with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "futur-e-lot/1.0"}), timeout=15) as r:
-                        accessibles.append((u, r.status))
-                except Exception as e:
-                    accessibles.append((u, f"inaccessible ({type(e).__name__})"))
-            reseau = {"id": x["id"], "titre": x["title"], "page": x["page_url"], "nom_commercial": offre.get("nom_commercial") or x["title"],
-                      "aom": aom, "epci": epci, "mis_a_jour": (x.get("updated") or "")[:10], "agence": agence,
-                      "sites_controles": accessibles, "consulte_le": jour}
+            reseau = identite_reseau(x, epci, cache, jour)
+            if ancien.get("collecte"):
+                reseau["collecte"] = ancien["collecte"]  # une collecte faite n'est jamais refaite
             json.dump(reseau, open(p_res, "w"), ensure_ascii=False, indent=1)
-        faits.append({"id": "doc.reseau.identite",
-                      "information": f"Le réseau de transport urbain publié pour l'intercommunalité {epci.get('nom')} est « {reseau['nom_commercial']} » (autorité organisatrice : {reseau['aom']}).",
-                      "source": f"transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « {reseau['titre']} » : {reseau['page']}",
-                      "consulte_le": reseau["consulte_le"], "validite": f"jeu de données mis à jour le {reseau['mis_a_jour']}",
-                      "perimetre": f"intercommunalité {epci.get('nom')} ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
-                      "usage": "oui", "statut_verification": "vérifié",
-                      "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."})
-        ok_sites = [u for u, s in reseau["sites_controles"] if s == 200]
-        if ok_sites:
+        if reseau["nom_commercial"]:
+            faits.append({"id": "doc.reseau.identite",
+                          "information": f"Le réseau de transport urbain de l'intercommunalité {epci.get('nom')} s'appelle « {reseau['nom_commercial']} » ; son autorité organisatrice est {reseau['aom']}.",
+                          "source": f"transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « {reseau['titre']} » : {reseau['page']} ; nom confirmé par : {reseau['preuve_nom']}",
+                          "consulte_le": reseau["consulte_le"], "validite": f"jeu de données mis à jour le {reseau['mis_a_jour']}",
+                          "perimetre": f"intercommunalité {epci.get('nom')} ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+                          "usage": "oui", "statut_verification": "vérifié",
+                          "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. "
+                                      "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."})
+        else:
+            recherches.append({"sujet": "nom commercial du réseau", "statut": "non vérifié", "source": reseau["page"],
+                               "consulte_le": reseau["consulte_le"], "note": reseau["preuve_nom"][:300]})
+        if reseau.get("site"):
             faits.append({"id": "doc.reseau.site",
-                          "information": f"Le site indiqué par le réseau dans ses horaires publiés est {ok_sites[0]}.",
+                          "information": f"Le site du réseau {reseau['nom_commercial']} est {reseau['site']}.",
                           "source": f"horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur {reseau['page']} ; site joint le {reseau['consulte_le']}",
                           "consulte_le": reseau["consulte_le"], "validite": "non précisée", "perimetre": f"réseau {reseau['nom_commercial']}",
                           "usage": "oui", "statut_verification": "vérifié",
@@ -190,8 +216,8 @@ def pre_complement(lot, insee, fiche):
         else:
             recherches.append({"sujet": "site officiel du réseau", "statut": "inaccessible" if reseau["sites_controles"] else "non vérifié",
                                "source": reseau["page"], "consulte_le": reseau["consulte_le"],
-                               "note": "; ".join(f"{u} : {s}" for u, s in reseau["sites_controles"]) or
-                               "agences du GTFS sans correspondance univoque avec le nom du réseau : " + "; ".join(f"{n} ({u})" for n, u in reseau["agence"].get("agences", []))[:300]})
+                               "note": "; ".join(f"{u} : {st}" for u, st in reseau["sites_controles"]) or
+                               "aucune agence du GTFS ne correspond de façon univoque au nom du réseau : " + "; ".join(f"{n} ({u})" for n, u in reseau["agence"].get("agences", []))[:300]})
     else:
         recherches.append({"sujet": "réseau de transport urbain", "statut": "introuvable" if not cand else "non vérifié",
                            "source": "transport.data.gouv.fr", "consulte_le": jour,
@@ -298,6 +324,23 @@ ENV_INTERDITES = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_U
                   "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "ANTHROPIC_PROFILE", "OPENAI_API_KEY")
 
 
+MOTIF_QUOTA = "suspendu par quota"
+
+
+def est_refus_quota(meta, texte=""):
+    """Refus pour limite d'usage de l'abonnement. Deux signes, l'un suffit :
+    - le message (« hit your limit », « usage limit », « resets … », etc.) ;
+    - la signature enregistrée le 14/10/2026 (le texte n'avait pas été conservé) : erreur déclarée, aucun jeton lu ni
+      produit, aucun modèle utilisé, en quelques secondes. Une vraie erreur de rédaction, elle, consomme des jetons."""
+    t = (texte or "").lower()
+    if re.search(r"usage limit|rate limit|limit reached|reached your|hit your limit|you've hit|resets? (at|in)|quota|429|overloaded|too many requests", t):
+        return True
+    u = meta.get("usage") or {}
+    return bool(meta.get("est_erreur") and not (u.get("input_tokens") or u.get("output_tokens") or u.get("cache_read_input_tokens")
+                                                or u.get("cache_creation_input_tokens")) and not meta.get("modele_effectif")
+                and (meta.get("duree_s") or 99) < 20)
+
+
 def pieces_justificatives(lot, insee):
     """Pièces référencées par le dossier, copiées en lecture seule dans la session : complément documentaire, repère de
     comparaison, fiches des réseaux (extraits vérifiés). PAS la fiche brute ni dossier.json : ils contiennent les valeurs de
@@ -333,7 +376,11 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         # modifiées depuis : on réutilise ; un appel échoué n'est pas retenté automatiquement.
         if os.path.exists(p_sortie):
             return open(p_sortie).read()
-        raise RuntimeError(f"« {etape_nom} » déjà tenté sans résultat ({json.load(open(p_meta)).get('motif', 'voir ' + p_meta)}) : pas de nouvelle tentative automatique")
+        if json.load(open(p_meta)).get("motif") == MOTIF_QUOTA:
+            # Un appel refusé pour quota n'a rien consommé : ce n'est pas une tentative ; il est archivé et l'étape reprend.
+            os.replace(p_meta, p_meta.replace(".json", f".quota-{int(time.time())}.json"))
+        else:
+            raise RuntimeError(f"« {etape_nom} » déjà tenté sans résultat ({json.load(open(p_meta)).get('motif', 'voir ' + p_meta)}) : pas de nouvelle tentative automatique")
     if os.path.exists(p_marq):
         raise RuntimeError(f"un appel « {etape_nom} » est parti sans réponse enregistrée ({open(p_marq).read().strip()}) : "
                            "vérifier à la main, puis supprimer le marqueur pour relancer")
@@ -415,15 +462,17 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         f.write(json.dumps({"date": maintenant(), "commune": insee, "etape": etape_nom, "outil": M["outil"], "modele": reglage["modele"],
                             "cout_usd_equivalent": cout, "duree_s": duree, "cle": cle}, ensure_ascii=False) + "\n")
     brut = ((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", ""))).lower()
+    if meta.get("est_erreur") or not texte:
+        meta["message"] = ((texte or "") + " " + r.stderr)[:1000].strip()  # conservé pour diagnostiquer, jamais publié
     if M["outil"] == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
         meta["motif"] = f"session hors abonnement (source d'authentification : {meta['contexte']['source_auth']})"
-    elif (not texte or meta.get("est_erreur")) and re.search(r"usage limit|rate limit|limit reached|reached your|quota|429|overloaded", brut):
-        meta["motif"] = "limite d'usage"
+    elif (not texte or meta.get("est_erreur")) and est_refus_quota(meta, brut):
+        meta["motif"] = MOTIF_QUOTA
     json.dump(meta, open(p_meta, "w"), ensure_ascii=False, indent=1)
     os.remove(p_marq)
     if meta.get("motif", "").startswith("session hors abonnement"):
         raise AuthNonAbonnement(meta["motif"])
-    if meta.get("motif") == "limite d'usage":
+    if meta.get("motif") == MOTIF_QUOTA:
         raise LimiteUsage(f"« {etape_nom} » : {(texte or r.stderr or '')[:200]}")
     if not texte or r.returncode or meta.get("est_erreur"):
         raise RuntimeError(f"génération « {etape_nom} » sans texte exploitable (code {r.returncode}, {meta.get('sous_type')})")
@@ -462,7 +511,7 @@ def cmd_collecter(lot, a):
                         if R["page"] in f["source"]:
                             reseaux.setdefault(R["id"], (R, []))[1].append(insee)
     for rid, (R, communes) in reseaux.items():
-        sites = [u for u, st in R.get("sites_controles", []) if st == 200]
+        sites = [R["site"]] if R.get("site") else []
         if not sites:
             print(f"· {R['nom_commercial']} : aucun site joignable, collecte impossible"); continue
         doms = sorted({domaine(u) for u in sites} | {"www." + domaine(u) for u in sites})
@@ -531,7 +580,7 @@ def visuels(lot, insee, texte):
 
 def rediger_commune(lot, insee, executer, plan):
     C = lot.c(insee)
-    if C["statut"] not in ("dossier prêt", "rédigé", "à corriger"):
+    if C["statut"] not in ("dossier prêt", "rédigé", "à corriger", MOTIF_QUOTA):
         return
     R = os.path.join(ETUDE, "redaction")
     dossier = open(os.path.join(lot.dir, insee, "dossier", "dossier.md")).read()
@@ -573,7 +622,8 @@ def cmd_controler(lot, a):
             r = controle(lot, insee, C["article"])
             C["anomalies_restantes"] = r["anomalies"]
             C["motif"] = (f"{r['bloquantes']} anomalie(s) déterministe(s)" if r["bloquantes"] else
-                          ("corrigé une fois ; vérifier la section E" if C["article"] == "correction.md" else ""))
+                          ("corrigé une fois ; vérifier la section E" if C["article"] == "correction.md" else
+                           "retouché à la main (section F) après une correction ; vérifier les sections E et F" if C["article"] == "edition.md" else ""))
     lot.sauver(); vue(lot)
 
 
@@ -591,7 +641,10 @@ def cmd_rediger(lot, a):
             if C.get("insee") and (not a.communes or insee in a.communes.split(",")):
                 try:
                     rediger_commune(lot, insee, a.executer, plan)
-                except (PlafondAtteint, LimiteUsage, AuthNonAbonnement) as e:
+                except LimiteUsage as e:
+                    # Quota : tout le lot s'arrête au premier refus ; les étapes faites restent, la reprise ne fera que le reste.
+                    C.update(statut=MOTIF_QUOTA, motif=f"{MOTIF_QUOTA} : {str(e)[:200]}"); lot.sauver(); print(f"■ lot suspendu par quota : {e}"); break
+                except (PlafondAtteint, AuthNonAbonnement) as e:
                     C.update(motif=f"arrêt du lot : {str(e)[:300]}"); lot.sauver(); print(f"■ arrêt propre du lot : {e}"); break
                 except Exception as e:
                     C.update(motif=f"erreur : {str(e)[:300]}"); lot.sauver(); print(f"✗ {C['nom']} : {e}")

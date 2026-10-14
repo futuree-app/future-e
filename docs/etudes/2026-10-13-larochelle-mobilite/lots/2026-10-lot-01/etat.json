@@ -20,16 +20,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:52:50Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:10Z",
+     "duree_s": 0.8
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:42:07Z",
-     "duree_s": 0.1,
-     "complement_sha": "34d8b0d9947150a9",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "d47faaea4b7f07d9"
+     "fin": "2026-10-14T22:27:56Z",
+     "duree_s": 0.2,
+     "complement_sha": "386d3b4bd598c807",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "1dd3a8469cdb5172"
     }
    },
    "manuel": [
@@ -57,8 +57,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_86194_clair.png",
@@ -113,16 +113,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:53:34Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:10Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:53:34Z",
+     "fin": "2026-10-14T22:27:56Z",
      "duree_s": 0.2,
-     "complement_sha": "015fbae26d0ef794",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "9cc1f8a98ab9f94f"
+     "complement_sha": "d946affeada01399",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "706762667a55d103"
     }
    },
    "manuel": [
@@ -157,8 +157,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_49007_clair.png",
@@ -182,12 +182,12 @@
     ],
     "reperes": [
      "490070105",
-     "490070107",
-     "490070106",
-     "490070204",
      "490070803",
+     "490070107",
      "490070805",
-     "490070407"
+     "490070407",
+     "490070106",
+     "490070204"
     ]
    }
   },
@@ -211,16 +211,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:54:13Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:11Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:54:13Z",
-     "duree_s": 0.1,
-     "complement_sha": "fb0a4d904eb25c0c",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "14cbf0bec06046ec"
+     "fin": "2026-10-14T22:27:56Z",
+     "duree_s": 0.2,
+     "complement_sha": "d08e504938176efe",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "e94957d55c07fadc"
     }
    },
    "manuel": [
@@ -233,7 +233,7 @@
    "notes": [
     "23 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 37.0,
+   "duree_preparation_s": 36.9,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -248,8 +248,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_56121_clair.png",
@@ -305,16 +305,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:31:37Z",
-     "duree_s": 0.2
+     "fin": "2026-10-14T22:27:11Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:30:42Z",
+     "fin": "2026-10-14T22:27:56Z",
      "duree_s": 0.2,
-     "complement_sha": "ab3805fbf47f6792",
+     "complement_sha": "6dc2c46bbb7bc56b",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "f5cee810c25d21a4"
+     "dossier_sha": "4c0fd4b0023921e3"
     }
    },
    "manuel": [
@@ -327,7 +327,7 @@
    "notes": [
     "20 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 29.9,
+   "duree_preparation_s": 29.8,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -342,8 +342,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_56260_clair.png",
@@ -368,12 +368,7 @@
     "reperes": [
      "562600118",
      "562600103",
-     "562600117",
-     "562600119",
-     "562600125",
-     "562600110",
-     "562600107",
-     "562600123"
+     "562600107"
     ]
    }
   },
@@ -397,16 +392,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:31:38Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:12Z",
+     "duree_s": 0.8
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:31:38Z",
+     "fin": "2026-10-14T22:27:56Z",
      "duree_s": 0.2,
-     "complement_sha": "df3cf72c63c48e58",
+     "complement_sha": "c0a31ebaea84a0a4",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "00f12fa797e8abcb"
+     "dossier_sha": "359db57e0a3bd6a9"
     }
    },
    "manuel": [
@@ -419,7 +414,7 @@
    "notes": [
     "28 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 41.3,
+   "duree_preparation_s": 42.0,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -434,8 +429,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) après une correction ; vérifier les sections E et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_44184_clair.png",
@@ -476,7 +471,7 @@
    "nom": "Cholet",
    "insee": "49099",
    "demande": "Cholet",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -492,16 +487,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:54:50Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:12Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:54:50Z",
+     "fin": "2026-10-14T22:27:56Z",
      "duree_s": 0.2,
-     "complement_sha": "f5c76cd39d68c7fa",
+     "complement_sha": "5979c12949a2a814",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "99df091356c325f7"
+     "dossier_sha": "8ac50c887103037d"
     }
    },
    "duree_preparation_s": 30.9,
@@ -528,7 +523,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "arrêté par la limite d'usage Pro (appel refusé en 2 s, 0 jeton) ; à relancer une fois après réinitialisation",
+   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
    "incidents": [
     {
      "date": "2026-10-14T15:19:55Z",
@@ -540,7 +535,7 @@
    "nom": "La Roche-sur-Yon",
    "insee": "85191",
    "demande": "La Roche-sur-Yon",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -556,16 +551,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:31:38Z",
+     "fin": "2026-10-14T22:27:12Z",
      "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:31:38Z",
+     "fin": "2026-10-14T22:27:57Z",
      "duree_s": 0.2,
-     "complement_sha": "2cec5da7acaa177a",
+     "complement_sha": "d08dcc96dc4f95d2",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "3ec33ac1600c109c"
+     "dossier_sha": "10ddf0eab48aba5c"
     }
    },
    "duree_preparation_s": 29.3,
@@ -592,7 +587,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "arrêté par la limite d'usage Pro (appel refusé en 2 s, 0 jeton) ; à relancer une fois après réinitialisation",
+   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
    "incidents": [
     {
      "date": "2026-10-14T15:19:57Z",
@@ -604,7 +599,7 @@
    "nom": "Saint-Brieuc",
    "insee": "22278",
    "demande": "Saint-Brieuc",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -620,16 +615,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:55:23Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:12Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:55:23Z",
-     "duree_s": 0.1,
-     "complement_sha": "1ba0debedc67516e",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "a92ba29b0e94833d"
+     "fin": "2026-10-14T22:27:57Z",
+     "duree_s": 0.3,
+     "complement_sha": "76ceae72ec5a6d69",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "ae1a7deeca1679bd"
     }
    },
    "manuel": [
@@ -642,7 +637,7 @@
    "notes": [
     "17 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 33.5,
+   "duree_preparation_s": 33.6,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -656,7 +651,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "arrêté par la limite d'usage Pro (appel refusé en 2 s, 0 jeton) ; à relancer une fois après réinitialisation",
+   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
    "incidents": [
     {
      "date": "2026-10-14T15:19:59Z",
@@ -668,7 +663,7 @@
    "nom": "Tours",
    "insee": "37261",
    "demande": "Tours",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -684,16 +679,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:55:59Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:13Z",
+     "duree_s": 0.2
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:55:59Z",
+     "fin": "2026-10-14T22:27:57Z",
      "duree_s": 0.2,
-     "complement_sha": "5c913b5cfd109fa8",
+     "complement_sha": "7a9c290390e9bc4e",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "042ef9c0d187a1da"
+     "dossier_sha": "f52a0a432225c0ca"
     }
    },
    "manuel": [
@@ -706,7 +701,7 @@
    "notes": [
     "56 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 37.6,
+   "duree_preparation_s": 37.5,
    "versions": {
     "prompt_redaction": "7dc2ca0c244ec27a",
     "relecture": "0bc9cb7d9c41f9f2",
@@ -720,7 +715,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "arrêté par la limite d'usage Pro (appel refusé en 2 s, 0 jeton) ; à relancer une fois après réinitialisation",
+   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
    "incidents": [
     {
      "date": "2026-10-14T15:20:01Z",
@@ -732,7 +727,7 @@
    "nom": "Le Mans",
    "insee": "72181",
    "demande": "Le Mans",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -748,16 +743,16 @@
     },
     "complement": {
      "ok": true,
-     "fin": "2026-10-14T14:56:29Z",
-     "duree_s": 0.1
+     "fin": "2026-10-14T22:27:13Z",
+     "duree_s": 0.3
     },
     "dossier": {
      "ok": true,
-     "fin": "2026-10-14T14:56:29Z",
-     "duree_s": 0.1,
-     "complement_sha": "414887cc7f887c90",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "148c966f499a549c"
+     "fin": "2026-10-14T22:27:57Z",
+     "duree_s": 0.2,
+     "complement_sha": "8985d813a3da4c46",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "b9c1284afe562f21"
     }
    },
    "manuel": [
@@ -784,7 +779,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "arrêté par la limite d'usage Pro (appel refusé en 2 s, 0 jeton) ; à relancer une fois après réinitialisation",
+   "motif": "suspendu par quota le 14/10/2026 à 15 h 19 UTC (refus sans consommation) ; reprise à l'étape rédaction",
    "incidents": [
     {
      "date": "2026-10-14T15:20:03Z",

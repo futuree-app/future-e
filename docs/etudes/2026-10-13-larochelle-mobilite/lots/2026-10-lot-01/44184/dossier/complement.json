@@ -1,6 +1,6 @@
 {
  "commune": "44184",
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "origine": "automatique",
  "sources_officielles": [
   "https://transport.data.gouv.fr"
@@ -8,24 +8,28 @@
  "faits": [
   {
    "id": "doc.reseau.identite",
-   "information": "Le réseau de transport urbain publié pour l'intercommunalité CA de la Région Nazairienne et de l'Estuaire (CARENE) est « STRAN » (autorité organisatrice : CA de la Région Nazairienne et de l'Estuaire (CARENE)).",
-   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain et scolaire Ycéo » : https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1",
-   "consulte_le": "2026-10-14",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA de la Région Nazairienne et de l'Estuaire (CARENE) s'appelle « Ycéo » ; son autorité organisatrice est CA de la Région Nazairienne et de l'Estuaire (CARENE).",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain et scolaire Ycéo » : https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1 ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
    "validite": "jeu de données mis à jour le 2026-10-13",
    "perimetre": "intercommunalité CA de la Région Nazairienne et de l'Estuaire (CARENE) ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
    "usage": "oui",
    "statut_verification": "vérifié",
-   "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Ycéo est https://yceo-mobilite.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1 ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Ycéo",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
   }
  ],
  "recherches": [
-  {
-   "sujet": "site officiel du réseau",
-   "statut": "non vérifié",
-   "source": "https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1",
-   "consulte_le": "2026-10-14",
-   "note": "agences du GTFS sans correspondance univoque avec le nom du réseau : Aléop TER (https://aleop.paysdelaloire.fr/); Aléop en Loire-Atlantique (https://aleop.paysdelaloire.fr/loire-atlantique); Lila Presqu'île (https://www.lilapresquile.fr/); Ycéo (http://www.stran.fr/); Ycéo (http://www.yceo-mobilite.fr/)"
-  },
   {
    "sujet": "tarification (gratuité, abonnements, exceptions)",
    "statut": "non recherché",

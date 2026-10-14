@@ -1,6 +1,6 @@
 {
  "commune": "49099",
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "origine": "automatique",
  "sources_officielles": [
   "https://transport.data.gouv.fr"
@@ -8,20 +8,20 @@
  "faits": [
   {
    "id": "doc.reseau.identite",
-   "information": "Le réseau de transport urbain publié pour l'intercommunalité CA Cholet Agglomération est « Choletbus » (autorité organisatrice : CA Agglomération du Choletais).",
-   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Choletbus » : https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus",
-   "consulte_le": "2026-10-14",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA Cholet Agglomération s'appelle « Choletbus » ; son autorité organisatrice est CA Agglomération du Choletais.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Choletbus » : https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
    "validite": "jeu de données mis à jour le 2026-10-13",
    "perimetre": "intercommunalité CA Cholet Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
    "usage": "oui",
    "statut_verification": "vérifié",
-   "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
   },
   {
    "id": "doc.reseau.site",
-   "information": "Le site indiqué par le réseau dans ses horaires publiés est http://www.choletbus.fr.",
-   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus ; site joint le 2026-10-14",
-   "consulte_le": "2026-10-14",
+   "information": "Le site du réseau Choletbus est https://www.choletbus.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
    "validite": "non précisée",
    "perimetre": "réseau Choletbus",
    "usage": "oui",

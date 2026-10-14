@@ -1,6 +1,6 @@
 {
  "commune": "85191",
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "origine": "automatique",
  "sources_officielles": [
   "https://transport.data.gouv.fr"
@@ -8,14 +8,14 @@
  "faits": [
   {
    "id": "doc.reseau.identite",
-   "information": "Le réseau de transport urbain publié pour l'intercommunalité CA La Roche-sur-Yon - Agglomération est « Impulsyon » (autorité organisatrice : CA La Roche sur Yon - Agglomération).",
-   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Impulsyon » : https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon",
-   "consulte_le": "2026-10-14",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA La Roche-sur-Yon - Agglomération s'appelle « Impulsyon » ; son autorité organisatrice est CA La Roche sur Yon - Agglomération.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Impulsyon » : https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon ; nom confirmé par : offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+   "consulte_le": "2026-10-15",
    "validite": "jeu de données mis à jour le 2026-09-27",
    "perimetre": "intercommunalité CA La Roche-sur-Yon - Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
    "usage": "oui",
    "statut_verification": "vérifié",
-   "consigne": "Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   "consigne": "Nom commercial du réseau et autorité organisatrice : deux choses distinctes. L'exploitant n'est pas établi : ne pas le nommer. Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
   }
  ],
  "recherches": [
@@ -23,8 +23,8 @@
    "sujet": "site officiel du réseau",
    "statut": "non vérifié",
    "source": "https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon",
-   "consulte_le": "2026-10-14",
-   "note": "agences du GTFS sans correspondance univoque avec le nom du réseau : Agence par défaut (https://orchestra.ratpdev.com)"
+   "consulte_le": "2026-10-15",
+   "note": "aucune agence du GTFS ne correspond de façon univoque au nom du réseau : Agence par défaut (https://orchestra.ratpdev.com)"
   },
   {
    "sujet": "tarification (gratuité, abonnements, exceptions)",

@@ -1,9 +1,13 @@
 {
+ "version": 2,
  "id": "5acb317988ee381778cbecf0",
  "titre": "Réseau urbain TUB",
  "page": "https://transport.data.gouv.fr/datasets/gtfs-du-reseau-de-transports-publics-de-saint-brieuc-armor-agglomeration",
- "nom_commercial": "TUB Saint Brieuc",
+ "nom_commercial": "TUB",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TUB Saint Brieuc",
  "aom": "CA Saint-Brieuc Armor Agglomération",
+ "exploitant": "non établi par ces sources",
  "epci": {
   "code": "200069409",
   "nom": "CA Saint-Brieuc Armor Agglomération"
@@ -15,19 +19,16 @@
     "TUB",
     "https://www.tub.bzh"
    ]
-  ],
-  "retenue": [
-   "TUB",
-   "https://www.tub.bzh"
   ]
  },
+ "site": "https://www.tub.bzh",
  "sites_controles": [
   [
    "https://www.tub.bzh",
    200
   ]
  ],
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "collecte": {
   "date": "2026-10-14",
   "faits": [

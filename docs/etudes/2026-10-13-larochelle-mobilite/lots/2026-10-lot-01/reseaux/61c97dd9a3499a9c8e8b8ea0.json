@@ -1,9 +1,13 @@
 {
+ "version": 2,
  "id": "61c97dd9a3499a9c8e8b8ea0",
  "titre": "Réseau urbain Izilo",
  "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-izilo-format-gtfs-de-lorient-agglomeration",
- "nom_commercial": "IZILO Mobilités",
+ "nom_commercial": "Izilo",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "IZILO Mobilités",
  "aom": "CA Lorient Agglomération",
+ "exploitant": "non établi par ces sources",
  "epci": {
   "code": "200042174",
   "nom": "CA Lorient Agglomération"
@@ -15,19 +19,16 @@
     "IZILO",
     "https://www.izilo.bzh/"
    ]
-  ],
-  "retenue": [
-   "IZILO",
-   "https://www.izilo.bzh/"
   ]
  },
+ "site": "https://www.izilo.bzh/",
  "sites_controles": [
   [
    "https://www.izilo.bzh/",
    200
   ]
  ],
- "consulte_le": "2026-10-14",
+ "consulte_le": "2026-10-15",
  "collecte": {
   "date": "2026-10-14",
   "faits": [
