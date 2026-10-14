@@ -1,0 +1,17 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 56260 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/56260/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_56260.json --classes auto --communes  --reperes 562600118,562600103,562600117,562600119,562600125,562600110,562600107,562600123 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/56260/visuels
+
+{
+ "carte": {
+  "habitat": 20,
+  "non_res": 9,
+  "sans_donnee": 0
+ },
+ "barres": [
+  0.586,
+  0.851,
+  0.836
+ ],
+ "alt_carte": "Carte de Vannes découpée en 20 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 85 %). La part la plus basse est d'environ 38 % (Intra-Muros), la plus élevée d'environ 81 % (Ménimur 1). 9 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": "Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Vannes, part qui va travailler principalement en voiture : travaillant à Vannes, 59 % ; travaillant à Saint-Avé, Séné ou Plescop, 85 % ; travaillant ailleurs (hors de Vannes, Saint-Avé, Séné et Plescop), 84 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022."
+}
+

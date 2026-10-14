@@ -457,7 +457,7 @@ def cmd_collecter(lot, a):
             for f in json.load(open(p))["faits"]:
                 if f["id"] == "doc.reseau.identite":
                     rid = re.search(r"datasets/([^ ]+)", f["source"])
-                    for fn in os.listdir(os.path.join(lot.dir, "reseaux")):
+                    for fn in sorted(f for f in os.listdir(os.path.join(lot.dir, "reseaux")) if f.endswith(".json")):
                         R = json.load(open(os.path.join(lot.dir, "reseaux", fn)))
                         if R["page"] in f["source"]:
                             reseaux.setdefault(R["id"], (R, []))[1].append(insee)

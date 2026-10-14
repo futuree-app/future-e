@@ -1,0 +1,106 @@
+{
+ "etape": "collecte",
+ "cle": "50fb5998ba4bb280",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "369c5a97b6e88319",
+ "debut": "2026-10-14T14:55:22Z",
+ "duree_s": 32.5,
+ "code_retour": 0,
+ "session": "0affe079-63ea-4b31-ae88-81985b9e7d5e",
+ "usage": {
+  "input_tokens": 6,
+  "cache_creation_input_tokens": 3309,
+  "cache_read_input_tokens": 7133,
+  "output_tokens": 2237,
+  "output_tokens_details": {
+   "thinking_tokens": 246
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 3309,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1631,
+    "cache_read_input_tokens": 3318,
+    "cache_creation_input_tokens": 1528,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 1528
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.041861999999999996,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 5,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-atnek6jt",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-atnek6jt/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.tub.bzh\", \"prompt\": \"Tarification (gratuité, pour qui, quelles lignes), jours de circulation des lignes urbaines (dimanche, fériés, samedi), période de validité des horaires, calc"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.tub.bzh/tarifs/titres-de-transport-et-tarifs-tub\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Donne extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.tub.bzh/reseau/lignes\", \"prompt\": \"Jours de circulation des lignes (dimanche, jours fériés, samedi), période de validité des horaires, fiches horaires. Extraits exacts mot pour mo"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.tub.bzh/reseau/recherche-ditineraire\", \"prompt\": \"Calcul d'itinéraire, temps réel. Extraits exacts mot pour mot.\"}"
+  }
+ ],
+ "refus": 0
+}

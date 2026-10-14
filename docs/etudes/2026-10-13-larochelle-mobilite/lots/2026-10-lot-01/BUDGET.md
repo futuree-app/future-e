@@ -29,15 +29,11 @@ Hypothèses mesurées : consignes + dossier ≈ 72 000 à 84 000 caractères par
 
 Incertitude principale : la longueur de la réflexion, qui peut doubler le poste rédaction. Durée attendue : 3 à 8 minutes par session, en série, soit 1 h 30 à 3 h pour le lot.
 
-## Plafond proposé, appliqué techniquement
+## Ce qui a été appliqué au lancement (14/10/2026, accord du porteur)
 
-- **Lot : 30 $ équivalent** (`plafond_usd_equivalent`). Avant chaque appel, le script additionne `depenses.jsonl` et refuse de partir si le cumul plus le plafond de l'appel dépasse ce montant ; il arrête alors tout le lot.
-- **Par appel** : `--max-budget-usd` de Claude Code (rédaction 3 $, relecture 2 $, correction 3 $, collecte 1,50 $). La session s'arrête d'elle-même au-delà.
-- **Pas de double appel** : empreinte des entrées, marqueur avant envoi, verrou du lot (voir `../README.md`).
+- **Abonnement seulement.** Claude Code connecté par le compte claude.ai (abonnement Pro, `claude auth status`). Chaque session est lancée sans aucune variable `ANTHROPIC_*` ni variable d'autre fournisseur ; la source d'authentification déclarée par la session (`apiKeySource`) est enregistrée et vaut `none` (OAuth de l'abonnement) pour tous les appels. Une autre valeur arrête le lot.
+- **Le compteur « équivalent API » n'est pas une mesure du quota.** `total_cost_usd` est calculé localement par Claude Code (jetons × tarif public de l'API). Il est conservé à titre d'information ; il ne dit rien de la part consommée de la limite d'usage Pro, qui n'est pas exposée.
+- **Limite appliquée : le nombre d'appels.** Une collecte par réseau, une rédaction, une relecture et au plus une correction par commune. Un appel fait n'est jamais refait, un appel échoué n'est pas retenté. `--max-budget-usd` reste posé par appel comme garde-fou de longueur.
+- **Limite d'usage :** une réponse de limite arrête proprement tout le lot et conserve l'avancement ; aucune nouvelle tentative.
 
-## Pour lancer, après accord
-
-1. Mettre `"plafond_usd_equivalent": 30` dans `lot.json` (ou le montant approuvé).
-2. Facultatif : `outil/lot.py collecter lots/2026-10-lot-01 --executer`, puis vérifier les compléments dans `/dev/lot`.
-3. `outil/lot.py rediger lots/2026-10-lot-01 --executer`.
-4. Relire les dix communes dans `/dev/lot`. Aucun état ne vaut publication.
+Le bilan réel (appels, durées mesurées) est dans `BILAN.md`.

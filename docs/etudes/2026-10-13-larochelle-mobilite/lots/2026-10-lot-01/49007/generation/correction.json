@@ -1,0 +1,86 @@
+{
+ "etape": "correction",
+ "cle": "005b296a56b0fb81",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "medium",
+ "consignes_sha": "ec2a42db105c2658",
+ "entree_sha": "df152cc18249913e",
+ "debut": "2026-10-14T15:02:33Z",
+ "duree_s": 96.8,
+ "code_retour": 0,
+ "session": "3d13c34a-af0f-46f9-ba46-7a3937185fd2",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 48370,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 12930,
+  "output_tokens_details": {
+   "thinking_tokens": 3418
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 48370,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 12930,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 48370,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 48370
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.645568,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-djue__ih",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-djue--ih/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [],
+ "refus": 0
+}

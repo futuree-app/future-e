@@ -27,35 +27,77 @@
    "usage": "oui",
    "statut_verification": "vérifié",
    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_moins_5_ans",
+   "information": "Les enfants de moins de 5 ans voyagent gratuitement sur tout le réseau bus + tram. La gratuité s'arrête au 1er jour des 5 ans.",
+   "source": "https://www.filbleu.fr/contact/besoin-daide/titres-de-transport/gratuite-des-transports (extrait vérifié le 2026-10-14 : « Les enfants de moins de 5 ans voyagent gratuitement sur l'ensemble du réseau bus + tram. »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau Fil Bleu ; Enfants de moins de 5 ans, ensemble du réseau bus et tram. Cela ne montre pas que le réseau est gratuit pour les autres publics. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.filbleu.fr/contact/besoin-daide/titres-de-transport/gratuite-des-transports",
+    "extrait": "Les enfants de moins de 5 ans voyagent gratuitement sur l'ensemble du réseau bus + tram."
+   }
+  },
+  {
+   "id": "doc.verifier.horaires_par_arret",
+   "information": "La page « Horaires par arrêt » permet de saisir le nom d'un arrêt pour voir les horaires de passage.",
+   "source": "https://www.filbleu.fr/horaires-et-trajets/horaires-par-arret (extrait vérifié le 2026-10-14 : « Je renseigne le nom d'un arrêt du réseau pour voir les horaires de passage. »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau Fil Bleu ; Arrêts du réseau ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.filbleu.fr/horaires-et-trajets/horaires-par-arret",
+    "extrait": "Je renseigne le nom d'un arrêt du réseau pour voir les horaires de passage."
+   }
   }
  ],
  "recherches": [
   {
-   "sujet": "tarification (gratuité, abonnements, exceptions)",
-   "statut": "non recherché",
-   "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   "sujet": "Tarification générale (gratuité pour d'autres publics ou lignes, exceptions)",
+   "statut": "non vérifié",
+   "source": "https://www.filbleu.fr/tarifs-demarches-et-achat-en-ligne/titres-et-tarifs",
+   "consulte_le": "2026-10-14",
+   "note": "Page repérée sur l'accueil mais pas ouverte. La FAQ sur la gratuité ne mentionne que les moins de 5 ans et ne liste aucune exception. Elle ne permet pas de conclure que le reste du réseau est payant."
   },
   {
-   "sujet": "jours et périodes de circulation des lignes urbaines",
-   "statut": "non recherché",
-   "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   "sujet": "Jours de circulation des lignes urbaines (dimanche, fériés, samedi) et période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://www.filbleu.fr/horaires-et-trajets/toutes-les-lignes",
+   "consulte_le": "2026-10-14",
+   "note": "La page « Toutes les lignes » ne donne pas ces informations. Il faut ouvrir les fiches de chaque ligne, que je n'ai pas consultées. Je n'ai pas vérifié les fiches horaires PDF."
   },
   {
-   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-   "statut": "non recherché",
-   "source": "",
-   "consulte_le": "",
-   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   "sujet": "Calcul d'itinéraire",
+   "statut": "non vérifié",
+   "source": "https://www.filbleu.fr/horaires-et-trajets/itineraire",
+   "consulte_le": "2026-10-14",
+   "note": "La page existe, mais son calculateur ne s'était pas chargé à la lecture (« Chargement en cours de la cartographie... »). Je n'ai pas pu confirmer ce qu'elle propose."
+  },
+  {
+   "sujet": "Temps réel et fiches horaires",
+   "statut": "introuvable",
+   "source": "https://www.filbleu.fr/horaires-et-trajets/horaires-par-arret",
+   "consulte_le": "2026-10-14",
+   "note": "La page ne mentionne ni temps réel ni fiches horaires. La page d'accueil évoque seulement la consultation des horaires en temps réel, sans lien direct. Je n'ai pas ouvert la page d'info trafic: https://www.filbleu.fr/horaires-et-trajets/info-trafic."
+  },
+  {
+   "sujet": "À partir du 1er jour des 5 ans de l'enfant, un titre de transport est exigé.",
+   "statut": "non vérifié",
+   "source": "https://www.filbleu.fr/contact/besoin-daide/titres-de-transport/gratuite-des-transports",
+   "consulte_le": "2026-10-14",
+   "note": "extrait introuvable sur la page"
   },
   {
    "sujet": "vélo ou gare (seulement si directement utile au logement)",
    "statut": "non recherché",
    "source": "",
-   "consulte_le": "",
+   "consulte_le": "2026-10-14",
    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
   }
  ],

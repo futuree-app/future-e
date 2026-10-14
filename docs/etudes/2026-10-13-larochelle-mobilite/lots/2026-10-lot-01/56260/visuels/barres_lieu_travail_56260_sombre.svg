@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 413" width="600" height="413" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<title id="t">Habiter Vannes, travailler ici ou ailleurs</title>
+<desc id="d">Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Vannes, part qui va travailler principalement en voiture : travaillant à Vannes, 59 % ; travaillant à Saint-Avé, Séné ou Plescop, 85 % ; travaillant ailleurs (hors de Vannes, Saint-Avé, Séné et Plescop), 84 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022.</desc>
+<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
+<rect width="600" height="413" fill="#0d1322"/>
+<line x1="24.0" y1="321.0" x2="24.0" y2="329.0" stroke="#2a3246" stroke-width="1"/>
+<text x="24.0" y="345.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">0 %</text>
+<line x1="144.5" y1="321.0" x2="144.5" y2="329.0" stroke="#2a3246" stroke-width="1"/>
+<text x="144.5" y="345.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">25 %</text>
+<line x1="265.0" y1="321.0" x2="265.0" y2="329.0" stroke="#2a3246" stroke-width="1"/>
+<text x="265.0" y="345.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">50 %</text>
+<line x1="385.5" y1="321.0" x2="385.5" y2="329.0" stroke="#2a3246" stroke-width="1"/>
+<text x="385.5" y="345.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">75 %</text>
+<line x1="506.0" y1="321.0" x2="506.0" y2="329.0" stroke="#2a3246" stroke-width="1"/>
+<text x="506.0" y="345.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="middle">100 %</text>
+<text x="24.0" y="40.0" font-size="22" font-weight="700" fill="#f6f4ef" text-anchor="start">Habiter Vannes, travailler ici ou ailleurs</text>
+<text x="24.0" y="63.0" font-size="14" font-weight="400" fill="#c6cfdb" text-anchor="start">Part utilisant principalement la voiture pour aller travailler, parmi</text>
+<text x="24.0" y="82.0" font-size="14" font-weight="400" fill="#c6cfdb" text-anchor="start">les actifs résidant à Vannes, en 2022.</text>
+<text x="24.0" y="123.0" font-size="15" font-weight="600" fill="#f6f4ef" text-anchor="start">Travaille à Vannes</text>
+<rect x="24" y="133.0" width="482.0" height="30" rx="4" fill="#1a2236"/>
+<line x1="144.5" y1="133.0" x2="144.5" y2="163.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="265.0" y1="133.0" x2="265.0" y2="163.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="385.5" y1="133.0" x2="385.5" y2="163.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="506.0" y1="133.0" x2="506.0" y2="163.0" stroke="#2a3246" stroke-width="1"/>
+<rect x="24" y="133.0" width="282.5" height="30" rx="4" fill="#5598e7"><title>Travaille à Vannes : 58.6 %</title></rect>
+<text x="316.5" y="154.6" font-size="20" font-weight="700" fill="#f6f4ef" text-anchor="start">59 %</text>
+<text x="24.0" y="201.0" font-size="15" font-weight="600" fill="#f6f4ef" text-anchor="start">Travaille à Saint-Avé, Séné ou Plescop</text>
+<rect x="24" y="211.0" width="482.0" height="30" rx="4" fill="#1a2236"/>
+<line x1="144.5" y1="211.0" x2="144.5" y2="241.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="265.0" y1="211.0" x2="265.0" y2="241.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="385.5" y1="211.0" x2="385.5" y2="241.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="506.0" y1="211.0" x2="506.0" y2="241.0" stroke="#2a3246" stroke-width="1"/>
+<rect x="24" y="211.0" width="410.2" height="30" rx="4" fill="#5598e7"><title>Travaille à Saint-Avé, Séné ou Plescop : 85.1 %</title></rect>
+<text x="444.2" y="232.6" font-size="20" font-weight="700" fill="#f6f4ef" text-anchor="start">85 %</text>
+<text x="24.0" y="279.0" font-size="15" font-weight="600" fill="#f6f4ef" text-anchor="start">Travaille ailleurs (hors de Vannes, Saint-Avé, Séné et Plescop)</text>
+<rect x="24" y="289.0" width="482.0" height="30" rx="4" fill="#1a2236"/>
+<line x1="144.5" y1="289.0" x2="144.5" y2="319.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="265.0" y1="289.0" x2="265.0" y2="319.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="385.5" y1="289.0" x2="385.5" y2="319.0" stroke="#2a3246" stroke-width="1"/>
+<line x1="506.0" y1="289.0" x2="506.0" y2="319.0" stroke="#2a3246" stroke-width="1"/>
+<rect x="24" y="289.0" width="403.0" height="30" rx="4" fill="#5598e7"><title>Travaille ailleurs (hors de Vannes, Saint-Avé, Séné et Plescop) : 83.6 %</title></rect>
+<text x="437.0" y="310.6" font-size="20" font-weight="700" fill="#f6f4ef" text-anchor="start">84 %</text>
+<text x="24.0" y="373.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="start">Groupes distincts de résidents ; les écarts décrivent des pratiques. Source : INSEE,</text>
+<text x="24.0" y="390.0" font-size="12" font-weight="400" fill="#9ba3b4" text-anchor="start">recensement 2022.</text>
+</svg>

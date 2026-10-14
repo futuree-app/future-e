@@ -1,0 +1,79 @@
+{
+ "etape": "redaction",
+ "cle": "b0e0a7a0d9218324",
+ "outil": "claude-code",
+ "version_outil": "2.1.299 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "high",
+ "consignes_sha": "7dc2ca0c244ec27a",
+ "entree_sha": "cfc950e961423e25",
+ "debut": "2026-10-14T15:19:59Z",
+ "duree_s": 2.0,
+ "code_retour": 1,
+ "session": "7387eb33-cea6-4d9b-b662-b517add86609",
+ "usage": {
+  "output_tokens_details": {
+   "thinking_tokens": 0
+  },
+  "input_tokens": 0,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 0,
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "",
+  "iterations": [],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0,
+ "est_erreur": true,
+ "sous_type": "success",
+ "modele_effectif": [],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "Glob",
+   "Read"
+  ],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-vy82tf3q",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude-perso/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-vy82tf3q/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": [
+   "complement.json",
+   "comparaison_voiture.json",
+   "5acb317988ee381778cbecf0.json"
+  ]
+ },
+ "appels_outils": [],
+ "refus": 0
+}

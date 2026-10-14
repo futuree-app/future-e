@@ -1,0 +1,67 @@
+{
+ "anomalies": [
+  {
+   "categorie": "borne",
+   "gravite": "bloquante",
+   "passage": "Il était de 2,30 € la semaine du 5 octobre 2026, soit 0,73 € de plus.",
+   "probleme": "Le lecteur qui soustrait les deux prix affichés (2,30 − 1,56) trouve 0,74 € et non 0,73 € : `carburant.gazole.ecart` est calculé sur les prix non arrondis, donc l'article semble contenir une erreur de calcul. Le tableau du scénario retient en plus +0,75 €, ce qui fait trois valeurs différentes pour une même hausse.",
+   "correction_minimale": "Retirer « soit 0,73 € de plus » de cette phrase (les deux prix suffisent), ou écrire « soit environ 0,7 € de plus », et dire en méthode que la hausse est calculée sur les prix non arrondis."
+  },
+  {
+   "categorie": "borne",
+   "gravite": "bloquante",
+   "passage": "le SP95-E10 est passé de 1,64 € à 2,14 €, soit 0,51 € de plus",
+   "probleme": "La différence des deux prix affichés vaut 0,50 € et non 0,51 € (`carburant.e10.ecart` est calculé sur les prix non arrondis) : le lecteur voit une erreur de calcul.",
+   "correction_minimale": "Écrire « est passé de 1,64 € à 2,14 € » sans « soit 0,51 € de plus », ou « soit environ 0,5 € de plus »."
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "À l'autre extrémité, la part atteint 82 % à Saint-Marc Est",
+   "probleme": "Saint-Marc Est (`iris.441840131.voiture`, 82 %) n'est pas à l'extrémité haute : Immaculée Bourg (85 %) et Villeneuve (84 %) le dépassent. « À l'autre extrémité » lui donne donc un rang qu'il n'a pas.",
+   "correction_minimale": "« À l'autre extrémité, la part atteint 85 % à Immaculée Bourg et 86 % à Immaculée Campagne », ou « elle dépasse 80 % dans plusieurs secteurs, jusqu'à 86 % à Immaculée Campagne »."
+  },
+  {
+   "categorie": "population",
+   "gravite": "a_revoir",
+   "passage": "Montoir-de-Bretagne accueille 7 % des actifs de Saint-Nazaire",
+   "probleme": "« Actifs de Saint-Nazaire » peut se lire comme les actifs qui travaillent à Saint-Nazaire, alors que `destination.44103.part_des_actifs` porte sur les actifs qui habitent Saint-Nazaire.",
+   "correction_minimale": "« Montoir-de-Bretagne accueille 7 % des actifs qui habitent Saint-Nazaire »."
+  },
+  {
+   "categorie": "population",
+   "gravite": "a_revoir",
+   "passage": "Pour ceux qui travaillent à La Baule-Escoublac, Guérande",
+   "probleme": "« Ceux » peut renvoyer à tous les actifs qui travaillent dans ces six communes, y compris ceux qui y habitent (section 5), alors que `mobpro.voiture_selon_destination.communes_voisines` ne porte que sur les actifs qui habitent Saint-Nazaire.",
+   "correction_minimale": "« Pour les actifs de Saint-Nazaire qui travaillent à La Baule-Escoublac, Guérande… »."
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Cela rappelle aussi que la commune de travail compte autant que l'adresse.",
+   "probleme": "Dans la section A, ce passage pose une hiérarchie causale (« compte autant que ») que le dossier ne mesure pas : `ecart.iris.voiture.max_moins_min` et `ecart.voiture_destination.voisines_moins_meme_commune` décrivent deux groupements distincts et non croisés, et non des effets comparables.",
+   "correction_minimale": "« La part de la voiture varie aussi selon la commune de travail. »"
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Cela ne veut pas dire qu'aucun de ces équipements n'est proche, seulement qu'ils sont rarement tous les trois à cette distance.",
+   "probleme": "C'est une précaution méthodologique dans le récit, alors que la phrase précédente (« réunissent les trois », `iris.441840130.panier_500m`) est déjà exacte.",
+   "correction_minimale": "Supprimer la phrase."
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Les secteurs cités ici sont des découpages statistiques de l'INSEE. Leurs noms ne correspondent pas toujours aux quartiers d'usage.",
+   "probleme": "C'est une précision technique placée dans le récit, juste avant les premiers chiffres par secteur, alors que sa place est dans la méthode ou la légende de la carte (vérification `iris.ecart_voiture`).",
+   "correction_minimale": "Déplacer ces deux phrases dans « Méthode et sources », au point « Secteurs »."
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Par ailleurs, avoir une voiture ne veut pas dire s'en servir pour aller travailler.",
+   "probleme": "Le paragraphe sur `mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture` change de sujet au milieu de la partie sur le lieu de travail, sans lien avec ce qui précède ni avec ce qui suit.",
+   "correction_minimale": "Le rattacher au paragraphe sur le stationnement (« Si vous gardez une voiture… ») ou le supprimer."
+  }
+ ]
+}

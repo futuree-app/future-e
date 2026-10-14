@@ -89,7 +89,9 @@ def controler(d, txt):
             continue
         passage, chiffre, ids = cells[0], cells[1], cells[2]
         ecrits.append(chiffre)
-        codes = re.findall(r"`([^`]+)`", ids)
+        # Identifiants entre accents graves, ou écrits nus (« iris.490070107.voiture ») : les deux formes sont reconnues.
+        codes = re.findall(r"`([^`]+)`", ids) or re.findall(
+            r"\b(?:mobpro|iris|acces|carburant|scenario|ecart|destination|voisine|doc|comparaison)\.[\w./-]*[\w/]", ids)
         definition = re.match(r"m[ée]thode|sources?", passage, re.I)  # périmètres, seuils et dates de la méthode : pas des valeurs
         if not codes:
             if re.search(r"\d", chiffre) and not definition and not re.search(r"capacit|hypoth|définition|millésime|limite|source|population|périmètre|date|méthode", ids, re.I):

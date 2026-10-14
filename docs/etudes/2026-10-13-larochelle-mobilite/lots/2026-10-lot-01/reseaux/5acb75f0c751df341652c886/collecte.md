@@ -1,0 +1,13 @@
+```json
+{"faits": [
+{"id":"doc.tarification.gratuite_moins_5_ans","information":"Les enfants de moins de 5 ans voyagent gratuitement, accompagnés d'un adulte. La page ne présente pas le réseau comme gratuit. Les titres sont payants (ticket 1 voyage à 1,50 €, d'après la page).","url":"https://www.setram.fr/fr/9bd1-Les-titres-de-transport-tout-public.html","extrait":"Les enfants de moins de 5 ans voyagent gratuitement","validite":"non précisée","perimetre":"Enfants de moins de 5 ans, accompagnés d'un adulte. Page des titres tout public, sans autre gratuité mentionnée. Les tarifs réduits sont sur une autre page, non consultée.","usage":"avec ses conditions"},
+{"id":"doc.horaires.validite","information":"Les horaires et plans des lignes régulières sont valables à partir du 31 août 2026. La page ne donne pas de date de fin.","url":"https://www.setram.fr/fr/zJXN-Horaires-et-plans-des-lignes-regulieres-.html","extrait":"Horaires et plans valables à partir du 31 août 2026","validite":"à partir du 31 août 2026, fin non précisée","perimetre":"Lignes régulières du réseau SETRAM","usage":"oui"},
+{"id":"doc.itineraire.page","information":"Le site propose une rubrique « Itinéraire » (« Je prépare mon trajet »). La page ne décrit pas le fonctionnement du calcul. Le site propose aussi les prochains passages aux arrêts (https://www.setram.fr/fr/pzy0-Prochains-passages-aux-arrets.html) et l'info trafic (https://www.setram.fr/infotrafic). Je n'ai pas ouvert ces deux pages.","url":"https://www.setram.fr/fr/bGjx-Itineraire.html","extrait":"Je prépare mon trajet","validite":"non précisée","perimetre":"Réseau SETRAM","usage":"oui"}
+],
+"recherches":[
+{"sujet":"Gratuité du réseau, lignes concernées et exceptions","statut":"introuvable","url":"https://www.setram.fr/fr/9bd1-Les-titres-de-transport-tout-public.html","note":"La page « tout public » ne mentionne que la gratuité des moins de 5 ans. La page des tarifs réduits (https://www.setram.fr/fr/m0Mp-Les-titres-de-transport-a-tarifs-reduits.html) n'a pas été consultée. Je ne conclus pas à l'absence d'autres gratuités."},
+{"sujet":"Jours de circulation (samedi, dimanche, jours fériés) des lignes urbaines","statut":"non vérifié","url":"https://www.setram.fr/fr/zJXN-Horaires-et-plans-des-lignes-regulieres-.html","note":"La page ne précise pas ces jours. Ils figurent probablement dans les dépliants PDF par ligne (par exemple Depliant_5.pdf), que je n'ai pas lus. Aucune fréquence n'est enregistrée."}
+]}
+```
+
+Les extraits viennent de réponses résumées par l'outil de lecture, pas du texte brut des pages. Ils peuvent donc être rejetés à la recherche automatique.

@@ -1,0 +1,44 @@
+2026-10-14T14:52:47Z
+✓ VITALIS : 4 information(s) vérifiée(s), 5 recherche(s) sans résultat vérifié
+✓ Irigo : 7 information(s) vérifiée(s), 6 recherche(s) sans résultat vérifié
+✓ IZILO Mobilités : 4 information(s) vérifiée(s), 5 recherche(s) sans résultat vérifié
+· Kicéo : aucun site joignable, collecte impossible
+· STRAN : aucun site joignable, collecte impossible
+✓ Choletbus : 4 information(s) vérifiée(s), 3 recherche(s) sans résultat vérifié
+· Impulsyon : aucun site joignable, collecte impossible
+✓ TUB Saint Brieuc : 3 information(s) vérifiée(s), 4 recherche(s) sans résultat vérifié
+✓ Fil Bleu : 2 information(s) vérifiée(s), 5 recherche(s) sans résultat vérifié
+✓ SETRAM : 3 information(s) vérifiée(s), 2 recherche(s) sans résultat vérifié
+
+Commune                INSEE  État                   Préparation  Motif
+Poitiers               86194  prêt à relire               34.9 s  corrigé une fois ; vérifier la section E
+Angers                 49007  dossier prêt                43.3 s  
+Lorient                56121  dossier prêt                37.0 s  
+Vannes                 56260  dossier prêt                29.9 s  
+Saint-Nazaire          44184  dossier prêt                41.3 s  
+Cholet                 49099  dossier prêt                30.9 s  
+La Roche-sur-Yon       85191  dossier prêt                29.3 s  
+Saint-Brieuc           22278  dossier prêt                33.5 s  
+Tours                  37261  dossier prêt                37.6 s  
+Le Mans                72181  dossier prêt                46.2 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 1.97 $
+== collecte finie 2026-10-14T14:56:29Z
+✗ Cholet : génération « redaction » sans texte exploitable (code 1, success)
+✗ La Roche-sur-Yon : génération « redaction » sans texte exploitable (code 1, success)
+✗ Saint-Brieuc : génération « redaction » sans texte exploitable (code 1, success)
+✗ Tours : génération « redaction » sans texte exploitable (code 1, success)
+✗ Le Mans : génération « redaction » sans texte exploitable (code 1, success)
+
+Commune                INSEE  État                   Préparation  Motif
+Poitiers               86194  prêt à relire               34.9 s  corrigé une fois ; vérifier la section E
+Angers                 49007  prêt à relire               43.3 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Lorient                56121  prêt à relire               37.0 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Vannes                 56260  prêt à relire               29.9 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Saint-Nazaire          44184  prêt à relire               41.3 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Cholet                 49099  dossier prêt                30.9 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
+La Roche-sur-Yon       85191  dossier prêt                29.3 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
+Saint-Brieuc           22278  dossier prêt                33.5 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
+Tours                  37261  dossier prêt                37.6 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
+Le Mans                72181  dossier prêt                46.2 s  erreur : génération « redaction » sans texte exploitable (code 1, success)
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 8.80 $
+== rédaction finie 2026-10-14T15:20:03Z

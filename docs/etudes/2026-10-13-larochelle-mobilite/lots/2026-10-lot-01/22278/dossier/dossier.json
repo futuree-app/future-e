@@ -24,7 +24,7 @@
   "generee_le": "2026-10-14T14:27:56Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-14T14:30:43Z",
+ "dossier_genere_le": "2026-10-14T14:55:23Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2356,41 +2356,90 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.tarif.groupe_scolaire_gratuit",
+    "information": "Un titre « Groupe scolaire gratuit » existe pour les établissements scolaires de l'agglomération. Il est valable de 8h30 à 16h30 les jours scolaires, uniquement sur les lignes régulières TUB. Les groupes doivent compter au moins 10 enfants avec un adulte. La page ne dit pas que tout le réseau est gratuit et affiche des prix payants (1 heure : 2 €, journée : 4,50 €).",
+    "source": "https://www.tub.bzh/tarifs/titres-de-transport-et-tarifs-tub (extrait vérifié le 2026-10-14 : « Valable de 8h30 à 16h30 les jours scolaires UNIQUEMENT sur les lignes régulières TUB. »)",
+    "consulte_le": "2026-10-14",
+    "validite": "non précisée",
+    "perimetre": "réseau TUB Saint Brieuc ; Groupes scolaires des établissements de Saint-Brieuc Armor Agglomération, lignes régulières TUB. La page ne liste pas les lignes. ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.tub.bzh/tarifs/titres-de-transport-et-tarifs-tub",
+     "extrait": "Valable de 8h30 à 16h30 les jours scolaires UNIQUEMENT sur les lignes régulières TUB."
+    }
+   },
+   {
+    "id": "doc.circulation.categories_lignes",
+    "information": "La page des lignes regroupe TEO-0, DF2, DF3, DF4 et DF5 sous la catégorie « Lignes Dimanches et Jours Fériés ». Elle classe aussi TEO-1, M2, M3 et M4 en lignes du matin, TEO-2, N2, N3 et N4 en lignes Noctub, et R en ligne estivale. Elle ne donne ni les jours précis de circulation des autres lignes urbaines, ni le samedi, ni la période de validité des horaires.",
+    "source": "https://www.tub.bzh/reseau/lignes (extrait vérifié le 2026-10-14 : « Lignes Dimanches et Jours Fériés »)",
+    "consulte_le": "2026-10-14",
+    "validite": "non précisée",
+    "perimetre": "réseau TUB Saint Brieuc ; Lignes TEO-0, DF2, DF3, DF4, DF5 pour les dimanches et jours fériés. Les autres lignes ne sont pas précisées. ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.tub.bzh/reseau/lignes",
+     "extrait": "Lignes Dimanches et Jours Fériés"
+    }
+   },
+   {
+    "id": "doc.verification.itineraire",
+    "information": "La page d'accueil renvoie vers une page de recherche d'itinéraire, qui donne accès à une carte interactive, aux horaires des lignes et à l'application mobile TUB. Le contenu du formulaire de recherche n'a pas pu être lu.",
+    "source": "https://www.tub.bzh/reseau/recherche-ditineraire (extrait vérifié le 2026-10-14 : « Trouvez votre itinéraire avec »)",
+    "consulte_le": "2026-10-14",
+    "validite": "non précisée",
+    "perimetre": "réseau TUB Saint Brieuc ; Réseau TUB ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.tub.bzh/reseau/recherche-ditineraire",
+     "extrait": "Trouvez votre itinéraire avec"
+    }
    }
   ],
   "recherches": [
    {
-    "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Gratuité générale du réseau",
+    "statut": "introuvable",
+    "source": "https://www.tub.bzh/tarifs/titres-de-transport-et-tarifs-tub",
+    "consulte_le": "2026-10-14",
+    "note": "La page présente des tarifs payants. La seule gratuité trouvée concerne les groupes scolaires. La Tarification Solidaire est mentionnée sans prix. Cela ne prouve pas l'absence d'autres gratuités."
    },
    {
-    "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Circulation samedi et jours des lignes urbaines hors DF",
+    "statut": "introuvable",
+    "source": "https://www.tub.bzh/reseau/lignes",
+    "consulte_le": "2026-10-14",
+    "note": "Les fiches horaires par ligne n'ont pas été ouvertes."
    },
    {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Période de validité des horaires",
+    "statut": "introuvable",
+    "source": "https://www.tub.bzh/reseau/lignes",
+    "consulte_le": "2026-10-14",
+    "note": "Aucune date de validité n'apparaît sur la page d'accueil ni sur la page des lignes."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "introuvable",
+    "source": "https://www.tub.bzh/reseau/infos-trafic",
+    "consulte_le": "2026-10-14",
+    "note": "Le temps réel n'est pas mentionné sur les pages lues. Cette page « Infos Trafic » n'a pas été ouverte. L'application mobile TUB est signalée sur la page d'itinéraire."
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-14",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/22278/dossier/complement.json",
-  "sha256": "1a97c6d0035a3b4f94f7aec18126d24f8b238e6196d705b800fbf3ea3b5e2f84"
+  "sha256": "1ba0debedc67516e050287d338244427fe787e7cf0f6f165ba065efa038f0f5c"
  },
  "comparaison": {
   "commune": {
