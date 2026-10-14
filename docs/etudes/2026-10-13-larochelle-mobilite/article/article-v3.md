@@ -51,9 +51,9 @@ Pourquoi certains territoires rendent la voiture difficile à remplacer, et ce q
 - **La place de la voiture.** Au centre, le stationnement ; ailleurs, les jours où elle restera indispensable.
 - **Vos kilomètres.** Reprenez le tableau du début avec votre distance et votre consommation.
 
-## Et pour une adresse précise ?
+## Votre projet, votre adresse
 
-Devant une annonce, il reste à savoir ce qu'il y a autour du logement. Le dossier d'adresse futur•e rassemble les équipements les plus proches et la part des ménages du secteur qui ont une voiture, comparée à celle de la commune.
+Se rapprocher d'un emploi, s'installer à deux avec deux lieux de travail, préparer sa retraite : selon le projet, les mêmes chiffres ne pèsent pas pareil. Les trajets comptent, mais aussi ce qui se trouve autour du logement, la chaleur de l'été et les risques à l'adresse. [Examinez avec futur•e l'adresse que vous envisagez](/dossier), à partir de votre projet.
 
 ---
 
@@ -67,4 +67,4 @@ Ménages et voiture, stationnement : INSEE, recensement 2022, base infracommunal
 
 Carburant : prix déclarés au flux officiel prix-carburants.gouv.fr par les stations à moins de 12 km du centre de La Rochelle, semaines du 6 octobre 2025 et du 5 octobre 2026 ; hausse vérifiée sur les mêmes stations. Le tableau est un scénario de surcoût de carburant (6 L/100 km, 200 allers-retours par an, hausse arrondie). Les pratiques (2022) et les prix (2025-2026) portent sur des périodes différentes.
 
-Étude futur•e, 13 octobre 2026.
+Étude futur•e du 13 octobre 2026, mise à jour le 14 octobre 2026.

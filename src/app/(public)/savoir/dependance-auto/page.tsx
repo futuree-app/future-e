@@ -119,7 +119,8 @@ const css = `
 // RENVOIS VERS LES ÉTUDES LOCALES (13/10/2026). Les articles de La Rochelle et de Niort ne sont pas publiés :
 // leurs seules adresses sont les prévisualisations /dev/article-*, qui renvoient 404 en production. La section
 // n'apparaît donc qu'en développement. À la publication des études : remplacer les deux href par leurs URL
-// publiques et retirer la condition (liste dans docs/etudes/2026-10-13-larochelle-mobilite/redaction/README.md).
+// publiques et retirer la condition. URL proposées : /savoir/dependance-auto/la-rochelle et /savoir/dependance-auto/niort
+// (docs/etudes/2026-10-13-larochelle-mobilite/PUBLICATION.md).
 const etudesLocales = process.env.NODE_ENV === 'production' ? '' : `
   <h2>Deux villes regardées de près</h2>
   <p>

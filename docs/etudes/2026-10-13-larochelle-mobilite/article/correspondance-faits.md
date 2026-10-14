@@ -15,7 +15,7 @@ Document interne : ne figure pas dans l'article. Version courante : `article-v3.
 | « Travailler à La Rochelle… » | 44 % / 72 % | F3 | `resultats/incertitudes_mobpro.csv` (0,441 ; 0,723) | **Quatre communes exactement** (Aytré, Lagord, Périgny, Puilboreau), sans Châtelaillon-Plage. Ce n'est PAS le fait `communes_voisines` de la fiche (0,732, cinq communes) |
 | idem | ~50 600 emplois ; 40 % hors unité urbaine ; 90 % en voiture ; unité urbaine de 11 communes | F8 | `fiches/17300/fiche.json` (`mobpro.qui_vient_travailler`) | v3 : la déduction « plus loin, donc plus de kilomètres, donc le surcoût le plus élevé » est retirée ; le tableau suffit pour l'effet de la distance |
 | Méthode | toutes les définitions | | `RAPPORT.md` 2.1, 2.5, 2.7, 2.9 | « Les petits écarts entre secteurs ne doivent pas être surinterprétés » remplace « pas significatifs » (13/10) |
-| « Et pour une adresse précise ? » | aucun | | `redaction/parametres_editoriaux.md`, capacités produit | 13/10 : estimation du temps de trajet retirée (restitution en attente de validation) ; restent les équipements proches et la part des ménages motorisés du secteur, comparée à la commune |
+| « Votre projet, votre adresse » (ex « Et pour une adresse précise ? ») | aucun | | `redaction/parametres_editoriaux.md`, capacité « Examen d'une adresse à partir du projet » | 13/10 : temps de trajet retiré. 14/10 : conclusion harmonisée avec Niort (projet du lecteur, adresse examinée dans son ensemble, lien `/dossier`) ; l'inventaire équipements / ménages motorisés est retiré |
 
 Visuels : carte des secteurs (F6, section des quartiers) ; graphique 44 % / 72 % (F3) et, à côté, carte de situation des quatre communes du graphique (aucune donnée, contours IGN fusionnés).
 

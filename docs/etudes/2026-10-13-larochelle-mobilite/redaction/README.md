@@ -83,12 +83,14 @@ L'article général `/savoir/dependance-auto` (page publique existante, révisé
 |---|---|---|
 | La Rochelle → article général | `[notre article sur la dépendance automobile](/savoir/dependance-auto)`, fin de la section « Travailler à La Rochelle, ou juste à côté » | rien à changer (URL publique existante) |
 | Niort → article général | même phrase, fin de la section « Travailler à Niort ou ailleurs » | rien à changer |
-| Article général → La Rochelle | `/dev/article-larochelle`, section « Deux villes regardées de près », **affichée en développement seulement** (`etudesLocales` dans `page.tsx`) | remplacer par l'URL publique de l'étude |
-| Article général → Niort | `/dev/article-niort`, même section | remplacer par l'URL publique, puis retirer la condition `NODE_ENV` |
+| Article général → La Rochelle | `/dev/article-larochelle`, section « Deux villes regardées de près », **affichée en développement seulement** (`etudesLocales` dans `page.tsx`) | remplacer par `/savoir/dependance-auto/la-rochelle` (proposée, `../PUBLICATION.md`) |
+| Article général → Niort | `/dev/article-niort`, même section | remplacer par `/savoir/dependance-auto/niort`, puis retirer la condition `NODE_ENV` |
 
 Légendes des visuels allégées le même jour : l'image porte titre, millésime, définition et source ; la légende HTML n'ajoute que ce qui manque. Textes alternatifs et tableaux accessibles inchangés.
 
 ### Avant publication (ne bloque pas la prévisualisation)
+
+Liste complète et à jour : `../PUBLICATION.md` (URL, métadonnées, dates, intégration, vérifications).
 
 - Relecture de chaque phrase chiffrée au-delà de son identifiant : population réellement désignée, valeur aux bornes, conditions documentaires, fidélité du raisonnement (voir le tableau ci-dessus).
 

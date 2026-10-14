@@ -46,7 +46,7 @@ Pour ceux qui font ce trajet en voiture, la distance se paie aussi à la pompe. 
 
 ## Votre projet, votre adresse
 
-Se rapprocher de son travail, préparer sa retraite, s'installer en famille : selon le projet, les mêmes informations ne pèsent pas pareil. La mobilité compte, mais aussi la chaleur de l'été, les risques à l'adresse et les services dont on aura besoin. Explorez avec futur•e l'adresse que vous envisagez, à partir de votre projet.
+Se rapprocher de son travail, préparer sa retraite, s'installer en famille : selon le projet, les mêmes informations ne pèsent pas pareil. La mobilité compte, mais aussi la chaleur de l'été, les risques à l'adresse et les services dont on aura besoin. [Explorez avec futur•e l'adresse que vous envisagez](/dossier), à partir de votre projet.
 
 ---
 
