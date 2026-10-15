@@ -1,0 +1,25 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Elle donne un point de départ pour examiner les déplacements professionnels depuis l’adresse envisagée.",
+   "probleme": "Avec le titre et la question de transition, cette phrase transforme les pratiques des actifs qui habitent un secteur (iris.voiture.min, iris.voiture.max, quel que soit leur lieu de travail) en indication sur le trajet que le lecteur fera depuis son adresse. Ce trajet dépend pourtant de son propre lieu de travail, et le dossier ne donne aucune part par secteur et commune de travail (section 3).",
+   "correction_minimale": "Remplacer par : « Elle décrit les pratiques des actifs qui habitent chaque secteur, quel que soit leur lieu de travail ; elle ne dit pas quel sera votre propre trajet depuis l’adresse envisagée. »"
+  },
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "Le dossier mesure un panier réunissant",
+   "probleme": "« Le dossier » est un renvoi au document interne de production. Le lecteur ne le connaît pas.",
+   "correction_minimale": "Remplacer « Le dossier mesure un panier » par « On considère ici un panier »."
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Son absence complète à cette distance ne signifie pas non plus que tous les équipements manquent.",
+   "probleme": "Le panier (iris.786460605.panier_500m) est absent dès qu'un des trois équipements manque. « Absence complète » peut se lire comme « aucun des trois équipements », ce que l'indicateur ne mesure pas.",
+   "correction_minimale": "Remplacer par : « Une adresse sans ce panier complet peut tout de même avoir un ou deux de ces équipements à moins de 500 m. »"
+  }
+ ]
+}

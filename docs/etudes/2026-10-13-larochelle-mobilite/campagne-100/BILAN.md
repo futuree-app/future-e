@@ -1,6 +1,6 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T19:32:26Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T19:38:24Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
 **Communes distinctes préparées : 60** (20 avant la campagne, 40 pendant).
 
@@ -32,21 +32,21 @@ Aucune : toutes les communes rédigées ont des faits carburant utilisables.
 - Aix-en-Provence (13001), corrigé : raisonnement : Le titre et la question du chapeau (« quels secteurs regarder si l'on souhaite réduire la place de la voiture ? Les pratiques de travail […] apportent des repèr
 - Annecy (74010), corrigé : raisonnement : La phrase fait des pratiques des actifs qui habitent Courier et Vieugy-Balmont (iris.740100101.voiture, iris.740101503.voiture) un critère de choix d'annonce. E
 - Limoges (87085), corrigé : croisement : Cet intertitre, avec le titre « Vivre et travailler à Limoges », présente l'écart entre 48 % et 94 % (iris.870850204.voiture, iris.870851601.voiture) comme un c
-- Lille (59350), après correction, 2 anomalie(s) du contrôle : contrôle valeur : « « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.voiture (63.8) ; contrôle valeur : « « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.panier_500m (100.0)
 - Perpignan (66136), corrigé : raisonnement : Le passage transforme les pratiques domicile-travail des actifs qui habitent un secteur (iris.voiture.min, iris.voiture.max) en recommandation de quartier pour  ; raisonnement : Le titre présente les parts de la voiture par secteur (iris.voiture.min, iris.voiture.max) comme une liste de quartiers à cibler pour moins conduire. C'est la m
 - Orléans (45234), corrigé : raisonnement : La part de la voiture chez les actifs qui habitent le secteur (iris.voiture.min) devient une recommandation de quartier pour le lecteur. La phrase suivante (« À
-- Saint-Denis (93066), après correction, 2 anomalie(s) du contrôle : contrôle valeur : « 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0) ; contrôle valeur : « 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)
-- Montreuil (93048), après correction, 2 anomalie(s) du contrôle : contrôle valeur : « 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min (6.0) ; contrôle valeur : « 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.voiture.max (41.0)
 - Argenteuil (95018), corrigé : raisonnement : La part de voiture des actifs qui habitent déjà Carême Prenant (iris.voiture.min, 24 %) devient un conseil de quartier pour le lecteur, comme si s'y installer d
 - Nancy (54395), corrigé : raisonnement : La phrase présente le secteur d'habitation comme un levier pour moins conduire. Or `iris.voiture.min` et `iris.voiture.max` décrivent seulement les pratiques de
 - Tourcoing (59599), corrigé : raisonnement : Dans un article qui veut aider à « choisir son adresse pour moins prendre la voiture », cette phrase fait des parts de voiture des habitants de chaque secteur (
 - Créteil (94028), corrigé : raisonnement : Cette phrase vient juste après « 24 % à Lévrière-Haye aux Moines, contre 41 % à L'Ormetteau » : elle fait des pratiques des actifs de ces deux secteurs (iris.94
 - Avignon (84007), corrigé : raisonnement : La phrase demande de trier les annonces d'après la part de la voiture chez les actifs qui habitent chaque secteur (iris.840070110.voiture, iris.840070130.voitur
-- Aulnay-sous-Bois (93005), après correction, 1 anomalie(s) du contrôle : contrôle valeur : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (21.6)
 
 Corrections déclenchées seulement par un faux positif du contrôle (corrigé depuis ; l'appel a bien eu lieu et est compté) :
 - Montpellier (34172) : « SP95-E10 » ne correspond à aucune valeur du dossier pour carburant.e10.ecart (0.51)
 - Boulogne-Billancourt (92012) : « « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.voiture.min (17.0) ; « « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.voiture.ma ; « « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.920120506.panier_500m (1 ; « « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.920120703.
+- Lille (59350) : « « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.vo ; « « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.pa
+- Saint-Denis (93066) : « 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0) ; « 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)
+- Montreuil (93048) : « 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min  ; « 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.vo
+- Aulnay-sous-Bois (93005) : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture 
 
 Niveau 2 (noté, sans nouvelle génération) : 57 remarque(s), détail dans `relecture.anomalies.json` de chaque commune.
 
@@ -56,26 +56,27 @@ Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l
 
 | Outil | Étape | Appels | Échecs ou refus | Entrée totale | dont cache lu | dont cache écrit | Sortie totale | dont raisonnement | Durée cumulée | Non mesurés |
 |---|---|---|---|---|---|---|---|---|---|---|
-| claude-code | collecte (par réseau) | 16 | 1 | 730 724 | 150 047 | 49 239 | 97 279 | 1 702 | 8 min 19 s |  |
-| claude-code | relecture | 41 | 1 | 1 739 342 | 133 770 | 1 605 492 | 132 637 | 111 461 | 21 min 43 s |  |
-| codex | correction | 26 | 0 | 936 700 | 46 080 | sans objet | 83 855 | 9 122 | 23 min 22 s |  |
-| codex | redaction | 40 | 0 | 1 398 725 | 171 136 | sans objet | 207 901 | 100 759 | 1 h 27 min |  |
+| claude-code | collecte (par réseau) | 19 | 1 | 881 974 | 182 819 | 65 334 | 127 360 | 2 208 | 10 min 24 s |  |
+| claude-code | relecture | 42 | 1 | 1 779 817 | 137 200 | 1 642 535 | 136 280 | 114 400 | 22 min 17 s |  |
+| codex | correction | 27 | 0 | 970 028 | 46 080 | sans objet | 86 627 | 9 271 | 24 min 05 s |  |
+| codex | redaction | 41 | 0 | 1 431 643 | 178 816 | sans objet | 212 784 | 103 081 | 1 h 29 min |  |
 
-Codex, par commune (entrée + sortie, hors collecte) : total 2 627 181, médiane 75 517, maximum 89 992 (Nice).
+Codex, par commune (entrée + sortie, hors collecte) : total 2 701 082, médiane 75 422, maximum 89 992 (Nice).
 
-Claude, par commune (entrée + sortie, hors collecte) : total 1 871 979, médiane 46 220, maximum 54 223 (Strasbourg).
+Claude, par commune (entrée + sortie, hors collecte) : total 1 916 097, médiane 45 923, maximum 54 223 (Strasbourg).
 
 ## Durées
 
-- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 3 h 33 min.
-- Par commune (hors collecte) : médiane 4 min 18 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
-- Durée réelle de la campagne : 3 h 37 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
-- Interventions du terminal pilote : 54 min (0 mesurées, 54 estimées).
+- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 3 h 38 min.
+- Par commune (hors collecte) : médiane 4 min 16 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
+- Durée réelle de la campagne : 3 h 43 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
+- Interventions du terminal pilote : 64 min (0 mesurées, 64 estimées).
   - 2026-10-15 15:56 UTC, 22 min (estimée) : Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc
   - 2026-10-15 16:39 UTC, 12 min (estimée) : Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance
   - 2026-10-15 16:50 UTC, 8 min (estimée) : Lot 1 : deux autres faux positifs du contrôle (SP95-E10, base 100 km) corrigés, essais de non-régression, second arrêt-relance pendant des visuels
   - 2026-10-15 18:00 UTC, 5 min (estimée) : Erreur du pilote : lot 2 lancé à 17:28 UTC alors que le lot 1 venait d'être suspendu par la limite de session Claude (fin prise pour une réussite) ; un appel de collecte refusé en 3 s, sans jeton consommé. Constat, commit et poussée de l'état suspendu
   - 2026-10-15 18:24 UTC, 7 min (estimée) : Fin du lot 1 : motifs recalculés, faux positif « « 1 » dans Trapèze 1 » corrigé, arrêt-relance du lot 2 pendant des visuels
+  - 2026-10-15 19:38 UTC, 10 min (estimée) : Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels
 
 ## Suspensions
 

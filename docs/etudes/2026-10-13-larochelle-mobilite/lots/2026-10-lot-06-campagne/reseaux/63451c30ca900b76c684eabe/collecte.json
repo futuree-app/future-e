@@ -1,0 +1,137 @@
+{
+ "etape": "collecte",
+ "cle": "dc4f333d25ada7b0",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "9641db085683292b",
+ "debut": "2026-10-15T19:32:41Z",
+ "fin": "2026-10-15T19:33:24Z",
+ "duree_s": 43.1,
+ "code_retour": 0,
+ "session": "0acb6827-52b3-4c27-b1f8-a43f33dc5fa6",
+ "usage": {
+  "input_tokens": 8,
+  "cache_creation_input_tokens": 8165,
+  "cache_read_input_tokens": 13205,
+  "output_tokens": 2839,
+  "output_tokens_details": {
+   "thinking_tokens": 156
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 8165,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 2097,
+    "cache_read_input_tokens": 7644,
+    "cache_creation_input_tokens": 521,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 521
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 8,
+   "outputTokens": 2839,
+   "cacheReadInputTokens": 13205,
+   "cacheCreationInputTokens": 8165,
+   "webSearchRequests": 0,
+   "costUSD": 0.0623865,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 156,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-haiku-5-5": {
+   "inputTokens": 27421,
+   "outputTokens": 8009,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.0067466,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 3300,
+   "canonicalModel": "claude-haiku-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.0691331,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 5,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-p_5rewz8",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-p-5rewz8/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.capcotentin.fr/\", \"prompt\": \"Réseau de transport Cap Cotentin : gratuité/tarification, jours de circulation, horaires, calcul d'itinéraire, temps réel. Donne les liens pertinents "
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.capcotentin.fr/titres-abonnements/\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions ? Tarifs. Donne des extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.capcotentin.fr/lignes-regulieres/\", \"prompt\": \"Jours de circulation des lignes (dimanche, jours fériés, samedi), période de validité des horaires, liens fiches horaires. Extraits "
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://storage.googleapis.com/is-wp-74-prod/uploads-prod/2026/08/CAP-COTENTIN-LIGNE-1-hiver-26-27-VF_WEB.pdf\", \"prompt\": \"Jours de circulation (lundi-vendredi, samedi, dimanche, jours fériés"
+  }
+ ],
+ "refus": 1
+}

@@ -20,7 +20,7 @@
   "generee_le": "2026-10-15T16:27:17Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-15T16:27:43Z",
+ "dossier_genere_le": "2026-10-15T19:33:29Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2568,41 +2568,125 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.tarification.sociale_gratuite",
+    "information": "Un abonnement gratuit d'un mois est proposé à certaines familles de Cherbourg-en-Cotentin (ressources égales ou inférieures au RSA brut), via le CCAS de leur mairie. Il n'est pas délivré entre le 25 et le 5 du mois suivant.",
+    "source": "https://www.capcotentin.fr/titres-abonnements/ (extrait vérifié le 2026-10-15 : « Un abonnement gratuit d’une durée mensuelle est proposé aux familles »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Cap Cotentin ; Familles habitant Cherbourg-en-Cotentin sous conditions de ressources ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.capcotentin.fr/titres-abonnements/",
+     "extrait": "Un abonnement gratuit d’une durée mensuelle est proposé aux familles"
+    }
+   },
+   {
+    "id": "doc.tarification.exception_delivrance",
+    "information": "L'abonnement de tarification sociale n'est pas délivré entre le 25 et le 5 du mois suivant.",
+    "source": "https://www.capcotentin.fr/titres-abonnements/ (extrait vérifié le 2026-10-15 : « Attention : cet abonnement n’est pas délivré entre le 25 et le 5 du mois suivant. »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Cap Cotentin ; Abonnement gratuit de tarification sociale ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.capcotentin.fr/titres-abonnements/",
+     "extrait": "Attention : cet abonnement n’est pas délivré entre le 25 et le 5 du mois suivant."
+    }
+   },
+   {
+    "id": "doc.horaires.validite_urbaines",
+    "information": "Les fiches horaires d'hiver des lignes régulières sont valables à compter du 31 août 2026. La ligne B a une nouvelle version au 5 octobre. Les fiches des lignes 1 à 8, A à H, S1 à S14 et P1 à P5 sont listées sur la page. Les pages P1 à P5 portent sur l'hiver 2022-2023 et sont peut-être obsolètes.",
+    "source": "https://www.capcotentin.fr/lignes-regulieres/ (extrait vérifié le 2026-10-15 : « Horaires valables à compter du 31 août 2026 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "à compter du 31 août 2026",
+    "perimetre": "réseau Cap Cotentin ; Lignes urbaines (1 à 8), intercommunales (A à H), secondaires et professionnelles du réseau ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.capcotentin.fr/lignes-regulieres/",
+     "extrait": "Horaires valables à compter du 31 août 2026"
+    }
+   },
+   {
+    "id": "doc.horaires.validite_nomad",
+    "information": "Les horaires et le plan des lignes Nomad 301 et 303 sont valables du 1er septembre 2026 au 31 août 2027 inclus.",
+    "source": "https://www.capcotentin.fr/lignes-regulieres/ (extrait vérifié le 2026-10-15 : « Horaires et plan valables du 1er septembre 2026 au 31 août 2027 inclus »)",
+    "consulte_le": "2026-10-15",
+    "validite": "1er septembre 2026 au 31 août 2027",
+    "perimetre": "réseau Cap Cotentin ; Lignes Nomad 301 et 303 ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.capcotentin.fr/lignes-regulieres/",
+     "extrait": "Horaires et plan valables du 1er septembre 2026 au 31 août 2027 inclus"
+    }
    }
   ],
   "recherches": [
    {
-    "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Jours de circulation (samedi, dimanche, jours fériés) des lignes urbaines",
+    "statut": "non vérifié",
+    "source": "https://storage.googleapis.com/is-wp-74-prod/uploads-prod/2026/08/CAP-COTENTIN-LIGNE-1-hiver-26-27-VF_WEB.pdf",
+    "consulte_le": "2026-10-15",
+    "note": "La page lignes-regulieres ne donne pas ces jours. Ils figurent sans doute dans les fiches PDF, mais le domaine storage.googleapis.com a été refusé par l'outil de lecture, donc je n'ai pas pu les ouvrir. Il n'y a aucune conclusion sur l'absence de service."
+   },
+   {
+    "sujet": "Extrait exact pour la page d'itinéraire plans.capcotentin.fr",
+    "statut": "non vérifié",
+    "source": "https://plans.capcotentin.fr/fr/",
+    "consulte_le": "2026-10-15",
+    "note": "Cette page n'a pas été ouverte directement. Le lien vient de la page d'accueil et de la page tarifs. Le fait doc.verification.itineraire n'a donc pas d'extrait copié : il est à rejeter ou à revérifier."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "introuvable",
+    "source": "https://www.capcotentin.fr/",
+    "consulte_le": "2026-10-15",
+    "note": "Aucune mention explicite d'un suivi en temps réel dans les pages lues. La page infos trafic est à l'adresse https://plans.capcotentin.fr/fr/infos-trafic (non ouverte)."
+   },
+   {
+    "sujet": "Gratuité sur des lignes précises",
+    "statut": "introuvable",
+    "source": "https://www.capcotentin.fr/titres-abonnements/",
+    "consulte_le": "2026-10-15",
+    "note": "La page ne détaille pas de gratuité par ligne. Une offre promotionnelle à 1 € le trajet figure sur https://www.capcotentin.fr/actualites/le-cotentin-pour-1e/ (non ouverte), ainsi qu'un essai gratuit d'un mois sur https://www.capcotentin.fr/actualites/1-mois-gratuit-pour-changer-vos-trajets/ (non ouverte)."
+   },
+   {
+    "sujet": "Le réseau n'est pas gratuit en général. Le ticket 1 voyage coûte 1 € et le tarif",
+    "statut": "non vérifié",
+    "source": "https://www.capcotentin.fr/titres-abonnements/",
+    "consulte_le": "2026-10-15",
+    "note": "extrait introuvable sur la page"
+   },
+   {
+    "sujet": "Le calcul d'itinéraire, les horaires et les infos trafic se font sur le site pla",
+    "statut": "non vérifié",
+    "source": "https://plans.capcotentin.fr/fr/",
+    "consulte_le": "2026-10-15",
+    "note": "URL hors du domaine officiel"
    },
    {
     "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
+    "statut": "introuvable",
     "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-   },
-   {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-15",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-06-campagne/50129/dossier/complement.json",
-  "sha256": "9ac32abfe7189c24180f683f753831c7f524f9aa6f01741746f0dae919caf2ac"
+  "sha256": "ed783a403bcd1a0b24c51630bc2b6995eebce112880dbc71f9c23d8628b733aa"
  },
  "comparaison": {
   "commune": {

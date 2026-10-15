@@ -32,5 +32,47 @@
    200
   ]
  ],
- "consulte_le": "2026-10-15"
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.horaires.validite_nuit",
+    "information": "Les horaires des lignes de nuit s'appliquent à compter du lundi 14 septembre 2026.",
+    "url": "https://palmdeplacements.fr/fiches-horaires/",
+    "extrait": "HORAIRES A COMPTER DU LUNDI 14 SEPTEMBRE 2026",
+    "validite": "à compter du 14 septembre 2026",
+    "perimetre": "lignes de nuit (Palm Night) uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T19:34:03Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification / gratuité",
+    "statut": "introuvable",
+    "url": "https://palmdeplacements.fr/tickets/",
+    "note": "La page des tickets présente des titres payants et ne mentionne aucune gratuité générale. Je ne peux pas en conclure que le réseau n'est pas gratuit. Une gratuité éventuelle pour certains publics n'a pas été cherchée dans les pages Prime transport et Abonnements (https://palmdeplacements.fr/prime-transport/, https://palmdeplacements.fr/abonnements/). Aucun extrait de 5 mots ou plus n'a pu être copié pour les exceptions tarifaires des navettes Suquet Forville et City Palm."
+   },
+   {
+    "sujet": "Jours de circulation (dimanche, fériés, samedi) et période de validité des lignes urbaines",
+    "statut": "non vérifié",
+    "url": "https://palmdeplacements.fr/fiches-horaires/",
+    "note": "La page ne donne pas les jours de circulation. Les fiches horaires sont en PDF par ligne. Le nom du fichier de la ligne 14 est « LIGNE-14-Jusquau-11-Decembre-2026 », ce qui laisse penser à une validité jusqu'au 11 décembre 2026, mais le contenu des PDF n'a pas été lu. Une actualité du 17/08/2026 sur les horaires de rentrée est tronquée sur la page d'accueil."
+   },
+   {
+    "sujet": "Où vérifier un trajet (calcul d'itinéraire)",
+    "statut": "non vérifié",
+    "url": "https://carto.palmdeplacements.fr/fr/",
+    "note": "La page d'accueil renvoie vers « Itinéraires » (https://carto.palmdeplacements.fr/fr/) et « Infos trafic » (https://carto.palmdeplacements.fr/fr/#is-TrafficInfos). Ces pages n'ont pas été ouvertes, et aucun extrait n'a été relevé."
+   },
+   {
+    "sujet": "La page de fiches horaires renvoie vers l'application Palm bus pour les horaires",
+    "statut": "non vérifié",
+    "url": "https://palmdeplacements.fr/fiches-horaires/",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
 }

@@ -4,7 +4,7 @@
    "nom": "Versailles",
    "insee": "78646",
    "demande": "78646",
-   "statut": "dossier prêt",
+   "statut": "à corriger",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -46,7 +46,20 @@
    "notes": [
     "36 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 33.4
+   "duree_preparation_s": 33.4,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "49bd61c279b2613e",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   }
   },
   "92026": {
    "nom": "Courbevoie",
@@ -214,18 +227,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:27:43Z",
-     "fin": "2026-10-15T16:27:43Z",
-     "duree_s": 0.6
+     "debut": "2026-10-15T19:33:29Z",
+     "fin": "2026-10-15T19:33:29Z",
+     "duree_s": 0.0
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:27:43Z",
-     "fin": "2026-10-15T16:27:43Z",
-     "duree_s": 0.1,
-     "complement_sha": "9ac32abfe7189c24",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "6c78215d6d99b8e5"
+     "debut": "2026-10-15T19:33:29Z",
+     "fin": "2026-10-15T19:33:29Z",
+     "duree_s": 0.2,
+     "complement_sha": "ed783a403bcd1a0b",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "732eef15206ed4d6"
     }
    },
    "manuel": [
@@ -238,7 +251,26 @@
    "notes": [
     "40 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 27.7
+   "duree_preparation_s": 27.7,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:27:43Z",
+     "fin": "2026-10-15T16:27:43Z",
+     "duree_s": 0.6
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:27:43Z",
+     "fin": "2026-10-15T16:27:43Z",
+     "duree_s": 0.1,
+     "complement_sha": "9ac32abfe7189c24",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "6c78215d6d99b8e5"
+    }
+   ]
   },
   "94017": {
    "nom": "Champigny-sur-Marne",
@@ -502,18 +534,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:30:22Z",
-     "fin": "2026-10-15T16:30:23Z",
-     "duree_s": 0.7
+     "debut": "2026-10-15T19:34:04Z",
+     "fin": "2026-10-15T19:34:04Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:30:23Z",
-     "fin": "2026-10-15T16:30:23Z",
-     "duree_s": 0.1,
-     "complement_sha": "0a154bfe228a6234",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "106dd2a8dc00b439"
+     "debut": "2026-10-15T19:34:04Z",
+     "fin": "2026-10-15T19:34:04Z",
+     "duree_s": 0.2,
+     "complement_sha": "bf034200cc296876",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "087805d2ee22f0e4"
     }
    },
    "manuel": [
@@ -526,7 +558,26 @@
    "notes": [
     "30 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 31.6
+   "duree_preparation_s": 31.6,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:30:22Z",
+     "fin": "2026-10-15T16:30:23Z",
+     "duree_s": 0.7
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:30:23Z",
+     "fin": "2026-10-15T16:30:23Z",
+     "duree_s": 0.1,
+     "complement_sha": "0a154bfe228a6234",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "106dd2a8dc00b439"
+    }
+   ]
   },
   "93029": {
    "nom": "Drancy",
@@ -790,18 +841,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:32:31Z",
-     "fin": "2026-10-15T16:32:31Z",
-     "duree_s": 0.2
+     "debut": "2026-10-15T19:34:55Z",
+     "fin": "2026-10-15T19:34:55Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:32:31Z",
-     "fin": "2026-10-15T16:32:31Z",
+     "debut": "2026-10-15T19:34:55Z",
+     "fin": "2026-10-15T19:34:55Z",
      "duree_s": 0.2,
-     "complement_sha": "8ea0ffc078df4b3c",
+     "complement_sha": "58f1fcf2dbfe65f4",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "64d474cfaef23a06"
+     "dossier_sha": "1aadbe8977267656"
     }
    },
    "manuel": [
@@ -814,7 +865,26 @@
    "notes": [
     "26 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 28.7
+   "duree_preparation_s": 28.7,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:32:31Z",
+     "fin": "2026-10-15T16:32:31Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:32:31Z",
+     "fin": "2026-10-15T16:32:31Z",
+     "duree_s": 0.2,
+     "complement_sha": "8ea0ffc078df4b3c",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "64d474cfaef23a06"
+    }
+   ]
   },
   "62193": {
    "nom": "Calais",

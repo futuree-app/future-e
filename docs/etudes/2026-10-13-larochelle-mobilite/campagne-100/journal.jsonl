@@ -29,3 +29,6 @@
 {"t": "2026-10-15T18:24:36Z", "evt": "intervention", "texte": "Fin du lot 1 : motifs recalculés, faux positif « « 1 » dans Trapèze 1 » corrigé, arrêt-relance du lot 2 pendant des visuels", "minutes": 7.0, "mesure": "estimée"}
 {"t": "2026-10-15T18:24:37Z", "evt": "production_debut", "lot": 2}
 {"t": "2026-10-15T19:32:25Z", "evt": "production_fin", "lot": 2}
+{"t": "2026-10-15T19:32:40Z", "evt": "production_debut", "lot": 3}
+{"t": "2026-10-15T19:38:13Z", "evt": "arret_relance", "lot": 3, "motif": "contrôle corrigé (règle générale : une ligne de correspondance qui justifie un libellé ne porte pas de valeur) ; arrêt pendant des visuels, aucun appel de modèle en cours"}
+{"t": "2026-10-15T19:38:24Z", "evt": "intervention", "texte": "Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels", "minutes": 10.0, "mesure": "estimée"}

@@ -1,18 +1,5 @@
 {
  "nature": "ok",
- "anomalies": [
-  {
-   "type": "valeur",
-   "gravite": "bloquante",
-   "passage": "Contraste entre secteurs, libellé",
-   "detail": "« 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min (6.0)"
-  },
-  {
-   "type": "valeur",
-   "gravite": "bloquante",
-   "passage": "Contraste entre secteurs, libellé",
-   "detail": "« 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.voiture.max (41.0)"
-  }
- ],
- "bloquantes": 2
+ "anomalies": [],
+ "bloquantes": 0
 }

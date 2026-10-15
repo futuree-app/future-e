@@ -24,7 +24,7 @@
   "generee_le": "2026-10-15T16:29:53Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-15T16:30:23Z",
+ "dossier_genere_le": "2026-10-15T19:34:04Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2619,41 +2619,76 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.horaires.validite_nuit",
+    "information": "Les horaires des lignes de nuit s'appliquent à compter du lundi 14 septembre 2026.",
+    "source": "https://palmdeplacements.fr/fiches-horaires/ (extrait vérifié le 2026-10-15 : « HORAIRES A COMPTER DU LUNDI 14 SEPTEMBRE 2026 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "à compter du 14 septembre 2026",
+    "perimetre": "réseau Palmbus ; lignes de nuit (Palm Night) uniquement ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://palmdeplacements.fr/fiches-horaires/",
+     "extrait": "HORAIRES A COMPTER DU LUNDI 14 SEPTEMBRE 2026"
+    }
    }
   ],
   "recherches": [
    {
+    "sujet": "Tarification / gratuité",
+    "statut": "introuvable",
+    "source": "https://palmdeplacements.fr/tickets/",
+    "consulte_le": "2026-10-15",
+    "note": "La page des tickets présente des titres payants et ne mentionne aucune gratuité générale. Je ne peux pas en conclure que le réseau n'est pas gratuit. Une gratuité éventuelle pour certains publics n'a pas été cherchée dans les pages Prime transport et Abonnements (https://palmdeplacements.fr/prime-transport/, https://palmdeplacements.fr/abonnements/). Aucun extrait de 5 mots ou plus n'a pu être copié pour les exceptions tarifaires des navettes Suquet Forville et City Palm."
+   },
+   {
+    "sujet": "Jours de circulation (dimanche, fériés, samedi) et période de validité des lignes urbaines",
+    "statut": "non vérifié",
+    "source": "https://palmdeplacements.fr/fiches-horaires/",
+    "consulte_le": "2026-10-15",
+    "note": "La page ne donne pas les jours de circulation. Les fiches horaires sont en PDF par ligne. Le nom du fichier de la ligne 14 est « LIGNE-14-Jusquau-11-Decembre-2026 », ce qui laisse penser à une validité jusqu'au 11 décembre 2026, mais le contenu des PDF n'a pas été lu. Une actualité du 17/08/2026 sur les horaires de rentrée est tronquée sur la page d'accueil."
+   },
+   {
+    "sujet": "Où vérifier un trajet (calcul d'itinéraire)",
+    "statut": "non vérifié",
+    "source": "https://carto.palmdeplacements.fr/fr/",
+    "consulte_le": "2026-10-15",
+    "note": "La page d'accueil renvoie vers « Itinéraires » (https://carto.palmdeplacements.fr/fr/) et « Infos trafic » (https://carto.palmdeplacements.fr/fr/#is-TrafficInfos). Ces pages n'ont pas été ouvertes, et aucun extrait n'a été relevé."
+   },
+   {
+    "sujet": "La page de fiches horaires renvoie vers l'application Palm bus pour les horaires",
+    "statut": "non vérifié",
+    "source": "https://palmdeplacements.fr/fiches-horaires/",
+    "consulte_le": "2026-10-15",
+    "note": "extrait introuvable sur la page"
+   },
+   {
     "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
+    "statut": "introuvable",
     "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
    },
    {
     "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
+    "statut": "introuvable",
     "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-   },
-   {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-15",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-06-campagne/06029/dossier/complement.json",
-  "sha256": "0a154bfe228a6234dfb2e49148fc2a19c5c7072212723610e9133eb11f34c1e9"
+  "sha256": "bf034200cc2968764e7a395c0cf83b0ad2927a68d2af5561f3b86e82cb49c2cc"
  },
  "comparaison": {
   "commune": {

@@ -1,18 +1,5 @@
 {
  "nature": "ok",
- "anomalies": [
-  {
-   "type": "valeur",
-   "gravite": "bloquante",
-   "passage": "Pratiques — libellé du secteur",
-   "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.voiture (63.8)"
-  },
-  {
-   "type": "valeur",
-   "gravite": "bloquante",
-   "passage": "Équipements — libellé du secteur répété",
-   "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.panier_500m (100.0)"
-  }
- ],
- "bloquantes": 2
+ "anomalies": [],
+ "bloquantes": 0
 }

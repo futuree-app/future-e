@@ -60,21 +60,8 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "anomalies_restantes": [
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Pratiques — libellé du secteur",
-     "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.voiture (63.8)"
-    },
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Équipements — libellé du secteur répété",
-     "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.panier_500m (100.0)"
-    }
-   ],
-   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -181,7 +168,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -270,7 +257,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -402,7 +389,9 @@
     "debut": "2026-10-15T18:37:06Z",
     "fin": "2026-10-15T18:37:22Z",
     "duree_s": 15.7
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "93066": {
    "nom": "Saint-Denis",
@@ -464,21 +453,8 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "anomalies_restantes": [
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Secteurs — suffixe du libellé République Gare Porte de Paris",
-     "detail": "« 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0)"
-    },
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Secteurs — suffixe du libellé Franc-Moisin Bel-Air",
-     "detail": "« 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)"
-    }
-   ],
-   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -565,21 +541,8 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "anomalies_restantes": [
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Contraste entre secteurs, libellé",
-     "detail": "« 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min (6.0)"
-    },
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Contraste entre secteurs, libellé",
-     "detail": "« 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.voiture.max (41.0)"
-    }
-   ],
-   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -667,7 +630,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -778,7 +741,9 @@
     "debut": "2026-10-15T18:49:06Z",
     "fin": "2026-10-15T18:49:24Z",
     "duree_s": 18.2
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "54395": {
    "nom": "Nancy",
@@ -841,7 +806,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -929,7 +894,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1041,7 +1006,9 @@
     "debut": "2026-10-15T18:59:21Z",
     "fin": "2026-10-15T18:59:36Z",
     "duree_s": 14.9
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "92050": {
    "nom": "Nanterre",
@@ -1128,7 +1095,9 @@
     "debut": "2026-10-15T19:02:41Z",
     "fin": "2026-10-15T19:02:55Z",
     "duree_s": 14.7
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "94081": {
    "nom": "Vitry-sur-Seine",
@@ -1214,7 +1183,9 @@
     "debut": "2026-10-15T19:05:33Z",
     "fin": "2026-10-15T19:05:47Z",
     "duree_s": 14.3
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "94028": {
    "nom": "Créteil",
@@ -1277,7 +1248,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1365,7 +1336,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1476,7 +1447,9 @@
     "debut": "2026-10-15T19:19:49Z",
     "fin": "2026-10-15T19:20:00Z",
     "duree_s": 11.2
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "92004": {
    "nom": "Asnières-sur-Seine",
@@ -1562,7 +1535,9 @@
     "debut": "2026-10-15T19:22:38Z",
     "fin": "2026-10-15T19:22:49Z",
     "duree_s": 10.7
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "92025": {
    "nom": "Colombes",
@@ -1648,7 +1623,9 @@
     "debut": "2026-10-15T19:25:46Z",
     "fin": "2026-10-15T19:25:58Z",
     "duree_s": 11.5
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "59183": {
    "nom": "Dunkerque",
@@ -1735,7 +1712,9 @@
     "debut": "2026-10-15T19:28:17Z",
     "fin": "2026-10-15T19:28:37Z",
     "duree_s": 20.1
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "93005": {
    "nom": "Aulnay-sous-Bois",
@@ -1797,15 +1776,8 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "anomalies_restantes": [
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Libellé de destination",
-     "detail": "« Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (21.6)"
-    }
-   ],
-   "motif": "1 anomalie(s) déterministe(s) après la correction unique",
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [

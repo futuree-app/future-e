@@ -24,7 +24,7 @@
   "generee_le": "2026-10-15T16:32:04Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-15T16:32:31Z",
+ "dossier_genere_le": "2026-10-15T19:34:55Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2591,41 +2591,104 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.tarification.gratuite_accompagnants_cmi",
+    "information": "Les accompagnants de personnes titulaires d'une carte CMI Invalidité voyagent gratuitement sur le réseau Trace, à condition que la personne accompagnée ait un titre valide. Le réseau n'est pas présenté comme gratuit pour les autres publics : les titres listés ont un tarif (billet à l'unité à 1,50 €).",
+    "source": "https://www.trace-colmar.fr/acheter/titres-de-transport/billets-et-abonnements/ (extrait vérifié le 2026-10-15 : « Les accompagnants des personnes titulaires d’une carte CMI Invalidité peuvent voyager gratuitement sur le réseau Trace »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau TRACE ; Accompagnants de titulaires de la carte CMI Invalidité, tout le réseau Trace ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.trace-colmar.fr/acheter/titres-de-transport/billets-et-abonnements/",
+     "extrait": "Les accompagnants des personnes titulaires d’une carte CMI Invalidité peuvent voyager gratuitement sur le réseau Trace"
+    }
+   },
+   {
+    "id": "doc.horaires.validite_lignes_B_C_D",
+    "information": "Les horaires d'hiver des lignes B, C et D sont valables du 31 août 2026 à juin 2027. La page annonce une circulation les dimanches et jours fériés pour ces lignes, en plus du lundi au vendredi et du samedi.",
+    "source": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/ (extrait vérifié le 2026-10-15 : « Horaires hiver valables du 31 août 2026 à juin 2027 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "du 31 août 2026 à juin 2027",
+    "perimetre": "réseau TRACE ; Lignes B, C, D ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/",
+     "extrait": "Horaires hiver valables du 31 août 2026 à juin 2027"
+    }
+   },
+   {
+    "id": "doc.horaires.validite_ligne_A",
+    "information": "Les horaires d'hiver de la ligne A sont valables du 31 août à mi-novembre 2026. La page annonce une circulation les dimanches et jours fériés. La ligne est modifiée à cause de travaux route de Neuf-Brisach.",
+    "source": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/ (extrait vérifié le 2026-10-15 : « Horaires hiver valables du 31 août à mi-novembre 2026 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "du 31 août à mi-novembre 2026",
+    "perimetre": "réseau TRACE ; Ligne A (Ingersheim/Turckheim – Colmar Théâtre) ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/",
+     "extrait": "Horaires hiver valables du 31 août à mi-novembre 2026"
+    }
+   },
+   {
+    "id": "doc.horaires.jours_lignes_E_N",
+    "information": "Les lignes E et N circulent du lundi au samedi. La page ne mentionne ni dimanche ni jours fériés pour ces lignes, ce qui ne prouve pas qu'elles ne circulent pas ces jours-là.",
+    "source": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/ (extrait vérifié le 2026-10-15 : « Période de fonctionnement : du lundi au samedi »)",
+    "consulte_le": "2026-10-15",
+    "validite": "horaires d'hiver du 31 août à mi-novembre 2026",
+    "perimetre": "réseau TRACE ; Lignes E et N ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/",
+     "extrait": "Période de fonctionnement : du lundi au samedi"
+    }
    }
   ],
   "recherches": [
    {
-    "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Gratuité générale du réseau",
+    "statut": "introuvable",
+    "source": "https://www.trace-colmar.fr/acheter/titres-de-transport/billets-et-abonnements/",
+    "consulte_le": "2026-10-15",
+    "note": "La page ne mentionne aucune gratuité générale. Une navette gratuite Cœur de Ville (ligne CV) apparaît dans les fiches horaires, mais je n'ai pas d'extrait exact et ses horaires hiver sont indiqués jusqu'au 5 juillet 2026, donc périmés. Les pages « Voyager en toute sérénité » et « Prime Transport » n'ont pas été lues."
    },
    {
-    "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Calcul d'itinéraire et temps réel",
+    "statut": "non vérifié",
+    "source": "https://www.trace-colmar.fr/se-deplacer/mon-itineraire/",
+    "consulte_le": "2026-10-15",
+    "note": "Page « Mon itinéraire » existante. Le formulaire n'apparaît pas dans le texte lu et je n'ai pas d'extrait fiable. Une appli « Trace Colmar » donnant le temps réel est annoncée sur https://www.trace-colmar.fr/votre-bus-en-temps-reel-avec-la-nouvelle-appli-trace-colmar/ (page non lue). Les horaires à l'arrêt sont sur https://www.trace-colmar.fr/se-deplacer/horaires/horaires-a-larret/ (non lue)."
    },
    {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Jours de circulation des lignes F, G, H, J, CV",
+    "statut": "non vérifié",
+    "source": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/",
+    "consulte_le": "2026-10-15",
+    "note": "F, G, H : lundi au samedi d'après la page, sans extrait exact. J : lundi au vendredi et samedi. Les fiches PDF n'ont pas été ouvertes."
+   },
+   {
+    "sujet": "Fréquences",
+    "statut": "introuvable",
+    "source": "https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/",
+    "consulte_le": "2026-10-15",
+    "note": "Aucune fréquence explicite lue sur les pages consultées."
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-15",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-06-campagne/68066/dossier/complement.json",
-  "sha256": "8ea0ffc078df4b3cc4ec4dbe0b3fd5f35bb476e90a8d29625f15a0ed523e5148"
+  "sha256": "58f1fcf2dbfe65f4488e7211a5cfee91ee58df4b24db2ad8acc4c754d4d7f1b2"
  },
  "comparaison": {
   "commune": {

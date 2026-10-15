@@ -128,10 +128,11 @@ def controler(d, txt):
         ch = re.sub(r"\d{1,2}(?:er)?\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(?:\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}", "", ch, flags=re.I)
         # Noms de secteurs (« Amiens Nord 3 », « Pau Centre 2 ») : leur numéro n'est pas une valeur (lot 03, 15/10/2026).
         for nom in sorted(noms_secteurs, key=len, reverse=True):
-            if nom in ch and re.search(r"«\s*\d+\s*»\s*dans\s*$", ch.split(nom)[0]):
-                ch = ""  # « « 1 » dans Trapèze 1 » : le numéro justifié est celui du libellé (Boulogne-Billancourt, 15/10/2026)
             ch = ch.replace(nom, "")
-        if re.search(r"dans le libell", ch, re.I):
+        # Ligne de correspondance qui justifie un LIBELLÉ (nom de secteur ou de commune : « 400 Maisons », « Paris 8e
+        # Arrondissement », « « 2 » dans Bas Montreuil Ouest 2 ») : le nombre fait partie du nom, ce n'est pas une valeur.
+        # Six faux positifs de la campagne (15/10/2026) avaient chacun déclenché une correction inutile.
+        if re.search(r"libell", passage + " " + ch, re.I):
             ch = ""
         n = [x for x in nombres(ch) if not (1900 < x < 2100)]
         if re.search(r"centimes?", ch):  # « 75 centimes » = 0,75 €
