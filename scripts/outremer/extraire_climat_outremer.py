@@ -123,8 +123,21 @@ NOM = re.compile(
     r"^(?P<ind>[A-Za-z0-9]+)_yr_(?P<periode>\d{4}-\d{4}|RWL-\d+)_TIMEavg_(?:(?P<anom>ANOMr?d)-1991-2020_)?GEOxy_"
     r"FR-(?P<domaine>[A-Za-z]+)_(?P<version>SocleOM-Climat-\d{4})_MF-(?P<bc>[A-Za-z]+)_(?P<scen>[a-z0-9-]+)_(?P<stat>ENS[a-z0-9]+)\.nc$"
 )
-RAYON_MAX_KM = 5.0  # au-delà, le pixel le plus proche ne décrit plus la commune : « hors grille »
+# RÈGLE DE DISTANCE, UNIQUE ET SANS EXCEPTION : le pixel retenu est à moins de RAYON_MAX_KM du point de référence,
+# quelle que soit la méthode qui l'a trouvé. Avant la consolidation, la méthode « pixel le plus proche dans la commune »
+# n'avait pas de limite : Arutua recevait un pixel situé à 12,8 km, sur un autre atoll de la commune (Apataki).
+RAYON_MAX_KM = 5.0
 ECART_CENTROIDE_MAX_C = 1.0  # cf. la règle du centroïde, dans main()
+# RÈGLE DE REPRÉSENTATIVITÉ DU POINT (Polynésie, Nouvelle-Calédonie, où la mairie vient de l'Annuaire ou d'un
+# géocodage du COG parfois approximatif) : un point à plus de ALTITUDE_CONTROLE_M d'altitude (SRTM), dans une commune
+# dont le pixel le plus chaud est d'au moins ECART_RELIEF_C plus chaud que celui du point, doit être corroboré par une
+# seconde localisation indépendante de la mairie à moins de CORROBORATION_MAX_KM (controles-points.json). Sinon, la
+# valeur décrirait un relief, pas le bourg : statut « point_de_reference_non_verifie », aucune valeur.
+# (Pirae : point à 778 m, 4,3 °C sous le pixel côtier, mairie OSM à 5,3 km.)
+ALTITUDE_CONTROLE_M = 100
+ECART_RELIEF_C = 1.5
+CORROBORATION_MAX_KM = 1.5
+TERRITOIRES_A_CORROBORER = ("987", "988")
 
 
 # ─── Géographie (COG via geo.api.gouv.fr) ──────────────────────────────────────────────────────────────────────
@@ -291,6 +304,55 @@ class Zone:
 UNITES_FICHIER = {"°C": "C", "°C·jours": "C", "jours": "day", "mm": "mm", "%": "%"}
 
 
+# LACUNES DE PUBLICATION CONNUES, relevées le 16/10/2026 dans les archives SocleOM. Ce sont les seules absences
+# admises : la donnée reste `null` (jamais zéro) et la commune garde ses autres indicateurs. Toute autre absence fait
+# échouer l'extraction ; une lacune listée qui serait publiée la fait échouer aussi, pour que la liste reste exacte.
+LACUNES_CONNUES = {
+    # Guyane : les archives RWL ne portent que 34 indicateurs sur 42 ; quatre de la sélection n'ont aucun horizon futur.
+    ("Guyane", "CDDcold26", "horizons"), ("Guyane", "ETR", "horizons"), ("Guyane", "DTRm", "horizons"),
+    ("Guyane", "PRCPTOT", "horizons"),
+    # Mayotte : aucune des deux archives historiques (« 20ans », « 30ans ») ne contient les séquences sèches et humides.
+    ("Mayotte", "PXCDD", "reference"), ("Mayotte", "PXCWD", "reference"),
+}
+
+
+def valider_zone(z):
+    """COHÉRENCE D'UNE ZONE, ou l'extraction échoue (aucun fichier « apparemment exploitable » n'est écrit) :
+    niveaux de réchauffement exactement ceux de la table TRACC du territoire ; référence 1991-2020 présente ; unité de
+    chaque indicateur conforme ; pour chaque indicateur retenu par la famille du territoire, une référence, et à
+    chaque niveau une valeur ET un écart, ou aucun des deux (donnée non publiée, comme le cumul de pluie futur en
+    Guyane) — jamais l'un sans l'autre."""
+    attendus = sorted(NIVEAUX[z.nom])
+    if z.niveaux() != attendus:
+        sys.exit(f"{z.nom} : niveaux {z.niveaux()} dans les fichiers, {attendus} attendus (table TRACC DRIAS)")
+    if z.reference_bornes is None:
+        sys.exit(f"{z.nom} : pas de période de référence")
+    familles = {t["famille"] for t in TERRITOIRES.values() if z.nom in t["zones"]}
+    if len(familles) != 1:
+        sys.exit(f"{z.nom} : rattachée à {len(familles)} familles de territoire")
+    famille = familles.pop()
+    for ind, d in INDICATEURS.items():
+        u = z.meta.get("unite_nc:" + ind)
+        if u is not None and u != UNITES_FICHIER[d["unite"]]:
+            sys.exit(f"{z.nom} / {ind} : unité « {u} » dans les fichiers, « {UNITES_FICHIER[d['unite']]} » attendue")
+        if famille not in d["familles"]:
+            continue
+        a_ref = (ind, "reference", "valeur", "ENSq50") in z.grilles
+        if a_ref == ((z.nom, ind, "reference") in LACUNES_CONNUES):
+            sys.exit(f"{z.nom} / {ind} : référence 1991-2020 {'publiée alors que listée en lacune' if a_ref else 'absente, et non listée en lacune'}")
+        presences = set()
+        for niveau in attendus:
+            v, e = (ind, niveau, "valeur", "ENSq50") in z.grilles, (ind, niveau, "ecart", "ENSq50") in z.grilles
+            if v != e:
+                sys.exit(f"{z.nom} / {ind} / +{niveau} °C : {'valeur sans écart' if v else 'écart sans valeur'}")
+            presences.add(v)
+        if len(presences) != 1:
+            sys.exit(f"{z.nom} / {ind} : publié pour une partie des niveaux seulement")
+        a_horizons = presences.pop()
+        if a_horizons == ((z.nom, ind, "horizons") in LACUNES_CONNUES):
+            sys.exit(f"{z.nom} / {ind} : horizons {'publiés alors que listés en lacune' if a_horizons else 'absents, et non listés en lacune'}")
+
+
 def r(x, nd):
     if x is None or not np.isfinite(x):
         return None
@@ -318,14 +380,16 @@ def main():
         z = zones.setdefault(arch["zone"], Zone(arch["zone"]))
         z.ajouter(os.path.join(a.cache, arch["fichier"]), arch)
 
-    for nom, z in zones.items():
-        attendus = sorted(NIVEAUX[nom])
-        if z.niveaux() != attendus:
-            sys.exit(f"{nom} : niveaux {z.niveaux()} dans les fichiers, {attendus} attendus (table TRACC DRIAS)")
-        if z.reference_bornes is None:
-            sys.exit(f"{nom} : pas de période de référence")
+    if set(zones) != set(NIVEAUX):
+        sys.exit(f"zones {sorted(zones)} dans les archives, {sorted(NIVEAUX)} attendues")
+    for z in zones.values():
+        valider_zone(z)
 
     cog = charger_cog(geo_cache)
+    chemin_controles = os.path.join(SORTIE, "controles-points.json")
+    if not os.path.exists(chemin_controles):
+        sys.exit("controles-points.json absent : lancer d'abord scripts/outremer/controler_points.py")
+    controles = json.load(open(chemin_controles))["points"]
 
     def points_cog(pr):
         return (pr.get("mairie") or {}).get("coordinates"), (pr.get("centre") or {}).get("coordinates")
@@ -360,8 +424,9 @@ def main():
             climat_communes[code] = {"statut": "source_non_integree" if terr.get("donnees_de_base_seulement") else "source_indisponible"}
             continue
 
-        # Le pixel du point, sinon le pixel terrestre le plus proche DANS la commune, sinon le plus proche à moins
-        # de RAYON_MAX_KM. Chaque zone candidate est essayée ; la Polynésie en a trois, disjointes.
+        # Le pixel du point, sinon le pixel terrestre le plus proche DANS la commune, sinon le plus proche hors de la
+        # commune ; dans les deux derniers cas, à moins de RAYON_MAX_KM. Chaque zone candidate est essayée ; la
+        # Polynésie en a trois, disjointes.
         choix = None
         for zn in terr["zones"]:
             z = zones[zn]
@@ -382,7 +447,7 @@ def main():
                         continue
                     dist = [km(plat, plon, z.lat[x], z.lon[y]) for x, y in zip(ii, jj)]
                     k = int(np.argmin(dist))
-                    if methode == "pixel_le_plus_proche" and dist[k] > RAYON_MAX_KM:
+                    if dist[k] > RAYON_MAX_KM:
                         continue
                     cand = (int(ii[k]), int(jj[k]), methode)
                     break
@@ -396,6 +461,11 @@ def main():
             continue
 
         z, (i, j, methode), pixels_commune = choix
+        # L'ÉTENDUE COMPREND TOUJOURS LE PIXEL RETENU. Les centres de pixels « dans la commune » excluent souvent le
+        # pixel côtier de la mairie (Saint-Denis : 47 jours ≥ 31 °C en 2050 au pixel retenu, 0 à 27 sur les pixels
+        # des hauts) ; une étendue qui n'encadrerait pas la valeur qu'elle accompagne serait trompeuse.
+        pixels_etendue = pixels_commune.copy()
+        pixels_etendue[i, j] = True
 
         # UN CENTROÏDE NE VAUT QUE POUR UNE COMMUNE HOMOGÈNE. Sans mairie connue, la valeur au centre géographique
         # n'est gardée que si la commune ne varie pas de plus de ECART_CENTROIDE_MAX_C en température moyenne
@@ -408,6 +478,19 @@ def main():
                                      "etendue_TMm_reference": [r(tmm.min(), 2), r(tmm.max(), 2)] if len(tmm) else None}
             continue
 
+        controle = controles.get(code, {})
+        gtmm = z.grilles[("TMm", "reference", "valeur", "ENSq50")]
+        ecart_relief = float(tmm.max() - gtmm[i, j]) if len(tmm) else 0.0
+        osm = controle.get("mairie_osm_km")
+        corrobore = None if code[:3] not in TERRITOIRES_A_CORROBORER else (osm is not None and osm <= CORROBORATION_MAX_KM)
+        point_controle = {"altitude_srtm_m": controle.get("altitude_srtm_m"), "mairie_osm_km": osm, "corrobore": corrobore,
+                          "ecart_au_pixel_le_plus_chaud_C": r(ecart_relief, 2)}
+        if (corrobore is False and (controle.get("altitude_srtm_m") or 0) > ALTITUDE_CONTROLE_M
+                and ecart_relief >= ECART_RELIEF_C):
+            climat_communes[code] = {"statut": "point_de_reference_non_verifie", "zone": z.nom, "point_controle": point_controle,
+                                     "etendue_TMm_reference": [r(tmm.min(), 2), r(tmm.max(), 2)]}
+            continue
+
         valeurs = {}
         for ind, d in INDICATEURS.items():
             if terr["famille"] not in d["familles"]:
@@ -417,11 +500,21 @@ def main():
             ref = [r(lire("reference", "valeur", s)[i, j], nd) if lire("reference", "valeur", s) is not None else None for s in CENTILES]
             entree = {"reference": ref, "horizons": {}}
             g50 = lire("reference", "valeur", "ENSq50")
-            if g50 is not None and pixels_commune.any():
-                vals = g50[pixels_commune]
+            if g50 is not None:
+                vals = g50[pixels_etendue]
                 vals = vals[np.isfinite(vals)]
                 if len(vals):
                     entree["etendue_reference"] = [r(vals.min(), nd), r(vals.max(), nd)]
+            # L'étendue communale à l'horizon 2050 aussi : sur un relief (La Réunion, Nouvelle-Calédonie, Tahiti) ou
+            # pour un comptage au-dessus d'un seuil (Saint-Martin, jours ≥ 33 °C : de 1 à 65 d'un pixel à l'autre), la
+            # valeur du point ne vaut pas pour toute la commune. Jamais de moyenne : le minimum et le maximum.
+            n2050 = next(n for n, h in NIVEAUX[z.nom].items() if h == "2050")
+            g2050 = lire(n2050, "valeur", "ENSq50")
+            if g2050 is not None:
+                vals = g2050[pixels_etendue]
+                vals = vals[np.isfinite(vals)]
+                if len(vals):
+                    entree["etendue_2050"] = [r(vals.min(), nd), r(vals.max(), nd)]
             for niveau, horizon in NIVEAUX[z.nom].items():
                 h = {}
                 for nature in ("valeur", "ecart", "ecart_relatif"):
@@ -438,6 +531,7 @@ def main():
             "pixel": {"lat": round(float(z.lat[i]), 4), "lon": round(float(z.lon[j]), 4), "methode": methode,
                       "distance_km": round(km(point[1], point[0], z.lat[i], z.lon[j]), 2),
                       "pixels_dans_la_commune": int(pixels_commune.sum())},
+            "point_controle": point_controle,
             "indicateurs": valeurs,
         }
 
@@ -452,14 +546,9 @@ def main():
             "fenetre_horizon_ans": 20,
             "pas_grille_deg": round(float(abs(z.lat[1] - z.lat[0])), 4),
             "corrections_de_biais": {k: sorted(v) for k, v in sorted(z.meta["corrections"].items())},
+            "lacunes_de_publication": sorted(f"{ind} ({quoi})" for zn, ind, quoi in LACUNES_CONNUES if zn == nom),
             "archives": sorted(z.meta["archives"], key=lambda x: x["cle"]),
         }
-
-    for z in zones.values():
-        for ind, d in INDICATEURS.items():
-            u = z.meta.get("unite_nc:" + ind)
-            if u is not None and u != UNITES_FICHIER[d["unite"]]:
-                sys.exit(f"{z.nom} / {ind} : unité « {u} » dans les fichiers, « {UNITES_FICHIER[d['unite']]} » attendue")
 
     indicateurs_sortie = {}
     for ind, d in INDICATEURS.items():
@@ -497,6 +586,8 @@ def main():
                 "ecarts": "tels que publiés par rapport à 1991-2020, jamais recalculés",
                 "absence": "null = donnée non publiée ; 0 = mesure nulle",
                 "rayon_max_km": RAYON_MAX_KM,
+                "corroboration": {"territoires": list(TERRITOIRES_A_CORROBORER), "altitude_m": ALTITUDE_CONTROLE_M,
+                                  "ecart_relief_C": ECART_RELIEF_C, "distance_max_km": CORROBORATION_MAX_KM},
             },
             "extrait_le": dt.date.today().isoformat(),
             "zones": zones_sortie,

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  creerLecteurOutremer, estCodeOutremer, indicateurOutremer, territoireDuCode, TERRITOIRES_OUTREMER,
+  creerLecteurOutremer, estCodeOutremer, HORIZONS_OUTREMER, indicateurOutremer, territoireDuCode, TERRITOIRES_OUTREMER,
   type IndicateurOutremer, type LectureClimatOutremer,
 } from "./climat-outremer.ts";
 
@@ -314,7 +314,10 @@ test("Couverture : la matrice compte chaque entité une fois et dit la couvertur
     assert.equal(par[id].parStatut.integree, par[id].entitesAttendues, id);
     assert.equal(par[id].couverture, "complete", id);
   }
-  assert.deepEqual(par["polynesie-francaise"].parStatut, { integree: 26, hors_grille: 20, point_de_reference_manquant: 2 });
+  // 48 = 23 intégrées + 21 hors grille (dont Arutua, pixel à 12,8 km) + 2 sans point (Taiarapu) + 2 points non
+  // vérifiés (Pirae, Tumaraa). 223 = 187 intégrées + 36 non couvertes.
+  assert.deepEqual(par["polynesie-francaise"].parStatut, { integree: 23, hors_grille: 21, point_de_reference_non_verifie: 2, point_de_reference_manquant: 2 });
+  assert.equal(m.reduce((s, l) => s + (l.parStatut.integree ?? 0), 0), 187);
   assert.equal(par["polynesie-francaise"].couverture, "partielle");
   assert.equal(par["wallis-et-futuna"].couverture, "source_non_integree");
   for (const id of ["saint-pierre-et-miquelon", "taaf", "clipperton"]) assert.equal(par[id].couverture, "source_indisponible", id);
@@ -324,5 +327,112 @@ test("Couverture : la matrice compte chaque entité une fois et dit la couvertur
     const n = l.parStatut.integree ?? 0;
     assert.equal(t.couverture === "complete", n === l.entitesAttendues, l.territoire);
     assert.equal(t.couverture === "partielle", n > 0 && n < l.entitesAttendues, l.territoire);
+  }
+});
+
+// ── Règles géographiques de la consolidation (16/10/2026) ───────────────────────────────────────────────────
+const controles = climat.communes as Record<string, { statut: string; pixel?: { distance_km: number; methode: string };
+  point_controle?: { altitude_srtm_m: number | null; corrobore: boolean | null; ecart_au_pixel_le_plus_chaud_C: number | null } }>;
+
+test("Distance : tout pixel retenu est à moins de 5 km de son point, quelle que soit la méthode (Arutua exclu)", () => {
+  for (const [code, c] of Object.entries(controles)) {
+    if (c.statut !== "integree") continue;
+    assert.ok(c.pixel!.distance_km <= climat.regles.rayon_max_km, `${code} : ${c.pixel!.distance_km} km (${c.pixel!.methode})`);
+  }
+  // Arutua : la mairie est sur l'atoll d'Arutua, le pixel le plus proche de la commune sur celui d'Apataki, à 12,8 km.
+  assert.equal(lireClimatOutremer("98713")!.statut, "hors_grille");
+});
+
+test("Représentativité : aucun point de relief non corroboré ne porte de valeur (Pirae, Tumaraa)", () => {
+  const r = climat.regles.corroboration;
+  for (const [code, c] of Object.entries(controles)) {
+    if (c.statut !== "integree" || !c.point_controle) continue;
+    const pc = c.point_controle;
+    assert.ok(!(pc.corrobore === false && (pc.altitude_srtm_m ?? 0) > r.altitude_m && (pc.ecart_au_pixel_le_plus_chaud_C ?? 0) >= r.ecart_relief_C),
+      `${code} : point à ${pc.altitude_srtm_m} m, ${pc.ecart_au_pixel_le_plus_chaud_C} °C sous le pixel le plus chaud, non corroboré`);
+  }
+  const pirae = lireClimatOutremer("98736")!;
+  assert.equal(pirae.statut, "point_de_reference_non_verifie");
+  assert.equal("indicateurs" in pirae, false);
+  assert.match(pirae.statut !== "integree" ? pirae.raison : "", /relief/);
+  assert.equal(lireClimatOutremer("98754")!.statut, "point_de_reference_non_verifie");
+  // Papara garde sa valeur : sa mairie de l'Annuaire est sur la côte (corroborée par OSM).
+  const papara = integree("98734");
+  assert.equal(papara.pointControle.corrobore, true);
+  assert.ok(papara.pointControle.altitudeM! < 50);
+  // Les DROM et les COM des Antilles ont la mairie du COG : pas de corroboration requise (null).
+  assert.equal(integree("97411").pointControle.corrobore, null);
+  // Une localisation non corroborée le dit dans les limites (Papeete : point de l'Annuaire à 2,6 km de l'hôtel de ville).
+  const papeete = integree("98735");
+  assert.equal(papeete.pointControle.corrobore, false);
+  assert.ok(papeete.limites.some((l) => /pas confirmée par une seconde source/.test(l)));
+});
+
+test("Étendue communale : la valeur du point ne vaut pas pour toute la commune, et la lecture le porte", () => {
+  // Saint-Martin : jours ≥ 33 °C, 35,2 au pixel de Marigot, de quelques jours à plus de 60 selon le pixel de l'île.
+  const sm = ind("97801", "TX33D");
+  assert.equal(sm.reference.mediane, 35.2);
+  assert.ok(sm.etendueCommunaleReference![0] < 5 && sm.etendueCommunaleReference![1] > 60, `${sm.etendueCommunaleReference}`);
+  // Saint-Barthélemy : île ventilée, homogène, sous le seuil presque partout.
+  const sb = ind("97701", "TX33D");
+  assert.ok(sb.etendueCommunaleReference![1] < 1, `${sb.etendueCommunaleReference}`);
+  // Relief : Saint-Paul (La Réunion), de la côte aux Hauts.
+  const sp = integree("97415");
+  assert.ok(sp.limites.some((l) => /Relief contrasté/.test(l)));
+  const t = indicateurOutremer(sp, "TMm")!;
+  assert.ok(t.etendueCommunale2050 && t.etendueCommunale2050[1] - t.etendueCommunale2050[0] > 8);
+  // Une étendue encadre toujours la valeur qu'elle accompagne (le pixel retenu en fait partie) : Saint-Denis, 47 jours
+  // ≥ 31 °C en 2050 au pixel côtier de la mairie, étaient hors d'une étendue « 0 à 27 » limitée aux pixels des hauts.
+  for (const e of listerEntitesOutremer()) {
+    const l = lireClimatOutremer(e.code)!;
+    if (l.statut !== "integree") continue;
+    for (const i of l.indicateurs) {
+      for (const [m, et] of [[i.reference.mediane, i.etendueCommunaleReference], [i.horizons["2050"].valeur?.mediane, i.etendueCommunale2050]] as const) {
+        if (m == null || !et) continue;
+        assert.ok(m >= et[0] && m <= et[1], `${e.code} ${i.code} : ${m} hors de [${et}]`);
+      }
+    }
+  }
+  assert.deepEqual(ind("97411", "TX31D").etendueCommunale2050, [0, 47]);
+});
+
+test("Lacunes de publication : déclarées, null, jamais zéro (Guyane, Mayotte)", () => {
+  assert.deepEqual(climat.zones.Guyane.lacunes_de_publication, ["CDDcold26 (horizons)", "DTRm (horizons)", "ETR (horizons)", "PRCPTOT (horizons)"]);
+  for (const code of ["CDDcold26", "DTRm", "ETR", "PRCPTOT"]) {
+    const i = ind("97302", code);
+    assert.ok(i.reference.mediane !== null, code);
+    for (const h of HORIZONS_OUTREMER) assert.equal(i.horizons[h].valeur, null, `${code} ${h}`);
+  }
+  assert.deepEqual(climat.zones.Mayotte.lacunes_de_publication, ["PXCDD (reference)", "PXCWD (reference)"]);
+  const sec = ind("97611", "PXCDD");
+  assert.deepEqual(sec.reference, { q17: null, mediane: null, q83: null });
+  assert.ok(sec.horizons["2050"].valeur!.mediane! > 0);
+});
+
+test("Doctrine : faits seulement, aucun verdict, et les centiles ne sont pas des scénarios", () => {
+  for (const e of listerEntitesOutremer()) {
+    const l = lireClimatOutremer(e.code)!;
+    assert.ok(l.capaciteDecision === "faits_seulement" || l.capaciteDecision === "aucune", e.code);
+    assert.equal(JSON.stringify(l).match(/favorable|défavorable|à surveiller|optimiste|pessimiste/i), null, e.code);
+  }
+});
+
+test("Sources : chaque entité lit une zone de SON territoire, et chaque niveau correspond à son horizon TRACC", () => {
+  // Table DRIAS « Définition des indicateurs Outre-Mer » (section 431) : niveaux régionaux vs 1850-1900.
+  const TRACC: Record<string, [number, number, number]> = {
+    Reunion: [1.5, 2.0, 2.9], Mayotte: [1.5, 2.0, 3.0], Guyane: [1.7, 2.3, 3.5], NouvelleCaledonie: [1.5, 2.0, 3.0],
+    Guadeloupe: [1.4, 1.9, 2.7], Martinique: [1.4, 1.9, 2.7], SaintMartinBarthelemy: [1.4, 1.9, 2.7],
+    "PF-Societe": [1.2, 1.6, 2.3], "PF-Tuamotu": [1.2, 1.6, 2.3], "PF-Australe": [1.2, 1.6, 2.3],
+  };
+  assert.deepEqual(Object.keys(climat.zones).sort(), Object.keys(TRACC).sort());
+  for (const [zone, z] of Object.entries(climat.zones as Record<string, { niveaux: { rechauffement_regional_C: number; horizon_tracc: string }[]; reference: { periode: string } }>)) {
+    assert.deepEqual(z.niveaux.map((n) => [n.horizon_tracc, n.rechauffement_regional_C]), [["2030", TRACC[zone][0]], ["2050", TRACC[zone][1]], ["2100", TRACC[zone][2]]], zone);
+    assert.equal(z.reference.periode, "1991-2020", zone);
+  }
+  for (const e of listerEntitesOutremer()) {
+    const l = lireClimatOutremer(e.code)!;
+    if (l.statut !== "integree") continue;
+    assert.ok(l.territoire.zones.includes(l.provenance.zone), `${e.code} : zone ${l.provenance.zone} hors de ${l.territoire.id}`);
+    assert.deepEqual([l.niveaux["2030"], l.niveaux["2050"], l.niveaux["2100"]], TRACC[l.provenance.zone], e.code);
   }
 });

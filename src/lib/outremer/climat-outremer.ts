@@ -38,12 +38,16 @@ export const HORIZONS_OUTREMER: readonly HorizonOutremer[] = ["2030", "2050", "2
  *   est des Tuamotu, Rapa) ;
  * - `point_de_reference_manquant` : la grille couvre l'entité, mais sans mairie connue et sur un relief trop
  *   contrasté pour qu'un centroïde la décrive (Taiarapu-Est et -Ouest) ;
+ * - `point_de_reference_non_verifie` : la « mairie » publiée tombe sur un relief (plus de 100 m d'altitude, au moins
+ *   1,5 °C sous le pixel le plus chaud de la commune) et aucune seconde localisation ne la confirme à moins de 1,5 km
+ *   (Pirae : 778 m, mairie réelle sur la côte à 5,3 km ; Tumaraa) ;
  * - `source_non_integree` : Météo-France publie des données de base (séries quotidiennes), pas d'indicateurs
  *   (Wallis-et-Futuna) ;
  * - `source_indisponible` : aucune projection SocleOM publiée (Saint-Pierre-et-Miquelon, TAAF, Clipperton).
  */
 export type StatutClimatOutremer =
-  | "integree" | "hors_grille" | "point_de_reference_manquant" | "source_non_integree" | "source_indisponible";
+  | "integree" | "hors_grille" | "point_de_reference_manquant" | "point_de_reference_non_verifie"
+  | "source_non_integree" | "source_indisponible";
 
 /** Couverture d'un territoire entier, pour la matrice. */
 export type CouvertureTerritoire = "complete" | "partielle" | "source_non_integree" | "source_indisponible";
@@ -62,6 +66,8 @@ export type IndicateurOutremer = {
   reference: Fourchette;
   /** Plus petite et plus grande médiane 1991-2020 parmi les pixels situés dans l'entité (jamais une moyenne). */
   etendueCommunaleReference: [number, number] | null;
+  /** Idem à l'horizon 2050. La valeur du point ne vaut pas pour toute la commune : l'étendue le dit. */
+  etendueCommunale2050: [number, number] | null;
   horizons: Record<HorizonOutremer, {
     valeur: Fourchette | null;
     /** Écart à 1991-2020, tel que publié. */
@@ -109,6 +115,9 @@ export type LectureClimatOutremer =
       niveaux: Record<HorizonOutremer, number>;
       fenetreHorizonAns: 20;
       pixel: { lat: number; lon: number; methode: string; distanceKm: number; pasDeg: number };
+      /** Contrôles du point de référence (scripts/outremer/controler_points.py). `corrobore` : `null` hors
+       *  Polynésie et Nouvelle-Calédonie (mairies du COG), sinon une mairie indépendante à moins de 1,5 km. */
+      pointControle: { altitudeM: number | null; mairieIndependanteKm: number | null; corrobore: boolean | null; ecartAuPixelLePlusChaudC: number | null };
       indicateurs: IndicateurOutremer[];
       capaciteDecision: "faits_seulement";
       limites: string[];
@@ -162,6 +171,7 @@ const PAR_PREFIXE = new Map(Object.values(TERRITOIRES_OUTREMER).map((t) => [t.pr
 const RAISONS: Record<Exclude<StatutClimatOutremer, "integree">, (t: TerritoireOutremer) => string> = {
   hors_grille: (t) => `Météo-France publie des indicateurs pour une partie de ${t.nom} seulement ; cette commune est hors des zones couvertes.`,
   point_de_reference_manquant: () => "La grille couvre la commune, mais sa mairie n'est pas localisée et son relief est trop contrasté pour qu'un point au centre la décrive.",
+  point_de_reference_non_verifie: () => "La localisation publiée de la mairie tombe sur un relief, et aucune seconde source ne la confirme : la valeur décrirait la montagne, pas le bourg.",
   source_non_integree: (t) => `Météo-France publie pour ${t.nom} des séries quotidiennes, pas d'indicateurs : rien n'est encore calculé ni intégré.`,
   source_indisponible: (t) => `Aucune projection climatique SocleOM n'est publiée pour ${t.nom}.`,
 };
@@ -172,10 +182,15 @@ type CentilesBruts = [number | null, number | null, number | null] | null;
 type IndicateurBrut = {
   reference: CentilesBruts;
   etendue_reference?: [number, number];
+  etendue_2050?: [number, number];
   horizons: Record<string, { valeur: CentilesBruts; ecart: CentilesBruts; ecart_relatif?: CentilesBruts }>;
 };
 type CommuneClimatBrute =
-  | { statut: "integree"; zone: string; pixel: { lat: number; lon: number; methode: string; distance_km: number }; indicateurs: Record<string, IndicateurBrut> }
+  | {
+      statut: "integree"; zone: string; pixel: { lat: number; lon: number; methode: string; distance_km: number };
+      point_controle: { altitude_srtm_m: number | null; mairie_osm_km: number | null; corrobore: boolean | null; ecart_au_pixel_le_plus_chaud_C: number | null };
+      indicateurs: Record<string, IndicateurBrut>;
+    }
   | { statut: Exclude<StatutClimatOutremer, "integree"> };
 type ZoneBrute = {
   versions: string[]; scenarios: string[]; pas_grille_deg: number; fenetre_horizon_ans: number;
@@ -290,6 +305,7 @@ export function creerLecteurOutremer(climatBrut: unknown, communesBrut: unknown)
         famille: FAMILLES[cle],
         reference: fourchette(v.reference) ?? { q17: null, mediane: null, q83: null },
         etendueCommunaleReference: v.etendue_reference ?? null,
+        etendueCommunale2050: v.etendue_2050 ?? null,
         horizons: Object.fromEntries(HORIZONS_OUTREMER.map((h) => {
           const x = v.horizons[h];
           const sortie: IndicateurOutremer["horizons"][HorizonOutremer] = { valeur: fourchette(x?.valeur ?? null), ecart: fourchette(x?.ecart ?? null) };
@@ -304,6 +320,18 @@ export function creerLecteurOutremer(climatBrut: unknown, communesBrut: unknown)
       `Horizons définis par niveau de réchauffement régional propre à ${territoire.nom} (2050 = +${String(niveaux["2050"]).replace(".", ",")} °C par rapport à 1850-1900), moyennés sur 20 ans ; la référence est 1991-2020.`,
       "Projections d'un ensemble de modèles à fortes émissions, corrigées sur des observations locales : une tendance probable, pas une prévision.",
     ];
+    const tmm = brut.indicateurs.TMm?.etendue_reference;
+    if (tmm && tmm[1] - tmm[0] >= 3) {
+      limites.push(`Relief contrasté : la température moyenne 1991-2020 varie de ${String(tmm[0]).replace(".", ",")} à ${String(tmm[1]).replace(".", ",")} °C entre les points de la commune. Chaque indicateur porte son étendue communale.`);
+    }
+    if (brut.point_controle.corrobore === false) {
+      const ecart = brut.point_controle.ecart_au_pixel_le_plus_chaud_C ?? 0;
+      // Au-delà de 1,5 °C, un point en altitude est déjà retenu par l'extraction ; un point bas peut passer, et la
+      // phrase ne doit jamais affirmer une équivalence fausse.
+      limites.push(ecart < 1.5
+        ? "La localisation publiée de la mairie n'est pas confirmée par une seconde source : la valeur décrit un point proche du bourg, à moins de 1,5 °C des secteurs les plus chauds de la commune."
+        : `La localisation publiée de la mairie n'est pas confirmée par une seconde source, et les secteurs les plus chauds de la commune le sont de ${String(ecart).replace(".", ",")} °C de plus en moyenne.`);
+    }
     if (entite.point?.type === "centroide") {
       limites.push("La mairie n'est pas localisée : le point retenu est le centre géographique de la commune, dont le climat est homogène (écart inférieur à 1 °C).");
     }
@@ -328,6 +356,10 @@ export function creerLecteurOutremer(climatBrut: unknown, communesBrut: unknown)
       niveaux,
       fenetreHorizonAns: 20,
       pixel: { lat: brut.pixel.lat, lon: brut.pixel.lon, methode: brut.pixel.methode, distanceKm: brut.pixel.distance_km, pasDeg: zone.pas_grille_deg },
+      pointControle: {
+        altitudeM: brut.point_controle.altitude_srtm_m, mairieIndependanteKm: brut.point_controle.mairie_osm_km,
+        corrobore: brut.point_controle.corrobore, ecartAuPixelLePlusChaudC: brut.point_controle.ecart_au_pixel_le_plus_chaud_C,
+      },
       indicateurs,
       capaciteDecision: "faits_seulement",
       limites,
