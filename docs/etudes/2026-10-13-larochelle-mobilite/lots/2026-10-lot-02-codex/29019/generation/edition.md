@@ -20,7 +20,7 @@ Le SP95-E10 a pris 0,47 € le litre sur la même période. Le tableau traduit c
 
 [VISUEL : Tableau du scénario de surcoût de carburant]
 
-Ce surcoût dépend de la seule longueur du trajet, quelle que soit l’adresse. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur et le lieu de travail.
+Avec ces hypothèses, le surcoût augmente avec la distance parcourue. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur et le lieu de travail.
 
 Dans les pratiques domicile-travail du recensement 2022, la voiture est le mode principal de 42 % des actifs qui habitent le secteur Saint-Martin, contre 87 % à Kervao-Rural Nord, quelle que soit leur commune de travail. Pour chercher un logement en espérant moins conduire, examinez votre destination de travail et les équipements autour de l’adresse.
 

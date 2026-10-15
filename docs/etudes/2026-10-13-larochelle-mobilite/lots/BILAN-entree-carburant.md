@@ -9,7 +9,7 @@ Caen, Brest, Nîmes (lot 02), Quimper, Amiens, Besançon, Valence et Pau (lot 03
 Ce qui a été ajouté à chaque article :
 - un chapeau sur la hausse datée du gazole (semaines du 6 octobre 2025 et du 5 octobre 2026, rayon de 12 km autour du centre) ;
 - un passage « Ce que la hausse coûte selon la distance » : la hausse du SP95-E10, les trois hypothèses dites une fois, puis le tableau déterministe ;
-- une transition : le surcoût ne dépend que de la longueur du trajet, quelle que soit l'adresse, et les pratiques recensées en 2022, avant cette hausse, varient selon le secteur. L'article parle aussi du lieu de travail quand il compare plusieurs groupes de destination (Brest, Besançon, Pau) ;
+- une transition : avec ces hypothèses, le surcoût augmente avec la distance parcourue, et les pratiques recensées en 2022, avant cette hausse, varient selon le secteur. L'article parle aussi du lieu de travail quand il compare plusieurs groupes de destination (Brest, Besançon, Pau) ;
 - la source carburant en méthode, les lignes de correspondance (section C), le visuel et la réextraction des prix avant publication (section D).
 
 Le reste est conservé :

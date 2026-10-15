@@ -22,7 +22,7 @@ Le SP95-E10 a pris 0,47 € le litre sur la même période. Le tableau traduit c
 
 [VISUEL : Tableau du scénario de surcoût de carburant]
 
-Ce surcoût dépend de la seule longueur du trajet, quelle que soit l’adresse. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur.
+Avec ces hypothèses, le surcoût augmente avec la distance parcourue. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur.
 
 Au recensement de 2022, 75 % des actifs occupés résidant à Amiens travaillent dans la commune. Si vous y cherchez un logement pour moins prendre la voiture, examinez le trajet vers votre travail, puis les destinations de votre quotidien autour de l’adresse.
 

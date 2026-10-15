@@ -20,7 +20,7 @@ Le SP95-E10 a pris 0,51 € le litre sur la même période. Le tableau traduit c
 
 [VISUEL : Tableau du scénario de surcoût de carburant]
 
-Ce surcoût dépend de la seule longueur du trajet, quelle que soit l’adresse. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur.
+Avec ces hypothèses, le surcoût augmente avec la distance parcourue. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur.
 
 Un logement proche des commerces et de l’école répond à une partie du quotidien. Pour chercher à moins conduire à Valence, il faut aussi examiner les déplacements professionnels : leur place varie fortement selon le secteur de résidence.
 
