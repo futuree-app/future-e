@@ -56,7 +56,7 @@ def index_dossier(d):
     for r in (d.get("scenario_carburant") or {}).get("lignes", []):
         # Les hypothèses du scénario (6 L/100 km, 200 allers-retours, arrondi à 5 centimes) sont des valeurs du dossier
         # (faux positif de la campagne, Toulouse et Nice, 15/10/2026).
-        I[r["id"]] = [r["surcout_an_eur"], r["km_aller"], r["hausse_retenue_eur_l"], h.get("litres_100km"), h.get("jours_trajet_an"), 0.05], "oui"
+        I[r["id"]] = [r["surcout_an_eur"], r["km_aller"], r["hausse_retenue_eur_l"], h.get("litres_100km"), 100, h.get("jours_trajet_an"), 0.05], "oui"
     for f in ((d.get("complement_documentaire") or {}).get("faits") or []):
         I[f["id"]] = nombres(f["information"] + " " + f.get("validite", "")), f["usage"]
     for f in ((d.get("comparaison") or {}).get("faits") or []):
@@ -122,6 +122,8 @@ def controler(d, txt):
             vals += [x for x in v if x is not None]
         # Distances de définition (« 500 m », « rayon de 12 km ») : pas des valeurs, sauf pour le scénario carburant.
         ch = chiffre if any(c.startswith("scenario.") for c in dev) else re.sub(r"\d+(?:,\d+)?\s?(km|m|mètres|kilomètres|L/100)\b", "", norm(chiffre))
+        # Noms de carburant (« SP95-E10 ») et unité de consommation (« aux 100 km ») : pas des valeurs (campagne, 15/10/2026).
+        ch = re.sub(r"\b(?:SP\s?9[58](?:-E10)?|E10|E85|B7)\b|(?:aux|/)\s?100\s?km", "", ch, flags=re.I)
         # Dates (« semaine du 6 octobre 2025 ») : des repères de période, pas des valeurs.
         ch = re.sub(r"\d{1,2}(?:er)?\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(?:\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}", "", ch, flags=re.I)
         # Noms de secteurs (« Amiens Nord 3 », « Pau Centre 2 ») : leur numéro n'est pas une valeur (lot 03, 15/10/2026).
