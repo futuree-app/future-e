@@ -282,7 +282,8 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
                 </li>
               ))}
             </ul>
-            <p className={c.aide}>{etat === "commune" ? "Choisissez-en une : la lecture s'affiche aussitôt. Rien n'est enregistré." : "Une ou plusieurs, facultatives. Rien n'est enregistré."}</p>
+            {/* L'invitation ne sert qu'avant le premier choix ; ensuite, la lecture parle d'elle-même. */}
+            {etat === "commune" ? <p className={c.aide}>Choisissez-en une : la lecture s&apos;affiche aussitôt. Rien n&apos;est enregistré.</p> : null}
           </div>
         ) : null}
 
