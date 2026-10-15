@@ -34,3 +34,5 @@
 {"t": "2026-10-15T19:38:24Z", "evt": "intervention", "texte": "Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels", "minutes": 10.0, "mesure": "estimée"}
 {"t": "2026-10-15T19:38:41Z", "evt": "production_debut", "lot": 3}
 {"t": "2026-10-15T20:43:53Z", "evt": "production_fin", "lot": 3}
+{"t": "2026-10-15T20:44:06Z", "evt": "production_debut", "lot": 4}
+{"t": "2026-10-15T20:44:46Z", "evt": "intervention", "texte": "Fin du lot 3 : faux positif « Paris 8e Arrondissement » (Saint-Maur-des-Fossés) ; noms des communes de travail traités comme les noms de secteurs ; vérification sur 78 articles et par falsification ; lot 4 non redémarré (cas rare)", "minutes": 6.0, "mesure": "estimée"}

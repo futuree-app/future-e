@@ -529,10 +529,12 @@ lot,insee,commune,etape,outil,modele_demande,modele_confirme,debut_utc,fin_utc,d
 4,94041,Ivry-sur-Seine,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:41:14Z,2026-10-15T16:41:22Z,7.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:22Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:22Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
-4,18033,Bourges,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:47Z,24.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
-4,18033,Bourges,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:41:47Z,2026-10-15T16:41:53Z,6.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:41:53Z,2026-10-15T16:41:53Z,0.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:41:53Z,2026-10-15T16:41:54Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:47Z,24.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:41:47Z,2026-10-15T16:41:53Z,6.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:44:46Z,2026-10-15T20:44:46Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:44:46Z,2026-10-15T20:44:46Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:41:54Z,2026-10-15T16:42:12Z,18.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:42:12Z,2026-10-15T16:42:20Z,8.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:42:20Z,2026-10-15T16:42:20Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
@@ -597,3 +599,4 @@ lot,insee,commune,etape,outil,modele_demande,modele_confirme,debut_utc,fin_utc,d
 4,77284,Meaux,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:49:09Z,2026-10-15T16:49:15Z,5.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:49:15Z,2026-10-15T16:49:15Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:49:15Z,2026-10-15T16:49:15Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,collecte (par réseau),claude-code,claude-sonnet-5-5,"claude-sonnet-5-5, claude-haiku-5-5",2026-10-15T20:44:07Z,2026-10-15T20:44:44Z,37.3,réussi,55422,9256,4621,6979,67,0.0495743

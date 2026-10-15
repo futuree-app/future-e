@@ -61,7 +61,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -173,7 +173,9 @@
     "debut": "2026-10-15T19:41:47Z",
     "fin": "2026-10-15T19:41:58Z",
     "duree_s": 11.6
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "34032": {
    "nom": "Béziers",
@@ -236,7 +238,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -349,7 +351,9 @@
     "debut": "2026-10-15T19:48:16Z",
     "fin": "2026-10-15T19:48:29Z",
     "duree_s": 12.8
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "50129": {
    "nom": "Cherbourg-en-Cotentin",
@@ -431,7 +435,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -520,7 +524,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -608,7 +612,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -695,15 +699,8 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "anomalies_restantes": [
-    {
-     "type": "valeur",
-     "gravite": "bloquante",
-     "passage": "Destination — arrondissement nommé",
-     "detail": "« Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (13.3)"
-    }
-   ],
-   "motif": "1 anomalie(s) déterministe(s) après la correction unique",
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -814,7 +811,9 @@
     "debut": "2026-10-15T20:04:54Z",
     "fin": "2026-10-15T20:06:19Z",
     "duree_s": 84.4
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "2A004": {
    "nom": "Ajaccio",
@@ -877,7 +876,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -981,7 +980,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1070,7 +1069,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1158,7 +1157,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1269,7 +1268,9 @@
     "debut": "2026-10-15T20:27:24Z",
     "fin": "2026-10-15T20:27:35Z",
     "duree_s": 11.2
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "95127": {
    "nom": "Cergy",
@@ -1356,7 +1357,9 @@
     "debut": "2026-10-15T20:30:11Z",
     "fin": "2026-10-15T20:30:23Z",
     "duree_s": 11.9
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "92044": {
    "nom": "Levallois-Perret",
@@ -1442,7 +1445,9 @@
     "debut": "2026-10-15T20:32:14Z",
     "fin": "2026-10-15T20:32:25Z",
     "duree_s": 10.9
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "68066": {
    "nom": "Colmar",
@@ -1547,7 +1552,9 @@
     "debut": "2026-10-15T20:35:01Z",
     "fin": "2026-10-15T20:35:17Z",
     "duree_s": 15.7
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "62193": {
    "nom": "Calais",
@@ -1634,7 +1641,9 @@
     "debut": "2026-10-15T20:37:29Z",
     "fin": "2026-10-15T20:37:46Z",
     "duree_s": 16.6
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "33318": {
    "nom": "Pessac",
@@ -1721,7 +1730,9 @@
     "debut": "2026-10-15T20:40:11Z",
     "fin": "2026-10-15T20:40:26Z",
     "duree_s": 14.8
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "69259": {
    "nom": "Vénissieux",
@@ -1784,7 +1795,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [

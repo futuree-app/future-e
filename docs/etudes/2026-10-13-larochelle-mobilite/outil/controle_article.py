@@ -77,7 +77,10 @@ def sections(txt):
 
 def controler(d, txt):
     I = index_dossier(d)
-    noms_secteurs = [norm(s["nom"]) for s in d.get("secteurs", []) if re.search(r"\d", s.get("nom", ""))]
+    # Noms qui contiennent un nombre : secteurs (« Amiens Nord 3 ») et communes de travail ou voisines (« Paris 8e
+    # Arrondissement », Saint-Maur-des-Fossés, campagne du 15/10/2026). Leur numéro n'est jamais une valeur.
+    noms_secteurs = [norm(s["nom"]) for s in [*d.get("secteurs", []), *d.get("destinations", []), *d.get("voisines", [])]
+                     if re.search(r"\d", s.get("nom") or "")]
     A = []
     S = sections(txt)
     if "B" not in S:

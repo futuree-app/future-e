@@ -1,6 +1,6 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T20:43:54Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T20:44:46Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
 **Communes distinctes préparées : 80** (20 avant la campagne, 60 pendant).
 
@@ -44,7 +44,6 @@ Mis à jour le 2026-10-15T20:43:54Z par `outil/campagne.py bilan`. Mesures déta
 - Cherbourg-en-Cotentin (50129), corrigé : raisonnement : Le « donc » déduit des 65 % de `mobpro.voiture_selon_destination.meme_commune` que le secteur choisi pèse sur l'usage de la voiture : il change les pratiques de ; raisonnement : La carte des parts de la voiture par secteur (`iris.*.voiture`) devient un guide pour choisir où chercher afin de moins conduire : la pratique des habitants act
 - Champigny-sur-Marne (94017), corrigé : raisonnement : Le titre fait des pratiques domicile-travail des actifs résidents (iris.940171101.voiture, iris.940171304.voiture) une recommandation de secteur pour le lecteur
 - Mérignac (33281), corrigé : raisonnement : Le titre fait des pratiques domicile-travail des actifs d'un secteur (iris.voiture.min, iris.voiture.max) une recommandation de quartier pour le lecteur, alors 
-- Saint-Maur-des-Fossés (94068), après correction, 1 anomalie(s) du contrôle : contrôle valeur : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (13.3)
 - Ajaccio (2A004), corrigé : raisonnement : Avec le titre « quels secteurs regarder pour utiliser moins la voiture ? », cette phrase fait des pratiques des actifs qui habitent Centre Ville et La Confina (
 - Cannes (06029), corrigé : raisonnement : Juste après les parts de 29 % et 75 % (iris.voiture.min, iris.voiture.max), la phrase fait des pratiques des actifs qui habitent un secteur un guide pour choisi
 - Drancy (93029), corrigé : raisonnement : La part de la voiture chez les actifs d'un secteur (iris.voiture.min, iris.voiture.max) sert ici de repère pour choisir un quartier : elle devient une recommand
@@ -58,6 +57,7 @@ Corrections déclenchées seulement par un faux positif du contrôle (corrigé d
 - Saint-Denis (93066) : « 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0) ; « 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)
 - Montreuil (93048) : « 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min  ; « 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.vo
 - Aulnay-sous-Bois (93005) : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture 
+- Saint-Maur-des-Fossés (94068) : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture 
 
 Niveau 2 (noté, sans nouvelle génération) : 82 remarque(s), détail dans `relecture.anomalies.json` de chaque commune.
 
@@ -67,7 +67,7 @@ Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l
 
 | Outil | Étape | Appels | Échecs ou refus | Entrée totale | dont cache lu | dont cache écrit | Sortie totale | dont raisonnement | Durée cumulée | Non mesurés |
 |---|---|---|---|---|---|---|---|---|---|---|
-| claude-code | collecte (par réseau) | 19 | 1 | 881 974 | 182 819 | 65 334 | 127 360 | 2 208 | 10 min 24 s |  |
+| claude-code | collecte (par réseau) | 20 | 1 | 937 396 | 192 075 | 69 955 | 134 339 | 2 275 | 11 min 02 s |  |
 | claude-code | relecture | 61 | 1 | 2 558 751 | 202 370 | 2 356 261 | 191 748 | 161 154 | 31 min 25 s |  |
 | codex | correction | 37 | 0 | 1 307 823 | 76 800 | sans objet | 116 529 | 11 949 | 31 min 59 s |  |
 | codex | redaction | 60 | 0 | 2 061 982 | 263 296 | sans objet | 312 789 | 153 559 | 2 h 06 min |  |
@@ -78,16 +78,17 @@ Claude, par commune (entrée + sortie, hors collecte) : total 2 750 499, médian
 
 ## Durées
 
-- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 4 h 43 min.
+- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 4 h 44 min.
 - Par commune (hors collecte) : médiane 4 min 10 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
-- Durée réelle de la campagne : 4 h 49 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
-- Interventions du terminal pilote : 64 min (0 mesurées, 64 estimées).
+- Durée réelle de la campagne : 4 h 50 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
+- Interventions du terminal pilote : 70 min (0 mesurées, 70 estimées).
   - 2026-10-15 15:56 UTC, 22 min (estimée) : Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc
   - 2026-10-15 16:39 UTC, 12 min (estimée) : Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance
   - 2026-10-15 16:50 UTC, 8 min (estimée) : Lot 1 : deux autres faux positifs du contrôle (SP95-E10, base 100 km) corrigés, essais de non-régression, second arrêt-relance pendant des visuels
   - 2026-10-15 18:00 UTC, 5 min (estimée) : Erreur du pilote : lot 2 lancé à 17:28 UTC alors que le lot 1 venait d'être suspendu par la limite de session Claude (fin prise pour une réussite) ; un appel de collecte refusé en 3 s, sans jeton consommé. Constat, commit et poussée de l'état suspendu
   - 2026-10-15 18:24 UTC, 7 min (estimée) : Fin du lot 1 : motifs recalculés, faux positif « « 1 » dans Trapèze 1 » corrigé, arrêt-relance du lot 2 pendant des visuels
   - 2026-10-15 19:38 UTC, 10 min (estimée) : Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels
+  - 2026-10-15 20:44 UTC, 6 min (estimée) : Fin du lot 3 : faux positif « Paris 8e Arrondissement » (Saint-Maur-des-Fossés) ; noms des communes de travail traités comme les noms de secteurs ; vérification sur 78 articles et par falsification ; lot 4 non redémarré (cas rare)
 
 ## Suspensions
 
