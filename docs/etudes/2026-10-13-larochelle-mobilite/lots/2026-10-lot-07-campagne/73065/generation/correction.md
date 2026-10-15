@@ -1,0 +1,118 @@
+## A. Question et format
+
+**Question principale : à Chambéry, un secteur bien équipé suffit-il pour envisager de moins prendre la voiture ?**
+
+Les pratiques domicile-travail varient fortement entre secteurs. Mais un secteur réunissant les équipements du quotidien peut aussi compter une majorité d’actifs allant travailler en voiture. Pour une recherche de logement, cela invite à examiner séparément le trajet professionnel et la proximité des services.
+
+Appuis : `iris.voiture.min`, `iris.voiture.max`, `iris.730650901.panier_500m`, `iris.730650605.panier_500m`, `iris.730650605.voiture`, `mobpro.voiture_selon_destination.meme_commune` et `mobpro.voiture_selon_destination.communes_voisines`.
+
+**Format retenu : article court**, avec l’ouverture carburant obligatoire.
+
+Pistes écartées : stationnement, possession automobile, actifs venant travailler à Chambéry et comparaison nationale, qui disperseraient cette question.
+
+## B. Article
+
+# Chambéry : un secteur bien équipé suffit-il pour moins prendre la voiture ?
+
+Entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du gazole augmente de 0,75 €/L autour de Chambéry, et celui du SP95-E10 de 0,51 €/L. Pour qui cherche un logement en souhaitant moins rouler, cette hausse donne une raison concrète d’examiner les déplacements associés à chaque adresse.
+
+Ces prix concernent les stations situées dans un rayon de 12 km à vol d’oiseau autour du centre de Chambéry. Le scénario suivant chiffre le **surcoût de carburant annuel**, avec une consommation de 6 L/100 km, 200 allers-retours domicile-travail par an et des hausses médianes arrondies à 5 centimes.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+| Trajet aller | Gazole, hausse retenue de 0,75 €/L | SP95-E10, hausse retenue de 0,50 €/L |
+|---|---:|---:|
+| 5 km | environ 90 € | environ 60 € |
+| 15 km | environ 270 € | environ 180 € |
+| 35 km | environ 630 € | environ 420 € |
+
+Pour passer de ce scénario à une recherche à Chambéry, il faut regarder les pratiques locales : que montrent-elles selon le secteur de résidence et le lieu de travail ?
+
+## Des pratiques très différentes selon le secteur
+
+Au recensement de 2022, la voiture est le mode principal pour aller travailler de **36 % des actifs résidant dans le secteur Centre Ville 1**, contre **86 % à Chambéry le Vieux**. Ces parts concernent les actifs qui habitent chaque secteur, quelle que soit leur commune de travail.
+
+[VISUEL : Carte de la part de la voiture par secteur (IRIS)]
+
+Le lieu de travail apporte une autre information utile : parmi les actifs qui habitent et travaillent à Chambéry, **45 %** vont travailler principalement en voiture.
+
+Cette part atteint **73 %** parmi les actifs chambériens travaillant à Aix-les-Bains, La Motte-Servolex, La Ravoire, Cognin, Saint-Alban-Leysse ou Challes-les-Eaux. Pour départager des annonces, le trajet vers votre emploi mérite donc son propre examen, en complément du secteur de résidence.
+
+## Courses et école : une proximité à regarder séparément
+
+Le travail ne couvre qu’une partie des déplacements du quotidien. Pour les courses, la pharmacie et l’école, un autre repère consiste à chercher la présence simultanée d’un commerce alimentaire, d’une pharmacie et d’une école élémentaire à moins de **500 m à vol d’oiseau** de l’adresse.
+
+Dans Centre Ville 1, toutes les adresses réunissent cette proximité. À Chambéry le Haut 5, c’est aussi la quasi-totalité des adresses, **99 %**, alors que **71 % des actifs du secteur** vont travailler principalement en voiture. Un secteur équipé et un usage majoritaire de la voiture pour travailler peuvent donc coexister.
+
+Pendant une visite, repérez les entrées des établissements et parcourez les chemins que vous envisagez d’emprunter. Si vous comptez prendre le bus, vérifiez votre trajet et vos horaires auprès du site officiel de [Synchro Bus](https://synchro.grandchambery.fr).
+
+## Votre projet, votre adresse
+
+Vous souhaitez peut-être vous rapprocher du travail ou vous installer en famille en utilisant moins la voiture. Avec futur•e, explorez l’adresse envisagée à partir de ce projet, en considérant l’ensemble de ce qui compte dans votre choix de logement.
+
+### Méthode et sources
+
+Les pratiques domicile-travail viennent du recensement de l’INSEE, fichier MOBPRO et bases infracommunales. Elles décrivent le mode principal des actifs occupés. Les comparaisons portent sur des groupes distincts, sans mesurer l’effet d’un déménagement ; les données par secteur et par commune de travail ne sont pas croisées. Groupe cité : les six autres communes les plus peuplées de l’unité urbaine INSEE. Les résultats sont des estimations par sondage.
+
+Les secteurs sont des IRIS statistiques, dont les libellés peuvent différer des noms de quartiers usuels. La proximité des équipements repose sur la Base adresse nationale et la Base permanente des équipements de l’INSEE, millésime 2025. Elle concerne des adresses et des distances à vol d’oiseau, sans décrire les parcours réels ni l’usage des établissements.
+
+Les prix proviennent du flux officiel prix-carburants.gouv.fr. Les stations déclarantes peuvent différer entre les semaines observées. Le scénario porte sur le carburant seul et ne s’attribue à aucun secteur.
+
+## C. Correspondance interne — non publiée
+
+| Passage | Chiffre écrit | Identifiant(s) | Usage |
+|---|---|---|---|
+| Chapeau — semaine initiale | 6 octobre 2025 | `carburant.gazole.prix_un_an_avant`, `carburant.e10.prix_un_an_avant` | oui |
+| Chapeau — semaine finale | 5 octobre 2026 | `carburant.gazole.prix`, `carburant.e10.prix` | oui |
+| Chapeau — hausse gazole | 0,75 €/L | `carburant.gazole.ecart` | oui |
+| Chapeau — hausse SP95-E10 | 0,51 €/L | `carburant.e10.ecart` | oui |
+| Ouverture — périmètre des prix | 12 km | `carburant.gazole.ecart`, `carburant.e10.ecart` | oui |
+| Hypothèses — consommation | 6 L/100 km | `scenario.carburant.gazole.5km`, section 7, hypothèses communes | oui |
+| Hypothèses — déplacements annuels | 200 allers-retours | `scenario.carburant.gazole.5km`, section 7, hypothèses communes | oui |
+| Hypothèses — arrondi des hausses | 5 centimes | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km`, section 7 | oui |
+| Tableau — hausse gazole retenue | 0,75 €/L | `scenario.carburant.gazole.5km`, `scenario.carburant.gazole.15km`, `scenario.carburant.gazole.35km` | oui |
+| Tableau — hausse SP95-E10 retenue | 0,50 €/L | `scenario.carburant.e10.5km`, `scenario.carburant.e10.15km`, `scenario.carburant.e10.35km` | oui |
+| Tableau — trajet aller | 5 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` | oui |
+| Tableau — surcoût gazole | environ 90 € | `scenario.carburant.gazole.5km` | oui |
+| Tableau — surcoût SP95-E10 | environ 60 € | `scenario.carburant.e10.5km` | oui |
+| Tableau — trajet aller | 15 km | `scenario.carburant.gazole.15km`, `scenario.carburant.e10.15km` | oui |
+| Tableau — surcoût gazole | environ 270 € | `scenario.carburant.gazole.15km` | oui |
+| Tableau — surcoût SP95-E10 | environ 180 € | `scenario.carburant.e10.15km` | oui |
+| Tableau — trajet aller | 35 km | `scenario.carburant.gazole.35km`, `scenario.carburant.e10.35km` | oui |
+| Tableau — surcoût gazole | environ 630 € | `scenario.carburant.gazole.35km` | oui |
+| Tableau — surcoût SP95-E10 | environ 420 € | `scenario.carburant.e10.35km` | oui |
+| Pratiques — millésime | 2022 | `iris.voiture.min`, `iris.voiture.max`, `mobpro.voiture_selon_destination.meme_commune` | oui |
+| Pratiques — libellé du secteur | Centre Ville 1 | `iris.voiture.min` | oui |
+| Pratiques — voiture, Centre Ville 1 | 36 % | `iris.voiture.min` | oui |
+| Pratiques — voiture, Chambéry le Vieux | 86 % | `iris.voiture.max` | oui |
+| Pratiques — actifs habitant et travaillant à Chambéry | 45 % | `mobpro.voiture_selon_destination.meme_commune` | oui |
+| Pratiques — actifs travaillant dans le groupe exactement nommé | 73 % | `mobpro.voiture_selon_destination.communes_voisines` | oui |
+| Équipements — seuil de proximité | 500 m | `iris.730650901.panier_500m`, `iris.730650605.panier_500m` | oui |
+| Équipements — libellé du secteur | Centre Ville 1 | `iris.730650901.panier_500m` | oui |
+| Équipements — « toutes les adresses » | 100 % exprimé en toutes lettres | `iris.730650901.panier_500m` | oui |
+| Équipements — libellé du secteur | Chambéry le Haut 5 | `iris.730650605.panier_500m`, `iris.730650605.voiture` | oui |
+| Équipements — proximité du panier | 99 % | `iris.730650605.panier_500m` | oui |
+| Équipements — voiture des actifs du secteur | 71 % | `iris.730650605.voiture` | oui |
+| Méthode — millésime des équipements | 2025 | `iris.730650901.panier_500m`, `iris.730650605.panier_500m` ; source BPE précisée dans le dossier | oui |
+
+## D. Visuels et vérifications restantes
+
+| Visuel retenu — nom exact | Emplacement | Étape manuelle indiquée par le dossier |
+|---|---|---|
+| Tableau du scénario de surcoût de carburant | Au début, après les hypothèses du scénario | Aucune. |
+| Carte de la part de la voiture par secteur (IRIS) | Après la comparaison entre Centre Ville 1 et Chambéry le Vieux | Aucune pour la production : classes automatiques et repères numérotés avec leur liste. Pose manuelle des libellés seulement pour une version soignée. |
+
+Vérifications avant publication concernant les faits utilisés :
+
+- **`carburant.evolution`** : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Obligatoire avant publication.
+- **`mobpro.voiture_selon_destination`** : relire l’intérêt du groupe de communes retenu. Sa composition exacte figure dans l’article ; vérification non bloquante pour la rédaction.
+- **`iris.ecart_voiture`** : relire les libellés Centre Ville 1, Chambéry le Vieux et Chambéry le Haut 5. L’article les présente comme des secteurs statistiques.
+
+Pour la carte, faire figurer le millésime des pratiques et repérer les secteurs cités. Aucun autre doute de lecture identifié.
+
+## E. Corrections.
+
+| Anomalie | Passage avant | Passage après |
+|---|---|---|
+| Raisonnement — bloquante : sélection des secteurs à partir des pratiques observées | « La carte donne ainsi un repère pour sélectionner les secteurs à examiner. » | Phrase supprimée. |
+| Méthode — a_revoir : sélection des six communes de travail | Aucun critère de sélection indiqué dans la méthode. | Ajout : « Groupe cité : les six autres communes les plus peuplées de l’unité urbaine INSEE. » |

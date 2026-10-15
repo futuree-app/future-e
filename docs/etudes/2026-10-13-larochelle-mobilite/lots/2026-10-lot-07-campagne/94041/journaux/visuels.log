@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 94041 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/94041/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_94041.json --classes auto --communes  --reperes 940410202,940410204 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/94041/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 22,
+  "non_res": 0,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Ivry-sur-Seine découpée en 22 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 10 à 60 %). La part la plus basse est d'environ 14 % (Petit Ivry Nord), la plus élevée d'environ 31 % (Cité Pierre et Marie Curie). Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

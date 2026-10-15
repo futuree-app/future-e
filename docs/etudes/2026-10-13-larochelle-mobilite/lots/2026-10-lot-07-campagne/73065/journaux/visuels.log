@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 73065 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/73065/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_73065.json --classes auto --communes  --reperes 730650901,730650501,730650605 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/73065/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 22,
+  "non_res": 0,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Chambéry découpée en 22 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 110 %). La part la plus basse est d'environ 36 % (Centre Ville 1), la plus élevée d'environ 86 % (Chambéry le Vieux). Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

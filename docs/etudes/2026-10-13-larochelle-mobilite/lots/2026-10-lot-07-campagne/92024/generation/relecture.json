@@ -7,38 +7,67 @@
  "effort": "high",
  "consignes_sha": "1d2a04100cc4f852",
  "entree_sha": "bbe79ab94c41241c",
- "debut": "2026-10-15T20:53:49Z",
- "fin": "2026-10-15T20:53:51Z",
- "duree_s": 2.4,
- "code_retour": 1,
- "session": "9c8dcab5-0264-49c5-bbf9-382ef251e2a8",
+ "debut": "2026-10-15T23:01:57Z",
+ "fin": "2026-10-15T23:02:27Z",
+ "duree_s": 29.9,
+ "code_retour": 0,
+ "session": "14e63e94-775f-4d26-b9d6-7e6d5c6f5f15",
  "usage": {
-  "output_tokens_details": {
-   "thinking_tokens": 0
-  },
-  "input_tokens": 0,
-  "cache_creation_input_tokens": 0,
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 39048,
   "cache_read_input_tokens": 0,
-  "output_tokens": 0,
+  "output_tokens": 3048,
+  "output_tokens_details": {
+   "thinking_tokens": 2503
+  },
   "server_tool_use": {
    "web_search_requests": 0,
    "web_fetch_requests": 0
   },
   "service_tier": "standard",
   "cache_creation": {
-   "ephemeral_1h_input_tokens": 0,
+   "ephemeral_1h_input_tokens": 39048,
    "ephemeral_5m_input_tokens": 0
   },
-  "inference_geo": "",
-  "iterations": [],
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3048,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 39048,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 39048
+    },
+    "type": "message"
+   }
+  ],
   "speed": "standard",
   "fallback_credit": null
  },
- "model_usage": {},
- "cout_usd_equivalent": 0,
- "est_erreur": true,
+ "model_usage": {
+  "claude-opus-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 3048,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 39048,
+   "webSearchRequests": 0,
+   "costUSD": 0.373352,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 2503,
+   "canonicalModel": "claude-opus-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.373352,
+ "est_erreur": false,
  "sous_type": "success",
- "modele_effectif": [],
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
  "tours": 1,
  "contexte": {
   "source_auth": "none",
@@ -48,10 +77,10 @@
   ],
   "mcp": [],
   "modele": "claude-opus-5-5",
-  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-vqbngrto",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-bfh0gsas",
   "permissions": "dontAsk",
   "memoire_projet": {
-   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-vqbngrto/memory/"
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-bfh0gsas/memory/"
   },
   "plugins": [
    {
@@ -76,7 +105,5 @@
   ]
  },
  "appels_outils": [],
- "refus": 0,
- "message": "You've hit your session limit · resets 1am (Europe/Paris)",
- "motif": "suspendu par quota"
+ "refus": 0
 }

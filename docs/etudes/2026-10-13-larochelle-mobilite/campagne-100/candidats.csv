@@ -75,29 +75,29 @@ rang,insee,commune,departement,population_2021,sort,lot,motif
 74,33318,Pessac,33,66760,retenue,2026-10-lot-06-campagne,prêt à relire
 75,69259,Vénissieux,69,66363,retenue,2026-10-lot-06-campagne,prêt à relire
 76,91228,Évry-Courcouronnes,91,66177,retenue,2026-10-lot-07-campagne,prêt à relire
-77,92024,Clichy,92,64849,retenue,2026-10-lot-07-campagne,suspendu par quota
+77,92024,Clichy,92,64849,retenue,2026-10-lot-07-campagne,prêt à relire
 78,26362,Valence,26,64483,exclue d'office,,déjà préparée : Valence (2026-10-lot-03-codex)
-79,94041,Ivry-sur-Seine,94,64001,retenue,2026-10-lot-07-campagne,dossier prêt
-80,18033,Bourges,18,63702,retenue,2026-10-lot-07-campagne,dossier prêt
+79,94041,Ivry-sur-Seine,94,64001,retenue,2026-10-lot-07-campagne,prêt à relire
+80,18033,Bourges,18,63702,retenue,2026-10-lot-07-campagne,prêt à relire
 81,29232,Quimper,29,63642,exclue d'office,,déjà préparée : Quimper (2026-10-lot-03-codex)
-82,92002,Antony,92,63232,retenue,2026-10-lot-07-campagne,dossier prêt
-83,10387,Troyes,10,62782,retenue,2026-10-lot-07-campagne,dossier prêt
-84,83126,La Seyne-sur-Mer,83,62763,retenue,2026-10-lot-07-campagne,dossier prêt
-85,59009,Villeneuve-d'Ascq,59,62067,retenue,2026-10-lot-07-campagne,dossier prêt
-86,82121,Montauban,82,61919,retenue,2026-10-lot-07-campagne,dossier prêt
-87,93055,Pantin,93,60800,retenue,2026-10-lot-07-campagne,dossier prêt
-88,73065,Chambéry,73,59856,retenue,2026-10-lot-07-campagne,dossier prêt
+82,92002,Antony,92,63232,retenue,2026-10-lot-07-campagne,prêt à relire
+83,10387,Troyes,10,62782,retenue,2026-10-lot-07-campagne,prêt à relire
+84,83126,La Seyne-sur-Mer,83,62763,retenue,2026-10-lot-07-campagne,prêt à relire
+85,59009,Villeneuve-d'Ascq,59,62067,retenue,2026-10-lot-07-campagne,prêt à relire
+86,82121,Montauban,82,61919,retenue,2026-10-lot-07-campagne,prêt à relire
+87,93055,Pantin,93,60800,retenue,2026-10-lot-07-campagne,prêt à relire
+88,73065,Chambéry,73,59856,retenue,2026-10-lot-07-campagne,prêt à relire
 89,79191,Niort,79,59309,exclue d'office,,déjà préparée : Niort (redaction/79191/article.md)
-90,92051,Neuilly-sur-Seine,92,59267,retenue,2026-10-lot-07-campagne,dossier prêt
-91,95585,Sarcelles,95,58424,retenue,2026-10-lot-07-campagne,dossier prêt
-92,93007,Le Blanc-Mesnil,93,58257,retenue,2026-10-lot-07-campagne,dossier prêt
-93,94046,Maisons-Alfort,94,58068,retenue,2026-10-lot-07-campagne,dossier prêt
+90,92051,Neuilly-sur-Seine,92,59267,retenue,2026-10-lot-07-campagne,prêt à relire
+91,95585,Sarcelles,95,58424,retenue,2026-10-lot-07-campagne,prêt à relire
+92,93007,Le Blanc-Mesnil,93,58257,retenue,2026-10-lot-07-campagne,prêt à relire
+93,94046,Maisons-Alfort,94,58068,retenue,2026-10-lot-07-campagne,prêt à relire
 94,56121,Lorient,56,57846,exclue d'office,,déjà préparée : Lorient (2026-10-lot-01)
-95,94076,Villejuif,94,57753,retenue,2026-10-lot-07-campagne,dossier prêt
-96,83061,Fréjus,83,57082,retenue,2026-10-lot-07-campagne,dossier prêt
-97,60057,Beauvais,60,56677,retenue,2026-10-lot-07-campagne,dossier prêt
-98,11262,Narbonne,11,56395,retenue,2026-10-lot-07-campagne,dossier prêt
-99,77284,Meaux,77,55616,retenue,2026-10-lot-07-campagne,dossier prêt
+95,94076,Villejuif,94,57753,retenue,2026-10-lot-07-campagne,prêt à relire
+96,83061,Fréjus,83,57082,retenue,2026-10-lot-07-campagne,prêt à relire
+97,60057,Beauvais,60,56677,retenue,2026-10-lot-07-campagne,prêt à relire
+98,11262,Narbonne,11,56395,retenue,2026-10-lot-07-campagne,prêt à relire
+99,77284,Meaux,77,55616,retenue,2026-10-lot-07-campagne,prêt à relire
 100,83069,Hyères,83,55103,en réserve,,
 101,93008,Bobigny,93,55056,en réserve,,
 102,85191,La Roche-sur-Yon,85,54952,exclue d'office,,déjà préparée : La Roche-sur-Yon (2026-10-lot-01)

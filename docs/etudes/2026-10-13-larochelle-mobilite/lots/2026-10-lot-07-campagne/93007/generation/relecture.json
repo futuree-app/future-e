@@ -1,0 +1,109 @@
+{
+ "etape": "relecture",
+ "cle": "05caf0358fe0cb78",
+ "outil": "claude-code",
+ "version_outil": "2.1.301 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "high",
+ "consignes_sha": "1d2a04100cc4f852",
+ "entree_sha": "145fae0351b5f6be",
+ "debut": "2026-10-15T23:39:35Z",
+ "fin": "2026-10-15T23:40:13Z",
+ "duree_s": 37.7,
+ "code_retour": 0,
+ "session": "6633ffc3-2f31-409b-9b4a-a6a1c53f47be",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 37312,
+  "cache_read_input_tokens": 3430,
+  "output_tokens": 3248,
+  "output_tokens_details": {
+   "thinking_tokens": 2826
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 37312,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3248,
+    "cache_read_input_tokens": 3430,
+    "cache_creation_input_tokens": 37312,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 37312
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-opus-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 3248,
+   "cacheReadInputTokens": 3430,
+   "cacheCreationInputTokens": 37312,
+   "webSearchRequests": 0,
+   "costUSD": 0.36415,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 2826,
+   "canonicalModel": "claude-opus-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.36415,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "Glob",
+   "Read"
+  ],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-51wme05s",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-51wme05s/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": [
+   "complement.json",
+   "comparaison_voiture.json"
+  ]
+ },
+ "appels_outils": [],
+ "refus": 0
+}

@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 94076 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/94076/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_94076.json --classes auto --communes  --reperes 940760107,940760116,940760103 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/94076/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 21,
+  "non_res": 0,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Villejuif découpée en 21 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 15 à 65 %). La part la plus basse est d'environ 16 % (Zola), la plus élevée d'environ 37 % (Mermoz). Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

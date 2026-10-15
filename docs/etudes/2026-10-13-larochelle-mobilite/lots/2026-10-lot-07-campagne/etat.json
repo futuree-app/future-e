@@ -92,7 +92,7 @@
    "nom": "Clichy",
    "insee": "92024",
    "demande": "92024",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -148,13 +148,38 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)"
+   "motif": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)",
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92024_clair.png",
+     "carte_iris_92024_clair.svg",
+     "carte_iris_92024_mobile_clair.png",
+     "carte_iris_92024_mobile_clair.svg",
+     "carte_iris_92024_mobile_sombre.png",
+     "carte_iris_92024_mobile_sombre.svg",
+     "carte_iris_92024_sombre.png",
+     "carte_iris_92024_sombre.svg",
+     "tableau_carburant_92024.html",
+     "tableau_carburant_92024.md",
+     "tableau_iris_92024.html",
+     "tableau_iris_92024.md"
+    ],
+    "reperes": [
+     "920240402",
+     "920240303"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:02:27Z",
+    "fin": "2026-10-15T23:02:46Z",
+    "duree_s": 19.6
+   }
   },
   "94041": {
    "nom": "Ivry-sur-Seine",
    "insee": "94041",
    "demande": "94041",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -196,13 +221,51 @@
    "notes": [
     "22 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 27.3
+   "duree_preparation_s": 27.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "fdf37821de9e8f08",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_94041_clair.png",
+     "carte_iris_94041_clair.svg",
+     "carte_iris_94041_mobile_clair.png",
+     "carte_iris_94041_mobile_clair.svg",
+     "carte_iris_94041_mobile_sombre.png",
+     "carte_iris_94041_mobile_sombre.svg",
+     "carte_iris_94041_sombre.png",
+     "carte_iris_94041_sombre.svg",
+     "tableau_carburant_94041.html",
+     "tableau_carburant_94041.md",
+     "tableau_iris_94041.html",
+     "tableau_iris_94041.md"
+    ],
+    "reperes": [
+     "940410202",
+     "940410204"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:04:44Z",
+    "fin": "2026-10-15T23:05:00Z",
+    "duree_s": 15.9
+   }
   },
   "18033": {
    "nom": "Bourges",
    "insee": "18033",
    "demande": "18033",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -263,13 +326,54 @@
      "duree_calcul_s": 0.2,
      "dossier_sha": "57ecdf8680fd8a68"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "7c497b60342ba510",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_18033_clair.png",
+     "carte_iris_18033_clair.svg",
+     "carte_iris_18033_mobile_clair.png",
+     "carte_iris_18033_mobile_clair.svg",
+     "carte_iris_18033_mobile_sombre.png",
+     "carte_iris_18033_mobile_sombre.svg",
+     "carte_iris_18033_sombre.png",
+     "carte_iris_18033_sombre.svg",
+     "tableau_carburant_18033.html",
+     "tableau_carburant_18033.md",
+     "tableau_iris_18033.html",
+     "tableau_iris_18033.md"
+    ],
+    "reperes": [
+     "180330202",
+     "180331401",
+     "180330102"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:08:13Z",
+    "fin": "2026-10-15T23:08:37Z",
+    "duree_s": 24.0
+   }
   },
   "92002": {
    "nom": "Antony",
    "insee": "92002",
    "demande": "92002",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -311,13 +415,53 @@
    "notes": [
     "27 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 26.7
+   "duree_preparation_s": 26.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "c78c001991094a01",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92002_clair.png",
+     "carte_iris_92002_clair.svg",
+     "carte_iris_92002_mobile_clair.png",
+     "carte_iris_92002_mobile_clair.svg",
+     "carte_iris_92002_mobile_sombre.png",
+     "carte_iris_92002_mobile_sombre.svg",
+     "carte_iris_92002_sombre.png",
+     "carte_iris_92002_sombre.svg",
+     "tableau_carburant_92002.html",
+     "tableau_carburant_92002.md",
+     "tableau_iris_92002.html",
+     "tableau_iris_92002.md"
+    ],
+    "reperes": [
+     "920020307",
+     "920020406"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:11:44Z",
+    "fin": "2026-10-15T23:11:58Z",
+    "duree_s": 13.8
+   }
   },
   "10387": {
    "nom": "Troyes",
    "insee": "10387",
    "demande": "10387",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -378,13 +522,52 @@
      "duree_calcul_s": 0.2,
      "dossier_sha": "9417555ca17157ff"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "a4bf811b86c8136f",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_10387_clair.png",
+     "carte_iris_10387_clair.svg",
+     "carte_iris_10387_mobile_clair.png",
+     "carte_iris_10387_mobile_clair.svg",
+     "carte_iris_10387_mobile_sombre.png",
+     "carte_iris_10387_mobile_sombre.svg",
+     "carte_iris_10387_sombre.png",
+     "carte_iris_10387_sombre.svg",
+     "tableau_carburant_10387.html",
+     "tableau_carburant_10387.md",
+     "tableau_iris_10387.html",
+     "tableau_iris_10387.md"
+    ],
+    "reperes": [
+     "103871102",
+     "103870501",
+     "103870204"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:14:52Z",
+    "fin": "2026-10-15T23:15:06Z",
+    "duree_s": 14.2
+   }
   },
   "83126": {
    "nom": "La Seyne-sur-Mer",
    "insee": "83126",
    "demande": "83126",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -426,13 +609,54 @@
    "notes": [
     "24 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 36.1
+   "duree_preparation_s": 36.1,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "c7c7332fc18edc51",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_83126_clair.png",
+     "carte_iris_83126_clair.svg",
+     "carte_iris_83126_mobile_clair.png",
+     "carte_iris_83126_mobile_clair.svg",
+     "carte_iris_83126_mobile_sombre.png",
+     "carte_iris_83126_mobile_sombre.svg",
+     "carte_iris_83126_sombre.png",
+     "carte_iris_83126_sombre.svg",
+     "tableau_carburant_83126.html",
+     "tableau_carburant_83126.md",
+     "tableau_iris_83126.html",
+     "tableau_iris_83126.md"
+    ],
+    "reperes": [
+     "831260101",
+     "831260402",
+     "831260505"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:17:58Z",
+    "fin": "2026-10-15T23:18:46Z",
+    "duree_s": 47.5
+   }
   },
   "59009": {
    "nom": "Villeneuve-d'Ascq",
    "insee": "59009",
    "demande": "59009",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -474,13 +698,54 @@
    "notes": [
     "28 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 54.5
+   "duree_preparation_s": 54.5,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "2ac798b4bef51cb6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_59009_clair.png",
+     "carte_iris_59009_clair.svg",
+     "carte_iris_59009_mobile_clair.png",
+     "carte_iris_59009_mobile_clair.svg",
+     "carte_iris_59009_mobile_sombre.png",
+     "carte_iris_59009_mobile_sombre.svg",
+     "carte_iris_59009_sombre.png",
+     "carte_iris_59009_sombre.svg",
+     "tableau_carburant_59009.html",
+     "tableau_carburant_59009.md",
+     "tableau_iris_59009.html",
+     "tableau_iris_59009.md"
+    ],
+    "reperes": [
+     "590090601",
+     "590090704",
+     "590090402"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:22:06Z",
+    "fin": "2026-10-15T23:22:29Z",
+    "duree_s": 22.3
+   }
   },
   "82121": {
    "nom": "Montauban",
    "insee": "82121",
    "demande": "82121",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -522,13 +787,54 @@
    "notes": [
     "23 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 32.1
+   "duree_preparation_s": 32.1,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "78f95f84131b48f6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_82121_clair.png",
+     "carte_iris_82121_clair.svg",
+     "carte_iris_82121_mobile_clair.png",
+     "carte_iris_82121_mobile_clair.svg",
+     "carte_iris_82121_mobile_sombre.png",
+     "carte_iris_82121_mobile_sombre.svg",
+     "carte_iris_82121_sombre.png",
+     "carte_iris_82121_sombre.svg",
+     "tableau_carburant_82121.html",
+     "tableau_carburant_82121.md",
+     "tableau_iris_82121.html",
+     "tableau_iris_82121.md"
+    ],
+    "reperes": [
+     "821210101",
+     "821211102",
+     "821210405"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:25:38Z",
+    "fin": "2026-10-15T23:26:02Z",
+    "duree_s": 23.9
+   }
   },
   "93055": {
    "nom": "Pantin",
    "insee": "93055",
    "demande": "93055",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -570,13 +876,52 @@
    "notes": [
     "18 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 34.7
+   "duree_preparation_s": 34.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "e3507a2025a3b89d",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93055_clair.png",
+     "carte_iris_93055_clair.svg",
+     "carte_iris_93055_mobile_clair.png",
+     "carte_iris_93055_mobile_clair.svg",
+     "carte_iris_93055_mobile_sombre.png",
+     "carte_iris_93055_mobile_sombre.svg",
+     "carte_iris_93055_sombre.png",
+     "carte_iris_93055_sombre.svg",
+     "tableau_carburant_93055.html",
+     "tableau_carburant_93055.md",
+     "tableau_iris_93055.html",
+     "tableau_iris_93055.md"
+    ],
+    "reperes": [
+     "930550402",
+     "930550102",
+     "930550202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:28:06Z",
+    "fin": "2026-10-15T23:28:19Z",
+    "duree_s": 13.0
+   }
   },
   "73065": {
    "nom": "Chambéry",
    "insee": "73065",
    "demande": "73065",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -637,13 +982,54 @@
      "duree_calcul_s": 0.1,
      "dossier_sha": "b3851273cb60b6dc"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "cc03cf720bff85bf",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_73065_clair.png",
+     "carte_iris_73065_clair.svg",
+     "carte_iris_73065_mobile_clair.png",
+     "carte_iris_73065_mobile_clair.svg",
+     "carte_iris_73065_mobile_sombre.png",
+     "carte_iris_73065_mobile_sombre.svg",
+     "carte_iris_73065_sombre.png",
+     "carte_iris_73065_sombre.svg",
+     "tableau_carburant_73065.html",
+     "tableau_carburant_73065.md",
+     "tableau_iris_73065.html",
+     "tableau_iris_73065.md"
+    ],
+    "reperes": [
+     "730650901",
+     "730650501",
+     "730650605"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:31:35Z",
+    "fin": "2026-10-15T23:31:53Z",
+    "duree_s": 18.3
+   }
   },
   "92051": {
    "nom": "Neuilly-sur-Seine",
    "insee": "92051",
    "demande": "92051",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -685,13 +1071,51 @@
    "notes": [
     "26 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 19.2
+   "duree_preparation_s": 19.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "35b5e9fff8056566",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92051_clair.png",
+     "carte_iris_92051_clair.svg",
+     "carte_iris_92051_mobile_clair.png",
+     "carte_iris_92051_mobile_clair.svg",
+     "carte_iris_92051_mobile_sombre.png",
+     "carte_iris_92051_mobile_sombre.svg",
+     "carte_iris_92051_sombre.png",
+     "carte_iris_92051_sombre.svg",
+     "tableau_carburant_92051.html",
+     "tableau_carburant_92051.md",
+     "tableau_iris_92051.html",
+     "tableau_iris_92051.md"
+    ],
+    "reperes": [
+     "920510306",
+     "920510102"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:34:24Z",
+    "fin": "2026-10-15T23:34:35Z",
+    "duree_s": 10.5
+   }
   },
   "95585": {
    "nom": "Sarcelles",
    "insee": "95585",
    "demande": "95585",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -733,13 +1157,53 @@
    "notes": [
     "24 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 21.2
+   "duree_preparation_s": 21.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "e59b58455694fc2e",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_95585_clair.png",
+     "carte_iris_95585_clair.svg",
+     "carte_iris_95585_mobile_clair.png",
+     "carte_iris_95585_mobile_clair.svg",
+     "carte_iris_95585_mobile_sombre.png",
+     "carte_iris_95585_mobile_sombre.svg",
+     "carte_iris_95585_sombre.png",
+     "carte_iris_95585_sombre.svg",
+     "tableau_carburant_95585.html",
+     "tableau_carburant_95585.md",
+     "tableau_iris_95585.html",
+     "tableau_iris_95585.md"
+    ],
+    "reperes": [
+     "955850104",
+     "955850112"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:37:12Z",
+    "fin": "2026-10-15T23:37:26Z",
+    "duree_s": 14.2
+   }
   },
   "93007": {
    "nom": "Le Blanc-Mesnil",
    "insee": "93007",
    "demande": "93007",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -781,13 +1245,51 @@
    "notes": [
     "20 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 19.7
+   "duree_preparation_s": 19.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "c28c10e75b9e5b9a",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93007_clair.png",
+     "carte_iris_93007_clair.svg",
+     "carte_iris_93007_mobile_clair.png",
+     "carte_iris_93007_mobile_clair.svg",
+     "carte_iris_93007_mobile_sombre.png",
+     "carte_iris_93007_mobile_sombre.svg",
+     "carte_iris_93007_sombre.png",
+     "carte_iris_93007_sombre.svg",
+     "tableau_carburant_93007.html",
+     "tableau_carburant_93007.md",
+     "tableau_iris_93007.html",
+     "tableau_iris_93007.md"
+    ],
+    "reperes": [
+     "930070106",
+     "930070109"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:40:13Z",
+    "fin": "2026-10-15T23:40:30Z",
+    "duree_s": 17.1
+   }
   },
   "94046": {
    "nom": "Maisons-Alfort",
    "insee": "94046",
    "demande": "94046",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -829,13 +1331,52 @@
    "notes": [
     "23 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 17.7
+   "duree_preparation_s": 17.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "c7e5d6f5c5cbd63b",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_94046_clair.png",
+     "carte_iris_94046_clair.svg",
+     "carte_iris_94046_mobile_clair.png",
+     "carte_iris_94046_mobile_clair.svg",
+     "carte_iris_94046_mobile_sombre.png",
+     "carte_iris_94046_mobile_sombre.svg",
+     "carte_iris_94046_sombre.png",
+     "carte_iris_94046_sombre.svg",
+     "tableau_carburant_94046.html",
+     "tableau_carburant_94046.md",
+     "tableau_iris_94046.html",
+     "tableau_iris_94046.md"
+    ],
+    "reperes": [
+     "940460102",
+     "940460403",
+     "940460202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:42:45Z",
+    "fin": "2026-10-15T23:42:56Z",
+    "duree_s": 11.3
+   }
   },
   "94076": {
    "nom": "Villejuif",
    "insee": "94076",
    "demande": "94076",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -877,13 +1418,52 @@
    "notes": [
     "21 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 19.2
+   "duree_preparation_s": 19.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "e33a7ded47375c82",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_94076_clair.png",
+     "carte_iris_94076_clair.svg",
+     "carte_iris_94076_mobile_clair.png",
+     "carte_iris_94076_mobile_clair.svg",
+     "carte_iris_94076_mobile_sombre.png",
+     "carte_iris_94076_mobile_sombre.svg",
+     "carte_iris_94076_sombre.png",
+     "carte_iris_94076_sombre.svg",
+     "tableau_carburant_94076.html",
+     "tableau_carburant_94076.md",
+     "tableau_iris_94076.html",
+     "tableau_iris_94076.md"
+    ],
+    "reperes": [
+     "940760107",
+     "940760116",
+     "940760103"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:45:06Z",
+    "fin": "2026-10-15T23:45:20Z",
+    "duree_s": 13.6
+   }
   },
   "83061": {
    "nom": "Fréjus",
    "insee": "83061",
    "demande": "83061",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -944,13 +1524,53 @@
      "duree_calcul_s": 0.1,
      "dossier_sha": "7a6846179baf34b1"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "719fde10621ecba2",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_83061_clair.png",
+     "carte_iris_83061_clair.svg",
+     "carte_iris_83061_mobile_clair.png",
+     "carte_iris_83061_mobile_clair.svg",
+     "carte_iris_83061_mobile_sombre.png",
+     "carte_iris_83061_mobile_sombre.svg",
+     "carte_iris_83061_sombre.png",
+     "carte_iris_83061_sombre.svg",
+     "tableau_carburant_83061.html",
+     "tableau_carburant_83061.md",
+     "tableau_iris_83061.html",
+     "tableau_iris_83061.md"
+    ],
+    "reperes": [
+     "830610108",
+     "830610106"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:48:26Z",
+    "fin": "2026-10-15T23:49:19Z",
+    "duree_s": 53.1
+   }
   },
   "60057": {
    "nom": "Beauvais",
    "insee": "60057",
    "demande": "60057",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -992,13 +1612,53 @@
    "notes": [
     "18 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 24.0
+   "duree_preparation_s": 24.0,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "91ded508dfd1f803",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_60057_clair.png",
+     "carte_iris_60057_clair.svg",
+     "carte_iris_60057_mobile_clair.png",
+     "carte_iris_60057_mobile_clair.svg",
+     "carte_iris_60057_mobile_sombre.png",
+     "carte_iris_60057_mobile_sombre.svg",
+     "carte_iris_60057_sombre.png",
+     "carte_iris_60057_sombre.svg",
+     "tableau_carburant_60057.html",
+     "tableau_carburant_60057.md",
+     "tableau_iris_60057.html",
+     "tableau_iris_60057.md"
+    ],
+    "reperes": [
+     "600570403",
+     "600570202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:51:47Z",
+    "fin": "2026-10-15T23:51:59Z",
+    "duree_s": 12.9
+   }
   },
   "11262": {
    "nom": "Narbonne",
    "insee": "11262",
    "demande": "11262",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1059,13 +1719,54 @@
      "duree_calcul_s": 0.1,
      "dossier_sha": "f798413a5d49e2b9"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "23fbb2cc5b8d9488",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_11262_clair.png",
+     "carte_iris_11262_clair.svg",
+     "carte_iris_11262_mobile_clair.png",
+     "carte_iris_11262_mobile_clair.svg",
+     "carte_iris_11262_mobile_sombre.png",
+     "carte_iris_11262_mobile_sombre.svg",
+     "carte_iris_11262_sombre.png",
+     "carte_iris_11262_sombre.svg",
+     "tableau_carburant_11262.html",
+     "tableau_carburant_11262.md",
+     "tableau_iris_11262.html",
+     "tableau_iris_11262.md"
+    ],
+    "reperes": [
+     "112620102",
+     "112620206",
+     "112620303"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:54:56Z",
+    "fin": "2026-10-15T23:55:24Z",
+    "duree_s": 27.9
+   }
   },
   "77284": {
    "nom": "Meaux",
    "insee": "77284",
    "demande": "77284",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1107,7 +1808,45 @@
    "notes": [
     "22 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 26.8
+   "duree_preparation_s": 26.8,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "eae731091cfb9aa8",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_77284_clair.png",
+     "carte_iris_77284_clair.svg",
+     "carte_iris_77284_mobile_clair.png",
+     "carte_iris_77284_mobile_clair.svg",
+     "carte_iris_77284_mobile_sombre.png",
+     "carte_iris_77284_mobile_sombre.svg",
+     "carte_iris_77284_sombre.png",
+     "carte_iris_77284_sombre.svg",
+     "tableau_carburant_77284.html",
+     "tableau_carburant_77284.md",
+     "tableau_iris_77284.html",
+     "tableau_iris_77284.md"
+    ],
+    "reperes": [
+     "772840902",
+     "772840202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T23:57:28Z",
+    "fin": "2026-10-15T23:57:40Z",
+    "duree_s": 12.6
+   }
   }
  },
  "journal": []

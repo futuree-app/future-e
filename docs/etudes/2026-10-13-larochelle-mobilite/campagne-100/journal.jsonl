@@ -37,3 +37,6 @@
 {"t": "2026-10-15T20:44:06Z", "evt": "production_debut", "lot": 4}
 {"t": "2026-10-15T20:44:46Z", "evt": "intervention", "texte": "Fin du lot 3 : faux positif « Paris 8e Arrondissement » (Saint-Maur-des-Fossés) ; noms des communes de travail traités comme les noms de secteurs ; vérification sur 78 articles et par falsification ; lot 4 non redémarré (cas rare)", "minutes": 6.0, "mesure": "estimée"}
 {"t": "2026-10-15T20:53:51Z", "evt": "suspension", "lot": 4, "etape": "rediger", "message": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)", "ou": "92024"}
+{"t": "2026-10-15T23:01:56Z", "evt": "reprise", "lot": 4, "suspension_du": "2026-10-15T20:53:51Z"}
+{"t": "2026-10-15T23:01:56Z", "evt": "production_debut", "lot": 4}
+{"t": "2026-10-15T23:57:40Z", "evt": "production_fin", "lot": 4}

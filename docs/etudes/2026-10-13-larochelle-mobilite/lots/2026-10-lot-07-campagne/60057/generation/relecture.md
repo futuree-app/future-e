@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Elle donne une raison d’explorer un secteur",
+   "probleme": "Les parts de la voiture par secteur (iris.voiture.min, iris.voiture.max, carte par IRIS) décrivent les pratiques des actifs qui y habitent, quelle que soit leur commune de travail. La phrase les transforme en conseil de quartier pour le lecteur, comme si habiter un secteur où l’on prend moins la voiture permettait de la prendre moins, alors que le dossier ne mesure aucun lien de cause entre un quartier et une pratique.",
+   "correction_minimale": "Remplacer par : « Elle montre comment se déplacent les actifs qui habitent chaque secteur ; reste à regarder la liaison entre le logement envisagé et son propre lieu de travail. »"}
+]}
+```

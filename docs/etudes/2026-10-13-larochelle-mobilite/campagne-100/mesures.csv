@@ -526,88 +526,107 @@ lot,insee,commune,etape,outil,modele_demande,modele_confirme,debut_utc,fin_utc,d
 4,92024,Clichy,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:40:45Z,2026-10-15T16:40:54Z,9.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92024,Clichy,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:40:54Z,2026-10-15T16:40:54Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92024,Clichy,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:40:54Z,2026-10-15T16:40:55Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,92024,Clichy,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:02:27Z,2026-10-15T23:02:46Z,19.6,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:40:55Z,2026-10-15T16:41:14Z,19.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:41:14Z,2026-10-15T16:41:22Z,7.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:22Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94041,Ivry-sur-Seine,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:22Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,94041,Ivry-sur-Seine,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:04:44Z,2026-10-15T23:05:00Z,15.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:41:53Z,2026-10-15T16:41:53Z,0.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:41:53Z,2026-10-15T16:41:54Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:41:22Z,2026-10-15T16:41:47Z,24.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:41:47Z,2026-10-15T16:41:53Z,6.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:44:46Z,2026-10-15T20:44:46Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:44:46Z,2026-10-15T20:44:46Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,18033,Bourges,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:08:13Z,2026-10-15T23:08:37Z,24.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:41:54Z,2026-10-15T16:42:12Z,18.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:42:12Z,2026-10-15T16:42:20Z,8.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:42:20Z,2026-10-15T16:42:20Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92002,Antony,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:42:20Z,2026-10-15T16:42:20Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,92002,Antony,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:11:44Z,2026-10-15T23:11:58Z,13.8,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:42:51Z,2026-10-15T16:42:51Z,0.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:42:51Z,2026-10-15T16:42:51Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:42:20Z,2026-10-15T16:42:42Z,21.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:42:42Z,2026-10-15T16:42:51Z,8.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:45:31Z,2026-10-15T20:45:31Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,10387,Troyes,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:45:31Z,2026-10-15T20:45:31Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,10387,Troyes,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:14:52Z,2026-10-15T23:15:06Z,14.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83126,La Seyne-sur-Mer,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:42:51Z,2026-10-15T16:43:19Z,27.8,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83126,La Seyne-sur-Mer,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:43:19Z,2026-10-15T16:43:27Z,8.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83126,La Seyne-sur-Mer,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:43:27Z,2026-10-15T16:43:27Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83126,La Seyne-sur-Mer,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:43:27Z,2026-10-15T16:43:27Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,83126,La Seyne-sur-Mer,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:17:58Z,2026-10-15T23:18:46Z,47.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,59009,Villeneuve-d'Ascq,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:43:27Z,2026-10-15T16:44:14Z,47.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,59009,Villeneuve-d'Ascq,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:44:14Z,2026-10-15T16:44:22Z,7.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,59009,Villeneuve-d'Ascq,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:44:22Z,2026-10-15T16:44:22Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,59009,Villeneuve-d'Ascq,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:44:22Z,2026-10-15T16:44:22Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,59009,Villeneuve-d'Ascq,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:22:06Z,2026-10-15T23:22:29Z,22.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,82121,Montauban,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:44:22Z,2026-10-15T16:44:45Z,23.6,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,82121,Montauban,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:44:45Z,2026-10-15T16:44:54Z,8.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,82121,Montauban,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:44:54Z,2026-10-15T16:44:54Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,82121,Montauban,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:44:54Z,2026-10-15T16:44:54Z,0.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,82121,Montauban,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:25:38Z,2026-10-15T23:26:02Z,23.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93055,Pantin,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:44:54Z,2026-10-15T16:45:19Z,25.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93055,Pantin,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:45:19Z,2026-10-15T16:45:28Z,9.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93055,Pantin,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:45:28Z,2026-10-15T16:45:29Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93055,Pantin,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:45:29Z,2026-10-15T16:45:29Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,93055,Pantin,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:28:06Z,2026-10-15T23:28:19Z,13.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:46:01Z,2026-10-15T16:46:02Z,0.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:46:02Z,2026-10-15T16:46:02Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:45:29Z,2026-10-15T16:45:54Z,25.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:45:54Z,2026-10-15T16:46:01Z,7.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:46:02Z,2026-10-15T20:46:02Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,73065,Chambéry,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:46:02Z,2026-10-15T20:46:02Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,73065,Chambéry,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:31:35Z,2026-10-15T23:31:53Z,18.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92051,Neuilly-sur-Seine,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:46:02Z,2026-10-15T16:46:16Z,13.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92051,Neuilly-sur-Seine,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:46:16Z,2026-10-15T16:46:21Z,5.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92051,Neuilly-sur-Seine,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:46:21Z,2026-10-15T16:46:21Z,0.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,92051,Neuilly-sur-Seine,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:46:21Z,2026-10-15T16:46:21Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,92051,Neuilly-sur-Seine,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:34:24Z,2026-10-15T23:34:35Z,10.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,95585,Sarcelles,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:46:21Z,2026-10-15T16:46:37Z,15.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,95585,Sarcelles,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:46:37Z,2026-10-15T16:46:43Z,5.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,95585,Sarcelles,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:46:43Z,2026-10-15T16:46:43Z,0.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,95585,Sarcelles,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:46:43Z,2026-10-15T16:46:43Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,95585,Sarcelles,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:37:12Z,2026-10-15T23:37:26Z,14.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93007,Le Blanc-Mesnil,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:46:43Z,2026-10-15T16:46:56Z,13.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93007,Le Blanc-Mesnil,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:46:56Z,2026-10-15T16:47:02Z,6.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93007,Le Blanc-Mesnil,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:47:02Z,2026-10-15T16:47:02Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,93007,Le Blanc-Mesnil,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:47:02Z,2026-10-15T16:47:02Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,93007,Le Blanc-Mesnil,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:40:13Z,2026-10-15T23:40:30Z,17.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94046,Maisons-Alfort,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:47:02Z,2026-10-15T16:47:14Z,11.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94046,Maisons-Alfort,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:47:14Z,2026-10-15T16:47:20Z,5.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94046,Maisons-Alfort,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:47:20Z,2026-10-15T16:47:20Z,0.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94046,Maisons-Alfort,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:47:20Z,2026-10-15T16:47:20Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,94046,Maisons-Alfort,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:42:45Z,2026-10-15T23:42:56Z,11.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94076,Villejuif,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:47:20Z,2026-10-15T16:47:33Z,12.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94076,Villejuif,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:47:33Z,2026-10-15T16:47:39Z,6.4,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94076,Villejuif,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:47:39Z,2026-10-15T16:47:39Z,0.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,94076,Villejuif,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:47:39Z,2026-10-15T16:47:40Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,94076,Villejuif,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:45:06Z,2026-10-15T23:45:20Z,13.6,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:48:03Z,2026-10-15T16:48:03Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:48:03Z,2026-10-15T16:48:03Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:47:40Z,2026-10-15T16:47:57Z,17.3,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:47:57Z,2026-10-15T16:48:03Z,5.6,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:46:34Z,2026-10-15T20:46:34Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,83061,Fréjus,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:46:34Z,2026-10-15T20:46:34Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,83061,Fréjus,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:48:26Z,2026-10-15T23:49:19Z,53.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,60057,Beauvais,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:48:03Z,2026-10-15T16:48:21Z,18.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,60057,Beauvais,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:48:21Z,2026-10-15T16:48:27Z,5.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,60057,Beauvais,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:48:27Z,2026-10-15T16:48:27Z,0.0,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,60057,Beauvais,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:48:27Z,2026-10-15T16:48:27Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,60057,Beauvais,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:51:47Z,2026-10-15T23:51:59Z,12.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:48:48Z,2026-10-15T16:48:48Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:48:48Z,2026-10-15T16:48:48Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:48:27Z,2026-10-15T16:48:42Z,15.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:48:42Z,2026-10-15T16:48:48Z,5.5,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : complement,local (python),sans objet,sans objet,2026-10-15T20:47:33Z,2026-10-15T20:47:33Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,11262,Narbonne,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T20:47:33Z,2026-10-15T20:47:34Z,0.2,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,11262,Narbonne,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:54:56Z,2026-10-15T23:55:24Z,27.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : fiche,local (python),sans objet,sans objet,2026-10-15T16:48:48Z,2026-10-15T16:49:09Z,20.7,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : comparaison,local (python),sans objet,sans objet,2026-10-15T16:49:09Z,2026-10-15T16:49:15Z,5.9,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : complement,local (python),sans objet,sans objet,2026-10-15T16:49:15Z,2026-10-15T16:49:15Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,77284,Meaux,préparation : dossier,local (python),sans objet,sans objet,2026-10-15T16:49:15Z,2026-10-15T16:49:15Z,0.1,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
+4,77284,Meaux,visuels,"local (python, Chrome sans interface)",sans objet,sans objet,2026-10-15T23:57:28Z,2026-10-15T23:57:40Z,12.6,réussi,sans objet,sans objet,sans objet,sans objet,sans objet,sans objet
 4,18033,Bourges,collecte (par réseau),claude-code,claude-sonnet-5-5,"claude-sonnet-5-5, claude-haiku-5-5",2026-10-15T20:44:07Z,2026-10-15T20:44:44Z,37.3,réussi,55422,9256,4621,6979,67,0.0495743
 4,10387,Troyes,collecte (par réseau),claude-code,claude-sonnet-5-5,"claude-sonnet-5-5, claude-haiku-5-5",2026-10-15T20:44:46Z,2026-10-15T20:45:28Z,41.7,réussi,55994,11139,3362,7761,91,0.043858400000000006
 4,73065,Chambéry,collecte (par réseau),claude-code,claude-sonnet-5-5,"claude-sonnet-5-5, claude-haiku-5-5",2026-10-15T20:45:31Z,2026-10-15T20:46:01Z,30.2,réussi,29405,6918,2541,5541,218,0.0316588
@@ -618,3 +637,50 @@ lot,insee,commune,etape,outil,modele_demande,modele_confirme,debut_utc,fin_utc,d
 4,91228,Évry-Courcouronnes,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T20:50:42Z,2026-10-15T20:51:20Z,38.5,réussi,33376,0,sans objet (Codex),2530,75,non mesuré
 4,92024,Clichy,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T20:51:42Z,2026-10-15T20:53:48Z,126.1,réussi,32224,7680,sans objet (Codex),5657,3166,non mesuré
 4,92024,Clichy,relecture,claude-code,claude-opus-5-5,non mesuré,2026-10-15T20:53:49Z,2026-10-15T20:53:51Z,2.4,suspendu par quota,0,0,0,0,0,0
+4,92024,Clichy,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:01:57Z,2026-10-15T23:02:27Z,29.9,réussi,39050,0,39048,3048,2503,0.373352
+4,94041,Ivry-sur-Seine,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:02:47Z,2026-10-15T23:04:19Z,92.0,réussi,32613,0,sans objet (Codex),4307,1552,non mesuré
+4,94041,Ivry-sur-Seine,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:04:19Z,2026-10-15T23:04:44Z,25.4,réussi,40846,3430,37414,2612,2325,0.352246
+4,18033,Bourges,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:05:01Z,2026-10-15T23:07:05Z,124.4,réussi,33610,0,sans objet (Codex),5856,3079,non mesuré
+4,18033,Bourges,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:07:05Z,2026-10-15T23:07:34Z,28.4,réussi,41850,3430,38418,2862,2497,0.365278
+4,18033,Bourges,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:07:34Z,2026-10-15T23:08:13Z,39.2,réussi,33949,0,sans objet (Codex),2885,76,non mesuré
+4,92002,Antony,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:08:38Z,2026-10-15T23:10:40Z,122.5,réussi,32978,0,sans objet (Codex),5758,3108,non mesuré
+4,92002,Antony,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:10:40Z,2026-10-15T23:11:08Z,28.0,réussi,40552,3430,37120,2557,2236,0.348794
+4,92002,Antony,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:11:09Z,2026-10-15T23:11:44Z,35.9,réussi,33189,0,sans objet (Codex),2681,66,non mesuré
+4,10387,Troyes,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:11:59Z,2026-10-15T23:14:16Z,137.5,réussi,33589,0,sans objet (Codex),6571,3626,non mesuré
+4,10387,Troyes,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:14:16Z,2026-10-15T23:14:52Z,35.9,réussi,42250,3430,38818,3940,3371,0.390038
+4,83126,La Seyne-sur-Mer,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:15:07Z,2026-10-15T23:16:46Z,99.5,réussi,34703,0,sans objet (Codex),4646,2072,non mesuré
+4,83126,La Seyne-sur-Mer,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:16:46Z,2026-10-15T23:17:19Z,32.4,réussi,43686,3430,40254,3042,2247,0.38356599999999996
+4,83126,La Seyne-sur-Mer,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:17:19Z,2026-10-15T23:17:58Z,39.1,réussi,35198,0,sans objet (Codex),2953,153,non mesuré
+4,59009,Villeneuve-d'Ascq,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:18:46Z,2026-10-15T23:20:44Z,117.5,réussi,33569,0,sans objet (Codex),5451,2590,non mesuré
+4,59009,Villeneuve-d'Ascq,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:20:44Z,2026-10-15T23:21:22Z,37.8,réussi,42287,3430,38855,3932,2907,0.390174
+4,59009,Villeneuve-d'Ascq,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:21:22Z,2026-10-15T23:22:06Z,44.5,réussi,34419,0,sans objet (Codex),3137,201,non mesuré
+4,82121,Montauban,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:22:29Z,2026-10-15T23:24:25Z,116.0,réussi,32623,0,sans objet (Codex),5366,2588,non mesuré
+4,82121,Montauban,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:24:25Z,2026-10-15T23:24:55Z,29.4,réussi,40083,3430,36651,2987,2332,0.353642
+4,82121,Montauban,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:24:55Z,2026-10-15T23:25:38Z,43.1,réussi,33225,0,sans objet (Codex),2991,117,non mesuré
+4,93055,Pantin,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:26:02Z,2026-10-15T23:27:48Z,105.9,réussi,32346,7680,sans objet (Codex),5372,2674,non mesuré
+4,93055,Pantin,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:27:48Z,2026-10-15T23:28:06Z,17.4,réussi,39837,3430,36405,1826,1810,0.328454
+4,73065,Chambéry,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:28:19Z,2026-10-15T23:30:08Z,109.1,réussi,33294,7680,sans objet (Codex),5303,2590,non mesuré
+4,73065,Chambéry,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:30:08Z,2026-10-15T23:30:40Z,31.7,réussi,41441,3430,38009,3391,2869,0.372586
+4,73065,Chambéry,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:30:40Z,2026-10-15T23:31:35Z,54.8,réussi,33753,7680,sans objet (Codex),3477,694,non mesuré
+4,92051,Neuilly-sur-Seine,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:31:54Z,2026-10-15T23:33:51Z,116.7,réussi,32860,7680,sans objet (Codex),5369,2752,non mesuré
+4,92051,Neuilly-sur-Seine,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:33:51Z,2026-10-15T23:34:24Z,33.5,réussi,40883,3430,37451,3627,3324,0.372842
+4,95585,Sarcelles,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:34:35Z,2026-10-15T23:36:01Z,86.1,réussi,32832,0,sans objet (Codex),4251,1554,non mesuré
+4,95585,Sarcelles,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:36:01Z,2026-10-15T23:36:25Z,23.4,réussi,40930,3430,37498,2351,1860,0.34769799999999995
+4,95585,Sarcelles,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:36:25Z,2026-10-15T23:37:12Z,47.2,réussi,33280,7680,sans objet (Codex),3070,285,non mesuré
+4,93007,Le Blanc-Mesnil,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:37:27Z,2026-10-15T23:39:35Z,128.3,réussi,32824,7680,sans objet (Codex),6232,3690,non mesuré
+4,93007,Le Blanc-Mesnil,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:39:35Z,2026-10-15T23:40:13Z,37.7,réussi,40744,3430,37312,3248,2826,0.36415
+4,94046,Maisons-Alfort,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:40:30Z,2026-10-15T23:42:17Z,106.3,réussi,32902,0,sans objet (Codex),5773,2897,non mesuré
+4,94046,Maisons-Alfort,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:42:17Z,2026-10-15T23:42:45Z,28.3,réussi,41303,3430,37871,2564,2272,0.35494200000000004
+4,94076,Villejuif,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:42:57Z,2026-10-15T23:44:38Z,101.5,réussi,32501,7680,sans objet (Codex),5420,2930,non mesuré
+4,94076,Villejuif,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:44:38Z,2026-10-15T23:45:06Z,27.5,réussi,39589,3430,36157,2839,2518,0.34673
+4,83061,Fréjus,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:45:20Z,2026-10-15T23:47:11Z,110.8,réussi,32600,0,sans objet (Codex),4865,2070,non mesuré
+4,83061,Fréjus,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:47:11Z,2026-10-15T23:47:45Z,34.4,réussi,40433,3430,37001,2694,2335,0.350582
+4,83061,Fréjus,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:47:46Z,2026-10-15T23:48:26Z,40.4,réussi,33020,0,sans objet (Codex),2878,69,non mesuré
+4,60057,Beauvais,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:49:20Z,2026-10-15T23:50:48Z,88.7,réussi,31520,7680,sans objet (Codex),4382,1883,non mesuré
+4,60057,Beauvais,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:50:48Z,2026-10-15T23:51:10Z,21.9,réussi,38471,3430,35039,2123,1799,0.32346600000000003
+4,60057,Beauvais,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:51:11Z,2026-10-15T23:51:47Z,35.8,réussi,31612,0,sans objet (Codex),2605,91,non mesuré
+4,11262,Narbonne,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:52:00Z,2026-10-15T23:53:46Z,105.6,réussi,31829,7680,sans objet (Codex),5355,2474,non mesuré
+4,11262,Narbonne,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:53:46Z,2026-10-15T23:54:15Z,29.7,réussi,39506,3430,36074,2845,2591,0.346186
+4,11262,Narbonne,correction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:54:16Z,2026-10-15T23:54:56Z,40.3,réussi,32212,0,sans objet (Codex),2881,57,non mesuré
+4,77284,Meaux,redaction,codex,gpt-6.1-sol,non renvoyé par l'outil,2026-10-15T23:55:24Z,2026-10-15T23:57:03Z,99.2,réussi,32215,0,sans objet (Codex),4489,1921,non mesuré
+4,77284,Meaux,relecture,claude-code,claude-opus-5-5,claude-opus-5-5,2026-10-15T23:57:03Z,2026-10-15T23:57:28Z,24.3,réussi,39520,3430,36088,2083,1795,0.331058

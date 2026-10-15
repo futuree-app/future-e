@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "les groupes de destination réunissent des personnes distinctes",
+   "probleme": "La méthode ne dit pas pourquoi ces six communes ont été retenues. L'article donne leur liste, mais pas la règle de choix fixée par le dossier (communes de la même unité urbaine, au plus les six plus peuplées) pour `mobpro.voiture_selon_destination.communes_voisines`, alors que le point 7 demande d'expliquer chaque groupe comparé dans la méthode.",
+   "correction_minimale": "Ajouter dans la méthode : « Les six communes de travail nommées sont les communes les plus peuplées de l'unité urbaine de Meaux, au plus six. »"}
+]}
+```

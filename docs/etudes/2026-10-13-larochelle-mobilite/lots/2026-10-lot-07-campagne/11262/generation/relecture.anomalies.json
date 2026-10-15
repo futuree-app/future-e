@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "La carte aide à repérer des secteurs à examiner pendant vos recherches.",
+   "probleme": "L'article a pour titre « moins prendre la voiture ». Dans ce cadre, cette phrase fait des pratiques des actifs qui habitent chaque secteur (section 3, iris.voiture.min / iris.voiture.max) une recommandation de quartiers pour le lecteur. Or le dossier ne permet de lier un quartier à une pratique ni par une cause, ni par un conseil.",
+   "correction_minimale": "La carte détaille cette part pour chaque secteur."
+  }
+ ]
+}
