@@ -10,6 +10,8 @@
 import { NextResponse } from "next/server";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { codeGaspar } from "@/lib/georisques-flags";
+import { getCommuneEntry } from "@/lib/comparateur-vie";
+import { villePLM } from "@/lib/territoire/plm-communal";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction, buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS, CLIMAT_HORIZON } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
@@ -124,16 +126,37 @@ async function entreesHivers(insee: string): Promise<{ nom: string | null; e: En
   };
 }
 
+/** Cinq chiffres, ou 2A / 2B suivis de trois chiffres (Corse). L'ancienne forme acceptait « 1A234 ». */
+const FORMAT_INSEE = /^(?:\d{2}|2[AB])\d{3}$/;
+
+/**
+ * LA COMMUNE CANONIQUE D'UN CODE INSEE, par les référentiels du produit, sans réseau :
+ *   - Paris, Lyon, Marseille (75056, 69123, 13055) : `villePLM`, la règle du dossier Territoire (FUT-43) ;
+ *   - toute autre commune, arrondissements compris : l'index des communes (`getCommuneEntry`), celui du moteur et
+ *     des dossiers, chargé une fois et gardé en mémoire.
+ * `null` : code absent de ces référentiels (inexistant, ancien code d'une commune fusionnée, outre-mer que l'index
+ * ne couvre pas). On ne devine jamais une identité.
+ */
+async function communeCanonique(insee: string): Promise<{ insee: string; nom: string } | null> {
+  const plm = villePLM(insee);
+  if (plm) return { insee, nom: plm.nom };
+  const entree = await getCommuneEntry(insee).catch(() => null);
+  return entree ? { insee: entree.insee, nom: entree.nom } : null;
+}
+
 export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") return new NextResponse(null, { status: 404 });
   const u = new URL(req.url);
-  const insee = (u.searchParams.get("insee") ?? "").trim();
+  const insee = (u.searchParams.get("insee") ?? "").trim().toUpperCase();
   const cle = u.searchParams.get("cle") as CleePastille;
-  if (!/^\d[0-9AB]\d{3}$/.test(insee) || !CLES.includes(cle)) return NextResponse.json({ error: "requête invalide" }, { status: 400 });
+  if (!FORMAT_INSEE.test(insee) || !CLES.includes(cle)) return NextResponse.json({ error: "requete_invalide" }, { status: 400 });
+  // L'IDENTITÉ VIENT DU CODE, JAMAIS DU NAVIGATEUR : les paramètres `commune` et `libelle` ne sont plus lus.
+  const canon = await communeCanonique(insee);
+  if (!canon) return NextResponse.json({ error: "commune_inconnue" }, { status: 404 });
   const lieu: Lieu = {
     type: u.searchParams.get("type") === "adresse" ? "adresse" : "commune",
-    libelle: u.searchParams.get("libelle") ?? "",
-    commune: u.searchParams.get("commune") ?? "",
+    libelle: canon.nom,
+    commune: canon.nom,
     insee,
   };
   const debut = Date.now();
@@ -141,11 +164,9 @@ export async function GET(req: Request) {
   if (cle === "chaleur") {
     lecture = lireChaleur(lieu, await entreesChaleur(insee));
   } else if (cle === "hivers") {
-    const { nom, e } = await entreesHivers(insee);
-    lecture = lireHivers({ ...lieu, commune: nom ?? lieu.commune }, e);
+    lecture = lireHivers(lieu, (await entreesHivers(insee)).e);
   } else if (cle === "taille") {
-    const { nom, e } = await entreesTaille(insee);
-    lecture = lireTaille({ ...lieu, commune: nom ?? lieu.commune }, e);
+    lecture = lireTaille(lieu, (await entreesTaille(insee)).e);
   } else if (cle === "risques") {
     lecture = lireRisques(lieu, await risquesGaspar(insee));
   } else {

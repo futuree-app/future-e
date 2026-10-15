@@ -302,8 +302,9 @@ for (const reduit of [false, true]) {
 // ── Commune sans données climatiques (La Réunion, hors DRIAS métropole) ─────────────────────────
 {
   const { ctx, page } = await ouvrir(1440, 900, 1);
-  const r = await page.evaluate(async () => (await (await fetch("/dev/fut50/api/lecture?insee=99999&cle=chaleur&commune=Inconnue")).json()).lecture);
-  constats.push(`données absentes (code inexistant 99999) : ${r.pourVous.signal} · ${r.pourVous.texte}`);
+  // Code inconnu des référentiels : la route refuse d'inventer une identité (404), plus de lecture devinée.
+  const r = await page.evaluate(async () => { const x = await fetch("/dev/fut50/api/lecture?insee=99999&cle=chaleur&commune=Inconnue"); return { statut: x.status, corps: await x.json() }; });
+  constats.push(`code inconnu (99999) : ${r.statut} ${r.corps.error ?? ""}`);
   await ctx.close();
 }
 

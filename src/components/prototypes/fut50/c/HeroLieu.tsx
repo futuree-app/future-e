@@ -58,7 +58,7 @@ const TEINTE: Record<Signal, string> = {
   indisponible: TEINTE_REGISTRE.unknowns!,
 };
 
-type EtatLecture = LecturePastille | "chargement" | "erreur";
+type EtatLecture = LecturePastille | "chargement" | "erreur" | "inconnue";
 
 export function HeroLieu({ composition = "recommandee" }: { composition?: Composition }) {
   const pastilles = pastillesDe(composition);
@@ -145,6 +145,8 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     try {
       const q = new URLSearchParams({ insee: l.insee, cle, type: l.type, commune: l.commune, libelle: l.libelle });
       const res = await fetch(`/dev/fut50/api/lecture?${q}`);
+      // Commune absente des référentiels du produit : un état à part, sans « Réessayer » qui ne changerait rien.
+      if (res.status === 404) { setLectures((m) => ({ ...m, [k]: "inconnue" })); return; }
       if (!res.ok) throw new Error(String(res.status));
       const { lecture } = (await res.json()) as { lecture: LecturePastille };
       setLectures((m) => ({ ...m, [k]: lecture }));
@@ -300,6 +302,11 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
           // Changer de priorité ne remplace que son contenu.
           <div className={`${c.ouverture} ${ouvertureFraiche ? c.ouvertureFraiche : ""}`}>
             {lectureFocale === "chargement" || lectureFocale === undefined ? <Attente titre={`${libelleDe(focale)} · ${lieu.commune}`} />
+              : lectureFocale === "inconnue" ? (
+                <div className={c.lecture} role="alert">
+                  <p className={c.tempsTexte}>Cette commune n&apos;est pas encore couverte par l&apos;aperçu.</p>
+                </div>
+              )
               : lectureFocale === "erreur" ? (
                 <div className={c.lecture} role="alert">
                   <p className={c.tempsTexte}>La lecture n&apos;a pas pu être chargée.</p>

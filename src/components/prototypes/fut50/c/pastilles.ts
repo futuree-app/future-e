@@ -148,11 +148,35 @@ export type EntreesChaleur = {
  * UNE VALEUR AFFICHÉE NE FRANCHIT JAMAIS LE SEUIL QU'ELLE NE FRANCHIT PAS. Arrondir 24,6 nuits à « 25 » sous un
  * seuil de 25 contredirait la lecture « sous le seuil » : dans ce cas, on garde une décimale.
  */
-export function valeurAffichee(v: number, seuil: number): string {
-  const r = Math.round(v);
-  if (v < 1) return "moins de 1";
-  if ((r >= seuil) !== (v >= seuil)) return v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  return String(r);
+/**
+ * LA VALEUR AFFICHÉE NE CONTREDIT JAMAIS LA CLASSIFICATION. Le moteur classe sur la valeur NON arrondie
+ * (`>= seuil`). L'affichage essaie, dans l'ordre, l'entier puis une décimale, et retient la première forme qui
+ * reste du même côté du seuil que la valeur réelle. Si aucune ne le fait (24,96 → « 25 », puis « 25,0 »), il dit
+ * la relation elle-même : « moins de 25 » (ou « au moins N » pour un seuil non entier dépassé de peu). Aucune
+ * deuxième décimale : ce serait une précision que la donnée n'a pas.
+ *   - sous une occurrence par an : « moins de 1 » (si le seuil est au-dessus de 1) ;
+ *   - `seuil = Infinity` : pas de seuil (journées au-dessus de 30 °C), l'entier suffit.
+ * Contrat : `v` est fini (les faits climatiques filtrent les valeurs non finies ; `lireChaleur` les traite comme
+ * absentes). Une valeur non finie lève une erreur plutôt que d'afficher « NaN ».
+ */
+const estFini = (v: number | null | undefined): v is number => typeof v === "number" && Number.isFinite(v);
+
+export function valeurAffichee(v: number, seuil: number, precision: "entier" | "decimale" = "entier"): string {
+  if (!Number.isFinite(v)) throw new RangeError(`valeur climatique non finie : ${v}`);
+  const atteint = v >= seuil;
+  if (v < 1 && seuil > 1) return "moins de 1";
+  const dixieme = Math.round(v * 10) / 10;
+  // « entier » : le grand chiffre (l'entier d'abord, la décimale seulement si l'entier franchirait le seuil).
+  // « decimale » : la méthode, qui donne la valeur au dixième (« 23,4 pour un repère de 25 »), sous la même garantie.
+  const formes: [string, number][] = precision === "decimale"
+    ? [[dixieme.toLocaleString("fr-FR", { maximumFractionDigits: 1 }), dixieme]]
+    : [
+        [String(Math.round(v)), Math.round(v)],
+        [v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }), dixieme],
+      ];
+  for (const [texte, nombre] of formes) if ((nombre >= seuil) === atteint) return texte;
+  const s = seuil.toLocaleString("fr-FR");
+  return atteint ? `au moins ${s}` : `moins de ${s}`;
 }
 
 // ── LA GRAMMAIRE DE LA LECTURE DE CHALEUR (revue du 15/10, soir) ─────────────────────────────────────
@@ -225,7 +249,6 @@ export function phraseChaleur(e: EntreesChaleur, commune: string): { signal: Sig
 export function methodeChaleur(e: EntreesChaleur): string[] {
   const { jours, nuits } = e;
   const jAtteint = jours.projete! >= jours.seuil, nAtteint = nuits.projete! >= nuits.seuil;
-  const un = (v: number) => v.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
   let ici: string;
   if (jAtteint && nAtteint) ici = "Ici, les deux repères sont atteints.";
   else if (jAtteint || nAtteint) ici = `Ici, seul le repère ${nAtteint ? "des nuits tropicales" : "des journées au-dessus de 35 °C"} est atteint.`;
@@ -234,12 +257,12 @@ export function methodeChaleur(e: EntreesChaleur): string[] {
     // La mesure la plus proche de son repère, dite par sa valeur exacte : aucun qualificatif, aucun palier nouveau.
     const n = nuits.projete! / nuits.seuil >= jours.projete! / jours.seuil;
     const a = n ? nuits : jours;
-    ici = `Ici, aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des ${n ? "nuits tropicales" : "journées au-dessus de 35 °C"} (${un(a.projete!)} pour un repère de ${a.seuil}). Une commune peut se réchauffer beaucoup sans atteindre ces repères.`;
+    ici = `Ici, aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des ${n ? "nuits tropicales" : "journées au-dessus de 35 °C"} (${valeurAffichee(a.projete!, a.seuil, "decimale")} pour un repère de ${a.seuil}). Une commune peut se réchauffer beaucoup sans atteindre ces repères.`;
   }
   return [
     "Deux mesures du climat de la commune : les journées où il fait plus de 35 °C, et les nuits tropicales, où la température ne descend pas sous 20 °C. Elles sont projetées pour 2050, quand la France se serait réchauffée d'environ 2,7 °C, et comparées à la période 1976-2005, qui n'est pas la situation actuelle.",
     `futur•e signale une exposition à partir de ${jours.seuil} journées au-dessus de 35 °C, ou de ${nuits.seuil} nuits tropicales par an en 2050. Ce sont des repères propres à futur•e, pas des seuils sanitaires officiels. ${ici}`,
-    ...(e.jours30?.projete != null
+    ...(estFini(e.jours30?.projete)
       ? ["Les journées au-dessus de 30 °C, à afficher sous le premier chiffre, complètent la lecture : elles comprennent celles au-dessus de 35 °C, et n'entrent pas dans ce résultat."]
       : []),
   ];
@@ -248,7 +271,8 @@ export function methodeChaleur(e: EntreesChaleur): string[] {
 export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
   const suite = SUITE_ADRESSE(lieu);
   const { jours, nuits } = e;
-  if (e.verdict === "absent" || e.verdict === "uncertain" || jours.projete == null || nuits.projete == null) {
+  // Une valeur non finie (NaN, Infinity) est une donnée absente, jamais un nombre à afficher.
+  if (e.verdict === "absent" || e.verdict === "uncertain" || !estFini(jours.projete) || !estFini(nuits.projete)) {
     return {
       cle: "chaleur", commune: lieu.commune, fait: null,
       pourVous: e.verdict === "absent"
@@ -269,7 +293,7 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
   mesures[1]!.texte = `Et ${vn} ${mesures[1]!.unite} par an, sans descendre sous 20 °C, ${ref(nuits, true)}.`;
   // 30 °C : seulement si la valeur existe. Sans référence reconstructible, aucune comparaison n'est fabriquée.
   const j30 = e.jours30;
-  if (j30?.projete != null) {
+  if (j30 && estFini(j30.projete)) {
     const v30 = valeurAffichee(j30.projete, Infinity);
     const ref30 = j30.reference != null ? `contre ${e.referenceTexte(j30.reference, false)} sur 1976-2005` : "sans comparaison possible avec 1976-2005";
     mesures[0]!.bascule = {

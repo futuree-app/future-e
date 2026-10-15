@@ -472,16 +472,82 @@ test("30 °C indisponible : pas de contrôle, la lecture à 35 °C intacte ; ré
   assert.doesNotMatch(sansRef.legende, /contre/);
 });
 
-test("frontières exactes : la classification se fait sur la valeur non arrondie, l'affichage ne franchit jamais un seuil non franchi", () => {
+test("frontières exactes : la classification se fait sur la valeur non arrondie", () => {
   const axe = (j: number, n: number) => ({ gwl20: { h: "gwl20", v: { NORTX35D_yr: j, ATX35D_yr: 1, NORTR_yr: n, ATR_yr: 1 } } });
   assert.equal(classifyClimateComfort(buildClimatFacts(axe(7.99, 24.99))!).verdict, "under_threshold");
   assert.equal(classifyClimateComfort(buildClimatFacts(axe(8, 10))!).verdict, "unfavorable");
   assert.equal(classifyClimateComfort(buildClimatFacts(axe(2, 25))!).verdict, "unfavorable");
-  assert.equal(valeurAffichee(24.6, 25), "24,6", "24,6 sous un seuil de 25 ne s'affiche pas « 25 »");
-  assert.equal(valeurAffichee(24.4, 25), "24");
-  assert.equal(valeurAffichee(7.6, 8), "7,6");
-  assert.equal(valeurAffichee(8, 8), "8");
-  assert.equal(valeurAffichee(0.4, 8), "moins de 1");
+});
+
+test("arrondi : la valeur affichée ne franchit jamais le seuil, cas limites nommés", () => {
+  const cas: [number, number, string][] = [
+    // Journées au-dessus de 35 °C, seuil 8.
+    [7.6, 8, "7,6"], [7.99, 8, "moins de 8"], [7.999, 8, "moins de 8"], [8, 8, "8"], [8.01, 8, "8"],
+    // Nuits tropicales, seuil 25.
+    [24.4, 25, "24"], [24.6, 25, "24,6"], [24.94, 25, "24,9"], [24.96, 25, "moins de 25"], [24.99, 25, "moins de 25"],
+    [24.999, 25, "moins de 25"], [25, 25, "25"], [25.01, 25, "25"],
+    // Moins d'une occurrence par an, entiers, décimales habituelles, pas de seuil (30 °C).
+    [0, 25, "moins de 1"], [0.4, 8, "moins de 1"], [0.99, 8, "moins de 1"], [1, 8, "1"], [12, 25, "12"], [69.1, 25, "69"],
+    [23.4, 25, "23"], [2.8, 8, "3"], [67.9, Infinity, "68"],
+    // Un seuil non entier (aucun aujourd'hui) : la règle tient dans les deux sens.
+    [8.46, 8.45, "8,5"], [8.44, 8.43, "au moins 8,43"],
+  ];
+  // La méthode, au dixième, sous la même garantie.
+  for (const [v, seuil, attendu] of [[23.4, 25, "23,4"], [7.1, 8, "7,1"], [24.94, 25, "24,9"], [24.96, 25, "moins de 25"], [7.99, 8, "moins de 8"], [24, 25, "24"]] as const)
+    assert.equal(valeurAffichee(v, seuil, "decimale"), attendu, `méthode : ${v}`);
+  for (const [v, seuil, attendu] of cas) assert.equal(valeurAffichee(v, seuil), attendu, `${v} pour un seuil de ${seuil}`);
+  assert.throws(() => valeurAffichee(Number.NaN, 25), RangeError);
+  assert.throws(() => valeurAffichee(Infinity, 25), RangeError);
+});
+
+/** Le côté du seuil que DIT le texte affiché. */
+function coteAffiche(texte: string, seuil: number): boolean {
+  if (texte.startsWith("moins de ")) return false;
+  if (texte.startsWith("au moins ")) return true;
+  return Number(texte.replace(",", ".")) >= seuil;
+}
+
+test("arrondi, propriété : sur un balayage fin autour de 8 et de 25, l'affichage et la classification concordent toujours", () => {
+  for (const seuil of [8, 25, 8.45]) {
+    let n = 0;
+    for (let k = -30000; k <= 30000; k++) {
+      const v = Math.round((seuil + k / 10000) * 1e6) / 1e6; // pas de 0,0001 sur ±3, sans dérive de flottant
+      if (v < 0) continue;
+      for (const precision of ["entier", "decimale"] as const) {
+        const t = valeurAffichee(v, seuil, precision);
+        assert.equal(coteAffiche(t, seuil), v >= seuil, `${v} → « ${t} » (seuil ${seuil}, ${precision})`);
+      }
+      n++;
+    }
+    assert.ok(n > 50000);
+  }
+  // Et aux bords extrêmes du flottant juste sous le seuil.
+  for (const seuil of [8, 25]) assert.equal(valeurAffichee(seuil - Number.EPSILON * seuil, seuil), `moins de ${seuil}`);
+});
+
+test("arrondi, dans la lecture : 24,96 nuits s'affichent « moins de 25 », dans la mesure ET dans la méthode", () => {
+  const base = entreesReelles("17300");
+  const l = lireChaleur(SETE, { ...base, nuits: { projete: 24.96, reference: 5.1, seuil: 25 } });
+  assert.equal(l.fait!.mesures![1]!.valeur, "moins de 25");
+  assert.match(l.methode!.join(" "), /aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des nuits tropicales \(moins de 25 pour un repère de 25\)/);
+  assert.doesNotMatch(JSON.stringify(l), /25,0/);
+  // Une valeur non finie est une donnée absente, jamais « NaN ».
+  const nan = lireChaleur(SETE, { ...base, verdict: "under_threshold", nuits: { projete: Number.NaN, reference: 5.1, seuil: 25 } });
+  assert.equal(nan.pourVous.signal, "indisponible");
+  assert.doesNotMatch(JSON.stringify(nan), /NaN/);
+  const inf = lireChaleur(SETE, { ...base, jours30: { projete: Number.POSITIVE_INFINITY, reference: 6 } });
+  assert.equal(inf.fait!.mesures![0]!.bascule, undefined, "30 °C non fini : pas de bascule");
+});
+
+test("non-régression : La Rochelle, Nantes, Bordeaux, Nîmes gardent valeurs, classement et lecture", () => {
+  const attendu: Record<string, [string, string, string]> = {
+    "17300": ["3", "23", "sous_seuil"], "44109": ["4", "11", "sous_seuil"],
+    "33063": ["6", "28", "defavorable"], "30189": ["14", "69", "defavorable"],
+  };
+  for (const [insee, [j, n, signal]] of Object.entries(attendu)) {
+    const l = lireChaleur({ ...SETE, insee }, entreesReelles(insee));
+    assert.deepEqual([l.fait!.mesures![0]!.valeur, l.fait!.mesures![1]!.valeur, l.pourVous.signal], [j, n, signal], insee);
+  }
 });
 
 test("chaleur : donnée absente ou mesure manquante, aucune conclusion, et les deux cas se distinguent", () => {
