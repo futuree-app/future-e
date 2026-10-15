@@ -11,7 +11,7 @@ import { NextResponse } from "next/server";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { getGeorisquesSummary } from "@/lib/georisques";
 import { getClimatDataCommune } from "@/lib/drias-json";
-import { summerComfortAction, buildClimatFacts, classifyClimateComfort, CLIMAT_METRICS } from "@/lib/decision/climat-facts";
+import { summerComfortAction, buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS, CLIMAT_HORIZON } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
 import { formatTemperature, formatCompte } from "@/lib/accueil/recits";
 import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil/faits";
@@ -46,6 +46,13 @@ async function entreesChaleur(insee: string): Promise<EntreesChaleur> {
     verdict: classifyClimateComfort(f).verdict,
     jours: { projete: f.joursTresChauds.projete, reference: f.joursTresChauds.reference, seuil: f.joursTresChauds.threshold },
     nuits: { projete: f.nuitsTropicales.projete, reference: f.nuitsTropicales.reference, seuil: f.nuitsTropicales.threshold },
+    // Les journées au-dessus de 30 °C viennent du MÊME chargement (aucune requête au basculement), au même
+    // horizon, avec la reconstruction de référence du moteur. Elles ne passent pas par le classifieur.
+    jours30: (() => {
+      const sc = climat?.commune.s;
+      const v = sc?.[CLIMAT_HORIZON]?.v?.NORTX30D_yr;
+      return { projete: typeof v === "number" && Number.isFinite(v) ? v : null, reference: reconstructReference(sc, "NORTX30D_yr", "ATX30D_yr") };
+    })(),
     referenceTexte, limite: LIMITE_CLIMAT, gesteSansAdresse,
   };
 }

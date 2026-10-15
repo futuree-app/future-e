@@ -22,7 +22,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import { GlypheGrain, TEINTE_REGISTRE } from "@/components/releve/primitives";
 import { fr } from "../commun";
-import { pastillesDe, libelleDe, MOT_DU_SIGNAL, type CleePastille, type Composition, type Lieu, type LecturePastille, type Signal } from "./pastilles";
+import { pastillesDe, libelleDe, MOT_DU_SIGNAL, type CleePastille, type Composition, type Lieu, type LecturePastille, type MesureChaleur, type Signal } from "./pastilles";
 import c from "./c.module.css";
 
 type Suggestion = Lieu & { id: string; contexte: string };
@@ -361,13 +361,7 @@ function Lecture({ lecture, onglets }: {
             <h3 className={c.tempsTitre}>{lecture.fait.grain === "unite_urbaine" ? `Agglomération de ${lecture.commune}` : `À ${lecture.commune}`}</h3>
             {lecture.fait.mesures ? (
               <div className={c.mesures}>
-                {lecture.fait.mesures.map((m) => (
-                  <div key={m.unite} className={c.mesure} aria-hidden>
-                    <p className={c.mesureValeur}>{m.valeur}<span className={c.mesureUnite}>{m.unite}</span></p>
-                    <p className={c.mesureLegende}>{fr(m.legende)}</p>
-                  </div>
-                ))}
-                <p className={c.lectureSeule}>{lecture.fait.texte}</p>
+                {lecture.fait.mesures.map((m) => <Mesure key={m.unite} m={m} />)}
               </div>
             ) : lecture.fait.mesure ? (
               // La valeur en grand, jamais seule : son unité et sa légende la suivent ; le fait complet reste lu
@@ -416,5 +410,39 @@ function Lecture({ lecture, onglets }: {
         </div>
       </div>
     </article>
+  );
+}
+
+/**
+ * Un grand chiffre, et sa lecture alternative quand elle existe (les journées au-dessus de 30 °C).
+ *
+ * Les deux vues occupent la MÊME cellule de grille : le bloc prend la hauteur de la plus grande, rien ne bouge
+ * autour au basculement. Fondu seul (`--m-bascule`, 180 ms, nul en mouvement réduit) : le repère change, la
+ * donnée ne défile pas. L'état est local : le contenu de la lecture est remonté à chaque changement de commune
+ * ou de priorité (prop `key`), la vue revient donc toujours à 35 °C. Aucune requête : la valeur à 30 °C est
+ * arrivée avec la lecture.
+ */
+function Mesure({ m }: { m: MesureChaleur }) {
+  const [alt, setAlt] = useState(false);
+  const b = m.bascule;
+  const vues = b ? [{ id: "principale", v: m }, { id: "alternative", v: b }] : [{ id: "principale", v: m }];
+  return (
+    <div className={c.mesure}>
+      <div className={c.mesureVues}>
+        {vues.map(({ id, v }) => (
+          <div key={id} className={c.mesureVue} data-visible={(id === "alternative") === alt} aria-hidden>
+            <p className={c.mesureValeur}>{v.valeur}<span className={c.mesureUnite}>{v.unite}</span></p>
+            <p className={c.mesureLegende}>{fr(v.legende)}</p>
+          </div>
+        ))}
+      </div>
+      {/* Ce qui est lu : la vue affichée, et elle seule. Annoncé au basculement par la zone vivante du panneau. */}
+      {m.texte ? <p className={c.lectureSeule}>{alt && b ? b.texte : m.texte}</p> : null}
+      {b ? (
+        <button type="button" className={c.mesureBascule} onClick={() => setAlt((x) => !x)}>
+          {alt ? b.revenir : b.ouvrir}
+        </button>
+      ) : null}
+    </div>
   );
 }

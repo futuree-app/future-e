@@ -366,6 +366,19 @@
 @keyframes deploie { from { clip-path: inset(0 100% 0 0 round 4px); } to { clip-path: inset(0 0 0 0 round 4px); } }
 @keyframes repere { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
 .mesures { display: grid; gap: 18px; }
+/* Deux vues dans la même cellule : la hauteur est celle de la plus grande, aucun saut au basculement. */
+.mesureVues { display: grid; }
+.mesureVue { grid-area: 1 / 1; display: grid; gap: 4px; align-content: start; transition: opacity var(--m-bascule) ease, visibility 0s linear var(--m-bascule); }
+.mesureVue[data-visible="false"] { opacity: 0; visibility: hidden; }
+.mesureVue[data-visible="true"] { transition: opacity var(--m-bascule) ease, visibility 0s; }
+.mesureBascule {
+  justify-self: start; margin-top: 4px; min-height: 32px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: 15px; color: var(--r-texte);
+  text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px; border-radius: 3px;
+  transition: color var(--m-geste) ease;
+}
+.mesureBascule:hover { color: var(--r-encre); text-decoration-style: solid; }
+.mesureBascule:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
 @media (min-width: 480px) { .mesures { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; } }
 .mesures .mesureValeur { font-size: clamp(32px, 3vw, 40px); }
 .mesures .mesureLegende { font-size: 15px; }

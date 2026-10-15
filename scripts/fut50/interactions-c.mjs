@@ -148,7 +148,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
 
 
 // ── Chaleur : La Rochelle et Nîmes, même priorité, ordinateur et mobile ; en-tête fixe sur mobile ─────
-for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
+for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 780, 2]]) {
   for (const [saisie, nom, fichier] of [["La Rochelle", "La Rochelle", "la-rochelle"], ["Nîmes", "Nîmes", "nimes"]]) {
     const { ctx, page } = await ouvrir(largeur, hauteur, dpr);
     await choisirCommune(page, saisie, nom);
@@ -156,7 +156,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
     await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
     await lecturePrete(page);
     await page.waitForTimeout(1100);
-    await page.screenshot({ path: `${IMG}/c5-chaleur-${fichier}-${largeur}.jpg`, type: "jpeg", quality: 78 });
+    await page.screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-35.jpg`, type: "jpeg", quality: 78 });
     constats.push(`${largeur} ${nom} titre : ${await page.locator('[data-classement]').innerText()} (classement ${await page.locator('[data-classement]').getAttribute("data-classement")})`);
     const texte = (await page.locator('[aria-live="polite"] article').innerText()).replace(/\s+/g, " ");
     constats.push(`${largeur} ${nom} chaleur : ${texte.slice(0, 260)}`);
@@ -168,15 +168,99 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
       });
       constats.push(`${largeur} ${nom} défilement : titre de la lecture à ${pos.titre} px, bas de l'en-tête à ${pos.entete} px → ${pos.titre >= pos.entete ? "visible" : "MASQUÉ"}`);
     }
-    // L'explication de méthode, ouverte, capturée en entier (le panneau de lecture seul).
-    await page.getByText("Comment lire ce résultat ?").click();
-    await page.waitForTimeout(300);
-    await page.locator('[aria-live="polite"] article').screenshot({ path: `${IMG}/c5-chaleur-${fichier}-${largeur}-methode.jpg`, type: "jpeg", quality: 78 });
+    // ── Et au-dessus de 30 °C ? Le geste, ses effets, et ce qui ne doit pas bouger. ──
+    const mesurer = () => page.evaluate(() => {
+      const art = document.querySelector('[aria-live="polite"] article');
+      const blocs = [...document.querySelectorAll('[aria-live="polite"] article [data-visible="true"]')];
+      const nuit = blocs.at(-1)?.getBoundingClientRect();
+      const vue = blocs[0];
+      return {
+        panneau: Math.round(art.getBoundingClientRect().height),
+        nuits: nuit ? `${Math.round(nuit.left)},${Math.round(nuit.top)},${Math.round(nuit.height)}` : "?",
+        nuitsTexte: blocs.at(-1)?.innerText.replace(/\s+/g, " "),
+        valeur: vue?.innerText.replace(/\s+/g, " "),
+        lu: vue?.parentElement?.parentElement?.querySelector(":scope > p[class*=lectureSeule]")?.textContent,
+        debord: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    });
+    const bouton = page.getByRole("button", { name: "Et au-dessus de 30 °C ?" });
+    await bouton.scrollIntoViewIfNeeded();
+    const avant = await mesurer();
+    let requetes = 0;
+    const urls = [];
+    const compter = (r) => { requetes++; urls.push(r.url().replace("http://localhost:3050", "")); };
+    page.on("request", compter);
+    await bouton.click();
+    await page.waitForTimeout(400);
+    const apres = await mesurer();
+    const focus = await page.evaluate(() => document.activeElement?.textContent);
+    page.off("request", compter);
+    await page.screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-30.jpg`, type: "jpeg", quality: 78 });
+    constats.push(`${largeur} ${nom} 30 °C : « ${avant.valeur} » → « ${apres.valeur} » ; lu : « ${apres.lu} » ; hauteur ${avant.panneau} → ${apres.panneau} px ; nuits ${avant.nuits} → ${apres.nuits} (${avant.nuitsTexte === apres.nuitsTexte ? "texte identique" : "TEXTE CHANGÉ"}) ; requêtes ${requetes}${urls.length ? ` (${urls.join(", ")})` : ""} ; focus « ${focus} » ; débordement ${apres.debord} px`);
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(400);
+    const retour = await mesurer();
+    constats.push(`${largeur} ${nom} retour (Entrée) : « ${retour.valeur} » ; hauteur ${retour.panneau} px`);
+    if (largeur === 1440) {
+      // L'explication de méthode, ouverte, capturée en entier (le panneau de lecture seul).
+      await page.getByText("Comment lire ce résultat ?").click();
+      await page.waitForTimeout(300);
+      await page.locator('[aria-live="polite"] article').screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-methode.jpg`, type: "jpeg", quality: 78 });
+    }
 
     await ctx.close();
   }
 }
 
+
+
+// ── 30 °C : clavier, mouvement réduit, changement de commune et de priorité ─────────────────────
+for (const reduit of [false, true]) {
+  const { ctx, page } = await ouvrir(390, 844, 2);
+  if (reduit) await page.emulateMedia({ reducedMotion: "reduce" });
+  await choisirCommune(page, "La Rochelle", "La Rochelle");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
+  await lecturePrete(page);
+  await page.locator('button[aria-pressed="true"]').first().focus();
+  let tabs = 0;
+  for (; tabs < 12; tabs++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement?.textContent === "Et au-dessus de 30 °C ?")) break; }
+  const contour = await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle);
+  const duree = await page.evaluate(() => getComputedStyle(document.querySelector("[data-visible]")).transitionDuration);
+  await page.keyboard.press("Enter");
+  const a30 = await page.evaluate(() => document.activeElement?.textContent);
+  await page.keyboard.press(" ");
+  const a35 = await page.evaluate(() => document.activeElement?.textContent);
+  constats.push(`30 °C au clavier${reduit ? " (mouvement réduit)" : ""} : atteint en ${tabs + 1} tabulation(s), contour ${contour}, transition ${duree} ; Entrée → « ${a30} », Espace → « ${a35} »`);
+  if (!reduit) {
+    // Basculé à 30 °C, puis une autre priorité, puis retour : la lecture revient à 35 °C.
+    await page.keyboard.press("Enter");
+    await page.getByRole("button", { name: "Avoir des hivers doux" }).click();
+    await lecturePrete(page);
+    await page.getByRole("tab", { name: "Éviter les fortes chaleurs" }).click();
+    await lecturePrete(page);
+    await page.waitForTimeout(500);
+    if (!(await page.locator('[data-visible="true"]').count())) {
+      await page.screenshot({ path: `${IMG}/_debug-priorite.jpg`, type: "jpeg", quality: 70 });
+      constats.push(`DEBUG priorité : ${(await page.locator('[aria-live="polite"]').innerText()).replace(/\s+/g, " ").slice(0, 400)}`);
+    }
+    const apresPriorite = await page.locator('[data-visible="true"]').first().innerText({ timeout: 5000 }).catch(() => "ABSENT");
+    // Basculé à 30 °C, puis une autre commune.
+    await page.getByRole("button", { name: "Et au-dessus de 30 °C ?" }).click();
+    await page.getByRole("button", { name: "Changer de commune" }).click();
+    await choisirCommune(page, "Nîmes", "Nîmes");
+    await page.keyboard.press("Enter");
+    // Les priorités choisies survivent au changement de commune : on ne reclique que si elle n'est plus active.
+    const chaleur = page.getByRole("button", { name: "Éviter les fortes chaleurs" });
+    if ((await chaleur.getAttribute("aria-pressed")) !== "true") await chaleur.click();
+    await lecturePrete(page);
+    await page.waitForTimeout(800);
+    constats.push(`30 °C, commune changée : lecture de « ${(await page.locator('[aria-live="polite"] article h2').innerText().catch(() => "?"))} »`);
+    const apresCommune = await page.locator('[data-visible="true"]').first().innerText();
+    constats.push(`30 °C, état : après changement de priorité « ${apresPriorite.replace(/\s+/g, " ").slice(0, 40)} » ; après changement de commune « ${apresCommune.replace(/\s+/g, " ").slice(0, 40)} »`);
+  }
+  await ctx.close();
+}
 
 // ── « Comment lire ce résultat ? » au clavier, et sous mouvement réduit ────────────────────────────
 for (const reduit of [false, true]) {

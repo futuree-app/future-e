@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, valeurAffichee, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
-import { buildClimatFacts, classifyClimateComfort, CLIMAT_METRICS } from "../../../../lib/decision/climat-facts.ts";
+import { buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS } from "../../../../lib/decision/climat-facts.ts";
 import { CAS_SETE } from "../cas-sete.ts";
 
 const SETE: Lieu = { type: "commune", libelle: "Sète", commune: "Sète", insee: "34301" };
@@ -189,7 +189,7 @@ test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l
 
 // ── La chaleur : données réelles, frontières exactes, même lecture pour toutes les communes ──────────────
 
-const COL = { NORTX35D_yr: "column08", ATX35D_yr: "column23", NORTR_yr: "column10", ATR_yr: "column25" } as const;
+const COL = { NORTX35D_yr: "column08", ATX35D_yr: "column23", NORTX30D_yr: "column09", ATX30D_yr: "column24", NORTR_yr: "column10", ATR_yr: "column25" } as const;
 const DRIAS = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
 function entreesReelles(insee: string): EntreesChaleur {
   const sc: Record<string, { h: string; v: Record<string, number> }> = {};
@@ -201,6 +201,8 @@ function entreesReelles(insee: string): EntreesChaleur {
     verdict: classifyClimateComfort(f).verdict,
     jours: { projete: f.joursTresChauds.projete, reference: f.joursTresChauds.reference, seuil: f.joursTresChauds.threshold },
     nuits: { projete: f.nuitsTropicales.projete, reference: f.nuitsTropicales.reference, seuil: f.nuitsTropicales.threshold },
+    // Comme la route : la valeur gwl20 et la référence reconstruite par la fonction du moteur.
+    jours30: { projete: sc.gwl20?.v.NORTX30D_yr ?? null, reference: reconstructReference(sc, "NORTX30D_yr", "ATX30D_yr") },
     referenceTexte: (v) => (v < 1 ? "moins d'une" : String(Math.round(v))),
     limite: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
     gesteSansAdresse: GESTE,
@@ -215,71 +217,105 @@ test("seuils de la règle du moteur : 8 jours au-dessus de 35 °C, 25 nuits trop
 // Le vocabulaire du moteur ne remonte jamais dans le texte visible ; il vit dans « Comment lire ce résultat ? ».
 const JARGON = /seuil|signalement|indicateur|convention|favorable|classement/i;
 const visible = (l: ReturnType<typeof lireChaleur>) => `${l.pourVous.titre} ${l.pourVous.texte}`;
+const chaleurDe = (insee: string, commune = insee) => lireChaleur({ ...SETE, commune, insee }, entreesReelles(insee));
 
-test("La Rochelle (2,8 j et 23,4 nuits, sous les deux seuils) : le titre dit les nuits, jamais un verdict ni un seuil franchi", () => {
+test("La Rochelle (2,8 j et 23,4 nuits, sous les deux seuils) : ce que la commune gagnerait, en nombres concrets", () => {
   const e = entreesReelles("17300");
   assert.equal(e.verdict, "under_threshold");
-  assert.equal(e.nuits.projete, 23.4);
-  const l = lireChaleur({ ...SETE, commune: "La Rochelle", insee: "17300" }, e);
+  const l = chaleurDe("17300", "La Rochelle");
   assert.equal(l.pourVous.signal, "sous_seuil", "le classement reste dans la donnée");
   assert.equal(l.pourVous.titre, "Des nuits chaudes plus fréquentes");
-  // 23,4 / 5,1 = 4,6 : « environ cinq fois », arithmétique sur les valeurs affichées.
-  assert.match(l.pourVous.texte, /^Les nuits tropicales seraient environ cinq fois plus fréquentes qu'en 1976-2005\. Cela ne signifie pas que les étés resteront frais\.$/);
+  // 23,4 − 5,1 = 18,3 nuits ; 2,8 − 0,3 = 2,5 journées : l'écart entre les deux chiffres affichés, arrondi.
+  assert.equal(l.pourVous.texte, "À l'horizon 2050, la commune compterait en moyenne environ 18 nuits tropicales et 3 journées au-dessus de 35 °C de plus par an qu'en 1976-2005. Les journées au-dessus de 35 °C y étaient presque absentes sur cette période.");
   assert.doesNotMatch(visible(l), JARGON);
   assert.doesNotMatch(l.pourVous.texte, /correspond mal/, "aucune conclusion défavorable sous les seuils");
-  // La méthode situe la mesure la plus proche par sa valeur exacte, sans qualificatif.
-  assert.match(l.methode!.join(" "), /aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des nuits tropicales \(23,4 pour un repère de 25\)/);
-  assert.match(l.methode!.join(" "), /pas des seuils sanitaires officiels/);
+  assert.match(l.methode!.join(" "), /nuits tropicales \(23,4 pour un repère de 25\)/);
   assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["3", "23"]);
-  assert.match(l.fait!.mesures![1]!.legende, /contre 5 sur 1976-2005/);
 });
 
-test("Nîmes (14,4 j et 69,1 nuits, les deux seuils atteints) : jour et nuit nommés, la conclusion relie à la priorité", () => {
-  const l = lireChaleur({ ...SETE, commune: "Nîmes", insee: "30189" }, entreesReelles("30189"));
+test("Nîmes (14,4 j et 69,1 nuits) : les gains, le contexte « déjà nombreuses » fondé sur le seuil existant, la conséquence", () => {
+  const l = chaleurDe("30189", "Nîmes");
   assert.equal(l.pourVous.signal, "defavorable");
   assert.equal(l.pourVous.titre, "Des étés plus chauds, de jour comme de nuit");
-  assert.equal(l.pourVous.texte, "Les nuits tropicales seraient environ deux fois plus fréquentes qu'en 1976-2005, et les journées au-dessus de 35 °C environ six fois plus. Cette évolution correspond mal à votre souhait d'éviter les fortes chaleurs.");
+  // Référence des nuits 33 ≥ seuil 25 : « déjà nombreuses » ne s'appuie sur aucun palier nouveau.
+  assert.equal(l.pourVous.texte, "À l'horizon 2050, la commune compterait en moyenne environ 36 nuits tropicales et 12 journées au-dessus de 35 °C de plus par an qu'en 1976-2005. Les nuits tropicales y étaient déjà nombreuses. Cette évolution correspond mal à votre souhait d'éviter les fortes chaleurs.");
   assert.doesNotMatch(visible(l), JARGON);
-  assert.match(l.methode!.join(" "), /Ici, les deux repères sont atteints\./);
-  assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["14", "69"]);
 });
 
-test("Bordeaux (6,3 j et 28,1 nuits, seuil des nuits seul) : le texte ne parle que de l'axe qui fonde le classement", () => {
-  const l = lireChaleur({ ...SETE, commune: "Bordeaux", insee: "33063" }, entreesReelles("33063"));
+test("Bordeaux (seuil des nuits seul) : le texte ne raconte que l'axe qui fonde le classement", () => {
+  const l = chaleurDe("33063", "Bordeaux");
   assert.equal(l.pourVous.signal, "defavorable");
-  assert.equal(l.pourVous.titre, "Des nuits chaudes plus fréquentes");
-  assert.doesNotMatch(l.pourVous.texte, /journées/);
+  assert.equal(l.pourVous.texte, "À l'horizon 2050, la commune compterait en moyenne environ 21 nuits tropicales de plus par an qu'en 1976-2005. Cette évolution correspond mal à votre souhait d'éviter les fortes chaleurs.");
   assert.match(l.methode!.join(" "), /seul le repère des nuits tropicales est atteint/);
-  assert.equal(l.fait!.mesures!.length, 2, "les jours restent affichés en chiffres");
 });
 
-test("Nantes (4,1 j depuis 0,5) : une mesure presque absente qui apparaît se dit sans promettre « chaque été »", () => {
-  const l = lireChaleur({ ...SETE, commune: "Nantes", insee: "44109" }, entreesReelles("44109"));
-  assert.equal(l.pourVous.titre, "Des journées très chaudes plus fréquentes");
-  assert.match(l.pourVous.texte, /presque absentes sur 1976-2005, reviendraient plusieurs fois par an en moyenne/);
-  assert.doesNotMatch(l.pourVous.texte, /chaque été/);
-  assert.doesNotMatch(visible(l), JARGON);
+test("Nantes et Pau : des profils différents, des phrases différentes, la proximité de Pau restée dans la méthode", () => {
+  const nantes = chaleurDe("44109", "Nantes"), pau = chaleurDe("64445", "Pau");
+  assert.match(nantes.pourVous.texte, /environ 9 nuits tropicales et 4 journées au-dessus de 35 °C de plus par an/);
+  assert.match(nantes.pourVous.texte, /presque absentes sur cette période/);
+  assert.equal(pau.pourVous.texte, "À l'horizon 2050, la commune compterait en moyenne environ 15 nuits tropicales et 6 journées au-dessus de 35 °C de plus par an qu'en 1976-2005.");
+  assert.match(pau.methode!.join(" "), /journées au-dessus de 35 °C \(7,1 pour un repère de 8\)/);
 });
 
-test("Pau (7,1 j pour un seuil de 8) : la proximité vit dans la méthode, chiffrée, jamais dans un verdict", () => {
-  const l = lireChaleur({ ...SETE, commune: "Pau", insee: "64445" }, entreesReelles("64445"));
-  assert.equal(l.pourVous.signal, "sous_seuil");
-  assert.equal(l.pourVous.titre, "Des journées très chaudes plus fréquentes");
-  assert.match(l.methode!.join(" "), /journées au-dessus de 35 °C \(7,1 pour un repère de 8\)/);
-});
-
-test("valeurs très faibles (La Condamine-Châtelard, 0 j et 0 nuit) : ni hausse inventée, ni confort promis", () => {
-  const l = lireChaleur({ ...SETE, commune: "La Condamine-Châtelard", insee: "04062" }, entreesReelles("04062"));
+test("valeurs très faibles (La Condamine-Châtelard) : la question des chaleurs modérées est répondue par la donnée à 30 °C", () => {
+  const l = chaleurDe("04062");
   assert.equal(l.pourVous.titre, "Des fortes chaleurs qui resteraient exceptionnelles");
-  assert.match(l.pourVous.texte, /Cela ne dit rien des épisodes de chaleur plus modérés/);
+  assert.match(l.pourVous.texte, /Les journées au-dessus de 30 °C y resteraient elles aussi sous une par an\./);
   assert.doesNotMatch(l.methode!.join(" "), /s'en approche/);
 });
 
-test("grammaire : aucun qualificatif d'intensité sans convention (fort, nettement, peu nombreux, difficile)", () => {
+test("grammaire : ni multiplicateur, ni formule défensive automatique, ni durée continue ou effet sanitaire", () => {
   for (const insee of ["17300", "30189", "33063", "44109", "64445", "04062"]) {
-    const l = lireChaleur({ ...SETE, insee }, entreesReelles(insee));
-    assert.doesNotMatch(visible(l), /fortement|nettement|peu nombreu|difficile|bien plus/, insee);
+    const t = visible(chaleurDe(insee));
+    assert.doesNotMatch(t, /fois plus|fortement|nettement|peu nombreu|difficile|bien plus/, insee);
+    assert.doesNotMatch(t, /resteront frais/, insee);
+    assert.doesNotMatch(t, /d'affilée|consécuti|semaines|mois|santé|sanitaire|cette année/, insee);
   }
+});
+
+test("une référence non reconstructible : aucune comparaison inventée, ni « stable » ni gain", () => {
+  const e = { ...entreesReelles("17300"), jours: { projete: 2.8, reference: null, seuil: 8 }, nuits: { projete: 23.4, reference: null, seuil: 25 } };
+  const l = lireChaleur(SETE, e);
+  assert.doesNotMatch(l.pourVous.texte, /de plus par an|même niveau|presque absentes/);
+  assert.equal(l.pourVous.texte, "La comparaison avec 1976-2005 n'est pas disponible pour cette commune.");
+  assert.match(l.fait!.mesures![0]!.legende, /référence 1976-2005 non lisible/);
+});
+
+// ── Et au-dessus de 30 °C ? ────────────────────────────────────────────────────────────────────
+
+test("30 °C, La Rochelle et Nîmes : valeurs gwl20 réelles, référence du moteur, inclusion des 35 °C dite", () => {
+  const r = chaleurDe("17300").fait!.mesures![0]!.bascule!;
+  // NORTX30D_yr gwl20 = 18 ; référence = médiane(13,6−7,3 ; 18−11,3 ; 29,9−23,9) = 6,3.
+  assert.equal(r.valeur, "18");
+  assert.equal(r.legende, "au-dessus de 30 °C à l'horizon 2050, dont 3 au-dessus de 35 °C ; contre 6 sur 1976-2005");
+  const n = chaleurDe("30189").fait!.mesures![0]!.bascule!;
+  assert.equal(n.valeur, "68");
+  assert.match(n.legende, /dont 14 au-dessus de 35 °C ; contre 36 sur 1976-2005/);
+  assert.equal(r.ouvrir, "Et au-dessus de 30 °C ?");
+  assert.equal(r.revenir, "Revenir à 35 °C");
+});
+
+test("30 °C : n'entre ni dans le classement, ni dans le titre, ni dans le texte, ni dans les nuits", () => {
+  for (const insee of ["17300", "30189", "33063", "44109", "64445"]) {
+    const e = entreesReelles(insee);
+    const avec = lireChaleur(SETE, e), sans = lireChaleur(SETE, { ...e, jours30: undefined });
+    assert.equal(avec.pourVous.signal, sans.pourVous.signal, insee);
+    assert.equal(avec.pourVous.titre, sans.pourVous.titre, insee);
+    assert.equal(avec.pourVous.texte, sans.pourVous.texte, insee);
+    assert.deepEqual(avec.fait!.mesures![1], sans.fait!.mesures![1], insee);
+    assert.match(avec.methode!.join(" "), /comprennent celles au-dessus de 35 °C, et n'entrent pas dans ce résultat/);
+    assert.doesNotMatch(sans.methode!.join(" "), /30 °C/);
+  }
+});
+
+test("30 °C indisponible : pas de contrôle, la lecture à 35 °C intacte ; référence absente : aucune comparaison fabriquée", () => {
+  const base = entreesReelles("17300");
+  const sansValeur = lireChaleur(SETE, { ...base, jours30: { projete: null, reference: 6.3 } });
+  assert.equal(sansValeur.fait!.mesures![0]!.bascule, undefined);
+  assert.equal(sansValeur.fait!.mesures![0]!.valeur, "3");
+  const sansRef = lireChaleur(SETE, { ...base, jours30: { projete: 18, reference: null } }).fait!.mesures![0]!.bascule!;
+  assert.match(sansRef.legende, /sans comparaison possible avec 1976-2005$/);
+  assert.doesNotMatch(sansRef.legende, /contre/);
 });
 
 test("frontières exactes : la classification se fait sur la valeur non arrondie, l'affichage ne franchit jamais un seuil non franchi", () => {
