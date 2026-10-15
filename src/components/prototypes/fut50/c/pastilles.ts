@@ -89,7 +89,7 @@ export type LecturePastille = {
     /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
     mesures?: MesureChaleur[];
   } | null;
-  pourVous: { signal: Signal; texte: string; titre?: string };
+  pourVous: { signal: Signal; texte: string };
   /** L'explication de méthode, consultable (« Comment lire ce résultat ? »). Ne répète pas les chiffres affichés. */
   methode?: string[];
   aVerifier: string;
@@ -101,8 +101,8 @@ export const MOT_DU_SIGNAL: Record<Signal, string> = {
   defavorable: "Plutôt défavorable",
   favorable: "Plutôt favorable",
   neutre: "Ni favorable, ni défavorable",
-  // « Sous les seuils » n'est PAS « favorable » : un seuil de signalement est une convention de lecture.
-  sous_seuil: "Sous les seuils de signalement",
+  // Sous les seuils n'est PAS « favorable » : la chaleur progresse sans atteindre ce que futur•e signale.
+  sous_seuil: "À surveiller",
   information: "À savoir",
   adresse: "Se lit à l'adresse",
   indisponible: "Donnée indisponible",
@@ -164,75 +164,46 @@ export function valeurAffichee(v: number, seuil: number): string {
 // Aucun mot comme « fort », « nettement » ou « peu » : ils demanderaient une convention qui n'existe pas.
 
 type Axe = "jours" | "nuits";
-const NOM: Record<Axe, { un: string; plusieurs: string; sujet: string }> = {
-  jours: { un: "journée au-dessus de 35 °C", plusieurs: "journées au-dessus de 35 °C", sujet: "Les journées au-dessus de 35 °C" },
-  nuits: { un: "nuit tropicale", plusieurs: "nuits tropicales", sujet: "Les nuits tropicales" },
-};
 
-/** Ce que la commune gagnerait par an, en moyenne : projeté moins référence reconstruite (médiane des trois paliers,
- *  `reconstructReference`), donc exactement l'écart entre les deux chiffres affichés. `null` sans référence. */
+/** Ce que la commune gagnerait par an, en moyenne : projeté moins référence reconstruite. `null` sans référence. */
 const gain = (a: AxeChaleur) => (a.projete != null && a.reference != null ? a.projete - a.reference : null);
-const quantite = (k: Axe, n: number, avecEnviron: boolean) => {
-  const r = Math.round(n);
-  return `${avecEnviron ? "environ " : ""}${r === 1 ? "une" : r} ${r === 1 ? NOM[k].un : NOM[k].plusieurs}`;
-};
-
-const TITRE_AXE = { jours: "Des journées très chaudes plus fréquentes", nuits: "Des nuits chaudes plus fréquentes" } as const;
+const MOT_AXE: Record<Axe, string> = { jours: "les journées très chaudes", nuits: "les nuits chaudes" };
 
 /**
- * La phrase principale raconte ce que les chiffres affichés ne disent pas d'eux-mêmes : COMBIEN de journées et de
- * nuits la commune gagnerait par an, en moyenne (l'écart entre les deux chiffres affichés, arrondi). Plus aucun multiplicateur.
- * Contextes possibles, chacun fondé sur une convention existante :
- *   - « presque absentes » : une référence sous 1 par an (le palier « moins d'un » de l'accueil) ;
- *   - « déjà nombreuses »  : une référence qui atteignait DÉJÀ le seuil du moteur sur 1976-2005 ;
- *   - « à peu près au même niveau » : un gain sous 1 par an (même palier).
- * Jamais de durée continue, d'année précise ni d'effet sanitaire : ce sont des moyennes annuelles.
+ * LA RÉPONSE À LA PRIORITÉ (revue utilisateur du 15/10, soir) : une pastille, puis au plus une phrase courte,
+ * qui interprète sans jamais reformuler les nombres affichés juste au-dessus.
+ *
+ *   classement du moteur     | pastille             | ce qui la fonde
+ *   unfavorable              | Plutôt défavorable   | au moins un axe atteint le seuil (`classifyClimateComfort`)
+ *   under_threshold, rare    | Plutôt favorable     | les DEUX mesures sous une par an même en 2050 (palier existant
+ *                            |                      | « moins d'un » de l'accueil)
+ *   under_threshold, sinon   | À surveiller         | sous les seuils, mais des fortes chaleurs présentes : un verdict
+ *                            |                      | positif ne serait pas honnête (La Rochelle : 23 nuits pour 25)
+ *   absent / uncertain       | Donnée indisponible  | (traité dans `lireChaleur`)
+ *
+ * « d'abord la nuit » désigne l'axe dont l'écart avec 1976-2005 est le plus grand : une comparaison des chiffres
+ * affichés, sans palier nouveau.
  */
-function phraseGains(e: EntreesChaleur, axes: Axe[]): string[] {
-  const axe = { jours: e.jours, nuits: e.nuits };
-  const lisibles = axes.filter((k) => (gain(axe[k]) ?? 0) >= 1).sort((a, b) => gain(axe[b])! - gain(axe[a])!);
-  const phrases: string[] = [];
-  if (lisibles.length) {
-    const q = lisibles.map((k, i) => quantite(k, gain(axe[k])!, i === 0)).join(" et ");
-    phrases.push(`À l'horizon 2050, la commune compterait en moyenne ${q} de plus par an qu'en 1976-2005.`);
-  }
-  for (const k of axes) {
-    const a = axe[k];
-    if (a.reference == null) continue;
-    if (lisibles.includes(k) && a.reference < 1) phrases.push(`${NOM[k].sujet} y étaient presque absentes sur cette période.`);
-    else if (a.reference >= a.seuil) phrases.push(`${NOM[k].sujet} y étaient déjà nombreuses${lisibles.includes(k) ? "" : ", et le resteraient"}.`);
-    else if (!lisibles.includes(k)) phrases.push(`${NOM[k].sujet} resteraient à peu près au même niveau.`);
-  }
-  return phrases;
-}
-
-export function phraseChaleur(e: EntreesChaleur): { signal: Signal; titre: string; texte: string } {
+export function phraseChaleur(e: EntreesChaleur): { signal: Signal; texte: string } {
   const { jours, nuits } = e;
   if (jours.projete! < 1 && nuits.projete! < 1) {
-    // Les épisodes plus modérés : la donnée à 30 °C, quand elle existe, répond à la question au lieu de la laisser ouverte.
-    const j30 = e.jours30?.projete;
-    const modere = j30 == null ? "Cela ne dit rien des épisodes de chaleur plus modérés."
-      : j30 < 1 ? "Les journées au-dessus de 30 °C y resteraient elles aussi sous une par an."
-      : "Pour les épisodes plus modérés, regardez les journées au-dessus de 30 °C.";
-    return { signal: "sous_seuil", titre: "Des fortes chaleurs qui resteraient exceptionnelles", texte: `Moins d'une journée au-dessus de 35 °C et moins d'une nuit tropicale par an, même à l'horizon 2050. ${modere}` };
+    return { signal: "favorable", texte: "Les fortes chaleurs resteraient exceptionnelles ici, même en 2050." };
   }
   const axe = { jours, nuits };
-  const parGain = (["nuits", "jours"] as Axe[]).sort((a, b) => (gain(axe[b]) ?? -1) - (gain(axe[a]) ?? -1));
   if (e.verdict === "unfavorable") {
-    // On raconte les axes qui atteignent le seuil du moteur, et seulement eux : ce sont eux qui fondent le classement.
-    const retenus = parGain.filter((k) => axe[k].projete! >= axe[k].seuil);
+    const atteints = (["nuits", "jours"] as Axe[]).filter((k) => axe[k].projete! >= axe[k].seuil);
     return {
       signal: "defavorable",
-      titre: retenus.length === 2 ? "Des étés plus chauds, de jour comme de nuit" : TITRE_AXE[retenus[0]!],
-      texte: [...phraseGains(e, retenus), "Cette évolution correspond mal à votre souhait d'éviter les fortes chaleurs."].join(" "),
+      texte: atteints.length === 2
+        ? "Les journées très chaudes comme les nuits chaudes dépassent ce que futur•e signale."
+        : `Ce sont ${MOT_AXE[atteints[0]!]} qui dépassent ce que futur•e signale.`,
     };
   }
-  const k = parGain.find((x) => (gain(axe[x]) ?? 0) >= 1) ?? null;
-  return {
-    signal: "sous_seuil",
-    titre: k ? TITRE_AXE[k] : "Pas de hausse lisible sur ces deux mesures",
-    texte: phraseGains(e, ["nuits", "jours"]).join(" ") || "La comparaison avec 1976-2005 n'est pas disponible pour cette commune.",
-  };
+  const gj = gain(jours), gn = gain(nuits);
+  if (gj == null || gn == null) return { signal: "sous_seuil", texte: "Sans atteindre ce que futur•e signale, faute de comparaison avec 1976-2005 pour en dire plus." };
+  if (gj < 1 && gn < 1) return { signal: "sous_seuil", texte: "Les fortes chaleurs resteraient à peu près au niveau de 1976-2005, sans atteindre ce que futur•e signale." };
+  const dabord = gn >= gj ? "d'abord la nuit" : "d'abord le jour";
+  return { signal: "sous_seuil", texte: `Les fortes chaleurs progresseraient, ${dabord}, sans atteindre ce que futur•e signale.` };
 }
 
 /** « Comment lire ce résultat ? » : la méthode, sans répéter les chiffres affichés au-dessus. */
@@ -266,8 +237,8 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
     return {
       cle: "chaleur", commune: lieu.commune, fait: null,
       pourVous: e.verdict === "absent"
-        ? { signal: "indisponible", titre: "Pas de projection de chaleur pour cette commune", texte: "Sans ces données, nous ne pouvons rien dire de ses étés futurs : une absence de donnée n'est pas une bonne nouvelle." }
-        : { signal: "indisponible", titre: "Des projections de chaleur incomplètes", texte: "Une des deux mesures manque pour cette commune : nous ne tirons aucune conclusion de celle qui reste." },
+        ? { signal: "indisponible", texte: "Sans ces données, nous ne pouvons rien dire de ses étés futurs : une absence de donnée n'est pas une bonne nouvelle." }
+        : { signal: "indisponible", texte: "Une des deux mesures manque pour cette commune : nous ne tirons aucune conclusion de celle qui reste." },
       aVerifier: "Le dossier de la commune présente les projections disponibles, avec leur période de référence.",
       suite,
     };

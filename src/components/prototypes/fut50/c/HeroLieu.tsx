@@ -52,7 +52,7 @@ const TEINTE: Record<Signal, string> = {
   defavorable: TEINTE_REGISTRE.mismatches!,
   favorable: TEINTE_REGISTRE.alignments!,
   neutre: TEINTE_REGISTRE.unknowns!,
-  sous_seuil: TEINTE_REGISTRE.unknowns!,
+  sous_seuil: TEINTE_REGISTRE.verifications!,
   information: TEINTE_REGISTRE.verifications!,
   adresse: TEINTE_REGISTRE.verifications!,
   indisponible: TEINTE_REGISTRE.unknowns!,
@@ -382,13 +382,8 @@ function Lecture({ lecture, onglets }: {
         ) : null}
         <div className={c.temps}>
           <h3 className={c.tempsTitre}>Pour votre priorité</h3>
-          {/* Un titre éditorial, quand la lecture en a un (chaleur), porte le message à la place de l'étiquette : le
-              classement du moteur reste dans la donnée (`data-classement`), les tests et l'explication de méthode. */}
-          {lecture.pourVous.titre ? (
-            <p className={c.lectureMessage} data-classement={lecture.pourVous.signal}>{fr(lecture.pourVous.titre)}</p>
-          ) : (
-            <span className={c.signal} style={{ "--r-teinte": TEINTE[lecture.pourVous.signal] } as CSSProperties}>{MOT_DU_SIGNAL[lecture.pourVous.signal]}</span>
-          )}
+          {/* La pastille répond à la priorité ; la couleur accompagne toujours un libellé, jamais seule. */}
+          <span className={c.signal} data-classement={lecture.pourVous.signal} style={{ "--r-teinte": TEINTE[lecture.pourVous.signal] } as CSSProperties}>{MOT_DU_SIGNAL[lecture.pourVous.signal]}</span>
           <p className={c.tempsTexte}>{fr(lecture.pourVous.texte)}</p>
           {lecture.methode?.length ? (
             // Natif : ouvert et fermé au clavier (Entrée, Espace), annoncé « réduit / développé » par les lecteurs d'écran.

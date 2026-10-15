@@ -4,7 +4,7 @@ import { createJiti } from "jiti";
 import { readFileSync } from "node:fs";
 const racine = process.cwd() + "/";
 const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
-const { lireChaleur } = await jiti.import(racine + "src/components/prototypes/fut50/c/pastilles.ts");
+const { lireChaleur, MOT_DU_SIGNAL } = await jiti.import(racine + "src/components/prototypes/fut50/c/pastilles.ts");
 const { buildClimatFacts, classifyClimateComfort, reconstructReference } = await jiti.import(racine + "src/lib/decision/climat-facts.ts");
 const L = JSON.parse(readFileSync("public/data_climat.json", "utf8"));
 const COL = { NORTX35D_yr: "column08", NORTX30D_yr: "column09", NORTR_yr: "column10", ATX35D_yr: "column23", ATX30D_yr: "column24", ATR_yr: "column25" };
@@ -24,7 +24,7 @@ for (const insee of process.argv.slice(2)) {
   const l = lireChaleur({ commune: rows[0]?.commune_name ?? insee, insee }, e);
   console.log(`\n## ${rows[0]?.commune_name ?? insee} (${insee}) · moteur : ${e.verdict}`);
   console.log(`   > 35 °C : ${un(e.jours.projete)} (réf. ${un(e.jours.reference)}) · > 30 °C : ${un(e.jours30?.projete)} (réf. ${un(e.jours30?.reference)}) · nuits : ${un(e.nuits.projete)} (réf. ${un(e.nuits.reference)})`);
-  console.log(`   TITRE   ${l.pourVous.titre}\n   TEXTE   ${l.pourVous.texte}`);
+  console.log(`   PASTILLE ${MOT_DU_SIGNAL[l.pourVous.signal]} [${l.pourVous.signal}]\n   TEXTE    ${l.pourVous.texte}`);
   const b = l.fait?.mesures?.[0]?.bascule;
   console.log(`   30 °C   ${b ? `${b.valeur} ${b.unite} · ${b.legende}` : "(aucun contrôle)"}`);
 }

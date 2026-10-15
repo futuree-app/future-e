@@ -149,15 +149,15 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
 
 // ── Chaleur : La Rochelle et Nîmes, même priorité, ordinateur et mobile ; en-tête fixe sur mobile ─────
 for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 780, 2]]) {
-  for (const [saisie, nom, fichier] of [["La Rochelle", "La Rochelle", "la-rochelle"], ["Nîmes", "Nîmes", "nimes"]]) {
+  for (const [saisie, nom, fichier] of [["La Rochelle", "La Rochelle", "la-rochelle"], ["Nantes", "Nantes", "nantes"], ["Bordeaux", "Bordeaux", "bordeaux"], ["Nîmes", "Nîmes", "nimes"]]) {
     const { ctx, page } = await ouvrir(largeur, hauteur, dpr);
     await choisirCommune(page, saisie, nom);
     await page.keyboard.press("Enter");
     await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
     await lecturePrete(page);
     await page.waitForTimeout(1100);
-    await page.screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-35.jpg`, type: "jpeg", quality: 78 });
-    constats.push(`${largeur} ${nom} titre : ${await page.locator('[data-classement]').innerText()} (classement ${await page.locator('[data-classement]').getAttribute("data-classement")})`);
+    await page.screenshot({ path: `${IMG}/c7-chaleur-${fichier}-${largeur}-35.jpg`, type: "jpeg", quality: 78 });
+    constats.push(`${largeur} ${nom} pastille : ${await page.locator('[data-classement]').innerText()} (classement ${await page.locator('[data-classement]').getAttribute("data-classement")}) · couleur ${await page.locator('[data-classement]').evaluate((e) => getComputedStyle(e).color)} · « ${await page.locator('[data-classement] + p').innerText()} »`);
     const texte = (await page.locator('[aria-live="polite"] article').innerText()).replace(/\s+/g, " ");
     constats.push(`${largeur} ${nom} chaleur : ${texte.slice(0, 260)}`);
     if (largeur < 1000) {
@@ -195,7 +195,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 780,
     const apres = await mesurer();
     const focus = await page.evaluate(() => document.activeElement?.textContent);
     page.off("request", compter);
-    await page.screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-30.jpg`, type: "jpeg", quality: 78 });
+    await page.screenshot({ path: `${IMG}/c7-chaleur-${fichier}-${largeur}-30.jpg`, type: "jpeg", quality: 78 });
     constats.push(`${largeur} ${nom} 30 °C : « ${avant.valeur} » → « ${apres.valeur} » ; lu : « ${apres.lu} » ; hauteur ${avant.panneau} → ${apres.panneau} px ; nuits ${avant.nuits} → ${apres.nuits} (${avant.nuitsTexte === apres.nuitsTexte ? "texte identique" : "TEXTE CHANGÉ"}) ; requêtes ${requetes}${urls.length ? ` (${urls.join(", ")})` : ""} ; focus « ${focus} » ; débordement ${apres.debord} px`);
     await page.keyboard.press("Enter");
     await page.waitForTimeout(400);
@@ -205,7 +205,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 780,
       // L'explication de méthode, ouverte, capturée en entier (le panneau de lecture seul).
       await page.getByText("Comment lire ce résultat ?").click();
       await page.waitForTimeout(300);
-      await page.locator('[aria-live="polite"] article').screenshot({ path: `${IMG}/c6-chaleur-${fichier}-${largeur}-methode.jpg`, type: "jpeg", quality: 78 });
+      await page.locator('[aria-live="polite"] article').screenshot({ path: `${IMG}/c7-chaleur-${fichier}-${largeur}-methode.jpg`, type: "jpeg", quality: 78 });
     }
 
     await ctx.close();
