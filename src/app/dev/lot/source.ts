@@ -21,7 +21,7 @@ export type Commune = {
   anomalies_restantes?: { type?: string; categorie?: string; detail?: string; probleme?: string }[];
   versions?: Record<string, unknown>;
 };
-export type Lot = { nom: string; conf: { objet?: string; moteur?: { outil: string } }; communes: Record<string, Commune>; depenses: number | null };
+export type Lot = { nom: string; conf: { objet?: string; moteur?: { outil: string } }; communes: Record<string, Commune>; depenses: number | null; appelsNonMesures: number };
 
 export const nomValide = (s: string) => /^[a-z0-9-]+$/i.test(s);
 
@@ -35,11 +35,16 @@ export async function lireLot(nom: string): Promise<Lot> {
   const conf = JSON.parse(await readFile(path.join(dir, "lot.json"), "utf8"));
   const etat = existsSync(path.join(dir, "etat.json")) ? JSON.parse(await readFile(path.join(dir, "etat.json"), "utf8")) : { communes: {} };
   // Sans depenses.jsonl (essai Codex : aucun équivalent API rapporté), la dépense est inconnue, pas nulle.
+  // Un appel Codex ne rapporte aucun équivalent API : il est compté à part, jamais pour zéro.
   let depenses: number | null = existsSync(path.join(dir, "depenses.jsonl")) ? 0 : null;
+  let appelsNonMesures = 0;
   if (depenses !== null)
-    for (const l of (await readFile(path.join(dir, "depenses.jsonl"), "utf8")).split("\n").filter(Boolean))
-      depenses = (depenses ?? 0) + (JSON.parse(l).cout_usd_equivalent ?? 0);
-  return { nom, conf, communes: etat.communes, depenses };
+    for (const l of (await readFile(path.join(dir, "depenses.jsonl"), "utf8")).split("\n").filter(Boolean)) {
+      const cout = JSON.parse(l).cout_usd_equivalent;
+      if (cout == null) appelsNonMesures++;
+      else depenses = (depenses ?? 0) + cout;
+    }
+  return { nom, conf, communes: etat.communes, depenses, appelsNonMesures };
 }
 
 // Section B (l'article) d'un rendu de rédaction, sans les sections A, C, D, E.

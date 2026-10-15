@@ -1,0 +1,18 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Saint-Martin constitue une piste à examiner si vous souhaitez réduire la place de la voiture dans vos déplacements.",
+   "probleme": "Les pratiques observées chez les actifs résidents deviennent une recommandation de secteur pour réduire l’usage personnel de la voiture, ce que ne permet pas iris.voiture.min.",
+   "correction_minimale": "Remplacer cette recommandation par « Saint-Martin présente la part de la voiture la plus basse des secteurs étudiés » et retirer du chapeau l’idée de présélection résidentielle fondée sur ces différences."
+  },
+  {
+   "categorie": "methode",
+   "gravite": "bloquante",
+   "passage": "Les groupes selon la destination de travail réunissent des personnes distinctes",
+   "probleme": "La méthode ne précise ni la composition ni la règle de sélection du groupe de six communes utilisé pour mobpro.voiture_selon_destination.communes_voisines.",
+   "correction_minimale": "Ajouter dans la méthode : « Les six communes de travail nommées sont sélectionnées automatiquement dans la même unité urbaine que Brest, en retenant au plus les six plus peuplées, hors Brest. »"
+  }
+ ]
+}

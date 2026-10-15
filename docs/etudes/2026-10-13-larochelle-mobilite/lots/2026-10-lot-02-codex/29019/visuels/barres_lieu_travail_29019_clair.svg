@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 451" width="600" height="451" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<title id="t">Habiter Brest, travailler ici ou ailleurs</title>
+<desc id="d">Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Brest, part qui va travailler principalement en voiture : travaillant à Brest, 56 % ; travaillant à Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou ou Bohars, 80 % ; travaillant ailleurs (hors de Brest, Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou et Bohars), 80 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022.</desc>
+<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
+<rect width="600" height="451" fill="#ffffff"/>
+<line x1="24.0" y1="359.0" x2="24.0" y2="367.0" stroke="#d9d6cf" stroke-width="1"/>
+<text x="24.0" y="383.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">0 %</text>
+<line x1="144.5" y1="359.0" x2="144.5" y2="367.0" stroke="#d9d6cf" stroke-width="1"/>
+<text x="144.5" y="383.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">25 %</text>
+<line x1="265.0" y1="359.0" x2="265.0" y2="367.0" stroke="#d9d6cf" stroke-width="1"/>
+<text x="265.0" y="383.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">50 %</text>
+<line x1="385.5" y1="359.0" x2="385.5" y2="367.0" stroke="#d9d6cf" stroke-width="1"/>
+<text x="385.5" y="383.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">75 %</text>
+<line x1="506.0" y1="359.0" x2="506.0" y2="367.0" stroke="#d9d6cf" stroke-width="1"/>
+<text x="506.0" y="383.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="middle">100 %</text>
+<text x="24.0" y="40.0" font-size="22" font-weight="700" fill="#1a1d28" text-anchor="start">Habiter Brest, travailler ici ou ailleurs</text>
+<text x="24.0" y="63.0" font-size="14" font-weight="400" fill="#3d4456" text-anchor="start">Part utilisant principalement la voiture pour aller travailler, parmi</text>
+<text x="24.0" y="82.0" font-size="14" font-weight="400" fill="#3d4456" text-anchor="start">les actifs résidant à Brest, en 2022.</text>
+<text x="24.0" y="123.0" font-size="15" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille à Brest</text>
+<rect x="24" y="133.0" width="482.0" height="30" rx="4" fill="#eef1f6"/>
+<line x1="144.5" y1="133.0" x2="144.5" y2="163.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="265.0" y1="133.0" x2="265.0" y2="163.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="385.5" y1="133.0" x2="385.5" y2="163.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="506.0" y1="133.0" x2="506.0" y2="163.0" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="133.0" width="271.4" height="30" rx="4" fill="#1c5cab"><title>Travaille à Brest : 56.3 %</title></rect>
+<text x="305.4" y="154.6" font-size="20" font-weight="700" fill="#1a1d28" text-anchor="start">56 %</text>
+<text x="24.0" y="201.0" font-size="15" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille à Guipavas, Plouzané, Plougastel-Daoulas, Le</text>
+<text x="24.0" y="220.0" font-size="15" font-weight="600" fill="#1a1d28" text-anchor="start">Relecq-Kerhuon, Gouesnou ou Bohars</text>
+<rect x="24" y="230.0" width="482.0" height="30" rx="4" fill="#eef1f6"/>
+<line x1="144.5" y1="230.0" x2="144.5" y2="260.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="265.0" y1="230.0" x2="265.0" y2="260.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="385.5" y1="230.0" x2="385.5" y2="260.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="506.0" y1="230.0" x2="506.0" y2="260.0" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="230.0" width="384.6" height="30" rx="4" fill="#1c5cab"><title>Travaille à Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou ou Bohars : 79.8 %</title></rect>
+<text x="418.6" y="251.6" font-size="20" font-weight="700" fill="#1a1d28" text-anchor="start">80 %</text>
+<text x="24.0" y="298.0" font-size="15" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille ailleurs (hors de Brest, Guipavas, Plouzané,</text>
+<text x="24.0" y="317.0" font-size="15" font-weight="600" fill="#1a1d28" text-anchor="start">Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou et Bohars)</text>
+<rect x="24" y="327.0" width="482.0" height="30" rx="4" fill="#eef1f6"/>
+<line x1="144.5" y1="327.0" x2="144.5" y2="357.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="265.0" y1="327.0" x2="265.0" y2="357.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="385.5" y1="327.0" x2="385.5" y2="357.0" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="506.0" y1="327.0" x2="506.0" y2="357.0" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="327.0" width="383.2" height="30" rx="4" fill="#1c5cab"><title>Travaille ailleurs (hors de Brest, Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou et Bohars) : 79.5 %</title></rect>
+<text x="417.2" y="348.6" font-size="20" font-weight="700" fill="#1a1d28" text-anchor="start">80 %</text>
+<text x="24.0" y="411.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">Groupes distincts de résidents ; les écarts décrivent des pratiques. Source : INSEE,</text>
+<text x="24.0" y="428.0" font-size="12" font-weight="400" fill="#5b6373" text-anchor="start">recensement 2022.</text>
+</svg>

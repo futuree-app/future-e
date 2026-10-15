@@ -329,7 +329,25 @@ class AuthNonAbonnement(Exception):
 
 # Variables qui feraient basculer Claude Code vers une clé API ou un autre fournisseur : retirées de chaque session.
 ENV_INTERDITES = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "ANTHROPIC_MODEL", "CLAUDE_CODE_USE_BEDROCK",
-                  "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "ANTHROPIC_PROFILE", "OPENAI_API_KEY")
+                  "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY", "ANTHROPIC_PROFILE", "OPENAI_API_KEY",
+                  "CODEX_API_KEY", "OPENAI_BASE_URL", "OPENAI_ORG_ID", "OPENAI_PROJECT", "AZURE_OPENAI_API_KEY")
+
+
+# Fonctions de Codex inutiles à la rédaction, désactivées dans chaque session (option inconnue = erreur, vérifié).
+CODEX_DESACTIVES = ("plugins", "remote_plugin", "apps", "multi_agent", "image_generation", "browser_use", "computer_use", "in_app_browser",
+                    "skill_search", "tool_suggest", "goals", "memories")
+
+
+def auth_codex():
+    """Codex doit tourner sur l'abonnement ChatGPT : `codex login status` le dit, auth.json en mode chatgpt sans clé API,
+    aucune variable de clé dans l'environnement (elles sont de toute façon retirées de la session)."""
+    st = subprocess.run(["codex", "login", "status"], capture_output=True, text=True)
+    try:
+        a = json.load(open(os.path.expanduser("~/.codex/auth.json")))
+    except Exception:
+        a = {}
+    info = {"login_status": (st.stdout + st.stderr).strip()[:200], "auth_mode": a.get("auth_mode"), "cle_api_dans_auth": bool(a.get("OPENAI_API_KEY"))}
+    return ("ChatGPT" in info["login_status"] and a.get("auth_mode") == "chatgpt" and not a.get("OPENAI_API_KEY")), info
 
 
 MOTIF_QUOTA = "suspendu par quota"
@@ -386,8 +404,9 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
     """Un appel = une session vierge. Retourne le texte produit, ou None en simulation. `domaines` : seule la lecture de
     pages de ces domaines est autorisée (collecte) ; sinon aucun outil."""
     M = lot.conf["moteur"]; reglage = M["etapes"][etape_nom]
+    outil = reglage.get("outil", M["outil"])  # un outil par étape possible (ex. : collecte Claude Code, rédaction Codex)
     d = d or lot.rep(insee, "generation"); os.makedirs(d, exist_ok=True)
-    cle = sha(M["outil"], reglage, systeme, utilisateur, domaines)
+    cle = sha(outil, reglage, systeme, utilisateur, domaines)
     p_meta, p_sortie, p_marq = (os.path.join(d, f"{etape_nom}.json"), os.path.join(d, f"{etape_nom}.md"), os.path.join(d, f"{etape_nom}.en_cours"))
     if os.path.exists(p_meta):
         # Limite explicite : UN appel par commune et par étape (une collecte par réseau). Déjà fait, même avec des entrées
@@ -413,7 +432,7 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         utilisateur += ("\n\n---\n\nPièces justificatives référencées par le dossier, en lecture seule dans ./pieces/ : "
                         + ", ".join(noms_pieces) + ". Tu peux les lire pour vérifier une source ; elles n'apportent aucun fait "
                         "qui ne soit déjà dans le dossier, et ne t'autorisent ni recherche extérieure ni autre fichier.")
-    if M["outil"] == "claude-code":
+    if outil == "claude-code":
         if domaines:
             outils = ["--tools", "WebFetch", "--allowedTools", ",".join(f"WebFetch(domain:{x})" for x in domaines)]
         elif pieces:
@@ -424,19 +443,33 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         cmd = ["claude", "-p", "--model", reglage["modele"], "--effort", reglage.get("effort", "high"),
                "--system-prompt-file", sys_p, "--strict-mcp-config", "--setting-sources", "project", "--permission-mode", "dontAsk",
                *outils, "--no-session-persistence", "--output-format", "stream-json", "--verbose", "--max-budget-usd", str(par_appel)]
-    elif M["outil"] == "codex" and domaines:
-        raise RuntimeError("collecte : seul Claude Code permet de limiter la lecture web à des domaines ; utiliser moteur claude-code")
-    elif M["outil"] == "codex":
-        out = os.path.join(tmp, "sortie.md")
+    elif outil == "codex" and domaines:
+        raise RuntimeError("collecte : seul Claude Code permet de limiter la lecture web à des domaines ; mettre \"outil\": \"claude-code\" sur l'étape collecte")
+    elif outil == "codex":
+        # Le dernier message est écrit HORS du dossier lisible par le modèle. Le mode « read-only » de Codex laisse lire tout
+        # le disque (dépôt et articles compris) : un profil de permissions limite la lecture au dossier de session (et au
+        # minimum système), sans écriture ni réseau ; vérifié par `codex sandbox` (essai Angers, 15/10/2026).
+        out = os.path.join(tempfile.mkdtemp(prefix="futuree-lot-sortie-"), "sortie.md")
         utilisateur = f"{systeme}\n\n---\n\n{utilisateur}"  # codex exec n'a pas de prompt système séparé
-        cmd = ["codex", "exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check",
-               "-s", "read-only", "-C", tmp, "-m", reglage["modele"], "-o", out, "-"]
+        cmd = ["codex", "exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check", "--json",
+               "-C", tmp, "-m", reglage["modele"], "-c", f'model_reasoning_effort="{reglage.get("effort", "high")}"',
+               "-c", 'web_search="disabled"', "-c", 'default_permissions="session"',
+               "-c", f'permissions.session.filesystem={{":minimal"="read", "{os.path.realpath(tmp)}"="read"}}',
+               "-c", 'approval_policy="never"', *[x for f in CODEX_DESACTIVES for x in ("--disable", f)], "-o", out, "-"]
     else:
-        raise RuntimeError(f"moteur inconnu : {M['outil']}")
+        raise RuntimeError(f"moteur inconnu : {outil}")
     if not executer:
         shutil.rmtree(tmp)
+        if outil == "codex":
+            shutil.rmtree(os.path.dirname(out), ignore_errors=True)
         return None
     version = subprocess.run([cmd[0], "--version"], capture_output=True, text=True).stdout.strip()
+    auth = None
+    if outil == "codex":
+        ok, auth = auth_codex()
+        if not ok:
+            shutil.rmtree(tmp, ignore_errors=True)
+            raise AuthNonAbonnement(f"Codex hors abonnement ChatGPT : {json.dumps(auth, ensure_ascii=False)}")
     env = {k: v for k, v in os.environ.items() if k not in ENV_INTERDITES}
     open(p_marq, "w").write(f"{maintenant()} clé {cle}")
     t0 = time.time()
@@ -447,11 +480,11 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         os.remove(p_marq); shutil.rmtree(tmp, ignore_errors=True)
         raise RuntimeError(f"« {etape_nom} » : délai dépassé ({reglage.get('delai_s', 1800)} s)")
     duree = round(time.time() - t0, 1)
-    meta = {"etape": etape_nom, "cle": cle, "outil": M["outil"], "version_outil": version, "modele": reglage["modele"],
+    meta = {"etape": etape_nom, "cle": cle, "outil": outil, "version_outil": version, "modele": reglage["modele"],
             "effort": reglage.get("effort"), "consignes_sha": sha(systeme), "entree_sha": sha(utilisateur), "debut": maintenant(),
             "duree_s": duree, "code_retour": r.returncode}
     texte, cout = None, None
-    if M["outil"] == "claude-code":
+    if outil == "claude-code":
         ev = []
         for l in r.stdout.splitlines():
             try:
@@ -473,16 +506,37 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
         if not ev:
             meta["sortie_brute"] = (r.stdout + r.stderr)[-2000:]
     else:
-        texte = open(out).read() if os.path.exists(out) else None
-        meta["sortie_brute"] = r.stderr[-2000:]
+        ev = []
+        for l in r.stdout.splitlines():
+            try:
+                ev.append(json.loads(l))
+            except json.JSONDecodeError:
+                pass
+        u = next((e.get("usage") for e in reversed(ev) if e.get("type") == "turn.completed"), None) or {}
+        erreurs = [e.get("message") or (e.get("error") or {}).get("message") for e in ev if e.get("type") in ("error", "turn.failed")]
+        texte = open(out).read() if os.path.exists(out) and not erreurs else None
+        # Compteurs tels que Codex les renvoie ; le modèle effectif n'est pas renvoyé par `codex exec --json` (seul le demandé est connu).
+        meta.update(authentification=auth, usage={"input_tokens": u.get("input_tokens"), "cached_input_tokens": u.get("cached_input_tokens"),
+                                                  "output_tokens": u.get("output_tokens"), "reasoning_output_tokens": u.get("reasoning_output_tokens")},
+                    cout_usd_equivalent=None, est_erreur=bool(erreurs) or not texte, modele_effectif=[], modele_effectif_renvoye=False,
+                    session=next((e.get("thread_id") for e in ev if e.get("type") == "thread.started"), None),
+                    contexte={"pieces": noms_pieces, "lecture": "dossier de session seulement", "web": "désactivé", "reseau": "refusé"},
+                    appels_outils=[{"outil": "shell", "entree": str((e.get("item") or {}).get("command"))[:200]} for e in ev
+                                   if e.get("type") == "item.completed" and (e.get("item") or {}).get("type") == "command_execution"],
+                    erreurs=[str(x)[:500] for x in erreurs], sortie_brute=r.stderr[-2000:])
+        if not ev:
+            meta["sortie_brute"] = (r.stdout + r.stderr)[-2000:]
     shutil.rmtree(tmp, ignore_errors=True)
+    if outil == "codex":
+        shutil.rmtree(os.path.dirname(out), ignore_errors=True)
     with open(os.path.join(lot.dir, "depenses.jsonl"), "a") as f:
-        f.write(json.dumps({"date": maintenant(), "commune": insee, "etape": etape_nom, "outil": M["outil"], "modele": reglage["modele"],
-                            "cout_usd_equivalent": cout, "duree_s": duree, "cle": cle}, ensure_ascii=False) + "\n")
-    brut = ((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", ""))).lower()
+        f.write(json.dumps({"date": maintenant(), "commune": insee, "etape": etape_nom, "outil": outil, "modele": reglage["modele"],
+                            "effort": reglage.get("effort"), "cout_usd_equivalent": cout, "duree_s": duree, "cle": cle,
+                            "jetons": meta.get("usage") if outil == "codex" else None}, ensure_ascii=False) + "\n")
+    brut = ((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", "")) + json.dumps(meta.get("erreurs", []))).lower()
     if meta.get("est_erreur") or not texte:
         meta["message"] = ((texte or "") + " " + r.stderr)[:1000].strip()  # conservé pour diagnostiquer, jamais publié
-    if M["outil"] == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
+    if outil == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
         meta["motif"] = f"session hors abonnement (source d'authentification : {meta['contexte']['source_auth']})"
     elif (not texte or meta.get("est_erreur")) and nature_refus(meta, brut):
         meta["motif"] = nature_refus(meta, brut)
@@ -511,7 +565,7 @@ def norm_txt(s):
 
 
 def domaine(u):
-    return re.sub(r"^www\.", "", urllib.parse.urlparse(u).netloc.lower())
+    return re.sub(r"^www\.", "", (urllib.parse.urlparse(u).hostname or "").lower())  # sans port (« bibus.fr:443 » → « bibus.fr »)
 
 
 def cmd_collecter(lot, a):
@@ -587,7 +641,18 @@ def visuels(lot, insee, texte):
     if not re.search(r"^\[(?:VISUEL|CARTE|GRAPHIQUE)", texte, re.M):
         return {"visuels": []}
     fiche_p = os.path.join(lot.dir, insee, "fiche", "fiche.json")
-    codes = sorted(set(re.findall(r"`iris\.(\d{9})\.", texte)), key=texte.index)
+    # Secteurs cités : identifiants explicites (`iris.<code>.…`) et secteur le plus bas / le plus haut (`iris.voiture.min/max`),
+    # dont le code se lit dans le dossier (Brest, 15/10/2026 : Kervao-Rural Nord cité par le seul `iris.voiture.max`, non repéré).
+    pos = {}
+    for m in re.finditer(r"`iris\.(\d{9})\.", texte):
+        pos.setdefault(m.group(1), m.start())
+    faits = {f["id"]: f for f in json.load(open(os.path.join(lot.dir, insee, "dossier", "dossier.json"))).get("faits", [])}
+    for borne in ("iris.voiture.min", "iris.voiture.max"):
+        m = re.search(rf"`{re.escape(borne)}`", texte)
+        code = re.search(r"IRIS (\d{9})", (faits.get(borne) or {}).get("fait", ""))
+        if m and code:
+            pos[code.group(1)] = min(pos.get(code.group(1), m.start()), m.start())
+    codes = sorted(pos, key=pos.get)
     veut_barres = bool(re.search(r"^\[(?:VISUEL|GRAPHIQUE)[^\]]*(lieu de travail|commune de travail|travailler)", texte, re.M | re.I))
     cmd = [lot.chemin("python"), "visuels/generer_visuels.py", "--insee", insee, "--fiche", fiche_p,
            "--contours", os.path.join(lot.chemin("cache"), f"iris_ign_{insee}.json"), "--classes", "auto", "--communes", "",

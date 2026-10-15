@@ -1,0 +1,126 @@
+{
+ "commune": "30189",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA de Nîmes Métropole s'appelle « Tango » ; son autorité organisatrice est CA de Nîmes Métropole.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Tango » : https://transport.data.gouv.fr/datasets/offre-de-transport-du-reseau-tango-de-nimes-metropole-gtfs-gtfs-rt ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-13",
+   "perimetre": "intercommunalité CA de Nîmes Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Tango est https://www.tangobus.fr.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/offre-de-transport-du-reseau-tango-de-nimes-metropole-gtfs-gtfs-rt ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Tango",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarif.pass_70_ans",
+   "information": "Le Pass 70 ans et + est indiqué « Gratuit », valable de manière illimitée pendant 12 mois consécutifs. C'est le seul titre gratuit de la page tarifs. La page ne dit pas que le réseau est gratuit.",
+   "source": "https://www.tangobus.fr/fr/titre-et-tarifs (extrait vérifié le 2026-10-14 : « Valable de manière illimitée pendant 12 mois consécutifs »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Tango ; Pass 70 ans et + uniquement ; ce n'est pas une gratuité de tout le réseau ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tangobus.fr/fr/titre-et-tarifs",
+    "extrait": "Valable de manière illimitée pendant 12 mois consécutifs"
+   }
+  },
+  {
+   "id": "doc.horaires.validite_guides",
+   "information": "Les guides horaires 2026-2027 sont valables à partir du 30 août 2026. Des dates particulières sont indiquées pour la ligne 31 (du 5 au 16 octobre), pour L42, Tempo 203A et Tempo 203B (à partir du 12 octobre).",
+   "source": "https://www.tangobus.fr/fr/guides-horaires-2026-2027 (extrait vérifié le 2026-10-14 : « Retrouvez l'intégralité de vos guides horaires valables à partir du 30 août 2026 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "à partir du 30 août 2026",
+   "perimetre": "réseau Tango ; Guides horaires du réseau Tango : Tram'bus T1 à T5, lignes L6 à L62, navettes, lignes de proximité, Tempo ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+    "extrait": "Retrouvez l'intégralité de vos guides horaires valables à partir du 30 août 2026"
+   }
+  },
+  {
+   "id": "doc.verification.guides_horaires",
+   "information": "La page « Guides horaires » renvoie vers le lien « Guides horaires 2026 - 2027 », qui donne un guide PDF par ligne.",
+   "source": "https://www.tangobus.fr/fr/page-4 (extrait vérifié le 2026-10-14 : « Guides horaires 2026 - 2027 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "2026-2027",
+   "perimetre": "réseau Tango ; Ensemble du réseau ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tangobus.fr/fr/page-4",
+    "extrait": "Guides horaires 2026 - 2027"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité du réseau (public, lignes, exceptions)",
+   "statut": "introuvable",
+   "source": "https://www.tangobus.fr/fr/titre-et-tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "La page tarifs ne mentionne pas de gratuité générale. Seul le Pass 70 ans et + est gratuit. Ce n'est pas la preuve que le réseau est payant. Les autres titres sont listés avec un prix ou « soumis à conditions »."
+  },
+  {
+   "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+   "statut": "introuvable",
+   "source": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune page HTML consultée ne donne ces jours. Ils sont probablement dans les guides PDF par ligne, que je n'ai pas ouverts : non vérifié."
+  },
+  {
+   "sujet": "Calcul d'itinéraire",
+   "statut": "non vérifié",
+   "source": "https://www.tangobus.fr/fr/itineraires",
+   "consulte_le": "2026-10-15",
+   "note": "La page existe (menu « Se déplacer »), mais son contenu n'a pas été lu : seul le menu est ressorti. Aucun extrait n'est enregistré."
+  },
+  {
+   "sujet": "Temps réel et perturbations",
+   "statut": "non vérifié",
+   "source": "https://www.tangobus.fr/fr/infos-trafic",
+   "consulte_le": "2026-10-15",
+   "note": "Page « Infos trafic » listée dans le menu, non ouverte. La page d'accueil mentionne aussi un « Service 'vacances scolaires' » du 19 au 30 octobre 2026, mais je n'ai pas pu le vérifier ni en tirer d'extrait."
+  },
+  {
+   "sujet": "Guides PDF par ligne",
+   "statut": "non vérifié",
+   "source": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+   "consulte_le": "2026-10-15",
+   "note": "Les PDF n'ont pas été ouverts."
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

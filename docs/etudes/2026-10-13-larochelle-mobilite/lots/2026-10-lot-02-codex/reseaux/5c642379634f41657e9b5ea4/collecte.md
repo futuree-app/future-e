@@ -1,0 +1,16 @@
+Je finis la collecte. J'ai les pages tarifs, itinéraires et guides horaires. Je rends maintenant le résultat avec les extraits que les pages m'ont donnés mot pour mot.
+
+```json
+{"faits": [
+{"id": "doc.tarif.pass_70_ans", "information": "Le Pass 70 ans et + est indiqué « Gratuit », valable de manière illimitée pendant 12 mois consécutifs. C'est le seul titre gratuit de la page tarifs. La page ne dit pas que le réseau est gratuit.", "url": "https://www.tangobus.fr/fr/titre-et-tarifs", "extrait": "Valable de manière illimitée pendant 12 mois consécutifs", "validite": "non précisée", "perimetre": "Pass 70 ans et + uniquement ; ce n'est pas une gratuité de tout le réseau", "usage": "avec ses conditions"},
+{"id": "doc.horaires.validite_guides", "information": "Les guides horaires 2026-2027 sont valables à partir du 30 août 2026. Des dates particulières sont indiquées pour la ligne 31 (du 5 au 16 octobre), pour L42, Tempo 203A et Tempo 203B (à partir du 12 octobre).", "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027", "extrait": "Retrouvez l'intégralité de vos guides horaires valables à partir du 30 août 2026", "validite": "à partir du 30 août 2026", "perimetre": "Guides horaires du réseau Tango : Tram'bus T1 à T5, lignes L6 à L62, navettes, lignes de proximité, Tempo", "usage": "oui"},
+{"id": "doc.verification.guides_horaires", "information": "La page « Guides horaires » renvoie vers le lien « Guides horaires 2026 - 2027 », qui donne un guide PDF par ligne.", "url": "https://www.tangobus.fr/fr/page-4", "extrait": "Guides horaires 2026 - 2027", "validite": "2026-2027", "perimetre": "Ensemble du réseau", "usage": "oui"}
+],
+"recherches": [
+{"sujet": "Gratuité du réseau (public, lignes, exceptions)", "statut": "introuvable", "url": "https://www.tangobus.fr/fr/titre-et-tarifs", "note": "La page tarifs ne mentionne pas de gratuité générale. Seul le Pass 70 ans et + est gratuit. Ce n'est pas la preuve que le réseau est payant. Les autres titres sont listés avec un prix ou « soumis à conditions »."},
+{"sujet": "Jours de circulation (samedi, dimanche, jours fériés)", "statut": "introuvable", "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027", "note": "Aucune page HTML consultée ne donne ces jours. Ils sont probablement dans les guides PDF par ligne, que je n'ai pas ouverts : non vérifié."},
+{"sujet": "Calcul d'itinéraire", "statut": "non vérifié", "url": "https://www.tangobus.fr/fr/itineraires", "note": "La page existe (menu « Se déplacer »), mais son contenu n'a pas été lu : seul le menu est ressorti. Aucun extrait n'est enregistré."},
+{"sujet": "Temps réel et perturbations", "statut": "non vérifié", "url": "https://www.tangobus.fr/fr/infos-trafic", "note": "Page « Infos trafic » listée dans le menu, non ouverte. La page d'accueil mentionne aussi un « Service 'vacances scolaires' » du 19 au 30 octobre 2026, mais je n'ai pas pu le vérifier ni en tirer d'extrait."},
+{"sujet": "Guides PDF par ligne", "statut": "non vérifié", "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027", "note": "Les PDF n'ont pas été ouverts."}
+]}
+```

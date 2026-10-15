@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 30189 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-02-codex/30189/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_30189.json --classes auto --communes  --reperes 301890101,301890901 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-02-codex/30189/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 56,
+  "non_res": 7,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Nîmes découpée en 56 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 30 à 105 %). La part la plus basse est d'environ 32 % (Arènes), la plus élevée d'environ 95 % (Super Nîmes). 7 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

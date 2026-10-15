@@ -1,0 +1,12 @@
+```json
+{"faits": [
+{"id":"doc.itineraire.calculateur","information":"Le site Bibus propose un calculateur d'itinéraire multimodal (réseau Bibus, vélo, marche, voiture, covoiturage).","url":"https://www.bibus.fr/se-deplacer/calcul-ditineraire","extrait":"Le calculateur d'itinéraire propose des trajets avec différents modes de transports","validite":"non précisée","perimetre":"Réseau Bibus, Brest Métropole","usage":"oui"},
+{"id":"doc.temps_reel.prochains_passages","information":"La page Prochains passages permet de générer les prochains passages en temps réel en choisissant un arrêt et une ligne.","url":"https://www.bibus.fr/se-deplacer/prochains-passages","extrait":"Sélectionnez l'arrêt et la ligne que vous souhaitez emprunter, afin de générer les prochains passages en temps réel !","validite":"non précisée","perimetre":"Arrêts et lignes du réseau Bibus","usage":"oui"}
+],
+"recherches": [
+{"sujet":"Tarification / gratuité","statut":"inaccessible","url":"https://www.bibus.fr/tarifs/tickets-et-abonnements","note":"La page renvoie une erreur HTTP 500. La page d'accueil évoque des titres et abonnements payants avec des tarifs selon l'âge et le statut, mais je n'ai pas pu confirmer ces extraits sur la page elle-même. Aucune mention de gratuité n'a été trouvée. Cela ne prouve pas que le réseau soit payant ou gratuit, ni qu'il n'existe pas de gratuité partielle."},
+{"sujet":"Jours de circulation des lignes urbaines (dimanche, fériés, samedi) et période de validité des horaires","statut":"introuvable","url":"https://www.bibus.fr/se-deplacer/guides-horaires-et-plans-des-lignes","note":"La page des guides horaires ne donne ni les jours de circulation ni la période de validité. Les pages https://www.bibus.fr/se-deplacer/horaires-aux-arrets et les fiches horaires par ligne, éventuellement en PDF, n'ont pas été lues."},
+{"sujet":"Fiches horaires","statut":"non vérifié","url":"https://www.bibus.fr/se-deplacer/guides-horaires-et-plans-des-lignes","note":"Cette page est l'emplacement probable des guides horaires et plans de lignes. Son contenu n'a pas fourni d'extrait utilisable sur les horaires de circulation."},
+{"sujet":"Temps réel dans l'application Bibus","statut":"non vérifié","url":"https://www.bibus.fr/bibus-et-vous/application-bibus/comment-consulter-les-horaires-en-temps-reel-sur-lapplication-bibus","note":"Cette page a été signalée par la page d'accueil, mais je ne l'ai pas ouverte."}
+]}
+```

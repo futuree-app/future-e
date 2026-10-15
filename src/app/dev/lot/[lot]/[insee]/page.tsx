@@ -79,6 +79,15 @@ export default async function ArticleLot({ params }: { params: Promise<{ lot: st
               </div>
             ),
           };
+        // Le tableau accessible accompagne la carte : lien vers le tableau produit, jamais une seconde carte.
+        if (/tableau accessible/i.test(l) && existsSync(path.join(vis, `tableau_iris_${insee}.html`)))
+          return {
+            noeud: (
+              <p key={k} className="apv-legende">
+                <a href={`/dev/lot/fichier?lot=${lot}&f=${encodeURIComponent(`${insee}/visuels/tableau_iris_${insee}.html`)}`}>Tableau des secteurs</a>
+              </p>
+            ),
+          };
         const quoi = /carte|secteur|quartier|iris/i.test(l) ? "carte" : /travail|graphique|barres/i.test(l) ? "barres" : null;
         const base = quoi === "carte" ? carte : quoi === "barres" ? barres : null;
         if (base && existsSync(path.join(vis, `${base}_sombre.png`)))

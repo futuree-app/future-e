@@ -1,0 +1,102 @@
+{
+ "version": 2,
+ "id": "5c642379634f41657e9b5ea4",
+ "titre": "Réseau urbain Tango",
+ "page": "https://transport.data.gouv.fr/datasets/offre-de-transport-du-reseau-tango-de-nimes-metropole-gtfs-gtfs-rt",
+ "nom_commercial": "Tango",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TANGO",
+ "aom": "CA de Nîmes Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "243000643",
+  "nom": "CA de Nîmes Métropole"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "TANGO",
+    "https://www.tangobus.fr"
+   ]
+  ]
+ },
+ "site": "https://www.tangobus.fr",
+ "sites_controles": [
+  [
+   "https://www.tangobus.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarif.pass_70_ans",
+    "information": "Le Pass 70 ans et + est indiqué « Gratuit », valable de manière illimitée pendant 12 mois consécutifs. C'est le seul titre gratuit de la page tarifs. La page ne dit pas que le réseau est gratuit.",
+    "url": "https://www.tangobus.fr/fr/titre-et-tarifs",
+    "extrait": "Valable de manière illimitée pendant 12 mois consécutifs",
+    "validite": "non précisée",
+    "perimetre": "Pass 70 ans et + uniquement ; ce n'est pas une gratuité de tout le réseau",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T23:59:39Z"
+   },
+   {
+    "id": "doc.horaires.validite_guides",
+    "information": "Les guides horaires 2026-2027 sont valables à partir du 30 août 2026. Des dates particulières sont indiquées pour la ligne 31 (du 5 au 16 octobre), pour L42, Tempo 203A et Tempo 203B (à partir du 12 octobre).",
+    "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+    "extrait": "Retrouvez l'intégralité de vos guides horaires valables à partir du 30 août 2026",
+    "validite": "à partir du 30 août 2026",
+    "perimetre": "Guides horaires du réseau Tango : Tram'bus T1 à T5, lignes L6 à L62, navettes, lignes de proximité, Tempo",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T23:59:39Z"
+   },
+   {
+    "id": "doc.verification.guides_horaires",
+    "information": "La page « Guides horaires » renvoie vers le lien « Guides horaires 2026 - 2027 », qui donne un guide PDF par ligne.",
+    "url": "https://www.tangobus.fr/fr/page-4",
+    "extrait": "Guides horaires 2026 - 2027",
+    "validite": "2026-2027",
+    "perimetre": "Ensemble du réseau",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T23:59:39Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité du réseau (public, lignes, exceptions)",
+    "statut": "introuvable",
+    "url": "https://www.tangobus.fr/fr/titre-et-tarifs",
+    "note": "La page tarifs ne mentionne pas de gratuité générale. Seul le Pass 70 ans et + est gratuit. Ce n'est pas la preuve que le réseau est payant. Les autres titres sont listés avec un prix ou « soumis à conditions »."
+   },
+   {
+    "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+    "statut": "introuvable",
+    "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+    "note": "Aucune page HTML consultée ne donne ces jours. Ils sont probablement dans les guides PDF par ligne, que je n'ai pas ouverts : non vérifié."
+   },
+   {
+    "sujet": "Calcul d'itinéraire",
+    "statut": "non vérifié",
+    "url": "https://www.tangobus.fr/fr/itineraires",
+    "note": "La page existe (menu « Se déplacer »), mais son contenu n'a pas été lu : seul le menu est ressorti. Aucun extrait n'est enregistré."
+   },
+   {
+    "sujet": "Temps réel et perturbations",
+    "statut": "non vérifié",
+    "url": "https://www.tangobus.fr/fr/infos-trafic",
+    "note": "Page « Infos trafic » listée dans le menu, non ouverte. La page d'accueil mentionne aussi un « Service 'vacances scolaires' » du 19 au 30 octobre 2026, mais je n'ai pas pu le vérifier ni en tirer d'extrait."
+   },
+   {
+    "sujet": "Guides PDF par ligne",
+    "statut": "non vérifié",
+    "url": "https://www.tangobus.fr/fr/guides-horaires-2026-2027",
+    "note": "Les PDF n'ont pas été ouverts."
+   }
+  ]
+ }
+}

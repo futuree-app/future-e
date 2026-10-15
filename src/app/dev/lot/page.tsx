@@ -48,6 +48,7 @@ export default async function IndexLots() {
           <section key={v.nom}>
             <h2>
               {v.nom} · moteur {v.conf.moteur?.outil ?? "?"} · {v.depenses === null ? "dépense non mesurée" : `dépense ${v.depenses.toFixed(2)} $ équivalent`}
+              {v.appelsNonMesures > 0 && ` (${v.appelsNonMesures} appel${v.appelsNonMesures > 1 ? "s" : ""} Codex : non mesuré${v.appelsNonMesures > 1 ? "s" : ""})`}
             </h2>
             {Object.entries(v.communes).map(async ([cle, c]) => {
               const insee = c.insee;
