@@ -43,6 +43,12 @@ const nextConfig: NextConfig = {
     "/rapport/logement": ["./data/comparateur-index.json.gz"],
     // Face 3 « autour de cette adresse » : la lib logement-bpe.ts lit les shards
     // de points BPE par cellule ; la lib icu.ts lit l'index îlot de chaleur (grand-IRIS).
+    // FUT-97 : `/qna` nomme la gare de la commune et la plus proche d'après les points BPE (lib/gares-commune.ts),
+    // et lit l'index (signaux du territoire), jusqu'ici inclus par le seul traçage automatique.
+    "/qna": [
+      "./data/comparateur-index.json.gz",
+      "./data/bpe-points/**",
+    ],
     "/api/logement-autour": [
       "./data/bpe-points/**",
       "./data/icu.json",

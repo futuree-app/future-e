@@ -41,6 +41,7 @@ import { deptRegionalCategories } from "@/lib/commune-categories";
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
+import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — moteur de compatibilité déterministe (V1).
@@ -821,7 +822,7 @@ const SOURCE_INDUS_FR: Record<string, string> = {
   industrie: "un site industriel",
 };
 
-export function buildTerritorySignals(c: IndexCommune): Record<string, unknown> {
+export function buildTerritorySignals(c: IndexCommune, gares?: GaresCommune): Record<string, unknown> {
   const s: Record<string, unknown> = {};
 
   if (c.calmeSonore) {
@@ -875,8 +876,11 @@ export function buildTerritorySignals(c: IndexCommune): Record<string, unknown> 
     };
   }
 
-  if (c.transport && c.transport.gare_nom) {
-    s.train = { gare: c.transport.gare_nom, desserte: c.transport.desserte >= 60 ? "bien reliée" : "desserte limitée" };
+  // FUT-97 : la gare de RÉFÉRENCE de l'indicateur (`gare_nom`) n'est plus transmise. Elle n'est ni la
+  // gare de la commune ni la plus proche (Rochefort et Surgères renvoyaient La Rochelle). Les gares
+  // dites au lecteur viennent de la BPE (`gares-commune.ts`) ; sans elle, seul le niveau d'accès.
+  if (c.transport) {
+    s.train = signalTrain(gares ?? garesDeLaCommune(c, null), c.transport.desserte);
   }
 
   return s;
