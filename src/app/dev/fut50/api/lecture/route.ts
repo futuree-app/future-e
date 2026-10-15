@@ -18,7 +18,7 @@ import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil
 import { CLIMAT_REFERENCE_LABEL } from "@/lib/decision/climat-facts";
 import { aCommune } from "@/lib/typography";
 import { projetDeTest } from "@/app/dev/fut87/projet-de-test";
-import { lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, type RisqueGaspar, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille, type EntreesHivers } from "@/components/prototypes/fut50/c/pastilles";
+import { lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, interpreterReponseGaspar, type RisqueGaspar, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille, type EntreesHivers } from "@/components/prototypes/fut50/c/pastilles";
 
 export const dynamic = "force-dynamic";
 
@@ -71,11 +71,7 @@ async function risquesGaspar(insee: string): Promise<RisqueGaspar[] | null> {
       headers: { accept: "application/json" }, next: { revalidate: 86400 }, signal: controle.signal,
     });
     if (!r.ok) return null;
-    const json = (await r.json()) as { data?: { risques_detail?: { num_risque?: string | null; libelle_risque_long?: string | null }[] | null }[] | null };
-    if (!Array.isArray(json.data)) return null;
-    return (json.data[0]?.risques_detail ?? [])
-      .map((d) => ({ code: String(d.num_risque ?? "").trim(), libelle: String(d.libelle_risque_long ?? "").trim() }))
-      .filter((d) => d.code && d.libelle);
+    return interpreterReponseGaspar(await r.json());
   } catch {
     return null;
   } finally {

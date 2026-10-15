@@ -89,7 +89,7 @@ export type LecturePastille = {
     /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
     mesures?: MesureChaleur[];
     /** Un détail consultable, replié par défaut (risques : la liste structurée de ce que la source recense). */
-    detail?: { resume: string; groupes: GroupeRisques[] };
+    detail?: { resume: string; groupes: GroupeRisques[]; notes?: string[] };
   } | null;
   pourVous: { signal: Signal; texte: string };
   /** L'explication de méthode, consultable (« Comment lire ce résultat ? »). Ne répète pas les chiffres affichés. */
@@ -306,68 +306,125 @@ const ADRESSE_TEXTE = (commune: string, aCommune: (n: string) => string) =>
 
 const SOURCE_DRIAS = "DRIAS · Météo-France, horizon 2050 (+2,7 °C en France)";
 
-// ── LES RISQUES : un constat, puis le détail replié (revue du 15/10) ──────────────────────────────────
+// ── LES RISQUES : un constat, puis le détail replié (revues du 15/10) ─────────────────────────────────
 //
-// Source : GASPAR (Géorisques, `/api/v1/gaspar/risques`), le recensement des risques par commune. Chaque ligne
-// porte un code `num_risque` HIÉRARCHIQUE, et c'est lui qui classe, jamais le libellé :
-//   - le premier chiffre dit la nature : 1 naturel, 2 technologique, 3 minier (observé sur Nantes, Lyon, Marseille,
-//     Brest, Briançon, Saint-Denis de La Réunion… ; tout autre préfixe reste affiché tel quel, sans être deviné) ;
-//   - deux chiffres = une famille (11 Inondation) ; trois chiffres = une déclinaison de la famille dont il porte le
-//     préfixe (112 « Par une crue à débordement lent… »). Une déclinaison n'est jamais un risque de plus.
-// L'ancien panneau énumérait les 23 lignes de Nantes à plat : familles, déclinaisons et risques technologiques
-// mêlés, parce que la route ne gardait que les libellés.
+// Source : GASPAR (Géorisques, `/api/v1/gaspar/risques`), le recensement des risques par commune. Nomenclature de
+// référence : le fichier officiel `ddrm_risq_gaspar` de l'archive GASPAR (files.georisques.fr/GASPAR/gaspar.zip,
+// millésime 2026-10-05, publié sur data.gouv.fr), colonnes `num_risque` / `lib_risque`. Le code est HIÉRARCHIQUE,
+// et c'est lui qui classe, jamais le libellé :
+//   - premier chiffre = nature : 1 naturel (11 à 18), 2 technologique (21 à 25), 3 minier (31 à 34 ; « 32
+//     Inondations de terrains miniers » n'est donc PAS une inondation naturelle) ;
+//   - deux chiffres = une famille ; trois = une déclinaison de la famille dont il porte le préfixe.
+// Hors de ce format (« AUTRE » dans le fichier, « AUT » dans l'API : « Autre risque », 27 communes de l'Oise et du
+// Calvados ; un code vide ou inattendu), la ligne n'est JAMAIS ignorée : elle va dans « Autres risques recensés »,
+// non classée, et le constat cesse de dire qu'aucun risque naturel n'est recensé.
 
 export type RisqueGaspar = { code: string; libelle: string };
 export type NatureRisque = "naturel" | "technologique" | "minier" | "autre";
-export type FamilleRisque = { code: string; nom: string; declinaisons: string[] };
+export type FamilleRisque = { code: string; nom: string; declinaisons: string[]; precision?: string };
 export type GroupeRisques = { nature: NatureRisque; titre: string; note?: string; familles: FamilleRisque[] };
 
 const NATURE_DU_CHIFFRE: Record<string, NatureRisque> = { "1": "naturel", "2": "technologique", "3": "minier" };
 
-// Les familles naturelles dans les mots du lecteur. C'est un renommage des familles DE LA SOURCE (même code, même
+// Les familles naturelles dans les mots du lecteur : un renommage des familles DE LA SOURCE (même code, même
 // périmètre), pas un regroupement nouveau ; une famille inconnue garde le libellé de la source.
 const NOM_FAMILLE_NATURELLE: Record<string, string> = {
   "11": "inondation", "12": "mouvements de terrain", "13": "séisme", "14": "avalanche",
   "15": "éruption volcanique", "16": "feux de forêt", "17": "phénomènes météorologiques", "18": "radon",
 };
 
-/** « Eboulement » : la source omet l'accent de la capitale ; en minuscule, il devient une faute. */
-const libelleLecteur = (l: string) => minusculeInitiale(l.replace(/^Eboulement/, "Éboulement"));
+/**
+ * LA PRÉCISION DANS LE CONSTAT. Une famille se précise quand elle n'a qu'UNE déclinaison ET que cette déclinaison
+ * est une MANIÈRE dont la famille se produit : dans la nomenclature, ce sont les déclinaisons de l'inondation,
+ * toutes écrites « Par … » (112 à 117), qui qualifient la famille d'elles-mêmes (« inondation par submersion
+ * marine »). Les autres déclinaisons sont des sous-types (127 « Tassements différentiels », 172 « Tempête… ») :
+ * les accrocher au constat en ferait une liste dans la liste. Mesuré sur les 31 733 communes du fichier : la règle
+ * « toute famille à une déclinaison » rallongeait le constat de 40 % en moyenne (jusqu'à 150 caractères, jusqu'à
+ * trois précisions) ; celle-ci, de 11 %, une précision au plus. Formes courtes fidèles au libellé officiel.
+ */
+const PRECISION_DE_MANIERE: Record<string, string> = {
+  "112": "par crue lente", "113": "par crue rapide", "114": "par ruissellement",
+  "115": "par lave torrentielle", "116": "par remontée de nappe", "117": "par submersion marine",
+};
+
+/** « Eboulement », « Eruption » : la source omet l'accent de la capitale ; en minuscule, il devient une faute. */
+const libelleLecteur = (l: string) => minusculeInitiale(l.replace(/^Eboulement/, "Éboulement").replace(/^Eruption/, "Éruption"));
 
 export function regrouperRisques(risques: RisqueGaspar[]): GroupeRisques[] {
-  const familles = new Map<string, FamilleRisque & { nature: NatureRisque }>();
+  const familles = new Map<string, FamilleRisque & { nature: NatureRisque; codesDeclinaisons: string[] }>();
+  const nonClassees: FamilleRisque[] = [];
   for (const r of [...risques].sort((a, b) => a.code.localeCompare(b.code))) {
     const code = r.code.trim();
-    if (!/^\d{2,}$/.test(code)) continue;
+    const libelle = r.libelle.trim();
+    // Une ligne sans libellé ne dit rien de lisible : on ne l'affiche pas, mais `illisibles` la compte (plus bas).
+    if (!libelle) continue;
+    if (!/^\d{2,}$/.test(code)) {
+      nonClassees.push({ code: code || "?", nom: libelleLecteur(libelle), declinaisons: [] });
+      continue;
+    }
     const cle = code.slice(0, 2);
     const nature = NATURE_DU_CHIFFRE[code[0]!] ?? "autre";
-    const f = familles.get(cle) ?? { code: cle, nom: "", declinaisons: [], nature };
-    if (code.length === 2) f.nom = nature === "naturel" ? (NOM_FAMILLE_NATURELLE[cle] ?? libelleLecteur(r.libelle)) : libelleLecteur(r.libelle);
-    else f.declinaisons.push(libelleLecteur(r.libelle));
+    const f = familles.get(cle) ?? { code: cle, nom: "", declinaisons: [], codesDeclinaisons: [], nature };
+    if (code.length === 2) f.nom = nature === "naturel" ? (NOM_FAMILLE_NATURELLE[cle] ?? libelleLecteur(libelle)) : libelleLecteur(libelle);
+    else { f.declinaisons.push(libelleLecteur(libelle)); f.codesDeclinaisons.push(code); }
     familles.set(cle, f);
   }
-  // Une déclinaison sans sa famille dans la réponse : elle devient sa propre ligne, rien ne se perd.
-  for (const f of familles.values()) if (!f.nom) f.nom = f.declinaisons.shift() ?? f.code;
+  // Une déclinaison sans sa famille dans la réponse (aucun cas dans le fichier officiel, possible dans l'API) : son
+  // code nomme la famille. Famille naturelle connue → ce nom, la déclinaison reste dessous ; sinon la déclinaison
+  // devient sa propre ligne. Rien ne se perd.
+  for (const f of familles.values()) {
+    if (f.nom) continue;
+    const connue = f.nature === "naturel" ? NOM_FAMILLE_NATURELLE[f.code] : undefined;
+    if (connue) f.nom = connue;
+    else { f.nom = f.declinaisons.shift() ?? f.code; f.codesDeclinaisons.shift(); }
+  }
   const groupe = (nature: NatureRisque, titre: string, note?: string): GroupeRisques | null => {
-    const liste = [...familles.values()].filter((f) => f.nature === nature).map(({ code, nom, declinaisons }) => ({ code, nom, declinaisons }));
+    const liste = nature === "autre"
+      ? [...[...familles.values()].filter((f) => f.nature === "autre").map(({ code, nom, declinaisons }) => ({ code, nom, declinaisons })), ...nonClassees]
+      : [...familles.values()].filter((f) => f.nature === nature).map(({ code, nom, declinaisons, codesDeclinaisons }) => {
+          const precision = codesDeclinaisons.length === 1 ? PRECISION_DE_MANIERE[codesDeclinaisons[0]!] : undefined;
+          return { code, nom, declinaisons, ...(precision ? { precision } : {}) };
+        });
     return liste.length ? { nature, titre, ...(note ? { note } : {}), familles: liste } : null;
   };
   return [
     groupe("naturel", "Risques naturels"),
     groupe("technologique", "Risques technologiques", "Recensés par la même source, ils ne relèvent pas des risques naturels."),
     groupe("minier", "Risques miniers", "Liés aux anciennes exploitations, ils ne relèvent pas des risques naturels."),
-    groupe("autre", "Autres risques recensés", "Catégorie que futur•e ne sait pas classer : elle est reprise telle quelle."),
+    groupe("autre", "Autres risques recensés", "La source ne les classe pas parmi les risques naturels, technologiques ou miniers : ils sont repris tels quels."),
   ].filter((g): g is GroupeRisques => g != null);
 }
 
+/**
+ * LA RÉPONSE DE L'API, en trois situations jamais confondues :
+ *   - `data: []` : la base répond valablement sans rien pour cette commune → `[]` ;
+ *   - une commune SANS `risques_detail` (absent, nul, pas une liste), ou une réponse sans `data` : réponse
+ *     incomplète. Le contrat de l'API ne dit pas qu'elle vaut « rien de recensé » → `null`, comme une panne ;
+ *   - sinon, chaque ligne est transmise, même sans code ou sans libellé : `regrouperRisques` décide.
+ */
+export function interpreterReponseGaspar(json: unknown): RisqueGaspar[] | null {
+  const data = (json as { data?: unknown } | null)?.data;
+  if (!Array.isArray(data)) return null;
+  if (data.length === 0) return [];
+  const detail = (data[0] as { risques_detail?: unknown } | null)?.risques_detail;
+  if (!Array.isArray(detail)) return null;
+  return detail.map((d: { num_risque?: unknown; libelle_risque_long?: unknown } | null) => ({
+    code: String(d?.num_risque ?? "").trim(),
+    libelle: String(d?.libelle_risque_long ?? "").trim(),
+  }));
+}
+
 const SOURCE_GEORISQUES = "Géorisques, base GASPAR · recensement actuel de l'État";
-const A_VERIFIER_RISQUES = "À une adresse précise, vérifiez si elle se trouve dans une zone concernée, quelles règles s'y appliquent et ce que l'on sait du terrain et du bâtiment. Être hors zone ne met pas à l'abri de tout risque.";
+// Ce que le dossier d'adresse sait fournir au point : le zonage d'un plan de prévention quand il en existe un, ses
+// règles, et la nature du sol (argiles, zone sismique). Rien de plus n'est promis.
+const A_VERIFIER_RISQUES = "À une adresse précise, vérifiez si elle se trouve dans une zone réglementée, les règles qui s'y appliquent et la nature du sol.";
+const HORS_ZONE = "Être hors d'une zone réglementée ne met pas à l'abri de tout risque.";
 
 /**
- * `risques` : `null` quand la source n'a pas répondu (jamais « aucun risque ») ; `[]` quand elle répond sans rien
- * recenser. GASPAR ne distingue pas « commune sans risque recensé » de « commune absente de la base » (deux vraies
- * communes, 02813 et 80589, répondent 0 résultat, comme un code inexistant) : le texte dit donc seulement que la
- * base ne recense rien.
+ * `risques` : `null` quand la source ne fournit pas de réponse exploitable (panne, ou réponse incomplète : jamais
+ * « aucun risque ») ; `[]` quand elle répond valablement sans rien recenser. GASPAR ne distingue pas « commune sans
+ * risque recensé » de « commune absente de la base » (02813 et 80589 répondent 0 résultat, comme un code
+ * inexistant) : le texte dit donc seulement que la base ne recense rien.
  */
 export function lireRisques(lieu: Lieu, risques: RisqueGaspar[] | null): LecturePastille {
   const suite = SUITE_ADRESSE(lieu);
@@ -380,24 +437,36 @@ export function lireRisques(lieu: Lieu, risques: RisqueGaspar[] | null): Lecture
     };
   }
   const groupes = regrouperRisques(risques);
+  const illisibles = risques.filter((r) => !r.libelle.trim()).length;
   const naturels = groupes.find((g) => g.nature === "naturel")?.familles ?? [];
+  const nonClasse = groupes.some((g) => g.nature === "autre");
   const autres = groupes.filter((g) => g.nature !== "naturel");
+  const nomme = (f: FamilleRisque) => (f.precision ? `${f.nom} ${f.precision}` : f.nom);
   const constat = naturels.length >= 2
-    ? `Plusieurs risques naturels sont recensés dans la commune : ${joinFr(naturels.map((f) => f.nom))}.`
+    ? `Plusieurs risques naturels sont recensés dans la commune : ${joinFr(naturels.map(nomme))}.`
     : naturels.length === 1
-      ? `Un risque naturel est recensé dans la commune : ${naturels[0]!.nom}.`
-      : autres.length
-        ? "Aucun risque naturel n'est recensé dans la commune ; d'autres risques le sont, détaillés ci-dessous."
-        : "La base nationale des risques ne recense rien pour cette commune.";
+      ? `Un risque naturel est recensé dans la commune : ${nomme(naturels[0]!)}.`
+      : nonClasse
+        // Un risque non classé pourrait être naturel : on ne dit ni « aucun risque naturel », ni qu'il ne l'est pas.
+        ? "La source recense pour la commune un risque sans en préciser la nature : il est détaillé ci-dessous."
+        : autres.length
+          ? "Aucun risque naturel n'est recensé dans la commune ; d'autres risques le sont, détaillés ci-dessous."
+          : illisibles
+            ? "La source recense des risques pour la commune, mais sans libellé lisible : nous ne pouvons pas les nommer."
+            : "La base nationale des risques ne recense rien pour cette commune.";
+  const noteDetail = [
+    ...(illisibles ? [`${illisibles === 1 ? "Une ligne" : `${illisibles} lignes`} de la source, sans libellé, n'${illisibles === 1 ? "a" : "ont"} pas pu être lue${illisibles === 1 ? "" : "s"}.`] : []),
+    HORS_ZONE,
+  ];
   return {
     cle: "risques", commune: lieu.commune,
     fait: {
       texte: constat, source: SOURCE_GEORISQUES, grain: "commune",
-      ...(groupes.length ? { detail: { resume: "Voir les risques recensés", groupes } } : {}),
+      ...(groupes.length ? { detail: { resume: "Voir les risques recensés", groupes, notes: noteDetail } } : {}),
     },
     pourVous: {
       signal: "information",
-      texte: naturels.length
+      texte: naturels.length || nonClasse
         ? "Un risque recensé dans la commune ne concerne pas forcément chaque adresse."
         : "Une absence de recensement ne garantit pas l'absence de danger.",
     },

@@ -394,6 +394,7 @@ function Lecture({ lecture, onglets }: {
                     </ul>
                   </div>
                 ))}
+                {lecture.fait.detail.notes?.map((n) => <p key={n} className={c.detailNote}>{fr(n)}</p>)}
               </details>
             ) : null}
             <span className={c.source}>

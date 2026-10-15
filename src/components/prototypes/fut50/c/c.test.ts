@@ -7,7 +7,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, valeurAffichee, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
+import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, interpreterReponseGaspar, valeurAffichee, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
 import { buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS } from "../../../../lib/decision/climat-facts.ts";
 import { CAS_SETE } from "../cas-sete.ts";
 
@@ -159,8 +159,11 @@ test("risques : le détail ne perd aucune ligne de la source et n'en compte aucu
 
 test("risques, La Rochelle : la submersion marine reste lisible dans le détail, sous l'inondation", () => {
   const l = lireRisques({ ...SETE, commune: "La Rochelle" }, GASPAR_LA_ROCHELLE);
-  assert.equal(l.fait?.texte, "Plusieurs risques naturels sont recensés dans la commune : inondation, mouvements de terrain, séisme et phénomènes météorologiques.");
-  assert.deepEqual(l.fait!.detail!.groupes[0]!.familles[0], { code: "11", nom: "inondation", declinaisons: ["par submersion marine"] });
+  // Une seule déclinaison, et c'est une manière (« Par … ») : elle précise la famille dans le constat.
+  assert.equal(l.fait?.texte, "Plusieurs risques naturels sont recensés dans la commune : inondation par submersion marine, mouvements de terrain, séisme et phénomènes météorologiques.");
+  assert.deepEqual(l.fait!.detail!.groupes[0]!.familles[0], { code: "11", nom: "inondation", declinaisons: ["par submersion marine"], precision: "par submersion marine" });
+  // « Mouvements de terrain » n'a qu'une déclinaison aussi (127), mais c'est un sous-type : pas de précision.
+  assert.equal(l.fait!.detail!.groupes[0]!.familles[1]!.precision, undefined);
 });
 
 test("risques : naturel, technologique, minier et inconnu classés par le code, jamais par le libellé", () => {
@@ -172,9 +175,13 @@ test("risques : naturel, technologique, minier et inconnu classés par le code, 
     ["autre", ["risque nouveau"]],
   ]);
   assert.equal(l.fait?.texte, "Un risque naturel est recensé dans la commune : feux de forêt.");
-  // Une déclinaison arrivée sans sa famille devient sa propre ligne.
+  // Une déclinaison arrivée sans sa famille : son code nomme la famille, elle reste dessous.
   const orphelin = lireRisques(SETE, [{ code: "117", libelle: "Par submersion marine" }]);
-  assert.deepEqual(orphelin.fait!.detail!.groupes[0]!.familles, [{ code: "11", nom: "par submersion marine", declinaisons: [] }]);
+  assert.deepEqual(orphelin.fait!.detail!.groupes[0]!.familles, [{ code: "11", nom: "inondation", declinaisons: ["par submersion marine"], precision: "par submersion marine" }]);
+  assert.equal(orphelin.fait?.texte, "Un risque naturel est recensé dans la commune : inondation par submersion marine.");
+  // Sans famille connue (technologique) : la déclinaison devient sa propre ligne.
+  const orphelinTech = lireRisques(SETE, [{ code: "211", libelle: "Effet thermique" }]);
+  assert.deepEqual(orphelinTech.fait!.detail!.groupes[0]!.familles, [{ code: "21", nom: "effet thermique", declinaisons: [] }]);
 });
 
 test("risques : technologiques seuls, base vide, source muette : trois cas distincts, jamais « aucun risque »", () => {
@@ -190,7 +197,10 @@ test("risques : technologiques seuls, base vide, source muette : trois cas disti
   assert.equal(muet.pourVous.signal, "indisponible");
   assert.match(muet.pourVous.texte, /n'a pas répondu : nous ne pouvons rien en dire, ni dans un sens ni dans l'autre/);
   for (const l of [tech, vide, muet]) assert.doesNotMatch(`${l.fait?.texte ?? ""} ${l.pourVous.texte}`, /aucun risque\.|sans risque|à l'abri/i);
-  assert.match(muet.aVerifier, /Être hors zone ne met pas à l'abri de tout risque/);
+  assert.equal(muet.aVerifier, "À une adresse précise, vérifiez si elle se trouve dans une zone réglementée, les règles qui s'y appliquent et la nature du sol.");
+  // La limite « hors zone » quitte la lecture principale, mais reste dans le détail.
+  assert.doesNotMatch(tech.aVerifier, /hors/);
+  assert.ok(tech.fait!.detail!.notes!.includes("Être hors d'une zone réglementée ne met pas à l'abri de tout risque."));
 });
 
 test("sans voiture : se lit à l'adresse ; une ADRESSE choisie n'est lue qu'à l'échelle de sa commune", () => {
@@ -278,6 +288,53 @@ test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l
   assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.hero \{ transition: none; \}/);
   const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
   assert.equal((hero.match(/role="combobox"/g) ?? []).length, 1, "un seul champ, jamais recréé");
+});
+
+test("risques, précision du constat : une seule déclinaison ET une manière ; plusieurs déclinaisons : la famille seule", () => {
+  const attigny = lireRisques(SETE, g(`
+    11 Inondation
+    112 Par une crue à débordement lent de cours d'eau
+    114 Par ruissellement et coulée de boue`));
+  assert.equal(attigny.fait?.texte, "Un risque naturel est recensé dans la commune : inondation.");
+  assert.equal(attigny.fait!.detail!.groupes[0]!.familles[0]!.declinaisons.length, 2, "les deux restent dans le détail");
+  const ageville = lireRisques(SETE, g(`
+    11 Inondation
+    112 Par une crue à débordement lent de cours d'eau
+    17 Phénomène lié à l'atmosphère
+    172 Tempête et grains (vent)`));
+  assert.equal(ageville.fait?.texte, "Plusieurs risques naturels sont recensés dans la commune : inondation par crue lente et phénomènes météorologiques.");
+  assert.match(lireRisques(SETE, GASPAR_NANTES).fait!.texte, /: inondation, mouvements de terrain/, "Nantes, trois déclinaisons : aucune précision");
+});
+
+test("risques, codes hors format : « AUT » de l'API, code vide, code d'un chiffre, libellé vide ; rien ne disparaît en silence", () => {
+  // Abancourt (60001), réponse réelle de l'API : son seul risque est « AUT · Autre risque ».
+  const abancourt = lireRisques(SETE, [{ code: "AUT", libelle: "Autre risque" }]);
+  assert.equal(abancourt.fait?.texte, "La source recense pour la commune un risque sans en préciser la nature : il est détaillé ci-dessous.");
+  assert.equal(abancourt.pourVous.texte, "Un risque recensé dans la commune ne concerne pas forcément chaque adresse.");
+  assert.deepEqual(abancourt.fait!.detail!.groupes.map((gr) => [gr.nature, gr.familles.map((f) => f.nom)]), [["autre", ["autre risque"]]]);
+  // Mêlé à des risques naturels : le constat les nomme, le non-classé reste dans le détail, jamais parmi les naturels.
+  const mele = lireRisques(SETE, [{ code: "11", libelle: "Inondation" }, { code: "", libelle: "Risque sans code" }, { code: "1", libelle: "Code tronqué" }, { code: "1A", libelle: "Code altéré" }]);
+  assert.equal(mele.fait?.texte, "Un risque naturel est recensé dans la commune : inondation.");
+  assert.deepEqual(mele.fait!.detail!.groupes.find((gr) => gr.nature === "autre")!.familles.map((f) => [f.code, f.nom]), [["?", "risque sans code"], ["1", "code tronqué"], ["1A", "code altéré"]]);
+  // Une ligne sans libellé ne s'affiche pas (rien de lisible), mais elle est comptée et dite.
+  const illisible = lireRisques(SETE, [{ code: "11", libelle: "Inondation" }, { code: "12", libelle: "" }]);
+  assert.match(illisible.fait!.detail!.notes![0]!, /^Une ligne de la source, sans libellé, n'a pas pu être lue\.$/);
+  const seulIllisible = lireRisques(SETE, [{ code: "13", libelle: "" }]);
+  assert.equal(seulIllisible.fait?.texte, "La source recense des risques pour la commune, mais sans libellé lisible : nous ne pouvons pas les nommer.");
+  assert.doesNotMatch(seulIllisible.fait!.texte, /ne recense rien/);
+});
+
+test("réponse de l'API : valide et vide, incomplète, panne ; trois issues distinctes", () => {
+  assert.deepEqual(interpreterReponseGaspar({ results: 0, data: [] }), [], "commune absente de la base : réponse valide sans recensement");
+  assert.equal(interpreterReponseGaspar({ data: [{ code_insee: "44109" }] }), null, "risques_detail absent : incomplet, pas « rien »");
+  assert.equal(interpreterReponseGaspar({ data: [{ risques_detail: null }] }), null);
+  assert.equal(interpreterReponseGaspar({ data: [{ risques_detail: "?" }] }), null);
+  assert.equal(interpreterReponseGaspar({}), null);
+  assert.equal(interpreterReponseGaspar(null), null);
+  assert.deepEqual(interpreterReponseGaspar({ data: [{ risques_detail: [] }] }), []);
+  assert.deepEqual(interpreterReponseGaspar({ data: [{ risques_detail: [{ num_risque: "AUT", libelle_risque_long: "Autre risque" }, { libelle_risque_long: "Sans code" }, null] }] }),
+    [{ code: "AUT", libelle: "Autre risque" }, { code: "", libelle: "Sans code" }, { code: "", libelle: "" }], "chaque ligne est transmise, même incomplète");
+  assert.equal(lireRisques(SETE, interpreterReponseGaspar({ data: [{}] })).pourVous.signal, "indisponible");
 });
 
 // ── La chaleur : données réelles, frontières exactes, même lecture pour toutes les communes ──────────────

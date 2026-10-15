@@ -220,6 +220,7 @@
 .detailListe li { padding-left: 14px; position: relative; }
 .detailListe li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 5px; height: 1px; background: var(--r-filet-fort); }
 .detailFamille { color: var(--r-encre); }
+.methode p.detailNote { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--r-filet); }
 .methode p { margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: var(--r-texte); }
 .signal::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--r-teinte, var(--r-encre)); flex: none; }
 
