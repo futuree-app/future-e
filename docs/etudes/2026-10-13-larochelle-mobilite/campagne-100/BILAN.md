@@ -1,6 +1,6 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T18:19:39Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T18:19:56Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
 **Communes distinctes préparées : 40** (20 avant la campagne, 20 pendant).
 
@@ -9,7 +9,7 @@ Mis à jour le 2026-10-15T18:19:39Z par `outil/campagne.py bilan`. Mesures déta
 | Lot | Communes retenues | Inexploitables remplacées | Prêtes à relire | Suspendu |
 |---|---|---|---|---|
 | 2026-10-lot-04-campagne | 20 | Lille (59350) | 20 | non |
-| 2026-10-lot-05-campagne | 20 | aucune | 0 | oui |
+| 2026-10-lot-05-campagne | 20 | aucune | 0 | non |
 | 2026-10-lot-06-campagne | 20 | aucune | 0 | non |
 | 2026-10-lot-07-campagne | 20 | aucune | 0 | non |
 
