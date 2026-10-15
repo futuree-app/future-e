@@ -330,6 +330,14 @@ def k(x):
     return f"{x:,}".replace(",", " ") if num(x) else str(x)
 
 
+def bloquantes(dj, article):
+    sys.path.insert(0, ICI)
+    from controle_article import controler
+    if not os.path.exists(article):
+        return []
+    return [x for x in controler(dj, open(article).read())[0] if x["gravite"] == "bloquante"]
+
+
 def cmd_bilan(a):
     L = lignes_mesures()
     with open(os.path.join(CAMP, "mesures.csv"), "w", newline="") as f:
@@ -339,7 +347,7 @@ def cmd_bilan(a):
     ecrire_candidats()
     J = lire_journal()
     deja = deja_preparees()
-    communes, exceptions, niv1, niv2, visuels_ko = {}, [], [], 0, []
+    communes, exceptions, niv1, niv2, visuels_ko, faux = {}, [], [], 0, [], []
     for n, d in lots_campagne():
         for kk, c in json.load(open(os.path.join(d, "etat.json")))["communes"].items():
             if c.get("article"):
@@ -350,15 +358,21 @@ def cmd_bilan(a):
                 if (F.get("carburant.gazole.ecart") or {}).get("usage") != "oui" or not (dj.get("scenario_carburant") or {}).get("lignes"):
                     exceptions.append(f"{c['nom']} ({kk}) : faits carburant absents ou inutilisables dans le dossier")
                 rel = json.load(open(os.path.join(g, "relecture.anomalies.json"))) if os.path.exists(os.path.join(g, "relecture.anomalies.json")) else {}
-                ctl = json.load(open(os.path.join(g, "redaction.controle.json"))) if os.path.exists(os.path.join(g, "redaction.controle.json")) else {}
                 b = [x for x in rel.get("anomalies", []) if x.get("gravite") == "bloquante"]
-                bc = [x for x in ctl.get("anomalies", []) if x.get("gravite") == "bloquante"]
                 niv2 += sum(1 for x in rel.get("anomalies", []) if x.get("gravite") == "a_revoir")
+                # Contrôle déterministe recalculé avec sa version actuelle (gratuit, rien n'est régénéré) : une anomalie de
+                # l'époque qu'il ne reproduit plus était un faux positif, corrigé depuis dans controle_article.py.
+                bc = bloquantes(dj, os.path.join(g, "redaction.md"))
+                ancien = [x for x in (json.load(open(os.path.join(g, "redaction.controle.json"))) if os.path.exists(os.path.join(g, "redaction.controle.json")) else {}).get("anomalies", [])
+                          if x.get("gravite") == "bloquante" and x.get("detail") not in {y.get("detail") for y in bc}]
+                if ancien and not (b or bc) and os.path.exists(os.path.join(g, "correction.md")):
+                    faux.append(f"{c['nom']} ({kk}) : " + " ; ".join(x.get("detail", "")[:100] for x in ancien))
                 if b or bc:
-                    apres = json.load(open(os.path.join(g, "correction.controle.json"))) if os.path.exists(os.path.join(g, "correction.controle.json")) else {}
+                    reste = bloquantes(dj, os.path.join(g, c["article"]))
                     niv1.append((c["nom"], kk, [f"{x.get('categorie', '')} : {x.get('probleme', '')[:160]}" for x in b]
                                  + [f"contrôle {x.get('type', '')} : {x.get('detail', '')[:160]}" for x in bc],
-                                 "corrigé" if os.path.exists(os.path.join(g, "correction.md")) and not apres.get("bloquantes") else "reste à voir"))
+                                 "corrigé" if os.path.exists(os.path.join(g, "correction.md")) and not reste
+                                 else f"après correction, {len(reste)} anomalie(s) du contrôle" if reste else "non corrigé"))
                 if c.get("visuels") and not c["visuels"].get("ok", True):
                     visuels_ko.append(f"{c['nom']} : {c['visuels'].get('erreur')}")
     appels = [l for l in L if l["outil"] in ("codex", "claude-code")]
@@ -394,10 +408,11 @@ def cmd_bilan(a):
             pc[l["insee"]]["duree_ia"] += l["duree_s"]
     traitement = sum(l["duree_s"] for l in L if num(l["duree_s"]))
     debut = min((t(e["t"]) for e in J if e["evt"] in ("preparation_debut", "production_debut")), default=None)
-    fin = max((t(e["t"]) for e in J if e["evt"] in ("production_fin", "preparation_fin")), default=None)
+    fins = [t(e["t"]) for e in J if e["evt"] != "intervention"] + [t(l["fin"]) for l in L if isinstance(l["fin"], str) and l["fin"][:2] == "20"]
+    fin = max(fins, default=None)
     pauses, ouverte = 0.0, None
     for e in J:
-        if e["evt"] == "suspension":
+        if e["evt"] == "suspension" and ouverte is None:  # plusieurs lots suspendus par la même limite : une seule pause
             ouverte = t(e["t"])
         elif e["evt"] == "reprise" and ouverte:
             pauses += (t(e["t"]) - ouverte).total_seconds(); ouverte = None
@@ -416,6 +431,8 @@ def cmd_bilan(a):
     o += ["\n## Exceptions carburant\n", "\n".join(f"- {x}" for x in exceptions) or "Aucune : toutes les communes rédigées ont des faits carburant utilisables.",
           "\n## Erreurs de niveau 1 (correction)\n"]
     o += [f"- {nom} ({kk}), {issue} : " + " ; ".join(x) for nom, kk, x, issue in niv1] or ["Aucune."]
+    if faux:
+        o += ["\nCorrections déclenchées seulement par un faux positif du contrôle (corrigé depuis ; l'appel a bien eu lieu et est compté) :"] + [f"- {x}" for x in faux]
     o += [f"\nNiveau 2 (noté, sans nouvelle génération) : {niv2} remarque(s), détail dans `relecture.anomalies.json` de chaque commune.",
           "\n## Jetons par outil et par étape\n",
           "Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l'entrée inclut le cache et la sortie inclut le "
@@ -442,8 +459,9 @@ def cmd_bilan(a):
           f"- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : {hm(traitement)}.",
           f"- Par commune (hors collecte) : médiane {hm(statistics.median(d_ia))}, les trois plus longues : "
           + ", ".join(f"{x['nom']} {hm(x['duree_ia'])}" for x in sorted(pc.values(), key=lambda x: -x['duree_ia'])[:3]) + "." if d_ia else "",
-          f"- Durée réelle de la campagne : {hm((fin - debut).total_seconds()) if debut and fin else NM} (du premier lancement à la dernière fin enregistrée)"
-          + (f", dont pauses de quota : {hm(pauses)}." if pauses else " ; aucune pause de quota."),
+          f"- Durée réelle de la campagne : {hm((fin - debut).total_seconds()) if debut and fin else NM} (du premier lancement à la dernière étape enregistrée)"
+          + (f", dont pauses de quota : {hm(pauses)} (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote)." if pauses else " ; aucune pause de quota.")
+          + (" Une pause est en cours." if ouverte else ""),
           f"- Interventions du terminal pilote : {sum(e['minutes'] for e in inter):g} min "
           f"({sum(e['minutes'] for e in inter if e['mesure'] == 'mesurée'):g} mesurées, {sum(e['minutes'] for e in inter if e['mesure'] == 'estimée'):g} estimées)."]
     o += [f"  - {e['t'][:16].replace('T', ' ')} UTC, {e['minutes']:g} min ({e['mesure']}) : {e['texte']}" for e in inter]
