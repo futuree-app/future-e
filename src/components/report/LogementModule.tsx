@@ -24,6 +24,7 @@ import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/
 import type { CatnatInondation } from "@/lib/decision/catnat-evidence";
 import { DecisionChecklist } from "@/components/report/logement/DecisionChecklist";
 import { relationDeLAdresse } from "@/lib/relation-au-lieu";
+import { voixAudit } from "@/lib/audit-lecture";
 import type { UserProject } from "@/lib/user-project";
 import { energyState, expositionArgileNotable } from "@/lib/decision/logement-coverage";
 import type { LogementFacts } from "@/lib/decision/decision-fact";
@@ -567,6 +568,9 @@ export default function LogementModule({
               dpe={dpe}
               audit={result.audit}
               auditStatus={result.auditStatus}
+              autresAudits={result.autresAudits ?? []}
+              autresAuditsIncomplets={result.autresAuditsIncomplets === true}
+              voixAudit={voixAudit(relationDeLAdresse(dossier))}
               candidates={dpeCandidates}
               dpeNonVerifiable={dpeNonVerifiable}
               listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}

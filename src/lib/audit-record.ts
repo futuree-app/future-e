@@ -74,6 +74,20 @@ export type AuditRecord = {
   adresse: string | null;
   objet: AuditObjet;
   scenarios: AuditScenario[];
+  /**
+   * FUT-62 : le numéro du DPE auquel la source rattache l'audit (`numero_dpe`, titre « numero_dpe_rattache »).
+   * C'est la seule PREUVE qu'un audit trouvé par l'adresse porte sur le diagnostic retenu pour ce logement :
+   * une surface ou une consommation voisines n'en sont pas. Optionnel : absent des rapports antérieurs.
+   */
+  numero_dpe?: string | null;
+  /**
+   * FUT-62 : le numéro d'immatriculation de la copropriété, quand la source le publie (`n_immatriculation_copro`).
+   * Présent, il établit que l'immeuble audité est une copropriété ; absent, il ne prouve RIEN (la plupart des
+   * audits d'immeuble ne le renseignent pas, et un immeuble peut appartenir à un seul propriétaire).
+   */
+  copropriete?: string | null;
+  /** FUT-62 : le nombre de logements de l'immeuble audité, tel que publié (`nb_appartement`). */
+  nb_logements?: number | null;
 };
 
 /** Les colonnes lues. Les totaux (`ep_conso_5_usages`, `emission_ges_5_usages`) n'en font PAS partie. */
@@ -92,6 +106,11 @@ export const AUDIT_SELECT = [
   "emission_ges_5_usages_m2",
   "surface_habitable_logement",
   "surface_habitable_immeuble",
+  // FUT-62 : ce qui relie l'audit au diagnostic retenu, à la copropriété, et à l'audit qu'il remplace.
+  "numero_dpe",
+  "n_immatriculation_copro",
+  "nb_appartement",
+  "n_audit_remplace",
 ] as const;
 
 export type AuditApiRow = {
@@ -107,6 +126,10 @@ export type AuditApiRow = {
   emission_ges_5_usages_m2?: number | null;
   surface_habitable_logement?: number | null;
   surface_habitable_immeuble?: number | null;
+  numero_dpe?: string | null;
+  n_immatriculation_copro?: string | null;
+  nb_appartement?: number | null;
+  n_audit_remplace?: string | null;
 };
 
 const fini = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
@@ -122,27 +145,10 @@ export function objetAudite(row: AuditApiRow): AuditObjet {
   return null;
 }
 
-/**
- * L'audit d'UNE adresse, à partir des lignes renvoyées par la source (triées du plus récent).
- *
- * Seules les lignes dont l'identifiant BAN est EXACTEMENT celui de l'adresse sont gardées : la recherche
- * plein texte de la source ne doit jamais faire entrer l'audit d'une autre adresse. Puis le premier audit
- * rencontré (le plus récent) est retenu, avec toutes ses étapes.
- */
-export function toAuditRecord(rows: AuditApiRow[], banId: string): AuditRecord | null {
-  rows = rows.filter((r) => r.identifiant_ban === banId);
-  if (rows.length === 0) return null;
+const texte = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
 
-  const byAudit = new Map<string, AuditApiRow[]>();
-  for (const row of rows) {
-    const list = byAudit.get(row.n_audit) ?? [];
-    list.push(row);
-    byAudit.set(row.n_audit, list);
-  }
-
-  const auditRows = byAudit.values().next().value as AuditApiRow[];
+function versRecord(auditRows: AuditApiRow[]): AuditRecord {
   const head = auditRows[0];
-
   return {
     correspondance: "exact_address",
     n_audit: head.n_audit,
@@ -157,7 +163,57 @@ export function toAuditRecord(rows: AuditApiRow[], banId: string): AuditRecord |
       conso_ep_m2: fini(r.ep_conso_5_usages_m2) ? r.ep_conso_5_usages_m2 : null,
       emission_ges_m2: fini(r.emission_ges_5_usages_m2) ? r.emission_ges_5_usages_m2 : null,
     })),
+    // FUT-62 : écrits SEULEMENT s'ils ont une valeur. Un rapport dont l'audit ne les publie pas garde ainsi
+    // exactement la forme (et l'empreinte) d'avant : aucune « nouvelle version » à l'actualisation.
+    ...siPresent("numero_dpe", auditRows.map((r) => texte(r.numero_dpe)).find(Boolean)),
+    ...siPresent("copropriete", auditRows.map((r) => texte(r.n_immatriculation_copro)).find(Boolean)),
+    ...siPresent("nb_logements", auditRows.map((r) => r.nb_appartement).find((v): v is number => fini(v) && v > 0)),
   };
+}
+
+function siPresent<K extends string, V>(cle: K, v: V | null | undefined): Partial<Record<K, V>> {
+  return v == null ? {} : ({ [cle]: v } as Record<K, V>);
+}
+
+/**
+ * TOUS LES AUDITS D'UNE ADRESSE (FUT-62), du plus pertinent au moins pertinent.
+ *
+ * Seules les lignes dont l'identifiant BAN est EXACTEMENT celui de l'adresse sont gardées : la recherche
+ * plein texte de la source ne doit jamais faire entrer l'audit d'une autre adresse.
+ *
+ * LE DÉFAUT CORRIGÉ. `toAuditRecord` gardait « le premier audit rencontré », sans dire qu'il y en avait
+ * d'autres. Au 1 rue Saint-Dominique (Paris 7e), la source en publie trois, établis le même jour (un
+ * immeuble de 434 m², un « immeuble » de 55 m², un appartement de 195 m²) : lequel s'affichait dépendait
+ * de l'ordre de l'API, et les deux autres n'existaient pour personne. L'ordre est maintenant écrit :
+ *   1. le plus récent (un audit plus ancien décrit un état peut-être dépassé) ;
+ *   2. à date égale, l'immeuble avant un logement : l'immeuble concerne tous les logements de l'adresse,
+ *      un audit de logement n'en concerne qu'un, qui n'est pas forcément celui-ci ;
+ *   3. puis la plus grande surface, puis le numéro d'audit (stable d'un appel à l'autre).
+ * Un audit que la source dit REMPLACÉ par un autre audit présent (`n_audit_remplace`) est écarté.
+ */
+export function toAuditRecords(rows: AuditApiRow[], banId: string): AuditRecord[] {
+  rows = rows.filter((r) => r.identifiant_ban === banId);
+  const byAudit = new Map<string, AuditApiRow[]>();
+  for (const row of rows) {
+    const list = byAudit.get(row.n_audit) ?? [];
+    list.push(row);
+    byAudit.set(row.n_audit, list);
+  }
+  const remplaces = new Set(rows.map((r) => texte(r.n_audit_remplace)).filter((v): v is string => v != null));
+  const rangGrain = (a: AuditRecord) => (a.objet?.grain === "immeuble" ? 0 : a.objet?.grain === "logement" ? 1 : 2);
+  return [...byAudit.values()]
+    .map(versRecord)
+    .filter((a) => !remplaces.has(a.n_audit))
+    .sort((a, b) =>
+      (b.date_audit ?? "").localeCompare(a.date_audit ?? "")
+      || rangGrain(a) - rangGrain(b)
+      || (b.objet?.surface_m2 ?? 0) - (a.objet?.surface_m2 ?? 0)
+      || a.n_audit.localeCompare(b.n_audit));
+}
+
+/** L'audit retenu pour une adresse : le premier de `toAuditRecords` (cf. son ordre), ou `null`. */
+export function toAuditRecord(rows: AuditApiRow[], banId: string): AuditRecord | null {
+  return toAuditRecords(rows, banId)[0] ?? null;
 }
 
 /**
@@ -221,6 +277,10 @@ function titreParcours(categorie: string): { titre: string; ordre: number; genre
   const variante = /complementaire/.test(c) ? " (variante)" : "";
   if (/multi|plusieurs/.test(c)) return { titre: `Rénovation par étapes${variante}`, ordre: variante ? 3 : 1, genre: "etapes" };
   if (/une etape|une seule/.test(c)) return { titre: `Rénovation en une seule fois${variante}`, ordre: variante ? 4 : 2, genre: "une_fois" };
+  // FUT-62 : « scénario complémentaire 1 », tel que la source l'écrit (4 % des audits échantillonnés) : un
+  // parcours de plus, proposé par l'auditeur, dont la source ne dit pas s'il procède par étapes.
+  const complementaire = /^scenario complementaire\s*(\d+)?$/.exec(c);
+  if (complementaire) return { titre: `Parcours complémentaire${complementaire[1] ? ` ${complementaire[1]}` : ""}`, ordre: 4.5 + Number(complementaire[1] ?? 0) / 100, genre: "autre" };
   const brut = categorie.replace(/["«»]/g, "").trim();
   return { titre: brut.charAt(0).toUpperCase() + brut.slice(1), ordre: 5, genre: "autre" };
 }
@@ -329,15 +389,29 @@ export function candidatProche(
  */
 export type AuditStatus = "present" | "absent" | "unavailable";
 export type AuditLookup =
-  | { status: "present"; audit: AuditRecord }
+  /** FUT-62 : `autres` = les autres audits de la même adresse ; `autresIncomplets` = la liste a été coupée. */
+  | { status: "present"; audit: AuditRecord; autres?: AuditRecord[]; autresIncomplets?: boolean }
   | { status: "absent" }
   | { status: "unavailable" };
 
-/** Les lignes rendues par la source → l'état établi. `null` : la source n'a pas répondu exploitablement. */
-export function lectureAudit(rows: AuditApiRow[] | null, banId: string): AuditLookup {
+/**
+ * Les lignes rendues par la source → l'état établi. `null` : la source n'a pas répondu exploitablement.
+ *
+ * `tronquee` (FUT-62) : la source a rendu autant de lignes que demandé, d'autres existent peut-être. Les
+ * lignes arrivent triées par date puis par numéro d'audit : seul le DERNIER audit de la page peut être
+ * coupé (une partie de ses étapes manquerait). Il est écarté, et la liste des autres audits est dite
+ * incomplète, pour que l'écran écrive « au moins ».
+ */
+export function lectureAudit(rows: AuditApiRow[] | null, banId: string, tronquee = false): AuditLookup {
   if (rows == null) return { status: "unavailable" };
-  const audit = toAuditRecord(rows, banId);
-  return audit ? { status: "present", audit } : { status: "absent" };
+  let lignes = rows;
+  if (tronquee && rows.length > 0) {
+    const dernier = rows[rows.length - 1].n_audit;
+    const sans = rows.filter((r) => r.n_audit !== dernier);
+    if (sans.some((r) => r.identifiant_ban === banId)) lignes = sans;
+  }
+  const [audit, ...autres] = toAuditRecords(lignes, banId);
+  return audit ? { status: "present", audit, autres, autresIncomplets: tronquee } : { status: "absent" };
 }
 
 /**
@@ -352,7 +426,16 @@ export function voisinAutorise(exact: AuditLookup): boolean {
 /** Ce que rend le module Logement : l'audit exact s'il existe, sinon (et seulement sur absence établie) un candidat voisin. */
 export function resultatAudit(
   exact: AuditLookup, proche: AuditCandidatProche | null,
-): { audit: AuditRecord | null; auditProche: AuditCandidatProche | null; auditStatus: AuditStatus } {
-  if (exact.status === "present") return { audit: exact.audit, auditProche: null, auditStatus: "present" };
+): {
+  audit: AuditRecord | null; auditProche: AuditCandidatProche | null; auditStatus: AuditStatus;
+  autresAudits?: AuditRecord[]; autresAuditsIncomplets?: boolean;
+} {
+  if (exact.status === "present") {
+    const base = { audit: exact.audit, auditProche: null, auditStatus: "present" as const };
+    // FUT-62 : les autres audits de l'adresse ne sont rendus que s'il y en a, pour ne rien changer ailleurs.
+    return exact.autres?.length || exact.autresIncomplets
+      ? { ...base, autresAudits: exact.autres ?? [], autresAuditsIncomplets: exact.autresIncomplets === true }
+      : base;
+  }
   return { audit: null, auditProche: voisinAutorise(exact) ? proche : null, auditStatus: exact.status };
 }
