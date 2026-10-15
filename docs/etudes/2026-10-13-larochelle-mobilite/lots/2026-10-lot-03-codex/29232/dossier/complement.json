@@ -1,0 +1,154 @@
+{
+ "commune": "29232",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA Quimper Bretagne Occidentale s'appelle « Qub » ; son autorité organisatrice est CA Quimper Bretagne Occidentale.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Qub » : https://transport.data.gouv.fr/datasets/horaires-theoriques-et-du-reseau-de-transports-qub-transports-urbains-de-quimper-bretagne-occidentale ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-09",
+   "perimetre": "intercommunalité CA Quimper Bretagne Occidentale ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Qub est https://www.qub.bzh.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-et-du-reseau-de-transports-qub-transports-urbains-de-quimper-bretagne-occidentale ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Qub",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_week_end",
+   "information": "Le réseau est gratuit tous les week-ends pour tous les voyageurs. La page ne dit pas quelles lignes sont concernées.",
+   "source": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Tous les week-ends pour tous »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Qub ; Tous publics, week-ends. Lignes non précisées par la page. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs",
+    "extrait": "Tous les week-ends pour tous"
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_moins_6_ans",
+   "information": "Les enfants de moins de 6 ans voyagent gratuitement.",
+   "source": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Pour les enfants de moins de 6 ans »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Qub ; Enfants de moins de 6 ans, réseau QUB ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs",
+    "extrait": "Pour les enfants de moins de 6 ans"
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_qub_city",
+   "information": "La navette électrique du centre-ville, QUB city, figure parmi les services gratuits.",
+   "source": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs (extrait vérifié le 2026-10-15 : « La navette électrique du centre-ville : QUB city »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Qub ; Navette QUB city, centre-ville de Quimper ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs",
+    "extrait": "La navette électrique du centre-ville : QUB city"
+   }
+  },
+  {
+   "id": "doc.jours.dimanche_lignes_D",
+   "information": "Le dimanche, les lignes D1, D2 et D3 circulent toutes les heures, avec une correspondance au centre-ville. D4 remplace la ligne E. Le plan du dimanche s'intitule « Plan du dimanche 2025-2026 ». Cette période est le seul repère de validité sur la page.",
+   "source": "https://www.qub.bzh/se-deplacer/lignes-du-dimanche (extrait vérifié le 2026-10-15 : « une correspondance systématique au centre-ville »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Plan du dimanche 2025-2026 (intitulé du fichier). Il ne couvre pas forcément la date du jour, 2026-10-15.",
+   "perimetre": "réseau Qub ; Lignes D1 à D4, dimanche uniquement ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.qub.bzh/se-deplacer/lignes-du-dimanche",
+    "extrait": "une correspondance systématique au centre-ville"
+   }
+  },
+  {
+   "id": "doc.jours.vendredi_16_octobre_2026",
+   "information": "Le vendredi 16 octobre 2026, les lignes urbaines A, B, C et 1 à 6 circulent, avec des perturbations liées à un mouvement social.",
+   "source": "https://www.qub.bzh/qub-vous/actualite/vie-du-reseau/perturbations-sur-le-reseau-qub-vendredi-16-octobre-2026 (extrait vérifié le 2026-10-15 : « Les lignes urbaines A, B, C ainsi que les lignes 1 à 6 circuleront ce vendredi 16 octobre »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Vendredi 16 octobre 2026 uniquement",
+   "perimetre": "réseau Qub ; Lignes urbaines A, B, C et 1 à 6 ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.qub.bzh/qub-vous/actualite/vie-du-reseau/perturbations-sur-le-reseau-qub-vendredi-16-octobre-2026",
+    "extrait": "Les lignes urbaines A, B, C ainsi que les lignes 1 à 6 circuleront ce vendredi 16 octobre"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Lignes concernées par la gratuité du week-end",
+   "statut": "introuvable",
+   "source": "https://www.qub.bzh/titres-abonnements/titres-et-tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "La page ne dit pas quelles lignes sont gratuites le week-end. Elle ne précise pas non plus si les lignes suburbaines et Presto en font partie."
+  },
+  {
+   "sujet": "Circulation des lignes urbaines le samedi et les jours fériés",
+   "statut": "introuvable",
+   "source": "https://www.qub.bzh/se-deplacer/lignes-du-dimanche",
+   "consulte_le": "2026-10-15",
+   "note": "Ni cette page ni la page « Lignes et horaires » ne donnent ces jours. Il faut consulter les fiches de chaque ligne."
+  },
+  {
+   "sujet": "Période de validité des horaires des lignes en semaine",
+   "statut": "introuvable",
+   "source": "https://www.qub.bzh/lignes-et-horaires",
+   "consulte_le": "2026-10-15",
+   "note": "La page liste seulement les lignes A, B, C, 1 à 7, D1 à D4, 10 à 17 et Presto, avec un lien vers chaque ligne. Je n'ai pas ouvert ces pages de ligne."
+  },
+  {
+   "sujet": "Temps réel",
+   "statut": "non vérifié",
+   "source": "https://www.qub.bzh/se-deplacer/prochains-passages",
+   "consulte_le": "2026-10-15",
+   "note": "La page d'accueil renvoie vers « Prochains passages » et « Info trafic ». Je n'ai pas ouvert ces pages, donc je n'ai pas d'extrait à citer."
+  },
+  {
+   "sujet": "Le site propose une page de calcul d'itinéraire et recommande l'appli QUB pour u",
+   "statut": "non vérifié",
+   "source": "https://www.qub.bzh/calcul-ditineraire",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

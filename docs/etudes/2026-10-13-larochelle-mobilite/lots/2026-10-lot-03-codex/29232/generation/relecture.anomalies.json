@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Les écarts entre secteurs donnent des pistes, à confronter aux déplacements que vous souhaitez changer.",
+   "probleme": "Sous un titre qui demande « quelle adresse chercher pour moins prendre la voiture », cette phrase présente les parts de voiture des actifs de chaque secteur (iris.voiture.min, iris.voiture.max, section 3) comme des pistes pour choisir où habiter. Le lecteur peut comprendre qu'un secteur où la voiture est moins utilisée lui permettra de moins la prendre, ce que le dossier ne mesure pas.",
+   "correction_minimale": "Remplacer « donnent des pistes » par « montrent comment se déplacent les habitants de chaque secteur, un repère »."
+  }
+ ]
+}

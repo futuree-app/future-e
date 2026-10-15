@@ -1,0 +1,154 @@
+{
+ "commune": "64445",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA Pau Béarn Pyrénées s'appelle « Idelis » ; son autorité organisatrice est SM \"Pau Béarn Pyrénées mobilités\".",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Idelis » : https://transport.data.gouv.fr/datasets/fichier-des-donnees-theoriques-du-reseau-idelis-au-format-gtfs ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-13",
+   "perimetre": "intercommunalité CA Pau Béarn Pyrénées ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Idelis est https://www.idelis.fr.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/fichier-des-donnees-theoriques-du-reseau-idelis-au-format-gtfs ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Idelis",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarif.gratuite_limitee",
+   "information": "Le titre de transport est payant en général. La page ne présente pas le réseau comme gratuit. La gratuité n'y apparaît que dans des cas particuliers, par exemple l'accompagnateur d'un titulaire de CMI Invalidité avec la mention « besoin d'accompagnement ».",
+   "source": "https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres (extrait vérifié le 2026-10-15 : « Celui-ci voyage gratuitement. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Idelis ; Accompagnateur d'un titulaire de CMI Invalidité avec mention « besoin d'accompagnement ». Le texte ne couvre pas le reste du réseau. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres",
+    "extrait": "Celui-ci voyage gratuitement."
+   }
+  },
+  {
+   "id": "doc.tarif.ligne_F_bord",
+   "information": "Le ticket à l'unité coûte 1,50 € à bord des bus, sauf sur la ligne F, où il n'y a pas de vente à bord.",
+   "source": "https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres (extrait vérifié le 2026-10-15 : « 1,50 Eur à bord des bus (sauf ligne F) »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Idelis ; Vente à bord, tous les bus sauf la ligne F ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres",
+    "extrait": "1,50 Eur à bord des bus (sauf ligne F)"
+   }
+  },
+  {
+   "id": "doc.horaires.validite_fiches",
+   "information": "Le menu du site affiche des fiches horaires valables du 31/08/26 au 04/07/27.",
+   "source": "https://www.idelis.fr/se-deplacer/vos-horaires/fiches-horaires-du-31/08/26-au-04/07/27 (extrait vérifié le 2026-10-15 : « Fiches horaires du 31/08/26 au 04/07/27 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "du 31/08/2026 au 04/07/2027",
+   "perimetre": "réseau Idelis ; Fiches horaires du réseau. Les lignes ne sont pas détaillées dans l'extrait, et l'extrait vient du menu du site, pas de cette page. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.idelis.fr/se-deplacer/vos-horaires/fiches-horaires-du-31/08/26-au-04/07/27",
+    "extrait": "Fiches horaires du 31/08/26 au 04/07/27"
+   }
+  },
+  {
+   "id": "doc.verification.itineraire",
+   "information": "Le site propose un calculateur d'itinéraire.",
+   "source": "https://www.idelis.fr/se-deplacer-a-pau/itineraire/calculateur-ditineraire (extrait vérifié le 2026-10-15 : « Calculateur d'itinéraire »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Idelis ; Réseau Idelis ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.idelis.fr/se-deplacer-a-pau/itineraire/calculateur-ditineraire",
+    "extrait": "Calculateur d'itinéraire"
+   }
+  },
+  {
+   "id": "doc.verification.temps_reel",
+   "information": "Le site propose une page d'horaires en temps réel, ainsi que les prochains passages des bus.",
+   "source": "https://www.idelis.fr/se-deplacer/vos-horaires/consulter-les-prochains-passages-de-votre-bus-en-temps-reel (extrait vérifié le 2026-10-15 : « Horaires en temps réel »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Idelis ; Réseau Idelis ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.idelis.fr/se-deplacer/vos-horaires/consulter-les-prochains-passages-de-votre-bus-en-temps-reel",
+    "extrait": "Horaires en temps réel"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité générale du réseau",
+   "statut": "introuvable",
+   "source": "https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres",
+   "consulte_le": "2026-10-15",
+   "note": "La page décrit des titres payants. Elle ne dit ni que le réseau est gratuit ni qu'il ne l'est pas. Je ne conclus à aucune gratuité générale ou partielle sur les lignes."
+  },
+  {
+   "sujet": "Circulation le samedi des lignes urbaines",
+   "statut": "introuvable",
+   "source": "https://www.idelis.fr/decouvrir-idelis/le-reseau-de-dimanche-et-jours-feries",
+   "consulte_le": "2026-10-15",
+   "note": "La page du réseau du dimanche ne parle pas du service du samedi. Les fiches horaires de la semaine n'ont pas été consultées."
+  },
+  {
+   "sujet": "Période de validité des horaires du dimanche et jours fériés",
+   "statut": "introuvable",
+   "source": "https://www.idelis.fr/decouvrir-idelis/le-reseau-de-dimanche-et-jours-feries",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune date de validité dans le texte de la page. Le dépliant lié n'a pas été ouvert, donc non vérifié."
+  },
+  {
+   "sujet": "Extraits exacts de la page d'accueil (période Orange, période bleue)",
+   "statut": "non vérifié",
+   "source": "https://www.idelis.fr",
+   "consulte_le": "2026-10-15",
+   "note": "La page d'accueil évoque une « période Orange » et des « horaires période bleue du lundi au vendredi ». Leur signification n'est pas précisée dans ce que j'ai lu, et je ne les ai pas enregistrées comme faits."
+  },
+  {
+   "sujet": "Cinq lignes circulent les dimanches et jours fériés : F, A, B, C et D. Elles des",
+   "statut": "non vérifié",
+   "source": "https://www.idelis.fr/decouvrir-idelis/le-reseau-de-dimanche-et-jours-feries",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

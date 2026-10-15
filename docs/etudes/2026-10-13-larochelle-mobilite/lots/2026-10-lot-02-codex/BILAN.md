@@ -75,3 +75,12 @@ Ces jetons ne mesurent **pas** la consommation du quota de l'abonnement ChatGPT,
 - **Style : défauts persistants.** On retrouve ceux d'Angers : un texte plus prescriptif que factuel et des conseils génériques quand les faits sont rares, malgré la consigne ajoutée.
 
 Codex convient pour produire des premiers jets courants. La chaîne Codex seule ne suffit pas encore à livrer des articles prêts à publier : une relecture humaine, ou une relecture par un autre modèle, reste nécessaire. Trois communes ne suffisent pas à trancher le choix d'outil.
+
+## Clôture (15/10/2026, après validation du porteur)
+
+Retouches demandées par le porteur, faites à la main sans régénération, dans `<insee>/generation/edition.md` (section F). C'est désormais l'article retenu des trois communes.
+- Caen : les pratiques domicile-travail ne servent plus à orienter le choix d'un secteur. Le contraste local est conservé, et le lecteur est invité à examiner séparément le trajet professionnel et les équipements.
+- Brest : « le dossier repère les adresses » devient « un second indicateur compte les adresses ». Le passage sur Lambezellec reste tel quel : la proximité mesurée des équipements peut guider une recherche de proximité.
+- Nîmes : « Le dossier ne croise pas… » devient « Les données présentées ne croisent pas… ».
+
+Contrôle déterministe après retouches : aucune anomalie bloquante. Visuels inchangés (mêmes secteurs cités). Temps de retouche du terminal pilote : environ 2 minutes (de 11 h 35 à 11 h 37 UTC), lecture comprise.

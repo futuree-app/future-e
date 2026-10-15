@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 80021 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-03-codex/80021/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_80021.json --classes auto --communes  --reperes 800212203,800210401,800211301 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-03-codex/80021/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 55,
+  "non_res": 3,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Amiens découpée en 55 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 30 à 80 %). La part la plus basse est d'environ 32 % (Amiens Nord 3), la plus élevée d'environ 78 % (Marivaux 2). 3 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

@@ -56,7 +56,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_14118_clair.png",
@@ -74,7 +74,9 @@
      "141180301",
      "141180802"
     ]
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "29019": {
    "nom": "Brest",
@@ -133,8 +135,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "barres_lieu_travail_29019_clair.png",
@@ -219,7 +221,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_30189_clair.png",
@@ -237,7 +239,9 @@
      "301890101",
      "301890901"
     ]
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   }
  },
  "journal": []

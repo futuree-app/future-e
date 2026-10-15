@@ -1,0 +1,30 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Ouverture — premier secteur",
+   "detail": "« Pau Centre 2 » ne correspond à aucune valeur du dossier pour iris.644450102.voiture (47.9)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Ouverture — second secteur",
+   "detail": "« Pau Est 2 » ne correspond à aucune valeur du dossier pour iris.644450302.voiture (80.6)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Équipements — premier secteur",
+   "detail": "« Pau Centre 2 » ne correspond à aucune valeur du dossier pour iris.644450102.panier_500m (100.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Équipements — second secteur",
+   "detail": "« Pau Est 2 » ne correspond à aucune valeur du dossier pour iris.644450302.panier_500m (91.6)"
+  }
+ ],
+ "bloquantes": 4
+}

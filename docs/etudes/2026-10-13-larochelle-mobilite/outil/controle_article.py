@@ -74,6 +74,7 @@ def sections(txt):
 
 def controler(d, txt):
     I = index_dossier(d)
+    noms_secteurs = [norm(s["nom"]) for s in d.get("secteurs", []) if re.search(r"\d", s.get("nom", ""))]
     A = []
     S = sections(txt)
     if "B" not in S:
@@ -120,6 +121,11 @@ def controler(d, txt):
         ch = chiffre if any(c.startswith("scenario.") for c in dev) else re.sub(r"\d+(?:,\d+)?\s?(km|m|mètres|kilomètres|L/100)\b", "", norm(chiffre))
         # Dates (« semaine du 6 octobre 2025 ») : des repères de période, pas des valeurs.
         ch = re.sub(r"\d{1,2}(?:er)?\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(?:\s+\d{4})?|\d{1,2}/\d{1,2}/\d{2,4}", "", ch, flags=re.I)
+        # Noms de secteurs (« Amiens Nord 3 », « Pau Centre 2 ») : leur numéro n'est pas une valeur (lot 03, 15/10/2026).
+        for nom in sorted(noms_secteurs, key=len, reverse=True):
+            ch = ch.replace(nom, "")
+        if re.search(r"dans le libell", ch, re.I):
+            ch = ""
         n = [x for x in nombres(ch) if not (1900 < x < 2100)]
         if re.search(r"centimes?", ch):  # « 75 centimes » = 0,75 €
             n += [x / 100 for x in n]

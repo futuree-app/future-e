@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "6033a87b4e276fd6499986bf",
+ "titre": "Réseau urbain Ametis",
+ "page": "https://transport.data.gouv.fr/datasets/ametis",
+ "nom_commercial": "AMETIS",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "AMETIS",
+ "aom": "CA Amiens Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248000531",
+  "nom": "CA Amiens Métropole"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "Keolis Amiens",
+    "https://www.ametis.fr/"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

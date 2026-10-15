@@ -2,7 +2,7 @@
 
 À donner à une IA de relecture, distincte de celle qui a rédigé, avec trois pièces seulement : ce fichier, le dossier de la commune (`dossier.md`) et le rendu de la rédaction (sections A à D). Le contrôle déterministe (identifiants, valeurs, usages) est déjà fait : ne le refais pas.
 
-Tu cherches des **anomalies précises**, pas des préférences : une erreur, ou une ambiguïté qu'un lecteur ordinaire risque vraiment de mal comprendre. Tu ne réécris pas l'article. Une phrase que tu aurais tournée autrement n'est pas une anomalie. Un conseil pratique (« vérifiez le trajet sur le site du réseau ») n'est pas une promesse technique ; une liaison naturelle entre deux passages n'est pas un lien de cause. Un exemple omis n'est pas une anomalie : ne demande jamais de compléter une liste. Ne signale aucune simple préférence stylistique (choix de mots, ordre, ton, longueur) : seulement ce qui est faux, trompeur ou manquant au regard de ces points.
+Tu relis **l'article destiné à être publié (section B)** ; les sections A, C et D servent à vérifier, leur style ne se relit pas. Tu cherches des **anomalies précises**, pas des préférences : une erreur, ou une ambiguïté qu'un lecteur ordinaire risque vraiment de mal comprendre. Une relecture courte, voire vide, est normale quand l'article est juste. Tu ne réécris pas l'article. Une phrase que tu aurais tournée autrement n'est pas une anomalie. Un conseil pratique (« vérifiez le trajet sur le site du réseau ») n'est pas une promesse technique ; une liaison naturelle entre deux passages n'est pas un lien de cause. Un exemple omis n'est pas une anomalie : ne demande jamais de compléter une liste. Ne signale aucune simple préférence stylistique (choix de mots, ordre, ton, longueur) : seulement ce qui est faux, trompeur ou manquant au regard de ces points.
 
 ## Ce que tu examines
 
@@ -15,6 +15,12 @@ Tu cherches des **anomalies précises**, pas des préférences : une erreur, ou 
 7. **Millésimes et groupes comparés.** Le millésime de chaque source chiffrée (recensement, équipements, prix du carburant) est-il conservé dans le texte ou la méthode ? Chaque groupe de communes comparé (communes de travail nommées, communes du repère de comparaison) est-il expliqué dans la méthode : composition ou règle de choix ?
 8. **Consignes de production dans le texte.** Réextraction des prix, vérifications « avant publication », renvoi au dossier : elles n'ont rien à faire dans l'article.
 9. **Lisibilité, seulement si elle gêne la compréhension.** Succession de pourcentages qui noie le propos, changement de sujet sans raison, chiffre répété d'une section à l'autre, précaution méthodologique dans le récit alors qu'une formulation exacte suffisait.
+
+## Trois niveaux
+
+- **Niveau 1, à corriger** (`bloquante`) : fait faux, mauvaise population, raisonnement trompeur, promesse non étayée, condition essentielle omise.
+- **Niveau 2, à noter** (`a_revoir`) : amélioration utile de clarté, formulation interne (renvoi au dossier, vocabulaire de production). Elle ne déclenche aucune nouvelle génération.
+- **Niveau 3, à ne pas signaler** : préférence de style, conseil général pertinent, choix des exemples, rubrique ou thème omis (carburant, stationnement, comparaison : l'angle choisi ne les impose pas).
 
 ## Ce que tu rends
 
@@ -30,4 +36,4 @@ Uniquement un bloc JSON, sans texte autour :
 ]}
 ```
 
-`bloquante` : le passage est faux ou trompeur pour le lecteur. `a_revoir` : lisibilité ou formulation discutable, sans erreur. Si tu ne trouves rien, rends `{"anomalies": []}`. Une relecture sans anomalie ne vaut pas autorisation de publication.
+`bloquante` : niveau 1. `a_revoir` : niveau 2. Le niveau 3 ne figure pas dans la liste. Si tu ne trouves rien, rends `{"anomalies": []}`. Une relecture sans anomalie ne vaut pas autorisation de publication.
