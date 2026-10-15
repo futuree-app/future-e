@@ -396,7 +396,9 @@ def main():
                "absents": [{"fait": x, "raison": y} for x, y in absents], "visuels": visuels, "verifications_humaines": verifs,
                "complement_documentaire": doc, "comparaison": cmp}
     os.makedirs(a.out, exist_ok=True)
-    json.dump(dossier, open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1)
+    # Une part sur zéro actif (NaN, secteur « Strasbourg » de Lille, 15/10/2026) n'est pas une valeur : écrite absente.
+    sans_nan = lambda x: {k: sans_nan(v) for k, v in x.items()} if isinstance(x, dict) else [sans_nan(v) for v in x] if isinstance(x, list) else None if isinstance(x, float) and x != x else x
+    json.dump(sans_nan(dossier), open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1, allow_nan=False)
     open(os.path.join(a.out, "dossier.md"), "w").write(rendu_md(dossier, sources_gtfs))
     print(f"✓ {a.out}/dossier.md, dossier.json · {len(faits)} faits, {len(secteurs)} secteurs, {len(absents)} absents"
           + (f", {len(doc['faits'])} informations documentaires ({doc['chemin']})" if doc else ", sans complément documentaire"))
@@ -481,7 +483,7 @@ def rendu_md(d, sources_gtfs):
           "`menages_sans_voiture`, `stationnement_reserve`, `panier_500m`. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés.", "",
           "| Code | Secteur | Statut | Usage | Actifs | Voiture | Vélo | TC | Marche | Ménages sans voiture | Stationnement réservé | Panier 500 m (adresses) |",
           "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
-    P = lambda v: "n.d." if v is None else pct(v)
+    P = lambda v: "n.d." if v is None or v != v else pct(v)  # v != v : NaN (secteur sans actif, Lille 15/10/2026)
     for s in sorted(d["secteurs"], key=lambda s: (s["type"] != "habitat", s.get("voiture") or 0)):
         if s["type"] != "habitat":
             L.append(f"| {s['code']} | {s['nom']} | absent ({s['motif']}) | `non` | | | | | | | | |"); continue

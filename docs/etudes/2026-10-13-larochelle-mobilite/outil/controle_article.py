@@ -52,8 +52,11 @@ def index_dossier(d):
     for c, v in (d.get("acces_communes") or {}).items():
         for col, x in (v or {}).items():
             I.setdefault(f"acces.{c}.{col}", ([pct(x)], "non" if col.startswith(("bus_", "aucun_bus")) else "oui"))
+    h = (d.get("scenario_carburant") or {}).get("hypotheses") or {}
     for r in (d.get("scenario_carburant") or {}).get("lignes", []):
-        I[r["id"]] = [r["surcout_an_eur"], r["km_aller"], r["hausse_retenue_eur_l"]], "oui"
+        # Les hypothèses du scénario (6 L/100 km, 200 allers-retours, arrondi à 5 centimes) sont des valeurs du dossier
+        # (faux positif de la campagne, Toulouse et Nice, 15/10/2026).
+        I[r["id"]] = [r["surcout_an_eur"], r["km_aller"], r["hausse_retenue_eur_l"], h.get("litres_100km"), h.get("jours_trajet_an"), 0.05], "oui"
     for f in ((d.get("complement_documentaire") or {}).get("faits") or []):
         I[f["id"]] = nombres(f["information"] + " " + f.get("validite", "")), f["usage"]
     for f in ((d.get("comparaison") or {}).get("faits") or []):
