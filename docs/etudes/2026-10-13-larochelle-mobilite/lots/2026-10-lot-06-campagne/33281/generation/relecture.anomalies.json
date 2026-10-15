@@ -1,0 +1,18 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Mérignac : quel secteur regarder pour moins prendre la voiture ?",
+   "probleme": "Le titre fait des pratiques domicile-travail des actifs d'un secteur (iris.voiture.min, iris.voiture.max) une recommandation de quartier pour le lecteur, alors que le dossier ne relie aucun quartier à une pratique par un lien de cause.",
+   "correction_minimale": "Reformuler le titre sur ce qui est décrit, par exemple « Mérignac : quelle place la voiture prend-elle selon le secteur ? »"
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "La carte permet de situer les annonces dans cet ensemble de pratiques.",
+   "probleme": "Avec le titre, cette phrase invite à trier les annonces selon la part de la voiture du secteur, comme si habiter un secteur conduisait à la pratique de ses actifs (iris.voiture.*).",
+   "correction_minimale": "Écrire « La carte montre la part de la voiture dans chaque secteur. »"
+  }
+ ]
+}

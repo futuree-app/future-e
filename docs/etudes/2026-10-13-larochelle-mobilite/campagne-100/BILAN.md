@@ -1,8 +1,8 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T19:38:24Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T20:43:54Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
-**Communes distinctes préparées : 60** (20 avant la campagne, 40 pendant).
+**Communes distinctes préparées : 80** (20 avant la campagne, 60 pendant).
 
 ## Lots
 
@@ -10,12 +10,12 @@ Mis à jour le 2026-10-15T19:38:24Z par `outil/campagne.py bilan`. Mesures déta
 |---|---|---|---|---|
 | 2026-10-lot-04-campagne | 20 | Lille (59350) | 20 | non |
 | 2026-10-lot-05-campagne | 20 | aucune | 20 | non |
-| 2026-10-lot-06-campagne | 20 | aucune | 0 | non |
+| 2026-10-lot-06-campagne | 20 | aucune | 20 | non |
 | 2026-10-lot-07-campagne | 20 | aucune | 0 | non |
 
 ## Exceptions carburant
 
-Aucune : toutes les communes rédigées ont des faits carburant utilisables.
+- Ajaccio (2A004) : faits carburant absents ou inutilisables dans le dossier
 
 ## Erreurs de niveau 1 (correction)
 
@@ -39,6 +39,17 @@ Aucune : toutes les communes rédigées ont des faits carburant utilisables.
 - Tourcoing (59599), corrigé : raisonnement : Dans un article qui veut aider à « choisir son adresse pour moins prendre la voiture », cette phrase fait des parts de voiture des habitants de chaque secteur (
 - Créteil (94028), corrigé : raisonnement : Cette phrase vient juste après « 24 % à Lévrière-Haye aux Moines, contre 41 % à L'Ormetteau » : elle fait des pratiques des actifs de ces deux secteurs (iris.94
 - Avignon (84007), corrigé : raisonnement : La phrase demande de trier les annonces d'après la part de la voiture chez les actifs qui habitent chaque secteur (iris.840070110.voiture, iris.840070130.voitur
+- Versailles (78646), corrigé : raisonnement : Avec le titre et la question de transition, cette phrase transforme les pratiques des actifs qui habitent un secteur (iris.voiture.min, iris.voiture.max, quel q
+- Béziers (34032), corrigé : raisonnement : Cette phrase fait de la part de la voiture des actifs d'un secteur (iris.voiture.min, iris.voiture.max) un repère pour le futur trajet du lecteur et pour sa pro
+- Cherbourg-en-Cotentin (50129), corrigé : raisonnement : Le « donc » déduit des 65 % de `mobpro.voiture_selon_destination.meme_commune` que le secteur choisi pèse sur l'usage de la voiture : il change les pratiques de ; raisonnement : La carte des parts de la voiture par secteur (`iris.*.voiture`) devient un guide pour choisir où chercher afin de moins conduire : la pratique des habitants act
+- Champigny-sur-Marne (94017), corrigé : raisonnement : Le titre fait des pratiques domicile-travail des actifs résidents (iris.940171101.voiture, iris.940171304.voiture) une recommandation de secteur pour le lecteur
+- Mérignac (33281), corrigé : raisonnement : Le titre fait des pratiques domicile-travail des actifs d'un secteur (iris.voiture.min, iris.voiture.max) une recommandation de quartier pour le lecteur, alors 
+- Saint-Maur-des-Fossés (94068), après correction, 1 anomalie(s) du contrôle : contrôle valeur : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (13.3)
+- Ajaccio (2A004), corrigé : raisonnement : Avec le titre « quels secteurs regarder pour utiliser moins la voiture ? », cette phrase fait des pratiques des actifs qui habitent Centre Ville et La Confina (
+- Cannes (06029), corrigé : raisonnement : Juste après les parts de 29 % et 75 % (iris.voiture.min, iris.voiture.max), la phrase fait des pratiques des actifs qui habitent un secteur un guide pour choisi
+- Drancy (93029), corrigé : raisonnement : La part de la voiture chez les actifs d'un secteur (iris.voiture.min, iris.voiture.max) sert ici de repère pour choisir un quartier : elle devient une recommand
+- Noisy-le-Grand (93051), corrigé : raisonnement : Le titre pose la question « où chercher », et le seul contraste de secteurs du texte y répond (20 % contre 47 % de voiture, puis 98 % contre 34 % pour le panier
+- Vénissieux (69259), corrigé : raisonnement : La part de la voiture par secteur décrit les pratiques de 2022 des actifs qui y résident, quelle que soit leur commune de travail (iris.voiture.min, iris.voitur
 
 Corrections déclenchées seulement par un faux positif du contrôle (corrigé depuis ; l'appel a bien eu lieu et est compté) :
 - Montpellier (34172) : « SP95-E10 » ne correspond à aucune valeur du dossier pour carburant.e10.ecart (0.51)
@@ -48,7 +59,7 @@ Corrections déclenchées seulement par un faux positif du contrôle (corrigé d
 - Montreuil (93048) : « 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min  ; « 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.vo
 - Aulnay-sous-Bois (93005) : « Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture 
 
-Niveau 2 (noté, sans nouvelle génération) : 57 remarque(s), détail dans `relecture.anomalies.json` de chaque commune.
+Niveau 2 (noté, sans nouvelle génération) : 82 remarque(s), détail dans `relecture.anomalies.json` de chaque commune.
 
 ## Jetons par outil et par étape
 
@@ -57,19 +68,19 @@ Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l
 | Outil | Étape | Appels | Échecs ou refus | Entrée totale | dont cache lu | dont cache écrit | Sortie totale | dont raisonnement | Durée cumulée | Non mesurés |
 |---|---|---|---|---|---|---|---|---|---|---|
 | claude-code | collecte (par réseau) | 19 | 1 | 881 974 | 182 819 | 65 334 | 127 360 | 2 208 | 10 min 24 s |  |
-| claude-code | relecture | 42 | 1 | 1 779 817 | 137 200 | 1 642 535 | 136 280 | 114 400 | 22 min 17 s |  |
-| codex | correction | 27 | 0 | 970 028 | 46 080 | sans objet | 86 627 | 9 271 | 24 min 05 s |  |
-| codex | redaction | 41 | 0 | 1 431 643 | 178 816 | sans objet | 212 784 | 103 081 | 1 h 29 min |  |
+| claude-code | relecture | 61 | 1 | 2 558 751 | 202 370 | 2 356 261 | 191 748 | 161 154 | 31 min 25 s |  |
+| codex | correction | 37 | 0 | 1 307 823 | 76 800 | sans objet | 116 529 | 11 949 | 31 min 59 s |  |
+| codex | redaction | 60 | 0 | 2 061 982 | 263 296 | sans objet | 312 789 | 153 559 | 2 h 06 min |  |
 
-Codex, par commune (entrée + sortie, hors collecte) : total 2 701 082, médiane 75 422, maximum 89 992 (Nice).
+Codex, par commune (entrée + sortie, hors collecte) : total 3 799 123, médiane 74 836, maximum 89 992 (Nice).
 
-Claude, par commune (entrée + sortie, hors collecte) : total 1 916 097, médiane 45 923, maximum 54 223 (Strasbourg).
+Claude, par commune (entrée + sortie, hors collecte) : total 2 750 499, médiane 44 895, maximum 54 223 (Strasbourg).
 
 ## Durées
 
-- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 3 h 38 min.
-- Par commune (hors collecte) : médiane 4 min 16 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
-- Durée réelle de la campagne : 3 h 43 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
+- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 4 h 43 min.
+- Par commune (hors collecte) : médiane 4 min 10 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
+- Durée réelle de la campagne : 4 h 49 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
 - Interventions du terminal pilote : 64 min (0 mesurées, 64 estimées).
   - 2026-10-15 15:56 UTC, 22 min (estimée) : Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc
   - 2026-10-15 16:39 UTC, 12 min (estimée) : Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance

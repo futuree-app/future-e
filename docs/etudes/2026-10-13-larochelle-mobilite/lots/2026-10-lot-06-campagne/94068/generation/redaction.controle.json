@@ -1,0 +1,12 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Destination — arrondissement nommé",
+   "detail": "« Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (13.3)"
+  }
+ ],
+ "bloquantes": 1
+}

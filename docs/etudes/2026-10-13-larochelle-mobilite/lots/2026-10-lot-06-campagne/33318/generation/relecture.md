@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "Le dossier mesure la présence simultanée d’un commerce alimentaire",
+   "probleme": "« Le dossier » est un terme de production qui renvoie au document interne : le lecteur ne sait pas de quoi il s'agit (fait iris.333180118.panier_500m / iris.333180122.panier_500m).",
+   "correction_minimale": "Remplacer « Le dossier mesure » par « On a regardé » ou par « Pour chaque adresse, on mesure »."},
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "La carte permet de situer ces contrastes parmi les secteurs où vous consultez des annonces.",
+   "probleme": "Avec le titre « où chercher un logement pour moins prendre la voiture ? », la phrase invite à choisir un secteur d'après la part de la voiture chez ses habitants (iris.voiture.min/max). Une pratique observée devient ainsi un critère de choix pour le lecteur, ce que le dossier ne mesure pas.",
+   "correction_minimale": "Écrire « La carte situe ces contrastes entre les secteurs. »"}
+]}
+```
