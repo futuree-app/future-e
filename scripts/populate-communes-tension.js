@@ -173,6 +173,9 @@ async function main() {
   const byInsee = new Map();
   for (const row of allRows) {
     const insee = String(row.insee_code).padStart(5, '0');
+    // Hotfix FUT-104 : DRIAS-TRACC ne couvre pas l'outre-mer ; ses lignes 97xxx/98xxx sont des points de grille
+    // métropolitains. Aucun score n'en est tiré.
+    if (/^9[78]/.test(insee)) continue;
     const scenario = String(row.scenario).toLowerCase(); // gwl15, gwl20, gwl30
     if (!byInsee.has(insee)) byInsee.set(insee, {});
     byInsee.get(insee)[scenario] = row;

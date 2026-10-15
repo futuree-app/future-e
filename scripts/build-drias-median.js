@@ -2,11 +2,14 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { joindreAuPointLePlusProche } from "./lib/drias-jointure.mjs";
 
 const SOURCE_DIR = path.join(process.cwd(), "data", "source");
 const COMMUNES_CSV = path.join(process.cwd(), "data", "communes-france-coords.csv");
-const OUTPUT_JSON = path.join(process.cwd(), "public", "data_climat.json");
-const OUTPUT_META = path.join(process.cwd(), "data", "drias_median_metadata.json");
+// Les sorties sont surchargeables pour vérifier une reconstruction sans écraser le fichier livré.
+const OUTPUT_JSON = process.env.DRIAS_OUTPUT_JSON ?? path.join(process.cwd(), "public", "data_climat.json");
+const OUTPUT_META = process.env.DRIAS_OUTPUT_META ?? path.join(process.cwd(), "data", "drias_median_metadata.json");
 
 function parseCsvLine(line) {
   const values = [];
@@ -53,12 +56,6 @@ function parseNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function squaredDistance(aLat, aLon, bLat, bLon) {
-  const dLat = aLat - bLat;
-  const dLon = aLon - bLon;
-  return dLat * dLat + dLon * dLon;
-}
-
 function median(values) {
   if (values.length === 0) {
     return null;
@@ -82,7 +79,7 @@ function toFixedNumber(value, digits = 4) {
   return Number(value.toFixed(digits));
 }
 
-async function loadCommunes() {
+export async function loadCommunes() {
   const raw = await fs.readFile(COMMUNES_CSV, "utf8");
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const header = parseCsvLine(lines[0]);
@@ -106,7 +103,7 @@ async function loadCommunes() {
   });
 }
 
-async function parseDriasFile(filePath) {
+export async function parseDriasFile(filePath) {
   const raw = await fs.readFile(filePath, "utf8");
   const lines = raw.split(/\r?\n/).filter(Boolean);
 
@@ -162,53 +159,18 @@ async function parseDriasFile(filePath) {
   };
 }
 
-// FUT-104 · LA GRILLE DRIAS-TRACC (EURO-CORDEX) NE COUVRE QUE L'HEXAGONE ET LA CORSE. Sans ces deux garde-fous,
-// le point « le plus proche » d'une commune ultramarine était cherché sur cette grille, en degrés bruts et sans
-// limite : la Guadeloupe recevait les valeurs du Conquet (Finistère), La Réunion celles du sud de la Corse. Les
-// 218 lignes 97xxx/98xxx de public/data_climat.json en viennent. Le climat ultramarin vient de SocleOM
-// (scripts/outremer/), pas d'ici.
-const EST_OUTREMER = (insee) => /^9[78]/.test(insee);
-// ~50 km : bien au-delà du pas de la grille (~8 km) et des îles métropolitaines les plus éloignées de leur point
-// (Ouessant, ~0,3°), mais assez court pour qu'une jointure absurde échoue au lieu de produire une ligne.
-const DISTANCE_MAX_DEG = 0.5;
-
-function buildNearestPointIndex(communes, pointRows) {
+export function buildNearestPointIndex(communes, pointRows) {
   const points = pointRows.map((row) => ({
     pointId: row.Point,
     latitude: row.Latitude,
     longitude: row.Longitude,
   }));
-
-  return communes.map((commune) => {
-    let nearestPointId = null;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-
-    for (const point of points) {
-      const distance = squaredDistance(
-        commune.latitude,
-        commune.longitude,
-        point.latitude,
-        point.longitude,
-      );
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestPointId = point.pointId;
-      }
-    }
-
-    if (nearestDistance > DISTANCE_MAX_DEG * DISTANCE_MAX_DEG) {
-      throw new Error(
-        `${commune.insee_code} ${commune.commune_name} : point DRIAS le plus proche à ${Math.sqrt(nearestDistance).toFixed(2)}°, ` +
-          `au-delà de ${DISTANCE_MAX_DEG}°. La commune n'est pas couverte par la grille.`,
-      );
-    }
-
-    return {
-      ...commune,
-      nearestPointId,
-    };
-  });
+  // Exclusion de l'outre-mer et distance maximale : cf. scripts/lib/drias-jointure.mjs.
+  const { associees, exclues } = joindreAuPointLePlusProche(communes, points);
+  if (exclues.length) {
+    console.log(`${exclues.length} communes ultramarines exclues : la grille DRIAS-TRACC ne couvre pas leur territoire.`);
+  }
+  return associees;
 }
 
 async function main() {
@@ -272,10 +234,7 @@ async function main() {
   }
 
   const referenceRows = Array.from(canonicalSource.records.values());
-  const enrichedCommunes = buildNearestPointIndex(
-    communes.filter((c) => !EST_OUTREMER(c.insee_code)),
-    referenceRows,
-  );
+  const enrichedCommunes = buildNearestPointIndex(communes, referenceRows);
   const indicatorKeys = Object.keys(referenceRows[0]).filter(
     (key) => !["Point", "Latitude", "Longitude", "Niveau"].includes(key),
   );
@@ -371,7 +330,10 @@ async function main() {
   console.log(`Wrote metadata to ${path.relative(process.cwd(), OUTPUT_META)}.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Exécuté seulement en ligne de commande : les tests importent les fonctions sans lancer la construction.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

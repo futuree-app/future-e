@@ -3,6 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { getAtmoForCommune, type AtmoAirQuality } from "@/lib/atmo";
 import { getEra5Trend, type Era5Trend } from "@/lib/era5-trend";
+import { estCodeOutremer } from "@/lib/outremer/code-outremer";
+
+// Hotfix FUT-104 : les scores `communes_tension` de ces thèmes sont calculés depuis DRIAS
+// (scripts/populate-communes-tension.js, RISK_DEFINITIONS). Pour un code ultramarin ils reprennent des points de grille
+// métropolitains (La Réunion : « sécheresse » 74, valeurs du sud de la Corse) et ne sont jamais renvoyés.
+// `dependance-auto` vient d'une autre source (INSEE) et reste servi.
+const THEMES_DRIAS = new Set(["canicule", "submersion", "feux", "secheresse"]);
 
 export type WizardPreviewData = {
   commune_name: string | null;
@@ -71,7 +78,8 @@ export async function GET(request: Request) {
   ]);
 
   const drias = driasResult.status === "fulfilled" ? driasResult.value : null;
-  const tensions = tensionsResult.status === "fulfilled" ? tensionsResult.value : [];
+  const tensionsBrutes = tensionsResult.status === "fulfilled" ? tensionsResult.value : [];
+  const tensions = estCodeOutremer(safeInsee) ? tensionsBrutes.filter((t) => !THEMES_DRIAS.has(t.slug)) : tensionsBrutes;
   const atmo = atmoResult.status === "fulfilled" ? atmoResult.value : null;
   const era5 = era5Result.status === "fulfilled" ? era5Result.value : null;
 

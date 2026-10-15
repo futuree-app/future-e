@@ -133,7 +133,7 @@ export default async function TerritoryUnlockPage({
             désormais un fait tiré des données du dossier, et son titre dit exactement cela. */}
         <section className="mt-20" style={reveal(2)}>
           <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
-            {apercu.etat === "sans_fait"
+            {apercu.etat !== "faits"
               ? "Aperçu du dossier"
               : apercu.faits.length > 1 ? "Deux faits de ce territoire" : "Un fait de ce territoire"}
           </p>

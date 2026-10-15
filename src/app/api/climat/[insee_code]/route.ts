@@ -7,9 +7,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ inse
   // On ajoute "await" pour déballer la promesse des params
   const { insee_code } = await params;
 
-  // FUT-104 : les lignes ultramarines du fichier sont des points de grille métropolitains (cf. drias-json.ts).
+  // Hotfix FUT-104 : les lignes ultramarines du fichier sont des points de grille métropolitains (cf. drias-json.ts).
+  // Refusées AVANT la lecture du fichier, sans valeur de substitution.
   if (estCodeOutremer(insee_code)) {
-    return NextResponse.json({ error: "Commune d'outre-mer : DRIAS-TRACC ne la couvre pas" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Commune d'outre-mer : les projections DRIAS-TRACC ne couvrent pas ce territoire." },
+      { status: 404 },
+    );
   }
 
   try {

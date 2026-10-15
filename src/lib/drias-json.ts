@@ -175,8 +175,8 @@ async function construireEchelleNationale(
  *
  * Retourne `null` quand la commune est absente de l'index, quand l'indicateur ne lui est pas
  * fourni, ou quand l'indicateur est inconnu. Une absence de rang se dit, elle ne se remplace pas
- * par une position moyenne : le périmètre DRIAS exclut les DROM, et une commune d'outre-mer doit
- * lire « non comparée » plutôt qu'un rang qui n'existe pas.
+ * par une position moyenne : le périmètre DRIAS exclut l'outre-mer, et une commune d'outre-mer doit
+ * lire « non comparée » plutôt qu'un rang qui n'existe pas (refus explicite, hotfix FUT-104).
  */
 export async function getRangNational(
   inseeCode: string,
@@ -223,9 +223,10 @@ export async function getClimatDataCommune(inseeCode: string, options: { accueil
   // Formatage de la recherche pour correspondre à l'index
   const safeInsee = inseeCode.padStart(5, '0');
 
-  // FUT-104 · AUCUNE LIGNE ULTRAMARINE N'EST SERVIE. DRIAS-TRACC (modèles EURO-CORDEX) ne couvre que l'Hexagone et
-  // la Corse ; les 218 lignes 97xxx/98xxx du fichier viennent d'une jointure au point de grille le plus proche,
-  // sans distance maximale : les Antilles y reçoivent les valeurs du Conquet, La Réunion celles du sud de la Corse.
+  // FUT-104 · AUCUNE LIGNE ULTRAMARINE N'EST SERVIE, et l'index n'est pas chargé pour un tel code.
+  // DRIAS-TRACC (modèles EURO-CORDEX) ne couvre que l'Hexagone et la Corse ; les 218 lignes 97xxx/98xxx du fichier
+  // viennent d'une jointure au point de grille le plus proche, sans distance maximale : les Antilles y reçoivent les
+  // valeurs du Conquet, La Réunion celles du sud de la Corse. Une absence vaut mieux qu'une valeur fausse.
   // Le climat ultramarin se lit dans `@/lib/outremer/climat-outremer` (SocleOM, Météo-France).
   // Les lignes restent dans le fichier et dans l'échelle du rang national, À DESSEIN : les en retirer changerait
   // le rang affiché de toutes les communes métropolitaines (35 006 → 34 788 comparées) ; c'est une décision à part.
