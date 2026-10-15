@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Ce panier d'équipements est donc proche dans les deux secteurs, malgré leurs pratiques domicile-travail différentes.",
+   "probleme": "Avec « malgré », la phrase laisse entendre que la proximité des équipements (iris.930480102.panier_500m, iris.930481105.panier_500m) devrait réduire l'usage de la voiture pour aller travailler (iris.voiture.min/max). Or le dossier présente la proximité comme un simple constat, jamais comme une cause des pratiques domicile-travail.",
+   "correction_minimale": "Ce panier d'équipements est proche dans les deux secteurs."
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Les groupes définis par leur commune de travail réunissent des personnes distinctes",
+   "probleme": "La méthode ne dit pas comment les six communes de `mobpro.voiture_selon_destination.communes_voisines` ont été choisies : ce sont les communes les plus peuplées de l'unité urbaine, retenues automatiquement. Un lecteur peut donc croire qu'il s'agit des principales destinations de travail, alors que Sausheim (`destination.68300.part_des_actifs`, 4 %) attire plus d'actifs que la plupart d'entre elles.",
+   "correction_minimale": "Ajouter à la méthode : « Wittenheim, Illzach, Rixheim, Kingersheim, Riedisheim et Wittelsheim sont les six communes les plus peuplées de l'unité urbaine de Mulhouse, hors Mulhouse, retenues par une règle automatique. »"
+  }
+ ]
+}

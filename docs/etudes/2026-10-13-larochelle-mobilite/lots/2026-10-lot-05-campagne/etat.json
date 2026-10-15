@@ -4,7 +4,7 @@
    "nom": "Lille",
    "insee": "59350",
    "demande": "59350",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -46,13 +46,66 @@
    "notes": [
     "93 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 50.3
+   "duree_preparation_s": 50.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "ecabc50aa231cd49",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Pratiques — libellé du secteur",
+     "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.voiture (63.8)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Équipements — libellé du secteur répété",
+     "detail": "« « 400 Maisons-Cimetière du Sud » » ne correspond à aucune valeur du dossier pour iris.593500707.panier_500m (100.0)"
+    }
+   ],
+   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_59350_clair.png",
+     "carte_iris_59350_clair.svg",
+     "carte_iris_59350_mobile_clair.png",
+     "carte_iris_59350_mobile_clair.svg",
+     "carte_iris_59350_mobile_sombre.png",
+     "carte_iris_59350_mobile_sombre.svg",
+     "carte_iris_59350_sombre.png",
+     "carte_iris_59350_sombre.svg",
+     "tableau_carburant_59350.html",
+     "tableau_carburant_59350.md",
+     "tableau_iris_59350.html",
+     "tableau_iris_59350.md"
+    ],
+    "reperes": [
+     "593500403",
+     "593500707"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:24:37Z",
+    "fin": "2026-10-15T18:25:17Z",
+    "duree_s": 40.4
+   }
   },
   "66136": {
    "nom": "Perpignan",
    "insee": "66136",
    "demande": "66136",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -70,18 +123,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:15:28Z",
-     "fin": "2026-10-15T16:15:29Z",
-     "duree_s": 1.1
+     "debut": "2026-10-15T18:20:31Z",
+     "fin": "2026-10-15T18:20:31Z",
+     "duree_s": 0.0
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:15:29Z",
-     "fin": "2026-10-15T16:15:29Z",
-     "duree_s": 0.2,
-     "complement_sha": "817e65ceef24005d",
-     "duree_calcul_s": 0.2,
-     "dossier_sha": "4221f1f021c43377"
+     "debut": "2026-10-15T18:20:31Z",
+     "fin": "2026-10-15T18:20:31Z",
+     "duree_s": 0.1,
+     "complement_sha": "753404bd00961fb6",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "663f2d9ddee96c3a"
     }
    },
    "manuel": [
@@ -94,13 +147,73 @@
    "notes": [
     "45 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 32.6
+   "duree_preparation_s": 32.6,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:15:28Z",
+     "fin": "2026-10-15T16:15:29Z",
+     "duree_s": 1.1
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:15:29Z",
+     "fin": "2026-10-15T16:15:29Z",
+     "duree_s": 0.2,
+     "complement_sha": "817e65ceef24005d",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "4221f1f021c43377"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "663f2d9ddee96c3a",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_66136_clair.png",
+     "carte_iris_66136_clair.svg",
+     "carte_iris_66136_mobile_clair.png",
+     "carte_iris_66136_mobile_clair.svg",
+     "carte_iris_66136_mobile_sombre.png",
+     "carte_iris_66136_mobile_sombre.svg",
+     "carte_iris_66136_sombre.png",
+     "carte_iris_66136_sombre.svg",
+     "tableau_carburant_66136.html",
+     "tableau_carburant_66136.md",
+     "tableau_iris_66136.html",
+     "tableau_iris_66136.md"
+    ],
+    "reperes": [
+     "661360103",
+     "661362101",
+     "661360901"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:28:53Z",
+    "fin": "2026-10-15T18:29:35Z",
+    "duree_s": 41.8
+   }
   },
   "45234": {
    "nom": "Orléans",
    "insee": "45234",
    "demande": "45234",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -142,13 +255,54 @@
    "notes": [
     "44 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 45.5
+   "duree_preparation_s": 45.5,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "3baf87723a52834d",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_45234_clair.png",
+     "carte_iris_45234_clair.svg",
+     "carte_iris_45234_mobile_clair.png",
+     "carte_iris_45234_mobile_clair.svg",
+     "carte_iris_45234_mobile_sombre.png",
+     "carte_iris_45234_mobile_sombre.svg",
+     "carte_iris_45234_sombre.png",
+     "carte_iris_45234_sombre.svg",
+     "tableau_carburant_45234.html",
+     "tableau_carburant_45234.md",
+     "tableau_iris_45234.html",
+     "tableau_iris_45234.md"
+    ],
+    "reperes": [
+     "452340103",
+     "452341702",
+     "452341901"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:33:24Z",
+    "fin": "2026-10-15T18:33:43Z",
+    "duree_s": 18.5
+   }
   },
   "76540": {
    "nom": "Rouen",
    "insee": "76540",
    "demande": "76540",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -166,18 +320,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:16:52Z",
-     "fin": "2026-10-15T16:16:52Z",
-     "duree_s": 0.2
+     "debut": "2026-10-15T18:20:48Z",
+     "fin": "2026-10-15T18:20:48Z",
+     "duree_s": 0.0
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:16:52Z",
-     "fin": "2026-10-15T16:16:52Z",
-     "duree_s": 0.2,
-     "complement_sha": "45598ebd49107b81",
-     "duree_calcul_s": 0.2,
-     "dossier_sha": "69340a6321e5a088"
+     "debut": "2026-10-15T18:20:48Z",
+     "fin": "2026-10-15T18:20:48Z",
+     "duree_s": 0.1,
+     "complement_sha": "7645a2123cd089c3",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "f4353b23a8b1b86f"
     }
    },
    "manuel": [
@@ -190,13 +344,71 @@
    "notes": [
     "37 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 37.2
+   "duree_preparation_s": 37.2,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:16:52Z",
+     "fin": "2026-10-15T16:16:52Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:16:52Z",
+     "fin": "2026-10-15T16:16:52Z",
+     "duree_s": 0.2,
+     "complement_sha": "45598ebd49107b81",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "69340a6321e5a088"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "f4353b23a8b1b86f",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_76540_clair.png",
+     "carte_iris_76540_clair.svg",
+     "carte_iris_76540_mobile_clair.png",
+     "carte_iris_76540_mobile_clair.svg",
+     "carte_iris_76540_mobile_sombre.png",
+     "carte_iris_76540_mobile_sombre.svg",
+     "carte_iris_76540_sombre.png",
+     "carte_iris_76540_sombre.svg",
+     "tableau_carburant_76540.html",
+     "tableau_carburant_76540.md",
+     "tableau_iris_76540.html",
+     "tableau_iris_76540.md"
+    ],
+    "reperes": [
+     "765400102",
+     "765400602",
+     "765401004"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:37:06Z",
+    "fin": "2026-10-15T18:37:22Z",
+    "duree_s": 15.7
+   }
   },
   "93066": {
    "nom": "Saint-Denis",
    "insee": "93066",
    "demande": "93066",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -238,13 +450,66 @@
    "notes": [
     "38 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 24.6
+   "duree_preparation_s": 24.6,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "f144a37d8a704add",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Secteurs — suffixe du libellé République Gare Porte de Paris",
+     "detail": "« 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Secteurs — suffixe du libellé Franc-Moisin Bel-Air",
+     "detail": "« 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)"
+    }
+   ],
+   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93066_clair.png",
+     "carte_iris_93066_clair.svg",
+     "carte_iris_93066_mobile_clair.png",
+     "carte_iris_93066_mobile_clair.svg",
+     "carte_iris_93066_mobile_sombre.png",
+     "carte_iris_93066_mobile_sombre.svg",
+     "carte_iris_93066_sombre.png",
+     "carte_iris_93066_sombre.svg",
+     "tableau_carburant_93066.html",
+     "tableau_carburant_93066.md",
+     "tableau_iris_93066.html",
+     "tableau_iris_93066.md"
+    ],
+    "reperes": [
+     "930660906",
+     "930660705"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:40:45Z",
+    "fin": "2026-10-15T18:41:04Z",
+    "duree_s": 18.2
+   }
   },
   "93048": {
    "nom": "Montreuil",
    "insee": "93048",
    "demande": "93048",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -286,13 +551,66 @@
    "notes": [
     "41 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 22.0
+   "duree_preparation_s": 22.0,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "1dc811029a949f6e",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Contraste entre secteurs, libellé",
+     "detail": "« 2 dans « Bas Montreuil Ouest 2 » » ne correspond à aucune valeur du dossier pour iris.voiture.min (6.0)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Contraste entre secteurs, libellé",
+     "detail": "« 5 dans « Montreau Ruffins Clos Arachis 5 » » ne correspond à aucune valeur du dossier pour iris.voiture.max (41.0)"
+    }
+   ],
+   "motif": "2 anomalie(s) déterministe(s) après la correction unique",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93048_clair.png",
+     "carte_iris_93048_clair.svg",
+     "carte_iris_93048_mobile_clair.png",
+     "carte_iris_93048_mobile_clair.svg",
+     "carte_iris_93048_mobile_sombre.png",
+     "carte_iris_93048_mobile_sombre.svg",
+     "carte_iris_93048_sombre.png",
+     "carte_iris_93048_sombre.svg",
+     "tableau_carburant_93048.html",
+     "tableau_carburant_93048.md",
+     "tableau_iris_93048.html",
+     "tableau_iris_93048.md"
+    ],
+    "reperes": [
+     "930480102",
+     "930481105"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:43:48Z",
+    "fin": "2026-10-15T18:44:02Z",
+    "duree_s": 14.1
+   }
   },
   "95018": {
    "nom": "Argenteuil",
    "insee": "95018",
    "demande": "95018",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -334,13 +652,53 @@
    "notes": [
     "37 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 28.0
+   "duree_preparation_s": 28.0,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "f10d258f7ba5e0d7",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_95018_clair.png",
+     "carte_iris_95018_clair.svg",
+     "carte_iris_95018_mobile_clair.png",
+     "carte_iris_95018_mobile_clair.svg",
+     "carte_iris_95018_mobile_sombre.png",
+     "carte_iris_95018_mobile_sombre.svg",
+     "carte_iris_95018_sombre.png",
+     "carte_iris_95018_sombre.svg",
+     "tableau_carburant_95018.html",
+     "tableau_carburant_95018.md",
+     "tableau_iris_95018.html",
+     "tableau_iris_95018.md"
+    ],
+    "reperes": [
+     "950180204",
+     "950180702"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:46:37Z",
+    "fin": "2026-10-15T18:46:52Z",
+    "duree_s": 15.2
+   }
   },
   "68224": {
    "nom": "Mulhouse",
    "insee": "68224",
    "demande": "68224",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -382,13 +740,51 @@
    "notes": [
     "43 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 34.2
+   "duree_preparation_s": 34.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "8d3f33e011351642",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_68224_clair.png",
+     "carte_iris_68224_clair.svg",
+     "carte_iris_68224_mobile_clair.png",
+     "carte_iris_68224_mobile_clair.svg",
+     "carte_iris_68224_mobile_sombre.png",
+     "carte_iris_68224_mobile_sombre.svg",
+     "carte_iris_68224_sombre.png",
+     "carte_iris_68224_sombre.svg",
+     "tableau_carburant_68224.html",
+     "tableau_carburant_68224.md",
+     "tableau_iris_68224.html",
+     "tableau_iris_68224.md"
+    ],
+    "reperes": [
+     "682240101",
+     "682241703"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:49:06Z",
+    "fin": "2026-10-15T18:49:24Z",
+    "duree_s": 18.2
+   }
   },
   "54395": {
    "nom": "Nancy",
    "insee": "54395",
    "demande": "54395",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -430,13 +826,53 @@
    "notes": [
     "38 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 31.7
+   "duree_preparation_s": 31.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "ea232b9e2d0bed80",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_54395_clair.png",
+     "carte_iris_54395_clair.svg",
+     "carte_iris_54395_mobile_clair.png",
+     "carte_iris_54395_mobile_clair.svg",
+     "carte_iris_54395_mobile_sombre.png",
+     "carte_iris_54395_mobile_sombre.svg",
+     "carte_iris_54395_sombre.png",
+     "carte_iris_54395_sombre.svg",
+     "tableau_carburant_54395.html",
+     "tableau_carburant_54395.md",
+     "tableau_iris_54395.html",
+     "tableau_iris_54395.md"
+    ],
+    "reperes": [
+     "543950902",
+     "543950203"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:52:54Z",
+    "fin": "2026-10-15T18:53:12Z",
+    "duree_s": 17.6
+   }
   },
   "59599": {
    "nom": "Tourcoing",
    "insee": "59599",
    "demande": "59599",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -478,13 +914,54 @@
    "notes": [
     "40 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 79.2
+   "duree_preparation_s": 79.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "d38a1ce6debb0b93",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_59599_clair.png",
+     "carte_iris_59599_clair.svg",
+     "carte_iris_59599_mobile_clair.png",
+     "carte_iris_59599_mobile_clair.svg",
+     "carte_iris_59599_mobile_sombre.png",
+     "carte_iris_59599_mobile_sombre.svg",
+     "carte_iris_59599_sombre.png",
+     "carte_iris_59599_sombre.svg",
+     "tableau_carburant_59599.html",
+     "tableau_carburant_59599.md",
+     "tableau_iris_59599.html",
+     "tableau_iris_59599.md"
+    ],
+    "reperes": [
+     "595990902",
+     "595990201",
+     "595990302"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:56:25Z",
+    "fin": "2026-10-15T18:56:44Z",
+    "duree_s": 18.7
+   }
   },
   "59512": {
    "nom": "Roubaix",
    "insee": "59512",
    "demande": "59512",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -526,13 +1003,51 @@
    "notes": [
     "38 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 65.3
+   "duree_preparation_s": 65.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "c71d375312968731",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_59512_clair.png",
+     "carte_iris_59512_clair.svg",
+     "carte_iris_59512_mobile_clair.png",
+     "carte_iris_59512_mobile_clair.svg",
+     "carte_iris_59512_mobile_sombre.png",
+     "carte_iris_59512_mobile_sombre.svg",
+     "carte_iris_59512_sombre.png",
+     "carte_iris_59512_sombre.svg",
+     "tableau_carburant_59512.html",
+     "tableau_carburant_59512.md",
+     "tableau_iris_59512.html",
+     "tableau_iris_59512.md"
+    ],
+    "reperes": [
+     "595120503",
+     "595121201"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:59:21Z",
+    "fin": "2026-10-15T18:59:36Z",
+    "duree_s": 14.9
+   }
   },
   "92050": {
    "nom": "Nanterre",
    "insee": "92050",
    "demande": "92050",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -574,13 +1089,52 @@
    "notes": [
     "38 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 23.0
+   "duree_preparation_s": 23.0,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "692a64c9778f73b9",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92050_clair.png",
+     "carte_iris_92050_clair.svg",
+     "carte_iris_92050_mobile_clair.png",
+     "carte_iris_92050_mobile_clair.svg",
+     "carte_iris_92050_mobile_sombre.png",
+     "carte_iris_92050_mobile_sombre.svg",
+     "carte_iris_92050_sombre.png",
+     "carte_iris_92050_sombre.svg",
+     "tableau_carburant_92050.html",
+     "tableau_carburant_92050.md",
+     "tableau_iris_92050.html",
+     "tableau_iris_92050.md"
+    ],
+    "reperes": [
+     "920500607",
+     "920500406",
+     "920500204"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:02:41Z",
+    "fin": "2026-10-15T19:02:55Z",
+    "duree_s": 14.7
+   }
   },
   "94081": {
    "nom": "Vitry-sur-Seine",
    "insee": "94081",
    "demande": "94081",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -622,13 +1176,51 @@
    "notes": [
     "36 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 24.7
+   "duree_preparation_s": 24.7,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "255d0fc7cd50e198",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_94081_clair.png",
+     "carte_iris_94081_clair.svg",
+     "carte_iris_94081_mobile_clair.png",
+     "carte_iris_94081_mobile_clair.svg",
+     "carte_iris_94081_mobile_sombre.png",
+     "carte_iris_94081_mobile_sombre.svg",
+     "carte_iris_94081_sombre.png",
+     "carte_iris_94081_sombre.svg",
+     "tableau_carburant_94081.html",
+     "tableau_carburant_94081.md",
+     "tableau_iris_94081.html",
+     "tableau_iris_94081.md"
+    ],
+    "reperes": [
+     "940810308",
+     "940810104"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:05:33Z",
+    "fin": "2026-10-15T19:05:47Z",
+    "duree_s": 14.3
+   }
   },
   "94028": {
    "nom": "Créteil",
    "insee": "94028",
    "demande": "94028",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -670,13 +1262,53 @@
    "notes": [
     "31 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 19.9
+   "duree_preparation_s": 19.9,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "812f2d9c9bf54db9",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_94028_clair.png",
+     "carte_iris_94028_clair.svg",
+     "carte_iris_94028_mobile_clair.png",
+     "carte_iris_94028_mobile_clair.svg",
+     "carte_iris_94028_mobile_sombre.png",
+     "carte_iris_94028_mobile_sombre.svg",
+     "carte_iris_94028_sombre.png",
+     "carte_iris_94028_sombre.svg",
+     "tableau_carburant_94028.html",
+     "tableau_carburant_94028.md",
+     "tableau_iris_94028.html",
+     "tableau_iris_94028.md"
+    ],
+    "reperes": [
+     "940280209",
+     "940280205"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:08:31Z",
+    "fin": "2026-10-15T19:08:46Z",
+    "duree_s": 15.0
+   }
   },
   "84007": {
    "nom": "Avignon",
    "insee": "84007",
    "demande": "84007",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -718,13 +1350,53 @@
    "notes": [
     "31 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 30.8
+   "duree_preparation_s": 30.8,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "220dfd5a24de1468",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_84007_clair.png",
+     "carte_iris_84007_clair.svg",
+     "carte_iris_84007_mobile_clair.png",
+     "carte_iris_84007_mobile_clair.svg",
+     "carte_iris_84007_mobile_sombre.png",
+     "carte_iris_84007_mobile_sombre.svg",
+     "carte_iris_84007_sombre.png",
+     "carte_iris_84007_sombre.svg",
+     "tableau_carburant_84007.html",
+     "tableau_carburant_84007.md",
+     "tableau_iris_84007.html",
+     "tableau_iris_84007.md"
+    ],
+    "reperes": [
+     "840070110",
+     "840070130"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:16:48Z",
+    "fin": "2026-10-15T19:17:12Z",
+    "duree_s": 23.9
+   }
   },
   "93001": {
    "nom": "Aubervilliers",
    "insee": "93001",
    "demande": "93001",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -766,13 +1438,51 @@
    "notes": [
     "25 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 18.8
+   "duree_preparation_s": 18.8,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "420cec0bafb4cc4b",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93001_clair.png",
+     "carte_iris_93001_clair.svg",
+     "carte_iris_93001_mobile_clair.png",
+     "carte_iris_93001_mobile_clair.svg",
+     "carte_iris_93001_mobile_sombre.png",
+     "carte_iris_93001_mobile_sombre.svg",
+     "carte_iris_93001_sombre.png",
+     "carte_iris_93001_sombre.svg",
+     "tableau_carburant_93001.html",
+     "tableau_carburant_93001.md",
+     "tableau_iris_93001.html",
+     "tableau_iris_93001.md"
+    ],
+    "reperes": [
+     "930010304",
+     "930010201"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:19:49Z",
+    "fin": "2026-10-15T19:20:00Z",
+    "duree_s": 11.2
+   }
   },
   "92004": {
    "nom": "Asnières-sur-Seine",
    "insee": "92004",
    "demande": "92004",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -814,13 +1524,51 @@
    "notes": [
     "32 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 18.4
+   "duree_preparation_s": 18.4,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "1c364adbf8a2dffc",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92004_clair.png",
+     "carte_iris_92004_clair.svg",
+     "carte_iris_92004_mobile_clair.png",
+     "carte_iris_92004_mobile_clair.svg",
+     "carte_iris_92004_mobile_sombre.png",
+     "carte_iris_92004_mobile_sombre.svg",
+     "carte_iris_92004_sombre.png",
+     "carte_iris_92004_sombre.svg",
+     "tableau_carburant_92004.html",
+     "tableau_carburant_92004.md",
+     "tableau_iris_92004.html",
+     "tableau_iris_92004.md"
+    ],
+    "reperes": [
+     "920040101",
+     "920040502"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:22:38Z",
+    "fin": "2026-10-15T19:22:49Z",
+    "duree_s": 10.7
+   }
   },
   "92025": {
    "nom": "Colombes",
    "insee": "92025",
    "demande": "92025",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -862,13 +1610,51 @@
    "notes": [
     "33 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 20.0
+   "duree_preparation_s": 20.0,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "45a61913cfcdd46b",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92025_clair.png",
+     "carte_iris_92025_clair.svg",
+     "carte_iris_92025_mobile_clair.png",
+     "carte_iris_92025_mobile_clair.svg",
+     "carte_iris_92025_mobile_sombre.png",
+     "carte_iris_92025_mobile_sombre.svg",
+     "carte_iris_92025_sombre.png",
+     "carte_iris_92025_sombre.svg",
+     "tableau_carburant_92025.html",
+     "tableau_carburant_92025.md",
+     "tableau_iris_92025.html",
+     "tableau_iris_92025.md"
+    ],
+    "reperes": [
+     "920250101",
+     "920250303"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:25:46Z",
+    "fin": "2026-10-15T19:25:58Z",
+    "duree_s": 11.5
+   }
   },
   "59183": {
    "nom": "Dunkerque",
    "insee": "59183",
    "demande": "59183",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -910,13 +1696,52 @@
    "notes": [
     "39 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 32.3
+   "duree_preparation_s": 32.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "5e0ef00730e68d2c",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_59183_clair.png",
+     "carte_iris_59183_clair.svg",
+     "carte_iris_59183_mobile_clair.png",
+     "carte_iris_59183_mobile_clair.svg",
+     "carte_iris_59183_mobile_sombre.png",
+     "carte_iris_59183_mobile_sombre.svg",
+     "carte_iris_59183_sombre.png",
+     "carte_iris_59183_sombre.svg",
+     "tableau_carburant_59183.html",
+     "tableau_carburant_59183.md",
+     "tableau_iris_59183.html",
+     "tableau_iris_59183.md"
+    ],
+    "reperes": [
+     "591830203",
+     "591830202",
+     "591831602"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:28:17Z",
+    "fin": "2026-10-15T19:28:37Z",
+    "duree_s": 20.1
+   }
   },
   "93005": {
    "nom": "Aulnay-sous-Bois",
    "insee": "93005",
    "demande": "93005",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -958,7 +1783,54 @@
    "notes": [
     "35 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 20.5
+   "duree_preparation_s": 20.5,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "76e80c384dd04129",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Libellé de destination",
+     "detail": "« Paris 8e Arrondissement » ne correspond à aucune valeur du dossier pour destination.75108.voiture (21.6)"
+    }
+   ],
+   "motif": "1 anomalie(s) déterministe(s) après la correction unique",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_93005_clair.png",
+     "carte_iris_93005_clair.svg",
+     "carte_iris_93005_mobile_clair.png",
+     "carte_iris_93005_mobile_clair.svg",
+     "carte_iris_93005_mobile_sombre.png",
+     "carte_iris_93005_mobile_sombre.svg",
+     "carte_iris_93005_sombre.png",
+     "carte_iris_93005_sombre.svg",
+     "tableau_carburant_93005.html",
+     "tableau_carburant_93005.md",
+     "tableau_iris_93005.html",
+     "tableau_iris_93005.md"
+    ],
+    "reperes": [
+     "930050401",
+     "930050601"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T19:32:12Z",
+    "fin": "2026-10-15T19:32:25Z",
+    "duree_s": 12.9
+   }
   }
  },
  "journal": []

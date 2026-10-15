@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 68224 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/68224/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_68224.json --classes auto --communes  --reperes 682240101,682241703 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/68224/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 43,
+  "non_res": 0,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Mulhouse découpée en 43 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 85 %). La part la plus basse est d'environ 35 % (Centre Historique Ouest), la plus élevée d'environ 81 % (Bourtzwiller Sud-Ouest). Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

@@ -1,0 +1,109 @@
+{
+ "etape": "relecture",
+ "cle": "02a57659727ea68b",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-opus-5-5",
+ "effort": "high",
+ "consignes_sha": "1d2a04100cc4f852",
+ "entree_sha": "405101654bff2035",
+ "debut": "2026-10-15T18:45:20Z",
+ "fin": "2026-10-15T18:45:55Z",
+ "duree_s": 34.4,
+ "code_retour": 0,
+ "session": "af7f3b25-80b8-480d-b875-e549250e7725",
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 37735,
+  "cache_read_input_tokens": 3430,
+  "output_tokens": 3393,
+  "output_tokens_details": {
+   "thinking_tokens": 2983
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 37735,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3393,
+    "cache_read_input_tokens": 3430,
+    "cache_creation_input_tokens": 37735,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 37735
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-opus-5-5": {
+   "inputTokens": 2,
+   "outputTokens": 3393,
+   "cacheReadInputTokens": 3430,
+   "cacheCreationInputTokens": 37735,
+   "webSearchRequests": 0,
+   "costUSD": 0.370434,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 2983,
+   "canonicalModel": "claude-opus-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.370434,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-opus-5-5"
+ ],
+ "tours": 1,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "Glob",
+   "Read"
+  ],
+  "mcp": [],
+  "modele": "claude-opus-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-hg_dwm1w",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-hg-dwm1w/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": [
+   "complement.json",
+   "comparaison_voiture.json"
+  ]
+ },
+ "appels_outils": [],
+ "refus": 0
+}

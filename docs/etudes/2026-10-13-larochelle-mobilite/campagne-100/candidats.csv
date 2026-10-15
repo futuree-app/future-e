@@ -8,7 +8,7 @@ rang,insee,commune,departement,population_2021,sort,lot,motif
 7,34172,Montpellier,34,302454,retenue,2026-10-lot-04-campagne,prêt à relire
 8,67482,Strasbourg,67,291313,retenue,2026-10-lot-04-campagne,prêt à relire
 9,33063,Bordeaux,33,261804,retenue,2026-10-lot-04-campagne,prêt à relire
-10,59350,Lille,59,236710,retenue,2026-10-lot-05-campagne,dossier prêt
+10,59350,Lille,59,236710,retenue,2026-10-lot-05-campagne,prêt à relire
 11,35238,Rennes,35,225081,retenue,2026-10-lot-04-campagne,prêt à relire
 12,83137,Toulon,83,180452,retenue,2026-10-lot-04-campagne,prêt à relire
 13,51454,Reims,51,179380,retenue,2026-10-lot-04-campagne,prêt à relire
@@ -29,28 +29,28 @@ rang,insee,commune,departement,population_2021,sort,lot,motif
 28,87085,Limoges,87,129760,retenue,2026-10-lot-04-campagne,prêt à relire
 29,57463,Metz,57,120874,retenue,2026-10-lot-04-campagne,prêt à relire
 30,92012,Boulogne-Billancourt,92,119808,retenue,2026-10-lot-04-campagne,prêt à relire
-31,66136,Perpignan,66,119656,retenue,2026-10-lot-05-campagne,dossier prêt
+31,66136,Perpignan,66,119656,retenue,2026-10-lot-05-campagne,prêt à relire
 32,25056,Besançon,25,119198,exclue d'office,,déjà préparée : Besançon (2026-10-lot-03-codex)
-33,45234,Orléans,45,116617,retenue,2026-10-lot-05-campagne,dossier prêt
-34,76540,Rouen,76,114083,retenue,2026-10-lot-05-campagne,dossier prêt
-35,93066,Saint-Denis,93,113942,retenue,2026-10-lot-05-campagne,dossier prêt
-36,93048,Montreuil,93,111455,retenue,2026-10-lot-05-campagne,dossier prêt
+33,45234,Orléans,45,116617,retenue,2026-10-lot-05-campagne,prêt à relire
+34,76540,Rouen,76,114083,retenue,2026-10-lot-05-campagne,prêt à relire
+35,93066,Saint-Denis,93,113942,retenue,2026-10-lot-05-campagne,prêt à relire
+36,93048,Montreuil,93,111455,retenue,2026-10-lot-05-campagne,prêt à relire
 37,14118,Caen,14,108200,exclue d'office,,déjà préparée : Caen (2026-10-lot-02-codex)
-38,95018,Argenteuil,95,107221,retenue,2026-10-lot-05-campagne,dossier prêt
-39,68224,Mulhouse,68,106341,retenue,2026-10-lot-05-campagne,dossier prêt
-40,54395,Nancy,54,104260,retenue,2026-10-lot-05-campagne,dossier prêt
-41,59599,Tourcoing,59,99011,retenue,2026-10-lot-05-campagne,dossier prêt
-42,59512,Roubaix,59,98892,retenue,2026-10-lot-05-campagne,dossier prêt
-43,92050,Nanterre,92,97351,retenue,2026-10-lot-05-campagne,dossier prêt
-44,94081,Vitry-sur-Seine,94,96205,retenue,2026-10-lot-05-campagne,dossier prêt
-45,94028,Créteil,94,92989,retenue,2026-10-lot-05-campagne,dossier prêt
-46,84007,Avignon,84,90330,retenue,2026-10-lot-05-campagne,dossier prêt
+38,95018,Argenteuil,95,107221,retenue,2026-10-lot-05-campagne,prêt à relire
+39,68224,Mulhouse,68,106341,retenue,2026-10-lot-05-campagne,prêt à relire
+40,54395,Nancy,54,104260,retenue,2026-10-lot-05-campagne,prêt à relire
+41,59599,Tourcoing,59,99011,retenue,2026-10-lot-05-campagne,prêt à relire
+42,59512,Roubaix,59,98892,retenue,2026-10-lot-05-campagne,prêt à relire
+43,92050,Nanterre,92,97351,retenue,2026-10-lot-05-campagne,prêt à relire
+44,94081,Vitry-sur-Seine,94,96205,retenue,2026-10-lot-05-campagne,prêt à relire
+45,94028,Créteil,94,92989,retenue,2026-10-lot-05-campagne,prêt à relire
+46,84007,Avignon,84,90330,retenue,2026-10-lot-05-campagne,prêt à relire
 47,86194,Poitiers,86,90240,exclue d'office,,déjà préparée : Poitiers (2026-10-lot-01)
-48,93001,Aubervilliers,93,90071,retenue,2026-10-lot-05-campagne,dossier prêt
-49,92004,Asnières-sur-Seine,92,89662,retenue,2026-10-lot-05-campagne,dossier prêt
-50,92025,Colombes,92,88870,retenue,2026-10-lot-05-campagne,dossier prêt
-51,59183,Dunkerque,59,86788,retenue,2026-10-lot-05-campagne,dossier prêt
-52,93005,Aulnay-sous-Bois,93,86135,retenue,2026-10-lot-05-campagne,dossier prêt
+48,93001,Aubervilliers,93,90071,retenue,2026-10-lot-05-campagne,prêt à relire
+49,92004,Asnières-sur-Seine,92,89662,retenue,2026-10-lot-05-campagne,prêt à relire
+50,92025,Colombes,92,88870,retenue,2026-10-lot-05-campagne,prêt à relire
+51,59183,Dunkerque,59,86788,retenue,2026-10-lot-05-campagne,prêt à relire
+52,93005,Aulnay-sous-Bois,93,86135,retenue,2026-10-lot-05-campagne,prêt à relire
 53,78646,Versailles,78,83587,retenue,2026-10-lot-06-campagne,dossier prêt
 54,92026,Courbevoie,92,81516,retenue,2026-10-lot-06-campagne,dossier prêt
 55,34032,Béziers,34,80341,retenue,2026-10-lot-06-campagne,dossier prêt

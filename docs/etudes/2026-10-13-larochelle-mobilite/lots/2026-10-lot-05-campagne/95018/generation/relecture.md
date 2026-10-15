@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Carême Prenant offre un point de départ pour explorer un secteur où la voiture occupe une place moins fréquente dans les déplacements professionnels observés.",
+   "probleme": "La part de voiture des actifs qui habitent déjà Carême Prenant (iris.voiture.min, 24 %) devient un conseil de quartier pour le lecteur, comme si s'y installer devait réduire son propre usage de la voiture ; cette part dépend aussi de leurs lieux de travail, que le dossier ne croise pas avec les secteurs (section 3). De plus, l'écart avec d'autres secteurs proches est trop petit pour être interprété (Hôtel de Ville 25 %, limite iris.ecart_voiture.*).",
+   "correction_minimale": "Remplacer la phrase par une description : « Ces parts décrivent les trajets des actifs qui habitent chaque secteur ; elles ne disent pas comment se déplacera un nouvel habitant, dont le trajet dépendra d'abord de son propre lieu de travail. »"}
+]}
+```

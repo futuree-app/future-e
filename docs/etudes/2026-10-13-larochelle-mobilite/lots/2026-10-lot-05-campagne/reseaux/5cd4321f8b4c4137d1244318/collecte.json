@@ -1,0 +1,133 @@
+{
+ "etape": "collecte",
+ "cle": "b7ebe2329d8bd7e6",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "9c120260e42a36b5",
+ "debut": "2026-10-15T18:20:32Z",
+ "fin": "2026-10-15T18:20:48Z",
+ "duree_s": 16.7,
+ "code_retour": 0,
+ "session": "a4cc2758-ebfc-44a2-8b06-fa330360b419",
+ "usage": {
+  "input_tokens": 6,
+  "cache_creation_input_tokens": 1857,
+  "cache_read_input_tokens": 6557,
+  "output_tokens": 1047,
+  "output_tokens_details": {
+   "thinking_tokens": 64
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 1857,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 578,
+    "cache_read_input_tokens": 2759,
+    "cache_creation_input_tokens": 635,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 635
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 6,
+   "outputTokens": 1047,
+   "cacheReadInputTokens": 6557,
+   "cacheCreationInputTokens": 1857,
+   "webSearchRequests": 0,
+   "costUSD": 0.018565699999999997,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 64,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-haiku-5-5": {
+   "inputTokens": 806,
+   "outputTokens": 1387,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.0007741,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 889,
+   "canonicalModel": "claude-haiku-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.019339799999999997,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 4,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-jjkxlsan",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-jjkxlsan/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.myastuce.fr\", \"prompt\": \"Tarification: le réseau est-il gratuit, pour qui, quelles lignes, exceptions ? Jours de circulation (dimanche, jours fériés), période de validité des hora"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.myastuce.fr/fr/tarifs\", \"prompt\": \"Tarification: gratuité, pour qui, quelles lignes, exceptions. Extraits exacts.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.myastuce.fr/fr/horaires-et-itineraires\", \"prompt\": \"Calcul d'itinéraire, fiches horaires, temps réel, jours de circulation, validité des horaires. Extraits exacts.\"}"
+  }
+ ],
+ "refus": 0
+}

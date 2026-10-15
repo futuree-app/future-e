@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 92050 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/92050/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_92050.json --classes auto --communes  --reperes 920500607,920500406,920500204 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/92050/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 38,
+  "non_res": 0,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Nanterre découpée en 38 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 0 à 75 %). La part la plus basse est d'environ 1 % (Université Groues), la plus élevée d'environ 51 % (Garches). Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

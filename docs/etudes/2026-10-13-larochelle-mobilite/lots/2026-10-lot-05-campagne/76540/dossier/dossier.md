@@ -1,6 +1,6 @@
 # Dossier d'entrée de rédaction · Rouen (76540)
 
-Fiche source : `/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/fiche/fiche.json` (générée le 2026-10-15T16:16:16Z, jour de référence 2026-10-13, sha256 `a833b0b914ea07b5`). Dossier généré le 2026-10-15T16:16:52Z par `outil/dossier_redaction.py`.
+Fiche source : `/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/fiche/fiche.json` (générée le 2026-10-15T16:16:16Z, jour de référence 2026-10-13, sha256 `a833b0b914ea07b5`). Dossier généré le 2026-10-15T18:20:48Z par `outil/dossier_redaction.py`.
 
 Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifiant stable (colonne `id`) : c'est lui que cite la correspondance interne du brouillon. Un fait qui n'est pas ici n'existe pas pour l'article.
 
@@ -119,10 +119,13 @@ Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si
 
 | Sujet | Statut | Source, date | Note |
 |---|---|---|---|
-| tarification (gratuité, abonnements, exceptions) | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
-| jours et périodes de circulation des lignes urbaines | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
-| calcul d'itinéraire ou fiches horaires officielles | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
-| vélo ou gare (seulement si directement utile au logement) | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
+| Tarification (gratuité, public, lignes, exceptions) | `introuvable` | https://www.myastuce.fr 2026-10-15 | La page d'accueil et /fr/tarifs ne renvoient que le titre « My Astuce », sans texte exploitable. Le site semble rendu côté navigateur. Aucun extrait n'a pu être copié. Je n'en conclus rien sur la gratuité ou le payant. |
+| Jours de circulation et période de validité des horaires | `introuvable` | https://www.myastuce.fr/fr/horaires-et-itineraires 2026-10-15 | La page ne donne aucun contenu exploitable. La réponse obtenue ne fait que reprendre les termes de ma demande, donc je ne la retiens pas comme source. Aucun extrait n'a pu être copié. |
+| Où vérifier un trajet (calcul d'itinéraire, fiches horaires, temps réel) | `introuvable` | https://www.myastuce.fr/fr/horaires-et-itineraires 2026-10-15 | Je n'ai pas pu confirmer par un extrait exact que cette page propose un calculateur d'itinéraire, des fiches horaires ou du temps réel. Je n'ai pas essayé d'autres URL sur le domaine, donc ce point reste à vérifier à la main. |
+| tarification (gratuité, abonnements, exceptions) | `introuvable` |  2026-10-15 | rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service |
+| jours et périodes de circulation des lignes urbaines | `introuvable` |  2026-10-15 | rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service |
+| calcul d'itinéraire ou fiches horaires officielles | `introuvable` |  2026-10-15 | rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service |
+| vélo ou gare (seulement si directement utile au logement) | `non recherché` |  2026-10-15 | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
 
 ## 3. Secteurs (IRIS)
 

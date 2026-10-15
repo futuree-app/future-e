@@ -28,5 +28,63 @@
    200
   ]
  ],
- "consulte_le": "2026-10-15"
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.circulation.dimanche_tsr",
+    "information": "Le dimanche, seul le Transport sur Réservation (TSR) circule, sur les lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25. Il faut réserver au 0800 800 370 (choix 2), du lundi au samedi, 19h30 au plus tard.",
+    "url": "https://www.sankeo.com/dimanches/",
+    "extrait": "Seules les lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25",
+    "validite": "non précisée",
+    "perimetre": "Lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25, le dimanche, en transport sur réservation. Les autres lignes ne sont pas concernées.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T18:20:29Z"
+   },
+   {
+    "id": "doc.horaires.validite_hiver",
+    "information": "La page des lignes, horaires et plans présente un plan du réseau « Hiver 2026 - 2027 ». Elle indique aussi que les horaires de la ligne scolaire Baho 2026-2027 démarrent le 2 novembre. Aucune date de début ou de fin n'est donnée pour l'ensemble des lignes.",
+    "url": "https://www.sankeo.com/lignes-horaires-plans/",
+    "extrait": "PLAN HIVER 2026 - 2027",
+    "validite": "Hiver 2026-2027, dates exactes non précisées",
+    "perimetre": "Plan du réseau. Ligne scolaire Baho pour la mention du 2 novembre.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T18:20:30Z"
+   },
+   {
+    "id": "doc.verification.pages",
+    "information": "Le site renvoie vers « Mon itinéraire » pour le calcul d'itinéraire, vers « Lignes, horaires, plans » pour les fiches horaires et vers « Infos Trafic » (« En direct ») pour l'information trafic. Je n'ai pas vu de mention explicite d'un temps réel sur les horaires.",
+    "url": "https://www.sankeo.com/mon-itineraire/",
+    "extrait": "Retrouvez vos horaires et vos titres de transport sur votre mobile",
+    "validite": "non précisée",
+    "perimetre": "Réseau Sankéo",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T18:20:31Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification / gratuité",
+    "statut": "introuvable",
+    "url": "https://www.sankeo.com/tous-les-tarifs/",
+    "note": "Les pages « Tous les titres » et « Tarifications spécifiques » ne disent rien de la gratuité. « Tarifications spécifiques » ne traite que de la prime de transport. La page « Tarifs réduits » (https://www.sankeo.com/tarifs-reduits/) n'a pas été consultée. Une image « Gratuité » est présente mais sans texte. Ne pas conclure à l'absence de gratuité."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines régulières (samedi, jours fériés)",
+    "statut": "introuvable",
+    "url": "https://www.sankeo.com/lignes-horaires-plans/",
+    "note": "Aucun jour de circulation lisible pour les lignes régulières. La page https://www.sankeo.com/jours-feries/ n'a pas été consultée. Les fiches horaires détaillées, éventuellement en PDF, n'ont pas été ouvertes : non vérifié."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "non vérifié",
+    "url": "https://www.sankeo.com/traffics-2/",
+    "note": "Cette page « Infos Trafic / En direct » n'a pas été ouverte. Je n'ai pas confirmé de temps réel sur les passages."
+   }
+  ]
+ }
 }

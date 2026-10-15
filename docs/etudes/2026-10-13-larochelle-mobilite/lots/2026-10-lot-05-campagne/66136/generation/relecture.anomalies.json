@@ -1,0 +1,18 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Saint-Jean constitue une piste à examiner si vous souhaitez moins conduire ; pour un logement à Porte d’Espagne, l’usage très majoritaire de la voiture invite à regarder précisément les alternatives",
+   "probleme": "Le passage transforme les pratiques domicile-travail des actifs qui habitent un secteur (iris.voiture.min, iris.voiture.max) en recommandation de quartier pour le lecteur. Il attribue ainsi une pratique au quartier, ce que le dossier interdit (section 11 : « tout lien de cause entre un quartier et une pratique »).",
+   "correction_minimale": "Supprimer cette phrase et garder seulement « Dans les deux cas, partez de l’adresse du logement et de votre destination professionnelle pour examiner le trajet envisagé. » Remplacer aussi « et d’élargir la recherche au-delà des premières annonces repérées » par une simple description des contrastes que montre la carte."
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Utiliser moins la voiture à Perpignan : quels secteurs regarder ?",
+   "probleme": "Le titre présente les parts de la voiture par secteur (iris.voiture.min, iris.voiture.max) comme une liste de quartiers à cibler pour moins conduire. C'est la même conversion d'une pratique d'habitants en recommandation de quartier, reprise par la transition « sur les secteurs à examiner ».",
+   "correction_minimale": "Formuler le titre sur les pratiques observées (par exemple « À Perpignan, la place de la voiture varie selon les secteurs »). Dans la transition, remplacer « sur les secteurs à examiner » par « sur la place de la voiture selon les secteurs »."
+  }
+ ]
+}

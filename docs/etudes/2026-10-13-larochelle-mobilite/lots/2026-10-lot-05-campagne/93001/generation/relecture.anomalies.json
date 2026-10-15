@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Ce panier de proximité accompagne donc des pratiques domicile-travail très différentes.",
+   "probleme": "La phrase met la proximité des équipements (iris.930010304.panier_500m, iris.930010201.panier_500m) en regard des trajets domicile-travail (iris.voiture.min, iris.voiture.max), comme si on avait pu attendre que l'une explique les autres ; or le dossier ne mesure ni l'usage des équipements ni un lien entre proximité et mode de déplacement vers le travail (limites acces.adresses.*).",
+   "correction_minimale": "Remplacer les deux phrases par : « Ce point commun ne permet donc pas de distinguer ces deux secteurs. »"
+  }
+ ]
+}

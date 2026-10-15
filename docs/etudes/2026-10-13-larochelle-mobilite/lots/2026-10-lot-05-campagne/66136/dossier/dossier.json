@@ -24,7 +24,7 @@
   "generee_le": "2026-10-15T16:14:58Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-15T16:15:29Z",
+ "dossier_genere_le": "2026-10-15T18:20:31Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2949,41 +2949,90 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.circulation.dimanche_tsr",
+    "information": "Le dimanche, seul le Transport sur Réservation (TSR) circule, sur les lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25. Il faut réserver au 0800 800 370 (choix 2), du lundi au samedi, 19h30 au plus tard.",
+    "source": "https://www.sankeo.com/dimanches/ (extrait vérifié le 2026-10-15 : « Seules les lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Sankéo ; Lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25, le dimanche, en transport sur réservation. Les autres lignes ne sont pas concernées. ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.sankeo.com/dimanches/",
+     "extrait": "Seules les lignes 1, 2, 4, 5, 6, 9, 10, 11, 15, 17, 18, 19, 20, 22 et 25"
+    }
+   },
+   {
+    "id": "doc.horaires.validite_hiver",
+    "information": "La page des lignes, horaires et plans présente un plan du réseau « Hiver 2026 - 2027 ». Elle indique aussi que les horaires de la ligne scolaire Baho 2026-2027 démarrent le 2 novembre. Aucune date de début ou de fin n'est donnée pour l'ensemble des lignes.",
+    "source": "https://www.sankeo.com/lignes-horaires-plans/ (extrait vérifié le 2026-10-15 : « PLAN HIVER 2026 - 2027 »)",
+    "consulte_le": "2026-10-15",
+    "validite": "Hiver 2026-2027, dates exactes non précisées",
+    "perimetre": "réseau Sankéo ; Plan du réseau. Ligne scolaire Baho pour la mention du 2 novembre. ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.sankeo.com/lignes-horaires-plans/",
+     "extrait": "PLAN HIVER 2026 - 2027"
+    }
+   },
+   {
+    "id": "doc.verification.pages",
+    "information": "Le site renvoie vers « Mon itinéraire » pour le calcul d'itinéraire, vers « Lignes, horaires, plans » pour les fiches horaires et vers « Infos Trafic » (« En direct ») pour l'information trafic. Je n'ai pas vu de mention explicite d'un temps réel sur les horaires.",
+    "source": "https://www.sankeo.com/mon-itineraire/ (extrait vérifié le 2026-10-15 : « Retrouvez vos horaires et vos titres de transport sur votre mobile »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Sankéo ; Réseau Sankéo ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.sankeo.com/mon-itineraire/",
+     "extrait": "Retrouvez vos horaires et vos titres de transport sur votre mobile"
+    }
    }
   ],
   "recherches": [
    {
+    "sujet": "Tarification / gratuité",
+    "statut": "introuvable",
+    "source": "https://www.sankeo.com/tous-les-tarifs/",
+    "consulte_le": "2026-10-15",
+    "note": "Les pages « Tous les titres » et « Tarifications spécifiques » ne disent rien de la gratuité. « Tarifications spécifiques » ne traite que de la prime de transport. La page « Tarifs réduits » (https://www.sankeo.com/tarifs-reduits/) n'a pas été consultée. Une image « Gratuité » est présente mais sans texte. Ne pas conclure à l'absence de gratuité."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines régulières (samedi, jours fériés)",
+    "statut": "introuvable",
+    "source": "https://www.sankeo.com/lignes-horaires-plans/",
+    "consulte_le": "2026-10-15",
+    "note": "Aucun jour de circulation lisible pour les lignes régulières. La page https://www.sankeo.com/jours-feries/ n'a pas été consultée. Les fiches horaires détaillées, éventuellement en PDF, n'ont pas été ouvertes : non vérifié."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "non vérifié",
+    "source": "https://www.sankeo.com/traffics-2/",
+    "consulte_le": "2026-10-15",
+    "note": "Cette page « Infos Trafic / En direct » n'a pas été ouverte. Je n'ai pas confirmé de temps réel sur les passages."
+   },
+   {
     "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
+    "statut": "introuvable",
     "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-   },
-   {
-    "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-   },
-   {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-15",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/66136/dossier/complement.json",
-  "sha256": "817e65ceef24005d6f70990f478c6e3aab0d89384453cfdfa9c1c9cd6401d106"
+  "sha256": "753404bd00961fb635764b446901ea4e3987083b530c3bc18c60ad5e815f5d51"
  },
  "comparaison": {
   "commune": {

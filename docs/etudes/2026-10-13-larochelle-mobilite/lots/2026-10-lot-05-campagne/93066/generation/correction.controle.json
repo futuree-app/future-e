@@ -1,0 +1,18 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Secteurs — suffixe du libellé République Gare Porte de Paris",
+   "detail": "« 06 » ne correspond à aucune valeur du dossier pour iris.voiture.min (11.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Secteurs — suffixe du libellé Franc-Moisin Bel-Air",
+   "detail": "« 05 » ne correspond à aucune valeur du dossier pour iris.voiture.max (35.0)"
+  }
+ ],
+ "bloquantes": 2
+}
