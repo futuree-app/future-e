@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5c123acf634f417c2d2e8ab4",
+ "titre": "Réseau urbain DK'BUS",
+ "page": "https://transport.data.gouv.fr/datasets/offre-de-transports-reseau-dk-bus-de-la-communaute-urbaine-de-dunkerque-gtfs",
+ "nom_commercial": "DK'BUS",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "DK'BUS",
+ "aom": "CU de Dunkerque",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "245900428",
+  "nom": "CU de Dunkerque"
+ },
+ "mis_a_jour": "2026-07-06",
+ "agence": {
+  "agences": [
+   [
+    "DKBUS",
+    "http://www.dkbus.com"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

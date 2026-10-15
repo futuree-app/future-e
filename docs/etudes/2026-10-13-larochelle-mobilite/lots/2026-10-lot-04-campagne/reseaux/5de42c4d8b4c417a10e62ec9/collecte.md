@@ -1,0 +1,16 @@
+Je n'ai pas trouvé la tarification ni les jours de circulation sur les pages ouvertes. Je rends donc ce que j'ai pu confirmer, avec les points non établis.
+
+```json
+{"faits": [
+{"id": "doc.tarification.zones", "information": "La tarification du réseau TCL dépend des zones traversées. La page ne mentionne aucune gratuité générale.", "url": "https://www.tcl.fr/titres-et-tarifs/tarification-tcl", "extrait": "Les tarifs varient selon les zones traversées pendant votre trajet.", "validite": "non précisée", "perimetre": "Réseau TCL, tarification par zones", "usage": "avec ses conditions : la page ne dit rien sur la gratuité. Cela ne prouve pas qu'aucune gratuité n'existe."},
+{"id": "doc.horaires.metro_a_validite", "information": "La page de la ligne Métro A indique des horaires à partir du 31 août 2026. Aucune date de fin n'est donnée. Une fiche horaire PDF est téléchargeable.", "url": "https://www.tcl.fr/lignes/metro-a", "extrait": "Ligne Métro A - Horaires à partir du 31 août 2026", "validite": "à partir du 31 août 2026, fin non précisée", "perimetre": "Ligne de métro A uniquement", "usage": "avec ses conditions : ne concerne que la ligne A. Les jours de circulation ne sont pas indiqués sur la page."},
+{"id": "doc.verification.itineraire", "information": "Le site propose une page de calcul d'itinéraire.", "url": "https://www.tcl.fr/se-deplacer/calcul-ditineraire", "extrait": "Calcul d’itinéraire TCL : trouvez votre trajet dans la région lyonnaise", "validite": "non précisée", "perimetre": "Réseau TCL", "usage": "oui"},
+{"id": "doc.verification.info_trafic", "information": "Le site propose une page d'info trafic en temps réel.", "url": "https://www.tcl.fr/se-deplacer/info-trafic", "extrait": "Restez informé en temps réel des conditions de circulation et voyagez sans imprévu.", "validite": "non précisée", "perimetre": "Réseau TCL", "usage": "oui"}
+],
+"recherches": [
+{"sujet": "Gratuité (publics, lignes, exceptions)", "statut": "introuvable", "url": "https://www.tcl.fr/titres-et-tarifs/tarification-tcl", "note": "La page ne parle pas de gratuité. Les pages « Les abonnements TCL » et le guide tarifaire 2026 en PDF n'ont pas été consultés."},
+{"sujet": "Jours de circulation (samedi, dimanche, jours fériés)", "statut": "introuvable", "url": "https://www.tcl.fr/lignes/metro-a", "note": "Les pages /se-deplacer/horaires, /lignes, la page d'aide sur les horaires et la page de la ligne Métro A ne donnent pas ces jours. Seule la fiche horaire PDF de la ligne A pourrait les contenir."},
+{"sujet": "Fiche horaire PDF de la ligne A (timetable-A-fiche_horaire_rentree)", "statut": "non vérifié", "url": "https://www.tcl.fr/lignes/metro-a", "note": "Le PDF n'a pas été ouvert. Son contenu, y compris les jours de circulation et d'éventuelles fréquences, n'est pas vérifié."},
+{"sujet": "Fiches horaires des autres lignes", "statut": "introuvable", "url": "https://www.tcl.fr/lignes", "note": "La page /lignes est longue et seuls les 100 000 premiers caractères sur 187 198 ont été lus. Chaque ligne a sa page, de la forme /lignes/<ligne>."}
+]}
+```

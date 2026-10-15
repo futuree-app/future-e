@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5c34c93f8b4c4104b817fb3a",
+ "titre": "Réseau urbain STAS",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-du-reseau-stas",
+ "nom_commercial": "STAS",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "STAS",
+ "aom": "Saint-Etienne Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "244200770",
+  "nom": "Saint-Étienne Métropole"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "SAINT-ETIENNE – STAS",
+    "http://STAS3.cityway.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

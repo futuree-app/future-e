@@ -1,0 +1,8 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python outil/fiche_mobilite.py --insee 93001 --jour 2026-10-13 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/93001/fiche --cache /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil --mobpro /Users/quentinbrache/Desktop/Futur·e/data/rp-mobpro-2022.parquet --bpe /Users/quentinbrache/Desktop/Futur·e/data/bpe25.parquet --index /Users/quentinbrache/Desktop/Futur·e/data/comparateur-index.json.gz
+
+
+· mobpro
+· iris
+· acces
+· carburant
+✓ /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/93001/fiche/fiche.json, fiche.md

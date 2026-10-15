@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "546609c1c751df1a6f6c8d07",
+ "titre": "Réseau urbain Le Met'",
+ "page": "https://transport.data.gouv.fr/datasets/fichiers-gtfs-eurometropole-de-metz",
+ "nom_commercial": "Le Met'",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Le Met'",
+ "aom": "Metz Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200039865",
+  "nom": "Metz Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "LE MET'",
+    "https://lemet.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [
+  [
+   "https://lemet.fr",
+   "inaccessible (HTTPError)"
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

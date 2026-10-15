@@ -1,0 +1,140 @@
+{
+ "commune": "74010",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA du Grand Annecy s'appelle « Sibra » ; son autorité organisatrice est CA du Grand Annecy.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Sibra » : https://transport.data.gouv.fr/datasets/offre-de-transports-sibra-a-annecy-gtfs ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-01",
+   "perimetre": "intercommunalité CA du Grand Annecy ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Sibra est https://www.sibra.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/offre-de-transports-sibra-a-annecy-gtfs ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Sibra",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.horaires.toussaint_2026",
+   "information": "Horaires de vacances de la Toussaint : le titre de l'actualité annonce une application à partir du samedi 17 octobre 2026. Le corps du texte donne une autre période, du 18 octobre au 2 novembre inclus. Le 18 octobre 2026 tombe un dimanche, donc la date de début est à confirmer auprès de Sibra.",
+   "source": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/ (extrait vérifié le 2026-10-15 : « Application des horaires à partir du samedi 17 Octobre 2026 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "titre : à partir du 17 octobre 2026 ; corps du texte : du 18 octobre au 2 novembre inclus (dates non concordantes)",
+   "perimetre": "réseau Sibra ; Lignes 4, 5, 11, 12, 13, 14, 21, 22, 23 et 80. Selon la page, les autres lignes ont « pas de changement ». ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/",
+    "extrait": "Application des horaires à partir du samedi 17 Octobre 2026"
+   }
+  },
+  {
+   "id": "doc.horaires.toussaint_2026.lignes",
+   "information": "Les lignes concernées par les horaires des samedis et vacances scolaires pendant la Toussaint sont listées. La page ne décrit ni le service du dimanche ni celui des jours fériés.",
+   "source": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/ (extrait vérifié le 2026-10-15 : « pour les lignes 4 / 5 / 11 / 12 / 13 / 14 / 21 / 22 / 23 et 80 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "vacances de la Toussaint 2026 (dates à confirmer, voir doc.horaires.toussaint_2026)",
+   "perimetre": "réseau Sibra ; Lignes 4, 5, 11, 12, 13, 14, 21, 22, 23 et 80 uniquement ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/",
+    "extrait": "pour les lignes 4 / 5 / 11 / 12 / 13 / 14 / 21 / 22 / 23 et 80"
+   }
+  },
+  {
+   "id": "doc.horaires.toussaint_2026.campus",
+   "information": "Exception sur la ligne 4 : deux trajets au départ de la Gare sont maintenus. Le résumé de la page les place la semaine du 19 au 23 octobre.",
+   "source": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/ (extrait vérifié le 2026-10-15 : « les 2 trajets au départ de la Gare à 07h15 et 07h30 sont maintenus sur la ligne 4 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "semaine du 19 au 23 octobre 2026",
+   "perimetre": "réseau Sibra ; Ligne 4, départs de la Gare à 07h15 et 07h30 ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/",
+    "extrait": "les 2 trajets au départ de la Gare à 07h15 et 07h30 sont maintenus sur la ligne 4"
+   }
+  },
+  {
+   "id": "doc.verification.itineraire",
+   "information": "Le site propose une page « Rechercher un itinéraire / un horaire ». Son contenu détaillé n'a pas pu être lu. Seul le titre est établi.",
+   "source": "https://www.sibra.fr/rechercher-un-itineraire-un-horaire/ (extrait vérifié le 2026-10-15 : « Rechercher un itinéraire / un horaire »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Sibra ; Réseau Sibra, agglomération d'Annecy ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.sibra.fr/rechercher-un-itineraire-un-horaire/",
+    "extrait": "Rechercher un itinéraire / un horaire"
+   }
+  },
+  {
+   "id": "doc.verification.temps_reel",
+   "information": "Le site a une page « Horaires en temps réel ». Elle ne donne aucun détail sur son fonctionnement.",
+   "source": "https://www.sibra.fr/horaires-en-temps-reel/ (extrait vérifié le 2026-10-15 : « Horaires en temps réel »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Sibra ; Réseau Sibra ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.sibra.fr/horaires-en-temps-reel/",
+    "extrait": "Horaires en temps réel"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Tarification : gratuité du réseau, publics, lignes, exceptions",
+   "statut": "introuvable",
+   "source": "https://www.sibra.fr/reduction-et-gratuite/",
+   "consulte_le": "2026-10-15",
+   "note": "La page « Réduction et gratuité » ne donne que « Découvrez les conditions pour voyager à tarif réduit. ». Elle renvoie vers « Accès préférentiel » et « Titres scolaires et collectivités », que je n'ai pas consultées. https://www.sibra.fr/tarifs/choisir-le-meilleur-tarif/ n'a pas été ouverte non plus."
+  },
+  {
+   "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés, samedi) en période normale",
+   "statut": "introuvable",
+   "source": "https://www.sibra.fr/plans-et-horaires/",
+   "consulte_le": "2026-10-15",
+   "note": "Les pages lues ne donnent pas le service du dimanche ni des jours fériés. La page d'accueil indique « Périodes A partir du 31 août 2026 » dans un sélecteur d'horaires. Les fiches horaires n'ont pas été lues."
+  },
+  {
+   "sujet": "Fiches horaires (contenu)",
+   "statut": "non vérifié",
+   "source": "https://www.sibra.fr/plans-et-horaires/",
+   "consulte_le": "2026-10-15",
+   "note": "La page propose des téléchargements. Leur contenu n'a pas été examiné, et aucune fréquence n'est enregistrée."
+  },
+  {
+   "sujet": "tarification (gratuité, abonnements, exceptions)",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

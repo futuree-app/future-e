@@ -1,0 +1,32 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "la seule localisation du logement dans Dijon renseigne donc peu sur les possibilités de laisser la voiture au repos",
+   "probleme": "Cette phrase déduit du seul chiffre `mobpro.voiture_selon_destination.communes_voisines` (72 %, tous secteurs confondus) que le secteur de résidence pèse peu pour ceux qui travaillent dans ces six communes, alors que le dossier ne donne aucune part par secteur et commune de travail (sections 3 et 4 non croisées) : la phrase sous-entend un croisement qui n'existe pas.",
+   "correction_minimale": "Remplacer la phrase par : « Pour une personne qui cherche un logement à Dijon et travaille dans l'une de ces communes, le trajet précis reste à examiner. »"
+  },
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Cette part est de 72 % parmi les actifs dijonnais qui travaillent à Chenôve, Talant, Chevigny-Saint-Sauveur, Quetigny, Fontaine-lès-Dijon ou Longvic.",
+   "probleme": "La méthode n'explique pas pourquoi ce groupe de communes de travail a été choisi (règle automatique : les six communes les plus peuplées de la même unité urbaine, `mobpro.voiture_selon_destination.communes_voisines`). Le lecteur peut croire à un choix arbitraire ou à « les communes voisines » en général.",
+   "correction_minimale": "Ajouter dans « Méthode et sources » : « Chenôve, Talant, Chevigny-Saint-Sauveur, Quetigny, Fontaine-lès-Dijon et Longvic sont les six communes les plus peuplées de l'unité urbaine de Dijon, hors Dijon. »"
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Pour comparer des logements dans ce secteur, la proximité de ce panier constitue un élément concret.",
+   "probleme": "Toutes les adresses de François Pompon ont le panier à moins de 500 m (`iris.212311501.panier_500m` = 100 %). Ce critère ne permet donc pas de départager deux logements de ce secteur, contrairement à ce que dit la phrase.",
+   "correction_minimale": "Écrire : « Dans ce secteur, la proximité de ce panier est acquise sur le papier ; reste à repérer… »"
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Il n’est attribué à aucun secteur ni à aucune destination de travail.",
+   "probleme": "C'est une précaution de méthode placée dans le récit (règle de la section 7 pour `scenario.carburant.*`). Elle n'aide pas le lecteur, puisque le tableau est déjà présenté selon la seule distance.",
+   "correction_minimale": "Supprimer la phrase ou la déplacer dans « Méthode et sources »."
+  }
+ ]
+}

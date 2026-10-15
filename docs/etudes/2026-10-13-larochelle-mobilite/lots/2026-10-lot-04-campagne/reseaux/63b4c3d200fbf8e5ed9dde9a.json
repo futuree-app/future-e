@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "63b4c3d200fbf8e5ed9dde9a",
+ "titre": "Réseau urbain Grand Reims Mobilités",
+ "page": "https://transport.data.gouv.fr/datasets/offre-de-transport-du-reseau-grand-reims-mobilites-communaute-urbaine-du-grand-reims",
+ "nom_commercial": "Grand Reims Mobilités",
+ "preuve_nom": "intitulé du jeu de données publié pour l'autorité organisatrice",
+ "offre_tdg": "CITURA",
+ "aom": "CU du Grand Reims",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200067213",
+  "nom": "CU du Grand Reims"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Transdev Reims",
+    "http://www.CITURA.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

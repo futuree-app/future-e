@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 51454 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/51454/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_51454.json --classes auto --communes  --reperes 514540302,514544503,514544502 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/51454/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 73,
+  "non_res": 11,
+  "sans_donnee": 1
+ },
+ "barres": null,
+ "alt_carte": "Carte de Reims découpée en 73 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 110 %). La part la plus basse est d'environ 40 % (Centre Erlon Est), la plus élevée d'environ 90 % (Murigny Sud-Est). 12 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

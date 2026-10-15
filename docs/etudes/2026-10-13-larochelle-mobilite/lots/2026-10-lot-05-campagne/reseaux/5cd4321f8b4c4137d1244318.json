@@ -1,0 +1,44 @@
+{
+ "version": 2,
+ "id": "5cd4321f8b4c4137d1244318",
+ "titre": "Réseau urbain Astuce",
+ "page": "https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie",
+ "nom_commercial": "Astuce",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Astuce",
+ "aom": "Métropole Rouen Normandie",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200023414",
+  "nom": "Métropole Rouen Normandie"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "Astuce",
+    "https://www.myastuce.fr"
+   ],
+   [
+    "Astuce (interurbain)",
+    "https://www.myastuce.fr"
+   ],
+   [
+    "Elbeuf",
+    "https://www.myastuce.fr"
+   ],
+   [
+    "Service TAD FLEXO",
+    "https://www.myastuce.fr"
+   ]
+  ]
+ },
+ "site": "https://www.myastuce.fr",
+ "sites_controles": [
+  [
+   "https://www.myastuce.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

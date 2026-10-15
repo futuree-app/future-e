@@ -1,0 +1,147 @@
+{
+ "commune": "35238",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Rennes Métropole s'appelle « STAR » ; son autorité organisatrice est Rennes Métropole.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain STAR » : https://transport.data.gouv.fr/datasets/versions-des-horaires-theoriques-des-lignes-de-bus-et-de-metro-du-reseau-star-dans-les-formats-gtfs-et-netex-ainsi-que-les-urls-dacces-au-gtfs-rt-1 ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-14",
+   "perimetre": "intercommunalité Rennes Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau STAR est https://www.star.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/versions-des-horaires-theoriques-des-lignes-de-bus-et-de-metro-du-reseau-star-dans-les-formats-gtfs-et-netex-ainsi-que-les-urls-dacces-au-gtfs-rt-1 ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau STAR",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarif.gratuite_moins_12_ans",
+   "information": "Le réseau STAR n'est pas gratuit pour tous. La page « Trouver mon tarif » prévoit la gratuité pour les enfants de moins de 12 ans. Les 5-11 ans doivent avoir une carte KorriGo Services, et les moins de 5 ans n'ont pas besoin de titre.",
+   "source": "https://www.star.fr/titres-et-tarifs/trouver-mon-tarif (extrait vérifié le 2026-10-15 : « Avant 12 ans, c'est gratuit ! »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau STAR ; Enfants de 0 à 11 ans, bus et métro. Les parcs relais ne sont pas mentionnés. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.star.fr/titres-et-tarifs/trouver-mon-tarif",
+    "extrait": "Avant 12 ans, c'est gratuit !"
+   }
+  },
+  {
+   "id": "doc.tarif.gratuite_5_11_carte",
+   "information": "Les enfants de 5 à 11 ans doivent avoir une carte KorriGo Services pour bénéficier de la gratuité.",
+   "source": "https://www.star.fr/titres-et-tarifs/trouver-mon-tarif (extrait vérifié le 2026-10-15 : « Pour les 5-11 ans, une carte KorriGo Services est obligatoire »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau STAR ; Enfants de 5 à 11 ans ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.star.fr/titres-et-tarifs/trouver-mon-tarif",
+    "extrait": "Pour les 5-11 ans, une carte KorriGo Services est obligatoire"
+   }
+  },
+  {
+   "id": "doc.horaires.fiches",
+   "information": "La page des plans du réseau propose de télécharger les fiches horaires et les plans. Elle contient notamment un plan des lignes métropolitaines du dimanche et un plan des lignes des vendredi et samedi soirs. La page ne donne ni les jours de circulation ni la validité des horaires.",
+   "source": "https://www.star.fr/se-deplacer/plans-du-reseau (extrait vérifié le 2026-10-15 : « 4-Lignes métropolitaines du dimanche »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau STAR ; Lignes métropolitaines du dimanche. Les lignes ne sont pas détaillées sur la page. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.star.fr/se-deplacer/plans-du-reseau",
+    "extrait": "4-Lignes métropolitaines du dimanche"
+   }
+  },
+  {
+   "id": "doc.horaires.recherche",
+   "information": "La page « Rechercher un horaire » permet de consulter les horaires des bus et du métro par ligne ou par arrêt.",
+   "source": "https://www.star.fr/se-deplacer/rechercher-un-horaire (extrait vérifié le 2026-10-15 : « Cliquez sur un arrêt »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau STAR ; Bus et métro du réseau STAR ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.star.fr/se-deplacer/rechercher-un-horaire",
+    "extrait": "Cliquez sur un arrêt"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité générale du réseau",
+   "statut": "introuvable",
+   "source": "https://www.star.fr/titres-et-tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "Les pages consultées ne décrivent que des gratuités ciblées. Aucune ne dit que le réseau est gratuit pour tous. Cela ne prouve pas qu'il ne le soit pas."
+  },
+  {
+   "sujet": "Jours de circulation des lignes urbaines (samedi, dimanche, jours fériés)",
+   "statut": "introuvable",
+   "source": "https://www.star.fr/se-deplacer/rechercher-un-horaire",
+   "consulte_le": "2026-10-15",
+   "note": "Les pages consultées ne donnent pas ces informations. Il faut ouvrir la fiche horaire de chaque ligne."
+  },
+  {
+   "sujet": "Période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://www.star.fr/se-deplacer/plans-du-reseau",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune date de validité n'apparaît dans les pages consultées."
+  },
+  {
+   "sujet": "Temps réel",
+   "statut": "introuvable",
+   "source": "https://www.star.fr/se-deplacer/info-trafic",
+   "consulte_le": "2026-10-15",
+   "note": "La page d'accueil renvoie vers l'info trafic en direct. Je n'ai pas ouvert cette page, et aucune fiche sur le temps réel des passages n'est enregistrée."
+  },
+  {
+   "sujet": "Vérification des extraits",
+   "statut": "non vérifié",
+   "source": "https://www.star.fr/",
+   "consulte_le": "2026-10-15",
+   "note": "Les extraits viennent de résumés produits par l'outil de lecture, pas du texte brut des pages. Certains sont courts, comme « Gratuité invalidité » et « Cliquez sur un arrêt », et peuvent être rejetés par la recherche automatique."
+  },
+  {
+   "sujet": "Une gratuité invalidité existe. Elle est réservée aux détenteurs d'une carte Kor",
+   "statut": "non vérifié",
+   "source": "https://www.star.fr/titres-et-tarifs/trouver-mon-tarif",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "Le site propose un module de calcul d'itinéraire, avec départ, arrivée, date et ",
+   "statut": "non vérifié",
+   "source": "https://www.star.fr/se-deplacer/preparer-un-itineraire",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

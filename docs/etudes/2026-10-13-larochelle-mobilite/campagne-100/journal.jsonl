@@ -1,0 +1,21 @@
+{"t": "2026-10-15T15:54:26Z", "evt": "preparation_debut", "lot": 1}
+{"t": "2026-10-15T15:56:29Z", "evt": "intervention", "texte": "Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc", "minutes": 22.0, "mesure": "estimée"}
+{"t": "2026-10-15T16:12:26Z", "evt": "inexploitable", "lot": 1, "insee": "59350", "motif": "à préparer; dossier : ValueError: cannot convert NaN to integer"}
+{"t": "2026-10-15T16:12:56Z", "evt": "preparation_fin", "lot": 1}
+{"t": "2026-10-15T16:13:57Z", "evt": "reprise_commune", "insee": "59350", "motif": "défaut de la chaîne corrigé (part sur zéro actif) ; Lille reprise en tête du lot 2"}
+{"t": "2026-10-15T16:14:03Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:14:04Z", "evt": "preparation_debut", "lot": 2}
+{"t": "2026-10-15T16:25:06Z", "evt": "preparation_fin", "lot": 2}
+{"t": "2026-10-15T16:25:16Z", "evt": "preparation_debut", "lot": 3}
+{"t": "2026-10-15T16:35:48Z", "evt": "preparation_fin", "lot": 3}
+{"t": "2026-10-15T16:39:12Z", "evt": "intervention", "texte": "Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance", "minutes": 12.0, "mesure": "estimée"}
+{"t": "2026-10-15T16:39:12Z", "evt": "arret_relance", "lot": 1, "motif": "contrôle corrigé (hypothèses du scénario carburant) : le processus gardait l’ancienne version ; arrêt pendant les visuels de Nantes, aucun appel de modèle en cours ; la reprise ne refait aucun appel"}
+{"t": "2026-10-15T16:39:13Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:39:21Z", "evt": "preparation_debut", "lot": 4}
+{"t": "2026-10-15T16:49:15Z", "evt": "preparation_fin", "lot": 4}
+{"t": "2026-10-15T16:50:04Z", "evt": "arret_relance", "lot": 1, "motif": "contrôle corrigé (SP95-E10, base 100 km) ; arrêt pendant des visuels, aucun appel de modèle en cours"}
+{"t": "2026-10-15T16:50:12Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:50:16Z", "evt": "intervention", "texte": "Lot 1 : deux autres faux positifs du contrôle (SP95-E10, base 100 km) corrigés, essais de non-régression, second arrêt-relance pendant des visuels", "minutes": 8.0, "mesure": "estimée"}
+{"t": "2026-10-15T17:28:09Z", "evt": "suspension", "lot": 1, "etape": "rediger", "message": "suspendu par quota · « relecture » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "13001"}
+{"t": "2026-10-15T17:28:17Z", "evt": "production_debut", "lot": 2}
+{"t": "2026-10-15T17:28:20Z", "evt": "suspension", "lot": 2, "etape": "collecter", "message": "suspendu par quota · « collecte » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "collecte"}

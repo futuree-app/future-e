@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5ab2376488ee383b60034880",
+ "titre": "Réseau urbain Transports Montalbanais",
+ "page": "https://transport.data.gouv.fr/datasets/gtfs-de-la-societe-de-transport-urbain-du-grand-montauban-semtm",
+ "nom_commercial": "Transports Montalbanais",
+ "preuve_nom": "intitulé du jeu de données publié pour l'autorité organisatrice",
+ "offre_tdg": "TM -Transports Montalbanais",
+ "aom": "CA Grand Montauban",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248200099",
+  "nom": "CA Grand Montauban"
+ },
+ "mis_a_jour": "2026-08-31",
+ "agence": {
+  "agences": [
+   [
+    "SEMTM",
+    "https://www.montm.com"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

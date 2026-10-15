@@ -1,0 +1,141 @@
+{
+ "etape": "collecte",
+ "cle": "4898c2712762e751",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "e68017e438d9c56a",
+ "debut": "2026-10-15T16:21:08Z",
+ "fin": "2026-10-15T16:21:40Z",
+ "duree_s": 32.6,
+ "code_retour": 0,
+ "session": "5c1593e1-5b86-4969-affe-33b0419894a1",
+ "usage": {
+  "input_tokens": 6,
+  "cache_creation_input_tokens": 3287,
+  "cache_read_input_tokens": 6922,
+  "output_tokens": 2594,
+  "output_tokens_details": {
+   "thinking_tokens": 98
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 3287,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1901,
+    "cache_read_input_tokens": 3128,
+    "cache_creation_input_tokens": 1696,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 1696
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 6,
+   "outputTokens": 2594,
+   "cacheReadInputTokens": 6922,
+   "cacheCreationInputTokens": 3287,
+   "webSearchRequests": 0,
+   "costUSD": 0.0397922,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 98,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-haiku-5-5": {
+   "inputTokens": 15705,
+   "outputTokens": 5002,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.0040715000000000005,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 3344,
+   "canonicalModel": "claude-haiku-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.0438637,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 6,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-1apjp7zb",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-1apjp7zb/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.sibra.fr/\", \"prompt\": \"Tarification (gratuité ?), jours de circulation (dimanche, fériés), validité des horaires, calcul d'itinéraire, fiches horaires, temps réel. Donne des extra"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.sibra.fr/reduction-et-gratuite/\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.sibra.fr/actualites/vacances-de-la-toussaint-application-des-horaires-a-partir-du-samedi-17-octobre-2026/\", \"prompt\": \"Horaires, jours de circulation (dimanche, jours fériés, same"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.sibra.fr/rechercher-un-itineraire-un-horaire/\", \"prompt\": \"Page de calcul d'itinéraire : extrait exact décrivant le service.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.sibra.fr/horaires-en-temps-reel/\", \"prompt\": \"Extrait exact décrivant le service temps réel.\"}"
+  }
+ ],
+ "refus": 0
+}

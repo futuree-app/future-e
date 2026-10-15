@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "667e891f8e6b8d7da738991c",
+ "titre": "Réseau urbain Citibus",
+ "page": "https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne",
+ "nom_commercial": "Citibus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Citibus",
+ "aom": "CA Le Grand Narbonne",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "241100593",
+  "nom": "CA Le Grand Narbonne"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "Citibus",
+    "https://www.citibus.fr"
+   ]
+  ]
+ },
+ "site": "https://www.citibus.fr",
+ "sites_controles": [
+  [
+   "https://www.citibus.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

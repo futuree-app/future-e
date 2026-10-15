@@ -1,0 +1,133 @@
+{
+ "commune": "69266",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Métropole de Lyon s'appelle « TCL » ; son autorité organisatrice est SYTRAL Mobilités.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain TCL » : https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-transports-en-commun-lyonnais ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-05-12",
+   "perimetre": "intercommunalité Métropole de Lyon ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau TCL est https://www.tcl.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-du-reseau-transports-en-commun-lyonnais ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau TCL",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.zones",
+   "information": "La tarification du réseau TCL dépend des zones traversées. La page ne mentionne aucune gratuité générale.",
+   "source": "https://www.tcl.fr/titres-et-tarifs/tarification-tcl (extrait vérifié le 2026-10-15 : « Les tarifs varient selon les zones traversées pendant votre trajet. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau TCL ; Réseau TCL, tarification par zones ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tcl.fr/titres-et-tarifs/tarification-tcl",
+    "extrait": "Les tarifs varient selon les zones traversées pendant votre trajet."
+   }
+  },
+  {
+   "id": "doc.horaires.metro_a_validite",
+   "information": "La page de la ligne Métro A indique des horaires à partir du 31 août 2026. Aucune date de fin n'est donnée. Une fiche horaire PDF est téléchargeable.",
+   "source": "https://www.tcl.fr/lignes/metro-a (extrait vérifié le 2026-10-15 : « Ligne Métro A - Horaires à partir du 31 août 2026 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "à partir du 31 août 2026, fin non précisée",
+   "perimetre": "réseau TCL ; Ligne de métro A uniquement ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tcl.fr/lignes/metro-a",
+    "extrait": "Ligne Métro A - Horaires à partir du 31 août 2026"
+   }
+  },
+  {
+   "id": "doc.verification.itineraire",
+   "information": "Le site propose une page de calcul d'itinéraire.",
+   "source": "https://www.tcl.fr/se-deplacer/calcul-ditineraire (extrait vérifié le 2026-10-15 : « Calcul d’itinéraire TCL : trouvez votre trajet dans la région lyonnaise »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau TCL ; Réseau TCL ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tcl.fr/se-deplacer/calcul-ditineraire",
+    "extrait": "Calcul d’itinéraire TCL : trouvez votre trajet dans la région lyonnaise"
+   }
+  },
+  {
+   "id": "doc.verification.info_trafic",
+   "information": "Le site propose une page d'info trafic en temps réel.",
+   "source": "https://www.tcl.fr/se-deplacer/info-trafic (extrait vérifié le 2026-10-15 : « Restez informé en temps réel des conditions de circulation et voyagez sans imprévu. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau TCL ; Réseau TCL ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tcl.fr/se-deplacer/info-trafic",
+    "extrait": "Restez informé en temps réel des conditions de circulation et voyagez sans imprévu."
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité (publics, lignes, exceptions)",
+   "statut": "introuvable",
+   "source": "https://www.tcl.fr/titres-et-tarifs/tarification-tcl",
+   "consulte_le": "2026-10-15",
+   "note": "La page ne parle pas de gratuité. Les pages « Les abonnements TCL » et le guide tarifaire 2026 en PDF n'ont pas été consultés."
+  },
+  {
+   "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+   "statut": "introuvable",
+   "source": "https://www.tcl.fr/lignes/metro-a",
+   "consulte_le": "2026-10-15",
+   "note": "Les pages /se-deplacer/horaires, /lignes, la page d'aide sur les horaires et la page de la ligne Métro A ne donnent pas ces jours. Seule la fiche horaire PDF de la ligne A pourrait les contenir."
+  },
+  {
+   "sujet": "Fiche horaire PDF de la ligne A (timetable-A-fiche_horaire_rentree)",
+   "statut": "non vérifié",
+   "source": "https://www.tcl.fr/lignes/metro-a",
+   "consulte_le": "2026-10-15",
+   "note": "Le PDF n'a pas été ouvert. Son contenu, y compris les jours de circulation et d'éventuelles fréquences, n'est pas vérifié."
+  },
+  {
+   "sujet": "Fiches horaires des autres lignes",
+   "statut": "introuvable",
+   "source": "https://www.tcl.fr/lignes",
+   "consulte_le": "2026-10-15",
+   "note": "La page /lignes est longue et seuls les 100 000 premiers caractères sur 187 198 ont été lus. Chaque ligne a sa page, de la forme /lignes/<ligne>."
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

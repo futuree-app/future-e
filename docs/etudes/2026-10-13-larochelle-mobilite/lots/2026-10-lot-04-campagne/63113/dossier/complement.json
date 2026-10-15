@@ -1,0 +1,119 @@
+{
+ "commune": "63113",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Clermont Auvergne Métropole s'appelle « T2C » ; son autorité organisatrice est SM des transports en commun de l'agglomération clermontoise (SMTC).",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain T2C » : https://transport.data.gouv.fr/datasets/syndicat-mixte-des-transports-en-commun-de-lagglomeration-clermontoise-smtc-ac-reseau-t2c-gtfs-gtfs-rt ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-14",
+   "perimetre": "intercommunalité Clermont Auvergne Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau T2C est https://www.t2c.fr.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/syndicat-mixte-des-transports-en-commun-de-lagglomeration-clermontoise-smtc-ac-reseau-t2c-gtfs-gtfs-rt ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau T2C",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_weekend_exception_feries",
+   "information": "La gratuité du réseau T2C s'applique les samedis et dimanches. Les jours fériés en semaine n'en bénéficient pas. Le réseau n'est donc pas gratuit en semaine.",
+   "source": "https://www.t2c.fr/page/la-gratuite-les-samedis-et-dimanches (extrait vérifié le 2026-10-15 : « les jours fériés en semaine ne sont pas concernés par la gratuité »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Week-ends, du samedi 4h15 au lundi 1h30 d'après la page. Mesure reconduite jusqu'en août 2027.",
+   "perimetre": "réseau T2C ; Tout public, tout âge. Ensemble du réseau : bus, tramway et Transport Sur Réservation. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.t2c.fr/page/la-gratuite-les-samedis-et-dimanches",
+    "extrait": "les jours fériés en semaine ne sont pas concernés par la gratuité"
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_weekend_duree",
+   "information": "La gratuité des transports en commun le week-end est reconduite jusqu'en août 2027.",
+   "source": "https://www.t2c.fr/page/la-gratuite-les-samedis-et-dimanches (extrait vérifié le 2026-10-15 : « reconduire la gratuité des transports en commun le week‐end jusqu'en août 2027 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Jusqu'en août 2027",
+   "perimetre": "réseau T2C ; Réseau T2C, week-ends uniquement ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.t2c.fr/page/la-gratuite-les-samedis-et-dimanches",
+    "extrait": "reconduire la gratuité des transports en commun le week‐end jusqu'en août 2027"
+   }
+  },
+  {
+   "id": "doc.verification.itineraires",
+   "information": "Le site propose une page de calcul d'itinéraire (départ, arrivée, date, heure, options accessibilité PMR et sans correspondance), un bouton « Calculer mon itinéraire » et une application mobile.",
+   "source": "https://www.t2c.fr/se-deplacer/itineraires (extrait vérifié le 2026-10-15 : « Itinéraires, horaires, infos trafic… l'app qui vous simplifie la vie. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau T2C ; Réseau T2C ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.t2c.fr/se-deplacer/itineraires",
+    "extrait": "Itinéraires, horaires, infos trafic… l'app qui vous simplifie la vie."
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Jours de circulation des lignes urbaines (dimanche, fériés, samedi)",
+   "statut": "introuvable",
+   "source": "https://www.t2c.fr/se-deplacer/horaires-et-plans",
+   "consulte_le": "2026-10-15",
+   "note": "La page évoque les jours de circulation, la validité des horaires, les fiches horaires et le temps réel, mais le contenu récupéré ne donne ni jours ni dates. Seule la gratuité du week-end est établie. Elle ne dit rien sur le fait que les lignes circulent. Les fiches par ligne n'ont pas été consultées."
+  },
+  {
+   "sujet": "Période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://www.t2c.fr/se-deplacer/horaires-et-plans",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune date de validité n'apparaît dans le contenu récupéré."
+  },
+  {
+   "sujet": "Temps réel",
+   "statut": "introuvable",
+   "source": "https://www.t2c.fr/se-deplacer/infos-trafic",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune page de temps réel explicite n'a été trouvée. La page d'itinéraires est décrite comme calculant en temps réel, mais je n'ai pas obtenu de phrase exacte à citer. La rubrique « Infos trafic » existe mais n'a pas été ouverte."
+  },
+  {
+   "sujet": "Fiches horaires par ligne",
+   "statut": "introuvable",
+   "source": "https://www.t2c.fr/se-deplacer/horaires-et-plans",
+   "consulte_le": "2026-10-15",
+   "note": "La page propose des filtres par arrêt et par ligne. Les fiches par ligne n'ont pas été ouvertes et aucune fréquence n'est enregistrée."
+  },
+  {
+   "sujet": "Tarifs hors gratuité",
+   "statut": "non vérifié",
+   "source": "https://www.t2c.fr/page/titres-tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "Page repérée mais non consultée."
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

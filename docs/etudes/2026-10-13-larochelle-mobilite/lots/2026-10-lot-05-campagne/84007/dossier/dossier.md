@@ -1,0 +1,396 @@
+# Dossier d'entrée de rédaction · Avignon (84007)
+
+Fiche source : `/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/84007/fiche/fiche.json` (générée le 2026-10-15T16:22:45Z, jour de référence 2026-10-13, sha256 `15bc2c913ac8c490`). Dossier généré le 2026-10-15T16:23:15Z par `outil/dossier_redaction.py`.
+
+Ce dossier est **la seule matière** de la rédaction. Chaque fait a un identifiant stable (colonne `id`) : c'est lui que cite la correspondance interne du brouillon. Un fait qui n'est pas ici n'existe pas pour l'article.
+
+**Statut et usage.** La colonne « Usage » dit ce que l'on peut écrire :
+
+| Statut | Ce que cela veut dire | Usage |
+|---|---|---|
+| `utilisable` | donnée exploitable, population, source et périmètre identifiés | `oui` : à écrire tel quel (valeur arrondie de la colonne « Valeur ») |
+| `fragile` | faible précision statistique (petit échantillon) | `ordre de grandeur` : jamais en chiffre de titre ni comme seul appui de la réponse, avec la précision du motif |
+| `en attente de validation` | dépend d'une vérification humaine non faite (réseau de bus, jour de référence) | `non` : ne pas écrire, même arrondi ou en termes vagues ; la valeur n'est pas donnée |
+| `absent` | pas de donnée, ou secteur exclu | `non` |
+
+**Valeurs aux bornes.** « 0 % » et « 100 % » sont des valeurs exactes : elles s'écrivent « aucun » ou « tous ». Une valeur proche d'une borne est donnée au dixième (« 99,8 % », « 0,4 % ») : elle s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun », ni « 100 % » ou « 0 % ».
+
+Les **informations documentaires** (section 2 bis, identifiants `doc.*`) ne sont pas des résultats calculés : elles ont leur propre colonne Usage (`oui`, `avec ses conditions`, `non`).
+
+**Populations.** Trois populations distinctes, à ne pas mélanger : les **actifs** occupés (pratiques domicile-travail, fichier MOBPRO et base IRIS Activité), les **ménages** (voiture, stationnement, base IRIS Logement), les **adresses** (proximité des équipements, Base adresse nationale). Une part d'adresses n'est pas une part de ménages ni d'habitants.
+
+## 1. Périmètres exacts
+
+- **Commune étudiée** : Avignon (84007), département 84, intercommunalité CA du Grand Avignon (COGA).
+- **Groupe de communes nommé** : Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092). Origine de cette liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3). Présenter ce groupe avec cette liste exacte la première fois qu'il apparaît ; ensuite « ces six communes » suffit. Ce groupe n'est pas « toutes les communes limitrophes » ni « les communes voisines » en général.
+- **Unité urbaine INSEE** : code 00754 ; sa composition n'est pas dans la fiche.
+- **Secteurs** : IRIS de l'INSEE ; leurs noms ne sont pas toujours ceux des quartiers d'usage.
+- **Bus** : GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)). Réseau et jour de référence non validés : tous les faits bus sont en attente de validation et ne s'écrivent pas. Les informations publiées par le réseau (section 2 bis) ne les valident pas et n'en tiennent pas lieu.
+
+## 2. Faits
+
+| id | Fait | Valeur | Population / dénominateur | Périmètre | Source, millésime | Statut | Usage |
+|---|---|---|---|---|---|---|---|
+| `mobpro.modes.pas_de_transport` | Part des actifs qui ne se déplacent pas pour travailler (travail à domicile) | 4 % [IC 95 % : 3 % à 5 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.modes.marche` | Part des actifs qui vont travailler principalement à pied | 10 % [IC 95 % : 9 % à 10 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.modes.velo` | Part des actifs qui vont travailler principalement à vélo | 9 % [IC 95 % : 8 % à 9 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.modes.deux_roues_mot` | Part des actifs qui vont travailler principalement en deux-roues motorisé | 2 % [IC 95 % : 2 % à 2 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.modes.voiture` | Part des actifs qui vont travailler principalement en voiture | 65 % [IC 95 % : 64 % à 66 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.modes.tc` | Part des actifs qui vont travailler principalement en transports en commun | 11 % [IC 95 % : 11 % à 12 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon, y compris ceux qui ne se déplacent pas | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.travaille_dans_commune` | Part des actifs résidents qui travaillent à Avignon même | 69 % [IC 95 % : 67 % à 70 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon | commune de résidence et de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.voiture_selon_destination.meme_commune` | Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Avignon | 57 % [IC 95 % : 55 % à 58 %] | actifs occupés de 15 ans ou plus résidant à Avignon qui travaillent à Avignon | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.voiture_selon_destination.communes_voisines` | Part allant travailler en voiture, parmi les actifs résidents qui travaillent dans l'une de ces communes : Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | 87 % [IC 95 % : 84 % à 90 %] | actifs occupés de 15 ans ou plus résidant à Avignon qui travaillent dans l'une de ces communes : Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | commune de travail : Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.voiture_selon_destination.ailleurs` | Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Avignon et hors de Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | 82 % [IC 95 % : 81 % à 84 %] | actifs occupés de 15 ans ou plus résidant à Avignon qui travaillent hors de Avignon et hors de Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | commune de travail : toute commune autre que Avignon, Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `ecart.voiture_destination.voisines_moins_meme_commune` | Écart de part de la voiture : travail dans Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) moins travail à Avignon | +30 points | deux groupes distincts (voir les deux faits) | commune de travail : Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable (écart des valeurs arrondies) | `oui` |
+| `mobpro.posseder_utiliser.actifs_menage_sans_voiture` | Part des actifs dont le ménage n'a pas de voiture | 12 % [IC 95 % : 11 % à 13 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.posseder_utiliser.actifs_menage_2_voitures_plus` | Part des actifs dont le ménage a deux voitures ou plus | 37 % [IC 95 % : 36 % à 39 %] | tous les actifs occupés de 15 ans ou plus résidant à Avignon | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture` | Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement) | 29 % [IC 95 % : 28 % à 31 %] | actifs occupés de 15 ans ou plus résidant à Avignon dont le ménage a au moins une voiture | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.proprietaires.voiture` | Part des actifs propriétaires qui vont travailler en voiture | 67 % [IC 95 % : 65 % à 69 %] | actifs occupés de 15 ans ou plus résidant à Avignon, propriétaires de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.proprietaires.velo` | Part des actifs propriétaires qui vont travailler à vélo | 12 % [IC 95 % : 10 % à 13 %] | actifs occupés de 15 ans ou plus résidant à Avignon, propriétaires de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.proprietaires.menage_sans_voiture` | Part des actifs propriétaires qui ont un ménage sans voiture | 3 % [IC 95 % : 2 % à 4 %] | actifs occupés de 15 ans ou plus résidant à Avignon, propriétaires de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.proprietaires.menage_2_voitures_plus` | Part des actifs propriétaires qui ont un ménage à deux voitures ou plus | 52 % [IC 95 % : 50 % à 54 %] | actifs occupés de 15 ans ou plus résidant à Avignon, propriétaires de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_prive.voiture` | Part des actifs locataires du privé qui vont travailler en voiture | 58 % [IC 95 % : 56 % à 60 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires du privé de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_prive.velo` | Part des actifs locataires du privé qui vont travailler à vélo | 8 % [IC 95 % : 7 % à 9 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires du privé de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_prive.menage_sans_voiture` | Part des actifs locataires du privé qui ont un ménage sans voiture | 21 % [IC 95 % : 19 % à 23 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires du privé de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus` | Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus | 25 % [IC 95 % : 23 % à 27 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires du privé de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_hlm.voiture` | Part des actifs locataires HLM qui vont travailler en voiture | 74 % [IC 95 % : 72 % à 77 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires HLM de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_hlm.velo` | Part des actifs locataires HLM qui vont travailler à vélo | 4 % [IC 95 % : 3 % à 6 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires HLM de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_hlm.menage_sans_voiture` | Part des actifs locataires HLM qui ont un ménage sans voiture | 14 % [IC 95 % : 12 % à 16 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires HLM de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus` | Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus | 31 % [IC 95 % : 28 % à 34 %] | actifs occupés de 15 ans ou plus résidant à Avignon, locataires HLM de leur logement | commune de résidence : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.total` | Nombre d'actifs qui travaillent à Avignon | environ 60 100 | — | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois` | Part, parmi les actifs qui travaillent à Avignon, de ceux qui habitent Avignon | 36 % | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.habitent_la_commune.voiture` | Part allant travailler en voiture, parmi les actifs qui travaillent à Avignon et habitent Avignon | 57 % [IC 95 % : 55 % à 58 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent Avignon | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.habitent_la_commune.tc` | Part allant travailler en transports en commun, parmi les actifs qui travaillent à Avignon et habitent Avignon | 11 % [IC 95 % : 10 % à 12 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent Avignon | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.reste_unite_urbaine.part_des_emplois` | Part, parmi les actifs qui travaillent à Avignon, de ceux qui habitent une autre commune de l'unité urbaine INSEE 00754 (liste des communes non exposée par la fiche) | 42 % | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.reste_unite_urbaine.voiture` | Part allant travailler en voiture, parmi les actifs qui travaillent à Avignon et habitent une autre commune de l'unité urbaine INSEE 00754 (liste des communes non exposée par la fiche) | 91 % [IC 95 % : 90 % à 92 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 00754 (liste des communes non exposée par la fiche) | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.reste_unite_urbaine.tc` | Part allant travailler en transports en commun, parmi les actifs qui travaillent à Avignon et habitent une autre commune de l'unité urbaine INSEE 00754 (liste des communes non exposée par la fiche) | 4 % [IC 95 % : 4 % à 5 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 00754 (liste des communes non exposée par la fiche) | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois` | Part, parmi les actifs qui travaillent à Avignon, de ceux qui habitent hors de l'unité urbaine INSEE 00754 | 23 % | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.hors_unite_urbaine.voiture` | Part allant travailler en voiture, parmi les actifs qui travaillent à Avignon et habitent hors de l'unité urbaine INSEE 00754 | 91 % [IC 95 % : 89 % à 92 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 00754 | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `mobpro.qui_vient_travailler.hors_unite_urbaine.tc` | Part allant travailler en transports en commun, parmi les actifs qui travaillent à Avignon et habitent hors de l'unité urbaine INSEE 00754 | 6 % [IC 95 % : 5 % à 8 %] | actifs occupés qui travaillent à Avignon, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 00754 | commune de travail : Avignon (84007) | INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 | utilisable | `oui` |
+| `iris.voiture.min` | Part de la voiture la plus basse parmi les secteurs : La Balance-Palais des Papes (IRIS 840070110) | 30 % | actifs occupés de 15 ans ou plus du secteur | secteurs statistiques (IRIS) d'habitat de Avignon (84007), au moins 300 actifs | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable | `oui` |
+| `iris.voiture.max` | Part de la voiture la plus élevée parmi les secteurs : Montfavet Centre (IRIS 840070104) | 82 % | actifs occupés de 15 ans ou plus du secteur | secteurs statistiques (IRIS) d'habitat de Avignon (84007), au moins 300 actifs | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable | `oui` |
+| `ecart.iris.voiture.max_moins_min` | Écart entre le secteur le plus haut et le plus bas (part de la voiture) | +52 points | deux secteurs distincts | secteurs statistiques (IRIS) d'habitat de Avignon (84007), au moins 300 actifs | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable (écart des valeurs arrondies) | `oui` |
+| `iris.menages_commune.menages_sans_voiture` | Part des ménages sans voiture | 26 % | toutes les résidences principales de Avignon | commune : Avignon (84007) | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable | `oui` |
+| `iris.menages_commune.menages_2_voitures_plus` | Part des ménages à deux voitures ou plus | 21 % | toutes les résidences principales de Avignon | commune : Avignon (84007) | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable | `oui` |
+| `iris.menages_commune.menages_stationnement_reserve` | Part des ménages disposant d'un emplacement réservé au stationnement | 47 % | toutes les résidences principales de Avignon | commune : Avignon (84007) | INSEE, RP 2022, bases infracommunales Activité des résidents et Logement, 2022 | utilisable | `oui` |
+| `acces.84007.commerce_alim_500m` | Part des adresses de Avignon qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau) | 91 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.grande_surface_500m` | Part des adresses de Avignon qui ont une grande surface à moins de 500 m (à vol d'oiseau) | 46 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.pharmacie_500m` | Part des adresses de Avignon qui ont une pharmacie à moins de 500 m (à vol d'oiseau) | 78 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.medecin_generaliste_500m` | Part des adresses de Avignon qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau) | 80 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.ecole_elementaire_500m` | Part des adresses de Avignon qui ont une école élémentaire à moins de 500 m (à vol d'oiseau) | 80 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.college_1km` | Part des adresses de Avignon qui ont un collège à moins de 1 km (à vol d'oiseau) | 82 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.gare_2km` | Part des adresses de Avignon qui ont une gare à moins de 2 km (à vol d'oiseau) | 73 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.panier_quotidien_500m` | Part des adresses de Avignon qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau) | 72 % | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | utilisable | `oui` |
+| `acces.84007.bus_8h_7_9h` | Part des adresses de Avignon qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m | — (non donnée : en attente de validation) | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | en attente de validation (réseau de bus et jour de référence non validés : ne pas écrire, même arrondi) | `non` |
+| `acces.84007.aucun_bus_7_9h` | Part des adresses de Avignon sans aucun passage de bus entre 7 h et 9 h à moins de 400 m | — (non donnée : en attente de validation) | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | en attente de validation (réseau de bus et jour de référence non validés : ne pas écrire, même arrondi) | `non` |
+| `acces.84007.bus_4h_20_22h` | Part des adresses de Avignon qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m | — (non donnée : en attente de validation) | toutes les adresses BAN de Avignon, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS) | adresses de Avignon (84007) | BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Orizo » (https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon), 1 candidat(s)), BPE 2025, GTFS du jour 2026-10-13 | en attente de validation (réseau de bus et jour de référence non validés : ne pas écrire, même arrondi) | `non` |
+| `carburant.gazole.prix` | Prix médian du gazole, semaine du 2026-10-05 | 2,35 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+| `carburant.gazole.prix_un_an_avant` | Prix médian du gazole, semaine du 2025-10-06 | 1,58 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+| `carburant.gazole.ecart` | Hausse du prix médian du gazole en un an | 0,77 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+| `carburant.e10.prix` | Prix médian du SP95-E10, semaine du 2026-10-05 | 2,17 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+| `carburant.e10.prix_un_an_avant` | Prix médian du SP95-E10, semaine du 2025-10-06 | 1,66 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+| `carburant.e10.ecart` | Hausse du prix médian du SP95-E10 en un an | 0,51 €/L | médiane entre stations du dernier prix déclaré dans la semaine | stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Avignon (centre communal de geo.api.gouv.fr : [4.8333, 43.9416]) | prix-carburants.gouv.fr, flux officiel (archives annuelles), 2025 à 2026-10-13 | utilisable | `oui` |
+
+### Limites par famille de faits
+
+- `mobpro.modes.*` : Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024). Mode et lieu de travail issus d'un échantillon : intervalles indicatifs. Le dénominateur inclut « pas de transport » (travail à domicile).
+- `mobpro.travaille_dans_commune.*` : Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024).
+- `mobpro.voiture_selon_destination.*` : Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi. Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024). Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.
+- `mobpro.posseder_utiliser.*` : Parts d'ACTIFS, pas de ménages. Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024). Mode et lieu de travail issus d'un échantillon : intervalles indicatifs. Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages.
+- `mobpro.statut_occupation.*` : Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024). Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.
+- `mobpro.qui_vient_travailler.*` : Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs. Pratiques du recensement 2022 (collectes 2020 à 2024). Mode et lieu de travail issus d'un échantillon : intervalles indicatifs. « Unité urbaine » = INSEE 2020, via l'index.
+- `iris.ecart_voiture.*` : Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire). Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers.
+- `iris.menages_commune.*` : Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO.
+- `acces.adresses.*` : Part d'adresses, pas de ménages ni d'habitants. Proximité d'un équipement ≠ son usage. Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance. Point BPE = adresse de l'établissement, pas son entrée. Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet.
+- `carburant.evolution.*` : Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil. La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre. Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas. Une hausse passée ne dit rien de l'avenir.
+
+## 2 bis. Informations documentaires (non calculées)
+
+Informations publiées par des sources officielles, recopiées à la main et datées (consultation : 2026-10-15 ; fichier `/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/84007/dossier/complement.json`). Ce ne sont **pas** des résultats calculés. Une fréquence ou une desserte n'y figure que si la source la donne explicitement, avec son périmètre (ligne ou service, sens, jours, période) : tu l'écris dans ce périmètre, sans la généraliser à d'autres lignes ni au réseau, et tu n'en tires ni temps de trajet, ni desserte d'une adresse. Elles servent la question « utiliser moins sa voiture » ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité de se passer d'une deuxième voiture ou de vivre sans voiture.
+
+Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si elle est utile ; `avec ses conditions` = à n'écrire qu'avec toutes ses conditions (public, horaires, réservation), sinon à laisser ; `non` = ne pas écrire. La colonne « À ne pas en déduire » s'applique toujours.
+
+| id | Information | Source | Consulté le | Validité | Périmètre | Usage | À ne pas en déduire |
+|---|---|---|---|---|---|---|---|
+| `doc.reseau.identite` | Le réseau de transport urbain de l'intercommunalité CA du Grand Avignon (COGA) s'appelle « Orizo » ; son autorité organisatrice est CA du Grand Avignon (COGA). | transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Orizo » : https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon ; nom confirmé par : offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS | 2026-10-15 | jeu de données mis à jour le 2026-10-15 | intercommunalité CA du Grand Avignon (COGA) ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source | `oui` | Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif. |
+
+**État des recherches documentaires.** `vérifié` : information trouvée et contrôlée (ci-dessus) ; `non vérifié` : trouvée mais non contrôlée, ne s'écrit pas ; `introuvable` : cherchée sans résultat ; `inaccessible` : source hors d'atteinte ; `non recherché` : pas cherchée. Seul `vérifié` s'écrit. **Une information absente, introuvable ou non recherchée ne veut pas dire que le service n'existe pas** : n'écris ni « pas de bus le dimanche », ni « pas de réseau gratuit », ni rien d'équivalent.
+
+| Sujet | Statut | Source, date | Note |
+|---|---|---|---|
+| site officiel du réseau | `non vérifié` | https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon 2026-10-15 | aucune agence du GTFS ne correspond de façon univoque au nom du réseau : TECELYS SPL (http://www.giro.ca) |
+| tarification (gratuité, abonnements, exceptions) | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
+| jours et périodes de circulation des lignes urbaines | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
+| calcul d'itinéraire ou fiches horaires officielles | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
+| vélo ou gare (seulement si directement utile au logement) | `non recherché` |   | collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md) |
+
+## 3. Secteurs (IRIS)
+
+Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés de 15 ans ou plus **qui habitent le secteur, quelle que soit leur commune de travail** (la commune étudiée ou une autre). Ce tableau et celui de la section 4 (actifs de toute la commune, selon leur commune de travail) ne se croisent pas : le dossier ne donne aucune part par secteur **et** commune de travail. On peut rapprocher les deux observations, pas attribuer la part d'un secteur aux seuls actifs qui travaillent dans la commune, ni l'inverse. Ménages sans voiture, stationnement réservé : **ménages** (résidences principales) du secteur. Panier 500 m : part des **adresses** du secteur (chaque adresse compte pareil) qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d'oiseau. Les fréquences de bus par secteur sont en attente de validation : elles ne sont pas données. Identifiant d'une cellule : `iris.<code>.<colonne>`, colonne parmi `actifs`, `voiture`, `velo`, `tc`, `marche`, `menages_sans_voiture`, `stationnement_reserve`, `panier_500m`. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés.
+
+| Code | Secteur | Statut | Usage | Actifs | Voiture | Vélo | TC | Marche | Ménages sans voiture | Stationnement réservé | Panier 500 m (adresses) |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 840070110 | La Balance-Palais des Papes | utilisable | `oui` | 1211 | 30 % | 15 % | 14 % | 31 % | 41 % | 28 % | 91 % |
+| 840070111 | Zone Piétonne | utilisable | `oui` | 1213 | 35 % | 12 % | 20 % | 26 % | 50 % | 22 % | 100 % |
+| 840070112 | Magnanen-Teinturiers | utilisable | `oui` | 914 | 40 % | 14 % | 19 % | 20 % | 45 % | 31 % | 100 % |
+| 840070113 | Carmes-Infirmières-Thiers | utilisable | `oui` | 1144 | 41 % | 13 % | 15 % | 26 % | 47 % | 33 % | 93 % |
+| 840070133 | Monclar Nord | utilisable | `oui` | 768 | 46 % | 19 % | 13 % | 15 % | 23 % | 56 % | 100 % |
+| 840070109 | La Balance-Raspail | utilisable | `oui` | 871 | 49 % | 11 % | 14 % | 17 % | 31 % | 52 % | 73 % |
+| 840070134 | Saint-Ruf-Trillade Nord | utilisable | `oui` | 1040 | 51 % | 17 % | 14 % | 10 % | 20 % | 49 % | 98 % |
+| 840070132 | Champfleury | utilisable | `oui` | 1092 | 51 % | 14 % | 14 % | 16 % | 23 % | 55 % | 98 % |
+| 840070121 | Saint-Ruf-Trillade Sud | utilisable | `oui` | 990 | 53 % | 25 % | 5 % | 11 % | 17 % | 52 % | 100 % |
+| 840070114 | Synagogue-Bonaventure | utilisable | `oui` | 1752 | 55 % | 10 % | 14 % | 9 % | 26 % | 70 % | 22 % |
+| 840070129 | Lopy-Chemin des Deux Routes | utilisable | `oui` | 610 | 65 % | 11 % | 11 % | 8 % | 23 % | 44 % | 98 % |
+| 840070122 | Rotondes-Barbière | utilisable | `oui` | 484 | 66 % | 3 % | 7 % | 12 % | 31 % | 10 % | 98 % |
+| 840070135 | Saint-Jean-Saint-Genies | utilisable | `oui` | 1661 | 66 % | 10 % | 11 % | 8 % | 27 % | 45 % | 82 % |
+| 840070125 | Saint-Gabriel-Clos de la Murette | utilisable | `oui` | 332 | 70 % | 5 % | 11 % | 11 % | 9 % | 81 % | 42 % |
+| 840070127 | Croix des Oiseaux | utilisable | `oui` | 549 | 70 % | 6 % | 16 % | 4 % | 35 % | 26 % | 100 % |
+| 840070126 | Chevalier de Folard-Sources Sud | utilisable | `oui` | 1148 | 71 % | 8 % | 15 % | 4 % | 27 % | 31 % | 100 % |
+| 840070124 | Saint-Gabriel-Croix de Noves | utilisable | `oui` | 415 | 72 % | 6 % | 17 % | 2 % | 24 % | 30 % | 44 % |
+| 840070123 | Saint-Chamand | utilisable | `oui` | 320 | 74 % | 4 % | 11 % | 8 % | 36 % | 13 % | 100 % |
+| 840070117 | Pont des Deux Eaux | utilisable | `oui` | 996 | 74 % | 8 % | 10 % | 2 % | 15 % | 72 % | 45 % |
+| 840070115 | Saint-Véran-Marsillargues | utilisable | `oui` | 1152 | 77 % | 4 % | 9 % | 6 % | 13 % | 68 % | 94 % |
+| 840070116 | Route de Morières-Réalpanier | utilisable | `oui` | 1079 | 77 % | 3 % | 10 % | 4 % | 11 % | 64 % | 90 % |
+| 840070131 | Eisenhower-Saint-Roch | utilisable | `oui` | 412 | 77 % | 4 % | 10 % | 8 % | 21 % | 30 % | 71 % |
+| 840070105 | Durance-Cantarel | utilisable | `oui` | 1243 | 77 % | 6 % | 7 % | 5 % | 23 % | 72 % | 0,3 % |
+| 840070118 | La Grange d'Orel | utilisable | `oui` | 843 | 78 % | 7 % | 10 % | 4 % | 31 % | 18 % | 63 % |
+| 840070136 | Stuart Nill-Malpeigné | utilisable | `oui` | 873 | 79 % | 3 % | 12 % | 5 % | 22 % | 32 % | 98 % |
+| 840070102 | Montfavet Banlieue | utilisable | `oui` | 1571 | 80 % | 2 % | 9 % | 3 % | 11 % | 63 % | 8 % |
+| 840070119 | Clos de l'Épi-Neuf Peyres | utilisable | `oui` | 946 | 80 % | 6 % | 5 % | 5 % | 14 % | 64 % | 15 % |
+| 840070103 | Montfavet Péricentre | utilisable | `oui` | 1989 | 82 % | 5 % | 5 % | 2 % | 8 % | 74 % | 44 % |
+| 840070104 | Montfavet Centre | utilisable | `oui` | 955 | 82 % | 4 % | 8 % | 1 % | 16 % | 59 % | 75 % |
+| 840070130 | Monclar Sud | utilisable | `oui` | 598 | 82 % | 2 % | 9 % | 7 % | 25 % | 22 % | 91 % |
+| 840070128 | Rocade Sud-Cabrière | utilisable | `oui` | 915 | 82 % | 3 % | 12 % | 2 % | 32 % | 30 % | 90 % |
+| 840070108 | La Pionne-Zone d'Échange | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
+| 840070120 | Fontcouverte | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
+| 840070107 | Courtine | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
+| 840070137 | Barthelasse-Piot Étendu | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
+| 840070106 | Durance-Baigne-Pieds-Hôpital | absent (secteur d'activité, exclu) | `non` | | | | | | | | |
+
+## 4. Mode selon la commune de travail (actifs résidant à Avignon)
+
+Actifs qui habitent l'ensemble de Avignon, tous secteurs confondus, selon leur commune de travail ; aucune répartition par secteur de résidence (voir section 3). Chaque ligne est un groupe distinct de personnes. Identifiant : `destination.<insee>.<colonne>`, colonne parmi `part_des_actifs`, `voiture`, `velo`, `tc`, `marche`. Statut d'après le nombre de lignes d'échantillon.
+
+| Commune de travail (code) | Part des actifs résidents | Voiture | Vélo | TC | Marche | Lignes | Statut | Usage |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| Avignon (84007) | 69 % | 57 % | 12 % | 11 % | 14 % | 6668 | utilisable | `oui` |
+| Le Pontet (84092) | 4 % | 81 % | 3 % | 14 % | 1 % | 354 | utilisable | `oui` |
+| Sorgues (84129) | 2 % | 91 % | 1 % | 5 % | 1 % | 245 | utilisable | `oui` |
+| Cavaillon (84035) | 2 % | 90 % | 1 % | 6 % | 1 % | 168 | utilisable | `oui` |
+| Châteaurenard (13027) | 1 % | 88 % | 2 % | 7 % | 2 % | 135 | fragile | `ordre de grandeur` |
+| Vedène (84141) | 1 % | 88 % | 5 % | 6 % | 0 % | 126 | fragile | `ordre de grandeur` |
+| Carpentras (84031) | 1 % | 91 % | 1 % | 4 % | 0 % | 103 | fragile | `ordre de grandeur` |
+| Les Angles (30011) | 1 % | 82 % | 2 % | 11 % | 1 % | 94 | fragile | `ordre de grandeur` |
+| Entraigues-sur-la-Sorgue (84043) | 1 % | 90 % | 1 % | 6 % | 1 % | 98 | fragile | `ordre de grandeur` |
+| Orange (84087) | 1 % | 88 % | 2 % | 11 % | 0 % | 82 | fragile | `ordre de grandeur` |
+| Villeneuve-lès-Avignon (30351) | 1 % | 58 % | 14 % | 26 % | 0 % | 80 | fragile | `ordre de grandeur` |
+| L'Isle-sur-la-Sorgue (84054) | 1 % | 92 % | 0 % | 8 % | 0 % | 84 | fragile | `ordre de grandeur` |
+| Morières-lès-Avignon (84081) | 1 % | 87 % | 0 % | 8 % | 2 % | 77 | fragile | `ordre de grandeur` |
+| Aix-en-Provence (13001) | 1 % | 74 % | 2 % | 24 % | 0 % | 67 | fragile | `ordre de grandeur` |
+| Noves (13066) | 1 % | 99 % | 0 % | 1 % | 0 % | 51 | fragile | `ordre de grandeur` |
+| Bagnols-sur-Cèze (30028) | 1 % | 73 % | 0 % | 24 % | 0 % | 49 | fragile | `ordre de grandeur` |
+| Nîmes (30189) | 1 % | 77 % | 0 % | 21 % | 0 % | 44 | fragile | `ordre de grandeur` |
+| Monteux (84080) | 1 % | 91 % | 0 % | 3 % | 0 % | 48 | fragile | `ordre de grandeur` |
+| Saint-Rémy-de-Provence (13100) | 0,4 % | 96 % | 0 % | 4 % | 0 % | 49 | fragile | `ordre de grandeur` |
+
+## 4 bis. Repère de comparaison avec d'autres communes (calculé)
+
+Règle de sélection, fixée avant de regarder les résultats et identique pour toutes les communes : communes de même rôle que Avignon (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 15 641 à 62 562), avec au moins 150 lignes d'échantillon ; Avignon exclue ; France métropolitaine. Indicateur : part des actifs allant travailler principalement en voiture (TRANS = 5) ; population : actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI) ; INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO), 2022 (collectes 2020 à 2024). Le rôle est une approximation (commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre).
+
+C'est la référence commune de la série pour comparer l'usage de la voiture. Comment l'écrire : dans le récit, la valeur locale et la médiane, avec un nom court (« les villes de taille proche ») et un renvoi à la méthode, où la règle est donnée en entier ; jamais « comparables sur tous les plans ». Le seuil de 150 lignes est un critère d'inclusion, pas une garantie de précision. La médiane est celle des parts communales, chaque commune comptant une fois : ce n'est pas la part de voiture de l'ensemble de leurs habitants. Pas de rang, pas de palmarès, pas de liste de villes dans l'article. Un écart de quelques points dit seulement que la commune est proche de la médiane ; s'il n'apporte rien à la question, le repère reste dehors.
+
+| id | Fait | Valeur | Usage |
+|---|---|---|---|
+| `comparaison.voiture.commune` | Part des actifs résidant à Avignon qui vont travailler principalement en voiture (valeur comparée) | 65 % | `oui` |
+| `comparaison.voiture.mediane_groupe` | Médiane des parts de la voiture des 71 communes du groupe (chaque commune compte une fois) | 67 % | `oui` |
+| `comparaison.voiture.ecart` | Écart : Avignon moins la médiane du groupe (valeurs arrondies) | -2 points | `oui` |
+| `comparaison.voiture.groupe_n` | Nombre de communes du groupe | 71 | `oui` |
+
+Communes du groupe (71, pour la vérification ; ne pas les citer) : Ajaccio, Albi, Amiens, Angoulême, Annecy, Annemasse, Arles, Arras, Bastia, Bayonne, Beauvais, Belfort, Besançon, Blois, Boulogne-Billancourt, Bourg-en-Bresse, Bourges, Brest, Brive-la-Gaillarde, Béziers, Caen, Calais, Carcassonne, Chalon-sur-Saône, Chambéry, Chartres, Cherbourg-en-Cotentin, Cholet, Châlons-en-Champagne, Clermont-Ferrand, Colmar, Dunkerque, Fréjus, Gap, Haguenau, La Roche-sur-Yon, La Rochelle, Laval, Le Havre, Le Mans, Les Sables-d'Olonne, Limoges, Lorient, Meaux, Metz, Montauban, Mulhouse, Nancy, Narbonne, Niort, Nîmes, Orléans, Pau, Perpignan, Poitiers, Quimper, Rouen, Saint-Brieuc, Saint-Malo, Saint-Nazaire, Saint-Quentin, Saint-Étienne, Salon-de-Provence, Thionville, Thonon-les-Bains, Tours, Troyes, Valence, Valenciennes, Vannes, Évreux.
+
+## 5. Les communes du groupe « voisines »
+
+Résidents de chaque commune (tous lieux de travail) et, parmi eux, ceux qui viennent travailler à Avignon. Identifiant : `voisine.<insee>.<colonne>`, colonne parmi `voiture`, `velo`, `tc` (tous résidents) et `voiture_vers_commune` (venant travailler).
+
+| Commune (code) | Voiture, tous résidents | Vélo | TC | Voiture, venant travailler à Avignon | Lignes (vers Avignon) | Statut (vers Avignon) | Usage (vers Avignon) |
+|---|---:|---:|---:|---:|---:|---|---|
+| Carpentras (84031) | 82 % | 2 % | 3 % | 91 % | 320 | utilisable | `oui` |
+| Orange (84087) | 79 % | 4 % | 4 % | 93 % | 260 | utilisable | `oui` |
+| Cavaillon (84035) | 81 % | 5 % | 2 % | 94 % | 172 | utilisable | `oui` |
+| L'Isle-sur-la-Sorgue (84054) | 81 % | 4 % | 3 % | 91 % | 260 | utilisable | `oui` |
+| Sorgues (84129) | 89 % | 2 % | 3 % | 90 % | 601 | utilisable | `oui` |
+| Le Pontet (84092) | 83 % | 3 % | 5 % | 87 % | 672 | utilisable | `oui` |
+
+*Les parts « tous résidents » viennent de la base IRIS agrégée à la commune ; celles « venant travailler » du fichier détail.*
+
+## 6. Accès depuis les adresses, par commune
+
+Part des **adresses** BAN de chaque commune, distances à vol d'oiseau ; chaque secteur (IRIS) pèse selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS). Ce n'est ni une part de ménages mesurée, ni une simple part des adresses : l'écrire avec cette qualification (par exemple « des adresses, chaque secteur pesant selon son nombre de ménages »), ne pas la comparer telle quelle aux parts par secteur (section 3, non pondérées), ou l'écarter si elle alourdit l'article. Identifiant : `acces.<insee>.<colonne>` (nom de colonne du tableau). Usage : `oui`. Les colonnes bus sont en attente de validation et ne sont pas données.
+
+| Commune (code) | commerce_alim_500m | pharmacie_500m | ecole_elementaire_500m | panier_quotidien_500m | gare_2km |
+|---|---|---|---|---|---|
+| Avignon (84007) | 91 % | 78 % | 80 % | 72 % | 73 % |
+| Carpentras (84031) | 79 % | 60 % | 56 % | 46 % | 81 % |
+| Orange (84087) | 71 % | 65 % | 65 % | 51 % | 78 % |
+| Cavaillon (84035) | 82 % | 69 % | 69 % | 57 % | 84 % |
+| L'Isle-sur-la-Sorgue (84054) | 61 % | 44 % | 36 % | 23 % | 72 % |
+| Sorgues (84129) | 66 % | 48 % | 54 % | 35 % | 83 % |
+| Le Pontet (84092) | 98 % | 65 % | 56 % | 44 % | 0,4 % |
+
+Libellés : `commerce_alim_500m` = un commerce alimentaire à moins de 500 m ; `pharmacie_500m` = une pharmacie à moins de 500 m ; `ecole_elementaire_500m` = une école élémentaire à moins de 500 m ; `panier_quotidien_500m` = à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m ; `gare_2km` = une gare à moins de 2 km.
+
+## 7. Scénario pré-calculé : surcoût de carburant par an
+
+Hypothèses (à écrire dans l'article) : 6 L/100 km, 200 allers-retours domicile-travail par an, hausse médiane de la fiche arrondie à 5 centimes. Carburant seul. Le scénario ne s'attribue à aucun quartier ni à aucune commune.
+
+| id | Carburant | Trajet aller | Hausse retenue | Surcoût par an |
+|---|---|---:|---:|---:|
+| `scenario.carburant.gazole.5km` | gazole | 5 km | +0,75 €/L | environ 90 € |
+| `scenario.carburant.gazole.15km` | gazole | 15 km | +0,75 €/L | environ 270 € |
+| `scenario.carburant.gazole.35km` | gazole | 35 km | +0,75 €/L | environ 630 € |
+| `scenario.carburant.e10.5km` | SP95-E10 | 5 km | +0,50 €/L | environ 60 € |
+| `scenario.carburant.e10.15km` | SP95-E10 | 15 km | +0,50 €/L | environ 180 € |
+| `scenario.carburant.e10.35km` | SP95-E10 | 35 km | +0,50 €/L | environ 420 € |
+
+## 8. Faits absents : ne pas les écrire, ne pas les reconstituer
+
+- Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit : seules les comparaisons calculées et documentées dans le dossier s'écrivent.
+- Population totale de la commune, nombre de ménages de la commune : non exposés par la fiche.
+- Composition de l'unité urbaine (liste et nombre de communes) : la fiche ne donne que son code.
+- Part de la voiture pour un groupe de communes de travail autre que ceux listés : recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py).
+- Temps de trajet, kilomètres routiers, itinéraires à vélo : exploration seulement, résultats divergents selon le calcul.
+- Autopartage, vélos en libre-service : flux GBFS propres à chaque réseau, non collectés.
+- Usage réel des équipements (où l'on fait ses courses, où vont les enfants) : aucune source.
+- Réaction des habitants à la hausse du carburant : les pratiques datent de 2022, les prix de 2025-2026.
+- Contrôle de la hausse sur les mêmes stations : non fait par l'outil (scripts/13 pour La Rochelle).
+
+## 9. Visuels disponibles ou réalisables
+
+| Visuel | État | Faits | Étape manuelle |
+|---|---|---|---|
+| Carte de la part de la voiture par secteur (IRIS) | réalisable avec classes à revoir | secteurs (tableau), iris.voiture.min/max | aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée |
+| Tableau accessible des secteurs (HTML et Markdown) | produit avec la carte | secteurs | aucun |
+| Barres : part de la voiture selon la commune de travail | réalisable automatiquement | mobpro.voiture_selon_destination.* (groupes utilisables seulement) | aucun : la liste exacte des communes figure dans l'intitulé de la barre |
+| Carte de situation : Avignon et Carpentras (84031), Orange (84087), Cavaillon (84035), L'Isle-sur-la-Sorgue (84054), Sorgues (84129) et Le Pontet (84092) | réalisable, seulement à côté du graphique précédent | aucun (contours IGN) | le sous-titre parle de « la seconde barre » : à n'utiliser qu'avec ce graphique, même liste exacte |
+| Tableau du scénario de surcoût de carburant | disponible (données ci-dessus) | scenario.carburant.* | aucun |
+
+## 10. Vérifications humaines en attente (avant publication)
+
+Ne reprendre dans le rendu que celles qui concernent un fait utilisé.
+
+- `mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.
+- `iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.
+- `acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.
+- `carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication.
+
+## 11. Paramètres éditoriaux
+
+### Lecteur et question
+
+**Lecteur visé.** Une personne ou un ménage qui cherche un logement (achat ou location) dans la commune ou autour, et qui se demande quelle place la voiture prendra dans sa vie quotidienne. Elle ne connaît pas les sources statistiques. Elle veut savoir quoi regarder pendant ses recherches et ses visites.
+
+**Question à éclairer.** Depuis quel quartier, et pour quels trajets, peut-on vivre dans cette commune en utilisant moins la voiture ? C'est le cadre commun. Chaque article en tire **une question principale**, celle que les données de la commune éclairent le mieux, et ne retient que les faits qui y répondent.
+
+### Conditions obligatoires
+
+Un fait ne peut entrer dans l'article que si les quatre conditions sont réunies. Elles ne se négocient pas.
+
+1. **Donnée exploitable** : le fait figure dans le dossier, avec une valeur.
+2. **Population, source et périmètre identifiés** : on sait de qui l'on parle (actifs, ménages, adresses), d'où vient le chiffre et sur quel territoire exact. La phrase désigne exactement cette population : les parts par secteur portent sur tous les actifs qui habitent le secteur, quelle que soit leur commune de travail ; aucun sous-groupe absent du dossier (secteur × commune de travail) ne s'écrit.
+3. **Statut et usage qui l'autorisent** : la colonne « Usage » du dossier dit `oui`, ou `ordre de grandeur` (alors seulement comme ordre de grandeur, avec sa précision). Un fait `en attente de validation` ou `absent` ne s'écrit pas, ni arrondi, ni sous une formule vague qui en tiendrait lieu.
+4. **Aucune promesse produit non validée** : la conclusion ne s'appuie que sur les capacités autorisées (dernière section).
+
+### Choisir la question et le format
+
+| Format | Quand | Longueur indicative |
+|---|---|---|
+| Article complet | Une découverte forte, ou plusieurs, qui apprennent au lecteur quelque chose de propre à la commune | De l'ordre de 700 à 1 000 mots hors méthode |
+| Article court | Une piste utile mais limitée, ou une matière surtout communale | De l'ordre de 300 à 500 mots hors méthode |
+| Ne pas publier | Les faits sont exacts mais n'apprennent rien au lecteur qui ne soit vrai presque partout, ou les faits utiles sont bloqués | Une note de quelques lignes qui explique pourquoi |
+
+Les longueurs sont des indications, pas des objectifs : on ne remplit pas pour les atteindre. Une seule découverte forte peut suffire à un article complet. La méthode, en fin d'article, n'est pas comptée ; elle reste brève.
+
+La question se choisit d'après les faits du dossier, jamais d'après un autre article. Une question proche de celle d'une autre commune est acceptable si les résultats le justifient ; recopier mécaniquement un récit ou des faits ne l'est pas.
+
+**Format de référence de la série mobilité.** Les articles de la série suivent une même progression, avec des titres propres au texte (pilotes : La Rochelle et Niort, 14/10/2026) :
+
+1. **L'ouverture : la hausse datée du carburant.** C'est le fil d'entrée de la série mobilité (décision du porteur, 15/10/2026) : elle relie le coût des déplacements au choix d'un logement. Le chapeau ou le premier passage donne la hausse datée, à partir des faits `carburant.*` utilisables ; le tableau du surcoût selon la distance (`scenario.carburant.*`) vient au début de l'article, avec ses hypothèses dites une seule fois, sans redire ses cellules dans la prose. Une transition amène ensuite la question locale : quelle place la voiture prend-elle dans les déplacements, selon le secteur et le lieu de travail ? Les distances et surcoûts du scénario ne s'attribuent à aucun quartier ni à aucune commune de travail, et les pratiques de 2022 ne s'expliquent pas par la hausse récente. Seule exception : des faits carburant absents ou inutilisables dans le dossier ; la section A le dit alors, avec l'identifiant en cause. Une préférence de rédaction ne justifie jamais de l'écarter.
+2. **Les pratiques locales** : ce que montrent les trajets des habitants, par quartier et selon le lieu de travail, dans l'ordre que leur intérêt impose.
+3. **« Et pour les courses, l'école ou la pharmacie ? »** : la transition dit pourquoi on passe du travail aux autres déplacements ; la proximité est décrite, jamais présentée comme la cause des pratiques domicile-travail.
+4. **Les options et vérifications concrètes** propres à la commune, tirées des observations locales et des informations documentaires disponibles.
+5. **« Votre projet, votre adresse »** : la conclusion (voir les capacités produit).
+
+C'est une progression, pas une grille à remplir : l'ouverture carburant est fixe ; la liberté éditoriale porte sur les faits locaux retenus et leur progression. Une étape suivante sans matière utile se réduit ou disparaît, aucune rubrique (bus, vélo, stationnement) ne s'ajoute pour ressembler à un autre article, et chaque ville garde ses résultats, ses exemples et ses conseils. Les parts par quartier et par commune de travail se lisent l'une après l'autre, jamais comme un croisement.
+
+Pour la question retenue, expliquer brièvement (section A du rendu) :
+
+- ce que le résultat apprend au lecteur ;
+- son lien avec une recherche de logement ;
+- les faits (identifiants) qui soutiennent cet intérêt.
+
+### Indices éditoriaux
+
+Les pistes ci-dessous ont été repérées sur un seul cas, l'article pilote de La Rochelle. Les chiffres qui les accompagnent sont des **indices** : ils signalent qu'une piste mérite d'être regardée. Ils ne décident **ni** de la question **ni** de la publication, et la liste n'est pas un plan : les pistes ne deviennent pas chacune une section. On peut retenir une autre piste étayée par le dossier ; on peut écarter une piste qui franchit l'indice mais n'apporte rien d'utile au lecteur.
+
+1. **Écart entre quartiers.** Indice : une quinzaine de points ou plus entre la part de la voiture du secteur le plus bas et celle du plus haut, parmi les secteurs d'habitat utilisables. Les petits écarts entre deux secteurs ne doivent pas être surinterprétés.
+2. **Le lieu de travail.** Indice : une dizaine de points ou plus entre deux groupes de destination utilisables.
+3. **Posséder sans utiliser.** Indice : une part notable (de l'ordre d'un actif motorisé sur cinq ou plus) d'actifs dont le ménage a une voiture et qui ne la prennent pas pour aller travailler. Sans comparaison avec d'autres communes dans le dossier, ne pas dire si c'est beaucoup ou peu.
+4. **Un quartier équipé où la voiture domine.** Indice : un secteur utilisable où presque toutes les adresses (de l'ordre de 90 % ou plus) ont le panier quotidien à moins de 500 m à vol d'oiseau, et dont la part de la voiture est parmi les plus élevées de la commune. Décrire la proximité, jamais l'usage des équipements.
+5. **Le stationnement au centre.** Indice : des secteurs utilisables où moins de la moitié des ménages a une place réservée, nettement sous la part communale (une vingtaine de points ou plus).
+6. **Ceux qui viennent travailler dans la commune.** Indice : faits `qui_vient_travailler` utilisables. Décrire, sans déduire de kilomètres ni de coût.
+**Entrée de l'article.** Le carburant n'est pas une piste parmi d'autres : c'est l'entrée de la série (format de référence, étape 1). Le scénario pré-calculé suffit ; il ne s'attribue à aucun quartier ni à aucune commune. Les prix sont réextraits avant publication.
+
+**Ce qu'on n'écrit pas faute de donnée.** Toute comparaison avec d'autres communes françaises (rang, « ville de vélo », « plus que la moyenne ») non fournie par le dossier. Le repère de comparaison (section 4 bis : médiane d'un groupe défini par une règle fixe, `outil/comparaison_voiture.py`) est la référence commune pour comparer l'usage de la voiture : valeur locale et médiane dans le récit, règle complète en méthode, sans rang ni palmarès. Il n'exclut pas une autre comparaison explicitement calculée et documentée dans le dossier (exemple : un rang vélo avec son groupe nommé) ; tout temps de trajet ou kilométrage ; tout lien de cause entre un quartier et une pratique.
+
+### Groupes de communes
+
+Un groupe de communes se présente **avec sa liste exacte** la première fois qu'il apparaît (titre, chapeau ou corps, selon où il apparaît en premier). Ensuite, « ces trois communes » (ou l'équivalent) suffit, sans répéter la liste à chaque phrase, tant que le lecteur ne peut pas confondre avec un autre groupe. Jamais « les communes voisines », « la périphérie » ou « l'agglomération » pour un groupe dont la composition n'a pas été donnée. Si le dossier dit qu'une composition n'est pas connue (unité urbaine), ne pas en donner le nombre de communes.
+
+### Visuels
+
+Proposer au plus trois visuels, choisis dans la section « Visuels disponibles ou réalisables » du dossier, chacun posé à côté du passage qu'il éclaire. Le visuel porte le détail que le texte n'énumère pas. Le texte n'annonce que les visuels retenus. Un visuel qui repose sur un fait non utilisable ne se propose pas. Une carte de situation n'accompagne que la comparaison de communes qu'elle situe, avec la même liste exacte.
+
+### Capacités produit
+
+Deux niveaux distincts : **repérée dans le code** (la fonction existe, lue le 12/10/2026, révision `a25fa9fd`, aucun parcours joué dans le navigateur) et **autorisée pour une promesse publiée** (le porteur l'a retenue pour un article). Seule la seconde peut figurer dans la conclusion. Une date de vérification récente ne remplace pas cette validation.
+
+| Capacité | Repérée dans le code | Autorisée dans la conclusion | Ce que l'on peut en dire |
+|---|---|---|---|
+| Équipements autour d'une adresse | oui | **oui** | Compris dans l'examen de l'adresse à partir du projet ; pas de mention propre dans la conclusion (ni détail, ni liste) |
+| Équipement automobile du secteur | oui | **oui** | Compris dans l'examen de l'adresse à partir du projet ; pas de mention propre dans la conclusion : dans un article qui parle de la part de la voiture par secteur, la nommer laisserait croire que futur•e donne ces parts |
+| Examen d'une adresse à partir du projet de la personne | oui | **oui** (porteur, 14/10/2026) | Inviter à explorer l'adresse envisagée à partir de son projet (se rapprocher du travail, préparer une retraite, s'installer en famille…) ; nommer au besoin ce qui peut peser dans le choix (mobilité, chaleur de l'été, risques à l'adresse, services), sans détailler de fonctionnalité ni promettre un résultat |
+| Temps de trajet estimé vers un lieu déclaré (voiture ou marche) | oui | **non** : validation en attente | Rien : ne pas l'évoquer, même au conditionnel |
+| Position de la commune pour la part de la voiture domicile-travail | oui | **non** : pas validée pour une promesse | Rien |
+| Comparateur de communes | oui | **non** : pas validé pour une promesse | Rien |
+
+Interdits en toute circonstance : promettre un budget ou un coût de déplacement calculé, des horaires ou fréquences de bus à l'adresse, des temps de trajet (quel que soit le mode), ou les parts de la voiture par secteur de l'article (analyse de la rédaction, absente du dossier d'adresse).
+
+La conclusion vers futur•e est courte (deux ou trois phrases). Elle part du projet du lecteur, pas des données déjà présentées ni de l'offre, et donne envie d'examiner l'adresse envisagée dans son ensemble (capacité « Examen d'une adresse à partir du projet ») ; elle n'est jamais un inventaire des équipements ou de la motorisation ; elle reste dans les seules capacités autorisées, avec ses propres mots, sans catalogue ni phrase commerciale recopiée. Ni le plan ni les formulations d'un article précédent ne sont un modèle.
+
+## 12. Voix futur•e
+
+*(Recopié de `NOTE_EDITORIALE.md`, section 2, à la génération du dossier.)*
+
+- La voix est sérieuse, concrète et vivante. Une phrase marquante est permise quand elle dit quelque chose de juste ; ce qui est proscrit, c'est le slogan automatique de fin de paragraphe. Un conseil pratique dit l'action à faire (« vérifiez dès l'annonce si une place est comprise »), sans comparaison qui la décore.
+- Partir d'une situation reconnaissable du lecteur (annonce, visite, trajet du matin, plein, horaires), puis faire avancer le récit par les données.
+- Deux entrées possibles : un fait d'actualité daté, s'il amène la question que les données éclairent (sinon il reste un décor) ; ou une question durable de recherche résidentielle (« depuis ce quartier, pourra-t-on moins prendre la voiture ? »). La série mobilité suit une progression de référence (ouverture, pratiques locales, courses et école, vérifications, projet du lecteur) décrite dans `redaction/parametres_editoriaux.md` ; elle règle l'ordre du raisonnement, pas le contenu de chaque ville.
+- Le millésime se dit clairement une fois dans le récit et figure sur chaque visuel ; ensuite, présent simple, sans « aujourd'hui » ni « habitants actuels ».
+- Décrire ce qui est mesuré : la proximité d'un équipement n'est pas son usage (« une école à moins de 500 mètres », pas « l'école se fait près de chez soi »).
+
+#### Contre la surjustification
+
+Le lecteur n'a pas besoin qu'on lui répète ce que le texte ne mesure pas. Un article qui s'excuse à chaque paragraphe prend une voix scolaire.
+
+- Garder une précision seulement si elle **change le sens**, et la porter d'abord par une formulation exacte plutôt que par une phrase de prudence : nommer chaque groupe par ce qu'il est (« les actifs qui habitent et travaillent à Niort », « ceux qui travaillent à Chauray ») évite d'ajouter qu'il s'agit de groupes distincts ; cette limite va dans la méthode. Restent dans le récit les hypothèses d'un scénario (consommation, nombre d'allers-retours, variation du prix).
+- Définir une notion **une fois, au bon endroit**, sans la redéfinir ensuite.
+- Le détail technique (vol d'oiseau, sondage, seuils, millésimes des contours) va dans la méthode ou la légende, pas dans le récit.
+- Supprimer les évidences : un tableau intitulé « surcoût de carburant » n'a pas à énumérer ensuite l'assurance, l'entretien et le stationnement ; « sept fois plus de kilomètres coûtent sept fois plus » n'apprend rien.
+- Ne pas remplacer une justification supprimée par une autre formule de prudence.
+- Pas de déduction en chaîne que les données ne portent pas (« ils habitent plus loin, donc roulent plus, donc paient plus ») : quand un scénario chiffré montre déjà l'effet, il suffit.
+- Décrire des pratiques, jamais des contraintes : aucun quartier n'« impose » un mode de vie ; ne jamais attribuer une pratique au seul quartier ; ne culpabiliser personne.
+- Pas de hiérarchie causale que les données ne mesurent pas (« compte plus que », « dépend d'abord de »).
+- Pas de transitions annoncées (« voici le résultat le plus utile »), de maximes de fin de section, d'antithèses d'emphase, ni de témoignages ou scènes inventés. Le texte doit rester concret après suppression de ses phrases d'accroche.
+- Chiffres arrondis et lisibles ; populations explicites (actifs, ménages, adresses) ; aucune précision qui laisserait croire à une mesure exacte. Un arrondi ne change pas le sens : une valeur proche de 100 % ou de 0 % s'écrit « la quasi-totalité » ou « presque aucun », jamais « tous » ou « aucun ».
+- La conclusion vers futur•e est courte : elle part du projet du lecteur et de l'intérêt d'examiner l'adresse dans son ensemble, sans inventaire de fonctionnalités, et ne promet que les capacités produit autorisées pour une promesse publiée (une capacité repérée dans le code ne suffit pas).
+- Chaque chiffre doit apporter quelque chose au lecteur : on n'ajoute pas un fait parce qu'il est disponible.
+

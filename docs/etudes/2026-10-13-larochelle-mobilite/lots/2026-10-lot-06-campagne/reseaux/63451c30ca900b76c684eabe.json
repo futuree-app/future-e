@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "63451c30ca900b76c684eabe",
+ "titre": "Réseau urbain Cap Cotentin",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-et-en-temps-reel-des-bus-et-autocars-circulant-sur-le-reseau-cap-cotentin",
+ "nom_commercial": "Cap Cotentin",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Cap Cotentin",
+ "aom": "CA du Cotentin",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200067205",
+  "nom": "CA du Cotentin"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Cap Cotentin",
+    "https://www.capcotentin.fr/"
+   ]
+  ]
+ },
+ "site": "https://www.capcotentin.fr/",
+ "sites_controles": [
+  [
+   "https://www.capcotentin.fr/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

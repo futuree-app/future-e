@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "5bae8c2806e3e75b699dc606",
+ "titre": "Réseau urbain Synchro Bus",
+ "page": "https://transport.data.gouv.fr/datasets/arrets-et-horaires-theoriques-bus-temps-reel",
+ "nom_commercial": "Synchro Bus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Synchro Bus",
+ "aom": "CA du Grand Chambéry",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200069110",
+  "nom": "CA du Grand Chambéry"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "Synchro Bus",
+    "https://synchro.grandchambery.fr"
+   ]
+  ]
+ },
+ "site": "https://synchro.grandchambery.fr",
+ "sites_controles": [
+  [
+   "https://synchro.grandchambery.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5c9a32d2634f411ddd69eb05",
+ "titre": "Réseau urbain Muvistrada",
+ "page": "https://transport.data.gouv.fr/datasets/information-sur-les-transports-en-commun",
+ "nom_commercial": "Muvistrada",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "Muvistrada",
+ "aom": "CA du Pays Ajaccien",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "242010056",
+  "nom": "CA du Pays Ajaccien"
+ },
+ "mis_a_jour": "2026-02-10",
+ "agence": {
+  "agences": [
+   [
+    "muvitarra",
+    "http://mobilite.muvitarra.fr/"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

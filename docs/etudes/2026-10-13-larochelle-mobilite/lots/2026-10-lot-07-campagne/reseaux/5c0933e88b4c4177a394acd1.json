@@ -1,0 +1,36 @@
+{
+ "version": 2,
+ "id": "5c0933e88b4c4177a394acd1",
+ "titre": "Réseau urbain TCAT",
+ "page": "https://transport.data.gouv.fr/datasets/donnees-tcat-troyes-champagne-metropole-1",
+ "nom_commercial": "TCAT",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TCAT",
+ "aom": "CA Troyes Champagne Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200069250",
+  "nom": "CA Troyes Champagne Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "MASQUE",
+    "https://tcat.fr/"
+   ],
+   [
+    "TCAT",
+    "https://tcat.fr/"
+   ]
+  ]
+ },
+ "site": "https://tcat.fr/",
+ "sites_controles": [
+  [
+   "https://tcat.fr/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

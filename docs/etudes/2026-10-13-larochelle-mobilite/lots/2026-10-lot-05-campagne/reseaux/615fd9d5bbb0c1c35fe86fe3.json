@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "615fd9d5bbb0c1c35fe86fe3",
+ "titre": "Réseau urbain et scolaire Sankéo",
+ "page": "https://transport.data.gouv.fr/datasets/gtfs-sankeo",
+ "nom_commercial": "Sankéo",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Sankéo",
+ "aom": "CU Perpignan Méditerranée Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200027183",
+  "nom": "CU Perpignan Méditerranée Métropole"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "Sankéo",
+    "https://www.sankeo.com/"
+   ]
+  ]
+ },
+ "site": "https://www.sankeo.com/",
+ "sites_controles": [
+  [
+   "https://www.sankeo.com/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

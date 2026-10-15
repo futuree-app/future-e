@@ -1,0 +1,71 @@
+{
+ "nom": "2026-10-lot-07-campagne",
+ "objet": "Campagne 20 → 100 communes (15/10/2026), lot 4 sur 4 : vingt communes, chaîne actuelle (rédaction Codex, une relecture Claude, au plus une correction Codex). Aucune publication.",
+ "jour_reference": "2026-10-13",
+ "communes": [
+  "91228",
+  "92024",
+  "94041",
+  "18033",
+  "92002",
+  "10387",
+  "83126",
+  "59009",
+  "82121",
+  "93055",
+  "73065",
+  "92051",
+  "95585",
+  "93007",
+  "94046",
+  "94076",
+  "83061",
+  "60057",
+  "11262",
+  "77284"
+ ],
+ "chemins": {
+  "python": "<checkout>/.venv-etudes/bin/python",
+  "mobpro": "<checkout>/data/rp-mobpro-2022.parquet",
+  "bpe": "<checkout>/data/bpe25.parquet",
+  "index": "<checkout>/data/comparateur-index.json.gz",
+  "cache": "<checkout>/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil"
+ },
+ "moteur": {
+  "outil": "codex",
+  "etapes": {
+   "redaction": {
+    "modele": "gpt-6.1-sol",
+    "effort": "high",
+    "delai_s": 1800
+   },
+   "relecture": {
+    "outil": "claude-code",
+    "modele": "claude-opus-5-5",
+    "effort": "high",
+    "plafond_appel_usd": 2,
+    "delai_s": 1200
+   },
+   "correction": {
+    "modele": "gpt-6.1-sol",
+    "effort": "high",
+    "delai_s": 1800
+   },
+   "collecte": {
+    "outil": "claude-code",
+    "modele": "claude-sonnet-5-5",
+    "effort": "medium",
+    "plafond_appel_usd": 1.5,
+    "delai_s": 1200
+   }
+  },
+  "remarque": "Rédaction et correction : codex exec sur l'abonnement ChatGPT (vérifié avant chaque appel ; arrêt sinon), réglages du lot 02. Relecture : Claude Code sur l'abonnement claude.ai (réglages de relecture du lot 01), une seule, qui remplace la relecture Codex. Sessions vierges et éphémères ; rédaction limitée au dossier et aux pièces autorisées, ni écriture, ni réseau, ni recherche web. Collecte documentaire bornée habituelle (Claude Code, lecture web limitée au domaine officiel du réseau). Les jetons rapportés ne mesurent pas le quota d'abonnement."
+ },
+ "execution_autorisee": {
+  "par": "porteur",
+  "le": "2026-10-15",
+  "perimetre": "campagne de 80 communes en quatre lots de vingt : collecte bornée et relecture Claude (abonnement claude.ai), rédaction et correction Codex (abonnement ChatGPT) ; sans clé API ni bascule ; suspension au premier refus ; sans publication"
+ },
+ "limites_appels": "une collecte par réseau, une rédaction, une relecture et au plus une correction par commune ; aucun nouvel essai automatique (outil/lot.py, generer)",
+ "delai_visuels_s": 600
+}

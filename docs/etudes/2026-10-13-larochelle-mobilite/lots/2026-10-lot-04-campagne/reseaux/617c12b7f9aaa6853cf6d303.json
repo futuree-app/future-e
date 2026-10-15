@@ -1,0 +1,79 @@
+{
+ "version": 2,
+ "id": "617c12b7f9aaa6853cf6d303",
+ "titre": "Réseau urbain LiA",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-de-transport-en-commun-lia-gtfs-siri",
+ "nom_commercial": "LiA",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Lia",
+ "aom": "Le Havre Seine Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200084952",
+  "nom": "CU Le Havre Seine Métropole"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "LIA",
+    "https://www.transports-lia.fr"
+   ]
+  ]
+ },
+ "site": "https://www.transports-lia.fr",
+ "sites_controles": [
+  [
+   "https://www.transports-lia.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.gratuite_moins_4_ans",
+    "information": "Le réseau LiA est gratuit pour les enfants jusqu'à 4 ans. À partir de 4 ans, un titre est nécessaire. La page ne présente pas le réseau comme gratuit pour les autres publics.",
+    "url": "https://www.transports-lia.fr/fr/trouver-mon-tarif",
+    "extrait": "Le réseau LiA est gratuit jusqu'à 4 ans.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 4 ans, ensemble du réseau LiA. Pas de gratuité générale constatée.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:55Z"
+   },
+   {
+    "id": "doc.horaires.vacances_octobre",
+    "information": "Du lundi 19 au vendredi 30 octobre, le réseau LiA circule selon les horaires des vacances scolaires. La page n'indique pas l'année. Elle ne donne ni fréquences ni jours de circulation par ligne.",
+    "url": "https://www.transports-lia.fr/fr/new-1",
+    "extrait": "Du lundi 19 au vendredi 30 octobre, le réseau LiA circulera selon les horaires vacances scolaires.",
+    "validite": "du lundi 19 au vendredi 30 octobre (année non précisée sur la page)",
+    "perimetre": "Ensemble du réseau LiA, selon la page",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:56Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité du réseau (autres publics, lignes gratuites)",
+    "statut": "introuvable",
+    "url": "https://www.transports-lia.fr/fr/trouver-mon-tarif",
+    "note": "Aucune ligne ni aucun public gratuit trouvé en dehors des moins de 4 ans. Une page de navettes gratuites HAC Stade existe (/fr/navettes-gratuites-hac-stade), mais je ne l'ai pas ouverte. Les pages /fr/decouvrir-les-tarifs-reduits et /fr/decouvrir-le-pass-lia n'ont pas été consultées. Cela ne prouve pas l'absence d'autres gratuités."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés, samedi) et validité générale des horaires",
+    "statut": "introuvable",
+    "url": "https://www.transports-lia.fr/fr/horaires",
+    "note": "La page ouverte ne contient que des intitulés de menu. Les fiches horaires par ligne et les éventuels PDF n'ont pas été consultés."
+   },
+   {
+    "sujet": "Calcul d'itinéraire, fiches horaires, temps réel",
+    "statut": "introuvable",
+    "url": "https://www.transports-lia.fr/fr/itineraires",
+    "note": "La page ne contient que des intitulés de menu (Itinéraires, Lignes et horaires, Carte interactive, Infos trafic /fr/infos-trafic). Aucune description du temps réel : seul un paramètre « Rafraîchir automatiquement les horaires » apparaît. La page new-1 renvoie à « Lignes et horaires » et à l'application LiA pour les horaires, sans extrait exploitable."
+   }
+  ]
+ }
+}

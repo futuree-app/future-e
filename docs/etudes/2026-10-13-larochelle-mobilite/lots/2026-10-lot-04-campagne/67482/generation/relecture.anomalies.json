@@ -1,0 +1,32 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Mais le rapprochement ne suit pas toujours le même dessin.",
+   "probleme": "Après les deux secteurs extrêmes pour la voiture (iris.674820202 : 9 % de voiture et 100 % de panier ; iris.674823002 : 67 % et 15 %), cette phrase présente un lien entre la proximité des équipements et la faible part de la voiture comme la règle habituelle, avec Cronenbourg Ouest Nord-Est (iris.674821802) comme exception. Le dossier ne mesure aucun lien de ce type et interdit de présenter la proximité comme la cause des pratiques domicile-travail. La suite (« conserver une voiture majoritaire ») renforce cette lecture.",
+   "correction_minimale": "Remplacer la phrase par « Ces deux secteurs ne font pas une règle. » et remplacer « conserver une voiture majoritaire » par « compter une majorité d'actifs en voiture »."
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Ces résultats donnent des repères pour explorer la ville pendant une recherche immobilière.",
+   "probleme": "Avec le titre (« où chercher un logement pour utiliser moins la voiture ? »), les parts de 9 % et 67 % (iris.voiture.min, iris.voiture.max) se lisent comme une indication des quartiers à privilégier. Or ces parts décrivent les pratiques des actifs qui habitent déjà ces secteurs, pas ce qu'un nouvel habitant pourra y faire.",
+   "correction_minimale": "Écrire « Ces résultats décrivent les habitudes des actifs de chaque secteur ; ils invitent à regarder où se trouve précisément une annonce, au-delà de la seule mention « Strasbourg ». »"
+  },
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "Le dossier mesure un panier réunissant",
+   "probleme": "« Le dossier » est un mot de la production : le lecteur ne connaît pas ce document.",
+   "correction_minimale": "Écrire « Prenons un panier réunissant… » ou « On regarde ici si une adresse a à la fois… »."
+  },
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Schiltigheim, Illkirch-Graffenstaden, Lingolsheim, Bischheim, Ostwald ou Hœnheim",
+   "probleme": "Les six communes sont bien nommées, mais nulle part l'article n'explique pourquoi elles ont été choisies : ce sont les six communes les plus peuplées de la même unité urbaine (mobpro.voiture_selon_destination.communes_voisines, section 1). La méthode ne parle pas de ce groupe.",
+   "correction_minimale": "Ajouter dans la méthode : « Le groupe de six communes réunit les communes les plus peuplées de la même unité urbaine que Strasbourg, au plus six. »"
+  }
+ ]
+}

@@ -1,0 +1,112 @@
+{
+ "commune": "31555",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Toulouse Métropole s'appelle « Tisséo » ; son autorité organisatrice est SM des transports en commun de l'agglomération toulousaine.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Tisséo » : https://transport.data.gouv.fr/datasets/tisseo-reseau-transport-urbain-toulousain ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-14",
+   "perimetre": "intercommunalité Toulouse Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Tisséo est https://www.tisseo.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/tisseo-reseau-transport-urbain-toulousain ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Tisséo",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.reseau_payant",
+   "information": "La page des tarifs présente une offre payante avec des tarifs réduits pour certains publics. Elle n'indique pas de gratuité générale.",
+   "source": "https://www.tisseo.fr/acheter/tarifs (extrait vérifié le 2026-10-15 : « Des transports pour tous, un tarif pour chacun ! »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Tisséo ; Réseau Tisséo, tarification générale. La page ne parle d'aucune gratuité. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tisseo.fr/acheter/tarifs",
+    "extrait": "Des transports pour tous, un tarif pour chacun !"
+   }
+  },
+  {
+   "id": "doc.verification.itineraire",
+   "information": "La page Itinéraires renvoie vers l'appli Tisséo pour le calcul d'itinéraire, avec le temps réel. L'accueil du site propose aussi un formulaire De / À / Quand.",
+   "source": "https://www.tisseo.fr/se-deplacer/itineraires (extrait vérifié le 2026-10-15 : « Itinéraires et achat de titres : avec vous, partout, tout le temps ! »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Tisséo ; Réseau Tisséo ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.tisseo.fr/se-deplacer/itineraires",
+    "extrait": "Itinéraires et achat de titres : avec vous, partout, tout le temps !"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité du réseau (pour qui, sur quelles lignes, exceptions)",
+   "statut": "introuvable",
+   "source": "https://www.tisseo.fr/acheter/tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "La page des tarifs ne mentionne ni gratuité ni lignes gratuites. Je ne conclus pas à leur absence. Les pages « Tarifs réduits et droits à réduction » et « Assistant tarifaire » n'ont pas été consultées."
+  },
+  {
+   "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés, samedi) et validité générale des horaires",
+   "statut": "introuvable",
+   "source": "https://www.tisseo.fr/se-deplacer/horaires",
+   "consulte_le": "2026-10-15",
+   "note": "La page Horaires charge son contenu dans un cadre intégré (iframe) qui n'a pas été lu. Seule la période de vacances scolaires 2026 est établie."
+  },
+  {
+   "sujet": "Fiches horaires et temps réel",
+   "statut": "non vérifié",
+   "source": "https://www.tisseo.fr/se-deplacer/horaires",
+   "consulte_le": "2026-10-15",
+   "note": "Le contenu intégré n'était pas lisible. Pour l'état du réseau et le trafic, la page /se-deplacer/info-trafic existe, mais je ne l'ai pas consultée."
+  },
+  {
+   "sujet": "Du 19 au 30 octobre 2026, le tram T1, la navette aéroport et les lignes de bus p",
+   "statut": "non vérifié",
+   "source": "https://www.tisseo.fr/actualites/horaires-vacances-scolaires-0",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "La navette Cimetières circule aussi le samedi 31 octobre et le dimanche 1er nove",
+   "statut": "non vérifié",
+   "source": "https://www.tisseo.fr/actualites/horaires-vacances-scolaires-0",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

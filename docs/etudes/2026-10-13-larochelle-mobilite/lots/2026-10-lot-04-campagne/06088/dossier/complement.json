@@ -1,0 +1,119 @@
+{
+ "commune": "06088",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Métropole Nice Côte d'Azur s'appelle « Lignes d'Azur » ; son autorité organisatrice est Métropole Nice Côte d'Azur.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Lignes d'Azur » : https://transport.data.gouv.fr/datasets/donnees-statiques-et-dynamiques-du-reseau-de-transport-lignes-dazur ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-15",
+   "perimetre": "intercommunalité Métropole Nice Côte d'Azur ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Lignes d'Azur est https://www.lignesdazur.com/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/donnees-statiques-et-dynamiques-du-reseau-de-transport-lignes-dazur ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Lignes d'Azur",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_65_ans",
+   "information": "La page d'accueil annonce des transports gratuits pour les métropolitains de plus de 65 ans. Les conditions, les lignes concernées et les exceptions ne figurent pas sur cette page.",
+   "source": "https://www.lignesdazur.com/ (extrait vérifié le 2026-10-15 : « Transports gratuits pour les métropolitains de + de 65 ans ! »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Lignes d'Azur ; Métropolitains de plus de 65 ans. Lignes et exceptions non précisées. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.lignesdazur.com/",
+    "extrait": "Transports gratuits pour les métropolitains de + de 65 ans !"
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_enfants",
+   "information": "La page des titres et tarifs mentionne un abonnement gratuit pour les enfants de moins de 11 ans.",
+   "source": "https://www.lignesdazur.com/titres-et-tarifs/ (extrait vérifié le 2026-10-15 : « abonnement gratuit pour les enfants de moins de 11 ans »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Lignes d'Azur ; Enfants de moins de 11 ans. Lignes et conditions non précisées. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.lignesdazur.com/titres-et-tarifs/",
+    "extrait": "abonnement gratuit pour les enfants de moins de 11 ans"
+   }
+  },
+  {
+   "id": "doc.verification.fiches_horaires",
+   "information": "Les fiches horaires sont publiées en PDF, une par ligne, sur la page des fiches horaires.",
+   "source": "https://www.lignesdazur.com/fiches-horaires/ (extrait vérifié le 2026-10-15 : « Consultez les fiches horaires PDF »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Lignes d'Azur ; Lignes listées sur la page. Contenu des PDF non lu. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.lignesdazur.com/fiches-horaires/",
+    "extrait": "Consultez les fiches horaires PDF"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité générale du réseau (lignes concernées, exceptions)",
+   "statut": "introuvable",
+   "source": "https://www.lignesdazur.com/titres-et-tarifs/",
+   "consulte_le": "2026-10-15",
+   "note": "La page des tarifs ne parle pas de gratuité du réseau. L'article sur la gratuité pour les plus de 65 ans n'a pas été ouvert, son URL n'étant pas connue."
+  },
+  {
+   "sujet": "Jours de circulation (dimanche, jours fériés, samedi) et période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://www.lignesdazur.com/fiches-horaires/",
+   "consulte_le": "2026-10-15",
+   "note": "La page n'indique ni jours de circulation ni validité. Ces informations sont probablement dans les fiches PDF par ligne, qui n'ont pas été ouvertes (non vérifié). L'accueil signale une maintenance de la ligne 1 du 27 septembre au 22 octobre 2026, ce qui n'est pas un horaire."
+  },
+  {
+   "sujet": "Temps réel / infos trafic",
+   "statut": "non vérifié",
+   "source": "https://www.lignesdazur.com/infos-trafic/",
+   "consulte_le": "2026-10-15",
+   "note": "Page repérée sur l'accueil mais non ouverte."
+  },
+  {
+   "sujet": "La rubrique « Préparer mon voyage » est présentée comme regroupant calcul d'itin",
+   "statut": "non vérifié",
+   "source": "https://www.lignesdazur.com/preparer-mon-voyage/",
+   "consulte_le": "2026-10-15",
+   "note": "extrait introuvable sur la page"
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

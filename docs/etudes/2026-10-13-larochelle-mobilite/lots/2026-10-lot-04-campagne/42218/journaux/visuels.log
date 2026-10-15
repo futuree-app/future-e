@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 42218 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/42218/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_42218.json --classes auto --communes  --reperes 422180102,422182301,422181804 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/42218/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 77,
+  "non_res": 1,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Saint-Étienne découpée en 77 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 25 à 100 %). La part la plus basse est d'environ 26 % (Peuple-Boivin-Saint-Jacques), la plus élevée d'environ 92 % (Saint-Victor). 1 secteur d'activité exclu. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

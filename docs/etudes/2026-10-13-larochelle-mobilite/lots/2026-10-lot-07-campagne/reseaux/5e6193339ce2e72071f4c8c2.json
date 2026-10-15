@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "5e6193339ce2e72071f4c8c2",
+ "titre": "Réseau urbain AggloBus",
+ "page": "https://transport.data.gouv.fr/datasets/agglobus-offre-theorique-mobilite-reseau-urbain-de-bourges",
+ "nom_commercial": "AggloBus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Agglobus",
+ "aom": "Agglobus",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "241800507",
+  "nom": "CA Bourges Plus"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Agglobus (Bourges)",
+    "http://www.agglobus.com"
+   ]
+  ]
+ },
+ "site": "https://www.agglobus.com:443/",
+ "sites_controles": [
+  [
+   "http://www.agglobus.com",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

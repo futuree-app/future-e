@@ -1,0 +1,25 @@
+{
+ "anomalies": [
+  {
+   "categorie": "population",
+   "gravite": "bloquante",
+   "passage": "À Lestonnat-Monséjour, dans le secteur cité, cette proximité concerne 97 % des adresses.",
+   "probleme": "Sans son numéro, « Lestonnat-Monséjour » se lit comme un quartier. Or le chiffre de 97 % ne vaut que pour Lestonnat-Monséjour 2 (`iris.330630802.panier_500m`). Les autres secteurs Lestonnat-Monséjour sont souvent bien plus bas (`iris.330630808.panier_500m` 6 %, `iris.330630804.panier_500m` 26 %, `iris.330630809.panier_500m` 31 %). Le lecteur peut donc étendre à tout le quartier une proximité propre à un seul secteur.",
+   "correction_minimale": "Écrire « Dans le secteur Lestonnat-Monséjour 2, cette proximité concerne 97 % des adresses. »"
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Dans le secteur Hôtel de Ville-Quinconces cité plus haut, toutes les adresses",
+   "probleme": "Le numéro du secteur manque. Or plusieurs secteurs portent le libellé Hôtel de Ville-Quinconces, et deux d'entre eux n'ont pas toutes leurs adresses à moins de 500 m (`iris.330630506.panier_500m` 60 %, `iris.330630507.panier_500m` 57 %). Lu comme un quartier, « toutes » deviendrait faux. Seule la mention « cité plus haut » évite la confusion.",
+   "correction_minimale": "Écrire « Dans le secteur Hôtel de Ville-Quinconces 4, toutes les adresses »."
+  },
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "les groupes de destination sont distincts et leur comparaison ne mesure pas l’effet d’un déménagement",
+   "probleme": "Ces groupes se distinguent par leur commune de travail, et non par leur lieu de résidence. La limite à donner porte donc sur l'effet d'un changement de lieu de travail (limites de `mobpro.voiture_selon_destination.*`). De plus, la méthode ne dit pas comment ont été choisies les six communes : ce sont les six plus peuplées de la même unité urbaine.",
+   "correction_minimale": "Remplacer par « les groupes de destination sont des groupes distincts d'actifs : leur comparaison ne mesure pas l'effet d'un changement de lieu de travail. Les six communes sont les plus peuplées de l'unité urbaine de Bordeaux, Bordeaux exceptée. »"
+  }
+ ]
+}

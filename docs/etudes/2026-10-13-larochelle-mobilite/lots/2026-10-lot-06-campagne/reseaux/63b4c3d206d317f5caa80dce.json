@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "63b4c3d206d317f5caa80dce",
+ "titre": "Réseau urbain TRACE",
+ "page": "https://transport.data.gouv.fr/datasets/fr-200052264-t0004-0000-1",
+ "nom_commercial": "TRACE",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TRACE",
+ "aom": "CA Colmar Agglomération",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "246800726",
+  "nom": "CA Colmar Agglomération"
+ },
+ "mis_a_jour": "2026-09-10",
+ "agence": {
+  "agences": [
+   [
+    "TRACE",
+    "https://www.trace-colmar.fr"
+   ]
+  ]
+ },
+ "site": "https://www.trace-colmar.fr",
+ "sites_controles": [
+  [
+   "https://www.trace-colmar.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

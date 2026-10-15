@@ -1,0 +1,965 @@
+{
+ "communes": {
+  "59350": {
+   "nom": "Lille",
+   "insee": "59350",
+   "demande": "59350",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:07Z",
+     "fin": "2026-10-15T16:14:50Z",
+     "duree_s": 43.7,
+     "duree_calcul_s": 43.7
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:50Z",
+     "fin": "2026-10-15T16:14:56Z",
+     "duree_s": 6.3,
+     "duree_calcul_s": 6.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:56Z",
+     "fin": "2026-10-15T16:14:57Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:57Z",
+     "fin": "2026-10-15T16:14:57Z",
+     "duree_s": 0.2,
+     "complement_sha": "d7ab73358e469def",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "ecabc50aa231cd49"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "93 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 50.3
+  },
+  "66136": {
+   "nom": "Perpignan",
+   "insee": "66136",
+   "demande": "66136",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:57Z",
+     "fin": "2026-10-15T16:15:22Z",
+     "duree_s": 24.9,
+     "duree_calcul_s": 24.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:22Z",
+     "fin": "2026-10-15T16:15:28Z",
+     "duree_s": 6.4,
+     "duree_calcul_s": 6.4
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:28Z",
+     "fin": "2026-10-15T16:15:29Z",
+     "duree_s": 1.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:29Z",
+     "fin": "2026-10-15T16:15:29Z",
+     "duree_s": 0.2,
+     "complement_sha": "817e65ceef24005d",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "4221f1f021c43377"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "45 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 32.6
+  },
+  "45234": {
+   "nom": "Orléans",
+   "insee": "45234",
+   "demande": "45234",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:29Z",
+     "fin": "2026-10-15T16:16:05Z",
+     "duree_s": 35.5,
+     "duree_calcul_s": 35.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:05Z",
+     "fin": "2026-10-15T16:16:14Z",
+     "duree_s": 9.6,
+     "duree_calcul_s": 9.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:14Z",
+     "fin": "2026-10-15T16:16:15Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:15Z",
+     "fin": "2026-10-15T16:16:15Z",
+     "duree_s": 0.2,
+     "complement_sha": "b5f6f36aec521eb3",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "3baf87723a52834d"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "44 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 45.5
+  },
+  "76540": {
+   "nom": "Rouen",
+   "insee": "76540",
+   "demande": "76540",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:15Z",
+     "fin": "2026-10-15T16:16:44Z",
+     "duree_s": 29.3,
+     "duree_calcul_s": 29.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:44Z",
+     "fin": "2026-10-15T16:16:52Z",
+     "duree_s": 7.5,
+     "duree_calcul_s": 7.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:52Z",
+     "fin": "2026-10-15T16:16:52Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:52Z",
+     "fin": "2026-10-15T16:16:52Z",
+     "duree_s": 0.2,
+     "complement_sha": "45598ebd49107b81",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "69340a6321e5a088"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "37 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 37.2
+  },
+  "93066": {
+   "nom": "Saint-Denis",
+   "insee": "93066",
+   "demande": "93066",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:52Z",
+     "fin": "2026-10-15T16:17:10Z",
+     "duree_s": 18.0,
+     "duree_calcul_s": 18.0
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:10Z",
+     "fin": "2026-10-15T16:17:17Z",
+     "duree_s": 6.5,
+     "duree_calcul_s": 6.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:17Z",
+     "fin": "2026-10-15T16:17:17Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:17Z",
+     "fin": "2026-10-15T16:17:17Z",
+     "duree_s": 0.1,
+     "complement_sha": "9bd079cfe388974e",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "f144a37d8a704add"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "38 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 24.6
+  },
+  "93048": {
+   "nom": "Montreuil",
+   "insee": "93048",
+   "demande": "93048",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:17Z",
+     "fin": "2026-10-15T16:17:32Z",
+     "duree_s": 15.3,
+     "duree_calcul_s": 15.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:32Z",
+     "fin": "2026-10-15T16:17:39Z",
+     "duree_s": 6.6,
+     "duree_calcul_s": 6.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:39Z",
+     "fin": "2026-10-15T16:17:39Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:39Z",
+     "fin": "2026-10-15T16:17:39Z",
+     "duree_s": 0.1,
+     "complement_sha": "a165769bddd819d9",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "1dc811029a949f6e"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "41 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 22.0
+  },
+  "95018": {
+   "nom": "Argenteuil",
+   "insee": "95018",
+   "demande": "95018",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:39Z",
+     "fin": "2026-10-15T16:17:58Z",
+     "duree_s": 19.5,
+     "duree_calcul_s": 19.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:58Z",
+     "fin": "2026-10-15T16:18:07Z",
+     "duree_s": 8.2,
+     "duree_calcul_s": 8.2
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:07Z",
+     "fin": "2026-10-15T16:18:07Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:07Z",
+     "fin": "2026-10-15T16:18:07Z",
+     "duree_s": 0.2,
+     "complement_sha": "d5a5fdeffb9532a3",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "f10d258f7ba5e0d7"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "37 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 28.0
+  },
+  "68224": {
+   "nom": "Mulhouse",
+   "insee": "68224",
+   "demande": "68224",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:07Z",
+     "fin": "2026-10-15T16:18:33Z",
+     "duree_s": 26.6,
+     "duree_calcul_s": 26.6
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:33Z",
+     "fin": "2026-10-15T16:18:41Z",
+     "duree_s": 7.2,
+     "duree_calcul_s": 7.2
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:41Z",
+     "fin": "2026-10-15T16:18:41Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:41Z",
+     "fin": "2026-10-15T16:18:41Z",
+     "duree_s": 0.3,
+     "complement_sha": "6ae9885128521048",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "8d3f33e011351642"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "43 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 34.2
+  },
+  "54395": {
+   "nom": "Nancy",
+   "insee": "54395",
+   "demande": "54395",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:41Z",
+     "fin": "2026-10-15T16:19:06Z",
+     "duree_s": 24.6,
+     "duree_calcul_s": 24.6
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:06Z",
+     "fin": "2026-10-15T16:19:12Z",
+     "duree_s": 6.8,
+     "duree_calcul_s": 6.8
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:12Z",
+     "fin": "2026-10-15T16:19:12Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:12Z",
+     "fin": "2026-10-15T16:19:13Z",
+     "duree_s": 0.2,
+     "complement_sha": "3b0aafecfa209a28",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "ea232b9e2d0bed80"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "38 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 31.7
+  },
+  "59599": {
+   "nom": "Tourcoing",
+   "insee": "59599",
+   "demande": "59599",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:13Z",
+     "fin": "2026-10-15T16:20:23Z",
+     "duree_s": 70.3,
+     "duree_calcul_s": 70.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:23Z",
+     "fin": "2026-10-15T16:20:31Z",
+     "duree_s": 8.6,
+     "duree_calcul_s": 8.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:31Z",
+     "fin": "2026-10-15T16:20:32Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:32Z",
+     "fin": "2026-10-15T16:20:32Z",
+     "duree_s": 0.2,
+     "complement_sha": "446cde1df363b979",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "d38a1ce6debb0b93"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "40 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 79.2
+  },
+  "59512": {
+   "nom": "Roubaix",
+   "insee": "59512",
+   "demande": "59512",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:32Z",
+     "fin": "2026-10-15T16:21:29Z",
+     "duree_s": 57.4,
+     "duree_calcul_s": 57.4
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:29Z",
+     "fin": "2026-10-15T16:21:37Z",
+     "duree_s": 7.6,
+     "duree_calcul_s": 7.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:37Z",
+     "fin": "2026-10-15T16:21:37Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:37Z",
+     "fin": "2026-10-15T16:21:37Z",
+     "duree_s": 0.2,
+     "complement_sha": "dfb5b59ceadd5c07",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "c71d375312968731"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "38 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 65.3
+  },
+  "92050": {
+   "nom": "Nanterre",
+   "insee": "92050",
+   "demande": "92050",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:37Z",
+     "fin": "2026-10-15T16:21:53Z",
+     "duree_s": 15.9,
+     "duree_calcul_s": 15.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:53Z",
+     "fin": "2026-10-15T16:22:00Z",
+     "duree_s": 6.8,
+     "duree_calcul_s": 6.8
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:00Z",
+     "fin": "2026-10-15T16:22:00Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:00Z",
+     "fin": "2026-10-15T16:22:00Z",
+     "duree_s": 0.2,
+     "complement_sha": "f9f9f268142b3296",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "692a64c9778f73b9"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "38 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 23.0
+  },
+  "94081": {
+   "nom": "Vitry-sur-Seine",
+   "insee": "94081",
+   "demande": "94081",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:00Z",
+     "fin": "2026-10-15T16:22:18Z",
+     "duree_s": 18.3,
+     "duree_calcul_s": 18.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:18Z",
+     "fin": "2026-10-15T16:22:24Z",
+     "duree_s": 6.3,
+     "duree_calcul_s": 6.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:24Z",
+     "fin": "2026-10-15T16:22:25Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:25Z",
+     "fin": "2026-10-15T16:22:25Z",
+     "duree_s": 0.1,
+     "complement_sha": "74900277ec161b9e",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "255d0fc7cd50e198"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "36 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 24.7
+  },
+  "94028": {
+   "nom": "Créteil",
+   "insee": "94028",
+   "demande": "94028",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:25Z",
+     "fin": "2026-10-15T16:22:38Z",
+     "duree_s": 13.6,
+     "duree_calcul_s": 13.6
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:38Z",
+     "fin": "2026-10-15T16:22:44Z",
+     "duree_s": 6.1,
+     "duree_calcul_s": 6.1
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:44Z",
+     "fin": "2026-10-15T16:22:44Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:44Z",
+     "fin": "2026-10-15T16:22:44Z",
+     "duree_s": 0.1,
+     "complement_sha": "ac0280378c9179a0",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "812f2d9c9bf54db9"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "31 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 19.9
+  },
+  "84007": {
+   "nom": "Avignon",
+   "insee": "84007",
+   "demande": "84007",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:22:44Z",
+     "fin": "2026-10-15T16:23:10Z",
+     "duree_s": 25.1,
+     "duree_calcul_s": 25.1
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:10Z",
+     "fin": "2026-10-15T16:23:15Z",
+     "duree_s": 5.6,
+     "duree_calcul_s": 5.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:15Z",
+     "fin": "2026-10-15T16:23:15Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:15Z",
+     "fin": "2026-10-15T16:23:15Z",
+     "duree_s": 0.1,
+     "complement_sha": "52da32a6cb6d920f",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "220dfd5a24de1468"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "31 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 30.8
+  },
+  "93001": {
+   "nom": "Aubervilliers",
+   "insee": "93001",
+   "demande": "93001",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:15Z",
+     "fin": "2026-10-15T16:23:28Z",
+     "duree_s": 12.9,
+     "duree_calcul_s": 12.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:28Z",
+     "fin": "2026-10-15T16:23:34Z",
+     "duree_s": 5.8,
+     "duree_calcul_s": 5.8
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:34Z",
+     "fin": "2026-10-15T16:23:34Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:34Z",
+     "fin": "2026-10-15T16:23:34Z",
+     "duree_s": 0.1,
+     "complement_sha": "a1d84760c97ab519",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "420cec0bafb4cc4b"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "25 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 18.8
+  },
+  "92004": {
+   "nom": "Asnières-sur-Seine",
+   "insee": "92004",
+   "demande": "92004",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:34Z",
+     "fin": "2026-10-15T16:23:47Z",
+     "duree_s": 12.7,
+     "duree_calcul_s": 12.7
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:47Z",
+     "fin": "2026-10-15T16:23:53Z",
+     "duree_s": 5.6,
+     "duree_calcul_s": 5.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:53Z",
+     "fin": "2026-10-15T16:23:53Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:53Z",
+     "fin": "2026-10-15T16:23:53Z",
+     "duree_s": 0.1,
+     "complement_sha": "d2a8254db93e4d27",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "1c364adbf8a2dffc"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "32 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 18.4
+  },
+  "92025": {
+   "nom": "Colombes",
+   "insee": "92025",
+   "demande": "92025",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:23:53Z",
+     "fin": "2026-10-15T16:24:07Z",
+     "duree_s": 14.3,
+     "duree_calcul_s": 14.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:07Z",
+     "fin": "2026-10-15T16:24:13Z",
+     "duree_s": 5.6,
+     "duree_calcul_s": 5.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:13Z",
+     "fin": "2026-10-15T16:24:13Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:13Z",
+     "fin": "2026-10-15T16:24:13Z",
+     "duree_s": 0.1,
+     "complement_sha": "f29499f37b32e9f8",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "45a61913cfcdd46b"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "33 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 20.0
+  },
+  "59183": {
+   "nom": "Dunkerque",
+   "insee": "59183",
+   "demande": "59183",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:13Z",
+     "fin": "2026-10-15T16:24:39Z",
+     "duree_s": 26.5,
+     "duree_calcul_s": 26.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:39Z",
+     "fin": "2026-10-15T16:24:45Z",
+     "duree_s": 5.7,
+     "duree_calcul_s": 5.7
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:45Z",
+     "fin": "2026-10-15T16:24:45Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:45Z",
+     "fin": "2026-10-15T16:24:45Z",
+     "duree_s": 0.1,
+     "complement_sha": "ffb4c2133f58d184",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "5e0ef00730e68d2c"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "39 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 32.3
+  },
+  "93005": {
+   "nom": "Aulnay-sous-Bois",
+   "insee": "93005",
+   "demande": "93005",
+   "statut": "dossier prêt",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:45Z",
+     "fin": "2026-10-15T16:24:59Z",
+     "duree_s": 14.0,
+     "duree_calcul_s": 14.0
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:24:59Z",
+     "fin": "2026-10-15T16:25:06Z",
+     "duree_s": 6.3,
+     "duree_calcul_s": 6.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:25:06Z",
+     "fin": "2026-10-15T16:25:06Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:25:06Z",
+     "fin": "2026-10-15T16:25:06Z",
+     "duree_s": 0.1,
+     "complement_sha": "7cd66cb32e3688d9",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "76e80c384dd04129"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "35 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 20.5
+  }
+ },
+ "journal": []
+}

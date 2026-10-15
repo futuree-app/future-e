@@ -1,0 +1,36 @@
+{
+ "version": 2,
+ "id": "5c65bad88b4c4143d45c9d5c",
+ "titre": "Réseau urbain Palmbus",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-et-temps-reel-gtfs-gtfs-rt-du-reseau-palmbus-cannes-pays-de-lerins",
+ "nom_commercial": "Palmbus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Palm Bus",
+ "aom": "CA Cannes Pays de Lérins",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200039915",
+  "nom": "CA Cannes Pays de Lérins"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Palm à la demande",
+    "https://palmdeplacements.fr/tad"
+   ],
+   [
+    "Palmbus",
+    "https://palmdeplacements.fr/"
+   ]
+  ]
+ },
+ "site": "https://palmdeplacements.fr/",
+ "sites_controles": [
+  [
+   "https://palmdeplacements.fr/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "6670560d00478a9b4a2d0233",
+ "titre": "Réseau urbain SITAC",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-et-temps-reel-aux-formats-gtfs-et-gtfs-rt-du-reseau-sitac",
+ "nom_commercial": "SITAC",
+ "preuve_nom": "intitulé du jeu de données publié pour l'autorité organisatrice",
+ "offre_tdg": "Imag’in",
+ "aom": "SI des transports urbains de l'agglomération du Calaisis (SITAC)",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200090751",
+  "nom": "CA Grand Calais Terres et Mers"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Zenbus",
+    "http://zenbus.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

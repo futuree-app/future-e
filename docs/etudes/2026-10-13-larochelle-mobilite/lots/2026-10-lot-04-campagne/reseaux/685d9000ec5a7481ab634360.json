@@ -1,0 +1,97 @@
+{
+ "version": 2,
+ "id": "685d9000ec5a7481ab634360",
+ "titre": "Réseau urbain Naolib",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-de-transports-collectifs-naolib",
+ "nom_commercial": "Naolib",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TAN",
+ "aom": "Nantes Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "244400404",
+  "nom": "Nantes Métropole"
+ },
+ "mis_a_jour": "2026-10-11",
+ "agence": {
+  "agences": [
+   [
+    "Naolib",
+    "https://www.naolib.fr"
+   ]
+  ]
+ },
+ "site": "https://naolib.fr/",
+ "sites_controles": [
+  [
+   "https://www.naolib.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.gratuite_weekend",
+    "information": "Les transports en commun et les parkings-relais sont annoncés gratuits le samedi et le dimanche.",
+    "url": "https://naolib.fr/",
+    "extrait": "Transports en commun et parkings-relais sont gratuits le samedi et le dimanche !",
+    "validite": "non précisée (bandeau de la page d'accueil, consulté le 2026-10-15)",
+    "perimetre": "Réseau Naolib, samedi et dimanche. Le détail est sur la page « En savoir plus ». Les jours fériés ne sont pas mentionnés.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:15:48Z"
+   },
+   {
+    "id": "doc.tarification.gratuite_weekend.detail",
+    "information": "Du samedi 00h00 au dimanche 23h59, la gratuité couvre les tramways, bus et navibus, pour tous les voyageurs. La navette aéroport est exclue et exige toujours un titre. Les enfants de moins de 6 ans accompagnés voyagent gratuitement toute la semaine. Les mTickets ne peuvent pas être validés le week-end, sauf ceux de la navette aéroport et d'Aléop.",
+    "url": "https://naolib.fr/gratuite-des-transports-en-commun",
+    "extrait": "voyagez sans titre de transport",
+    "validite": "Chaque week-end, du samedi 00h00 au dimanche 23h59. Aucune autre période n'est mentionnée, jours fériés compris.",
+    "perimetre": "Tramways, bus et navibus de Naolib, tous publics le week-end. Exceptions : navette aéroport, cars scolaires et groupes scolaires. Aléop : TER dans l'agglomération nantaise, et cars 320 et 322 (arrêts Le Gray et Gergaudière), 350 et 360 dans le périmètre métropolitain.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:15:48Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité en semaine (hors moins de 6 ans accompagnés)",
+    "statut": "introuvable",
+    "url": "https://naolib.fr/gratuite-des-transports-en-commun",
+    "note": "Aucune gratuité générale en semaine n'apparaît. Seuls les enfants de moins de 6 ans accompagnés sont mentionnés. Ce n'est pas une preuve d'absence d'autres dispositifs."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés) et période de validité des horaires",
+    "statut": "introuvable",
+    "url": "https://naolib.fr/",
+    "note": "Je n'ai pas ouvert les fiches horaires par ligne. Aucune page consultée ne donne les jours fériés ni la période de validité des horaires."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "introuvable",
+    "url": "https://naolib.fr/fr/info-trafic-1",
+    "note": "La page d'accueil ne décrit pas de service de temps réel. Elle renvoie vers la page « Info trafic » pour les perturbations, que je n'ai pas ouverte. Le contenu de plan.naolib.fr n'a pas été vérifié."
+   },
+   {
+    "sujet": "Extrait de la page de gratuité",
+    "statut": "non vérifié",
+    "url": "https://naolib.fr/gratuite-des-transports-en-commun",
+    "note": "Le fait détaillé repose sur le résumé de la page, pas sur un texte brut. Seul l'extrait « voyagez sans titre de transport » est une citation. Il est court et à confirmer. Les autres éléments (exclusions, Aléop, enfants de moins de 6 ans) sont reformulés."
+   },
+   {
+    "sujet": "Extrait « Horaires, itinéraires, plan »",
+    "statut": "non vérifié",
+    "url": "https://plan.naolib.fr/",
+    "note": "Cet intitulé vient de la page d'accueil, naolib.fr, et non de plan.naolib.fr. L'extrait est à rattacher à https://naolib.fr/. Je n'ai pas ouvert plan.naolib.fr."
+   },
+   {
+    "sujet": "La rubrique « Horaires, itinéraires, plan » du site renvoie vers plan.naolib.fr,",
+    "statut": "non vérifié",
+    "url": "https://plan.naolib.fr/",
+    "note": "URL hors du domaine officiel"
+   }
+  ]
+ }
+}

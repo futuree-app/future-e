@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5d31d8b69ce2e703da90b699",
+ "titre": "Réseau urbain DiviaMobilités",
+ "page": "https://transport.data.gouv.fr/datasets/gtfs-diviamobilites",
+ "nom_commercial": "DiviaMobilités",
+ "preuve_nom": "intitulé du jeu de données publié pour l'autorité organisatrice",
+ "offre_tdg": "Divia",
+ "aom": "Dijon Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "242100410",
+  "nom": "Dijon Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "KEOLIS DIJON",
+    "https://www.divia.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

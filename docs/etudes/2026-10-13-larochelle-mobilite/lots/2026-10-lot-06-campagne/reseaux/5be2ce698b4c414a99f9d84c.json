@@ -1,0 +1,44 @@
+{
+ "version": 2,
+ "id": "5be2ce698b4c414a99f9d84c",
+ "titre": "Réseau urbain ENVIBUS",
+ "page": "https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-bus-du-reseau-des-transports-publics-envibus",
+ "nom_commercial": "ENVIBUS",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Envibus",
+ "aom": "CA de Sophia Antipolis",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "240600585",
+  "nom": "CA de Sophia Antipolis"
+ },
+ "mis_a_jour": "2026-10-13",
+ "agence": {
+  "agences": [
+   [
+    "ENVIBUS",
+    "http://localhost"
+   ],
+   [
+    "KEOLIS SOPHIA ANTIPOLIS",
+    "http://localhost"
+   ],
+   [
+    "STCAR",
+    "http://localhost"
+   ],
+   [
+    "TUA TRANSDEV",
+    "http://localhost"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [
+  [
+   "http://localhost",
+   "inaccessible (URLError)"
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

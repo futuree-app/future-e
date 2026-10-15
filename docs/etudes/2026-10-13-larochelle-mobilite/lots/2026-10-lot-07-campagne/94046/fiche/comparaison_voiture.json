@@ -1,0 +1,759 @@
+{
+ "commune": {
+  "insee": "94046",
+  "nom": "Maisons-Alfort",
+  "role": "autre",
+  "actifs": 29373,
+  "lignes": 9729,
+  "voiture": 0.2781
+ },
+ "definition": {
+  "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+  "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+  "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+  "millesime": "2022 (collectes 2020 à 2024)"
+ },
+ "regle": {
+  "texte": "communes de même rôle que Maisons-Alfort (autre commune d'une unité urbaine), comptant de la moitié au double de ses actifs occupés résidents (de 14 686 à 58 746), avec au moins 150 lignes d'échantillon ; Maisons-Alfort exclue ; France métropolitaine",
+  "role": "autre commune d'une unité urbaine",
+  "taille": [
+   0.5,
+   2.0
+  ],
+  "bornes_actifs": [
+   14686,
+   58746
+  ],
+  "lignes_min": 150,
+  "groupe_min": 10,
+  "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+  "fixee_le": "2026-10-14"
+ },
+ "sources_fichiers": {
+  "mobpro": {
+   "chemin": "rp-mobpro-2022.parquet",
+   "sha256": "6b91385a79846e1a"
+  },
+  "index": {
+   "chemin": "comparateur-index.json.gz",
+   "sha256": "3a21daa14fad5bb1"
+  }
+ },
+ "genere_le": "2026-10-15T16:47:20Z",
+ "disponible": true,
+ "groupe": {
+  "n": 118,
+  "mediane_voiture": 0.4195,
+  "communes": [
+   {
+    "insee": "94002",
+    "nom": "Alfortville",
+    "actifs": 20794,
+    "voiture": 0.2846
+   },
+   {
+    "insee": "64024",
+    "nom": "Anglet",
+    "actifs": 16932,
+    "voiture": 0.7696
+   },
+   {
+    "insee": "06004",
+    "nom": "Antibes",
+    "actifs": 32273,
+    "voiture": 0.6618
+   },
+   {
+    "insee": "92002",
+    "nom": "Antony",
+    "actifs": 30344,
+    "voiture": 0.3957
+   },
+   {
+    "insee": "95018",
+    "nom": "Argenteuil",
+    "actifs": 44560,
+    "voiture": 0.4024
+   },
+   {
+    "insee": "92004",
+    "nom": "Asnières-sur-Seine",
+    "actifs": 46534,
+    "voiture": 0.2188
+   },
+   {
+    "insee": "91027",
+    "nom": "Athis-Mons",
+    "actifs": 16465,
+    "voiture": 0.5374
+   },
+   {
+    "insee": "13005",
+    "nom": "Aubagne",
+    "actifs": 19102,
+    "voiture": 0.7252
+   },
+   {
+    "insee": "93001",
+    "nom": "Aubervilliers",
+    "actifs": 35834,
+    "voiture": 0.2163
+   },
+   {
+    "insee": "93005",
+    "nom": "Aulnay-sous-Bois",
+    "actifs": 33059,
+    "voiture": 0.4818
+   },
+   {
+    "insee": "92007",
+    "nom": "Bagneux",
+    "actifs": 18927,
+    "voiture": 0.2919
+   },
+   {
+    "insee": "93006",
+    "nom": "Bagnolet",
+    "actifs": 18492,
+    "voiture": 0.1984
+   },
+   {
+    "insee": "95063",
+    "nom": "Bezons",
+    "actifs": 16064,
+    "voiture": 0.3658
+   },
+   {
+    "insee": "93008",
+    "nom": "Bobigny",
+    "actifs": 19249,
+    "voiture": 0.3355
+   },
+   {
+    "insee": "92009",
+    "nom": "Bois-Colombes",
+    "actifs": 15285,
+    "voiture": 0.2257
+   },
+   {
+    "insee": "93010",
+    "nom": "Bondy",
+    "actifs": 19346,
+    "voiture": 0.4017
+   },
+   {
+    "insee": "69029",
+    "nom": "Bron",
+    "actifs": 17660,
+    "voiture": 0.5442
+   },
+   {
+    "insee": "33039",
+    "nom": "Bègles",
+    "actifs": 15126,
+    "voiture": 0.5487
+   },
+   {
+    "insee": "06027",
+    "nom": "Cagnes-sur-Mer",
+    "actifs": 22077,
+    "voiture": 0.6805
+   },
+   {
+    "insee": "69034",
+    "nom": "Caluire-et-Cuire",
+    "actifs": 19845,
+    "voiture": 0.507
+   },
+   {
+    "insee": "06029",
+    "nom": "Cannes",
+    "actifs": 26995,
+    "voiture": 0.5584
+   },
+   {
+    "insee": "95127",
+    "nom": "Cergy",
+    "actifs": 28449,
+    "voiture": 0.3896
+   },
+   {
+    "insee": "94017",
+    "nom": "Champigny-sur-Marne",
+    "actifs": 33345,
+    "voiture": 0.4118
+   },
+   {
+    "insee": "77108",
+    "nom": "Chelles",
+    "actifs": 24136,
+    "voiture": 0.4812
+   },
+   {
+    "insee": "94022",
+    "nom": "Choisy-le-Roi",
+    "actifs": 20514,
+    "voiture": 0.3219
+   },
+   {
+    "insee": "92019",
+    "nom": "Châtenay-Malabry",
+    "actifs": 17172,
+    "voiture": 0.4721
+   },
+   {
+    "insee": "92020",
+    "nom": "Châtillon",
+    "actifs": 18446,
+    "voiture": 0.265
+   },
+   {
+    "insee": "92023",
+    "nom": "Clamart",
+    "actifs": 27316,
+    "voiture": 0.3534
+   },
+   {
+    "insee": "92024",
+    "nom": "Clichy",
+    "actifs": 32139,
+    "voiture": 0.169
+   },
+   {
+    "insee": "92025",
+    "nom": "Colombes",
+    "actifs": 41627,
+    "voiture": 0.2584
+   },
+   {
+    "insee": "31149",
+    "nom": "Colomiers",
+    "actifs": 17843,
+    "voiture": 0.7566
+   },
+   {
+    "insee": "78172",
+    "nom": "Conflans-Sainte-Honorine",
+    "actifs": 16506,
+    "voiture": 0.452
+   },
+   {
+    "insee": "91174",
+    "nom": "Corbeil-Essonnes",
+    "actifs": 22888,
+    "voiture": 0.5922
+   },
+   {
+    "insee": "92026",
+    "nom": "Courbevoie",
+    "actifs": 42920,
+    "voiture": 0.2043
+   },
+   {
+    "insee": "94028",
+    "nom": "Créteil",
+    "actifs": 40670,
+    "voiture": 0.3309
+   },
+   {
+    "insee": "93029",
+    "nom": "Drancy",
+    "actifs": 28102,
+    "voiture": 0.4247
+   },
+   {
+    "insee": "94033",
+    "nom": "Fontenay-sous-Bois",
+    "actifs": 24425,
+    "voiture": 0.2249
+   },
+   {
+    "insee": "95252",
+    "nom": "Franconville",
+    "actifs": 17369,
+    "voiture": 0.5134
+   },
+   {
+    "insee": "93032",
+    "nom": "Gagny",
+    "actifs": 17706,
+    "voiture": 0.4484
+   },
+   {
+    "insee": "95268",
+    "nom": "Garges-lès-Gonesse",
+    "actifs": 15231,
+    "voiture": 0.4211
+   },
+   {
+    "insee": "92036",
+    "nom": "Gennevilliers",
+    "actifs": 19613,
+    "voiture": 0.3158
+   },
+   {
+    "insee": "06069",
+    "nom": "Grasse",
+    "actifs": 20536,
+    "voiture": 0.8147
+   },
+   {
+    "insee": "78311",
+    "nom": "Houilles",
+    "actifs": 16905,
+    "voiture": 0.2984
+   },
+   {
+    "insee": "83069",
+    "nom": "Hyères",
+    "actifs": 20482,
+    "voiture": 0.7231
+   },
+   {
+    "insee": "92040",
+    "nom": "Issy-les-Moulineaux",
+    "actifs": 35795,
+    "voiture": 0.2217
+   },
+   {
+    "insee": "13047",
+    "nom": "Istres",
+    "actifs": 19003,
+    "voiture": 0.859
+   },
+   {
+    "insee": "94041",
+    "nom": "Ivry-sur-Seine",
+    "actifs": 28752,
+    "voiture": 0.2026
+   },
+   {
+    "insee": "37122",
+    "nom": "Joué-lès-Tours",
+    "actifs": 14780,
+    "voiture": 0.7306
+   },
+   {
+    "insee": "93027",
+    "nom": "La Courneuve",
+    "actifs": 17972,
+    "voiture": 0.2576
+   },
+   {
+    "insee": "92035",
+    "nom": "La Garenne-Colombes",
+    "actifs": 16067,
+    "voiture": 0.2526
+   },
+   {
+    "insee": "83126",
+    "nom": "La Seyne-sur-Mer",
+    "actifs": 23351,
+    "voiture": 0.7385
+   },
+   {
+    "insee": "93007",
+    "nom": "Le Blanc-Mesnil",
+    "actifs": 23160,
+    "voiture": 0.48
+   },
+   {
+    "insee": "06030",
+    "nom": "Le Cannet",
+    "actifs": 16508,
+    "voiture": 0.6735
+   },
+   {
+    "insee": "94058",
+    "nom": "Le Perreux-sur-Marne",
+    "actifs": 17078,
+    "voiture": 0.3579
+   },
+   {
+    "insee": "92044",
+    "nom": "Levallois-Perret",
+    "actifs": 35485,
+    "voiture": 0.2065
+   },
+   {
+    "insee": "93046",
+    "nom": "Livry-Gargan",
+    "actifs": 19628,
+    "voiture": 0.5456
+   },
+   {
+    "insee": "92046",
+    "nom": "Malakoff",
+    "actifs": 15036,
+    "voiture": 0.1798
+   },
+   {
+    "insee": "78361",
+    "nom": "Mantes-la-Jolie",
+    "actifs": 15180,
+    "voiture": 0.4588
+   },
+   {
+    "insee": "59378",
+    "nom": "Marcq-en-Barœul",
+    "actifs": 17833,
+    "voiture": 0.6465
+   },
+   {
+    "insee": "13056",
+    "nom": "Martigues",
+    "actifs": 18927,
+    "voiture": 0.8469
+   },
+   {
+    "insee": "91377",
+    "nom": "Massy",
+    "actifs": 25268,
+    "voiture": 0.4152
+   },
+   {
+    "insee": "77288",
+    "nom": "Melun",
+    "actifs": 18223,
+    "voiture": 0.4569
+   },
+   {
+    "insee": "92048",
+    "nom": "Meudon",
+    "actifs": 22171,
+    "voiture": 0.3541
+   },
+   {
+    "insee": "69282",
+    "nom": "Meyzieu",
+    "actifs": 15522,
+    "voiture": 0.7073
+   },
+   {
+    "insee": "78423",
+    "nom": "Montigny-le-Bretonneux",
+    "actifs": 15457,
+    "voiture": 0.5381
+   },
+   {
+    "insee": "93048",
+    "nom": "Montreuil",
+    "actifs": 50425,
+    "voiture": 0.1884
+   },
+   {
+    "insee": "92049",
+    "nom": "Montrouge",
+    "actifs": 24480,
+    "voiture": 0.1631
+   },
+   {
+    "insee": "33281",
+    "nom": "Mérignac",
+    "actifs": 37163,
+    "voiture": 0.6364
+   },
+   {
+    "insee": "92050",
+    "nom": "Nanterre",
+    "actifs": 44579,
+    "voiture": 0.2699
+   },
+   {
+    "insee": "93050",
+    "nom": "Neuilly-sur-Marne",
+    "actifs": 17002,
+    "voiture": 0.3582
+   },
+   {
+    "insee": "92051",
+    "nom": "Neuilly-sur-Seine",
+    "actifs": 27124,
+    "voiture": 0.2733
+   },
+   {
+    "insee": "94052",
+    "nom": "Nogent-sur-Marne",
+    "actifs": 16090,
+    "voiture": 0.2564
+   },
+   {
+    "insee": "93051",
+    "nom": "Noisy-le-Grand",
+    "actifs": 32164,
+    "voiture": 0.3501
+   },
+   {
+    "insee": "93053",
+    "nom": "Noisy-le-Sec",
+    "actifs": 19377,
+    "voiture": 0.2933
+   },
+   {
+    "insee": "69149",
+    "nom": "Oullins-Pierre-Bénite",
+    "actifs": 16928,
+    "voiture": 0.4995
+   },
+   {
+    "insee": "91477",
+    "nom": "Palaiseau",
+    "actifs": 17137,
+    "voiture": 0.4577
+   },
+   {
+    "insee": "93055",
+    "nom": "Pantin",
+    "actifs": 27692,
+    "voiture": 0.1688
+   },
+   {
+    "insee": "33318",
+    "nom": "Pessac",
+    "actifs": 28545,
+    "voiture": 0.6621
+   },
+   {
+    "insee": "78498",
+    "nom": "Poissy",
+    "actifs": 17610,
+    "voiture": 0.4186
+   },
+   {
+    "insee": "77373",
+    "nom": "Pontault-Combault",
+    "actifs": 17869,
+    "voiture": 0.5943
+   },
+   {
+    "insee": "92062",
+    "nom": "Puteaux",
+    "actifs": 23693,
+    "voiture": 0.2001
+   },
+   {
+    "insee": "44143",
+    "nom": "Rezé",
+    "actifs": 19950,
+    "voiture": 0.5553
+   },
+   {
+    "insee": "93063",
+    "nom": "Romainville",
+    "actifs": 15851,
+    "voiture": 0.2912
+   },
+   {
+    "insee": "93064",
+    "nom": "Rosny-sous-Bois",
+    "actifs": 20826,
+    "voiture": 0.3499
+   },
+   {
+    "insee": "59512",
+    "nom": "Roubaix",
+    "actifs": 28518,
+    "voiture": 0.618
+   },
+   {
+    "insee": "92063",
+    "nom": "Rueil-Malmaison",
+    "actifs": 39238,
+    "voiture": 0.4093
+   },
+   {
+    "insee": "93066",
+    "nom": "Saint-Denis",
+    "actifs": 46321,
+    "voiture": 0.2187
+   },
+   {
+    "insee": "78551",
+    "nom": "Saint-Germain-en-Laye",
+    "actifs": 20248,
+    "voiture": 0.3495
+   },
+   {
+    "insee": "44162",
+    "nom": "Saint-Herblain",
+    "actifs": 22663,
+    "voiture": 0.6524
+   },
+   {
+    "insee": "38421",
+    "nom": "Saint-Martin-d'Hères",
+    "actifs": 15300,
+    "voiture": 0.5775
+   },
+   {
+    "insee": "94068",
+    "nom": "Saint-Maur-des-Fossés",
+    "actifs": 35582,
+    "voiture": 0.3748
+   },
+   {
+    "insee": "33449",
+    "nom": "Saint-Médard-en-Jalles",
+    "actifs": 14898,
+    "voiture": 0.8284
+   },
+   {
+    "insee": "93070",
+    "nom": "Saint-Ouen-sur-Seine",
+    "actifs": 24739,
+    "voiture": 0.1604
+   },
+   {
+    "insee": "69290",
+    "nom": "Saint-Priest",
+    "actifs": 20669,
+    "voiture": 0.7108
+   },
+   {
+    "insee": "91549",
+    "nom": "Sainte-Geneviève-des-Bois",
+    "actifs": 15469,
+    "voiture": 0.6243
+   },
+   {
+    "insee": "95585",
+    "nom": "Sarcelles",
+    "actifs": 20733,
+    "voiture": 0.4019
+   },
+   {
+    "insee": "78586",
+    "nom": "Sartrouville",
+    "actifs": 23758,
+    "voiture": 0.3545
+   },
+   {
+    "insee": "91589",
+    "nom": "Savigny-sur-Orge",
+    "actifs": 17299,
+    "voiture": 0.5464
+   },
+   {
+    "insee": "67447",
+    "nom": "Schiltigheim",
+    "actifs": 14920,
+    "voiture": 0.4503
+   },
+   {
+    "insee": "93071",
+    "nom": "Sevran",
+    "actifs": 19323,
+    "voiture": 0.4204
+   },
+   {
+    "insee": "92073",
+    "nom": "Suresnes",
+    "actifs": 25020,
+    "voiture": 0.2963
+   },
+   {
+    "insee": "33522",
+    "nom": "Talence",
+    "actifs": 20184,
+    "voiture": 0.4716
+   },
+   {
+    "insee": "94073",
+    "nom": "Thiais",
+    "actifs": 14940,
+    "voiture": 0.4834
+   },
+   {
+    "insee": "59599",
+    "nom": "Tourcoing",
+    "actifs": 37873,
+    "voiture": 0.7007
+   },
+   {
+    "insee": "93073",
+    "nom": "Tremblay-en-France",
+    "actifs": 16146,
+    "voiture": 0.6124
+   },
+   {
+    "insee": "69256",
+    "nom": "Vaulx-en-Velin",
+    "actifs": 18458,
+    "voiture": 0.5786
+   },
+   {
+    "insee": "78646",
+    "nom": "Versailles",
+    "actifs": 38865,
+    "voiture": 0.3354
+   },
+   {
+    "insee": "94076",
+    "nom": "Villejuif",
+    "actifs": 25961,
+    "voiture": 0.2396
+   },
+   {
+    "insee": "33550",
+    "nom": "Villenave-d'Ornon",
+    "actifs": 21238,
+    "voiture": 0.7564
+   },
+   {
+    "insee": "59009",
+    "nom": "Villeneuve-d'Ascq",
+    "actifs": 24208,
+    "voiture": 0.6102
+   },
+   {
+    "insee": "93078",
+    "nom": "Villepinte",
+    "actifs": 15216,
+    "voiture": 0.5644
+   },
+   {
+    "insee": "94079",
+    "nom": "Villiers-sur-Marne",
+    "actifs": 15084,
+    "voiture": 0.3706
+   },
+   {
+    "insee": "94080",
+    "nom": "Vincennes",
+    "actifs": 26123,
+    "voiture": 0.1371
+   },
+   {
+    "insee": "94081",
+    "nom": "Vitry-sur-Seine",
+    "actifs": 39812,
+    "voiture": 0.3427
+   },
+   {
+    "insee": "69259",
+    "nom": "Vénissieux",
+    "actifs": 22727,
+    "voiture": 0.5583
+   },
+   {
+    "insee": "59650",
+    "nom": "Wattrelos",
+    "actifs": 15988,
+    "voiture": 0.8184
+   },
+   {
+    "insee": "93031",
+    "nom": "Épinay-sur-Seine",
+    "actifs": 21253,
+    "voiture": 0.3206
+   },
+   {
+    "insee": "91228",
+    "nom": "Évry-Courcouronnes",
+    "actifs": 26336,
+    "voiture": 0.4786
+   }
+  ]
+ },
+ "ecart_points": -14
+}
