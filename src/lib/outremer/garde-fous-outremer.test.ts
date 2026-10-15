@@ -1,11 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { estCodeOutremer } from "./code-outremer.ts";
 
 // HOTFIX FUT-104 · AUCUNE VALEUR DRIAS MÉTROPOLITAINE NE SORT POUR UN CODE ULTRAMARIN.
 //
-// 218 entités 97xxx/98xxx de public/data_climat.json portent des points de grille métropolitains (Fort-de-France :
+// 218 entités 97xxx/98xxx de data/data_climat.json portent des points de grille métropolitains (Fort-de-France :
 // Le Conquet ; Saint-Denis de La Réunion : sud de la Corse). Chaque test ci-dessous ferme UNE surface de diffusion
 // recensée dans docs/audits/2026-10-16-hotfix-fut104-donnees-outremer.md. Les vérifications HTTP sur un build de
 // production sont dans scripts/verifier-hotfix-outremer.mjs.
@@ -18,6 +18,15 @@ test("estCodeOutremer : tous les préfixes 97 et 98 du COG, rien d'autre", () =>
   }
   for (const c of ["01001", "29040", "17300", "44109", "30189", "2A004", "2B033", "75056", "69123", "13055", "75101", "96123", "9741", "974110", "", "abcde"]) {
     assert.ok(!estCodeOutremer(c), c);
+  }
+});
+
+test("Fichier statique : data_climat.json n'est plus sous public/, donc plus distribué tel quel", () => {
+  assert.equal(existsSync("public/data_climat.json"), false);
+  assert.ok(existsSync("data/data_climat.json"));
+  for (const f of ["src/lib/drias-json.ts", "src/app/api/climat/[insee_code]/route.ts", "scripts/build-drias-median.js",
+    "scripts/build-apercu-climat.mjs", "scripts/build-comparateur-index.mjs", "scripts/populate-communes-tension.js"]) {
+    assert.doesNotMatch(readFileSync(f, "utf8"), /["']public["'],\s*["']data_climat\.json["']|public\/data_climat\.json/, f);
   }
 });
 

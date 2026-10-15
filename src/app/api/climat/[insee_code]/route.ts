@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ inse
   }
 
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data_climat.json');
+    const filePath = path.join(process.cwd(), 'data', 'data_climat.json');
     const fileData = fs.readFileSync(filePath, 'utf-8');
     const data = JSON.parse(fileData);
     

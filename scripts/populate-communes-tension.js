@@ -6,7 +6,7 @@
  * les 50 communes les plus exposées dans la table `communes_tension` de Supabase.
  *
  * Sources :
- *   - public/data_climat.json (DRIAS, 35 000+ communes, scénario gwl20)
+ *   - data/data_climat.json (DRIAS, 35 000+ communes, scénario gwl20)
  *   - communes_categorization Supabase (catégories territoriales)
  *
  * Usage :
@@ -165,7 +165,7 @@ function deptFromInsee(insee) {
 
 async function main() {
   console.log('Loading data_climat.json …');
-  const filePath = path.join(process.cwd(), 'public', 'data_climat.json');
+  const filePath = path.join(process.cwd(), 'data', 'data_climat.json');
   const raw = await fs.readFile(filePath, 'utf8');
   const allRows = JSON.parse(raw);
 

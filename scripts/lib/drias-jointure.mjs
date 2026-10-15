@@ -3,7 +3,7 @@
 // La grille DRIAS-TRACC (17 couples de modèles EURO-CORDEX, maille SAFRAN ~8 km) ne couvre que l'Hexagone et la
 // Corse. Sans garde-fou, le point « le plus proche » d'une commune ultramarine était cherché sur cette grille, en
 // degrés bruts et sans limite : la Guadeloupe recevait les valeurs du Conquet (Finistère), La Réunion celles du sud
-// de la Corse, la Guyane celles de la côte basque. 218 lignes 97xxx/98xxx de public/data_climat.json en viennent.
+// de la Corse, la Guyane celles de la côte basque. 218 lignes 97xxx/98xxx de data/data_climat.json en viennent.
 //
 // RÈGLE : AUCUNE COMMUNE NE REÇOIT UNE VALEUR D'UNE GRILLE QUI NE COUVRE PAS SON TERRITOIRE.
 //   1. Les codes ultramarins (97xxx, 98xxx) sont exclus AVANT la jointure : la grille ne les couvre pas, quelle que

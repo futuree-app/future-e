@@ -96,7 +96,7 @@ async function getIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
 }
 
 async function chargerIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
-  const filePath = path.join(process.cwd(), "public", "data_climat.json");
+  const filePath = path.join(process.cwd(), "data", "data_climat.json");
   const raw = await fs.readFile(filePath, "utf8");
   const rows: RawRow[] = JSON.parse(raw);
 

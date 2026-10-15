@@ -560,7 +560,7 @@ export function getEmptyStateCopy(categories: readonly string[] | null | undefin
 // ── Machine à sous du hero ───────────────────────────────────────────────────────────────────
 // Avant toute commune, l'accueil fait défiler quatre villes. Leurs cartes climat sont désormais
 // CONSTRUITES par les mêmes fonctions que celles d'une commune, à l'horizon 2050, depuis un extrait
-// figé de public/data_climat.json (un test vérifie qu'il n'a pas dérivé). Les cartes non climatiques
+// figé de data/data_climat.json (un test vérifie qu'il n'a pas dérivé). Les cartes non climatiques
 // restent dans le composant (hors FUT-37).
 //
 // Retirés : « parmi les communes les plus exposées » (classement sans base affichée), « seront »

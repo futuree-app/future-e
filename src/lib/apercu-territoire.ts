@@ -153,7 +153,7 @@ export function construireApercu(insee: string, commune: string, scenarios: GwlS
 
 // ── LA DONNÉE COMPACTE ───────────────────────────────────────────────────────────────────────
 // `src/data/apercu-climat-communes.json`, produit par `scripts/build-apercu-climat.mjs` depuis
-// `public/data_climat.json` : pour chaque commune, les six clés DRIAS des trois axes aux trois
+// `data/data_climat.json` : pour chaque commune, les six clés DRIAS des trois axes aux trois
 // horizons, à la suite. Elle se reconvertit ici dans la forme exacte de `getClimatDataCommune`, pour que
 // `buildClimatFacts` lise l'aperçu comme il lit le dossier.
 
@@ -166,7 +166,7 @@ export type ExtraitClimat = {
 };
 
 export function scenariosDepuisExtrait(extrait: ExtraitClimat, insee: string): GwlScenarios | null {
-  // Hotfix FUT-104 : l'extrait reprend les lignes ultramarines de `public/data_climat.json`, qui sont des copies de
+  // Hotfix FUT-104 : l'extrait reprend les lignes ultramarines de `data/data_climat.json`, qui sont des copies de
   // points de grille métropolitains (cf. getClimatDataCommune). Elles ne sont jamais servies.
   if (estCodeOutremer(insee)) return null;
   const ligne = extrait.communes[insee];

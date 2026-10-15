@@ -8,7 +8,7 @@
  * zéro LLM au moment de la recherche).
  *
  * Entrées (toutes locales) :
- *   - public/data_climat.json        : DRIAS, 35 006 communes × 3 scénarios,
+ *   - data/data_climat.json        : DRIAS, 35 006 communes × 3 scénarios,
  *                                      lat/lon embarqués (col01/col02).
  *   - data/communes-population.json  : cache population/densité (optionnel ;
  *                                      voir scripts/fetch-communes-population.mjs).
@@ -143,8 +143,8 @@ function makePercentile(sortedVals) {
 async function main() {
   const root = process.cwd();
 
-  console.log('Lecture public/data_climat.json…');
-  const climRaw = await fs.readFile(path.join(root, 'public', 'data_climat.json'), 'utf8');
+  console.log('Lecture data/data_climat.json…');
+  const climRaw = await fs.readFile(path.join(root, 'data', 'data_climat.json'), 'utf8');
   const rows = JSON.parse(climRaw);
 
   // Vivabilité (population/densité + air/soins/services). Surensemble du cache
