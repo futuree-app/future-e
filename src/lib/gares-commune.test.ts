@@ -1,12 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { gunzipSync } from "node:zlib";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import {
   communeDeLAdresse, eloignementEnMots, gareDansLaCommune, garesDeLaCommune, nomDeGareLisible,
   normaliserNomCommune, signalTrain, RAYON_GARES_KM,
 } from "./gares-commune.ts";
-import { loadBpePointsAround } from "./logement-bpe.ts";
+import { chargerGaresBpe, lireGaresBpe } from "./gares-bpe.ts";
 
 const lire = (p: string) => readFileSync(p, "utf8");
 
@@ -20,8 +22,9 @@ function commune(insee: string): Commune {
 }
 async function cas(insee: string) {
   const c = commune(insee);
-  const { points } = await loadBpePointsAround({ lat: c.lat, lon: c.lon });
-  const gares = garesDeLaCommune(c, points);
+  const bpe = await chargerGaresBpe();
+  assert.ok(bpe, "data/gares-bpe.json doit être lisible");
+  const gares = garesDeLaCommune(c, bpe.gares);
   return { c, gares, signal: signalTrain(gares, c.transport!.desserte) };
 }
 
@@ -77,6 +80,51 @@ test("FUT-97 : sans la BPE, le signal ne nomme AUCUNE gare, pas même celle de r
   assert.doesNotMatch(JSON.stringify(s), /Rochelle|gare_de_reference|"gare"/);
 });
 
+// ── Illisible n'est pas vide (revue du 15/10/2026) ─────────────────────────────────────────
+
+test("FUT-97 : des gares illisibles ne deviennent JAMAIS « aucune gare recensée »", async () => {
+  const dossier = mkdtempSync(path.join(tmpdir(), "fut97-"));
+  const absent = path.join(dossier, "absent.json");
+  const casIllisibles: [string, string | null][] = [
+    ["fichier absent de la fonction déployée", null],
+    ["JSON invalide", "{ pas du json"],
+    ["liste vide", JSON.stringify({ millesime: "2025", gares: [] })],
+    ["millésime manquant", JSON.stringify({ gares: [{ t: "E108", lat: 45.9, lon: -0.9 }] })],
+    ["liste partiellement corrompue", JSON.stringify({ millesime: "2025", gares: [{ t: "E108", lat: 45.9, lon: -0.9 }, { t: "E108", lat: "x" }] })],
+  ];
+  const rochefort = { nom: "Rochefort", dept: "17", lat: 45.9455, lon: -0.9745, transport: { gare_nom: "La Rochelle", gare_km: 26.5 } };
+  for (const [motif, contenu] of casIllisibles) {
+    const fichier = contenu === null ? absent : path.join(dossier, `${motif.replace(/\W+/g, "-")}.json`);
+    if (contenu !== null) writeFileSync(fichier, contenu);
+    const lu = await chargerGaresBpe(fichier);
+    assert.equal(lu, null, `${motif} : lu comme une liste`);
+    const signal = JSON.stringify(signalTrain(garesDeLaCommune(rochefort, lu?.gares ?? null), 44));
+    assert.doesNotMatch(signal, /aucune gare|gare_dans_la_commune|gare_la_plus_proche|Rochelle/, motif);
+  }
+  // Une liste vide passée directement n'est pas une absence de gares non plus.
+  const vide = garesDeLaCommune(rochefort, []);
+  assert.equal(vide.bpeLue, false);
+  assert.equal(vide.dansLaCommune, null);
+  // Un échec ne reste pas en mémoire : le fichier réparé est relu.
+  writeFileSync(absent, JSON.stringify({ millesime: "2025", gares: [{ t: "E108", lat: 45.9455, lon: -0.9745, n: "ROCHEFORT", a: "17300 ROCHEFORT" }] }));
+  assert.equal((await chargerGaresBpe(absent))?.gares.length, 1);
+  assert.equal(lireGaresBpe("null"), null);
+});
+
+test("FUT-97 : data/gares-bpe.json reprend fidèlement les gares des points BPE versionnés", () => {
+  const derive = JSON.parse(readFileSync("data/gares-bpe.json", "utf8")) as { millesime: string; gares: { t: string; lat: number; lon: number; n?: string; a?: string }[] };
+  const millesimes = new Set<string>();
+  const attendues: string[] = [];
+  for (const f of readdirSync("data/bpe-points").filter((f) => f.endsWith(".json"))) {
+    const j = JSON.parse(readFileSync(path.join("data/bpe-points", f), "utf8")) as { millesime?: string; points: { t: string; lat: number; lon: number; n?: string; a?: string }[] };
+    if (j.millesime) millesimes.add(j.millesime);
+    for (const p of j.points) if (["E107", "E108", "E109"].includes(p.t)) attendues.push(`${p.t}|${p.lat}|${p.lon}|${p.n ?? ""}|${p.a ?? ""}`);
+  }
+  assert.deepEqual([...millesimes], [derive.millesime], "un seul millésime, celui des points BPE");
+  const obtenues = derive.gares.map((g) => `${g.t}|${g.lat}|${g.lon}|${g.n ?? ""}|${g.a ?? ""}`);
+  assert.deepEqual(obtenues.sort(), attendues.sort(), "régénérer : node scripts/extraire-gares-bpe.mjs");
+});
+
 // ── Les cas de l'étude, sur les données versionnées ─────────────────────────────────────────
 
 test("FUT-97 : Rochefort a sa gare, et La Rochelle n'est plus transmise comme telle", async () => {
@@ -130,10 +178,13 @@ test("câblage FUT-97 : /qna reçoit les gares de la BPE, jamais `gare_nom`", ()
   const code = signaux.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
   assert.doesNotMatch(code, /gare_nom|gare_km/, "la gare de référence ne doit plus entrer dans les signaux");
   const route = lire("src/app/qna/route.ts");
-  assert.match(route, /buildTerritorySignals\(entry, garesDeLaCommune\(entry, pointsBpe\)\)/);
-  assert.match(route, /loadBpePointsAround\(\{ lat: entry\.lat, lon: entry\.lon \}\)/);
-  // Sans les points BPE dans la fonction déployée, la route ne nommerait aucune gare en production.
-  assert.match(lire("next.config.ts"), /"\/qna": \[\s*"\.\/data\/comparateur-index\.json\.gz",\s*"\.\/data\/bpe-points\/\*\*",\s*\]/);
+  assert.match(route, /buildTerritorySignals\(entry, garesDeLaCommune\(entry, garesBpe\)\)/);
+  assert.match(route, /const garesBpe = entry \? \(await chargerGaresBpe\(\)\)\?\.gares \?\? null : null;/);
+  // Les gares seules (273 Ko), pas les cellules BPE complètes (39 Mo) : sans elles dans la fonction
+  // déployée, la route ne nommerait aucune gare en production.
+  const config = lire("next.config.ts");
+  assert.match(config, /"\/qna": \[\s*"\.\/data\/comparateur-index\.json\.gz",\s*"\.\/data\/gares-bpe\.json",\s*\]/);
+  assert.doesNotMatch(config.slice(config.indexOf('"/qna"'), config.indexOf('"/api/logement-autour"')), /bpe-points/);
   assert.match(lire("src/lib/accueil/qna.ts"), /Never present any other station as the commune's station, its nearest station or its usual station/);
 });
 

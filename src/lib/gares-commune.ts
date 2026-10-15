@@ -15,9 +15,9 @@ import type { BpePoint } from "./logement-autour-types.ts";
 import { haversineM } from "./geo-distance.ts";
 
 /**
- * Le rayon de recherche autour du point de référence. Les cellules BPE lues autour d'un point
- * (`neighborKeys`, 3 × 3 cellules de 0,18°) couvrent au moins 11 km dans toute la métropole : à
- * 10 km, une gare absente des points chargés est une gare absente de la BPE.
+ * Le rayon autour du point de référence de la commune. Au-delà, on ne parle plus de la gare de la
+ * commune ni d'une gare proche : une commune très étendue peut avoir une gare plus loin de ce point,
+ * d'où « non recensée près de son point de référence », jamais « absente ».
  */
 export const RAYON_GARES_KM = 10;
 
@@ -26,11 +26,11 @@ const TYPES_GARE = new Set(["E107", "E108", "E109"]);
 export type GaresCommune = {
   /** La gare de l'indicateur. Ne se restitue jamais comme gare de la commune ni comme la plus proche. */
   reference: { nom: string; km: number | null } | null;
-  /** Une gare de la BPE est-elle dans la commune (dans le rayon) ? `null` : BPE non lue. */
+  /** Une gare de la BPE est-elle dans la commune (dans le rayon) ? `null` : gares BPE inconnues. */
   dansLaCommune: boolean | null;
-  /** La gare BPE la plus proche du point de référence, dans le rayon. `null` : aucune, ou BPE non lue. */
+  /** La gare BPE la plus proche du point de référence, dans le rayon. `null` : aucune, ou gares inconnues. */
   plusProche: { nom: string; km: number; dansLaCommune: boolean } | null;
-  /** La BPE a-t-elle été lue ? Sans elle, on ne dit rien des gares. */
+  /** Les gares BPE ont-elles été lues ? Sans elles, on ne dit rien des gares, pas même leur absence. */
   bpeLue: boolean;
 };
 
@@ -89,16 +89,20 @@ export function nomDeGareLisible(s: string): string {
     .join("");
 }
 
+/**
+ * `garesBpe` : les gares de voyageurs de la BPE (`chargerGaresBpe`), ou `null` si elles n'ont pas pu être
+ * lues. `null` ne se confond JAMAIS avec une liste vide : « on ne sait pas » n'est pas « il n'y en a pas ».
+ */
 export function garesDeLaCommune(
   commune: { nom: string; dept: string; lat: number; lon: number; transport?: { gare_nom: string | null; gare_km: number | null } | null },
-  pointsBpe: BpePoint[] | null,
+  garesBpe: BpePoint[] | null,
 ): GaresCommune {
   const reference = commune.transport?.gare_nom
     ? { nom: commune.transport.gare_nom, km: commune.transport.gare_km ?? null }
     : null;
-  if (pointsBpe === null) return { reference, dansLaCommune: null, plusProche: null, bpeLue: false };
+  if (garesBpe === null || garesBpe.length === 0) return { reference, dansLaCommune: null, plusProche: null, bpeLue: false };
   const centre = { lat: commune.lat, lon: commune.lon };
-  const gares = pointsBpe
+  const gares = garesBpe
     .filter((p) => TYPES_GARE.has(p.t))
     .map((p) => ({ p, km: haversineM(centre, { lat: p.lat, lon: p.lon }) / 1000 }))
     .filter((g) => g.km <= RAYON_GARES_KM)

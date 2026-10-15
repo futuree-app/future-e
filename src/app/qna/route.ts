@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getCommuneEntry, buildTerritorySignals } from "@/lib/comparateur-vie";
-import { loadBpePointsAround } from "@/lib/logement-bpe";
+import { chargerGaresBpe } from "@/lib/gares-bpe";
 import { garesDeLaCommune } from "@/lib/gares-commune";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { getGeorisquesSummary } from "@/lib/georisques";
@@ -107,10 +107,10 @@ export async function POST(request: Request) {
   if (inseeCode) {
     try {
       const entry = await getCommuneEntry(String(inseeCode));
-      // FUT-97 : les gares dites au lecteur viennent de la BPE, autour du point de référence de la
-      // commune. Illisible : `null`, et le signal ne nomme aucune gare.
-      const pointsBpe = entry ? await loadBpePointsAround({ lat: entry.lat, lon: entry.lon }).then((r) => r.points).catch(() => null) : null;
-      if (entry) territorySignals = buildTerritorySignals(entry, garesDeLaCommune(entry, pointsBpe));
+      // FUT-97 : les gares dites au lecteur viennent de la BPE (data/gares-bpe.json, lu une fois par
+      // instance). Illisible : `null`, et le signal ne nomme aucune gare, pas même leur absence.
+      const garesBpe = entry ? (await chargerGaresBpe())?.gares ?? null : null;
+      if (entry) territorySignals = buildTerritorySignals(entry, garesDeLaCommune(entry, garesBpe));
     } catch {
       territorySignals = null;
     }
