@@ -14,6 +14,16 @@ Arènes et Super Nîmes présentent des pratiques domicile-travail très différ
 
 # À Nîmes, des équipements proches ne disent pas tout de la place de la voiture
 
+**En un an, entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du gazole a augmenté de 0,76 € le litre dans les stations situées dans un rayon de 12 km autour du centre de Nîmes. Pour qui cherche un logement, la question devient concrète : quelle place la voiture prendra-t-elle dans ses déplacements depuis l’adresse visée ?**
+
+## Ce que la hausse coûte selon la distance
+
+Le SP95-E10 a pris 0,54 € le litre sur la même période. Le tableau traduit ces hausses en surcoût annuel pour un trajet domicile-travail fait en voiture, selon sa longueur. Il repose sur trois hypothèses : une consommation de 6 litres aux 100 km, 200 allers-retours par an et une hausse arrondie à 5 centimes. Seul le carburant est compté.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+Ce surcoût dépend de la seule longueur du trajet, quelle que soit l’adresse. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur.
+
 Pour chercher un logement en espérant moins conduire, la proximité des commerces et de l’école mérite attention. À Nîmes, elle se rencontre pourtant dans des secteurs où les pratiques de déplacement vers le travail sont très différentes.
 
 ## Des pratiques contrastées selon le secteur
@@ -50,6 +60,8 @@ Les secteurs sont les IRIS de l’INSEE, dont les libellés peuvent différer de
 
 La proximité des équipements repose sur la Base adresse nationale et la Base permanente des équipements de l’INSEE, millésime 2025. Dans les résultats par secteur cités ici, chaque adresse compte autant ; ces parts ne représentent ni des ménages ni des habitants.
 
+Carburant : prix-carburants.gouv.fr, flux officiel. Prix médian entre les stations du dernier prix déclaré dans la semaine, dans un rayon de 12 km à vol d’oiseau autour du centre de Nîmes. Le tableau compte le seul carburant, sans achat, assurance, entretien ni stationnement.
+
 ## C. Correspondance interne — non publiée
 
 | Passage | Chiffre écrit | Identifiant(s) | Usage |
@@ -63,6 +75,15 @@ La proximité des équipements repose sur la Base adresse nationale et la Base p
 | Courses et école — distance de chaque équipement du panier | 500 m | `iris.301890101.panier_500m`, `iris.301890901.panier_500m` | oui — seuil à vol d’oiseau |
 | Méthode — millésime des pratiques | 2022 | `iris.voiture.min`, `iris.voiture.max`, `mobpro.travaille_dans_commune`, `mobpro.voiture_selon_destination.meme_commune` | oui — millésime |
 | Méthode — millésime des équipements | 2025 | `acces.30189.panier_quotidien_500m` | oui — millésime de la source BPE |
+| Chapeau | 0,76 € le litre | `carburant.gazole.ecart` | oui |
+| Chapeau | semaine du 6 octobre 2025 | `carburant.gazole.prix_un_an_avant` (libellé du fait) | oui |
+| Chapeau | semaine du 5 octobre 2026 | `carburant.gazole.prix` (libellé du fait) | oui |
+| Chapeau | rayon de 12 km | `carburant.gazole.ecart` (périmètre) | oui |
+| Hausse selon la distance | 0,54 € le litre | `carburant.e10.ecart` | oui |
+| Hausse selon la distance | 6 litres aux 100 km | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Hausse selon la distance | 200 allers-retours | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Hausse selon la distance | 5 centimes | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Méthode | 12 km | `carburant.*` (périmètre) | oui |
 
 ## D. Visuels et vérifications restantes
 
@@ -77,8 +98,12 @@ La proximité des équipements repose sur la Base adresse nationale et la Base p
 
 Aucun autre doute de lecture identifié.
 
+- **Tableau du scénario de surcoût de carburant** : après le passage sur la hausse, au début de l’article ; aucune étape manuelle (tableau construit à partir du scénario du dossier).
+- `carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations ; mettre à jour les deux semaines citées. Obligatoire avant publication.
+
 ## F. Retouches éditoriales (15/10/2026, à la main, hors génération)
 
 | Passage | Changement | Raison |
 |---|---|---|
 | Méthode | « Le dossier ne croise pas… » → « Les données présentées ne croisent pas… » | Vocabulaire de production |
+| Ouverture | Chapeau sur la hausse datée du gazole, passage « Ce que la hausse coûte selon la distance » (SP95-E10, hypothèses, tableau, transition vers les pratiques locales) ; l’ancien chapeau devient un paragraphe ; source carburant en méthode | Entrée de la série mobilité (porteur, 15/10/2026) |

@@ -10,7 +10,7 @@ Tu relis **l'article destiné à être publié (section B)** ; les sections A, C
 2. **Croisements inventés.** L'article attribue-t-il une part de secteur aux seuls actifs qui travaillent dans la commune, ou combine-t-il deux tableaux en un chiffre que le dossier ne donne pas ?
 3. **Bornes et arrondis.** « Tous », « aucun », « 100 % », « 0 % » ne valent que pour une valeur exacte. « Presque tous » pour 87 % est faux.
 4. **Conditions documentaires.** Chaque information `doc.*` est-elle écrite dans son périmètre (lignes concernées, public, dates de validité) ? Une gratuité est-elle présentée comme une faisabilité ? Une absence d'information devient-elle une absence de service ?
-5. **Raisonnement.** Les pratiques des habitants d'un secteur deviennent-elles une recommandation de quartier pour le lecteur (« ce secteur mérite d'être regardé si vous voulez moins prendre la voiture ») ? Une proximité devient-elle un usage, une pratique une contrainte, un écart entre groupes l'effet d'un changement de lieu, une comparaison une évolution ? Une cause est-elle affirmée sans que le dossier la mesure ? La comparaison avec d'autres communes respecte-t-elle sa règle (médiane, pas de rang inventé) ?
+5. **Raisonnement.** Les pratiques des habitants d'un secteur deviennent-elles une recommandation de quartier pour le lecteur (« ce secteur mérite d'être regardé si vous voulez moins prendre la voiture ») ? Une proximité devient-elle un usage, une pratique une contrainte, un écart entre groupes l'effet d'un changement de lieu, une comparaison une évolution ? Une cause est-elle affirmée sans que le dossier la mesure (les pratiques de 2022 présentées comme une réaction à la hausse du carburant, un surcoût du scénario attribué à un quartier ou à une commune de travail) ? La comparaison avec d'autres communes respecte-t-elle sa règle (médiane, pas de rang inventé) ?
 6. **Conclusion.** Part-elle du projet du lecteur et reste-t-elle dans les capacités autorisées du dossier, sans inventaire de fonctionnalités ni temps de trajet ?
 7. **Millésimes et groupes comparés.** Le millésime de chaque source chiffrée (recensement, équipements, prix du carburant) est-il conservé dans le texte ou la méthode ? Chaque groupe de communes comparé (communes de travail nommées, communes du repère de comparaison) est-il expliqué dans la méthode : composition ou règle de choix ?
 8. **Consignes de production dans le texte.** Réextraction des prix, vérifications « avant publication », renvoi au dossier : elles n'ont rien à faire dans l'article.
@@ -20,7 +20,7 @@ Tu relis **l'article destiné à être publié (section B)** ; les sections A, C
 
 - **Niveau 1, à corriger** (`bloquante`) : fait faux, mauvaise population, raisonnement trompeur, promesse non étayée, condition essentielle omise.
 - **Niveau 2, à noter** (`a_revoir`) : amélioration utile de clarté, formulation interne (renvoi au dossier, vocabulaire de production). Elle ne déclenche aucune nouvelle génération.
-- **Niveau 3, à ne pas signaler** : préférence de style, conseil général pertinent, choix des exemples, rubrique ou thème omis (carburant, stationnement, comparaison : l'angle choisi ne les impose pas).
+- **Niveau 3, à ne pas signaler** : préférence de style, conseil général pertinent, choix des exemples, rubrique ou thème omis (stationnement, comparaison : l'angle choisi ne les impose pas). L'ouverture carburant fait exception : elle est l'entrée de la série et son absence est vérifiée par le contrôle déterministe.
 
 ## Ce que tu rends
 

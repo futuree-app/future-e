@@ -134,6 +134,14 @@ def controler(d, txt):
         if n and vals and not definition and not any(ok(x, y) for x in n for y in vals):
             A.append({"type": "valeur", "gravite": "bloquante", "passage": passage,
                       "detail": f"« {chiffre} » ne correspond à aucune valeur du dossier pour {', '.join(codes)} ({', '.join(str(v) for v in vals[:6])})"})
+    # Entrée de la série mobilité (porteur, 15/10/2026) : quand le dossier a des faits carburant utilisables et un scénario,
+    # l'article s'ouvre sur la hausse et place le tableau du surcoût avant tout autre visuel.
+    carbu = [f for f in d.get("faits", []) if f["id"].startswith("carburant.") and f.get("usage") == "oui"]
+    if carbu and (d.get("scenario_carburant") or {}).get("lignes"):
+        vis = re.findall(r"^\[(?:VISUEL|CARTE|GRAPHIQUE|TABLEAU)[^\]]*\]", S["B"], re.M)
+        if not vis or not re.search(r"carburant|sc[ée]nario|surco[ûu]t", vis[0], re.I):
+            A.append({"type": "entree_carburant", "gravite": "bloquante",
+                      "detail": "faits carburant utilisables : l'article doit s'ouvrir sur la hausse et placer le tableau du surcoût avant les autres visuels"})
     tous_ecrits = " ".join(norm(e) for e in ecrits)
     for m in re.finditer(r"(\d+(?:,\d+)?)\s?%", norm(corps)):
         if m.group(1) not in tous_ecrits:

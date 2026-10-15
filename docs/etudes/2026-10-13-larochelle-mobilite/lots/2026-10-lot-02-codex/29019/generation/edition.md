@@ -12,6 +12,16 @@ Pistes écartées : carburant, comparaison nationale, stationnement et statut d�
 
 # À Brest, où chercher un logement pour utiliser moins la voiture ?
 
+**En un an, entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du gazole a augmenté de 0,73 € le litre dans les stations situées dans un rayon de 12 km autour du centre de Brest. Pour qui cherche un logement, la question devient concrète : quelle place la voiture prendra-t-elle dans ses déplacements depuis l’adresse visée ?**
+
+## Ce que la hausse coûte selon la distance
+
+Le SP95-E10 a pris 0,47 € le litre sur la même période. Le tableau traduit ces hausses en surcoût annuel pour un trajet domicile-travail fait en voiture, selon sa longueur. Il repose sur trois hypothèses : une consommation de 6 litres aux 100 km, 200 allers-retours par an et une hausse arrondie à 5 centimes. Seul le carburant est compté.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+Ce surcoût dépend de la seule longueur du trajet, quelle que soit l’adresse. Ce qui change d’un logement à l’autre, c’est la place que la voiture prend dans les déplacements : les trajets domicile-travail recensés en 2022, avant cette hausse, la montrent très variable selon le secteur et le lieu de travail.
+
 Dans les pratiques domicile-travail du recensement 2022, la voiture est le mode principal de 42 % des actifs qui habitent le secteur Saint-Martin, contre 87 % à Kervao-Rural Nord, quelle que soit leur commune de travail. Pour chercher un logement en espérant moins conduire, examinez votre destination de travail et les équipements autour de l’adresse.
 
 ## Situer le secteur et le lieu de travail
@@ -50,6 +60,8 @@ Les pratiques domicile-travail concernent les actifs occupés et proviennent du 
 
 Les proximités reposent sur la Base adresse nationale et la Base permanente des équipements de l’INSEE, millésime 2025. Chaque adresse compte pareil dans son secteur ; le point recensé correspond à l’adresse de l’établissement, pas nécessairement à son entrée. Les outils Bibus cités proviennent des informations officielles du réseau.
 
+Carburant : prix-carburants.gouv.fr, flux officiel. Prix médian entre les stations du dernier prix déclaré dans la semaine, dans un rayon de 12 km à vol d’oiseau autour du centre de Brest. Le tableau compte le seul carburant, sans achat, assurance, entretien ni stationnement.
+
 ## C. Correspondance interne — non publiée
 
 | Passage | Chiffre écrit | Identifiant(s) | Usage |
@@ -64,6 +76,15 @@ Les proximités reposent sur la Base adresse nationale et la Base permanente des
 | Courses et école — adresses de Lambezellec | 98 % | `iris.290190160.panier_500m` | oui |
 | Courses et école — voiture à Lambezellec | 79 % | `iris.290190160.voiture` | oui |
 | Méthode — millésime des équipements | 2025 | `iris.290190140.panier_500m`, `iris.290190160.panier_500m` — source BPE précisée dans le dossier | oui |
+| Chapeau | 0,73 € le litre | `carburant.gazole.ecart` | oui |
+| Chapeau | semaine du 6 octobre 2025 | `carburant.gazole.prix_un_an_avant` (libellé du fait) | oui |
+| Chapeau | semaine du 5 octobre 2026 | `carburant.gazole.prix` (libellé du fait) | oui |
+| Chapeau | rayon de 12 km | `carburant.gazole.ecart` (périmètre) | oui |
+| Hausse selon la distance | 0,47 € le litre | `carburant.e10.ecart` | oui |
+| Hausse selon la distance | 6 litres aux 100 km | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Hausse selon la distance | 200 allers-retours | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Hausse selon la distance | 5 centimes | `scenario.carburant.*` (hypothèses, section 7) | oui |
+| Méthode | 12 km | `carburant.*` (périmètre) | oui |
 
 ## D. Visuels et vérifications restantes
 
@@ -79,6 +100,9 @@ Vérifications concernant les faits utilisés :
 - **`iris.ecart_voiture` :** relire les libellés Saint-Martin, Kervao-Rural Nord et Lambezellec. Le texte les désigne comme des secteurs statistiques, sans les assimiler à des quartiers d’usage.
 - Faire figurer les millésimes sur les visuels : pratiques du recensement pour la carte et les barres ; sources des pratiques et des équipements pour le tableau.
 
+- **Tableau du scénario de surcoût de carburant** : après le passage sur la hausse, au début de l’article ; aucune étape manuelle (tableau construit à partir du scénario du dossier).
+- `carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations ; mettre à jour les deux semaines citées. Obligatoire avant publication.
+
 ## E. Corrections
 
 | Anomalie | Passage avant | Passage après |
@@ -91,3 +115,4 @@ Vérifications concernant les faits utilisés :
 | Passage | Changement | Raison |
 |---|---|---|
 | Courses et école | « le dossier repère les adresses » → « un second indicateur compte les adresses » | Vocabulaire de production |
+| Ouverture | Chapeau sur la hausse datée du gazole, passage « Ce que la hausse coûte selon la distance » (SP95-E10, hypothèses, tableau, transition vers les pratiques locales) ; l’ancien chapeau devient un paragraphe ; source carburant en méthode | Entrée de la série mobilité (porteur, 15/10/2026) |
