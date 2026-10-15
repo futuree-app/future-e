@@ -88,6 +88,8 @@ export type LecturePastille = {
     mesure?: { valeur: string; unite: string; legende: string };
     /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
     mesures?: MesureChaleur[];
+    /** Un détail consultable, replié par défaut (risques : la liste structurée de ce que la source recense). */
+    detail?: { resume: string; groupes: GroupeRisques[] };
   } | null;
   pourVous: { signal: Signal; texte: string };
   /** L'explication de méthode, consultable (« Comment lire ce résultat ? »). Ne répète pas les chiffres affichés. */
@@ -303,31 +305,103 @@ const ADRESSE_TEXTE = (commune: string, aCommune: (n: string) => string) =>
   `Les trajets, les transports à pied et les services proches dépendent de l'endroit précis où l'on vit ${aCommune(commune)}. Le dossier les mesure autour de l'adresse.`;
 
 const SOURCE_DRIAS = "DRIAS · Météo-France, horizon 2050 (+2,7 °C en France)";
-const SOURCE_GEORISQUES = "Géorisques · recensement actuel de l'État";
 
-export function lireRisques(lieu: Lieu, libelles: string[] | null): LecturePastille {
+// ── LES RISQUES : un constat, puis le détail replié (revue du 15/10) ──────────────────────────────────
+//
+// Source : GASPAR (Géorisques, `/api/v1/gaspar/risques`), le recensement des risques par commune. Chaque ligne
+// porte un code `num_risque` HIÉRARCHIQUE, et c'est lui qui classe, jamais le libellé :
+//   - le premier chiffre dit la nature : 1 naturel, 2 technologique, 3 minier (observé sur Nantes, Lyon, Marseille,
+//     Brest, Briançon, Saint-Denis de La Réunion… ; tout autre préfixe reste affiché tel quel, sans être deviné) ;
+//   - deux chiffres = une famille (11 Inondation) ; trois chiffres = une déclinaison de la famille dont il porte le
+//     préfixe (112 « Par une crue à débordement lent… »). Une déclinaison n'est jamais un risque de plus.
+// L'ancien panneau énumérait les 23 lignes de Nantes à plat : familles, déclinaisons et risques technologiques
+// mêlés, parce que la route ne gardait que les libellés.
+
+export type RisqueGaspar = { code: string; libelle: string };
+export type NatureRisque = "naturel" | "technologique" | "minier" | "autre";
+export type FamilleRisque = { code: string; nom: string; declinaisons: string[] };
+export type GroupeRisques = { nature: NatureRisque; titre: string; note?: string; familles: FamilleRisque[] };
+
+const NATURE_DU_CHIFFRE: Record<string, NatureRisque> = { "1": "naturel", "2": "technologique", "3": "minier" };
+
+// Les familles naturelles dans les mots du lecteur. C'est un renommage des familles DE LA SOURCE (même code, même
+// périmètre), pas un regroupement nouveau ; une famille inconnue garde le libellé de la source.
+const NOM_FAMILLE_NATURELLE: Record<string, string> = {
+  "11": "inondation", "12": "mouvements de terrain", "13": "séisme", "14": "avalanche",
+  "15": "éruption volcanique", "16": "feux de forêt", "17": "phénomènes météorologiques", "18": "radon",
+};
+
+/** « Eboulement » : la source omet l'accent de la capitale ; en minuscule, il devient une faute. */
+const libelleLecteur = (l: string) => minusculeInitiale(l.replace(/^Eboulement/, "Éboulement"));
+
+export function regrouperRisques(risques: RisqueGaspar[]): GroupeRisques[] {
+  const familles = new Map<string, FamilleRisque & { nature: NatureRisque }>();
+  for (const r of [...risques].sort((a, b) => a.code.localeCompare(b.code))) {
+    const code = r.code.trim();
+    if (!/^\d{2,}$/.test(code)) continue;
+    const cle = code.slice(0, 2);
+    const nature = NATURE_DU_CHIFFRE[code[0]!] ?? "autre";
+    const f = familles.get(cle) ?? { code: cle, nom: "", declinaisons: [], nature };
+    if (code.length === 2) f.nom = nature === "naturel" ? (NOM_FAMILLE_NATURELLE[cle] ?? libelleLecteur(r.libelle)) : libelleLecteur(r.libelle);
+    else f.declinaisons.push(libelleLecteur(r.libelle));
+    familles.set(cle, f);
+  }
+  // Une déclinaison sans sa famille dans la réponse : elle devient sa propre ligne, rien ne se perd.
+  for (const f of familles.values()) if (!f.nom) f.nom = f.declinaisons.shift() ?? f.code;
+  const groupe = (nature: NatureRisque, titre: string, note?: string): GroupeRisques | null => {
+    const liste = [...familles.values()].filter((f) => f.nature === nature).map(({ code, nom, declinaisons }) => ({ code, nom, declinaisons }));
+    return liste.length ? { nature, titre, ...(note ? { note } : {}), familles: liste } : null;
+  };
+  return [
+    groupe("naturel", "Risques naturels"),
+    groupe("technologique", "Risques technologiques", "Recensés par la même source, ils ne relèvent pas des risques naturels."),
+    groupe("minier", "Risques miniers", "Liés aux anciennes exploitations, ils ne relèvent pas des risques naturels."),
+    groupe("autre", "Autres risques recensés", "Catégorie que futur•e ne sait pas classer : elle est reprise telle quelle."),
+  ].filter((g): g is GroupeRisques => g != null);
+}
+
+const SOURCE_GEORISQUES = "Géorisques, base GASPAR · recensement actuel de l'État";
+const A_VERIFIER_RISQUES = "À une adresse précise, vérifiez si elle se trouve dans une zone concernée, quelles règles s'y appliquent et ce que l'on sait du terrain et du bâtiment. Être hors zone ne met pas à l'abri de tout risque.";
+
+/**
+ * `risques` : `null` quand la source n'a pas répondu (jamais « aucun risque ») ; `[]` quand elle répond sans rien
+ * recenser. GASPAR ne distingue pas « commune sans risque recensé » de « commune absente de la base » (deux vraies
+ * communes, 02813 et 80589, répondent 0 résultat, comme un code inexistant) : le texte dit donc seulement que la
+ * base ne recense rien.
+ */
+export function lireRisques(lieu: Lieu, risques: RisqueGaspar[] | null): LecturePastille {
   const suite = SUITE_ADRESSE(lieu);
-  if (libelles == null) {
+  if (risques == null) {
     return {
       cle: "risques", commune: lieu.commune, fait: null,
-      pourVous: { signal: "indisponible", texte: "Géorisques n'a pas répondu. Une absence de réponse ne dit pas qu'il n'y a pas de risque." },
-      aVerifier: "L'état des risques précise ce qu'il en est à une adresse donnée.",
+      pourVous: { signal: "indisponible", texte: "La base nationale des risques n'a pas répondu : nous ne pouvons rien en dire, ni dans un sens ni dans l'autre." },
+      aVerifier: A_VERIFIER_RISQUES,
       suite,
     };
   }
-  const fait = libelles.length === 0
-    ? "L'État ne recense aucun risque naturel ou technologique pour la commune."
-    : `L'État recense pour la commune : ${joinFr(libelles.map(minusculeInitiale))}.`;
+  const groupes = regrouperRisques(risques);
+  const naturels = groupes.find((g) => g.nature === "naturel")?.familles ?? [];
+  const autres = groupes.filter((g) => g.nature !== "naturel");
+  const constat = naturels.length >= 2
+    ? `Plusieurs risques naturels sont recensés dans la commune : ${joinFr(naturels.map((f) => f.nom))}.`
+    : naturels.length === 1
+      ? `Un risque naturel est recensé dans la commune : ${naturels[0]!.nom}.`
+      : autres.length
+        ? "Aucun risque naturel n'est recensé dans la commune ; d'autres risques le sont, détaillés ci-dessous."
+        : "La base nationale des risques ne recense rien pour cette commune.";
   return {
     cle: "risques", commune: lieu.commune,
-    fait: { texte: fait, source: SOURCE_GEORISQUES, grain: "commune" },
+    fait: {
+      texte: constat, source: SOURCE_GEORISQUES, grain: "commune",
+      ...(groupes.length ? { detail: { resume: "Voir les risques recensés", groupes } } : {}),
+    },
     pourVous: {
       signal: "information",
-      texte: libelles.length === 0
-        ? "Ce recensement vaut pour la commune entière : il ne dit rien d'une adresse précise."
-        : "Ce recensement est actuel et porte sur la commune entière : il ne dit pas quelle partie est concernée, ni comment le risque évoluera.",
+      texte: naturels.length
+        ? "Un risque recensé dans la commune ne concerne pas forcément chaque adresse."
+        : "Une absence de recensement ne garantit pas l'absence de danger.",
     },
-    aVerifier: "L'état des risques précise ce qu'il en est à une adresse donnée : zone réglementée, sol, sinistres reconnus.",
+    aVerifier: A_VERIFIER_RISQUES,
     suite,
   };
 }

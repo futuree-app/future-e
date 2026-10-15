@@ -376,6 +376,26 @@ function Lecture({ lecture, onglets }: {
             ) : (
               <p className={c.tempsTexte}>{fr(lecture.fait.texte)}</p>
             )}
+            {lecture.fait.detail ? (
+              // Le détail, replié : visible au besoin, jamais imposé. Natif, donc clavier et lecteurs d'écran.
+              <details className={c.methode}>
+                <summary>{lecture.fait.detail.resume}</summary>
+                {lecture.fait.detail.groupes.map((g) => (
+                  <div key={g.nature} className={c.detailGroupe}>
+                    <h4 className={c.detailTitre}>{g.titre}</h4>
+                    {g.note ? <p>{fr(g.note)}</p> : null}
+                    <ul className={c.detailListe}>
+                      {g.familles.map((f) => (
+                        <li key={f.code}>
+                          <span className={c.detailFamille}>{f.nom.charAt(0).toUpperCase() + f.nom.slice(1)}</span>
+                          {f.declinaisons.length ? fr(` : ${f.declinaisons.join(" ; ")}`) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </details>
+            ) : null}
             <span className={c.source}>
               <GlypheGrain grain={lecture.fait.grain} taille={11} />{" "}
               {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : "à l'échelle de la commune"} · {lecture.fait.source}

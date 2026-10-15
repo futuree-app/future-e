@@ -9,7 +9,7 @@
 // n'appelle que des sources déjà lues par l'accueil ou par le dossier (cf. compte rendu FUT-50 C).
 import { NextResponse } from "next/server";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
-import { getGeorisquesSummary } from "@/lib/georisques";
+import { codeGaspar } from "@/lib/georisques-flags";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction, buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS, CLIMAT_HORIZON } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
@@ -18,7 +18,7 @@ import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil
 import { CLIMAT_REFERENCE_LABEL } from "@/lib/decision/climat-facts";
 import { aCommune } from "@/lib/typography";
 import { projetDeTest } from "@/app/dev/fut87/projet-de-test";
-import { lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille, type EntreesHivers } from "@/components/prototypes/fut50/c/pastilles";
+import { lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, type RisqueGaspar, type CleePastille, type Lieu, type EntreesChaleur, type EntreesTaille, type EntreesHivers } from "@/components/prototypes/fut50/c/pastilles";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +55,32 @@ async function entreesChaleur(insee: string): Promise<EntreesChaleur> {
     })(),
     referenceTexte, limite: LIMITE_CLIMAT, gesteSansAdresse,
   };
+}
+
+/**
+ * LES RISQUES AVEC LEUR CODE. `getGeorisquesSummary` (production) ne garde que les libellés : c'est ce qui rendait
+ * l'ancien inventaire à plat. Le prototype lit la MÊME ressource (GASPAR v1, même grain communal, même repli
+ * Paris/Lyon/Marseille via `codeGaspar`) en gardant `num_risque`, sans toucher à la bibliothèque de production.
+ * `null` : pas de réponse exploitable (jamais « aucun risque ») ; `[]` : la base répond sans rien recenser.
+ */
+async function risquesGaspar(insee: string): Promise<RisqueGaspar[] | null> {
+  const controle = new AbortController();
+  const delai = setTimeout(() => controle.abort(), 8000);
+  try {
+    const r = await fetch(`https://georisques.gouv.fr/api/v1/gaspar/risques?code_insee=${encodeURIComponent(codeGaspar(insee))}`, {
+      headers: { accept: "application/json" }, next: { revalidate: 86400 }, signal: controle.signal,
+    });
+    if (!r.ok) return null;
+    const json = (await r.json()) as { data?: { risques_detail?: { num_risque?: string | null; libelle_risque_long?: string | null }[] | null }[] | null };
+    if (!Array.isArray(json.data)) return null;
+    return (json.data[0]?.risques_detail ?? [])
+      .map((d) => ({ code: String(d.num_risque ?? "").trim(), libelle: String(d.libelle_risque_long ?? "").trim() }))
+      .filter((d) => d.code && d.libelle);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(delai);
+  }
 }
 
 async function entreesTaille(insee: string): Promise<{ nom: string | null; e: EntreesTaille }> {
@@ -125,8 +151,7 @@ export async function GET(req: Request) {
     const { nom, e } = await entreesTaille(insee);
     lecture = lireTaille({ ...lieu, commune: nom ?? lieu.commune }, e);
   } else if (cle === "risques") {
-    const g = await getGeorisquesSummary(insee).catch(() => null);
-    lecture = lireRisques(lieu, g ? g.riskLabels : null);
+    lecture = lireRisques(lieu, await risquesGaspar(insee));
   } else {
     lecture = lireAdresse("voiture", lieu, aCommune);
   }

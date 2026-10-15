@@ -91,13 +91,106 @@ test("hivers doux : la position du moteur, la température de référence, la li
   assert.equal(lireHivers(SETE, { issue: "absent", position: null, limite: null, temperatureReference: null }).pourVous.signal, "indisponible");
 });
 
-test("risques : une INFORMATION de la commune entière, et Géorisques muet n'est pas « aucun risque »", () => {
-  const l = lireRisques(SETE, ["Inondation", "Feu de forêt"]);
+// ── Les risques : réponses GASPAR réelles (codes et libellés tels que l'API v1 les renvoie, relevés le 15/10/2026) ──
+const g = (lignes: string) => lignes.trim().split("\n").map((l) => { const [code, ...lib] = l.trim().split(" "); return { code: code!, libelle: lib.join(" ") }; });
+const GASPAR_NANTES = g(`
+  11 Inondation
+  112 Par une crue à débordement lent de cours d'eau
+  114 Par ruissellement et coulée de boue
+  116 Par remontées de nappes naturelles
+  12 Mouvement de terrain
+  121 Affaissements et effondrements d'origine anthropique (anciennes carrières souterraines, hors mines)
+  122 Affaissements et effondrements d'origine naturelle (cavités souterraines)
+  123 Eboulement ou chutes de pierres et de blocs
+  124 Glissement de terrain
+  125 Avancée dunaire
+  127 Tassements différentiels
+  13 Séisme
+  17 Phénomène lié à l'atmosphère
+  172 Tempête et grains (vent)
+  174 Foudre
+  175 Grêle
+  176 Neige et pluies verglaçantes
+  18 Radon
+  21 Risque industriel
+  23 Rupture de barrage
+  24 Transport de marchandises dangereuses
+  25 Engins de guerre`);
+const GASPAR_LA_ROCHELLE = g(`
+  11 Inondation
+  117 Par submersion marine
+  12 Mouvement de terrain
+  127 Tassements différentiels
+  13 Séisme
+  17 Phénomène lié à l'atmosphère
+  172 Tempête et grains (vent)
+  24 Transport de marchandises dangereuses`);
+const GASPAR_MARSEILLE_MINIER = g(`
+  16 Feu de forêt
+  31 Affaissement minier
+  311 Effondrements généralisés`);
+const lignesDuDetail = (l: ReturnType<typeof lireRisques>) =>
+  (l.fait?.detail?.groupes ?? []).flatMap((gr) => gr.familles.flatMap((f) => [f.nom, ...f.declinaisons]));
+
+test("risques, Nantes : 23 lignes de la source → cinq familles naturelles nommées, rien de technologique dans le constat", () => {
+  const l = lireRisques({ ...SETE, commune: "Nantes" }, GASPAR_NANTES);
+  assert.equal(l.fait?.texte, "Plusieurs risques naturels sont recensés dans la commune : inondation, mouvements de terrain, séisme, phénomènes météorologiques et radon.");
+  assert.doesNotMatch(l.fait!.texte, /industriel|barrage|marchandises|guerre|crue|ruissellement|grêle/);
   assert.equal(l.pourVous.signal, "information");
-  assert.equal(l.fait?.texte, "L'État recense pour la commune : inondation et feu de forêt.");
+  assert.equal(MOT_DU_SIGNAL[l.pourVous.signal], "À savoir");
+  assert.equal(l.pourVous.texte, "Un risque recensé dans la commune ne concerne pas forcément chaque adresse.");
+  const [nat, tech] = l.fait!.detail!.groupes;
+  assert.equal(nat!.titre, "Risques naturels");
+  assert.deepEqual(nat!.familles.map((f) => [f.nom, f.declinaisons.length]), [["inondation", 3], ["mouvements de terrain", 6], ["séisme", 0], ["phénomènes météorologiques", 4], ["radon", 0]]);
+  assert.equal(tech!.titre, "Risques technologiques");
+  assert.deepEqual(tech!.familles.map((f) => f.nom), ["risque industriel", "rupture de barrage", "transport de marchandises dangereuses", "engins de guerre"]);
+  assert.match(tech!.note!, /ne relèvent pas des risques naturels/);
+});
+
+test("risques : le détail ne perd aucune ligne de la source et n'en compte aucune deux fois", () => {
+  for (const source of [GASPAR_NANTES, GASPAR_LA_ROCHELLE, GASPAR_MARSEILLE_MINIER]) {
+    const lignes = lignesDuDetail(lireRisques(SETE, source));
+    assert.equal(lignes.length, source.length);
+    assert.equal(new Set(lignes).size, lignes.length);
+  }
+  // « Eboulement » de la source : l'accent rétabli en minuscule, le reste mot pour mot.
+  assert.ok(lignesDuDetail(lireRisques(SETE, GASPAR_NANTES)).includes("éboulement ou chutes de pierres et de blocs"));
+});
+
+test("risques, La Rochelle : la submersion marine reste lisible dans le détail, sous l'inondation", () => {
+  const l = lireRisques({ ...SETE, commune: "La Rochelle" }, GASPAR_LA_ROCHELLE);
+  assert.equal(l.fait?.texte, "Plusieurs risques naturels sont recensés dans la commune : inondation, mouvements de terrain, séisme et phénomènes météorologiques.");
+  assert.deepEqual(l.fait!.detail!.groupes[0]!.familles[0], { code: "11", nom: "inondation", declinaisons: ["par submersion marine"] });
+});
+
+test("risques : naturel, technologique, minier et inconnu classés par le code, jamais par le libellé", () => {
+  const l = lireRisques(SETE, [...GASPAR_MARSEILLE_MINIER, { code: "91", libelle: "Risque nouveau" }, { code: "21", libelle: "Inondation (libellé trompeur)" }]);
+  assert.deepEqual(l.fait!.detail!.groupes.map((gr) => [gr.nature, gr.familles.map((f) => f.nom)]), [
+    ["naturel", ["feux de forêt"]],
+    ["technologique", ["inondation (libellé trompeur)"]],
+    ["minier", ["affaissement minier"]],
+    ["autre", ["risque nouveau"]],
+  ]);
+  assert.equal(l.fait?.texte, "Un risque naturel est recensé dans la commune : feux de forêt.");
+  // Une déclinaison arrivée sans sa famille devient sa propre ligne.
+  const orphelin = lireRisques(SETE, [{ code: "117", libelle: "Par submersion marine" }]);
+  assert.deepEqual(orphelin.fait!.detail!.groupes[0]!.familles, [{ code: "11", nom: "par submersion marine", declinaisons: [] }]);
+});
+
+test("risques : technologiques seuls, base vide, source muette : trois cas distincts, jamais « aucun risque »", () => {
+  const tech = lireRisques(SETE, [{ code: "21", libelle: "Risque industriel" }]);
+  assert.equal(tech.fait?.texte, "Aucun risque naturel n'est recensé dans la commune ; d'autres risques le sont, détaillés ci-dessous.");
+  assert.equal(tech.pourVous.texte, "Une absence de recensement ne garantit pas l'absence de danger.");
+  const vide = lireRisques(SETE, []);
+  assert.equal(vide.fait?.texte, "La base nationale des risques ne recense rien pour cette commune.");
+  assert.equal(vide.fait?.detail, undefined, "pas de détail vide à ouvrir");
+  assert.equal(vide.pourVous.signal, "information");
   const muet = lireRisques(SETE, null);
+  assert.equal(muet.fait, null);
   assert.equal(muet.pourVous.signal, "indisponible");
-  assert.match(muet.pourVous.texte, /ne dit pas qu'il n'y a pas de risque/);
+  assert.match(muet.pourVous.texte, /n'a pas répondu : nous ne pouvons rien en dire, ni dans un sens ni dans l'autre/);
+  for (const l of [tech, vide, muet]) assert.doesNotMatch(`${l.fait?.texte ?? ""} ${l.pourVous.texte}`, /aucun risque\.|sans risque|à l'abri/i);
+  assert.match(muet.aVerifier, /Être hors zone ne met pas à l'abri de tout risque/);
 });
 
 test("sans voiture : se lit à l'adresse ; une ADRESSE choisie n'est lue qu'à l'échelle de sa commune", () => {
@@ -175,7 +268,7 @@ test("la mesure en grand : présente quand une valeur pertinente existe, jamais 
   const guéret = lireTaille({ ...SETE, commune: "Guéret" }, { issue: "favorable", phraseTaille: null, population: 13901, source: "urban_unit" });
   assert.equal(guéret.fait?.mesure?.unite, "habitants");
   assert.equal(guéret.fait?.mesure?.legende, "dans l'agglomération de Guéret");
-  assert.equal(lireRisques(SETE, ["Inondation"]).fait?.mesure, undefined);
+  assert.equal(lireRisques(SETE, [{ code: "11", libelle: "Inondation" }]).fait?.mesure, undefined);
 });
 
 test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l'état 3, rien en mouvement réduit", () => {

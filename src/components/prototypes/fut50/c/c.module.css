@@ -214,6 +214,12 @@
 .methode[open] summary::before { content: "−"; }
 .methode summary:hover { color: var(--r-encre); }
 .methode summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.detailGroupe { margin-top: 14px; }
+.detailTitre { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--r-encre); }
+.detailListe { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 15px; line-height: 1.5; color: var(--r-texte); }
+.detailListe li { padding-left: 14px; position: relative; }
+.detailListe li::before { content: ""; position: absolute; left: 0; top: 0.7em; width: 5px; height: 1px; background: var(--r-filet-fort); }
+.detailFamille { color: var(--r-encre); }
 .methode p { margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: var(--r-texte); }
 .signal::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--r-teinte, var(--r-encre)); flex: none; }
 
