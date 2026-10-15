@@ -358,7 +358,8 @@ function Lecture({ lecture, onglets }: {
         {...(onglets ? { role: "tabpanel", "aria-labelledby": `onglet-${onglets.focale}` } : {})}>
         {lecture.fait ? (
           <div className={c.temps}>
-            <h3 className={c.tempsTitre}>{lecture.fait.grain === "unite_urbaine" ? `Agglomération de ${lecture.commune}` : `À ${lecture.commune}`}</h3>
+            {/* Pas d'intertitre « À {commune} » : il doublait le titre de la lecture. L'échelle (commune ou
+                agglomération) reste dite par la ligne de source, sous les chiffres. */}
             {lecture.fait.mesures ? (
               <div className={c.mesures}>
                 {lecture.fait.mesures.map((m) => <Mesure key={m.unite} m={m} />)}
