@@ -347,7 +347,7 @@ def cmd_bilan(a):
     ecrire_candidats()
     J = lire_journal()
     deja = deja_preparees()
-    communes, exceptions, niv1, niv2, visuels_ko, faux = {}, [], [], 0, [], []
+    communes, exceptions, niv1, niv2, visuels_ko, faux, fragiles = {}, [], [], 0, [], [], []
     for n, d in lots_campagne():
         for kk, c in json.load(open(os.path.join(d, "etat.json")))["communes"].items():
             if c.get("article"):
@@ -355,8 +355,12 @@ def cmd_bilan(a):
                 g = os.path.join(d, kk, "generation")
                 dj = json.load(open(os.path.join(d, kk, "dossier", "dossier.json")))
                 F = {f["id"]: f for f in dj.get("faits", [])}
-                if (F.get("carburant.gazole.ecart") or {}).get("usage") != "oui" or not (dj.get("scenario_carburant") or {}).get("lignes"):
+                u = (F.get("carburant.gazole.ecart") or {}).get("usage")
+                if u not in ("oui", "ordre de grandeur") or not (dj.get("scenario_carburant") or {}).get("lignes"):
                     exceptions.append(f"{c['nom']} ({kk}) : faits carburant absents ou inutilisables dans le dossier")
+                elif u != "oui" or (F.get("carburant.e10.ecart") or {}).get("usage") not in ("oui",):
+                    fragiles.append(f"{c['nom']} ({kk}) : hausse du gazole en ordre de grandeur"
+                                    + ("" if (F.get("carburant.e10.ecart") or {}).get("usage") else ", sans SP95-E10") + " ; entrée carburant présente")
                 rel = json.load(open(os.path.join(g, "relecture.anomalies.json"))) if os.path.exists(os.path.join(g, "relecture.anomalies.json")) else {}
                 b = [x for x in rel.get("anomalies", []) if x.get("gravite") == "bloquante"]
                 niv2 += sum(1 for x in rel.get("anomalies", []) if x.get("gravite") == "a_revoir")
@@ -429,6 +433,7 @@ def cmd_bilan(a):
                  f"{', '.join(c['nom'] + ' (' + kk + ')' for kk, c in e.items() if c.get('inexploitable')) or 'aucune'} | "
                  f"{sum(1 for c in e.values() if c.get('statut') == 'prêt à relire')} | {'oui' if os.path.exists(os.path.join(d, 'SUSPENDU.json')) else 'non'} |")
     o += ["\n## Exceptions carburant\n", "\n".join(f"- {x}" for x in exceptions) or "Aucune : toutes les communes rédigées ont des faits carburant utilisables.",
+          *(["\nDonnées carburant plus fragiles, écrites comme telles :"] + [f"- {x}" for x in fragiles] if fragiles else []),
           "\n## Erreurs de niveau 1 (correction)\n"]
     o += [f"- {nom} ({kk}), {issue} : " + " ; ".join(x) for nom, kk, x, issue in niv1] or ["Aucune."]
     if faux:
@@ -445,6 +450,9 @@ def cmd_bilan(a):
         o.append(f"| {outil} | {et} | {p['n']} | {p['echecs']} | {k(p['entree'])} | {k(p['cache_lu'])} | "
                  f"{k(p['cache_ecrit']) if outil != 'codex' else 'sans objet'} | {k(p['sortie'])} | {k(p['raisonnement'])}"
                  + (f" ({p['rais_nm']} non mesuré)" if p["rais_nm"] else "") + f" | {hm(p['duree'])} | {p['nm'] or ''} |")
+    if any(e.startswith("collecte") for _, e in par):
+        o.append("\nCollecte : entrée et sortie comprennent les lectures de pages que Claude Code confie à Haiku (modèle confirmé "
+                 "dans le CSV) ; le raisonnement compté est celui de Sonnet seul, **celui de Haiku n'est pas rapporté : non mesuré**.")
     for outil, cle in (("Codex", "codex"), ("Claude", "claude")):
         v = sorted(x[cle] for x in pc.values())
         if v:

@@ -40,3 +40,4 @@
 {"t": "2026-10-15T23:01:56Z", "evt": "reprise", "lot": 4, "suspension_du": "2026-10-15T20:53:51Z"}
 {"t": "2026-10-15T23:01:56Z", "evt": "production_debut", "lot": 4}
 {"t": "2026-10-15T23:57:40Z", "evt": "production_fin", "lot": 4}
+{"t": "2026-10-15T23:58:54Z", "evt": "intervention", "texte": "Fin de campagne : reprise du lot 4 après la limite (23:01 UTC), motifs recalculés, classement carburant d'Ajaccio corrigé dans le bilan (ordre de grandeur, pas exception), vérification des compteurs de collecte, bilan final, FUT-100", "minutes": 15.0, "mesure": "estimée"}

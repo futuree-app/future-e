@@ -61,7 +61,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -148,7 +148,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)",
+   "motif": "aucune anomalie bloquante : pas de correction",
    "article": "redaction.md",
    "visuels": {
     "visuels": [
@@ -173,7 +173,8 @@
     "debut": "2026-10-15T23:02:27Z",
     "fin": "2026-10-15T23:02:46Z",
     "duree_s": 19.6
-   }
+   },
+   "anomalies_restantes": []
   },
   "94041": {
    "nom": "Ivry-sur-Seine",
@@ -259,7 +260,9 @@
     "debut": "2026-10-15T23:04:44Z",
     "fin": "2026-10-15T23:05:00Z",
     "duree_s": 15.9
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "18033": {
    "nom": "Bourges",
@@ -341,7 +344,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -430,7 +433,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -561,7 +564,9 @@
     "debut": "2026-10-15T23:14:52Z",
     "fin": "2026-10-15T23:15:06Z",
     "duree_s": 14.2
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "83126": {
    "nom": "La Seyne-sur-Mer",
@@ -624,7 +629,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -713,7 +718,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -802,7 +807,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -915,7 +920,9 @@
     "debut": "2026-10-15T23:28:06Z",
     "fin": "2026-10-15T23:28:19Z",
     "duree_s": 13.0
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "73065": {
    "nom": "Chambéry",
@@ -997,7 +1004,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1109,7 +1116,9 @@
     "debut": "2026-10-15T23:34:24Z",
     "fin": "2026-10-15T23:34:35Z",
     "duree_s": 10.5
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "95585": {
    "nom": "Sarcelles",
@@ -1172,7 +1181,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1283,7 +1292,9 @@
     "debut": "2026-10-15T23:40:13Z",
     "fin": "2026-10-15T23:40:30Z",
     "duree_s": 17.1
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "94046": {
    "nom": "Maisons-Alfort",
@@ -1370,7 +1381,9 @@
     "debut": "2026-10-15T23:42:45Z",
     "fin": "2026-10-15T23:42:56Z",
     "duree_s": 11.3
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "94076": {
    "nom": "Villejuif",
@@ -1457,7 +1470,9 @@
     "debut": "2026-10-15T23:45:06Z",
     "fin": "2026-10-15T23:45:20Z",
     "duree_s": 13.6
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   },
   "83061": {
    "nom": "Fréjus",
@@ -1539,7 +1554,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1627,7 +1642,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1734,7 +1749,7 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "motif": "corrigé une fois ; vérifier la section E",
    "article": "correction.md",
    "visuels": {
     "visuels": [
@@ -1846,7 +1861,9 @@
     "debut": "2026-10-15T23:57:28Z",
     "fin": "2026-10-15T23:57:40Z",
     "duree_s": 12.6
-   }
+   },
+   "anomalies_restantes": [],
+   "motif": "aucune anomalie bloquante : pas de correction"
   }
  },
  "journal": []

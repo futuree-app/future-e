@@ -1,6 +1,6 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T23:57:42Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T23:58:55Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
 **Communes distinctes préparées : 100** (20 avant la campagne, 80 pendant).
 
@@ -15,7 +15,10 @@ Mis à jour le 2026-10-15T23:57:42Z par `outil/campagne.py bilan`. Mesures déta
 
 ## Exceptions carburant
 
-- Ajaccio (2A004) : faits carburant absents ou inutilisables dans le dossier
+Aucune : toutes les communes rédigées ont des faits carburant utilisables.
+
+Données carburant plus fragiles, écrites comme telles :
+- Ajaccio (2A004) : hausse du gazole en ordre de grandeur, sans SP95-E10 ; entrée carburant présente
 
 ## Erreurs de niveau 1 (correction)
 
@@ -83,6 +86,8 @@ Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l
 | codex | correction | 48 | 0 | 1 675 056 | 92 160 | sans objet | 148 617 | 13 833 | 39 min 38 s |  |
 | codex | redaction | 80 | 0 | 2 718 864 | 332 416 | sans objet | 418 715 | 205 800 | 2 h 44 min |  |
 
+Collecte : entrée et sortie comprennent les lectures de pages que Claude Code confie à Haiku (modèle confirmé dans le CSV) ; le raisonnement compté est celui de Sonnet seul, **celui de Haiku n'est pas rapporté : non mesuré**.
+
 Codex, par commune (entrée + sortie, hors collecte) : total 4 961 252, médiane 73 853, maximum 89 992 (Nice).
 
 Claude, par commune (entrée + sortie, hors collecte) : total 3 622 346, médiane 44 602, maximum 54 223 (Strasbourg).
@@ -92,7 +97,7 @@ Claude, par commune (entrée + sortie, hors collecte) : total 3 622 346, médian
 - Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 5 h 48 min.
 - Par commune (hors collecte) : médiane 4 min 04 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
 - Durée réelle de la campagne : 8 h 03 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 2 h 40 min (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
-- Interventions du terminal pilote : 70 min (0 mesurées, 70 estimées).
+- Interventions du terminal pilote : 85 min (0 mesurées, 85 estimées).
   - 2026-10-15 15:56 UTC, 22 min (estimée) : Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc
   - 2026-10-15 16:39 UTC, 12 min (estimée) : Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance
   - 2026-10-15 16:50 UTC, 8 min (estimée) : Lot 1 : deux autres faux positifs du contrôle (SP95-E10, base 100 km) corrigés, essais de non-régression, second arrêt-relance pendant des visuels
@@ -100,6 +105,7 @@ Claude, par commune (entrée + sortie, hors collecte) : total 3 622 346, médian
   - 2026-10-15 18:24 UTC, 7 min (estimée) : Fin du lot 1 : motifs recalculés, faux positif « « 1 » dans Trapèze 1 » corrigé, arrêt-relance du lot 2 pendant des visuels
   - 2026-10-15 19:38 UTC, 10 min (estimée) : Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels
   - 2026-10-15 20:44 UTC, 6 min (estimée) : Fin du lot 3 : faux positif « Paris 8e Arrondissement » (Saint-Maur-des-Fossés) ; noms des communes de travail traités comme les noms de secteurs ; vérification sur 78 articles et par falsification ; lot 4 non redémarré (cas rare)
+  - 2026-10-15 23:58 UTC, 15 min (estimée) : Fin de campagne : reprise du lot 4 après la limite (23:01 UTC), motifs recalculés, classement carburant d'Ajaccio corrigé dans le bilan (ordre de grandeur, pas exception), vérification des compteurs de collecte, bilan final, FUT-100
 
 ## Suspensions
 
