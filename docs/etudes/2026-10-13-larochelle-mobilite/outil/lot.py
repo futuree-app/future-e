@@ -98,9 +98,20 @@ def resoudre(lot):
 
 
 # ── Étapes gratuites ─────────────────────────────────────────────────────────────────────────────────
-def lancer(cmd, journal):
+def lancer(cmd, journal, delai_s=None):
+    """`delai_s` : durée maximale ; au-delà, tout le groupe de processus est tué (un Chrome sans interface bloqué a
+    immobilisé les visuels de Brest pendant des heures, 15/10/2026)."""
+    import signal
     t0 = time.time()
-    r = subprocess.run(cmd, cwd=ETUDE, capture_output=True, text=True)
+    p = subprocess.Popen(cmd, cwd=ETUDE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=delai_s)
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        out, err = p.communicate()
+        open(journal, "w").write(f"$ {' '.join(cmd)}\n\n{out}\n{err}\n\nARRÊTÉ : délai de {delai_s} s dépassé")
+        raise RuntimeError(f"délai de {delai_s} s dépassé : processus arrêté")
+    r = subprocess.CompletedProcess(cmd, p.returncode, out, err)
     open(journal, "w").write(f"$ {' '.join(cmd)}\n\n{r.stdout}\n{r.stderr}")
     if r.returncode:
         raise RuntimeError((r.stderr or r.stdout).strip().splitlines()[-1] if (r.stderr or r.stdout).strip() else f"code {r.returncode}")
@@ -112,13 +123,15 @@ def etape(lot, insee, nom, fonction, refaire=()):
     E = lot.c(insee)["etapes"]
     if E.get(nom, {}).get("ok") and nom not in refaire:
         return True
-    t0 = time.time()
+    t0, debut = time.time(), maintenant()
+    if nom in E:  # une reprise garde la trace de la tentative précédente (mesure : échecs et reprises comptent)
+        lot.c(insee).setdefault("tentatives", []).append({"etape": nom, **E[nom]})
     try:
         info = fonction() or {}
-        E[nom] = {"ok": True, "fin": maintenant(), "duree_s": round(time.time() - t0, 1), **info}
+        E[nom] = {"ok": True, "debut": debut, "fin": maintenant(), "duree_s": round(time.time() - t0, 1), **info}
         ok = True
     except Exception as e:  # une commune en échec n'arrête pas le lot
-        E[nom] = {"ok": False, "fin": maintenant(), "duree_s": round(time.time() - t0, 1), "erreur": str(e)[:500]}
+        E[nom] = {"ok": False, "debut": debut, "fin": maintenant(), "duree_s": round(time.time() - t0, 1), "erreur": str(e)[:500]}
         ok = False
     lot.sauver()
     return ok
@@ -178,6 +191,22 @@ def identite_reseau(x, epci, cache, jour):
             "site": ok[0] if len(ok) == 1 else None, "sites_controles": [[u, st] for u, st, _ in controles], "consulte_le": jour}
 
 
+def reseau_d_un_autre_lot(lot, rid, jour, validite_j=30):
+    """Mutualisation entre lots : la fiche d'un réseau déjà identifié et collecté dans un autre lot est réutilisée si elle
+    porte sur le même jeu de données (même périmètre : identifiant transport.data.gouv.fr) et si sa collecte a moins de
+    `validite_j` jours. La provenance est tracée ; aucune nouvelle collecte n'est lancée pour ce réseau."""
+    lots = os.path.dirname(lot.dir)
+    for nom in sorted(os.listdir(lots), reverse=True):
+        p = os.path.join(lots, nom, "reseaux", f"{rid}.json")
+        if nom == os.path.basename(lot.dir) or not os.path.exists(p):
+            continue
+        R = json.load(open(p))
+        col = R.get("collecte")
+        if R.get("version") == 2 and col and (dt.date.fromisoformat(jour) - dt.date.fromisoformat(col["date"])).days <= validite_j:
+            return {**R, "reutilise_de": {"lot": nom, "collecte_du": col["date"], "regle": f"même jeu de données, collecte de moins de {validite_j} jours"}}
+    return {}
+
+
 def pre_complement(lot, insee, fiche):
     """Complément documentaire automatique et gratuit : identité du réseau urbain (transport.data.gouv.fr, Point d'accès
     national) et site déclaré dans ses horaires publiés (GTFS agency.txt). Mutualisé par réseau. Rien n'est attribué à la
@@ -193,9 +222,11 @@ def pre_complement(lot, insee, fiche):
         x = cand[0]
         p_res = os.path.join(lot.dir, "reseaux", f"{x['id']}.json")
         os.makedirs(os.path.dirname(p_res), exist_ok=True)
-        ancien = json.load(open(p_res)) if os.path.exists(p_res) else {}
+        ancien = json.load(open(p_res)) if os.path.exists(p_res) else reseau_d_un_autre_lot(lot, x["id"], jour)
         if ancien.get("version") == 2:
             reseau = ancien
+            if not os.path.exists(p_res):
+                json.dump(reseau, open(p_res, "w"), ensure_ascii=False, indent=1)
         else:
             reseau = identite_reseau(x, epci, cache, jour)
             if ancien.get("collecte"):
@@ -472,17 +503,35 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
             raise AuthNonAbonnement(f"Codex hors abonnement ChatGPT : {json.dumps(auth, ensure_ascii=False)}")
     env = {k: v for k, v in os.environ.items() if k not in ENV_INTERDITES}
     open(p_marq, "w").write(f"{maintenant()} clé {cle}")
-    t0 = time.time()
+    t0, debut = time.time(), maintenant()
+
+    def releve(meta, texte_ok):
+        """Relevé de mesure de l'appel (depenses.jsonl), écrit pour CHAQUE appel parti, réussi ou non. Compteurs tels que
+        l'outil les rapporte (`usage_brut`), sans recalcul : leur définition diffère entre Claude Code et Codex (outil/campagne.py)."""
+        with open(os.path.join(lot.dir, "depenses.jsonl"), "a") as f:
+            f.write(json.dumps({"date": maintenant(), "debut": debut, "fin": meta.get("fin"), "commune": insee, "etape": etape_nom,
+                                "outil": outil, "version_outil": version, "modele": reglage["modele"], "modele_demande": reglage["modele"],
+                                "modele_confirme": meta.get("modele_effectif") or None, "effort": reglage.get("effort"),
+                                "cout_usd_equivalent": meta.get("cout_usd_equivalent"), "duree_s": meta.get("duree_s"), "cle": cle,
+                                "issue": "réussi" if texte_ok else (meta.get("motif") or "échec"),
+                                "jetons": meta.get("usage") if outil == "codex" else None, "usage_brut": meta.get("usage"),
+                                "model_usage_brut": meta.get("model_usage"), "brut": os.path.relpath(p_brut, lot.dir)}, ensure_ascii=False) + "\n")
+
+    p_brut = os.path.join(d, f"{etape_nom}.brut-{debut.replace(':', '')}.jsonl")  # un fichier par appel : une reprise n'écrase rien
     try:
         r = subprocess.run(cmd, cwd=tmp, input=utilisateur, capture_output=True, text=True, env=env, timeout=int(reglage.get("delai_s", 1800)))
-    except subprocess.TimeoutExpired:
-        json.dump({"etape": etape_nom, "cle": cle, "motif": "délai dépassé", "debut": maintenant()}, open(p_meta, "w"), ensure_ascii=False)
+    except subprocess.TimeoutExpired as e:
+        meta = {"etape": etape_nom, "cle": cle, "motif": "délai dépassé", "debut": debut, "fin": maintenant(), "duree_s": round(time.time() - t0, 1)}
+        open(p_brut, "w").write(e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or ""))
+        json.dump(meta, open(p_meta, "w"), ensure_ascii=False)
+        releve(meta, False)
         os.remove(p_marq); shutil.rmtree(tmp, ignore_errors=True)
         raise RuntimeError(f"« {etape_nom} » : délai dépassé ({reglage.get('delai_s', 1800)} s)")
     duree = round(time.time() - t0, 1)
+    open(p_brut, "w").write(r.stdout)  # relevé brut de l'outil (événements JSON), conservé tel quel
     meta = {"etape": etape_nom, "cle": cle, "outil": outil, "version_outil": version, "modele": reglage["modele"],
-            "effort": reglage.get("effort"), "consignes_sha": sha(systeme), "entree_sha": sha(utilisateur), "debut": maintenant(),
-            "duree_s": duree, "code_retour": r.returncode}
+            "effort": reglage.get("effort"), "consignes_sha": sha(systeme), "entree_sha": sha(utilisateur), "debut": debut,
+            "fin": maintenant(), "duree_s": duree, "code_retour": r.returncode}
     texte, cout = None, None
     if outil == "claude-code":
         ev = []
@@ -497,7 +546,7 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
                   for e in ev if e.get("type") == "assistant" for b in (e.get("message") or {}).get("content", []) if b.get("type") == "tool_use"]
         refus = [e for e in ev if e.get("type") == "user" and "denied" in json.dumps(e).lower()]
         texte, cout = res.get("result"), res.get("total_cost_usd")
-        meta.update(session=res.get("session_id"), usage=res.get("usage"), cout_usd_equivalent=cout, est_erreur=res.get("is_error"),
+        meta.update(session=res.get("session_id"), usage=res.get("usage"), model_usage=res.get("modelUsage"), cout_usd_equivalent=cout, est_erreur=res.get("is_error"),
                     sous_type=res.get("subtype"), modele_effectif=list((res.get("modelUsage") or {}).keys()), tours=res.get("num_turns"),
                     contexte={"source_auth": init.get("apiKeySource"), "outils": init.get("tools"), "mcp": init.get("mcp_servers"),
                               "modele": init.get("model"), "cwd": init.get("cwd"), "permissions": init.get("permissionMode"),
@@ -529,11 +578,7 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
     shutil.rmtree(tmp, ignore_errors=True)
     if outil == "codex":
         shutil.rmtree(os.path.dirname(out), ignore_errors=True)
-    with open(os.path.join(lot.dir, "depenses.jsonl"), "a") as f:
-        f.write(json.dumps({"date": maintenant(), "commune": insee, "etape": etape_nom, "outil": outil, "modele": reglage["modele"],
-                            "effort": reglage.get("effort"), "cout_usd_equivalent": cout, "duree_s": duree, "cle": cle,
-                            "jetons": meta.get("usage") if outil == "codex" else None}, ensure_ascii=False) + "\n")
-    brut = ((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", "")) + json.dumps(meta.get("erreurs", []))).lower()
+    brut =((texte or "") + r.stderr + json.dumps(meta.get("sortie_brute", "")) + json.dumps(meta.get("erreurs", []))).lower()
     if meta.get("est_erreur") or not texte:
         meta["message"] = ((texte or "") + " " + r.stderr)[:1000].strip()  # conservé pour diagnostiquer, jamais publié
     if outil == "claude-code" and meta.get("contexte", {}).get("source_auth") not in (None, "none"):
@@ -541,6 +586,7 @@ def generer(lot, insee, etape_nom, systeme, utilisateur, executer, d=None, domai
     elif (not texte or meta.get("est_erreur")) and nature_refus(meta, brut):
         meta["motif"] = nature_refus(meta, brut)
     json.dump(meta, open(p_meta, "w"), ensure_ascii=False, indent=1)
+    releve(meta, bool(texte) and not r.returncode and not meta.get("est_erreur") and not meta.get("motif"))
     os.remove(p_marq)
     if meta.get("motif", "").startswith("session hors abonnement"):
         raise AuthNonAbonnement(meta["motif"])
@@ -584,6 +630,16 @@ def cmd_collecter(lot, a):
                             reseaux.setdefault(R["id"], (R, []))[1].append(insee)
     for rid, (R, communes) in reseaux.items():
         sites = [R["site"]] if R.get("site") else []
+        if not R.get("collecte"):  # collecte faite entre-temps par un autre lot (préparations en parallèle) : réutilisée
+            autre = reseau_d_un_autre_lot(lot, R["id"], dt.date.today().isoformat())
+            if autre.get("collecte"):
+                R.update(collecte=autre["collecte"], reutilise_de=autre["reutilise_de"])
+                json.dump(R, open(os.path.join(lot.dir, "reseaux", f"{rid}.json"), "w"), ensure_ascii=False, indent=1)
+                for insee in communes:
+                    preparer_commune(lot, insee, {"complement"}); lot.sauver()
+        if R.get("collecte"):
+            print(f"· {R['nom_commercial']} : collecte déjà faite le {R['collecte']['date']}" +
+                  (f" (lot {R['reutilise_de']['lot']}), réutilisée" if R.get("reutilise_de") else "") + " : aucun appel"); continue
         if not sites:
             print(f"· {R['nom_commercial']} : aucun site joignable, collecte impossible"); continue
         doms = sorted({domaine(u) for u in sites} | {"www." + domaine(u) for u in sites})
@@ -596,7 +652,7 @@ def cmd_collecter(lot, a):
         try:
             texte = generer(lot, communes[0], "collecte", syst, user, True, d=os.path.join(lot.dir, "reseaux", rid), domaines=doms)
         except (PlafondAtteint, LimiteUsage, AuthNonAbonnement) as e:
-            print(f"■ arrêt propre de la collecte : {e}"); break
+            print(f"■ arrêt propre de la collecte : {e}"); suspendre(lot, "collecte", e); break
         except Exception as e:
             print(f"✗ collecte {R['nom_commercial']} : {e}"); continue
         res = json_dans(texte)
@@ -619,6 +675,15 @@ def cmd_collecter(lot, a):
         for insee in communes:
             preparer_commune(lot, insee, {"complement"}); lot.sauver()
     vue(lot)
+    if os.path.exists(os.path.join(lot.dir, "SUSPENDU.json")):
+        sys.exit(3)
+
+
+def suspendre(lot, ou, e):
+    """Premier refus d'accès ou de quota : le message est conservé tel quel, la campagne s'arrête (code de sortie 3) et
+    reprendra plus tard les seules étapes non faites. Le fichier est retiré à la reprise (outil/campagne.py)."""
+    json.dump({"le": maintenant(), "ou": ou, "type": type(e).__name__, "message": str(e)}, open(os.path.join(lot.dir, "SUSPENDU.json"), "w"),
+              ensure_ascii=False, indent=1)
 
 
 def json_dans(texte):
@@ -636,10 +701,53 @@ def controle(lot, insee, nom_fichier):
     return res
 
 
+def tableau_carburant(lot, insee, ville):
+    """Tableau accessible du scénario de surcoût, écrit à partir des lignes pré-calculées du dossier (aucune valeur saisie),
+    mêmes colonnes que la prévisualisation /dev/lot."""
+    import html as H
+    sc = json.load(open(os.path.join(lot.dir, insee, "dossier", "dossier.json"))).get("scenario_carburant") or {}
+    L, h = sc.get("lignes") or [], sc.get("hypotheses") or {}
+    if not L:
+        return None
+    carbus, kms = list(dict.fromkeys(l["carburant"] for l in L)), list(dict.fromkeys(l["km_aller"] for l in L))
+    v = {(l["carburant"], l["km_aller"]): l for l in L}
+    eur = lambda x: f"{x:.2f}".replace(".", ",") + " €"
+    legende = (f"Surcoût annuel de carburant d'un trajet domicile-travail fait en voiture, selon sa longueur, {ville}. Hypothèses : "
+               f"{format(h.get('litres_100km'), 'g').replace('.', ',')} litres aux 100 km, {h.get('jours_trajet_an')} allers-retours par an, hausse "
+               "arrondie à 5 centimes. Seul le carburant est compté. Source : prix-carburants.gouv.fr, flux officiel.")
+    tetes = [f"Surcoût de carburant par an, {c} (+{eur(v[(c, kms[0])]['hausse_retenue_eur_l'])}/L)" for c in carbus]
+    lignes = [(f"{k} km", [f"environ {v[(c, k)]['surcout_an_eur']} €" for c in carbus]) for k in kms]
+    d = lot.rep(insee, "visuels")
+    open(os.path.join(d, f"tableau_carburant_{insee}.html"), "w").write(
+        f"<table>\n<caption>{H.escape(legende)}</caption>\n<thead><tr><th scope=\"col\">Trajet aller</th>"
+        + "".join(f"<th scope=\"col\">{H.escape(t)}</th>" for t in tetes) + "</tr></thead>\n<tbody>\n"
+        + "".join(f"<tr><th scope=\"row\">{k}</th>" + "".join(f"<td>{x}</td>" for x in xs) + "</tr>\n" for k, xs in lignes) + "</tbody>\n</table>\n")
+    open(os.path.join(d, f"tableau_carburant_{insee}.md"), "w").write(
+        f"{legende}\n\n| Trajet aller | " + " | ".join(tetes) + " |\n|---|" + "---|" * len(tetes) + "\n"
+        + "".join(f"| {k} | " + " | ".join(xs) + " |\n" for k, xs in lignes))
+    return f"tableau_carburant_{insee}.html"
+
+
 def visuels(lot, insee, texte):
-    """Seulement les visuels annoncés par l'article retenu. Carte : repères numérotés pour les secteurs cités (aucun placement manuel)."""
+    """Seulement les visuels annoncés par l'article retenu. Carte : repères numérotés pour les secteurs cités (aucun placement
+    manuel). Durée bornée (`delai_visuels_s` de lot.json, 600 s par défaut) : au-delà, le rendu est arrêté et la commune
+    continue avec la note « visuel prévu, non produit »."""
+    t0, debut = time.time(), maintenant()
+    try:
+        r = _visuels(lot, insee, texte)
+        return {**r, "ok": True, "debut": debut, "fin": maintenant(), "duree_s": round(time.time() - t0, 1)}
+    except Exception as e:
+        return {"ok": False, "debut": debut, "fin": maintenant(), "duree_s": round(time.time() - t0, 1),
+                "erreur": f"visuel prévu, non produit : {str(e)[:300]}", "visuels": sorted(os.listdir(lot.rep(insee, "visuels")))}
+
+
+def _visuels(lot, insee, texte):
     if not re.search(r"^\[(?:VISUEL|CARTE|GRAPHIQUE)", texte, re.M):
         return {"visuels": []}
+    if re.search(r"^\[VISUEL[^\]]*(sc[ée]nario|carburant|surco[ûu]t)", texte, re.M | re.I):
+        tableau_carburant(lot, insee, lot.c(insee)["nom"])
+    if not re.search(r"^\[(?:VISUEL|CARTE|GRAPHIQUE)(?![^\]]*(sc[ée]nario|carburant|surco[ûu]t))", texte, re.M | re.I):
+        return {"visuels": sorted(os.listdir(lot.rep(insee, "visuels")))}
     fiche_p = os.path.join(lot.dir, insee, "fiche", "fiche.json")
     # Secteurs cités : identifiants explicites (`iris.<code>.…`) et secteur le plus bas / le plus haut (`iris.voiture.min/max`),
     # dont le code se lit dans le dossier (Brest, 15/10/2026 : Kervao-Rural Nord cité par le seul `iris.voiture.max`, non repéré).
@@ -657,7 +765,7 @@ def visuels(lot, insee, texte):
     cmd = [lot.chemin("python"), "visuels/generer_visuels.py", "--insee", insee, "--fiche", fiche_p,
            "--contours", os.path.join(lot.chemin("cache"), f"iris_ign_{insee}.json"), "--classes", "auto", "--communes", "",
            "--reperes", ",".join(codes), "--out", lot.rep(insee, "visuels")] + ([] if veut_barres else ["--sans-barres"])
-    lancer(cmd, os.path.join(lot.rep(insee, "journaux"), "visuels.log"))
+    lancer(cmd, os.path.join(lot.rep(insee, "journaux"), "visuels.log"), delai_s=int(lot.conf.get("delai_visuels_s", 600)))
     return {"visuels": sorted(os.listdir(lot.rep(insee, "visuels"))), "reperes": codes}
 
 
@@ -695,6 +803,8 @@ def rediger_commune(lot, insee, executer, plan):
                       else "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)")
     C["article"] = final
     C["visuels"] = visuels(lot, insee, open(os.path.join(lot.rep(insee, "generation"), final)).read())
+    if not C["visuels"]["ok"]:
+        C.setdefault("notes", []).append(C["visuels"]["erreur"])
     C["statut"] = "prêt à relire"; lot.sauver()
 
 
@@ -729,9 +839,9 @@ def cmd_rediger(lot, a):
                     # Refus sans consommation : tout le lot s'arrête au premier ; les étapes faites restent, la reprise ne fera que le reste.
                     # « Quota » seulement si le message le confirme, sinon « cause à confirmer ».
                     etat = MOTIF_QUOTA if str(e).startswith(MOTIF_QUOTA) else MOTIF_REFUS
-                    C.update(statut=etat, motif=str(e)[:250]); lot.sauver(); print(f"■ lot suspendu : {e}"); break
+                    C.update(statut=etat, motif=str(e)[:250]); lot.sauver(); print(f"■ lot suspendu : {e}"); suspendre(lot, insee, e); break
                 except (PlafondAtteint, AuthNonAbonnement) as e:
-                    C.update(motif=f"arrêt du lot : {str(e)[:300]}"); lot.sauver(); print(f"■ arrêt propre du lot : {e}"); break
+                    C.update(motif=f"arrêt du lot : {str(e)[:300]}"); lot.sauver(); print(f"■ arrêt propre du lot : {e}"); suspendre(lot, insee, e); break
                 except Exception as e:
                     C.update(motif=f"erreur : {str(e)[:300]}"); lot.sauver(); print(f"✗ {C['nom']} : {e}")
     finally:
@@ -743,6 +853,8 @@ def cmd_rediger(lot, a):
             print(f"  {lot.c(insee)['nom']} ({insee}) : consignes + dossier ≈ {n // 1000} k caractères")
         print("Lancer réellement : ajouter --executer (limite : une rédaction, une relecture, au plus une correction par commune)")
     vue(lot)
+    if os.path.exists(os.path.join(lot.dir, "SUSPENDU.json")):
+        sys.exit(3)
 
 
 # ── Vue du lot (le détail est dans /dev/lot côté site) ───────────────────────────────────────────────────

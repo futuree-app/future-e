@@ -53,3 +53,18 @@ Suivi : `http://localhost:3155/dev/lot` (serveur de développement). Option `--c
 - Relecture humaine de chaque article « prêt à relire » : la seule autorisation de publication.
 
 Les durées de préparation affichées sont mesurées par le script (cache des téléchargements déjà rempli pour la plupart des sources ; un premier passage sur un nouveau département télécharge la BAN et coûte une à deux minutes de plus).
+
+## Campagne 20 → 100 communes (à partir du 15/10/2026)
+
+Quatre lots de vingt (`2026-10-lot-04-campagne` à `2026-10-lot-07-campagne`), produits par la même chaîne, orchestrés par `outil/campagne.py`. Données de campagne dans `campagne-100/` :
+- `selection.json` et `candidats.csv` : communes classées par population, avec la source et le millésime, et le sort de chaque candidate (retenue, inexploitable avec son motif, exclue d'office, en réserve) ;
+- `journal.jsonl` : débuts et fins, suspensions, reprises, interventions du terminal pilote ;
+- `mesures.csv` et `BILAN.md` : une ligne par étape et par appel, bilan cumulatif après chaque lot.
+
+Ajouts à la chaîne pour la mesure, sans changer son déroulement :
+- chaque appel (réussi, échoué ou refusé) écrit dans `depenses.jsonl` son début, sa fin, le modèle demandé et le modèle confirmé (Claude Code seulement : Codex ne le renvoie pas), et les compteurs bruts de l'outil ; sa sortie brute est gardée dans `generation/<étape>.brut-<horodatage>.jsonl` ;
+- les étapes de préparation et les visuels enregistrent leur début et leur durée ; une reprise garde la trace de la tentative précédente (`tentatives`) ;
+- les visuels ont une durée maximale (`delai_visuels_s`, 600 s ; 180 s par rendu Chrome) : au-delà, le rendu est arrêté et la commune continue avec la note « visuel prévu, non produit » ;
+- le tableau du surcoût de carburant est aussi écrit en fichier accessible (`visuels/tableau_carburant_<insee>.html` et `.md`), à partir du dossier ;
+- une collecte déjà faite pour le même réseau dans un autre lot (même jeu de données, moins de 30 jours) est réutilisée, avec sa provenance ;
+- au premier refus d'accès ou de quota, `SUSPENDU.json` conserve le message et `campagne.py produire` s'arrête (code 3) ; la reprise ne fait que les étapes restantes.

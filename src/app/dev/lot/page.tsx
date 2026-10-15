@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { notFound } from "next/navigation";
-import { articleDe, lireLot, listeLots, LOTS } from "./source";
+import { articleDe, CAMPAGNE, communesDistinctes, lireLot, listeLots, LOTS } from "./source";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,7 @@ const css = `
   .lot ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--fg-3);}
   .lot li{margin:2px 0;}
   .lot .alerte{color:#c0563c;}
+  .lot-compteur{font-size:15px;margin:-12px 0 28px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;}
 `;
 
 const bon = new Set(["dossier prêt", "prêt à relire"]);
@@ -38,12 +39,18 @@ export default async function IndexLots() {
   if (process.env.NODE_ENV === "production") notFound();
   const lots = await listeLots();
   const vues = await Promise.all(lots.map(lireLot));
+  const distinctes = await communesDistinctes();
+  const fc = (f: string) => existsSync(path.join(CAMPAGNE, f)) && <a href={`/dev/lot/fichier?lot=campagne-100&f=${f}`}>{f}</a>;
   return (
     <div className="lot">
       <style>{css}</style>
       <div className="lot-page">
         <h1>Lots d&apos;articles mobilité</h1>
         <p className="sous">Prévisualisation interne · non publiée · état écrit par <code>outil/lot.py</code>. Aucun état ne vaut autorisation de publication.</p>
+        <p className="lot-compteur">
+          <strong>{distinctes} communes distinctes préparées</strong> sur les 100 visées (articles retenus des lots et deux pilotes).
+          {" "}Campagne : {fc("BILAN.md")} {fc("mesures.csv")} {fc("candidats.csv")}
+        </p>
         {vues.map((v) => (
           <section key={v.nom}>
             <h2>

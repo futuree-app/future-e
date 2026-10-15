@@ -84,7 +84,7 @@ def render_png(svg_path, w, h):
     png = svg_path[:-4] + ".png"
     subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--window-size={w},{h}",
                     "--force-device-scale-factor=2", "--virtual-time-budget=4000", f"--screenshot={png}",
-                    "file://" + os.path.abspath(page)], check=True, capture_output=True)
+                    "file://" + os.path.abspath(page)], check=True, capture_output=True, timeout=180)  # Chrome bloqué : erreur, pas une attente sans fin
     os.remove(page)
 
 
