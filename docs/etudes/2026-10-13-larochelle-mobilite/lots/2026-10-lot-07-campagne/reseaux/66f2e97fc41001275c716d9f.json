@@ -28,5 +28,86 @@
    200
   ]
  ],
- "consulte_le": "2026-10-15"
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.moins_4_ans",
+    "information": "Les enfants de moins de 4 ans voyagent gratuitement, accompagnés. La page présente par ailleurs une gamme tarifaire payante (ticket unité à 1,50 €). Elle ne dit pas que le réseau est gratuit.",
+    "url": "https://www.esterelcotedazur-lebus.fr/tarifs/",
+    "extrait": "Les enfants de moins de 4 ans voyagent gratuitement et accompagnés.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 4 ans accompagnés. La page ne cite aucune ligne particulière.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:46:32Z"
+   },
+   {
+    "id": "doc.tarification.correspondance",
+    "information": "Une correspondance de 60 minutes est gratuite. Ce n'est pas une gratuité du réseau.",
+    "url": "https://www.esterelcotedazur-lebus.fr/tarifs/",
+    "extrait": "Correspondance de 60 minutes gratuites.",
+    "validite": "non précisée",
+    "perimetre": "Voyageurs munis d'un titre, dans les 60 minutes. Lignes non précisées.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:46:32Z"
+   },
+   {
+    "id": "doc.tarification.passjunior_allobus",
+    "information": "Le Pass Junior n'est pas valable sur AlloBus pendant la période scolaire.",
+    "url": "https://www.esterelcotedazur-lebus.fr/tarifs/",
+    "extrait": "Le Pass Junior n'est pas valable sur AlloBus pendant la période scolaire.",
+    "validite": "période scolaire",
+    "perimetre": "Pass Junior, service AlloBus",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:46:33Z"
+   },
+   {
+    "id": "doc.reseau.lignes",
+    "information": "Le réseau compte 25 lignes urbaines, dont 7 navettes de centre-ville.",
+    "url": "https://www.esterelcotedazur-lebus.fr/",
+    "extrait": "constitué de 25 lignes urbaines dont 7 navettes de centre-ville",
+    "validite": "non précisée",
+    "perimetre": "Ensemble du réseau Le Bus",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:46:33Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité du réseau (public, lignes)",
+    "statut": "introuvable",
+    "url": "https://www.esterelcotedazur-lebus.fr/tarifs/",
+    "note": "La page Titres et tarifs décrit des tarifs payants. Elle ne mentionne aucune gratuité générale ni sur des lignes précises, hormis les moins de 4 ans. Cela ne prouve pas qu'il n'existe aucune gratuité ailleurs."
+   },
+   {
+    "sujet": "Jours de circulation (samedi, dimanche, jours fériés) et validité des horaires",
+    "statut": "introuvable",
+    "url": "https://www.esterelcotedazur-lebus.fr/horaires/",
+    "note": "La page ne montre qu'un sélecteur de ligne, de date et de période. Les fiches par ligne n'ont pas été consultées. Agences indiquées : Fréjus 04 94 53 78 46, Saint-Raphaël 04 94 44 52 70."
+   },
+   {
+    "sujet": "Temps réel",
+    "statut": "non vérifié",
+    "url": "https://www.esterelcotedazur-lebus.fr/ouestmonbus/",
+    "note": "Le lien « Où est mon bus » figure sur l'accueil. Je n'ai pas ouvert la page pour confirmer qu'elle donne le temps réel."
+   },
+   {
+    "sujet": "Une page de calcul d'itinéraire existe sur le site. Je n'ai pas lu son contenu, ",
+    "statut": "non vérifié",
+    "url": "https://www.esterelcotedazur-lebus.fr/itineraires/",
+    "note": "extrait introuvable sur la page"
+   },
+   {
+    "sujet": "Une page donne les horaires de passage des lignes à un arrêt.",
+    "statut": "non vérifié",
+    "url": "https://www.esterelcotedazur-lebus.fr/heuredepassage/",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
 }

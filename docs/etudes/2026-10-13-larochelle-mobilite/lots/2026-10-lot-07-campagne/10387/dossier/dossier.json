@@ -24,7 +24,7 @@
   "generee_le": "2026-10-15T16:42:21Z",
   "jour_reference": "2026-10-13"
  },
- "dossier_genere_le": "2026-10-15T16:42:51Z",
+ "dossier_genere_le": "2026-10-15T20:45:31Z",
  "faits": [
   {
    "id": "mobpro.modes.pas_de_transport",
@@ -2534,41 +2534,104 @@
     "usage": "oui",
     "statut_verification": "vérifié",
     "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.tarification.moins_4_ans",
+    "information": "Les enfants de moins de 4 ans voyagent gratuitement sans titre de transport, sauf sur les lignes à vocation scolaire (lignes 21 à 38) et pour les déplacements de groupe. Le réseau n'est donc pas gratuit pour tous.",
+    "source": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/ (extrait vérifié le 2026-10-15 : « Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe. »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau TCAT ; Enfants de moins de 4 ans ; tout le réseau sauf les lignes 21 à 38 et les déplacements de groupe ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+     "extrait": "Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe."
+    }
+   },
+   {
+    "id": "doc.tarification.abonnement_scolaire",
+    "information": "L'abonnement scolaire annuel est gratuit pour les écoliers de la maternelle au CM2. Il faut présenter la carte BUSSÉO et un justificatif de domicile de moins de 3 mois, et un justificatif de scolarité dès 12 ans. Ces conditions sont résumées par l'outil de lecture, sans extrait copié.",
+    "source": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/ (extrait vérifié le 2026-10-15 : « Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe. »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau TCAT ; Écoliers de la maternelle au CM2 ; lignes non précisées ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+     "extrait": "Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe."
+    }
+   },
+   {
+    "id": "doc.itineraire.calcul",
+    "information": "La page d'accueil renvoie vers carte.tcat.fr pour préparer un itinéraire et rechercher un horaire, et vers services.tcat.fr/fiche_horaire/ pour les fiches horaires.",
+    "source": "https://tcat.fr/ (extrait vérifié le 2026-10-15 : « Préparer un itinéraire »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau TCAT ; Réseau TCAT ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://tcat.fr/",
+     "extrait": "Préparer un itinéraire"
+    }
+   },
+   {
+    "id": "doc.temps_reel.application",
+    "information": "Le temps réel est accessible via l'application Mobilités by TCM & TCAT, les QR codes aux arrêts et la page infos trafic. Allô TCAT: 03 25 70 49 01.",
+    "source": "https://tcat.fr/se-deplacer/le-reseau-tcat/infos-trafic/ (extrait vérifié le 2026-10-15 : « Mobilités by TCM & TCAT »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau TCAT ; Réseau TCAT ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://tcat.fr/se-deplacer/le-reseau-tcat/infos-trafic/",
+     "extrait": "Mobilités by TCM & TCAT"
+    }
    }
   ],
   "recherches": [
    {
-    "sujet": "tarification (gratuité, abonnements, exceptions)",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "sujet": "Jours de circulation (dimanche, jours fériés, samedi) et période de validité des horaires",
+    "statut": "introuvable",
+    "source": "https://tcat.fr/se-deplacer/le-reseau-tcat/",
+    "consulte_le": "2026-10-15",
+    "note": "Les pages consultées (accueil, infos trafic, réseau) ne donnent ni jours de circulation ni période de validité. Les fiches horaires (https://services.tcat.fr/fiche_horaire/) et l'article « Votre réseau bus évolue » n'ont pas été ouverts."
+   },
+   {
+    "sujet": "Gratuité de l'ensemble du réseau",
+    "statut": "introuvable",
+    "source": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+    "consulte_le": "2026-10-15",
+    "note": "Aucune gratuité générale n'apparaît. Seuls les cas ci-dessus sont signalés."
+   },
+   {
+    "sujet": "Une actualité annonce une évolution du réseau bus au 1er septembre 2026. Son con",
+    "statut": "non vérifié",
+    "source": "https://tcat.fr/se-deplacer/le-reseau-tcat/infos-trafic/",
+    "consulte_le": "2026-10-15",
+    "note": "extrait introuvable sur la page"
    },
    {
     "sujet": "jours et périodes de circulation des lignes urbaines",
-    "statut": "non recherché",
+    "statut": "introuvable",
     "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
-   },
-   {
-    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
-    "statut": "non recherché",
-    "source": "",
-    "consulte_le": "",
-    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
    },
    {
     "sujet": "vélo ou gare (seulement si directement utile au logement)",
     "statut": "non recherché",
     "source": "",
-    "consulte_le": "",
+    "consulte_le": "2026-10-15",
     "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
    }
   ],
   "ecartes": [],
   "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/10387/dossier/complement.json",
-  "sha256": "d217a0fda89fcc94b3a0b7fea4fa9629745d5d2e786c9f1554d56cd7002d0fdc"
+  "sha256": "e33f5b2f6388c8b910fe1f3b0e2e8714988cb037950a89e5fe03e94d20cdf52f"
  },
  "comparaison": {
   "commune": {

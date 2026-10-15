@@ -1,8 +1,8 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T20:44:46Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-15T20:53:52Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
-**Communes distinctes préparées : 80** (20 avant la campagne, 60 pendant).
+**Communes distinctes préparées : 81** (20 avant la campagne, 61 pendant).
 
 ## Lots
 
@@ -11,7 +11,7 @@ Mis à jour le 2026-10-15T20:44:46Z par `outil/campagne.py bilan`. Mesures déta
 | 2026-10-lot-04-campagne | 20 | Lille (59350) | 20 | non |
 | 2026-10-lot-05-campagne | 20 | aucune | 20 | non |
 | 2026-10-lot-06-campagne | 20 | aucune | 20 | non |
-| 2026-10-lot-07-campagne | 20 | aucune | 0 | non |
+| 2026-10-lot-07-campagne | 20 | aucune | 1 | oui |
 
 ## Exceptions carburant
 
@@ -49,6 +49,7 @@ Mis à jour le 2026-10-15T20:44:46Z par `outil/campagne.py bilan`. Mesures déta
 - Drancy (93029), corrigé : raisonnement : La part de la voiture chez les actifs d'un secteur (iris.voiture.min, iris.voiture.max) sert ici de repère pour choisir un quartier : elle devient une recommand
 - Noisy-le-Grand (93051), corrigé : raisonnement : Le titre pose la question « où chercher », et le seul contraste de secteurs du texte y répond (20 % contre 47 % de voiture, puis 98 % contre 34 % pour le panier
 - Vénissieux (69259), corrigé : raisonnement : La part de la voiture par secteur décrit les pratiques de 2022 des actifs qui y résident, quelle que soit leur commune de travail (iris.voiture.min, iris.voitur
+- Évry-Courcouronnes (91228), corrigé : raisonnement : Les parts de la voiture des actifs qui habitent Centre Urbain Nord et Courcouronnes Centre Nord (iris.voiture.min, iris.voiture.max) deviennent un critère pour 
 
 Corrections déclenchées seulement par un faux positif du contrôle (corrigé depuis ; l'appel a bien eu lieu et est compté) :
 - Montpellier (34172) : « SP95-E10 » ne correspond à aucune valeur du dossier pour carburant.e10.ecart (0.51)
@@ -67,20 +68,20 @@ Compteurs tels que chaque outil les rapporte, sans double compte : chez Codex, l
 
 | Outil | Étape | Appels | Échecs ou refus | Entrée totale | dont cache lu | dont cache écrit | Sortie totale | dont raisonnement | Durée cumulée | Non mesurés |
 |---|---|---|---|---|---|---|---|---|---|---|
-| claude-code | collecte (par réseau) | 20 | 1 | 937 396 | 192 075 | 69 955 | 134 339 | 2 275 | 11 min 02 s |  |
-| claude-code | relecture | 61 | 1 | 2 558 751 | 202 370 | 2 356 261 | 191 748 | 161 154 | 31 min 25 s |  |
-| codex | correction | 37 | 0 | 1 307 823 | 76 800 | sans objet | 116 529 | 11 949 | 31 min 59 s |  |
-| codex | redaction | 60 | 0 | 2 061 982 | 263 296 | sans objet | 312 789 | 153 559 | 2 h 06 min |  |
+| claude-code | collecte (par réseau) | 24 | 1 | 1 134 914 | 239 849 | 83 551 | 166 758 | 2 811 | 13 min 41 s |  |
+| claude-code | relecture | 63 | 2 | 2 599 627 | 205 800 | 2 393 705 | 194 887 | 163 845 | 31 min 58 s |  |
+| codex | correction | 38 | 0 | 1 341 199 | 76 800 | sans objet | 119 059 | 12 024 | 32 min 38 s |  |
+| codex | redaction | 62 | 0 | 2 127 456 | 278 656 | sans objet | 323 949 | 159 750 | 2 h 11 min |  |
 
-Codex, par commune (entrée + sortie, hors collecte) : total 3 799 123, médiane 74 836, maximum 89 992 (Nice).
+Codex, par commune (entrée + sortie, hors collecte) : total 3 911 663, médiane 74 649, maximum 89 992 (Nice).
 
-Claude, par commune (entrée + sortie, hors collecte) : total 2 750 499, médiane 44 895, maximum 54 223 (Strasbourg).
+Claude, par commune (entrée + sortie, hors collecte) : total 2 794 514, médiane 44 769, maximum 54 223 (Strasbourg).
 
 ## Durées
 
-- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 4 h 44 min.
+- Temps cumulé des traitements (préparation, collecte, rédaction, relecture, correction, visuels) : 4 h 53 min.
 - Par commune (hors collecte) : médiane 4 min 10 s, les trois plus longues : Nice 9 min 20 s, Avignon 8 min 55 s, Montpellier 6 min 35 s.
-- Durée réelle de la campagne : 4 h 50 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote).
+- Durée réelle de la campagne : 4 h 59 min (du premier lancement à la dernière étape enregistrée), dont pauses de quota : 32 min 33 s (de la suspension à la reprise ; la limite se levait à l'heure annoncée par le message, la reprise dépend du pilote). Une pause est en cours.
 - Interventions du terminal pilote : 70 min (0 mesurées, 70 estimées).
   - 2026-10-15 15:56 UTC, 22 min (estimée) : Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc
   - 2026-10-15 16:39 UTC, 12 min (estimée) : Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance
@@ -94,3 +95,4 @@ Claude, par commune (entrée + sortie, hors collecte) : total 2 750 499, médian
 
 - 2026-10-15T17:28:09Z (lot 1, rediger) : suspendu par quota · « relecture » : You've hit your session limit · resets 7:30pm (Europe/Paris)
 - 2026-10-15T17:28:20Z (lot 2, collecter) : suspendu par quota · « collecte » : You've hit your session limit · resets 7:30pm (Europe/Paris)
+- 2026-10-15T20:53:51Z (lot 4, rediger) : suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)

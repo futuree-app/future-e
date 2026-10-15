@@ -4,7 +4,7 @@
    "nom": "Évry-Courcouronnes",
    "insee": "91228",
    "demande": "91228",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -46,13 +46,53 @@
    "notes": [
     "24 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 51.1
+   "duree_preparation_s": 51.1,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "2f484fdbfd9c273c",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_91228_clair.png",
+     "carte_iris_91228_clair.svg",
+     "carte_iris_91228_mobile_clair.png",
+     "carte_iris_91228_mobile_clair.svg",
+     "carte_iris_91228_mobile_sombre.png",
+     "carte_iris_91228_mobile_sombre.svg",
+     "carte_iris_91228_sombre.png",
+     "carte_iris_91228_sombre.svg",
+     "tableau_carburant_91228.html",
+     "tableau_carburant_91228.md",
+     "tableau_iris_91228.html",
+     "tableau_iris_91228.md"
+    ],
+    "reperes": [
+     "912280105",
+     "912280204"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T20:51:20Z",
+    "fin": "2026-10-15T20:51:42Z",
+    "duree_s": 21.8
+   }
   },
   "92024": {
    "nom": "Clichy",
    "insee": "92024",
    "demande": "92024",
-   "statut": "dossier prêt",
+   "statut": "suspendu par quota",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -94,7 +134,21 @@
    "notes": [
     "22 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 36.5
+   "duree_preparation_s": 36.5,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "88d6d197084e618b",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "motif": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)"
   },
   "94041": {
    "nom": "Ivry-sur-Seine",
@@ -166,18 +220,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:41:53Z",
-     "fin": "2026-10-15T16:41:53Z",
-     "duree_s": 0.4
+     "debut": "2026-10-15T20:44:46Z",
+     "fin": "2026-10-15T20:44:46Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:41:53Z",
-     "fin": "2026-10-15T16:41:54Z",
-     "duree_s": 0.2,
-     "complement_sha": "f0611a6f9fe08173",
-     "duree_calcul_s": 0.2,
-     "dossier_sha": "57ecdf8680fd8a68"
+     "debut": "2026-10-15T20:44:46Z",
+     "fin": "2026-10-15T20:44:46Z",
+     "duree_s": 0.1,
+     "complement_sha": "f5cd080a8106cafb",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "7c497b60342ba510"
     }
    },
    "manuel": [
@@ -190,7 +244,26 @@
    "notes": [
     "27 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 31.8
+   "duree_preparation_s": 31.8,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:41:53Z",
+     "fin": "2026-10-15T16:41:53Z",
+     "duree_s": 0.4
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:41:53Z",
+     "fin": "2026-10-15T16:41:54Z",
+     "duree_s": 0.2,
+     "complement_sha": "f0611a6f9fe08173",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "57ecdf8680fd8a68"
+    }
+   ]
   },
   "92002": {
    "nom": "Antony",
@@ -262,18 +335,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:42:51Z",
-     "fin": "2026-10-15T16:42:51Z",
-     "duree_s": 0.4
+     "debut": "2026-10-15T20:45:31Z",
+     "fin": "2026-10-15T20:45:31Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:42:51Z",
-     "fin": "2026-10-15T16:42:51Z",
+     "debut": "2026-10-15T20:45:31Z",
+     "fin": "2026-10-15T20:45:31Z",
      "duree_s": 0.2,
-     "complement_sha": "d217a0fda89fcc94",
+     "complement_sha": "e33f5b2f6388c8b9",
      "duree_calcul_s": 0.2,
-     "dossier_sha": "9417555ca17157ff"
+     "dossier_sha": "a4bf811b86c8136f"
     }
    },
    "manuel": [
@@ -286,7 +359,26 @@
    "notes": [
     "26 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 31.0
+   "duree_preparation_s": 31.0,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:42:51Z",
+     "fin": "2026-10-15T16:42:51Z",
+     "duree_s": 0.4
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:42:51Z",
+     "fin": "2026-10-15T16:42:51Z",
+     "duree_s": 0.2,
+     "complement_sha": "d217a0fda89fcc94",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "9417555ca17157ff"
+    }
+   ]
   },
   "83126": {
    "nom": "La Seyne-sur-Mer",
@@ -502,18 +594,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:46:01Z",
-     "fin": "2026-10-15T16:46:02Z",
-     "duree_s": 0.9
+     "debut": "2026-10-15T20:46:02Z",
+     "fin": "2026-10-15T20:46:02Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:46:02Z",
-     "fin": "2026-10-15T16:46:02Z",
-     "duree_s": 0.1,
-     "complement_sha": "e26d5c0801678bc3",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "b3851273cb60b6dc"
+     "debut": "2026-10-15T20:46:02Z",
+     "fin": "2026-10-15T20:46:02Z",
+     "duree_s": 0.2,
+     "complement_sha": "74f51d71daa9e25f",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "cc03cf720bff85bf"
     }
    },
    "manuel": [
@@ -526,7 +618,26 @@
    "notes": [
     "22 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 33.4
+   "duree_preparation_s": 33.4,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:46:01Z",
+     "fin": "2026-10-15T16:46:02Z",
+     "duree_s": 0.9
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:46:02Z",
+     "fin": "2026-10-15T16:46:02Z",
+     "duree_s": 0.1,
+     "complement_sha": "e26d5c0801678bc3",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "b3851273cb60b6dc"
+    }
+   ]
   },
   "92051": {
    "nom": "Neuilly-sur-Seine",
@@ -790,18 +901,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:48:03Z",
-     "fin": "2026-10-15T16:48:03Z",
-     "duree_s": 0.2
+     "debut": "2026-10-15T20:46:34Z",
+     "fin": "2026-10-15T20:46:34Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:48:03Z",
-     "fin": "2026-10-15T16:48:03Z",
-     "duree_s": 0.1,
-     "complement_sha": "d47fb5fb9e6765bd",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "7a6846179baf34b1"
+     "debut": "2026-10-15T20:46:34Z",
+     "fin": "2026-10-15T20:46:34Z",
+     "duree_s": 0.2,
+     "complement_sha": "1087932fae2089c1",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "719fde10621ecba2"
     }
    },
    "manuel": [
@@ -814,7 +925,26 @@
    "notes": [
     "19 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 23.2
+   "duree_preparation_s": 23.2,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:48:03Z",
+     "fin": "2026-10-15T16:48:03Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:48:03Z",
+     "fin": "2026-10-15T16:48:03Z",
+     "duree_s": 0.1,
+     "complement_sha": "d47fb5fb9e6765bd",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "7a6846179baf34b1"
+    }
+   ]
   },
   "60057": {
    "nom": "Beauvais",
@@ -886,18 +1016,18 @@
     },
     "complement": {
      "ok": true,
-     "debut": "2026-10-15T16:48:48Z",
-     "fin": "2026-10-15T16:48:48Z",
-     "duree_s": 0.2
+     "debut": "2026-10-15T20:47:33Z",
+     "fin": "2026-10-15T20:47:33Z",
+     "duree_s": 0.1
     },
     "dossier": {
      "ok": true,
-     "debut": "2026-10-15T16:48:48Z",
-     "fin": "2026-10-15T16:48:48Z",
-     "duree_s": 0.1,
-     "complement_sha": "6ca2f5b4a7d2dd7f",
-     "duree_calcul_s": 0.1,
-     "dossier_sha": "f798413a5d49e2b9"
+     "debut": "2026-10-15T20:47:33Z",
+     "fin": "2026-10-15T20:47:34Z",
+     "duree_s": 0.2,
+     "complement_sha": "6cb24cc85ebbc79e",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "23fbb2cc5b8d9488"
     }
    },
    "manuel": [
@@ -910,7 +1040,26 @@
    "notes": [
     "23 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 20.9
+   "duree_preparation_s": 20.9,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:48:48Z",
+     "fin": "2026-10-15T16:48:48Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:48:48Z",
+     "fin": "2026-10-15T16:48:48Z",
+     "duree_s": 0.1,
+     "complement_sha": "6ca2f5b4a7d2dd7f",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "f798413a5d49e2b9"
+    }
+   ]
   },
   "77284": {
    "nom": "Meaux",

@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Ce contraste mérite d’entrer dans votre sélection d’annonces : il donne une raison d’examiner ces secteurs de près",
+   "probleme": "Les parts de la voiture des actifs qui habitent Centre Urbain Nord et Courcouronnes Centre Nord (iris.voiture.min, iris.voiture.max) deviennent un critère pour choisir des annonces. Avec le titre « quel secteur regarder pour utiliser moins la voiture ? », le lecteur comprend que Centre Urbain Nord est le secteur à privilégier. Or ces chiffres décrivent ce que font les habitants en 2022 : ils ne disent pas comment le lecteur se déplacera depuis une adresse de ce secteur (iris.ecart_voiture : aucun lien de cause entre un quartier et une pratique).",
+   "correction_minimale": "Supprimer la phrase « Ce contraste mérite d’entrer dans votre sélection d’annonces : il donne une raison d’examiner ces secteurs de près, puis de confronter chaque adresse à vos déplacements. » Les parts restent alors une description des pratiques des habitants."}
+]}
+```

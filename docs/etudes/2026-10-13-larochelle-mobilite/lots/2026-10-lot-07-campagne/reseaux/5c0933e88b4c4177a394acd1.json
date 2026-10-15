@@ -32,5 +32,74 @@
    200
   ]
  ],
- "consulte_le": "2026-10-15"
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.moins_4_ans",
+    "information": "Les enfants de moins de 4 ans voyagent gratuitement sans titre de transport, sauf sur les lignes à vocation scolaire (lignes 21 à 38) et pour les déplacements de groupe. Le réseau n'est donc pas gratuit pour tous.",
+    "url": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+    "extrait": "Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 4 ans ; tout le réseau sauf les lignes 21 à 38 et les déplacements de groupe",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:45:28Z"
+   },
+   {
+    "id": "doc.tarification.abonnement_scolaire",
+    "information": "L'abonnement scolaire annuel est gratuit pour les écoliers de la maternelle au CM2. Il faut présenter la carte BUSSÉO et un justificatif de domicile de moins de 3 mois, et un justificatif de scolarité dès 12 ans. Ces conditions sont résumées par l'outil de lecture, sans extrait copié.",
+    "url": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+    "extrait": "Les enfants de moins de 4 ans voyagent gratuitement, sans titre de transport, sauf sur les lignes à vocation scolaire (Lignes 21 à 38)et pour les déplacements de groupe.",
+    "validite": "non précisée",
+    "perimetre": "Écoliers de la maternelle au CM2 ; lignes non précisées",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:45:29Z"
+   },
+   {
+    "id": "doc.itineraire.calcul",
+    "information": "La page d'accueil renvoie vers carte.tcat.fr pour préparer un itinéraire et rechercher un horaire, et vers services.tcat.fr/fiche_horaire/ pour les fiches horaires.",
+    "url": "https://tcat.fr/",
+    "extrait": "Préparer un itinéraire",
+    "validite": "non précisée",
+    "perimetre": "Réseau TCAT",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:45:30Z"
+   },
+   {
+    "id": "doc.temps_reel.application",
+    "information": "Le temps réel est accessible via l'application Mobilités by TCM & TCAT, les QR codes aux arrêts et la page infos trafic. Allô TCAT: 03 25 70 49 01.",
+    "url": "https://tcat.fr/se-deplacer/le-reseau-tcat/infos-trafic/",
+    "extrait": "Mobilités by TCM & TCAT",
+    "validite": "non précisée",
+    "perimetre": "Réseau TCAT",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:45:30Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Jours de circulation (dimanche, jours fériés, samedi) et période de validité des horaires",
+    "statut": "introuvable",
+    "url": "https://tcat.fr/se-deplacer/le-reseau-tcat/",
+    "note": "Les pages consultées (accueil, infos trafic, réseau) ne donnent ni jours de circulation ni période de validité. Les fiches horaires (https://services.tcat.fr/fiche_horaire/) et l'article « Votre réseau bus évolue » n'ont pas été ouverts."
+   },
+   {
+    "sujet": "Gratuité de l'ensemble du réseau",
+    "statut": "introuvable",
+    "url": "https://tcat.fr/titres-et-tarifs/la-gamme-tarifaire/",
+    "note": "Aucune gratuité générale n'apparaît. Seuls les cas ci-dessus sont signalés."
+   },
+   {
+    "sujet": "Une actualité annonce une évolution du réseau bus au 1er septembre 2026. Son con",
+    "statut": "non vérifié",
+    "url": "https://tcat.fr/se-deplacer/le-reseau-tcat/infos-trafic/",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
 }
