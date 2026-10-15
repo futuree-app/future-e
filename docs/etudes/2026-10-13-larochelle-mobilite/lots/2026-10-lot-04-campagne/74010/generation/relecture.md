@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Pour sélectionner des annonces, ce contraste mérite de regarder où se situe le logement dans la commune.",
+   "probleme": "La phrase fait des pratiques des actifs qui habitent Courier et Vieugy-Balmont (iris.740100101.voiture, iris.740101503.voiture) un critère de choix d'annonce. Elle suggère que le secteur fixera la place de la voiture pour le lecteur, un lien de cause que le dossier ne mesure pas. Le titre (« quel secteur regarder pour utiliser moins la voiture ? ») renforce cette lecture.",
+   "correction_minimale": "Supprimer la phrase et enchaîner directement : « Le lieu de travail est une autre question : parmi les actifs qui habitent et travaillent à Annecy, 52 % … »."},
+  {"categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier mesure un panier commun",
+   "probleme": "« Le dossier » est un terme de production : le lecteur ne connaît pas cette pièce (acces / iris.*.panier_500m).",
+   "correction_minimale": "Remplacer par « on peut regarder un panier commun » ou « un indicateur réunit »."}
+]}
+```

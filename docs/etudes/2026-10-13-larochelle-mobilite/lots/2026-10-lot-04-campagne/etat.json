@@ -1511,7 +1511,7 @@
    "nom": "Aix-en-Provence",
    "insee": "13001",
    "demande": "13001",
-   "statut": "suspendu par quota",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1586,13 +1586,40 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "suspendu par quota · « relecture » : You've hit your session limit · resets 7:30pm (Europe/Paris)"
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "anomalies_restantes": [],
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_13001_clair.png",
+     "carte_iris_13001_clair.svg",
+     "carte_iris_13001_mobile_clair.png",
+     "carte_iris_13001_mobile_clair.svg",
+     "carte_iris_13001_mobile_sombre.png",
+     "carte_iris_13001_mobile_sombre.svg",
+     "carte_iris_13001_sombre.png",
+     "carte_iris_13001_sombre.svg",
+     "tableau_carburant_13001.html",
+     "tableau_carburant_13001.md",
+     "tableau_iris_13001.html",
+     "tableau_iris_13001.md"
+    ],
+    "reperes": [
+     "130010102",
+     "130010801",
+     "130010905"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:02:23Z",
+    "fin": "2026-10-15T18:03:13Z",
+    "duree_s": 49.8
+   }
   },
   "63113": {
    "nom": "Clermont-Ferrand",
    "insee": "63113",
    "demande": "63113",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1653,13 +1680,52 @@
      "duree_calcul_s": 0.1,
      "dossier_sha": "afa68d52d4e6eb1b"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "146762f401bd01b6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_63113_clair.png",
+     "carte_iris_63113_clair.svg",
+     "carte_iris_63113_mobile_clair.png",
+     "carte_iris_63113_mobile_clair.svg",
+     "carte_iris_63113_mobile_sombre.png",
+     "carte_iris_63113_mobile_sombre.svg",
+     "carte_iris_63113_sombre.png",
+     "carte_iris_63113_sombre.svg",
+     "tableau_carburant_63113.html",
+     "tableau_carburant_63113.md",
+     "tableau_iris_63113.html",
+     "tableau_iris_63113.md"
+    ],
+    "reperes": [
+     "631131401",
+     "631132001",
+     "631132101"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:05:15Z",
+    "fin": "2026-10-15T18:05:33Z",
+    "duree_s": 18.7
+   }
   },
   "74010": {
    "nom": "Annecy",
    "insee": "74010",
    "demande": "74010",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1720,13 +1786,54 @@
      "duree_calcul_s": 0.1,
      "dossier_sha": "f7073fc26110e0ba"
     }
-   ]
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "aeac9dda36eb50b2",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_74010_clair.png",
+     "carte_iris_74010_clair.svg",
+     "carte_iris_74010_mobile_clair.png",
+     "carte_iris_74010_mobile_clair.svg",
+     "carte_iris_74010_mobile_sombre.png",
+     "carte_iris_74010_mobile_sombre.svg",
+     "carte_iris_74010_sombre.png",
+     "carte_iris_74010_sombre.svg",
+     "tableau_carburant_74010.html",
+     "tableau_carburant_74010.md",
+     "tableau_iris_74010.html",
+     "tableau_iris_74010.md"
+    ],
+    "reperes": [
+     "740100101",
+     "740101503",
+     "740101102"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:08:39Z",
+    "fin": "2026-10-15T18:09:39Z",
+    "duree_s": 59.8
+   }
   },
   "87085": {
    "nom": "Limoges",
    "insee": "87085",
    "demande": "87085",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1768,13 +1875,53 @@
    "notes": [
     "55 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 31.3
+   "duree_preparation_s": 31.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "a0ef8b2c19ef6c7f",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_87085_clair.png",
+     "carte_iris_87085_clair.svg",
+     "carte_iris_87085_mobile_clair.png",
+     "carte_iris_87085_mobile_clair.svg",
+     "carte_iris_87085_mobile_sombre.png",
+     "carte_iris_87085_mobile_sombre.svg",
+     "carte_iris_87085_sombre.png",
+     "carte_iris_87085_sombre.svg",
+     "tableau_carburant_87085.html",
+     "tableau_carburant_87085.md",
+     "tableau_iris_87085.html",
+     "tableau_iris_87085.md"
+    ],
+    "reperes": [
+     "870850204",
+     "870851601"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:12:32Z",
+    "fin": "2026-10-15T18:13:20Z",
+    "duree_s": 48.0
+   }
   },
   "57463": {
    "nom": "Metz",
    "insee": "57463",
    "demande": "57463",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1816,13 +1963,51 @@
    "notes": [
     "47 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 32.2
+   "duree_preparation_s": 32.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "0be2bd2987a72da9",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "redaction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_57463_clair.png",
+     "carte_iris_57463_clair.svg",
+     "carte_iris_57463_mobile_clair.png",
+     "carte_iris_57463_mobile_clair.svg",
+     "carte_iris_57463_mobile_sombre.png",
+     "carte_iris_57463_mobile_sombre.svg",
+     "carte_iris_57463_sombre.png",
+     "carte_iris_57463_sombre.svg",
+     "tableau_carburant_57463.html",
+     "tableau_carburant_57463.md",
+     "tableau_iris_57463.html",
+     "tableau_iris_57463.md"
+    ],
+    "reperes": [
+     "574630401",
+     "574631202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:16:00Z",
+    "fin": "2026-10-15T18:16:17Z",
+    "duree_s": 17.0
+   }
   },
   "92012": {
    "nom": "Boulogne-Billancourt",
    "insee": "92012",
    "demande": "92012",
-   "statut": "dossier prêt",
+   "statut": "prêt à relire",
    "etapes": {
     "fiche": {
      "ok": true,
@@ -1864,7 +2049,72 @@
    "notes": [
     "42 secteurs d'habitat (IRIS)"
    ],
-   "duree_preparation_s": 26.8
+   "duree_preparation_s": 26.8,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "b0c9fe22a9421223",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Pratiques — libellé de secteur",
+     "detail": "« « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.voiture.min (17.0)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Pratiques — libellé de secteur",
+     "detail": "« « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.voiture.max (46.0)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Équipements — libellé de secteur",
+     "detail": "« « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.920120506.panier_500m (100.0)"
+    },
+    {
+     "type": "valeur",
+     "gravite": "bloquante",
+     "passage": "Équipements — libellé de secteur",
+     "detail": "« « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.920120703.panier_500m (77.7)"
+    }
+   ],
+   "motif": "4 anomalie(s) déterministe(s) après la correction unique",
+   "article": "correction.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92012_clair.png",
+     "carte_iris_92012_clair.svg",
+     "carte_iris_92012_mobile_clair.png",
+     "carte_iris_92012_mobile_clair.svg",
+     "carte_iris_92012_mobile_sombre.png",
+     "carte_iris_92012_mobile_sombre.svg",
+     "carte_iris_92012_sombre.png",
+     "carte_iris_92012_sombre.svg",
+     "tableau_carburant_92012.html",
+     "tableau_carburant_92012.md",
+     "tableau_iris_92012.html",
+     "tableau_iris_92012.md"
+    ],
+    "reperes": [
+     "920120506",
+     "920120703"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:19:27Z",
+    "fin": "2026-10-15T18:19:39Z",
+    "duree_s": 11.6
+   }
   }
  },
  "journal": []

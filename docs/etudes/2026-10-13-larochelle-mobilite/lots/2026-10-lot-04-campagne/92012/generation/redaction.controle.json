@@ -1,0 +1,30 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Pratiques — libellé de secteur",
+   "detail": "« « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.voiture.min (17.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Pratiques — libellé de secteur",
+   "detail": "« « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.voiture.max (46.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Équipements — libellé de secteur",
+   "detail": "« « 1 » dans Trapèze 1 » ne correspond à aucune valeur du dossier pour iris.920120506.panier_500m (100.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Équipements — libellé de secteur",
+   "detail": "« « 2 » dans Les Princes Marmottan 2 » ne correspond à aucune valeur du dossier pour iris.920120703.panier_500m (77.7)"
+  }
+ ],
+ "bloquantes": 4
+}

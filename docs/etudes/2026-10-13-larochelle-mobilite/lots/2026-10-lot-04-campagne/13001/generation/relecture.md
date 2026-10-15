@@ -1,0 +1,19 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Moins utiliser la voiture à Aix-en-Provence : quel secteur regarder ?",
+   "probleme": "Le titre et la question du chapeau (« quels secteurs regarder si l'on souhaite réduire la place de la voiture ? Les pratiques de travail […] apportent des repères ») transforment les pratiques des actifs d'un secteur (iris.voiture.min, iris.voiture.max) en conseil sur le quartier à choisir pour moins prendre la voiture. C'est un lien entre quartier et pratique que le dossier ne mesure pas.",
+   "correction_minimale": "Titre : « Moins utiliser la voiture à Aix-en-Provence : ce que montrent les secteurs » ; chapeau : « À Aix-en-Provence, la place de la voiture dans les trajets de travail et la proximité des équipements varient fortement d'un secteur à l'autre. »"},
+  {"categorie": "croisement",
+   "gravite": "a_revoir",
+   "passage": "La mention « emploi à Aix-en-Provence » ne suffit donc pas à trancher entre des logements.",
+   "probleme": "La part de 56 % porte sur toute la commune (mobpro.voiture_selon_destination.meme_commune) et ne dit rien des écarts entre logements. Cette phrase, le titre de section (« Travailler à Aix laisse encore le secteur à choisir ») et les parts par secteur qui suivent laissent croire que, parmi ceux qui travaillent à Aix, la part de la voiture varie selon le secteur. Le dossier ne donne pas ce croisement entre secteur et commune de travail.",
+   "correction_minimale": "Supprimer la phrase et retitrer la section sans lier le lieu de travail au choix du secteur, par exemple « Le travail, puis les secteurs »."},
+  {"categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier repère les adresses ayant à la fois",
+   "probleme": "L'article renvoie au « dossier », qui est un document de production et n'a rien à faire dans un texte publié.",
+   "correction_minimale": "Remplacer par « on a repéré les adresses ayant à la fois »."}
+]}
+```

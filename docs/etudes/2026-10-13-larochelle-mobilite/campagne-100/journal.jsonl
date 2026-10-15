@@ -19,3 +19,7 @@
 {"t": "2026-10-15T17:28:09Z", "evt": "suspension", "lot": 1, "etape": "rediger", "message": "suspendu par quota · « relecture » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "13001"}
 {"t": "2026-10-15T17:28:17Z", "evt": "production_debut", "lot": 2}
 {"t": "2026-10-15T17:28:20Z", "evt": "suspension", "lot": 2, "etape": "collecter", "message": "suspendu par quota · « collecte » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "collecte"}
+{"t": "2026-10-15T18:00:38Z", "evt": "intervention", "texte": "Erreur du pilote : lot 2 lancé à 17:28 UTC alors que le lot 1 venait d'être suspendu par la limite de session Claude (fin prise pour une réussite) ; un appel de collecte refusé en 3 s, sans jeton consommé. Constat, commit et poussée de l'état suspendu", "minutes": 5.0, "mesure": "estimée"}
+{"t": "2026-10-15T18:00:42Z", "evt": "reprise", "lot": 1, "suspension_du": "2026-10-15T17:28:09Z"}
+{"t": "2026-10-15T18:00:42Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T18:19:39Z", "evt": "production_fin", "lot": 1}
