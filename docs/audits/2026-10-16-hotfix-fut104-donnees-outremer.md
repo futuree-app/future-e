@@ -1,5 +1,7 @@
 # Hotfix P0 : fausses projections climatiques servies à l'outre-mer
 
+> **Mis à jour par `2026-10-16-fut104-consolidation.md`** : les 218 lignes ne sont plus seulement bloquées, elles sont purgées du fichier, et l'échelle nationale est recalculée sur 34 788 communes. La purge SQL a été déplacée dans `supabase/maintenance/`.
+
 16 octobre 2026 · branche `hotfix/fut104-exposition-donnees-outremer`, depuis `origin/main` (6c496676). Rien n'est ouvert, fusionné ni déployé. FUT-50 et la branche FUT-104 ne sont pas touchés.
 
 ## Vérification négative

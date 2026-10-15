@@ -1,5 +1,7 @@
 # FUT-104 · Une couverture climatique ultramarine réelle
 
+> **Mis à jour par `2026-10-16-fut104-consolidation.md`** : 187 entités intégrées (Arutua, Pirae et Tumaraa retirées par les règles de distance et de représentativité), lignes DRIAS ultramarines purgées, lacunes de publication de la Guyane étendues à quatre indicateurs.
+
 15 octobre 2026 · branche `feat/fut-104-climat-outremer`, depuis `main` (6c496676). Aucune PR, fusion ni déploiement. FUT-50 non modifié.
 
 ## 0. À retenir
