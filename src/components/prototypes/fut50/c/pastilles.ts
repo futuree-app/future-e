@@ -163,47 +163,60 @@ export function valeurAffichee(v: number, seuil: number): string {
 //   - « moins d'un par an » : le palier existant de l'accueil (`formatCompte`).
 // Aucun mot comme « fort », « nettement » ou « peu » : ils demanderaient une convention qui n'existe pas.
 
-type Axe = "jours" | "nuits";
 
 /** Ce que la commune gagnerait par an, en moyenne : projeté moins référence reconstruite. `null` sans référence. */
 const gain = (a: AxeChaleur) => (a.projete != null && a.reference != null ? a.projete - a.reference : null);
-const MOT_AXE: Record<Axe, string> = { jours: "les journées très chaudes", nuits: "les nuits chaudes" };
-
 /**
- * LA RÉPONSE À LA PRIORITÉ (revue utilisateur du 15/10, soir) : une pastille, puis au plus une phrase courte,
- * qui interprète sans jamais reformuler les nombres affichés juste au-dessus.
+ * LA RÉPONSE À LA PRIORITÉ : une pastille, puis une phrase qui parle de la commune, jamais du mécanisme de futur•e
+ * (revue du 15/10 : ni « seuil », ni « ce que futur•e signale »). Elle ne reformule pas les nombres affichés.
  *
- *   classement du moteur     | pastille             | ce qui la fonde
- *   unfavorable              | Plutôt défavorable   | au moins un axe atteint le seuil (`classifyClimateComfort`)
- *   under_threshold, rare    | Plutôt favorable     | les DEUX mesures sous une par an même en 2050 (palier existant
- *                            |                      | « moins d'un » de l'accueil)
- *   under_threshold, sinon   | À surveiller         | sous les seuils, mais des fortes chaleurs présentes : un verdict
- *                            |                      | positif ne serait pas honnête (La Rochelle : 23 nuits pour 25)
+ *   classement du moteur     | pastille             | phrase
+ *   unfavorable              | Plutôt défavorable   | nomme ce qui atteint le seuil du moteur, et seulement cela
+ *   under_threshold, rare    | Plutôt favorable     | les deux mesures sous une par an même en 2050 (palier existant)
+ *   under_threshold, sinon   | À surveiller         | jamais favorable : la chaleur progresse sous les seuils
  *   absent / uncertain       | Donnée indisponible  | (traité dans `lireChaleur`)
  *
- * « d'abord la nuit » désigne l'axe dont l'écart avec 1976-2005 est le plus grand : une comparaison des chiffres
- * affichés, sans palier nouveau.
+ * Chaque qualificatif a sa règle, et une seule :
+ *   « peu nombreuses »              → sous le seuil du moteur (8 jours, 25 nuits) ;
+ *   « particulièrement fréquentes » → seuil du moteur atteint ;
+ *   « beaucoup plus fréquentes »    → au moins DOUBLÉES depuis 1976-2005 (convention éditoriale du 15/10, à valider) ;
+ *   « plus fréquentes »             → une de plus par an au moins, sans doubler (palier « moins d'un » existant).
+ * Deux communes aux chiffres différents peuvent recevoir la même phrase : la différence se lit dans les chiffres.
  */
-export function phraseChaleur(e: EntreesChaleur): { signal: Signal; texte: string } {
+const double = (a: AxeChaleur) => a.projete != null && a.reference != null && a.projete >= 1 && a.projete >= 2 * a.reference;
+
+/** Comment évoluent les nuits tropicales d'une commune sous les seuils. `null` : rien à en dire sans inventer. */
+function evolutionNuits(n: AxeChaleur): string | null {
+  const g = gain(n);
+  if (g == null || g < 1) return null;
+  return double(n) ? "les nuits tropicales deviendraient beaucoup plus fréquentes" : "les nuits tropicales seraient plus fréquentes";
+}
+
+export function phraseChaleur(e: EntreesChaleur, commune: string): { signal: Signal; texte: string } {
   const { jours, nuits } = e;
   if (jours.projete! < 1 && nuits.projete! < 1) {
     return { signal: "favorable", texte: "Les fortes chaleurs resteraient exceptionnelles ici, même en 2050." };
   }
-  const axe = { jours, nuits };
   if (e.verdict === "unfavorable") {
-    const atteints = (["nuits", "jours"] as Axe[]).filter((k) => axe[k].projete! >= axe[k].seuil);
-    return {
-      signal: "defavorable",
-      texte: atteints.length === 2
-        ? "Les journées très chaudes comme les nuits chaudes dépassent ce que futur•e signale."
-        : `Ce sont ${MOT_AXE[atteints[0]!]} qui dépassent ce que futur•e signale.`,
-    };
+    const j = jours.projete! >= jours.seuil, n = nuits.projete! >= nuits.seuil;
+    if (j && n) {
+      const hausse = (gain(jours) ?? 0) >= 1 && (gain(nuits) ?? 0) >= 1;
+      return {
+        signal: "defavorable",
+        texte: `${hausse ? "Les fortes chaleurs augmenteraient de jour comme de nuit." : "Les fortes chaleurs seraient fréquentes de jour comme de nuit."} Sur ces deux aspects, ${commune} correspond mal à votre priorité.`,
+      };
+    }
+    const sujet = n ? "Les nuits tropicales" : "Les journées au-dessus de 35 °C";
+    return { signal: "defavorable", texte: `${sujet} deviendraient particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.` };
   }
-  const gj = gain(jours), gn = gain(nuits);
-  if (gj == null || gn == null) return { signal: "sous_seuil", texte: "Sans atteindre ce que futur•e signale, faute de comparaison avec 1976-2005 pour en dire plus." };
-  if (gj < 1 && gn < 1) return { signal: "sous_seuil", texte: "Les fortes chaleurs resteraient à peu près au niveau de 1976-2005, sans atteindre ce que futur•e signale." };
-  const dabord = gn >= gj ? "d'abord la nuit" : "d'abord le jour";
-  return { signal: "sous_seuil", texte: `Les fortes chaleurs progresseraient, ${dabord}, sans atteindre ce que futur•e signale.` };
+  // Sous les seuils : les deux mesures restent sous le seuil du moteur, donc « peu nombreuses ».
+  const nuitsEvoluent = evolutionNuits(nuits);
+  return {
+    signal: "sous_seuil",
+    texte: nuitsEvoluent
+      ? `Les journées au-dessus de 35 °C resteraient peu nombreuses, mais ${nuitsEvoluent}.`
+      : "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.",
+  };
 }
 
 /** « Comment lire ce résultat ? » : la méthode, sans répéter les chiffres affichés au-dessus. */
@@ -266,7 +279,7 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
     };
   }
   const texte = `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} au-dessus de 35 °C (${ref(jours, false)}), et ${vn} ${mesures[1]!.unite} par an (${ref(nuits, true)}).`;
-  const pourVous = phraseChaleur(e);
+  const pourVous = phraseChaleur(e, lieu.commune);
   const methode = methodeChaleur(e);
   return {
     cle: "chaleur", commune: lieu.commune,

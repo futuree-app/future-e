@@ -215,44 +215,49 @@ test("seuils de la règle du moteur : 8 jours au-dessus de 35 °C, 25 nuits trop
 });
 
 // La phrase sous la pastille interprète ; elle ne reformule jamais les nombres affichés au-dessus. Les années
-// (2050, 1976-2005) situent la lecture, ce ne sont pas des quantités.
-const quantiteReformulee = (t: string) => /\d/.test(t.replace(/\b(?:19|20)\d{2}\b/g, ""));
+// (2050, 1976-2005) situent la lecture et les températures (35 °C) nomment la mesure : ce ne sont pas des quantités.
+const quantiteReformulee = (t: string) => /\d/.test(t.replace(/\b(?:19|20)\d{2}\b/g, "").replace(/\d+\s?°C/g, ""));
 const chaleurDe = (insee: string, commune = insee) => lireChaleur({ ...SETE, commune, insee }, entreesReelles(insee));
 
-test("La Rochelle (sous les seuils, 23,4 nuits pour 25) : « À surveiller », jamais « favorable »", () => {
+const AVANT_LA_ROCHELLE = "Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient beaucoup plus fréquentes.";
+
+test("La Rochelle (sous les seuils, 23,4 nuits pour 25) : « À surveiller », jamais « favorable », une phrase de lecteur", () => {
   const e = entreesReelles("17300");
   assert.equal(e.verdict, "under_threshold");
   const l = chaleurDe("17300", "La Rochelle");
-  assert.equal(l.pourVous.signal, "sous_seuil");
   assert.equal(MOT_DU_SIGNAL[l.pourVous.signal], "À surveiller");
   assert.notEqual(l.pourVous.signal, "favorable");
-  assert.equal(l.pourVous.texte, "Les fortes chaleurs progresseraient, d'abord la nuit, sans atteindre ce que futur•e signale.");
+  // « peu nombreuses » : 2,8 < 8 ; « beaucoup plus fréquentes » : 23,4 ≥ 2 × 5,1.
+  assert.equal(l.pourVous.texte, AVANT_LA_ROCHELLE);
   assert.ok(!quantiteReformulee(l.pourVous.texte));
   assert.match(l.methode!.join(" "), /nuits tropicales \(23,4 pour un repère de 25\)/);
   assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["3", "23"]);
 });
 
-test("Nîmes et Bordeaux : « Plutôt défavorable », la phrase nomme les axes qui fondent le classement, et eux seuls", () => {
+test("Nantes : la même phrase que La Rochelle, la différence se lit dans les chiffres", () => {
+  const l = chaleurDe("44109", "Nantes");
+  assert.equal(MOT_DU_SIGNAL[l.pourVous.signal], "À surveiller");
+  assert.equal(l.pourVous.texte, AVANT_LA_ROCHELLE);
+});
+
+test("Nîmes et Bordeaux : « Plutôt défavorable », la phrase nomme ce qui atteint le seuil, et la commune", () => {
   const nimes = chaleurDe("30189", "Nîmes"), bordeaux = chaleurDe("33063", "Bordeaux");
   assert.equal(MOT_DU_SIGNAL[nimes.pourVous.signal], "Plutôt défavorable");
-  assert.equal(nimes.pourVous.texte, "Les journées très chaudes comme les nuits chaudes dépassent ce que futur•e signale.");
+  assert.equal(nimes.pourVous.texte, "Les fortes chaleurs augmenteraient de jour comme de nuit. Sur ces deux aspects, Nîmes correspond mal à votre priorité.");
   assert.equal(MOT_DU_SIGNAL[bordeaux.pourVous.signal], "Plutôt défavorable");
-  assert.equal(bordeaux.pourVous.texte, "Ce sont les nuits chaudes qui dépassent ce que futur•e signale.");
+  assert.equal(bordeaux.pourVous.texte, "Les nuits tropicales deviendraient particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.");
   for (const l of [nimes, bordeaux]) assert.ok(!quantiteReformulee(l.pourVous.texte));
 });
 
-test("Nantes : même restitution que La Rochelle (aucune convention ne distingue « proche du seuil »)", () => {
-  const l = chaleurDe("44109", "Nantes");
-  assert.equal(MOT_DU_SIGNAL[l.pourVous.signal], "À surveiller");
-  assert.match(l.pourVous.texte, /d'abord la nuit/);
-});
-
-test("« d'abord le jour » quand l'écart des journées dépasse celui des nuits ; aucune hausse lisible : pas de « progresseraient »", () => {
+test("chaque qualificatif suit sa règle : doublé, simplement plus fréquent, sans hausse, jours seuls au-dessus du seuil", () => {
   const base = entreesReelles("17300");
-  const jour = lireChaleur(SETE, { ...base, jours: { projete: 7, reference: 1, seuil: 8 }, nuits: { projete: 4, reference: 2, seuil: 25 } });
-  assert.match(jour.pourVous.texte, /d'abord le jour/);
-  const stable = lireChaleur(SETE, { ...base, jours: { projete: 2, reference: 1.5, seuil: 8 }, nuits: { projete: 3, reference: 2.5, seuil: 25 } });
-  assert.equal(stable.pourVous.texte, "Les fortes chaleurs resteraient à peu près au niveau de 1976-2005, sans atteindre ce que futur•e signale.");
+  const avec = (jours: [number, number], nuits: [number, number], verdict: EntreesChaleur["verdict"] = "under_threshold") =>
+    lireChaleur(SETE, { ...base, verdict, jours: { projete: jours[0], reference: jours[1], seuil: 8 }, nuits: { projete: nuits[0], reference: nuits[1], seuil: 25 } }).pourVous.texte;
+  assert.match(avec([3, 1], [12, 7]), /les nuits tropicales seraient plus fréquentes\.$/, "12 < 2 × 7 : pas « beaucoup »");
+  assert.match(avec([3, 1], [14, 7]), /beaucoup plus fréquentes/, "14 = 2 × 7 : doublé");
+  assert.equal(avec([3, 2.5], [6, 5.5]), "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.");
+  assert.equal(avec([9, 2], [10, 4], "unfavorable"), "Les journées au-dessus de 35 °C deviendraient particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs.");
+  assert.match(avec([12, 11.5], [40, 39.6], "unfavorable"), /^Les fortes chaleurs seraient fréquentes de jour comme de nuit\./, "sans hausse, pas « augmenteraient »");
 });
 
 test("valeurs très faibles (La Condamine-Châtelard, les deux mesures sous une par an en 2050) : seul cas « Plutôt favorable »", () => {
@@ -262,11 +267,13 @@ test("valeurs très faibles (La Condamine-Châtelard, les deux mesures sous une 
   for (const insee of ["17300", "44109", "64445"]) assert.notEqual(chaleurDe(insee).pourVous.signal, "favorable", insee);
 });
 
-test("grammaire : ni multiplicateur, ni gain chiffré, ni durée continue ou effet sanitaire", () => {
-  for (const insee of ["17300", "30189", "33063", "44109", "64445", "04062"]) {
-    const t = chaleurDe(insee).pourVous.texte;
+test("grammaire : jamais le mécanisme de futur•e dans la phrase, ni chiffre, ni durée continue ou effet sanitaire", () => {
+  const NOMS: Record<string, string> = { "17300": "La Rochelle", "30189": "Nîmes", "33063": "Bordeaux", "44109": "Nantes", "64445": "Pau", "04062": "La Condamine-Châtelard" };
+  for (const insee of Object.keys(NOMS)) {
+    const t = chaleurDe(insee, NOMS[insee]).pourVous.texte;
     assert.ok(!quantiteReformulee(t), insee);
-    assert.doesNotMatch(t, /fois plus|de plus par an|fortement|nettement|difficile/, insee);
+    assert.doesNotMatch(t, /futur•e|seuil|signal|repère|d'abord/, insee);
+    assert.doesNotMatch(t, /fois plus|de plus par an|difficile/, insee);
     assert.doesNotMatch(t, /d'affilée|consécuti|semaines|mois|santé|sanitaire/, insee);
   }
 });
@@ -275,7 +282,7 @@ test("une référence non reconstructible : aucune comparaison inventée, ni « 
   const e = { ...entreesReelles("17300"), jours: { projete: 2.8, reference: null, seuil: 8 }, nuits: { projete: 23.4, reference: null, seuil: 25 } };
   const l = lireChaleur(SETE, e);
   assert.equal(l.pourVous.signal, "sous_seuil", "jamais favorable sans comparaison");
-  assert.equal(l.pourVous.texte, "Sans atteindre ce que futur•e signale, faute de comparaison avec 1976-2005 pour en dire plus.");
+  assert.equal(l.pourVous.texte, "Les journées au-dessus de 35 °C comme les nuits tropicales resteraient peu nombreuses.", "aucune évolution dite sans référence");
   assert.match(l.fait!.mesures![0]!.legende, /référence 1976-2005 non lisible/);
 });
 

@@ -78,3 +78,52 @@
 **Captures** : `c7-chaleur-{la-rochelle,nantes,bordeaux,nimes}-{1440,390,360}-{35,30}.jpg`.
 
 **Hors périmètre, signalé** : sur mobile, le blanc réservé sous la légende à 35 °C (pour la légende à 30 °C, plus longue) fait environ deux lignes. Raccourcir la légende à 30 °C, en laissant l'horizon à la ligne de source, le réduirait.
+
+---
+
+## Révision : des phrases de lecteur (revue du 15/10, soir)
+
+**Le problème** : « d'abord la nuit » et « sans atteindre ce que futur•e signale » traduisaient encore les règles du moteur.
+
+**La règle retenue** : la phrase principale ne parle jamais du mécanisme de futur•e (ni « seuil », ni « signale », ni « repère »). Elle dit ce qui se passe dans la commune, et ce que cela signifie pour la priorité. Deux communes peuvent recevoir la même phrase : la différence se lit dans les chiffres.
+
+| Commune | Pastille | Phrase |
+| --- | --- | --- |
+| La Rochelle | À surveiller | Les journées au-dessus de 35 °C resteraient peu nombreuses, mais les nuits tropicales deviendraient beaucoup plus fréquentes. |
+| Nantes | À surveiller | (même phrase) |
+| Pau | À surveiller | (même phrase) |
+| Bordeaux | Plutôt défavorable | Les nuits tropicales deviendraient particulièrement fréquentes, ce qui correspond mal à votre souhait d'éviter les fortes chaleurs. |
+| Nîmes | Plutôt défavorable | Les fortes chaleurs augmenteraient de jour comme de nuit. Sur ces deux aspects, Nîmes correspond mal à votre priorité. |
+| La Condamine-Châtelard | Plutôt favorable | Les fortes chaleurs resteraient exceptionnelles ici, même en 2050. |
+
+**Une règle par qualificatif**, vérifiée par test :
+
+| Qualificatif | Règle | Statut |
+| --- | --- | --- |
+| « peu nombreuses » | sous le seuil du moteur (8 jours, 25 nuits) | existant |
+| « particulièrement fréquentes » | seuil du moteur atteint | existant |
+| « beaucoup plus fréquentes » | au moins doublées depuis 1976-2005 | **convention éditoriale nouvelle, à valider** |
+| « plus fréquentes » | au moins une de plus par an, sans doubler | palier « moins d'un » existant |
+| « augmenteraient » (de jour comme de nuit) | les deux mesures gagnent au moins une par an | existant ; sinon « seraient fréquentes de jour comme de nuit » |
+
+Valeurs du doublement :
+- La Rochelle : 5,1 → 23,4 nuits ;
+- Nantes : 2,0 → 11,1 ;
+- Pau : 4,2 → 19,2.
+
+**Cas limite à juger** : à Pau, 7,1 journées au-dessus de 35 °C, juste sous le seuil de 8, sont dites « peu nombreuses ». C'est cohérent avec le moteur, mais c'est le point le plus discutable.
+
+**Inchangés** : la méthode (« Comment lire ce résultat ? ») garde le vocabulaire des repères, à sa place ; le basculement 30 °C ; les seuils ; les classifications.
+
+**Vérifications** :
+- tests FUT-50 : 34/34 ;
+- suite complète : 2 589/2 589 ;
+- `tsc` et `eslint` sans erreur ;
+- build réussi ; le prototype renvoie 404 en production.
+
+**Navigateur**, pour les quatre communes à 1440, 390 et 360 px :
+- la pastille, la couleur et la phrase sont conformes ;
+- au basculement à 30 °C, la hauteur et les nuits ne changent pas, rien ne déborde ;
+- la seule requête observée est la mesure d'audience `clarity.ms`.
+
+**Captures** : `c8-chaleur-*`.
