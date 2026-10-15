@@ -1,0 +1,30 @@
+{
+ "17028": {
+  "voie_rapide": 0.042,
+  "voie_ferree": 0.998
+ },
+ "17094": {
+  "voie_rapide": 0.0,
+  "voie_ferree": 1.0
+ },
+ "17200": {
+  "voie_rapide": 0.738,
+  "voie_ferree": 1.0
+ },
+ "17274": {
+  "voie_rapide": 1.0,
+  "voie_ferree": 1.0
+ },
+ "17291": {
+  "voie_rapide": 0.887,
+  "voie_ferree": 1.0
+ },
+ "17300": {
+  "voie_rapide": 0.023,
+  "voie_ferree": 0.588
+ },
+ "_osm": {
+  "ways_route": 245,
+  "ways_rail": 283
+ }
+}

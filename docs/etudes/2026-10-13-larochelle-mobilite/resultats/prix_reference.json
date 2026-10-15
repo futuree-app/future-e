@@ -1,0 +1,14 @@
+{
+ "hypotheses": {
+  "jours": 200,
+  "l_100km": 6.0,
+  "hausse_eur_l": {
+   "Gazole": 0.75,
+   "E10": 0.5
+  },
+  "prix_oct2026": {
+   "Gazole": 2.288,
+   "E10": 2.129
+  }
+ }
+}

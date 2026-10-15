@@ -125,7 +125,7 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
                 <span className="article-cat" style={{ background: 'rgba(232, 130, 58,0.12)', color: ACCENT }}>Savoir</span>
                 <div className="article-title">Pourquoi certains territoires rendent la voiture presque obligatoire</div>
                 <div className="article-desc">
-                  84 % des actifs ruraux vont travailler en voiture. Ce que ce chiffre dit de l&apos;organisation du territoire, et pourquoi cette dépendance est d&apos;abord une affaire de territoire.
+                  Hors des pôles urbains, près de neuf actifs sur dix vont travailler en voiture. Pourquoi certains territoires la rendent difficile à remplacer, et quoi vérifier avant de choisir un logement.
                 </div>
                 <div className="article-cta">Lire l&apos;article →</div>
               </div>
@@ -217,8 +217,8 @@ export default function JUtiliseBeaucoupMaVoiturePage() {
 
           <div className="signal-grid">
             <div className="signal-card">
-              <div className="signal-source">INSEE · Ecolab</div>
-              <div className="signal-head">84 % des actifs ruraux vont travailler en voiture</div>
+              <div className="signal-source">INSEE · recensement 2017</div>
+              <div className="signal-head">Hors des pôles urbains, près de neuf actifs sur dix vont travailler en voiture</div>
               <div className="signal-body">
                 Ce chiffre ne décrit pas un goût français pour l&apos;automobile. Il décrit surtout des territoires où les autres solutions sont trop rares, trop lentes ou simplement absentes.
               </div>

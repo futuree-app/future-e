@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 export const metadata: Metadata = {
   title: 'Pourquoi certains territoires rendent la voiture presque obligatoire · futur•e',
   description:
-    "En France, 84 % des actifs ruraux utilisent leur voiture pour aller travailler. Ce chiffre reflète une organisation du territoire construite sur des décennies.",
+    "Dans les pôles urbains, 58 % des actifs vont travailler en voiture ; ailleurs, près de neuf sur dix. Pourquoi certains territoires rendent la voiture difficile à remplacer, et quoi vérifier avant de choisir un logement.",
 };
 
 const css = `
@@ -64,14 +64,6 @@ const css = `
   .keystat-label{font-size:15px;color:var(--fg-3);line-height:1.5;position:relative;z-index:1;}
   .keystat-src{display:block;margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--fg-4);letter-spacing:0.05em;}
 
-  .two-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:40px 0;}
-  .stat-card{padding:24px 22px;background:var(--bg-elev);border:1px solid var(--border-1);border-radius:6px;position:relative;overflow:hidden;}
-  .stat-card-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg-4);margin-bottom:10px;}
-  .stat-card-number{font-family:var(--font-serif);font-size:40px;line-height:1;font-weight:var(--weight-title);margin-bottom:6px;}
-  .stat-card-number.hi{color:var(--accent);}
-  .stat-card-number.lo{color:var(--blue);}
-  .stat-card-desc{font-size:13px;color:var(--fg-3);line-height:1.5;}
-  .stat-card-src{margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--fg-4);}
 
   .map-figure{margin:44px -20px;padding:32px 28px 28px;background:var(--bg-elev);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:8px;position:relative;overflow:hidden;}
   .map-figure::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 65% 35%,rgba(232, 130, 58,0.06) 0%,transparent 55%);pointer-events:none;}
@@ -80,6 +72,10 @@ const css = `
   .map-figure figcaption a{color:var(--fg-1);text-decoration:none;border-bottom:1px solid var(--border-hi);transition:color 0.2s,border-color 0.2s;}
   .map-figure figcaption a:hover{color:var(--accent);border-color:var(--accent);}
 
+  .checklist{margin:8px 0 28px;padding:0;list-style:none;display:grid;gap:14px;}
+  .checklist li{font-size:17px;line-height:1.65;color:var(--fg-2);padding-left:18px;position:relative;}
+  .checklist li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .checklist strong{color:var(--fg-1);font-weight:600;}
   .actions-card{margin:48px 0 32px;padding:28px;background:var(--bg-elev);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-1);border-radius:8px;}
   .actions-card-head{font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--fg-4);margin-bottom:18px;}
   .actions-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px;}
@@ -111,7 +107,7 @@ const css = `
     p{font-size:16px;}
     .keystat{padding:22px 20px;}
     .keystat-number{font-size:42px;}
-    .two-stats{grid-template-columns:1fr;}
+    .checklist li{font-size:16px;}
     .actions-card{padding:22px;}
     .actions-list li a{font-size:17px;padding:14px 0;}
     .map-figure{margin:36px -8px;padding:20px 14px 18px;}
@@ -120,10 +116,29 @@ const css = `
   }
 `;
 
+// RENVOIS VERS LES ÉTUDES LOCALES (13/10/2026). Les articles de La Rochelle et de Niort ne sont pas publiés :
+// leurs seules adresses sont les prévisualisations /dev/article-*, qui renvoient 404 en production. La section
+// n'apparaît donc qu'en développement. À la publication des études : remplacer les deux href par leurs URL
+// publiques et retirer la condition. URL proposées : /savoir/dependance-auto/la-rochelle et /savoir/dependance-auto/niort
+// (docs/etudes/2026-10-13-larochelle-mobilite/PUBLICATION.md).
+const etudesLocales = process.env.NODE_ENV === 'production' ? '' : `
+  <h2>Deux villes regardées de près</h2>
+  <p>
+    Les chiffres nationaux ne disent rien d'un quartier en particulier. Nos études de La&nbsp;Rochelle et de Niort descendent au niveau des secteurs de la ville et du lieu de travail&nbsp;: la place de la voiture y change nettement d'un quartier à l'autre, et selon la commune où l'on travaille. Ce sont deux villes, pas une règle générale. Leurs chiffres viennent du recensement de 2022 et incluent les actifs qui ne se déplacent pas&nbsp;: ils ne se comparent pas directement à ceux de l'INSEE cités plus haut.
+  </p>
+  <div class="actions-card">
+    <div class="actions-card-head">Études locales · prévisualisation, liens à activer à la publication</div>
+    <ul class="actions-list">
+      <li><a href="/dev/article-larochelle">Vivre à La&nbsp;Rochelle en utilisant moins la voiture<span class="arrow">→</span></a></li>
+      <li><a href="/dev/article-niort">À Niort, la voiture ne tient pas la même place d'un secteur à l'autre<span class="arrow">→</span></a></li>
+    </ul>
+  </div>
+`;
+
 const articleBody = `
   <div class="article-meta">
     <span class="tag">Mobilité</span>
-    <span class="read-info">Lecture 7 min</span>
+    <span class="read-info">Lecture 6 min</span>
   </div>
 
   <h1>Pourquoi certains territoires rendent la voiture <em>presque obligatoire</em></h1>
@@ -136,129 +151,84 @@ const articleBody = `
     <div class="date-sep"></div>
     <div class="date-item">
       <span class="date-label">Mis à jour</span>
-      <span class="date-value date-value-muted">Aucune révision</span>
+      <span class="date-value">13 octobre 2026</span>
     </div>
   </div>
 
   <p class="lede">
-    En France, 84 % des actifs résidant dans des communes rurales utilisent leur voiture pour aller travailler. Derrière ce chiffre, une organisation du territoire construite sur plusieurs décennies, qui a rendu la voiture nécessaire au quotidien. Comprendre pourquoi certains endroits produisent cette dépendance, et ce que cela implique pour les foyers qui y vivent, c'est l'objet de cette page.
+    Dans les pôles urbains, 58&nbsp;% des actifs qui se déplacent pour travailler prennent la voiture. Dans les couronnes périurbaines et les communes éloignées des villes, c'est près de neuf sur dix. L'écart ne tient pas à un goût pour l'automobile&nbsp;: il tient aux distances, et à ce qui existe pour les parcourir. En choisissant un logement, on choisit aussi, souvent sans le voir, la place que la voiture prendra dans ses journées.
   </p>
 
-  <h2>De quoi parle-t-on précisément</h2>
+  <h2>Utiliser la voiture, ou en dépendre</h2>
   <p>
-    La dépendance automobile désigne une situation dans laquelle l'accès à l'emploi, aux commerces, aux services de santé et aux espaces de sociabilité est structurellement impossible ou très difficile sans voiture. Elle se distingue d'un usage intensif mais choisi : un Parisien qui loue une voiture chaque week-end fait un choix ; un habitant de Bressuire ou de Decazeville qui ne possède pas de voiture ne peut, dans la plupart des cas, ni accéder à son travail ni faire ses courses sans elle.
+    On parle de dépendance quand, pour des trajets qui comptent (le travail, l'école, les courses, les soins), il n'existe pas d'autre solution raisonnable&nbsp;: trop loin à pied, trop long ou trop dangereux à vélo, pas de bus à la bonne heure. Ce n'est pas la même chose qu'un usage fréquent. On peut prendre la voiture chaque jour par commodité alors qu'un bus passe en bas de chez soi&nbsp;; on peut aussi ne s'en servir que deux fois par semaine, pour des trajets qu'aucune autre solution ne permet.
   </p>
   <p>
-    L'INSEE mesure cette réalité à travers plusieurs indicateurs : la part de la voiture dans les déplacements domicile-travail, la part des flux sortants (actifs travaillant hors de leur commune), la distance médiane des trajets et la couverture par les transports collectifs. Ces données permettent de classer les territoires selon leur niveau de dépendance structurelle à l'automobile.
+    Pour un ménage, la différence est concrète. Ce qui coûte, ce n'est pas d'avoir une voiture, c'est de ne pas pouvoir s'en passer&nbsp;: quand elle tombe en panne, quand le carburant augmente, quand l'un des adultes n'a pas le permis.
   </p>
 
   <div class="keystat">
-    <span class="keystat-number">84 %</span>
-    <span class="keystat-label">des actifs résidant en commune rurale utilisent la voiture comme mode de transport principal vers leur lieu de travail.</span>
-    <span class="keystat-src">Source : INSEE / Ecolab, flux domicile-travail, données 2026</span>
+    <span class="keystat-number">74&nbsp;%</span>
+    <span class="keystat-label">des actifs en emploi qui se déplacent pour aller travailler y vont en voiture, en France.</span>
+    <span class="keystat-src">Source : INSEE, recensement 2017 (Insee Première n° 1835, janvier 2021)</span>
   </div>
 
-  <h2>D'où cela vient</h2>
+  <h2>Ce que montrent les chiffres nationaux</h2>
   <p>
-    La dépendance automobile n'est pas un état naturel. Elle est le résultat d'un ensemble de choix d'aménagement du territoire qui se sont renforcés mutuellement depuis les années 1960. Le premier facteur est l'étalement urbain : les villes et leurs périphéries se sont développées en partant du principe que les habitants disposeraient d'une voiture. Les zones commerciales en périphérie, les grands équipements scolaires ou hospitaliers dimensionnés pour de larges bassins de population, les lotissements résidentiels construits loin des centres : tous ces éléments ont été conçus pour être desservis par la route.
+    L'INSEE a mesuré l'usage de la voiture pour aller travailler selon le lieu de résidence. Dans les pôles urbains, la ville-centre et les communes denses qui l'entourent, 58&nbsp;% des actifs qui se déplacent y vont en voiture. Dans les couronnes, ces communes dont une part importante des actifs travaille dans le pôle, et dans les communes situées hors de l'influence des villes, la part atteint 89 à 90&nbsp;%.
   </p>
   <p>
-    Le deuxième facteur est le déclin progressif des services de proximité dans les territoires peu denses. Quand une pharmacie, une poste, une école ou un cabinet médical ferme dans une commune de 800 habitants, les déplacements s'allongent et deviennent impossibles à pied ou à vélo. Ce mécanisme est documenté par le Commissariat général à l'égalité des territoires.
+    La distance n'explique pas tout. Pour des trajets de 5&nbsp;km au plus, 60&nbsp;% des actifs prennent encore la voiture&nbsp;; à moins d'un kilomètre, c'est environ la moitié. Les transports collectifs, eux, restent peu utilisés hors de la région parisienne&nbsp;: 8&nbsp;% des actifs, 15&nbsp;% dans les aires de plus de 700&nbsp;000 habitants, moins de 3&nbsp;% dans celles de moins de 50&nbsp;000.
   </p>
   <p>
-    Le troisième facteur est le sous-investissement chronique dans les alternatives. La France a maintenu un réseau ferroviaire dense pour les trajets interrégionaux, mais les dessertes locales (trains du quotidien, cars interurbains, navettes communales) ont subi des coupes significatives entre les années 1980 et 2010. La loi d'orientation des mobilités de 2019 a cherché à inverser cette tendance, mais les effets restent limités dans les zones les plus isolées.
-  </p>
-
-  <h2>Ce que cela change concrètement</h2>
-  <p>
-    Le premier effet est budgétaire. Un foyer dépendant d'une ou deux voitures dans un territoire périurbain consacre en moyenne entre 4 000 et 7 000 euros par an aux coûts de transport (carburant, assurance, entretien, amortissement), selon les calculs de l'Observatoire des inégalités et de l'ADEME. Dans un foyer dont le revenu net est de 2 000 euros par mois, cela représente entre 17 et 29 % du budget, une part largement incompressible : on peut renoncer à des loisirs, rarement à son trajet pour travailler.
-  </p>
-  <p>
-    Le deuxième effet est une exposition directe à la volatilité du prix des carburants. Un foyer qui consomme 1 500 litres d'essence par an subit une variation de 750 euros sur son budget annuel pour chaque écart de 50 centimes au litre. Les périodes de forte hausse, comme celles de 2022 et de 2025-2026, sont sans conséquence pour un foyer bien desservi par les transports, très douloureuses pour un foyer périurbain sans alternative réaliste.
-  </p>
-  <p>
-    Le troisième effet concerne la fragilité sociale. L'absence de permis de conduire, la perte de capacité à conduire liée à l'âge, la panne d'une voiture unique : chacun de ces événements peut remettre en cause l'accès à l'emploi ou aux soins dans les territoires fortement dépendants de la voiture.
+    Ces chiffres décrivent des pratiques en 2017. Ils ne disent pas ce que chacun pourrait faire autrement, ni pourquoi il ne le fait pas.
   </p>
 
-  <div class="two-stats">
-    <div class="stat-card">
-      <div class="stat-card-label">Part du budget transport</div>
-      <div class="stat-card-number hi">29 %</div>
-      <div class="stat-card-desc">Maximum observé dans les foyers à revenus modestes en zone périurbaine très dépendante</div>
-      <div class="stat-card-src">ADEME / Observatoire des inégalités</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-label">Flux domicile-travail sortants</div>
-      <div class="stat-card-number hi">52 %</div>
-      <div class="stat-card-desc">Part médiane des actifs travaillant hors de leur commune dans les zones périurbaines très dépendantes</div>
-      <div class="stat-card-src">INSEE / Ecolab, 2026</div>
-    </div>
-  </div>
-
-  <h2>Quels territoires sont concernés en France</h2>
+  <h2>Pourquoi certains territoires la rendent difficile à remplacer</h2>
   <p>
-    La dépendance automobile n'est pas uniformément répartie. Elle touche de façon structurelle les espaces périurbains des grandes agglomérations (couronnes de Bordeaux, Lyon, Toulouse, Nantes, Lille) où les logements sont accessibles financièrement mais les services et les emplois restent concentrés dans les coeurs d'agglomération. Elle est également très forte dans les territoires ruraux du Massif central, du nord de la Nouvelle-Aquitaine, du Grand Est rural et des franges des Hauts-de-France.
+    Trois choses se combinent, plus ou moins selon les endroits. La distance d'abord&nbsp;: quand le logement, l'emploi, l'école et les commerces sont éloignés les uns des autres, peu de trajets se font à pied ou à vélo. La fréquence ensuite&nbsp;: un bus par heure, ou qui ne circule pas tôt le matin, ne remplace pas une voiture pour aller travailler, même s'il figure sur la carte. L'enchaînement, enfin&nbsp;: déposer un enfant, aller travailler, faire une course au retour. Une solution qui marche pour chaque trajet pris à part peut ne pas marcher pour la journée entière.
+  </p>
+  <p>
+    Ces contraintes ne s'arrêtent pas aux limites des communes. Dans une même ville, deux quartiers peuvent offrir des situations très différentes&nbsp;; et selon la commune où l'on travaille, le même logement peut convenir ou non.
   </p>
 
+  <h2>Ce que cela change pour un ménage</h2>
   <p>
-    Les métropoles elles-mêmes présentent des contrastes internes très marqués. Dans l'aire urbaine de Bordeaux, la dépendance à la voiture entre les quartiers du centre et les communes de la troisième couronne peut varier du simple au triple. Les projections de l'ADEME indiquent que, sans intervention sur la densification et l'offre de transport, cet écart continuera de se creuser.
-  </p>
-
-  <h2>Ce qui est débattu, ce qui ne l'est pas</h2>
-  <p>
-    Le constat de la dépendance structurelle est bien établi et fait consensus entre les chercheurs en géographie, les économistes des transports et les institutions publiques (ADEME, Cerema, CGEDD). Les données INSEE sont précises et régulièrement mises à jour. Ce qui n'est pas débattu : la voiture est devenue une condition d'accès au marché du travail et aux services essentiels pour une fraction importante de la population française, et cette dépendance est inégalement répartie sur le territoire.
+    Le premier effet est budgétaire. Le carburant n'est qu'une partie du coût d'une voiture, à côté de l'achat, de l'assurance et de l'entretien, mais c'est celle qui varie le plus vite. Un calcul simple donne l'ordre de grandeur&nbsp;: une voiture qui consomme 6 litres aux 100&nbsp;km et roule 15&nbsp;000&nbsp;km par an utilise environ 900 litres de carburant. Avec 50 centimes de plus par litre, cela fait environ 450&nbsp;€ de plus par an.
   </p>
   <p>
-    Ce qui fait davantage l'objet de discussions entre chercheurs et responsables de politiques publiques : la hiérarchie des solutions. Faut-il densifier les villes pour rapprocher emplois et logements, ou développer les transports pour relier des territoires moins denses ? Le rapport Dumont sur la mobilité rurale (2023) et les travaux du Cerema soulignent que la réponse dépend fortement de la configuration locale et qu'il n'existe pas de solution universelle applicable partout. La vitesse à laquelle une transition vers d'autres modes de déplacement est possible, et pour quels profils de population, reste une question ouverte et dépendante des investissements publics à venir.
+    Une même hausse ne pèse pas pareil partout. Un ménage qui roule peu, ou qui peut faire une partie de ses trajets autrement, en limite l'effet. Un ménage qui roule beaucoup, sans autre solution, la subit en entier.
   </p>
   <p>
-    Un point fait également débat : la part de la contrainte résidentielle dans cette dépendance. Des travaux en sciences sociales, notamment ceux de Sylvie Fol sur les mobilités précaires, montrent que ces choix résidentiels sont souvent liés aux prix du logement plutôt que librement consentis.
+    Le second effet est la fragilité. La panne de la seule voiture du foyer, la perte du permis, l'âge qui rend la conduite difficile&nbsp;: là où rien ne la remplace, chacun de ces événements peut compliquer l'accès au travail ou aux soins.
   </p>
-
-  <h2>Ce que vous pouvez faire</h2>
+${etudesLocales}
+  <h2>Avant de choisir un logement</h2>
   <p>
-    Si vous vous interrogez sur votre propre exposition à cette dépendance, les pages suivantes vous proposent des outils concrets : comment évaluer votre vulnérabilité budgétaire de mobilité, et comment décider si passer à un véhicule électrique a du sens dans votre territoire et pour vos usages.
+    Ce qui suit n'est pas tiré des statistiques&nbsp;: ce sont des questions à poser pour vos propres trajets. Les moyennes d'un quartier ne disent pas ce qui sera possible pour vous. Un secteur où la plupart des actifs prennent la voiture peut très bien convenir à quelqu'un qui travaille à dix minutes à pied, et l'inverse.
   </p>
+  <ul class="checklist">
+    <li><strong>Vos destinations habituelles.</strong> Le travail de chaque adulte, l'école, les courses, le médecin, les activités&nbsp;: situez-les depuis l'adresse visitée.</li>
+    <li><strong>Vos horaires.</strong> Un bus qui passe à 8&nbsp;h ne sert à rien si vous commencez à 6&nbsp;h. Regardez les horaires aux heures où vous partirez et rentrerez, y compris le dernier retour.</li>
+    <li><strong>Les trajets réellement praticables.</strong> Une distance à vol d'oiseau peut cacher un détour, une route sans trottoir ou un carrefour difficile. Faites le chemin à pied ou à vélo au moins une fois.</li>
+    <li><strong>Le stationnement.</strong> Une place est-elle comprise dans l'annonce&nbsp;? Sinon, passez dans la rue le soir. Si le ménage garde une voiture, la question compte autant que la surface.</li>
+    <li><strong>Le jour où la voiture manque.</strong> Une panne, une seule voiture pour deux adultes&nbsp;: comment se feraient les trajets indispensables&nbsp;?</li>
+  </ul>
 
   <div class="actions-card">
     <div class="actions-card-head">Pour aller plus loin</div>
     <ul class="actions-list">
       <li><a href="/agir/dependance-auto">Évaluer votre dépendance à la voiture et ses alternatives réelles<span class="arrow">→</span></a></li>
       <li><a href="/agir/voiture-electrique">Passer à l'électrique : ce qui a du sens selon votre territoire<span class="arrow">→</span></a></li>
-      <li><a href="#">Comment lire l'offre de transport collectif de votre commune<span class="arrow">→</span></a></li>
     </ul>
   </div>
 
   <section class="sources">
-    <h2>Sources et pour aller plus loin</h2>
+    <h2>Source</h2>
     <ul>
       <li>
         <span class="src-tag">INSEE</span>
-        <span>Déplacements domicile-travail et flux selon le mode de transport principal, <a href="https://www.data.gouv.fr/fr/datasets/deplacements-domicile-travail/" target="_blank" rel="noopener">data.gouv.fr</a>, mis à jour septembre 2025.</span>
-      </li>
-      <li>
-        <span class="src-tag">Ecolab</span>
-        <span>Part des flux domicile-travail et flux domicile-travail selon le mode de transport principal utilisé, <a href="https://www.data.gouv.fr/fr/datasets/part-des-flux-domicile-travail/" target="_blank" rel="noopener">data.gouv.fr</a>, mis à jour février 2026.</span>
-      </li>
-      <li>
-        <span class="src-tag">ADEME</span>
-        <span>Prospective Transition(s) 2050, scénarios de mobilité à horizon 2050, <a href="https://librairie.ademe.fr/societe-et-politiques-publiques/5071-prospective-transitions-2050-synthese-edition-2024.html" target="_blank" rel="noopener">librairie.ademe.fr</a>, édition 2024.</span>
-      </li>
-      <li>
-        <span class="src-tag">Cerema</span>
-        <span>Travaux sur la mobilité dans les espaces peu denses et les solutions de continuité territoriale, cerema.fr.</span>
-      </li>
-      <li>
-        <span class="src-tag">CGDD</span>
-        <span>Rapport Dumont sur les mobilités du quotidien dans les territoires ruraux et périurbains, 2023.</span>
-      </li>
-      <li>
-        <span class="src-tag">Obs. inégalités</span>
-        <span>Données sur la part des dépenses de transport dans les budgets des ménages selon les catégories sociales et la localisation résidentielle, inegalites.fr.</span>
-      </li>
-      <li>
-        <span class="src-tag">Fol, S.</span>
-        <span>Fol, Sylvie. "La mobilité des pauvres", Belin, 2009. Référence fondatrice sur les contraintes de mobilité des ménages à revenus modestes dans les territoires périurbains.</span>
+        <span>« La voiture reste majoritaire pour les déplacements domicile-travail, même pour de courtes distances », Insee Première n° 1835, janvier 2021, <a href="https://www.insee.fr/fr/statistiques/5013868" target="_blank" rel="noopener">insee.fr</a>. Recensement de la population 2017&nbsp;; actifs en emploi de 15 ans ou plus qui se déplacent à moins de 150&nbsp;km pour aller travailler. Pôles, couronnes et communes hors attraction des villes&nbsp;: zonage en aires d'attraction des villes 2020.</span>
       </li>
     </ul>
   </section>
