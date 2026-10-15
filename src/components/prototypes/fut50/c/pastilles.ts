@@ -89,7 +89,9 @@ export type LecturePastille = {
     /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
     mesures?: { valeur: string; unite: string; legende: string }[];
   } | null;
-  pourVous: { signal: Signal; texte: string };
+  pourVous: { signal: Signal; texte: string; titre?: string };
+  /** L'explication de méthode, consultable (« Comment lire ce résultat ? »). Ne répète pas les chiffres affichés. */
+  methode?: string[];
   aVerifier: string;
   /** Le prochain geste : toujours un vrai parcours. */
   suite: { libelle: string; href: string };
@@ -141,13 +143,101 @@ export function valeurAffichee(v: number, seuil: number): string {
   return String(r);
 }
 
+// ── LA GRAMMAIRE DE LA LECTURE DE CHALEUR (revue du 15/10, soir) ─────────────────────────────────────
+//
+// Le moteur raisonne en seuils ; la lecture parle de jours et de nuits. Tout ce qu'elle affirme se déduit des
+// valeurs et du classement EXISTANTS, sans aucun nouveau seuil :
+//   - le classement du moteur (`verdict`) et les axes qui atteignent leur seuil (`>=`, valeur non arrondie) ;
+//   - l'évolution depuis 1976-2005, dite par un multiple arrondi (arithmétique sur les valeurs affichées) ;
+//   - l'axe mis en avant : le plus proche de SON seuil (projeté / seuil), l'échelle que le moteur fournit déjà ;
+//   - « moins d'un par an » : le palier existant de l'accueil (`formatCompte`).
+// Aucun mot comme « fort », « nettement » ou « peu » : ils demanderaient une convention qui n'existe pas.
+
+const FOIS = ["", "", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
+
+/** L'évolution d'un axe, en mots. `null` quand rien ne se dit sans inventer (pas d'augmentation lisible). */
+function evolution(a: AxeChaleur): { kind: "apparait" | "multiple" | "hausse"; mot?: string } | null {
+  if (a.projete == null || a.reference == null || a.projete <= a.reference) return null;
+  if (a.reference < 1) return a.projete >= 1 ? { kind: "apparait" } : null;
+  const r = Math.round(a.projete / a.reference);
+  return r >= 2 ? { kind: "multiple", mot: r <= 10 ? FOIS[r] : String(r) } : { kind: "hausse" };
+}
+
+const SUJET = { jours: "Les journées au-dessus de 35 °C", nuits: "Les nuits tropicales" } as const;
+
+/** La phrase d'évolution d'un axe. `seconde` : forme courte, accrochée à une première phrase qui a déjà nommé 1976-2005. */
+function frequence(axe: "jours" | "nuits", a: AxeChaleur, seconde = false): string | null {
+  const ev = evolution(a);
+  if (!ev) return null;
+  const sujet = seconde ? SUJET[axe].charAt(0).toLowerCase() + SUJET[axe].slice(1) : SUJET[axe];
+  if (ev.kind === "apparait") {
+    // « Plusieurs » ne se dit que d'une moyenne arrondie d'au moins 2 : arithmétique, pas un palier nouveau.
+    const combien = Math.round(a.projete!) >= 2 ? "plusieurs fois par an" : "environ une fois par an";
+    return `${sujet}, presque absentes sur 1976-2005, reviendraient ${combien} en moyenne`;
+  }
+  if (ev.kind === "multiple") return seconde ? `${sujet} environ ${ev.mot} fois plus` : `${sujet} seraient environ ${ev.mot} fois plus fréquentes qu'en 1976-2005`;
+  return seconde ? `${sujet} un peu plus` : `${sujet} seraient plus fréquentes qu'en 1976-2005`;
+}
+
+const TITRE_AXE = { jours: "Des journées très chaudes plus fréquentes", nuits: "Des nuits chaudes plus fréquentes" } as const;
+
+export function phraseChaleur(e: EntreesChaleur): { signal: Signal; titre: string; texte: string } {
+  const { jours, nuits } = e;
+  const jAtteint = jours.projete! >= jours.seuil, nAtteint = nuits.projete! >= nuits.seuil;
+  // L'axe mis en avant : celui qui est le plus près de son propre seuil (l'échelle que le moteur fournit).
+  const ordre: ("jours" | "nuits")[] = nuits.projete! / nuits.seuil >= jours.projete! / jours.seuil ? ["nuits", "jours"] : ["jours", "nuits"];
+  const axe = { jours, nuits };
+  if (jours.projete! < 1 && nuits.projete! < 1) {
+    return { signal: "sous_seuil", titre: "Des fortes chaleurs qui resteraient exceptionnelles", texte: "Moins d'une journée au-dessus de 35 °C et moins d'une nuit tropicale par an, même à l'horizon 2050. Cela ne dit rien des épisodes de chaleur plus modérés." };
+  }
+  if (e.verdict === "unfavorable") {
+    // On raconte les axes qui atteignent le seuil du moteur, et seulement eux : ce sont ceux qui fondent le classement.
+    const retenus = ordre.filter((k) => (k === "jours" ? jAtteint : nAtteint));
+    const phrases = retenus.map((k, i) => frequence(k, axe[k], i > 0)).filter(Boolean);
+    return {
+      signal: "defavorable",
+      titre: retenus.length === 2 ? "Des étés plus chauds, de jour comme de nuit" : TITRE_AXE[retenus[0]!],
+      texte: `${phrases.length ? `${phrases.join(", et ")}. ` : ""}Cette évolution correspond mal à votre souhait d'éviter les fortes chaleurs.`,
+    };
+  }
+  const k = ordre.find((x) => evolution(axe[x])) ?? null;
+  return {
+    signal: "sous_seuil",
+    titre: k ? TITRE_AXE[k] : "Pas de hausse lisible sur ces deux mesures",
+    texte: `${k ? `${frequence(k, axe[k])}. ` : ""}Cela ne signifie pas que les étés resteront frais.`,
+  };
+}
+
+/** « Comment lire ce résultat ? » : la méthode, sans répéter les chiffres affichés au-dessus. */
+export function methodeChaleur(e: EntreesChaleur): string[] {
+  const { jours, nuits } = e;
+  const jAtteint = jours.projete! >= jours.seuil, nAtteint = nuits.projete! >= nuits.seuil;
+  const un = (v: number) => v.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+  let ici: string;
+  if (jAtteint && nAtteint) ici = "Ici, les deux repères sont atteints.";
+  else if (jAtteint || nAtteint) ici = `Ici, seul le repère ${nAtteint ? "des nuits tropicales" : "des journées au-dessus de 35 °C"} est atteint.`;
+  else if (jours.projete! < 1 && nuits.projete! < 1) ici = "Ici, aucun des deux repères n'est atteint.";
+  else {
+    // La mesure la plus proche de son repère, dite par sa valeur exacte : aucun qualificatif, aucun palier nouveau.
+    const n = nuits.projete! / nuits.seuil >= jours.projete! / jours.seuil;
+    const a = n ? nuits : jours;
+    ici = `Ici, aucun des deux repères n'est atteint ; la mesure qui s'en approche le plus est celle des ${n ? "nuits tropicales" : "journées au-dessus de 35 °C"} (${un(a.projete!)} pour un repère de ${a.seuil}). Une commune peut se réchauffer beaucoup sans atteindre ces repères.`;
+  }
+  return [
+    "Deux mesures du climat de la commune : les journées où il fait plus de 35 °C, et les nuits tropicales, où la température ne descend pas sous 20 °C. Elles sont projetées pour 2050, quand la France se serait réchauffée d'environ 2,7 °C, et comparées à la période 1976-2005, qui n'est pas la situation actuelle.",
+    `futur•e signale une exposition à partir de ${jours.seuil} journées au-dessus de 35 °C, ou de ${nuits.seuil} nuits tropicales par an en 2050. Ce sont des repères propres à futur•e, pas des seuils sanitaires officiels. ${ici}`,
+  ];
+}
+
 export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
   const suite = SUITE_ADRESSE(lieu);
   const { jours, nuits } = e;
   if (e.verdict === "absent" || e.verdict === "uncertain" || jours.projete == null || nuits.projete == null) {
     return {
       cle: "chaleur", commune: lieu.commune, fait: null,
-      pourVous: { signal: "indisponible", texte: "Les projections de chaleur de cette commune ne sont pas lisibles en entier ici. Une donnée absente n'est jamais une bonne nouvelle." },
+      pourVous: e.verdict === "absent"
+        ? { signal: "indisponible", titre: "Pas de projection de chaleur pour cette commune", texte: "Sans ces données, nous ne pouvons rien dire de ses étés futurs : une absence de donnée n'est pas une bonne nouvelle." }
+        : { signal: "indisponible", titre: "Des projections de chaleur incomplètes", texte: "Une des deux mesures manque pour cette commune : nous ne tirons aucune conclusion de celle qui reste." },
       aVerifier: "Le dossier de la commune présente les projections disponibles, avec leur période de référence.",
       suite,
     };
@@ -160,29 +250,13 @@ export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
     { valeur: vn, unite: nuits.projete >= 1 && Math.round(nuits.projete) > 1 ? "nuits tropicales" : "nuit tropicale", legende: `par an à l'horizon 2050, sans descendre sous 20 °C, ${ref(nuits, true)}` },
   ];
   const texte = `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} au-dessus de 35 °C (${ref(jours, false)}), et ${vn} ${mesures[1]!.unite} par an (${ref(nuits, true)}).`;
-  const seuils = `${jours.seuil} jours au-dessus de 35 °C, ou ${nuits.seuil} nuits tropicales par an`;
-  let pourVous: LecturePastille["pourVous"];
-  if (e.verdict === "unfavorable") {
-    const franchis = [jours.projete >= jours.seuil ? "les jours au-dessus de 35 °C" : null, nuits.projete >= nuits.seuil ? "les nuits tropicales" : null].filter(Boolean);
-    pourVous = {
-      signal: "defavorable",
-      texte: `Des étés plus difficiles à concilier avec cette priorité : ${franchis.join(" et ")} atteignent le seuil de signalement de futur•e (${seuils}).`,
-    };
-  } else {
-    // Proportionné : un axe à moins de 20 % de son seuil est nommé comme proche.
-    const proches = [
-      jours.projete >= 0.8 * jours.seuil ? `les jours au-dessus de 35 °C en sont proches (${vj} pour un seuil de ${jours.seuil})` : null,
-      nuits.projete >= 0.8 * nuits.seuil ? `les nuits tropicales en sont proches (${vn} pour un seuil de ${nuits.seuil})` : null,
-    ].filter(Boolean);
-    pourVous = {
-      signal: "sous_seuil",
-      texte: `Les deux indicateurs restent sous les seuils de signalement de futur•e (${seuils})${proches.length ? `, mais ${proches.join(", et ")}` : ""}. Ces seuils sont des conventions de lecture, pas des seuils sanitaires : cela ne veut pas dire que les étés resteront frais.`,
-    };
-  }
+  const pourVous = phraseChaleur(e);
+  const methode = methodeChaleur(e);
   return {
     cle: "chaleur", commune: lieu.commune,
     fait: { texte, source: SOURCE_DRIAS, grain: "commune", mesures },
     pourVous,
+    methode,
     aVerifier: `${e.limite} La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit. ${e.gesteSansAdresse}.`,
     suite,
   };

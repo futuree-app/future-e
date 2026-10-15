@@ -388,8 +388,21 @@ function Lecture({ lecture, onglets }: {
         ) : null}
         <div className={c.temps}>
           <h3 className={c.tempsTitre}>Pour votre priorité</h3>
-          <span className={c.signal} style={{ "--r-teinte": TEINTE[lecture.pourVous.signal] } as CSSProperties}>{MOT_DU_SIGNAL[lecture.pourVous.signal]}</span>
+          {/* Un titre éditorial, quand la lecture en a un (chaleur), porte le message à la place de l'étiquette : le
+              classement du moteur reste dans la donnée (`data-classement`), les tests et l'explication de méthode. */}
+          {lecture.pourVous.titre ? (
+            <p className={c.lectureMessage} data-classement={lecture.pourVous.signal}>{fr(lecture.pourVous.titre)}</p>
+          ) : (
+            <span className={c.signal} style={{ "--r-teinte": TEINTE[lecture.pourVous.signal] } as CSSProperties}>{MOT_DU_SIGNAL[lecture.pourVous.signal]}</span>
+          )}
           <p className={c.tempsTexte}>{fr(lecture.pourVous.texte)}</p>
+          {lecture.methode?.length ? (
+            // Natif : ouvert et fermé au clavier (Entrée, Espace), annoncé « réduit / développé » par les lecteurs d'écran.
+            <details className={c.methode}>
+              <summary>Comment lire ce résultat ?</summary>
+              {lecture.methode.map((m) => <p key={m}>{fr(m)}</p>)}
+            </details>
+          ) : null}
         </div>
         <div className={c.temps}>
           <h3 className={c.tempsTitre}>À vérifier</h3>

@@ -156,7 +156,8 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
     await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
     await lecturePrete(page);
     await page.waitForTimeout(1100);
-    await page.screenshot({ path: `${IMG}/c4-chaleur-${fichier}-${largeur}.jpg`, type: "jpeg", quality: 78 });
+    await page.screenshot({ path: `${IMG}/c5-chaleur-${fichier}-${largeur}.jpg`, type: "jpeg", quality: 78 });
+    constats.push(`${largeur} ${nom} titre : ${await page.locator('[data-classement]').innerText()} (classement ${await page.locator('[data-classement]').getAttribute("data-classement")})`);
     const texte = (await page.locator('[aria-live="polite"] article').innerText()).replace(/\s+/g, " ");
     constats.push(`${largeur} ${nom} chaleur : ${texte.slice(0, 260)}`);
     if (largeur < 1000) {
@@ -167,8 +168,36 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
       });
       constats.push(`${largeur} ${nom} défilement : titre de la lecture à ${pos.titre} px, bas de l'en-tête à ${pos.entete} px → ${pos.titre >= pos.entete ? "visible" : "MASQUÉ"}`);
     }
+    // L'explication de méthode, ouverte, capturée en entier (le panneau de lecture seul).
+    await page.getByText("Comment lire ce résultat ?").click();
+    await page.waitForTimeout(300);
+    await page.locator('[aria-live="polite"] article').screenshot({ path: `${IMG}/c5-chaleur-${fichier}-${largeur}-methode.jpg`, type: "jpeg", quality: 78 });
+
     await ctx.close();
   }
+}
+
+
+// ── « Comment lire ce résultat ? » au clavier, et sous mouvement réduit ────────────────────────────
+for (const reduit of [false, true]) {
+  const { ctx, page } = await ouvrir(390, 844, 2);
+  if (reduit) await page.emulateMedia({ reducedMotion: "reduce" });
+  await choisirCommune(page, "La Rochelle", "La Rochelle");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
+  await lecturePrete(page);
+  // Atteint par Tab, comme au clavier : depuis la priorité choisie, jusqu'au résumé.
+  await page.locator('[role="tab"][aria-selected="true"], button[aria-pressed="true"]').first().focus();
+  for (let t = 0; t < 12; t++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement?.tagName === "SUMMARY")) break; }
+  const etat = async () => page.evaluate(() => ({ ouvert: document.querySelector("details")?.open, focus: document.activeElement?.tagName, contour: getComputedStyle(document.activeElement).outlineStyle }));
+  const avant = await etat();
+  await page.keyboard.press("Enter");
+  const ouvert = await etat();
+  await page.keyboard.press(" ");
+  const ferme = await etat();
+  const anim = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length);
+  constats.push(`méthode au clavier${reduit ? " (mouvement réduit)" : ""} : fermé=${!avant.ouvert} → Entrée ouvert=${ouvert.ouvert} → Espace fermé=${!ferme.ouvert} ; focus ${ouvert.focus}, contour ${avant.contour} ; animations en cours ${anim}`);
+  await ctx.close();
 }
 
 // ── Onglets de priorités multiples au clavier ───────────────────────────────────────────────────

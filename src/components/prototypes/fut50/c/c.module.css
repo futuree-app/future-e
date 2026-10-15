@@ -203,6 +203,19 @@
 .tempsTexteDoux { font-size: 16px; line-height: 1.55; color: var(--r-texte); margin: 0; }
 .source { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--r-discret); }
 .signal { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; font-size: 16px; color: var(--r-teinte, var(--r-encre)); }
+.lectureMessage { margin: 0; font-weight: 600; font-size: 19px; line-height: 1.3; color: var(--r-encre); }
+.methode { border-top: 1px solid var(--r-filet); padding-top: 10px; }
+.methode summary {
+  cursor: pointer; width: fit-content; min-height: 32px; display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; color: var(--r-texte); text-decoration: underline; text-underline-offset: 3px;
+  list-style: none; border-radius: 3px;
+}
+.methode summary::-webkit-details-marker { display: none; }
+.methode summary::before { content: "+"; font-variant-numeric: tabular-nums; width: 1ch; }
+.methode[open] summary::before { content: "−"; }
+.methode summary:hover { color: var(--r-encre); }
+.methode summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.methode p { margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: var(--r-texte); }
 .signal::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--r-teinte, var(--r-encre)); flex: none; }
 
 .suites { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding-top: 4px; }

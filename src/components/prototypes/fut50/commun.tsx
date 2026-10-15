@@ -20,6 +20,7 @@ export function fr(texte: string): string {
     .replace(/« /g, "«\u00a0")
     .replace(/ (\d+) (par|nuits|jours|habitants|%)/g, " $1\u00a0$2")
     .replace(/(\d) °C/g, "$1\u00a0°C")
+    .replace(/(\d{4})-(\d{4})/g, "$1\u2011$2")
     .replace(/(?<=^|[\s«(\u00a0])(le|la|les|l'|de|des|du|d'|à|au|aux|et|un|une|en|ce|sa|son|ses|sur|par|pas|ni|y) /giu, "$1\u00a0");
 }
 
