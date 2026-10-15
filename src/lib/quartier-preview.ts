@@ -9,7 +9,7 @@ import {
 // Il ne contacte AUCUNE source. L'ancien aperçu attendait `gatherCommuneEnrichment` (huit sources, dont
 // cinq en réseau) sous un `Promise.race` de 1 200 ms et rendait `null` au-delà : le bloc disparaissait,
 // au premier visiteur de chaque fonction neuve notamment, parce que la seule lecture de DRIAS
-// (`public/data_climat.json`, 63 Mo) consommait déjà 0,7 à 0,9 s. Il lit désormais un extrait de 2,7 Mo
+// (`data/data_climat.json`, 63 Mo) consommait déjà 0,7 à 0,9 s. Il lit désormais un extrait de 2,7 Mo
 // (`scripts/build-apercu-climat.mjs`), embarqué dans le bundle, et ne peut donc ni attendre ni échouer
 // sur une source tierce.
 //

@@ -7,8 +7,10 @@ import { joindreAuPointLePlusProche } from "./lib/drias-jointure.mjs";
 
 const SOURCE_DIR = path.join(process.cwd(), "data", "source");
 const COMMUNES_CSV = path.join(process.cwd(), "data", "communes-france-coords.csv");
+// HORS DE public/ (hotfix FUT-104, 16/10/2026) : le fichier n'est lu que par le serveur. Sous public/, Vercel le
+// distribuait tel quel à https://futur-e.fr/data_climat.json, lignes ultramarines erronées comprises.
 // Les sorties sont surchargeables pour vérifier une reconstruction sans écraser le fichier livré.
-const OUTPUT_JSON = process.env.DRIAS_OUTPUT_JSON ?? path.join(process.cwd(), "public", "data_climat.json");
+const OUTPUT_JSON = process.env.DRIAS_OUTPUT_JSON ?? path.join(process.cwd(), "data", "data_climat.json");
 const OUTPUT_META = process.env.DRIAS_OUTPUT_META ?? path.join(process.cwd(), "data", "drias_median_metadata.json");
 
 function parseCsvLine(line) {

@@ -4,7 +4,7 @@
 // POURQUOI CE FICHIER EXISTE. L'aperçu du paywall Territoire (`/territoire/[insee]/debloquer`) doit
 // s'afficher tout de suite et dire un fait propre à la commune. Sa vérité climatique est celle du
 // dossier (`buildClimatFacts`, `src/lib/decision/climat-facts.ts`), qui lit DRIAS par
-// `getClimatDataCommune`, donc `public/data_climat.json` : 63 Mo, 0,7 à 0,9 s de lecture à froid. Une
+// `getClimatDataCommune`, donc `data/data_climat.json` : 63 Mo, 0,7 à 0,9 s de lecture à froid. Une
 // page de vente ne peut pas payer ce prix à chaque fonction neuve, et c'est ce prix, sous un plafond
 // global de 1,2 s, qui faisait disparaître l'aperçu.
 //
@@ -18,7 +18,7 @@
 // disparaît. `src/lib/apercu-territoire.test.ts` vérifie ensuite, sur le vrai fichier, que l'extrait
 // rend les mêmes nombres que DRIAS et que son empreinte correspond au fichier présent.
 //
-// À RELANCER chaque fois que `public/data_climat.json` change :
+// À RELANCER chaque fois que `data/data_climat.json` change :
 //   node scripts/build-apercu-climat.mjs
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -26,7 +26,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE = "public/data_climat.json";
+const SOURCE = "data/data_climat.json";
 const SORTIE = "src/data/apercu-climat-communes.json";
 
 // Les clés DRIAS des trois axes de l'aperçu, dans le vocabulaire de `CLIMAT_METRICS`.

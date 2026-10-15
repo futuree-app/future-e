@@ -1,5 +1,5 @@
 {
- "_source": "public/data_climat.json (médiane DRIAS-TRACC) ; drapeaux GASPAR /gaspar/risques interrogés le 2026-10-02 ; catégories : communes_categorization (Supabase) sinon deriveCategoriesFromEntry, relevées le 2026-10-02.",
+ "_source": "data/data_climat.json (médiane DRIAS-TRACC) ; drapeaux GASPAR /gaspar/risques interrogés le 2026-10-02 ; catégories : communes_categorization (Supabase) sinon deriveCategoriesFromEntry, relevées le 2026-10-02.",
  "communes": {
   "12202": {
    "nom": "Rodez",

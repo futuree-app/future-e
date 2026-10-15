@@ -251,10 +251,10 @@ test("D : un code d'arrondissement est dit « arrondissement », jamais « commu
 
 // ── L'extrait : fidèle à DRIAS, et à jour ───────────────────────────────────────────────────────────
 test("Extrait : son empreinte est celle du fichier DRIAS présent", () => {
-  const sha = createHash("sha256").update(readFileSync("public/data_climat.json")).digest("hex");
+  const sha = createHash("sha256").update(readFileSync("data/data_climat.json")).digest("hex");
   assert.equal(
     extrait.source.sha256, sha,
-    "public/data_climat.json a changé depuis la génération de src/data/apercu-climat-communes.json : " +
+    "data/data_climat.json a changé depuis la génération de src/data/apercu-climat-communes.json : " +
       "l'extrait compact de l'aperçu Territoire doit être régénéré. Lancez " +
       "`node scripts/build-apercu-climat.mjs`, puis committez le fichier produit avec ce changement de DRIAS.",
   );
@@ -264,7 +264,7 @@ test("Extrait : son empreinte est celle du fichier DRIAS présent", () => {
 
 test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-json.ts", () => {
   const columnMap = lireColumnMap(readFileSync("src/lib/drias-json.ts", "utf8"));
-  const lignes = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, unknown>[];
+  const lignes = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, unknown>[];
   // 97411 était témoin ici : depuis le hotfix FUT-104, un code ultramarin ne rend plus rien (test suivant).
   const temoins = new Set(["17300", "29019", "13201", "05023", "2B033", "01001"]);
   let vus = 0;
