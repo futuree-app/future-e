@@ -200,7 +200,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     <section className={c.hero} data-etat={etat} aria-labelledby="hero-c">
       <div className={c.heroGauche}>
         <div className={c.heroTete}>
-          <h1 id="hero-c" className={c.titre}>Un lieu où vivre en tête ? Regardez au‑delà de l&apos;annonce.</h1>
+          <h1 id="hero-c" className={c.titre}>Choisir où vivre mérite plus qu&apos;une intuition.</h1>
           <p className={c.sous}>{fr("Climat futur, risques, services, mobilité, logement : futur•e rassemble les données publiques pour comprendre un lieu, le confronter à votre projet et savoir quoi vérifier avant de décider.")}</p>
         </div>
 
