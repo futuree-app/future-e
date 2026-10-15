@@ -9,6 +9,7 @@ import {
 import { buildClimatFacts, CLIMAT_METRICS, type GwlScenarios } from "./decision/climat-facts.ts";
 import { carteCompte, CHALEUR, FEUX, formatCompte } from "./accueil/recits.ts";
 import { indicatorsDepuisScenarios } from "./accueil/faits.ts";
+import { estCodeOutremer } from "./outremer/code-outremer.ts";
 import {
   CLES_APERCU, HORIZONS_APERCU, lireColumnMap, valeurDrias,
 } from "../../scripts/build-apercu-climat.mjs";
@@ -42,7 +43,9 @@ const texteDe = (f: FaitApercu) =>
 
 const extrait = JSON.parse(readFileSync("src/data/apercu-climat-communes.json", "utf8")) as ExtraitClimat;
 const reel = (insee: string, nom = insee) => construireApercu(insee, nom, scenariosDepuisExtrait(extrait, insee));
-const echantillon = (pas: number) => Object.keys(extrait.communes).filter((_, i) => i % pas === 0);
+// Les codes ultramarins sont écartés APRÈS l'échantillonnage, pour garder exactement les mêmes communes
+// métropolitaines qu'avant FUT-104 : l'extrait les contient, la lecture les refuse.
+const echantillon = (pas: number) => Object.keys(extrait.communes).filter((c, i) => i % pas === 0 && !estCodeOutremer(c));
 
 // ── T1 : plus de timeout destructeur ────────────────────────────────────────────────────────────────
 test("T1 : l'aperçu ne dépend plus d'un Promise.race ni d'un plafond de temps pour exister", () => {
@@ -163,6 +166,7 @@ test("T10 : l'aperçu primaire n'appelle aucune source réseau, donc aucune ne p
   const autorises = new Set([
     "server-only", "@/data/apercu-climat-communes.json", "@/lib/apercu-territoire",
     "./decision/climat-facts.ts", "./horizons.ts", "./accueil/recits.ts", "./accueil/faits.ts", "./plm.ts",
+    "./outremer/code-outremer.ts",
   ]);
   for (const fichier of ["src/lib/quartier-preview.ts", "src/lib/apercu-territoire.ts"]) {
     const src = readFileSync(fichier, "utf8");
@@ -260,7 +264,8 @@ test("Extrait : son empreinte est celle du fichier DRIAS présent", () => {
 test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-json.ts", () => {
   const columnMap = lireColumnMap(readFileSync("src/lib/drias-json.ts", "utf8"));
   const lignes = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, unknown>[];
-  const temoins = new Set(["17300", "29019", "13201", "05023", "2B033", "01001", "97411"]);
+  // 97411 était témoin ici : depuis FUT-104, un code ultramarin ne rend plus rien (test suivant).
+  const temoins = new Set(["17300", "29019", "13201", "05023", "2B033", "01001"]);
   let vus = 0;
   for (const row of lignes) {
     const insee = String(row.insee_code).padStart(5, "0");
@@ -272,4 +277,13 @@ test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-
     vus++;
   }
   assert.ok(vus >= 15);
+});
+
+test("Extrait : une ligne ultramarine n'est jamais servie (FUT-104, points de grille métropolitains)", () => {
+  // Les lignes existent dans l'extrait (copies du Conquet, de Bonifacio…) : c'est la lecture qui les refuse.
+  for (const code of ["97411", "97209", "97302", "97611", "98735", "98818", "97801"]) {
+    assert.ok(extrait.communes[code], `${code} attendu dans l'extrait`);
+    assert.equal(scenariosDepuisExtrait(extrait, code), null, code);
+  }
+  assert.ok(scenariosDepuisExtrait(extrait, "29040"), "Le Conquet reste servi");
 });

@@ -162,6 +162,16 @@ async function parseDriasFile(filePath) {
   };
 }
 
+// FUT-104 · LA GRILLE DRIAS-TRACC (EURO-CORDEX) NE COUVRE QUE L'HEXAGONE ET LA CORSE. Sans ces deux garde-fous,
+// le point « le plus proche » d'une commune ultramarine était cherché sur cette grille, en degrés bruts et sans
+// limite : la Guadeloupe recevait les valeurs du Conquet (Finistère), La Réunion celles du sud de la Corse. Les
+// 218 lignes 97xxx/98xxx de public/data_climat.json en viennent. Le climat ultramarin vient de SocleOM
+// (scripts/outremer/), pas d'ici.
+const EST_OUTREMER = (insee) => /^9[78]/.test(insee);
+// ~50 km : bien au-delà du pas de la grille (~8 km) et des îles métropolitaines les plus éloignées de leur point
+// (Ouessant, ~0,3°), mais assez court pour qu'une jointure absurde échoue au lieu de produire une ligne.
+const DISTANCE_MAX_DEG = 0.5;
+
 function buildNearestPointIndex(communes, pointRows) {
   const points = pointRows.map((row) => ({
     pointId: row.Point,
@@ -185,6 +195,13 @@ function buildNearestPointIndex(communes, pointRows) {
         nearestDistance = distance;
         nearestPointId = point.pointId;
       }
+    }
+
+    if (nearestDistance > DISTANCE_MAX_DEG * DISTANCE_MAX_DEG) {
+      throw new Error(
+        `${commune.insee_code} ${commune.commune_name} : point DRIAS le plus proche à ${Math.sqrt(nearestDistance).toFixed(2)}°, ` +
+          `au-delà de ${DISTANCE_MAX_DEG}°. La commune n'est pas couverte par la grille.`,
+      );
     }
 
     return {
@@ -255,7 +272,10 @@ async function main() {
   }
 
   const referenceRows = Array.from(canonicalSource.records.values());
-  const enrichedCommunes = buildNearestPointIndex(communes, referenceRows);
+  const enrichedCommunes = buildNearestPointIndex(
+    communes.filter((c) => !EST_OUTREMER(c.insee_code)),
+    referenceRows,
+  );
   const indicatorKeys = Object.keys(referenceRows[0]).filter(
     (key) => !["Point", "Latitude", "Longitude", "Niveau"].includes(key),
   );

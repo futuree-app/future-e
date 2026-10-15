@@ -48,6 +48,7 @@ import { mentionHorizon, type HorizonKey } from "./horizons.ts";
 import { carteCompte, CHALEUR, NUITS, FEUX, type IndicateurCompte } from "./accueil/recits.ts";
 import { indicatorsDepuisScenarios, NOTES_FAITS } from "./accueil/faits.ts";
 import { communeParent } from "./plm.ts";
+import { estCodeOutremer } from "./outremer/code-outremer.ts";
 
 /** Un fait de l'aperçu, avec tout ce qui le rend lisible seul. */
 export type FaitApercu = {
@@ -161,6 +162,9 @@ export type ExtraitClimat = {
 };
 
 export function scenariosDepuisExtrait(extrait: ExtraitClimat, insee: string): GwlScenarios | null {
+  // FUT-104 : l'extrait reprend les lignes ultramarines de `public/data_climat.json`, qui sont des copies de points
+  // de grille métropolitains (cf. getClimatDataCommune). Elles ne sont jamais servies.
+  if (estCodeOutremer(insee)) return null;
   const ligne = extrait.communes[insee];
   if (!ligne) return null;
   const n = extrait.cles.length;
