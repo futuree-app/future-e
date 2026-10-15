@@ -3,6 +3,7 @@ import path from "node:path";
 import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
 import type { ClimatProjete } from "@/lib/logement-synthesis-cache";
 import { construireEchelle, rangDe, type Rang } from "@/lib/rang-national";
+import { estCodeOutremer } from "@/lib/outremer/code-outremer";
 
 // Mapping des colonnes techniques vers nos indicateurs métier.
 //
@@ -174,16 +175,18 @@ async function construireEchelleNationale(
  *
  * Retourne `null` quand la commune est absente de l'index, quand l'indicateur ne lui est pas
  * fourni, ou quand l'indicateur est inconnu. Une absence de rang se dit, elle ne se remplace pas
- * par une position moyenne : le périmètre DRIAS exclut les DROM, et une commune d'outre-mer doit
- * lire « non comparée » plutôt qu'un rang qui n'existe pas.
+ * par une position moyenne : le périmètre DRIAS exclut l'outre-mer, et une commune d'outre-mer doit
+ * lire « non comparée » plutôt qu'un rang qui n'existe pas (refus explicite, hotfix FUT-104).
  */
 export async function getRangNational(
   inseeCode: string,
   scenario: ScenarioId,
   indicateur: string,
 ): Promise<Rang | null> {
-  const index = await getIndex();
   const safeInsee = String(inseeCode).padStart(5, "0");
+  // Un code ultramarin n'a pas de rang : DRIAS ne le couvre pas (cf. getClimatDataCommune).
+  if (estCodeOutremer(safeInsee)) return null;
+  const index = await getIndex();
   const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;
 
   const row = index.get(lookupInsee)?.get(scenario);
@@ -217,10 +220,18 @@ function rowToIndicators(row: RawRow, colonnes: Record<string, string> = COLUMN_
  * @param inseeCode Le code INSEE (ex: "13055")
  */
 export async function getClimatDataCommune(inseeCode: string, options: { accueil?: boolean } = {}) {
-  const index = await getIndex();
-  
   // Formatage de la recherche pour correspondre à l'index
   const safeInsee = inseeCode.padStart(5, '0');
+
+  // HOTFIX FUT-104 · AUCUNE LIGNE ULTRAMARINE N'EST SERVIE, et l'index n'est pas chargé pour un tel code.
+  // DRIAS-TRACC (modèles EURO-CORDEX) ne couvre que l'Hexagone et la Corse ; les 218 lignes 97xxx/98xxx du fichier
+  // viennent d'une jointure au point de grille le plus proche, sans distance maximale : les Antilles y reçoivent les
+  // valeurs du Conquet, La Réunion celles du sud de la Corse. Une absence vaut mieux qu'une valeur fausse.
+  // Les lignes restent dans le fichier et dans l'échelle du rang national, À DESSEIN : les en retirer changerait
+  // le rang affiché de toutes les communes métropolitaines (35 006 → 34 788 comparées) ; c'est une décision à part.
+  if (estCodeOutremer(safeInsee)) return null;
+
+  const index = await getIndex();
 
   // Pour Paris, Lyon, Marseille : DRIAS indexe par arrondissement, pas par ville entière
   const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;

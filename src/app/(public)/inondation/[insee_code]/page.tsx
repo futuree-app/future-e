@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { estCodeOutremer } from '@/lib/outremer/code-outremer';
 import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
 import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
@@ -17,7 +19,8 @@ import communesLoiLittoralMer from "@/data/communes-loi-littoral-mer.json";
 import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
-  return communesAPregenerer().map((code) => ({ insee_code: code }));
+  // Hotfix FUT-104 : aucune page ultramarine n'est fabriquée au build (elles répondent 404, cf. plus bas).
+  return communesAPregenerer().filter((code) => !estCodeOutremer(code)).map((code) => ({ insee_code: code }));
 }
 
 const ACCENT = '#60a5fa';
@@ -66,6 +69,12 @@ export async function generateMetadata({
   params: Promise<{ insee_code: string }>;
 }): Promise<Metadata> {
   const { insee_code } = await params;
+  // Hotfix FUT-104 : ni titre ni description de projection pour un territoire que DRIAS ne couvre pas. La page répond
+  // 404 (`notFound()` dans le composant) ; les métadonnées ne l'appellent pas, sans quoi le HTML initial de la page
+  // d'explication sort vide (rendu seulement côté client, constaté sur le build de production).
+  if (estCodeOutremer(insee_code)) {
+    return { title: "Projections climatiques indisponibles · futur•e", robots: { index: false, follow: false } };
+  }
   const [commune, drias] = await Promise.all([fetchCommune(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
   const nomCommune = commune?.nom_commune ?? drias?.commune?.n ?? insee_code;
   const title = `Inondation et submersion à ${nomCommune} : risques et données officielles`;
@@ -164,6 +173,10 @@ export default async function InondationCommune({
   params: Promise<{ insee_code: string }>;
 }) {
   const { insee_code } = await params;
+  // HOTFIX FUT-104 · AUCUNE PROJECTION DRIAS POUR L'OUTRE-MER. Les anciennes valeurs de ces codes venaient de points de
+  // grille métropolitains (Fort-de-France affichait celles du Conquet). Statut 404 et page d'explication
+  // (`not-found.tsx`), sans chiffre ni rang ni appel au dossier, jusqu'au raccordement des projections SocleOM.
+  if (estCodeOutremer(insee_code)) notFound();
 
   const [commune, driasData, georisques, catnat] = await Promise.all([
     fetchCommune(insee_code),

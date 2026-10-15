@@ -48,6 +48,7 @@ import { mentionHorizon, type HorizonKey } from "./horizons.ts";
 import { carteCompte, CHALEUR, NUITS, FEUX, type IndicateurCompte } from "./accueil/recits.ts";
 import { indicatorsDepuisScenarios, NOTES_FAITS } from "./accueil/faits.ts";
 import { communeParent } from "./plm.ts";
+import { estCodeOutremer } from "./outremer/code-outremer.ts";
 
 /** Un fait de l'aperçu, avec tout ce qui le rend lisible seul. */
 export type FaitApercu = {
@@ -79,7 +80,10 @@ export type FaitApercu = {
 
 export type ApercuTerritoire =
   | { etat: "faits"; commune: string; faits: [FaitApercu] | [FaitApercu, FaitApercu] }
-  | { etat: "sans_fait"; commune: string };
+  | { etat: "sans_fait"; commune: string }
+  // Hotfix FUT-104 : code ultramarin. DRIAS ne couvre pas le territoire ; le dossier n'en porte aucune trajectoire
+  // climatique, et l'aperçu le dit au lieu d'annoncer une analyse qui n'existe pas.
+  | { etat: "hors_couverture"; commune: string };
 
 /** « Un nombre de jours par an ne dit rien de la durée ni de la continuité d'une période. » */
 const NOTE_COMPTE = NOTES_FAITS.find((n) => n.startsWith("Un nombre de jours"))!;
@@ -120,6 +124,7 @@ function fait(
  * Même code, même donnée : même aperçu.
  */
 export function construireApercu(insee: string, commune: string, scenarios: GwlScenarios | null): ApercuTerritoire {
+  if (estCodeOutremer(insee)) return { etat: "hors_couverture", commune };
   const climat = buildClimatFacts(scenarios);
   if (!climat || !scenarios) return { etat: "sans_fait", commune };
 
@@ -161,6 +166,9 @@ export type ExtraitClimat = {
 };
 
 export function scenariosDepuisExtrait(extrait: ExtraitClimat, insee: string): GwlScenarios | null {
+  // Hotfix FUT-104 : l'extrait reprend les lignes ultramarines de `public/data_climat.json`, qui sont des copies de
+  // points de grille métropolitains (cf. getClimatDataCommune). Elles ne sont jamais servies.
+  if (estCodeOutremer(insee)) return null;
   const ligne = extrait.communes[insee];
   if (!ligne) return null;
   const n = extrait.cles.length;
