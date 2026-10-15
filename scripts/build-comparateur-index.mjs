@@ -8,7 +8,7 @@
  * zéro LLM au moment de la recherche).
  *
  * Entrées (toutes locales) :
- *   - data/data_climat.json        : DRIAS, 35 006 communes × 3 scénarios,
+ *   - data/data_climat.json        : DRIAS, 34 788 communes (Hexagone et Corse) × 3 scénarios,
  *                                      lat/lon embarqués (col01/col02).
  *   - data/communes-population.json  : cache population/densité (optionnel ;
  *                                      voir scripts/fetch-communes-population.mjs).

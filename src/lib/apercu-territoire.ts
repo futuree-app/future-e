@@ -166,8 +166,8 @@ export type ExtraitClimat = {
 };
 
 export function scenariosDepuisExtrait(extrait: ExtraitClimat, insee: string): GwlScenarios | null {
-  // Hotfix FUT-104 : l'extrait reprend les lignes ultramarines de `data/data_climat.json`, qui sont des copies de
-  // points de grille métropolitains (cf. getClimatDataCommune). Elles ne sont jamais servies.
+  // FUT-104 : l'extrait ne contient plus de ligne ultramarine (DRIAS ne couvre pas l'outre-mer, cf.
+  // getClimatDataCommune) ; ce refus explicite empêche qu'une ligne réintroduite soit jamais servie.
   if (estCodeOutremer(insee)) return null;
   const ligne = extrait.communes[insee];
   if (!ligne) return null;

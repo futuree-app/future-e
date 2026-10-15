@@ -270,26 +270,22 @@ test("Point de référence : la mairie, jamais un centroïde de relief contrast�
 });
 
 // ── Aucune contamination métropolitaine ──────────────────────────────────────────────────────────────────────
-test("Contamination : aucune valeur ultramarine ne reprend une ligne de public/data_climat.json", () => {
-  // Les lignes ultramarines de DRIAS : Le Conquet (TMm 13,57 en 2050), Bonifacio (18,08), Biriatou (14,38), Aléria (17,9).
-  const drias = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
-  const faux = new Map<string, number>();
-  for (const r of drias) {
-    const c = String(r.insee_code).padStart(5, "0");
-    if (estCodeOutremer(c) && r.scenario === "gwl20") faux.set(c, Number(r.column04));
-  }
-  assert.equal(faux.size, 218);
-  // Une proximité de valeur ne prouve rien (La Plaine-des-Palmistes, à ~1 000 m, a 17,7 °C quand Bonifacio en a
-  // 18,1). La contamination a deux signatures : la valeur exacte de la ligne DRIAS, et l'uniformité d'un territoire
-  // entier (toutes les communes d'un territoire y partagent la même ligne).
+test("Contamination : DRIAS ne contient plus aucune ligne ultramarine, et SocleOM n'en reprend aucune signature", () => {
+  // Les 218 entités ultramarines de l'ancien fichier DRIAS portaient, à l'horizon 2050, la température moyenne de
+  // quatre points métropolitains : Le Conquet 13,57 °C, Bonifacio 18,08, Biriatou 14,38, Aléria 17,9. Elles en sont
+  // retirées (constructeur, scripts/lib/drias-jointure.mjs) ; on vérifie qu'aucune n'y revient.
+  const drias = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, string | number>[];
+  assert.equal(drias.filter((r) => estCodeOutremer(String(r.insee_code).padStart(5, "0"))).length, 0);
+  const signatures = new Set([13.57, 18.08, 14.38, 17.9]);
+  // Une proximité de valeur ne prouve rien (La Plaine-des-Palmistes, à ~1 000 m, a 17,7 °C) : la contamination avait
+  // deux signatures, la valeur exacte d'un de ces points et l'uniformité d'un territoire entier.
   const parTerritoire = new Map<string, Set<number>>();
-  for (const [code, tmmFaux] of faux) {
-    const l = lireClimatOutremer(code);
-    if (!l || l.statut !== "integree") continue;
+  for (const e of listerEntitesOutremer()) {
+    const l = lireClimatOutremer(e.code)!;
+    if (l.statut !== "integree") continue;
     const t = med(indicateurOutremer(l, "TMm")!, "2050")!;
-    assert.notEqual(t, tmmFaux, `${code} : ${t} °C, la valeur exacte de la ligne DRIAS`);
-    const s = parTerritoire.get(l.territoire.id) ?? new Set<number>();
-    parTerritoire.set(l.territoire.id, s.add(t));
+    assert.ok(!signatures.has(t), `${e.code} : ${t} °C, la valeur exacte d'un point métropolitain`);
+    parTerritoire.set(e.territoire, (parTerritoire.get(e.territoire) ?? new Set<number>()).add(t));
   }
   for (const [id, valeurs] of parTerritoire) {
     const n = listerEntitesOutremer().filter((e) => e.territoire === id && lireClimatOutremer(e.code)!.statut === "integree").length;

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { estCodeOutremer } from "./code-outremer.ts";
 
 // HOTFIX FUT-104 · AUCUNE VALEUR DRIAS MÉTROPOLITAINE NE SORT POUR UN CODE ULTRAMARIN.
@@ -27,6 +27,43 @@ test("Fichier statique : data_climat.json n'est plus sous public/, donc plus dis
   for (const f of ["src/lib/drias-json.ts", "src/app/api/climat/[insee_code]/route.ts", "scripts/build-drias-median.js",
     "scripts/build-apercu-climat.mjs", "scripts/build-comparateur-index.mjs", "scripts/populate-communes-tension.js"]) {
     assert.doesNotMatch(readFileSync(f, "utf8"), /["']public["'],\s*["']data_climat\.json["']|public\/data_climat\.json/, f);
+  }
+});
+
+test("Index DRIAS : aucune ligne ultramarine, 34 788 communes × 3 horizons, et l'échelle nationale n'en compte pas d'autre", () => {
+  const lignes = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as { insee_code: string | number; scenario: string; column09: number | null }[];
+  assert.equal(lignes.length, 104364);
+  assert.equal(lignes.filter((r) => estCodeOutremer(String(r.insee_code).padStart(5, "0"))).length, 0);
+  for (const sc of ["gwl15", "gwl20", "gwl30"]) {
+    // L'échelle d'un indicateur (getEchelle) se construit sur toutes les lignes de son horizon : sans ligne
+    // ultramarine, elle compte exactement les 34 788 communes que DRIAS couvre.
+    assert.equal(lignes.filter((r) => r.scenario === sc && r.column09 != null).length, 34788, sc);
+  }
+  const meta = JSON.parse(readFileSync("data/drias_median_metadata.json", "utf8"));
+  assert.equal(meta.commune_count, 34788);
+  // L'extrait de l'aperçu suit le fichier.
+  const extrait = JSON.parse(readFileSync("src/data/apercu-climat-communes.json", "utf8"));
+  assert.equal(Object.keys(extrait.communes).filter(estCodeOutremer).length, 0);
+  assert.equal(extrait.source.fichier, "data/data_climat.json");
+});
+
+test("Fichiers publics : aucun ne contient de ligne climatique ultramarine", () => {
+  const fichiers = (d: string): string[] => readdirSync(d, { withFileTypes: true })
+    .flatMap((e) => (e.isDirectory() ? fichiers(`${d}/${e.name}`) : e.name.endsWith(".json") ? [`${d}/${e.name}`] : []));
+  for (const f of fichiers("public")) {
+    assert.doesNotMatch(readFileSync(f, "utf8"), /"insee_code":\s*"?9[78]\d{3}"?\s*,\s*"commune_name"/, f);
+  }
+});
+
+test("Libellés : un rang DRIAS se dit parmi les communes de l'Hexagone et de Corse, jamais « françaises »", () => {
+  const r = src("src/lib/rang-national.ts");
+  assert.match(r, /communes de l'Hexagone et de Corse les plus exposées/);
+  assert.doesNotMatch(r, /communes françaises/);
+  for (const seg of ["chaleur", "inondation"]) {
+    const p = readFileSync(`src/app/(public)/${seg}/[insee_code]/page.tsx`, "utf8");
+    assert.match(p, /\{" "\}communes de l&apos;Hexagone et de Corse comparées · DRIAS-TRACC/, "espace explicite : l'entité &apos; faisait perdre l'espace");
+    assert.match(p, /item\.rang!\.total\.toLocaleString\('fr-FR'\)/, "l'effectif vient des données comparées");
+    assert.doesNotMatch(p, /ensemble des communes françaises/);
   }
 });
 

@@ -2,7 +2,7 @@
 //
 // La source est SocleOM-Climat-2025 (Météo-France, Licence Ouverte 2.0), extraite par
 // `scripts/outremer/extraire_climat_outremer.py` dans `src/data/outremer/`. Rien ici ne vient de
-// `public/data_climat.json` : ses lignes ultramarines sont des copies de points de grille métropolitains.
+// `data/data_climat.json` (DRIAS-TRACC, Hexagone et Corse), qui ne contient plus aucune ligne ultramarine.
 //
 // Module PUR : il reçoit les deux fichiers (`creerLecteurOutremer`). Le produit l'utilise par `./index.ts`, qui lie
 // les données embarquées ; les tests lui passent les mêmes fichiers lus sur disque.

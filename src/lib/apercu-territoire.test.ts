@@ -280,11 +280,15 @@ test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-
   assert.ok(vus >= 15);
 });
 
-test("Extrait : une ligne ultramarine n'est jamais servie, et l'aperçu dit l'absence (hotfix FUT-104)", () => {
-  // Les lignes existent dans l'extrait (copies du Conquet, de Bonifacio…) : c'est la lecture qui les refuse.
+test("Extrait : aucune ligne ultramarine, et l'aperçu dit l'absence (FUT-104)", () => {
+  // Les 218 lignes ultramarines (copies du Conquet, de Bonifacio…) ont quitté DRIAS, donc l'extrait.
+  assert.equal(Object.keys(extrait.communes).filter(estCodeOutremer).length, 0);
+  assert.equal(Object.keys(extrait.communes).length, 34788);
   for (const code of ["97411", "97209", "97302", "97611", "98735", "98818", "97801", "97101"]) {
-    assert.ok(extrait.communes[code], `${code} attendu dans l'extrait`);
-    assert.equal(scenariosDepuisExtrait(extrait, code), null, code);
+    assert.equal(extrait.communes[code], undefined, `${code} absent de l'extrait`);
+    // Et si une ligne réapparaissait, la lecture la refuserait encore.
+    const contamine = { ...extrait, communes: { ...extrait.communes, [code]: extrait.communes["29040"] } };
+    assert.equal(scenariosDepuisExtrait(contamine, code), null, code);
     // Même si quelqu'un lui passait les scénarios bruts, l'aperçu d'un code ultramarin ne formule aucun fait.
     const brut = { gwl20: { h: "2050", v: { NORTX35D_yr: 0.3, ATX35D_yr: 0.2, NORTR_yr: 2.5, ATR_yr: 1.5 } } };
     assert.deepEqual(construireApercu(code, "Fort-de-France", brut), { etat: "hors_couverture", commune: "Fort-de-France" });

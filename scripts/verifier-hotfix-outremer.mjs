@@ -1,5 +1,5 @@
-// HOTFIX FUT-104 · BANC HTTP : aucune projection DRIAS métropolitaine ne sort pour un code ultramarin, et la
-// métropole répond comme avant.
+// FUT-104 · BANC HTTP : aucune projection DRIAS métropolitaine ne sort pour un code ultramarin, et la
+// métropole répond comme avant (valeurs identiques ; rangs recalculés sur les 34 788 communes que DRIAS couvre).
 //
 //   node scripts/verifier-hotfix-outremer.mjs http://localhost:3000            # build de production local
 //   node scripts/verifier-hotfix-outremer.mjs https://futur-e.fr               # après déploiement
@@ -79,7 +79,7 @@ for (const seg of ["chaleur", "inondation"]) {
     ok(/Pas encore de projection fiable pour ce territoire/.test(html), `/${seg}/${code} : page d'explication dans la réponse`);
     ok(!/projections 2050|risques et données officielles/i.test(titre(html) + (meta(html, "og:title") ?? "") + (meta(html, "description") ?? "")),
       `/${seg}/${code} : ni titre ni description de projection (« ${titre(html)} »)`);
-    ok(!/communes comparées|DRIAS-TRACC, Météo-France \/ CNRS|Ouvrir le dossier|\+2,7 °C en France/.test(html),
+    ok(!/comparées|DRIAS-TRACC, Météo-France \/ CNRS|Ouvrir le dossier|\+2,7 °C en France/.test(html),
       `/${seg}/${code} : aucune tuile, aucun rang, aucun appel au dossier`);
   }
   for (const [code, nom] of Object.entries(METRO)) {
@@ -90,7 +90,11 @@ for (const seg of ["chaleur", "inondation"]) {
 }
 {
   const html = (await get(`${base}/chaleur/17300`)).texte;
-  ok(/communes comparées/.test(html) && /DRIAS-TRACC/.test(html), "/chaleur/17300 : tuiles et rangs DRIAS présents");
+  // React sépare les morceaux de texte par des commentaires vides : on les retire avant de lire la phrase.
+  const texte = html.replace(/<!-- -->/g, "");
+  ok(/DRIAS-TRACC/.test(texte) && /34(&nbsp;|\u202f| |&#x202F;)?788 communes de l(&#x27;|')Hexagone et de Corse comparées/.test(texte),
+    "/chaleur/17300 : tuiles et rangs DRIAS, sur les 34 788 communes de l'Hexagone et de Corse");
+  ok(!/communes françaises|ensemble des communes françaises/.test(html), "/chaleur/17300 : aucune comparaison dite « française »");
 }
 
 // ── Aperçu du dossier ─────────────────────────────────────────────────────────────────────────────────────────

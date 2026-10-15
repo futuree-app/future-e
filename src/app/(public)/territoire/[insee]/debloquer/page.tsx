@@ -186,7 +186,7 @@ export default async function TerritoryUnlockPage({
           <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
             Dire que {displayName} sera exposée à la chaleur ne vous apprend rien : c&apos;est vrai
             presque partout. Ce qui décide, c&apos;est de savoir où elle se situe parmi les 34 000
-            communes françaises, et sur quels critères précisément. Cette position se calcule avant
+            communes de l&apos;Hexagone et de Corse, et sur quels critères précisément. Cette position se calcule avant
             qu&apos;on vous la demande, sur toutes les communes à la fois, avec la même méthode.
             C&apos;est ce travail que vous payez, pas l&apos;accès à des données publiques et
             gratuites.

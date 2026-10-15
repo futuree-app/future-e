@@ -316,7 +316,7 @@ export default async function InondationCommune({
             À {communeName}, quel est le risque d&apos;inondation réel ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes, issues de Géorisques, de Météo-France et du CNRS, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi l&apos;ensemble des communes françaises.
+            Cette page rassemble les données officielles sur l&apos;exposition de {communeName} aux inondations, aux submersions marines et aux précipitations extrêmes, issues de Géorisques, de Météo-France et du CNRS, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi les communes de l&apos;Hexagone et de Corse que couvrent ces projections.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y acheter un bien ou prépariez votre avenir, ces données ont une valeur concrète pour vos décisions.
@@ -394,7 +394,7 @@ export default async function InondationCommune({
                   <strong>{phraseDePosition(item.rang ?? null)}</strong>, à l&apos;horizon{' '}
                   {HORIZON.gwl20.annee}.
                   <div className="rang-meta">
-                    {item.rang!.total.toLocaleString('fr-FR')} communes comparées · DRIAS-TRACC ·
+                    {item.rang!.total.toLocaleString('fr-FR')}{" "}communes de l&apos;Hexagone et de Corse comparées · DRIAS-TRACC ·
                     Météo-France · maille communale
                   </div>
                 </div>

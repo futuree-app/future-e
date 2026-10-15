@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ inse
   // On ajoute "await" pour déballer la promesse des params
   const { insee_code } = await params;
 
-  // Hotfix FUT-104 : les lignes ultramarines du fichier sont des points de grille métropolitains (cf. drias-json.ts).
+  // FUT-104 : DRIAS-TRACC ne couvre pas l'outre-mer (le fichier n'en contient plus, cf. drias-json.ts).
   // Refusées AVANT la lecture du fichier, sans valeur de substitution.
   if (estCodeOutremer(insee_code)) {
     return NextResponse.json(

@@ -320,7 +320,7 @@ export default async function ChaleurCommune({
             À {communeName}, à quoi ressemblera un été en 2050 ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les projections climatiques officielles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi l&apos;ensemble des communes françaises. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
+            Cette page rassemble les projections climatiques officielles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi les communes de l&apos;Hexagone et de Corse que couvrent ces projections. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
@@ -414,7 +414,7 @@ export default async function ChaleurCommune({
                   <strong>{phraseDePosition(item.rang ?? null)}</strong>, à l&apos;horizon{' '}
                   {HORIZON.gwl20.annee}.
                   <div className="rang-meta">
-                    {item.rang!.total.toLocaleString('fr-FR')} communes comparées · DRIAS-TRACC ·
+                    {item.rang!.total.toLocaleString('fr-FR')}{" "}communes de l&apos;Hexagone et de Corse comparées · DRIAS-TRACC ·
                     Météo-France · maille communale
                   </div>
                 </div>
