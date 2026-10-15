@@ -11,9 +11,9 @@ import { NextResponse } from "next/server";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { getGeorisquesSummary } from "@/lib/georisques";
 import { getClimatDataCommune } from "@/lib/drias-json";
-import { summerComfortAction } from "@/lib/decision/climat-facts";
+import { summerComfortAction, buildClimatFacts, classifyClimateComfort, CLIMAT_METRICS } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
-import { carteCompte, CHALEUR, formatTemperature, formatCompte } from "@/lib/accueil/recits";
+import { formatTemperature, formatCompte } from "@/lib/accueil/recits";
 import { indicatorsDepuisScenarios, construireFaitsCommune } from "@/lib/accueil/faits";
 import { CLIMAT_REFERENCE_LABEL } from "@/lib/decision/climat-facts";
 import { aCommune } from "@/lib/typography";
@@ -24,46 +24,29 @@ export const dynamic = "force-dynamic";
 
 const CLES: CleePastille[] = ["chaleur", "hivers", "taille", "voiture", "risques"];
 
-async function entreesChaleur(insee: string): Promise<{ nom: string | null; e: EntreesChaleur }> {
-  const simple = projetDeTest("faible_chaleur:2").projet;
-  const condition = projetDeTest("faible_chaleur:2", "faible_chaleur").projet;
-  const [d1, d2, climat] = await Promise.all([
-    buildCommuneDossier(insee, simple, { hasAddress: false }).catch(() => null),
-    buildCommuneDossier(insee, condition, { hasAddress: false }).catch(() => null),
-    getClimatDataCommune(insee).catch(() => null),
-  ]);
+// LA LIMITE CLIMATIQUE DU MOTEUR, mot pour mot (`LIMITATION_CLIMAT`, materiality-rules.ts ; vérifiée par la
+// fixture Sète). Non exportée par le moteur : recopiée ici plutôt que de toucher au moteur dans FUT-50.
+const LIMITE_CLIMAT = "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.";
+
+/**
+ * LA CHALEUR SANS RELANCER TOUT LE DOSSIER : les données (`buildClimatFacts`) et la classification
+ * (`classifyClimateComfort`) sont les fonctions mêmes que la règle `territoire.climat-chaleur` du moteur appelle.
+ * Même source, même seuils, même verdict ; la formulation seule est propre à l'accueil (`lireChaleur`).
+ */
+async function entreesChaleur(insee: string): Promise<EntreesChaleur> {
+  const climat = await getClimatDataCommune(insee).catch(() => null);
+  const f = buildClimatFacts(climat?.commune.s ?? null);
+  const seuils = { jours: CLIMAT_METRICS.joursTresChauds.threshold, nuits: CLIMAT_METRICS.nuitsTropicales.threshold };
+  const referenceTexte = (v: number, nuits: boolean) => formatCompte(v, nuits ? { singulier: "nuit", pluriel: "nuits", feminin: true } : undefined);
   const gesteSansAdresse = summerComfortAction(false).label;
-  if (!d1) return { nom: null, e: { issue: "absent", ecart: null, phraseCondition: null, faitDrias: null, gesteSansAdresse } };
-  // `indeterminate` couvre deux cas : examiné sans signal net, ou NON examiné (donnée absente). Seul le
-  // premier est une lecture ; le second est une absence, jamais une bonne nouvelle.
-  const critere = d1.dossier.criteria.registry.find((c) => c.criterionKey === "faible_chaleur");
-  const issue = critere?.coverage === "examined" ? critere.outcome : undefined;
-  const cartes = d1.dossier.sections.flatMap((s) => s.cards);
-  const compo = cartes.flatMap((c) => (c.kind === "composition" ? [c.composition] : []))
-    .find((c) => c.referencedRuleIds.some((r) => r.includes("chaleur")));
-  const ecart = compo && "summary" in compo
-    ? {
-        constat: compo.summary,
-        titre: compo.title,
-        limite: "limitation" in compo ? (compo.limitation ?? null) : null,
-        geste: "action" in compo && compo.action ? compo.action.label : null,
-      }
-    : null;
-  const conditionCarte = d2?.dossier.sections.flatMap((s) => s.cards)
-    .flatMap((c) => (c.kind === "fact" && c.fact.role === "condition_check" ? [c.fact] : []))[0];
-  const indicateurs = climat ? indicatorsDepuisScenarios(climat.commune.s) : null;
-  const faitDrias = indicateurs ? carteCompte(CHALEUR, indicateurs, "2050")?.fait ?? null : null;
-  const j35 = indicateurs ? construireFaitsCommune(d1.moduleFacts.nom, indicateurs, null).climat?.jours_au_dessus_de_35C : null;
+  if (!f) {
+    return { verdict: "absent", jours: { projete: null, reference: null, seuil: seuils.jours }, nuits: { projete: null, reference: null, seuil: seuils.nuits }, referenceTexte, limite: LIMITE_CLIMAT, gesteSansAdresse };
+  }
   return {
-    nom: d1.moduleFacts.nom,
-    e: {
-      issue: issue === "favorable" || issue === "mismatch" || issue === "indeterminate" ? issue : "absent",
-      ecart,
-      phraseCondition: conditionCarte?.statement ?? null,
-      faitDrias,
-      jours35: j35?.projete != null && j35.reference != null ? { projete: j35.projete, referenceTexte: formatCompte(j35.reference) } : null,
-      gesteSansAdresse,
-    },
+    verdict: classifyClimateComfort(f).verdict,
+    jours: { projete: f.joursTresChauds.projete, reference: f.joursTresChauds.reference, seuil: f.joursTresChauds.threshold },
+    nuits: { projete: f.nuitsTropicales.projete, reference: f.nuitsTropicales.reference, seuil: f.nuitsTropicales.threshold },
+    referenceTexte, limite: LIMITE_CLIMAT, gesteSansAdresse,
   };
 }
 
@@ -127,8 +110,7 @@ export async function GET(req: Request) {
   const debut = Date.now();
   let lecture;
   if (cle === "chaleur") {
-    const { nom, e } = await entreesChaleur(insee);
-    lecture = lireChaleur({ ...lieu, commune: nom ?? lieu.commune }, e);
+    lecture = lireChaleur(lieu, await entreesChaleur(insee));
   } else if (cle === "hivers") {
     const { nom, e } = await entreesHivers(insee);
     lecture = lireHivers({ ...lieu, commune: nom ?? lieu.commune }, e);

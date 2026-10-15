@@ -352,3 +352,8 @@
 
 @keyframes deploie { from { clip-path: inset(0 100% 0 0 round 4px); } to { clip-path: inset(0 0 0 0 round 4px); } }
 @keyframes repere { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+.mesures { display: grid; gap: 18px; }
+@media (min-width: 480px) { .mesures { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; } }
+.mesures .mesureValeur { font-size: clamp(32px, 3vw, 40px); }
+.mesures .mesureLegende { font-size: 15px; }
+.rechercheGratuit { font-weight: 400; color: var(--r-discret); }

@@ -8,8 +8,10 @@ import { mkdirSync, readdirSync, rmSync } from "node:fs";
 
 const base = process.argv[2] ?? "http://localhost:3050";
 const URL_C = `${base}/dev/fut50/c`;
-const IMG = "docs/audits/fut50-accueil/images";
-const VID = "docs/audits/fut50-accueil/videos";
+// Écrites HORS du dépôt pendant le parcours : le serveur de développement surveille les fichiers du projet, et une
+// capture déposée dans docs/ peut recharger la page en pleine saisie. Recopiées à la fin.
+const IMG = process.env.SORTIE_IMG ?? "docs/audits/fut50-accueil/images";
+const VID = process.env.SORTIE_VID ?? "docs/audits/fut50-accueil/videos";
 const exe = process.env.CHROME ?? `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-x64/chrome-headless-shell`;
 const nav = await chromium.launch({ executablePath: exe });
 const constats = [];
@@ -31,11 +33,27 @@ const lecturePrete = (page) => page.waitForFunction(() => {
   const z = document.querySelector('[aria-live="polite"] article');
   return z && !document.querySelector('[aria-busy="true"]');
 }, null, { timeout: 30000 });
+async function optionsVisibles(page, texte) {
+  for (let essai = 0; essai < 3; essai++) {
+    if (await page.waitForSelector('[role="option"]', { timeout: 8000 }).then(() => true).catch(() => false)) return;
+    await page.waitForLoadState("networkidle");
+    const champ = page.getByRole("combobox");
+    await champ.fill("");
+    await champ.pressSequentially(texte, { delay: 60 });
+  }
+  throw new Error(`aucune suggestion pour « ${texte} »`);
+}
 async function choisirCommune(page, texte, nom) {
   const champ = page.getByRole("combobox");
-  await champ.click();
-  await champ.pressSequentially(texte, { delay: 60 });
-  await page.waitForSelector('[role="option"]', { timeout: 15000 });
+  // Le serveur de développement peut recharger la page pendant la saisie : on recommence une fois.
+  for (let essai = 0; essai < 3; essai++) {
+    await champ.fill("");
+    await champ.click();
+    await champ.pressSequentially(texte, { delay: 60 });
+    const ok = await page.waitForSelector('[role="option"]', { timeout: 8000 }).then(() => true).catch(() => false);
+    if (ok) break;
+    await page.waitForLoadState("networkidle");
+  }
   await page.waitForTimeout(200);
   if (nom) {
     // Au clavier jusqu'à la commune voulue : la flèche descend dans la liste, Entrée choisit.
@@ -128,6 +146,54 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   await ctx.close();
 }
 
+
+// ── Chaleur : La Rochelle et Nîmes, même priorité, ordinateur et mobile ; en-tête fixe sur mobile ─────
+for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
+  for (const [saisie, nom, fichier] of [["La Rochelle", "La Rochelle", "la-rochelle"], ["Nîmes", "Nîmes", "nimes"]]) {
+    const { ctx, page } = await ouvrir(largeur, hauteur, dpr);
+    await choisirCommune(page, saisie, nom);
+    await page.keyboard.press("Enter");
+    await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
+    await lecturePrete(page);
+    await page.waitForTimeout(1100);
+    await page.screenshot({ path: `${IMG}/c4-chaleur-${fichier}-${largeur}.jpg`, type: "jpeg", quality: 78 });
+    const texte = (await page.locator('[aria-live="polite"] article').innerText()).replace(/\s+/g, " ");
+    constats.push(`${largeur} ${nom} chaleur : ${texte.slice(0, 260)}`);
+    if (largeur < 1000) {
+      const pos = await page.evaluate(() => {
+        const t = document.querySelector('[aria-live="polite"] article h2')?.getBoundingClientRect().top;
+        const h = document.querySelector("nav")?.getBoundingClientRect().bottom;
+        return { titre: Math.round(t ?? -1), entete: Math.round(h ?? -1) };
+      });
+      constats.push(`${largeur} ${nom} défilement : titre de la lecture à ${pos.titre} px, bas de l'en-tête à ${pos.entete} px → ${pos.titre >= pos.entete ? "visible" : "MASQUÉ"}`);
+    }
+    await ctx.close();
+  }
+}
+
+// ── Onglets de priorités multiples au clavier ───────────────────────────────────────────────────
+{
+  const { ctx, page } = await ouvrir(1440, 900, 1);
+  await choisirCommune(page, "Nant", "Nantes");
+  await page.keyboard.press("Enter");
+  for (const n of ["Éviter les fortes chaleurs", "Avoir des hivers doux"]) { await page.getByRole("button", { name: n }).click(); await lecturePrete(page); }
+  await page.waitForTimeout(800);
+  await page.locator('[role="tab"][aria-selected="true"]').focus();
+  await page.keyboard.press("ArrowLeft");
+  await page.waitForTimeout(400);
+  const r = await page.evaluate(() => ({ focus: document.activeElement?.textContent, choisi: document.querySelector('[role="tab"][aria-selected="true"]')?.textContent, panneau: document.querySelector('[role="tabpanel"]')?.getAttribute("aria-labelledby"), tabindex: [...document.querySelectorAll('[role="tab"]')].map((t) => t.getAttribute("tabindex")).join(",") }));
+  constats.push(`onglets clavier : flèche gauche → focus « ${r.focus} », sélection « ${r.choisi} », panneau lié à ${r.panneau}, tabindex ${r.tabindex}`);
+  await ctx.close();
+}
+
+// ── Commune sans données climatiques (La Réunion, hors DRIAS métropole) ─────────────────────────
+{
+  const { ctx, page } = await ouvrir(1440, 900, 1);
+  const r = await page.evaluate(async () => (await (await fetch("/dev/fut50/api/lecture?insee=99999&cle=chaleur&commune=Inconnue")).json()).lecture);
+  constats.push(`données absentes (code inexistant 99999) : ${r.pourVous.signal} · ${r.pourVous.texte}`);
+  await ctx.close();
+}
+
 // ── Changer de commune : aucune lecture de l'ancienne ne reste ───────────────────────────────
 {
   const { ctx, page } = await ouvrir(1440, 900, 1);
@@ -184,8 +250,9 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
   const { ctx, page } = await ouvrir(1440, 900, 1);
   let tabs = 0;
   for (; tabs < 40; tabs++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement?.getAttribute("role") === "combobox")) break; }
+  if (tabs >= 40) constats.push("clavier : CHAMP NON ATTEINT en 40 tabulations");
   await page.keyboard.type("Lille", { delay: 60 });
-  await page.waitForSelector('[role="option"]', { timeout: 15000 });
+  await optionsVisibles(page, "Lille");
   await page.keyboard.press("Enter");
   await page.waitForTimeout(300);
   let n = 0;
@@ -219,36 +286,43 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
   await ctx.close();
 }
 
-// ── Vidéo du hero corrigé ────────────────────────────────────────────────────────────────────
+// ── Vidéo du hero ─────────────────────────────────────────────────────────────────────────────
 mkdirSync(VID, { recursive: true });
 const tmp = `${VID}/.tmp`;
-rmSync(tmp, { recursive: true, force: true });
-{
-  const ctx = await nav.newContext({ viewport: { width: 1280, height: 800 }, recordVideo: { dir: tmp, size: { width: 1280, height: 800 } } });
-  await prep(ctx);
-  const page = await ctx.newPage();
-  await page.goto(URL_C, { waitUntil: "networkidle" });
-  await sansDev(page);
-  await page.waitForTimeout(1500);
-  const champ = page.getByRole("combobox");
-  await champ.click();
-  await champ.pressSequentially("Annecy", { delay: 130 });
-  await page.waitForSelector('[role="option"]', { timeout: 15000 });
-  await page.waitForTimeout(800);
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(1600);
-  for (const nom of ["Avoir des hivers doux", "Éviter les fortes chaleurs", "Vivre dans une petite ville"]) {
-    await page.getByRole("button", { name: nom }).click();
-    await lecturePrete(page);
-    await page.waitForTimeout(2600);
-  }
-  await page.getByRole("button", { name: "Vivre dans une petite ville" }).click();
-  await page.waitForTimeout(1600);
-  await ctx.close();
-  const webm = readdirSync(tmp).find((f) => f.endsWith(".webm"));
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${tmp}/${webm}`, "-vf", "scale=1280:-2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart", `${VID}/c3-hero-adaptatif.mp4`]);
+// Le serveur de développement recharge parfois la page juste après le premier rendu : jusqu'à trois prises.
+for (let prise = 1; prise <= 3; prise++) {
   rmSync(tmp, { recursive: true, force: true });
-  constats.push(`vidéo ${VID}/c3-hero-adaptatif.mp4`);
+  try {
+    {
+      const ctx = await nav.newContext({ viewport: { width: 1280, height: 800 }, recordVideo: { dir: tmp, size: { width: 1280, height: 800 } } });
+      await prep(ctx);
+      const page = await ctx.newPage();
+      await page.goto(URL_C, { waitUntil: "networkidle" });
+      await sansDev(page);
+      await page.waitForTimeout(1500);
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(800);
+      // Le geste d'un visiteur qui ne sait pas quoi chercher : l'exemple proposé sous le champ.
+      await page.getByRole("button", { name: "Annecy" }).click();
+      await page.waitForTimeout(1600);
+      for (const nom of ["Avoir des hivers doux", "Éviter les fortes chaleurs", "Vivre dans une petite ville"]) {
+        await page.getByRole("button", { name: nom }).click();
+        await lecturePrete(page);
+        await page.waitForTimeout(2600);
+      }
+      await page.getByRole("button", { name: "Vivre dans une petite ville" }).click();
+      await page.waitForTimeout(1600);
+      await ctx.close();
+      const webm = readdirSync(tmp).find((f) => f.endsWith(".webm"));
+      execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", `${tmp}/${webm}`, "-vf", "scale=1280:-2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart", `${VID}/c3-hero-adaptatif.mp4`]);
+      rmSync(tmp, { recursive: true, force: true });
+      constats.push(`vidéo ${VID}/c3-hero-adaptatif.mp4`);
+    }
+    break;
+  } catch (e) {
+    constats.push(`vidéo, prise ${prise} : ${e.message.split("\n")[0]}`);
+    rmSync(tmp, { recursive: true, force: true });
+  }
 }
 
 await nav.close();

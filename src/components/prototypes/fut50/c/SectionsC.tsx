@@ -20,10 +20,7 @@ export function Pourquoi() {
       <div className={c.pourquoi}>
         <div className={c.pourquoiTexte}>
           <h2 id="pourquoi-c" className={c.sectionTitre}>Votre futur lieu de vie ne tient pas dans une annonce.</h2>
-          {/* nouveau, une phrase (revue du 14/10) : ce qu'une annonce ne dit pas. Pas de second manifeste. */}
-          <p className={c.pourquoiAccroche}>
-            {fr("Une annonce décrit un bien. Rarement ses alentours, l'avenir du lieu, ou les vérifications à faire avant de signer.")}
-          </p>
+          {/* La phrase sur l'annonce (14/10) est retirée le 15/10 : le titre du hero porte désormais cette idée. */}
           {/* existant, mot pour mot : premier et troisième paragraphes de la section « Pourquoi futur•e ». */}
           <p className={c.pourquoiCorps}>
             {fr("Choisir où vivre est l’une des décisions les plus engageantes qui soient : des années de vie, une grande partie d’un patrimoine, parfois la santé d’une famille.")}

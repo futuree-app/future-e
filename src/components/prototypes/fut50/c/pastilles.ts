@@ -71,7 +71,7 @@ export type Lieu = {
  * ce que disent les données, ce que cela implique pour cette priorité, ce qu'il reste à vérifier,
  * et ce qu'on peut faire ensuite.
  */
-export type Signal = "defavorable" | "favorable" | "neutre" | "information" | "adresse" | "indisponible";
+export type Signal = "defavorable" | "favorable" | "neutre" | "sous_seuil" | "information" | "adresse" | "indisponible";
 
 export type LecturePastille = {
   cle: CleePastille;
@@ -86,6 +86,8 @@ export type LecturePastille = {
      * Le texte complet reste celui du fait, lu par les lecteurs d'écran.
      */
     mesure?: { valeur: string; unite: string; legende: string };
+    /** Deux dimensions côte à côte (chaleur : jours au-dessus de 35 °C et nuits tropicales). */
+    mesures?: { valeur: string; unite: string; legende: string }[];
   } | null;
   pourVous: { signal: Signal; texte: string };
   aVerifier: string;
@@ -97,6 +99,8 @@ export const MOT_DU_SIGNAL: Record<Signal, string> = {
   defavorable: "Plutôt défavorable",
   favorable: "Plutôt favorable",
   neutre: "Ni favorable, ni défavorable",
+  // « Sous les seuils » n'est PAS « favorable » : un seuil de signalement est une convention de lecture.
+  sous_seuil: "Sous les seuils de signalement",
   information: "À savoir",
   adresse: "Se lit à l'adresse",
   indisponible: "Donnée indisponible",
@@ -104,20 +108,85 @@ export const MOT_DU_SIGNAL: Record<Signal, string> = {
 
 // ── Les entrées, telles que la route de développement les rassemble ───────────────────────────────
 
+/**
+ * LA CHALEUR, EN TROIS COUCHES SÉPARÉES (revue du 15/10) :
+ *   données         `buildClimatFacts` (DRIAS, horizon 2050, référence 1976-2005 reconstruite), valeurs non arrondies ;
+ *   classification  `classifyClimateComfort`, la fonction même de la règle du moteur (seuils déclarés : 8 jours
+ *                   au-dessus de 35 °C, 25 nuits tropicales par an ; un seul axe atteint suffit) ;
+ *   formulation     ici. Les DEUX trajectoires sont toujours montrées, quelle que soit la classification : la
+ *                   différence entre deux communes tient à l'interprétation, pas aux données auxquelles on a droit.
+ * « Sous les seuils » n'est jamais présenté comme favorable : les seuils sont des conventions de signalement de
+ * futur•e, pas des seuils sanitaires ni une promesse de confort.
+ */
+export type AxeChaleur = { projete: number | null; reference: number | null; seuil: number };
 export type EntreesChaleur = {
-  /** L'issue du registre des critères pour `faible_chaleur` (poids 2). */
-  issue: "favorable" | "mismatch" | "indeterminate" | "absent";
-  /** Le constat du moteur quand il est défavorable (carte « Ce qui correspond moins bien »). */
-  ecart: { constat: string; titre: string; limite: string | null; geste: string | null } | null;
-  /** La phrase du moteur quand la priorité est lue comme condition (favorable ou neutre). */
-  phraseCondition: string | null;
-  /** Le fait DRIAS des jours au-dessus de 35 °C, écrit par l'accueil (`carteCompte`). */
-  faitDrias: string | null;
-  /** Les mêmes jours, en nombres (DRIAS, horizon 2050 et référence reconstruite), pour la mesure. */
-  jours35?: { projete: number; referenceTexte: string } | null;
-  /** Le geste du moteur sans adresse (`summerComfortAction(false)`). */
+  verdict: "unfavorable" | "under_threshold" | "uncertain" | "absent";
+  jours: AxeChaleur;
+  nuits: AxeChaleur;
+  /** Formulation d'une référence (« moins d'une journée », « 5 nuits »), par l'accueil (`formatCompte`). */
+  referenceTexte: (v: number, nuits: boolean) => string;
+  /** La limite du moteur pour le climat, et son geste sans adresse. */
+  limite: string;
   gesteSansAdresse: string;
 };
+
+/**
+ * UNE VALEUR AFFICHÉE NE FRANCHIT JAMAIS LE SEUIL QU'ELLE NE FRANCHIT PAS. Arrondir 24,6 nuits à « 25 » sous un
+ * seuil de 25 contredirait la lecture « sous le seuil » : dans ce cas, on garde une décimale.
+ */
+export function valeurAffichee(v: number, seuil: number): string {
+  const r = Math.round(v);
+  if (v < 1) return "moins de 1";
+  if ((r >= seuil) !== (v >= seuil)) return v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return String(r);
+}
+
+export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
+  const suite = SUITE_ADRESSE(lieu);
+  const { jours, nuits } = e;
+  if (e.verdict === "absent" || e.verdict === "uncertain" || jours.projete == null || nuits.projete == null) {
+    return {
+      cle: "chaleur", commune: lieu.commune, fait: null,
+      pourVous: { signal: "indisponible", texte: "Les projections de chaleur de cette commune ne sont pas lisibles en entier ici. Une donnée absente n'est jamais une bonne nouvelle." },
+      aVerifier: "Le dossier de la commune présente les projections disponibles, avec leur période de référence.",
+      suite,
+    };
+  }
+  const ref = (a: AxeChaleur, n: boolean) => (a.reference != null ? `contre ${e.referenceTexte(a.reference, n)} sur 1976-2005` : "référence 1976-2005 non lisible");
+  const vj = valeurAffichee(jours.projete, jours.seuil);
+  const vn = valeurAffichee(nuits.projete, nuits.seuil);
+  const mesures = [
+    { valeur: vj, unite: jours.projete >= 1 && Math.round(jours.projete) > 1 ? "jours par an" : "jour par an", legende: `au-dessus de 35 °C à l'horizon 2050, ${ref(jours, false)}` },
+    { valeur: vn, unite: nuits.projete >= 1 && Math.round(nuits.projete) > 1 ? "nuits tropicales" : "nuit tropicale", legende: `par an à l'horizon 2050, sans descendre sous 20 °C, ${ref(nuits, true)}` },
+  ];
+  const texte = `À l'horizon 2050 (+2,7 °C en France) : ${vj} ${mesures[0]!.unite} au-dessus de 35 °C (${ref(jours, false)}), et ${vn} ${mesures[1]!.unite} par an (${ref(nuits, true)}).`;
+  const seuils = `${jours.seuil} jours au-dessus de 35 °C, ou ${nuits.seuil} nuits tropicales par an`;
+  let pourVous: LecturePastille["pourVous"];
+  if (e.verdict === "unfavorable") {
+    const franchis = [jours.projete >= jours.seuil ? "les jours au-dessus de 35 °C" : null, nuits.projete >= nuits.seuil ? "les nuits tropicales" : null].filter(Boolean);
+    pourVous = {
+      signal: "defavorable",
+      texte: `Des étés plus difficiles à concilier avec cette priorité : ${franchis.join(" et ")} atteignent le seuil de signalement de futur•e (${seuils}).`,
+    };
+  } else {
+    // Proportionné : un axe à moins de 20 % de son seuil est nommé comme proche.
+    const proches = [
+      jours.projete >= 0.8 * jours.seuil ? `les jours au-dessus de 35 °C en sont proches (${vj} pour un seuil de ${jours.seuil})` : null,
+      nuits.projete >= 0.8 * nuits.seuil ? `les nuits tropicales en sont proches (${vn} pour un seuil de ${nuits.seuil})` : null,
+    ].filter(Boolean);
+    pourVous = {
+      signal: "sous_seuil",
+      texte: `Les deux indicateurs restent sous les seuils de signalement de futur•e (${seuils})${proches.length ? `, mais ${proches.join(", et ")}` : ""}. Ces seuils sont des conventions de lecture, pas des seuils sanitaires : cela ne veut pas dire que les étés resteront frais.`,
+    };
+  }
+  return {
+    cle: "chaleur", commune: lieu.commune,
+    fait: { texte, source: SOURCE_DRIAS, grain: "commune", mesures },
+    pourVous,
+    aVerifier: `${e.limite} La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit. ${e.gesteSansAdresse}.`,
+    suite,
+  };
+}
 
 const SUITE_ADRESSE = (lieu: Lieu) => ({
   libelle: lieu.type === "adresse" ? "Faire examiner cette adresse" : `Examiner une adresse à ${lieu.commune}`,
@@ -132,46 +201,6 @@ const ADRESSE_TEXTE = (commune: string, aCommune: (n: string) => string) =>
 
 const SOURCE_DRIAS = "DRIAS · Météo-France, horizon 2050 (+2,7 °C en France)";
 const SOURCE_GEORISQUES = "Géorisques · recensement actuel de l'État";
-
-export function lireChaleur(lieu: Lieu, e: EntreesChaleur): LecturePastille {
-  const suite = SUITE_ADRESSE(lieu);
-  if (e.issue === "mismatch" && e.ecart) {
-    return {
-      cle: "chaleur", commune: lieu.commune,
-      fait: { texte: e.ecart.constat, source: SOURCE_DRIAS, grain: "commune" },
-      // Le titre du moteur parle de « votre projet » ; ici, la personne a seulement coché une priorité, et rien
-      // n'est enregistré. Dire « projet » laisserait croire qu'un Projet a été gardé.
-      pourVous: { signal: "defavorable", texte: e.ecart.titre.replace(/votre projet/, "cette priorité") },
-      aVerifier: [e.ecart.limite, `${e.ecart.geste ?? e.gesteSansAdresse}.`].filter(Boolean).join(" "),
-      suite,
-    };
-  }
-  if ((e.issue === "favorable" || e.issue === "indeterminate") && e.phraseCondition) {
-    return {
-      cle: "chaleur", commune: lieu.commune,
-      fait: e.faitDrias ? {
-        texte: `Jours au-dessus de 35 °C : ${minusculeInitiale(e.faitDrias)}`, source: SOURCE_DRIAS, grain: "commune",
-        // Un grand « 0 » se lirait comme une absence de chaleur : sous un jour par an, on garde la phrase.
-        ...(e.jours35 && e.jours35.projete >= 1 ? {
-          mesure: {
-            valeur: String(Math.round(e.jours35.projete)),
-            unite: Math.round(e.jours35.projete) > 1 ? "jours par an" : "jour par an",
-            legende: `au-dessus de 35 °C à l'horizon 2050 (+2,7 °C en France), contre ${e.jours35.referenceTexte} sur 1976-2005`,
-          },
-        } : {}),
-      } : null,
-      pourVous: { signal: e.issue === "favorable" ? "favorable" : "neutre", texte: e.phraseCondition },
-      aVerifier: `Cette lecture vaut pour la commune entière. ${e.gesteSansAdresse}.`,
-      suite,
-    };
-  }
-  return {
-    cle: "chaleur", commune: lieu.commune, fait: null,
-    pourVous: { signal: "indisponible", texte: "Les projections de chaleur de cette commune ne sont pas lisibles ici. Une donnée absente n'est jamais une bonne nouvelle." },
-    aVerifier: "Le dossier de la commune présente les projections disponibles, avec leur période de référence.",
-    suite,
-  };
-}
 
 export function lireRisques(lieu: Lieu, libelles: string[] | null): LecturePastille {
   const suite = SUITE_ADRESSE(lieu);

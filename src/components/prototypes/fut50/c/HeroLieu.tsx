@@ -52,6 +52,7 @@ const TEINTE: Record<Signal, string> = {
   defavorable: TEINTE_REGISTRE.mismatches!,
   favorable: TEINTE_REGISTRE.alignments!,
   neutre: TEINTE_REGISTRE.unknowns!,
+  sous_seuil: TEINTE_REGISTRE.unknowns!,
   information: TEINTE_REGISTRE.verifications!,
   adresse: TEINTE_REGISTRE.verifications!,
   indisponible: TEINTE_REGISTRE.unknowns!,
@@ -167,7 +168,12 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     requestAnimationFrame(() => {
       const el = lectureRef.current;
       if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      if (el.getBoundingClientRect().top > window.innerHeight - 120) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // L'en-tête du site est fixe : on vise le haut de la lecture SOUS lui, jamais derrière.
+      const r = el.getBoundingClientRect();
+      if (r.top > window.innerHeight - 120 || r.top < 0) {
+        const entete = document.querySelector("nav")?.closest("header, nav")?.getBoundingClientRect().bottom ?? 64;
+        window.scrollTo({ top: window.scrollY + r.top - entete - 16, behavior: "smooth" });
+      }
     });
   }
 
@@ -194,12 +200,12 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     <section className={c.hero} data-etat={etat} aria-labelledby="hero-c">
       <div className={c.heroGauche}>
         <div className={c.heroTete}>
-          <h1 id="hero-c" className={c.titre}>Une commune en tête ? Voyez-la à travers vos priorités.</h1>
-          <p className={c.sous}>{fr("Chaleur, hivers, taille de la ville, risques naturels : choisissez une priorité, et les données publiques de la commune prennent un sens, limites comprises.")}</p>
+          <h1 id="hero-c" className={c.titre}>Un lieu où vivre en tête ? Regardez au‑delà de l&apos;annonce.</h1>
+          <p className={c.sous}>{fr("Climat futur, risques, services, mobilité, logement : futur•e rassemble les données publiques pour comprendre un lieu, le confronter à votre projet et savoir quoi vérifier avant de décider.")}</p>
         </div>
 
         <div className={c.recherche} ref={zoneRef} id="lieu">
-          <label htmlFor="champ-commune" className={c.rechercheLabel}>Quelle commune vous intéresse ?</label>
+          <label htmlFor="champ-commune" className={c.rechercheLabel}>Commencez par une commune <span className={c.rechercheGratuit}>· premier aperçu gratuit</span></label>
           <div className={c.champ}>
             <svg className={c.champIcone} width="18" height="18" viewBox="0 0 18 18" aria-hidden><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.6" /><path d="M12.5 12.5 L16.5 16.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
             <input
@@ -265,7 +271,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
         {lieu ? (
           <div className={c.priorites} key={`priorites-${lieu.insee}`}>
-            <p className={c.question} id="question-priorites">À quoi tenez-vous ?</p>
+            <p className={c.question} id="question-priorites">Qu&apos;est-ce qui compte pour vous ?</p>
             <ul className={c.pastilles} aria-labelledby="question-priorites">
               {pastilles.map((p, i) => (
                 <li key={p.cle} className={c.pastilleEntree} style={{ animationDelay: `${i * 40}ms` } as CSSProperties}>
@@ -329,17 +335,41 @@ function Lecture({ lecture, onglets }: {
         <h2 className={c.lectureTitre}>{libelleDe(lecture.cle)} · {lecture.commune}</h2>
       </div>
       {onglets ? (
-        <div className={c.onglets} role="tablist" aria-label="Vos priorités choisies">
+        <div className={c.onglets} role="tablist" aria-label="Vos priorités choisies"
+          onKeyDown={(e) => {
+            // Le motif des onglets : flèches gauche/droite, Début, Fin ; le focus suit l'onglet choisi.
+            const i = onglets.choisies.indexOf(onglets.focale);
+            const n = onglets.choisies.length;
+            const cible = e.key === "ArrowRight" ? (i + 1) % n : e.key === "ArrowLeft" ? (i - 1 + n) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : -1;
+            if (cible < 0) return;
+            e.preventDefault();
+            // L'élément est capturé MAINTENANT : après l'événement, `currentTarget` ne vaut plus rien.
+            const liste = e.currentTarget;
+            onglets.choisir(onglets.choisies[cible]!);
+            requestAnimationFrame(() => liste.querySelectorAll<HTMLButtonElement>('[role="tab"]')[cible]?.focus());
+          }}>
           {onglets.choisies.map((k) => (
-            <button key={k} type="button" role="tab" aria-selected={k === onglets.focale} className={c.onglet} onClick={() => onglets.choisir(k)}>{libelleDe(k)}</button>
+            <button key={k} id={`onglet-${k}`} type="button" role="tab" aria-selected={k === onglets.focale} aria-controls="lecture-panneau"
+              tabIndex={k === onglets.focale ? 0 : -1} className={c.onglet} onClick={() => onglets.choisir(k)}>{libelleDe(k)}</button>
           ))}
         </div>
       ) : null}
-      <div className={c.lectureContenu} key={`${lecture.commune}-${lecture.cle}`}>
+      <div className={c.lectureContenu} key={`${lecture.commune}-${lecture.cle}`} id="lecture-panneau"
+        {...(onglets ? { role: "tabpanel", "aria-labelledby": `onglet-${onglets.focale}` } : {})}>
         {lecture.fait ? (
           <div className={c.temps}>
             <h3 className={c.tempsTitre}>{lecture.fait.grain === "unite_urbaine" ? `Agglomération de ${lecture.commune}` : `À ${lecture.commune}`}</h3>
-            {lecture.fait.mesure ? (
+            {lecture.fait.mesures ? (
+              <div className={c.mesures}>
+                {lecture.fait.mesures.map((m) => (
+                  <div key={m.unite} className={c.mesure} aria-hidden>
+                    <p className={c.mesureValeur}>{m.valeur}<span className={c.mesureUnite}>{m.unite}</span></p>
+                    <p className={c.mesureLegende}>{fr(m.legende)}</p>
+                  </div>
+                ))}
+                <p className={c.lectureSeule}>{lecture.fait.texte}</p>
+              </div>
+            ) : lecture.fait.mesure ? (
               // La valeur en grand, jamais seule : son unité et sa légende la suivent ; le fait complet reste lu
               // par les lecteurs d'écran.
               <div className={c.mesure}>
@@ -367,7 +397,9 @@ function Lecture({ lecture, onglets }: {
         </div>
         <div className={c.suites}>
           <Link href={lecture.suite.href} className={c.boutonMarque}>{lecture.suite.libelle} <span aria-hidden>→</span></Link>
-          <Link href="/ou-vivre" className={c.lienFleche}>Décrire tout mon projet</Link>
+          {/* La destination fait ce que le libellé annonce : `/ou-vivre` cherche des COMMUNES à partir d'un projet
+              écrit ; il ne poursuit pas la lecture de celle-ci (revue du 15/10). */}
+          <Link href="/ou-vivre" className={c.lienFleche}>Chercher des communes selon mon projet</Link>
         </div>
       </div>
     </article>

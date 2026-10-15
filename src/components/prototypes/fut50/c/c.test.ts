@@ -7,7 +7,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
+import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, valeurAffichee, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
+import { buildClimatFacts, classifyClimateComfort, CLIMAT_METRICS } from "../../../../lib/decision/climat-facts.ts";
 import { CAS_SETE } from "../cas-sete.ts";
 
 const SETE: Lieu = { type: "commune", libelle: "Sète", commune: "Sète", insee: "34301" };
@@ -59,39 +60,6 @@ test("le storyboard dure entre 18 et 22 secondes, plans continus", () => {
   for (let i = 1; i < bornes.length; i++) assert.equal(bornes[i]![0], bornes[i - 1]![1], "plans continus");
   const duree = bornes[bornes.length - 1]![1];
   assert.ok(duree >= 18 && duree <= 22, `${duree} s`);
-});
-
-test("chaleur DÉFAVORABLE : le constat du moteur, sa limite et son geste, mot pour mot", () => {
-  const e: EntreesChaleur = {
-    issue: "mismatch",
-    ecart: { constat: CAS_SETE.faits.nuits.constat, titre: CAS_SETE.faits.nuits.titreSiPriorite, limite: CAS_SETE.faits.nuits.limite, geste: CAS_SETE.faits.nuits.geste },
-    phraseCondition: null, faitDrias: null, gesteSansAdresse: GESTE,
-  };
-  const l = lireChaleur(SETE, e);
-  assert.equal(l.pourVous.signal, "defavorable");
-  assert.equal(l.fait?.texte, CAS_SETE.faits.nuits.constat);
-  assert.equal(l.pourVous.texte, "Des étés plus difficiles à concilier avec cette priorité", "aucun « projet » supposé enregistré");
-  assert.equal(l.aVerifier, `${CAS_SETE.faits.nuits.limite} ${CAS_SETE.faits.nuits.geste}.`);
-  assert.equal(l.suite.href, "/dossier");
-});
-
-test("chaleur FAVORABLE : le fait DRIAS et la phrase du moteur, jamais une conclusion inventée", () => {
-  const l = lireChaleur(SETE, {
-    issue: "favorable", ecart: null,
-    phraseCondition: "À l'échelle de la commune, rien de défavorable n'apparaît pour des étés plus frais.",
-    faitDrias: "Moins d'une journée par an à l'horizon 2050, comme sur 1976-2005.", gesteSansAdresse: GESTE,
-  });
-  assert.equal(l.pourVous.signal, "favorable");
-  assert.equal(l.fait?.texte, "Jours au-dessus de 35 °C : moins d'une journée par an à l'horizon 2050, comme sur 1976-2005.");
-  assert.match(l.aVerifier, /commune entière/);
-});
-
-test("chaleur ABSENTE : une absence n'est jamais une bonne nouvelle", () => {
-  const l = lireChaleur(SETE, { issue: "absent", ecart: null, phraseCondition: null, faitDrias: null, gesteSansAdresse: GESTE });
-  assert.equal(l.pourVous.signal, "indisponible");
-  assert.equal(l.fait, null);
-  assert.match(l.pourVous.texte, /jamais une bonne nouvelle/);
-  assert.notEqual(MOT_DU_SIGNAL[l.pourVous.signal], MOT_DU_SIGNAL.favorable);
 });
 
 test("petite ville : la population dite simplement, la convention du moteur en clair, le bon grain", () => {
@@ -207,15 +175,6 @@ test("la mesure en grand : présente quand une valeur pertinente existe, jamais 
   const guéret = lireTaille({ ...SETE, commune: "Guéret" }, { issue: "favorable", phraseTaille: null, population: 13901, source: "urban_unit" });
   assert.equal(guéret.fait?.mesure?.unite, "habitants");
   assert.equal(guéret.fait?.mesure?.legende, "dans l'agglomération de Guéret");
-  // Chaleur favorable : les jours au-dessus de 35 °C, avec horizon et référence ; sous un jour, pas de grand « 0 ».
-  const base = { issue: "favorable" as const, ecart: null, phraseCondition: "À l'échelle de la commune, rien de défavorable n'apparaît pour des étés plus frais.", faitDrias: "4 jours par an à l'horizon 2050, contre moins d'une journée sur 1976-2005.", gesteSansAdresse: GESTE };
-  const nantes = lireChaleur(SETE, { ...base, jours35: { projete: 4.2, referenceTexte: "moins d'une journée" } });
-  assert.deepEqual([nantes.fait?.mesure?.valeur, nantes.fait?.mesure?.unite], ["4", "jours par an"]);
-  assert.match(nantes.fait!.mesure!.legende, /35 °C.*2050.*\+2,7 °C en France.*1976-2005/);
-  assert.equal(lireChaleur(SETE, { ...base, jours35: { projete: 0.4, referenceTexte: "aucune journée" } }).fait?.mesure, undefined);
-  // Chaleur défavorable et risques : une phrase, pas de chiffre extrait.
-  const ecart = lireChaleur(SETE, { issue: "mismatch", ecart: { constat: "Les nuits tropicales passeraient de 42 à 80.", titre: "Des étés plus difficiles à concilier avec votre projet", limite: null, geste: null }, phraseCondition: null, faitDrias: null, gesteSansAdresse: GESTE });
-  assert.equal(ecart.fait?.mesure, undefined);
   assert.equal(lireRisques(SETE, ["Inondation"]).fait?.mesure, undefined);
 });
 
@@ -226,4 +185,89 @@ test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l
   assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.hero \{ transition: none; \}/);
   const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
   assert.equal((hero.match(/role="combobox"/g) ?? []).length, 1, "un seul champ, jamais recréé");
+});
+
+// ── La chaleur : données réelles, frontières exactes, même lecture pour toutes les communes ──────────────
+
+const COL = { NORTX35D_yr: "column08", ATX35D_yr: "column23", NORTR_yr: "column10", ATR_yr: "column25" } as const;
+const DRIAS = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
+function entreesReelles(insee: string): EntreesChaleur {
+  const sc: Record<string, { h: string; v: Record<string, number> }> = {};
+  for (const r of DRIAS.filter((r) => String(r.insee_code).padStart(5, "0") === insee)) {
+    sc[String(r.scenario)] = { h: String(r.scenario), v: Object.fromEntries(Object.entries(COL).map(([k, c]) => [k, Number(r[c])])) };
+  }
+  const f = buildClimatFacts(sc)!;
+  return {
+    verdict: classifyClimateComfort(f).verdict,
+    jours: { projete: f.joursTresChauds.projete, reference: f.joursTresChauds.reference, seuil: f.joursTresChauds.threshold },
+    nuits: { projete: f.nuitsTropicales.projete, reference: f.nuitsTropicales.reference, seuil: f.nuitsTropicales.threshold },
+    referenceTexte: (v) => (v < 1 ? "moins d'une" : String(Math.round(v))),
+    limite: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
+    gesteSansAdresse: GESTE,
+  };
+}
+
+test("seuils de la règle du moteur : 8 jours au-dessus de 35 °C, 25 nuits tropicales (horizon 2050)", () => {
+  assert.equal(CLIMAT_METRICS.joursTresChauds.threshold, 8);
+  assert.equal(CLIMAT_METRICS.nuitsTropicales.threshold, 25);
+});
+
+test("La Rochelle (valeurs réelles 2,8 j et 23,4 nuits) : sous les seuils, jamais « favorable », les nuits nommées comme proches", () => {
+  const e = entreesReelles("17300");
+  assert.equal(e.verdict, "under_threshold");
+  assert.equal(e.nuits.projete, 23.4);
+  const l = lireChaleur({ ...SETE, commune: "La Rochelle", insee: "17300" }, e);
+  assert.equal(l.pourVous.signal, "sous_seuil");
+  assert.notEqual(MOT_DU_SIGNAL.sous_seuil, MOT_DU_SIGNAL.favorable);
+  assert.doesNotMatch(l.pourVous.texte, /rien de défavorable|favorable/);
+  assert.match(l.pourVous.texte, /nuits tropicales en sont proches \(23 pour un seuil de 25\)/);
+  assert.match(l.pourVous.texte, /pas des seuils sanitaires : cela ne veut pas dire que les étés resteront frais/);
+  // Les DEUX trajectoires, avec leur référence : la même information que pour une commune défavorable.
+  assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["3", "23"]);
+  assert.match(l.fait!.mesures![1]!.legende, /contre 5 sur 1976-2005/);
+});
+
+test("Nîmes (14,4 j et 69,1 nuits) : défavorable, les deux axes nommés, les deux trajectoires visibles", () => {
+  const l = lireChaleur({ ...SETE, commune: "Nîmes", insee: "30189" }, entreesReelles("30189"));
+  assert.equal(l.pourVous.signal, "defavorable");
+  assert.match(l.pourVous.texte, /les jours au-dessus de 35 °C et les nuits tropicales atteignent le seuil/);
+  assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["14", "69"]);
+});
+
+test("Bordeaux (6,3 j et 28,1 nuits) : défavorable par les nuits seules, les jours restent montrés", () => {
+  const l = lireChaleur({ ...SETE, commune: "Bordeaux", insee: "33063" }, entreesReelles("33063"));
+  assert.match(l.pourVous.texte, /: les nuits tropicales atteignent le seuil/);
+  assert.equal(l.fait!.mesures!.length, 2);
+});
+
+test("Nantes (4,1 j et 11,1 nuits) : sous les seuils, aucun axe proche, même gabarit d'information", () => {
+  const l = lireChaleur({ ...SETE, commune: "Nantes", insee: "44109" }, entreesReelles("44109"));
+  assert.equal(l.pourVous.signal, "sous_seuil");
+  assert.doesNotMatch(l.pourVous.texte, /proches/);
+  assert.deepEqual(l.fait!.mesures!.map((m) => m.valeur), ["4", "11"]);
+});
+
+test("frontières exactes : la classification se fait sur la valeur non arrondie, l'affichage ne franchit jamais un seuil non franchi", () => {
+  const axe = (j: number, n: number) => ({ gwl20: { h: "gwl20", v: { NORTX35D_yr: j, ATX35D_yr: 1, NORTR_yr: n, ATR_yr: 1 } } });
+  assert.equal(classifyClimateComfort(buildClimatFacts(axe(7.99, 24.99))!).verdict, "under_threshold");
+  assert.equal(classifyClimateComfort(buildClimatFacts(axe(8, 10))!).verdict, "unfavorable");
+  assert.equal(classifyClimateComfort(buildClimatFacts(axe(2, 25))!).verdict, "unfavorable");
+  assert.equal(valeurAffichee(24.6, 25), "24,6", "24,6 sous un seuil de 25 ne s'affiche pas « 25 »");
+  assert.equal(valeurAffichee(24.4, 25), "24");
+  assert.equal(valeurAffichee(7.6, 8), "7,6");
+  assert.equal(valeurAffichee(8, 8), "8");
+  assert.equal(valeurAffichee(0.4, 8), "moins de 1");
+});
+
+test("chaleur : donnée absente ou incomplète, jamais une conclusion favorable", () => {
+  const base = entreesReelles("17300");
+  for (const e of [
+    { ...base, verdict: "absent" as const },
+    { ...base, verdict: "uncertain" as const, nuits: { ...base.nuits, projete: null } },
+  ]) {
+    const l = lireChaleur(SETE, e);
+    assert.equal(l.pourVous.signal, "indisponible");
+    assert.equal(l.fait, null);
+    assert.match(l.pourVous.texte, /jamais une bonne nouvelle/);
+  }
 });
