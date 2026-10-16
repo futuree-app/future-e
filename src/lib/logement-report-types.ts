@@ -43,6 +43,14 @@ export type LogementReport = {
   // FUT-59 : un audit VOISIN, non attribué (référence et distance, aucune valeur). Jamais lu par l'écran
   // Énergie : conservé pour qu'une preuve future (parcelle, bâtiment) puisse confirmer l'attribution.
   auditProche?: AuditCandidatProche | null;
+  /**
+   * FUT-62 : les AUTRES audits publiés pour la même adresse (même identifiant BAN), dans l'ordre de
+   * `toAuditRecords`. Une adresse peut porter l'audit de l'immeuble ET ceux de plusieurs appartements :
+   * l'écran le dit, sans en attribuer aucun à ce logement. Absent = un seul audit, ou rapport antérieur.
+   * `autresAuditsIncomplets` : la source en publie peut-être d'autres (« au moins »).
+   */
+  autresAudits?: AuditRecord[];
+  autresAuditsIncomplets?: boolean;
   zfe?: { inZfe: boolean; zones: Array<{ id: string; nom: string; vp_critair: string | null; deux_rm_critair: string | null; date_debut: string | null; date_fin: string | null; }>; } | null;
   // `irep` retiré du contrat le 29/07/2026 : il n'était lu par aucun composant ni aucune règle.
   // La source vit toujours (`src/lib/irep.ts`, `/api/proxy/irep`, page /agir/pollutions-invisibles).

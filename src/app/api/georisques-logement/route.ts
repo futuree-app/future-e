@@ -103,7 +103,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
     ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
-    const { audit, auditProche: candidat, auditStatus } = resultatAudit(auditExact, auditProche);
+    const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
     // communal (aléas GASPAR sans source fine). Les labels GASPAR au point donnent le signalement
@@ -129,6 +129,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       audit,
       auditStatus,
       auditProche: candidat,
+      // FUT-62 : les autres audits de la même adresse, seulement s'il y en a (rapport inchangé sinon).
+      ...(autresAudits ? { autresAudits, autresAuditsIncomplets } : {}),
       zfe,
       // IREP DÉBRANCHÉ LE 29/07/2026 — l'appel, pas la source. Les rejets industriels déclarés
       // étaient fetchés à chaque dossier, transportés dans le payload, et lus par AUCUN composant ni

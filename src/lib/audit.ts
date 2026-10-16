@@ -17,7 +17,9 @@ async function fetchAuditLines<T>(params: Record<string, string>, select: readon
   const url = new URL(`${BASE}/lines`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.set("select", select.join(","));
-  url.searchParams.set("sort", "-date_etablissement_audit");
+  // FUT-62 : à date égale, le numéro d'audit range les lignes d'un même audit ensemble. Sans lui, l'ordre
+  // de l'API décidait seul quel audit d'une adresse qui en porte plusieurs s'affichait.
+  url.searchParams.set("sort", "-date_etablissement_audit,n_audit");
   // BORNÉE (FUT-13) : sans délai, une réponse ADEME qui traîne tenait tout le module Logement.
   const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS) });
   // UNE PANNE LÈVE (FUT-65). `[]` est réservé à la source qui a RÉPONDU sans ligne : un 500, une
@@ -36,10 +38,16 @@ async function fetchAuditLines<T>(params: Record<string, string>, select: readon
 // aucune valeur. Une proximité ne prouve pas qu'un audit concerne ce bâtiment.
 
 /** L'audit de l'adresse exacte, et ce que la recherche a établi : présent, absent, ou non vérifiable. Ne lève pas. */
+// FUT-62 : 60 lignes, pas 20. Un audit compte quatre à sept lignes (une par étape) : 20 lignes coupaient
+// déjà le troisième audit d'une adresse, sans que personne le sache. Au-delà de 60, la liste est dite
+// incomplète (`lectureAudit`).
+const AUDIT_LIGNES_MAX = 60;
+
+/** L'audit de l'adresse exacte, et ce que la recherche a établi : présent, absent, ou non vérifiable. Ne lève pas. */
 export async function getAuditByBanId(banId: string): Promise<AuditLookup> {
-  const rows = await fetchAuditLines<AuditApiRow>({ qs: `identifiant_ban:"${banId}"`, size: "20" }, AUDIT_SELECT)
+  const rows = await fetchAuditLines<AuditApiRow>({ qs: `identifiant_ban:"${banId}"`, size: String(AUDIT_LIGNES_MAX) }, AUDIT_SELECT)
     .catch(() => null); // délai dépassé, réseau, HTTP non-2xx, réponse inexploitable
-  return lectureAudit(rows, banId);
+  return lectureAudit(rows, banId, rows != null && rows.length >= AUDIT_LIGNES_MAX);
 }
 
 /** Un audit voisin (carré d'environ 50 m), hors audits de l'adresse. Jamais une valeur. Lève sur une panne. */

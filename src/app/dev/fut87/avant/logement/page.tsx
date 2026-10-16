@@ -44,7 +44,7 @@ export default async function AvantLogement({ searchParams }: { searchParams: Pr
           <div style={{ display: "grid", gap: 36 }}>
             <FamilyHeading color="var(--accent)">Le logement lui-même</FamilyHeading>
             <EnergieAvant dpe={cas.dpe} audit={r.audit} auditStatus={r.auditStatus} candidates={r.dpeCandidates ?? []} />
-            <ThermalComfortSection evidence={l.confort} communeName={cas.commune} dpeYear={dpeAnnee} />
+            <ThermalComfortSection evidence={l.confort} dpeYear={dpeAnnee} />
             <FamilyHeading color="var(--blue)">Ce à quoi cette adresse est exposée</FamilyHeading>
             {/* Même condition d'affichage que `LogementModule` : le bloc disparaît sans donnée. */}
             {g?.seismic?.label || g?.rga?.label ? (

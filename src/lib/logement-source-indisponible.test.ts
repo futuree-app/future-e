@@ -135,7 +135,8 @@ test("A8 : audit exact non vérifiable → AUCUNE recherche voisine, et la route
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
   assert.match(route, /getAuditByBanId\(address\.id\)\.catch\(\(\): AuditLookup => \(\{ status: "unavailable" \}\)\)/);
   assert.match(route, /auditExactP\.then\(\(exact\) =>\s*voisinAutorise\(exact\)\s*\?\s*getNearbyAuditCandidate/);
-  assert.match(route, /const \{ audit, auditProche: candidat, auditStatus \} = resultatAudit\(auditExact, auditProche\);/);
+  // FUT-62 : la route rend aussi les autres audits de l'adresse, par la même règle.
+  assert.match(route, /const \{ audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets \} = resultatAudit\(auditExact, auditProche\);/);
   assert.match(route, /\n\s+auditStatus,\n/);
 });
 
@@ -195,10 +196,12 @@ test("A13 : première génération avec l'audit en panne → version écrite, pa
   assert.ok(ecrite, "le rapport partiel est enregistré");
   assert.deepEqual(r.version?.sourcesAbsentes, ["audit_energetique"]);
   assert.equal(JSON.parse(jsonCanonique(ecrite!.report)).auditStatus, "unavailable", "le statut est persisté dans le JSON");
-  const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.match(ecran, /\{auditStatus === "unavailable" && \(/);
+  // FUT-62 : l'audit se rend dans `AuditEnergetiqueBlock`, monté par EnergieSection dans tous ses états.
+  const ecran = readFileSync("src/components/report/logement/AuditEnergetiqueBlock.tsx", "utf8");
+  assert.match(ecran, /if \(auditStatus === "unavailable"\) \{/);
   assert.match(ecran, /Audit énergétique non vérifiable pour le moment/);
   assert.doesNotMatch(ecran, /aucun audit/i);
+  assert.match(readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8"), /auditStatus=\{auditStatus\}/);
 });
 
 test("A14 : un rapport antérieur sans statut n'est jamais lu comme une absence confirmée", () => {
@@ -207,8 +210,10 @@ test("A14 : un rapport antérieur sans statut n'est jamais lu comme une absence 
   delete ancien.dpeCandidatesStatus;
   assert.deepEqual(sourcesAbsentes(ancien), [], "aucune panne inventée");
   // Ni absence : aucune phrase d'absence d'audit n'existe, et seul `unavailable` déclenche une phrase.
-  const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.doesNotMatch(ecran, /auditStatus === "absent"|auditStatus !== /);
+  for (const f of ["EnergieSection", "AuditEnergetiqueBlock"]) {
+    const ecran = readFileSync(`src/components/report/logement/${f}.tsx`, "utf8");
+    assert.doesNotMatch(ecran, /auditStatus === "absent"|auditStatus !== /, f);
+  }
   // Et `resultatAudit` ne fabrique pas `absent` à partir de `audit === null`.
   assert.doesNotMatch(readFileSync("src/lib/audit-record.ts", "utf8"), /audit == null|audit === null/);
 });
