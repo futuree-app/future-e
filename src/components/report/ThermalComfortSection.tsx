@@ -1,7 +1,7 @@
 import React from "react";
 import { ReportSection } from "@/components/report/kit";
 import { ChipTooltip } from "@/components/ChipTooltip";
-import { IconSun, IconClock } from "@/components/report/logement/icons";
+import { IconClock } from "@/components/report/logement/icons";
 import type { ThermalEvidence, ThermalFactor } from "@/lib/thermal-evidence";
 
 // Glose de chaque caractéristique du confort d'été (≤2 phrases, « pourquoi ça aide à comprendre »,
@@ -64,29 +64,10 @@ function Chips({ factors }: { factors: ThermalFactor[] }) {
   );
 }
 
-function ClimateFuture({ communeName, level }: { communeName: string; level: ThermalEvidence["level"] }) {
-  const text =
-    level === "A_EXACT_UNIT"
-      ? `Avec la progression des nuits chaudes à ${communeName}, les caractéristiques décrites ci-dessus prendront davantage d'importance.`
-      : level === "B1_EXACT_BUILDING"
-        ? `Avec la progression des nuits chaudes à ${communeName}, les caractéristiques thermiques du bâtiment compteront davantage. La capacité propre de ce logement à évacuer la chaleur reste à documenter.`
-        : `Avec la progression des nuits chaudes à ${communeName}, la capacité du logement à limiter puis évacuer la chaleur deviendra plus importante. Les données retrouvées ne permettent pas encore de la qualifier.`;
-  return (
-    <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 16, paddingTop: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--fg-4)", marginBottom: 6 }}>
-        <IconSun />
-        Dans le climat futur
-      </div>
-      <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>{text}</p>
-    </div>
-  );
-}
-
 export function ThermalComfortSection({
-  evidence, communeName, dpeYear, dpeNonVerifiable = false,
+  evidence, dpeYear, dpeNonVerifiable = false,
 }: {
   evidence: ThermalEvidence;
-  communeName: string;
   dpeYear: string | null;
   /** FUT-65 : la base des diagnostics n'a pas répondu. « Rien n'a été retrouvé » serait faux. */
   dpeNonVerifiable?: boolean;
@@ -154,8 +135,13 @@ export function ThermalComfortSection({
           </>
         )}
 
-        <ClimateFuture communeName={communeName} level={level} />
-
+        {/* AUCUNE PHRASE CLIMATIQUE ICI (FUT-112, 16/10/2026). Un bloc « Dans le climat futur » écrivait
+            « Avec la progression des nuits chaudes à {commune} » pour toute adresse, sans lire la
+            moindre donnée climatique : contredit par l'indicateur sur 59 communes où les nuits tropicales ne progressent pas
+            d'ici 2050, à moins d'une nuit par an sur 239 (audit FUT-85, §D.2). Le signal que reçoit le
+            module (`climatProjete`) ne peut pas le remplacer : « marquee » peut venir des seules journées
+            > 30 °C, et `null` mêle hausse modérée, donnée absente et commune non couverte. Une lecture
+            de la chaleur future ne revient ici qu'appuyée sur les faits de la commune (pilote FUT-20). */}
         {(level === "A_EXACT_UNIT" || level === "B1_EXACT_BUILDING") && (
           <Drawer summary="Comprendre cette lecture">
             <div>

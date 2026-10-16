@@ -331,7 +331,6 @@ export default function LogementModule({
   const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
   // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
   const thermalEvidence = deriveThermalEvidence(dpe);
-  const communeName = result?.address?.city ?? defaultCommune ?? "cette commune";
   const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
   // Synthèse artefact : prête dès que l'analyse est là et que l'attribution a un RÉSULTAT, quel
   // qu'il soit.
@@ -589,7 +588,6 @@ export default function LogementModule({
 
             <ThermalComfortSection
               evidence={thermalEvidence}
-              communeName={communeName}
               dpeYear={dpeYear}
               dpeNonVerifiable={dpeNonVerifiable}
             />
