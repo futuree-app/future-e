@@ -345,7 +345,8 @@ function candidateActions(
   if (comp) {
     const labels =
       comp.kind === "grouped_verification" ? comp.items.flatMap((i) => (i.action ? [i.action.label] : []))
-      : comp.kind === "tradeoff" ? (comp.unfavorableSide.action ? [comp.unfavorableSide.action.label] : [])
+      // FUT-20 : avec le logement, le geste de la carte est sur son côté logement (le défavorable n'en a plus).
+      : comp.kind === "tradeoff" ? [comp.unfavorableSide.action, comp.logement?.action].flatMap((x) => (x ? [x.label] : []))
       : [];
     return labels.length > 0
       ? { anchorId: comp.id, anchors: [comp.id, ...comp.absorbedFactIds], labels }

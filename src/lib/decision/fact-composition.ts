@@ -33,6 +33,10 @@ export type TradeoffComposition = {
   // AlignmentFact sur cette même clé redirait, dans la carte « Ce qui correspond », ce que ce tradeoff
   // montre déjà favorablement. La carte alignment est alors masquée si CE tradeoff est affiché.
   favorableProjectKey: PreferenceKey;
+  // FUT-20 : CE QUE L'ON SAIT DU LOGEMENT face à la chaleur, au grain adresse (`chaleur-logement.ts`).
+  // Présent : il porte le SEUL geste de la carte, et le côté défavorable n'en porte plus. Absent des
+  // compositions sans adresse, et de toutes celles figées avant FUT-20 (elles se rendent comme avant).
+  logement?: CompositionSide;
   absorbedFactIds: string[];
   referencedRuleIds: string[];
   materialityTier: MaterialityTier; // hérité du côté défavorable, jamais aggravé par le favorable
@@ -78,7 +82,9 @@ export type SharedEvidenceComposition = {
 export type GroupedVerificationComposition = {
   id: string;
   kind: "grouped_verification";
-  patternId: "clay_regulation_grouped";
+  // `ambient_heat_housing` (FUT-20) : la chaleur NON demandée (constat territoire) et ce que l'on sait du
+  // logement, réunis en une carte « À contrôler ». Le geste n'est porté que par l'item logement.
+  patternId: "clay_regulation_grouped" | "ambient_heat_housing";
   title: string;
   // Même contrat que les autres patrons : court, bas de casse, jamais le titre. Et SANS coordination
   // de haut niveau : ce sujet est énuméré avec d'autres par un « et », et un « et » interne ferait
@@ -121,6 +127,10 @@ export type MismatchWithActionComposition = {
   // (summerComfortAction). C'est la raison d'être de ce patron.
   action: DecisionAction;
   limitation?: string;
+  // FUT-20 (confort d'été seulement) : ce que l'on sait du logement, au grain adresse. Quand il est
+  // présent, `action` est le geste CIBLÉ qu'il appelle, et le côté lui-même n'en porte pas (un seul
+  // geste par carte). Absent : la carte se lit et se rend exactement comme avant FUT-20.
+  logement?: CompositionSide;
   absorbedFactIds: string[];
   referencedRuleIds: string[];
   materialityTier: MaterialityTier;

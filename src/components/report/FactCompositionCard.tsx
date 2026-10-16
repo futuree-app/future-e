@@ -8,13 +8,14 @@ import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import { factsNonNarresParLaFace } from "@/lib/decision/dossier-view";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { evidenceHref } from "@/lib/decision/evidence-targets";
+import { bindOrphans } from "@/lib/typography";
 
 // `panel` : le côté est rendu en côté de TRADEOFF (teinte plate discrète, .tradeoff-side). Le libellé y
 // est en SANS-SERIF casse normale, coloré à son ton — plus l'eyebrow mono capitale d'avant, qui rejouait
 // le geste du verdict à un niveau inférieur (le mono uppercase signale un changement de REGISTRE, pas
 // chaque paragraphe). Hors tradeoff (grouped_verification, où les items se COMPLÈTENT au lieu de
 // s'opposer), `panel` reste faux : label neutre, aucun fond, aucune tension suggérée.
-function SideBlock({ side, color, panel = false }: { side: CompositionSide; color: string; panel?: boolean }) {
+function SideBlock({ side, color, panel = false, lie = false }: { side: CompositionSide; color: string; panel?: boolean; lie?: boolean }) {
   const inner = (
     <>
       {panel ? (
@@ -23,7 +24,7 @@ function SideBlock({ side, color, panel = false }: { side: CompositionSide; colo
         <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
       )}
       {side.status ? <StatusTag label={side.status} color={color} /> : null}
-      <p className="text-label text-[15px] leading-[1.6]">{side.statement}</p>
+      <p className="text-label text-[15px] leading-[1.6]">{lie ? bindOrphans(side.statement) : side.statement}</p>
       {side.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{side.limitation}</p> : null}
       {/* `signalConvention` a quitté la face : il est regroupé dans le dépliable « Données et limites » de la carte. */}
       <div className="mt-2 flex flex-col gap-2">
@@ -47,13 +48,18 @@ function SideBlock({ side, color, panel = false }: { side: CompositionSide; colo
 
 // Les conventions de signalement des côtés/items, dédupliquées (un tradeoff saisonnier partage la même
 // convention entre ses deux saisons). Rendues une fois, dans le dépliable « Données et limites ».
+// Les côtés d'une composition, y compris le côté logement des cartes chaleur (FUT-20).
+function sidesOf(composition: FactComposition): CompositionSide[] {
+  if (composition.kind === "tradeoff") {
+    return [composition.favorableSide, composition.unfavorableSide, ...(composition.logement ? [composition.logement] : [])];
+  }
+  if (composition.kind === "grouped_verification") return composition.items;
+  if (composition.kind === "mismatch_with_action") return composition.logement ? [composition.logement] : [];
+  return [];
+}
+
 function compositionConventions(composition: FactComposition): string[] {
-  const sides: CompositionSide[] =
-    composition.kind === "tradeoff"
-      ? [composition.favorableSide, composition.unfavorableSide]
-      : composition.kind === "grouped_verification"
-        ? composition.items
-        : [];
+  const sides = sidesOf(composition);
   // La convention de seuil, PUIS la provenance des références qui n'établissent aucune valeur : même
   // règle que la carte élémentaire (sans valeur mesurée, pas de pastille sur la face).
   const seen = new Set<string>();
@@ -73,12 +79,7 @@ function compositionConventions(composition: FactComposition): string[] {
 // Le concret à regarder, côté composition : le `detail` des actions portées par ses côtés ou ses
 // items. Une shared_evidence n'en a pas (ses conséquences sont des mismatchs, qui n'ont pas d'action).
 function compositionChecks(composition: FactComposition): string[] {
-  const sides: CompositionSide[] =
-    composition.kind === "tradeoff"
-      ? [composition.favorableSide, composition.unfavorableSide]
-      : composition.kind === "grouped_verification"
-        ? composition.items
-        : [];
+  const sides = sidesOf(composition);
   const checks = sides.map((s) => s.action?.detail).filter((d): d is string => Boolean(d));
   // climate_comfort n'a pas de côtés : son action (le renvoi logement) porte le concret à regarder.
   if (composition.kind === "mismatch_with_action" && composition.action.detail) checks.push(composition.action.detail);
@@ -127,19 +128,27 @@ export function FactCompositionCard({
     <li id={dossierAnchorId(composition.id)} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
       <p className="text-label text-[16px] font-semibold leading-[1.4]">{composition.title}</p>
       {composition.kind === "tradeoff" ? (
-        <TradeoffFaceoff composition={composition} />
+        <>
+          <TradeoffFaceoff composition={composition} />
+          {/* FUT-20 : ce que l'on sait du logement, sous le compromis, avec le seul geste de la carte. */}
+          {composition.logement ? (
+            <div className="mt-4"><SideBlock side={composition.logement} color={color} lie /></div>
+          ) : null}
+        </>
       ) : composition.kind === "grouped_verification" ? (
         // Deux constats établis, un même sujet décisionnel : chaque item garde son constat, sa preuve,
         // son action et sa limitation (invariant 8), la même brique que les côtés d'un tradeoff.
         <div className="mt-3 flex flex-col gap-5">
           {composition.items.map((item, i) => (
-            <SideBlock key={i} side={item} color={color} />
+            <SideBlock key={i} side={item} color={color} lie={composition.patternId === "ambient_heat_housing"} />
           ))}
         </div>
       ) : composition.kind === "mismatch_with_action" ? (
         // Le fallback confort d'été : un seul côté (le mismatch chaleur absorbé), plus le renvoi au
         // logement qu'un mismatch ne porte pas. Constat commune, preuve chiffrée, action au grain adresse.
         <div className="mt-3 flex flex-col gap-2">
+          {/* FUT-20 : avec le logement, chaque échelle est nommée. Sans lui, la carte reste celle d'avant. */}
+          {composition.logement ? <p className="text-[13px] font-semibold text-muted">À l&apos;échelle de la commune</p> : null}
           <p className="text-label text-[15px] leading-[1.6]">{composition.summary}</p>
           {composition.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55]">{composition.limitation}</p> : null}
           {composition.evidence.some((e) => e.observedValue) ? (
@@ -148,6 +157,9 @@ export function FactCompositionCard({
                 <Chip key={i} label={e.href ? "Preuve" : e.label} value={e.observedValue} href={e.href ? evidenceHref(e.targetKey, e.href) : undefined} color={color} />
               ))}
             </div>
+          ) : null}
+          {composition.logement ? (
+            <div className="mt-3"><SideBlock side={composition.logement} color={color} lie /></div>
           ) : null}
           <div className="mt-1">
             <ActionCue label={composition.action.label} color={color} type={composition.action.type} />

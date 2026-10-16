@@ -271,9 +271,10 @@ export function assembleDossier(
       evidence: [
         ...shown.flatMap(factEvidence),
         ...shownComps.flatMap((c) => {
-          if (c.kind === "tradeoff") return [...c.favorableSide.evidence, ...c.unfavorableSide.evidence];
+          // FUT-20 : le côté logement des cartes chaleur fonde aussi la conclusion.
+          if (c.kind === "tradeoff") return [...c.favorableSide.evidence, ...c.unfavorableSide.evidence, ...(c.logement?.evidence ?? [])];
           if (c.kind === "grouped_verification") return c.items.flatMap((i) => i.evidence);
-          if (c.kind === "mismatch_with_action") return c.evidence;
+          if (c.kind === "mismatch_with_action") return [...c.evidence, ...(c.logement?.evidence ?? [])];
           return c.sharedEvidence;
         }),
       ],
