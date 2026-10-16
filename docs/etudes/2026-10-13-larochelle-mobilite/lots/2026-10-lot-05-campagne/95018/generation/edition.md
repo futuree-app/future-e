@@ -1,0 +1,108 @@
+## A. Question et format
+
+**Question principale :** à Argenteuil, quels secteurs examiner pour rapprocher un usage moins fréquent de la voiture pour travailler et la proximité des équipements du quotidien ?
+
+Le contraste entre Carême Prenant et Morifosse donne un repère utile pour orienter une recherche de logement, sans promettre au lecteur les mêmes pratiques. Il s’appuie sur `iris.voiture.min`, `iris.voiture.max`, `iris.950180204.panier_500m` et `iris.950180702.panier_500m`. Le fait `mobpro.voiture_selon_destination.meme_commune` rappelle l’intérêt d’examiner aussi le trajet vers son emploi.
+
+**Format retenu : article court.** L’ouverture utilise les hausses de carburant et le scénario fourni.
+
+Pistes écartées : possession automobile, stationnement et actifs venant travailler à Argenteuil, qui disperseraient la question ; comparaison nationale, peu éclairante ici ; comparaison entre destinations, laissée de côté pour concentrer le texte sur les secteurs et l’adresse.
+
+## B. Article
+
+# À Argenteuil, où chercher un logement pour utiliser moins la voiture ?
+
+Entre les semaines du 6 octobre 2025 et du 5 octobre 2026, le prix médian du gazole augmente de 0,66 €/L et celui du SP95-E10 de 0,23 €/L dans les stations situées dans un rayon de 12 km à vol d’oiseau autour du centre d’Argenteuil. Pour qui cherche un logement, cette hausse donne une raison concrète d’examiner les déplacements que l’adresse laissera à faire en voiture.
+
+Le scénario suivant chiffre le **surcoût annuel de carburant** selon la distance. Il retient une consommation de 6 L/100 km, 200 allers-retours domicile-travail par an et des hausses arrondies à 5 centimes : +0,65 €/L pour le gazole et +0,25 €/L pour le SP95-E10.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+Ces distances sont des hypothèses, sans attribution à un secteur ou à un lieu de travail. Pour orienter la recherche à Argenteuil, les pratiques locales apportent un autre éclairage.
+
+## Des pratiques très différentes selon le secteur
+
+Dans les données du recensement de 2022, la voiture est le mode principal pour aller travailler de 24 % des actifs habitant Carême Prenant, contre 66 % de ceux habitant Morifosse. Ces parts concernent les actifs qui résident dans chaque secteur, quelle que soit leur commune de travail.
+
+[VISUEL : Carte de la part de la voiture par secteur (IRIS)]
+
+Pour sélectionner des annonces, ce contraste invite à regarder le secteur précis du logement.
+
+Le lieu de travail mérite aussi sa place dans cette sélection : parmi les actifs qui habitent et travaillent à Argenteuil, 42 % déclarent la voiture comme mode principal. Un emploi dans la commune ne suffit donc pas à présumer un trajet sans voiture.
+
+## Les courses et l’école dessinent-elles le même contraste ?
+
+Le trajet professionnel ne couvre qu’une partie du quotidien. Pour examiner ce qu’une adresse permet de rapprocher, on peut regarder la présence simultanée d’un commerce alimentaire, d’une pharmacie et d’une école élémentaire à moins de 500 m à vol d’oiseau.
+
+À Carême Prenant, la quasi-totalité des adresses dispose de ce panier à proximité ; à Morifosse, c’est le cas de 38 % des adresses. Le contraste concerne donc aussi la proximité de ces équipements, sans renseigner leur fréquentation.
+
+Lors d’une visite à Carême Prenant, examinez les cheminements vers les équipements qui vous seraient utiles. À Morifosse, repérez ceux qui entourent l’adresse retenue : l’absence du panier complet ne signifie pas l’absence de tout équipement. Dans les deux secteurs, confrontez séparément le logement à votre destination professionnelle et à vos horaires.
+
+## Votre projet, votre adresse
+
+Si votre déménagement vise à réduire la place de la voiture, partez des déplacements que vous souhaitez changer. Avec futur•e, explorez l’adresse envisagée à partir de ce projet pour voir comment elle s’inscrit dans votre choix de vie.
+
+### Méthode et sources
+
+Pratiques professionnelles : INSEE, fichier MOBPRO et bases infracommunales Activité des résidents ; estimations par sondage. Les secteurs sont les IRIS statistiques de l’INSEE, dont les libellés peuvent différer des noms de quartiers usuels. Les observations par secteur et celles selon le lieu de travail ne sont pas croisées.
+
+Proximité : Base adresse nationale et Base permanente des équipements 2025 de l’INSEE ; chaque adresse compte pareil au sein du secteur. Les distances à vol d’oiseau ne décrivent pas le cheminement réel. Prix : archives officielles de prix-carburants.gouv.fr, médiane des derniers prix déclarés par station dans chaque semaine étudiée.
+
+## C. Correspondance interne (non publiée)
+
+| Passage | Chiffre écrit | Identifiant(s) | Usage |
+|---|---|---|---|
+| Chapeau — début de comparaison | Semaine du 6 octobre 2025 | `carburant.gazole.prix_un_an_avant`, `carburant.e10.prix_un_an_avant` | oui |
+| Chapeau — fin de comparaison | Semaine du 5 octobre 2026 | `carburant.gazole.prix`, `carburant.e10.prix` | oui |
+| Chapeau — hausse du gazole | 0,66 €/L | `carburant.gazole.ecart` | oui |
+| Chapeau — hausse du SP95-E10 | 0,23 €/L | `carburant.e10.ecart` | oui |
+| Chapeau — périmètre des stations | 12 km | `carburant.gazole.ecart`, `carburant.e10.ecart` | oui |
+| Hypothèses — consommation | 6 L/100 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses — déplacements annuels | 200 allers-retours | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses — arrondi des hausses | 5 centimes | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses — hausse retenue du gazole | +0,65 €/L | `scenario.carburant.gazole.5km` | oui |
+| Hypothèses — hausse retenue du SP95-E10 | +0,25 €/L | `scenario.carburant.e10.5km` | oui |
+| Tableau — distance, première ligne | 5 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` | oui |
+| Tableau — gazole, première ligne | environ 80 € | `scenario.carburant.gazole.5km` | oui |
+| Tableau — SP95-E10, première ligne | environ 30 € | `scenario.carburant.e10.5km` | oui |
+| Tableau — distance, deuxième ligne | 15 km | `scenario.carburant.gazole.15km`, `scenario.carburant.e10.15km` | oui |
+| Tableau — gazole, deuxième ligne | environ 230 € | `scenario.carburant.gazole.15km` | oui |
+| Tableau — SP95-E10, deuxième ligne | environ 90 € | `scenario.carburant.e10.15km` | oui |
+| Tableau — distance, troisième ligne | 35 km | `scenario.carburant.gazole.35km`, `scenario.carburant.e10.35km` | oui |
+| Tableau — gazole, troisième ligne | environ 550 € | `scenario.carburant.gazole.35km` | oui |
+| Tableau — SP95-E10, troisième ligne | environ 210 € | `scenario.carburant.e10.35km` | oui |
+| Pratiques — millésime | 2022 | `iris.voiture.min`, `iris.voiture.max`, `mobpro.voiture_selon_destination.meme_commune` | oui |
+| Pratiques — Carême Prenant | 24 % | `iris.voiture.min` | oui |
+| Pratiques — Morifosse | 66 % | `iris.voiture.max` | oui |
+| Pratiques — actifs habitant et travaillant à Argenteuil | 42 % | `mobpro.voiture_selon_destination.meme_commune` | oui |
+| Équipements — seuil de proximité | 500 m | `iris.950180204.panier_500m`, `iris.950180702.panier_500m` | oui |
+| Équipements — Carême Prenant | « la quasi-totalité » — valeur source : 99,7 % | `iris.950180204.panier_500m` | oui |
+| Équipements — Morifosse | 38 % | `iris.950180702.panier_500m` | oui |
+| Méthode — millésime des équipements | 2025 | `iris.950180204.panier_500m`, `iris.950180702.panier_500m` — source du tableau des secteurs | oui |
+
+## D. Visuels et vérifications restantes
+
+| Visuel retenu | Emplacement | Étape manuelle indiquée par le dossier |
+|---|---|---|
+| Tableau du scénario de surcoût de carburant | Au début de l’article, après les hypothèses | Aucune |
+| Carte de la part de la voiture par secteur (IRIS) | Après le contraste entre Carême Prenant et Morifosse | Aucune pour la production automatique ; libellés posés à la main seulement pour une version soignée |
+
+La carte portera le millésime des pratiques et repérera les secteurs cités.
+
+Vérifications concernant les faits utilisés :
+
+- **Carburant et scénario** : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Vérification obligatoire avant publication.
+- **Libellés d’IRIS** : relire Carême Prenant et Morifosse. Le texte les présente comme des secteurs statistiques.
+- **Part de la voiture selon la destination** : la section de contrôle demande une relecture du choix du groupe de communes. L’article utilise uniquement le fait relatif aux actifs habitant et travaillant à Argenteuil ; aucun groupe extérieur n’y figure.
+
+## E. Corrections.
+
+| Anomalie | Passage avant | Passage après |
+|---|---|---|
+| Raisonnement — bloquante : conseil de secteur tiré des pratiques des résidents | Carême Prenant offre un point de départ pour explorer un secteur où la voiture occupe une place moins fréquente dans les déplacements professionnels observés. | Phrase supprimée : les pratiques observées ne permettent pas de prédire celles d’un nouvel habitant ni de privilégier ce secteur face à des secteurs aux parts proches. |
+
+## F. Retouches éditoriales (2026-10-16, hors génération)
+
+| Passage | Changement | Raison |
+|---|---|---|
+| Tableau du surcoût | tableau Markdown recopié remplacé par le marqueur du tableau construit depuis le dossier | doublon d'affichage relevé à la relecture du 16/10/2026 (retrait par script, outil/lot.py) |

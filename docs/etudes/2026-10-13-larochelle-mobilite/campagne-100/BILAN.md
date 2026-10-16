@@ -1,6 +1,6 @@
 # Campagne 20 → 100 communes : bilan cumulatif
 
-Mis à jour le 2026-10-15T23:58:55Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
+Mis à jour le 2026-10-16T00:09:07Z par `outil/campagne.py bilan`. Mesures détaillées : `campagne-100/mesures.csv` (une ligne par étape et par appel). Sélection : `campagne-100/candidats.csv`. Aucune publication ; les vérifications avant publication restent à faire.
 
 **Communes distinctes préparées : 100** (20 avant la campagne, 80 pendant).
 
@@ -20,7 +20,9 @@ Aucune : toutes les communes rédigées ont des faits carburant utilisables.
 Données carburant plus fragiles, écrites comme telles :
 - Ajaccio (2A004) : hausse du gazole en ordre de grandeur, sans SP95-E10 ; entrée carburant présente
 
-## Erreurs de niveau 1 (correction)
+## Articles corrigés pour une anomalie de niveau 1 : 41
+
+Un article peut avoir reçu plusieurs anomalies ; leur gravité varie (une recommandation explicite de quartier n'a pas le poids d'une invitation générale à examiner son trajet).
 
 - Toulouse (31555), corrigé : raisonnement : Le titre fait de la part de la voiture chez les actifs d'un secteur (iris.voiture.min, iris.voiture.max, tableau de la section 3) un critère de choix de quartie ; raisonnement : Les pratiques des actifs de chaque secteur (section 3) deviennent une liste de secteurs à cibler. La phrase suivante (« gardez donc votre lieu de travail à côté
 - Nice (06088), corrigé : raisonnement : Le titre présente les pratiques des actifs d'un secteur (iris.voiture.min, iris.voiture.max) comme un levier : choisir un secteur ferait moins prendre la voitur ; raisonnement : La faible part de la voiture chez les actifs d'un secteur (section 3) devient une recommandation de quartier pour le lecteur, juste après des chiffres par commu

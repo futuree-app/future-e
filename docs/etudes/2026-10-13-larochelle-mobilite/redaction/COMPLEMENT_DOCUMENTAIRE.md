@@ -6,7 +6,7 @@ Consigne générale, valable pour toute commune. Les faits d'une commune vont da
 
 Le dossier de rédaction contient les faits **calculés** (`fiche_mobilite.py`). Certaines informations utiles au lecteur ne se calculent pas : la gratuité d'un réseau, ses jours de circulation, l'endroit où vérifier un trajet. Le complément les apporte, **datées et sourcées**, pour que l'IA de rédaction les reçoive dans le dossier sans dépendre d'une conversation ni de ce qu'elle croit savoir de la commune.
 
-Question servie : **utiliser moins sa voiture** quand on choisit un logement. Le complément ne sert à conclure ni sur la deuxième voiture, ni sur la vie sans voiture, ni sur la faisabilité d'un trajet.
+Question servie : **la place de la voiture dans les déplacements** depuis un futur logement. Le complément ne sert à conclure ni sur la deuxième voiture, ni sur la vie sans voiture, ni sur la faisabilité d'un trajet.
 
 ## Procédure
 

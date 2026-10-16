@@ -701,6 +701,43 @@ def controle(lot, insee, nom_fichier):
     return res
 
 
+MARQUEUR_CARBU = re.compile(r"^\[VISUEL[^\]\n]*(?:sc[ée]nario|carburant|surco[ûu]t)[^\]\n]*\]\s*$", re.M | re.I)
+
+
+def dedoublonner_tableau_carburant(t):
+    """Le tableau du surcoût est construit depuis le dossier (marqueur [VISUEL : Tableau du scénario…]). Un tableau Markdown
+    recopié par le rédacteur dans la section B, juste après le marqueur (au plus deux paragraphes plus loin), ferait
+    afficher le tableau deux fois (campagne, 80 articles sur 80, relecture du 16/10/2026). Le tableau recopié est remplacé
+    par le marqueur, à sa place, et le marqueur d'origine retiré : l'ordre du texte reste celui du rédacteur.
+    Retourne (texte, changé)."""
+    b0 = re.search(r"^##\s+B\.", t, re.M)
+    b1 = re.search(r"^##\s+[C-F]\.", t[b0.end():], re.M) if b0 else None
+    if not b0:
+        return t, False
+    fin_b = b0.end() + (b1.start() if b1 else len(t) - b0.end())
+    m = MARQUEUR_CARBU.search(t, b0.end(), fin_b)
+    if not m:
+        return t, False
+    tab = re.compile(r"(?:^\|.*\n?)+", re.M).search(t, m.end(), fin_b)
+    if not tab or not re.search(r"km|surco|carbur|gazole|trajet", tab.group(0).splitlines()[0], re.I):
+        return t, False
+    entre = t[m.end():tab.start()]
+    if len([p for p in re.split(r"\n\s*\n", entre) if p.strip()]) > 2 or re.search(r"^#|^\[VISUEL", entre, re.M):
+        return t, False
+    neuf = t[:tab.start()] + m.group(0).strip() + "\n" + t[tab.end():]
+    neuf = neuf[:m.start()] + neuf[m.end():].lstrip("\n")  # le marqueur d'origine (avant le tableau) disparaît
+    return neuf, True
+
+
+def ligne_retouche(t, passage, changement, raison, jour):
+    """Ajoute une ligne à la section F (retouches hors génération), en la créant au besoin."""
+    ligne = f"| {passage} | {changement} | {raison} |"
+    if re.search(r"^## F\.", t, re.M):
+        return t.rstrip("\n") + "\n" + ligne + "\n"
+    return (t.rstrip("\n") + f"\n\n## F. Retouches éditoriales ({jour}, hors génération)\n\n| Passage | Changement | Raison |\n|---|---|---|\n"
+            + ligne + "\n")
+
+
 def tableau_carburant(lot, insee, ville):
     """Tableau accessible du scénario de surcoût, écrit à partir des lignes pré-calculées du dossier (aucune valeur saisie),
     mêmes colonnes que la prévisualisation /dev/lot."""
@@ -801,6 +838,12 @@ def rediger_commune(lot, insee, executer, plan):
         C["anomalies_restantes"] = apres["anomalies"]
         C["motif"] = (f"{apres['bloquantes']} anomalie(s) déterministe(s) après la correction unique" if apres["bloquantes"]
                       else "corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)")
+    t_final, change = dedoublonner_tableau_carburant(open(os.path.join(lot.rep(insee, "generation"), final)).read())
+    if change:  # tableau du surcoût recopié en Markdown : retiré automatiquement, tracé en section F
+        open(os.path.join(lot.rep(insee, "generation"), "edition.md"), "w").write(ligne_retouche(
+            t_final, "Tableau du surcoût", "tableau Markdown recopié remplacé par le marqueur du tableau construit depuis le dossier",
+            "doublon d'affichage (retrait automatique, outil/lot.py)", dt.date.today().isoformat()))
+        final = "edition.md"
     C["article"] = final
     C["visuels"] = visuels(lot, insee, open(os.path.join(lot.rep(insee, "generation"), final)).read())
     if not C["visuels"]["ok"]:

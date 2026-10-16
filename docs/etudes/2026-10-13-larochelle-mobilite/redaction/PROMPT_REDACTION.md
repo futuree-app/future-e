@@ -59,7 +59,7 @@ Lis-le en entier avant d'écrire.
 
 **A. Question et format.** Quelques lignes : la question principale, ce que la réponse apprend au lecteur et son lien avec une recherche de logement, les identifiants qui la soutiennent ; le format retenu ; en une ligne, les pistes écartées et pourquoi. Si les faits carburant sont absents ou inutilisables, dis-le ici avec l'identifiant en cause : c'est la seule raison d'ouvrir autrement.
 
-**B. Article.** En Markdown : titre, chapeau, intertitres, corps, conclusion produit, puis « Méthode et sources ». Place chaque visuel retenu par une ligne seule de la forme `[VISUEL : <nom exact du visuel dans le dossier>]`, à côté du passage qu'il éclaire. Aucun identifiant de fait dans l'article.
+**B. Article.** En Markdown : titre, chapeau, intertitres, corps, conclusion produit, puis « Méthode et sources ». Place chaque visuel retenu par une ligne seule de la forme `[VISUEL : <nom exact du visuel dans le dossier>]`, à côté du passage qu'il éclaire. Le visuel est produit à partir du dossier : n'en recopie pas le contenu dans l'article (pas de tableau Markdown du scénario carburant ni des secteurs). Aucun identifiant de fait dans l'article.
 
 **C. Correspondance interne (non publiée).** Un tableau `| Passage | Chiffre écrit | Identifiant(s) | Usage |`, une ligne par chiffre de l'article (titre, chapeau, corps, légendes, méthode), y compris les pourcentages des titres. Un chiffre sans identifiant est une erreur à corriger avant de rendre.
 

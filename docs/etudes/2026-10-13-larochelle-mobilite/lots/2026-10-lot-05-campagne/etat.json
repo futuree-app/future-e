@@ -61,8 +61,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_59350_clair.png",
@@ -168,8 +168,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_66136_clair.png",
@@ -257,8 +257,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_45234_clair.png",
@@ -364,7 +364,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_76540_clair.png",
@@ -391,7 +391,7 @@
     "duree_s": 15.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "93066": {
    "nom": "Saint-Denis",
@@ -454,8 +454,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93066_clair.png",
@@ -542,8 +542,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93048_clair.png",
@@ -630,8 +630,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_95018_clair.png",
@@ -717,7 +717,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_68224_clair.png",
@@ -743,7 +743,7 @@
     "duree_s": 18.2
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "54395": {
    "nom": "Nancy",
@@ -806,8 +806,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_54395_clair.png",
@@ -894,8 +894,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_59599_clair.png",
@@ -982,7 +982,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_59512_clair.png",
@@ -1008,7 +1008,7 @@
     "duree_s": 14.9
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "92050": {
    "nom": "Nanterre",
@@ -1070,7 +1070,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92050_clair.png",
@@ -1097,7 +1097,7 @@
     "duree_s": 14.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "94081": {
    "nom": "Vitry-sur-Seine",
@@ -1159,7 +1159,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_94081_clair.png",
@@ -1185,7 +1185,7 @@
     "duree_s": 14.3
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "94028": {
    "nom": "Créteil",
@@ -1248,8 +1248,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_94028_clair.png",
@@ -1336,8 +1336,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_84007_clair.png",
@@ -1423,7 +1423,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93001_clair.png",
@@ -1449,7 +1449,7 @@
     "duree_s": 11.2
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "92004": {
    "nom": "Asnières-sur-Seine",
@@ -1511,7 +1511,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92004_clair.png",
@@ -1537,7 +1537,7 @@
     "duree_s": 10.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "92025": {
    "nom": "Colombes",
@@ -1599,7 +1599,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92025_clair.png",
@@ -1625,7 +1625,7 @@
     "duree_s": 11.5
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "59183": {
    "nom": "Dunkerque",
@@ -1687,7 +1687,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_59183_clair.png",
@@ -1714,7 +1714,7 @@
     "duree_s": 20.1
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "93005": {
    "nom": "Aulnay-sous-Bois",
@@ -1777,8 +1777,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93005_clair.png",

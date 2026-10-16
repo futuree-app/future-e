@@ -61,8 +61,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_78646_clair.png",
@@ -149,7 +149,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92026_clair.png",
@@ -175,7 +175,7 @@
     "duree_s": 11.6
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "34032": {
    "nom": "Béziers",
@@ -238,8 +238,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_34032_clair.png",
@@ -326,7 +326,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92063_clair.png",
@@ -353,7 +353,7 @@
     "duree_s": 12.8
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "50129": {
    "nom": "Cherbourg-en-Cotentin",
@@ -435,8 +435,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_50129_clair.png",
@@ -524,8 +524,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_94017_clair.png",
@@ -612,8 +612,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_33281_clair.png",
@@ -700,8 +700,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_94068_clair.png",
@@ -787,7 +787,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_06004_clair.png",
@@ -813,7 +813,7 @@
     "duree_s": 84.4
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "2A004": {
    "nom": "Ajaccio",
@@ -876,8 +876,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_2A004_clair.png",
@@ -980,8 +980,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_06029_clair.png",
@@ -1069,8 +1069,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93029_clair.png",
@@ -1157,8 +1157,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_93051_clair.png",
@@ -1244,7 +1244,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92040_clair.png",
@@ -1270,7 +1270,7 @@
     "duree_s": 11.2
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "95127": {
    "nom": "Cergy",
@@ -1332,7 +1332,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_95127_clair.png",
@@ -1359,7 +1359,7 @@
     "duree_s": 11.9
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "92044": {
    "nom": "Levallois-Perret",
@@ -1421,7 +1421,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92044_clair.png",
@@ -1447,7 +1447,7 @@
     "duree_s": 10.9
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "68066": {
    "nom": "Colmar",
@@ -1528,7 +1528,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_68066_clair.png",
@@ -1554,7 +1554,7 @@
     "duree_s": 15.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "62193": {
    "nom": "Calais",
@@ -1616,7 +1616,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_62193_clair.png",
@@ -1643,7 +1643,7 @@
     "duree_s": 16.6
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "33318": {
    "nom": "Pessac",
@@ -1705,7 +1705,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_33318_clair.png",
@@ -1732,7 +1732,7 @@
     "duree_s": 14.8
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "69259": {
    "nom": "Vénissieux",
@@ -1795,8 +1795,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_69259_clair.png",

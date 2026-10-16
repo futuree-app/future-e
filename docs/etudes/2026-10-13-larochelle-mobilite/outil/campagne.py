@@ -434,7 +434,8 @@ def cmd_bilan(a):
                  f"{sum(1 for c in e.values() if c.get('statut') == 'prêt à relire')} | {'oui' if os.path.exists(os.path.join(d, 'SUSPENDU.json')) else 'non'} |")
     o += ["\n## Exceptions carburant\n", "\n".join(f"- {x}" for x in exceptions) or "Aucune : toutes les communes rédigées ont des faits carburant utilisables.",
           *(["\nDonnées carburant plus fragiles, écrites comme telles :"] + [f"- {x}" for x in fragiles] if fragiles else []),
-          "\n## Erreurs de niveau 1 (correction)\n"]
+          f"\n## Articles corrigés pour une anomalie de niveau 1 : {len(niv1)}\n",
+          "Un article peut avoir reçu plusieurs anomalies ; leur gravité varie (une recommandation explicite de quartier n'a pas le poids d'une invitation générale à examiner son trajet).\n"]
     o += [f"- {nom} ({kk}), {issue} : " + " ; ".join(x) for nom, kk, x, issue in niv1] or ["Aucune."]
     if faux:
         o += ["\nCorrections déclenchées seulement par un faux positif du contrôle (corrigé depuis ; l'appel a bien eu lieu et est compté) :"] + [f"- {x}" for x in faux]

@@ -1,0 +1,123 @@
+## A. Question et format
+
+**Question principale :** que regarder dans le secteur d’une future adresse, au-delà du fait de travailler à Narbonne, lorsqu’on souhaite utiliser moins la voiture ?
+
+Les pratiques diffèrent fortement entre secteurs, alors que la voiture reste majoritaire chez les actifs qui habitent et travaillent dans la commune. La proximité des équipements apporte un autre éclairage, sans expliquer à elle seule les déplacements professionnels. Pour une recherche de logement, ces observations invitent à examiner séparément les trajets de travail et les besoins quotidiens.
+
+Appuis : `mobpro.travaille_dans_commune`, `mobpro.voiture_selon_destination.meme_commune`, `iris.voiture.min`, `iris.voiture.max`, `iris.112620102.panier_500m`, `iris.112620303.panier_500m`, `iris.112620303.voiture`.
+
+**Format retenu : article court**, avec l’ouverture carburant et deux visuels. Pistes écartées : comparaison nationale, stationnement, possession automobile et actifs venant travailler à Narbonne, qui disperseraient la question.
+
+## B. Article
+
+# À Narbonne, que regarder pour choisir un logement et moins prendre la voiture ?
+
+Entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du carburant augmente de 0,79 €/L pour le gazole et de 0,54 €/L pour le SP95-E10 dans les stations situées dans un rayon de 12 km à vol d’oiseau autour du centre de Narbonne. De quoi remettre les déplacements réguliers dans les critères d’une recherche de logement.
+
+## Le carburant donne une raison de regarder les trajets
+
+Le scénario suivant montre le surcoût annuel selon la distance domicile-travail. Il retient une consommation de 6 L/100 km, 200 allers-retours par an et les hausses médianes arrondies à 5 centimes : +0,80 €/L pour le gazole et +0,55 €/L pour le SP95-E10.
+
+*Surcoût annuel de carburant — hausse 2025–2026.*
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+Ces distances ne correspondent à aucun secteur particulier. Pour chercher à Narbonne, il faut ensuite regarder comment les déplacements s’organisent selon le lieu de travail et le secteur de résidence.
+
+## Travailler dans la commune laisse la question du trajet ouverte
+
+Au recensement de 2022, 76 % des actifs occupés résidant à Narbonne travaillent dans la commune. Parmi les actifs qui habitent et travaillent à Narbonne, 71 % déclarent la voiture comme mode principal pour aller travailler. Une annonce située dans la même commune que votre emploi ne suffit donc pas à renseigner le trajet que vous envisagez.
+
+Les pratiques varient aussi fortement selon le secteur de résidence : la voiture est le mode principal de 50 % des actifs occupés de Cité Est, contre 89 % à Roches Grises-Fontfroide. Ces parts concernent les actifs qui habitent chaque secteur, quelle que soit leur commune de travail.
+
+[VISUEL : Carte de la part de la voiture par secteur (IRIS)]
+
+*Mode principal pour aller travailler des actifs occupés résidant dans chaque secteur — recensement 2022.*
+
+La carte détaille cette part pour chaque secteur. Pour chaque logement retenu, reste à regarder le parcours entre l’adresse et votre propre lieu de travail.
+
+## Les courses et l’école demandent un autre regard
+
+Le trajet professionnel ne couvre pas les autres déplacements réguliers. Pour une famille, la présence d’une école et de commerces près du logement mérite donc un examen distinct.
+
+À Cité Est, toutes les adresses ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d’oiseau. À Razimbaud, ce panier est proche de 98 % des adresses, tandis que 85 % des actifs occupés du secteur vont travailler principalement en voiture. La proximité des équipements et les pratiques domicile-travail renseignent ainsi des aspects différents d’une adresse.
+
+Lors d’une visite, regardez les cheminements vers les équipements qui vous intéressent, notamment les accès et les traversées. Pour un trajet envisagé en bus, consultez les horaires sur le site [Citibus](https://www.citibus.fr). Sa page « Prochain passage » affiche les prochains passages en temps réel après sélection d’un arrêt et d’une ligne.
+
+## Votre projet, votre adresse
+
+Si vous déménagez pour simplifier vos déplacements quotidiens, partez des trajets que vous souhaitez changer. Avec futur•e, explorez l’adresse envisagée à partir de ce projet, en la regardant dans son ensemble avant de choisir.
+
+### Méthode et sources
+
+Les pratiques professionnelles proviennent du recensement de l’INSEE, fichier MOBPRO et base infracommunale Activité. Ce sont des estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés. Les groupes observés sont distincts : leurs différences ne mesurent pas l’effet d’un déménagement. Les données ne croisent pas secteur de résidence et commune de travail.
+
+Les noms cités sont ceux des secteurs statistiques IRIS, qui ne correspondent pas toujours aux quartiers d’usage. Les équipements viennent de la BPE 2025 et les adresses de la Base adresse nationale. Les proximités sont mesurées à vol d’oiseau, sans décrire les cheminements réels ni l’usage des équipements.
+
+Les prix proviennent du flux officiel prix-carburants.gouv.fr : médiane entre stations du dernier prix déclaré dans chaque semaine. Les informations documentaires de Citibus ont été consultées le 15 octobre 2026.
+
+## C. Correspondance interne — non publiée
+
+Les identifiants `scenario.carburant.*` renvoient aux lignes du scénario et à leurs hypothèses communes, données en section 7 du dossier.
+
+| Passage | Chiffre écrit | Identifiant(s) | Usage |
+|---|---|---|---|
+| Chapeau — début de période | 6 octobre 2025 | `carburant.gazole.prix_un_an_avant`, `carburant.e10.prix_un_an_avant` | oui |
+| Chapeau — fin de période | 5 octobre 2026 | `carburant.gazole.prix`, `carburant.e10.prix` | oui |
+| Chapeau — hausse du gazole | 0,79 €/L | `carburant.gazole.ecart` | oui |
+| Chapeau — hausse du SP95-E10 | 0,54 €/L | `carburant.e10.ecart` | oui |
+| Chapeau — périmètre des stations | 12 km | `carburant.gazole.ecart`, `carburant.e10.ecart` | oui |
+| Hypothèses — consommation | 6 L/100 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes, section 7 | oui |
+| Hypothèses — déplacements annuels | 200 allers-retours | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes, section 7 | oui |
+| Hypothèses — arrondi de la hausse | 5 centimes | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes, section 7 | oui |
+| Hypothèses — hausse retenue, gazole | +0,80 €/L | `scenario.carburant.gazole.5km` | oui |
+| Hypothèses — hausse retenue, SP95-E10 | +0,55 €/L | `scenario.carburant.e10.5km` | oui |
+| Légende du tableau — période | 2025–2026 | `carburant.gazole.prix_un_an_avant`, `carburant.gazole.prix`, `carburant.e10.prix_un_an_avant`, `carburant.e10.prix` | oui |
+| Tableau — distance, première ligne | 5 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` | oui |
+| Tableau — gazole, première ligne | environ 100 € | `scenario.carburant.gazole.5km` | oui |
+| Tableau — SP95-E10, première ligne | environ 70 € | `scenario.carburant.e10.5km` | oui |
+| Tableau — distance, deuxième ligne | 15 km | `scenario.carburant.gazole.15km`, `scenario.carburant.e10.15km` | oui |
+| Tableau — gazole, deuxième ligne | environ 290 € | `scenario.carburant.gazole.15km` | oui |
+| Tableau — SP95-E10, deuxième ligne | environ 200 € | `scenario.carburant.e10.15km` | oui |
+| Tableau — distance, troisième ligne | 35 km | `scenario.carburant.gazole.35km`, `scenario.carburant.e10.35km` | oui |
+| Tableau — gazole, troisième ligne | environ 670 € | `scenario.carburant.gazole.35km` | oui |
+| Tableau — SP95-E10, troisième ligne | environ 460 € | `scenario.carburant.e10.35km` | oui |
+| Pratiques locales — millésime | 2022 | `mobpro.travaille_dans_commune` | oui |
+| Pratiques locales — travail dans la commune | 76 % | `mobpro.travaille_dans_commune` | oui |
+| Pratiques locales — voiture des actifs habitant et travaillant à Narbonne | 71 % | `mobpro.voiture_selon_destination.meme_commune` | oui |
+| Pratiques locales — voiture à Cité Est | 50 % | `iris.voiture.min` | oui |
+| Pratiques locales — voiture à Roches Grises-Fontfroide | 89 % | `iris.voiture.max` | oui |
+| Légende de la carte — millésime | 2022 | `iris.voiture.min`, `iris.voiture.max` | oui |
+| Équipements — totalité des adresses de Cité Est | toutes les adresses, soit 100 % | `iris.112620102.panier_500m` | oui |
+| Équipements — rayon du panier à Cité Est | 500 m | `iris.112620102.panier_500m` | oui |
+| Équipements — panier à Razimbaud | 98 % | `iris.112620303.panier_500m` | oui |
+| Équipements — voiture à Razimbaud | 85 % | `iris.112620303.voiture` | oui |
+| Méthode — millésime des équipements | 2025 | `iris.112620102.panier_500m`, `iris.112620303.panier_500m` — source commune des données d’équipements | oui |
+| Méthode — consultation documentaire | 15 octobre 2026 | `doc.reseau.site`, `doc.verification.temps_reel` | oui |
+
+## D. Visuels et vérifications restantes
+
+| Visuel retenu — nom exact | Emplacement | Étape manuelle indiquée par le dossier |
+|---|---|---|
+| Tableau du scénario de surcoût de carburant | Au début, après les hypothèses ; contenu reproduit dans B | Aucune |
+| Carte de la part de la voiture par secteur (IRIS) | Après les parts de Cité Est et Roches Grises-Fontfroide | Aucune pour la production avec classes automatiques et repères numérotés ; libellés manuels seulement pour une version soignée |
+
+Vérifications concernant les faits utilisés :
+
+- **`carburant.evolution`** : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Obligatoire avant publication, pour l’ouverture comme pour le scénario.
+- **`iris.ecart_voiture`** : relire les libellés Cité Est, Roches Grises-Fontfroide et Razimbaud. Le texte les présente comme des secteurs statistiques.
+- **`mobpro.voiture_selon_destination`** : le fait retenu concerne uniquement les actifs résidant et travaillant à Narbonne. La relecture demandée sur le choix des communes voisines est sans objet pour ce périmètre.
+
+Aucun autre doute de lecture relevé.
+
+## E. Corrections.
+
+| Anomalie | Passage avant | Passage après |
+|---|---|---|
+| Raisonnement — bloquante : recommandation de secteurs à partir des pratiques observées | La carte aide à repérer des secteurs à examiner pendant vos recherches. | La carte détaille cette part pour chaque secteur. |
+
+## F. Retouches éditoriales (2026-10-16, hors génération)
+
+| Passage | Changement | Raison |
+|---|---|---|
+| Tableau du surcoût | tableau Markdown recopié remplacé par le marqueur du tableau construit depuis le dossier | doublon d'affichage relevé à la relecture du 16/10/2026 (retrait par script, outil/lot.py) |

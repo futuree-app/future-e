@@ -458,7 +458,7 @@ def rendu_md(d, sources_gtfs):
         L += ["", "## 2 bis. Informations documentaires (non calculées)", "",
               f"Informations publiées par des sources officielles, recopiées à la main et datées (consultation : {doc['consulte_le']} ; fichier `{doc['chemin']}`). "
               "Ce ne sont **pas** des résultats calculés. Une fréquence ou une desserte n'y figure que si la source la donne explicitement, avec son périmètre (ligne ou service, sens, jours, période) : tu l'écris dans ce périmètre, sans la généraliser à d'autres lignes ni au réseau, et tu n'en tires ni temps de trajet, ni desserte d'une adresse. "
-              "Elles servent la question « utiliser moins sa voiture » ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité "
+              "Elles servent la question de la série : la place de la voiture dans les déplacements depuis un futur logement ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité "
               "de se passer d'une deuxième voiture ou de vivre sans voiture.", "",
               "Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si elle est utile ; `avec ses conditions` = à n'écrire qu'avec toutes "
               "ses conditions (public, horaires, réservation), sinon à laisser ; `non` = ne pas écrire. La colonne « À ne pas en déduire » s'applique toujours.", "",

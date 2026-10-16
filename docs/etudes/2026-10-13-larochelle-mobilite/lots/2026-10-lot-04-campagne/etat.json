@@ -80,8 +80,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_31555_clair.png",
@@ -187,8 +187,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_06088_clair.png",
@@ -295,8 +295,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_44109_clair.png",
@@ -403,8 +403,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_34172_clair.png",
@@ -510,8 +510,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_67482_clair.png",
@@ -618,8 +618,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_33063_clair.png",
@@ -776,8 +776,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_35238_clair.png",
@@ -882,7 +882,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_83137_clair.png",
@@ -908,7 +908,7 @@
     "duree_s": 38.6
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "51454": {
    "nom": "Reims",
@@ -971,8 +971,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_51454_clair.png",
@@ -1060,8 +1060,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_42218_clair.png",
@@ -1168,8 +1168,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_76351_clair.png",
@@ -1257,8 +1257,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_21231_clair.png",
@@ -1345,7 +1345,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_38185_clair.png",
@@ -1371,7 +1371,7 @@
     "duree_s": 25.8
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "69266": {
    "nom": "Villeurbanne",
@@ -1452,7 +1452,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_69266_clair.png",
@@ -1478,7 +1478,7 @@
     "duree_s": 20.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "13001": {
    "nom": "Aix-en-Provence",
@@ -1559,9 +1559,9 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "motif": "corrigé une fois ; vérifier la section E",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
    "anomalies_restantes": [],
-   "article": "correction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_13001_clair.png",
@@ -1667,7 +1667,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_63113_clair.png",
@@ -1694,7 +1694,7 @@
     "duree_s": 18.7
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "74010": {
    "nom": "Annecy",
@@ -1776,8 +1776,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_74010_clair.png",
@@ -1865,8 +1865,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_87085_clair.png",
@@ -1952,7 +1952,7 @@
      "collecte": "claude-sonnet-5-5"
     }
    },
-   "article": "redaction.md",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_57463_clair.png",
@@ -1978,7 +1978,7 @@
     "duree_s": 17.0
    },
    "anomalies_restantes": [],
-   "motif": "aucune anomalie bloquante : pas de correction"
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
   },
   "92012": {
    "nom": "Boulogne-Billancourt",
@@ -2041,8 +2041,8 @@
     }
    },
    "anomalies_restantes": [],
-   "motif": "corrigé une fois ; vérifier la section E",
-   "article": "correction.md",
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
    "visuels": {
     "visuels": [
      "carte_iris_92012_clair.png",
