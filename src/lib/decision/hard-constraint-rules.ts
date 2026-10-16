@@ -269,9 +269,11 @@ function pourquoiNonTranche(key: HardConstraintKey, c: CapabilityAssessment): st
 
 // CE QUE CELA CHANGE POUR LA DÉCISION. Le signal dit vers quoi penche ce que l'on sait ; la condition,
 // elle, reste ouverte dans tous les cas.
-export function consequenceDuSignal(signal: ConditionSignal): string {
-  if (signal === "defavorable") return "Ce que l'on sait penche contre cette condition. Elle reste ouverte : à vérifier avant de décider.";
-  if (signal === "favorable") return "Ce que l'on sait va dans le sens de cette condition. Elle reste ouverte : à confirmer avant de décider.";
+// FUT-110 : `porteur` nomme ce qui penche quand la carte réunit aussi des constats qui ne penchent pas
+// (« Ce que l'on sait de la commune »). Absent, la phrase de toujours.
+export function consequenceDuSignal(signal: ConditionSignal, porteur = "Ce que l'on sait"): string {
+  if (signal === "defavorable") return `${porteur} penche contre cette condition. Elle reste ouverte : à vérifier avant de décider.`;
+  if (signal === "favorable") return `${porteur} va dans le sens de cette condition. Elle reste ouverte : à confirmer avant de décider.`;
   // Le constat porte déjà la mesure neutre : la conséquence ne la redit pas.
   return "Elle reste ouverte : à vérifier avant de décider.";
 }

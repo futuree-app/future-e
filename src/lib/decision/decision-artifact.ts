@@ -42,7 +42,11 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // une distance à une liste de villes côtières : il reste tel qu'il a été vendu, et sa version le dit.
 // engine-4 (FUT-45, 03/10/2026) : la lecture n'est « complète » que si chaque demande comprise a été lue ; les
 // demandes non mesurées (le budget d'un lecteur) sont nommées dans la conclusion. Plus de seuil de 70 %.
-export const ENGINE_VERSION = "engine-4";
+// engine-5 (FUT-110, 16/10/2026) : une condition confirmée ne penche plus contre le lecteur parce qu'un constat est
+// à vérifier. Un médecin à 550 m, une gare, un secteur moins motorisé n'orientent plus le signal ; seules les
+// expositions établies (inondation, pluies, air, bruit, industrie) le font. Un dossier engine-4 a pu dire
+// « plutôt défavorable » sur une commune parmi les plus favorables : il reste tel qu'il a été vendu.
+export const ENGINE_VERSION = "engine-5";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;
