@@ -1,0 +1,55 @@
+{
+ "nom": "2026-10-lot-03-codex",
+ "objet": "Troisième lot (15/10/2026) : cinq communes rédigées par Codex, relues une fois par Claude, corrigées au plus une fois par Codex (niveau 1 seulement). Vers vingt articles préparés. Aucune publication.",
+ "jour_reference": "2026-10-13",
+ "communes": [
+  "Quimper",
+  "Amiens",
+  "Besançon",
+  "Valence (26)",
+  "Pau"
+ ],
+ "chemins": {
+  "python": "<checkout>/.venv-etudes/bin/python",
+  "mobpro": "<checkout>/data/rp-mobpro-2022.parquet",
+  "bpe": "<checkout>/data/bpe25.parquet",
+  "index": "<checkout>/data/comparateur-index.json.gz",
+  "cache": "<checkout>/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil"
+ },
+ "moteur": {
+  "outil": "codex",
+  "etapes": {
+   "redaction": {
+    "modele": "gpt-6.1-sol",
+    "effort": "high",
+    "delai_s": 1800
+   },
+   "relecture": {
+    "outil": "claude-code",
+    "modele": "claude-opus-5-5",
+    "effort": "high",
+    "plafond_appel_usd": 2,
+    "delai_s": 1200
+   },
+   "correction": {
+    "modele": "gpt-6.1-sol",
+    "effort": "high",
+    "delai_s": 1800
+   },
+   "collecte": {
+    "outil": "claude-code",
+    "modele": "claude-sonnet-5-5",
+    "effort": "medium",
+    "plafond_appel_usd": 1.5,
+    "delai_s": 1200
+   }
+  },
+  "remarque": "Rédaction et correction : codex exec sur l'abonnement ChatGPT (vérifié avant chaque appel ; arrêt sinon), réglages du lot 02. Relecture : Claude Code sur l'abonnement claude.ai (réglages de relecture du lot 01), une seule, qui remplace la relecture Codex. Sessions vierges et éphémères ; rédaction limitée au dossier et aux pièces autorisées, ni écriture, ni réseau, ni recherche web. Collecte documentaire bornée habituelle (Claude Code, lecture web limitée au domaine officiel du réseau). Les jetons rapportés ne mesurent pas le quota d'abonnement."
+ },
+ "execution_autorisee": {
+  "par": "porteur",
+  "le": "2026-10-15",
+  "perimetre": "cinq communes (Quimper, Amiens, Besançon, Valence, Pau) : rédaction et correction Codex (abonnement ChatGPT), relecture Claude (abonnement claude.ai), collecte habituelle ; sans clé API, sans publication"
+ },
+ "limites_appels": "une collecte par réseau, une rédaction, une relecture et au plus une correction par commune ; aucun nouvel essai automatique (outil/lot.py, generer)"
+}

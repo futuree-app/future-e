@@ -1,0 +1,54 @@
+· AggloBus : collecte déjà faite le 2026-10-15 : aucun appel
+· TCAT : collecte déjà faite le 2026-10-15 : aucun appel
+· RESEAU MISTRAL : collecte déjà faite le 2026-10-15 (lot 2026-10-lot-04-campagne), réutilisée : aucun appel
+· Transports Montalbanais : aucun site joignable, collecte impossible
+· Synchro Bus : collecte déjà faite le 2026-10-15 : aucun appel
+· Le Bus : collecte déjà faite le 2026-10-15 : aucun appel
+· Citibus : collecte déjà faite le 2026-10-15 : aucun appel
+
+Commune                INSEE  État                   Préparation  Motif
+Évry-Courcouronnes     91228  prêt à relire               51.1 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Clichy                 92024  suspendu par quota          36.5 s  suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)
+Ivry-sur-Seine         94041  dossier prêt                27.3 s  
+Bourges                18033  dossier prêt                31.8 s  
+Antony                 92002  dossier prêt                26.7 s  
+Troyes                 10387  dossier prêt                31.0 s  
+La Seyne-sur-Mer       83126  dossier prêt                36.1 s  
+Villeneuve-d'Ascq      59009  dossier prêt                54.5 s  
+Montauban              82121  dossier prêt                32.1 s  
+Pantin                 93055  dossier prêt                34.7 s  
+Chambéry               73065  dossier prêt                33.4 s  
+Neuilly-sur-Seine      92051  dossier prêt                19.2 s  
+Sarcelles              95585  dossier prêt                21.2 s  
+Le Blanc-Mesnil        93007  dossier prêt                19.7 s  
+Maisons-Alfort         94046  dossier prêt                17.7 s  
+Villejuif              94076  dossier prêt                19.2 s  
+Fréjus                 83061  dossier prêt                23.2 s  
+Beauvais               60057  dossier prêt                24.0 s  
+Narbonne               11262  dossier prêt                20.9 s  
+Meaux                  77284  dossier prêt                26.8 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 0.59 $
+
+Commune                INSEE  État                   Préparation  Motif
+Évry-Courcouronnes     91228  prêt à relire               51.1 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Clichy                 92024  prêt à relire               36.5 s  suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)
+Ivry-sur-Seine         94041  prêt à relire               27.3 s  
+Bourges                18033  prêt à relire               31.8 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Antony                 92002  prêt à relire               26.7 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Troyes                 10387  prêt à relire               31.0 s  
+La Seyne-sur-Mer       83126  prêt à relire               36.1 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Villeneuve-d'Ascq      59009  prêt à relire               54.5 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Montauban              82121  prêt à relire               32.1 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Pantin                 93055  prêt à relire               34.7 s  
+Chambéry               73065  prêt à relire               33.4 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Neuilly-sur-Seine      92051  prêt à relire               19.2 s  
+Sarcelles              95585  prêt à relire               21.2 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Le Blanc-Mesnil        93007  prêt à relire               19.7 s  
+Maisons-Alfort         94046  prêt à relire               17.7 s  
+Villejuif              94076  prêt à relire               19.2 s  
+Fréjus                 83061  prêt à relire               23.2 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Beauvais               60057  prêt à relire               24.0 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Narbonne               11262  prêt à relire               20.9 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Meaux                  77284  prêt à relire               26.8 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 7.39 $
+bilan : 100 communes distinctes ; 685 lignes de mesure

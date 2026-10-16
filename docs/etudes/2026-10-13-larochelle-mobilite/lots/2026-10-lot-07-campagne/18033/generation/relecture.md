@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "La carte permet de situer ces pratiques par rapport aux logements proposés. Pendant vos recherches, confrontez ce premier repère",
+   "probleme": "Sous le titre « où chercher un logement pour moins prendre la voiture ? », la part de la voiture chez les actifs qui habitent un secteur (iris.voiture.min, iris.voiture.max, tableau de la section 3) devient un critère pour trier les annonces, donc une recommandation de quartier : on laisse entendre qu'en habitant Couronne Centrale 2 le lecteur prendra moins la voiture, ce que le dossier ne mesure pas.",
+   "correction_minimale": "Remplacer par « La carte situe ces pratiques secteur par secteur. Pendant vos recherches, partez de votre propre destination professionnelle : travailler à Bourges ne décrit pas à lui seul le trajet depuis une adresse. »"}
+]}
+```

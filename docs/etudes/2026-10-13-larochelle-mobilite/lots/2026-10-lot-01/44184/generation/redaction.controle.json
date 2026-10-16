@@ -1,0 +1,12 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "identifiant_inconnu",
+   "gravite": "bloquante",
+   "passage": "Méthode",
+   "detail": "`absent` absent du dossier"
+  }
+ ],
+ "bloquantes": 1
+}

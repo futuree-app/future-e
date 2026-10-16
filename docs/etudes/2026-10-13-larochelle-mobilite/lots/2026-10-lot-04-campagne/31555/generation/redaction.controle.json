@@ -1,0 +1,18 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Hypothèses : consommation",
+   "detail": "« 6 L/100 km » ne correspond à aucune valeur du dossier pour scenario.carburant.gazole.5km, scenario.carburant.e10.5km (80, 5, 0.7, 60, 5, 0.5)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Hypothèses : déplacements annuels",
+   "detail": "« 200 allers-retours » ne correspond à aucune valeur du dossier pour scenario.carburant.gazole.5km, scenario.carburant.e10.5km (80, 5, 0.7, 60, 5, 0.5)"
+  }
+ ],
+ "bloquantes": 2
+}

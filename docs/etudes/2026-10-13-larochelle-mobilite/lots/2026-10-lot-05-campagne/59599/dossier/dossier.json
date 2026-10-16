@@ -1,0 +1,3488 @@
+{
+ "commune": {
+  "insee": "59599",
+  "nom": "Tourcoing",
+  "departement": "59",
+  "epci": {
+   "code": "200093201",
+   "nom": "Métropole Européenne de Lille"
+  },
+  "unite_urbaine": "59702",
+  "voisines": {
+   "59350": "Lille",
+   "59512": "Roubaix",
+   "59009": "Villeneuve-d'Ascq",
+   "59650": "Wattrelos",
+   "59378": "Marcq-en-Barœul",
+   "59328": "Lambersart"
+  },
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/59599/fiche/fiche.json",
+  "sha256": "cac19f985be887aeaf3631d9f90c38ba71d7ee4a469ce4933f515b25338b884c",
+  "generee_le": "2026-10-15T16:19:14Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-15T16:20:32Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.024,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.02,
+    0.028
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.064,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.058,
+    0.07
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.021,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.018,
+    0.025
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.009,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.007,
+    0.011
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.701,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": [
+    0.69,
+    0.711
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.182,
+   "unite": "part",
+   "affichage": "18 %",
+   "intervalle_95": [
+    0.173,
+    0.192
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à Tourcoing même",
+   "valeur": 0.3,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": [
+    0.289,
+    0.311
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "perimetre": "commune de résidence et de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Tourcoing",
+   "valeur": 0.567,
+   "unite": "part",
+   "affichage": "57 %",
+   "intervalle_95": [
+    0.545,
+    0.588
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent à Tourcoing",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent à Tourcoing",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.communes_voisines",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent dans l'une de ces communes : Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "valeur": 0.681,
+   "unite": "part",
+   "affichage": "68 %",
+   "intervalle_95": [
+    0.661,
+    0.7
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent dans l'une de ces communes : Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent dans l'une de ces communes : Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "perimetre": "commune de travail : Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Tourcoing et hors de Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "valeur": 0.758,
+   "unite": "part",
+   "affichage": "76 %",
+   "intervalle_95": [
+    0.746,
+    0.77
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent hors de Tourcoing et hors de Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing qui travaillent hors de Tourcoing et hors de Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "perimetre": "commune de travail : toute commune autre que Tourcoing, Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "ecart.voiture_destination.voisines_moins_meme_commune",
+   "fait": "Écart de part de la voiture : travail dans Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328) moins travail à Tourcoing",
+   "valeur": 11,
+   "unite": "points",
+   "affichage": "+11 points",
+   "intervalle_95": null,
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "deux groupes distincts (voir les deux faits)",
+   "perimetre": "commune de travail : Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.103,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.096,
+    0.11
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.443,
+   "unite": "part",
+   "affichage": "44 %",
+   "intervalle_95": [
+    0.432,
+    0.455
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.236,
+   "unite": "part",
+   "affichage": "24 %",
+   "intervalle_95": [
+    0.226,
+    0.247
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.758,
+   "unite": "part",
+   "affichage": "76 %",
+   "intervalle_95": [
+    0.745,
+    0.772
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.023,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.019,
+    0.028
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.036,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.03,
+    0.042
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.569,
+   "unite": "part",
+   "affichage": "57 %",
+   "intervalle_95": [
+    0.553,
+    0.585
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.613,
+   "unite": "part",
+   "affichage": "61 %",
+   "intervalle_95": [
+    0.589,
+    0.636
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.023,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.017,
+    0.032
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.213,
+   "unite": "part",
+   "affichage": "21 %",
+   "intervalle_95": [
+    0.194,
+    0.234
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.252,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": [
+    0.231,
+    0.274
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.65,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.622,
+    0.676
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.012,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.007,
+    0.02
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.188,
+   "unite": "part",
+   "affichage": "19 %",
+   "intervalle_95": [
+    0.167,
+    0.211
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.292,
+   "unite": "part",
+   "affichage": "29 %",
+   "intervalle_95": [
+    0.267,
+    0.318
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Tourcoing, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à Tourcoing",
+   "valeur": 28857,
+   "unite": "nombre",
+   "affichage": "environ 28 900",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Tourcoing, de ceux qui habitent Tourcoing",
+   "valeur": 0.394,
+   "unite": "part",
+   "affichage": "39 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Tourcoing et habitent Tourcoing",
+   "valeur": 0.567,
+   "unite": "part",
+   "affichage": "57 %",
+   "intervalle_95": [
+    0.545,
+    0.588
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent Tourcoing",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Tourcoing et habitent Tourcoing",
+   "valeur": 0.146,
+   "unite": "part",
+   "affichage": "15 %",
+   "intervalle_95": [
+    0.131,
+    0.162
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent Tourcoing",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Tourcoing, de ceux qui habitent une autre commune de l'unité urbaine INSEE 59702 (liste des communes non exposée par la fiche)",
+   "valeur": 0.504,
+   "unite": "part",
+   "affichage": "50 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Tourcoing et habitent une autre commune de l'unité urbaine INSEE 59702 (liste des communes non exposée par la fiche)",
+   "valeur": 0.78,
+   "unite": "part",
+   "affichage": "78 %",
+   "intervalle_95": [
+    0.763,
+    0.796
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 59702 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Tourcoing et habitent une autre commune de l'unité urbaine INSEE 59702 (liste des communes non exposée par la fiche)",
+   "valeur": 0.178,
+   "unite": "part",
+   "affichage": "18 %",
+   "intervalle_95": [
+    0.164,
+    0.194
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 59702 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Tourcoing, de ceux qui habitent hors de l'unité urbaine INSEE 59702",
+   "valeur": 0.102,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Tourcoing et habitent hors de l'unité urbaine INSEE 59702",
+   "valeur": 0.841,
+   "unite": "part",
+   "affichage": "84 %",
+   "intervalle_95": [
+    0.803,
+    0.873
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 59702",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Tourcoing et habitent hors de l'unité urbaine INSEE 59702",
+   "valeur": 0.135,
+   "unite": "part",
+   "affichage": "14 %",
+   "intervalle_95": [
+    0.106,
+    0.171
+   ],
+   "population": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Tourcoing, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 59702",
+   "perimetre": "commune de travail : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Hôtel de Ville (IRIS 595990902)",
+   "valeur": 0.508,
+   "unite": "part",
+   "affichage": "51 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Tourcoing (59599), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Bois d'Achelles (IRIS 595990201)",
+   "valeur": 0.864,
+   "unite": "part",
+   "affichage": "86 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Tourcoing (59599), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 35,
+   "unite": "points",
+   "affichage": "+35 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Tourcoing (59599), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.249,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Tourcoing",
+   "denominateur": "toutes les résidences principales de Tourcoing",
+   "perimetre": "commune : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.25,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Tourcoing",
+   "denominateur": "toutes les résidences principales de Tourcoing",
+   "perimetre": "commune : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.363,
+   "unite": "part",
+   "affichage": "36 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Tourcoing",
+   "denominateur": "toutes les résidences principales de Tourcoing",
+   "perimetre": "commune : Tourcoing (59599)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.59599.commerce_alim_500m",
+   "fait": "Part des adresses de Tourcoing qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.98,
+   "unite": "part",
+   "affichage": "98 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.grande_surface_500m",
+   "fait": "Part des adresses de Tourcoing qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.746,
+   "unite": "part",
+   "affichage": "75 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.pharmacie_500m",
+   "fait": "Part des adresses de Tourcoing qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.922,
+   "unite": "part",
+   "affichage": "92 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.medecin_generaliste_500m",
+   "fait": "Part des adresses de Tourcoing qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.935,
+   "unite": "part",
+   "affichage": "94 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.ecole_elementaire_500m",
+   "fait": "Part des adresses de Tourcoing qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.937,
+   "unite": "part",
+   "affichage": "94 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.college_1km",
+   "fait": "Part des adresses de Tourcoing qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.874,
+   "unite": "part",
+   "affichage": "87 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.gare_2km",
+   "fait": "Part des adresses de Tourcoing qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.654,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.panier_quotidien_500m",
+   "fait": "Part des adresses de Tourcoing qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.856,
+   "unite": "part",
+   "affichage": "86 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.bus_8h_7_9h",
+   "fait": "Part des adresses de Tourcoing qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.0,
+   "unite": "part",
+   "affichage": "0 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.aucun_bus_7_9h",
+   "fait": "Part des adresses de Tourcoing sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 1.0,
+   "unite": "part",
+   "affichage": "100 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.59599.bus_4h_20_22h",
+   "fait": "Part des adresses de Tourcoing qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.0,
+   "unite": "part",
+   "affichage": "0 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Tourcoing",
+   "denominateur": "toutes les adresses BAN de Tourcoing, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Tourcoing (59599)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Navettes Aéroport de Lille » (https://transport.data.gouv.fr/datasets/flibco-lille-airport-gtfs), 2 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.319,
+   "unite": "€/L",
+   "affichage": "2,32 €/L",
+   "intervalle_95": null,
+   "population": "41 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.58,
+   "unite": "€/L",
+   "affichage": "1,58 €/L",
+   "intervalle_95": null,
+   "population": "41 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.739,
+   "unite": "€/L",
+   "affichage": "0,74 €/L",
+   "intervalle_95": null,
+   "population": "41 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.124,
+   "unite": "€/L",
+   "affichage": "2,12 €/L",
+   "intervalle_95": null,
+   "population": "38 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.659,
+   "unite": "€/L",
+   "affichage": "1,66 €/L",
+   "intervalle_95": null,
+   "population": "38 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.465,
+   "unite": "€/L",
+   "affichage": "0,47 €/L",
+   "intervalle_95": null,
+   "population": "38 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Tourcoing (centre communal de geo.api.gouv.fr : [3.1577, 50.721])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "595990902",
+   "nom": "Hôtel de Ville",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1277,
+   "voiture": 0.508,
+   "velo": 0.031,
+   "tc": 0.304,
+   "marche": 0.125,
+   "menages_sans_voiture": 0.415,
+   "menages_stationnement_reserve": 0.3,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990503",
+   "nom": "Gare",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1082,
+   "voiture": 0.519,
+   "velo": 0.031,
+   "tc": 0.3,
+   "marche": 0.101,
+   "menages_sans_voiture": 0.303,
+   "menages_stationnement_reserve": 0.504,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990901",
+   "nom": "Nationale",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1593,
+   "voiture": 0.552,
+   "velo": 0.026,
+   "tc": 0.27,
+   "marche": 0.091,
+   "menages_sans_voiture": 0.36,
+   "menages_stationnement_reserve": 0.446,
+   "panier_quotidien_500m": 0.991,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990502",
+   "nom": "Point Central",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 848,
+   "voiture": 0.574,
+   "velo": 0.019,
+   "tc": 0.317,
+   "marche": 0.059,
+   "menages_sans_voiture": 0.297,
+   "menages_stationnement_reserve": 0.276,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991401",
+   "nom": "Hôpital Dron",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 471,
+   "voiture": 0.605,
+   "velo": 0.024,
+   "tc": 0.331,
+   "marche": 0.018,
+   "menages_sans_voiture": 0.377,
+   "menages_stationnement_reserve": 0.253,
+   "panier_quotidien_500m": 0.677,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991403",
+   "nom": "Schweitzer",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 836,
+   "voiture": 0.62,
+   "velo": 0.006,
+   "tc": 0.311,
+   "marche": 0.046,
+   "menages_sans_voiture": 0.368,
+   "menages_stationnement_reserve": 0.182,
+   "panier_quotidien_500m": 0.955,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990801",
+   "nom": "Tilleul-Guisnes",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1300,
+   "voiture": 0.624,
+   "velo": 0.019,
+   "tc": 0.25,
+   "marche": 0.084,
+   "menages_sans_voiture": 0.278,
+   "menages_stationnement_reserve": 0.417,
+   "panier_quotidien_500m": 0.852,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991103",
+   "nom": "Courbet",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1078,
+   "voiture": 0.635,
+   "velo": 0.035,
+   "tc": 0.239,
+   "marche": 0.059,
+   "menages_sans_voiture": 0.237,
+   "menages_stationnement_reserve": 0.372,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990501",
+   "nom": "Gambetta",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1349,
+   "voiture": 0.664,
+   "velo": 0.02,
+   "tc": 0.199,
+   "marche": 0.075,
+   "menages_sans_voiture": 0.18,
+   "menages_stationnement_reserve": 0.622,
+   "panier_quotidien_500m": 0.807,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990701",
+   "nom": "Épidème",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1120,
+   "voiture": 0.675,
+   "velo": 0.018,
+   "tc": 0.21,
+   "marche": 0.046,
+   "menages_sans_voiture": 0.305,
+   "menages_stationnement_reserve": 0.22,
+   "panier_quotidien_500m": 0.997,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991002",
+   "nom": "Menin",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1093,
+   "voiture": 0.688,
+   "velo": 0.017,
+   "tc": 0.163,
+   "marche": 0.102,
+   "menages_sans_voiture": 0.268,
+   "menages_stationnement_reserve": 0.138,
+   "panier_quotidien_500m": 0.996,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990402",
+   "nom": "Blanche Porte",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1235,
+   "voiture": 0.692,
+   "velo": 0.012,
+   "tc": 0.208,
+   "marche": 0.066,
+   "menages_sans_voiture": 0.28,
+   "menages_stationnement_reserve": 0.383,
+   "panier_quotidien_500m": 0.921,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991001",
+   "nom": "Belencontre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 790,
+   "voiture": 0.695,
+   "velo": 0.021,
+   "tc": 0.172,
+   "marche": 0.087,
+   "menages_sans_voiture": 0.303,
+   "menages_stationnement_reserve": 0.342,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991203",
+   "nom": "Chêne-Houplines",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 877,
+   "voiture": 0.706,
+   "velo": 0.03,
+   "tc": 0.141,
+   "marche": 0.067,
+   "menages_sans_voiture": 0.241,
+   "menages_stationnement_reserve": 0.299,
+   "panier_quotidien_500m": 0.927,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991201",
+   "nom": "Boulevard",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1134,
+   "voiture": 0.707,
+   "velo": 0.015,
+   "tc": 0.201,
+   "marche": 0.058,
+   "menages_sans_voiture": 0.209,
+   "menages_stationnement_reserve": 0.606,
+   "panier_quotidien_500m": 0.761,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991102",
+   "nom": "Malcense",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 845,
+   "voiture": 0.711,
+   "velo": 0.028,
+   "tc": 0.145,
+   "marche": 0.078,
+   "menages_sans_voiture": 0.213,
+   "menages_stationnement_reserve": 0.239,
+   "panier_quotidien_500m": 0.922,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991003",
+   "nom": "La Baille",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 976,
+   "voiture": 0.712,
+   "velo": 0.015,
+   "tc": 0.202,
+   "marche": 0.058,
+   "menages_sans_voiture": 0.161,
+   "menages_stationnement_reserve": 0.188,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990601",
+   "nom": "Rue des Villas",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 755,
+   "voiture": 0.714,
+   "velo": 0.042,
+   "tc": 0.189,
+   "marche": 0.025,
+   "menages_sans_voiture": 0.282,
+   "menages_stationnement_reserve": 0.252,
+   "panier_quotidien_500m": 0.982,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990301",
+   "nom": "Les Francs",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 977,
+   "voiture": 0.72,
+   "velo": 0.026,
+   "tc": 0.142,
+   "marche": 0.071,
+   "menages_sans_voiture": 0.213,
+   "menages_stationnement_reserve": 0.211,
+   "panier_quotidien_500m": 0.978,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991204",
+   "nom": "Croix Rouge",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 921,
+   "voiture": 0.721,
+   "velo": 0.019,
+   "tc": 0.139,
+   "marche": 0.1,
+   "menages_sans_voiture": 0.225,
+   "menages_stationnement_reserve": 0.424,
+   "panier_quotidien_500m": 0.98,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990802",
+   "nom": "Virolois",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1281,
+   "voiture": 0.723,
+   "velo": 0.021,
+   "tc": 0.192,
+   "marche": 0.039,
+   "menages_sans_voiture": 0.265,
+   "menages_stationnement_reserve": 0.378,
+   "panier_quotidien_500m": 0.823,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990103",
+   "nom": "Z.A. du Ferrain",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "595990303",
+   "nom": "Hippodrome",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 862,
+   "voiture": 0.729,
+   "velo": 0.031,
+   "tc": 0.119,
+   "marche": 0.084,
+   "menages_sans_voiture": 0.205,
+   "menages_stationnement_reserve": 0.409,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990202",
+   "nom": "Clinquet",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 868,
+   "voiture": 0.73,
+   "velo": 0.019,
+   "tc": 0.137,
+   "marche": 0.062,
+   "menages_sans_voiture": 0.17,
+   "menages_stationnement_reserve": 0.47,
+   "panier_quotidien_500m": 0.704,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991005",
+   "nom": "Maraîchers",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 843,
+   "voiture": 0.736,
+   "velo": 0.008,
+   "tc": 0.141,
+   "marche": 0.083,
+   "menages_sans_voiture": 0.142,
+   "menages_stationnement_reserve": 0.227,
+   "panier_quotidien_500m": 0.91,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990403",
+   "nom": "Flocon",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1307,
+   "voiture": 0.743,
+   "velo": 0.012,
+   "tc": 0.152,
+   "marche": 0.051,
+   "menages_sans_voiture": 0.188,
+   "menages_stationnement_reserve": 0.508,
+   "panier_quotidien_500m": 0.075,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991502",
+   "nom": "Yser",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 783,
+   "voiture": 0.743,
+   "velo": 0.03,
+   "tc": 0.14,
+   "marche": 0.068,
+   "menages_sans_voiture": 0.254,
+   "menages_stationnement_reserve": 0.446,
+   "panier_quotidien_500m": 0.876,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991402",
+   "nom": "Colbert",
+   "type": "habitat",
+   "statut": "fragile",
+   "usage": "ordre de grandeur",
+   "motif": "220 actifs (< 300)",
+   "actifs": 220,
+   "voiture": 0.747,
+   "velo": 0.0,
+   "tc": 0.144,
+   "marche": 0.109,
+   "menages_sans_voiture": 0.319,
+   "menages_stationnement_reserve": 0.249,
+   "panier_quotidien_500m": 0.99,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990603",
+   "nom": "Descat",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 843,
+   "voiture": 0.75,
+   "velo": 0.016,
+   "tc": 0.165,
+   "marche": 0.044,
+   "menages_sans_voiture": 0.221,
+   "menages_stationnement_reserve": 0.272,
+   "panier_quotidien_500m": 0.821,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990401",
+   "nom": "Petit Village",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 961,
+   "voiture": 0.75,
+   "velo": 0.028,
+   "tc": 0.139,
+   "marche": 0.058,
+   "menages_sans_voiture": 0.16,
+   "menages_stationnement_reserve": 0.306,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990101",
+   "nom": "Orions",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 653,
+   "voiture": 0.75,
+   "velo": 0.0,
+   "tc": 0.149,
+   "marche": 0.067,
+   "menages_sans_voiture": 0.199,
+   "menages_stationnement_reserve": 0.288,
+   "panier_quotidien_500m": 0.807,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991302",
+   "nom": "Testelin",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 614,
+   "voiture": 0.756,
+   "velo": 0.011,
+   "tc": 0.162,
+   "marche": 0.031,
+   "menages_sans_voiture": 0.362,
+   "menages_stationnement_reserve": 0.29,
+   "panier_quotidien_500m": 0.79,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991202",
+   "nom": "Piats",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1358,
+   "voiture": 0.761,
+   "velo": 0.032,
+   "tc": 0.133,
+   "marche": 0.058,
+   "menages_sans_voiture": 0.256,
+   "menages_stationnement_reserve": 0.306,
+   "panier_quotidien_500m": 0.78,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990602",
+   "nom": "Blanc Seau",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1108,
+   "voiture": 0.766,
+   "velo": 0.023,
+   "tc": 0.147,
+   "marche": 0.034,
+   "menages_sans_voiture": 0.15,
+   "menages_stationnement_reserve": 0.395,
+   "panier_quotidien_500m": 0.665,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990302",
+   "nom": "Brun Pain",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1021,
+   "voiture": 0.771,
+   "velo": 0.023,
+   "tc": 0.134,
+   "marche": 0.044,
+   "menages_sans_voiture": 0.176,
+   "menages_stationnement_reserve": 0.379,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991004",
+   "nom": "Phalempins",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 791,
+   "voiture": 0.771,
+   "velo": 0.032,
+   "tc": 0.088,
+   "marche": 0.08,
+   "menages_sans_voiture": 0.144,
+   "menages_stationnement_reserve": 0.233,
+   "panier_quotidien_500m": 0.859,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991501",
+   "nom": "Pont de Neuville",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 556,
+   "voiture": 0.787,
+   "velo": 0.014,
+   "tc": 0.126,
+   "marche": 0.033,
+   "menages_sans_voiture": 0.179,
+   "menages_stationnement_reserve": 0.484,
+   "panier_quotidien_500m": 0.656,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991101",
+   "nom": "Égalité",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 859,
+   "voiture": 0.798,
+   "velo": 0.005,
+   "tc": 0.153,
+   "marche": 0.027,
+   "menages_sans_voiture": 0.16,
+   "menages_stationnement_reserve": 0.546,
+   "panier_quotidien_500m": 0.995,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990102",
+   "nom": "Pont Rompu",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 503,
+   "voiture": 0.801,
+   "velo": 0.01,
+   "tc": 0.109,
+   "marche": 0.037,
+   "menages_sans_voiture": 0.283,
+   "menages_stationnement_reserve": 0.375,
+   "panier_quotidien_500m": 0.306,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595991301",
+   "nom": "Marlière",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1018,
+   "voiture": 0.833,
+   "velo": 0.011,
+   "tc": 0.075,
+   "marche": 0.035,
+   "menages_sans_voiture": 0.101,
+   "menages_stationnement_reserve": 0.33,
+   "panier_quotidien_500m": 0.773,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "595990201",
+   "nom": "Bois d'Achelles",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 848,
+   "voiture": 0.864,
+   "velo": 0.022,
+   "tc": 0.069,
+   "marche": 0.018,
+   "menages_sans_voiture": 0.102,
+   "menages_stationnement_reserve": 0.571,
+   "panier_quotidien_500m": 0.366,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "59599",
+   "nom": "Tourcoing",
+   "lignes": 3464,
+   "fragilite": "ok",
+   "part_des_actifs": 0.3,
+   "pas_de_transport": 0.075,
+   "marche": 0.176,
+   "velo": 0.03,
+   "deux_roues_mot": 0.006,
+   "voiture": 0.567,
+   "tc": 0.146
+  },
+  {
+   "travail": "59350",
+   "nom": "Lille",
+   "lignes": 1400,
+   "fragilite": "ok",
+   "part_des_actifs": 0.115,
+   "pas_de_transport": 0.0,
+   "marche": 0.002,
+   "velo": 0.007,
+   "deux_roues_mot": 0.008,
+   "voiture": 0.596,
+   "tc": 0.386
+  },
+  {
+   "travail": "59512",
+   "nom": "Roubaix",
+   "lignes": 1012,
+   "fragilite": "ok",
+   "part_des_actifs": 0.083,
+   "pas_de_transport": 0.0,
+   "marche": 0.023,
+   "velo": 0.033,
+   "deux_roues_mot": 0.013,
+   "voiture": 0.652,
+   "tc": 0.279
+  },
+  {
+   "travail": "99999",
+   "nom": "99999",
+   "lignes": 866,
+   "fragilite": "ok",
+   "part_des_actifs": 0.076,
+   "pas_de_transport": 0.002,
+   "marche": 0.007,
+   "velo": 0.006,
+   "deux_roues_mot": 0.009,
+   "voiture": 0.951,
+   "tc": 0.026
+  },
+  {
+   "travail": "59009",
+   "nom": "Villeneuve-d'Ascq",
+   "lignes": 715,
+   "fragilite": "ok",
+   "part_des_actifs": 0.06,
+   "pas_de_transport": 0.0,
+   "marche": 0.009,
+   "velo": 0.007,
+   "deux_roues_mot": 0.007,
+   "voiture": 0.776,
+   "tc": 0.201
+  },
+  {
+   "travail": "59378",
+   "nom": "Marcq-en-Barœul",
+   "lignes": 468,
+   "fragilite": "ok",
+   "part_des_actifs": 0.039,
+   "pas_de_transport": 0.002,
+   "marche": 0.01,
+   "velo": 0.006,
+   "deux_roues_mot": 0.012,
+   "voiture": 0.757,
+   "tc": 0.212
+  },
+  {
+   "travail": "59508",
+   "nom": "Roncq",
+   "lignes": 342,
+   "fragilite": "ok",
+   "part_des_actifs": 0.031,
+   "pas_de_transport": 0.0,
+   "marche": 0.06,
+   "velo": 0.041,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.802,
+   "tc": 0.079
+  },
+  {
+   "travail": "59646",
+   "nom": "Wasquehal",
+   "lignes": 339,
+   "fragilite": "ok",
+   "part_des_actifs": 0.028,
+   "pas_de_transport": 0.004,
+   "marche": 0.011,
+   "velo": 0.005,
+   "deux_roues_mot": 0.007,
+   "voiture": 0.729,
+   "tc": 0.243
+  },
+  {
+   "travail": "59426",
+   "nom": "Neuville-en-Ferrain",
+   "lignes": 305,
+   "fragilite": "ok",
+   "part_des_actifs": 0.026,
+   "pas_de_transport": 0.0,
+   "marche": 0.045,
+   "velo": 0.049,
+   "deux_roues_mot": 0.034,
+   "voiture": 0.704,
+   "tc": 0.168
+  },
+  {
+   "travail": "59650",
+   "nom": "Wattrelos",
+   "lignes": 243,
+   "fragilite": "ok",
+   "part_des_actifs": 0.022,
+   "pas_de_transport": 0.0,
+   "marche": 0.029,
+   "velo": 0.027,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.811,
+   "tc": 0.133
+  },
+  {
+   "travail": "59163",
+   "nom": "Croix",
+   "lignes": 192,
+   "fragilite": "ok",
+   "part_des_actifs": 0.016,
+   "pas_de_transport": 0.0,
+   "marche": 0.028,
+   "velo": 0.018,
+   "deux_roues_mot": 0.005,
+   "voiture": 0.72,
+   "tc": 0.229
+  },
+  {
+   "travail": "59090",
+   "nom": "Bondues",
+   "lignes": 177,
+   "fragilite": "ok",
+   "part_des_actifs": 0.015,
+   "pas_de_transport": 0.015,
+   "marche": 0.029,
+   "velo": 0.079,
+   "deux_roues_mot": 0.017,
+   "voiture": 0.734,
+   "tc": 0.126
+  },
+  {
+   "travail": "59279",
+   "nom": "Halluin",
+   "lignes": 156,
+   "fragilite": "ok",
+   "part_des_actifs": 0.014,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.03,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.852,
+   "tc": 0.1
+  },
+  {
+   "travail": "59421",
+   "nom": "Mouvaux",
+   "lignes": 164,
+   "fragilite": "ok",
+   "part_des_actifs": 0.014,
+   "pas_de_transport": 0.0,
+   "marche": 0.082,
+   "velo": 0.04,
+   "deux_roues_mot": 0.003,
+   "voiture": 0.715,
+   "tc": 0.159
+  },
+  {
+   "travail": "59343",
+   "nom": "Lesquin",
+   "lignes": 118,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.01,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.936,
+   "tc": 0.064
+  },
+  {
+   "travail": "59368",
+   "nom": "La Madeleine",
+   "lignes": 106,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.009,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.01,
+   "deux_roues_mot": 0.013,
+   "voiture": 0.719,
+   "tc": 0.258
+  },
+  {
+   "travail": "59299",
+   "nom": "Hem",
+   "lignes": 90,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.008,
+   "pas_de_transport": 0.0,
+   "marche": 0.01,
+   "velo": 0.013,
+   "deux_roues_mot": 0.004,
+   "voiture": 0.797,
+   "tc": 0.176
+  },
+  {
+   "travail": "59339",
+   "nom": "Leers",
+   "lignes": 83,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.016,
+   "velo": 0.057,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.844,
+   "tc": 0.083
+  },
+  {
+   "travail": "59636",
+   "nom": "Wambrechies",
+   "lignes": 85,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.012,
+   "velo": 0.011,
+   "deux_roues_mot": 0.017,
+   "voiture": 0.88,
+   "tc": 0.08
+  },
+  {
+   "travail": "59152",
+   "nom": "Comines",
+   "lignes": 65,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.89,
+   "tc": 0.11
+  },
+  {
+   "travail": "59352",
+   "nom": "Linselles",
+   "lignes": 53,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.035,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.875,
+   "tc": 0.09
+  },
+  {
+   "travail": "59098",
+   "nom": "Bousbecque",
+   "lignes": 53,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.057,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.048,
+   "voiture": 0.769,
+   "tc": 0.126
+  },
+  {
+   "travail": "59346",
+   "nom": "Lezennes",
+   "lignes": 61,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.866,
+   "tc": 0.134
+  },
+  {
+   "travail": "59367",
+   "nom": "Lys-lez-Lannoy",
+   "lignes": 49,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.081,
+   "deux_roues_mot": 0.026,
+   "voiture": 0.71,
+   "tc": 0.183
+  },
+  {
+   "travail": "59386",
+   "nom": "Marquette-lez-Lille",
+   "lignes": 43,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.887,
+   "tc": 0.113
+  },
+  {
+   "travail": "59410",
+   "nom": "Mons-en-Barœul",
+   "lignes": 49,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.051,
+   "voiture": 0.658,
+   "tc": 0.291
+  },
+  {
+   "travail": "59360",
+   "nom": "Loos",
+   "lignes": 41,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.003,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.777,
+   "tc": 0.223
+  }
+ ],
+ "voisines": [
+  {
+   "insee": "59350",
+   "nom": "Lille",
+   "voiture": 0.395,
+   "velo": 0.087,
+   "tc": 0.363,
+   "vers_commune_etudiee": {
+    "lignes": 622,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.564,
+     "bas": 0.51,
+     "haut": 0.616,
+     "lignes": 622,
+     "n_eff": 336
+    },
+    "velo": {
+     "p": 0.013,
+     "bas": 0.005,
+     "haut": 0.032,
+     "lignes": 622,
+     "n_eff": 336
+    }
+   }
+  },
+  {
+   "insee": "59512",
+   "nom": "Roubaix",
+   "voiture": 0.618,
+   "velo": 0.023,
+   "tc": 0.241,
+   "vers_commune_etudiee": {
+    "lignes": 505,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.622,
+     "bas": 0.564,
+     "haut": 0.676,
+     "lignes": 505,
+     "n_eff": 280
+    },
+    "velo": {
+     "p": 0.024,
+     "bas": 0.012,
+     "haut": 0.05,
+     "lignes": 505,
+     "n_eff": 280
+    }
+   }
+  },
+  {
+   "insee": "59009",
+   "nom": "Villeneuve-d'Ascq",
+   "voiture": 0.61,
+   "velo": 0.05,
+   "tc": 0.245,
+   "vers_commune_etudiee": {
+    "lignes": 182,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.762,
+     "bas": 0.673,
+     "haut": 0.833,
+     "lignes": 182,
+     "n_eff": 107
+    },
+    "velo": {
+     "p": 0.007,
+     "bas": 0.001,
+     "haut": 0.047,
+     "lignes": 182,
+     "n_eff": 107
+    }
+   }
+  },
+  {
+   "insee": "59650",
+   "nom": "Wattrelos",
+   "voiture": 0.818,
+   "velo": 0.022,
+   "tc": 0.088,
+   "vers_commune_etudiee": {
+    "lignes": 349,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.862,
+     "bas": 0.81,
+     "haut": 0.902,
+     "lignes": 349,
+     "n_eff": 217
+    },
+    "velo": {
+     "p": 0.039,
+     "bas": 0.02,
+     "haut": 0.074,
+     "lignes": 349,
+     "n_eff": 217
+    }
+   }
+  },
+  {
+   "insee": "59378",
+   "nom": "Marcq-en-Barœul",
+   "voiture": 0.646,
+   "velo": 0.073,
+   "tc": 0.178,
+   "vers_commune_etudiee": {
+    "lignes": 164,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.77,
+     "bas": 0.678,
+     "haut": 0.841,
+     "lignes": 164,
+     "n_eff": 100
+    },
+    "velo": {
+     "p": 0.044,
+     "bas": 0.018,
+     "haut": 0.103,
+     "lignes": 164,
+     "n_eff": 100
+    }
+   }
+  },
+  {
+   "insee": "59328",
+   "nom": "Lambersart",
+   "voiture": 0.589,
+   "velo": 0.119,
+   "tc": 0.187,
+   "vers_commune_etudiee": {
+    "lignes": 64,
+    "fragilite": "fragile",
+    "voiture": {
+     "p": 0.929,
+     "bas": 0.807,
+     "haut": 0.976,
+     "lignes": 64,
+     "n_eff": 40
+    },
+    "velo": {
+     "p": 0.015,
+     "bas": 0.002,
+     "haut": 0.112,
+     "lignes": 64,
+     "n_eff": 40
+    }
+   }
+  }
+ ],
+ "acces_communes": {
+  "59599": {
+   "commerce_alim_500m": 0.98,
+   "grande_surface_500m": 0.746,
+   "pharmacie_500m": 0.922,
+   "medecin_generaliste_500m": 0.935,
+   "ecole_elementaire_500m": 0.937,
+   "college_1km": 0.874,
+   "gare_2km": 0.654,
+   "panier_quotidien_500m": 0.856,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "59350": {
+   "commerce_alim_500m": 0.989,
+   "grande_surface_500m": 0.841,
+   "pharmacie_500m": 0.94,
+   "medecin_generaliste_500m": 0.959,
+   "ecole_elementaire_500m": 0.948,
+   "college_1km": 0.961,
+   "gare_2km": 0.863,
+   "panier_quotidien_500m": 0.901,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 0.978,
+   "bus_4h_20_22h": 0.0
+  },
+  "59512": {
+   "commerce_alim_500m": 0.99,
+   "grande_surface_500m": 0.638,
+   "pharmacie_500m": 0.958,
+   "medecin_generaliste_500m": 0.937,
+   "ecole_elementaire_500m": 0.966,
+   "college_1km": 0.959,
+   "gare_2km": 0.634,
+   "panier_quotidien_500m": 0.938,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "59009": {
+   "commerce_alim_500m": 0.799,
+   "grande_surface_500m": 0.532,
+   "pharmacie_500m": 0.722,
+   "medecin_generaliste_500m": 0.817,
+   "ecole_elementaire_500m": 0.808,
+   "college_1km": 0.905,
+   "gare_2km": 0.766,
+   "panier_quotidien_500m": 0.577,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "59650": {
+   "commerce_alim_500m": 0.819,
+   "grande_surface_500m": 0.286,
+   "pharmacie_500m": 0.818,
+   "medecin_generaliste_500m": 0.735,
+   "ecole_elementaire_500m": 0.845,
+   "college_1km": 0.744,
+   "gare_2km": 0.256,
+   "panier_quotidien_500m": 0.675,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "59378": {
+   "commerce_alim_500m": 0.801,
+   "grande_surface_500m": 0.495,
+   "pharmacie_500m": 0.767,
+   "medecin_generaliste_500m": 0.897,
+   "ecole_elementaire_500m": 0.831,
+   "college_1km": 0.738,
+   "gare_2km": 0.613,
+   "panier_quotidien_500m": 0.61,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "59328": {
+   "commerce_alim_500m": 0.919,
+   "grande_surface_500m": 0.714,
+   "pharmacie_500m": 0.864,
+   "medecin_generaliste_500m": 0.919,
+   "ecole_elementaire_500m": 0.904,
+   "college_1km": 0.917,
+   "gare_2km": 0.673,
+   "panier_quotidien_500m": 0.757,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 90
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 270
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 630
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.45,
+    "surcout_an_eur": 50
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.45,
+    "surcout_an_eur": 160
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.45,
+    "surcout_an_eur": 380
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit",
+   "raison": "seules les comparaisons calculées et documentées dans le dossier s'écrivent"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 59599 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/59599/fiche/fiche.json --contours <cache>/iris_ign_59599.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.5",
+   "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable automatiquement",
+   "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+   "commande": "generer_visuels.py (sans --sans-barres)",
+   "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Carte de situation : Tourcoing et Lille (59350), Roubaix (59512), Villeneuve-d'Ascq (59009), Wattrelos (59650), Marcq-en-Barœul (59378) et Lambersart (59328)",
+   "etat": "réalisable, seulement à côté du graphique précédent",
+   "faits": "aucun (contours IGN)",
+   "commande": "generer_visuels.py … --communes 59350,59512,59009,59650,59378,59328",
+   "manuel": "le sous-titre parle de « la seconde barre » : à n'utiliser qu'avec ce graphique, même liste exacte"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "59599",
+  "consulte_le": "2026-10-15",
+  "origine": "automatique",
+  "sources_officielles": [
+   "https://transport.data.gouv.fr"
+  ],
+  "faits": [],
+  "recherches": [
+   {
+    "sujet": "réseau de transport urbain",
+    "statut": "non vérifié",
+    "source": "transport.data.gouv.fr",
+    "consulte_le": "2026-10-15",
+    "note": "2 jeu(x) urbain(s) couvrant l'intercommunalité 200093201 : identification à faire à la main"
+   },
+   {
+    "sujet": "tarification (gratuité, abonnements, exceptions)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "jours et périodes de circulation des lignes urbaines",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "vélo ou gare (seulement si directement utile au logement)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   }
+  ],
+  "ecartes": [],
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/59599/dossier/complement.json",
+  "sha256": "446cde1df363b9795194b45962979de1ab8e322d98b7d2d51a7a63f49786cef2"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "59599",
+   "nom": "Tourcoing",
+   "role": "autre",
+   "actifs": 37873,
+   "lignes": 11763,
+   "voiture": 0.7007
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que Tourcoing (autre commune d'une unité urbaine), comptant de la moitié au double de ses actifs occupés résidents (de 18 936 à 75 746), avec au moins 150 lignes d'échantillon ; Tourcoing exclue ; France métropolitaine",
+   "role": "autre commune d'une unité urbaine",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    18936,
+    75746
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "3a21daa14fad5bb1"
+   }
+  },
+  "genere_le": "2026-10-15T16:20:31Z",
+  "disponible": true,
+  "groupe": {
+   "n": 72,
+   "mediane_voiture": 0.3646,
+   "communes": [
+    {
+     "insee": "94002",
+     "nom": "Alfortville",
+     "actifs": 20794,
+     "voiture": 0.2846
+    },
+    {
+     "insee": "06004",
+     "nom": "Antibes",
+     "actifs": 32273,
+     "voiture": 0.6618
+    },
+    {
+     "insee": "92002",
+     "nom": "Antony",
+     "actifs": 30344,
+     "voiture": 0.3957
+    },
+    {
+     "insee": "95018",
+     "nom": "Argenteuil",
+     "actifs": 44560,
+     "voiture": 0.4024
+    },
+    {
+     "insee": "92004",
+     "nom": "Asnières-sur-Seine",
+     "actifs": 46534,
+     "voiture": 0.2188
+    },
+    {
+     "insee": "13005",
+     "nom": "Aubagne",
+     "actifs": 19102,
+     "voiture": 0.7252
+    },
+    {
+     "insee": "93001",
+     "nom": "Aubervilliers",
+     "actifs": 35834,
+     "voiture": 0.2163
+    },
+    {
+     "insee": "93005",
+     "nom": "Aulnay-sous-Bois",
+     "actifs": 33059,
+     "voiture": 0.4818
+    },
+    {
+     "insee": "93008",
+     "nom": "Bobigny",
+     "actifs": 19249,
+     "voiture": 0.3355
+    },
+    {
+     "insee": "93010",
+     "nom": "Bondy",
+     "actifs": 19346,
+     "voiture": 0.4017
+    },
+    {
+     "insee": "06027",
+     "nom": "Cagnes-sur-Mer",
+     "actifs": 22077,
+     "voiture": 0.6805
+    },
+    {
+     "insee": "69034",
+     "nom": "Caluire-et-Cuire",
+     "actifs": 19845,
+     "voiture": 0.507
+    },
+    {
+     "insee": "06029",
+     "nom": "Cannes",
+     "actifs": 26995,
+     "voiture": 0.5584
+    },
+    {
+     "insee": "95127",
+     "nom": "Cergy",
+     "actifs": 28449,
+     "voiture": 0.3896
+    },
+    {
+     "insee": "94017",
+     "nom": "Champigny-sur-Marne",
+     "actifs": 33345,
+     "voiture": 0.4118
+    },
+    {
+     "insee": "77108",
+     "nom": "Chelles",
+     "actifs": 24136,
+     "voiture": 0.4812
+    },
+    {
+     "insee": "94022",
+     "nom": "Choisy-le-Roi",
+     "actifs": 20514,
+     "voiture": 0.3219
+    },
+    {
+     "insee": "92023",
+     "nom": "Clamart",
+     "actifs": 27316,
+     "voiture": 0.3534
+    },
+    {
+     "insee": "92024",
+     "nom": "Clichy",
+     "actifs": 32139,
+     "voiture": 0.169
+    },
+    {
+     "insee": "92025",
+     "nom": "Colombes",
+     "actifs": 41627,
+     "voiture": 0.2584
+    },
+    {
+     "insee": "91174",
+     "nom": "Corbeil-Essonnes",
+     "actifs": 22888,
+     "voiture": 0.5922
+    },
+    {
+     "insee": "92026",
+     "nom": "Courbevoie",
+     "actifs": 42920,
+     "voiture": 0.2043
+    },
+    {
+     "insee": "94028",
+     "nom": "Créteil",
+     "actifs": 40670,
+     "voiture": 0.3309
+    },
+    {
+     "insee": "93029",
+     "nom": "Drancy",
+     "actifs": 28102,
+     "voiture": 0.4247
+    },
+    {
+     "insee": "94033",
+     "nom": "Fontenay-sous-Bois",
+     "actifs": 24425,
+     "voiture": 0.2249
+    },
+    {
+     "insee": "92036",
+     "nom": "Gennevilliers",
+     "actifs": 19613,
+     "voiture": 0.3158
+    },
+    {
+     "insee": "06069",
+     "nom": "Grasse",
+     "actifs": 20536,
+     "voiture": 0.8147
+    },
+    {
+     "insee": "83069",
+     "nom": "Hyères",
+     "actifs": 20482,
+     "voiture": 0.7231
+    },
+    {
+     "insee": "92040",
+     "nom": "Issy-les-Moulineaux",
+     "actifs": 35795,
+     "voiture": 0.2217
+    },
+    {
+     "insee": "13047",
+     "nom": "Istres",
+     "actifs": 19003,
+     "voiture": 0.859
+    },
+    {
+     "insee": "94041",
+     "nom": "Ivry-sur-Seine",
+     "actifs": 28752,
+     "voiture": 0.2026
+    },
+    {
+     "insee": "83126",
+     "nom": "La Seyne-sur-Mer",
+     "actifs": 23351,
+     "voiture": 0.7385
+    },
+    {
+     "insee": "93007",
+     "nom": "Le Blanc-Mesnil",
+     "actifs": 23160,
+     "voiture": 0.48
+    },
+    {
+     "insee": "92044",
+     "nom": "Levallois-Perret",
+     "actifs": 35485,
+     "voiture": 0.2065
+    },
+    {
+     "insee": "93046",
+     "nom": "Livry-Gargan",
+     "actifs": 19628,
+     "voiture": 0.5456
+    },
+    {
+     "insee": "94046",
+     "nom": "Maisons-Alfort",
+     "actifs": 29373,
+     "voiture": 0.2781
+    },
+    {
+     "insee": "91377",
+     "nom": "Massy",
+     "actifs": 25268,
+     "voiture": 0.4152
+    },
+    {
+     "insee": "92048",
+     "nom": "Meudon",
+     "actifs": 22171,
+     "voiture": 0.3541
+    },
+    {
+     "insee": "93048",
+     "nom": "Montreuil",
+     "actifs": 50425,
+     "voiture": 0.1884
+    },
+    {
+     "insee": "92049",
+     "nom": "Montrouge",
+     "actifs": 24480,
+     "voiture": 0.1631
+    },
+    {
+     "insee": "33281",
+     "nom": "Mérignac",
+     "actifs": 37163,
+     "voiture": 0.6364
+    },
+    {
+     "insee": "92050",
+     "nom": "Nanterre",
+     "actifs": 44579,
+     "voiture": 0.2699
+    },
+    {
+     "insee": "92051",
+     "nom": "Neuilly-sur-Seine",
+     "actifs": 27124,
+     "voiture": 0.2733
+    },
+    {
+     "insee": "93051",
+     "nom": "Noisy-le-Grand",
+     "actifs": 32164,
+     "voiture": 0.3501
+    },
+    {
+     "insee": "93053",
+     "nom": "Noisy-le-Sec",
+     "actifs": 19377,
+     "voiture": 0.2933
+    },
+    {
+     "insee": "93055",
+     "nom": "Pantin",
+     "actifs": 27692,
+     "voiture": 0.1688
+    },
+    {
+     "insee": "33318",
+     "nom": "Pessac",
+     "actifs": 28545,
+     "voiture": 0.6621
+    },
+    {
+     "insee": "92062",
+     "nom": "Puteaux",
+     "actifs": 23693,
+     "voiture": 0.2001
+    },
+    {
+     "insee": "44143",
+     "nom": "Rezé",
+     "actifs": 19950,
+     "voiture": 0.5553
+    },
+    {
+     "insee": "93064",
+     "nom": "Rosny-sous-Bois",
+     "actifs": 20826,
+     "voiture": 0.3499
+    },
+    {
+     "insee": "59512",
+     "nom": "Roubaix",
+     "actifs": 28518,
+     "voiture": 0.618
+    },
+    {
+     "insee": "92063",
+     "nom": "Rueil-Malmaison",
+     "actifs": 39238,
+     "voiture": 0.4093
+    },
+    {
+     "insee": "93066",
+     "nom": "Saint-Denis",
+     "actifs": 46321,
+     "voiture": 0.2187
+    },
+    {
+     "insee": "78551",
+     "nom": "Saint-Germain-en-Laye",
+     "actifs": 20248,
+     "voiture": 0.3495
+    },
+    {
+     "insee": "44162",
+     "nom": "Saint-Herblain",
+     "actifs": 22663,
+     "voiture": 0.6524
+    },
+    {
+     "insee": "94068",
+     "nom": "Saint-Maur-des-Fossés",
+     "actifs": 35582,
+     "voiture": 0.3748
+    },
+    {
+     "insee": "93070",
+     "nom": "Saint-Ouen-sur-Seine",
+     "actifs": 24739,
+     "voiture": 0.1604
+    },
+    {
+     "insee": "69290",
+     "nom": "Saint-Priest",
+     "actifs": 20669,
+     "voiture": 0.7108
+    },
+    {
+     "insee": "95585",
+     "nom": "Sarcelles",
+     "actifs": 20733,
+     "voiture": 0.4019
+    },
+    {
+     "insee": "78586",
+     "nom": "Sartrouville",
+     "actifs": 23758,
+     "voiture": 0.3545
+    },
+    {
+     "insee": "93071",
+     "nom": "Sevran",
+     "actifs": 19323,
+     "voiture": 0.4204
+    },
+    {
+     "insee": "92073",
+     "nom": "Suresnes",
+     "actifs": 25020,
+     "voiture": 0.2963
+    },
+    {
+     "insee": "33522",
+     "nom": "Talence",
+     "actifs": 20184,
+     "voiture": 0.4716
+    },
+    {
+     "insee": "78646",
+     "nom": "Versailles",
+     "actifs": 38865,
+     "voiture": 0.3354
+    },
+    {
+     "insee": "94076",
+     "nom": "Villejuif",
+     "actifs": 25961,
+     "voiture": 0.2396
+    },
+    {
+     "insee": "33550",
+     "nom": "Villenave-d'Ornon",
+     "actifs": 21238,
+     "voiture": 0.7564
+    },
+    {
+     "insee": "59009",
+     "nom": "Villeneuve-d'Ascq",
+     "actifs": 24208,
+     "voiture": 0.6102
+    },
+    {
+     "insee": "94080",
+     "nom": "Vincennes",
+     "actifs": 26123,
+     "voiture": 0.1371
+    },
+    {
+     "insee": "94081",
+     "nom": "Vitry-sur-Seine",
+     "actifs": 39812,
+     "voiture": 0.3427
+    },
+    {
+     "insee": "69259",
+     "nom": "Vénissieux",
+     "actifs": 22727,
+     "voiture": 0.5583
+    },
+    {
+     "insee": "93031",
+     "nom": "Épinay-sur-Seine",
+     "actifs": 21253,
+     "voiture": 0.3206
+    },
+    {
+     "insee": "91228",
+     "nom": "Évry-Courcouronnes",
+     "actifs": 26336,
+     "voiture": 0.4786
+    }
+   ]
+  },
+  "ecart_points": 34,
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/59599/fiche/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à Tourcoing qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "70 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 72 communes du groupe (chaque commune compte une fois)",
+    "affichage": "36 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : Tourcoing moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "+34 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "72",
+    "usage": "oui"
+   }
+  ]
+ }
+}

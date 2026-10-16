@@ -1,0 +1,126 @@
+{
+ "commune": "83137",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Métropole Toulon-Provence-Méditerranée s'appelle « RESEAU MISTRAL » ; son autorité organisatrice est Métropole Toulon-Provence-Méditerranée.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Mistral » : https://transport.data.gouv.fr/datasets/reseau-de-transport-urbain-de-la-metropole-toulon-provence-mediterranee ; nom confirmé par : offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-14",
+   "perimetre": "intercommunalité Métropole Toulon-Provence-Méditerranée ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau RESEAU MISTRAL est https://www.reseaumistral.com/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/reseau-de-transport-urbain-de-la-metropole-toulon-provence-mediterranee ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau RESEAU MISTRAL",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_moins_3_ans",
+   "information": "Les enfants de moins de 3 ans circulent gratuitement sur les lignes du réseau. La page présente par ailleurs des titres payants, par exemple le ticket « 1 voyage terrestre » à 1,40 €. Le réseau n'est donc pas gratuit dans son ensemble.",
+   "source": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Les enfants - 3 ans circulent gratuitement sur les lignes du réseau. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau RESEAU MISTRAL ; Enfants de moins de 3 ans, lignes du réseau ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+    "extrait": "Les enfants - 3 ans circulent gratuitement sur les lignes du réseau."
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_handicap",
+   "information": "L'abonnement « 1 an H » est indiqué gratuit pour les personnes handicapées résidant sur la Métropole.",
+   "source": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Personne handicapée (résidant sur la Métropole) »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau RESEAU MISTRAL ; Personnes handicapées résidant sur la Métropole TPM, abonnement « 1 an H » ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+    "extrait": "Personne handicapée (résidant sur la Métropole)"
+   }
+  },
+  {
+   "id": "doc.horaires.validite_ligne1",
+   "information": "La page de la ligne de bus 1 donne deux périodes de validité des horaires : hiver du 01 septembre 2025 au 05 juillet 2026, et été du 06 juillet au 30 août 2026. À la date du jour (2026-10-15), ces deux périodes sont terminées. Les horaires en vigueur sont à vérifier.",
+   "source": "https://www.reseaumistral.com/se-deplacer/lignes/ligne-bus-1 (extrait vérifié le 2026-10-15 : « Du 01 septembre 2025 au 05 juillet 2026 »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Hiver : du 01 septembre 2025 au 05 juillet 2026. Été : du 06 juillet au 30 août 2026",
+   "perimetre": "réseau RESEAU MISTRAL ; Ligne de bus 1 uniquement ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.reseaumistral.com/se-deplacer/lignes/ligne-bus-1",
+    "extrait": "Du 01 septembre 2025 au 05 juillet 2026"
+   }
+  },
+  {
+   "id": "doc.verification.lignes_horaires",
+   "information": "La page « Lignes et horaires » permet de rechercher les horaires de l'ensemble des lignes du réseau. Les détails de chaque ligne figurent sur sa page dédiée.",
+   "source": "https://www.reseaumistral.com/se-deplacer/lignes (extrait vérifié le 2026-10-15 : « Rechercher l'ensemble des horaires des lignes traversant le réseau »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau RESEAU MISTRAL ; Ensemble des lignes du réseau ; application à chaque commune non établie",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.reseaumistral.com/se-deplacer/lignes",
+    "extrait": "Rechercher l'ensemble des horaires des lignes traversant le réseau"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Tarification : gratuité totale ou par lignes",
+   "statut": "introuvable",
+   "source": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune gratuité générale ni par ligne n'apparaît sur la page tarifs. La page signale seulement des catégories gratuites et un astérisque non expliqué pour les anciens combattants. La conclusion « non gratuit » vaut pour la page consultée et doit être confirmée."
+  },
+  {
+   "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+   "statut": "introuvable",
+   "source": "https://www.reseaumistral.com/se-deplacer/lignes/ligne-bus-1",
+   "consulte_le": "2026-10-15",
+   "note": "Ni la page « Lignes et horaires » ni la page de la ligne 1 ne donnent ces jours. Les fiches horaires PDF sont liées mais n'ont pas été lues : non vérifié."
+  },
+  {
+   "sujet": "Calcul d'itinéraire",
+   "statut": "non vérifié",
+   "source": "https://www.reseaumistral.com/se-deplacer/calcul-ditineraire",
+   "consulte_le": "2026-10-15",
+   "note": "La page existe, avec le titre « Calcul d'itinéraire ». Le contenu lu ne montre aucun formulaire, donc son fonctionnement n'est pas confirmé."
+  },
+  {
+   "sujet": "Temps réel et prochains passages",
+   "statut": "non vérifié",
+   "source": "https://www.reseaumistral.com/se-deplacer/prochains-passages",
+   "consulte_le": "2026-10-15",
+   "note": "L'accueil renvoie vers cette page et mentionne des « Horaires en temps réel » dans l'application. Je n'ai pas ouvert la page, et je n'ai pas d'extrait vérifié."
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

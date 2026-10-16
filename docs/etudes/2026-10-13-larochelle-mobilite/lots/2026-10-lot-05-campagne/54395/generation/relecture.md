@@ -1,0 +1,19 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Pour chercher à moins conduire à Nancy, deux éléments méritent ensuite d’être examinés : le secteur de l’adresse et le lieu de travail.",
+   "probleme": "La phrase présente le secteur d'habitation comme un levier pour moins conduire. Or `iris.voiture.min` et `iris.voiture.max` décrivent seulement les pratiques des actifs de deux secteurs ; ils ne mesurent pas l'effet du quartier sur l'usage de la voiture du lecteur (section 11 : aucun lien de cause entre un quartier et une pratique).",
+   "correction_minimale": "Remplacer par une transition descriptive : « Reste à voir quelle place la voiture prend dans les trajets des habitants, selon leur secteur et leur lieu de travail. »"},
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Le nom du secteur ne suffit donc pas à examiner un logement",
+   "probleme": "Le « donc » tire de l'écart entre groupes de destination (`ecart.voiture_destination.voisines_moins_meme_commune`) que le secteur serait un critère valable mais incomplet pour juger un logement. La phrase prolonge ainsi la lecture de `iris.voiture.*` comme indicateur de quartier pour le lecteur.",
+   "correction_minimale": "Supprimer « Le nom du secteur ne suffit donc pas à examiner un logement : » et garder « Gardez votre lieu de travail comme point de repère pendant vos recherches. »"},
+  {"categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Les groupes de destinations sont distincts",
+   "probleme": "La méthode ne dit pas comment ont été choisies les six communes de travail nommées (`mobpro.voiture_selon_destination.communes_voisines` : les six communes les plus peuplées de la même unité urbaine, choisies automatiquement). Le lecteur ne sait pas pourquoi elles sont retenues et pas d'autres.",
+   "correction_minimale": "Ajouter dans la méthode : « Les six communes de travail nommées sont, hors Nancy, les plus peuplées de son unité urbaine INSEE. »"}
+]}
+```

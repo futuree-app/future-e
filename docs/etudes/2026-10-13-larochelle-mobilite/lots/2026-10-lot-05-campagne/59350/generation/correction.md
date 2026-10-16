@@ -1,0 +1,116 @@
+## A. Question et format
+
+**Question principale :** à Lille, la proximité des commerces et de l’école suffit-elle à orienter une recherche de logement pour utiliser moins la voiture ?
+
+Deux secteurs ont le même accès au panier d’équipements, mais des pratiques domicile-travail très différentes. Pour le lecteur, cela invite à examiner les services autour du logement et le trajet vers son travail comme deux questions distinctes.
+
+Appuis : `iris.593500403.voiture`, `iris.593500707.voiture`, `iris.593500403.panier_500m`, `iris.593500707.panier_500m`, `destination.59350.voiture`, `destination.59343.voiture`. L’ouverture utilise `carburant.gazole.ecart`, `carburant.e10.ecart` et les six lignes `scenario.carburant.*`.
+
+**Format retenu : article court**, centré sur ce contraste et ses conséquences pour une visite.
+
+Pistes écartées : stationnement, possession automobile, actifs venant travailler à Lille et comparaison nationale, qui disperseraient la question ; données de bus inutilisables.
+
+## B. Article
+
+# Vivre à Lille en utilisant moins la voiture : regarder au-delà des commerces
+
+Entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du gazole augmente de 0,73 €/L et celui du SP95-E10 de 0,45 €/L dans les stations situées dans un rayon de 12 km à vol d’oiseau autour du centre de Lille. Quand on cherche un logement, cette hausse donne une raison concrète d’examiner les déplacements qu’une adresse permettra d’organiser.
+
+Le scénario suivant porte sur le carburant seul. Il retient une consommation de 6 L/100 km et 200 allers-retours domicile-travail par an. Les hausses utilisées sont arrondies à 5 centimes : +0,75 €/L pour le gazole et +0,45 €/L pour le SP95-E10.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+| Distance du trajet aller | Surcoût annuel — gazole | Surcoût annuel — SP95-E10 |
+|---|---:|---:|
+| 5 km | environ 90 € | environ 50 € |
+| 15 km | environ 270 € | environ 160 € |
+| 35 km | environ 630 € | environ 380 € |
+
+À Lille, par où commencer la recherche pour moins conduire ? Les pratiques selon le secteur de résidence et le lieu de travail donnent des repères ; la proximité des services apporte un autre éclairage.
+
+## Du secteur de résidence au lieu de travail
+
+Les pratiques domicile-travail décrites ici sont celles du recensement de 2022. Dans le secteur statistique Magenta-Fombello, 24 % des actifs occupés déclarent la voiture comme mode principal pour aller travailler. Dans le secteur « 400 Maisons-Cimetière du Sud », cette part atteint 64 %. Ces chiffres concernent les actifs qui habitent chaque secteur, quelle que soit leur commune de travail.
+
+[VISUEL : Carte de la part de la voiture par secteur (IRIS)]
+
+Pour une recherche de logement, la carte aide à situer des pratiques différentes au sein de Lille. Le trajet professionnel mérite ensuite son propre examen : parmi les actifs qui habitent Lille et y travaillent, 26 % vont principalement travailler en voiture. Parmi ceux qui habitent Lille et travaillent à Lesquin, cette part est de 74 %.
+
+Avant de retenir un secteur, confrontez donc l’adresse envisagée à votre destination de travail et à vos horaires habituels.
+
+## Courses et école : regarder aussi le parcours depuis le logement
+
+Le trajet professionnel ne couvre qu’une partie du quotidien. Pour les courses ou l’accompagnement des enfants, que trouve-t-on près de chez soi ?
+
+Dans les secteurs Magenta-Fombello et « 400 Maisons-Cimetière du Sud », toutes les adresses ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d’oiseau. Cette proximité commune accompagne donc des pratiques domicile-travail très différentes.
+
+Lors d’une visite dans ces secteurs, l’examen peut aller au-delà de la présence des équipements : suivez les cheminements depuis le logement, regardez les traversées et l’accès aux établissements dont vous auriez l’usage. La distance à vol d’oiseau donne un premier repère ; le parcours réel reste à examiner sur place.
+
+## Votre projet, votre adresse
+
+Si votre déménagement vise à réduire la place de la voiture, partez des déplacements que vous souhaitez changer. Avec futur•e, explorez l’adresse envisagée à partir de ce projet et de ce qui compte pour votre installation.
+
+### Méthode et sources
+
+Pratiques : INSEE, recensement de la population, fichier Mobilités professionnelles et bases infracommunales. Les résultats sont des estimations par sondage ; les secteurs sont des IRIS statistiques, dont les libellés peuvent différer des noms de quartiers usuels. Les groupes selon le lieu de travail sont distincts : leur comparaison ne mesure pas l’effet d’un déménagement.
+
+Équipements : Base adresse nationale et Base permanente des équipements 2025. Les parts citées portent sur les adresses de chaque secteur ; la proximité ne décrit pas l’usage des établissements.
+
+Carburants : archives officielles de prix-carburants.gouv.fr, médianes des derniers prix déclarés par station dans chaque semaine. Le tableau présente un scénario de surcoût, sans l’attribuer à un secteur ni à une destination de travail.
+
+## C. Correspondance interne — non publiée
+
+| Passage | Chiffre écrit | Identifiant(s) | Usage |
+|---|---|---|---|
+| Ouverture — semaine initiale | 6 octobre 2025 | `carburant.gazole.prix_un_an_avant` ; `carburant.e10.prix_un_an_avant` | oui |
+| Ouverture — semaine finale | 5 octobre 2026 | `carburant.gazole.prix` ; `carburant.e10.prix` | oui |
+| Ouverture — hausse du gazole | 0,73 €/L | `carburant.gazole.ecart` | oui |
+| Ouverture — hausse du SP95-E10 | 0,45 €/L | `carburant.e10.ecart` | oui |
+| Ouverture — périmètre des stations | rayon de 12 km à vol d’oiseau | `carburant.gazole.ecart` ; `carburant.e10.ecart` | oui |
+| Hypothèses — consommation | 6 L/100 km | Les six identifiants `scenario.carburant.*` détaillés ci-dessous | oui |
+| Hypothèses — déplacements annuels | 200 allers-retours | Les six identifiants `scenario.carburant.*` détaillés ci-dessous | oui |
+| Hypothèses — arrondi des hausses | 5 centimes | Les six identifiants `scenario.carburant.*` détaillés ci-dessous | oui |
+| Hypothèses — hausse retenue, gazole | +0,75 €/L | `scenario.carburant.gazole.5km` ; `scenario.carburant.gazole.15km` ; `scenario.carburant.gazole.35km` | oui |
+| Hypothèses — hausse retenue, SP95-E10 | +0,45 €/L | `scenario.carburant.e10.5km` ; `scenario.carburant.e10.15km` ; `scenario.carburant.e10.35km` | oui |
+| Tableau — trajet aller court | 5 km | `scenario.carburant.gazole.5km` ; `scenario.carburant.e10.5km` | oui |
+| Tableau — gazole, trajet court | environ 90 € | `scenario.carburant.gazole.5km` | oui |
+| Tableau — SP95-E10, trajet court | environ 50 € | `scenario.carburant.e10.5km` | oui |
+| Tableau — trajet aller intermédiaire | 15 km | `scenario.carburant.gazole.15km` ; `scenario.carburant.e10.15km` | oui |
+| Tableau — gazole, trajet intermédiaire | environ 270 € | `scenario.carburant.gazole.15km` | oui |
+| Tableau — SP95-E10, trajet intermédiaire | environ 160 € | `scenario.carburant.e10.15km` | oui |
+| Tableau — trajet aller long | 35 km | `scenario.carburant.gazole.35km` ; `scenario.carburant.e10.35km` | oui |
+| Tableau — gazole, trajet long | environ 630 € | `scenario.carburant.gazole.35km` | oui |
+| Tableau — SP95-E10, trajet long | environ 380 € | `scenario.carburant.e10.35km` | oui |
+| Pratiques — millésime | 2022 | `iris.593500403.voiture` ; `iris.593500707.voiture` ; `destination.59350.voiture` ; `destination.59343.voiture` | oui |
+| Pratiques — Magenta-Fombello | 24 % | `iris.593500403.voiture` | oui |
+| Pratiques — libellé du secteur | « 400 Maisons-Cimetière du Sud » | `iris.593500707.voiture` | oui — nombre inclus dans le libellé |
+| Pratiques — voiture dans ce secteur | 64 % | `iris.593500707.voiture` | oui |
+| Pratiques — résidence et travail à Lille | 26 % | `destination.59350.voiture` | oui |
+| Pratiques — résidence à Lille, travail à Lesquin | 74 % | `destination.59343.voiture` | oui |
+| Équipements — libellé du secteur répété | « 400 Maisons-Cimetière du Sud » | `iris.593500707.panier_500m` | oui — nombre inclus dans le libellé |
+| Équipements — couverture du panier | toutes les adresses, soit 100 % dans chaque secteur | `iris.593500403.panier_500m` ; `iris.593500707.panier_500m` | oui |
+| Équipements — seuil de proximité | moins de 500 m à vol d’oiseau | `iris.593500403.panier_500m` ; `iris.593500707.panier_500m` | oui |
+| Méthode — millésime des équipements | 2025 | `iris.593500403.panier_500m` ; `iris.593500707.panier_500m` | oui |
+
+## D. Visuels et vérifications restantes
+
+| Visuel retenu — nom exact | Emplacement | Étape manuelle indiquée dans le dossier |
+|---|---|---|
+| Tableau du scénario de surcoût de carburant | Ouverture, après les hypothèses | Aucune |
+| Carte de la part de la voiture par secteur (IRIS) | Après la comparaison des pratiques à Magenta-Fombello et « 400 Maisons-Cimetière du Sud » | Aucune pour la production : classes automatiques et secteurs cités repérés par des numéros avec leur liste. Libellés posés à la main seulement pour une version soignée. |
+
+Faire figurer les périodes des prix sur le tableau et le millésime des pratiques sur la carte.
+
+Vérifications concernant les faits utilisés :
+
+- **Carburant :** réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Obligatoire avant publication ; le scénario est également concerné.
+- **Libellés d’IRIS :** relire Magenta-Fombello et « 400 Maisons-Cimetière du Sud ». Le texte les désigne comme secteurs statistiques, sans les assimiler à des quartiers d’usage.
+
+Aucun groupe agrégé de communes de travail n’est utilisé ; la vérification du choix des communes de ce groupe ne concerne donc pas cet article.
+
+## E. Corrections
+
+| Anomalie | Passage avant | Passage après |
+|---|---|---|
+| Valeur — Pratiques — libellé du secteur : écartée | « 400 Maisons-Cimetière du Sud » | Inchangé : libellé exact de l’IRIS 593500707 dans la section 3 du dossier. « 400 » appartient au nom du secteur. La part de la voiture est écrite séparément, à 64 %, conformément au dossier. |
+| Valeur — Équipements — libellé du secteur répété : écartée | « 400 Maisons-Cimetière du Sud » | Inchangé : même libellé exact du dossier. « 400 » appartient au nom du secteur. La couverture du panier est écrite séparément, « toutes les adresses », conformément aux 100 % du dossier. |

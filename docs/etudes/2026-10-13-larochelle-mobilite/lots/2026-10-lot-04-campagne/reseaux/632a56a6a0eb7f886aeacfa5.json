@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "632a56a6a0eb7f886aeacfa5",
+ "titre": "Réseau urbain TCL",
+ "page": "https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-lim-nva-m-1",
+ "nom_commercial": "TCL",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "TCL",
+ "aom": "CU Limoges Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248719312",
+  "nom": "CU Limoges Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "STCLM (Limoges Métropole)",
+    "https://www.stcl.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

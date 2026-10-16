@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5ae2e01d88ee381811e691b5",
+ "titre": "Réseau urbain Orizo",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-orizo-grand-avignon",
+ "nom_commercial": "Orizo",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "Orizo",
+ "aom": "CA du Grand Avignon (COGA)",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248400251",
+  "nom": "CA du Grand Avignon (COGA)"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "TECELYS SPL",
+    "http://www.giro.ca"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

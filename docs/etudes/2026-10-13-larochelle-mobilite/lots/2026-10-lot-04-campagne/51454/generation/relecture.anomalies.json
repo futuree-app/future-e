@@ -1,0 +1,39 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "À Murigny Sud-Centre, examinez aussi les possibilités pour rejoindre votre travail.",
+   "probleme": "La part de la voiture chez les actifs qui habitent ce secteur (`iris.514544502.voiture`, 81 %, tous lieux de travail confondus) devient un conseil propre à ce quartier pour le lecteur, comme si y habiter rendait l'accès au travail sans voiture plus difficile : une pratique est présentée comme une contrainte du secteur.",
+   "correction_minimale": "Rendre le conseil indépendant du secteur, par exemple : « Quel que soit le secteur, examinez aussi les possibilités pour rejoindre votre travail depuis l'adresse visitée. »"
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Dans ce secteur, **81 %** des actifs déclarent pourtant la voiture",
+   "probleme": "« Pourtant » laisse attendre que des commerces, une pharmacie et une école proches (`iris.514544502.panier_500m`) réduisent l'usage de la voiture pour aller travailler. Le dossier n'établit pas ce lien : la proximité ne se présente pas comme une cause des pratiques domicile-travail.",
+   "correction_minimale": "Supprimer « pourtant » (par exemple : « Dans ce secteur, 81 % des actifs déclarent la voiture… »)."
+  },
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier fait apparaître un contraste utile",
+   "probleme": "Cette phrase renvoie au dossier de rédaction, un document interne que le lecteur ne connaît pas.",
+   "correction_minimale": "Remplacer « le dossier fait apparaître » par « les données font apparaître »."
+  },
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Base adresse nationale et Base permanente des équipements",
+   "probleme": "L'année de la Base permanente des équipements (BPE 2025), source des parts d'adresses `iris.*.panier_500m`, ne figure ni dans le texte ni dans la méthode.",
+   "correction_minimale": "Écrire « Base permanente des équipements (INSEE, 2025) »."
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "au-delà de leur présence dans la même commune",
+   "probleme": "Grammaticalement, « leur » renvoie à « ces observations ». Le lecteur doit deviner qu'il s'agit du logement et du lieu de travail, et la phrase suppose en plus qu'il travaille à Reims.",
+   "correction_minimale": "Écrire « même si le logement et votre lieu de travail sont tous deux à Reims »."
+  }
+ ]
+}

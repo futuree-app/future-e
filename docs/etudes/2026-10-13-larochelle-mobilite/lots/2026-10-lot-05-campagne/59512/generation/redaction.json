@@ -1,0 +1,42 @@
+{
+ "etape": "redaction",
+ "cle": "bd82a37c0502b976",
+ "outil": "codex",
+ "version_outil": "codex-cli 0.160.0",
+ "modele": "gpt-6.1-sol",
+ "effort": "high",
+ "consignes_sha": "5ce0562195d9777e",
+ "entree_sha": "3ab75f9cf71a8cdc",
+ "debut": "2026-10-15T18:56:44Z",
+ "fin": "2026-10-15T18:58:44Z",
+ "duree_s": 120.1,
+ "code_retour": 0,
+ "authentification": {
+  "login_status": "Logged in using ChatGPT",
+  "auth_mode": "chatgpt",
+  "cle_api_dans_auth": false
+ },
+ "usage": {
+  "input_tokens": 33304,
+  "cached_input_tokens": 7680,
+  "output_tokens": 4911,
+  "reasoning_output_tokens": 2243
+ },
+ "cout_usd_equivalent": null,
+ "est_erreur": false,
+ "modele_effectif": [],
+ "modele_effectif_renvoye": false,
+ "session": "01a140ec-85db-7be1-855d-78b2c6d8b1df",
+ "contexte": {
+  "pieces": [
+   "complement.json",
+   "comparaison_voiture.json"
+  ],
+  "lecture": "dossier de session seulement",
+  "web": "désactivé",
+  "reseau": "refusé"
+ },
+ "appels_outils": [],
+ "erreurs": [],
+ "sortie_brute": ""
+}

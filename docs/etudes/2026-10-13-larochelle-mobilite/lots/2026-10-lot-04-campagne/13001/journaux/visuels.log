@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 13001 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/13001/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_13001.json --classes auto --communes  --reperes 130010102,130010801,130010905 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/13001/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 53,
+  "non_res": 1,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Aix-en-Provence découpée en 53 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 15 à 90 %). La part la plus basse est d'environ 19 % (Cardeurs), la plus élevée d'environ 84 % (Sud-Est Plateau Puyricard). 1 secteur d'activité exclu. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

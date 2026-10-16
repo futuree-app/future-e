@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "La carte permet de situer les annonces dans ces contrastes. Elle donne un repère pour orienter les visites",
+   "probleme": "La part de la voiture par secteur décrit les pratiques de 2022 des actifs qui y résident, quelle que soit leur commune de travail (iris.voiture.min, iris.voiture.max, section 3) ; s'en servir pour orienter les visites en fait une recommandation de quartier et laisse croire que s'installer dans un secteur peu motorisé ferait moins prendre la voiture au lecteur, un lien de cause que le dossier ne mesure pas.",
+   "correction_minimale": "Remplacer ces deux phrases par : « La carte situe ces parts secteur par secteur. Pendant les visites, une question précise reste à poser : quel parcours relie ce logement à votre travail ? »"
+  }
+ ]
+}

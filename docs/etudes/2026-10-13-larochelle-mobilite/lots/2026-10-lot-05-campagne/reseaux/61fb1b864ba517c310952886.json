@@ -1,0 +1,32 @@
+{
+ "version": 2,
+ "id": "61fb1b864ba517c310952886",
+ "titre": "Réseau urbain TAO",
+ "page": "https://transport.data.gouv.fr/datasets/gtfs-netex-et-gtfs-rt-reseau-tao-orleans-metropole",
+ "nom_commercial": "TAO",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TAO le Réseau de l'AgglO",
+ "aom": "Orléans Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "244500468",
+  "nom": "Orléans Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "TAO (Orléans)",
+    "http://reseau-tao.fr/"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [
+  [
+   "http://reseau-tao.fr/",
+   "inaccessible (URLError)"
+  ]
+ ],
+ "consulte_le": "2026-10-15"
+}

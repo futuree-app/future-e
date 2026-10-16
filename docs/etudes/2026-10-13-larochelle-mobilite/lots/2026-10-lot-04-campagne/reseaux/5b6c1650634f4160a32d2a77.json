@@ -1,0 +1,111 @@
+{
+ "version": 2,
+ "id": "5b6c1650634f4160a32d2a77",
+ "titre": "Réseau urbain Mistral",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-de-transport-urbain-de-la-metropole-toulon-provence-mediterranee",
+ "nom_commercial": "RESEAU MISTRAL",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "RESEAU MISTRAL",
+ "aom": "Métropole Toulon-Provence-Méditerranée",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248300543",
+  "nom": "Métropole Toulon-Provence-Méditerranée"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Réseau Mistral",
+    "https://www.reseaumistral.com/"
+   ],
+   [
+    "Téléphérique Faron",
+    "https://www.telepherique-faron.fr/"
+   ]
+  ]
+ },
+ "site": "https://www.reseaumistral.com/",
+ "sites_controles": [
+  [
+   "https://www.reseaumistral.com/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.gratuite_moins_3_ans",
+    "information": "Les enfants de moins de 3 ans circulent gratuitement sur les lignes du réseau. La page présente par ailleurs des titres payants, par exemple le ticket « 1 voyage terrestre » à 1,40 €. Le réseau n'est donc pas gratuit dans son ensemble.",
+    "url": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+    "extrait": "Les enfants - 3 ans circulent gratuitement sur les lignes du réseau.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 3 ans, lignes du réseau",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:25Z"
+   },
+   {
+    "id": "doc.tarification.gratuite_handicap",
+    "information": "L'abonnement « 1 an H » est indiqué gratuit pour les personnes handicapées résidant sur la Métropole.",
+    "url": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+    "extrait": "Personne handicapée (résidant sur la Métropole)",
+    "validite": "non précisée",
+    "perimetre": "Personnes handicapées résidant sur la Métropole TPM, abonnement « 1 an H »",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:25Z"
+   },
+   {
+    "id": "doc.horaires.validite_ligne1",
+    "information": "La page de la ligne de bus 1 donne deux périodes de validité des horaires : hiver du 01 septembre 2025 au 05 juillet 2026, et été du 06 juillet au 30 août 2026. À la date du jour (2026-10-15), ces deux périodes sont terminées. Les horaires en vigueur sont à vérifier.",
+    "url": "https://www.reseaumistral.com/se-deplacer/lignes/ligne-bus-1",
+    "extrait": "Du 01 septembre 2025 au 05 juillet 2026",
+    "validite": "Hiver : du 01 septembre 2025 au 05 juillet 2026. Été : du 06 juillet au 30 août 2026",
+    "perimetre": "Ligne de bus 1 uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:26Z"
+   },
+   {
+    "id": "doc.verification.lignes_horaires",
+    "information": "La page « Lignes et horaires » permet de rechercher les horaires de l'ensemble des lignes du réseau. Les détails de chaque ligne figurent sur sa page dédiée.",
+    "url": "https://www.reseaumistral.com/se-deplacer/lignes",
+    "extrait": "Rechercher l'ensemble des horaires des lignes traversant le réseau",
+    "validite": "non précisée",
+    "perimetre": "Ensemble des lignes du réseau",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:18:26Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification : gratuité totale ou par lignes",
+    "statut": "introuvable",
+    "url": "https://www.reseaumistral.com/titres-tarifs/titres-et-tarifs",
+    "note": "Aucune gratuité générale ni par ligne n'apparaît sur la page tarifs. La page signale seulement des catégories gratuites et un astérisque non expliqué pour les anciens combattants. La conclusion « non gratuit » vaut pour la page consultée et doit être confirmée."
+   },
+   {
+    "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+    "statut": "introuvable",
+    "url": "https://www.reseaumistral.com/se-deplacer/lignes/ligne-bus-1",
+    "note": "Ni la page « Lignes et horaires » ni la page de la ligne 1 ne donnent ces jours. Les fiches horaires PDF sont liées mais n'ont pas été lues : non vérifié."
+   },
+   {
+    "sujet": "Calcul d'itinéraire",
+    "statut": "non vérifié",
+    "url": "https://www.reseaumistral.com/se-deplacer/calcul-ditineraire",
+    "note": "La page existe, avec le titre « Calcul d'itinéraire ». Le contenu lu ne montre aucun formulaire, donc son fonctionnement n'est pas confirmé."
+   },
+   {
+    "sujet": "Temps réel et prochains passages",
+    "statut": "non vérifié",
+    "url": "https://www.reseaumistral.com/se-deplacer/prochains-passages",
+    "note": "L'accueil renvoie vers cette page et mentionne des « Horaires en temps réel » dans l'application. Je n'ai pas ouvert la page, et je n'ai pas d'extrait vérifié."
+   }
+  ]
+ }
+}

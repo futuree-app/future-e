@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "À Antony, quel secteur examiner pour utiliser moins la voiture ?",
+   "probleme": "Le titre pose une question qui appelle un secteur à recommander. Le récit y répond implicitement par le contraste entre Fontaine Mouton et Bas Graviers (iris.920020307.voiture, iris.920020406.voiture). Les pratiques des actifs d'un secteur deviennent ainsi une recommandation de quartier, et une pratique se lit comme un effet du lieu de résidence, alors que le dossier ne mesure aucun lien de cause entre un quartier et une pratique.",
+   "correction_minimale": "Formuler le titre comme une description des pratiques, par exemple : « À Antony, la place de la voiture selon le secteur et le lieu de travail »."
+  }
+ ]
+}

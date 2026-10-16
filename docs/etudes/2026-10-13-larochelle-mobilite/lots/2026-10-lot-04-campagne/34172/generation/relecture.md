@@ -1,0 +1,24 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "À Montpellier, quel secteur choisir pour utiliser moins la voiture ?",
+   "probleme": "Le titre promet une réponse sur le choix d'un secteur. Le seul appui sectoriel est la pratique des habitants (iris.voiture.min, iris.voiture.max) : le lecteur risque d'en déduire que s'installer à Saint-Roch fait moins conduire, ce que le dossier ne mesure pas.",
+   "correction_minimale": "Formuler le titre sur les pratiques observées, par exemple « À Montpellier, de Saint-Roch à Salaison, quelle place pour la voiture ? »."},
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Des équipements proches, y compris là où la voiture domine",
+   "probleme": "Le titre de section généralise le seul cas de Salaison. D'autres secteurs où la part de la voiture est élevée ont peu d'adresses avec le panier à moins de 500 m : Les Grèzes (71 % / 15 %), Grammont (66 % / 16 %), Aiguelongue (62 % / 9 %) (iris.<code>.panier_500m).",
+   "correction_minimale": "Remplacer « là où la voiture domine » par « à Salaison »."},
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "où la voiture est pourtant le mode principal le plus déclaré pour travailler",
+   "probleme": "« Pourtant » laisse entendre que la proximité des équipements (iris.341722101.panier_500m) devrait réduire l'usage de la voiture pour aller travailler (iris.voiture.max). Cela présente implicitement la proximité comme une cause des pratiques domicile-travail.",
+   "correction_minimale": "Supprimer « pourtant »."},
+  {"categorie": "population",
+   "gravite": "a_revoir",
+   "passage": "40 % utilisent principalement la voiture",
+   "probleme": "Le fait (destination.34172.voiture) ne porte que sur le mode principal pour aller travailler. Sans cette précision, un lecteur peut y voir l'usage de la voiture pour tous les déplacements.",
+   "correction_minimale": "Écrire « 40 % vont travailler principalement en voiture »."}
+]}
+```

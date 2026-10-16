@@ -1,0 +1,43 @@
+{"t": "2026-10-15T15:54:26Z", "evt": "preparation_debut", "lot": 1}
+{"t": "2026-10-15T15:56:29Z", "evt": "intervention", "texte": "Mise en place : phrase remplacée dans les huit articles, instrumentation de la chaîne pour la mesure, sélection, compteur /dev/lot, essais à blanc", "minutes": 22.0, "mesure": "estimée"}
+{"t": "2026-10-15T16:12:26Z", "evt": "inexploitable", "lot": 1, "insee": "59350", "motif": "à préparer; dossier : ValueError: cannot convert NaN to integer"}
+{"t": "2026-10-15T16:12:56Z", "evt": "preparation_fin", "lot": 1}
+{"t": "2026-10-15T16:13:57Z", "evt": "reprise_commune", "insee": "59350", "motif": "défaut de la chaîne corrigé (part sur zéro actif) ; Lille reprise en tête du lot 2"}
+{"t": "2026-10-15T16:14:03Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:14:04Z", "evt": "preparation_debut", "lot": 2}
+{"t": "2026-10-15T16:25:06Z", "evt": "preparation_fin", "lot": 2}
+{"t": "2026-10-15T16:25:16Z", "evt": "preparation_debut", "lot": 3}
+{"t": "2026-10-15T16:35:48Z", "evt": "preparation_fin", "lot": 3}
+{"t": "2026-10-15T16:39:12Z", "evt": "intervention", "texte": "Lot 1 : Lille (défaut NaN du dossier corrigé, reprise au lot 2) ; faux positif du contrôle sur les hypothèses du scénario carburant corrigé ; arrêt du lot pendant un rendu de visuels (aucun appel en cours) et relance", "minutes": 12.0, "mesure": "estimée"}
+{"t": "2026-10-15T16:39:12Z", "evt": "arret_relance", "lot": 1, "motif": "contrôle corrigé (hypothèses du scénario carburant) : le processus gardait l’ancienne version ; arrêt pendant les visuels de Nantes, aucun appel de modèle en cours ; la reprise ne refait aucun appel"}
+{"t": "2026-10-15T16:39:13Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:39:21Z", "evt": "preparation_debut", "lot": 4}
+{"t": "2026-10-15T16:49:15Z", "evt": "preparation_fin", "lot": 4}
+{"t": "2026-10-15T16:50:04Z", "evt": "arret_relance", "lot": 1, "motif": "contrôle corrigé (SP95-E10, base 100 km) ; arrêt pendant des visuels, aucun appel de modèle en cours"}
+{"t": "2026-10-15T16:50:12Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T16:50:16Z", "evt": "intervention", "texte": "Lot 1 : deux autres faux positifs du contrôle (SP95-E10, base 100 km) corrigés, essais de non-régression, second arrêt-relance pendant des visuels", "minutes": 8.0, "mesure": "estimée"}
+{"t": "2026-10-15T17:28:09Z", "evt": "suspension", "lot": 1, "etape": "rediger", "message": "suspendu par quota · « relecture » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "13001"}
+{"t": "2026-10-15T17:28:17Z", "evt": "production_debut", "lot": 2}
+{"t": "2026-10-15T17:28:20Z", "evt": "suspension", "lot": 2, "etape": "collecter", "message": "suspendu par quota · « collecte » : You've hit your session limit · resets 7:30pm (Europe/Paris)", "ou": "collecte"}
+{"t": "2026-10-15T18:00:38Z", "evt": "intervention", "texte": "Erreur du pilote : lot 2 lancé à 17:28 UTC alors que le lot 1 venait d'être suspendu par la limite de session Claude (fin prise pour une réussite) ; un appel de collecte refusé en 3 s, sans jeton consommé. Constat, commit et poussée de l'état suspendu", "minutes": 5.0, "mesure": "estimée"}
+{"t": "2026-10-15T18:00:42Z", "evt": "reprise", "lot": 1, "suspension_du": "2026-10-15T17:28:09Z"}
+{"t": "2026-10-15T18:00:42Z", "evt": "production_debut", "lot": 1}
+{"t": "2026-10-15T18:19:39Z", "evt": "production_fin", "lot": 1}
+{"t": "2026-10-15T18:19:48Z", "evt": "reprise", "lot": 2, "suspension_du": "2026-10-15T17:28:20Z"}
+{"t": "2026-10-15T18:19:48Z", "evt": "production_debut", "lot": 2}
+{"t": "2026-10-15T18:24:26Z", "evt": "arret_relance", "lot": 2, "motif": "contrôle corrigé (« « 1 » dans Trapèze 1 » : numéro de libellé) ; arrêt pendant des visuels, aucun appel de modèle en cours"}
+{"t": "2026-10-15T18:24:36Z", "evt": "intervention", "texte": "Fin du lot 1 : motifs recalculés, faux positif « « 1 » dans Trapèze 1 » corrigé, arrêt-relance du lot 2 pendant des visuels", "minutes": 7.0, "mesure": "estimée"}
+{"t": "2026-10-15T18:24:37Z", "evt": "production_debut", "lot": 2}
+{"t": "2026-10-15T19:32:25Z", "evt": "production_fin", "lot": 2}
+{"t": "2026-10-15T19:32:40Z", "evt": "production_debut", "lot": 3}
+{"t": "2026-10-15T19:38:13Z", "evt": "arret_relance", "lot": 3, "motif": "contrôle corrigé (règle générale : une ligne de correspondance qui justifie un libellé ne porte pas de valeur) ; arrêt pendant des visuels, aucun appel de modèle en cours"}
+{"t": "2026-10-15T19:38:24Z", "evt": "intervention", "texte": "Fin du lot 2 : six faux positifs de libellés remplacés par une règle générale du contrôle (ligne qui justifie un libellé), vérification sur 58 articles et par falsification, motifs des lots 1 et 2 recalculés, arrêt-relance du lot 3 pendant des visuels", "minutes": 10.0, "mesure": "estimée"}
+{"t": "2026-10-15T19:38:41Z", "evt": "production_debut", "lot": 3}
+{"t": "2026-10-15T20:43:53Z", "evt": "production_fin", "lot": 3}
+{"t": "2026-10-15T20:44:06Z", "evt": "production_debut", "lot": 4}
+{"t": "2026-10-15T20:44:46Z", "evt": "intervention", "texte": "Fin du lot 3 : faux positif « Paris 8e Arrondissement » (Saint-Maur-des-Fossés) ; noms des communes de travail traités comme les noms de secteurs ; vérification sur 78 articles et par falsification ; lot 4 non redémarré (cas rare)", "minutes": 6.0, "mesure": "estimée"}
+{"t": "2026-10-15T20:53:51Z", "evt": "suspension", "lot": 4, "etape": "rediger", "message": "suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)", "ou": "92024"}
+{"t": "2026-10-15T23:01:56Z", "evt": "reprise", "lot": 4, "suspension_du": "2026-10-15T20:53:51Z"}
+{"t": "2026-10-15T23:01:56Z", "evt": "production_debut", "lot": 4}
+{"t": "2026-10-15T23:57:40Z", "evt": "production_fin", "lot": 4}
+{"t": "2026-10-15T23:58:54Z", "evt": "intervention", "texte": "Fin de campagne : reprise du lot 4 après la limite (23:01 UTC), motifs recalculés, classement carburant d'Ajaccio corrigé dans le bilan (ordre de grandeur, pas exception), vérification des compteurs de collecte, bilan final, FUT-100", "minutes": 15.0, "mesure": "estimée"}

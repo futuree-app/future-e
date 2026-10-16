@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5f11962cc694e04ea707f124",
+ "titre": "Réseau urbain Impulsyon",
+ "page": "https://transport.data.gouv.fr/datasets/reseau-de-transport-impulsyon-a-la-roche-sur-yon",
+ "nom_commercial": "Impulsyon",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "Impulsyon",
+ "aom": "CA La Roche sur Yon - Agglomération",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "248500589",
+  "nom": "CA La Roche-sur-Yon - Agglomération"
+ },
+ "mis_a_jour": "2026-09-27",
+ "agence": {
+  "agences": [
+   [
+    "Agence par défaut",
+    "https://orchestra.ratpdev.com"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

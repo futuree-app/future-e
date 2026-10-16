@@ -1,0 +1,107 @@
+## A. Question et format
+
+**Question principale :** à Toulouse, comment choisir un secteur pour utiliser moins la voiture, en tenant compte de son lieu de travail et des déplacements du quotidien ?
+
+Les écarts entre secteurs donnent un premier repérage ; les pratiques selon la commune de travail invitent ensuite à examiner le trajet propre au lecteur. La proximité des équipements complète cette lecture pour une recherche de logement. Appuis principaux : `iris.voiture.min`, `iris.voiture.max`, `destination.31555.voiture`, `destination.31069.voiture`, `destination.31149.voiture`, `iris.315550102.panier_500m` et `iris.315555503.panier_500m`.
+
+**Format retenu : article court**, avec l’ouverture carburant obligatoire et deux visuels. Les pistes sur la possession automobile, le stationnement et les actifs venant travailler à Toulouse sont écartées pour garder le fil du choix d’une adresse.
+
+## B. Article
+
+# À Toulouse, quel secteur regarder pour utiliser moins la voiture ?
+
+Entre la semaine du 6 octobre 2025 et celle du 5 octobre 2026, le prix médian du carburant augmente autour de Toulouse : +0,71 €/L pour le gazole et +0,51 €/L pour le SP95-E10. Ces hausses concernent les stations situées dans un rayon de 12 km à vol d’oiseau autour du centre communal. Pour qui cherche un logement, elles donnent une raison concrète d’examiner les déplacements qui accompagneront cette adresse.
+
+## Ce que la distance change au surcoût
+
+Le scénario suivant retient une consommation de 6 L/100 km et 200 allers-retours domicile-travail par an. Les hausses sont arrondies à 5 centimes : +0,70 €/L pour le gazole et +0,50 €/L pour le SP95-E10. Il chiffre uniquement le surcoût annuel de carburant, sans l’attribuer à un secteur ou à une destination.
+
+[VISUEL : Tableau du scénario de surcoût de carburant]
+
+| Distance du trajet aller | Gazole : surcoût annuel | SP95-E10 : surcoût annuel |
+|---|---:|---:|
+| 5 km | environ 80 € | environ 60 € |
+| 15 km | environ 250 € | environ 180 € |
+| 35 km | environ 590 € | environ 420 € |
+
+Pour orienter une recherche à Toulouse, reste à regarder où la voiture est utilisée pour travailler, puis les trajets que votre propre adresse demanderait.
+
+## Des pratiques très différentes selon le secteur
+
+Les pratiques du recensement 2022 montrent un contraste marqué. Parmi les actifs qui habitent chaque secteur, quelle que soit leur commune de travail, la voiture est le mode principal pour aller travailler de 14 % à Saint-Rome, contre 74 % à Saint-Simon Ouest.
+
+[VISUEL : Carte de la part de la voiture par secteur (IRIS)]
+
+La carte permet de situer les secteurs à examiner pendant vos recherches. Une annonce prend ensuite son sens avec votre destination : parmi les actifs résidant à Toulouse qui travaillent à Toulouse même, 40 % utilisent principalement la voiture. Cette part est de 59 % parmi ceux qui travaillent à Blagnac et de 70 % parmi ceux qui travaillent à Colomiers.
+
+Pour sélectionner des annonces, gardez donc votre lieu de travail à côté de la carte des secteurs. Le repérage devient utile lorsqu’il conduit à examiner un trajet précis.
+
+## Rapprocher aussi les courses et l’école
+
+Le travail ne couvre qu’une partie des déplacements. Si votre déménagement vise aussi à rapprocher les courses et l’école, les équipements autour du logement méritent leur propre examen.
+
+À Saint-Rome, toutes les adresses ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m à vol d’oiseau. À Saint-Simon Ouest, cette part est de 24 %. Lors d’une visite, parcourez les chemins entre le logement et les équipements qui vous seraient utiles : la distance à vol d’oiseau ne décrit pas le chemin à pied.
+
+Pour examiner le trajet vers votre emploi, le site [Tisséo](https://www.tisseo.fr/) propose un formulaire « De / À / Quand ». Sa page Itinéraires renvoie également vers l’application du réseau, pour le calcul d’itinéraire avec le temps réel. Renseignez les jours et les horaires correspondant à votre organisation.
+
+## Votre projet, votre adresse
+
+Vous cherchez à vous rapprocher du travail ou à vous installer en famille en utilisant moins la voiture ? Avec futur•e, explorez l’adresse envisagée à partir de ce projet, pour voir comment elle s’inscrit dans le quotidien que vous souhaitez construire.
+
+### Méthode et sources
+
+Les pratiques domicile-travail proviennent du recensement INSEE, fichier Mobilités professionnelles et bases infracommunales. Ce sont des estimations par sondage ; les secteurs sont des IRIS statistiques, dont les noms peuvent différer des quartiers d’usage. Les comparaisons selon la commune de travail portent sur des groupes distincts et ne mesurent pas l’effet d’un déménagement.
+
+La proximité des équipements repose sur la Base adresse nationale et la Base permanente des équipements de l’INSEE, millésime 2025. Elle décrit des adresses, sans mesurer l’usage des établissements. Les prix proviennent du flux officiel de prix-carburants.gouv.fr ; les stations prises en compte peuvent différer entre les semaines comparées. Les informations sur l’outil d’itinéraire proviennent du site officiel Tisséo.
+
+## C. Correspondance interne — non publiée
+
+| Passage | Chiffre écrit | Identifiant(s) | Usage |
+|---|---|---|---|
+| Chapeau : semaine initiale | 6 octobre 2025 | `carburant.gazole.prix_un_an_avant`, `carburant.e10.prix_un_an_avant` | oui |
+| Chapeau : semaine finale | 5 octobre 2026 | `carburant.gazole.prix`, `carburant.e10.prix` | oui |
+| Chapeau : hausse du gazole | +0,71 €/L | `carburant.gazole.ecart` | oui |
+| Chapeau : hausse du SP95-E10 | +0,51 €/L | `carburant.e10.ecart` | oui |
+| Chapeau : périmètre des stations | 12 km à vol d’oiseau | `carburant.gazole.ecart`, `carburant.e10.ecart` | oui |
+| Hypothèses : consommation | 6 L/100 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses : déplacements annuels | 200 allers-retours | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses : arrondi | 5 centimes | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` — hypothèses communes de la section 7 | oui |
+| Hypothèses : hausse du gazole | +0,70 €/L | `scenario.carburant.gazole.5km` | oui |
+| Hypothèses : hausse du SP95-E10 | +0,50 €/L | `scenario.carburant.e10.5km` | oui |
+| Tableau : trajet aller | 5 km | `scenario.carburant.gazole.5km`, `scenario.carburant.e10.5km` | oui |
+| Tableau : surcoût gazole | environ 80 € | `scenario.carburant.gazole.5km` | oui |
+| Tableau : surcoût SP95-E10 | environ 60 € | `scenario.carburant.e10.5km` | oui |
+| Tableau : trajet aller | 15 km | `scenario.carburant.gazole.15km`, `scenario.carburant.e10.15km` | oui |
+| Tableau : surcoût gazole | environ 250 € | `scenario.carburant.gazole.15km` | oui |
+| Tableau : surcoût SP95-E10 | environ 180 € | `scenario.carburant.e10.15km` | oui |
+| Tableau : trajet aller | 35 km | `scenario.carburant.gazole.35km`, `scenario.carburant.e10.35km` | oui |
+| Tableau : surcoût gazole | environ 590 € | `scenario.carburant.gazole.35km` | oui |
+| Tableau : surcoût SP95-E10 | environ 420 € | `scenario.carburant.e10.35km` | oui |
+| Pratiques : millésime | 2022 | `iris.voiture.min`, `iris.voiture.max`, `destination.31555.voiture`, `destination.31069.voiture`, `destination.31149.voiture` | oui |
+| Pratiques : Saint-Rome | 14 % | `iris.voiture.min` | oui |
+| Pratiques : Saint-Simon Ouest | 74 % | `iris.voiture.max` | oui |
+| Destination : travail à Toulouse | 40 % | `destination.31555.voiture` | oui |
+| Destination : travail à Blagnac | 59 % | `destination.31069.voiture` | oui |
+| Destination : travail à Colomiers | 70 % | `destination.31149.voiture` | oui |
+| Équipements : Saint-Rome | toutes les adresses — 100 % | `iris.315550102.panier_500m` | oui |
+| Équipements : seuil de proximité | moins de 500 m à vol d’oiseau | `iris.315550102.panier_500m`, `iris.315555503.panier_500m` | oui |
+| Équipements : Saint-Simon Ouest | 24 % | `iris.315555503.panier_500m` | oui |
+| Méthode : millésime des équipements | 2025 | `iris.315550102.panier_500m`, `iris.315555503.panier_500m` — source BPE donnée dans le dossier | oui |
+
+Les mentions du formulaire et de l’application Tisséo reposent sur `doc.reseau.site` et `doc.verification.itineraire` ; elles ne comportent aucun chiffre.
+
+## D. Visuels et vérifications restantes
+
+| Nom exact du visuel retenu | Emplacement | Étape manuelle indiquée par le dossier |
+|---|---|---|
+| Tableau du scénario de surcoût de carburant | Au début, après les hypothèses du scénario | Aucune. Le tableau est intégré au brouillon. |
+| Carte de la part de la voiture par secteur (IRIS) | Après le contraste entre Saint-Rome et Saint-Simon Ouest | Aucune pour la production automatique ; secteurs cités repérés par des numéros accompagnés de leur liste. Libellés à poser à la main seulement pour une version soignée. |
+
+La carte reste à produire. Elle devra porter le millésime des pratiques ; le tableau devra rappeler les périodes de prix comparées.
+
+Vérifications avant publication concernant les faits utilisés :
+
+- **Carburant et scénario — `carburant.evolution` :** réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Vérification obligatoire avant publication.
+- **Noms des secteurs — `iris.ecart_voiture` :** relire les libellés Saint-Rome et Saint-Simon Ouest. Le brouillon les désigne comme des secteurs statistiques.
+
+Aucun autre doute de lecture relevé.

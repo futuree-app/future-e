@@ -1,0 +1,61 @@
+{
+ "version": 2,
+ "id": "67f5bad303325228295b7dff",
+ "titre": "Réseau urbain et scolaire TBM",
+ "page": "https://transport.data.gouv.fr/datasets/offres-de-services-bus-tram-et-scolaire-au-format-gtfs-netex-gtfs-rt-siri-lite",
+ "nom_commercial": "TBM",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "TBM - Transports Bordeaux Métropole",
+ "aom": "Bordeaux Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "243300316",
+  "nom": "Bordeaux Métropole"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "TBM",
+    "http://www.infotbm.com"
+   ]
+  ]
+ },
+ "site": "https://www.infotbm.com/fr",
+ "sites_controles": [
+  [
+   "http://www.infotbm.com",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [],
+  "recherches": [
+   {
+    "sujet": "Tarification (gratuité, public, lignes, exceptions)",
+    "statut": "introuvable",
+    "url": "https://www.infotbm.com/fr",
+    "note": "La page d'accueil ne donne aucune information tarifaire exploitable. L'URL https://www.infotbm.com/fr/tarifs renvoie une erreur 404. Je n'ai pas essayé d'autres pages tarifaires. Je ne conclus pas à l'absence de gratuité."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines et période de validité des horaires",
+    "statut": "introuvable",
+    "url": "https://www.infotbm.com/fr/horaires",
+    "note": "La page s'ouvre, mais l'outil n'a renvoyé qu'un résumé de ses thèmes (jours de service, validité des horaires, fiches horaires, calcul d'itinéraire, temps réel). Je n'ai aucun texte exact de la page, donc aucun extrait vérifiable ni aucun jour ou période précis."
+   },
+   {
+    "sujet": "Où vérifier un trajet (calcul d'itinéraire, fiches horaires, temps réel)",
+    "statut": "non vérifié",
+    "url": "https://www.infotbm.com/fr/horaires",
+    "note": "La page « Horaires et prochains passages » semble regrouper calcul d'itinéraire, fiches horaires et temps réel. Je n'ai pas pu en copier d'extrait exact, ni identifier les URL précises de ces outils. Il faut donc une vérification manuelle."
+   }
+  ]
+ },
+ "reutilise_de": {
+  "lot": "2026-10-lot-04-campagne",
+  "collecte_du": "2026-10-15",
+  "regle": "même jeu de données, collecte de moins de 30 jours"
+ }
+}

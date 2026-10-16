@@ -1,0 +1,52 @@
+· Sankéo : collecte déjà faite le 2026-10-15 : aucun appel
+· TAO : aucun site joignable, collecte impossible
+· Astuce : collecte déjà faite le 2026-10-15 : aucun appel
+· Orizo : aucun site joignable, collecte impossible
+· DK'BUS : aucun site joignable, collecte impossible
+
+Commune                INSEE  État                   Préparation  Motif
+Lille                  59350  à corriger                  50.3 s  
+Perpignan              66136  dossier prêt                32.6 s  
+Orléans                45234  dossier prêt                45.5 s  
+Rouen                  76540  dossier prêt                37.2 s  
+Saint-Denis            93066  dossier prêt                24.6 s  
+Montreuil              93048  dossier prêt                22.0 s  
+Argenteuil             95018  dossier prêt                28.0 s  
+Mulhouse               68224  dossier prêt                34.2 s  
+Nancy                  54395  dossier prêt                31.7 s  
+Tourcoing              59599  dossier prêt                79.2 s  
+Roubaix                59512  dossier prêt                65.3 s  
+Nanterre               92050  dossier prêt                23.0 s  
+Vitry-sur-Seine        94081  dossier prêt                24.7 s  
+Créteil                94028  dossier prêt                19.9 s  
+Avignon                84007  dossier prêt                30.8 s  
+Aubervilliers          93001  dossier prêt                18.8 s  
+Asnières-sur-Seine     92004  dossier prêt                18.4 s  
+Colombes               92025  dossier prêt                20.0 s  
+Dunkerque              59183  dossier prêt                32.3 s  
+Aulnay-sous-Bois       93005  dossier prêt                20.5 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 0.45 $
+
+Commune                INSEE  État                   Préparation  Motif
+Lille                  59350  prêt à relire               50.3 s  2 anomalie(s) déterministe(s) après la correction unique
+Perpignan              66136  prêt à relire               32.6 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Orléans                45234  prêt à relire               45.5 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Rouen                  76540  prêt à relire               37.2 s  
+Saint-Denis            93066  prêt à relire               24.6 s  2 anomalie(s) déterministe(s) après la correction unique
+Montreuil              93048  prêt à relire               22.0 s  2 anomalie(s) déterministe(s) après la correction unique
+Argenteuil             95018  prêt à relire               28.0 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Mulhouse               68224  prêt à relire               34.2 s  
+Nancy                  54395  prêt à relire               31.7 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Tourcoing              59599  prêt à relire               79.2 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Roubaix                59512  prêt à relire               65.3 s  
+Nanterre               92050  prêt à relire               23.0 s  
+Vitry-sur-Seine        94081  prêt à relire               24.7 s  
+Créteil                94028  prêt à relire               19.9 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Avignon                84007  prêt à relire               30.8 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Aubervilliers          93001  prêt à relire               18.8 s  
+Asnières-sur-Seine     92004  prêt à relire               18.4 s  
+Colombes               92025  prêt à relire               20.0 s  
+Dunkerque              59183  prêt à relire               32.3 s  
+Aulnay-sous-Bois       93005  prêt à relire               20.5 s  1 anomalie(s) déterministe(s) après la correction unique
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 7.42 $
+bilan : 60 communes distinctes ; 518 lignes de mesure

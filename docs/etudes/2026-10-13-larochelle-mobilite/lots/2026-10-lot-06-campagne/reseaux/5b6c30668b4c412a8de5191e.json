@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "5b6c30668b4c412a8de5191e",
+ "titre": "Réseau urbain beeMob",
+ "page": "https://transport.data.gouv.fr/datasets/horaires-theoriques-et-temps-reel-du-reseau-de-transports-beemob-beziers-mediterranee",
+ "nom_commercial": "beemob",
+ "preuve_nom": "offre de transport.data.gouv.fr confirmée par l'intitulé ou l'agence du GTFS",
+ "offre_tdg": "beemob",
+ "aom": "CA de Béziers-Méditerranée",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "243400769",
+  "nom": "CA de Béziers-Méditerranée"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "RDBM",
+    "https://beemob.fr/fr/"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

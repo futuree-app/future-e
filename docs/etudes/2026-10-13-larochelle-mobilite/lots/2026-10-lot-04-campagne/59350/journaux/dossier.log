@@ -1,0 +1,21 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python outil/dossier_redaction.py --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/59350/fiche/fiche.json --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-04-campagne/59350/dossier --origine-voisines automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)
+
+
+Traceback (most recent call last):
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 563, in <module>
+    main()
+    ~~~~^^
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 400, in main
+    open(os.path.join(a.out, "dossier.md"), "w").write(rendu_md(dossier, sources_gtfs))
+                                                       ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 489, in rendu_md
+    L.append(f"| {s['code']} | {s['nom']} | {st} | `{s['usage']}` | {s['actifs']} | {P(s['voiture'])} | {P(s['velo'])} | {P(s['tc'])} | {P(s['marche'])} | "
+                                                                                     ~^^^^^^^^^^^^^^
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 484, in <lambda>
+    P = lambda v: "n.d." if v is None else pct(v)
+                                           ~~~^^^
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 106, in pct
+    a = arrondi(p * 100)
+  File "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/outil/dossier_redaction.py", line 99, in arrondi
+    return int(Decimal(repr(x)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+ValueError: cannot convert NaN to integer

@@ -1,0 +1,84 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 32 % (Ralliement) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 35 % (Boisnet) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 28 % (marche Voltaire) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 33 % (marche Boisnet) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 23 % (vélo Brisepotière) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Secteurs",
+   "detail": "« 33 % (TC Henri Dunant) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Lieu de travail",
+   "detail": "« 61 % (Nantes, TC) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Courses",
+   "detail": "« 98 % (Voltaire) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Courses",
+   "detail": "« 69 % (Europe) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Courses",
+   "detail": "« 6 % (Vauban) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Courses",
+   "detail": "« 48 % (Vauban) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Vérifications",
+   "detail": "« 17 % (Voltaire) » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Vérifications",
+   "detail": "« 19 % (Ralliement) » sans identifiant"
+  }
+ ],
+ "bloquantes": 13
+}

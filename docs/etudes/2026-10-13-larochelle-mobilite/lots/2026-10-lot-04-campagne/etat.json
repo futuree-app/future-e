@@ -1,0 +1,2073 @@
+{
+ "communes": {
+  "31555": {
+   "nom": "Toulouse",
+   "insee": "31555",
+   "demande": "31555",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T15:54:29Z",
+     "fin": "2026-10-15T15:55:18Z",
+     "duree_s": 48.8,
+     "duree_calcul_s": 48.8
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T15:55:18Z",
+     "fin": "2026-10-15T15:55:26Z",
+     "duree_s": 8.3,
+     "duree_calcul_s": 8.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:40Z",
+     "fin": "2026-10-15T16:14:40Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:14:40Z",
+     "fin": "2026-10-15T16:14:40Z",
+     "duree_s": 0.2,
+     "complement_sha": "958569a4a2b60e3b",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "89185ca70092c7b3"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "146 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 57.6,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T15:55:26Z",
+     "fin": "2026-10-15T15:55:27Z",
+     "duree_s": 0.3
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T15:55:27Z",
+     "fin": "2026-10-15T15:55:27Z",
+     "duree_s": 0.2,
+     "complement_sha": "eaaf7c6883372bca",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "28f0bac2f7209a65"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "89185ca70092c7b3",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_31555_clair.png",
+     "carte_iris_31555_clair.svg",
+     "carte_iris_31555_mobile_clair.png",
+     "carte_iris_31555_mobile_clair.svg",
+     "carte_iris_31555_mobile_sombre.png",
+     "carte_iris_31555_mobile_sombre.svg",
+     "carte_iris_31555_sombre.png",
+     "carte_iris_31555_sombre.svg",
+     "tableau_carburant_31555.html",
+     "tableau_carburant_31555.md",
+     "tableau_iris_31555.html",
+     "tableau_iris_31555.md"
+    ],
+    "reperes": [
+     "315550102",
+     "315555503"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:24:59Z",
+    "fin": "2026-10-15T16:26:49Z",
+    "duree_s": 109.9
+   }
+  },
+  "06088": {
+   "nom": "Nice",
+   "insee": "06088",
+   "demande": "06088",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T15:55:27Z",
+     "fin": "2026-10-15T15:56:13Z",
+     "duree_s": 45.9,
+     "duree_calcul_s": 45.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T15:56:13Z",
+     "fin": "2026-10-15T15:56:21Z",
+     "duree_s": 8.5,
+     "duree_calcul_s": 8.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:15Z",
+     "fin": "2026-10-15T16:15:15Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:15Z",
+     "fin": "2026-10-15T16:15:15Z",
+     "duree_s": 0.2,
+     "complement_sha": "5eddaba9be12835b",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "3dcf028beb23a3fa"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "144 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 55.6,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T15:56:21Z",
+     "fin": "2026-10-15T15:56:22Z",
+     "duree_s": 1.0
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T15:56:22Z",
+     "fin": "2026-10-15T15:56:22Z",
+     "duree_s": 0.2,
+     "complement_sha": "095ab1371ad96163",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "5a1aa2313ab1c367"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "3dcf028beb23a3fa",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_06088_clair.png",
+     "carte_iris_06088_clair.svg",
+     "carte_iris_06088_mobile_clair.png",
+     "carte_iris_06088_mobile_clair.svg",
+     "carte_iris_06088_mobile_sombre.png",
+     "carte_iris_06088_mobile_sombre.svg",
+     "carte_iris_06088_sombre.png",
+     "carte_iris_06088_sombre.svg",
+     "tableau_carburant_06088.html",
+     "tableau_carburant_06088.md",
+     "tableau_iris_06088.html",
+     "tableau_iris_06088.md"
+    ],
+    "reperes": [
+     "060880103",
+     "060883501",
+     "060880905"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:31:13Z",
+    "fin": "2026-10-15T16:35:14Z",
+    "duree_s": 241.4
+   }
+  },
+  "44109": {
+   "nom": "Nantes",
+   "insee": "44109",
+   "demande": "44109",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T15:56:22Z",
+     "fin": "2026-10-15T15:57:25Z",
+     "duree_s": 62.3,
+     "duree_calcul_s": 62.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T15:57:25Z",
+     "fin": "2026-10-15T15:57:40Z",
+     "duree_s": 14.8,
+     "duree_calcul_s": 14.8
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:48Z",
+     "fin": "2026-10-15T16:15:48Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:15:48Z",
+     "fin": "2026-10-15T16:15:48Z",
+     "duree_s": 0.2,
+     "complement_sha": "db16aa916973745b",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "b1808cce81d35485"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "90 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 78.0,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T15:57:40Z",
+     "fin": "2026-10-15T15:57:40Z",
+     "duree_s": 0.6
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T15:57:40Z",
+     "fin": "2026-10-15T15:57:41Z",
+     "duree_s": 0.3,
+     "complement_sha": "3ddecda525d08e81",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "f189acfc6c6ebe85"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "b1808cce81d35485",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_44109_clair.png",
+     "carte_iris_44109_clair.svg",
+     "carte_iris_44109_mobile_clair.png",
+     "carte_iris_44109_mobile_clair.svg",
+     "carte_iris_44109_mobile_sombre.png",
+     "carte_iris_44109_mobile_sombre.svg",
+     "carte_iris_44109_sombre.png",
+     "carte_iris_44109_sombre.svg",
+     "tableau_carburant_44109.html",
+     "tableau_carburant_44109.md",
+     "tableau_iris_44109.html",
+     "tableau_iris_44109.md"
+    ],
+    "reperes": [
+     "441090106",
+     "441090804",
+     "441090802"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:39:14Z",
+    "fin": "2026-10-15T16:40:25Z",
+    "duree_s": 71.5
+   }
+  },
+  "34172": {
+   "nom": "Montpellier",
+   "insee": "34172",
+   "demande": "34172",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T15:57:41Z",
+     "fin": "2026-10-15T15:59:09Z",
+     "duree_s": 88.2,
+     "duree_calcul_s": 88.2
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T15:59:09Z",
+     "fin": "2026-10-15T15:59:23Z",
+     "duree_s": 14.6,
+     "duree_calcul_s": 14.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:11Z",
+     "fin": "2026-10-15T16:16:11Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:11Z",
+     "fin": "2026-10-15T16:16:12Z",
+     "duree_s": 0.3,
+     "complement_sha": "012f836532a65f16",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "2fcad862c21f689e"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "83 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 103.3,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T15:59:23Z",
+     "fin": "2026-10-15T15:59:24Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T15:59:24Z",
+     "fin": "2026-10-15T15:59:24Z",
+     "duree_s": 0.3,
+     "complement_sha": "61d62372b822f8af",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "73789c82c0ff0ea6"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "2fcad862c21f689e",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_34172_clair.png",
+     "carte_iris_34172_clair.svg",
+     "carte_iris_34172_mobile_clair.png",
+     "carte_iris_34172_mobile_clair.svg",
+     "carte_iris_34172_mobile_sombre.png",
+     "carte_iris_34172_mobile_sombre.svg",
+     "carte_iris_34172_sombre.png",
+     "carte_iris_34172_sombre.svg",
+     "tableau_carburant_34172.html",
+     "tableau_carburant_34172.md",
+     "tableau_iris_34172.html",
+     "tableau_iris_34172.md"
+    ],
+    "reperes": [
+     "341722504",
+     "341722101"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:44:15Z",
+    "fin": "2026-10-15T16:45:17Z",
+    "duree_s": 62.3
+   }
+  },
+  "67482": {
+   "nom": "Strasbourg",
+   "insee": "67482",
+   "demande": "67482",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T15:59:24Z",
+     "fin": "2026-10-15T16:00:14Z",
+     "duree_s": 49.8,
+     "duree_calcul_s": 49.8
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:00:14Z",
+     "fin": "2026-10-15T16:00:23Z",
+     "duree_s": 9.5,
+     "duree_calcul_s": 9.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:45Z",
+     "fin": "2026-10-15T16:16:45Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:16:45Z",
+     "fin": "2026-10-15T16:16:45Z",
+     "duree_s": 0.1,
+     "complement_sha": "2860977a74368d5e",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "7d1b64047b315db6"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "100 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 60.1,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:00:23Z",
+     "fin": "2026-10-15T16:00:24Z",
+     "duree_s": 0.6
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:00:24Z",
+     "fin": "2026-10-15T16:00:24Z",
+     "duree_s": 0.2,
+     "complement_sha": "ba32c2813fcb4a73",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "fc7b8259460a58e8"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "7d1b64047b315db6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_67482_clair.png",
+     "carte_iris_67482_clair.svg",
+     "carte_iris_67482_mobile_clair.png",
+     "carte_iris_67482_mobile_clair.svg",
+     "carte_iris_67482_mobile_sombre.png",
+     "carte_iris_67482_mobile_sombre.svg",
+     "carte_iris_67482_sombre.png",
+     "carte_iris_67482_sombre.svg",
+     "tableau_carburant_67482.html",
+     "tableau_carburant_67482.md",
+     "tableau_iris_67482.html",
+     "tableau_iris_67482.md"
+    ],
+    "reperes": [
+     "674820202",
+     "674823002",
+     "674821802"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:50:13Z",
+    "fin": "2026-10-15T16:50:55Z",
+    "duree_s": 41.5
+   }
+  },
+  "33063": {
+   "nom": "Bordeaux",
+   "insee": "33063",
+   "demande": "33063",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:00:24Z",
+     "fin": "2026-10-15T16:01:28Z",
+     "duree_s": 63.7,
+     "duree_calcul_s": 63.7
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:01:28Z",
+     "fin": "2026-10-15T16:01:36Z",
+     "duree_s": 8.0,
+     "duree_calcul_s": 8.0
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:05Z",
+     "fin": "2026-10-15T16:17:05Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:05Z",
+     "fin": "2026-10-15T16:17:05Z",
+     "duree_s": 0.2,
+     "complement_sha": "1c25beaa071531f2",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "b639346b083f8dbd"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "85 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 72.4,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:01:36Z",
+     "fin": "2026-10-15T16:01:36Z",
+     "duree_s": 0.4
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:01:36Z",
+     "fin": "2026-10-15T16:01:36Z",
+     "duree_s": 0.3,
+     "complement_sha": "69f48c45c5d57f5b",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "bfde8eb260df79fd"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "b639346b083f8dbd",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_33063_clair.png",
+     "carte_iris_33063_clair.svg",
+     "carte_iris_33063_mobile_clair.png",
+     "carte_iris_33063_mobile_clair.svg",
+     "carte_iris_33063_mobile_sombre.png",
+     "carte_iris_33063_mobile_sombre.svg",
+     "carte_iris_33063_sombre.png",
+     "carte_iris_33063_sombre.svg",
+     "tableau_carburant_33063.html",
+     "tableau_carburant_33063.md",
+     "tableau_iris_33063.html",
+     "tableau_iris_33063.md"
+    ],
+    "reperes": [
+     "330630504",
+     "330630802"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:54:25Z",
+    "fin": "2026-10-15T16:54:52Z",
+    "duree_s": 26.9
+   }
+  },
+  "59350": {
+   "nom": "Lille",
+   "insee": "59350",
+   "demande": "59350",
+   "statut": "à préparer",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:01:36Z",
+     "fin": "2026-10-15T16:02:42Z",
+     "duree_s": 65.9,
+     "duree_calcul_s": 65.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:02:42Z",
+     "fin": "2026-10-15T16:02:51Z",
+     "duree_s": 8.3,
+     "duree_calcul_s": 8.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:02:51Z",
+     "fin": "2026-10-15T16:02:51Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": false,
+     "debut": "2026-10-15T16:12:26Z",
+     "fin": "2026-10-15T16:12:26Z",
+     "duree_s": 0.1,
+     "erreur": "ValueError: cannot convert NaN to integer"
+    }
+   },
+   "duree_preparation_s": 74.4,
+   "reprise_preparation": {
+    "le": "2026-10-15T16:12:22Z",
+    "motif": "échec au premier passage (à préparer; dossier : ValueError: cannot convert NaN to integer) : une reprise, au cas où l'erreur serait passagère"
+   },
+   "tentatives": [
+    {
+     "etape": "dossier",
+     "ok": false,
+     "debut": "2026-10-15T16:02:51Z",
+     "fin": "2026-10-15T16:02:51Z",
+     "duree_s": 0.2,
+     "erreur": "ValueError: cannot convert NaN to integer"
+    }
+   ],
+   "inexploitable": "échec du dossier au lot 1 (défaut de la chaîne : un secteur sans actif, « Strasbourg », donnait une part indéfinie qui faisait planter la mise en forme) ; défaut corrigé dans outil/dossier_redaction.py, Lille reprise en tête du lot 2"
+  },
+  "35238": {
+   "nom": "Rennes",
+   "insee": "35238",
+   "demande": "35238",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:02:51Z",
+     "fin": "2026-10-15T16:03:27Z",
+     "duree_s": 36.5,
+     "duree_calcul_s": 36.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:03:27Z",
+     "fin": "2026-10-15T16:03:36Z",
+     "duree_s": 8.0,
+     "duree_calcul_s": 8.0
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:46Z",
+     "fin": "2026-10-15T16:17:46Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:17:46Z",
+     "fin": "2026-10-15T16:17:46Z",
+     "duree_s": 0.1,
+     "complement_sha": "dbb884c4fb68cf2f",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "08009b895a19c5d2"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "85 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 45.1,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:03:36Z",
+     "fin": "2026-10-15T16:03:36Z",
+     "duree_s": 0.3
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:03:36Z",
+     "fin": "2026-10-15T16:03:36Z",
+     "duree_s": 0.3,
+     "complement_sha": "7516150d7a80666e",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "b0624ed28dd3c768"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "08009b895a19c5d2",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_35238_clair.png",
+     "carte_iris_35238_clair.svg",
+     "carte_iris_35238_mobile_clair.png",
+     "carte_iris_35238_mobile_clair.svg",
+     "carte_iris_35238_mobile_sombre.png",
+     "carte_iris_35238_mobile_sombre.svg",
+     "carte_iris_35238_sombre.png",
+     "carte_iris_35238_sombre.svg",
+     "tableau_carburant_35238.html",
+     "tableau_carburant_35238.md",
+     "tableau_iris_35238.html",
+     "tableau_iris_35238.md"
+    ],
+    "reperes": [
+     "352380102",
+     "352380506"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T16:59:09Z",
+    "fin": "2026-10-15T16:59:42Z",
+    "duree_s": 33.6
+   }
+  },
+  "83137": {
+   "nom": "Toulon",
+   "insee": "83137",
+   "demande": "83137",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:03:36Z",
+     "fin": "2026-10-15T16:04:33Z",
+     "duree_s": 57.1,
+     "duree_calcul_s": 57.1
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:04:33Z",
+     "fin": "2026-10-15T16:04:46Z",
+     "duree_s": 13.2,
+     "duree_calcul_s": 13.2
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:26Z",
+     "fin": "2026-10-15T16:18:26Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:26Z",
+     "fin": "2026-10-15T16:18:26Z",
+     "duree_s": 0.1,
+     "complement_sha": "d50f4fe678727eb5",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "b36e85f6469321d3"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "70 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 70.9,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:04:46Z",
+     "fin": "2026-10-15T16:04:47Z",
+     "duree_s": 0.3
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:04:47Z",
+     "fin": "2026-10-15T16:04:47Z",
+     "duree_s": 0.3,
+     "complement_sha": "9f140d4f2b6d02b0",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "ee339f44e61e5e61"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "b36e85f6469321d3",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_83137_clair.png",
+     "carte_iris_83137_clair.svg",
+     "carte_iris_83137_mobile_clair.png",
+     "carte_iris_83137_mobile_clair.svg",
+     "carte_iris_83137_mobile_sombre.png",
+     "carte_iris_83137_mobile_sombre.svg",
+     "carte_iris_83137_sombre.png",
+     "carte_iris_83137_sombre.svg",
+     "tableau_carburant_83137.html",
+     "tableau_carburant_83137.md",
+     "tableau_iris_83137.html",
+     "tableau_iris_83137.md"
+    ],
+    "reperes": [
+     "831370502",
+     "831370302"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:02:21Z",
+    "fin": "2026-10-15T17:02:59Z",
+    "duree_s": 38.6
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
+  },
+  "51454": {
+   "nom": "Reims",
+   "insee": "51454",
+   "demande": "51454",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:04:47Z",
+     "fin": "2026-10-15T16:05:22Z",
+     "duree_s": 34.8,
+     "duree_calcul_s": 34.8
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:05:22Z",
+     "fin": "2026-10-15T16:05:30Z",
+     "duree_s": 8.1,
+     "duree_calcul_s": 8.1
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:05:30Z",
+     "fin": "2026-10-15T16:05:30Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:05:30Z",
+     "fin": "2026-10-15T16:05:30Z",
+     "duree_s": 0.2,
+     "complement_sha": "742e9bcc3a4dd0e8",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "f69ee0a42e9780e6"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "73 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 43.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "f69ee0a42e9780e6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_51454_clair.png",
+     "carte_iris_51454_clair.svg",
+     "carte_iris_51454_mobile_clair.png",
+     "carte_iris_51454_mobile_clair.svg",
+     "carte_iris_51454_mobile_sombre.png",
+     "carte_iris_51454_mobile_sombre.svg",
+     "carte_iris_51454_sombre.png",
+     "carte_iris_51454_sombre.svg",
+     "tableau_carburant_51454.html",
+     "tableau_carburant_51454.md",
+     "tableau_iris_51454.html",
+     "tableau_iris_51454.md"
+    ],
+    "reperes": [
+     "514540302",
+     "514544503",
+     "514544502"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:06:42Z",
+    "fin": "2026-10-15T17:07:09Z",
+    "duree_s": 27.5
+   }
+  },
+  "42218": {
+   "nom": "Saint-Étienne",
+   "insee": "42218",
+   "demande": "42218",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:05:30Z",
+     "fin": "2026-10-15T16:06:06Z",
+     "duree_s": 36.2,
+     "duree_calcul_s": 36.2
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:06Z",
+     "fin": "2026-10-15T16:06:13Z",
+     "duree_s": 6.6,
+     "duree_calcul_s": 6.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:13Z",
+     "fin": "2026-10-15T16:06:13Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:13Z",
+     "fin": "2026-10-15T16:06:13Z",
+     "duree_s": 0.2,
+     "complement_sha": "406fcbbde7fdc169",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "6f7e1073e5fa00e9"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "77 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 43.1,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "6f7e1073e5fa00e9",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_42218_clair.png",
+     "carte_iris_42218_clair.svg",
+     "carte_iris_42218_mobile_clair.png",
+     "carte_iris_42218_mobile_clair.svg",
+     "carte_iris_42218_mobile_sombre.png",
+     "carte_iris_42218_mobile_sombre.svg",
+     "carte_iris_42218_sombre.png",
+     "carte_iris_42218_sombre.svg",
+     "tableau_carburant_42218.html",
+     "tableau_carburant_42218.md",
+     "tableau_iris_42218.html",
+     "tableau_iris_42218.md"
+    ],
+    "reperes": [
+     "422180102",
+     "422182301",
+     "422181804"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:10:40Z",
+    "fin": "2026-10-15T17:11:19Z",
+    "duree_s": 38.0
+   }
+  },
+  "76351": {
+   "nom": "Le Havre",
+   "insee": "76351",
+   "demande": "76351",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:13Z",
+     "fin": "2026-10-15T16:06:42Z",
+     "duree_s": 28.5,
+     "duree_calcul_s": 28.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:42Z",
+     "fin": "2026-10-15T16:06:48Z",
+     "duree_s": 6.3,
+     "duree_calcul_s": 6.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:56Z",
+     "fin": "2026-10-15T16:18:56Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:18:56Z",
+     "fin": "2026-10-15T16:18:56Z",
+     "duree_s": 0.1,
+     "complement_sha": "a4f08f66ff8c21dc",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "5733348d86f34fe2"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "80 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 35.2,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:06:48Z",
+     "fin": "2026-10-15T16:06:48Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:06:48Z",
+     "fin": "2026-10-15T16:06:49Z",
+     "duree_s": 0.2,
+     "complement_sha": "2345190bdbb5c0d6",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "d3367e16e2d5efb7"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "5733348d86f34fe2",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_76351_clair.png",
+     "carte_iris_76351_clair.svg",
+     "carte_iris_76351_mobile_clair.png",
+     "carte_iris_76351_mobile_clair.svg",
+     "carte_iris_76351_mobile_sombre.png",
+     "carte_iris_76351_mobile_sombre.svg",
+     "carte_iris_76351_sombre.png",
+     "carte_iris_76351_sombre.svg",
+     "tableau_carburant_76351.html",
+     "tableau_carburant_76351.md",
+     "tableau_iris_76351.html",
+     "tableau_iris_76351.md"
+    ],
+    "reperes": [
+     "763510404",
+     "763512101",
+     "763511703"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:14:49Z",
+    "fin": "2026-10-15T17:15:43Z",
+    "duree_s": 54.2
+   }
+  },
+  "21231": {
+   "nom": "Dijon",
+   "insee": "21231",
+   "demande": "21231",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:06:49Z",
+     "fin": "2026-10-15T16:07:18Z",
+     "duree_s": 29.4,
+     "duree_calcul_s": 29.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:07:18Z",
+     "fin": "2026-10-15T16:07:31Z",
+     "duree_s": 12.8,
+     "duree_calcul_s": 12.8
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:07:31Z",
+     "fin": "2026-10-15T16:07:31Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:07:31Z",
+     "fin": "2026-10-15T16:07:31Z",
+     "duree_s": 0.3,
+     "complement_sha": "327f15d281402b47",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "199508fa86f3ec5d"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "61 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 42.6,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "199508fa86f3ec5d",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_21231_clair.png",
+     "carte_iris_21231_clair.svg",
+     "carte_iris_21231_mobile_clair.png",
+     "carte_iris_21231_mobile_clair.svg",
+     "carte_iris_21231_mobile_sombre.png",
+     "carte_iris_21231_mobile_sombre.svg",
+     "carte_iris_21231_sombre.png",
+     "carte_iris_21231_sombre.svg",
+     "tableau_carburant_21231.html",
+     "tableau_carburant_21231.md",
+     "tableau_iris_21231.html",
+     "tableau_iris_21231.md"
+    ],
+    "reperes": [
+     "212310201",
+     "212311101",
+     "212311501"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:19:47Z",
+    "fin": "2026-10-15T17:20:18Z",
+    "duree_s": 30.6
+   }
+  },
+  "38185": {
+   "nom": "Grenoble",
+   "insee": "38185",
+   "demande": "38185",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:07:31Z",
+     "fin": "2026-10-15T16:08:23Z",
+     "duree_s": 51.8,
+     "duree_calcul_s": 51.8
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:08:23Z",
+     "fin": "2026-10-15T16:08:33Z",
+     "duree_s": 10.0,
+     "duree_calcul_s": 10.0
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:08:33Z",
+     "fin": "2026-10-15T16:08:33Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:08:33Z",
+     "fin": "2026-10-15T16:08:33Z",
+     "duree_s": 0.2,
+     "complement_sha": "f835679d4b290c38",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "7f881d6ab70f64a7"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "68 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 62.1,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "7f881d6ab70f64a7",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_38185_clair.png",
+     "carte_iris_38185_clair.svg",
+     "carte_iris_38185_mobile_clair.png",
+     "carte_iris_38185_mobile_clair.svg",
+     "carte_iris_38185_mobile_sombre.png",
+     "carte_iris_38185_mobile_sombre.svg",
+     "carte_iris_38185_sombre.png",
+     "carte_iris_38185_sombre.svg",
+     "tableau_carburant_38185.html",
+     "tableau_carburant_38185.md",
+     "tableau_iris_38185.html",
+     "tableau_iris_38185.md"
+    ],
+    "reperes": [
+     "381850107",
+     "381850505"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:22:44Z",
+    "fin": "2026-10-15T17:23:10Z",
+    "duree_s": 25.8
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
+  },
+  "69266": {
+   "nom": "Villeurbanne",
+   "insee": "69266",
+   "demande": "69266",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:08:33Z",
+     "fin": "2026-10-15T16:09:14Z",
+     "duree_s": 40.7,
+     "duree_calcul_s": 40.7
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:09:14Z",
+     "fin": "2026-10-15T16:09:22Z",
+     "duree_s": 8.3,
+     "duree_calcul_s": 8.3
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:51Z",
+     "fin": "2026-10-15T16:19:52Z",
+     "duree_s": 0.2
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:19:52Z",
+     "fin": "2026-10-15T16:19:52Z",
+     "duree_s": 0.5,
+     "complement_sha": "2c7f56ab86834aba",
+     "duree_calcul_s": 0.5,
+     "dossier_sha": "d20c47df5dc7c9a3"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "45 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 49.4,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:09:22Z",
+     "fin": "2026-10-15T16:09:22Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:09:22Z",
+     "fin": "2026-10-15T16:09:23Z",
+     "duree_s": 0.2,
+     "complement_sha": "afe14f38fc9aa99e",
+     "duree_calcul_s": 0.2,
+     "dossier_sha": "eaee7bb53c59c841"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "d20c47df5dc7c9a3",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_69266_clair.png",
+     "carte_iris_69266_clair.svg",
+     "carte_iris_69266_mobile_clair.png",
+     "carte_iris_69266_mobile_clair.svg",
+     "carte_iris_69266_mobile_sombre.png",
+     "carte_iris_69266_mobile_sombre.svg",
+     "carte_iris_69266_sombre.png",
+     "carte_iris_69266_sombre.svg",
+     "tableau_carburant_69266.html",
+     "tableau_carburant_69266.md",
+     "tableau_iris_69266.html",
+     "tableau_iris_69266.md"
+    ],
+    "reperes": [
+     "692660102",
+     "692660801"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T17:25:35Z",
+    "fin": "2026-10-15T17:25:56Z",
+    "duree_s": 20.7
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
+  },
+  "13001": {
+   "nom": "Aix-en-Provence",
+   "insee": "13001",
+   "demande": "13001",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:09:23Z",
+     "fin": "2026-10-15T16:10:05Z",
+     "duree_s": 42.5,
+     "duree_calcul_s": 42.5
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:10:05Z",
+     "fin": "2026-10-15T16:10:13Z",
+     "duree_s": 7.5,
+     "duree_calcul_s": 7.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:23Z",
+     "fin": "2026-10-15T16:20:23Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:20:23Z",
+     "fin": "2026-10-15T16:20:23Z",
+     "duree_s": 0.3,
+     "complement_sha": "7aeb748a776f1f76",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "e640d0e44848ddc8"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "53 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 50.3,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:10:13Z",
+     "fin": "2026-10-15T16:10:13Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:10:13Z",
+     "fin": "2026-10-15T16:10:13Z",
+     "duree_s": 0.1,
+     "complement_sha": "241441271276a838",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "24ba4e0ea2eba9a1"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "e640d0e44848ddc8",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "anomalies_restantes": [],
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_13001_clair.png",
+     "carte_iris_13001_clair.svg",
+     "carte_iris_13001_mobile_clair.png",
+     "carte_iris_13001_mobile_clair.svg",
+     "carte_iris_13001_mobile_sombre.png",
+     "carte_iris_13001_mobile_sombre.svg",
+     "carte_iris_13001_sombre.png",
+     "carte_iris_13001_sombre.svg",
+     "tableau_carburant_13001.html",
+     "tableau_carburant_13001.md",
+     "tableau_iris_13001.html",
+     "tableau_iris_13001.md"
+    ],
+    "reperes": [
+     "130010102",
+     "130010801",
+     "130010905"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:02:23Z",
+    "fin": "2026-10-15T18:03:13Z",
+    "duree_s": 49.8
+   }
+  },
+  "63113": {
+   "nom": "Clermont-Ferrand",
+   "insee": "63113",
+   "demande": "63113",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:10:13Z",
+     "fin": "2026-10-15T16:10:42Z",
+     "duree_s": 28.6,
+     "duree_calcul_s": 28.6
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:10:42Z",
+     "fin": "2026-10-15T16:10:48Z",
+     "duree_s": 6.5,
+     "duree_calcul_s": 6.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:07Z",
+     "fin": "2026-10-15T16:21:07Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:07Z",
+     "fin": "2026-10-15T16:21:08Z",
+     "duree_s": 0.3,
+     "complement_sha": "60c0de0f3f573ef4",
+     "duree_calcul_s": 0.3,
+     "dossier_sha": "146762f401bd01b6"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "39 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 35.6,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:10:48Z",
+     "fin": "2026-10-15T16:10:49Z",
+     "duree_s": 0.4
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:10:49Z",
+     "fin": "2026-10-15T16:10:49Z",
+     "duree_s": 0.1,
+     "complement_sha": "84d9fd0a7909517f",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "afa68d52d4e6eb1b"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "146762f401bd01b6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_63113_clair.png",
+     "carte_iris_63113_clair.svg",
+     "carte_iris_63113_mobile_clair.png",
+     "carte_iris_63113_mobile_clair.svg",
+     "carte_iris_63113_mobile_sombre.png",
+     "carte_iris_63113_mobile_sombre.svg",
+     "carte_iris_63113_sombre.png",
+     "carte_iris_63113_sombre.svg",
+     "tableau_carburant_63113.html",
+     "tableau_carburant_63113.md",
+     "tableau_iris_63113.html",
+     "tableau_iris_63113.md"
+    ],
+    "reperes": [
+     "631131401",
+     "631132001",
+     "631132101"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:05:15Z",
+    "fin": "2026-10-15T18:05:33Z",
+    "duree_s": 18.7
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
+  },
+  "74010": {
+   "nom": "Annecy",
+   "insee": "74010",
+   "demande": "74010",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:10:49Z",
+     "fin": "2026-10-15T16:11:12Z",
+     "duree_s": 22.9,
+     "duree_calcul_s": 22.9
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:12Z",
+     "fin": "2026-10-15T16:11:18Z",
+     "duree_s": 6.6,
+     "duree_calcul_s": 6.6
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:41Z",
+     "fin": "2026-10-15T16:21:41Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:21:41Z",
+     "fin": "2026-10-15T16:21:41Z",
+     "duree_s": 0.1,
+     "complement_sha": "6050f1218700fe3f",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "aeac9dda36eb50b2"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "43 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 29.8,
+   "tentatives": [
+    {
+     "etape": "complement",
+     "ok": true,
+     "debut": "2026-10-15T16:11:18Z",
+     "fin": "2026-10-15T16:11:18Z",
+     "duree_s": 0.2
+    },
+    {
+     "etape": "dossier",
+     "ok": true,
+     "debut": "2026-10-15T16:11:18Z",
+     "fin": "2026-10-15T16:11:19Z",
+     "duree_s": 0.1,
+     "complement_sha": "6ee56acc1a61e6e1",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "f7073fc26110e0ba"
+    }
+   ],
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "aeac9dda36eb50b2",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_74010_clair.png",
+     "carte_iris_74010_clair.svg",
+     "carte_iris_74010_mobile_clair.png",
+     "carte_iris_74010_mobile_clair.svg",
+     "carte_iris_74010_mobile_sombre.png",
+     "carte_iris_74010_mobile_sombre.svg",
+     "carte_iris_74010_sombre.png",
+     "carte_iris_74010_sombre.svg",
+     "tableau_carburant_74010.html",
+     "tableau_carburant_74010.md",
+     "tableau_iris_74010.html",
+     "tableau_iris_74010.md"
+    ],
+    "reperes": [
+     "740100101",
+     "740101503",
+     "740101102"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:08:39Z",
+    "fin": "2026-10-15T18:09:39Z",
+    "duree_s": 59.8
+   }
+  },
+  "87085": {
+   "nom": "Limoges",
+   "insee": "87085",
+   "demande": "87085",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:19Z",
+     "fin": "2026-10-15T16:11:43Z",
+     "duree_s": 24.8,
+     "duree_calcul_s": 24.8
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:43Z",
+     "fin": "2026-10-15T16:11:50Z",
+     "duree_s": 6.4,
+     "duree_calcul_s": 6.4
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:50Z",
+     "fin": "2026-10-15T16:11:50Z",
+     "duree_s": 0.0
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:50Z",
+     "fin": "2026-10-15T16:11:50Z",
+     "duree_s": 0.1,
+     "complement_sha": "e517baea902fe1a5",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "a0ef8b2c19ef6c7f"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "55 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 31.3,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "a0ef8b2c19ef6c7f",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_87085_clair.png",
+     "carte_iris_87085_clair.svg",
+     "carte_iris_87085_mobile_clair.png",
+     "carte_iris_87085_mobile_clair.svg",
+     "carte_iris_87085_mobile_sombre.png",
+     "carte_iris_87085_mobile_sombre.svg",
+     "carte_iris_87085_sombre.png",
+     "carte_iris_87085_sombre.svg",
+     "tableau_carburant_87085.html",
+     "tableau_carburant_87085.md",
+     "tableau_iris_87085.html",
+     "tableau_iris_87085.md"
+    ],
+    "reperes": [
+     "870850204",
+     "870851601"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:12:32Z",
+    "fin": "2026-10-15T18:13:20Z",
+    "duree_s": 48.0
+   }
+  },
+  "57463": {
+   "nom": "Metz",
+   "insee": "57463",
+   "demande": "57463",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:11:50Z",
+     "fin": "2026-10-15T16:12:15Z",
+     "duree_s": 25.3,
+     "duree_calcul_s": 25.3
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:15Z",
+     "fin": "2026-10-15T16:12:22Z",
+     "duree_s": 6.4,
+     "duree_calcul_s": 6.4
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:22Z",
+     "fin": "2026-10-15T16:12:22Z",
+     "duree_s": 0.4
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:22Z",
+     "fin": "2026-10-15T16:12:22Z",
+     "duree_s": 0.1,
+     "complement_sha": "528712993197a6e0",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "0be2bd2987a72da9"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "47 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 32.2,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "0be2bd2987a72da9",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_57463_clair.png",
+     "carte_iris_57463_clair.svg",
+     "carte_iris_57463_mobile_clair.png",
+     "carte_iris_57463_mobile_clair.svg",
+     "carte_iris_57463_mobile_sombre.png",
+     "carte_iris_57463_mobile_sombre.svg",
+     "carte_iris_57463_sombre.png",
+     "carte_iris_57463_sombre.svg",
+     "tableau_carburant_57463.html",
+     "tableau_carburant_57463.md",
+     "tableau_iris_57463.html",
+     "tableau_iris_57463.md"
+    ],
+    "reperes": [
+     "574630401",
+     "574631202"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:16:00Z",
+    "fin": "2026-10-15T18:16:17Z",
+    "duree_s": 17.0
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F"
+  },
+  "92012": {
+   "nom": "Boulogne-Billancourt",
+   "insee": "92012",
+   "demande": "92012",
+   "statut": "prêt à relire",
+   "etapes": {
+    "fiche": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:29Z",
+     "fin": "2026-10-15T16:12:48Z",
+     "duree_s": 19.0,
+     "duree_calcul_s": 19.0
+    },
+    "comparaison": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:48Z",
+     "fin": "2026-10-15T16:12:55Z",
+     "duree_s": 7.5,
+     "duree_calcul_s": 7.5
+    },
+    "complement": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:55Z",
+     "fin": "2026-10-15T16:12:55Z",
+     "duree_s": 0.1
+    },
+    "dossier": {
+     "ok": true,
+     "debut": "2026-10-15T16:12:55Z",
+     "fin": "2026-10-15T16:12:56Z",
+     "duree_s": 0.2,
+     "complement_sha": "1ada1ccc5a595553",
+     "duree_calcul_s": 0.1,
+     "dossier_sha": "b0c9fe22a9421223"
+    }
+   },
+   "manuel": [
+    "compléter le complément documentaire (tarifs, jours de circulation, où vérifier) : collecte non lancée",
+    "relire les libellés d'IRIS cités comme noms de quartiers",
+    "relire l'intérêt du groupe de communes voisines (liste automatique)",
+    "réextraire les prix du carburant avant publication",
+    "relecture humaine avant toute publication"
+   ],
+   "notes": [
+    "42 secteurs d'habitat (IRIS)"
+   ],
+   "duree_preparation_s": 26.8,
+   "versions": {
+    "prompt_redaction": "5ce0562195d9777e",
+    "relecture": "1d2a04100cc4f852",
+    "correction": "bace80bf24cd6105",
+    "dossier": "b0c9fe22a9421223",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol",
+     "relecture": "claude-opus-5-5",
+     "correction": "gpt-6.1-sol",
+     "collecte": "claude-sonnet-5-5"
+    }
+   },
+   "anomalies_restantes": [],
+   "motif": "retouché à la main (section F) ; vérifier les sections E (s'il y a eu correction) et F",
+   "article": "edition.md",
+   "visuels": {
+    "visuels": [
+     "carte_iris_92012_clair.png",
+     "carte_iris_92012_clair.svg",
+     "carte_iris_92012_mobile_clair.png",
+     "carte_iris_92012_mobile_clair.svg",
+     "carte_iris_92012_mobile_sombre.png",
+     "carte_iris_92012_mobile_sombre.svg",
+     "carte_iris_92012_sombre.png",
+     "carte_iris_92012_sombre.svg",
+     "tableau_carburant_92012.html",
+     "tableau_carburant_92012.md",
+     "tableau_iris_92012.html",
+     "tableau_iris_92012.md"
+    ],
+    "reperes": [
+     "920120506",
+     "920120703"
+    ],
+    "ok": true,
+    "debut": "2026-10-15T18:19:27Z",
+    "fin": "2026-10-15T18:19:39Z",
+    "duree_s": 11.6
+   }
+  }
+ },
+ "journal": []
+}

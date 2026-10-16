@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "qui travaillent à Saint-Martin-d’Hères, Échirolles, Fontaine, Meylan, Saint-Égrève ou Seyssinet-Pariset",
+   "probleme": "La méthode ne dit pas comment ce groupe a été choisi. D'après le dossier (mobpro.voiture_selon_destination.communes_voisines), ce sont les six communes les plus peuplées de la même unité urbaine. Sans cette règle, le lecteur peut croire qu'il s'agit de toutes les communes voisines, alors que La Tronche par exemple n'en fait pas partie.",
+   "correction_minimale": "Ajouter une phrase dans « Méthode et sources » : « Les six communes de travail citées sont les plus peuplées de l'unité urbaine de Grenoble, en dehors de Grenoble. »"},
+  {"categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "leur proximité sur la carte est une première information sur l’adresse",
+   "probleme": "Dans l'article, « la carte » désigne déjà la carte de la part de la voiture par secteur, qui ne montre pas les équipements. Le lecteur peut croire qu'elle situe les commerces, la pharmacie et l'école.",
+   "correction_minimale": "Remplacer « sur la carte » par « à vol d'oiseau »."}
+]}
+```

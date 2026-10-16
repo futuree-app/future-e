@@ -1,0 +1,141 @@
+{
+ "etape": "collecte",
+ "cle": "337ce75bc86b4963",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "f3e85644ea774096",
+ "debut": "2026-10-15T16:17:05Z",
+ "fin": "2026-10-15T16:17:45Z",
+ "duree_s": 40.4,
+ "code_retour": 0,
+ "session": "13b351b7-3d96-463a-b666-13bf90ce00fc",
+ "usage": {
+  "input_tokens": 8,
+  "cache_creation_input_tokens": 3687,
+  "cache_read_input_tokens": 11015,
+  "output_tokens": 2620,
+  "output_tokens_details": {
+   "thinking_tokens": 95
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 3687,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1811,
+    "cache_read_input_tokens": 4039,
+    "cache_creation_input_tokens": 1185,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 1185
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 8,
+   "outputTokens": 2620,
+   "cacheReadInputTokens": 11015,
+   "cacheCreationInputTokens": 3687,
+   "webSearchRequests": 0,
+   "costUSD": 0.0420655,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 95,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-haiku-5-5": {
+   "inputTokens": 40326,
+   "outputTokens": 5930,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.0069976,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 4039,
+   "canonicalModel": "claude-haiku-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.0490631,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 6,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-e0f24k4w",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-e0f24k4w/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.star.fr/\", \"prompt\": \"Tarification: le réseau est-il gratuit ? Jours de circulation (dimanche, jours fériés), période de validité des horaires, calcul d'itinéraire, fiches horaire"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.star.fr/titres-et-tarifs\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.star.fr/se-deplacer/plans-du-reseau\", \"prompt\": \"Jours de circulation (dimanche, jours fériés, samedi), période de validité des horaires, fiches horaires. Extraits exacts mot pour"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.star.fr/titres-et-tarifs/trouver-mon-tarif\", \"prompt\": \"Gratuité du réseau, publics concernés, lignes, exceptions. Extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.star.fr/se-deplacer/rechercher-un-horaire\", \"prompt\": \"Jours de circulation, validité des horaires, temps réel. Extraits exacts mot pour mot.\"}"
+  }
+ ],
+ "refus": 0
+}

@@ -1,0 +1,297 @@
+{
+ "commune": {
+  "insee": "45234",
+  "nom": "Orléans",
+  "role": "principale",
+  "actifs": 49354,
+  "lignes": 15036,
+  "voiture": 0.5278
+ },
+ "definition": {
+  "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+  "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+  "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+  "millesime": "2022 (collectes 2020 à 2024)"
+ },
+ "regle": {
+  "texte": "communes de même rôle que Orléans (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 24 677 à 98 708), avec au moins 150 lignes d'échantillon ; Orléans exclue ; France métropolitaine",
+  "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+  "taille": [
+   0.5,
+   2.0
+  ],
+  "bornes_actifs": [
+   24677,
+   98708
+  ],
+  "lignes_min": 150,
+  "groupe_min": 10,
+  "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+  "fixee_le": "2026-10-14"
+ },
+ "sources_fichiers": {
+  "mobpro": {
+   "chemin": "rp-mobpro-2022.parquet",
+   "sha256": "6b91385a79846e1a"
+  },
+  "index": {
+   "chemin": "comparateur-index.json.gz",
+   "sha256": "3a21daa14fad5bb1"
+  }
+ },
+ "genere_le": "2026-10-15T16:16:14Z",
+ "disponible": true,
+ "groupe": {
+  "n": 41,
+  "mediane_voiture": 0.6159,
+  "communes": [
+   {
+    "insee": "13001",
+    "nom": "Aix-en-Provence",
+    "actifs": 63809,
+    "voiture": 0.6333
+   },
+   {
+    "insee": "2A004",
+    "nom": "Ajaccio",
+    "actifs": 31282,
+    "voiture": 0.7559
+   },
+   {
+    "insee": "80021",
+    "nom": "Amiens",
+    "actifs": 50204,
+    "voiture": 0.5688
+   },
+   {
+    "insee": "49007",
+    "nom": "Angers",
+    "actifs": 64100,
+    "voiture": 0.5376
+   },
+   {
+    "insee": "74010",
+    "nom": "Annecy",
+    "actifs": 61994,
+    "voiture": 0.6391
+   },
+   {
+    "insee": "84007",
+    "nom": "Avignon",
+    "actifs": 31281,
+    "voiture": 0.6473
+   },
+   {
+    "insee": "25056",
+    "nom": "Besançon",
+    "actifs": 47686,
+    "voiture": 0.558
+   },
+   {
+    "insee": "92012",
+    "nom": "Boulogne-Billancourt",
+    "actifs": 61615,
+    "voiture": 0.2529
+   },
+   {
+    "insee": "18033",
+    "nom": "Bourges",
+    "actifs": 24724,
+    "voiture": 0.7284
+   },
+   {
+    "insee": "29019",
+    "nom": "Brest",
+    "actifs": 58364,
+    "voiture": 0.6302
+   },
+   {
+    "insee": "14118",
+    "nom": "Caen",
+    "actifs": 43167,
+    "voiture": 0.5765
+   },
+   {
+    "insee": "73065",
+    "nom": "Chambéry",
+    "actifs": 25185,
+    "voiture": 0.5657
+   },
+   {
+    "insee": "50129",
+    "nom": "Cherbourg-en-Cotentin",
+    "actifs": 33130,
+    "voiture": 0.7047
+   },
+   {
+    "insee": "63113",
+    "nom": "Clermont-Ferrand",
+    "actifs": 59484,
+    "voiture": 0.555
+   },
+   {
+    "insee": "68066",
+    "nom": "Colmar",
+    "actifs": 27853,
+    "voiture": 0.6192
+   },
+   {
+    "insee": "21231",
+    "nom": "Dijon",
+    "actifs": 69120,
+    "voiture": 0.5196
+   },
+   {
+    "insee": "59183",
+    "nom": "Dunkerque",
+    "actifs": 31408,
+    "voiture": 0.6949
+   },
+   {
+    "insee": "38185",
+    "nom": "Grenoble",
+    "actifs": 68430,
+    "voiture": 0.3226
+   },
+   {
+    "insee": "17300",
+    "nom": "La Rochelle",
+    "actifs": 30550,
+    "voiture": 0.5328
+   },
+   {
+    "insee": "76351",
+    "nom": "Le Havre",
+    "actifs": 59821,
+    "voiture": 0.6308
+   },
+   {
+    "insee": "72181",
+    "nom": "Le Mans",
+    "actifs": 55004,
+    "voiture": 0.5813
+   },
+   {
+    "insee": "87085",
+    "nom": "Limoges",
+    "actifs": 48515,
+    "voiture": 0.6996
+   },
+   {
+    "insee": "57463",
+    "nom": "Metz",
+    "actifs": 50936,
+    "voiture": 0.5651
+   },
+   {
+    "insee": "82121",
+    "nom": "Montauban",
+    "actifs": 24798,
+    "voiture": 0.7846
+   },
+   {
+    "insee": "68224",
+    "nom": "Mulhouse",
+    "actifs": 35491,
+    "voiture": 0.6112
+   },
+   {
+    "insee": "54395",
+    "nom": "Nancy",
+    "actifs": 43903,
+    "voiture": 0.4838
+   },
+   {
+    "insee": "79191",
+    "nom": "Niort",
+    "actifs": 25863,
+    "voiture": 0.7011
+   },
+   {
+    "insee": "30189",
+    "nom": "Nîmes",
+    "actifs": 52730,
+    "voiture": 0.6586
+   },
+   {
+    "insee": "64445",
+    "nom": "Pau",
+    "actifs": 30140,
+    "voiture": 0.6678
+   },
+   {
+    "insee": "66136",
+    "nom": "Perpignan",
+    "actifs": 36885,
+    "voiture": 0.7311
+   },
+   {
+    "insee": "86194",
+    "nom": "Poitiers",
+    "actifs": 33952,
+    "voiture": 0.5927
+   },
+   {
+    "insee": "29232",
+    "nom": "Quimper",
+    "actifs": 27007,
+    "voiture": 0.7802
+   },
+   {
+    "insee": "51454",
+    "nom": "Reims",
+    "actifs": 70720,
+    "voiture": 0.6214
+   },
+   {
+    "insee": "35238",
+    "nom": "Rennes",
+    "actifs": 97064,
+    "voiture": 0.4074
+   },
+   {
+    "insee": "76540",
+    "nom": "Rouen",
+    "actifs": 49112,
+    "voiture": 0.437
+   },
+   {
+    "insee": "44184",
+    "nom": "Saint-Nazaire",
+    "actifs": 28139,
+    "voiture": 0.7111
+   },
+   {
+    "insee": "42218",
+    "nom": "Saint-Étienne",
+    "actifs": 61049,
+    "voiture": 0.5911
+   },
+   {
+    "insee": "83137",
+    "nom": "Toulon",
+    "actifs": 69554,
+    "voiture": 0.6159
+   },
+   {
+    "insee": "37261",
+    "nom": "Tours",
+    "actifs": 57750,
+    "voiture": 0.5
+   },
+   {
+    "insee": "26362",
+    "nom": "Valence",
+    "actifs": 25309,
+    "voiture": 0.6173
+   },
+   {
+    "insee": "69266",
+    "nom": "Villeurbanne",
+    "actifs": 73197,
+    "voiture": 0.3279
+   }
+  ]
+ },
+ "ecart_points": -9
+}

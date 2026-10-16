@@ -1,0 +1,27 @@
+{
+ "version": 2,
+ "id": "649c3cc8d773e2df916455c7",
+ "titre": "Réseau urbain Citéa",
+ "page": "https://transport.data.gouv.fr/datasets/ce-jeu-de-donnees-contient-la-liste-des-arrets-des-horaires-et-des-parcours-theoriques-du-reseau-de-transport-urbain-et-interurbain-de-vrm",
+ "nom_commercial": "Citéa",
+ "preuve_nom": "intitulé du jeu de données publié pour l'autorité organisatrice",
+ "offre_tdg": "VRD Mobilités - CITEA",
+ "aom": "Valence-Romans déplacements",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200068781",
+  "nom": "CA Valence Romans Agglo"
+ },
+ "mis_a_jour": "2026-07-14",
+ "agence": {
+  "agences": [
+   [
+    "Valence Romans Mobilités",
+    "https://www.valenceromansmobilites.fr"
+   ]
+  ]
+ },
+ "site": null,
+ "sites_controles": [],
+ "consulte_le": "2026-10-15"
+}

@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Cette proximité commune accompagne pourtant des pratiques domicile-travail différentes.",
+   "probleme": "Le « pourtant » suggère qu'un commerce, une pharmacie et une école proches devraient réduire la voiture pour aller au travail. Or ce sont deux sortes de déplacements différentes, et le dossier ne mesure aucun lien entre les deux (limites de `acces.adresses.*` et de `mobpro.modes.*`). De plus, les deux secteurs sont mis en regard alors qu'une vingtaine d'autres ont aussi 100 % (`iris.930660906.panier_500m`, `iris.930660705.panier_500m`, `iris.voiture.min`, `iris.voiture.max`).",
+   "correction_minimale": "Supprimer la phrase, ou écrire seulement : « Ces deux secteurs ont ce point commun, alors que leurs parts de la voiture pour aller travailler diffèrent », sans « pourtant »."},
+  {"categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Le trajet professionnel ne couvre pas les déplacements qu'un déménagement peut modifier.",
+   "probleme": "Prise à la lettre, la phrase dit qu'un déménagement ne change pas le trajet vers le travail. C'est l'inverse de ce que dit la section précédente sur la destination professionnelle.",
+   "correction_minimale": "« Le trajet professionnel n'est pas le seul déplacement qu'un déménagement peut modifier. »"}
+]}
+```

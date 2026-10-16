@@ -1,0 +1,47 @@
+{
+ "commune": "92050",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [],
+ "recherches": [
+  {
+   "sujet": "réseau de transport urbain",
+   "statut": "introuvable",
+   "source": "transport.data.gouv.fr",
+   "consulte_le": "2026-10-15",
+   "note": "0 jeu(x) urbain(s) couvrant l'intercommunalité 200054781 : identification à faire à la main"
+  },
+  {
+   "sujet": "tarification (gratuité, abonnements, exceptions)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  },
+  {
+   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

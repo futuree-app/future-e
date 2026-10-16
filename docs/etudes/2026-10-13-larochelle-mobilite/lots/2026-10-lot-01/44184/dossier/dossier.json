@@ -1,0 +1,3135 @@
+{
+ "commune": {
+  "insee": "44184",
+  "nom": "Saint-Nazaire",
+  "departement": "44",
+  "epci": {
+   "code": "244400644",
+   "nom": "CA de la Région Nazairienne et de l'Estuaire (CARENE)"
+  },
+  "unite_urbaine": "44601",
+  "voisines": {
+   "44055": "La Baule-Escoublac",
+   "44069": "Guérande",
+   "44154": "Saint-Brevin-les-Pins",
+   "44132": "Pornichet",
+   "44052": "Donges",
+   "44210": "Trignac"
+  },
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/fiche/fiche.json",
+  "sha256": "717c56d8386d6f075afafff50a1d74a1c9c2361ad3790df22260ab4243aeb7f1",
+  "generee_le": "2026-10-14T14:26:12Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-14T23:20:43Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.03,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.026,
+    0.035
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.061,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.055,
+    0.068
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.083,
+   "unite": "part",
+   "affichage": "8 %",
+   "intervalle_95": [
+    0.076,
+    0.091
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.012,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.01,
+    0.016
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.711,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": [
+    0.699,
+    0.723
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.102,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.094,
+    0.11
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à Saint-Nazaire même",
+   "valeur": 0.654,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.641,
+    0.667
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "perimetre": "commune de résidence et de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Saint-Nazaire",
+   "valeur": 0.64,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": [
+    0.624,
+    0.656
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent à Saint-Nazaire",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent à Saint-Nazaire",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.communes_voisines",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent dans l'une de ces communes : La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "valeur": 0.889,
+   "unite": "part",
+   "affichage": "89 %",
+   "intervalle_95": [
+    0.863,
+    0.91
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent dans l'une de ces communes : La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent dans l'une de ces communes : La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "perimetre": "commune de travail : La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Saint-Nazaire et hors de La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "valeur": 0.845,
+   "unite": "part",
+   "affichage": "85 %",
+   "intervalle_95": [
+    0.827,
+    0.861
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent hors de Saint-Nazaire et hors de La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire qui travaillent hors de Saint-Nazaire et hors de La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "perimetre": "commune de travail : toute commune autre que Saint-Nazaire, La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "ecart.voiture_destination.voisines_moins_meme_commune",
+   "fait": "Écart de part de la voiture : travail dans La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210) moins travail à Saint-Nazaire",
+   "valeur": 25,
+   "unite": "points",
+   "affichage": "+25 points",
+   "intervalle_95": null,
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "deux groupes distincts (voir les deux faits)",
+   "perimetre": "commune de travail : La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.093,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.085,
+    0.101
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.445,
+   "unite": "part",
+   "affichage": "45 %",
+   "intervalle_95": [
+    0.431,
+    0.458
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.24,
+   "unite": "part",
+   "affichage": "24 %",
+   "intervalle_95": [
+    0.228,
+    0.253
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.744,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.726,
+    0.76
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.104,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.092,
+    0.116
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.019,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.015,
+    0.026
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.608,
+   "unite": "part",
+   "affichage": "61 %",
+   "intervalle_95": [
+    0.589,
+    0.627
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.697,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": [
+    0.675,
+    0.719
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.066,
+   "unite": "part",
+   "affichage": "7 %",
+   "intervalle_95": [
+    0.055,
+    0.08
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.145,
+   "unite": "part",
+   "affichage": "14 %",
+   "intervalle_95": [
+    0.129,
+    0.163
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.286,
+   "unite": "part",
+   "affichage": "29 %",
+   "intervalle_95": [
+    0.265,
+    0.309
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.648,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.616,
+    0.679
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.053,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.04,
+    0.07
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.22,
+   "unite": "part",
+   "affichage": "22 %",
+   "intervalle_95": [
+    0.194,
+    0.249
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.242,
+   "unite": "part",
+   "affichage": "24 %",
+   "intervalle_95": [
+    0.215,
+    0.272
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Saint-Nazaire, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à Saint-Nazaire",
+   "valeur": 42119,
+   "unite": "nombre",
+   "affichage": "environ 42 100",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Saint-Nazaire, de ceux qui habitent Saint-Nazaire",
+   "valeur": 0.437,
+   "unite": "part",
+   "affichage": "44 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Saint-Nazaire et habitent Saint-Nazaire",
+   "valeur": 0.64,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": [
+    0.624,
+    0.656
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent Saint-Nazaire",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Saint-Nazaire et habitent Saint-Nazaire",
+   "valeur": 0.096,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.086,
+    0.106
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent Saint-Nazaire",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Saint-Nazaire, de ceux qui habitent une autre commune de l'unité urbaine INSEE 44601 (liste des communes non exposée par la fiche)",
+   "valeur": 0.281,
+   "unite": "part",
+   "affichage": "28 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Saint-Nazaire et habitent une autre commune de l'unité urbaine INSEE 44601 (liste des communes non exposée par la fiche)",
+   "valeur": 0.923,
+   "unite": "part",
+   "affichage": "92 %",
+   "intervalle_95": [
+    0.91,
+    0.935
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 44601 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Saint-Nazaire et habitent une autre commune de l'unité urbaine INSEE 44601 (liste des communes non exposée par la fiche)",
+   "valeur": 0.036,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.028,
+    0.045
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 44601 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Saint-Nazaire, de ceux qui habitent hors de l'unité urbaine INSEE 44601",
+   "valeur": 0.282,
+   "unite": "part",
+   "affichage": "28 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Saint-Nazaire et habitent hors de l'unité urbaine INSEE 44601",
+   "valeur": 0.925,
+   "unite": "part",
+   "affichage": "93 %",
+   "intervalle_95": [
+    0.912,
+    0.937
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 44601",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Saint-Nazaire et habitent hors de l'unité urbaine INSEE 44601",
+   "valeur": 0.06,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.05,
+    0.072
+   ],
+   "population": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Saint-Nazaire, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 44601",
+   "perimetre": "commune de travail : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Ville Port (IRIS 441840107)",
+   "valeur": 0.56,
+   "unite": "part",
+   "affichage": "56 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Saint-Nazaire (44184), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Immaculée Campagne (IRIS 441840133)",
+   "valeur": 0.86,
+   "unite": "part",
+   "affichage": "86 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Saint-Nazaire (44184), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 30,
+   "unite": "points",
+   "affichage": "+30 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Saint-Nazaire (44184), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.197,
+   "unite": "part",
+   "affichage": "20 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Saint-Nazaire",
+   "denominateur": "toutes les résidences principales de Saint-Nazaire",
+   "perimetre": "commune : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.254,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Saint-Nazaire",
+   "denominateur": "toutes les résidences principales de Saint-Nazaire",
+   "perimetre": "commune : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.616,
+   "unite": "part",
+   "affichage": "62 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Saint-Nazaire",
+   "denominateur": "toutes les résidences principales de Saint-Nazaire",
+   "perimetre": "commune : Saint-Nazaire (44184)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.44184.commerce_alim_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.826,
+   "unite": "part",
+   "affichage": "83 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.grande_surface_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.378,
+   "unite": "part",
+   "affichage": "38 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.pharmacie_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.688,
+   "unite": "part",
+   "affichage": "69 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.medecin_generaliste_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.667,
+   "unite": "part",
+   "affichage": "67 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.ecole_elementaire_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.767,
+   "unite": "part",
+   "affichage": "77 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.college_1km",
+   "fait": "Part des adresses de Saint-Nazaire qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.729,
+   "unite": "part",
+   "affichage": "73 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.gare_2km",
+   "fait": "Part des adresses de Saint-Nazaire qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.429,
+   "unite": "part",
+   "affichage": "43 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.panier_quotidien_500m",
+   "fait": "Part des adresses de Saint-Nazaire qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.617,
+   "unite": "part",
+   "affichage": "62 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.bus_8h_7_9h",
+   "fait": "Part des adresses de Saint-Nazaire qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.825,
+   "unite": "part",
+   "affichage": "83 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.aucun_bus_7_9h",
+   "fait": "Part des adresses de Saint-Nazaire sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.05,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.44184.bus_4h_20_22h",
+   "fait": "Part des adresses de Saint-Nazaire qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.736,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Saint-Nazaire",
+   "denominateur": "toutes les adresses BAN de Saint-Nazaire, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Saint-Nazaire (44184)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain et scolaire Ycéo » (https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.298,
+   "unite": "€/L",
+   "affichage": "2,30 €/L",
+   "intervalle_95": null,
+   "population": "13 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.565,
+   "unite": "€/L",
+   "affichage": "1,56 €/L",
+   "intervalle_95": null,
+   "population": "13 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.733,
+   "unite": "€/L",
+   "affichage": "0,73 €/L",
+   "intervalle_95": null,
+   "population": "13 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.144,
+   "unite": "€/L",
+   "affichage": "2,14 €/L",
+   "intervalle_95": null,
+   "population": "12 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.637,
+   "unite": "€/L",
+   "affichage": "1,64 €/L",
+   "intervalle_95": null,
+   "population": "12 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.507,
+   "unite": "€/L",
+   "affichage": "0,51 €/L",
+   "intervalle_95": null,
+   "population": "12 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Saint-Nazaire (centre communal de geo.api.gouv.fr : [-2.2392, 47.2768])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "441840102",
+   "nom": "Le Port",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "441840107",
+   "nom": "Ville Port",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1040,
+   "voiture": 0.56,
+   "velo": 0.111,
+   "tc": 0.152,
+   "marche": 0.129,
+   "menages_sans_voiture": 0.263,
+   "menages_stationnement_reserve": 0.428,
+   "panier_quotidien_500m": 0.843,
+   "bus_8h_7_9h": 0.871,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840104",
+   "nom": "Centre Halles",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 878,
+   "voiture": 0.578,
+   "velo": 0.123,
+   "tc": 0.103,
+   "marche": 0.152,
+   "menages_sans_voiture": 0.273,
+   "menages_stationnement_reserve": 0.318,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840106",
+   "nom": "Hôtel de ville",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1121,
+   "voiture": 0.585,
+   "velo": 0.099,
+   "tc": 0.167,
+   "marche": 0.096,
+   "menages_sans_voiture": 0.283,
+   "menages_stationnement_reserve": 0.474,
+   "panier_quotidien_500m": 0.963,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840111",
+   "nom": "Gambetta",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 988,
+   "voiture": 0.606,
+   "velo": 0.134,
+   "tc": 0.096,
+   "marche": 0.114,
+   "menages_sans_voiture": 0.298,
+   "menages_stationnement_reserve": 0.513,
+   "panier_quotidien_500m": 0.996,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840108",
+   "nom": "Jardin des Plantes",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 906,
+   "voiture": 0.614,
+   "velo": 0.144,
+   "tc": 0.067,
+   "marche": 0.115,
+   "menages_sans_voiture": 0.206,
+   "menages_stationnement_reserve": 0.587,
+   "panier_quotidien_500m": 0.958,
+   "bus_8h_7_9h": 0.766,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840103",
+   "nom": "Herbins Gare",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1010,
+   "voiture": 0.616,
+   "velo": 0.098,
+   "tc": 0.17,
+   "marche": 0.077,
+   "menages_sans_voiture": 0.269,
+   "menages_stationnement_reserve": 0.479,
+   "panier_quotidien_500m": 0.574,
+   "bus_8h_7_9h": 0.995,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840122",
+   "nom": "Bouletterie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 853,
+   "voiture": 0.625,
+   "velo": 0.062,
+   "tc": 0.241,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.331,
+   "menages_stationnement_reserve": 0.341,
+   "panier_quotidien_500m": 0.905,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840119",
+   "nom": "Chesnaie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 450,
+   "voiture": 0.63,
+   "velo": 0.059,
+   "tc": 0.177,
+   "marche": 0.072,
+   "menages_sans_voiture": 0.346,
+   "menages_stationnement_reserve": 0.405,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840105",
+   "nom": "Hyper Centre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1190,
+   "voiture": 0.637,
+   "velo": 0.062,
+   "tc": 0.122,
+   "marche": 0.142,
+   "menages_sans_voiture": 0.227,
+   "menages_stationnement_reserve": 0.48,
+   "panier_quotidien_500m": 0.984,
+   "bus_8h_7_9h": 0.999,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840129",
+   "nom": "Brais",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "441840109",
+   "nom": "Petit Caporal",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1329,
+   "voiture": 0.639,
+   "velo": 0.129,
+   "tc": 0.123,
+   "marche": 0.073,
+   "menages_sans_voiture": 0.188,
+   "menages_stationnement_reserve": 0.549,
+   "panier_quotidien_500m": 0.819,
+   "bus_8h_7_9h": 0.892,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840132",
+   "nom": "Landettes-Avalix",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 879,
+   "voiture": 0.688,
+   "velo": 0.041,
+   "tc": 0.138,
+   "marche": 0.036,
+   "menages_sans_voiture": 0.232,
+   "menages_stationnement_reserve": 0.554,
+   "panier_quotidien_500m": 0.294,
+   "bus_8h_7_9h": 0.996,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840101",
+   "nom": "Méan Penhoët",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1591,
+   "voiture": 0.689,
+   "velo": 0.069,
+   "tc": 0.084,
+   "marche": 0.106,
+   "menages_sans_voiture": 0.191,
+   "menages_stationnement_reserve": 0.505,
+   "panier_quotidien_500m": 0.328,
+   "bus_8h_7_9h": 0.872,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840121",
+   "nom": "Gavy Océanis",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "441840113",
+   "nom": "Parc Paysager",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1037,
+   "voiture": 0.693,
+   "velo": 0.133,
+   "tc": 0.082,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.131,
+   "menages_stationnement_reserve": 0.734,
+   "panier_quotidien_500m": 0.849,
+   "bus_8h_7_9h": 0.772,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840116",
+   "nom": "Québrais",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 784,
+   "voiture": 0.706,
+   "velo": 0.084,
+   "tc": 0.124,
+   "marche": 0.041,
+   "menages_sans_voiture": 0.27,
+   "menages_stationnement_reserve": 0.587,
+   "panier_quotidien_500m": 0.734,
+   "bus_8h_7_9h": 0.892,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840125",
+   "nom": "Porcé",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 788,
+   "voiture": 0.718,
+   "velo": 0.1,
+   "tc": 0.094,
+   "marche": 0.043,
+   "menages_sans_voiture": 0.222,
+   "menages_stationnement_reserve": 0.679,
+   "panier_quotidien_500m": 0.519,
+   "bus_8h_7_9h": 0.961,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840115",
+   "nom": "Prézégat-Berthauderie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 579,
+   "voiture": 0.729,
+   "velo": 0.044,
+   "tc": 0.154,
+   "marche": 0.046,
+   "menages_sans_voiture": 0.285,
+   "menages_stationnement_reserve": 0.408,
+   "panier_quotidien_500m": 0.048,
+   "bus_8h_7_9h": 0.968,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840112",
+   "nom": "Pertuischaud",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 782,
+   "voiture": 0.737,
+   "velo": 0.075,
+   "tc": 0.124,
+   "marche": 0.027,
+   "menages_sans_voiture": 0.227,
+   "menages_stationnement_reserve": 0.584,
+   "panier_quotidien_500m": 0.99,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840124",
+   "nom": "Trébale",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 820,
+   "voiture": 0.743,
+   "velo": 0.063,
+   "tc": 0.14,
+   "marche": 0.02,
+   "menages_sans_voiture": 0.222,
+   "menages_stationnement_reserve": 0.595,
+   "panier_quotidien_500m": 0.804,
+   "bus_8h_7_9h": 0.941,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840110",
+   "nom": "Cité Scolaire",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1131,
+   "voiture": 0.745,
+   "velo": 0.081,
+   "tc": 0.079,
+   "marche": 0.047,
+   "menages_sans_voiture": 0.247,
+   "menages_stationnement_reserve": 0.584,
+   "panier_quotidien_500m": 0.606,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840114",
+   "nom": "Ville ès Martin",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 977,
+   "voiture": 0.749,
+   "velo": 0.111,
+   "tc": 0.07,
+   "marche": 0.051,
+   "menages_sans_voiture": 0.146,
+   "menages_stationnement_reserve": 0.792,
+   "panier_quotidien_500m": 0.528,
+   "bus_8h_7_9h": 0.218,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840126",
+   "nom": "Kerlédé",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 688,
+   "voiture": 0.766,
+   "velo": 0.114,
+   "tc": 0.098,
+   "marche": 0.009,
+   "menages_sans_voiture": 0.146,
+   "menages_stationnement_reserve": 0.669,
+   "panier_quotidien_500m": 0.995,
+   "bus_8h_7_9h": 0.971,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840120",
+   "nom": "Reton-Plaisance",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 454,
+   "voiture": 0.78,
+   "velo": 0.068,
+   "tc": 0.092,
+   "marche": 0.033,
+   "menages_sans_voiture": 0.203,
+   "menages_stationnement_reserve": 0.565,
+   "panier_quotidien_500m": 0.677,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840130",
+   "nom": "Saint-Marc Ouest",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1246,
+   "voiture": 0.8,
+   "velo": 0.089,
+   "tc": 0.074,
+   "marche": 0.02,
+   "menages_sans_voiture": 0.068,
+   "menages_stationnement_reserve": 0.916,
+   "panier_quotidien_500m": 0.011,
+   "bus_8h_7_9h": 0.618,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840123",
+   "nom": "Richarderie-Côte d'Amour",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 496,
+   "voiture": 0.821,
+   "velo": 0.021,
+   "tc": 0.092,
+   "marche": 0.026,
+   "menages_sans_voiture": 0.19,
+   "menages_stationnement_reserve": 0.659,
+   "panier_quotidien_500m": 0.773,
+   "bus_8h_7_9h": 0.866,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840131",
+   "nom": "Saint-Marc Est",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1755,
+   "voiture": 0.822,
+   "velo": 0.064,
+   "tc": 0.043,
+   "marche": 0.028,
+   "menages_sans_voiture": 0.072,
+   "menages_stationnement_reserve": 0.875,
+   "panier_quotidien_500m": 0.292,
+   "bus_8h_7_9h": 0.553,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840117",
+   "nom": "Villeneuve",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1265,
+   "voiture": 0.841,
+   "velo": 0.078,
+   "tc": 0.042,
+   "marche": 0.009,
+   "menages_sans_voiture": 0.084,
+   "menages_stationnement_reserve": 0.839,
+   "panier_quotidien_500m": 0.297,
+   "bus_8h_7_9h": 0.957,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840134",
+   "nom": "Immaculée Bourg",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1505,
+   "voiture": 0.849,
+   "velo": 0.041,
+   "tc": 0.039,
+   "marche": 0.029,
+   "menages_sans_voiture": 0.071,
+   "menages_stationnement_reserve": 0.843,
+   "panier_quotidien_500m": 0.036,
+   "bus_8h_7_9h": 0.534,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "441840133",
+   "nom": "Immaculée Campagne",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1022,
+   "voiture": 0.86,
+   "velo": 0.026,
+   "tc": 0.029,
+   "marche": 0.022,
+   "menages_sans_voiture": 0.037,
+   "menages_stationnement_reserve": 0.877,
+   "panier_quotidien_500m": 0.019,
+   "bus_8h_7_9h": 0.069,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "44184",
+   "nom": "Saint-Nazaire",
+   "lignes": 5996,
+   "fragilite": "ok",
+   "part_des_actifs": 0.654,
+   "pas_de_transport": 0.045,
+   "marche": 0.089,
+   "velo": 0.117,
+   "deux_roues_mot": 0.014,
+   "voiture": 0.64,
+   "tc": 0.096
+  },
+  {
+   "travail": "44103",
+   "nom": "Montoir-de-Bretagne",
+   "lignes": 689,
+   "fragilite": "ok",
+   "part_des_actifs": 0.072,
+   "pas_de_transport": 0.0,
+   "marche": 0.002,
+   "velo": 0.053,
+   "deux_roues_mot": 0.013,
+   "voiture": 0.857,
+   "tc": 0.076
+  },
+  {
+   "travail": "44210",
+   "nom": "Trignac",
+   "lignes": 295,
+   "fragilite": "ok",
+   "part_des_actifs": 0.034,
+   "pas_de_transport": 0.0,
+   "marche": 0.027,
+   "velo": 0.048,
+   "deux_roues_mot": 0.026,
+   "voiture": 0.757,
+   "tc": 0.142
+  },
+  {
+   "travail": "44109",
+   "nom": "Nantes",
+   "lignes": 287,
+   "fragilite": "ok",
+   "part_des_actifs": 0.032,
+   "pas_de_transport": 0.009,
+   "marche": 0.015,
+   "velo": 0.0,
+   "deux_roues_mot": 0.002,
+   "voiture": 0.554,
+   "tc": 0.421
+  },
+  {
+   "travail": "44069",
+   "nom": "Guérande",
+   "lignes": 271,
+   "fragilite": "ok",
+   "part_des_actifs": 0.03,
+   "pas_de_transport": 0.004,
+   "marche": 0.005,
+   "velo": 0.002,
+   "deux_roues_mot": 0.011,
+   "voiture": 0.925,
+   "tc": 0.053
+  },
+  {
+   "travail": "44055",
+   "nom": "La Baule-Escoublac",
+   "lignes": 233,
+   "fragilite": "ok",
+   "part_des_actifs": 0.025,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.017,
+   "voiture": 0.943,
+   "tc": 0.04
+  },
+  {
+   "travail": "44132",
+   "nom": "Pornichet",
+   "lignes": 203,
+   "fragilite": "ok",
+   "part_des_actifs": 0.021,
+   "pas_de_transport": 0.0,
+   "marche": 0.007,
+   "velo": 0.03,
+   "deux_roues_mot": 0.006,
+   "voiture": 0.933,
+   "tc": 0.024
+  },
+  {
+   "travail": "44052",
+   "nom": "Donges",
+   "lignes": 136,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.015,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.009,
+   "deux_roues_mot": 0.011,
+   "voiture": 0.893,
+   "tc": 0.087
+  },
+  {
+   "travail": "44154",
+   "nom": "Saint-Brevin-les-Pins",
+   "lignes": 128,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.013,
+   "pas_de_transport": 0.012,
+   "marche": 0.003,
+   "velo": 0.0,
+   "deux_roues_mot": 0.009,
+   "voiture": 0.962,
+   "tc": 0.014
+  },
+  {
+   "travail": "44162",
+   "nom": "Saint-Herblain",
+   "lignes": 70,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.007,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.878,
+   "tc": 0.115
+  },
+  {
+   "travail": "44131",
+   "nom": "Pornic",
+   "lignes": 59,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 1.0,
+   "tc": 0.0
+  },
+  {
+   "travail": "44151",
+   "nom": "Saint-André-des-Eaux",
+   "lignes": 55,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.962,
+   "tc": 0.038
+  },
+  {
+   "travail": "44195",
+   "nom": "Savenay",
+   "lignes": 54,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.825,
+   "tc": 0.175
+  },
+  {
+   "travail": "44129",
+   "nom": "Pontchâteau",
+   "lignes": 49,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.969,
+   "tc": 0.031
+  }
+ ],
+ "voisines": [
+  {
+   "insee": "44055",
+   "nom": "La Baule-Escoublac",
+   "voiture": 0.783,
+   "velo": 0.036,
+   "tc": 0.054,
+   "vers_commune_etudiee": {
+    "lignes": 412,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.943,
+     "bas": 0.903,
+     "haut": 0.967,
+     "lignes": 412,
+     "n_eff": 214
+    },
+    "velo": {
+     "p": 0.018,
+     "bas": 0.007,
+     "haut": 0.046,
+     "lignes": 412,
+     "n_eff": 214
+    }
+   }
+  },
+  {
+   "insee": "44069",
+   "nom": "Guérande",
+   "voiture": 0.832,
+   "velo": 0.032,
+   "tc": 0.026,
+   "vers_commune_etudiee": {
+    "lignes": 429,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.962,
+     "bas": 0.929,
+     "haut": 0.98,
+     "lignes": 429,
+     "n_eff": 230
+    },
+    "velo": {
+     "p": 0.006,
+     "bas": 0.001,
+     "haut": 0.027,
+     "lignes": 429,
+     "n_eff": 230
+    }
+   }
+  },
+  {
+   "insee": "44154",
+   "nom": "Saint-Brevin-les-Pins",
+   "voiture": 0.869,
+   "velo": 0.031,
+   "tc": 0.027,
+   "vers_commune_etudiee": {
+    "lignes": 443,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.956,
+     "bas": 0.923,
+     "haut": 0.975,
+     "lignes": 443,
+     "n_eff": 251
+    },
+    "velo": {
+     "p": 0.01,
+     "bas": 0.003,
+     "haut": 0.032,
+     "lignes": 443,
+     "n_eff": 251
+    }
+   }
+  },
+  {
+   "insee": "44132",
+   "nom": "Pornichet",
+   "voiture": 0.818,
+   "velo": 0.048,
+   "tc": 0.048,
+   "vers_commune_etudiee": {
+    "lignes": 521,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.906,
+     "bas": 0.865,
+     "haut": 0.936,
+     "lignes": 521,
+     "n_eff": 267
+    },
+    "velo": {
+     "p": 0.045,
+     "bas": 0.026,
+     "haut": 0.077,
+     "lignes": 521,
+     "n_eff": 267
+    }
+   }
+  },
+  {
+   "insee": "44052",
+   "nom": "Donges",
+   "voiture": 0.896,
+   "velo": 0.02,
+   "tc": 0.027,
+   "vers_commune_etudiee": {
+    "lignes": 211,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.943,
+     "bas": 0.892,
+     "haut": 0.971,
+     "lignes": 211,
+     "n_eff": 141
+    },
+    "velo": {
+     "p": 0.005,
+     "bas": 0.001,
+     "haut": 0.035,
+     "lignes": 211,
+     "n_eff": 141
+    }
+   }
+  },
+  {
+   "insee": "44210",
+   "nom": "Trignac",
+   "voiture": 0.867,
+   "velo": 0.026,
+   "tc": 0.047,
+   "vers_commune_etudiee": {
+    "lignes": 259,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.876,
+     "bas": 0.819,
+     "haut": 0.917,
+     "lignes": 259,
+     "n_eff": 172
+    },
+    "velo": {
+     "p": 0.027,
+     "bas": 0.011,
+     "haut": 0.064,
+     "lignes": 259,
+     "n_eff": 172
+    }
+   }
+  }
+ ],
+ "acces_communes": {
+  "44184": {
+   "commerce_alim_500m": 0.826,
+   "grande_surface_500m": 0.378,
+   "pharmacie_500m": 0.688,
+   "medecin_generaliste_500m": 0.667,
+   "ecole_elementaire_500m": 0.767,
+   "college_1km": 0.729,
+   "gare_2km": 0.429,
+   "panier_quotidien_500m": 0.617,
+   "bus_8h_7_9h": 0.825,
+   "aucun_bus_7_9h": 0.05,
+   "bus_4h_20_22h": 0.736
+  },
+  "44055": {
+   "commerce_alim_500m": 0.509,
+   "grande_surface_500m": 0.144,
+   "pharmacie_500m": 0.425,
+   "medecin_generaliste_500m": 0.478,
+   "ecole_elementaire_500m": 0.351,
+   "college_1km": 0.375,
+   "gare_2km": 0.954,
+   "panier_quotidien_500m": 0.257,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 0.63,
+   "bus_4h_20_22h": 0.0
+  },
+  "44069": {
+   "commerce_alim_500m": 0.387,
+   "grande_surface_500m": 0.196,
+   "pharmacie_500m": 0.325,
+   "medecin_generaliste_500m": 0.385,
+   "ecole_elementaire_500m": 0.339,
+   "college_1km": 0.452,
+   "gare_2km": 0.111,
+   "panier_quotidien_500m": 0.224,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 0.811,
+   "bus_4h_20_22h": 0.0
+  },
+  "44154": {
+   "commerce_alim_500m": 0.452,
+   "grande_surface_500m": 0.236,
+   "pharmacie_500m": 0.35,
+   "medecin_generaliste_500m": 0.213,
+   "ecole_elementaire_500m": 0.216,
+   "college_1km": 0.329,
+   "gare_2km": 0.0,
+   "panier_quotidien_500m": 0.065,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 0.825,
+   "bus_4h_20_22h": 0.0
+  },
+  "44132": {
+   "commerce_alim_500m": 0.594,
+   "grande_surface_500m": 0.162,
+   "pharmacie_500m": 0.369,
+   "medecin_generaliste_500m": 0.506,
+   "ecole_elementaire_500m": 0.523,
+   "college_1km": 0.307,
+   "gare_2km": 0.415,
+   "panier_quotidien_500m": 0.263,
+   "bus_8h_7_9h": 0.002,
+   "aucun_bus_7_9h": 0.402,
+   "bus_4h_20_22h": 0.002
+  },
+  "44052": {
+   "commerce_alim_500m": 0.344,
+   "grande_surface_500m": 0.272,
+   "pharmacie_500m": 0.176,
+   "medecin_generaliste_500m": 0.256,
+   "ecole_elementaire_500m": 0.269,
+   "college_1km": 0.528,
+   "gare_2km": 0.386,
+   "panier_quotidien_500m": 0.175,
+   "bus_8h_7_9h": 0.011,
+   "aucun_bus_7_9h": 0.364,
+   "bus_4h_20_22h": 0.0
+  },
+  "44210": {
+   "commerce_alim_500m": 0.531,
+   "grande_surface_500m": 0.437,
+   "pharmacie_500m": 0.527,
+   "medecin_generaliste_500m": 0.264,
+   "ecole_elementaire_500m": 0.534,
+   "college_1km": 0.41,
+   "gare_2km": 0.773,
+   "panier_quotidien_500m": 0.304,
+   "bus_8h_7_9h": 0.66,
+   "aucun_bus_7_9h": 0.264,
+   "bus_4h_20_22h": 0.61
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 90
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 270
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 630
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 60
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 180
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 420
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit",
+   "raison": "seules les comparaisons calculées et documentées dans le dossier s'écrivent"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 44184 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/fiche/fiche.json --contours <cache>/iris_ign_44184.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.55",
+   "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable automatiquement",
+   "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+   "commande": "generer_visuels.py (sans --sans-barres)",
+   "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Carte de situation : Saint-Nazaire et La Baule-Escoublac (44055), Guérande (44069), Saint-Brevin-les-Pins (44154), Pornichet (44132), Donges (44052) et Trignac (44210)",
+   "etat": "réalisable, seulement à côté du graphique précédent",
+   "faits": "aucun (contours IGN)",
+   "commande": "generer_visuels.py … --communes 44055,44069,44154,44132,44052,44210",
+   "manuel": "le sous-titre parle de « la seconde barre » : à n'utiliser qu'avec ce graphique, même liste exacte"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "44184",
+  "consulte_le": "2026-10-15",
+  "origine": "automatique",
+  "sources_officielles": [
+   "https://transport.data.gouv.fr"
+  ],
+  "faits": [
+   {
+    "id": "doc.reseau.identite",
+    "information": "Le réseau de transport urbain de l'intercommunalité CA de la Région Nazairienne et de l'Estuaire (CARENE) s'appelle « Ycéo » ; son autorité organisatrice est CA de la Région Nazairienne et de l'Estuaire (CARENE).",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain et scolaire Ycéo » : https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1 ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
+    "validite": "jeu de données mis à jour le 2026-10-13",
+    "perimetre": "intercommunalité CA de la Région Nazairienne et de l'Estuaire (CARENE) ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   },
+   {
+    "id": "doc.reseau.site",
+    "information": "Le site du réseau Ycéo est https://yceo-mobilite.fr/.",
+    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/yceo-arrets-horaires-et-lignes-urbaines-et-scolaires-gtfs-1 ; site joint le 2026-10-15",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Ycéo",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "tarification (gratuité, abonnements, exceptions)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "jours et périodes de circulation des lignes urbaines",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   },
+   {
+    "sujet": "vélo ou gare (seulement si directement utile au logement)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   }
+  ],
+  "ecartes": [],
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/dossier/complement.json",
+  "sha256": "1747133b0ec8bef04cb6178be1a7a92711859a43d52efc096abf6ed2c7b31f21"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "44184",
+   "nom": "Saint-Nazaire",
+   "role": "principale",
+   "actifs": 28139,
+   "lignes": 9198,
+   "voiture": 0.7111
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que Saint-Nazaire (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 14 069 à 56 278), avec au moins 150 lignes d'échantillon ; Saint-Nazaire exclue ; France métropolitaine",
+   "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    14069,
+    56278
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "3a21daa14fad5bb1"
+   }
+  },
+  "genere_le": "2026-10-14T14:26:52Z",
+  "disponible": true,
+  "groupe": {
+   "n": 72,
+   "mediane_voiture": 0.6748,
+   "communes": [
+    {
+     "insee": "2A004",
+     "nom": "Ajaccio",
+     "actifs": 31282,
+     "voiture": 0.7559
+    },
+    {
+     "insee": "81004",
+     "nom": "Albi",
+     "actifs": 17834,
+     "voiture": 0.7026
+    },
+    {
+     "insee": "80021",
+     "nom": "Amiens",
+     "actifs": 50204,
+     "voiture": 0.5688
+    },
+    {
+     "insee": "16015",
+     "nom": "Angoulême",
+     "actifs": 16572,
+     "voiture": 0.649
+    },
+    {
+     "insee": "74012",
+     "nom": "Annemasse",
+     "actifs": 16867,
+     "voiture": 0.4809
+    },
+    {
+     "insee": "13004",
+     "nom": "Arles",
+     "actifs": 19148,
+     "voiture": 0.7454
+    },
+    {
+     "insee": "62041",
+     "nom": "Arras",
+     "actifs": 16425,
+     "voiture": 0.6128
+    },
+    {
+     "insee": "84007",
+     "nom": "Avignon",
+     "actifs": 31281,
+     "voiture": 0.6473
+    },
+    {
+     "insee": "2B033",
+     "nom": "Bastia",
+     "actifs": 18177,
+     "voiture": 0.749
+    },
+    {
+     "insee": "64102",
+     "nom": "Bayonne",
+     "actifs": 24509,
+     "voiture": 0.6786
+    },
+    {
+     "insee": "60057",
+     "nom": "Beauvais",
+     "actifs": 20011,
+     "voiture": 0.6938
+    },
+    {
+     "insee": "90010",
+     "nom": "Belfort",
+     "actifs": 16728,
+     "voiture": 0.6285
+    },
+    {
+     "insee": "25056",
+     "nom": "Besançon",
+     "actifs": 47686,
+     "voiture": 0.558
+    },
+    {
+     "insee": "41018",
+     "nom": "Blois",
+     "actifs": 17025,
+     "voiture": 0.6567
+    },
+    {
+     "insee": "62160",
+     "nom": "Boulogne-sur-Mer",
+     "actifs": 14414,
+     "voiture": 0.6735
+    },
+    {
+     "insee": "01053",
+     "nom": "Bourg-en-Bresse",
+     "actifs": 15736,
+     "voiture": 0.6573
+    },
+    {
+     "insee": "18033",
+     "nom": "Bourges",
+     "actifs": 24724,
+     "voiture": 0.7284
+    },
+    {
+     "insee": "19031",
+     "nom": "Brive-la-Gaillarde",
+     "actifs": 18097,
+     "voiture": 0.7385
+    },
+    {
+     "insee": "34032",
+     "nom": "Béziers",
+     "actifs": 24205,
+     "voiture": 0.7667
+    },
+    {
+     "insee": "14118",
+     "nom": "Caen",
+     "actifs": 43167,
+     "voiture": 0.5765
+    },
+    {
+     "insee": "62193",
+     "nom": "Calais",
+     "actifs": 23291,
+     "voiture": 0.7608
+    },
+    {
+     "insee": "11069",
+     "nom": "Carcassonne",
+     "actifs": 16509,
+     "voiture": 0.7395
+    },
+    {
+     "insee": "81065",
+     "nom": "Castres",
+     "actifs": 15487,
+     "voiture": 0.7658
+    },
+    {
+     "insee": "71076",
+     "nom": "Chalon-sur-Saône",
+     "actifs": 17261,
+     "voiture": 0.6612
+    },
+    {
+     "insee": "73065",
+     "nom": "Chambéry",
+     "actifs": 25185,
+     "voiture": 0.5657
+    },
+    {
+     "insee": "08105",
+     "nom": "Charleville-Mézières",
+     "actifs": 15228,
+     "voiture": 0.6508
+    },
+    {
+     "insee": "28085",
+     "nom": "Chartres",
+     "actifs": 16156,
+     "voiture": 0.5875
+    },
+    {
+     "insee": "50129",
+     "nom": "Cherbourg-en-Cotentin",
+     "actifs": 33130,
+     "voiture": 0.7047
+    },
+    {
+     "insee": "49099",
+     "nom": "Cholet",
+     "actifs": 22354,
+     "voiture": 0.782
+    },
+    {
+     "insee": "51108",
+     "nom": "Châlons-en-Champagne",
+     "actifs": 16714,
+     "voiture": 0.6911
+    },
+    {
+     "insee": "36044",
+     "nom": "Châteauroux",
+     "actifs": 15621,
+     "voiture": 0.7246
+    },
+    {
+     "insee": "68066",
+     "nom": "Colmar",
+     "actifs": 27853,
+     "voiture": 0.6192
+    },
+    {
+     "insee": "60159",
+     "nom": "Compiègne",
+     "actifs": 15264,
+     "voiture": 0.6341
+    },
+    {
+     "insee": "83050",
+     "nom": "Draguignan",
+     "actifs": 15388,
+     "voiture": 0.7907
+    },
+    {
+     "insee": "59183",
+     "nom": "Dunkerque",
+     "actifs": 31408,
+     "voiture": 0.6949
+    },
+    {
+     "insee": "83061",
+     "nom": "Fréjus",
+     "actifs": 22251,
+     "voiture": 0.8084
+    },
+    {
+     "insee": "05061",
+     "nom": "Gap",
+     "actifs": 16136,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "67180",
+     "nom": "Haguenau",
+     "actifs": 16998,
+     "voiture": 0.7048
+    },
+    {
+     "insee": "85191",
+     "nom": "La Roche-sur-Yon",
+     "actifs": 22342,
+     "voiture": 0.7443
+    },
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "actifs": 30550,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "53130",
+     "nom": "Laval",
+     "actifs": 19809,
+     "voiture": 0.6742
+    },
+    {
+     "insee": "72181",
+     "nom": "Le Mans",
+     "actifs": 55004,
+     "voiture": 0.5813
+    },
+    {
+     "insee": "85194",
+     "nom": "Les Sables-d'Olonne",
+     "actifs": 16149,
+     "voiture": 0.7804
+    },
+    {
+     "insee": "87085",
+     "nom": "Limoges",
+     "actifs": 48515,
+     "voiture": 0.6996
+    },
+    {
+     "insee": "56121",
+     "nom": "Lorient",
+     "actifs": 22717,
+     "voiture": 0.6667
+    },
+    {
+     "insee": "77284",
+     "nom": "Meaux",
+     "actifs": 23761,
+     "voiture": 0.4646
+    },
+    {
+     "insee": "57463",
+     "nom": "Metz",
+     "actifs": 50936,
+     "voiture": 0.5651
+    },
+    {
+     "insee": "82121",
+     "nom": "Montauban",
+     "actifs": 24798,
+     "voiture": 0.7846
+    },
+    {
+     "insee": "26198",
+     "nom": "Montélimar",
+     "actifs": 15059,
+     "voiture": 0.7868
+    },
+    {
+     "insee": "68224",
+     "nom": "Mulhouse",
+     "actifs": 35491,
+     "voiture": 0.6112
+    },
+    {
+     "insee": "54395",
+     "nom": "Nancy",
+     "actifs": 43903,
+     "voiture": 0.4838
+    },
+    {
+     "insee": "11262",
+     "nom": "Narbonne",
+     "actifs": 19278,
+     "voiture": 0.7433
+    },
+    {
+     "insee": "79191",
+     "nom": "Niort",
+     "actifs": 25863,
+     "voiture": 0.7011
+    },
+    {
+     "insee": "30189",
+     "nom": "Nîmes",
+     "actifs": 52730,
+     "voiture": 0.6586
+    },
+    {
+     "insee": "45234",
+     "nom": "Orléans",
+     "actifs": 49354,
+     "voiture": 0.5278
+    },
+    {
+     "insee": "64445",
+     "nom": "Pau",
+     "actifs": 30140,
+     "voiture": 0.6678
+    },
+    {
+     "insee": "66136",
+     "nom": "Perpignan",
+     "actifs": 36885,
+     "voiture": 0.7311
+    },
+    {
+     "insee": "86194",
+     "nom": "Poitiers",
+     "actifs": 33952,
+     "voiture": 0.5927
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "actifs": 27007,
+     "voiture": 0.7802
+    },
+    {
+     "insee": "76540",
+     "nom": "Rouen",
+     "actifs": 49112,
+     "voiture": 0.437
+    },
+    {
+     "insee": "22278",
+     "nom": "Saint-Brieuc",
+     "actifs": 17182,
+     "voiture": 0.6897
+    },
+    {
+     "insee": "35288",
+     "nom": "Saint-Malo",
+     "actifs": 17251,
+     "voiture": 0.6755
+    },
+    {
+     "insee": "02691",
+     "nom": "Saint-Quentin",
+     "actifs": 17220,
+     "voiture": 0.7042
+    },
+    {
+     "insee": "13103",
+     "nom": "Salon-de-Provence",
+     "actifs": 18741,
+     "voiture": 0.7669
+    },
+    {
+     "insee": "65440",
+     "nom": "Tarbes",
+     "actifs": 15277,
+     "voiture": 0.74
+    },
+    {
+     "insee": "57672",
+     "nom": "Thionville",
+     "actifs": 19332,
+     "voiture": 0.6725
+    },
+    {
+     "insee": "74281",
+     "nom": "Thonon-les-Bains",
+     "actifs": 16506,
+     "voiture": 0.6496
+    },
+    {
+     "insee": "10387",
+     "nom": "Troyes",
+     "actifs": 22143,
+     "voiture": 0.6432
+    },
+    {
+     "insee": "26362",
+     "nom": "Valence",
+     "actifs": 25309,
+     "voiture": 0.6173
+    },
+    {
+     "insee": "59606",
+     "nom": "Valenciennes",
+     "actifs": 16541,
+     "voiture": 0.6638
+    },
+    {
+     "insee": "56260",
+     "nom": "Vannes",
+     "actifs": 21270,
+     "voiture": 0.6754
+    },
+    {
+     "insee": "27229",
+     "nom": "Évreux",
+     "actifs": 17632,
+     "voiture": 0.6818
+    }
+   ]
+  },
+  "ecart_points": 4,
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/fiche/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à Saint-Nazaire qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "71 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 72 communes du groupe (chaque commune compte une fois)",
+    "affichage": "67 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : Saint-Nazaire moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "+4 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "72",
+    "usage": "oui"
+   }
+  ]
+ }
+}

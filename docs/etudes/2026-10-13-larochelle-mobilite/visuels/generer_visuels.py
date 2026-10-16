@@ -84,7 +84,7 @@ def render_png(svg_path, w, h):
     png = svg_path[:-4] + ".png"
     subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--window-size={w},{h}",
                     "--force-device-scale-factor=2", "--virtual-time-budget=4000", f"--screenshot={png}",
-                    "file://" + os.path.abspath(page)], check=True, capture_output=True)
+                    "file://" + os.path.abspath(page)], check=True, capture_output=True, timeout=180)  # Chrome bloqué : erreur, pas une attente sans fin
     os.remove(page)
 
 
@@ -184,6 +184,27 @@ def carte(a, mobile):
     else:
         codes = {c: None for c in (a.libelles or "").split(",") if c}
     lh = 15 * fs
+    reperes = [c for c in (a.reperes or "").split(",") if c in centres and c in data]
+    if reperes:
+        codes = {}  # les repères remplacent les libellés : aucun placement manuel
+        from shapely.geometry import shape
+        geo = {f["properties"]["code_iris"]: shape(f["geometry"]) for f in feats}
+        r9, places = 10 * fs, []
+        for i, code in enumerate(reperes, 1):
+            pt = geo[code].representative_point()  # toujours DANS le secteur (formes en croissant comprises)
+            ax, ay = P(pt.x, pt.y); cx, cy = ax, ay
+            # Anti-chevauchement : si le repère touche un repère déjà posé, on le décale sur une spirale autour de son
+            # point d'accroche, puis un trait fin le relie à son secteur (aucun placement manuel).
+            essai = 0
+            while any((cx - x) ** 2 + (cy - y) ** 2 < (2.15 * r9) ** 2 for x, y in places) and essai < 60:
+                essai += 1; ang = essai * 2.4; rad = r9 * (1.2 + 0.35 * essai)
+                cx, cy = ax + rad * math.cos(ang), ay + rad * math.sin(ang)
+            places.append((cx, cy))
+            if essai:
+                body.append(f'<line x1="{ax:.1f}" y1="{ay:.1f}" x2="{cx:.1f}" y2="{cy:.1f}" stroke="{INK}" stroke-width="1"/>'
+                            f'<circle cx="{ax:.1f}" cy="{ay:.1f}" r="2.4" fill="{INK}"/>')
+            body.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r9:.1f}" fill="{SURFACE}" stroke="{INK}" stroke-width="1.4"/>')
+            body.append(text(cx, cy + 4.6 * fs, str(i), round(12.5 * fs), 700, INK, "middle"))
     for code, pos in codes.items():
         if code not in centres or code not in data:
             continue
@@ -239,6 +260,14 @@ def carte(a, mobile):
         leg.append(f'<rect x="{lx0}" y="{yy:.1f}" width="{sw}" height="{sw}" rx="3" fill="{NO_DATA}" stroke="{HATCH}" stroke-dasharray="3 2"/>')
         leg.append(text(lx0 + sw + 10, yy + sw * 0.75, "Sans donnée exploitable", round(13 * fs), 400, INK2))
         yy += sw + 8
+    if reperes:
+        yy += 10
+        leg.append(text(lx0, yy + 12 * fs, "Secteurs repérés", round(14 * fs), 600, INK)); yy += 22 * fs
+        for i, code in enumerate(reperes, 1):
+            r = data[code]; v = pct(r["voiture"]) if r["TYP_IRIS"] == "H" else "secteur d'activité"
+            for j, l in enumerate(wrap(f"{i}. {r['nom']} : {v}", 40 if mobile else 30)):
+                leg.append(text(lx0, yy + 12 * fs, l, round(13 * fs), 400, INK2)); yy += 17 * fs
+            yy += 2
     col_bottom = yy
     # Pied : définition courte, source et millésime (le reste va dans la légende HTML associée)
     foot = ["Actifs occupés de 15 ans ou plus résidant dans le secteur ; mode de transport principal déclaré pour aller travailler.",
@@ -369,9 +398,15 @@ def groupes_barres(a):
     fiche = json.load(open(a.fiche))
     nom = fiche["commune"]["nom"]; vois = list(fiche["commune"]["voisines"].values())
     V = next(f for f in fiche["faits"] if f["id"] == "mobpro.voiture_selon_destination")["valeur"]
-    ou = liste_fr(vois).replace(" et ", " ou ")
-    return nom, [(f"Travaille à {nom}", V["meme_commune"]["p"]), (f"Travaille à {ou}", V["communes_voisines"]["p"]),
-                 (f"Travaille ailleurs (hors de {nom}, {liste_fr(vois)})", V["ailleurs"]["p"])]
+    # Seuls les groupes utilisables (au moins 150 lignes d'échantillon, seuil de la fiche) deviennent des barres ; une commune
+    # sans voisines retenues (seule dans son unité urbaine) n'a que « ici » et « ailleurs ».
+    g = [(f"Travaille à {nom}", V["meme_commune"])]
+    if vois:
+        g += [(f"Travaille à {liste_fr(vois).replace(' et ', ' ou ')}", V["communes_voisines"]),
+              (f"Travaille ailleurs (hors de {nom}, {liste_fr(vois)})", V["ailleurs"])]
+    else:
+        g += [(f"Travaille hors de {nom}", V["ailleurs"])]
+    return nom, [(t, v["p"]) for t, v in g if v.get("lignes", 0) >= 150]
 
 
 def barres(a, mobile):
@@ -442,13 +477,24 @@ def main():
     p.add_argument("--incertitudes", default="", help="La Rochelle seulement (barres) ; une autre commune lit la fiche")
     p.add_argument("--out", required=True)
     p.add_argument("--libelles", default=""); p.add_argument("--sans-png", action="store_true")
+    p.add_argument("--reperes", default="", help="codes IRIS à repérer par un numéro (dans le secteur) et une liste en légende ; "
+                   "repli sans placement manuel, prioritaire sur --libelles")
     p.add_argument("--sans-barres", action="store_true", help="ne pas produire le graphique selon le lieu de travail")
     p.add_argument("--classes", default="", help="borne basse de la première classe, en part (ex. 0.45 : classes de 10 points "
-                   "de 45 à 95 %%). Défaut 0.25 (La Rochelle)")
+                   "de 45 à 95 %%) ou « auto » (déduites des données). Défaut 0.25 (La Rochelle)")
     p.add_argument("--communes", default=None, help="codes INSEE des communes du graphique à situer (défaut pour 17300 : "
                    "les quatre communes de la seconde barre). Produit carte_communes_<insee>_*. Vide : pas de carte de situation")
     a = p.parse_args(); os.makedirs(a.out, exist_ok=True)
-    if a.classes:
+    if a.classes == "auto":
+        # Cinq classes égales, bornes rondes, déduites des secteurs d'habitat de la fiche (aucun réglage par commune) :
+        # pas de 10 points si l'étendue tient en 50 points, sinon le plus petit multiple de 5 points qui la couvre.
+        v = [r["voiture"] for r in json.load(open(a.fiche))["tableaux"].get("iris") or []
+             if r.get("TYP_IRIS") == "H" and r.get("voiture") is not None and r["voiture"] == r["voiture"]]
+        if v:
+            lo = math.floor(min(v) * 20) / 20
+            pas = max(0.10, math.ceil((max(v) - lo) / 5 * 20 + 1e-9) / 20)
+            CLASSES[:] = [(round(lo + i * pas, 2), round(lo + (i + 1) * pas, 2)) for i in range(5)]
+    elif a.classes:
         lo = float(a.classes)
         CLASSES[:] = [(round(lo + i / 10, 2), round(lo + (i + 1) / 10, 2)) for i in range(5)]
     if a.communes is None:

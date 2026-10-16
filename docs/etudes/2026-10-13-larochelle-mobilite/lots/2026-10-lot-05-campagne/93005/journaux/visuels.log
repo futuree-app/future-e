@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 93005 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/93005/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_93005.json --classes auto --communes  --reperes 930050401,930050601 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/93005/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 35,
+  "non_res": 1,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Aulnay-sous-Bois découpée en 35 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 30 à 80 %). La part la plus basse est d'environ 33 % (Parc 1), la plus élevée d'environ 59 % (Fontaine des Prés 2). 1 secteur d'activité exclu. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

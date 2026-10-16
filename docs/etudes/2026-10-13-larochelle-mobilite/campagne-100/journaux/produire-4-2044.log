@@ -1,0 +1,55 @@
+✓ AggloBus : 5 information(s) vérifiée(s), 4 recherche(s) sans résultat vérifié
+✓ TCAT : 4 information(s) vérifiée(s), 3 recherche(s) sans résultat vérifié
+· RESEAU MISTRAL : collecte déjà faite le 2026-10-15 (lot 2026-10-lot-04-campagne), réutilisée : aucun appel
+· Transports Montalbanais : aucun site joignable, collecte impossible
+✓ Synchro Bus : 1 information(s) vérifiée(s), 3 recherche(s) sans résultat vérifié
+✓ Le Bus : 4 information(s) vérifiée(s), 5 recherche(s) sans résultat vérifié
+✓ Citibus : 5 information(s) vérifiée(s), 6 recherche(s) sans résultat vérifié
+
+Commune                INSEE  État                   Préparation  Motif
+Évry-Courcouronnes     91228  dossier prêt                51.1 s  
+Clichy                 92024  dossier prêt                36.5 s  
+Ivry-sur-Seine         94041  dossier prêt                27.3 s  
+Bourges                18033  dossier prêt                31.8 s  
+Antony                 92002  dossier prêt                26.7 s  
+Troyes                 10387  dossier prêt                31.0 s  
+La Seyne-sur-Mer       83126  dossier prêt                36.1 s  
+Villeneuve-d'Ascq      59009  dossier prêt                54.5 s  
+Montauban              82121  dossier prêt                32.1 s  
+Pantin                 93055  dossier prêt                34.7 s  
+Chambéry               73065  dossier prêt                33.4 s  
+Neuilly-sur-Seine      92051  dossier prêt                19.2 s  
+Sarcelles              95585  dossier prêt                21.2 s  
+Le Blanc-Mesnil        93007  dossier prêt                19.7 s  
+Maisons-Alfort         94046  dossier prêt                17.7 s  
+Villejuif              94076  dossier prêt                19.2 s  
+Fréjus                 83061  dossier prêt                23.2 s  
+Beauvais               60057  dossier prêt                24.0 s  
+Narbonne               11262  dossier prêt                20.9 s  
+Meaux                  77284  dossier prêt                26.8 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 0.23 $
+■ lot suspendu : suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)
+
+Commune                INSEE  État                   Préparation  Motif
+Évry-Courcouronnes     91228  prêt à relire               51.1 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Clichy                 92024  suspendu par quota          36.5 s  suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)
+Ivry-sur-Seine         94041  dossier prêt                27.3 s  
+Bourges                18033  dossier prêt                31.8 s  
+Antony                 92002  dossier prêt                26.7 s  
+Troyes                 10387  dossier prêt                31.0 s  
+La Seyne-sur-Mer       83126  dossier prêt                36.1 s  
+Villeneuve-d'Ascq      59009  dossier prêt                54.5 s  
+Montauban              82121  dossier prêt                32.1 s  
+Pantin                 93055  dossier prêt                34.7 s  
+Chambéry               73065  dossier prêt                33.4 s  
+Neuilly-sur-Seine      92051  dossier prêt                19.2 s  
+Sarcelles              95585  dossier prêt                21.2 s  
+Le Blanc-Mesnil        93007  dossier prêt                19.7 s  
+Maisons-Alfort         94046  dossier prêt                17.7 s  
+Villejuif              94076  dossier prêt                19.2 s  
+Fréjus                 83061  dossier prêt                23.2 s  
+Beauvais               60057  dossier prêt                24.0 s  
+Narbonne               11262  dossier prêt                20.9 s  
+Meaux                  77284  dossier prêt                26.8 s  
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 0.59 $
+■ campagne suspendue (rediger) : suspendu par quota · « relecture » : You've hit your session limit · resets 1am (Europe/Paris)

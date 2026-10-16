@@ -1,0 +1,130 @@
+{
+ "version": 2,
+ "id": "667e891f8e6b8d7da738991c",
+ "titre": "Réseau urbain Citibus",
+ "page": "https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne",
+ "nom_commercial": "Citibus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Citibus",
+ "aom": "CA Le Grand Narbonne",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "241100593",
+  "nom": "CA Le Grand Narbonne"
+ },
+ "mis_a_jour": "2026-10-15",
+ "agence": {
+  "agences": [
+   [
+    "Citibus",
+    "https://www.citibus.fr"
+   ]
+  ]
+ },
+ "site": "https://www.citibus.fr",
+ "sites_controles": [
+  [
+   "https://www.citibus.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.titres_gratuits_conditions",
+    "information": "Le réseau n'est pas gratuit pour tous : la page de tarifs liste des titres payants et certains titres gratuits sous conditions (CitiSenior'Annuel sous conditions de revenus).",
+    "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "extrait": "Gratuit (sous conditions de revenus)",
+    "validite": "non précisée",
+    "perimetre": "Titre CitiSenior'Annuel (version gratuite) : Narbonnais titulaires de la carte ELICIA ou résidents du Grand Narbonne de plus de 65 ans, sous conditions de revenus. Le texte ne précise pas de lignes.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:47:32Z"
+   },
+   {
+    "id": "doc.tarification.titres_gratuits_invalidite",
+    "information": "Un titre annuel gratuit (CitiMobil'Annuel Invalide) existe pour les personnes avec un taux d'invalidité d'au moins 80 %.",
+    "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "extrait": "Personnes justifiant d’un taux d’invalidité supérieur ou égal à 80%",
+    "validite": "non précisée",
+    "perimetre": "Public : personnes justifiant d'un taux d'invalidité ≥ 80 % ; lignes non précisées",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:47:32Z"
+   },
+   {
+    "id": "doc.jours.ligne1_7j7",
+    "information": "La ligne 1 (Bonne Source > Saint-Jean Saint-Pierre / Centre commercial La Coupe) circule du lundi au dimanche et les jours fériés. Pour les autres lignes, la page ne donne pas les jours de circulation, qu'il faut chercher dans les dépliants PDF de chaque ligne.",
+    "url": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+    "extrait": "Du lundi au dimanche et jours fériés.",
+    "validite": "Nouveau réseau à compter du 1er septembre (horaires rentrée 2026) ; date de fin non précisée",
+    "perimetre": "Ligne 1 uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:47:33Z"
+   },
+   {
+    "id": "doc.horaires.validite_debut",
+    "information": "Un nouveau réseau Citibus, avec de nouvelles lignes et de nouveaux horaires, démarre le 1er septembre. Le lien associé est intitulé « horaires rentrée 2026 ». La date de fin de validité n'est pas donnée.",
+    "url": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+    "extrait": "À compter du 1er septembre, découvrez votre nouveau réseau Citibus avec ses nouvelles lignes et ses nouveaux horaires.",
+    "validite": "à compter du 1er septembre (année non indiquée dans l'extrait ; la page est intitulée rentrée 2026)",
+    "perimetre": "Ensemble du réseau Citibus",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:47:33Z"
+   },
+   {
+    "id": "doc.verification.temps_reel",
+    "information": "La page « Prochain passage » donne les prochains passages en temps réel après sélection d'un arrêt et d'une ligne.",
+    "url": "https://www.citibus.fr/se-deplacer/prochain-passage",
+    "extrait": "Sélectionnez l'arrêt et la ligne que vous souhaitez emprunter, afin de générer les prochains passages en temps réel !",
+    "validite": "non précisée",
+    "perimetre": "Réseau Citibus, par arrêt et par ligne",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:47:33Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité générale du réseau (lignes gratuites, gratuité pour tous)",
+    "statut": "introuvable",
+    "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "note": "Aucune gratuité générale ni gratuité par ligne trouvée sur les pages consultées. Seuls des titres gratuits sous conditions sont listés (CitiSenior'Annuel, CitiMobil'Annuel Invalide, CitiMobil demandeur d'emploi/RSA). Je n'en conclus pas qu'il n'existe aucune autre gratuité."
+   },
+   {
+    "sujet": "Jours de circulation des lignes autres que la ligne 1 (samedi, dimanche, jours fériés)",
+    "statut": "non vérifié",
+    "url": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+    "note": "La page renvoie aux dépliants PDF de chaque ligne. Je ne les ai pas ouverts."
+   },
+   {
+    "sujet": "Période de validité (date de fin) des horaires",
+    "statut": "introuvable",
+    "url": "https://www.citibus.fr/se-deplacer/lignes-horaires",
+    "note": "Seule la date de début (1er septembre) est annoncée dans la bannière."
+   },
+   {
+    "sujet": "Calcul d'itinéraire",
+    "statut": "non vérifié",
+    "url": "https://www.citibus.fr/se-deplacer/calcul-ditineraire",
+    "note": "La page existe, mais le texte récupéré ne contient pas le formulaire de recherche, qui est probablement dynamique. L'outil d'itinéraire est à vérifier directement sur la page."
+   },
+   {
+    "sujet": "Fiches horaires par ligne",
+    "statut": "non vérifié",
+    "url": "https://www.citibus.fr/se-deplacer/lignes-horaires",
+    "note": "Page « Lignes et horaires » et page « Horaires rentrée 2026 » à consulter. Les PDF n'ont pas été lus."
+   },
+   {
+    "sujet": "Le ticket unité Citi1 est payant, à 1,20 €. Cela montre que le réseau n'est pas ",
+    "statut": "non vérifié",
+    "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
+}

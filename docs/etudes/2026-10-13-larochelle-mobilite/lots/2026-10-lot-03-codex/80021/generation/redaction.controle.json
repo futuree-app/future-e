@@ -1,0 +1,24 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Pratiques — libellé Amiens Nord 3",
+   "detail": "« 3, dans le libellé » ne correspond à aucune valeur du dossier pour iris.800212203.voiture (32.3)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Équipements — libellé Centre Ville 1",
+   "detail": "« 1, dans le libellé » ne correspond à aucune valeur du dossier pour iris.800211301.panier_500m (100.0)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Vérifications du lecteur — libellé Amiens Nord 3",
+   "detail": "« 3, dans le libellé » ne correspond à aucune valeur du dossier pour iris.800212203.tc (43.1)"
+  }
+ ],
+ "bloquantes": 3
+}

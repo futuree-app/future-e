@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 72181 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/72181/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_72181.json --classes auto --communes  --reperes 721810103,721810201,721810202,721812403,721810502,721810902,721810102,721811601,721811401,721811102,721811801,721810101 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/72181/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 63,
+  "non_res": 8,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Le Mans découpée en 63 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 35 à 85 %). La part la plus basse est d'environ 37 % (Jacobins-République), la plus élevée d'environ 80 % (Oasis). 8 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

@@ -59,6 +59,8 @@ MOTIF_BUS = "réseau de bus et jour de référence non validés : ne pas écrire
 ADR_COMMUNE = ("toutes les adresses BAN de {nom}, chaque secteur (IRIS) pesant selon son nombre de ménages "
                "(poids d'une adresse = ménages de son IRIS / adresses de son IRIS)")
 USAGES_DOC = ("oui", "avec ses conditions", "non")
+# Statut d'une RECHERCHE documentaire. Une absence d'information n'est jamais une absence de service.
+STATUTS_RECHERCHE = ("vérifié", "non vérifié", "introuvable", "inaccessible", "non recherché")
 CHAMPS_DOC = ("id", "information", "source", "consulte_le", "validite", "perimetre", "usage")
 
 
@@ -74,6 +76,12 @@ def complement(chemin):
         if not str(f.get("id", "")).startswith("doc."): erreurs.append(f"fait {f.get('id', i)} : l'identifiant doit commencer par « doc. »")
         if f.get("usage") not in USAGES_DOC: erreurs.append(f"fait {f.get('id', i)} : usage « {f.get('usage')} » hors de {USAGES_DOC}")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(f.get("consulte_le", ""))): erreurs.append(f"fait {f.get('id', i)} : consulte_le au format AAAA-MM-JJ")
+    for r in c.get("recherches", []):
+        if r.get("statut") not in STATUTS_RECHERCHE or not r.get("sujet"):
+            erreurs.append(f"recherche {r.get('sujet')} : statut « {r.get('statut')} » hors de {STATUTS_RECHERCHE}")
+    for f in c.get("faits", []):
+        if f.get("statut_verification", "vérifié") != "vérifié":
+            erreurs.append(f"fait {f.get('id')} : seul un fait vérifié entre au dossier ; les autres vont dans « recherches »")
     for e in c.get("ecartes", []):
         if not (e.get("sujet") and e.get("raison")): erreurs.append(f"écarté sans sujet ou sans raison : {e}")
     if erreurs:
@@ -177,11 +185,14 @@ def main():
                "mobpro.travaille_dans_commune", s, m, [v["bas"], v["haut"]])
     if "mobpro.voiture_selon_destination" in F:
         V = F["mobpro.voiture_selon_destination"]["valeur"]
-        groupes = {"meme_commune": (f"qui travaillent à {nom}", f"commune de travail : {commune}"),
-                   "communes_voisines": (f"qui travaillent dans l'une de ces communes : {liste(vois)}",
-                                         f"commune de travail : {liste(vois)} (exactement ; origine de la liste : {a.origine_voisines})"),
-                   "ailleurs": (f"qui travaillent hors de {nom} et hors de {liste(vois)}",
-                                f"commune de travail : toute commune autre que {nom}, {liste(vois)}")}
+        groupes = {"meme_commune": (f"qui travaillent à {nom}", f"commune de travail : {commune}")}
+        if vois:  # commune seule dans son unité urbaine, ou hors unité urbaine : pas de groupe de voisines
+            groupes["communes_voisines"] = (f"qui travaillent dans l'une de ces communes : {liste(vois)}",
+                                            f"commune de travail : {liste(vois)} (exactement ; origine de la liste : {a.origine_voisines})")
+            groupes["ailleurs"] = (f"qui travaillent hors de {nom} et hors de {liste(vois)}",
+                                   f"commune de travail : toute commune autre que {nom}, {liste(vois)}")
+        else:
+            groupes["ailleurs"] = (f"qui travaillent hors de {nom}", f"commune de travail : toute commune autre que {nom}")
         for k, (qui, perim) in groupes.items():
             if k not in V:
                 continue
@@ -189,7 +200,7 @@ def main():
             ajoute(f"mobpro.voiture_selon_destination.{k}", f"Part allant travailler en voiture, parmi les actifs résidents {qui}",
                    v["p"], "part", f"{actifs_res} {qui}", f"{actifs_res} {qui}", perim, "mobpro.voiture_selon_destination", s, m,
                    [v["bas"], v["haut"]], ["Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi."])
-        if "meme_commune" in V and "communes_voisines" in V:
+        if "meme_commune" in V and "communes_voisines" in V and vois:
             s = "utilisable" if all(statut_lignes(V[g]["lignes"])[0] == "utilisable" for g in ("meme_commune", "communes_voisines")) else "fragile"
             ajoute("ecart.voiture_destination.voisines_moins_meme_commune",
                    f"Écart de part de la voiture : travail dans {liste(vois)} moins travail à {nom}",
@@ -224,11 +235,16 @@ def main():
                 "reste_unite_urbaine": f"habitent une autre commune de l'unité urbaine INSEE {C.get('uu')} (liste des communes non exposée par la fiche)",
                 "hors_unite_urbaine": f"habitent hors de l'unité urbaine INSEE {C.get('uu')}"}
         for k, qui in orig.items():
-            v = V[k]
+            v = V.get(k) or {}
+            if not v.get("voiture") and not v.get("part_des_emplois"):
+                continue  # unité urbaine d'une seule commune : pas d'« autre commune de l'unité urbaine »
             ajoute(f"mobpro.qui_vient_travailler.{k}.part_des_emplois", f"Part, parmi les actifs qui travaillent à {nom}, de ceux qui {qui}",
                    v["part_des_emplois"], "part", travail, travail, f"commune de travail : {commune}", "mobpro.qui_vient_travailler")
             for mode in ("voiture", "tc"):
-                w = v[mode]; s, m = statut_lignes(w["lignes"])
+                w = v.get(mode)
+                if not w:
+                    continue
+                s, m = statut_lignes(w["lignes"])
                 ajoute(f"mobpro.qui_vient_travailler.{k}.{mode}", f"Part allant travailler {MODES[mode]}, parmi les actifs qui travaillent à {nom} et {qui}",
                        w["p"], "part", travail, f"{travail} et qui {qui}", f"commune de travail : {commune}", "mobpro.qui_vient_travailler",
                        s, m, [w["bas"], w["haut"]])
@@ -288,8 +304,10 @@ def main():
                              ("ecart", f"Hausse du prix médian du {nomc} en un an")):
                 ajoute(f"carburant.{c.lower()}.{champ}", t, v[champ], "€/L", f"{v['stations']} stations déclarantes",
                        "médiane entre stations du dernier prix déclaré dans la semaine", rayon, "carburant.evolution", s,
-                       "réextraire la veille de la publication",
-                       limites_propres=["Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil."])
+                       "",  # la réextraction est une vérification de production (section 10), pas une information pour le lecteur
+                       limites_propres=["Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+                                        "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix "
+                                        "arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre."])
             hausse = arrondi(v["ecart"] * 20) / 20  # arrondie à 5 centimes, comme dans l'article pilote
             for km in KMS:
                 litres = 2 * km * JOURS * CONSO / 100
@@ -336,13 +354,13 @@ def main():
         visuels.append({"visuel": "Carte de la part de la voiture par secteur (IRIS)", "etat": "réalisable" if tient else "réalisable avec classes à revoir",
                         "faits": "secteurs (tableau), iris.voiture.min/max",
                         "commande": f"python visuels/generer_visuels.py --insee {insee} --fiche {a.fiche} --contours <cache>/iris_ign_{insee}.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes {bas}",
-                        "manuel": "poser les libellés des secteurs cités (--libelles CODE,… place au centre ; positions fines à la main) ; légende HTML et texte alternatif à relire"})
+                        "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"})
         visuels.append({"visuel": "Tableau accessible des secteurs (HTML et Markdown)", "etat": "produit avec la carte", "faits": "secteurs", "commande": "idem", "manuel": "aucun"})
     if T.get("modes_par_destination"):
-        visuels.append({"visuel": "Barres : part de la voiture selon la commune de travail", "etat": "réalisable, non automatisé",
-                        "faits": "mobpro.voiture_selon_destination.* ou tableau des destinations (lignes utilisables seulement)",
-                        "commande": "aucune : barres() de generer_visuels.py est écrite pour La Rochelle",
-                        "manuel": "paramétrer groupes, intitulés et valeurs ; la liste exacte des communes figure dans l'intitulé de la barre"})
+        visuels.append({"visuel": "Barres : part de la voiture selon la commune de travail", "etat": "réalisable automatiquement",
+                        "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+                        "commande": "generer_visuels.py (sans --sans-barres)",
+                        "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"})
         if vois:
             visuels.append({"visuel": f"Carte de situation : {nom} et {liste(vois)}", "etat": "réalisable, seulement à côté du graphique précédent",
                             "faits": "aucun (contours IGN)",
@@ -378,7 +396,9 @@ def main():
                "absents": [{"fait": x, "raison": y} for x, y in absents], "visuels": visuels, "verifications_humaines": verifs,
                "complement_documentaire": doc, "comparaison": cmp}
     os.makedirs(a.out, exist_ok=True)
-    json.dump(dossier, open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1)
+    # Une part sur zéro actif (NaN, secteur « Strasbourg » de Lille, 15/10/2026) n'est pas une valeur : écrite absente.
+    sans_nan = lambda x: {k: sans_nan(v) for k, v in x.items()} if isinstance(x, dict) else [sans_nan(v) for v in x] if isinstance(x, list) else None if isinstance(x, float) and x != x else x
+    json.dump(sans_nan(dossier), open(os.path.join(a.out, "dossier.json"), "w"), ensure_ascii=False, indent=1, allow_nan=False)
     open(os.path.join(a.out, "dossier.md"), "w").write(rendu_md(dossier, sources_gtfs))
     print(f"✓ {a.out}/dossier.md, dossier.json · {len(faits)} faits, {len(secteurs)} secteurs, {len(absents)} absents"
           + (f", {len(doc['faits'])} informations documentaires ({doc['chemin']})" if doc else ", sans complément documentaire"))
@@ -438,13 +458,20 @@ def rendu_md(d, sources_gtfs):
         L += ["", "## 2 bis. Informations documentaires (non calculées)", "",
               f"Informations publiées par des sources officielles, recopiées à la main et datées (consultation : {doc['consulte_le']} ; fichier `{doc['chemin']}`). "
               "Ce ne sont **pas** des résultats calculés. Une fréquence ou une desserte n'y figure que si la source la donne explicitement, avec son périmètre (ligne ou service, sens, jours, période) : tu l'écris dans ce périmètre, sans la généraliser à d'autres lignes ni au réseau, et tu n'en tires ni temps de trajet, ni desserte d'une adresse. "
-              "Elles servent la question « utiliser moins sa voiture » ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité "
+              "Elles servent la question de la série : la place de la voiture dans les déplacements depuis un futur logement ; elles ne permettent de conclure ni sur la faisabilité d'un trajet, ni sur la possibilité "
               "de se passer d'une deuxième voiture ou de vivre sans voiture.", "",
               "Usage : `oui` = à écrire tel quel, avec sa date ou sa période de validité si elle est utile ; `avec ses conditions` = à n'écrire qu'avec toutes "
               "ses conditions (public, horaires, réservation), sinon à laisser ; `non` = ne pas écrire. La colonne « À ne pas en déduire » s'applique toujours.", "",
               "| id | Information | Source | Consulté le | Validité | Périmètre | Usage | À ne pas en déduire |", "|---|---|---|---|---|---|---|---|"]
         for f in doc["faits"]:
             L.append(f"| `{f['id']}` | {f['information']} | {f['source']} | {f['consulte_le']} | {f['validite']} | {f['perimetre']} | `{f['usage']}` | {f.get('consigne', '')} |")
+        if doc.get("recherches"):
+            L += ["", "**État des recherches documentaires.** `vérifié` : information trouvée et contrôlée (ci-dessus) ; `non vérifié` : trouvée mais non "
+                  "contrôlée, ne s'écrit pas ; `introuvable` : cherchée sans résultat ; `inaccessible` : source hors d'atteinte ; `non recherché` : pas cherchée. "
+                  "Seul `vérifié` s'écrit. **Une information absente, introuvable ou non recherchée ne veut pas dire que le service n'existe pas** : "
+                  "n'écris ni « pas de bus le dimanche », ni « pas de réseau gratuit », ni rien d'équivalent.", "",
+                  "| Sujet | Statut | Source, date | Note |", "|---|---|---|---|"]
+            L += [f"| {r['sujet']} | `{r['statut']}` | {r.get('source', '')} {r.get('consulte_le', '')} | {r.get('note', '')} |" for r in doc["recherches"]]
     L += ["", "## 3. Secteurs (IRIS)", "",
           "Part de la voiture, du vélo, des transports en commun et de la marche : **actifs** occupés de 15 ans ou plus **qui habitent le secteur, quelle que soit "
           "leur commune de travail** (la commune étudiée ou une autre). Ce tableau et celui de la section 4 (actifs de toute la commune, selon leur commune de travail) "
@@ -456,7 +483,7 @@ def rendu_md(d, sources_gtfs):
           "`menages_sans_voiture`, `stationnement_reserve`, `panier_500m`. Estimations par sondage : les petits écarts entre secteurs ne doivent pas être surinterprétés.", "",
           "| Code | Secteur | Statut | Usage | Actifs | Voiture | Vélo | TC | Marche | Ménages sans voiture | Stationnement réservé | Panier 500 m (adresses) |",
           "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
-    P = lambda v: "n.d." if v is None else pct(v)
+    P = lambda v: "n.d." if v is None or v != v else pct(v)  # v != v : NaN (secteur sans actif, Lille 15/10/2026)
     for s in sorted(d["secteurs"], key=lambda s: (s["type"] != "habitat", s.get("voiture") or 0)):
         if s["type"] != "habitat":
             L.append(f"| {s['code']} | {s['nom']} | absent ({s['motif']}) | `non` | | | | | | | | |"); continue

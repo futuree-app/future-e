@@ -1,0 +1,79 @@
+{
+ "version": 2,
+ "id": "5ae1715488ee384c8ba0342b",
+ "titre": "Réseau urbain CTS",
+ "page": "https://transport.data.gouv.fr/datasets/donnees-theoriques-gtfs-et-temps-reel-siri-lite-du-reseau-cts",
+ "nom_commercial": "CTS",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "CTS",
+ "aom": "Eurométropole de Strasbourg",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "246700488",
+  "nom": "Eurométropole de Strasbourg"
+ },
+ "mis_a_jour": "2026-10-08",
+ "agence": {
+  "agences": [
+   [
+    "CTS",
+    "http://www.cts-strasbourg.eu/"
+   ]
+  ]
+ },
+ "site": "https://www.cts-strasbourg.eu/en/home/",
+ "sites_controles": [
+  [
+   "http://www.cts-strasbourg.eu/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarif.billet_unitaire",
+    "information": "Le ticket unitaire est valable 1 heure, avec ou sans correspondance, dans l'EMS, y compris Kehl (Allemagne) sur la ligne D. Ce n'est pas un réseau gratuit : des titres payants existent.",
+    "url": "https://www.cts-strasbourg.eu/en/buy/our-tickets/occasional-tickets/single-ticket/",
+    "extrait": "Valid for 1 hour, with or without transfers, within the EMS including Kehl (Germany) on Line D.",
+    "validite": "non précisée",
+    "perimetre": "Ticket unitaire, réseau CTS dans l'EMS et Kehl sur la ligne D",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:16:44Z"
+   },
+   {
+    "id": "doc.itineraire.application",
+    "information": "Le site propose une page de recherche d'itinéraire (https://www.cts-strasbourg.eu/en/move/search-route/). Il présente aussi une application pour préparer ses trajets.",
+    "url": "https://www.cts-strasbourg.eu/en/move/search-route/",
+    "extrait": "Plan your journeys, get information, buy and validate your tickets, directly from your smartphone!",
+    "validite": "non précisée",
+    "perimetre": "Réseau CTS",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:16:45Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification : gratuité (public, lignes, exceptions)",
+    "statut": "introuvable",
+    "url": "https://www.cts-strasbourg.eu/en/my-cts/home/apply-free-subscription/",
+    "note": "La page d'accueil renvoie vers un formulaire « Apply Free Subscription », mais aucune condition d'éligibilité n'est donnée. Aucune gratuité générale du réseau n'est établie, et son absence n'est pas non plus établie."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés, samedi) et validité des horaires",
+    "statut": "introuvable",
+    "url": "https://www.cts-strasbourg.eu/en/move/search-timetable/",
+    "note": "La page d'accueil, la page de recherche d'itinéraire et celle de recherche d'horaires n'indiquent ni jours de circulation ni période de validité. Seuls les horaires de réservation de Flex'hop et du service client apparaissent, et ce ne sont pas des horaires de lignes. Les fiches horaires par ligne n'ont pas été consultées."
+   },
+   {
+    "sujet": "Temps réel et fiches horaires",
+    "statut": "introuvable",
+    "url": "https://www.cts-strasbourg.eu/en/move/search-timetable/",
+    "note": "Le résumé de la page d'accueil mentionne des horaires en temps réel et une page d'infos trafic (/en/move/infos-trafic/). Je n'ai pas pu en copier un extrait exact, donc je n'en fais pas un fait vérifié. La page infos-trafic n'a pas été ouverte."
+   }
+  ]
+ }
+}

@@ -1,0 +1,126 @@
+{
+ "commune": "49099",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA Cholet Agglomération s'appelle « Choletbus » ; son autorité organisatrice est CA Agglomération du Choletais.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Choletbus » : https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-13",
+   "perimetre": "intercommunalité CA Cholet Agglomération ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Choletbus est https://www.choletbus.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/horaires-theoriques-reseau-choletbus ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Choletbus",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.horaires.validite_cholet",
+   "information": "Les horaires de la desserte de Cholet (lignes 1 à 6, A, ZA1 et ZA2) s'appliquent à partir du 24 août 2026.",
+   "source": "https://www.choletbus.fr/se-deplacer/horaires-par-ligne/ (extrait vérifié le 2026-10-14 : « Horaires applicables à partir du 24 août 2026 »)",
+   "consulte_le": "2026-10-14",
+   "validite": "à partir du 24 août 2026",
+   "perimetre": "réseau Choletbus ; Desserte de Cholet : lignes 1 à 6, A, ZA1, ZA2 ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.choletbus.fr/se-deplacer/horaires-par-ligne/",
+    "extrait": "Horaires applicables à partir du 24 août 2026"
+   }
+  },
+  {
+   "id": "doc.horaires.validite_autres_communes",
+   "information": "Les horaires des autres communes de l'agglomération (lignes 10 à 17, dont la ligne 13 TAD) s'appliquent à partir du 1er septembre 2026.",
+   "source": "https://www.choletbus.fr/se-deplacer/horaires-par-ligne/ (extrait vérifié le 2026-10-14 : « Horaires applicables à partir du 01 septembre 2026 »)",
+   "consulte_le": "2026-10-14",
+   "validite": "à partir du 1er septembre 2026",
+   "perimetre": "réseau Choletbus ; Lignes 10 à 17 (dont ligne 13 TAD), autres communes de l'agglomération ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.choletbus.fr/se-deplacer/horaires-par-ligne/",
+    "extrait": "Horaires applicables à partir du 01 septembre 2026"
+   }
+  },
+  {
+   "id": "doc.tarif.solidaire",
+   "information": "Tarification solidaire : réduction de 50 % sur les abonnements selon le quotient familial (inférieur à 600 €). Ce n'est pas une gratuité.",
+   "source": "https://www.choletbus.fr/tarification-solidaire-transport-en-commun/ (extrait vérifié le 2026-10-14 : « vous bénéficiez de 50% de réduction sur tous les abonnements »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau Choletbus ; Foyers au quotient familial CAF ou MSA inférieur à 600 €, tous les membres rattachés au foyer ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.choletbus.fr/tarification-solidaire-transport-en-commun/",
+    "extrait": "vous bénéficiez de 50% de réduction sur tous les abonnements"
+   }
+  },
+  {
+   "id": "doc.tarif.payant",
+   "information": "Le réseau propose des titres payants (occasionnels, abonnements). La page ne mentionne aucune gratuité, mais cela ne prouve pas son absence ; les montants sont dans des images.",
+   "source": "https://www.choletbus.fr/tarifs-transport-en-commun/ (extrait vérifié le 2026-10-14 : « Retrouvez ci-dessous les tarifs de nos titres de transports »)",
+   "consulte_le": "2026-10-14",
+   "validite": "non précisée",
+   "perimetre": "réseau Choletbus ; Réseau Choletbus, transport en commun ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://www.choletbus.fr/tarifs-transport-en-commun/",
+    "extrait": "Retrouvez ci-dessous les tarifs de nos titres de transports"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité du réseau (pour qui, quelles lignes)",
+   "statut": "introuvable",
+   "source": "https://www.choletbus.fr/tarifs-transport-en-commun/",
+   "consulte_le": "2026-10-14",
+   "note": "Aucune mention de gratuité sur les pages tarifs et tarification solidaire. L'absence de gratuité n'est pas établie."
+  },
+  {
+   "sujet": "Jours de circulation (samedi, dimanche, jours fériés)",
+   "statut": "introuvable",
+   "source": "https://www.choletbus.fr/se-deplacer/horaires-par-ligne/",
+   "consulte_le": "2026-10-14",
+   "note": "La page n'indique pas les jours de circulation. Ils figurent probablement dans les fiches horaires PDF par ligne, qui n'ont pas été consultées. Le service n'a pas été vérifié sur ces PDF, donc non vérifié."
+  },
+  {
+   "sujet": "Calcul d'itinéraire et temps réel",
+   "statut": "inaccessible",
+   "source": "https://reseau.choletbus.fr/",
+   "consulte_le": "2026-10-14",
+   "note": "La lecture a été refusée par l'outil (permission refusée). Le site principal renvoie vers ce portail pour l'itinéraire et vers https://www.choletbus.fr/se-deplacer/etat-du-reseau/ pour l'état du réseau. La page d'état du réseau n'a pas été ouverte. Aucun extrait n'a été vérifié pour ces deux pages."
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-14",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-14",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

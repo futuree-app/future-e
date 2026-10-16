@@ -1,0 +1,18 @@
+{
+ "anomalies": [
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Thise, École-Valentin, Miserey-Salines, Avanne-Aveney, Pirey et Châtillon-le-Duc",
+   "probleme": "La section Méthode n'explique pas comment ces six communes de travail ont été choisies. Le dossier donne pourtant la règle (communes de la même unité urbaine, au plus les six plus peuplées ; mobpro.voiture_selon_destination.communes_voisines). Sans elle, le lecteur peut croire à un choix arbitraire ou les prendre pour « les communes voisines ».",
+   "correction_minimale": "Ajouter dans la Méthode une phrase du type : « Les six communes de travail citées sont les plus peuplées de l'unité urbaine de Besançon (au plus six), hors Besançon. »"
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Montrapon invite donc à regarder séparément les possibilités autour du logement",
+   "probleme": "Cette phrase contredit l'ouverture (« ces questions doivent être examinées ensemble »). Le lecteur ne sait plus s'il faut croiser la proximité des équipements et le trajet au travail, ou les traiter à part. Le propos de l'article est de regarder les deux, sans prendre l'un pour un indicateur de l'autre.",
+   "correction_minimale": "Remplacer « regarder séparément » par « regarder chacune pour elle-même », ou dans l'ouverture « examinées ensemble » par « examinées l'une et l'autre »."
+  }
+ ]
+}

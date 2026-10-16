@@ -1,0 +1,17 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 44184 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_44184.json --classes auto --communes  --reperes 441840107,441840106,441840134,441840133,441840122,441840108,441840104,441840111,441840130,441840126,441840103 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/44184/visuels
+
+{
+ "carte": {
+  "habitat": 28,
+  "non_res": 3,
+  "sans_donnee": 0
+ },
+ "barres": [
+  0.64,
+  0.889,
+  0.845
+ ],
+ "alt_carte": "Carte de Saint-Nazaire découpée en 28 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 55 à 105 %). La part la plus basse est d'environ 56 % (Ville Port), la plus élevée d'environ 86 % (Immaculée Campagne). 3 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": "Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Saint-Nazaire, part qui va travailler principalement en voiture : travaillant à Saint-Nazaire, 64 % ; travaillant à La Baule-Escoublac, Guérande, Saint-Brevin-les-Pins, Pornichet, Donges ou Trignac, 89 % ; travaillant ailleurs (hors de Saint-Nazaire, La Baule-Escoublac, Guérande, Saint-Brevin-les-Pins, Pornichet, Donges et Trignac), 85 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022."
+}
+

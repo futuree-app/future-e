@@ -1,0 +1,17 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 29019 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-02-codex/29019/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_29019.json --classes auto --communes  --reperes 290190140,290190166,290190160 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-02-codex/29019/visuels
+
+{
+ "carte": {
+  "habitat": 57,
+  "non_res": 7,
+  "sans_donnee": 0
+ },
+ "barres": [
+  0.563,
+  0.798,
+  0.795
+ ],
+ "alt_carte": "Carte de Brest découpée en 57 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 40 à 90 %). La part la plus basse est d'environ 42 % (Saint-Martin), la plus élevée d'environ 87 % (Kervao-Rural Nord). 7 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": "Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Brest, part qui va travailler principalement en voiture : travaillant à Brest, 56 % ; travaillant à Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou ou Bohars, 80 % ; travaillant ailleurs (hors de Brest, Guipavas, Plouzané, Plougastel-Daoulas, Le Relecq-Kerhuon, Gouesnou et Bohars), 80 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022."
+}
+

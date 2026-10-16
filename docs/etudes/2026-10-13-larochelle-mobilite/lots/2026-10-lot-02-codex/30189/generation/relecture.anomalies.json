@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "Le dossier ne croise pas secteur de résidence et commune de travail.",
+   "probleme": "La méthode publiée fait référence au dossier interne pour décrire une limite des données sectorielles et par destination (`iris.301890101.voiture`, `destination.30189.voiture`).",
+   "correction_minimale": "Remplacer « Le dossier » par « Les données disponibles »."
+  }
+ ]
+}

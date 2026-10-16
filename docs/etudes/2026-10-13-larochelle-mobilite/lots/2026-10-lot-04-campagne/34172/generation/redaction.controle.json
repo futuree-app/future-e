@@ -1,0 +1,12 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Chapeau — désignation du carburant",
+   "detail": "« SP95-E10 » ne correspond à aucune valeur du dossier pour carburant.e10.ecart (0.51)"
+  }
+ ],
+ "bloquantes": 1
+}

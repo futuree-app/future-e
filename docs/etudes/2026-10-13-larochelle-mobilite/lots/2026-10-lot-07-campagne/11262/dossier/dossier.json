@@ -1,0 +1,2854 @@
+{
+ "commune": {
+  "insee": "11262",
+  "nom": "Narbonne",
+  "departement": "11",
+  "epci": {
+   "code": "241100593",
+   "nom": "CA Le Grand Narbonne"
+  },
+  "unite_urbaine": "11501",
+  "voisines": {},
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/11262/fiche/fiche.json",
+  "sha256": "de8a03fb059b7fd16bff74d61b57b2063a75072319c281015976cb6010bc145c",
+  "generee_le": "2026-10-15T16:48:28Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-15T20:47:34Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.036,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.031,
+    0.043
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.104,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.094,
+    0.115
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.041,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.035,
+    0.049
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.014,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.011,
+    0.019
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.743,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.728,
+    0.758
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.061,
+   "unite": "part",
+   "affichage": "6 %",
+   "intervalle_95": [
+    0.053,
+    0.069
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à Narbonne même",
+   "valeur": 0.755,
+   "unite": "part",
+   "affichage": "76 %",
+   "intervalle_95": [
+    0.74,
+    0.769
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "perimetre": "commune de résidence et de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Narbonne",
+   "valeur": 0.707,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": [
+    0.689,
+    0.724
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne qui travaillent à Narbonne",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne qui travaillent à Narbonne",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Narbonne",
+   "valeur": 0.857,
+   "unite": "part",
+   "affichage": "86 %",
+   "intervalle_95": [
+    0.832,
+    0.878
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne qui travaillent hors de Narbonne",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne qui travaillent hors de Narbonne",
+   "perimetre": "commune de travail : toute commune autre que Narbonne",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.081,
+   "unite": "part",
+   "affichage": "8 %",
+   "intervalle_95": [
+    0.072,
+    0.091
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.432,
+   "unite": "part",
+   "affichage": "43 %",
+   "intervalle_95": [
+    0.416,
+    0.449
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.218,
+   "unite": "part",
+   "affichage": "22 %",
+   "intervalle_95": [
+    0.204,
+    0.233
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.766,
+   "unite": "part",
+   "affichage": "77 %",
+   "intervalle_95": [
+    0.744,
+    0.786
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.052,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.042,
+    0.064
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.02,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.014,
+    0.029
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.6,
+   "unite": "part",
+   "affichage": "60 %",
+   "intervalle_95": [
+    0.575,
+    0.624
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.709,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": [
+    0.683,
+    0.733
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.032,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.023,
+    0.043
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.149,
+   "unite": "part",
+   "affichage": "15 %",
+   "intervalle_95": [
+    0.131,
+    0.17
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.279,
+   "unite": "part",
+   "affichage": "28 %",
+   "intervalle_95": [
+    0.255,
+    0.304
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.789,
+   "unite": "part",
+   "affichage": "79 %",
+   "intervalle_95": [
+    0.752,
+    0.822
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.035,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.022,
+    0.055
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.113,
+   "unite": "part",
+   "affichage": "11 %",
+   "intervalle_95": [
+    0.089,
+    0.144
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.299,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": [
+    0.261,
+    0.34
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Narbonne, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à Narbonne",
+   "valeur": 29355,
+   "unite": "nombre",
+   "affichage": "environ 29 400",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Narbonne, de ceux qui habitent Narbonne",
+   "valeur": 0.496,
+   "unite": "part",
+   "affichage": "50 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Narbonne et habitent Narbonne",
+   "valeur": 0.707,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": [
+    0.689,
+    0.724
+   ],
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence et qui habitent Narbonne",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Narbonne et habitent Narbonne",
+   "valeur": 0.045,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.038,
+    0.054
+   ],
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence et qui habitent Narbonne",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Narbonne, de ceux qui habitent hors de l'unité urbaine INSEE 11501",
+   "valeur": 0.504,
+   "unite": "part",
+   "affichage": "50 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Narbonne et habitent hors de l'unité urbaine INSEE 11501",
+   "valeur": 0.93,
+   "unite": "part",
+   "affichage": "93 %",
+   "intervalle_95": [
+    0.919,
+    0.941
+   ],
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 11501",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Narbonne et habitent hors de l'unité urbaine INSEE 11501",
+   "valeur": 0.047,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.039,
+    0.057
+   ],
+   "population": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Narbonne, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 11501",
+   "perimetre": "commune de travail : Narbonne (11262)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Cité Est (IRIS 112620102)",
+   "valeur": 0.495,
+   "unite": "part",
+   "affichage": "50 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Narbonne (11262), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Roches Grises-Fontfroide (IRIS 112620206)",
+   "valeur": 0.893,
+   "unite": "part",
+   "affichage": "89 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Narbonne (11262), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 39,
+   "unite": "points",
+   "affichage": "+39 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Narbonne (11262), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.207,
+   "unite": "part",
+   "affichage": "21 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Narbonne",
+   "denominateur": "toutes les résidences principales de Narbonne",
+   "perimetre": "commune : Narbonne (11262)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.233,
+   "unite": "part",
+   "affichage": "23 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Narbonne",
+   "denominateur": "toutes les résidences principales de Narbonne",
+   "perimetre": "commune : Narbonne (11262)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.576,
+   "unite": "part",
+   "affichage": "58 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Narbonne",
+   "denominateur": "toutes les résidences principales de Narbonne",
+   "perimetre": "commune : Narbonne (11262)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.11262.commerce_alim_500m",
+   "fait": "Part des adresses de Narbonne qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.868,
+   "unite": "part",
+   "affichage": "87 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.grande_surface_500m",
+   "fait": "Part des adresses de Narbonne qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.638,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.pharmacie_500m",
+   "fait": "Part des adresses de Narbonne qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.697,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.medecin_generaliste_500m",
+   "fait": "Part des adresses de Narbonne qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.741,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.ecole_elementaire_500m",
+   "fait": "Part des adresses de Narbonne qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.714,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.college_1km",
+   "fait": "Part des adresses de Narbonne qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.784,
+   "unite": "part",
+   "affichage": "78 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.gare_2km",
+   "fait": "Part des adresses de Narbonne qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.707,
+   "unite": "part",
+   "affichage": "71 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.panier_quotidien_500m",
+   "fait": "Part des adresses de Narbonne qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.643,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.bus_8h_7_9h",
+   "fait": "Part des adresses de Narbonne qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.695,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.aucun_bus_7_9h",
+   "fait": "Part des adresses de Narbonne sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.039,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.11262.bus_4h_20_22h",
+   "fait": "Part des adresses de Narbonne qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.602,
+   "unite": "part",
+   "affichage": "60 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Narbonne",
+   "denominateur": "toutes les adresses BAN de Narbonne, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Narbonne (11262)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Citibus » (https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.353,
+   "unite": "€/L",
+   "affichage": "2,35 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.564,
+   "unite": "€/L",
+   "affichage": "1,56 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.789,
+   "unite": "€/L",
+   "affichage": "0,79 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.191,
+   "unite": "€/L",
+   "affichage": "2,19 €/L",
+   "intervalle_95": null,
+   "population": "17 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.648,
+   "unite": "€/L",
+   "affichage": "1,65 €/L",
+   "intervalle_95": null,
+   "population": "17 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.543,
+   "unite": "€/L",
+   "affichage": "0,54 €/L",
+   "intervalle_95": null,
+   "population": "17 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Narbonne (centre communal de geo.api.gouv.fr : [3.0337, 43.1493])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "112620102",
+   "nom": "Cité Est",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 831,
+   "voiture": 0.495,
+   "velo": 0.073,
+   "tc": 0.093,
+   "marche": 0.292,
+   "menages_sans_voiture": 0.482,
+   "menages_stationnement_reserve": 0.131,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620101",
+   "nom": "Bourg-Charité",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 817,
+   "voiture": 0.508,
+   "velo": 0.064,
+   "tc": 0.093,
+   "marche": 0.246,
+   "menages_sans_voiture": 0.466,
+   "menages_stationnement_reserve": 0.159,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620202",
+   "nom": "Cassayet",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 675,
+   "voiture": 0.531,
+   "velo": 0.071,
+   "tc": 0.058,
+   "marche": 0.273,
+   "menages_sans_voiture": 0.203,
+   "menages_stationnement_reserve": 0.47,
+   "panier_quotidien_500m": 0.981,
+   "bus_8h_7_9h": 0.972,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620104",
+   "nom": "Vallière",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 619,
+   "voiture": 0.571,
+   "velo": 0.035,
+   "tc": 0.076,
+   "marche": 0.243,
+   "menages_sans_voiture": 0.19,
+   "menages_stationnement_reserve": 0.466,
+   "panier_quotidien_500m": 0.634,
+   "bus_8h_7_9h": 0.489,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620103",
+   "nom": "Victor Hugo",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 684,
+   "voiture": 0.576,
+   "velo": 0.048,
+   "tc": 0.074,
+   "marche": 0.257,
+   "menages_sans_voiture": 0.266,
+   "menages_stationnement_reserve": 0.437,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620203",
+   "nom": "Maraussan",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 428,
+   "voiture": 0.611,
+   "velo": 0.11,
+   "tc": 0.057,
+   "marche": 0.159,
+   "menages_sans_voiture": 0.13,
+   "menages_stationnement_reserve": 0.8,
+   "panier_quotidien_500m": 0.414,
+   "bus_8h_7_9h": 0.508,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620302",
+   "nom": "Gare",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 752,
+   "voiture": 0.615,
+   "velo": 0.076,
+   "tc": 0.15,
+   "marche": 0.091,
+   "menages_sans_voiture": 0.29,
+   "menages_stationnement_reserve": 0.417,
+   "panier_quotidien_500m": 0.964,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620305",
+   "nom": "Vignes Bâties",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 624,
+   "voiture": 0.635,
+   "velo": 0.121,
+   "tc": 0.075,
+   "marche": 0.13,
+   "menages_sans_voiture": 0.158,
+   "menages_stationnement_reserve": 0.602,
+   "panier_quotidien_500m": 0.909,
+   "bus_8h_7_9h": 0.997,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620401",
+   "nom": "Convention",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 592,
+   "voiture": 0.656,
+   "velo": 0.043,
+   "tc": 0.127,
+   "marche": 0.142,
+   "menages_sans_voiture": 0.264,
+   "menages_stationnement_reserve": 0.399,
+   "panier_quotidien_500m": 0.991,
+   "bus_8h_7_9h": 0.985,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620301",
+   "nom": "Cité Ouest",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1116,
+   "voiture": 0.683,
+   "velo": 0.026,
+   "tc": 0.05,
+   "marche": 0.181,
+   "menages_sans_voiture": 0.285,
+   "menages_stationnement_reserve": 0.489,
+   "panier_quotidien_500m": 0.881,
+   "bus_8h_7_9h": 0.986,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620201",
+   "nom": "Pyrénées",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 666,
+   "voiture": 0.736,
+   "velo": 0.021,
+   "tc": 0.031,
+   "marche": 0.145,
+   "menages_sans_voiture": 0.315,
+   "menages_stationnement_reserve": 0.309,
+   "panier_quotidien_500m": 0.871,
+   "bus_8h_7_9h": 0.782,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620603",
+   "nom": "Écarts 2 - Narbonne Plage",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 451,
+   "voiture": 0.76,
+   "velo": 0.029,
+   "tc": 0.013,
+   "marche": 0.074,
+   "menages_sans_voiture": 0.123,
+   "menages_stationnement_reserve": 0.676,
+   "panier_quotidien_500m": 0.19,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620207",
+   "nom": "Plaisance",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "112620503",
+   "nom": "Pompidor",
+   "type": "habitat",
+   "statut": "fragile",
+   "usage": "ordre de grandeur",
+   "motif": "267 actifs (< 300)",
+   "actifs": 267,
+   "voiture": 0.764,
+   "velo": 0.043,
+   "tc": 0.17,
+   "marche": 0.0,
+   "menages_sans_voiture": 0.313,
+   "menages_stationnement_reserve": 0.448,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620505",
+   "nom": "Anatole France-Mayral",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1425,
+   "voiture": 0.78,
+   "velo": 0.036,
+   "tc": 0.048,
+   "marche": 0.101,
+   "menages_sans_voiture": 0.181,
+   "menages_stationnement_reserve": 0.698,
+   "panier_quotidien_500m": 0.82,
+   "bus_8h_7_9h": 0.886,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620504",
+   "nom": "Saint-Salvayre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 641,
+   "voiture": 0.8,
+   "velo": 0.031,
+   "tc": 0.074,
+   "marche": 0.06,
+   "menages_sans_voiture": 0.169,
+   "menages_stationnement_reserve": 0.73,
+   "panier_quotidien_500m": 0.966,
+   "bus_8h_7_9h": 0.643,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620403",
+   "nom": "Égassiairal-Bonne Source",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 659,
+   "voiture": 0.807,
+   "velo": 0.071,
+   "tc": 0.035,
+   "marche": 0.047,
+   "menages_sans_voiture": 0.152,
+   "menages_stationnement_reserve": 0.719,
+   "panier_quotidien_500m": 0.496,
+   "bus_8h_7_9h": 0.945,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620402",
+   "nom": "Horte Neuve",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 599,
+   "voiture": 0.808,
+   "velo": 0.037,
+   "tc": 0.052,
+   "marche": 0.08,
+   "menages_sans_voiture": 0.171,
+   "menages_stationnement_reserve": 0.571,
+   "panier_quotidien_500m": 0.562,
+   "bus_8h_7_9h": 0.348,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620304",
+   "nom": "Baliste",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 949,
+   "voiture": 0.817,
+   "velo": 0.075,
+   "tc": 0.042,
+   "marche": 0.026,
+   "menages_sans_voiture": 0.092,
+   "menages_stationnement_reserve": 0.813,
+   "panier_quotidien_500m": 0.086,
+   "bus_8h_7_9h": 0.53,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620502",
+   "nom": "La Campagne",
+   "type": "habitat",
+   "statut": "fragile",
+   "usage": "ordre de grandeur",
+   "motif": "274 actifs (< 300)",
+   "actifs": 274,
+   "voiture": 0.839,
+   "velo": 0.061,
+   "tc": 0.085,
+   "marche": 0.0,
+   "menages_sans_voiture": 0.126,
+   "menages_stationnement_reserve": 0.534,
+   "panier_quotidien_500m": 0.473,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620303",
+   "nom": "Razimbaud",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 486,
+   "voiture": 0.849,
+   "velo": 0.01,
+   "tc": 0.084,
+   "marche": 0.04,
+   "menages_sans_voiture": 0.293,
+   "menages_stationnement_reserve": 0.202,
+   "panier_quotidien_500m": 0.984,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620501",
+   "nom": "Saint-Jean la Source",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 710,
+   "voiture": 0.861,
+   "velo": 0.02,
+   "tc": 0.054,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.139,
+   "menages_stationnement_reserve": 0.75,
+   "panier_quotidien_500m": 0.578,
+   "bus_8h_7_9h": 0.847,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620602",
+   "nom": "Écarts 1 - Narbonne Ville",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1894,
+   "voiture": 0.883,
+   "velo": 0.016,
+   "tc": 0.028,
+   "marche": 0.009,
+   "menages_sans_voiture": 0.051,
+   "menages_stationnement_reserve": 0.903,
+   "panier_quotidien_500m": 0.017,
+   "bus_8h_7_9h": 0.128,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "112620206",
+   "nom": "Roches Grises-Fontfroide",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2823,
+   "voiture": 0.893,
+   "velo": 0.01,
+   "tc": 0.039,
+   "marche": 0.018,
+   "menages_sans_voiture": 0.051,
+   "menages_stationnement_reserve": 0.881,
+   "panier_quotidien_500m": 0.012,
+   "bus_8h_7_9h": 0.009,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "11262",
+   "nom": "Narbonne",
+   "lignes": 4970,
+   "fragilite": "ok",
+   "part_des_actifs": 0.755,
+   "pas_de_transport": 0.046,
+   "marche": 0.136,
+   "velo": 0.052,
+   "deux_roues_mot": 0.015,
+   "voiture": 0.707,
+   "tc": 0.045
+  },
+  {
+   "travail": "34032",
+   "nom": "Béziers",
+   "lignes": 198,
+   "fragilite": "ok",
+   "part_des_actifs": 0.031,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.006,
+   "deux_roues_mot": 0.008,
+   "voiture": 0.854,
+   "tc": 0.132
+  },
+  {
+   "travail": "11255",
+   "nom": "Montredon-des-Corbières",
+   "lignes": 191,
+   "fragilite": "ok",
+   "part_des_actifs": 0.027,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.008,
+   "deux_roues_mot": 0.007,
+   "voiture": 0.974,
+   "tc": 0.012
+  },
+  {
+   "travail": "11203",
+   "nom": "Lézignan-Corbières",
+   "lignes": 146,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.019,
+   "pas_de_transport": 0.009,
+   "marche": 0.0,
+   "velo": 0.016,
+   "deux_roues_mot": 0.009,
+   "voiture": 0.903,
+   "tc": 0.063
+  },
+  {
+   "travail": "11170",
+   "nom": "Gruissan",
+   "lignes": 129,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.018,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.004,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.967,
+   "tc": 0.029
+  },
+  {
+   "travail": "11069",
+   "nom": "Carcassonne",
+   "lignes": 84,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.013,
+   "pas_de_transport": 0.0,
+   "marche": 0.006,
+   "velo": 0.016,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.652,
+   "tc": 0.327
+  },
+  {
+   "travail": "11106",
+   "nom": "Coursan",
+   "lignes": 56,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.008,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.078,
+   "deux_roues_mot": 0.007,
+   "voiture": 0.888,
+   "tc": 0.026
+  },
+  {
+   "travail": "34172",
+   "nom": "Montpellier",
+   "lignes": 54,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.008,
+   "pas_de_transport": 0.02,
+   "marche": 0.009,
+   "velo": 0.008,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.622,
+   "tc": 0.342
+  },
+  {
+   "travail": "11266",
+   "nom": "Port-la-Nouvelle",
+   "lignes": 44,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.1,
+   "voiture": 0.87,
+   "tc": 0.03
+  },
+  {
+   "travail": "66136",
+   "nom": "Perpignan",
+   "lignes": 49,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.732,
+   "tc": 0.268
+  },
+  {
+   "travail": "11116",
+   "nom": "Cuxac-d'Aude",
+   "lignes": 44,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.015,
+   "deux_roues_mot": 0.075,
+   "voiture": 0.886,
+   "tc": 0.024
+  },
+  {
+   "travail": "11379",
+   "nom": "Sigean",
+   "lignes": 40,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.013,
+   "voiture": 0.966,
+   "tc": 0.021
+  }
+ ],
+ "voisines": [],
+ "acces_communes": {
+  "11262": {
+   "commerce_alim_500m": 0.868,
+   "grande_surface_500m": 0.638,
+   "pharmacie_500m": 0.697,
+   "medecin_generaliste_500m": 0.741,
+   "ecole_elementaire_500m": 0.714,
+   "college_1km": 0.784,
+   "gare_2km": 0.707,
+   "panier_quotidien_500m": 0.643,
+   "bus_8h_7_9h": 0.695,
+   "aucun_bus_7_9h": 0.039,
+   "bus_4h_20_22h": 0.602
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.8,
+    "surcout_an_eur": 100
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.8,
+    "surcout_an_eur": 290
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.8,
+    "surcout_an_eur": 670
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.55,
+    "surcout_an_eur": 70
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.55,
+    "surcout_an_eur": 200
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.55,
+    "surcout_an_eur": 460
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit",
+   "raison": "seules les comparaisons calculées et documentées dans le dossier s'écrivent"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 11262 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/11262/fiche/fiche.json --contours <cache>/iris_ign_11262.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.45",
+   "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable automatiquement",
+   "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+   "commande": "generer_visuels.py (sans --sans-barres)",
+   "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "11262",
+  "consulte_le": "2026-10-15",
+  "origine": "automatique",
+  "sources_officielles": [
+   "https://transport.data.gouv.fr"
+  ],
+  "faits": [
+   {
+    "id": "doc.reseau.identite",
+    "information": "Le réseau de transport urbain de l'intercommunalité CA Le Grand Narbonne s'appelle « Citibus » ; son autorité organisatrice est CA Le Grand Narbonne.",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Citibus » : https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
+    "validite": "jeu de données mis à jour le 2026-10-15",
+    "perimetre": "intercommunalité CA Le Grand Narbonne ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   },
+   {
+    "id": "doc.reseau.site",
+    "information": "Le site du réseau Citibus est https://www.citibus.fr.",
+    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/offre-de-transport-communaute-dagglomeration-le-grand-narbonne ; site joint le 2026-10-15",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Citibus",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   },
+   {
+    "id": "doc.tarification.titres_gratuits_conditions",
+    "information": "Le réseau n'est pas gratuit pour tous : la page de tarifs liste des titres payants et certains titres gratuits sous conditions (CitiSenior'Annuel sous conditions de revenus).",
+    "source": "https://www.citibus.fr/tarifs/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Gratuit (sous conditions de revenus) »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Citibus ; Titre CitiSenior'Annuel (version gratuite) : Narbonnais titulaires de la carte ELICIA ou résidents du Grand Narbonne de plus de 65 ans, sous conditions de revenus. Le texte ne précise pas de lignes. ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+     "extrait": "Gratuit (sous conditions de revenus)"
+    }
+   },
+   {
+    "id": "doc.tarification.titres_gratuits_invalidite",
+    "information": "Un titre annuel gratuit (CitiMobil'Annuel Invalide) existe pour les personnes avec un taux d'invalidité d'au moins 80 %.",
+    "source": "https://www.citibus.fr/tarifs/titres-et-tarifs (extrait vérifié le 2026-10-15 : « Personnes justifiant d’un taux d’invalidité supérieur ou égal à 80% »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Citibus ; Public : personnes justifiant d'un taux d'invalidité ≥ 80 % ; lignes non précisées ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+     "extrait": "Personnes justifiant d’un taux d’invalidité supérieur ou égal à 80%"
+    }
+   },
+   {
+    "id": "doc.jours.ligne1_7j7",
+    "information": "La ligne 1 (Bonne Source > Saint-Jean Saint-Pierre / Centre commercial La Coupe) circule du lundi au dimanche et les jours fériés. Pour les autres lignes, la page ne donne pas les jours de circulation, qu'il faut chercher dans les dépliants PDF de chaque ligne.",
+    "source": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026 (extrait vérifié le 2026-10-15 : « Du lundi au dimanche et jours fériés. »)",
+    "consulte_le": "2026-10-15",
+    "validite": "Nouveau réseau à compter du 1er septembre (horaires rentrée 2026) ; date de fin non précisée",
+    "perimetre": "réseau Citibus ; Ligne 1 uniquement ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+     "extrait": "Du lundi au dimanche et jours fériés."
+    }
+   },
+   {
+    "id": "doc.horaires.validite_debut",
+    "information": "Un nouveau réseau Citibus, avec de nouvelles lignes et de nouveaux horaires, démarre le 1er septembre. Le lien associé est intitulé « horaires rentrée 2026 ». La date de fin de validité n'est pas donnée.",
+    "source": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026 (extrait vérifié le 2026-10-15 : « À compter du 1er septembre, découvrez votre nouveau réseau Citibus avec ses nouvelles lignes et ses nouveaux horaires. »)",
+    "consulte_le": "2026-10-15",
+    "validite": "à compter du 1er septembre (année non indiquée dans l'extrait ; la page est intitulée rentrée 2026)",
+    "perimetre": "réseau Citibus ; Ensemble du réseau Citibus ; application à chaque commune non établie",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+     "extrait": "À compter du 1er septembre, découvrez votre nouveau réseau Citibus avec ses nouvelles lignes et ses nouveaux horaires."
+    }
+   },
+   {
+    "id": "doc.verification.temps_reel",
+    "information": "La page « Prochain passage » donne les prochains passages en temps réel après sélection d'un arrêt et d'une ligne.",
+    "source": "https://www.citibus.fr/se-deplacer/prochain-passage (extrait vérifié le 2026-10-15 : « Sélectionnez l'arrêt et la ligne que vous souhaitez emprunter, afin de générer les prochains passages en temps réel ! »)",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Citibus ; Réseau Citibus, par arrêt et par ligne ; application à chaque commune non établie",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "justificatif": {
+     "url": "https://www.citibus.fr/se-deplacer/prochain-passage",
+     "extrait": "Sélectionnez l'arrêt et la ligne que vous souhaitez emprunter, afin de générer les prochains passages en temps réel !"
+    }
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité générale du réseau (lignes gratuites, gratuité pour tous)",
+    "statut": "introuvable",
+    "source": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "consulte_le": "2026-10-15",
+    "note": "Aucune gratuité générale ni gratuité par ligne trouvée sur les pages consultées. Seuls des titres gratuits sous conditions sont listés (CitiSenior'Annuel, CitiMobil'Annuel Invalide, CitiMobil demandeur d'emploi/RSA). Je n'en conclus pas qu'il n'existe aucune autre gratuité."
+   },
+   {
+    "sujet": "Jours de circulation des lignes autres que la ligne 1 (samedi, dimanche, jours fériés)",
+    "statut": "non vérifié",
+    "source": "https://www.citibus.fr/horaires-rentree-2026/horaires-rentree-2026",
+    "consulte_le": "2026-10-15",
+    "note": "La page renvoie aux dépliants PDF de chaque ligne. Je ne les ai pas ouverts."
+   },
+   {
+    "sujet": "Période de validité (date de fin) des horaires",
+    "statut": "introuvable",
+    "source": "https://www.citibus.fr/se-deplacer/lignes-horaires",
+    "consulte_le": "2026-10-15",
+    "note": "Seule la date de début (1er septembre) est annoncée dans la bannière."
+   },
+   {
+    "sujet": "Calcul d'itinéraire",
+    "statut": "non vérifié",
+    "source": "https://www.citibus.fr/se-deplacer/calcul-ditineraire",
+    "consulte_le": "2026-10-15",
+    "note": "La page existe, mais le texte récupéré ne contient pas le formulaire de recherche, qui est probablement dynamique. L'outil d'itinéraire est à vérifier directement sur la page."
+   },
+   {
+    "sujet": "Fiches horaires par ligne",
+    "statut": "non vérifié",
+    "source": "https://www.citibus.fr/se-deplacer/lignes-horaires",
+    "consulte_le": "2026-10-15",
+    "note": "Page « Lignes et horaires » et page « Horaires rentrée 2026 » à consulter. Les PDF n'ont pas été lus."
+   },
+   {
+    "sujet": "Le ticket unité Citi1 est payant, à 1,20 €. Cela montre que le réseau n'est pas ",
+    "statut": "non vérifié",
+    "source": "https://www.citibus.fr/tarifs/titres-et-tarifs",
+    "consulte_le": "2026-10-15",
+    "note": "extrait introuvable sur la page"
+   },
+   {
+    "sujet": "vélo ou gare (seulement si directement utile au logement)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "2026-10-15",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   }
+  ],
+  "ecartes": [],
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/11262/dossier/complement.json",
+  "sha256": "6cb24cc85ebbc79e933adfefb484834d340038a09c6d400b75e5dbfa01b86124"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "11262",
+   "nom": "Narbonne",
+   "role": "principale",
+   "actifs": 19278,
+   "lignes": 6669,
+   "voiture": 0.7433
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que Narbonne (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 9 639 à 38 555), avec au moins 150 lignes d'échantillon ; Narbonne exclue ; France métropolitaine",
+   "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    9639,
+    38555
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "3a21daa14fad5bb1"
+   }
+  },
+  "genere_le": "2026-10-15T16:48:47Z",
+  "disponible": true,
+  "groupe": {
+   "n": 93,
+   "mediane_voiture": 0.6894,
+   "communes": [
+    {
+     "insee": "47001",
+     "nom": "Agen",
+     "actifs": 13478,
+     "voiture": 0.642
+    },
+    {
+     "insee": "2A004",
+     "nom": "Ajaccio",
+     "actifs": 31282,
+     "voiture": 0.7559
+    },
+    {
+     "insee": "81004",
+     "nom": "Albi",
+     "actifs": 17834,
+     "voiture": 0.7026
+    },
+    {
+     "insee": "30007",
+     "nom": "Alès",
+     "actifs": 12771,
+     "voiture": 0.8295
+    },
+    {
+     "insee": "16015",
+     "nom": "Angoulême",
+     "actifs": 16572,
+     "voiture": 0.649
+    },
+    {
+     "insee": "74012",
+     "nom": "Annemasse",
+     "actifs": 16867,
+     "voiture": 0.4809
+    },
+    {
+     "insee": "13004",
+     "nom": "Arles",
+     "actifs": 19148,
+     "voiture": 0.7454
+    },
+    {
+     "insee": "59017",
+     "nom": "Armentières",
+     "actifs": 10116,
+     "voiture": 0.6673
+    },
+    {
+     "insee": "62041",
+     "nom": "Arras",
+     "actifs": 16425,
+     "voiture": 0.6128
+    },
+    {
+     "insee": "15014",
+     "nom": "Aurillac",
+     "actifs": 10345,
+     "voiture": 0.6412
+    },
+    {
+     "insee": "89024",
+     "nom": "Auxerre",
+     "actifs": 13254,
+     "voiture": 0.6874
+    },
+    {
+     "insee": "84007",
+     "nom": "Avignon",
+     "actifs": 31281,
+     "voiture": 0.6473
+    },
+    {
+     "insee": "2B033",
+     "nom": "Bastia",
+     "actifs": 18177,
+     "voiture": 0.749
+    },
+    {
+     "insee": "64102",
+     "nom": "Bayonne",
+     "actifs": 24509,
+     "voiture": 0.6786
+    },
+    {
+     "insee": "49023",
+     "nom": "Beaupréau-en-Mauges",
+     "actifs": 10823,
+     "voiture": 0.8711
+    },
+    {
+     "insee": "60057",
+     "nom": "Beauvais",
+     "actifs": 20011,
+     "voiture": 0.6938
+    },
+    {
+     "insee": "90010",
+     "nom": "Belfort",
+     "actifs": 16728,
+     "voiture": 0.6285
+    },
+    {
+     "insee": "41018",
+     "nom": "Blois",
+     "actifs": 17025,
+     "voiture": 0.6567
+    },
+    {
+     "insee": "62160",
+     "nom": "Boulogne-sur-Mer",
+     "actifs": 14414,
+     "voiture": 0.6735
+    },
+    {
+     "insee": "01053",
+     "nom": "Bourg-en-Bresse",
+     "actifs": 15736,
+     "voiture": 0.6573
+    },
+    {
+     "insee": "18033",
+     "nom": "Bourges",
+     "actifs": 24724,
+     "voiture": 0.7284
+    },
+    {
+     "insee": "38053",
+     "nom": "Bourgoin-Jallieu",
+     "actifs": 12500,
+     "voiture": 0.7359
+    },
+    {
+     "insee": "19031",
+     "nom": "Brive-la-Gaillarde",
+     "actifs": 18097,
+     "voiture": 0.7385
+    },
+    {
+     "insee": "34032",
+     "nom": "Béziers",
+     "actifs": 24205,
+     "voiture": 0.7667
+    },
+    {
+     "insee": "62193",
+     "nom": "Calais",
+     "actifs": 23291,
+     "voiture": 0.7608
+    },
+    {
+     "insee": "59122",
+     "nom": "Cambrai",
+     "actifs": 11222,
+     "voiture": 0.7643
+    },
+    {
+     "insee": "11069",
+     "nom": "Carcassonne",
+     "actifs": 16509,
+     "voiture": 0.7395
+    },
+    {
+     "insee": "81065",
+     "nom": "Castres",
+     "actifs": 15487,
+     "voiture": 0.7658
+    },
+    {
+     "insee": "71076",
+     "nom": "Chalon-sur-Saône",
+     "actifs": 17261,
+     "voiture": 0.6612
+    },
+    {
+     "insee": "73065",
+     "nom": "Chambéry",
+     "actifs": 25185,
+     "voiture": 0.5657
+    },
+    {
+     "insee": "08105",
+     "nom": "Charleville-Mézières",
+     "actifs": 15228,
+     "voiture": 0.6508
+    },
+    {
+     "insee": "28085",
+     "nom": "Chartres",
+     "actifs": 16156,
+     "voiture": 0.5875
+    },
+    {
+     "insee": "49092",
+     "nom": "Chemillé-en-Anjou",
+     "actifs": 9853,
+     "voiture": 0.8263
+    },
+    {
+     "insee": "50129",
+     "nom": "Cherbourg-en-Cotentin",
+     "actifs": 33130,
+     "voiture": 0.7047
+    },
+    {
+     "insee": "49099",
+     "nom": "Cholet",
+     "actifs": 22354,
+     "voiture": 0.782
+    },
+    {
+     "insee": "51108",
+     "nom": "Châlons-en-Champagne",
+     "actifs": 16714,
+     "voiture": 0.6911
+    },
+    {
+     "insee": "36044",
+     "nom": "Châteauroux",
+     "actifs": 15621,
+     "voiture": 0.7246
+    },
+    {
+     "insee": "86066",
+     "nom": "Châtellerault",
+     "actifs": 10494,
+     "voiture": 0.7541
+    },
+    {
+     "insee": "68066",
+     "nom": "Colmar",
+     "actifs": 27853,
+     "voiture": 0.6192
+    },
+    {
+     "insee": "60159",
+     "nom": "Compiègne",
+     "actifs": 15264,
+     "voiture": 0.6341
+    },
+    {
+     "insee": "60175",
+     "nom": "Creil",
+     "actifs": 11237,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "59178",
+     "nom": "Douai",
+     "actifs": 13788,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "83050",
+     "nom": "Draguignan",
+     "actifs": 15388,
+     "voiture": 0.7907
+    },
+    {
+     "insee": "28134",
+     "nom": "Dreux",
+     "actifs": 10105,
+     "voiture": 0.7358
+    },
+    {
+     "insee": "59183",
+     "nom": "Dunkerque",
+     "actifs": 31408,
+     "voiture": 0.6949
+    },
+    {
+     "insee": "83061",
+     "nom": "Fréjus",
+     "actifs": 22251,
+     "voiture": 0.8084
+    },
+    {
+     "insee": "05061",
+     "nom": "Gap",
+     "actifs": 16136,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "67180",
+     "nom": "Haguenau",
+     "actifs": 16998,
+     "voiture": 0.7048
+    },
+    {
+     "insee": "85191",
+     "nom": "La Roche-sur-Yon",
+     "actifs": 22342,
+     "voiture": 0.7443
+    },
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "actifs": 30550,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "33529",
+     "nom": "La Teste-de-Buch",
+     "actifs": 10794,
+     "voiture": 0.8079
+    },
+    {
+     "insee": "53130",
+     "nom": "Laval",
+     "actifs": 19809,
+     "voiture": 0.6742
+    },
+    {
+     "insee": "85194",
+     "nom": "Les Sables-d'Olonne",
+     "actifs": 16149,
+     "voiture": 0.7804
+    },
+    {
+     "insee": "33243",
+     "nom": "Libourne",
+     "actifs": 9693,
+     "voiture": 0.6869
+    },
+    {
+     "insee": "56121",
+     "nom": "Lorient",
+     "actifs": 22717,
+     "voiture": 0.6667
+    },
+    {
+     "insee": "77284",
+     "nom": "Meaux",
+     "actifs": 23761,
+     "voiture": 0.4646
+    },
+    {
+     "insee": "06083",
+     "nom": "Menton",
+     "actifs": 12633,
+     "voiture": 0.449
+    },
+    {
+     "insee": "40192",
+     "nom": "Mont-de-Marsan",
+     "actifs": 12607,
+     "voiture": 0.7567
+    },
+    {
+     "insee": "85146",
+     "nom": "Montaigu-Vendée",
+     "actifs": 10033,
+     "voiture": 0.8608
+    },
+    {
+     "insee": "82121",
+     "nom": "Montauban",
+     "actifs": 24798,
+     "voiture": 0.7846
+    },
+    {
+     "insee": "03185",
+     "nom": "Montluçon",
+     "actifs": 11656,
+     "voiture": 0.6955
+    },
+    {
+     "insee": "26198",
+     "nom": "Montélimar",
+     "actifs": 15059,
+     "voiture": 0.7868
+    },
+    {
+     "insee": "68224",
+     "nom": "Mulhouse",
+     "actifs": 35491,
+     "voiture": 0.6112
+    },
+    {
+     "insee": "71270",
+     "nom": "Mâcon",
+     "actifs": 13117,
+     "voiture": 0.7119
+    },
+    {
+     "insee": "58194",
+     "nom": "Nevers",
+     "actifs": 11413,
+     "voiture": 0.6716
+    },
+    {
+     "insee": "79191",
+     "nom": "Niort",
+     "actifs": 25863,
+     "voiture": 0.7011
+    },
+    {
+     "insee": "64445",
+     "nom": "Pau",
+     "actifs": 30140,
+     "voiture": 0.6678
+    },
+    {
+     "insee": "66136",
+     "nom": "Perpignan",
+     "actifs": 36885,
+     "voiture": 0.7311
+    },
+    {
+     "insee": "86194",
+     "nom": "Poitiers",
+     "actifs": 33952,
+     "voiture": 0.5927
+    },
+    {
+     "insee": "24322",
+     "nom": "Périgueux",
+     "actifs": 12102,
+     "voiture": 0.6055
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "actifs": 27007,
+     "voiture": 0.7802
+    },
+    {
+     "insee": "78517",
+     "nom": "Rambouillet",
+     "actifs": 12140,
+     "voiture": 0.4567
+    },
+    {
+     "insee": "42187",
+     "nom": "Roanne",
+     "actifs": 12297,
+     "voiture": 0.6643
+    },
+    {
+     "insee": "12202",
+     "nom": "Rodez",
+     "actifs": 10186,
+     "voiture": 0.6743
+    },
+    {
+     "insee": "26281",
+     "nom": "Romans-sur-Isère",
+     "actifs": 12530,
+     "voiture": 0.7674
+    },
+    {
+     "insee": "22278",
+     "nom": "Saint-Brieuc",
+     "actifs": 17182,
+     "voiture": 0.6897
+    },
+    {
+     "insee": "35288",
+     "nom": "Saint-Malo",
+     "actifs": 17251,
+     "voiture": 0.6755
+    },
+    {
+     "insee": "44184",
+     "nom": "Saint-Nazaire",
+     "actifs": 28139,
+     "voiture": 0.7111
+    },
+    {
+     "insee": "02691",
+     "nom": "Saint-Quentin",
+     "actifs": 17220,
+     "voiture": 0.7042
+    },
+    {
+     "insee": "13103",
+     "nom": "Salon-de-Provence",
+     "actifs": 18741,
+     "voiture": 0.7669
+    },
+    {
+     "insee": "34301",
+     "nom": "Sète",
+     "actifs": 13916,
+     "voiture": 0.5967
+    },
+    {
+     "insee": "49301",
+     "nom": "Sèvremoine",
+     "actifs": 12348,
+     "voiture": 0.8804
+    },
+    {
+     "insee": "65440",
+     "nom": "Tarbes",
+     "actifs": 15277,
+     "voiture": 0.74
+    },
+    {
+     "insee": "57672",
+     "nom": "Thionville",
+     "actifs": 19332,
+     "voiture": 0.6725
+    },
+    {
+     "insee": "74281",
+     "nom": "Thonon-les-Bains",
+     "actifs": 16506,
+     "voiture": 0.6496
+    },
+    {
+     "insee": "10387",
+     "nom": "Troyes",
+     "actifs": 22143,
+     "voiture": 0.6432
+    },
+    {
+     "insee": "26362",
+     "nom": "Valence",
+     "actifs": 25309,
+     "voiture": 0.6173
+    },
+    {
+     "insee": "59606",
+     "nom": "Valenciennes",
+     "actifs": 16541,
+     "voiture": 0.6638
+    },
+    {
+     "insee": "56260",
+     "nom": "Vannes",
+     "actifs": 21270,
+     "voiture": 0.6754
+    },
+    {
+     "insee": "38544",
+     "nom": "Vienne",
+     "actifs": 13121,
+     "voiture": 0.6894
+    },
+    {
+     "insee": "88160",
+     "nom": "Épinal",
+     "actifs": 12068,
+     "voiture": 0.707
+    },
+    {
+     "insee": "91223",
+     "nom": "Étampes",
+     "actifs": 11264,
+     "voiture": 0.5379
+    },
+    {
+     "insee": "27229",
+     "nom": "Évreux",
+     "actifs": 17632,
+     "voiture": 0.6818
+    }
+   ]
+  },
+  "ecart_points": 5,
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/11262/fiche/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à Narbonne qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "74 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 93 communes du groupe (chaque commune compte une fois)",
+    "affichage": "69 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : Narbonne moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "+5 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "93",
+    "usage": "oui"
+   }
+  ]
+ }
+}

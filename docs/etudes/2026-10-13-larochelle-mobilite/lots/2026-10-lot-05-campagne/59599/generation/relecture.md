@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "La carte aide à repérer les secteurs à examiner lors des recherches.",
+   "probleme": "Dans un article qui veut aider à « choisir son adresse pour moins prendre la voiture », cette phrase fait des parts de voiture des habitants de chaque secteur (iris.voiture.min, iris.voiture.max, tableau de la section 3) une liste de quartiers à cibler. C'est une recommandation de quartier tirée de pratiques, et le dossier ne mesure aucun lien de cause entre un quartier et une pratique.",
+   "correction_minimale": "La carte détaille la part de la voiture parmi les actifs de chaque secteur."}
+]}
+```

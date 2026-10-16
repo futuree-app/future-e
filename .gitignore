@@ -89,6 +89,8 @@ data/cache-saisonnalite/
 # BPE : venv dédié + sources parquet locales (non versionnées ; cf. l'en-tête de
 # scripts/populate-bpe.py pour la commande de téléchargement Insee)
 .venv-bpe/
+# Études mobilité : venv des outils (outil/requirements.txt), partagé par les worktrees.
+.venv-etudes/
 data/bpe24.parquet
 data/bpe25.parquet
 data/.cache/

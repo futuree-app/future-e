@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 94017 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-06-campagne/94017/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_94017.json --classes auto --communes  --reperes 940171101,940171304 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-06-campagne/94017/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 32,
+  "non_res": 1,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Champigny-sur-Marne découpée en 32 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 15 à 65 %). La part la plus basse est d'environ 15 % (Mordacs 1), la plus élevée d'environ 58 % (Cœuilly 3). 1 secteur d'activité exclu. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

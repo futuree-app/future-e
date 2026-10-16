@@ -1,0 +1,3408 @@
+{
+ "commune": {
+  "insee": "76540",
+  "nom": "Rouen",
+  "departement": "76",
+  "epci": {
+   "code": "200023414",
+   "nom": "Métropole Rouen Normandie"
+  },
+  "unite_urbaine": "00755",
+  "voisines": {
+   "76681": "Sotteville-lès-Rouen",
+   "76575": "Saint-Étienne-du-Rouvray",
+   "76322": "Le Grand-Quevilly",
+   "76498": "Le Petit-Quevilly",
+   "76451": "Mont-Saint-Aignan",
+   "76231": "Elbeuf"
+  },
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/fiche/fiche.json",
+  "sha256": "a833b0b914ea07b5f4d562c53b5b7e29cc22d0af18c6c7142f2400d47934a96c",
+  "generee_le": "2026-10-15T16:16:16Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-15T18:20:48Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.033,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.029,
+    0.037
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.171,
+   "unite": "part",
+   "affichage": "17 %",
+   "intervalle_95": [
+    0.163,
+    0.179
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.054,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.049,
+    0.059
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.01,
+   "unite": "part",
+   "affichage": "1 %",
+   "intervalle_95": [
+    0.008,
+    0.013
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.437,
+   "unite": "part",
+   "affichage": "44 %",
+   "intervalle_95": [
+    0.426,
+    0.448
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.295,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": [
+    0.286,
+    0.305
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à Rouen même",
+   "valeur": 0.559,
+   "unite": "part",
+   "affichage": "56 %",
+   "intervalle_95": [
+    0.548,
+    0.569
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen",
+   "perimetre": "commune de résidence et de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Rouen",
+   "valeur": 0.267,
+   "unite": "part",
+   "affichage": "27 %",
+   "intervalle_95": [
+    0.255,
+    0.28
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent à Rouen",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent à Rouen",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.communes_voisines",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent dans l'une de ces communes : Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "valeur": 0.593,
+   "unite": "part",
+   "affichage": "59 %",
+   "intervalle_95": [
+    0.565,
+    0.621
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent dans l'une de ces communes : Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent dans l'une de ces communes : Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "perimetre": "commune de travail : Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Rouen et hors de Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "valeur": 0.652,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.636,
+    0.667
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent hors de Rouen et hors de Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen qui travaillent hors de Rouen et hors de Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "perimetre": "commune de travail : toute commune autre que Rouen, Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "ecart.voiture_destination.voisines_moins_meme_commune",
+   "fait": "Écart de part de la voiture : travail dans Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231) moins travail à Rouen",
+   "valeur": 32,
+   "unite": "points",
+   "affichage": "+32 points",
+   "intervalle_95": null,
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "deux groupes distincts (voir les deux faits)",
+   "perimetre": "commune de travail : Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.236,
+   "unite": "part",
+   "affichage": "24 %",
+   "intervalle_95": [
+    0.227,
+    0.245
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.221,
+   "unite": "part",
+   "affichage": "22 %",
+   "intervalle_95": [
+    0.212,
+    0.23
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Rouen",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.462,
+   "unite": "part",
+   "affichage": "46 %",
+   "intervalle_95": [
+    0.45,
+    0.474
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.504,
+   "unite": "part",
+   "affichage": "50 %",
+   "intervalle_95": [
+    0.486,
+    0.523
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.081,
+   "unite": "part",
+   "affichage": "8 %",
+   "intervalle_95": [
+    0.072,
+    0.092
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.078,
+   "unite": "part",
+   "affichage": "8 %",
+   "intervalle_95": [
+    0.069,
+    0.089
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.362,
+   "unite": "part",
+   "affichage": "36 %",
+   "intervalle_95": [
+    0.344,
+    0.381
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.394,
+   "unite": "part",
+   "affichage": "39 %",
+   "intervalle_95": [
+    0.378,
+    0.409
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.045,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.039,
+    0.052
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.324,
+   "unite": "part",
+   "affichage": "32 %",
+   "intervalle_95": [
+    0.309,
+    0.339
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.151,
+   "unite": "part",
+   "affichage": "15 %",
+   "intervalle_95": [
+    0.14,
+    0.163
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.439,
+   "unite": "part",
+   "affichage": "44 %",
+   "intervalle_95": [
+    0.415,
+    0.464
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.026,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.019,
+    0.035
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.324,
+   "unite": "part",
+   "affichage": "32 %",
+   "intervalle_95": [
+    0.301,
+    0.347
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.133,
+   "unite": "part",
+   "affichage": "13 %",
+   "intervalle_95": [
+    0.117,
+    0.15
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Rouen, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à Rouen",
+   "valeur": 89358,
+   "unite": "nombre",
+   "affichage": "environ 89 400",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Rouen, de ceux qui habitent Rouen",
+   "valeur": 0.307,
+   "unite": "part",
+   "affichage": "31 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Rouen et habitent Rouen",
+   "valeur": 0.267,
+   "unite": "part",
+   "affichage": "27 %",
+   "intervalle_95": [
+    0.255,
+    0.28
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent Rouen",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Rouen et habitent Rouen",
+   "valeur": 0.297,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": [
+    0.284,
+    0.311
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent Rouen",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Rouen, de ceux qui habitent une autre commune de l'unité urbaine INSEE 00755 (liste des communes non exposée par la fiche)",
+   "valeur": 0.386,
+   "unite": "part",
+   "affichage": "39 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Rouen et habitent une autre commune de l'unité urbaine INSEE 00755 (liste des communes non exposée par la fiche)",
+   "valeur": 0.636,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": [
+    0.623,
+    0.649
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 00755 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Rouen et habitent une autre commune de l'unité urbaine INSEE 00755 (liste des communes non exposée par la fiche)",
+   "valeur": 0.281,
+   "unite": "part",
+   "affichage": "28 %",
+   "intervalle_95": [
+    0.27,
+    0.294
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 00755 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Rouen, de ceux qui habitent hors de l'unité urbaine INSEE 00755",
+   "valeur": 0.307,
+   "unite": "part",
+   "affichage": "31 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Rouen et habitent hors de l'unité urbaine INSEE 00755",
+   "valeur": 0.855,
+   "unite": "part",
+   "affichage": "86 %",
+   "intervalle_95": [
+    0.843,
+    0.866
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 00755",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Rouen et habitent hors de l'unité urbaine INSEE 00755",
+   "valeur": 0.123,
+   "unite": "part",
+   "affichage": "12 %",
+   "intervalle_95": [
+    0.113,
+    0.134
+   ],
+   "population": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Rouen, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 00755",
+   "perimetre": "commune de travail : Rouen (76540)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Vieux Marché Palais de Justice (IRIS 765400102)",
+   "valeur": 0.204,
+   "unite": "part",
+   "affichage": "20 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Rouen (76540), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Grieu Vallon Suisse (IRIS 765400602)",
+   "valeur": 0.667,
+   "unite": "part",
+   "affichage": "67 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Rouen (76540), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 47,
+   "unite": "points",
+   "affichage": "+47 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Rouen (76540), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.397,
+   "unite": "part",
+   "affichage": "40 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Rouen",
+   "denominateur": "toutes les résidences principales de Rouen",
+   "perimetre": "commune : Rouen (76540)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.115,
+   "unite": "part",
+   "affichage": "12 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Rouen",
+   "denominateur": "toutes les résidences principales de Rouen",
+   "perimetre": "commune : Rouen (76540)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.448,
+   "unite": "part",
+   "affichage": "45 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Rouen",
+   "denominateur": "toutes les résidences principales de Rouen",
+   "perimetre": "commune : Rouen (76540)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.76540.commerce_alim_500m",
+   "fait": "Part des adresses de Rouen qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.978,
+   "unite": "part",
+   "affichage": "98 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.grande_surface_500m",
+   "fait": "Part des adresses de Rouen qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.751,
+   "unite": "part",
+   "affichage": "75 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.pharmacie_500m",
+   "fait": "Part des adresses de Rouen qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.875,
+   "unite": "part",
+   "affichage": "88 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.medecin_generaliste_500m",
+   "fait": "Part des adresses de Rouen qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.888,
+   "unite": "part",
+   "affichage": "89 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.ecole_elementaire_500m",
+   "fait": "Part des adresses de Rouen qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.918,
+   "unite": "part",
+   "affichage": "92 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.college_1km",
+   "fait": "Part des adresses de Rouen qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.912,
+   "unite": "part",
+   "affichage": "91 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.gare_2km",
+   "fait": "Part des adresses de Rouen qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.683,
+   "unite": "part",
+   "affichage": "68 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.panier_quotidien_500m",
+   "fait": "Part des adresses de Rouen qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.838,
+   "unite": "part",
+   "affichage": "84 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.bus_8h_7_9h",
+   "fait": "Part des adresses de Rouen qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.0,
+   "unite": "part",
+   "affichage": "0 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.aucun_bus_7_9h",
+   "fait": "Part des adresses de Rouen sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 1.0,
+   "unite": "part",
+   "affichage": "100 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.76540.bus_4h_20_22h",
+   "fait": "Part des adresses de Rouen qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.0,
+   "unite": "part",
+   "affichage": "0 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Rouen",
+   "denominateur": "toutes les adresses BAN de Rouen, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Rouen (76540)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Astuce » (https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.323,
+   "unite": "€/L",
+   "affichage": "2,32 €/L",
+   "intervalle_95": null,
+   "population": "47 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.579,
+   "unite": "€/L",
+   "affichage": "1,58 €/L",
+   "intervalle_95": null,
+   "population": "47 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.744,
+   "unite": "€/L",
+   "affichage": "0,74 €/L",
+   "intervalle_95": null,
+   "population": "47 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.159,
+   "unite": "€/L",
+   "affichage": "2,16 €/L",
+   "intervalle_95": null,
+   "population": "45 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.655,
+   "unite": "€/L",
+   "affichage": "1,66 €/L",
+   "intervalle_95": null,
+   "population": "45 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.504,
+   "unite": "€/L",
+   "affichage": "0,50 €/L",
+   "intervalle_95": null,
+   "population": "45 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Rouen (centre communal de geo.api.gouv.fr : [1.0912, 49.4412])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "La hausse est calculée sur les prix non arrondis : elle peut différer d'un centime de la différence des deux prix arrondis. Ne pas écrire la hausse et les deux prix comme une soustraction que le lecteur refera ; choisir l'un ou l'autre.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "765400302",
+   "nom": "Zone Gare Saint-Sever",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "765400102",
+   "nom": "Vieux Marché Palais de Justice",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1187,
+   "voiture": 0.204,
+   "velo": 0.081,
+   "tc": 0.346,
+   "marche": 0.322,
+   "menages_sans_voiture": 0.537,
+   "menages_stationnement_reserve": 0.229,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400101",
+   "nom": "Carmes Saint-Maclou",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1355,
+   "voiture": 0.235,
+   "velo": 0.064,
+   "tc": 0.273,
+   "marche": 0.364,
+   "menages_sans_voiture": 0.539,
+   "menages_stationnement_reserve": 0.215,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400105",
+   "nom": "Grand Pont Général Leclerc",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1249,
+   "voiture": 0.26,
+   "velo": 0.06,
+   "tc": 0.294,
+   "marche": 0.343,
+   "menages_sans_voiture": 0.42,
+   "menages_stationnement_reserve": 0.293,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400202",
+   "nom": "Martainville",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 856,
+   "voiture": 0.283,
+   "velo": 0.02,
+   "tc": 0.371,
+   "marche": 0.283,
+   "menages_sans_voiture": 0.577,
+   "menages_stationnement_reserve": 0.376,
+   "panier_quotidien_500m": 0.842,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400103",
+   "nom": "Vieux Marché Saint-Patrice",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1498,
+   "voiture": 0.285,
+   "velo": 0.062,
+   "tc": 0.28,
+   "marche": 0.319,
+   "menages_sans_voiture": 0.589,
+   "menages_stationnement_reserve": 0.169,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400201",
+   "nom": "Place Saint-Marc",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1485,
+   "voiture": 0.33,
+   "velo": 0.046,
+   "tc": 0.238,
+   "marche": 0.302,
+   "menages_sans_voiture": 0.431,
+   "menages_stationnement_reserve": 0.371,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400104",
+   "nom": "Vieux Marché Sud Saint-Éloi",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1117,
+   "voiture": 0.333,
+   "velo": 0.062,
+   "tc": 0.333,
+   "marche": 0.226,
+   "menages_sans_voiture": 0.506,
+   "menages_stationnement_reserve": 0.288,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400306",
+   "nom": "Orléans",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 712,
+   "voiture": 0.335,
+   "velo": 0.061,
+   "tc": 0.372,
+   "marche": 0.163,
+   "menages_sans_voiture": 0.479,
+   "menages_stationnement_reserve": 0.253,
+   "panier_quotidien_500m": 0.953,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400203",
+   "nom": "Croix de Pierre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1608,
+   "voiture": 0.338,
+   "velo": 0.068,
+   "tc": 0.271,
+   "marche": 0.281,
+   "menages_sans_voiture": 0.534,
+   "menages_stationnement_reserve": 0.256,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400106",
+   "nom": "Beauvoisine",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1921,
+   "voiture": 0.339,
+   "velo": 0.054,
+   "tc": 0.284,
+   "marche": 0.264,
+   "menages_sans_voiture": 0.433,
+   "menages_stationnement_reserve": 0.343,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400501",
+   "nom": "Cauchoise Saint-Gervais Est",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1468,
+   "voiture": 0.357,
+   "velo": 0.051,
+   "tc": 0.328,
+   "marche": 0.229,
+   "menages_sans_voiture": 0.404,
+   "menages_stationnement_reserve": 0.361,
+   "panier_quotidien_500m": 0.822,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400901",
+   "nom": "Grand Mare Centre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 851,
+   "voiture": 0.383,
+   "velo": 0.015,
+   "tc": 0.535,
+   "marche": 0.027,
+   "menages_sans_voiture": 0.519,
+   "menages_stationnement_reserve": 0.333,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400204",
+   "nom": "Saint-Nicaise",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1100,
+   "voiture": 0.391,
+   "velo": 0.04,
+   "tc": 0.238,
+   "marche": 0.302,
+   "menages_sans_voiture": 0.446,
+   "menages_stationnement_reserve": 0.395,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400802",
+   "nom": "Lombardie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 616,
+   "voiture": 0.398,
+   "velo": 0.019,
+   "tc": 0.511,
+   "marche": 0.028,
+   "menages_sans_voiture": 0.606,
+   "menages_stationnement_reserve": 0.058,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400304",
+   "nom": "Saint-Sever Emmurées",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1801,
+   "voiture": 0.413,
+   "velo": 0.062,
+   "tc": 0.342,
+   "marche": 0.158,
+   "menages_sans_voiture": 0.375,
+   "menages_stationnement_reserve": 0.641,
+   "panier_quotidien_500m": 0.982,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400502",
+   "nom": "Gare SNCF",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2204,
+   "voiture": 0.413,
+   "velo": 0.047,
+   "tc": 0.315,
+   "marche": 0.161,
+   "menages_sans_voiture": 0.321,
+   "menages_stationnement_reserve": 0.57,
+   "panier_quotidien_500m": 0.962,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400404",
+   "nom": "Pasteur Madeleine",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2522,
+   "voiture": 0.434,
+   "velo": 0.048,
+   "tc": 0.293,
+   "marche": 0.191,
+   "menages_sans_voiture": 0.42,
+   "menages_stationnement_reserve": 0.444,
+   "panier_quotidien_500m": 0.777,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400305",
+   "nom": "Saint-Sever Ouest Faïenciers",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1475,
+   "voiture": 0.438,
+   "velo": 0.021,
+   "tc": 0.345,
+   "marche": 0.176,
+   "menages_sans_voiture": 0.452,
+   "menages_stationnement_reserve": 0.525,
+   "panier_quotidien_500m": 0.865,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400303",
+   "nom": "Saint-Sever Est",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1890,
+   "voiture": 0.449,
+   "velo": 0.045,
+   "tc": 0.297,
+   "marche": 0.174,
+   "menages_sans_voiture": 0.37,
+   "menages_stationnement_reserve": 0.552,
+   "panier_quotidien_500m": 0.808,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400504",
+   "nom": "Jouvenet Est Boulingrin",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1281,
+   "voiture": 0.449,
+   "velo": 0.113,
+   "tc": 0.255,
+   "marche": 0.136,
+   "menages_sans_voiture": 0.164,
+   "menages_stationnement_reserve": 0.639,
+   "panier_quotidien_500m": 0.642,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400405",
+   "nom": "Cauchoise Saint-Gervais Ouest",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1335,
+   "voiture": 0.45,
+   "velo": 0.076,
+   "tc": 0.286,
+   "marche": 0.161,
+   "menages_sans_voiture": 0.423,
+   "menages_stationnement_reserve": 0.338,
+   "panier_quotidien_500m": 0.716,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765401005",
+   "nom": "Saint-Clément Jean Rondeaux",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2190,
+   "voiture": 0.475,
+   "velo": 0.044,
+   "tc": 0.322,
+   "marche": 0.121,
+   "menages_sans_voiture": 0.355,
+   "menages_stationnement_reserve": 0.582,
+   "panier_quotidien_500m": 0.877,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400503",
+   "nom": "Jouvenet Ouest Rue d'Ernemont",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 864,
+   "voiture": 0.482,
+   "velo": 0.054,
+   "tc": 0.246,
+   "marche": 0.152,
+   "menages_sans_voiture": 0.301,
+   "menages_stationnement_reserve": 0.551,
+   "panier_quotidien_500m": 0.98,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765401001",
+   "nom": "Voltaire Grammont",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1150,
+   "voiture": 0.484,
+   "velo": 0.037,
+   "tc": 0.345,
+   "marche": 0.085,
+   "menages_sans_voiture": 0.439,
+   "menages_stationnement_reserve": 0.365,
+   "panier_quotidien_500m": 0.545,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765401003",
+   "nom": "Saint-Clément Méridienne",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1870,
+   "voiture": 0.493,
+   "velo": 0.053,
+   "tc": 0.274,
+   "marche": 0.148,
+   "menages_sans_voiture": 0.274,
+   "menages_stationnement_reserve": 0.602,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400701",
+   "nom": "Vieux Sapins",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 689,
+   "voiture": 0.5,
+   "velo": 0.021,
+   "tc": 0.383,
+   "marche": 0.053,
+   "menages_sans_voiture": 0.373,
+   "menages_stationnement_reserve": 0.427,
+   "panier_quotidien_500m": 0.878,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400601",
+   "nom": "Saint-Hilaire",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1215,
+   "voiture": 0.508,
+   "velo": 0.089,
+   "tc": 0.233,
+   "marche": 0.136,
+   "menages_sans_voiture": 0.28,
+   "menages_stationnement_reserve": 0.656,
+   "panier_quotidien_500m": 0.518,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400301",
+   "nom": "Île Lacroix",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 567,
+   "voiture": 0.512,
+   "velo": 0.048,
+   "tc": 0.263,
+   "marche": 0.145,
+   "menages_sans_voiture": 0.291,
+   "menages_stationnement_reserve": 0.687,
+   "panier_quotidien_500m": 0.553,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400702",
+   "nom": "Sapins",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 589,
+   "voiture": 0.518,
+   "velo": 0.0,
+   "tc": 0.423,
+   "marche": 0.025,
+   "menages_sans_voiture": 0.566,
+   "menages_stationnement_reserve": 0.119,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400603",
+   "nom": "Zone de la Vallée des Deux Rivières",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "765400403",
+   "nom": "Fond du Val Chasselière",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1747,
+   "voiture": 0.561,
+   "velo": 0.064,
+   "tc": 0.246,
+   "marche": 0.095,
+   "menages_sans_voiture": 0.25,
+   "menages_stationnement_reserve": 0.686,
+   "panier_quotidien_500m": 0.523,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400801",
+   "nom": "Châtelet",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 499,
+   "voiture": 0.566,
+   "velo": 0.011,
+   "tc": 0.37,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.411,
+   "menages_stationnement_reserve": 0.345,
+   "panier_quotidien_500m": 0.986,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400401",
+   "nom": "Zone Portuaire Nord",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "765401002",
+   "nom": "Trianon Jardin des Plantes",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2000,
+   "voiture": 0.575,
+   "velo": 0.092,
+   "tc": 0.221,
+   "marche": 0.094,
+   "menages_sans_voiture": 0.245,
+   "menages_stationnement_reserve": 0.586,
+   "panier_quotidien_500m": 0.91,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400402",
+   "nom": "Sacré-Cœur",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1240,
+   "voiture": 0.578,
+   "velo": 0.043,
+   "tc": 0.302,
+   "marche": 0.024,
+   "menages_sans_voiture": 0.24,
+   "menages_stationnement_reserve": 0.558,
+   "panier_quotidien_500m": 0.386,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400604",
+   "nom": "Mont Gargan Saint-Paul",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1054,
+   "voiture": 0.594,
+   "velo": 0.085,
+   "tc": 0.161,
+   "marche": 0.09,
+   "menages_sans_voiture": 0.191,
+   "menages_stationnement_reserve": 0.645,
+   "panier_quotidien_500m": 0.001,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400902",
+   "nom": "Grand Mare Périphérie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 626,
+   "voiture": 0.609,
+   "velo": 0.023,
+   "tc": 0.288,
+   "marche": 0.03,
+   "menages_sans_voiture": 0.165,
+   "menages_stationnement_reserve": 0.909,
+   "panier_quotidien_500m": 0.773,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765401004",
+   "nom": "Saint-Clément Pépinières",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 701,
+   "voiture": 0.62,
+   "velo": 0.041,
+   "tc": 0.207,
+   "marche": 0.081,
+   "menages_sans_voiture": 0.258,
+   "menages_stationnement_reserve": 0.772,
+   "panier_quotidien_500m": 1.0,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765400602",
+   "nom": "Grieu Vallon Suisse",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1605,
+   "voiture": 0.667,
+   "velo": 0.043,
+   "tc": 0.219,
+   "marche": 0.02,
+   "menages_sans_voiture": 0.196,
+   "menages_stationnement_reserve": 0.639,
+   "panier_quotidien_500m": 0.624,
+   "bus_8h_7_9h": 0.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "765401006",
+   "nom": "Zone Portuaire Sud",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "765400205",
+   "nom": "C.H.U.R.",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "76540",
+   "nom": "Rouen",
+   "lignes": 8444,
+   "fragilite": "ok",
+   "part_des_actifs": 0.559,
+   "pas_de_transport": 0.056,
+   "marche": 0.293,
+   "velo": 0.076,
+   "deux_roues_mot": 0.011,
+   "voiture": 0.267,
+   "tc": 0.297
+  },
+  {
+   "travail": "76575",
+   "nom": "Saint-Étienne-du-Rouvray",
+   "lignes": 562,
+   "fragilite": "ok",
+   "part_des_actifs": 0.036,
+   "pas_de_transport": 0.002,
+   "marche": 0.021,
+   "velo": 0.043,
+   "deux_roues_mot": 0.008,
+   "voiture": 0.568,
+   "tc": 0.357
+  },
+  {
+   "travail": "76451",
+   "nom": "Mont-Saint-Aignan",
+   "lignes": 518,
+   "fragilite": "ok",
+   "part_des_actifs": 0.034,
+   "pas_de_transport": 0.0,
+   "marche": 0.027,
+   "velo": 0.024,
+   "deux_roues_mot": 0.015,
+   "voiture": 0.58,
+   "tc": 0.354
+  },
+  {
+   "travail": "76681",
+   "nom": "Sotteville-lès-Rouen",
+   "lignes": 383,
+   "fragilite": "ok",
+   "part_des_actifs": 0.026,
+   "pas_de_transport": 0.0,
+   "marche": 0.023,
+   "velo": 0.064,
+   "deux_roues_mot": 0.026,
+   "voiture": 0.607,
+   "tc": 0.28
+  },
+  {
+   "travail": "76108",
+   "nom": "Bois-Guillaume",
+   "lignes": 369,
+   "fragilite": "ok",
+   "part_des_actifs": 0.025,
+   "pas_de_transport": 0.0,
+   "marche": 0.03,
+   "velo": 0.041,
+   "deux_roues_mot": 0.016,
+   "voiture": 0.663,
+   "tc": 0.25
+  },
+  {
+   "travail": "76498",
+   "nom": "Le Petit-Quevilly",
+   "lignes": 318,
+   "fragilite": "ok",
+   "part_des_actifs": 0.021,
+   "pas_de_transport": 0.003,
+   "marche": 0.028,
+   "velo": 0.085,
+   "deux_roues_mot": 0.013,
+   "voiture": 0.528,
+   "tc": 0.343
+  },
+  {
+   "travail": "76322",
+   "nom": "Le Grand-Quevilly",
+   "lignes": 281,
+   "fragilite": "ok",
+   "part_des_actifs": 0.019,
+   "pas_de_transport": 0.006,
+   "marche": 0.007,
+   "velo": 0.067,
+   "deux_roues_mot": 0.01,
+   "voiture": 0.651,
+   "tc": 0.26
+  },
+  {
+   "travail": "27701",
+   "nom": "Val-de-Reuil",
+   "lignes": 169,
+   "fragilite": "ok",
+   "part_des_actifs": 0.011,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.006,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.703,
+   "tc": 0.272
+  },
+  {
+   "travail": "76377",
+   "nom": "Isneauville",
+   "lignes": 152,
+   "fragilite": "ok",
+   "part_des_actifs": 0.01,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.023,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.799,
+   "tc": 0.178
+  },
+  {
+   "travail": "76212",
+   "nom": "Darnétal",
+   "lignes": 107,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.042,
+   "velo": 0.052,
+   "deux_roues_mot": 0.002,
+   "voiture": 0.641,
+   "tc": 0.263
+  },
+  {
+   "travail": "76351",
+   "nom": "Le Havre",
+   "lignes": 112,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.01,
+   "marche": 0.026,
+   "velo": 0.01,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.421,
+   "tc": 0.534
+  },
+  {
+   "travail": "27229",
+   "nom": "Évreux",
+   "lignes": 103,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.014,
+   "velo": 0.0,
+   "deux_roues_mot": 0.015,
+   "voiture": 0.848,
+   "tc": 0.123
+  },
+  {
+   "travail": "76095",
+   "nom": "Bihorel",
+   "lignes": 85,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.004,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.637,
+   "tc": 0.36
+  },
+  {
+   "travail": "76157",
+   "nom": "Canteleu",
+   "lignes": 98,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.015,
+   "velo": 0.023,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.59,
+   "tc": 0.373
+  },
+  {
+   "travail": "76178",
+   "nom": "Cléon",
+   "lignes": 91,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.004,
+   "velo": 0.013,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.926,
+   "tc": 0.057
+  },
+  {
+   "travail": "76231",
+   "nom": "Elbeuf",
+   "lignes": 98,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.016,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.797,
+   "tc": 0.187
+  },
+  {
+   "travail": "76319",
+   "nom": "Grand-Couronne",
+   "lignes": 94,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.011,
+   "deux_roues_mot": 0.017,
+   "voiture": 0.887,
+   "tc": 0.085
+  },
+  {
+   "travail": "76475",
+   "nom": "Franqueville-Saint-Pierre",
+   "lignes": 80,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.014,
+   "velo": 0.042,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.72,
+   "tc": 0.223
+  },
+  {
+   "travail": "76057",
+   "nom": "Barentin",
+   "lignes": 83,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.004,
+   "velo": 0.026,
+   "deux_roues_mot": 0.005,
+   "voiture": 0.853,
+   "tc": 0.113
+  },
+  {
+   "travail": "76216",
+   "nom": "Déville-lès-Rouen",
+   "lignes": 75,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.02,
+   "velo": 0.044,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.598,
+   "tc": 0.338
+  },
+  {
+   "travail": "76474",
+   "nom": "Notre-Dame-de-Bondeville",
+   "lignes": 84,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.014,
+   "velo": 0.018,
+   "deux_roues_mot": 0.009,
+   "voiture": 0.613,
+   "tc": 0.345
+  },
+  {
+   "travail": "76705",
+   "nom": "Tourville-la-Rivière",
+   "lignes": 82,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.005,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.859,
+   "tc": 0.141
+  },
+  {
+   "travail": "27375",
+   "nom": "Louviers",
+   "lignes": 63,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.775,
+   "tc": 0.225
+  },
+  {
+   "travail": "75108",
+   "nom": "Paris 8e Arrondissement",
+   "lignes": 62,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.018,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.026,
+   "voiture": 0.261,
+   "tc": 0.696
+  },
+  {
+   "travail": "76410",
+   "nom": "Maromme",
+   "lignes": 67,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.021,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.68,
+   "tc": 0.299
+  },
+  {
+   "travail": "76429",
+   "nom": "Le Mesnil-Esnard",
+   "lignes": 67,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.053,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.668,
+   "tc": 0.28
+  },
+  {
+   "travail": "76484",
+   "nom": "Oissel-sur-Seine",
+   "lignes": 68,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.017,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.741,
+   "tc": 0.242
+  },
+  {
+   "travail": "76497",
+   "nom": "Petit-Couronne",
+   "lignes": 67,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.006,
+   "velo": 0.021,
+   "deux_roues_mot": 0.04,
+   "voiture": 0.782,
+   "tc": 0.151
+  },
+  {
+   "travail": "76561",
+   "nom": "Saint-Aubin-lès-Elbeuf",
+   "lignes": 64,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.004,
+   "velo": 0.0,
+   "deux_roues_mot": 0.006,
+   "voiture": 0.818,
+   "tc": 0.171
+  },
+  {
+   "travail": "76709",
+   "nom": "Le Trait",
+   "lignes": 79,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.004,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.9,
+   "tc": 0.1
+  },
+  {
+   "travail": "27681",
+   "nom": "Vernon",
+   "lignes": 43,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.003,
+   "pas_de_transport": 0.0,
+   "marche": 0.019,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.603,
+   "tc": 0.378
+  },
+  {
+   "travail": "75115",
+   "nom": "Paris 15e Arrondissement",
+   "lignes": 48,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.003,
+   "pas_de_transport": 0.022,
+   "marche": 0.029,
+   "velo": 0.008,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.234,
+   "tc": 0.707
+  },
+  {
+   "travail": "76217",
+   "nom": "Dieppe",
+   "lignes": 55,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.003,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.586,
+   "tc": 0.414
+  },
+  {
+   "travail": "27351",
+   "nom": "Incarville",
+   "lignes": 40,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.002,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.965,
+   "tc": 0.035
+  }
+ ],
+ "voisines": [
+  {
+   "insee": "76681",
+   "nom": "Sotteville-lès-Rouen",
+   "voiture": 0.604,
+   "velo": 0.058,
+   "tc": 0.216,
+   "vers_commune_etudiee": {
+    "lignes": 1041,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.474,
+     "bas": 0.435,
+     "haut": 0.513,
+     "lignes": 1041,
+     "n_eff": 628
+    },
+    "velo": {
+     "p": 0.082,
+     "bas": 0.063,
+     "haut": 0.106,
+     "lignes": 1041,
+     "n_eff": 628
+    }
+   }
+  },
+  {
+   "insee": "76575",
+   "nom": "Saint-Étienne-du-Rouvray",
+   "voiture": 0.722,
+   "velo": 0.03,
+   "tc": 0.164,
+   "vers_commune_etudiee": {
+    "lignes": 618,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.672,
+     "bas": 0.622,
+     "haut": 0.718,
+     "lignes": 618,
+     "n_eff": 361
+    },
+    "velo": {
+     "p": 0.036,
+     "bas": 0.021,
+     "haut": 0.061,
+     "lignes": 618,
+     "n_eff": 361
+    }
+   }
+  },
+  {
+   "insee": "76322",
+   "nom": "Le Grand-Quevilly",
+   "voiture": 0.716,
+   "velo": 0.029,
+   "tc": 0.169,
+   "vers_commune_etudiee": {
+    "lignes": 765,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.566,
+     "bas": 0.519,
+     "haut": 0.612,
+     "lignes": 765,
+     "n_eff": 434
+    },
+    "velo": {
+     "p": 0.041,
+     "bas": 0.026,
+     "haut": 0.064,
+     "lignes": 765,
+     "n_eff": 434
+    }
+   }
+  },
+  {
+   "insee": "76498",
+   "nom": "Le Petit-Quevilly",
+   "voiture": 0.632,
+   "velo": 0.038,
+   "tc": 0.236,
+   "vers_commune_etudiee": {
+    "lignes": 836,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.456,
+     "bas": 0.411,
+     "haut": 0.503,
+     "lignes": 836,
+     "n_eff": 452
+    },
+    "velo": {
+     "p": 0.049,
+     "bas": 0.033,
+     "haut": 0.073,
+     "lignes": 836,
+     "n_eff": 452
+    }
+   }
+  },
+  {
+   "insee": "76451",
+   "nom": "Mont-Saint-Aignan",
+   "voiture": 0.602,
+   "velo": 0.04,
+   "tc": 0.221,
+   "vers_commune_etudiee": {
+    "lignes": 593,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.512,
+     "bas": 0.456,
+     "haut": 0.567,
+     "lignes": 593,
+     "n_eff": 312
+    },
+    "velo": {
+     "p": 0.07,
+     "bas": 0.046,
+     "haut": 0.104,
+     "lignes": 593,
+     "n_eff": 312
+    }
+   }
+  },
+  {
+   "insee": "76231",
+   "nom": "Elbeuf",
+   "voiture": 0.735,
+   "velo": 0.018,
+   "tc": 0.139,
+   "vers_commune_etudiee": {
+    "lignes": 163,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.703,
+     "bas": 0.605,
+     "haut": 0.785,
+     "lignes": 163,
+     "n_eff": 96
+    },
+    "velo": {
+     "p": 0.0,
+     "bas": 0.0,
+     "haut": 0.039,
+     "lignes": 163,
+     "n_eff": 96
+    }
+   }
+  }
+ ],
+ "acces_communes": {
+  "76540": {
+   "commerce_alim_500m": 0.978,
+   "grande_surface_500m": 0.751,
+   "pharmacie_500m": 0.875,
+   "medecin_generaliste_500m": 0.888,
+   "ecole_elementaire_500m": 0.918,
+   "college_1km": 0.912,
+   "gare_2km": 0.683,
+   "panier_quotidien_500m": 0.838,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76681": {
+   "commerce_alim_500m": 0.956,
+   "grande_surface_500m": 0.521,
+   "pharmacie_500m": 0.834,
+   "medecin_generaliste_500m": 0.801,
+   "ecole_elementaire_500m": 0.843,
+   "college_1km": 0.674,
+   "gare_2km": 0.953,
+   "panier_quotidien_500m": 0.703,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76575": {
+   "commerce_alim_500m": 0.846,
+   "grande_surface_500m": 0.447,
+   "pharmacie_500m": 0.572,
+   "medecin_generaliste_500m": 0.501,
+   "ecole_elementaire_500m": 0.759,
+   "college_1km": 0.944,
+   "gare_2km": 0.449,
+   "panier_quotidien_500m": 0.422,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76322": {
+   "commerce_alim_500m": 0.896,
+   "grande_surface_500m": 0.299,
+   "pharmacie_500m": 0.67,
+   "medecin_generaliste_500m": 0.587,
+   "ecole_elementaire_500m": 0.69,
+   "college_1km": 0.916,
+   "gare_2km": 0.0,
+   "panier_quotidien_500m": 0.514,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76498": {
+   "commerce_alim_500m": 0.978,
+   "grande_surface_500m": 0.738,
+   "pharmacie_500m": 0.881,
+   "medecin_generaliste_500m": 0.834,
+   "ecole_elementaire_500m": 0.93,
+   "college_1km": 0.975,
+   "gare_2km": 0.001,
+   "panier_quotidien_500m": 0.814,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76451": {
+   "commerce_alim_500m": 0.912,
+   "grande_surface_500m": 0.444,
+   "pharmacie_500m": 0.602,
+   "medecin_generaliste_500m": 0.664,
+   "ecole_elementaire_500m": 0.669,
+   "college_1km": 0.773,
+   "gare_2km": 0.504,
+   "panier_quotidien_500m": 0.497,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  },
+  "76231": {
+   "commerce_alim_500m": 0.775,
+   "grande_surface_500m": 0.629,
+   "pharmacie_500m": 0.643,
+   "medecin_generaliste_500m": 0.577,
+   "ecole_elementaire_500m": 0.864,
+   "college_1km": 0.743,
+   "gare_2km": 0.623,
+   "panier_quotidien_500m": 0.643,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 1.0,
+   "bus_4h_20_22h": 0.0
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 90
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 270
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 630
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 60
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 180
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 420
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes que ni la section 4 bis ni un autre fait du dossier ne fournit",
+   "raison": "seules les comparaisons calculées et documentées dans le dossier s'écrivent"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 76540 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/fiche/fiche.json --contours <cache>/iris_ign_76540.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.2",
+   "manuel": "aucun pour la production : classes automatiques (--classes auto) et secteurs cités repérés par des numéros avec leur liste (--reperes) ; libellés posés à la main seulement pour une version soignée"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable automatiquement",
+   "faits": "mobpro.voiture_selon_destination.* (groupes utilisables seulement)",
+   "commande": "generer_visuels.py (sans --sans-barres)",
+   "manuel": "aucun : la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Carte de situation : Rouen et Sotteville-lès-Rouen (76681), Saint-Étienne-du-Rouvray (76575), Le Grand-Quevilly (76322), Le Petit-Quevilly (76498), Mont-Saint-Aignan (76451) et Elbeuf (76231)",
+   "etat": "réalisable, seulement à côté du graphique précédent",
+   "faits": "aucun (contours IGN)",
+   "commande": "generer_visuels.py … --communes 76681,76575,76322,76498,76451,76231",
+   "manuel": "le sous-titre parle de « la seconde barre » : à n'utiliser qu'avec ce graphique, même liste exacte"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "76540",
+  "consulte_le": "2026-10-15",
+  "origine": "automatique",
+  "sources_officielles": [
+   "https://transport.data.gouv.fr"
+  ],
+  "faits": [
+   {
+    "id": "doc.reseau.identite",
+    "information": "Le réseau de transport urbain de l'intercommunalité Métropole Rouen Normandie s'appelle « Astuce » ; son autorité organisatrice est Métropole Rouen Normandie.",
+    "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Astuce » : https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+    "consulte_le": "2026-10-15",
+    "validite": "jeu de données mis à jour le 2026-10-15",
+    "perimetre": "intercommunalité Métropole Rouen Normandie ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+   },
+   {
+    "id": "doc.reseau.site",
+    "information": "Le site du réseau Astuce est https://www.myastuce.fr.",
+    "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie ; site joint le 2026-10-15",
+    "consulte_le": "2026-10-15",
+    "validite": "non précisée",
+    "perimetre": "réseau Astuce",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification (gratuité, public, lignes, exceptions)",
+    "statut": "introuvable",
+    "source": "https://www.myastuce.fr",
+    "consulte_le": "2026-10-15",
+    "note": "La page d'accueil et /fr/tarifs ne renvoient que le titre « My Astuce », sans texte exploitable. Le site semble rendu côté navigateur. Aucun extrait n'a pu être copié. Je n'en conclus rien sur la gratuité ou le payant."
+   },
+   {
+    "sujet": "Jours de circulation et période de validité des horaires",
+    "statut": "introuvable",
+    "source": "https://www.myastuce.fr/fr/horaires-et-itineraires",
+    "consulte_le": "2026-10-15",
+    "note": "La page ne donne aucun contenu exploitable. La réponse obtenue ne fait que reprendre les termes de ma demande, donc je ne la retiens pas comme source. Aucun extrait n'a pu être copié."
+   },
+   {
+    "sujet": "Où vérifier un trajet (calcul d'itinéraire, fiches horaires, temps réel)",
+    "statut": "introuvable",
+    "source": "https://www.myastuce.fr/fr/horaires-et-itineraires",
+    "consulte_le": "2026-10-15",
+    "note": "Je n'ai pas pu confirmer par un extrait exact que cette page propose un calculateur d'itinéraire, des fiches horaires ou du temps réel. Je n'ai pas essayé d'autres URL sur le domaine, donc ce point reste à vérifier à la main."
+   },
+   {
+    "sujet": "tarification (gratuité, abonnements, exceptions)",
+    "statut": "introuvable",
+    "source": "",
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+   },
+   {
+    "sujet": "jours et périodes de circulation des lignes urbaines",
+    "statut": "introuvable",
+    "source": "",
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+   },
+   {
+    "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+    "statut": "introuvable",
+    "source": "",
+    "consulte_le": "2026-10-15",
+    "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+   },
+   {
+    "sujet": "vélo ou gare (seulement si directement utile au logement)",
+    "statut": "non recherché",
+    "source": "",
+    "consulte_le": "2026-10-15",
+    "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+   }
+  ],
+  "ecartes": [],
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/dossier/complement.json",
+  "sha256": "7645a2123cd089c364c5f486e543f0fb6fb8c1819d598353249b9dcdbfada6c6"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "76540",
+   "nom": "Rouen",
+   "role": "principale",
+   "actifs": 49112,
+   "lignes": 15250,
+   "voiture": 0.437
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que Rouen (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 24 556 à 98 225), avec au moins 150 lignes d'échantillon ; Rouen exclue ; France métropolitaine",
+   "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    24556,
+    98225
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "3a21daa14fad5bb1"
+   }
+  },
+  "genere_le": "2026-10-15T16:16:51Z",
+  "disponible": true,
+  "groupe": {
+   "n": 41,
+   "mediane_voiture": 0.6159,
+   "communes": [
+    {
+     "insee": "13001",
+     "nom": "Aix-en-Provence",
+     "actifs": 63809,
+     "voiture": 0.6333
+    },
+    {
+     "insee": "2A004",
+     "nom": "Ajaccio",
+     "actifs": 31282,
+     "voiture": 0.7559
+    },
+    {
+     "insee": "80021",
+     "nom": "Amiens",
+     "actifs": 50204,
+     "voiture": 0.5688
+    },
+    {
+     "insee": "49007",
+     "nom": "Angers",
+     "actifs": 64100,
+     "voiture": 0.5376
+    },
+    {
+     "insee": "74010",
+     "nom": "Annecy",
+     "actifs": 61994,
+     "voiture": 0.6391
+    },
+    {
+     "insee": "84007",
+     "nom": "Avignon",
+     "actifs": 31281,
+     "voiture": 0.6473
+    },
+    {
+     "insee": "25056",
+     "nom": "Besançon",
+     "actifs": 47686,
+     "voiture": 0.558
+    },
+    {
+     "insee": "92012",
+     "nom": "Boulogne-Billancourt",
+     "actifs": 61615,
+     "voiture": 0.2529
+    },
+    {
+     "insee": "18033",
+     "nom": "Bourges",
+     "actifs": 24724,
+     "voiture": 0.7284
+    },
+    {
+     "insee": "29019",
+     "nom": "Brest",
+     "actifs": 58364,
+     "voiture": 0.6302
+    },
+    {
+     "insee": "14118",
+     "nom": "Caen",
+     "actifs": 43167,
+     "voiture": 0.5765
+    },
+    {
+     "insee": "73065",
+     "nom": "Chambéry",
+     "actifs": 25185,
+     "voiture": 0.5657
+    },
+    {
+     "insee": "50129",
+     "nom": "Cherbourg-en-Cotentin",
+     "actifs": 33130,
+     "voiture": 0.7047
+    },
+    {
+     "insee": "63113",
+     "nom": "Clermont-Ferrand",
+     "actifs": 59484,
+     "voiture": 0.555
+    },
+    {
+     "insee": "68066",
+     "nom": "Colmar",
+     "actifs": 27853,
+     "voiture": 0.6192
+    },
+    {
+     "insee": "21231",
+     "nom": "Dijon",
+     "actifs": 69120,
+     "voiture": 0.5196
+    },
+    {
+     "insee": "59183",
+     "nom": "Dunkerque",
+     "actifs": 31408,
+     "voiture": 0.6949
+    },
+    {
+     "insee": "38185",
+     "nom": "Grenoble",
+     "actifs": 68430,
+     "voiture": 0.3226
+    },
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "actifs": 30550,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "76351",
+     "nom": "Le Havre",
+     "actifs": 59821,
+     "voiture": 0.6308
+    },
+    {
+     "insee": "72181",
+     "nom": "Le Mans",
+     "actifs": 55004,
+     "voiture": 0.5813
+    },
+    {
+     "insee": "87085",
+     "nom": "Limoges",
+     "actifs": 48515,
+     "voiture": 0.6996
+    },
+    {
+     "insee": "57463",
+     "nom": "Metz",
+     "actifs": 50936,
+     "voiture": 0.5651
+    },
+    {
+     "insee": "82121",
+     "nom": "Montauban",
+     "actifs": 24798,
+     "voiture": 0.7846
+    },
+    {
+     "insee": "68224",
+     "nom": "Mulhouse",
+     "actifs": 35491,
+     "voiture": 0.6112
+    },
+    {
+     "insee": "54395",
+     "nom": "Nancy",
+     "actifs": 43903,
+     "voiture": 0.4838
+    },
+    {
+     "insee": "79191",
+     "nom": "Niort",
+     "actifs": 25863,
+     "voiture": 0.7011
+    },
+    {
+     "insee": "30189",
+     "nom": "Nîmes",
+     "actifs": 52730,
+     "voiture": 0.6586
+    },
+    {
+     "insee": "45234",
+     "nom": "Orléans",
+     "actifs": 49354,
+     "voiture": 0.5278
+    },
+    {
+     "insee": "64445",
+     "nom": "Pau",
+     "actifs": 30140,
+     "voiture": 0.6678
+    },
+    {
+     "insee": "66136",
+     "nom": "Perpignan",
+     "actifs": 36885,
+     "voiture": 0.7311
+    },
+    {
+     "insee": "86194",
+     "nom": "Poitiers",
+     "actifs": 33952,
+     "voiture": 0.5927
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "actifs": 27007,
+     "voiture": 0.7802
+    },
+    {
+     "insee": "51454",
+     "nom": "Reims",
+     "actifs": 70720,
+     "voiture": 0.6214
+    },
+    {
+     "insee": "35238",
+     "nom": "Rennes",
+     "actifs": 97064,
+     "voiture": 0.4074
+    },
+    {
+     "insee": "44184",
+     "nom": "Saint-Nazaire",
+     "actifs": 28139,
+     "voiture": 0.7111
+    },
+    {
+     "insee": "42218",
+     "nom": "Saint-Étienne",
+     "actifs": 61049,
+     "voiture": 0.5911
+    },
+    {
+     "insee": "83137",
+     "nom": "Toulon",
+     "actifs": 69554,
+     "voiture": 0.6159
+    },
+    {
+     "insee": "37261",
+     "nom": "Tours",
+     "actifs": 57750,
+     "voiture": 0.5
+    },
+    {
+     "insee": "26362",
+     "nom": "Valence",
+     "actifs": 25309,
+     "voiture": 0.6173
+    },
+    {
+     "insee": "69266",
+     "nom": "Villeurbanne",
+     "actifs": 73197,
+     "voiture": 0.3279
+    }
+   ]
+  },
+  "ecart_points": -18,
+  "chemin": "/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-05-campagne/76540/fiche/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à Rouen qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "44 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 41 communes du groupe (chaque commune compte une fois)",
+    "affichage": "62 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : Rouen moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "-18 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "41",
+    "usage": "oui"
+   }
+  ]
+ }
+}

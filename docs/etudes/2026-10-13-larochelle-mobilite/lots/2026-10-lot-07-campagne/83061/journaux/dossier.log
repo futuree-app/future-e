@@ -1,0 +1,4 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python outil/dossier_redaction.py --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/83061/fiche/fiche.json --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/83061/dossier --origine-voisines automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)
+
+✓ /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/83061/dossier/dossier.md, dossier.json · 59 faits, 19 secteurs, 9 absents, 6 informations documentaires (/Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-07-campagne/83061/dossier/complement.json)
+

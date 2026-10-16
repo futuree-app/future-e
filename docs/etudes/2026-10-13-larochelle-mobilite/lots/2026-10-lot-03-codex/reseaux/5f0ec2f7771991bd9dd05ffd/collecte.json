@@ -1,0 +1,102 @@
+{
+ "etape": "collecte",
+ "cle": "81b3d0dda6e17a62",
+ "outil": "claude-code",
+ "version_outil": "2.1.300 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "f44288275eaab936",
+ "debut": "2026-10-15T11:42:57Z",
+ "duree_s": 40.2,
+ "code_retour": 0,
+ "session": "73baf46d-abe8-46d6-b3b7-b63d3c8890c1",
+ "usage": {
+  "input_tokens": 6,
+  "cache_creation_input_tokens": 3125,
+  "cache_read_input_tokens": 6936,
+  "output_tokens": 2452,
+  "output_tokens_details": {
+   "thinking_tokens": 28
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 3125,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1904,
+    "cache_read_input_tokens": 3127,
+    "cache_creation_input_tokens": 1535,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 1535
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "cout_usd_equivalent": 0.0462152,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 4,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-vvkup5lr",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-vvkup5lr/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.idelis.fr\", \"prompt\": \"Tarification: le réseau est-il gratuit (pour qui, quelles lignes, exceptions)? Jours de circulation des lignes (dimanche, fériés, samedi), période de validi"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.idelis.fr/tarifs/titres-de-transport-et-tarifs/tous-les-titres\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions ? Donne des extraits exacts mot pour mo"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.idelis.fr/decouvrir-idelis/le-reseau-de-dimanche-et-jours-feries\", \"prompt\": \"Quelles lignes circulent le dimanche et jours fériés, période de validité ? Extraits exacts mot pour "
+  }
+ ],
+ "refus": 0
+}

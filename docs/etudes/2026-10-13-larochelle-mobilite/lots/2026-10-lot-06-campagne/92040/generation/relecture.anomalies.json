@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "À Palais des Congrès Mail Menand, 98 % des adresses réunissent ces proximités, contre 70 % au Petit Pont Amphibie.",
+   "probleme": "Les deux secteurs retenus pour le panier sont exactement ceux où la part de la voiture est la plus basse et la plus haute (iris.voiture.min, iris.voiture.max) : le lecteur peut croire que la proximité explique cet écart, alors que le dossier ne mesure aucun lien de cause (iris.920400203.panier_500m, iris.920400701.panier_500m, acces.adresses.* : « Proximité d'un équipement ≠ son usage »).",
+   "correction_minimale": "Rattacher la phrase à l'examen de l'adresse et non à l'écart de pratiques, par exemple « Même entre secteurs, cette proximité varie : 98 % des adresses de Palais des Congrès Mail Menand, 70 % au Petit Pont Amphibie », ou écrire en méthode que les deux observations ne sont pas liées."
+  }
+ ]
+}

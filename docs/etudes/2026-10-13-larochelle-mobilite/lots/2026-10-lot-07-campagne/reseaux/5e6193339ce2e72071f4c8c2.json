@@ -1,0 +1,118 @@
+{
+ "version": 2,
+ "id": "5e6193339ce2e72071f4c8c2",
+ "titre": "Réseau urbain AggloBus",
+ "page": "https://transport.data.gouv.fr/datasets/agglobus-offre-theorique-mobilite-reseau-urbain-de-bourges",
+ "nom_commercial": "AggloBus",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Agglobus",
+ "aom": "Agglobus",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "241800507",
+  "nom": "CA Bourges Plus"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Agglobus (Bourges)",
+    "http://www.agglobus.com"
+   ]
+  ]
+ },
+ "site": "https://www.agglobus.com:443/",
+ "sites_controles": [
+  [
+   "http://www.agglobus.com",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.reseau",
+    "information": "Les services du réseau AggloBus sont gratuits, sauf la location de vélos Cycloplus.",
+    "url": "https://www.agglobus.com/",
+    "extrait": "l'ensemble des services du réseau AggloBus sont gratuits à l'exception du service de location de vélos Cycloplus",
+    "validite": "non précisée (la page indique une gratuité depuis le 1er septembre 2023)",
+    "perimetre": "Réseau AggloBus, tout public. Exception : Cycloplus (payant). Le service Pony est aussi signalé comme payant, mais je n'ai pas d'extrait pour ce point.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:44:44Z"
+   },
+   {
+    "id": "doc.tarification.remi",
+    "information": "Les cars et trains Rémi sont gratuits pour les trajets réalisés à l'intérieur du territoire AggloBus.",
+    "url": "https://www.agglobus.com/",
+    "extrait": "les cars et trains Rémi sont également gratuits pour tous les trajets réalisés à l'intérieur du territoire AggloBus",
+    "validite": "non précisée",
+    "perimetre": "Trajets Rémi (cars et trains) internes au territoire AggloBus uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:44:45Z"
+   },
+   {
+    "id": "doc.jours.ligne1",
+    "information": "La ligne 1 (CREPS – La Rottée) circule du lundi au vendredi en période scolaire, le samedi et pendant les vacances scolaires, et le dimanche et les jours fériés sauf le 1er mai. Les plages horaires diffèrent selon le type de jour : dimanche et jours fériés de 9h10 à 20h03 dans le sens CREPS → Rottée.",
+    "url": "https://www.agglobus.com/se-deplacer/lignes/ligne-bus-1",
+    "extrait": "le dimanche et les jours fériés (sauf 1er mai)",
+    "validite": "Horaires L1 au 31.08.2026. Plan de transport adapté (service réduit) du 31/08/2026 au 09/10/2026. Déviation du 21/09/2026 au 31/12/2026.",
+    "perimetre": "Ligne 1 uniquement (CREPS – La Rottée). Ne s'applique pas aux autres lignes urbaines.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:44:45Z"
+   },
+   {
+    "id": "doc.jours.noxibus",
+    "information": "Le service Noxibus (nuit, à la demande) fonctionne 7 jours sur 7, jours fériés compris sauf le 1er mai.",
+    "url": "https://www.agglobus.com/se-deplacer/lignes-et-horaires",
+    "extrait": "7 jours sur 7, y compris les jours fériés (sauf le 1er mai)",
+    "validite": "non précisée",
+    "perimetre": "Noxibus uniquement, pas les lignes urbaines 1 à 14",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:44:45Z"
+   },
+   {
+    "id": "doc.verification.itineraire",
+    "information": "Le site propose un calculateur d'itinéraire multimodal.",
+    "url": "https://www.agglobus.com/se-deplacer/calcul-ditineraire",
+    "extrait": "Le calculateur d'itinéraire propose des trajets avec différents modes de transports",
+    "validite": "non précisée",
+    "perimetre": "Réseau AggloBus",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T20:44:46Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Jours de circulation des lignes 2 à 14",
+    "statut": "non vérifié",
+    "url": "https://www.agglobus.com/se-deplacer/lignes-et-horaires",
+    "note": "Seule la page de la ligne 1 a été lue. Les autres lignes ont chacune leur page, sur le modèle /se-deplacer/lignes/ligne-bus-N."
+   },
+   {
+    "sujet": "Fréquences",
+    "statut": "introuvable",
+    "url": "https://www.agglobus.com/se-deplacer/lignes/ligne-bus-1",
+    "note": "La page donne seulement les plages horaires. Le détail des passages est dans un PDF que je n'ai pas pu lire (non vérifié)."
+   },
+   {
+    "sujet": "Temps réel et fiches horaires",
+    "statut": "non vérifié",
+    "url": "https://www.agglobus.com/se-deplacer/prochains-passages",
+    "note": "Pages repérées sur l'accueil, mais pas ouvertes : https://www.agglobus.com/se-deplacer/prochains-passages et https://www.agglobus.com/se-deplacer/ma-fiche-horaire-personnalisee. Je n'ai pas d'extrait à citer pour elles."
+   },
+   {
+    "sujet": "Horaires vacances scolaires du 17 au 31 octobre 2026",
+    "statut": "non vérifié",
+    "url": "https://www.agglobus.com/",
+    "note": "Actualité du 15/10/2026 repérée sur l'accueil. Je n'ai pas lu son contenu."
+   }
+  ]
+ }
+}

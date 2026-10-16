@@ -1,0 +1,91 @@
+{
+ "version": 2,
+ "id": "638157af7f6b7cd00e2908e1",
+ "titre": "Réseau urbain et périurbain Fil Bleu",
+ "page": "https://transport.data.gouv.fr/datasets/fil-bleu-syndicat-des-mobilites-gtfs-gtfs-rt",
+ "nom_commercial": "Fil Bleu",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Fil Bleu",
+ "aom": "Syndicat des Mobilités de Touraine",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "243700754",
+  "nom": "Tours Métropole Val de Loire"
+ },
+ "mis_a_jour": "2026-09-27",
+ "agence": {
+  "agences": [
+   [
+    "Fil Bleu (Tours)",
+    "https://www.filbleu.fr"
+   ]
+  ]
+ },
+ "site": "https://www.filbleu.fr",
+ "sites_controles": [
+  [
+   "https://www.filbleu.fr",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-14",
+  "faits": [
+   {
+    "id": "doc.tarification.gratuite_moins_5_ans",
+    "information": "Les enfants de moins de 5 ans voyagent gratuitement sur tout le réseau bus + tram. La gratuité s'arrête au 1er jour des 5 ans.",
+    "url": "https://www.filbleu.fr/contact/besoin-daide/titres-de-transport/gratuite-des-transports",
+    "extrait": "Les enfants de moins de 5 ans voyagent gratuitement sur l'ensemble du réseau bus + tram.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 5 ans, ensemble du réseau bus et tram. Cela ne montre pas que le réseau est gratuit pour les autres publics.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:55:58Z"
+   },
+   {
+    "id": "doc.verifier.horaires_par_arret",
+    "information": "La page « Horaires par arrêt » permet de saisir le nom d'un arrêt pour voir les horaires de passage.",
+    "url": "https://www.filbleu.fr/horaires-et-trajets/horaires-par-arret",
+    "extrait": "Je renseigne le nom d'un arrêt du réseau pour voir les horaires de passage.",
+    "validite": "non précisée",
+    "perimetre": "Arrêts du réseau",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:55:59Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Tarification générale (gratuité pour d'autres publics ou lignes, exceptions)",
+    "statut": "non vérifié",
+    "url": "https://www.filbleu.fr/tarifs-demarches-et-achat-en-ligne/titres-et-tarifs",
+    "note": "Page repérée sur l'accueil mais pas ouverte. La FAQ sur la gratuité ne mentionne que les moins de 5 ans et ne liste aucune exception. Elle ne permet pas de conclure que le reste du réseau est payant."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines (dimanche, fériés, samedi) et période de validité des horaires",
+    "statut": "introuvable",
+    "url": "https://www.filbleu.fr/horaires-et-trajets/toutes-les-lignes",
+    "note": "La page « Toutes les lignes » ne donne pas ces informations. Il faut ouvrir les fiches de chaque ligne, que je n'ai pas consultées. Je n'ai pas vérifié les fiches horaires PDF."
+   },
+   {
+    "sujet": "Calcul d'itinéraire",
+    "statut": "non vérifié",
+    "url": "https://www.filbleu.fr/horaires-et-trajets/itineraire",
+    "note": "La page existe, mais son calculateur ne s'était pas chargé à la lecture (« Chargement en cours de la cartographie... »). Je n'ai pas pu confirmer ce qu'elle propose."
+   },
+   {
+    "sujet": "Temps réel et fiches horaires",
+    "statut": "introuvable",
+    "url": "https://www.filbleu.fr/horaires-et-trajets/horaires-par-arret",
+    "note": "La page ne mentionne ni temps réel ni fiches horaires. La page d'accueil évoque seulement la consultation des horaires en temps réel, sans lien direct. Je n'ai pas ouvert la page d'info trafic: https://www.filbleu.fr/horaires-et-trajets/info-trafic."
+   },
+   {
+    "sujet": "À partir du 1er jour des 5 ans de l'enfant, un titre de transport est exigé.",
+    "statut": "non vérifié",
+    "url": "https://www.filbleu.fr/contact/besoin-daide/titres-de-transport/gratuite-des-transports",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
+}

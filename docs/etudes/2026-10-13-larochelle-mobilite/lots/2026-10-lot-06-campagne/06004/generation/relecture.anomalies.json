@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier permet de regarder ce qui se trouve près des adresses",
+   "probleme": "Le texte publié renvoie au « dossier », un document de production que le lecteur ne voit pas (passage qui introduit `iris.060040115.panier_500m` et `iris.060040102.panier_500m`).",
+   "correction_minimale": "Remplacer « le dossier permet de regarder » par « on peut regarder »."
+  }
+ ]
+}

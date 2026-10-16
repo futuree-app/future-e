@@ -1,0 +1,91 @@
+{
+ "commune": "73065",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité CA du Grand Chambéry s'appelle « Synchro Bus » ; son autorité organisatrice est CA du Grand Chambéry.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Synchro Bus » : https://transport.data.gouv.fr/datasets/arrets-et-horaires-theoriques-bus-temps-reel ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-15",
+   "perimetre": "intercommunalité CA du Grand Chambéry ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Synchro Bus est https://synchro.grandchambery.fr.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/arrets-et-horaires-theoriques-bus-temps-reel ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Synchro Bus",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.titre_obligatoire",
+   "information": "Un titre de transport valide est nécessaire pour prendre le bus. La page ne présente pas le réseau comme gratuit.",
+   "source": "https://synchro.grandchambery.fr/tarifs-et-abonnements-bus/ (extrait vérifié le 2026-10-15 : « Pour prendre le bus avec Synchro mobilités, vous devez avoir un titre de transport valide. »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée (la page renvoie au guide tarifaire 2025/2026)",
+   "perimetre": "réseau Synchro Bus ; Réseau Synchro, tout public ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://synchro.grandchambery.fr/tarifs-et-abonnements-bus/",
+    "extrait": "Pour prendre le bus avec Synchro mobilités, vous devez avoir un titre de transport valide."
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Tarification : gratuité (pour qui, quelles lignes, exceptions)",
+   "statut": "introuvable",
+   "source": "https://synchro.grandchambery.fr/tarifs-et-abonnements-bus/",
+   "consulte_le": "2026-10-15",
+   "note": "La page ne mentionne aucune gratuité générale. Elle renvoie au guide tarifaire 2025/2026 (PDF), que je n'ai pas ouvert. Deux offres d'essai ponctuelles sont annoncées sur l'accueil (« 21 jours de bus gratuits » pour les salariés, et des offres séniors pour les 65 ans et plus). Je ne les ai pas enregistrées comme des faits, faute d'avoir ouvert leurs pages et vérifié leurs extraits."
+  },
+  {
+   "sujet": "Jours de circulation des lignes urbaines (samedi, dimanche, fériés) et période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://synchro.grandchambery.fr/plans-et-horaires-bus/",
+   "consulte_le": "2026-10-15",
+   "note": "La page n'indique ni les jours ni la période de validité. Les horaires sont peut-être dans des images ou des fiches horaires liées. Il reste à ouvrir https://start.synchro.grandchambery.fr/fr/horaires/. Je n'ai pas conclu à l'absence de service le dimanche ou les jours fériés."
+  },
+  {
+   "sujet": "Où vérifier un trajet (itinéraire, fiches horaires, temps réel)",
+   "statut": "non vérifié",
+   "source": "https://start.synchro.grandchambery.fr",
+   "consulte_le": "2026-10-15",
+   "note": "L'accueil renvoie vers « Itinéraire interactif » (https://start.synchro.grandchambery.fr) et « Rechercher un horaire bus » (https://start.synchro.grandchambery.fr/fr/horaires/). Je n'ai pas d'extrait de 5 mots ou plus pour appuyer ces liens, et je n'ai pas ouvert ces pages. Le temps réel n'est pas mentionné explicitement. La rubrique Infos trafic ne contient que du texte factice (« Lorem ipsum »)."
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

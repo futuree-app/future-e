@@ -1,0 +1,84 @@
+{
+ "commune": "76540",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Métropole Rouen Normandie s'appelle « Astuce » ; son autorité organisatrice est Métropole Rouen Normandie.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Astuce » : https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-15",
+   "perimetre": "intercommunalité Métropole Rouen Normandie ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Astuce est https://www.myastuce.fr.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/donnees-statiques-et-temps-reel-du-reseau-astuce-metropole-rouen-normandie ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Astuce",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Tarification (gratuité, public, lignes, exceptions)",
+   "statut": "introuvable",
+   "source": "https://www.myastuce.fr",
+   "consulte_le": "2026-10-15",
+   "note": "La page d'accueil et /fr/tarifs ne renvoient que le titre « My Astuce », sans texte exploitable. Le site semble rendu côté navigateur. Aucun extrait n'a pu être copié. Je n'en conclus rien sur la gratuité ou le payant."
+  },
+  {
+   "sujet": "Jours de circulation et période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://www.myastuce.fr/fr/horaires-et-itineraires",
+   "consulte_le": "2026-10-15",
+   "note": "La page ne donne aucun contenu exploitable. La réponse obtenue ne fait que reprendre les termes de ma demande, donc je ne la retiens pas comme source. Aucun extrait n'a pu être copié."
+  },
+  {
+   "sujet": "Où vérifier un trajet (calcul d'itinéraire, fiches horaires, temps réel)",
+   "statut": "introuvable",
+   "source": "https://www.myastuce.fr/fr/horaires-et-itineraires",
+   "consulte_le": "2026-10-15",
+   "note": "Je n'ai pas pu confirmer par un extrait exact que cette page propose un calculateur d'itinéraire, des fiches horaires ou du temps réel. Je n'ai pas essayé d'autres URL sur le domaine, donc ce point reste à vérifier à la main."
+  },
+  {
+   "sujet": "tarification (gratuité, abonnements, exceptions)",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "jours et périodes de circulation des lignes urbaines",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

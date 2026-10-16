@@ -1,0 +1,13 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 29232 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-03-codex/29232/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_29232.json --classes auto --communes  --reperes 292320101,292320135,292320120 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-03-codex/29232/visuels --sans-barres
+
+{
+ "carte": {
+  "habitat": 28,
+  "non_res": 1,
+  "sans_donnee": 0
+ },
+ "barres": null,
+ "alt_carte": "Carte de Quimper découpée en 28 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 50 à 100 %). La part la plus basse est d'environ 55 % (Quimper Centre), la plus élevée d'environ 93 % (Nord Kerfeunteun-Penhars). 1 secteur d'activité exclu. Source : INSEE, recensement 2022.",
+ "alt_barres": null
+}
+

@@ -1,0 +1,119 @@
+{
+ "commune": "44109",
+ "consulte_le": "2026-10-15",
+ "origine": "automatique",
+ "sources_officielles": [
+  "https://transport.data.gouv.fr"
+ ],
+ "faits": [
+  {
+   "id": "doc.reseau.identite",
+   "information": "Le réseau de transport urbain de l'intercommunalité Nantes Métropole s'appelle « Naolib » ; son autorité organisatrice est Nantes Métropole.",
+   "source": "transport.data.gouv.fr (Point d'accès national aux données de transport), jeu « Réseau urbain Naolib » : https://transport.data.gouv.fr/datasets/reseau-de-transports-collectifs-naolib ; nom confirmé par : intitulé du jeu de données et agence du GTFS",
+   "consulte_le": "2026-10-15",
+   "validite": "jeu de données mis à jour le 2026-10-11",
+   "perimetre": "intercommunalité Nantes Métropole ; la desserte de chaque commune et de chaque adresse n'est pas établie par cette source",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Nom commercial du réseau, autorité organisatrice et exploitant sont trois choses distinctes ; l'exploitant n'est pas donné par cette source (le nommer seulement si une autre information du dossier le donne, comme exploitant). Ne dit ni quelles lignes passent dans la commune, ni à quelle fréquence, ni à quel tarif."
+  },
+  {
+   "id": "doc.reseau.site",
+   "information": "Le site du réseau Naolib est https://naolib.fr/.",
+   "source": "horaires théoriques du réseau (GTFS, fichier agency.txt), publiés sur https://transport.data.gouv.fr/datasets/reseau-de-transports-collectifs-naolib ; site joint le 2026-10-15",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée",
+   "perimetre": "réseau Naolib",
+   "usage": "oui",
+   "statut_verification": "vérifié",
+   "consigne": "Pour renvoyer le lecteur vérifier son trajet et ses horaires ; ne dit rien de la desserte."
+  },
+  {
+   "id": "doc.tarification.gratuite_weekend",
+   "information": "Les transports en commun et les parkings-relais sont annoncés gratuits le samedi et le dimanche.",
+   "source": "https://naolib.fr/ (extrait vérifié le 2026-10-15 : « Transports en commun et parkings-relais sont gratuits le samedi et le dimanche ! »)",
+   "consulte_le": "2026-10-15",
+   "validite": "non précisée (bandeau de la page d'accueil, consulté le 2026-10-15)",
+   "perimetre": "réseau Naolib ; Réseau Naolib, samedi et dimanche. Le détail est sur la page « En savoir plus ». Les jours fériés ne sont pas mentionnés. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://naolib.fr/",
+    "extrait": "Transports en commun et parkings-relais sont gratuits le samedi et le dimanche !"
+   }
+  },
+  {
+   "id": "doc.tarification.gratuite_weekend.detail",
+   "information": "Du samedi 00h00 au dimanche 23h59, la gratuité couvre les tramways, bus et navibus, pour tous les voyageurs. La navette aéroport est exclue et exige toujours un titre. Les enfants de moins de 6 ans accompagnés voyagent gratuitement toute la semaine. Les mTickets ne peuvent pas être validés le week-end, sauf ceux de la navette aéroport et d'Aléop.",
+   "source": "https://naolib.fr/gratuite-des-transports-en-commun (extrait vérifié le 2026-10-15 : « voyagez sans titre de transport »)",
+   "consulte_le": "2026-10-15",
+   "validite": "Chaque week-end, du samedi 00h00 au dimanche 23h59. Aucune autre période n'est mentionnée, jours fériés compris.",
+   "perimetre": "réseau Naolib ; Tramways, bus et navibus de Naolib, tous publics le week-end. Exceptions : navette aéroport, cars scolaires et groupes scolaires. Aléop : TER dans l'agglomération nantaise, et cars 320 et 322 (arrêts Le Gray et Gergaudière), 350 et 360 dans le périmètre métropolitain. ; application à chaque commune non établie",
+   "usage": "avec ses conditions",
+   "statut_verification": "vérifié",
+   "justificatif": {
+    "url": "https://naolib.fr/gratuite-des-transports-en-commun",
+    "extrait": "voyagez sans titre de transport"
+   }
+  }
+ ],
+ "recherches": [
+  {
+   "sujet": "Gratuité en semaine (hors moins de 6 ans accompagnés)",
+   "statut": "introuvable",
+   "source": "https://naolib.fr/gratuite-des-transports-en-commun",
+   "consulte_le": "2026-10-15",
+   "note": "Aucune gratuité générale en semaine n'apparaît. Seuls les enfants de moins de 6 ans accompagnés sont mentionnés. Ce n'est pas une preuve d'absence d'autres dispositifs."
+  },
+  {
+   "sujet": "Jours de circulation des lignes urbaines (dimanche, jours fériés) et période de validité des horaires",
+   "statut": "introuvable",
+   "source": "https://naolib.fr/",
+   "consulte_le": "2026-10-15",
+   "note": "Je n'ai pas ouvert les fiches horaires par ligne. Aucune page consultée ne donne les jours fériés ni la période de validité des horaires."
+  },
+  {
+   "sujet": "Temps réel",
+   "statut": "introuvable",
+   "source": "https://naolib.fr/fr/info-trafic-1",
+   "consulte_le": "2026-10-15",
+   "note": "La page d'accueil ne décrit pas de service de temps réel. Elle renvoie vers la page « Info trafic » pour les perturbations, que je n'ai pas ouverte. Le contenu de plan.naolib.fr n'a pas été vérifié."
+  },
+  {
+   "sujet": "Extrait de la page de gratuité",
+   "statut": "non vérifié",
+   "source": "https://naolib.fr/gratuite-des-transports-en-commun",
+   "consulte_le": "2026-10-15",
+   "note": "Le fait détaillé repose sur le résumé de la page, pas sur un texte brut. Seul l'extrait « voyagez sans titre de transport » est une citation. Il est court et à confirmer. Les autres éléments (exclusions, Aléop, enfants de moins de 6 ans) sont reformulés."
+  },
+  {
+   "sujet": "Extrait « Horaires, itinéraires, plan »",
+   "statut": "non vérifié",
+   "source": "https://plan.naolib.fr/",
+   "consulte_le": "2026-10-15",
+   "note": "Cet intitulé vient de la page d'accueil, naolib.fr, et non de plan.naolib.fr. L'extrait est à rattacher à https://naolib.fr/. Je n'ai pas ouvert plan.naolib.fr."
+  },
+  {
+   "sujet": "La rubrique « Horaires, itinéraires, plan » du site renvoie vers plan.naolib.fr,",
+   "statut": "non vérifié",
+   "source": "https://plan.naolib.fr/",
+   "consulte_le": "2026-10-15",
+   "note": "URL hors du domaine officiel"
+  },
+  {
+   "sujet": "calcul d'itinéraire ou fiches horaires officielles",
+   "statut": "introuvable",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "rien de vérifiable trouvé lors de la collecte ; l'absence d'information ne veut pas dire absence de service"
+  },
+  {
+   "sujet": "vélo ou gare (seulement si directement utile au logement)",
+   "statut": "non recherché",
+   "source": "",
+   "consulte_le": "2026-10-15",
+   "note": "collecte automatique non lancée ; à rechercher sur les sources officielles (COMPLEMENT_DOCUMENTAIRE.md)"
+  }
+ ],
+ "ecartes": []
+}

@@ -1,0 +1,30 @@
+{
+ "nature": "ok",
+ "anomalies": [
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Plein",
+   "detail": "« semaine du 6 octobre 2025 » ne correspond à aucune valeur du dossier pour carburant.gazole.prix_un_an_avant (1.56)"
+  },
+  {
+   "type": "valeur",
+   "gravite": "bloquante",
+   "passage": "Plein",
+   "detail": "« semaine du 5 octobre 2026 » ne correspond à aucune valeur du dossier pour carburant.gazole.prix (2.34)"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Méthode",
+   "detail": "« 16 976 à 67 903 » sans identifiant"
+  },
+  {
+   "type": "identifiant_absent",
+   "gravite": "bloquante",
+   "passage": "Méthode",
+   "detail": "« 150 lignes » sans identifiant"
+  }
+ ],
+ "bloquantes": 4
+}

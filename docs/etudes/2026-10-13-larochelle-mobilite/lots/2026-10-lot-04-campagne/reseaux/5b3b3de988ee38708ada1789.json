@@ -1,0 +1,107 @@
+{
+ "version": 2,
+ "id": "5b3b3de988ee38708ada1789",
+ "titre": "Réseaux urbains de la Métropole Aix-Marseille-Provence",
+ "page": "https://transport.data.gouv.fr/datasets/reseaux-de-transports-en-commun-de-la-metropole-daix-marseille-provence-et-des-bouches-du-rhone",
+ "nom_commercial": "Marseille",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "RTM",
+ "aom": "Métropole d'Aix-Marseille-Provence",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "200054807",
+  "nom": "Métropole d'Aix-Marseille-Provence"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "Marseille",
+    "https://www.rtm.fr/"
+   ]
+  ]
+ },
+ "site": "https://www.rtm.fr/",
+ "sites_controles": [
+  [
+   "https://www.rtm.fr/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-15",
+  "faits": [
+   {
+    "id": "doc.tarification.gratuite_enfants_seniors",
+    "information": "Le voyage est gratuit pour les enfants de moins de 11 ans et les seniors de 65 ans et plus. Il s'agit d'un pass gratuit sur demande, pas d'une gratuité générale du réseau. La page précise le périmètre : « zone jaune », 92 communes.",
+    "url": "https://www.rtm.fr/droits-reduction",
+    "extrait": "les enfants de moins de 11 ans et les seniors de 65 ans et plus",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 11 ans et seniors de 65 ans et plus. Réseaux métropolitains de la zone jaune (92 communes) : bus, cars, tram, métro, bus à la demande, navettes maritimes, lignes aéroport A1 et A2. Les parkings-relais ne sont couverts que pour le pass senior. Hors TER, levélo et bateau du Frioul.",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:20:22Z"
+   },
+   {
+    "id": "doc.tarification.demande_gratuite",
+    "information": "La page d'accueil propose une demande de gratuité pour les enfants et les seniors, ce qui montre que la gratuité n'est pas automatique.",
+    "url": "https://www.rtm.fr/",
+    "extrait": "Demande de gratuité pour les enfants de moins de 11 ans et les séniors de plus de 65 ans.",
+    "validite": "non précisée",
+    "perimetre": "Enfants de moins de 11 ans et seniors de plus de 65 ans",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:20:23Z"
+   },
+   {
+    "id": "doc.verification.horaires_temps_reel",
+    "information": "La page des horaires par ligne s'intitule « Horaires des lignes en temps réel ». C'est l'endroit pour vérifier les horaires et le temps réel.",
+    "url": "https://www.rtm.fr/horaires",
+    "extrait": "Horaires des lignes en temps réel | RTM",
+    "validite": "non précisée",
+    "perimetre": "Réseau RTM",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:20:23Z"
+   },
+   {
+    "id": "doc.verification.itineraire",
+    "information": "RTM propose une page de recherche d'itinéraire pour les secteurs Marseille, Allauch / Plan-de-Cuques, La Ciotat / Ceyreste, Aubagne, Gémenos et Martigues / Port-de-Bouc.",
+    "url": "https://www.rtm.fr/itineraires",
+    "extrait": "Recherche d'itinéraire - Se déplacer à Marseille en transport en commun",
+    "validite": "non précisée",
+    "perimetre": "Secteurs Marseille, Allauch / Plan-de-Cuques, La Ciotat / Ceyreste, Aubagne, Gémenos, Martigues / Port-de-Bouc",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-15T16:20:23Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Gratuité générale du réseau",
+    "statut": "introuvable",
+    "url": "https://www.rtm.fr/",
+    "note": "Seule la gratuité pour les enfants de moins de 11 ans et les seniors de 65 ans et plus est trouvée. La page des tarifs (https://www.rtm.fr/tarifs) n'a pas été consultée. Je ne conclus pas à l'absence d'autres gratuités."
+   },
+   {
+    "sujet": "Jours de circulation des lignes urbaines (dimanche, fériés, samedi) et période de validité des horaires",
+    "statut": "introuvable",
+    "url": "https://www.rtm.fr/horaires",
+    "note": "La page /horaires, telle qu'elle m'a été restituée, ne contient que la navigation. Les fiches de chaque ligne n'ont pas été consultées. Aucun PDF n'a été ouvert."
+   },
+   {
+    "sujet": "Fréquences",
+    "statut": "introuvable",
+    "url": "https://www.rtm.fr/horaires",
+    "note": "Aucune fréquence donnée explicitement par une page consultée."
+   },
+   {
+    "sujet": "La gratuité enfants et seniors exclut le TER, levélo et le bateau du Frioul.",
+    "statut": "non vérifié",
+    "url": "https://www.rtm.fr/droits-reduction",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
+}

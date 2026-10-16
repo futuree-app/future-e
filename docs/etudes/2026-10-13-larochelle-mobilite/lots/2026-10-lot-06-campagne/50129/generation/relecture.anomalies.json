@@ -1,0 +1,25 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Le choix du secteur mérite donc d’être regardé aussi.",
+   "probleme": "Le « donc » déduit des 65 % de `mobpro.voiture_selon_destination.meme_commune` que le secteur choisi pèse sur l'usage de la voiture : il change les pratiques des habitants (`iris.voiture.min`, `iris.voiture.max`) en recommandation de quartier pour le lecteur, alors que le dossier ne mesure aucun lien de cause entre secteur et pratique.",
+   "correction_minimale": "Remplacer par : « Les pratiques varient aussi d’un secteur à l’autre. »"
+  },
+  {
+   "categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "La carte donne des repères pour orienter les recherches.",
+   "probleme": "La carte des parts de la voiture par secteur (`iris.*.voiture`) devient un guide pour choisir où chercher afin de moins conduire : la pratique des habitants actuels y est présentée comme ce que le lecteur pourra faire depuis ce secteur.",
+   "correction_minimale": "Remplacer par : « La carte montre ces écarts entre secteurs. »"
+  },
+  {
+   "categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "la Base permanente des équipements de l’INSEE",
+   "probleme": "Le millésime de la source des équipements (BPE 2025, `iris.501290102.panier_500m`, `iris.501290501.panier_500m`) n'apparaît ni dans le récit ni dans la méthode.",
+   "correction_minimale": "Écrire « la Base permanente des équipements 2025 de l’INSEE »."
+  }
+ ]
+}

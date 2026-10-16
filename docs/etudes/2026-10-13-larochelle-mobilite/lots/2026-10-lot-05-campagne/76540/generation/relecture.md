@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "Les comparaisons selon la destination portent sur des groupes distincts de personnes",
+   "probleme": "La méthode ne dit pas comment les six communes de travail ont été choisies (règle automatique : communes de la même unité urbaine, au plus les six plus peuplées, fait mobpro.voiture_selon_destination.communes_voisines) : le lecteur peut croire qu'il s'agit des communes limitrophes ou des principales destinations, alors que Bois-Guillaume (3 % des actifs) n'y figure pas et qu'Elbeuf (1 %) y figure.",
+   "correction_minimale": "Ajouter en méthode : « Les six communes de travail citées sont, parmi les communes de la même unité urbaine que Rouen, les six plus peuplées. »"},
+  {"categorie": "condition_documentaire",
+   "gravite": "a_revoir",
+   "passage": "Pour une option en transports en commun vers votre travail, renseignez-vous auprès du réseau [Astuce]",
+   "probleme": "Astuce est le réseau urbain de la Métropole Rouen Normandie (doc.reseau.identite). Le passage ne donne pas ce périmètre et renvoie à ce réseau pour tout trajet vers le travail, y compris vers une commune située hors de la Métropole.",
+   "correction_minimale": "Écrire « auprès du réseau Astuce, réseau urbain de la Métropole Rouen Normandie, » à la place de « auprès du réseau Astuce, »."}
+]}
+```

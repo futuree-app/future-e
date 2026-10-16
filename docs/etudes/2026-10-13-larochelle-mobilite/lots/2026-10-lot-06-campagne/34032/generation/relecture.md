@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Pour une annonce qui vous intéresse, le secteur fournit un repère à rapprocher de votre propre destination professionnelle.",
+   "probleme": "Cette phrase fait de la part de la voiture des actifs d'un secteur (iris.voiture.min, iris.voiture.max) un repère pour le futur trajet du lecteur et pour sa propre destination. Elle transforme ainsi une pratique observée en recommandation de quartier. Elle suggère aussi un croisement secteur × commune de travail, alors que le dossier ne donne aucune part par secteur selon la commune de travail (section 3). La transition « quels secteurs examiner si l'on souhaite moins prendre la voiture ? » prépare cette lecture.",
+   "correction_minimale": "Remplacer par : « La carte situe le secteur d'une annonce parmi ces pratiques des actifs qui y habitent, tous lieux de travail confondus. »"},
+  {"categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier retient un même ensemble d’équipements",
+   "probleme": "« Le dossier » renvoie au document de production, pas à l'article lu par le public.",
+   "correction_minimale": "Remplacer « le dossier retient » par « on retient »."}
+]}
+```

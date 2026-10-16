@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "methode",
+   "gravite": "a_revoir",
+   "passage": "les parts par destination concernent les actifs de toute la commune",
+   "probleme": "La méthode n'explique pas pourquoi l'article cite Créteil et Paris 12e Arrondissement (destination.94028.voiture, destination.75112.voiture) parmi toutes les communes de travail de la section 4. Le lecteur ne peut donc pas savoir s'il s'agit des destinations les plus fréquentes ou d'un choix fait pour l'effet de contraste.",
+   "correction_minimale": "Ajouter dans la méthode : « Créteil et Paris 12e Arrondissement sont, après Maisons-Alfort, les deux communes où travaillent le plus d'actifs résidents. »"}
+]}
+```

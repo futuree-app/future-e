@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "Pour examiner une annonce, situez donc le logement dans son secteur plutôt que de vous arrêter au nom de la commune.",
+   "probleme": "Avec « donc », l'écart entre les pratiques des actifs qui habitent Préfecture et Justice-Heuruelles (iris.voiture.min, iris.voiture.max) devient une consigne pour le lecteur : on peut comprendre que le secteur fixera sa propre part de voiture, alors que le dossier décrit seulement des pratiques d'habitants et ne mesure aucun lien de cause entre un quartier et une pratique.",
+   "correction_minimale": "Supprimer « donc » et rattacher le conseil au constat, par exemple : « Les pratiques varient donc d'un secteur à l'autre : situez le logement dans son secteur plutôt que de vous arrêter au nom de la commune. »"}
+]}
+```

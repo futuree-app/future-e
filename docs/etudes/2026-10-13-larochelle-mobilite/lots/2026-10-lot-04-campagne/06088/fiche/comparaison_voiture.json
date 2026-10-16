@@ -1,0 +1,45 @@
+{
+ "commune": {
+  "insee": "06088",
+  "nom": "Nice",
+  "role": "principale",
+  "actifs": 140395,
+  "lignes": 45068,
+  "voiture": 0.4362
+ },
+ "definition": {
+  "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+  "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+  "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+  "millesime": "2022 (collectes 2020 à 2024)"
+ },
+ "regle": {
+  "texte": "communes de même rôle que Nice (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 70 198 à 280 791), avec au moins 150 lignes d'échantillon ; Nice exclue ; France métropolitaine",
+  "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+  "taille": [
+   0.5,
+   2.0
+  ],
+  "bornes_actifs": [
+   70198,
+   280791
+  ],
+  "lignes_min": 150,
+  "groupe_min": 10,
+  "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+  "fixee_le": "2026-10-14"
+ },
+ "sources_fichiers": {
+  "mobpro": {
+   "chemin": "rp-mobpro-2022.parquet",
+   "sha256": "6b91385a79846e1a"
+  },
+  "index": {
+   "chemin": "comparateur-index.json.gz",
+   "sha256": "3a21daa14fad5bb1"
+  }
+ },
+ "genere_le": "2026-10-15T15:56:21Z",
+ "disponible": false,
+ "raison": "groupe de 9 communes, sous le minimum de 10 : repère indisponible, critères non élargis"
+}

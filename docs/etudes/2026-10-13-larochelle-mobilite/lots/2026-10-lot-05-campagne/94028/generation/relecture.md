@@ -1,0 +1,9 @@
+```json
+{"anomalies": [
+  {"categorie": "raisonnement",
+   "gravite": "bloquante",
+   "passage": "Pour départager des annonces, ces observations donnent des repères.",
+   "probleme": "Cette phrase vient juste après « 24 % à Lévrière-Haye aux Moines, contre 41 % à L'Ormetteau » : elle fait des pratiques des actifs de ces deux secteurs (iris.940280209.voiture, iris.940280205.voiture) un critère pour choisir entre deux logements, donc une recommandation de quartier, alors que le dossier n'établit aucun lien entre un secteur et ce que permettra une adresse.",
+   "correction_minimale": "Remplacer par : « Ces parts décrivent les trajets des actifs qui habitent ces secteurs, pas ce que permettra une adresse précise. »"}
+]}
+```

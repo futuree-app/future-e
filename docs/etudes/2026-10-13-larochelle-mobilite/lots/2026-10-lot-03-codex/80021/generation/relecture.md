@@ -1,0 +1,14 @@
+```json
+{"anomalies": [
+  {"categorie": "croisement",
+   "gravite": "a_revoir",
+   "passage": "Travailler à Amiens, avec des pratiques différentes selon les secteurs",
+   "probleme": "Le titre, suivi de « Les pratiques varient aussi selon le secteur » juste après le chiffre des actifs qui habitent et travaillent à Amiens, laisse croire que les parts par secteur (iris.800212203.voiture, iris.800210401.voiture) portent sur les actifs qui travaillent à Amiens. La phrase « quelle que soit leur commune de travail » corrige ensuite cette lecture, mais le titre la suggère d'abord.",
+   "correction_minimale": "Remplacer le titre par « Des pratiques différentes selon le travail et le secteur de résidence » ou un équivalent qui ne rattache pas les secteurs aux seuls actifs travaillant à Amiens, et retirer « aussi »."},
+  {"categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "le dossier permet de regarder la présence simultanée",
+   "probleme": "« Le dossier » est un renvoi au document de production interne, que le lecteur ne connaît pas.",
+   "correction_minimale": "Remplacer par « on peut regarder la présence simultanée » ou « regardons la présence simultanée »."}
+]}
+```

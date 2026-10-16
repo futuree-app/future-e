@@ -1,0 +1,141 @@
+{
+ "etape": "collecte",
+ "cle": "6bf43cf4553cc258",
+ "outil": "claude-code",
+ "version_outil": "2.1.301 (Claude Code)",
+ "modele": "claude-sonnet-5-5",
+ "effort": "medium",
+ "consignes_sha": "476b4dbd2a646341",
+ "entree_sha": "ce69a391fbf9c264",
+ "debut": "2026-10-15T19:34:04Z",
+ "fin": "2026-10-15T19:34:54Z",
+ "duree_s": 49.2,
+ "code_retour": 0,
+ "session": "922ca7d7-e933-4e48-a160-f30ac60fee20",
+ "usage": {
+  "input_tokens": 8,
+  "cache_creation_input_tokens": 4662,
+  "cache_read_input_tokens": 12417,
+  "output_tokens": 2803,
+  "output_tokens_details": {
+   "thinking_tokens": 186
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4662,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1794,
+    "cache_read_input_tokens": 5271,
+    "cache_creation_input_tokens": 928,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 928
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 8,
+   "outputTokens": 2803,
+   "cacheReadInputTokens": 12417,
+   "cacheCreationInputTokens": 4662,
+   "webSearchRequests": 0,
+   "costUSD": 0.0479357,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 186,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-haiku-5-5": {
+   "inputTokens": 42248,
+   "outputTokens": 9106,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.0087778,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 6423,
+   "canonicalModel": "claude-haiku-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "cout_usd_equivalent": 0.0567135,
+ "est_erreur": false,
+ "sous_type": "success",
+ "modele_effectif": [
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5"
+ ],
+ "tours": 6,
+ "contexte": {
+  "source_auth": "none",
+  "outils": [
+   "WebFetch"
+  ],
+  "mcp": [],
+  "modele": "claude-sonnet-5-5",
+  "cwd": "/private/var/folders/z7/5ky0c86d3s9c8k_7jdvj8b4c0000gn/T/futuree-lot-tjrjf50z",
+  "permissions": "dontAsk",
+  "memoire_projet": {
+   "auto": "/Users/quentinbrache/.claude/projects/-private-var-folders-z7-5ky0c86d3s9c8k-7jdvj8b4c0000gn-T-futuree-lot-tjrjf50z/memory/"
+  },
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "pieces": []
+ },
+ "appels_outils": [
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.trace-colmar.fr\", \"prompt\": \"Tarification (gratuité, pour qui, quelles lignes), jours de circulation des lignes (dimanche, fériés, samedi), période de validité des horaires, calcu"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.trace-colmar.fr/acheter/titres-de-transport/billets-et-abonnements/\", \"prompt\": \"Le réseau est-il gratuit ? Pour qui, quelles lignes, exceptions. Donne extraits exacts mot pour mo"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/\", \"prompt\": \"Jours de circulation (dimanche, fériés, samedi), période de validité des horaires, fiches ho"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.trace-colmar.fr/se-deplacer/mon-itineraire/\", \"prompt\": \"Calcul d'itinéraire, temps réel. Extraits exacts mot pour mot.\"}"
+  },
+  {
+   "outil": "WebFetch",
+   "entree": "{\"url\": \"https://www.trace-colmar.fr/se-deplacer/horaires/fiches-horaires-pdf-telechargeables/\", \"prompt\": \"Recopie mot pour mot les phrases exactes concernant la validité des horaires et les jours de"
+  }
+ ],
+ "refus": 0
+}

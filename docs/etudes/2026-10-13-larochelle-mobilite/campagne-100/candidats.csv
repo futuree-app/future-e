@@ -1,0 +1,401 @@
+rang,insee,commune,departement,population_2021,sort,lot,motif
+1,75056,Paris,75,2133111,exclue d'office,,"commune découpée en 20 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)"
+2,13055,Marseille,13,873076,exclue d'office,,"commune découpée en 16 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)"
+3,69123,Lyon,69,522250,exclue d'office,,"commune découpée en 9 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)"
+4,31555,Toulouse,31,504078,retenue,2026-10-lot-04-campagne,prêt à relire
+5,06088,Nice,06,348085,retenue,2026-10-lot-04-campagne,prêt à relire
+6,44109,Nantes,44,323204,retenue,2026-10-lot-04-campagne,prêt à relire
+7,34172,Montpellier,34,302454,retenue,2026-10-lot-04-campagne,prêt à relire
+8,67482,Strasbourg,67,291313,retenue,2026-10-lot-04-campagne,prêt à relire
+9,33063,Bordeaux,33,261804,retenue,2026-10-lot-04-campagne,prêt à relire
+10,59350,Lille,59,236710,retenue,2026-10-lot-05-campagne,prêt à relire
+11,35238,Rennes,35,225081,retenue,2026-10-lot-04-campagne,prêt à relire
+12,83137,Toulon,83,180452,retenue,2026-10-lot-04-campagne,prêt à relire
+13,51454,Reims,51,179380,retenue,2026-10-lot-04-campagne,prêt à relire
+14,42218,Saint-Étienne,42,172718,retenue,2026-10-lot-04-campagne,prêt à relire
+15,76351,Le Havre,76,166058,retenue,2026-10-lot-04-campagne,prêt à relire
+16,21231,Dijon,21,159346,retenue,2026-10-lot-04-campagne,prêt à relire
+17,38185,Grenoble,38,157477,retenue,2026-10-lot-04-campagne,prêt à relire
+18,49007,Angers,49,157175,exclue d'office,,déjà préparée : Angers (2026-10-lot-01)
+19,69266,Villeurbanne,69,156928,retenue,2026-10-lot-04-campagne,prêt à relire
+20,30189,Nîmes,30,148104,exclue d'office,,déjà préparée : Nîmes (2026-10-lot-02-codex)
+21,13001,Aix-en-Provence,13,147478,retenue,2026-10-lot-04-campagne,prêt à relire
+22,63113,Clermont-Ferrand,63,147327,retenue,2026-10-lot-04-campagne,prêt à relire
+23,72181,Le Mans,72,145004,exclue d'office,,déjà préparée : Le Mans (2026-10-lot-01)
+24,29019,Brest,29,139619,exclue d'office,,déjà préparée : Brest (2026-10-lot-02-codex)
+25,37261,Tours,37,137658,exclue d'office,,déjà préparée : Tours (2026-10-lot-01)
+26,80021,Amiens,80,133625,exclue d'office,,déjà préparée : Amiens (2026-10-lot-03-codex)
+27,74010,Annecy,74,131715,retenue,2026-10-lot-04-campagne,prêt à relire
+28,87085,Limoges,87,129760,retenue,2026-10-lot-04-campagne,prêt à relire
+29,57463,Metz,57,120874,retenue,2026-10-lot-04-campagne,prêt à relire
+30,92012,Boulogne-Billancourt,92,119808,retenue,2026-10-lot-04-campagne,prêt à relire
+31,66136,Perpignan,66,119656,retenue,2026-10-lot-05-campagne,prêt à relire
+32,25056,Besançon,25,119198,exclue d'office,,déjà préparée : Besançon (2026-10-lot-03-codex)
+33,45234,Orléans,45,116617,retenue,2026-10-lot-05-campagne,prêt à relire
+34,76540,Rouen,76,114083,retenue,2026-10-lot-05-campagne,prêt à relire
+35,93066,Saint-Denis,93,113942,retenue,2026-10-lot-05-campagne,prêt à relire
+36,93048,Montreuil,93,111455,retenue,2026-10-lot-05-campagne,prêt à relire
+37,14118,Caen,14,108200,exclue d'office,,déjà préparée : Caen (2026-10-lot-02-codex)
+38,95018,Argenteuil,95,107221,retenue,2026-10-lot-05-campagne,prêt à relire
+39,68224,Mulhouse,68,106341,retenue,2026-10-lot-05-campagne,prêt à relire
+40,54395,Nancy,54,104260,retenue,2026-10-lot-05-campagne,prêt à relire
+41,59599,Tourcoing,59,99011,retenue,2026-10-lot-05-campagne,prêt à relire
+42,59512,Roubaix,59,98892,retenue,2026-10-lot-05-campagne,prêt à relire
+43,92050,Nanterre,92,97351,retenue,2026-10-lot-05-campagne,prêt à relire
+44,94081,Vitry-sur-Seine,94,96205,retenue,2026-10-lot-05-campagne,prêt à relire
+45,94028,Créteil,94,92989,retenue,2026-10-lot-05-campagne,prêt à relire
+46,84007,Avignon,84,90330,retenue,2026-10-lot-05-campagne,prêt à relire
+47,86194,Poitiers,86,90240,exclue d'office,,déjà préparée : Poitiers (2026-10-lot-01)
+48,93001,Aubervilliers,93,90071,retenue,2026-10-lot-05-campagne,prêt à relire
+49,92004,Asnières-sur-Seine,92,89662,retenue,2026-10-lot-05-campagne,prêt à relire
+50,92025,Colombes,92,88870,retenue,2026-10-lot-05-campagne,prêt à relire
+51,59183,Dunkerque,59,86788,retenue,2026-10-lot-05-campagne,prêt à relire
+52,93005,Aulnay-sous-Bois,93,86135,retenue,2026-10-lot-05-campagne,prêt à relire
+53,78646,Versailles,78,83587,retenue,2026-10-lot-06-campagne,prêt à relire
+54,92026,Courbevoie,92,81516,retenue,2026-10-lot-06-campagne,prêt à relire
+55,34032,Béziers,34,80341,retenue,2026-10-lot-06-campagne,prêt à relire
+56,17300,La Rochelle,17,78535,exclue d'office,,déjà préparée : La Rochelle (article/article-v3.md)
+57,92063,Rueil-Malmaison,92,78186,retenue,2026-10-lot-06-campagne,prêt à relire
+58,50129,Cherbourg-en-Cotentin,50,77808,retenue,2026-10-lot-06-campagne,prêt à relire
+59,94017,Champigny-sur-Marne,94,77724,retenue,2026-10-lot-06-campagne,prêt à relire
+60,64445,Pau,64,77066,exclue d'office,,déjà préparée : Pau (2026-10-lot-03-codex)
+61,33281,Mérignac,33,75729,retenue,2026-10-lot-06-campagne,prêt à relire
+62,94068,Saint-Maur-des-Fossés,94,75441,retenue,2026-10-lot-06-campagne,prêt à relire
+63,06004,Antibes,06,75130,retenue,2026-10-lot-06-campagne,prêt à relire
+64,2A004,Ajaccio,2A,73822,retenue,2026-10-lot-06-campagne,prêt à relire
+65,06029,Cannes,06,73255,retenue,2026-10-lot-06-campagne,prêt à relire
+66,44184,Saint-Nazaire,44,72057,exclue d'office,,déjà préparée : Saint-Nazaire (2026-10-lot-01)
+67,93029,Drancy,93,71363,retenue,2026-10-lot-06-campagne,prêt à relire
+68,93051,Noisy-le-Grand,93,70374,retenue,2026-10-lot-06-campagne,prêt à relire
+69,92040,Issy-les-Moulineaux,92,68580,retenue,2026-10-lot-06-campagne,prêt à relire
+70,95127,Cergy,95,68348,retenue,2026-10-lot-06-campagne,prêt à relire
+71,92044,Levallois-Perret,92,68009,retenue,2026-10-lot-06-campagne,prêt à relire
+72,68066,Colmar,68,67730,retenue,2026-10-lot-06-campagne,prêt à relire
+73,62193,Calais,62,67380,retenue,2026-10-lot-06-campagne,prêt à relire
+74,33318,Pessac,33,66760,retenue,2026-10-lot-06-campagne,prêt à relire
+75,69259,Vénissieux,69,66363,retenue,2026-10-lot-06-campagne,prêt à relire
+76,91228,Évry-Courcouronnes,91,66177,retenue,2026-10-lot-07-campagne,prêt à relire
+77,92024,Clichy,92,64849,retenue,2026-10-lot-07-campagne,prêt à relire
+78,26362,Valence,26,64483,exclue d'office,,déjà préparée : Valence (2026-10-lot-03-codex)
+79,94041,Ivry-sur-Seine,94,64001,retenue,2026-10-lot-07-campagne,prêt à relire
+80,18033,Bourges,18,63702,retenue,2026-10-lot-07-campagne,prêt à relire
+81,29232,Quimper,29,63642,exclue d'office,,déjà préparée : Quimper (2026-10-lot-03-codex)
+82,92002,Antony,92,63232,retenue,2026-10-lot-07-campagne,prêt à relire
+83,10387,Troyes,10,62782,retenue,2026-10-lot-07-campagne,prêt à relire
+84,83126,La Seyne-sur-Mer,83,62763,retenue,2026-10-lot-07-campagne,prêt à relire
+85,59009,Villeneuve-d'Ascq,59,62067,retenue,2026-10-lot-07-campagne,prêt à relire
+86,82121,Montauban,82,61919,retenue,2026-10-lot-07-campagne,prêt à relire
+87,93055,Pantin,93,60800,retenue,2026-10-lot-07-campagne,prêt à relire
+88,73065,Chambéry,73,59856,retenue,2026-10-lot-07-campagne,prêt à relire
+89,79191,Niort,79,59309,exclue d'office,,déjà préparée : Niort (redaction/79191/article.md)
+90,92051,Neuilly-sur-Seine,92,59267,retenue,2026-10-lot-07-campagne,prêt à relire
+91,95585,Sarcelles,95,58424,retenue,2026-10-lot-07-campagne,prêt à relire
+92,93007,Le Blanc-Mesnil,93,58257,retenue,2026-10-lot-07-campagne,prêt à relire
+93,94046,Maisons-Alfort,94,58068,retenue,2026-10-lot-07-campagne,prêt à relire
+94,56121,Lorient,56,57846,exclue d'office,,déjà préparée : Lorient (2026-10-lot-01)
+95,94076,Villejuif,94,57753,retenue,2026-10-lot-07-campagne,prêt à relire
+96,83061,Fréjus,83,57082,retenue,2026-10-lot-07-campagne,prêt à relire
+97,60057,Beauvais,60,56677,retenue,2026-10-lot-07-campagne,prêt à relire
+98,11262,Narbonne,11,56395,retenue,2026-10-lot-07-campagne,prêt à relire
+99,77284,Meaux,77,55616,retenue,2026-10-lot-07-campagne,prêt à relire
+100,83069,Hyères,83,55103,en réserve,,
+101,93008,Bobigny,93,55056,en réserve,,
+102,85191,La Roche-sur-Yon,85,54952,exclue d'office,,déjà préparée : La Roche-sur-Yon (2026-10-lot-01)
+103,92023,Clamart,92,54491,en réserve,,
+104,56260,Vannes,56,54420,exclue d'office,,déjà préparée : Vannes (2026-10-lot-01)
+105,77108,Chelles,77,54309,en réserve,,
+106,49099,Cholet,49,53936,exclue d'office,,déjà préparée : Cholet (2026-10-lot-01)
+107,93031,Épinay-sur-Seine,93,53489,en réserve,,
+108,93070,Saint-Ouen-sur-Seine,93,53207,en réserve,,
+109,02691,Saint-Quentin,02,52958,en réserve,,
+110,93010,Bondy,93,52905,en réserve,,
+111,64102,Bayonne,64,52749,en réserve,,
+112,91174,Corbeil-Essonnes,91,52683,en réserve,,
+113,06027,Cagnes-sur-Mer,06,52580,en réserve,,
+114,69256,Vaulx-en-Velin,69,52139,en réserve,,
+115,93071,Sevran,93,51845,en réserve,,
+116,94033,Fontenay-sous-Bois,94,51812,en réserve,,
+117,78586,Sartrouville,78,51220,en réserve,,
+118,91377,Massy,91,50962,en réserve,,
+119,13004,Arles,13,50415,en réserve,,
+120,81004,Albi,81,49714,en réserve,,
+121,53130,Laval,53,49657,en réserve,,
+122,44162,Saint-Herblain,44,49537,en réserve,,
+123,92036,Gennevilliers,92,49410,en réserve,,
+124,92073,Suresnes,92,49104,en réserve,,
+125,69290,Saint-Priest,69,48822,en réserve,,
+126,94080,Vincennes,94,48798,en réserve,,
+127,2B033,Bastia,2B,48768,en réserve,,
+128,13056,Martigues,13,48568,en réserve,,
+129,85194,Les Sables-d'Olonne,85,48402,en réserve,,
+130,06069,Grasse,06,48323,en réserve,,
+131,92049,Montrouge,92,47657,en réserve,,
+132,13005,Aubagne,13,47342,en réserve,,
+133,35288,Saint-Malo,35,47323,en réserve,,
+134,27229,Évreux,27,47289,en réserve,,
+135,93027,La Courneuve,93,47160,en réserve,,
+136,41018,Blois,41,46813,en réserve,,
+137,19031,Brive-la-Gaillarde,19,46599,en réserve,,
+138,08105,Charleville-Mézières,08,46398,en réserve,,
+139,92048,Meudon,92,46342,en réserve,,
+140,11069,Carcassonne,11,46218,en réserve,,
+141,94022,Choisy-le-Roi,94,46129,en réserve,,
+142,93053,Noisy-le-Sec,93,46094,en réserve,,
+143,93046,Livry-Gargan,93,46028,en réserve,,
+144,93064,Rosny-sous-Bois,93,45655,en réserve,,
+145,33522,Talence,33,45225,en réserve,,
+146,90010,Belfort,90,45155,en réserve,,
+147,94002,Alfortville,94,45046,en réserve,,
+148,71076,Chalon-sur-Saône,71,45031,en réserve,,
+149,13103,Salon-de-Provence,13,44731,en réserve,,
+150,34301,Sète,34,44712,en réserve,,
+151,13047,Istres,13,44577,en réserve,,
+152,78361,Mantes-la-Jolie,78,44539,en réserve,,
+153,78551,Saint-Germain-en-Laye,78,44380,en réserve,,
+154,22278,Saint-Brieuc,22,44224,exclue d'office,,déjà préparée : Saint-Brieuc (2026-10-lot-01)
+155,65440,Tarbes,65,43955,en réserve,,
+156,30007,Alès,30,43892,en réserve,,
+157,51108,Châlons-en-Champagne,51,43877,en réserve,,
+158,92007,Bagneux,92,43699,en réserve,,
+159,92062,Puteaux,92,43672,en réserve,,
+160,69034,Caluire-et-Cuire,69,43572,en réserve,,
+161,69029,Bron,69,43049,en réserve,,
+162,44143,Rezé,44,42998,en réserve,,
+163,59606,Valenciennes,59,42991,en réserve,,
+164,36044,Châteauroux,36,42968,en réserve,,
+165,95268,Garges-lès-Gonesse,95,42841,en réserve,,
+166,81065,Castres,81,42672,en réserve,,
+167,62041,Arras,62,42600,en réserve,,
+168,77288,Melun,77,42367,en réserve,,
+169,57672,Thionville,57,42163,en réserve,,
+170,06030,Le Cannet,06,41597,en réserve,,
+171,01053,Bourg-en-Bresse,01,41525,en réserve,,
+172,64024,Anglet,64,41153,en réserve,,
+173,16015,Angoulême,16,41086,en réserve,,
+174,62160,Boulogne-sur-Mer,62,40910,en réserve,,
+175,59650,Wattrelos,59,40836,en réserve,,
+176,05061,Gap,05,40500,en réserve,,
+177,33550,Villenave-d'Ornon,33,40500,en réserve,,
+178,26198,Montélimar,26,40399,en réserve,,
+179,60159,Compiègne,60,40394,en réserve,,
+180,93072,Stains,93,40359,en réserve,,
+181,93032,Gagny,93,40189,en réserve,,
+182,31149,Colomiers,31,40159,en réserve,,
+183,78498,Poissy,78,40016,en réserve,,
+184,83050,Draguignan,83,39745,en réserve,,
+185,59178,Douai,59,39648,en réserve,,
+186,93006,Bagnolet,93,39366,en réserve,,
+187,59378,Marcq-en-Barœul,59,39356,en réserve,,
+188,93078,Villepinte,93,38725,en réserve,,
+189,38421,Saint-Martin-d'Hères,38,38454,en réserve,,
+190,28085,Chartres,28,38447,en réserve,,
+191,77373,Pontault-Combault,77,38258,en réserve,,
+192,37122,Joué-lès-Tours,37,38183,en réserve,,
+193,74012,Annemasse,74,37918,en réserve,,
+194,69149,Oullins-Pierre-Bénite,69,37628,en réserve,,
+195,93050,Neuilly-sur-Marne,93,37531,en réserve,,
+196,95252,Franconville,95,37520,en réserve,,
+197,91589,Savigny-sur-Orge,91,37371,en réserve,,
+198,93073,Tremblay-en-France,93,37271,en réserve,,
+199,74281,Thonon-les-Bains,74,37027,en réserve,,
+200,13028,La Ciotat,13,36987,en réserve,,
+201,38151,Échirolles,38,36849,en réserve,,
+202,92020,Châtillon,92,36777,en réserve,,
+203,91027,Athis-Mons,91,36222,en réserve,,
+204,83129,Six-Fours-les-Plages,83,36203,en réserve,,
+205,60175,Creil,60,36106,en réserve,,
+206,83118,Saint-Raphaël,83,35950,en réserve,,
+207,78172,Conflans-Sainte-Honorine,78,35926,en réserve,,
+208,69264,Villefranche-sur-Saône,69,35913,en réserve,,
+209,69282,Meyzieu,69,35882,en réserve,,
+210,91549,Sainte-Geneviève-des-Bois,91,35846,en réserve,,
+211,67180,Haguenau,67,35715,en réserve,,
+212,13117,Vitrolles,13,35532,en réserve,,
+213,94078,Villeneuve-Saint-Georges,94,35492,en réserve,,
+214,42207,Saint-Chamond,42,35068,en réserve,,
+215,92019,Châtenay-Malabry,92,34898,en réserve,,
+216,91477,Palaiseau,91,34893,en réserve,,
+217,89024,Auxerre,89,34778,en réserve,,
+218,42187,Roanne,42,34762,en réserve,,
+219,71270,Mâcon,71,34448,en réserve,,
+220,94058,Le Perreux-sur-Marne,94,34213,en réserve,,
+221,67447,Schiltigheim,67,34129,en réserve,,
+222,78440,Les Mureaux,78,33977,en réserve,,
+223,78621,Trappes,78,33717,en réserve,,
+224,94052,Nogent-sur-Marne,94,33472,en réserve,,
+225,78311,Houilles,78,33449,en réserve,,
+226,03185,Montluçon,03,33342,en réserve,,
+227,93063,Romainville,93,33266,en réserve,,
+228,13054,Marignane,13,33003,en réserve,,
+229,26281,Romans-sur-Isère,26,32911,en réserve,,
+230,58194,Nevers,58,32830,en réserve,,
+231,62498,Lens,62,32618,en réserve,,
+232,33449,Saint-Médard-en-Jalles,33,32538,en réserve,,
+233,47001,Agen,47,32485,en réserve,,
+234,88160,Épinal,88,32285,en réserve,,
+235,95063,Bezons,95,32017,en réserve,,
+236,73008,Aix-les-Bains,73,31874,en réserve,,
+237,78423,Montigny-le-Bretonneux,78,31777,en réserve,,
+238,95306,Herblay-sur-Seine,95,31605,en réserve,,
+239,59122,Cambrai,59,31425,en réserve,,
+240,94038,L'Haÿ-les-Roses,94,31392,en réserve,,
+241,78490,Plaisir,78,31375,en réserve,,
+242,95500,Pontoise,95,31327,en réserve,,
+243,86066,Châtellerault,86,31284,en réserve,,
+244,69286,Rillieux-la-Pape,69,31247,en réserve,,
+245,94073,Thiais,94,31097,en réserve,,
+246,38544,Vienne,38,31051,en réserve,,
+247,91657,Vigneux-sur-Seine,91,31050,en réserve,,
+248,91687,Viry-Châtillon,91,31045,en réserve,,
+249,06123,Saint-Laurent-du-Var,06,30941,en réserve,,
+250,78158,Le Chesnay-Rocquencourt,78,30924,en réserve,,
+251,28134,Dreux,28,30879,en réserve,,
+252,33039,Bègles,33,30813,en réserve,,
+253,84031,Carpentras,84,30769,en réserve,,
+254,95280,Goussainville,95,30693,en réserve,,
+255,40192,Mont-de-Marsan,40,30674,en réserve,,
+256,94079,Villiers-sur-Marne,94,30669,en réserve,,
+257,94016,Cachan,94,30592,en réserve,,
+258,77445,Savigny-le-Temple,77,30510,en réserve,,
+259,06083,Menton,06,30412,en réserve,,
+260,93077,Villemomble,93,30332,en réserve,,
+261,92046,Malakoff,92,30292,en réserve,,
+262,62510,Liévin,62,30149,en réserve,,
+263,92035,La Garenne-Colombes,92,29932,en réserve,,
+264,91521,Ris-Orangis,91,29825,en réserve,,
+265,92009,Bois-Colombes,92,29765,en réserve,,
+266,93014,Clichy-sous-Bois,93,29735,en réserve,,
+267,69275,Décines-Charpieu,69,29731,en réserve,,
+268,92064,Saint-Cloud,92,29727,en réserve,,
+269,78146,Chatou,78,29649,en réserve,,
+270,38053,Bourgoin-Jallieu,38,29577,en réserve,,
+271,54547,Vandœuvre-lès-Nancy,54,29537,en réserve,,
+272,24322,Périgueux,24,29516,en réserve,,
+273,94018,Charenton-le-Pont,94,29445,en réserve,,
+274,31557,Tournefeuille,31,29439,en réserve,,
+275,78297,Guyancourt,78,29406,en réserve,,
+276,92060,Le Plessis-Robinson,92,29228,en réserve,,
+277,91201,Draveil,91,29173,en réserve,,
+278,34003,Agde,34,29103,en réserve,,
+279,59392,Maubeuge,59,29066,en réserve,,
+280,95219,Ermont,95,28987,en réserve,,
+281,76681,Sotteville-lès-Rouen,76,28965,en réserve,,
+282,84087,Orange,84,28949,en réserve,,
+283,95680,Villiers-le-Bel,95,28836,en réserve,,
+284,94034,Fresnes,94,28780,en réserve,,
+285,02722,Soissons,02,28705,en réserve,,
+286,91691,Yerres,91,28699,en réserve,,
+287,76575,Saint-Étienne-du-Rouvray,76,28508,en réserve,,
+288,76217,Dieppe,76,28358,en réserve,,
+289,44190,Saint-Sébastien-sur-Loire,44,28283,en réserve,,
+290,06155,Vallauris,06,28025,en réserve,,
+291,92075,Vanves,92,28014,en réserve,,
+292,94044,Limeil-Brévannes,94,27999,en réserve,,
+293,93047,Montfermeil,93,27980,en réserve,,
+294,44114,Orvault,44,27872,en réserve,,
+295,94071,Sucy-en-Brie,94,27622,en réserve,,
+296,91286,Grigny,91,27257,en réserve,,
+297,59328,Lambersart,59,27121,en réserve,,
+298,67218,Illkirch-Graffenstaden,67,27118,en réserve,,
+299,91103,Brétigny-sur-Orge,91,27106,en réserve,,
+300,89387,Sens,89,27034,en réserve,,
+301,95607,Taverny,95,27025,en réserve,,
+302,77514,Villeparisis,77,26822,en réserve,,
+303,78517,Rambouillet,78,26816,en réserve,,
+304,33119,Cenon,33,26778,en réserve,,
+305,95582,Sannois,95,26768,en réserve,,
+306,95176,Cormeilles-en-Parisis,95,26741,en réserve,,
+307,77058,Bussy-Saint-Georges,77,26571,en réserve,,
+308,33529,La Teste-de-Buch,33,26556,en réserve,,
+309,91223,Étampes,91,26529,en réserve,,
+310,31069,Blagnac,31,26466,en réserve,,
+311,13063,Miramas,13,26405,en réserve,,
+312,24037,Bergerac,24,26323,en réserve,,
+313,49328,Saumur,49,26215,en réserve,,
+314,34145,Lunel,34,26185,en réserve,,
+315,78208,Élancourt,78,26082,en réserve,,
+316,62427,Hénin-Beaumont,62,26035,en réserve,,
+317,44215,Vertou,44,26002,en réserve,,
+318,76322,Le Grand-Quevilly,76,25975,en réserve,,
+319,95277,Gonesse,95,25963,en réserve,,
+320,84035,Cavaillon,84,25923,en réserve,,
+321,83062,La Garde,83,25912,en réserve,,
+322,33192,Gradignan,33,25835,en réserve,,
+323,15014,Aurillac,15,25815,en réserve,,
+324,49301,Sèvremoine,49,25806,en réserve,,
+325,03310,Vichy,03,25789,en réserve,,
+326,64122,Biarritz,64,25764,en réserve,,
+327,77083,Champs-sur-Marne,77,25695,en réserve,,
+328,59017,Armentières,59,25581,en réserve,,
+329,25388,Montbéliard,25,25573,en réserve,,
+330,61001,Alençon,61,25555,en réserve,,
+331,17415,Saintes,17,25518,en réserve,,
+332,91114,Brunoy,91,25423,en réserve,,
+333,95203,Eaubonne,95,25373,en réserve,,
+334,92078,Villeneuve-la-Garenne,92,25371,en réserve,,
+335,18279,Vierzon,18,25348,en réserve,,
+336,91692,Les Ulis,91,25253,en réserve,,
+337,31395,Muret,31,25060,en réserve,,
+338,95572,Saint-Ouen-l'Aumône,95,25023,en réserve,,
+339,62119,Béthune,62,24992,en réserve,,
+340,34057,Castelnau-le-Lez,34,24888,en réserve,,
+341,92032,Fontenay-aux-Roses,92,24772,en réserve,,
+342,33243,Libourne,33,24557,en réserve,,
+343,27681,Vernon,27,24543,en réserve,,
+344,94054,Orly,94,24482,en réserve,,
+345,94043,Le Kremlin-Bicêtre,94,24380,en réserve,,
+346,33162,Eysines,33,24374,en réserve,,
+347,33069,Le Bouscat,33,24339,en réserve,,
+348,12202,Rodez,12,24207,en réserve,,
+349,93057,Les Pavillons-sous-Bois,93,24165,en réserve,,
+350,02408,Laon,02,24021,en réserve,,
+351,83144,La Valette-du-Var,83,23955,en réserve,,
+352,34108,Frontignan,34,23808,en réserve,,
+353,91421,Montgeron,91,23800,en réserve,,
+354,39198,Dole,39,23775,en réserve,,
+355,49023,Beaupréau-en-Mauges,49,23639,en réserve,,
+356,93045,Les Lilas,93,23469,en réserve,,
+357,33249,Lormont,33,23291,en réserve,,
+358,17299,Rochefort,17,23092,en réserve,,
+359,78358,Maisons-Laffitte,78,23080,en réserve,,
+360,52448,Saint-Dizier,52,23068,en réserve,,
+361,77390,Roissy-en-Brie,77,23061,en réserve,,
+362,44047,Couëron,44,23057,en réserve,,
+363,32013,Auch,32,23041,en réserve,,
+364,56098,Lanester,56,23026,en réserve,,
+365,59360,Loos,59,23013,en réserve,,
+366,04112,Manosque,04,22926,en réserve,,
+367,38169,Fontaine,38,22891,en réserve,,
+368,45232,Olivet,45,22855,en réserve,,
+369,77152,Dammarie-les-Lys,77,22845,en réserve,,
+370,78640,Vélizy-Villacoublay,78,22713,en réserve,,
+371,68297,Saint-Louis,68,22698,en réserve,,
+372,69244,Tassin-la-Demi-Lune,69,22676,en réserve,,
+373,92072,Sèvres,92,22618,en réserve,,
+374,95424,Montigny-lès-Cormeilles,95,22603,en réserve,,
+375,80001,Abbeville,80,22595,en réserve,,
+376,95197,Deuil-la-Barre,95,22510,en réserve,,
+377,85047,Challans,85,22494,en réserve,,
+378,59368,La Madeleine,59,22488,en réserve,,
+379,77468,Torcy,77,22444,en réserve,,
+380,33199,Gujan-Mestras,33,22399,en réserve,,
+381,91272,Gif-sur-Yvette,91,22352,en réserve,,
+382,01283,Oyonnax,01,22277,en réserve,,
+383,77305,Montereau-Fault-Yonne,77,22259,en réserve,,
+384,77122,Combs-la-Ville,77,22240,en réserve,,
+385,14327,Hérouville-Saint-Clair,14,22227,en réserve,,
+386,13071,Les Pennes-Mirabeau,13,22161,en réserve,,
+387,51230,Épernay,51,22001,en réserve,,
+388,95428,Montmorency,95,21870,en réserve,,
+389,69202,Sainte-Foy-lès-Lyon,69,21858,en réserve,,
+390,57480,Montigny-lès-Metz,57,21854,en réserve,,
+391,62178,Bruay-la-Buissière,62,21827,en réserve,,
+392,76498,Le Petit-Quevilly,76,21782,en réserve,,
+393,12145,Millau,12,21712,en réserve,,
+394,45284,Saint-Jean-de-Braye,45,21700,en réserve,,
+395,52121,Chaumont,52,21699,en réserve,,
+396,47323,Villeneuve-sur-Lot,47,21629,en réserve,,
+397,06079,Mandelieu-la-Napoule,06,21561,en réserve,,
+398,94003,Arcueil,94,21557,en réserve,,
+399,59295,Hazebrouck,59,21498,en réserve,,
+400,13002,Allauch,13,21490,en réserve,,

@@ -1,0 +1,152 @@
+{
+ "version": 2,
+ "id": "6178cee254e3b3f0744a1318",
+ "titre": "Réseau urbain Irigo",
+ "page": "https://transport.data.gouv.fr/datasets/angers-loire-metropole-reseau-irigo-gtfs-gtfs-rt-siri",
+ "nom_commercial": "Irigo",
+ "preuve_nom": "intitulé du jeu de données et agence du GTFS",
+ "offre_tdg": "Irigo",
+ "aom": "CU Angers Loire Métropole",
+ "exploitant": "non établi par ces sources (peut être nommé si une source officielle le donne)",
+ "epci": {
+  "code": "244900015",
+  "nom": "CU Angers Loire Métropole"
+ },
+ "mis_a_jour": "2026-10-14",
+ "agence": {
+  "agences": [
+   [
+    "IRIGO",
+    "https://www.irigo.fr/"
+   ]
+  ]
+ },
+ "site": "https://www.irigo.fr/",
+ "sites_controles": [
+  [
+   "https://www.irigo.fr/",
+   200
+  ]
+ ],
+ "consulte_le": "2026-10-15",
+ "collecte": {
+  "date": "2026-10-14",
+  "faits": [
+   {
+    "id": "doc.jours.tram",
+    "information": "Les trams A, B et C circulent toute la semaine de 5h00 à 01h00.",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "extrait": "Elles fonctionnent de 5h00 à 01h00 toute la semaine",
+    "validite": "non précisée",
+    "perimetre": "Tram A, B, C",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:32Z"
+   },
+   {
+    "id": "doc.jours.bus_1_4",
+    "information": "Les lignes de bus 1 à 4 circulent du lundi au dimanche de 5h30 à 01h00. La page indique que ce sont les seules lignes de bus à circuler le dimanche.",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "extrait": "Les lignes 1 – 2 – 3 – 4 circulent du lundi au dimanche de 5h30 à 01h00",
+    "validite": "non précisée",
+    "perimetre": "Bus lignes 1, 2, 3, 4 uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   },
+   {
+    "id": "doc.jours.express",
+    "information": "Les lignes E20 à E25 circulent du lundi au samedi de 7h à 21h30.",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "extrait": "Les lignes E20 à E25 circulent du lundi au samedi de 7h à 21h30",
+    "validite": "non précisée",
+    "perimetre": "Lignes express E20 à E25",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   },
+   {
+    "id": "doc.jours.suburbaines",
+    "information": "Les lignes 30 à 42 circulent du lundi au samedi de 7h à 19h30.",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "extrait": "de 7h à 19h30 du lundi au samedi",
+    "validite": "non précisée",
+    "perimetre": "Lignes 30 à 42",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   },
+   {
+    "id": "doc.gratuite.navette_marche",
+    "information": "La Navette Marché (dimanche, 9h-14h) est gratuite ; la page la présente comme la seule ligne gratuite de la page. Pas de gratuité générale du réseau constatée.",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "extrait": "gratuitement faire vos courses au marché de Monplaisir",
+    "validite": "non précisée",
+    "perimetre": "Navette Marché, dimanche, Monplaisir uniquement",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   },
+   {
+    "id": "doc.tarif.titre_obligatoire",
+    "information": "Un titre de transport est obligatoire pour les voyageurs de plus de 6 ans.",
+    "url": "https://www.irigo.fr/",
+    "extrait": "L'achat d'un titre de transport est obligatoire pour les voyageurs de plus de 6 ans.",
+    "validite": "non précisée",
+    "perimetre": "Réseau irigo, voyageurs de plus de 6 ans",
+    "usage": "oui",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   },
+   {
+    "id": "doc.horaires.toussaint_2026",
+    "information": "Les lignes s'adaptent pendant les vacances de la Toussaint 2026, du 19 au 30 octobre (tram A/B/C, bus 1-12, E20-E25, 30-42).",
+    "url": "https://www.irigo.fr/services/actualites/le-reseau/horaires-vacances-scolaires-toussaint-2026",
+    "extrait": "Du lundi 19 au vendredi 30 octobre 2026",
+    "validite": "du 19 au 30 octobre 2026",
+    "perimetre": "Tramway A, B, C ; bus 1 à 12 ; E20 à E25 ; 30 à 42",
+    "usage": "avec ses conditions",
+    "statut_verification": "vérifié",
+    "verifie_le": "2026-10-14T14:53:33Z"
+   }
+  ],
+  "recherches": [
+   {
+    "sujet": "Jours de circulation des jours fériés",
+    "statut": "introuvable",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "note": "La page ne précise pas le service les jours fériés."
+   },
+   {
+    "sujet": "Période de validité des horaires hors vacances",
+    "statut": "introuvable",
+    "url": "https://www.irigo.fr/",
+    "note": "Aucune période de validité trouvée hors la période de la Toussaint 2026."
+   },
+   {
+    "sujet": "Gratuité générale du réseau",
+    "statut": "introuvable",
+    "url": "https://www.irigo.fr/",
+    "note": "Aucune gratuité générale constatée. Les pages tarifs détaillées (https://www.irigo.fr/titres-tarifs/comment-acheter-un-titre-de-transport-irigo) n'ont pas été consultées."
+   },
+   {
+    "sujet": "Où vérifier un trajet (itinéraire, fiches horaires, temps réel)",
+    "statut": "non vérifié",
+    "url": "https://www.irigo.fr/cartagene-itinerary",
+    "note": "Pages indiquées par la page d'accueil : https://www.irigo.fr/cartagene-itinerary (itinéraire), https://www.irigo.fr/cartagene/lines (horaires par ligne), https://www.irigo.fr/se-deplacer/infos-trafic (infos trafic). Je n'ai pas ouvert ces pages et je n'ai pas d'extrait exact à fournir. Le fait doc.verifier.itineraire a donc un extrait vide, à rejeter ou à valider."
+   },
+   {
+    "sujet": "Fréquences",
+    "statut": "introuvable",
+    "url": "https://www.irigo.fr/services-accessibilite/le-reseau-irigo/les-lignes-du-reseau-toutes-nos-lignes-de-trams-et-de-bus",
+    "note": "Aucune fréquence explicite relevée."
+   },
+   {
+    "sujet": "Un outil de calcul d'itinéraire est disponible sur le site, ainsi que les horair",
+    "statut": "non vérifié",
+    "url": "https://www.irigo.fr/cartagene-itinerary",
+    "note": "extrait introuvable sur la page"
+   }
+  ]
+ }
+}

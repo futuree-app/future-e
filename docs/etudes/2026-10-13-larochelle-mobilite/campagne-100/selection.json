@@ -1,0 +1,2836 @@
+{
+ "cree_le": "2026-10-15T15:54:14Z",
+ "source_population": {
+  "fichier": "data/comparateur-index.json.gz (index du comparateur, lu par outil/lot.py)",
+  "champ": "population",
+  "origine": "population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)",
+  "millesime": "2021 (population totale, champ population_totale_2021 du jeu ADEME data_communes)",
+  "perimetre": "France métropolitaine (Corse incluse, DROM exclus)"
+ },
+ "regle": "rang de population décroissant ; toute commune, principale ou non dans son agglomération ; hors communes déjà préparées ; une commune inexploitable est consignée avec son motif et remplacée par la suivante",
+ "candidates": [
+  {
+   "insee": "75056",
+   "nom": "Paris",
+   "dept": "75",
+   "population": 2133111,
+   "exclusion": "commune découpée en 20 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)",
+   "rang": 1
+  },
+  {
+   "insee": "13055",
+   "nom": "Marseille",
+   "dept": "13",
+   "population": 873076,
+   "exclusion": "commune découpée en 16 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)",
+   "rang": 2
+  },
+  {
+   "insee": "69123",
+   "nom": "Lyon",
+   "dept": "69",
+   "population": 522250,
+   "exclusion": "commune découpée en 9 arrondissements municipaux : l'index et la chaîne actuelle ne traitent que les arrondissements ; un article sur la commune entière demanderait une nouvelle architecture (population : somme des arrondissements, même source)",
+   "rang": 3
+  },
+  {
+   "insee": "31555",
+   "nom": "Toulouse",
+   "dept": "31",
+   "population": 504078,
+   "rang": 4
+  },
+  {
+   "insee": "06088",
+   "nom": "Nice",
+   "dept": "06",
+   "population": 348085,
+   "rang": 5
+  },
+  {
+   "insee": "44109",
+   "nom": "Nantes",
+   "dept": "44",
+   "population": 323204,
+   "rang": 6
+  },
+  {
+   "insee": "34172",
+   "nom": "Montpellier",
+   "dept": "34",
+   "population": 302454,
+   "rang": 7
+  },
+  {
+   "insee": "67482",
+   "nom": "Strasbourg",
+   "dept": "67",
+   "population": 291313,
+   "rang": 8
+  },
+  {
+   "insee": "33063",
+   "nom": "Bordeaux",
+   "dept": "33",
+   "population": 261804,
+   "rang": 9
+  },
+  {
+   "insee": "59350",
+   "nom": "Lille",
+   "dept": "59",
+   "population": 236710,
+   "rang": 10
+  },
+  {
+   "insee": "35238",
+   "nom": "Rennes",
+   "dept": "35",
+   "population": 225081,
+   "rang": 11
+  },
+  {
+   "insee": "83137",
+   "nom": "Toulon",
+   "dept": "83",
+   "population": 180452,
+   "rang": 12
+  },
+  {
+   "insee": "51454",
+   "nom": "Reims",
+   "dept": "51",
+   "population": 179380,
+   "rang": 13
+  },
+  {
+   "insee": "42218",
+   "nom": "Saint-Étienne",
+   "dept": "42",
+   "population": 172718,
+   "rang": 14
+  },
+  {
+   "insee": "76351",
+   "nom": "Le Havre",
+   "dept": "76",
+   "population": 166058,
+   "rang": 15
+  },
+  {
+   "insee": "21231",
+   "nom": "Dijon",
+   "dept": "21",
+   "population": 159346,
+   "rang": 16
+  },
+  {
+   "insee": "38185",
+   "nom": "Grenoble",
+   "dept": "38",
+   "population": 157477,
+   "rang": 17
+  },
+  {
+   "insee": "49007",
+   "nom": "Angers",
+   "dept": "49",
+   "population": 157175,
+   "rang": 18,
+   "exclusion": "déjà préparée : Angers (2026-10-lot-01)"
+  },
+  {
+   "insee": "69266",
+   "nom": "Villeurbanne",
+   "dept": "69",
+   "population": 156928,
+   "rang": 19
+  },
+  {
+   "insee": "30189",
+   "nom": "Nîmes",
+   "dept": "30",
+   "population": 148104,
+   "rang": 20,
+   "exclusion": "déjà préparée : Nîmes (2026-10-lot-02-codex)"
+  },
+  {
+   "insee": "13001",
+   "nom": "Aix-en-Provence",
+   "dept": "13",
+   "population": 147478,
+   "rang": 21
+  },
+  {
+   "insee": "63113",
+   "nom": "Clermont-Ferrand",
+   "dept": "63",
+   "population": 147327,
+   "rang": 22
+  },
+  {
+   "insee": "72181",
+   "nom": "Le Mans",
+   "dept": "72",
+   "population": 145004,
+   "rang": 23,
+   "exclusion": "déjà préparée : Le Mans (2026-10-lot-01)"
+  },
+  {
+   "insee": "29019",
+   "nom": "Brest",
+   "dept": "29",
+   "population": 139619,
+   "rang": 24,
+   "exclusion": "déjà préparée : Brest (2026-10-lot-02-codex)"
+  },
+  {
+   "insee": "37261",
+   "nom": "Tours",
+   "dept": "37",
+   "population": 137658,
+   "rang": 25,
+   "exclusion": "déjà préparée : Tours (2026-10-lot-01)"
+  },
+  {
+   "insee": "80021",
+   "nom": "Amiens",
+   "dept": "80",
+   "population": 133625,
+   "rang": 26,
+   "exclusion": "déjà préparée : Amiens (2026-10-lot-03-codex)"
+  },
+  {
+   "insee": "74010",
+   "nom": "Annecy",
+   "dept": "74",
+   "population": 131715,
+   "rang": 27
+  },
+  {
+   "insee": "87085",
+   "nom": "Limoges",
+   "dept": "87",
+   "population": 129760,
+   "rang": 28
+  },
+  {
+   "insee": "57463",
+   "nom": "Metz",
+   "dept": "57",
+   "population": 120874,
+   "rang": 29
+  },
+  {
+   "insee": "92012",
+   "nom": "Boulogne-Billancourt",
+   "dept": "92",
+   "population": 119808,
+   "rang": 30
+  },
+  {
+   "insee": "66136",
+   "nom": "Perpignan",
+   "dept": "66",
+   "population": 119656,
+   "rang": 31
+  },
+  {
+   "insee": "25056",
+   "nom": "Besançon",
+   "dept": "25",
+   "population": 119198,
+   "rang": 32,
+   "exclusion": "déjà préparée : Besançon (2026-10-lot-03-codex)"
+  },
+  {
+   "insee": "45234",
+   "nom": "Orléans",
+   "dept": "45",
+   "population": 116617,
+   "rang": 33
+  },
+  {
+   "insee": "76540",
+   "nom": "Rouen",
+   "dept": "76",
+   "population": 114083,
+   "rang": 34
+  },
+  {
+   "insee": "93066",
+   "nom": "Saint-Denis",
+   "dept": "93",
+   "population": 113942,
+   "rang": 35
+  },
+  {
+   "insee": "93048",
+   "nom": "Montreuil",
+   "dept": "93",
+   "population": 111455,
+   "rang": 36
+  },
+  {
+   "insee": "14118",
+   "nom": "Caen",
+   "dept": "14",
+   "population": 108200,
+   "rang": 37,
+   "exclusion": "déjà préparée : Caen (2026-10-lot-02-codex)"
+  },
+  {
+   "insee": "95018",
+   "nom": "Argenteuil",
+   "dept": "95",
+   "population": 107221,
+   "rang": 38
+  },
+  {
+   "insee": "68224",
+   "nom": "Mulhouse",
+   "dept": "68",
+   "population": 106341,
+   "rang": 39
+  },
+  {
+   "insee": "54395",
+   "nom": "Nancy",
+   "dept": "54",
+   "population": 104260,
+   "rang": 40
+  },
+  {
+   "insee": "59599",
+   "nom": "Tourcoing",
+   "dept": "59",
+   "population": 99011,
+   "rang": 41
+  },
+  {
+   "insee": "59512",
+   "nom": "Roubaix",
+   "dept": "59",
+   "population": 98892,
+   "rang": 42
+  },
+  {
+   "insee": "92050",
+   "nom": "Nanterre",
+   "dept": "92",
+   "population": 97351,
+   "rang": 43
+  },
+  {
+   "insee": "94081",
+   "nom": "Vitry-sur-Seine",
+   "dept": "94",
+   "population": 96205,
+   "rang": 44
+  },
+  {
+   "insee": "94028",
+   "nom": "Créteil",
+   "dept": "94",
+   "population": 92989,
+   "rang": 45
+  },
+  {
+   "insee": "84007",
+   "nom": "Avignon",
+   "dept": "84",
+   "population": 90330,
+   "rang": 46
+  },
+  {
+   "insee": "86194",
+   "nom": "Poitiers",
+   "dept": "86",
+   "population": 90240,
+   "rang": 47,
+   "exclusion": "déjà préparée : Poitiers (2026-10-lot-01)"
+  },
+  {
+   "insee": "93001",
+   "nom": "Aubervilliers",
+   "dept": "93",
+   "population": 90071,
+   "rang": 48
+  },
+  {
+   "insee": "92004",
+   "nom": "Asnières-sur-Seine",
+   "dept": "92",
+   "population": 89662,
+   "rang": 49
+  },
+  {
+   "insee": "92025",
+   "nom": "Colombes",
+   "dept": "92",
+   "population": 88870,
+   "rang": 50
+  },
+  {
+   "insee": "59183",
+   "nom": "Dunkerque",
+   "dept": "59",
+   "population": 86788,
+   "rang": 51
+  },
+  {
+   "insee": "93005",
+   "nom": "Aulnay-sous-Bois",
+   "dept": "93",
+   "population": 86135,
+   "rang": 52
+  },
+  {
+   "insee": "78646",
+   "nom": "Versailles",
+   "dept": "78",
+   "population": 83587,
+   "rang": 53
+  },
+  {
+   "insee": "92026",
+   "nom": "Courbevoie",
+   "dept": "92",
+   "population": 81516,
+   "rang": 54
+  },
+  {
+   "insee": "34032",
+   "nom": "Béziers",
+   "dept": "34",
+   "population": 80341,
+   "rang": 55
+  },
+  {
+   "insee": "17300",
+   "nom": "La Rochelle",
+   "dept": "17",
+   "population": 78535,
+   "rang": 56,
+   "exclusion": "déjà préparée : La Rochelle (article/article-v3.md)"
+  },
+  {
+   "insee": "92063",
+   "nom": "Rueil-Malmaison",
+   "dept": "92",
+   "population": 78186,
+   "rang": 57
+  },
+  {
+   "insee": "50129",
+   "nom": "Cherbourg-en-Cotentin",
+   "dept": "50",
+   "population": 77808,
+   "rang": 58
+  },
+  {
+   "insee": "94017",
+   "nom": "Champigny-sur-Marne",
+   "dept": "94",
+   "population": 77724,
+   "rang": 59
+  },
+  {
+   "insee": "64445",
+   "nom": "Pau",
+   "dept": "64",
+   "population": 77066,
+   "rang": 60,
+   "exclusion": "déjà préparée : Pau (2026-10-lot-03-codex)"
+  },
+  {
+   "insee": "33281",
+   "nom": "Mérignac",
+   "dept": "33",
+   "population": 75729,
+   "rang": 61
+  },
+  {
+   "insee": "94068",
+   "nom": "Saint-Maur-des-Fossés",
+   "dept": "94",
+   "population": 75441,
+   "rang": 62
+  },
+  {
+   "insee": "06004",
+   "nom": "Antibes",
+   "dept": "06",
+   "population": 75130,
+   "rang": 63
+  },
+  {
+   "insee": "2A004",
+   "nom": "Ajaccio",
+   "dept": "2A",
+   "population": 73822,
+   "rang": 64
+  },
+  {
+   "insee": "06029",
+   "nom": "Cannes",
+   "dept": "06",
+   "population": 73255,
+   "rang": 65
+  },
+  {
+   "insee": "44184",
+   "nom": "Saint-Nazaire",
+   "dept": "44",
+   "population": 72057,
+   "rang": 66,
+   "exclusion": "déjà préparée : Saint-Nazaire (2026-10-lot-01)"
+  },
+  {
+   "insee": "93029",
+   "nom": "Drancy",
+   "dept": "93",
+   "population": 71363,
+   "rang": 67
+  },
+  {
+   "insee": "93051",
+   "nom": "Noisy-le-Grand",
+   "dept": "93",
+   "population": 70374,
+   "rang": 68
+  },
+  {
+   "insee": "92040",
+   "nom": "Issy-les-Moulineaux",
+   "dept": "92",
+   "population": 68580,
+   "rang": 69
+  },
+  {
+   "insee": "95127",
+   "nom": "Cergy",
+   "dept": "95",
+   "population": 68348,
+   "rang": 70
+  },
+  {
+   "insee": "92044",
+   "nom": "Levallois-Perret",
+   "dept": "92",
+   "population": 68009,
+   "rang": 71
+  },
+  {
+   "insee": "68066",
+   "nom": "Colmar",
+   "dept": "68",
+   "population": 67730,
+   "rang": 72
+  },
+  {
+   "insee": "62193",
+   "nom": "Calais",
+   "dept": "62",
+   "population": 67380,
+   "rang": 73
+  },
+  {
+   "insee": "33318",
+   "nom": "Pessac",
+   "dept": "33",
+   "population": 66760,
+   "rang": 74
+  },
+  {
+   "insee": "69259",
+   "nom": "Vénissieux",
+   "dept": "69",
+   "population": 66363,
+   "rang": 75
+  },
+  {
+   "insee": "91228",
+   "nom": "Évry-Courcouronnes",
+   "dept": "91",
+   "population": 66177,
+   "rang": 76
+  },
+  {
+   "insee": "92024",
+   "nom": "Clichy",
+   "dept": "92",
+   "population": 64849,
+   "rang": 77
+  },
+  {
+   "insee": "26362",
+   "nom": "Valence",
+   "dept": "26",
+   "population": 64483,
+   "rang": 78,
+   "exclusion": "déjà préparée : Valence (2026-10-lot-03-codex)"
+  },
+  {
+   "insee": "94041",
+   "nom": "Ivry-sur-Seine",
+   "dept": "94",
+   "population": 64001,
+   "rang": 79
+  },
+  {
+   "insee": "18033",
+   "nom": "Bourges",
+   "dept": "18",
+   "population": 63702,
+   "rang": 80
+  },
+  {
+   "insee": "29232",
+   "nom": "Quimper",
+   "dept": "29",
+   "population": 63642,
+   "rang": 81,
+   "exclusion": "déjà préparée : Quimper (2026-10-lot-03-codex)"
+  },
+  {
+   "insee": "92002",
+   "nom": "Antony",
+   "dept": "92",
+   "population": 63232,
+   "rang": 82
+  },
+  {
+   "insee": "10387",
+   "nom": "Troyes",
+   "dept": "10",
+   "population": 62782,
+   "rang": 83
+  },
+  {
+   "insee": "83126",
+   "nom": "La Seyne-sur-Mer",
+   "dept": "83",
+   "population": 62763,
+   "rang": 84
+  },
+  {
+   "insee": "59009",
+   "nom": "Villeneuve-d'Ascq",
+   "dept": "59",
+   "population": 62067,
+   "rang": 85
+  },
+  {
+   "insee": "82121",
+   "nom": "Montauban",
+   "dept": "82",
+   "population": 61919,
+   "rang": 86
+  },
+  {
+   "insee": "93055",
+   "nom": "Pantin",
+   "dept": "93",
+   "population": 60800,
+   "rang": 87
+  },
+  {
+   "insee": "73065",
+   "nom": "Chambéry",
+   "dept": "73",
+   "population": 59856,
+   "rang": 88
+  },
+  {
+   "insee": "79191",
+   "nom": "Niort",
+   "dept": "79",
+   "population": 59309,
+   "rang": 89,
+   "exclusion": "déjà préparée : Niort (redaction/79191/article.md)"
+  },
+  {
+   "insee": "92051",
+   "nom": "Neuilly-sur-Seine",
+   "dept": "92",
+   "population": 59267,
+   "rang": 90
+  },
+  {
+   "insee": "95585",
+   "nom": "Sarcelles",
+   "dept": "95",
+   "population": 58424,
+   "rang": 91
+  },
+  {
+   "insee": "93007",
+   "nom": "Le Blanc-Mesnil",
+   "dept": "93",
+   "population": 58257,
+   "rang": 92
+  },
+  {
+   "insee": "94046",
+   "nom": "Maisons-Alfort",
+   "dept": "94",
+   "population": 58068,
+   "rang": 93
+  },
+  {
+   "insee": "56121",
+   "nom": "Lorient",
+   "dept": "56",
+   "population": 57846,
+   "rang": 94,
+   "exclusion": "déjà préparée : Lorient (2026-10-lot-01)"
+  },
+  {
+   "insee": "94076",
+   "nom": "Villejuif",
+   "dept": "94",
+   "population": 57753,
+   "rang": 95
+  },
+  {
+   "insee": "83061",
+   "nom": "Fréjus",
+   "dept": "83",
+   "population": 57082,
+   "rang": 96
+  },
+  {
+   "insee": "60057",
+   "nom": "Beauvais",
+   "dept": "60",
+   "population": 56677,
+   "rang": 97
+  },
+  {
+   "insee": "11262",
+   "nom": "Narbonne",
+   "dept": "11",
+   "population": 56395,
+   "rang": 98
+  },
+  {
+   "insee": "77284",
+   "nom": "Meaux",
+   "dept": "77",
+   "population": 55616,
+   "rang": 99
+  },
+  {
+   "insee": "83069",
+   "nom": "Hyères",
+   "dept": "83",
+   "population": 55103,
+   "rang": 100
+  },
+  {
+   "insee": "93008",
+   "nom": "Bobigny",
+   "dept": "93",
+   "population": 55056,
+   "rang": 101
+  },
+  {
+   "insee": "85191",
+   "nom": "La Roche-sur-Yon",
+   "dept": "85",
+   "population": 54952,
+   "rang": 102,
+   "exclusion": "déjà préparée : La Roche-sur-Yon (2026-10-lot-01)"
+  },
+  {
+   "insee": "92023",
+   "nom": "Clamart",
+   "dept": "92",
+   "population": 54491,
+   "rang": 103
+  },
+  {
+   "insee": "56260",
+   "nom": "Vannes",
+   "dept": "56",
+   "population": 54420,
+   "rang": 104,
+   "exclusion": "déjà préparée : Vannes (2026-10-lot-01)"
+  },
+  {
+   "insee": "77108",
+   "nom": "Chelles",
+   "dept": "77",
+   "population": 54309,
+   "rang": 105
+  },
+  {
+   "insee": "49099",
+   "nom": "Cholet",
+   "dept": "49",
+   "population": 53936,
+   "rang": 106,
+   "exclusion": "déjà préparée : Cholet (2026-10-lot-01)"
+  },
+  {
+   "insee": "93031",
+   "nom": "Épinay-sur-Seine",
+   "dept": "93",
+   "population": 53489,
+   "rang": 107
+  },
+  {
+   "insee": "93070",
+   "nom": "Saint-Ouen-sur-Seine",
+   "dept": "93",
+   "population": 53207,
+   "rang": 108
+  },
+  {
+   "insee": "02691",
+   "nom": "Saint-Quentin",
+   "dept": "02",
+   "population": 52958,
+   "rang": 109
+  },
+  {
+   "insee": "93010",
+   "nom": "Bondy",
+   "dept": "93",
+   "population": 52905,
+   "rang": 110
+  },
+  {
+   "insee": "64102",
+   "nom": "Bayonne",
+   "dept": "64",
+   "population": 52749,
+   "rang": 111
+  },
+  {
+   "insee": "91174",
+   "nom": "Corbeil-Essonnes",
+   "dept": "91",
+   "population": 52683,
+   "rang": 112
+  },
+  {
+   "insee": "06027",
+   "nom": "Cagnes-sur-Mer",
+   "dept": "06",
+   "population": 52580,
+   "rang": 113
+  },
+  {
+   "insee": "69256",
+   "nom": "Vaulx-en-Velin",
+   "dept": "69",
+   "population": 52139,
+   "rang": 114
+  },
+  {
+   "insee": "93071",
+   "nom": "Sevran",
+   "dept": "93",
+   "population": 51845,
+   "rang": 115
+  },
+  {
+   "insee": "94033",
+   "nom": "Fontenay-sous-Bois",
+   "dept": "94",
+   "population": 51812,
+   "rang": 116
+  },
+  {
+   "insee": "78586",
+   "nom": "Sartrouville",
+   "dept": "78",
+   "population": 51220,
+   "rang": 117
+  },
+  {
+   "insee": "91377",
+   "nom": "Massy",
+   "dept": "91",
+   "population": 50962,
+   "rang": 118
+  },
+  {
+   "insee": "13004",
+   "nom": "Arles",
+   "dept": "13",
+   "population": 50415,
+   "rang": 119
+  },
+  {
+   "insee": "81004",
+   "nom": "Albi",
+   "dept": "81",
+   "population": 49714,
+   "rang": 120
+  },
+  {
+   "insee": "53130",
+   "nom": "Laval",
+   "dept": "53",
+   "population": 49657,
+   "rang": 121
+  },
+  {
+   "insee": "44162",
+   "nom": "Saint-Herblain",
+   "dept": "44",
+   "population": 49537,
+   "rang": 122
+  },
+  {
+   "insee": "92036",
+   "nom": "Gennevilliers",
+   "dept": "92",
+   "population": 49410,
+   "rang": 123
+  },
+  {
+   "insee": "92073",
+   "nom": "Suresnes",
+   "dept": "92",
+   "population": 49104,
+   "rang": 124
+  },
+  {
+   "insee": "69290",
+   "nom": "Saint-Priest",
+   "dept": "69",
+   "population": 48822,
+   "rang": 125
+  },
+  {
+   "insee": "94080",
+   "nom": "Vincennes",
+   "dept": "94",
+   "population": 48798,
+   "rang": 126
+  },
+  {
+   "insee": "2B033",
+   "nom": "Bastia",
+   "dept": "2B",
+   "population": 48768,
+   "rang": 127
+  },
+  {
+   "insee": "13056",
+   "nom": "Martigues",
+   "dept": "13",
+   "population": 48568,
+   "rang": 128
+  },
+  {
+   "insee": "85194",
+   "nom": "Les Sables-d'Olonne",
+   "dept": "85",
+   "population": 48402,
+   "rang": 129
+  },
+  {
+   "insee": "06069",
+   "nom": "Grasse",
+   "dept": "06",
+   "population": 48323,
+   "rang": 130
+  },
+  {
+   "insee": "92049",
+   "nom": "Montrouge",
+   "dept": "92",
+   "population": 47657,
+   "rang": 131
+  },
+  {
+   "insee": "13005",
+   "nom": "Aubagne",
+   "dept": "13",
+   "population": 47342,
+   "rang": 132
+  },
+  {
+   "insee": "35288",
+   "nom": "Saint-Malo",
+   "dept": "35",
+   "population": 47323,
+   "rang": 133
+  },
+  {
+   "insee": "27229",
+   "nom": "Évreux",
+   "dept": "27",
+   "population": 47289,
+   "rang": 134
+  },
+  {
+   "insee": "93027",
+   "nom": "La Courneuve",
+   "dept": "93",
+   "population": 47160,
+   "rang": 135
+  },
+  {
+   "insee": "41018",
+   "nom": "Blois",
+   "dept": "41",
+   "population": 46813,
+   "rang": 136
+  },
+  {
+   "insee": "19031",
+   "nom": "Brive-la-Gaillarde",
+   "dept": "19",
+   "population": 46599,
+   "rang": 137
+  },
+  {
+   "insee": "08105",
+   "nom": "Charleville-Mézières",
+   "dept": "08",
+   "population": 46398,
+   "rang": 138
+  },
+  {
+   "insee": "92048",
+   "nom": "Meudon",
+   "dept": "92",
+   "population": 46342,
+   "rang": 139
+  },
+  {
+   "insee": "11069",
+   "nom": "Carcassonne",
+   "dept": "11",
+   "population": 46218,
+   "rang": 140
+  },
+  {
+   "insee": "94022",
+   "nom": "Choisy-le-Roi",
+   "dept": "94",
+   "population": 46129,
+   "rang": 141
+  },
+  {
+   "insee": "93053",
+   "nom": "Noisy-le-Sec",
+   "dept": "93",
+   "population": 46094,
+   "rang": 142
+  },
+  {
+   "insee": "93046",
+   "nom": "Livry-Gargan",
+   "dept": "93",
+   "population": 46028,
+   "rang": 143
+  },
+  {
+   "insee": "93064",
+   "nom": "Rosny-sous-Bois",
+   "dept": "93",
+   "population": 45655,
+   "rang": 144
+  },
+  {
+   "insee": "33522",
+   "nom": "Talence",
+   "dept": "33",
+   "population": 45225,
+   "rang": 145
+  },
+  {
+   "insee": "90010",
+   "nom": "Belfort",
+   "dept": "90",
+   "population": 45155,
+   "rang": 146
+  },
+  {
+   "insee": "94002",
+   "nom": "Alfortville",
+   "dept": "94",
+   "population": 45046,
+   "rang": 147
+  },
+  {
+   "insee": "71076",
+   "nom": "Chalon-sur-Saône",
+   "dept": "71",
+   "population": 45031,
+   "rang": 148
+  },
+  {
+   "insee": "13103",
+   "nom": "Salon-de-Provence",
+   "dept": "13",
+   "population": 44731,
+   "rang": 149
+  },
+  {
+   "insee": "34301",
+   "nom": "Sète",
+   "dept": "34",
+   "population": 44712,
+   "rang": 150
+  },
+  {
+   "insee": "13047",
+   "nom": "Istres",
+   "dept": "13",
+   "population": 44577,
+   "rang": 151
+  },
+  {
+   "insee": "78361",
+   "nom": "Mantes-la-Jolie",
+   "dept": "78",
+   "population": 44539,
+   "rang": 152
+  },
+  {
+   "insee": "78551",
+   "nom": "Saint-Germain-en-Laye",
+   "dept": "78",
+   "population": 44380,
+   "rang": 153
+  },
+  {
+   "insee": "22278",
+   "nom": "Saint-Brieuc",
+   "dept": "22",
+   "population": 44224,
+   "rang": 154,
+   "exclusion": "déjà préparée : Saint-Brieuc (2026-10-lot-01)"
+  },
+  {
+   "insee": "65440",
+   "nom": "Tarbes",
+   "dept": "65",
+   "population": 43955,
+   "rang": 155
+  },
+  {
+   "insee": "30007",
+   "nom": "Alès",
+   "dept": "30",
+   "population": 43892,
+   "rang": 156
+  },
+  {
+   "insee": "51108",
+   "nom": "Châlons-en-Champagne",
+   "dept": "51",
+   "population": 43877,
+   "rang": 157
+  },
+  {
+   "insee": "92007",
+   "nom": "Bagneux",
+   "dept": "92",
+   "population": 43699,
+   "rang": 158
+  },
+  {
+   "insee": "92062",
+   "nom": "Puteaux",
+   "dept": "92",
+   "population": 43672,
+   "rang": 159
+  },
+  {
+   "insee": "69034",
+   "nom": "Caluire-et-Cuire",
+   "dept": "69",
+   "population": 43572,
+   "rang": 160
+  },
+  {
+   "insee": "69029",
+   "nom": "Bron",
+   "dept": "69",
+   "population": 43049,
+   "rang": 161
+  },
+  {
+   "insee": "44143",
+   "nom": "Rezé",
+   "dept": "44",
+   "population": 42998,
+   "rang": 162
+  },
+  {
+   "insee": "59606",
+   "nom": "Valenciennes",
+   "dept": "59",
+   "population": 42991,
+   "rang": 163
+  },
+  {
+   "insee": "36044",
+   "nom": "Châteauroux",
+   "dept": "36",
+   "population": 42968,
+   "rang": 164
+  },
+  {
+   "insee": "95268",
+   "nom": "Garges-lès-Gonesse",
+   "dept": "95",
+   "population": 42841,
+   "rang": 165
+  },
+  {
+   "insee": "81065",
+   "nom": "Castres",
+   "dept": "81",
+   "population": 42672,
+   "rang": 166
+  },
+  {
+   "insee": "62041",
+   "nom": "Arras",
+   "dept": "62",
+   "population": 42600,
+   "rang": 167
+  },
+  {
+   "insee": "77288",
+   "nom": "Melun",
+   "dept": "77",
+   "population": 42367,
+   "rang": 168
+  },
+  {
+   "insee": "57672",
+   "nom": "Thionville",
+   "dept": "57",
+   "population": 42163,
+   "rang": 169
+  },
+  {
+   "insee": "06030",
+   "nom": "Le Cannet",
+   "dept": "06",
+   "population": 41597,
+   "rang": 170
+  },
+  {
+   "insee": "01053",
+   "nom": "Bourg-en-Bresse",
+   "dept": "01",
+   "population": 41525,
+   "rang": 171
+  },
+  {
+   "insee": "64024",
+   "nom": "Anglet",
+   "dept": "64",
+   "population": 41153,
+   "rang": 172
+  },
+  {
+   "insee": "16015",
+   "nom": "Angoulême",
+   "dept": "16",
+   "population": 41086,
+   "rang": 173
+  },
+  {
+   "insee": "62160",
+   "nom": "Boulogne-sur-Mer",
+   "dept": "62",
+   "population": 40910,
+   "rang": 174
+  },
+  {
+   "insee": "59650",
+   "nom": "Wattrelos",
+   "dept": "59",
+   "population": 40836,
+   "rang": 175
+  },
+  {
+   "insee": "05061",
+   "nom": "Gap",
+   "dept": "05",
+   "population": 40500,
+   "rang": 176
+  },
+  {
+   "insee": "33550",
+   "nom": "Villenave-d'Ornon",
+   "dept": "33",
+   "population": 40500,
+   "rang": 177
+  },
+  {
+   "insee": "26198",
+   "nom": "Montélimar",
+   "dept": "26",
+   "population": 40399,
+   "rang": 178
+  },
+  {
+   "insee": "60159",
+   "nom": "Compiègne",
+   "dept": "60",
+   "population": 40394,
+   "rang": 179
+  },
+  {
+   "insee": "93072",
+   "nom": "Stains",
+   "dept": "93",
+   "population": 40359,
+   "rang": 180
+  },
+  {
+   "insee": "93032",
+   "nom": "Gagny",
+   "dept": "93",
+   "population": 40189,
+   "rang": 181
+  },
+  {
+   "insee": "31149",
+   "nom": "Colomiers",
+   "dept": "31",
+   "population": 40159,
+   "rang": 182
+  },
+  {
+   "insee": "78498",
+   "nom": "Poissy",
+   "dept": "78",
+   "population": 40016,
+   "rang": 183
+  },
+  {
+   "insee": "83050",
+   "nom": "Draguignan",
+   "dept": "83",
+   "population": 39745,
+   "rang": 184
+  },
+  {
+   "insee": "59178",
+   "nom": "Douai",
+   "dept": "59",
+   "population": 39648,
+   "rang": 185
+  },
+  {
+   "insee": "93006",
+   "nom": "Bagnolet",
+   "dept": "93",
+   "population": 39366,
+   "rang": 186
+  },
+  {
+   "insee": "59378",
+   "nom": "Marcq-en-Barœul",
+   "dept": "59",
+   "population": 39356,
+   "rang": 187
+  },
+  {
+   "insee": "93078",
+   "nom": "Villepinte",
+   "dept": "93",
+   "population": 38725,
+   "rang": 188
+  },
+  {
+   "insee": "38421",
+   "nom": "Saint-Martin-d'Hères",
+   "dept": "38",
+   "population": 38454,
+   "rang": 189
+  },
+  {
+   "insee": "28085",
+   "nom": "Chartres",
+   "dept": "28",
+   "population": 38447,
+   "rang": 190
+  },
+  {
+   "insee": "77373",
+   "nom": "Pontault-Combault",
+   "dept": "77",
+   "population": 38258,
+   "rang": 191
+  },
+  {
+   "insee": "37122",
+   "nom": "Joué-lès-Tours",
+   "dept": "37",
+   "population": 38183,
+   "rang": 192
+  },
+  {
+   "insee": "74012",
+   "nom": "Annemasse",
+   "dept": "74",
+   "population": 37918,
+   "rang": 193
+  },
+  {
+   "insee": "69149",
+   "nom": "Oullins-Pierre-Bénite",
+   "dept": "69",
+   "population": 37628,
+   "rang": 194
+  },
+  {
+   "insee": "93050",
+   "nom": "Neuilly-sur-Marne",
+   "dept": "93",
+   "population": 37531,
+   "rang": 195
+  },
+  {
+   "insee": "95252",
+   "nom": "Franconville",
+   "dept": "95",
+   "population": 37520,
+   "rang": 196
+  },
+  {
+   "insee": "91589",
+   "nom": "Savigny-sur-Orge",
+   "dept": "91",
+   "population": 37371,
+   "rang": 197
+  },
+  {
+   "insee": "93073",
+   "nom": "Tremblay-en-France",
+   "dept": "93",
+   "population": 37271,
+   "rang": 198
+  },
+  {
+   "insee": "74281",
+   "nom": "Thonon-les-Bains",
+   "dept": "74",
+   "population": 37027,
+   "rang": 199
+  },
+  {
+   "insee": "13028",
+   "nom": "La Ciotat",
+   "dept": "13",
+   "population": 36987,
+   "rang": 200
+  },
+  {
+   "insee": "38151",
+   "nom": "Échirolles",
+   "dept": "38",
+   "population": 36849,
+   "rang": 201
+  },
+  {
+   "insee": "92020",
+   "nom": "Châtillon",
+   "dept": "92",
+   "population": 36777,
+   "rang": 202
+  },
+  {
+   "insee": "91027",
+   "nom": "Athis-Mons",
+   "dept": "91",
+   "population": 36222,
+   "rang": 203
+  },
+  {
+   "insee": "83129",
+   "nom": "Six-Fours-les-Plages",
+   "dept": "83",
+   "population": 36203,
+   "rang": 204
+  },
+  {
+   "insee": "60175",
+   "nom": "Creil",
+   "dept": "60",
+   "population": 36106,
+   "rang": 205
+  },
+  {
+   "insee": "83118",
+   "nom": "Saint-Raphaël",
+   "dept": "83",
+   "population": 35950,
+   "rang": 206
+  },
+  {
+   "insee": "78172",
+   "nom": "Conflans-Sainte-Honorine",
+   "dept": "78",
+   "population": 35926,
+   "rang": 207
+  },
+  {
+   "insee": "69264",
+   "nom": "Villefranche-sur-Saône",
+   "dept": "69",
+   "population": 35913,
+   "rang": 208
+  },
+  {
+   "insee": "69282",
+   "nom": "Meyzieu",
+   "dept": "69",
+   "population": 35882,
+   "rang": 209
+  },
+  {
+   "insee": "91549",
+   "nom": "Sainte-Geneviève-des-Bois",
+   "dept": "91",
+   "population": 35846,
+   "rang": 210
+  },
+  {
+   "insee": "67180",
+   "nom": "Haguenau",
+   "dept": "67",
+   "population": 35715,
+   "rang": 211
+  },
+  {
+   "insee": "13117",
+   "nom": "Vitrolles",
+   "dept": "13",
+   "population": 35532,
+   "rang": 212
+  },
+  {
+   "insee": "94078",
+   "nom": "Villeneuve-Saint-Georges",
+   "dept": "94",
+   "population": 35492,
+   "rang": 213
+  },
+  {
+   "insee": "42207",
+   "nom": "Saint-Chamond",
+   "dept": "42",
+   "population": 35068,
+   "rang": 214
+  },
+  {
+   "insee": "92019",
+   "nom": "Châtenay-Malabry",
+   "dept": "92",
+   "population": 34898,
+   "rang": 215
+  },
+  {
+   "insee": "91477",
+   "nom": "Palaiseau",
+   "dept": "91",
+   "population": 34893,
+   "rang": 216
+  },
+  {
+   "insee": "89024",
+   "nom": "Auxerre",
+   "dept": "89",
+   "population": 34778,
+   "rang": 217
+  },
+  {
+   "insee": "42187",
+   "nom": "Roanne",
+   "dept": "42",
+   "population": 34762,
+   "rang": 218
+  },
+  {
+   "insee": "71270",
+   "nom": "Mâcon",
+   "dept": "71",
+   "population": 34448,
+   "rang": 219
+  },
+  {
+   "insee": "94058",
+   "nom": "Le Perreux-sur-Marne",
+   "dept": "94",
+   "population": 34213,
+   "rang": 220
+  },
+  {
+   "insee": "67447",
+   "nom": "Schiltigheim",
+   "dept": "67",
+   "population": 34129,
+   "rang": 221
+  },
+  {
+   "insee": "78440",
+   "nom": "Les Mureaux",
+   "dept": "78",
+   "population": 33977,
+   "rang": 222
+  },
+  {
+   "insee": "78621",
+   "nom": "Trappes",
+   "dept": "78",
+   "population": 33717,
+   "rang": 223
+  },
+  {
+   "insee": "94052",
+   "nom": "Nogent-sur-Marne",
+   "dept": "94",
+   "population": 33472,
+   "rang": 224
+  },
+  {
+   "insee": "78311",
+   "nom": "Houilles",
+   "dept": "78",
+   "population": 33449,
+   "rang": 225
+  },
+  {
+   "insee": "03185",
+   "nom": "Montluçon",
+   "dept": "03",
+   "population": 33342,
+   "rang": 226
+  },
+  {
+   "insee": "93063",
+   "nom": "Romainville",
+   "dept": "93",
+   "population": 33266,
+   "rang": 227
+  },
+  {
+   "insee": "13054",
+   "nom": "Marignane",
+   "dept": "13",
+   "population": 33003,
+   "rang": 228
+  },
+  {
+   "insee": "26281",
+   "nom": "Romans-sur-Isère",
+   "dept": "26",
+   "population": 32911,
+   "rang": 229
+  },
+  {
+   "insee": "58194",
+   "nom": "Nevers",
+   "dept": "58",
+   "population": 32830,
+   "rang": 230
+  },
+  {
+   "insee": "62498",
+   "nom": "Lens",
+   "dept": "62",
+   "population": 32618,
+   "rang": 231
+  },
+  {
+   "insee": "33449",
+   "nom": "Saint-Médard-en-Jalles",
+   "dept": "33",
+   "population": 32538,
+   "rang": 232
+  },
+  {
+   "insee": "47001",
+   "nom": "Agen",
+   "dept": "47",
+   "population": 32485,
+   "rang": 233
+  },
+  {
+   "insee": "88160",
+   "nom": "Épinal",
+   "dept": "88",
+   "population": 32285,
+   "rang": 234
+  },
+  {
+   "insee": "95063",
+   "nom": "Bezons",
+   "dept": "95",
+   "population": 32017,
+   "rang": 235
+  },
+  {
+   "insee": "73008",
+   "nom": "Aix-les-Bains",
+   "dept": "73",
+   "population": 31874,
+   "rang": 236
+  },
+  {
+   "insee": "78423",
+   "nom": "Montigny-le-Bretonneux",
+   "dept": "78",
+   "population": 31777,
+   "rang": 237
+  },
+  {
+   "insee": "95306",
+   "nom": "Herblay-sur-Seine",
+   "dept": "95",
+   "population": 31605,
+   "rang": 238
+  },
+  {
+   "insee": "59122",
+   "nom": "Cambrai",
+   "dept": "59",
+   "population": 31425,
+   "rang": 239
+  },
+  {
+   "insee": "94038",
+   "nom": "L'Haÿ-les-Roses",
+   "dept": "94",
+   "population": 31392,
+   "rang": 240
+  },
+  {
+   "insee": "78490",
+   "nom": "Plaisir",
+   "dept": "78",
+   "population": 31375,
+   "rang": 241
+  },
+  {
+   "insee": "95500",
+   "nom": "Pontoise",
+   "dept": "95",
+   "population": 31327,
+   "rang": 242
+  },
+  {
+   "insee": "86066",
+   "nom": "Châtellerault",
+   "dept": "86",
+   "population": 31284,
+   "rang": 243
+  },
+  {
+   "insee": "69286",
+   "nom": "Rillieux-la-Pape",
+   "dept": "69",
+   "population": 31247,
+   "rang": 244
+  },
+  {
+   "insee": "94073",
+   "nom": "Thiais",
+   "dept": "94",
+   "population": 31097,
+   "rang": 245
+  },
+  {
+   "insee": "38544",
+   "nom": "Vienne",
+   "dept": "38",
+   "population": 31051,
+   "rang": 246
+  },
+  {
+   "insee": "91657",
+   "nom": "Vigneux-sur-Seine",
+   "dept": "91",
+   "population": 31050,
+   "rang": 247
+  },
+  {
+   "insee": "91687",
+   "nom": "Viry-Châtillon",
+   "dept": "91",
+   "population": 31045,
+   "rang": 248
+  },
+  {
+   "insee": "06123",
+   "nom": "Saint-Laurent-du-Var",
+   "dept": "06",
+   "population": 30941,
+   "rang": 249
+  },
+  {
+   "insee": "78158",
+   "nom": "Le Chesnay-Rocquencourt",
+   "dept": "78",
+   "population": 30924,
+   "rang": 250
+  },
+  {
+   "insee": "28134",
+   "nom": "Dreux",
+   "dept": "28",
+   "population": 30879,
+   "rang": 251
+  },
+  {
+   "insee": "33039",
+   "nom": "Bègles",
+   "dept": "33",
+   "population": 30813,
+   "rang": 252
+  },
+  {
+   "insee": "84031",
+   "nom": "Carpentras",
+   "dept": "84",
+   "population": 30769,
+   "rang": 253
+  },
+  {
+   "insee": "95280",
+   "nom": "Goussainville",
+   "dept": "95",
+   "population": 30693,
+   "rang": 254
+  },
+  {
+   "insee": "40192",
+   "nom": "Mont-de-Marsan",
+   "dept": "40",
+   "population": 30674,
+   "rang": 255
+  },
+  {
+   "insee": "94079",
+   "nom": "Villiers-sur-Marne",
+   "dept": "94",
+   "population": 30669,
+   "rang": 256
+  },
+  {
+   "insee": "94016",
+   "nom": "Cachan",
+   "dept": "94",
+   "population": 30592,
+   "rang": 257
+  },
+  {
+   "insee": "77445",
+   "nom": "Savigny-le-Temple",
+   "dept": "77",
+   "population": 30510,
+   "rang": 258
+  },
+  {
+   "insee": "06083",
+   "nom": "Menton",
+   "dept": "06",
+   "population": 30412,
+   "rang": 259
+  },
+  {
+   "insee": "93077",
+   "nom": "Villemomble",
+   "dept": "93",
+   "population": 30332,
+   "rang": 260
+  },
+  {
+   "insee": "92046",
+   "nom": "Malakoff",
+   "dept": "92",
+   "population": 30292,
+   "rang": 261
+  },
+  {
+   "insee": "62510",
+   "nom": "Liévin",
+   "dept": "62",
+   "population": 30149,
+   "rang": 262
+  },
+  {
+   "insee": "92035",
+   "nom": "La Garenne-Colombes",
+   "dept": "92",
+   "population": 29932,
+   "rang": 263
+  },
+  {
+   "insee": "91521",
+   "nom": "Ris-Orangis",
+   "dept": "91",
+   "population": 29825,
+   "rang": 264
+  },
+  {
+   "insee": "92009",
+   "nom": "Bois-Colombes",
+   "dept": "92",
+   "population": 29765,
+   "rang": 265
+  },
+  {
+   "insee": "93014",
+   "nom": "Clichy-sous-Bois",
+   "dept": "93",
+   "population": 29735,
+   "rang": 266
+  },
+  {
+   "insee": "69275",
+   "nom": "Décines-Charpieu",
+   "dept": "69",
+   "population": 29731,
+   "rang": 267
+  },
+  {
+   "insee": "92064",
+   "nom": "Saint-Cloud",
+   "dept": "92",
+   "population": 29727,
+   "rang": 268
+  },
+  {
+   "insee": "78146",
+   "nom": "Chatou",
+   "dept": "78",
+   "population": 29649,
+   "rang": 269
+  },
+  {
+   "insee": "38053",
+   "nom": "Bourgoin-Jallieu",
+   "dept": "38",
+   "population": 29577,
+   "rang": 270
+  },
+  {
+   "insee": "54547",
+   "nom": "Vandœuvre-lès-Nancy",
+   "dept": "54",
+   "population": 29537,
+   "rang": 271
+  },
+  {
+   "insee": "24322",
+   "nom": "Périgueux",
+   "dept": "24",
+   "population": 29516,
+   "rang": 272
+  },
+  {
+   "insee": "94018",
+   "nom": "Charenton-le-Pont",
+   "dept": "94",
+   "population": 29445,
+   "rang": 273
+  },
+  {
+   "insee": "31557",
+   "nom": "Tournefeuille",
+   "dept": "31",
+   "population": 29439,
+   "rang": 274
+  },
+  {
+   "insee": "78297",
+   "nom": "Guyancourt",
+   "dept": "78",
+   "population": 29406,
+   "rang": 275
+  },
+  {
+   "insee": "92060",
+   "nom": "Le Plessis-Robinson",
+   "dept": "92",
+   "population": 29228,
+   "rang": 276
+  },
+  {
+   "insee": "91201",
+   "nom": "Draveil",
+   "dept": "91",
+   "population": 29173,
+   "rang": 277
+  },
+  {
+   "insee": "34003",
+   "nom": "Agde",
+   "dept": "34",
+   "population": 29103,
+   "rang": 278
+  },
+  {
+   "insee": "59392",
+   "nom": "Maubeuge",
+   "dept": "59",
+   "population": 29066,
+   "rang": 279
+  },
+  {
+   "insee": "95219",
+   "nom": "Ermont",
+   "dept": "95",
+   "population": 28987,
+   "rang": 280
+  },
+  {
+   "insee": "76681",
+   "nom": "Sotteville-lès-Rouen",
+   "dept": "76",
+   "population": 28965,
+   "rang": 281
+  },
+  {
+   "insee": "84087",
+   "nom": "Orange",
+   "dept": "84",
+   "population": 28949,
+   "rang": 282
+  },
+  {
+   "insee": "95680",
+   "nom": "Villiers-le-Bel",
+   "dept": "95",
+   "population": 28836,
+   "rang": 283
+  },
+  {
+   "insee": "94034",
+   "nom": "Fresnes",
+   "dept": "94",
+   "population": 28780,
+   "rang": 284
+  },
+  {
+   "insee": "02722",
+   "nom": "Soissons",
+   "dept": "02",
+   "population": 28705,
+   "rang": 285
+  },
+  {
+   "insee": "91691",
+   "nom": "Yerres",
+   "dept": "91",
+   "population": 28699,
+   "rang": 286
+  },
+  {
+   "insee": "76575",
+   "nom": "Saint-Étienne-du-Rouvray",
+   "dept": "76",
+   "population": 28508,
+   "rang": 287
+  },
+  {
+   "insee": "76217",
+   "nom": "Dieppe",
+   "dept": "76",
+   "population": 28358,
+   "rang": 288
+  },
+  {
+   "insee": "44190",
+   "nom": "Saint-Sébastien-sur-Loire",
+   "dept": "44",
+   "population": 28283,
+   "rang": 289
+  },
+  {
+   "insee": "06155",
+   "nom": "Vallauris",
+   "dept": "06",
+   "population": 28025,
+   "rang": 290
+  },
+  {
+   "insee": "92075",
+   "nom": "Vanves",
+   "dept": "92",
+   "population": 28014,
+   "rang": 291
+  },
+  {
+   "insee": "94044",
+   "nom": "Limeil-Brévannes",
+   "dept": "94",
+   "population": 27999,
+   "rang": 292
+  },
+  {
+   "insee": "93047",
+   "nom": "Montfermeil",
+   "dept": "93",
+   "population": 27980,
+   "rang": 293
+  },
+  {
+   "insee": "44114",
+   "nom": "Orvault",
+   "dept": "44",
+   "population": 27872,
+   "rang": 294
+  },
+  {
+   "insee": "94071",
+   "nom": "Sucy-en-Brie",
+   "dept": "94",
+   "population": 27622,
+   "rang": 295
+  },
+  {
+   "insee": "91286",
+   "nom": "Grigny",
+   "dept": "91",
+   "population": 27257,
+   "rang": 296
+  },
+  {
+   "insee": "59328",
+   "nom": "Lambersart",
+   "dept": "59",
+   "population": 27121,
+   "rang": 297
+  },
+  {
+   "insee": "67218",
+   "nom": "Illkirch-Graffenstaden",
+   "dept": "67",
+   "population": 27118,
+   "rang": 298
+  },
+  {
+   "insee": "91103",
+   "nom": "Brétigny-sur-Orge",
+   "dept": "91",
+   "population": 27106,
+   "rang": 299
+  },
+  {
+   "insee": "89387",
+   "nom": "Sens",
+   "dept": "89",
+   "population": 27034,
+   "rang": 300
+  },
+  {
+   "insee": "95607",
+   "nom": "Taverny",
+   "dept": "95",
+   "population": 27025,
+   "rang": 301
+  },
+  {
+   "insee": "77514",
+   "nom": "Villeparisis",
+   "dept": "77",
+   "population": 26822,
+   "rang": 302
+  },
+  {
+   "insee": "78517",
+   "nom": "Rambouillet",
+   "dept": "78",
+   "population": 26816,
+   "rang": 303
+  },
+  {
+   "insee": "33119",
+   "nom": "Cenon",
+   "dept": "33",
+   "population": 26778,
+   "rang": 304
+  },
+  {
+   "insee": "95582",
+   "nom": "Sannois",
+   "dept": "95",
+   "population": 26768,
+   "rang": 305
+  },
+  {
+   "insee": "95176",
+   "nom": "Cormeilles-en-Parisis",
+   "dept": "95",
+   "population": 26741,
+   "rang": 306
+  },
+  {
+   "insee": "77058",
+   "nom": "Bussy-Saint-Georges",
+   "dept": "77",
+   "population": 26571,
+   "rang": 307
+  },
+  {
+   "insee": "33529",
+   "nom": "La Teste-de-Buch",
+   "dept": "33",
+   "population": 26556,
+   "rang": 308
+  },
+  {
+   "insee": "91223",
+   "nom": "Étampes",
+   "dept": "91",
+   "population": 26529,
+   "rang": 309
+  },
+  {
+   "insee": "31069",
+   "nom": "Blagnac",
+   "dept": "31",
+   "population": 26466,
+   "rang": 310
+  },
+  {
+   "insee": "13063",
+   "nom": "Miramas",
+   "dept": "13",
+   "population": 26405,
+   "rang": 311
+  },
+  {
+   "insee": "24037",
+   "nom": "Bergerac",
+   "dept": "24",
+   "population": 26323,
+   "rang": 312
+  },
+  {
+   "insee": "49328",
+   "nom": "Saumur",
+   "dept": "49",
+   "population": 26215,
+   "rang": 313
+  },
+  {
+   "insee": "34145",
+   "nom": "Lunel",
+   "dept": "34",
+   "population": 26185,
+   "rang": 314
+  },
+  {
+   "insee": "78208",
+   "nom": "Élancourt",
+   "dept": "78",
+   "population": 26082,
+   "rang": 315
+  },
+  {
+   "insee": "62427",
+   "nom": "Hénin-Beaumont",
+   "dept": "62",
+   "population": 26035,
+   "rang": 316
+  },
+  {
+   "insee": "44215",
+   "nom": "Vertou",
+   "dept": "44",
+   "population": 26002,
+   "rang": 317
+  },
+  {
+   "insee": "76322",
+   "nom": "Le Grand-Quevilly",
+   "dept": "76",
+   "population": 25975,
+   "rang": 318
+  },
+  {
+   "insee": "95277",
+   "nom": "Gonesse",
+   "dept": "95",
+   "population": 25963,
+   "rang": 319
+  },
+  {
+   "insee": "84035",
+   "nom": "Cavaillon",
+   "dept": "84",
+   "population": 25923,
+   "rang": 320
+  },
+  {
+   "insee": "83062",
+   "nom": "La Garde",
+   "dept": "83",
+   "population": 25912,
+   "rang": 321
+  },
+  {
+   "insee": "33192",
+   "nom": "Gradignan",
+   "dept": "33",
+   "population": 25835,
+   "rang": 322
+  },
+  {
+   "insee": "15014",
+   "nom": "Aurillac",
+   "dept": "15",
+   "population": 25815,
+   "rang": 323
+  },
+  {
+   "insee": "49301",
+   "nom": "Sèvremoine",
+   "dept": "49",
+   "population": 25806,
+   "rang": 324
+  },
+  {
+   "insee": "03310",
+   "nom": "Vichy",
+   "dept": "03",
+   "population": 25789,
+   "rang": 325
+  },
+  {
+   "insee": "64122",
+   "nom": "Biarritz",
+   "dept": "64",
+   "population": 25764,
+   "rang": 326
+  },
+  {
+   "insee": "77083",
+   "nom": "Champs-sur-Marne",
+   "dept": "77",
+   "population": 25695,
+   "rang": 327
+  },
+  {
+   "insee": "59017",
+   "nom": "Armentières",
+   "dept": "59",
+   "population": 25581,
+   "rang": 328
+  },
+  {
+   "insee": "25388",
+   "nom": "Montbéliard",
+   "dept": "25",
+   "population": 25573,
+   "rang": 329
+  },
+  {
+   "insee": "61001",
+   "nom": "Alençon",
+   "dept": "61",
+   "population": 25555,
+   "rang": 330
+  },
+  {
+   "insee": "17415",
+   "nom": "Saintes",
+   "dept": "17",
+   "population": 25518,
+   "rang": 331
+  },
+  {
+   "insee": "91114",
+   "nom": "Brunoy",
+   "dept": "91",
+   "population": 25423,
+   "rang": 332
+  },
+  {
+   "insee": "95203",
+   "nom": "Eaubonne",
+   "dept": "95",
+   "population": 25373,
+   "rang": 333
+  },
+  {
+   "insee": "92078",
+   "nom": "Villeneuve-la-Garenne",
+   "dept": "92",
+   "population": 25371,
+   "rang": 334
+  },
+  {
+   "insee": "18279",
+   "nom": "Vierzon",
+   "dept": "18",
+   "population": 25348,
+   "rang": 335
+  },
+  {
+   "insee": "91692",
+   "nom": "Les Ulis",
+   "dept": "91",
+   "population": 25253,
+   "rang": 336
+  },
+  {
+   "insee": "31395",
+   "nom": "Muret",
+   "dept": "31",
+   "population": 25060,
+   "rang": 337
+  },
+  {
+   "insee": "95572",
+   "nom": "Saint-Ouen-l'Aumône",
+   "dept": "95",
+   "population": 25023,
+   "rang": 338
+  },
+  {
+   "insee": "62119",
+   "nom": "Béthune",
+   "dept": "62",
+   "population": 24992,
+   "rang": 339
+  },
+  {
+   "insee": "34057",
+   "nom": "Castelnau-le-Lez",
+   "dept": "34",
+   "population": 24888,
+   "rang": 340
+  },
+  {
+   "insee": "92032",
+   "nom": "Fontenay-aux-Roses",
+   "dept": "92",
+   "population": 24772,
+   "rang": 341
+  },
+  {
+   "insee": "33243",
+   "nom": "Libourne",
+   "dept": "33",
+   "population": 24557,
+   "rang": 342
+  },
+  {
+   "insee": "27681",
+   "nom": "Vernon",
+   "dept": "27",
+   "population": 24543,
+   "rang": 343
+  },
+  {
+   "insee": "94054",
+   "nom": "Orly",
+   "dept": "94",
+   "population": 24482,
+   "rang": 344
+  },
+  {
+   "insee": "94043",
+   "nom": "Le Kremlin-Bicêtre",
+   "dept": "94",
+   "population": 24380,
+   "rang": 345
+  },
+  {
+   "insee": "33162",
+   "nom": "Eysines",
+   "dept": "33",
+   "population": 24374,
+   "rang": 346
+  },
+  {
+   "insee": "33069",
+   "nom": "Le Bouscat",
+   "dept": "33",
+   "population": 24339,
+   "rang": 347
+  },
+  {
+   "insee": "12202",
+   "nom": "Rodez",
+   "dept": "12",
+   "population": 24207,
+   "rang": 348
+  },
+  {
+   "insee": "93057",
+   "nom": "Les Pavillons-sous-Bois",
+   "dept": "93",
+   "population": 24165,
+   "rang": 349
+  },
+  {
+   "insee": "02408",
+   "nom": "Laon",
+   "dept": "02",
+   "population": 24021,
+   "rang": 350
+  },
+  {
+   "insee": "83144",
+   "nom": "La Valette-du-Var",
+   "dept": "83",
+   "population": 23955,
+   "rang": 351
+  },
+  {
+   "insee": "34108",
+   "nom": "Frontignan",
+   "dept": "34",
+   "population": 23808,
+   "rang": 352
+  },
+  {
+   "insee": "91421",
+   "nom": "Montgeron",
+   "dept": "91",
+   "population": 23800,
+   "rang": 353
+  },
+  {
+   "insee": "39198",
+   "nom": "Dole",
+   "dept": "39",
+   "population": 23775,
+   "rang": 354
+  },
+  {
+   "insee": "49023",
+   "nom": "Beaupréau-en-Mauges",
+   "dept": "49",
+   "population": 23639,
+   "rang": 355
+  },
+  {
+   "insee": "93045",
+   "nom": "Les Lilas",
+   "dept": "93",
+   "population": 23469,
+   "rang": 356
+  },
+  {
+   "insee": "33249",
+   "nom": "Lormont",
+   "dept": "33",
+   "population": 23291,
+   "rang": 357
+  },
+  {
+   "insee": "17299",
+   "nom": "Rochefort",
+   "dept": "17",
+   "population": 23092,
+   "rang": 358
+  },
+  {
+   "insee": "78358",
+   "nom": "Maisons-Laffitte",
+   "dept": "78",
+   "population": 23080,
+   "rang": 359
+  },
+  {
+   "insee": "52448",
+   "nom": "Saint-Dizier",
+   "dept": "52",
+   "population": 23068,
+   "rang": 360
+  },
+  {
+   "insee": "77390",
+   "nom": "Roissy-en-Brie",
+   "dept": "77",
+   "population": 23061,
+   "rang": 361
+  },
+  {
+   "insee": "44047",
+   "nom": "Couëron",
+   "dept": "44",
+   "population": 23057,
+   "rang": 362
+  },
+  {
+   "insee": "32013",
+   "nom": "Auch",
+   "dept": "32",
+   "population": 23041,
+   "rang": 363
+  },
+  {
+   "insee": "56098",
+   "nom": "Lanester",
+   "dept": "56",
+   "population": 23026,
+   "rang": 364
+  },
+  {
+   "insee": "59360",
+   "nom": "Loos",
+   "dept": "59",
+   "population": 23013,
+   "rang": 365
+  },
+  {
+   "insee": "04112",
+   "nom": "Manosque",
+   "dept": "04",
+   "population": 22926,
+   "rang": 366
+  },
+  {
+   "insee": "38169",
+   "nom": "Fontaine",
+   "dept": "38",
+   "population": 22891,
+   "rang": 367
+  },
+  {
+   "insee": "45232",
+   "nom": "Olivet",
+   "dept": "45",
+   "population": 22855,
+   "rang": 368
+  },
+  {
+   "insee": "77152",
+   "nom": "Dammarie-les-Lys",
+   "dept": "77",
+   "population": 22845,
+   "rang": 369
+  },
+  {
+   "insee": "78640",
+   "nom": "Vélizy-Villacoublay",
+   "dept": "78",
+   "population": 22713,
+   "rang": 370
+  },
+  {
+   "insee": "68297",
+   "nom": "Saint-Louis",
+   "dept": "68",
+   "population": 22698,
+   "rang": 371
+  },
+  {
+   "insee": "69244",
+   "nom": "Tassin-la-Demi-Lune",
+   "dept": "69",
+   "population": 22676,
+   "rang": 372
+  },
+  {
+   "insee": "92072",
+   "nom": "Sèvres",
+   "dept": "92",
+   "population": 22618,
+   "rang": 373
+  },
+  {
+   "insee": "95424",
+   "nom": "Montigny-lès-Cormeilles",
+   "dept": "95",
+   "population": 22603,
+   "rang": 374
+  },
+  {
+   "insee": "80001",
+   "nom": "Abbeville",
+   "dept": "80",
+   "population": 22595,
+   "rang": 375
+  },
+  {
+   "insee": "95197",
+   "nom": "Deuil-la-Barre",
+   "dept": "95",
+   "population": 22510,
+   "rang": 376
+  },
+  {
+   "insee": "85047",
+   "nom": "Challans",
+   "dept": "85",
+   "population": 22494,
+   "rang": 377
+  },
+  {
+   "insee": "59368",
+   "nom": "La Madeleine",
+   "dept": "59",
+   "population": 22488,
+   "rang": 378
+  },
+  {
+   "insee": "77468",
+   "nom": "Torcy",
+   "dept": "77",
+   "population": 22444,
+   "rang": 379
+  },
+  {
+   "insee": "33199",
+   "nom": "Gujan-Mestras",
+   "dept": "33",
+   "population": 22399,
+   "rang": 380
+  },
+  {
+   "insee": "91272",
+   "nom": "Gif-sur-Yvette",
+   "dept": "91",
+   "population": 22352,
+   "rang": 381
+  },
+  {
+   "insee": "01283",
+   "nom": "Oyonnax",
+   "dept": "01",
+   "population": 22277,
+   "rang": 382
+  },
+  {
+   "insee": "77305",
+   "nom": "Montereau-Fault-Yonne",
+   "dept": "77",
+   "population": 22259,
+   "rang": 383
+  },
+  {
+   "insee": "77122",
+   "nom": "Combs-la-Ville",
+   "dept": "77",
+   "population": 22240,
+   "rang": 384
+  },
+  {
+   "insee": "14327",
+   "nom": "Hérouville-Saint-Clair",
+   "dept": "14",
+   "population": 22227,
+   "rang": 385
+  },
+  {
+   "insee": "13071",
+   "nom": "Les Pennes-Mirabeau",
+   "dept": "13",
+   "population": 22161,
+   "rang": 386
+  },
+  {
+   "insee": "51230",
+   "nom": "Épernay",
+   "dept": "51",
+   "population": 22001,
+   "rang": 387
+  },
+  {
+   "insee": "95428",
+   "nom": "Montmorency",
+   "dept": "95",
+   "population": 21870,
+   "rang": 388
+  },
+  {
+   "insee": "69202",
+   "nom": "Sainte-Foy-lès-Lyon",
+   "dept": "69",
+   "population": 21858,
+   "rang": 389
+  },
+  {
+   "insee": "57480",
+   "nom": "Montigny-lès-Metz",
+   "dept": "57",
+   "population": 21854,
+   "rang": 390
+  },
+  {
+   "insee": "62178",
+   "nom": "Bruay-la-Buissière",
+   "dept": "62",
+   "population": 21827,
+   "rang": 391
+  },
+  {
+   "insee": "76498",
+   "nom": "Le Petit-Quevilly",
+   "dept": "76",
+   "population": 21782,
+   "rang": 392
+  },
+  {
+   "insee": "12145",
+   "nom": "Millau",
+   "dept": "12",
+   "population": 21712,
+   "rang": 393
+  },
+  {
+   "insee": "45284",
+   "nom": "Saint-Jean-de-Braye",
+   "dept": "45",
+   "population": 21700,
+   "rang": 394
+  },
+  {
+   "insee": "52121",
+   "nom": "Chaumont",
+   "dept": "52",
+   "population": 21699,
+   "rang": 395
+  },
+  {
+   "insee": "47323",
+   "nom": "Villeneuve-sur-Lot",
+   "dept": "47",
+   "population": 21629,
+   "rang": 396
+  },
+  {
+   "insee": "06079",
+   "nom": "Mandelieu-la-Napoule",
+   "dept": "06",
+   "population": 21561,
+   "rang": 397
+  },
+  {
+   "insee": "94003",
+   "nom": "Arcueil",
+   "dept": "94",
+   "population": 21557,
+   "rang": 398
+  },
+  {
+   "insee": "59295",
+   "nom": "Hazebrouck",
+   "dept": "59",
+   "population": 21498,
+   "rang": 399
+  },
+  {
+   "insee": "13002",
+   "nom": "Allauch",
+   "dept": "13",
+   "population": 21490,
+   "rang": 400
+  }
+ ]
+}

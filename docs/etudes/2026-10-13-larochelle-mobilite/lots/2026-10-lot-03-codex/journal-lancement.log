@@ -1,0 +1,8 @@
+
+Commune                INSEE  État                   Préparation  Motif
+Quimper                29232  prêt à relire               46.1 s  
+Amiens                 80021  prêt à relire               47.7 s  3 anomalie(s) déterministe(s) après la correction unique
+Besançon               25056  prêt à relire               31.3 s  
+Valence                26362  prêt à relire               26.9 s  corrigé une fois ; vérifier que les anomalies de relecture sont traitées (section E)
+Pau                    64445  prêt à relire               42.2 s  4 anomalie(s) déterministe(s) après la correction unique
+Coût « équivalent API » rapporté par Claude Code (information, non facturé, n'est pas une mesure du quota) : 1.97 $

@@ -1,0 +1,32 @@
+{
+ "communes": {
+  "49007": {
+   "nom": "Angers",
+   "insee": "49007",
+   "demande": "Angers",
+   "statut": "rédigé",
+   "article": "redaction.md",
+   "motif": "premier jet Codex, non relu ni corrigé ; comparaison avec le premier jet Claude dans BILAN.md de ce dossier. Carte reprise du lot 01 : ses repères numérotés sont ceux de l'article Claude (Croix Blanche non repéré).",
+   "etapes": {
+    "redaction": {
+     "ok": true,
+     "duree_s": 149.2,
+     "fin": "2026-10-14T23:39:48Z"
+    }
+   },
+   "manuel": [
+    "aucune relecture ni correction prévue dans cet essai",
+    "ne pas publier"
+   ],
+   "versions": {
+    "prompt_redaction": "7dc2ca0c244ec27a",
+    "entree": "47175bc2cd29cbd6",
+    "moteur": "codex",
+    "modeles": {
+     "redaction": "gpt-6.1-sol"
+    }
+   }
+  }
+ },
+ "journal": []
+}

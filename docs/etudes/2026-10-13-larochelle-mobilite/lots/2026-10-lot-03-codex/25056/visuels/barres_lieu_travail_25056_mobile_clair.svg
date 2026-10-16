@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 775" width="640" height="775" role="img" aria-labelledby="t d" font-family="Archivo, 'Helvetica Neue', Arial, sans-serif">
+<title id="t">Habiter Besançon, travailler ici ou ailleurs</title>
+<desc id="d">Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Besançon, part qui va travailler principalement en voiture : travaillant à Besançon, 49 % ; travaillant à Thise, École-Valentin, Miserey-Salines, Avanne-Aveney, Pirey ou Châtillon-le-Duc, 83 % ; travaillant ailleurs (hors de Besançon, Thise, École-Valentin, Miserey-Salines, Avanne-Aveney, Pirey et Châtillon-le-Duc), 79 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022.</desc>
+<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap");</style>
+<rect width="640" height="775" fill="#ffffff"/>
+<line x1="24.0" y1="644.8" x2="24.0" y2="652.8" stroke="#d9d6cf" stroke-width="1"/>
+<text x="24.0" y="678.6" font-size="17" font-weight="400" fill="#5b6373" text-anchor="middle">0 %</text>
+<line x1="146.6" y1="644.8" x2="146.6" y2="652.8" stroke="#d9d6cf" stroke-width="1"/>
+<text x="146.6" y="678.6" font-size="17" font-weight="400" fill="#5b6373" text-anchor="middle">25 %</text>
+<line x1="269.2" y1="644.8" x2="269.2" y2="652.8" stroke="#d9d6cf" stroke-width="1"/>
+<text x="269.2" y="678.6" font-size="17" font-weight="400" fill="#5b6373" text-anchor="middle">50 %</text>
+<line x1="391.9" y1="644.8" x2="391.9" y2="652.8" stroke="#d9d6cf" stroke-width="1"/>
+<text x="391.9" y="678.6" font-size="17" font-weight="400" fill="#5b6373" text-anchor="middle">75 %</text>
+<line x1="514.5" y1="644.8" x2="514.5" y2="652.8" stroke="#d9d6cf" stroke-width="1"/>
+<text x="514.5" y="678.6" font-size="17" font-weight="400" fill="#5b6373" text-anchor="middle">100 %</text>
+<text x="24.0" y="58.0" font-size="32" font-weight="700" fill="#1a1d28" text-anchor="start">Habiter Besançon, travailler ici</text>
+<text x="24.0" y="97.2" font-size="32" font-weight="700" fill="#1a1d28" text-anchor="start">ou ailleurs</text>
+<text x="24.0" y="132.3" font-size="20" font-weight="400" fill="#3d4456" text-anchor="start">Part utilisant principalement la voiture pour aller</text>
+<text x="24.0" y="159.9" font-size="20" font-weight="400" fill="#3d4456" text-anchor="start">travailler, parmi les actifs résidant à Besançon, en</text>
+<text x="24.0" y="187.4" font-size="20" font-weight="400" fill="#3d4456" text-anchor="start">2022.</text>
+<text x="24.0" y="246.9" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille à Besançon</text>
+<rect x="24" y="261.4" width="490.5" height="44" rx="4" fill="#eef1f6"/>
+<line x1="146.6" y1="261.4" x2="146.6" y2="305.4" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="269.2" y1="261.4" x2="269.2" y2="305.4" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="391.9" y1="261.4" x2="391.9" y2="305.4" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="514.5" y1="261.4" x2="514.5" y2="305.4" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="261.4" width="239.4" height="44" rx="4" fill="#1c5cab"><title>Travaille à Besançon : 48.8 %</title></rect>
+<text x="273.4" y="293.0" font-size="29" font-weight="700" fill="#1a1d28" text-anchor="start">49 %</text>
+<text x="24.0" y="360.5" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille à Thise, École-Valentin,</text>
+<text x="24.0" y="388.0" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Miserey-Salines, Avanne-Aveney, Pirey ou</text>
+<text x="24.0" y="415.6" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Châtillon-le-Duc</text>
+<rect x="24" y="430.1" width="490.5" height="44" rx="4" fill="#eef1f6"/>
+<line x1="146.6" y1="430.1" x2="146.6" y2="474.1" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="269.2" y1="430.1" x2="269.2" y2="474.1" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="391.9" y1="430.1" x2="391.9" y2="474.1" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="514.5" y1="430.1" x2="514.5" y2="474.1" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="430.1" width="408.6" height="44" rx="4" fill="#1c5cab"><title>Travaille à Thise, École-Valentin, Miserey-Salines, Avanne-Aveney, Pirey ou Châtillon-le-Duc : 83.3 %</title></rect>
+<text x="442.6" y="461.7" font-size="29" font-weight="700" fill="#1a1d28" text-anchor="start">83 %</text>
+<text x="24.0" y="529.2" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Travaille ailleurs (hors de Besançon, Thise,</text>
+<text x="24.0" y="556.7" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">École-Valentin, Miserey-Salines,</text>
+<text x="24.0" y="584.2" font-size="22" font-weight="600" fill="#1a1d28" text-anchor="start">Avanne-Aveney, Pirey et Châtillon-le-Duc)</text>
+<rect x="24" y="598.8" width="490.5" height="44" rx="4" fill="#eef1f6"/>
+<line x1="146.6" y1="598.8" x2="146.6" y2="642.8" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="269.2" y1="598.8" x2="269.2" y2="642.8" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="391.9" y1="598.8" x2="391.9" y2="642.8" stroke="#d9d6cf" stroke-width="1"/>
+<line x1="514.5" y1="598.8" x2="514.5" y2="642.8" stroke="#d9d6cf" stroke-width="1"/>
+<rect x="24" y="598.8" width="389.5" height="44" rx="4" fill="#1c5cab"><title>Travaille ailleurs (hors de Besançon, Thise, École-Valentin, Miserey-Salines, Avanne-Aveney, Pirey et Châtillon-le-Duc) : 79.4 %</title></rect>
+<text x="423.5" y="630.4" font-size="29" font-weight="700" fill="#1a1d28" text-anchor="start">79 %</text>
+<text x="24.0" y="719.2" font-size="18" font-weight="400" fill="#5b6373" text-anchor="start">Groupes distincts de résidents ; les écarts décrivent des</text>
+<text x="24.0" y="743.9" font-size="18" font-weight="400" fill="#5b6373" text-anchor="start">pratiques. Source : INSEE, recensement 2022.</text>
+</svg>

@@ -1,0 +1,17 @@
+$ /Users/quentinbrache/Desktop/Futur·e/.venv-etudes/bin/python visuels/generer_visuels.py --insee 86194 --fiche /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/86194/fiche/fiche.json --contours /Users/quentinbrache/Desktop/Futur·e/data/cache-etudes/2026-10-13-larochelle-mobilite/cache-outil/iris_ign_86194.json --classes auto --communes  --reperes 861940104,861940103,861940803,861940105,861940106,861940404,861940503,861940605,861940101 --out /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/etude-larochelle/docs/etudes/2026-10-13-larochelle-mobilite/lots/2026-10-lot-01/86194/visuels
+
+{
+ "carte": {
+  "habitat": 35,
+  "non_res": 6,
+  "sans_donnee": 0
+ },
+ "barres": [
+  0.538,
+  0.759,
+  0.74
+ ],
+ "alt_carte": "Carte de Poitiers découpée en 35 secteurs statistiques (IRIS) d'habitat, colorés selon la part des actifs qui vont travailler principalement en voiture en 2022 (cinq classes de bleu, de 30 à 80 %). La part la plus basse est d'environ 33 % (Hôtel de Ville), la plus élevée d'environ 77 % (Saint-Éloi-Fraternité). 6 secteurs d'activité exclus. Source : INSEE, recensement 2022.",
+ "alt_barres": "Graphique en 3 barres sur une échelle de 0 à 100 %. Parmi les actifs résidant à Poitiers, part qui va travailler principalement en voiture : travaillant à Poitiers, 54 % ; travaillant à Buxerolles, Jaunay-Marigny, Saint-Benoît, Vouneuil-sous-Biard, Migné-Auxances ou Chasseneuil-du-Poitou, 76 % ; travaillant ailleurs (hors de Poitiers, Buxerolles, Jaunay-Marigny, Saint-Benoît, Vouneuil-sous-Biard, Migné-Auxances et Chasseneuil-du-Poitou), 74 %. Groupes distincts ; les écarts décrivent des pratiques, pas un effet causal. Source : INSEE, recensement 2022."
+}
+

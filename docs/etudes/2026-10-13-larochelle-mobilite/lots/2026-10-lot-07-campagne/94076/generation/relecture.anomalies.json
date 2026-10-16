@@ -1,0 +1,11 @@
+{
+ "anomalies": [
+  {
+   "categorie": "raisonnement",
+   "gravite": "a_revoir",
+   "passage": "À Mermoz, les services proches accompagnent des usages variés",
+   "probleme": "Le titre parle d'« usages » à côté des services proches. Un lecteur peut comprendre que le dossier mesure l'usage de ces équipements ou un lien entre proximité et pratiques. Or `iris.940760116.panier_500m` ne décrit que la proximité des adresses. Le seul usage mesuré est le mode domicile-travail (`iris.voiture.max`), et c'est à Mermoz que la part de la voiture est la plus élevée, ce que « variés » ne dit pas.",
+   "correction_minimale": "Remplacer le titre par une formulation descriptive, par exemple : « À Mermoz, des services proches et la plus forte part de voiture pour aller travailler »."
+  }
+ ]
+}

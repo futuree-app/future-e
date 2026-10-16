@@ -1,0 +1,18 @@
+{
+ "anomalies": [
+  {
+   "categorie": "consigne_interne",
+   "gravite": "a_revoir",
+   "passage": "Le dossier mesure la présence conjointe d’un commerce alimentaire",
+   "probleme": "« Le dossier » est un mot de production qui renvoie à une pièce que le lecteur ne voit pas (faits iris.591830203.panier_500m, iris.591830202.panier_500m, iris.591831602.panier_500m).",
+   "correction_minimale": "Remplacer « Le dossier mesure la présence conjointe » par « On regarde ici la présence conjointe » ou par une tournure sans sujet, par exemple « La présence conjointe […] concerne 43 % des adresses de Sud-Gare… »."
+  },
+  {
+   "categorie": "lisibilite",
+   "gravite": "a_revoir",
+   "passage": "Pour le travail, regarder le secteur et sa destination",
+   "probleme": "« sa destination » se rapporte grammaticalement au secteur : le titre laisse croire que l'on a une part par secteur et par commune de travail, alors que les parts par secteur (iris.*.voiture) et selon la destination (destination.59183.voiture) ne se croisent pas.",
+   "correction_minimale": "« Pour le travail, regarder le secteur et votre lieu de travail »."
+  }
+ ]
+}
