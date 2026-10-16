@@ -16,7 +16,7 @@ import { HORIZONS } from "@/lib/horizons";
 import { releve as s, Surtitre, Plaque, RegleDuTemps, Marge, GlypheGrain, EmblemeEchelles, type GrainCle } from "@/components/releve/primitives";
 
 // La trajectoire de Marseille (maille du 1er arrondissement), valeurs figées et vérifiées contre
-// `public/data_climat.json` par `recits.test.ts`. Le texte de chaque palier vient de `carteCompte`.
+// `data/data_climat.json` par `recits.test.ts`. Le texte de chaque palier vient de `carteCompte`.
 function trajectoireMarseille() {
   const brut = MACHINE_A_SOUS_DRIAS["13201"];
   const ind = Object.fromEntries(Object.entries(brut).map(([g, v]) => [g, Object.fromEntries(Object.entries(v).map(([k, n]) => [k, { value_numeric: n }]))])) as Indicators;

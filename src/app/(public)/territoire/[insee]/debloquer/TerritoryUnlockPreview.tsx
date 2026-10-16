@@ -41,6 +41,23 @@ function CarteFait({ fait }: { fait: FaitApercu }) {
 }
 
 export function TerritoryUnlockPreview({ apercu }: { apercu: ApercuTerritoire }) {
+  if (apercu.etat === "hors_couverture") {
+    // HOTFIX FUT-104 · CODE ULTRAMARIN. L'état « sans fait » annoncerait une trajectoire climatique que le dossier
+    // n'a pas : on dit l'absence, et pourquoi, avant tout achat.
+    return (
+      <div className="rounded-2xl border border-[var(--border-1)] bg-[var(--bg-elev)] p-5">
+        <p className="text-[15px] leading-[1.7] text-label/85">
+          Les projections climatiques du dossier (DRIAS-TRACC, Météo-France) couvrent l&apos;Hexagone et la
+          Corse&nbsp;: elles ne s&apos;appliquent pas à {apercu.commune}.
+        </p>
+        <p className="mt-3 text-[14px] leading-[1.7] text-muted">
+          Le dossier de {apercu.commune} ne contient donc pas de trajectoire climatique. Les projections propres
+          aux outre-mer sont en cours d&apos;intégration.
+        </p>
+      </div>
+    );
+  }
+
   if (apercu.etat === "sans_fait") {
     // L'ÉTAT SANS FAIT. Visible et stable. Il dit que l'analyse existe dans le dossier, et que l'aperçu
     // gratuit n'en isole aucun indicateur : jamais que futur•e n'aurait rien trouvé.

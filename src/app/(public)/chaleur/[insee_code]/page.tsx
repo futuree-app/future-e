@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { estCodeOutremer } from '@/lib/outremer/code-outremer';
 import { getClimatDataCommune, getRangNational } from '@/lib/drias-json';
 import { phraseDePosition, type Rang } from '@/lib/rang-national';
 import { HORIZON } from '@/lib/horizons';
@@ -19,7 +21,8 @@ import { communesAPregenerer } from '@/lib/communes-pregenerees';
 import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
-  return communesAPregenerer().map((code) => ({ insee_code: code }));
+  // Hotfix FUT-104 : aucune page ultramarine n'est fabriquée au build (elles répondent 404, cf. plus bas).
+  return communesAPregenerer().filter((code) => !estCodeOutremer(code)).map((code) => ({ insee_code: code }));
 }
 
 const ACCENT = '#f87171';
@@ -65,6 +68,12 @@ export async function generateMetadata({
   params: Promise<{ insee_code: string }>;
 }): Promise<Metadata> {
   const { insee_code } = await params;
+  // Hotfix FUT-104 : ni titre ni description de projection pour un territoire que DRIAS ne couvre pas. La page répond
+  // 404 (`notFound()` dans le composant) ; les métadonnées ne l'appellent pas, sans quoi le HTML initial de la page
+  // d'explication sort vide (rendu seulement côté client, constaté sur le build de production).
+  if (estCodeOutremer(insee_code)) {
+    return { title: "Projections climatiques indisponibles · futur•e", robots: { index: false, follow: false } };
+  }
   const [commune, drias] = await Promise.all([fetchCommune(insee_code), getClimatDataCommune(insee_code).catch(() => null)]);
   const nomCommune = commune?.nom_commune ?? drias?.commune?.n ?? insee_code;
   const title = `Chaleur et canicule à ${nomCommune} : projections 2050`;
@@ -167,6 +176,10 @@ export default async function ChaleurCommune({
   params: Promise<{ insee_code: string }>;
 }) {
   const { insee_code } = await params;
+  // HOTFIX FUT-104 · AUCUNE PROJECTION DRIAS POUR L'OUTRE-MER. Les anciennes valeurs de ces codes venaient de points de
+  // grille métropolitains (Fort-de-France affichait celles du Conquet). Statut 404 et page d'explication
+  // (`not-found.tsx`), sans chiffre ni rang ni appel au dossier, jusqu'au raccordement des projections SocleOM.
+  if (estCodeOutremer(insee_code)) notFound();
 
   const [commune, driasData, georisques, atmo, era5, catnat] = await Promise.all([
     fetchCommune(insee_code),
@@ -307,7 +320,7 @@ export default async function ChaleurCommune({
             À {communeName}, à quoi ressemblera un été en 2050 ?
           </h1>
           <p style={{ fontSize: 15, color: 'var(--fg-3)', lineHeight: 1.75, maxWidth: 640, margin: '0 0 12px' }}>
-            Cette page rassemble les projections climatiques officielles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi l&apos;ensemble des communes françaises. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
+            Cette page rassemble les projections climatiques officielles pour {communeName}, nombre de jours de canicule, nuits sans fraîcheur, risques associés, à deux horizons : 2050, où la France atteint +2,7 °C, et 2100, où elle atteint +4 °C. Chaque mesure est située parmi les communes de l&apos;Hexagone et de Corse que couvrent ces projections. Les données viennent de Météo-France, du CNRS, et des bases de risques officielles de l&apos;État.
           </p>
           <p style={{ fontSize: 14, color: 'var(--fg-4)', lineHeight: 1.65, maxWidth: 640, margin: 0, fontFamily: 'var(--font-mono)' }}>
             Que vous habitiez ici, envisagiez d&apos;y déménager ou prépariez votre avenir, ces chiffres vous concernent directement.
@@ -401,7 +414,7 @@ export default async function ChaleurCommune({
                   <strong>{phraseDePosition(item.rang ?? null)}</strong>, à l&apos;horizon{' '}
                   {HORIZON.gwl20.annee}.
                   <div className="rang-meta">
-                    {item.rang!.total.toLocaleString('fr-FR')} communes comparées · DRIAS-TRACC ·
+                    {item.rang!.total.toLocaleString('fr-FR')}{" "}communes de l&apos;Hexagone et de Corse comparées · DRIAS-TRACC ·
                     Météo-France · maille communale
                   </div>
                 </div>

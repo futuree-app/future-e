@@ -3,6 +3,7 @@ import path from "node:path";
 import { DRIAS_CITY_FALLBACK } from "@/lib/communes";
 import type { ClimatProjete } from "@/lib/logement-synthesis-cache";
 import { construireEchelle, rangDe, type Rang } from "@/lib/rang-national";
+import { estCodeOutremer } from "@/lib/outremer/code-outremer";
 
 // Mapping des colonnes techniques vers nos indicateurs métier.
 //
@@ -95,7 +96,7 @@ async function getIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
 }
 
 async function chargerIndex(): Promise<Map<string, Map<ScenarioId, RawRow>>> {
-  const filePath = path.join(process.cwd(), "public", "data_climat.json");
+  const filePath = path.join(process.cwd(), "data", "data_climat.json");
   const raw = await fs.readFile(filePath, "utf8");
   const rows: RawRow[] = JSON.parse(raw);
 
@@ -174,16 +175,19 @@ async function construireEchelleNationale(
  *
  * Retourne `null` quand la commune est absente de l'index, quand l'indicateur ne lui est pas
  * fourni, ou quand l'indicateur est inconnu. Une absence de rang se dit, elle ne se remplace pas
- * par une position moyenne : le périmètre DRIAS exclut les DROM, et une commune d'outre-mer doit
- * lire « non comparée » plutôt qu'un rang qui n'existe pas.
+ * par une position moyenne : le périmètre DRIAS exclut l'outre-mer, et une commune d'outre-mer doit
+ * lire « non comparée » plutôt qu'un rang qui n'existe pas (refus explicite, FUT-104). L'échelle ne compte
+ * que les communes que DRIAS couvre : 34 788, Hexagone et Corse.
  */
 export async function getRangNational(
   inseeCode: string,
   scenario: ScenarioId,
   indicateur: string,
 ): Promise<Rang | null> {
-  const index = await getIndex();
   const safeInsee = String(inseeCode).padStart(5, "0");
+  // Un code ultramarin n'a pas de rang : DRIAS ne le couvre pas (cf. getClimatDataCommune).
+  if (estCodeOutremer(safeInsee)) return null;
+  const index = await getIndex();
   const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;
 
   const row = index.get(lookupInsee)?.get(scenario);
@@ -217,10 +221,18 @@ function rowToIndicators(row: RawRow, colonnes: Record<string, string> = COLUMN_
  * @param inseeCode Le code INSEE (ex: "13055")
  */
 export async function getClimatDataCommune(inseeCode: string, options: { accueil?: boolean } = {}) {
-  const index = await getIndex();
-  
   // Formatage de la recherche pour correspondre à l'index
   const safeInsee = inseeCode.padStart(5, '0');
+
+  // FUT-104 · UN CODE ULTRAMARIN N'EST PAS UNE COMMUNE DRIAS, et l'index n'est pas chargé pour lui.
+  // DRIAS-TRACC (modèles EURO-CORDEX) ne couvre que l'Hexagone et la Corse. Le fichier contenait 218 entités
+  // 97xxx/98xxx venues d'une jointure au point de grille le plus proche, sans distance maximale (les Antilles y
+  // recevaient les valeurs du Conquet) : le constructeur les exclut désormais (scripts/lib/drias-jointure.mjs) et le
+  // fichier n'en contient plus aucune. Ce refus reste explicite, pour qu'une ligne réintroduite ne soit jamais servie.
+  // Le climat ultramarin se lit dans `@/lib/outremer` (SocleOM, Météo-France).
+  if (estCodeOutremer(safeInsee)) return null;
+
+  const index = await getIndex();
 
   // Pour Paris, Lyon, Marseille : DRIAS indexe par arrondissement, pas par ville entière
   const lookupInsee = DRIAS_CITY_FALLBACK[safeInsee] ?? safeInsee;

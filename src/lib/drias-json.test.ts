@@ -20,7 +20,7 @@ type Ligne = Record<string, string | number | null> & { insee_code: string | num
 
 let cache: Ligne[] | null = null;
 function lignes(): Ligne[] {
-  cache ??= JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Ligne[];
+  cache ??= JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Ligne[];
   return cache;
 }
 const num = (r: Ligne | undefined, col: string): number | null => {

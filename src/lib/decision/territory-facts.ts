@@ -6,7 +6,7 @@ import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import {
   getCommuneEntry, subScore, PREFERENCE_KEYS, placeDirectory, tailleVilleResolvedOf, type IndexCommune,
 } from "../comparateur-vie.ts";
-import { hydrateHardConstraints } from "../hard-constraints-hydrate.ts";
+import { hydrateHardConstraints, annuaireNecessaire } from "../hard-constraints-hydrate.ts";
 import { resolveExternalReferences } from "../hard-constraints-external.ts";
 import {
   PRODUCT_CONVENTIONS_VERSION, ROUTABLE_MODES,
@@ -124,8 +124,10 @@ export async function buildHardContext(
 ): Promise<EvaluationContext> {
   // La MÊME chaîne que matchProjects : même annuaire, même géocodage, même isochrone, mêmes contrôles.
   const hcRaw = project.parsed?.hardConstraints;
-  const dir = await placeDirectory();
-  const constraints = hydrateHardConstraints(hcRaw, dir, await resolveExternalReferences(hcRaw, dir));
+  // L'annuaire (l'index complet) n'est chargé que si une contrainte le lit : sans « près de… », « hors de… » ni
+  // taille relative, l'hydratation est identique sans lui (`annuaireNecessaire`). FUT-50, 16/10/2026.
+  const dir = annuaireNecessaire(hcRaw) ? await placeDirectory() : null;
+  const constraints = hydrateHardConstraints(hcRaw, dir, dir ? await resolveExternalReferences(hcRaw, dir) : undefined);
   // LE POINT RÉELLEMENT TESTÉ. Sans coordonnées, il reste NULL : une commune sans lat/lon repliée sur
   // (0, 0) atterrit dans le golfe de Guinée, et la contrainte de proximité en tirerait une incompatibilité
   // ÉTABLIE, avec sa carte et sa preuve, sur un point inventé.
@@ -245,6 +247,20 @@ export async function buildCommuneDossier(
 ): Promise<{ moduleFacts: ModuleFacts; dossier: Dossier; hard: EvaluationContext } | null> {
   const loaded = await loadModuleFacts(insee, { hasAddress: opts?.hasAddress ?? false, citycode: opts?.citycode });
   if (!loaded) return null;
+  return dossierDepuisFaits(loaded, project, { relation: opts?.relation ?? null });
+}
+
+/**
+ * LE DOSSIER À PARTIR DE FAITS DÉJÀ CHARGÉS : la partie pure de `buildCommuneDossier` (projet effectif, contexte
+ * des contraintes, règles, assemblage). Le dossier payant y passe ses faits complets ; la lecture de l'accueil
+ * (`src/lib/accueil/lecture-accueil.ts`) y passe des faits reconstitués depuis les fichiers légers. UNE seule suite
+ * de règles pour les deux : aucune règle n'est réécrite pour l'accueil.
+ */
+export async function dossierDepuisFaits(
+  loaded: ModuleFacts,
+  project: UserProject,
+  opts?: { relation?: RelationAuLieu | null },
+): Promise<{ moduleFacts: ModuleFacts; dossier: Dossier; hard: EvaluationContext }> {
   const facts: ModuleFacts = { ...loaded, relationAuLieu: opts?.relation ?? null };
   project = await projetDeLecture(project);
   const hard = await buildHardContext(project, facts);

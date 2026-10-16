@@ -113,7 +113,7 @@ export const SAVOIR_HUB_ARTICLES: HubArticle[] = [
     slug: 'canicule',
     title: 'Canicule en 2050',
     description:
-      "Des villes comme Marseille atteindront 63 jours > 30 °C par an. Découvrez les communes françaises les plus exposées.",
+      "Des villes comme Marseille atteindront 63 jours > 30 °C par an. Découvrez les communes de l'Hexagone et de Corse les plus exposées.",
     category: 'Environnement',
     accent: '#f87171',
     href: '/chaleur',

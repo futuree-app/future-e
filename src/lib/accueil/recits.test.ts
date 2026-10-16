@@ -1,6 +1,6 @@
 // FUT-37 : ce que les cartes de l'accueil RACONTENT, pas seulement qu'elles apparaissent.
 //
-// Les communes du panel sont réelles (__fixtures__/panel.json : valeurs DRIAS de public/data_climat.json,
+// Les communes du panel sont réelles (__fixtures__/panel.json : valeurs DRIAS de data/data_climat.json,
 // drapeaux GASPAR et catégories relevés le 02/10/2026). Avant FUT-37, la carte d'accroche disait à
 // Chamonix (0 jour au-dessus de 35 °C) que les chaleurs extrêmes « pourraient durer plusieurs semaines
 // par an » ; à Briançon (0 jour d'indice forêt-météo ≥ 40) que le risque d'incendie « pourrait
@@ -287,9 +287,9 @@ test("machine à sous : Vannes n'a plus de submersion, et aucune carte n'emploie
   assert.equal(carteMachineASous("Marseille", "risque")!.fait, "L'État recense un risque de submersion marine sur la commune.");
 });
 
-test("machine à sous : les valeurs figées n'ont pas dérivé de public/data_climat.json", () => {
+test("machine à sous : les valeurs figées n'ont pas dérivé de data/data_climat.json", () => {
   const COL: Record<string, string> = { NORTX35D_yr: "column08", ATX35D_yr: "column23", NORTR_yr: "column10", ATR_yr: "column25" };
-  const lignes = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
+  const lignes = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, string | number>[];
   for (const [insee, parGwl] of Object.entries(MACHINE_A_SOUS_DRIAS)) {
     for (const [gwl, valeurs] of Object.entries(parGwl)) {
       const ligne = lignes.find((r) => String(r.insee_code).padStart(5, "0") === insee && r.scenario === gwl)!;

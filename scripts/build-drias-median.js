@@ -2,11 +2,16 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { joindreAuPointLePlusProche } from "./lib/drias-jointure.mjs";
 
 const SOURCE_DIR = path.join(process.cwd(), "data", "source");
 const COMMUNES_CSV = path.join(process.cwd(), "data", "communes-france-coords.csv");
-const OUTPUT_JSON = path.join(process.cwd(), "public", "data_climat.json");
-const OUTPUT_META = path.join(process.cwd(), "data", "drias_median_metadata.json");
+// HORS DE public/ (hotfix FUT-104, 16/10/2026) : le fichier n'est lu que par le serveur. Sous public/, Vercel le
+// distribuait tel quel à https://futur-e.fr/data_climat.json, lignes ultramarines erronées comprises.
+// Les sorties sont surchargeables pour vérifier une reconstruction sans écraser le fichier livré.
+const OUTPUT_JSON = process.env.DRIAS_OUTPUT_JSON ?? path.join(process.cwd(), "data", "data_climat.json");
+const OUTPUT_META = process.env.DRIAS_OUTPUT_META ?? path.join(process.cwd(), "data", "drias_median_metadata.json");
 
 function parseCsvLine(line) {
   const values = [];
@@ -53,12 +58,6 @@ function parseNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function squaredDistance(aLat, aLon, bLat, bLon) {
-  const dLat = aLat - bLat;
-  const dLon = aLon - bLon;
-  return dLat * dLat + dLon * dLon;
-}
-
 function median(values) {
   if (values.length === 0) {
     return null;
@@ -82,7 +81,7 @@ function toFixedNumber(value, digits = 4) {
   return Number(value.toFixed(digits));
 }
 
-async function loadCommunes() {
+export async function loadCommunes() {
   const raw = await fs.readFile(COMMUNES_CSV, "utf8");
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const header = parseCsvLine(lines[0]);
@@ -106,7 +105,7 @@ async function loadCommunes() {
   });
 }
 
-async function parseDriasFile(filePath) {
+export async function parseDriasFile(filePath) {
   const raw = await fs.readFile(filePath, "utf8");
   const lines = raw.split(/\r?\n/).filter(Boolean);
 
@@ -162,36 +161,18 @@ async function parseDriasFile(filePath) {
   };
 }
 
-function buildNearestPointIndex(communes, pointRows) {
+export function buildNearestPointIndex(communes, pointRows) {
   const points = pointRows.map((row) => ({
     pointId: row.Point,
     latitude: row.Latitude,
     longitude: row.Longitude,
   }));
-
-  return communes.map((commune) => {
-    let nearestPointId = null;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-
-    for (const point of points) {
-      const distance = squaredDistance(
-        commune.latitude,
-        commune.longitude,
-        point.latitude,
-        point.longitude,
-      );
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestPointId = point.pointId;
-      }
-    }
-
-    return {
-      ...commune,
-      nearestPointId,
-    };
-  });
+  // Exclusion de l'outre-mer et distance maximale : cf. scripts/lib/drias-jointure.mjs.
+  const { associees, exclues } = joindreAuPointLePlusProche(communes, points);
+  if (exclues.length) {
+    console.log(`${exclues.length} communes ultramarines exclues : la grille DRIAS-TRACC ne couvre pas leur territoire.`);
+  }
+  return associees;
 }
 
 async function main() {
@@ -351,7 +332,10 @@ async function main() {
   console.log(`Wrote metadata to ${path.relative(process.cwd(), OUTPUT_META)}.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Exécuté seulement en ligne de commande : les tests importent les fonctions sans lancer la construction.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

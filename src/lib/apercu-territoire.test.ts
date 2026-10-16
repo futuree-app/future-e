@@ -9,6 +9,7 @@ import {
 import { buildClimatFacts, CLIMAT_METRICS, type GwlScenarios } from "./decision/climat-facts.ts";
 import { carteCompte, CHALEUR, FEUX, formatCompte } from "./accueil/recits.ts";
 import { indicatorsDepuisScenarios } from "./accueil/faits.ts";
+import { estCodeOutremer } from "./outremer/code-outremer.ts";
 import {
   CLES_APERCU, HORIZONS_APERCU, lireColumnMap, valeurDrias,
 } from "../../scripts/build-apercu-climat.mjs";
@@ -42,7 +43,9 @@ const texteDe = (f: FaitApercu) =>
 
 const extrait = JSON.parse(readFileSync("src/data/apercu-climat-communes.json", "utf8")) as ExtraitClimat;
 const reel = (insee: string, nom = insee) => construireApercu(insee, nom, scenariosDepuisExtrait(extrait, insee));
-const echantillon = (pas: number) => Object.keys(extrait.communes).filter((_, i) => i % pas === 0);
+// Les codes ultramarins sont écartés APRÈS l'échantillonnage, pour garder exactement les mêmes communes
+// métropolitaines qu'avant le hotfix FUT-104 : l'extrait les contient, la lecture les refuse.
+const echantillon = (pas: number) => Object.keys(extrait.communes).filter((c, i) => i % pas === 0 && !estCodeOutremer(c));
 
 // ── T1 : plus de timeout destructeur ────────────────────────────────────────────────────────────────
 test("T1 : l'aperçu ne dépend plus d'un Promise.race ni d'un plafond de temps pour exister", () => {
@@ -131,7 +134,8 @@ test("T8 : sans fait formulable, l'aperçu rend un état explicite, jamais null,
   assert.doesNotMatch(page, /\{\s*(preview|apercu)\s*&&/);
   assert.match(page, /<TerritoryUnlockPreview apercu=\{apercu\} \/>/);
   // Le surtitre ne promet pas « un fait » quand il n'y en a aucun.
-  assert.match(page, /apercu\.etat === "sans_fait"\s*\?\s*"Aperçu du dossier"/);
+  // (Depuis le hotfix FUT-104, tout état autre que « faits », sans fait ou hors couverture, prend ce surtitre.)
+  assert.match(page, /apercu\.etat !== "faits"\s*\?\s*"Aperçu du dossier"/);
   // Et l'état sans fait ne laisse pas croire que futur•e n'a rien trouvé : il dit que le dossier lit.
   const composant = readFileSync("src/app/(public)/territoire/[insee]/debloquer/TerritoryUnlockPreview.tsx", "utf8");
   assert.match(composant, /apercu\.etat === "sans_fait"/);
@@ -163,6 +167,7 @@ test("T10 : l'aperçu primaire n'appelle aucune source réseau, donc aucune ne p
   const autorises = new Set([
     "server-only", "@/data/apercu-climat-communes.json", "@/lib/apercu-territoire",
     "./decision/climat-facts.ts", "./horizons.ts", "./accueil/recits.ts", "./accueil/faits.ts", "./plm.ts",
+    "./outremer/code-outremer.ts",
   ]);
   for (const fichier of ["src/lib/quartier-preview.ts", "src/lib/apercu-territoire.ts"]) {
     const src = readFileSync(fichier, "utf8");
@@ -246,10 +251,10 @@ test("D : un code d'arrondissement est dit « arrondissement », jamais « commu
 
 // ── L'extrait : fidèle à DRIAS, et à jour ───────────────────────────────────────────────────────────
 test("Extrait : son empreinte est celle du fichier DRIAS présent", () => {
-  const sha = createHash("sha256").update(readFileSync("public/data_climat.json")).digest("hex");
+  const sha = createHash("sha256").update(readFileSync("data/data_climat.json")).digest("hex");
   assert.equal(
     extrait.source.sha256, sha,
-    "public/data_climat.json a changé depuis la génération de src/data/apercu-climat-communes.json : " +
+    "data/data_climat.json a changé depuis la génération de src/data/apercu-climat-communes.json : " +
       "l'extrait compact de l'aperçu Territoire doit être régénéré. Lancez " +
       "`node scripts/build-apercu-climat.mjs`, puis committez le fichier produit avec ce changement de DRIAS.",
   );
@@ -259,8 +264,9 @@ test("Extrait : son empreinte est celle du fichier DRIAS présent", () => {
 
 test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-json.ts", () => {
   const columnMap = lireColumnMap(readFileSync("src/lib/drias-json.ts", "utf8"));
-  const lignes = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, unknown>[];
-  const temoins = new Set(["17300", "29019", "13201", "05023", "2B033", "01001", "97411"]);
+  const lignes = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, unknown>[];
+  // 97411 était témoin ici : depuis le hotfix FUT-104, un code ultramarin ne rend plus rien (test suivant).
+  const temoins = new Set(["17300", "29019", "13201", "05023", "2B033", "01001"]);
   let vus = 0;
   for (const row of lignes) {
     const insee = String(row.insee_code).padStart(5, "0");
@@ -272,4 +278,23 @@ test("Extrait : il rend les mêmes nombres que DRIAS lu par le mapping de drias-
     vus++;
   }
   assert.ok(vus >= 15);
+});
+
+test("Extrait : aucune ligne ultramarine, et l'aperçu dit l'absence (FUT-104)", () => {
+  // Les 218 lignes ultramarines (copies du Conquet, de Bonifacio…) ont quitté DRIAS, donc l'extrait.
+  assert.equal(Object.keys(extrait.communes).filter(estCodeOutremer).length, 0);
+  assert.equal(Object.keys(extrait.communes).length, 34788);
+  for (const code of ["97411", "97209", "97302", "97611", "98735", "98818", "97801", "97101"]) {
+    assert.equal(extrait.communes[code], undefined, `${code} absent de l'extrait`);
+    // Et si une ligne réapparaissait, la lecture la refuserait encore.
+    const contamine = { ...extrait, communes: { ...extrait.communes, [code]: extrait.communes["29040"] } };
+    assert.equal(scenariosDepuisExtrait(contamine, code), null, code);
+    // Même si quelqu'un lui passait les scénarios bruts, l'aperçu d'un code ultramarin ne formule aucun fait.
+    const brut = { gwl20: { h: "2050", v: { NORTX35D_yr: 0.3, ATX35D_yr: 0.2, NORTR_yr: 2.5, ATR_yr: 1.5 } } };
+    assert.deepEqual(construireApercu(code, "Fort-de-France", brut), { etat: "hors_couverture", commune: "Fort-de-France" });
+    assert.deepEqual(reel(code, "Fort-de-France"), { etat: "hors_couverture", commune: "Fort-de-France" });
+  }
+  // Le Conquet, dont Fort-de-France recevait la ligne, reste servi tel quel.
+  assert.ok(scenariosDepuisExtrait(extrait, "29040"));
+  assert.equal(reel("29040").etat, "faits");
 });

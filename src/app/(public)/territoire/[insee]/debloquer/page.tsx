@@ -133,7 +133,7 @@ export default async function TerritoryUnlockPage({
             désormais un fait tiré des données du dossier, et son titre dit exactement cela. */}
         <section className="mt-20" style={reveal(2)}>
           <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent mb-2">
-            {apercu.etat === "sans_fait"
+            {apercu.etat !== "faits"
               ? "Aperçu du dossier"
               : apercu.faits.length > 1 ? "Deux faits de ce territoire" : "Un fait de ce territoire"}
           </p>
@@ -186,7 +186,7 @@ export default async function TerritoryUnlockPage({
           <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
             Dire que {displayName} sera exposée à la chaleur ne vous apprend rien : c&apos;est vrai
             presque partout. Ce qui décide, c&apos;est de savoir où elle se situe parmi les 34 000
-            communes françaises, et sur quels critères précisément. Cette position se calcule avant
+            communes de l&apos;Hexagone et de Corse, et sur quels critères précisément. Cette position se calcule avant
             qu&apos;on vous la demande, sur toutes les communes à la fois, avec la même méthode.
             C&apos;est ce travail que vous payez, pas l&apos;accès à des données publiques et
             gratuites.

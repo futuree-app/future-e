@@ -116,12 +116,14 @@ export function phraseDePosition(rang: Rang | null): string | null {
   if (!rang) return null;
   const { percentile } = rang;
 
+  // « De l'Hexagone et de Corse », pas « françaises » (FUT-104) : l'échelle est celle de DRIAS-TRACC, qui ne couvre
+  // pas l'outre-mer. Ses 218 lignes ultramarines, des points de grille métropolitains, en sont retirées.
   if (percentile >= 75) {
-    return `Parmi les ${partSuperieure(rang)} % des communes françaises les plus exposées`;
+    return `Parmi les ${partSuperieure(rang)} % des communes de l'Hexagone et de Corse les plus exposées`;
   }
   if (percentile <= 25) {
     const part = Math.min(100, Math.max(1, Math.round(percentile)));
-    return `Parmi les ${part} % des communes françaises les moins exposées`;
+    return `Parmi les ${part} % des communes de l'Hexagone et de Corse les moins exposées`;
   }
   return null;
 }

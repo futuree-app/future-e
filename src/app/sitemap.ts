@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { isArrondissement } from '@/lib/communes';
+import { estCodeOutremer } from '@/lib/outremer/code-outremer';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://futur-e.fr';
 
@@ -50,7 +51,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const communes: { code: string }[] = await res.json();
 
     communeEntries = communes
-      .filter((c) => !isArrondissement(c.code))
+      // Hotfix FUT-104 : les pages climatiques ultramarines répondent 404 tant que leurs projections propres
+      // (SocleOM) ne sont pas raccordées ; DRIAS ne couvre pas l'outre-mer. Elles n'ont rien à faire ici.
+      .filter((c) => !isArrondissement(c.code) && !estCodeOutremer(c.code))
       .map((c) => ({
         url: `${BASE_URL}/chaleur/${c.code}`,
         priority: 0.6,

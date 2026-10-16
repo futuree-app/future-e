@@ -6,7 +6,7 @@
  * les 50 communes les plus exposées dans la table `communes_tension` de Supabase.
  *
  * Sources :
- *   - public/data_climat.json (DRIAS, 35 000+ communes, scénario gwl20)
+ *   - data/data_climat.json (DRIAS, 35 000+ communes, scénario gwl20)
  *   - communes_categorization Supabase (catégories territoriales)
  *
  * Usage :
@@ -165,7 +165,7 @@ function deptFromInsee(insee) {
 
 async function main() {
   console.log('Loading data_climat.json …');
-  const filePath = path.join(process.cwd(), 'public', 'data_climat.json');
+  const filePath = path.join(process.cwd(), 'data', 'data_climat.json');
   const raw = await fs.readFile(filePath, 'utf8');
   const allRows = JSON.parse(raw);
 
@@ -173,6 +173,9 @@ async function main() {
   const byInsee = new Map();
   for (const row of allRows) {
     const insee = String(row.insee_code).padStart(5, '0');
+    // Hotfix FUT-104 : DRIAS-TRACC ne couvre pas l'outre-mer ; ses lignes 97xxx/98xxx sont des points de grille
+    // métropolitains. Aucun score n'en est tiré.
+    if (/^9[78]/.test(insee)) continue;
     const scenario = String(row.scenario).toLowerCase(); // gwl15, gwl20, gwl30
     if (!byInsee.has(insee)) byInsee.set(insee, {});
     byInsee.get(insee)[scenario] = row;
