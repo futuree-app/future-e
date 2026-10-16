@@ -17,6 +17,10 @@ import type { LecturePastille, Lieu, MesureChaleur } from "./pastilles.ts";
 export const HORS_OFFRE_OUTREMER = "Les dossiers de futur•e couvrent pour l'instant l'Hexagone et la Corse. Ils ne sont pas encore proposés pour ce territoire.";
 export const SUITE_OUTREMER: LecturePastille["suite"] = { horsOffre: HORS_OFFRE_OUTREMER };
 
+// Ce qui reste à vérifier quand une donnée manque, dit sans renvoyer à un dossier qui n'existe pas outre-mer (V1).
+const RESSENTI = "La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit.";
+const BASSIN_DE_VIE = "Le bassin de vie peut être bien plus large que la commune : services, emplois et trajets se lisent autour de l'adresse.";
+
 /** 5,4 · 47 · 0,1 : une décimale sous 10 (sauf si elle est nulle), l'entier au-delà. */
 export function nombre(v: number): string {
   const arrondi = v < 10 ? Math.round(v * 10) / 10 : Math.round(v);
@@ -60,7 +64,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
   const nuits = axe(lecture, t.reperes?.chaleurNuit);
   if (!jours) {
     return indisponible(lieu, "chaleur", "L'indicateur de chaleur retenu pour ce territoire n'est pas publié ici : nous n'en tirons rien.",
-      "Le dossier de la commune présentera les projections disponibles.");
+      `Les projections propres aux territoires d'outre-mer sont publiées par Météo-France. ${RESSENTI}`);
   }
   const niveau = degres(lecture.niveaux["2050"]);
   const ref = (a: Axe) => (a.reference != null ? `contre ${nombre(a.reference)} sur 1991-2020` : "sans valeur publiée pour 1991-2020");
@@ -99,7 +103,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
       texte: `Ces chiffres décrivent l'évolution projetée de la chaleur à ${lieu.commune}. futur•e ne les classe pas encore en favorable ou défavorable : les règles de lecture propres à ${t.designation} restent à établir.`,
     },
     methode,
-    aVerifier: `${limites.join(" ")} La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit.`,
+    aVerifier: `${limites.join(" ")} ${RESSENTI}`,
     suite: SUITE_OUTREMER,
   };
 }
@@ -108,7 +112,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
 export function lireHiversOutremer(lieu: Lieu, t: TerritoireOutremer): LecturePastille {
   return indisponible(lieu, "hivers",
     `Ce critère est défini pour l'Hexagone : la température moyenne de décembre à février, sur 1976-2005. Pour ${t.designation}, futur•e n'a pas encore de lecture validée de la saison fraîche : aucun chiffre n'est affiché.`,
-    "Le dossier de la commune présentera les températures disponibles pour ce territoire, avec leur période de référence.");
+    "Les projections propres aux territoires d'outre-mer sont publiées par Météo-France, par rapport à la période 1991-2020.");
 }
 
 /**
@@ -118,7 +122,7 @@ export function lireHiversOutremer(lieu: Lieu, t: TerritoireOutremer): LecturePa
 export function lireTailleOutremer(lieu: Lieu, entite: EntiteOutremer, t: TerritoireOutremer): LecturePastille {
   if (entite.population == null) {
     return indisponible(lieu, "taille", "La population de ce lieu n'est pas publiée dans le référentiel officiel : nous n'en tirons rien.",
-      "Le dossier de la commune présentera les données disponibles.");
+      BASSIN_DE_VIE);
   }
   const unite = t.uniteGeographique === "commune" ? "La commune" : `La ${t.uniteGeographique}`;
   return {
@@ -133,7 +137,7 @@ export function lireTailleOutremer(lieu: Lieu, entite: EntiteOutremer, t: Territ
       signal: "information",
       texte: "Ce critère se lit à l'échelle de l'agglomération, que futur•e ne mesure pas encore pour l'outre-mer : la population de la commune seule ne suffit pas à dire si elle correspond à une petite ville.",
     },
-    aVerifier: "Le bassin de vie peut être bien plus large que la commune : services, emplois et trajets se lisent autour de l'adresse.",
+    aVerifier: BASSIN_DE_VIE,
     suite: SUITE_OUTREMER,
   };
 }

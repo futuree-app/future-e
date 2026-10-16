@@ -51,6 +51,12 @@ Désormais :
 - **La porte « Examiner cette adresse »** du hero se retire quand la commune choisie est ultramarine.
 - **Les lectures gratuites, fiables et qualifiées restent** : chaleur SocleOM sans verdict, indisponibilités motivées, GASPAR hors couverture dit comme tel, jamais « aucun risque ».
 - **Le blocage serveur des achats ultramarins** relève de FUT-18, non traité ici. `/dossier` et `/checkout` n'ont pas été modifiés.
+- **Revue du 16/10** : trois lectures de donnée absente (chaleur sans indicateur publié, hivers, population non publiée) promettaient encore « Le dossier de la commune présentera… ». Elles disent désormais ce qui est vérifiable gratuitement :
+  - chaleur sans indicateur : les projections sont publiées par Météo-France, et la chaleur ressentie dépend aussi du quartier et du logement ;
+  - hivers : les projections sont publiées par Météo-France, par rapport à 1991-2020 ;
+  - population non publiée : le bassin de vie peut être plus large que la commune.
+
+  Les phrases reprises existaient déjà dans le module. Le test V1 vérifie leur texte exact et interdit toute mention du dossier dans le texte visible ; il échoue sur l'ancien module.
 
 **Tests ajoutés** :
 - `outremer.test.ts` : 6 lectures ultramarines, aucune vers `/dossier`, aucune promesse ;
@@ -99,6 +105,7 @@ Les temps sont stables. La mémoire au repos augmente d'environ 40 Mo. Next 16 p
 - **Délai GASPAR à 3 s** : une panne coûte 3 s par visiteur, sans mise en cache. La valeur reste à décider après la mesure sur Vercel.
 - **Trois communes de taille 0 dans l'index** (60694, 85165, 85212) : la donnée vient de l'index lui-même, hors FUT-50.
 - **FUT-18** (blocage serveur des achats ultramarins), **FUT-106 et FUT-107** (dossiers ultramarins) : non traités.
+- **`/territoire/[insee]/debloquer`** affiche encore un bouton de paiement (`TerritoryUnlockPanel`) pour un code ultramarin. Retirer les boutons de l'accueil n'interdit pas l'achat par une autre route : le verrou serveur, avant toute création de paiement Stripe, sur tous les parcours, relève de FUT-18. Il est à faire avant l'ouverture commerciale V1. Cette dette est antérieure à FUT-50.
 
 ## 7. Prévisualisation Vercel
 

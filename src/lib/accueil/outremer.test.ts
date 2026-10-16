@@ -150,10 +150,25 @@ test("V1 : aucune lecture ultramarine ne mène à un dossier payant, ni ne le pr
     ["risques hors GASPAR", lireRisquesHorsGaspar(lieu("98735"), pf)],
     ["sans voiture", lireAdresseOutremer(lieu("97209"), aCommune)],
   ];
+  // Les trois lectures de donnée absente qui promettaient « Le dossier de la commune présentera… » (revue du 16/10).
+  const sd = L.lireClimatOutremer("97411")!;
+  assert.equal(sd.statut, "integree");
+  const sansIndicateur = sd.statut === "integree" ? { ...sd, territoire: { ...sd.territoire, reperes: { ...sd.territoire.reperes, chaleurJour: "ABSENT" } } } : sd;
+  const chaleurAbsente = lireChaleurOutremer(lieu("97411"), sansIndicateur as typeof sd);
+  const tailleAbsente = lireTailleOutremer(lieu("97411"), { ...L.getEntiteOutremer("97411")!, population: null }, re);
+  const hivers = lireHiversOutremer(lieu("97411"), re);
+  assert.equal(chaleurAbsente.pourVous.signal, "indisponible");
+  assert.equal(chaleurAbsente.aVerifier, "Les projections propres aux territoires d'outre-mer sont publiées par Météo-France. La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit.");
+  assert.equal(hivers.aVerifier, "Les projections propres aux territoires d'outre-mer sont publiées par Météo-France, par rapport à la période 1991-2020.");
+  assert.equal(tailleAbsente.pourVous.signal, "indisponible");
+  assert.equal(tailleAbsente.aVerifier, "Le bassin de vie peut être bien plus large que la commune : services, emplois et trajets se lisent autour de l'adresse.");
+  lectures.push(["chaleur, indicateur absent", chaleurAbsente], ["taille, population absente", tailleAbsente]);
   for (const [nom, l] of lectures) {
     assert.deepEqual(l.suite, { horsOffre: HORS_OFFRE_OUTREMER }, nom);
-    assert.doesNotMatch(tout(l), /\/dossier|le dossier les mesure|Examiner une adresse|Faire examiner/i, nom);
+    // Le texte visible, hors constat V1 : aucun renvoi au dossier, sous aucune forme.
+    assert.doesNotMatch(tout({ ...l, suite: { horsOffre: "" } }), /\/dossier|dossier|présentera|Examiner une adresse|Faire examiner/i, nom);
   }
+  assert.doesNotMatch(readFileSync("src/lib/accueil/outremer.ts", "utf8"), /présentera/, "plus aucune promesse dans le module");
   assert.match(HORS_OFFRE_OUTREMER, /l'Hexagone et la Corse/);
   assert.deepEqual(SUITE_OUTREMER, { horsOffre: HORS_OFFRE_OUTREMER });
   // Les risques des DROM passent par la lecture GASPAR de l'Hexagone : le service leur impose la même suite.
