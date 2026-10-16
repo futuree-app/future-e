@@ -12,8 +12,17 @@
 //
 // Rien n'est fabriqué : sans aucun examen exploitable (donnée absente ici), il n'y a pas de carte, et
 // le registre porte la condition comme ouverte, faute de donnée.
+//
+// FUT-110 (16/10/2026) : « IL Y A QUELQUE CHOSE À VÉRIFIER » N'EST PAS « CELA PENCHE CONTRE ». Le rôle
+// `verification` porte deux choses que ce module confondait : une EXPOSITION établie (une inondation
+// notable, un seuil sanitaire dépassé), qui oriente bien le critère, et un CONSTAT À CONFIRMER (un médecin
+// à 550 m, une gare, un secteur moins motorisé), qui n'oriente pas. Lu comme défavorable, ce second
+// constat retournait la carte d'une commune parmi les 20 % les plus favorables en « plutôt défavorable ».
+// Désormais, seules les règles d'exposition orientent le signal ; les constats à confirmer restent dans la
+// carte, nommés à leur échelle, avec leur geste et leur limite, sans peser dans un sens ni dans l'autre.
 import type {
   DecisionFact, ModuleFacts, RuleEvaluation, ConditionCheckFact, ConditionSignal, EvidenceRef, DecisionAction,
+  VerificationFact,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -35,7 +44,29 @@ const POURQUOI_PREFERENCE =
 const POURQUOI_MER =
   "Cette distance est mesurée à vol d'oiseau depuis le point de référence de la commune jusqu'au rivage marin. Elle ne correspond pas nécessairement à la mesure que vous visez pour cette condition.";
 
-const DEFAVORABLES = new Set<RuleEvaluation["outcome"]>(["mismatch", "verification"]);
+// LES VÉRIFICATIONS QUI ORIENTENT LE CRITÈRE (FUT-110). Une `verification` de ces règles constate une
+// EXPOSITION que la règle a jugée notable (seuil franchi, source opposable) : elle penche bien contre la
+// priorité du lecteur. Toute autre `verification` est un constat À CONFIRMER, et n'oriente pas :
+//   - `autour.acces-soins`, `autour.gare` : une présence (ou une absence dans un périmètre borné) ne dit
+//     ni qu'un médecin prendra le lecteur, ni que les trains servent ses trajets ;
+//   - `secteur.equipement-auto` : une nuance de secteur, qui se déclare elle-même sans verdict ;
+//   - `territoire.climat-feu` (branche boisement) : la règle écrit qu'un couvert forestier « n'établit
+//     AUCUN risque » ; elle n'existe que pour interdire de conclure à une bonne nouvelle.
+// Le défaut est donc « n'oriente pas » : une règle nouvelle qui oublierait de se déclarer ici rendrait une
+// condition « ouverte », jamais un sens que ses faits ne portent pas. Littéraux plutôt qu'imports : les
+// règles importent ce module (cycle), et le test FUT-110 vérifie que ces identifiants existent.
+export const VERIFICATIONS_ORIENTEES: ReadonlySet<string> = new Set([
+  "territoire.inondation-exposition",
+  "territoire.climat-pluies",
+  "territoire.sante-air",
+  "territoire.sante-bruit",
+  "territoire.sante-industrie",
+]);
+
+const evaluationOriente = (e: RuleEvaluation): boolean =>
+  e.outcome !== "verification" || VERIFICATIONS_ORIENTEES.has(e.ruleId);
+const faitOriente = (f: DecisionFact): boolean =>
+  f.role !== "verification" || VERIFICATIONS_ORIENTEES.has(f.ruleId);
 
 function faitsDuCritere(key: PreferenceKey, evaluations: RuleEvaluation[], facts: DecisionFact[]): DecisionFact[] {
   // Les règles qui examinent CE critère, et lui seul : un compromis tient deux priorités, il garde sa
@@ -48,12 +79,28 @@ function faitsDuCritere(key: PreferenceKey, evaluations: RuleEvaluation[], facts
     || (f.role === "verification" && regles.has(f.ruleId)));
 }
 
-function signalDe(key: PreferenceKey, evaluations: RuleEvaluation[], reunis: DecisionFact[]): ConditionSignal | null {
-  const miennes = evaluations.filter((e) => e.projectKeys.length === 1 && e.projectKeys[0] === key);
-  if (miennes.some((e) => DEFAVORABLES.has(e.outcome))) return "defavorable";
-  if (miennes.some((e) => e.outcome === "satisfied") || reunis.some((f) => f.role === "alignment")) return "favorable";
-  if (miennes.some((e) => e.outcome === "neutral" || e.outcome === "not_surfaced")) return "neutre";
-  return null; // rien d'exploitable ici : la condition reste ouverte, faute de donnée
+// CE QUE L'ON SAIT DU CRITÈRE, EN DEUX PARTS. Les faits qui l'ORIENTENT (rang, exposition établie) fondent
+// le signal ; les constats À CONFIRMER l'accompagnent sans peser. `lue` : une règle orientante a conclu
+// quelque chose d'exploitable ici (sans elle, la carte ne parle que des constats à confirmer).
+type Lecture = {
+  signal: ConditionSignal;
+  lue: boolean;
+  orientants: DecisionFact[];
+  aConfirmer: VerificationFact[];
+};
+
+function lectureDe(key: PreferenceKey, evaluations: RuleEvaluation[], reunis: DecisionFact[]): Lecture | null {
+  const miennes = evaluations.filter((e) => e.projectKeys.length === 1 && e.projectKeys[0] === key && evaluationOriente(e));
+  const orientants = reunis.filter(faitOriente);
+  const aConfirmer = reunis.filter((f): f is VerificationFact => f.role === "verification" && !faitOriente(f));
+  const lue = miennes.some((e) => ["mismatch", "verification", "satisfied", "neutral", "not_surfaced"].includes(e.outcome));
+  const signal: ConditionSignal | null =
+    miennes.some((e) => e.outcome === "mismatch" || e.outcome === "verification") ? "defavorable"
+      : miennes.some((e) => e.outcome === "satisfied") || orientants.some((f) => f.role === "alignment") ? "favorable"
+        // Un constat à confirmer, seul, ne penche pas : la carte existe pour le porter, sans sens.
+        : lue || aConfirmer.length > 0 ? "neutre"
+          : null; // rien d'exploitable ici : la condition reste ouverte, faute de donnée
+  return signal == null ? null : { signal, lue, orientants, aConfirmer };
 }
 
 function preuvesDe(reunis: DecisionFact[], f: ModuleFacts, key: PreferenceKey, label: string): EvidenceRef[] {
@@ -87,7 +134,7 @@ function sansConclusion(statement: string): string {
   return statement.replace(/,\s*(dans )?ce que vous recherchez/, "");
 }
 
-function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: string): string {
+function constatOriente(reunis: DecisionFact[], signal: ConditionSignal, label: string): string {
   if (signal === "favorable") {
     const align = reunis.find((r) => r.role === "alignment");
     if (align) return sansConclusion(align.statement);
@@ -97,6 +144,56 @@ function constatDe(reunis: DecisionFact[], signal: ConditionSignal, label: strin
   return signal === "favorable"
     ? `À l'échelle de la commune, rien de défavorable n'apparaît pour ${label}.`
     : `À l'échelle de la commune, ${label} ne se distingue ni parmi les communes les plus favorables, ni parmi les moins favorables.`;
+}
+
+// LA LECTURE QUI ORIENTE D'ABORD, PUIS LES CONSTATS À CONFIRMER, chacun dans ses mots. Chaque phrase de
+// règle nomme déjà son échelle (« Châtelaillon-Plage se situe… », « … de cette adresse », « Dans ce
+// secteur… ») : on les juxtapose sans les fondre, pour qu'aucune ne disparaisse derrière l'autre.
+function constatDe(l: Lecture, label: string): string {
+  const tete = l.lue ? [constatOriente(l.orientants, l.signal, label)] : [];
+  return [...tete, ...l.aConfirmer.map((v) => v.statement)].join(" ");
+}
+
+// L'ÉCHELLE D'UN FAIT, DITE AU LECTEUR. Elle se lit sur la première preuve, comme partout (`echelles.ts`).
+const ECHELLE_DU_CONSTAT: Record<EvidenceRef["grain"], string> = {
+  adresse: "autour de l'adresse",
+  secteur: "sur le secteur de l'adresse",
+  commune: "sur la commune",
+  unite_urbaine: "sur l'agglomération",
+};
+const ECHELLE_DE_LA_LECTURE: Record<EvidenceRef["grain"], string> = {
+  adresse: "de l'adresse",
+  secteur: "du secteur",
+  commune: "de la commune",
+  unite_urbaine: "de l'agglomération",
+};
+// Une lecture favorable peut être silencieuse (aucun fait) : elle vient alors du rang de la commune.
+const grainDe = (faits: DecisionFact[]): EvidenceRef["grain"] =>
+  faits.flatMap((f) => (f.role === "compromise" ? [] : f.evidence))[0]?.grain ?? "commune";
+
+// POURQUOI futur•e NE TRANCHE PAS, au grain réel des faits réunis. Sans constat à confirmer, la phrase de
+// toujours. Avec, elle dit d'où vient le sens, que le constat n'en donne pas, et ce que ce constat ne
+// permet pas de conclure (sa limite, écrite par sa règle : « Cette présence ne dit ni la disponibilité du
+// praticien… »).
+function pourquoiDe(key: PreferenceKey, l: Lecture): string {
+  if (key === "proximite_mer") return POURQUOI_MER;
+  if (l.aConfirmer.length === 0) return POURQUOI_PREFERENCE;
+  const echelles = [...new Set(l.aConfirmer.map((v) => ECHELLE_DU_CONSTAT[grainDe([v])]))];
+  const tete = l.aConfirmer.length === 1
+    ? { sujet: `Le constat ${echelles[0]}`, oriente: "ne l'oriente pas : il reste", seul: "à lui seul, il ne dit pas" }
+    : { sujet: `Les constats ${echelles.join(" et ")}`, oriente: "ne l'orientent pas : ils restent", seul: "à eux seuls, ils ne disent pas" };
+  const phrase = l.lue
+    ? `Le sens de cette lecture vient ${ECHELLE_DE_LA_LECTURE[grainDe(l.orientants)]}, sans seuil fixé par vous. ${tete.sujet} ${tete.oriente} à vérifier. Elle éclaire votre condition sans pouvoir la trancher.`
+    : `${tete.sujet} ${l.aConfirmer.length === 1 ? "reste" : "restent"} à vérifier : ${tete.seul} si votre condition est respectée.`;
+  const limites = [...new Set(l.aConfirmer.flatMap((v) => (v.limitation ? [v.limitation] : [])))];
+  return [phrase, ...limites].join(" ");
+}
+
+// CE QUE CELA CHANGE, ATTRIBUÉ. Quand un constat d'une autre nature accompagne la lecture, « ce que l'on
+// sait » engloberait ce constat, qui ne penche pas : la conséquence nomme alors ce qui penche.
+function consequenceDe(l: Lecture): string {
+  if (l.aConfirmer.length === 0 || l.signal === "neutre") return consequenceDuSignal(l.signal);
+  return consequenceDuSignal(l.signal, `Ce que l'on sait ${ECHELLE_DE_LA_LECTURE[grainDe(l.orientants)]}`);
 }
 
 // LA MER A UNE MESURE, ET ELLE SE DIT TOUJOURS DE LA MÊME FAÇON : la distance du point de référence de la
@@ -138,9 +235,13 @@ export function conditionsDePreference(
     const key = ref.key;
     const label = PREFERENCE_LABELS[key] ?? String(key);
     const reunis = faitsDuCritere(key, evaluations, facts);
-    const signal = signalDe(key, evaluations, reunis);
-    if (signal == null) continue;
-    const action = actionDe(reunis);
+    const lecture = lectureDe(key, evaluations, reunis);
+    if (lecture == null) continue;
+    const { signal } = lecture;
+    // La lecture qui oriente passe devant : elle donne le sujet, la première preuve et, s'il y en a un,
+    // le geste de l'exposition ; les constats à confirmer suivent avec le leur.
+    const ordonnes = [...lecture.orientants, ...lecture.aConfirmer];
+    const action = actionDe(ordonnes);
     const mer = key === "proximite_mer" ? mesureMer(f) : null;
     const carte: ConditionCheckFact = {
       id: `${f.insee}:condition:${key}`,
@@ -156,12 +257,12 @@ export function conditionsDePreference(
       // préférence ; c'est le rôle (`condition_check`) et l'orientation (`condition_to_confirm`) qui portent
       // le statut de condition. Une préférence de poids 1 confirmée reste, sur cet axe, de poids 1.
       materialityTier: preferenceWeight(project, key) >= 3 ? "structuring" : "secondary",
-      topic: reunis[0]?.topic ?? label,
-      statement: mer?.statement ?? constatDe(reunis, signal, label),
-      evidence: mer ? [mer.evidence] : preuvesDe(reunis, f, key, label),
-      whyNotDecided: key === "proximite_mer" ? POURQUOI_MER : POURQUOI_PREFERENCE,
+      topic: ordonnes[0]?.topic ?? label,
+      statement: mer?.statement ?? constatDe(lecture, label),
+      evidence: mer ? [mer.evidence] : preuvesDe(ordonnes, f, key, label),
+      whyNotDecided: pourquoiDe(key, lecture),
       capabilityReason: capacite.reason,
-      consequence: consequenceDuSignal(signal),
+      consequence: consequenceDe(lecture),
       ...(action ? { action } : {}),
     };
     cartes.push(carte);
