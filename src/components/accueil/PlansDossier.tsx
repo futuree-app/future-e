@@ -1,4 +1,4 @@
-// FUT-50 · LE STORYBOARD DU MINI-FILM « DOSSIER ADRESSE ». DEV UNIQUEMENT.
+// FUT-50 · LE STORYBOARD DU MINI-FILM « DOSSIER ADRESSE ». Repères de conception, affichés dans le prototype seulement.
 //
 // AUCUNE DONNÉE ICI. Chaque cadre est un repère de conception : des formes à la place des valeurs, les
 // glyphes et les intitulés réels du dossier (« Ce qui correspond à votre projet », « Ce qui correspond moins
@@ -9,7 +9,7 @@
 // champs exacts à lire dans la fixture FUT-56. C'est le contrat du futur film.
 import type { CSSProperties, ReactNode } from "react";
 import { GlypheGrain, EmblemeEchelles, TEINTE_REGISTRE } from "@/components/releve/primitives";
-import c from "./c.module.css";
+import c from "./accueil.module.css";
 
 export type Plan = {
   id: string;

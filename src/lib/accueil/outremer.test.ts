@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { creerLecteurOutremer, seuilDe, TERRITOIRES_OUTREMER } from "../../../../lib/outremer/climat-outremer.ts";
-import { gasparCouvre, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer, nombre } from "./outremer.ts";
+import { creerLecteurOutremer, seuilDe, TERRITOIRES_OUTREMER } from "../outremer/climat-outremer.ts";
+import { gasparCouvre, lireAdresseOutremer, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer, nombre, HORS_OFFRE_OUTREMER, SUITE_OUTREMER } from "./outremer.ts";
 import type { LecturePastille, Lieu } from "./pastilles.ts";
 
 // FUT-50 × FUT-104 · La pastille « chaleur » d'une commune ultramarine dit les faits SocleOM de son territoire, sans
@@ -134,4 +134,34 @@ test("Désignation : chaque territoire se dit avec son article dans une phrase",
   assert.equal(TERRITOIRES_OUTREMER.reunion.designation, "La Réunion");
   assert.equal(TERRITOIRES_OUTREMER.mayotte.designation, "Mayotte");
   assert.match(lireHiversOutremer(lieu("97209"), TERRITOIRES_OUTREMER.martinique).pourVous.texte, /Pour la Martinique, futur•e/);
+});
+
+// ── Périmètre commercial V1 (décision du 16/10/2026) : l'Hexagone et la Corse ──────────────────────────────────────
+// Aucun dossier payant n'est proposé outre-mer. Une lecture ultramarine dit ce constat ; elle ne finit jamais sur un
+// bouton vers `/dossier`, et n'en promet pas un dans son texte.
+test("V1 : aucune lecture ultramarine ne mène à un dossier payant, ni ne le promet", () => {
+  const re = TERRITOIRES_OUTREMER.reunion, pf = TERRITOIRES_OUTREMER["polynesie-francaise"];
+  const aCommune = (n: string) => `à ${n}`;
+  const lectures: [string, LecturePastille][] = [
+    ["chaleur couverte (Saint-Denis)", chaleur("97411")],
+    ["chaleur non couverte (Pirae)", chaleur("98736")],
+    ["hivers", lireHiversOutremer(lieu("97411"), re)],
+    ["taille", lireTailleOutremer(lieu("97411"), L.getEntiteOutremer("97411")!, re)],
+    ["risques hors GASPAR", lireRisquesHorsGaspar(lieu("98735"), pf)],
+    ["sans voiture", lireAdresseOutremer(lieu("97209"), aCommune)],
+  ];
+  for (const [nom, l] of lectures) {
+    assert.deepEqual(l.suite, { horsOffre: HORS_OFFRE_OUTREMER }, nom);
+    assert.doesNotMatch(tout(l), /\/dossier|le dossier les mesure|Examiner une adresse|Faire examiner/i, nom);
+  }
+  assert.match(HORS_OFFRE_OUTREMER, /l'Hexagone et la Corse/);
+  assert.deepEqual(SUITE_OUTREMER, { horsOffre: HORS_OFFRE_OUTREMER });
+  // Les risques des DROM passent par la lecture GASPAR de l'Hexagone : le service leur impose la même suite.
+  const service = readFileSync("src/lib/accueil/lecture-accueil.ts", "utf8");
+  assert.match(service, /gasparCouvre\(insee\) \? lireLesRisques\(SUITE_OUTREMER\)/);
+  assert.match(service, /return ok\(lireAdresseOutremer\(lieu, aCommune\)\);/);
+  // Le hero retire la porte de l'adresse pour une commune ultramarine, et rend `horsOffre` sans lien.
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
+  assert.match(hero, /\{lieu && estCodeOutremer\(lieu\.insee\) \? null : \(/);
+  assert.match(hero, /"horsOffre" in lecture\.suite\s*\/\/[^\n]*\n\s*\? <p className=\{c\.tempsTexteDoux\}>\{fr\(lecture\.suite\.horsOffre\)\}<\/p>/);
 });

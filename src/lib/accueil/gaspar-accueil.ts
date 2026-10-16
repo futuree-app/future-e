@@ -6,7 +6,7 @@
 // réponse valide : seule une réponse valide peut être mise en cache (`cache-accueil.ts`). Une panne ne devient
 // jamais « aucun risque » : la lecture dit « Donnée indisponible ».
 import { codeGaspar } from "../georisques-flags.ts";
-import { interpreterReponseGaspar, type RisqueGaspar } from "../../components/prototypes/fut50/c/pastilles.ts";
+import { interpreterReponseGaspar, type RisqueGaspar } from "./pastilles.ts";
 
 /** Le délai accordé à GASPAR avant de dire la donnée indisponible (FUT-50 : 8 s → 3 s ; mesures dans le compte rendu). */
 export const DELAI_GASPAR_MS = 3000;

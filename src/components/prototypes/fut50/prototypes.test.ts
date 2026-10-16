@@ -9,7 +9,9 @@ import { join } from "node:path";
 
 const RACINE = "src/app/dev/fut50";
 const COMPOSANTS = "src/components/prototypes/fut50";
-const COMPOSANTS_C = "src/components/prototypes/fut50/c";
+// La version C est passée en production (src/components/accueil, src/lib/accueil) : la même vigilance s'y applique.
+const ACCUEIL = "src/components/accueil";
+const ACCUEIL_LOGIQUE = ["src/lib/accueil/pastilles.ts", "src/lib/accueil/outremer.ts", "src/lib/accueil/fr.ts"];
 
 function pages(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {
@@ -41,8 +43,8 @@ test("les portes mènent à des routes publiques qui existent", () => {
   }
 });
 
-test("aucune donnée personnelle, aucun score, aucune voix interdite dans les prototypes", () => {
-  const tout = [COMPOSANTS, COMPOSANTS_C].flatMap((d) => readdirSync(d).map((n) => join(d, n)))
+test("aucune donnée personnelle, aucun score, aucune voix interdite dans les prototypes et l'accueil", () => {
+  const tout = [...[COMPOSANTS, ACCUEIL].flatMap((d) => readdirSync(d).map((n) => join(d, n))), ...ACCUEIL_LOGIQUE]
     .filter((p) => statSync(p).isFile() && !p.endsWith(".test.ts"))
     .map((p) => readFileSync(p, "utf8"))
     .join("\n");

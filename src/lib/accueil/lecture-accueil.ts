@@ -28,8 +28,8 @@ import { risquesGaspar } from "./gaspar-accueil.ts";
 import {
   lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse,
   type CleePastille, type Lieu, type LecturePastille, type EntreesChaleur, type EntreesTaille, type EntreesHivers,
-} from "../../components/prototypes/fut50/c/pastilles.ts";
-import { gasparCouvre, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer } from "../../components/prototypes/fut50/c/outremer.ts";
+} from "./pastilles.ts";
+import { gasparCouvre, lireAdresseOutremer, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer, SUITE_OUTREMER } from "./outremer.ts";
 
 export const CLES_ACCUEIL: readonly CleePastille[] = ["chaleur", "hivers", "taille", "voiture", "risques"];
 /** Cinq chiffres, ou 2A / 2B suivis de trois chiffres (Corse). */
@@ -209,9 +209,10 @@ export async function lireAccueil(
   const lieu: Lieu = { type: opts.type ?? "commune", libelle: canon.nom, commune: canon.nom, insee };
   const om = estCodeOutremer(insee) ? getEntiteOutremer(insee) : null;
   const ok = (lecture: LecturePastille, durable = true, motif = "donnees_publiees"): ResultatLecture => ({ statut: 200, lecture, durable, motif });
-  const lireLesRisques = async () => {
+  const lireLesRisques = async (suite?: LecturePastille["suite"]) => {
     const g = await gaspar(insee);
-    return ok(lireRisques(lieu, g.risques), !g.panne, g.panne ? "gaspar_indisponible" : "donnees_publiees");
+    const lecture = lireRisques(lieu, g.risques);
+    return ok(suite ? { ...lecture, suite } : lecture, !g.panne, g.panne ? "gaspar_indisponible" : "donnees_publiees");
   };
   if (om) {
     // OUTRE-MER : SocleOM pour la chaleur, aucune règle ni donnée métropolitaine (ni DRIAS, ni classifyClimateComfort,
@@ -220,8 +221,10 @@ export async function lireAccueil(
     if (cle === "chaleur") return ok(lireChaleurOutremer(lieu, lireClimatOutremer(insee)!));
     if (cle === "hivers") return ok(lireHiversOutremer(lieu, t));
     if (cle === "taille") return ok(lireTailleOutremer(lieu, om, t));
-    if (cle === "risques") return gasparCouvre(insee) ? lireLesRisques() : ok(lireRisquesHorsGaspar(lieu, t), true, "hors_couverture_gaspar");
-    return ok(lireAdresse("voiture", lieu, aCommune));
+    // V1 : aucune lecture ultramarine ne débouche sur un dossier payant (`SUITE_OUTREMER`), pas même celle des
+    // risques, lue par GASPAR comme en métropole.
+    if (cle === "risques") return gasparCouvre(insee) ? lireLesRisques(SUITE_OUTREMER) : ok(lireRisquesHorsGaspar(lieu, t), true, "hors_couverture_gaspar");
+    return ok(lireAdresseOutremer(lieu, aCommune));
   }
   if (cle === "chaleur") return ok(lireChaleur(lieu, await entreesChaleur(insee, sources)));
   if (cle === "hivers") return ok(lireHivers(lieu, await entreesHivers(insee, sources)));

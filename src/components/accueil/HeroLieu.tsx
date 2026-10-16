@@ -1,5 +1,6 @@
 "use client";
-// FUT-50 · VERSION C AFFINÉE · LE HERO EN TROIS ÉTATS. DEV UNIQUEMENT.
+// FUT-50 · VERSION C · LE HERO DE L'ACCUEIL, EN TROIS ÉTATS. Monté par `/` (lectures par `/api/accueil/*`) et par
+// le prototype `/dev/fut50/c` (mêmes lectures, par les routes de développement, branchées sur le même service).
 //
 //   A · vierge     le titre, une promesse courte, un champ de COMMUNE, quelques communes à essayer, et une porte
 //                  séparée pour une adresse précise. Aucun résultat, aucun exemple.
@@ -9,7 +10,7 @@
 //                  cette priorité, ce qu'il reste à vérifier, la suite.
 //
 // LE GESTE (revue du 15/10) : aux états A et B, le bloc de recherche est centré ; à l'état C, la grille du hero
-// s'ouvre en deux colonnes (420 ms, CSS seul, voir `c.module.css`) : le MÊME bloc glisse vers la gauche, sans être
+// s'ouvre en deux colonnes (420 ms, CSS seul, voir `accueil.module.css`) : le MÊME bloc glisse vers la gauche, sans être
 // recréé, et la lecture arrive dans la colonne qui s'ouvre. En mouvement réduit, le changement est immédiat.
 //
 // Décisions du 14/10/2026 (FUT-50) : le champ ne cherche que des COMMUNES, parce que l'aperçu gratuit ne lit
@@ -20,10 +21,11 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
+import { estCodeOutremer } from "@/lib/outremer/code-outremer";
 import { GlypheGrain, TEINTE_REGISTRE } from "@/components/releve/primitives";
-import { fr } from "../commun";
-import { pastillesDe, libelleDe, MOT_DU_SIGNAL, type CleePastille, type Composition, type Lieu, type LecturePastille, type MesureChaleur, type Signal } from "./pastilles";
-import c from "./c.module.css";
+import { fr } from "@/lib/accueil/fr";
+import { pastillesDe, libelleDe, MOT_DU_SIGNAL, type CleePastille, type Composition, type Lieu, type LecturePastille, type MesureChaleur, type Signal } from "@/lib/accueil/pastilles";
+import c from "./accueil.module.css";
 
 type Suggestion = Lieu & { id: string; contexte: string };
 type FeatureBan = { properties: Record<string, string | undefined> };
@@ -60,7 +62,11 @@ const TEINTE: Record<Signal, string> = {
 
 type EtatLecture = LecturePastille | "chargement" | "erreur" | "inconnue";
 
-export function HeroLieu({ composition = "recommandee" }: { composition?: Composition }) {
+/**
+ * `api` : la base des deux lectures (`/commune`, `/lecture`). L'accueil public lit `/api/accueil` ; le prototype, ses
+ * routes de développement. Les deux appellent le même service (`@/lib/accueil/lecture-accueil`).
+ */
+export function HeroLieu({ composition = "recommandee", api = "/api/accueil" }: { composition?: Composition; api?: string }) {
   const pastilles = pastillesDe(composition);
   const [saisie, setSaisie] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -152,7 +158,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     const controle = (identiteEnVol.current = new AbortController());
     setIdentite("provisoire");
     try {
-      const res = await fetch(`/dev/fut50/api/commune?insee=${encodeURIComponent(insee)}`, { signal: controle.signal });
+      const res = await fetch(`${api}/commune?insee=${encodeURIComponent(insee)}`, { signal: controle.signal });
       if (jeton !== jetonIdentite.current) return;
       if (res.status === 404) { setIdentite("inconnue"); return; }
       if (!res.ok) return; // le nom de la recherche reste affiché, marqué provisoire ; les lectures portent le leur
@@ -192,7 +198,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
       // Le code et la priorité, rien d'autre : l'identité vient du serveur, et une URL minimale est une seule entrée
       // de cache CDN par commune et par priorité.
       const q = new URLSearchParams({ insee: l.insee, cle });
-      const res = await fetch(`/dev/fut50/api/lecture?${q}`, { signal: controle.signal });
+      const res = await fetch(`${api}/lecture?${q}`, { signal: controle.signal });
       // Commune absente des référentiels du produit : un état à part, sans « Réessayer » qui ne changerait rien.
       if (res.status === 404) { setLectures((m) => ({ ...m, [k]: "inconnue" })); return; }
       if (!res.ok) throw new Error(String(res.status));
@@ -345,11 +351,14 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
           </div>
         ) : null}
 
-        {/* LA PORTE DE L'ADRESSE : séparée, discrète, toujours là. Une adresse précise relève du dossier payant ;
-            son parcours explique le périmètre et le prix. */}
-        <p className={c.porteAdresse}>
-          Vous avez déjà une adresse précise ? <Link href="/dossier" className={c.lienFleche}>Examiner cette adresse</Link>
-        </p>
+        {/* LA PORTE DE L'ADRESSE : séparée, discrète, là tant qu'elle mène quelque part. Une adresse précise relève du
+            dossier payant ; son parcours explique le périmètre et le prix. Pour une commune d'outre-mer, aucun dossier
+            n'est encore proposé (V1 : Hexagone et Corse) : la porte se retire plutôt que d'y inviter. */}
+        {lieu && estCodeOutremer(lieu.insee) ? null : (
+          <p className={c.porteAdresse}>
+            Vous avez déjà une adresse précise ? <Link href="/dossier" className={c.lienFleche}>Examiner cette adresse</Link>
+          </p>
+        )}
       </div>
 
       <div className={c.heroDroite} aria-live="polite" ref={lectureRef}>
@@ -484,7 +493,10 @@ function Lecture({ lecture, onglets }: {
           <p className={c.tempsTexteDoux}>{fr(lecture.aVerifier)}</p>
         </div>
         <div className={c.suites}>
-          <Link href={lecture.suite.href} className={c.boutonMarque}>{lecture.suite.libelle} <span aria-hidden>→</span></Link>
+          {"horsOffre" in lecture.suite
+            // Aucun parcours payant pour ce lieu : le constat, sans bouton (V1, outre-mer).
+            ? <p className={c.tempsTexteDoux}>{fr(lecture.suite.horsOffre)}</p>
+            : <Link href={lecture.suite.href} className={c.boutonMarque}>{lecture.suite.libelle} <span aria-hidden>→</span></Link>}
           {/* La destination fait ce que le libellé annonce : `/ou-vivre` cherche des COMMUNES à partir d'un projet
               écrit ; il ne poursuit pas la lecture de celle-ci (revue du 15/10). */}
           <Link href="/ou-vivre" className={c.lienFleche}>Chercher des communes selon mon projet</Link>

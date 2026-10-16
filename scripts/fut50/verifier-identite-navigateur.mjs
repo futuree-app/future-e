@@ -5,6 +5,9 @@
 import { chromium } from "playwright-core";
 
 const BASE = process.env.BASE ?? "http://localhost:3150";
+// PAGE et API : le prototype par défaut ; `PAGE=/ API=/api/accueil` pour l'accueil public (build de production).
+const PAGE = process.env.PAGE ?? "/dev/fut50/c";
+const API = process.env.API ?? "/dev/fut50/api";
 const nav = await chromium.launch({ executablePath: process.env.CHROME });
 let echecs = 0;
 const verifier = (ok, message) => { console.log(`${ok ? "ok  " : "ÉCHEC"} ${message}`); if (!ok) echecs++; };
@@ -12,7 +15,7 @@ const verifier = (ok, message) => { console.log(`${ok ? "ok  " : "ÉCHEC"} ${mes
 async function page(options = {}) {
   const ctx = await nav.newContext({ viewport: { width: 1440, height: 900 }, ...options });
   const p = await ctx.newPage();
-  await p.goto(`${BASE}/dev/fut50/c`, { waitUntil: "networkidle" });
+  await p.goto(`${BASE}${PAGE}`, { waitUntil: "networkidle" });
   await p.waitForTimeout(1200);
   return { ctx, p };
 }
@@ -55,14 +58,14 @@ for (const [saisie, repere, attendu] of [
 // 2. Réponses dans le désordre : la confirmation de Saint-Denis arrive APRÈS le choix de Nîmes.
 {
   const { ctx, p } = await page();
-  await p.route("**/dev/fut50/api/commune?insee=97411", async (route) => { await new Promise((r) => setTimeout(r, 2500)); await route.continue(); });
+  await p.route(`**${API}/commune?insee=97411`, async (route) => { await new Promise((r) => setTimeout(r, 2500)); await route.continue(); });
   await choisir(p, "Saint-Denis", "974");
   await p.getByRole("button", { name: "Changer de commune" }).click();
   await choisir(p, "Nîmes", "Nîmes");
   await p.waitForTimeout(3500);
   verifier((await nom(p)) === "Nîmes" && (await p.getByRole("combobox").inputValue()) === "Nîmes", `désordre : Saint-Denis lente, puis Nîmes → « ${await nom(p)} »`);
   // La même chose sans « Changer de commune » : la saisie reprend directement dans le champ.
-  await p.route("**/dev/fut50/api/commune?insee=97209", async (route) => { await new Promise((r) => setTimeout(r, 2500)); await route.continue(); });
+  await p.route(`**${API}/commune?insee=97209`, async (route) => { await new Promise((r) => setTimeout(r, 2500)); await route.continue(); });
   await choisir(p, "Fort-de-France", "Fort-de-France");
   await choisir(p, "Papeete", "Papeete");
   await p.waitForTimeout(3500);
@@ -78,7 +81,7 @@ for (const [saisie, repere, attendu] of [
 // 3. Commune inconnue du serveur : rien n'est confirmé, rien n'est inventé.
 {
   const { ctx, p } = await page();
-  await p.route("**/dev/fut50/api/commune?insee=30189", (route) => route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"commune_inconnue"}' }));
+  await p.route(`**${API}/commune?insee=30189`, (route) => route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"commune_inconnue"}' }));
   await choisir(p, "Nîmes", "Nîmes");
   await p.waitForSelector('[data-identite="inconnue"]', { timeout: 15000 });
   verifier((await etat(p)) === "inconnue", `inconnue → état « ${await etat(p)} »`);
@@ -90,7 +93,7 @@ for (const [saisie, repere, attendu] of [
   const { ctx, p } = await page();
   const annulees = [];
   p.on("requestfailed", (r) => { if (/\/api\/(lecture|commune)/.test(r.url())) annulees.push(`${new URL(r.url()).searchParams.get("insee")}:${new URL(r.url()).searchParams.get("cle") ?? "identité"} (${r.failure()?.errorText})`); });
-  await p.route("**/dev/fut50/api/lecture?**", async (route) => { await new Promise((r) => setTimeout(r, 2000)); await route.continue().catch(() => {}); });
+  await p.route(`**${API}/lecture?**`, async (route) => { await new Promise((r) => setTimeout(r, 2000)); await route.continue().catch(() => {}); });
   await choisir(p, "Nîmes", "Nîmes");
   await p.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
   await p.getByRole("button", { name: "Avoir des hivers doux" }).click(); // même commune : ne doit rien annuler

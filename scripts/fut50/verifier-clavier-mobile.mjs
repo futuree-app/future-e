@@ -4,6 +4,9 @@ import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3150";
+// PAGE et API : le prototype par défaut ; `PAGE=/ API=/api/accueil` pour l'accueil public (build de production).
+const PAGE = process.env.PAGE ?? "/dev/fut50/c";
+const API = process.env.API ?? "/dev/fut50/api";
 const SORTIE = process.env.SORTIE ?? "docs/audits/2026-10-16-fut50-clavier-mobile";
 mkdirSync(SORTIE, { recursive: true });
 const nav = await chromium.launch({ executablePath: process.env.CHROME });
@@ -23,7 +26,7 @@ const prete = (p) => p.waitForFunction(() => document.querySelector('[aria-live=
 {
   const ctx = await nav.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await ctx.newPage();
-  await p.goto(`${BASE}/dev/fut50/c`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
+  await p.goto(`${BASE}${PAGE}`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
   let r = await tabJusqua(p, (a) => a.role === "combobox");
   // Le focus du champ est porté par son CADRE (anneau orange et bordure claire), pas par l'outline de l'input.
   await p.waitForTimeout(400); // l'anneau apparaît par une transition : on le lit une fois posé
@@ -88,7 +91,7 @@ const prete = (p) => p.waitForFunction(() => document.querySelector('[aria-live=
 for (const [largeur, hauteur] of [[390, 844], [1440, 900]]) {
   const ctx = await nav.newContext({ viewport: { width: largeur, height: hauteur }, deviceScaleFactor: 2, reducedMotion: "reduce", hasTouch: largeur < 800, isMobile: largeur < 800 });
   const p = await ctx.newPage();
-  await p.goto(`${BASE}/dev/fut50/c`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
+  await p.goto(`${BASE}${PAGE}`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
   const media = await p.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
   await p.evaluate(() => { window.__defilements = []; const o = window.scrollTo.bind(window); window.scrollTo = (...a) => { window.__defilements.push(JSON.stringify(a[0] ?? a)); return o(...a); }; });
   const champ = p.getByRole("combobox");
@@ -117,7 +120,7 @@ for (const [largeur, hauteur] of [[390, 844], [1440, 900]]) {
 for (const [nom, largeur, hauteur, mobile] of [["360x800", 360, 800, true], ["390x844", 390, 844, true], ["tablette-820x1180", 820, 1180, true], ["ordinateur-1440x900", 1440, 900, false]]) {
   const ctx = await nav.newContext({ viewport: { width: largeur, height: hauteur }, deviceScaleFactor: 2, isMobile: mobile, hasTouch: mobile });
   const p = await ctx.newPage();
-  await p.goto(`${BASE}/dev/fut50/c`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
+  await p.goto(`${BASE}${PAGE}`, { waitUntil: "networkidle" }); await p.waitForTimeout(1200);
   const vw = await p.evaluate(() => innerWidth);
   const champ = p.getByRole("combobox");
   await champ.click(); await champ.pressSequentially("Saint-Denis", { delay: 50 });

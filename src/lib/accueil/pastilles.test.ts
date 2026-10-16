@@ -8,8 +8,8 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { PASTILLES, pastillesDe, lireChaleur, lireTaille, lireHivers, lireRisques, lireAdresse, interpreterReponseGaspar, valeurAffichee, MOT_DU_SIGNAL, type Lieu, type EntreesChaleur } from "./pastilles.ts";
-import { buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS } from "../../../../lib/decision/climat-facts.ts";
-import { CAS_SETE } from "../cas-sete.ts";
+import { buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS } from "../decision/climat-facts.ts";
+import { CAS_SETE } from "../../components/prototypes/fut50/cas-sete.ts";
 
 const SETE: Lieu = { type: "commune", libelle: "Sète", commune: "Sète", insee: "34301" };
 const ADRESSE_NIMES: Lieu = { type: "adresse", libelle: "1 Place de l'Hôtel de Ville 30000 Nîmes", commune: "Nîmes", insee: "30189" };
@@ -22,39 +22,39 @@ test("quatre pastilles au plus, aucune présélectionnée, libellés compréhens
     "Éviter les fortes chaleurs", "Avoir des hivers doux", "Vivre dans une petite ville", "Connaître les risques naturels",
   ]);
   assert.deepEqual(pastillesDe("mobilite").map((p) => p.cle), ["chaleur", "taille", "voiture", "risques"]);
-  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
   assert.match(hero, /useState<CleePastille\[\]>\(\[\]\)/, "aucune priorité présélectionnée");
   assert.doesNotMatch(hero, /\/qna|anthropic|generat/i, "aucune génération IA depuis le hero");
 });
 
 test("hero : le champ ne cherche que des COMMUNES, l'adresse a sa propre porte vers /dossier", () => {
-  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
   assert.match(hero, /urlRechercheCommunes\(/);
   assert.doesNotMatch(hero, /urlRechercheBan\(/, "aucune recherche d'adresse dans le champ principal");
   assert.match(hero, /Vous avez déjà une adresse précise \? <Link href="\/dossier"/);
 });
 
 test("hero : aucun exemple d'une autre commune, aucun résultat avant le choix d'une priorité", () => {
-  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
   assert.doesNotMatch(hero, /CAS_SETE|Sète/, "aucun exemple Sète dans le hero");
   // La colonne de lecture ne rend rien hors de l'état « priorité ».
   assert.match(hero, /etat !== "priorite" \|\| !lieu \|\| !focale \? null/);
 });
 
 test("section Dossier Adresse : absente de l'accueil public tant que le film réel n'existe pas", () => {
-  const src = readFileSync("src/components/prototypes/fut50/c/SectionsC.tsx", "utf8");
+  const src = readFileSync("src/components/accueil/SectionsAccueil.tsx", "utf8");
   assert.match(src, /export const FILM_DOSSIER: Film \| null = null;/);
   assert.match(src, /export const EXEMPLE_DOSSIER_URL: string \| null = null;/);
   assert.match(src, /if \(!FILM_DOSSIER && !maquette\) return null;/);
   // Dans le prototype, la maquette se déclare comme telle.
-  const plans = readFileSync("src/components/prototypes/fut50/c/PlansDossier.tsx", "utf8");
+  const plans = readFileSync("src/components/accueil/PlansDossier.tsx", "utf8");
   assert.match(plans, /maquette · sans données/);
   assert.doesNotMatch(plans, /\d+ (jours|nuits|habitants|°C)/, "aucune valeur inventée dans les cadres");
 });
 
 test("le storyboard dure entre 18 et 22 secondes, plans continus", () => {
   // PlansDossier contient du JSX, que `node --test` ne lit pas : on relit les durées dans la source.
-  const src = readFileSync("src/components/prototypes/fut50/c/PlansDossier.tsx", "utf8");
+  const src = readFileSync("src/components/accueil/PlansDossier.tsx", "utf8");
   const bornes = [...src.matchAll(/debut: (\d+), fin: (\d+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(bornes.length, 5);
   for (let i = 1; i < bornes.length; i++) assert.equal(bornes[i]![0], bornes[i - 1]![1], "plans continus");
@@ -228,7 +228,7 @@ function routeExiste(href: string): boolean {
 }
 
 test("chaque lien de l'accueil C mène à une route qui existe", () => {
-  const fichiers = ["src/components/prototypes/fut50/c/SectionsC.tsx", "src/components/prototypes/fut50/c/HeroLieu.tsx", "src/components/prototypes/fut50/c/pastilles.ts", "src/app/dev/fut50/c/page.tsx"];
+  const fichiers = ["src/components/accueil/SectionsAccueil.tsx", "src/components/accueil/HeroLieu.tsx", "src/lib/accueil/pastilles.ts", "src/lib/accueil/outremer.ts", "src/app/dev/fut50/c/page.tsx", "src/app/(public)/page.tsx"];
   const hrefs = new Set<string>();
   for (const f of fichiers) {
     const src = readFileSync(f, "utf8");
@@ -239,7 +239,7 @@ test("chaque lien de l'accueil C mène à une route qui existe", () => {
 });
 
 test("chaque ancre interne vise un identifiant présent dans la page, et #savoir existe toujours", () => {
-  const page = ["SectionsC.tsx", "HeroLieu.tsx"].map((f) => readFileSync(`src/components/prototypes/fut50/c/${f}`, "utf8")).join("\n");
+  const page = ["SectionsAccueil.tsx", "HeroLieu.tsx"].map((f) => readFileSync(`src/components/accueil/${f}`, "utf8")).join("\n");
   const ancres = [...page.matchAll(/href(?:=|: )"#([a-z-]+)"/g)].map((m) => m[1]!);
   assert.ok(ancres.length >= 2);
   for (const a of ancres) assert.match(page, new RegExp(`id="${a}"`), `#${a} : aucune cible`);
@@ -247,7 +247,7 @@ test("chaque ancre interne vise un identifiant présent dans la page, et #savoir
 });
 
 test("aucune étude locale en préparation n'est affichée comme publiée", () => {
-  const src = readFileSync("src/components/prototypes/fut50/c/SectionsC.tsx", "utf8");
+  const src = readFileSync("src/components/accueil/SectionsAccueil.tsx", "utf8");
   // La liste est vide ; les URL en préparation ne figurent que dans le commentaire qui l'explique.
   assert.match(src, /ETUDES_LOCALES_PUBLIEES: \{ commune: string; titre: string; href: string \}\[\] = \[\];/);
   const code = src.split("\n").filter((l) => !l.trim().startsWith("*") && !l.trim().startsWith("//")).join("\n");
@@ -255,9 +255,9 @@ test("aucune étude locale en préparation n'est affichée comme publiée", () =
 });
 
 test("la voix : ni tiret cadratin, ni point d'exclamation dans les textes de la version C", () => {
-  const dir = "src/components/prototypes/fut50/c";
-  for (const n of readdirSync(dir)) {
-    const p = join(dir, n);
+  const dir = "src/components/accueil";
+  for (const p of [...readdirSync(dir).map((n) => join(dir, n)), "src/lib/accueil/pastilles.ts", "src/lib/accueil/outremer.ts"]) {
+    const n = p.split("/").pop()!;
     if (!statSync(p).isFile() || n.endsWith(".test.ts") || n.endsWith(".css")) continue;
     const src = readFileSync(p, "utf8");
     assert.doesNotMatch(src, /—/, `${n} : tiret cadratin`);
@@ -282,11 +282,11 @@ test("la mesure en grand : présente quand une valeur pertinente existe, jamais 
 });
 
 test("le hero adaptatif : un seul bloc de recherche, une grille qui s'ouvre à l'état 3, rien en mouvement réduit", () => {
-  const css = readFileSync("src/components/prototypes/fut50/c/c.module.css", "utf8");
+  const css = readFileSync("src/components/accueil/accueil.module.css", "utf8");
   assert.match(css, /grid-template-columns: minmax\(0, 1fr\) minmax\(0, 0fr\);/, "états 1 et 2 : une seule colonne utile");
   assert.match(css, /\.hero\[data-etat="priorite"\] \{ grid-template-columns: minmax\(0, 1fr\) minmax\(0, 0\.85fr\);/, "état 3 : deux colonnes");
   assert.match(css, /prefers-reduced-motion: reduce\) \{\s*\.hero \{ transition: none; \}/);
-  const hero = readFileSync("src/components/prototypes/fut50/c/HeroLieu.tsx", "utf8");
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
   assert.equal((hero.match(/role="combobox"/g) ?? []).length, 1, "un seul champ, jamais recréé");
 });
 

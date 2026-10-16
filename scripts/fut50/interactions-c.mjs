@@ -7,7 +7,10 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readdirSync, rmSync } from "node:fs";
 
 const base = process.argv[2] ?? "http://localhost:3050";
-const URL_C = `${base}/dev/fut50/c`;
+// PAGE et API : le prototype par défaut ; `PAGE=/ API=/api/accueil` pour l'accueil public (build de production).
+const PAGE = process.env.PAGE ?? "/dev/fut50/c";
+const API = process.env.API ?? "/dev/fut50/api";
+const URL_C = `${base}${PAGE}`;
 // Écrites HORS du dépôt pendant le parcours : le serveur de développement surveille les fichiers du projet, et une
 // capture déposée dans docs/ peut recharger la page en pleine saisie. Recopiées à la fin.
 const IMG = process.env.SORTIE_IMG ?? "docs/audits/fut50-accueil/images";
@@ -113,7 +116,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
     return { titreHaut: Math.round(t.top), champGauche: Math.round(b.left) };
   });
   // Données préchauffées : la bande d'images montre le geste, pas le chargement.
-  await page.evaluate(() => fetch("/dev/fut50/api/lecture?insee=44109&cle=hivers&type=commune&commune=Nantes&libelle=Nantes"));
+  await page.evaluate(() => fetch(`${API}/lecture?insee=44109&cle=hivers&type=commune&commune=Nantes&libelle=Nantes`));
   await page.getByRole("button", { name: "Avoir des hivers doux" }).click();
   let ecoule = 0;
   for (const t of [120, 300, 480, 700]) {
@@ -303,7 +306,7 @@ for (const reduit of [false, true]) {
 {
   const { ctx, page } = await ouvrir(1440, 900, 1);
   // Code inconnu des référentiels : la route refuse d'inventer une identité (404), plus de lecture devinée.
-  const r = await page.evaluate(async () => { const x = await fetch("/dev/fut50/api/lecture?insee=99999&cle=chaleur&commune=Inconnue"); return { statut: x.status, corps: await x.json() }; });
+  const r = await page.evaluate(async () => { const x = await fetch(`${API}/lecture?insee=99999&cle=chaleur&commune=Inconnue`); return { statut: x.status, corps: await x.json() }; });
   constats.push(`code inconnu (99999) : ${r.statut} ${r.corps.error ?? ""}`);
   await ctx.close();
 }
@@ -349,7 +352,7 @@ for (const reduit of [false, true]) {
 // ── Erreur de lecture : le message et « Réessayer » ──────────────────────────────────────────
 {
   const { ctx, page } = await ouvrir(1440, 900, 1);
-  await page.route("**/dev/fut50/api/lecture**", (r) => r.fulfill({ status: 500, body: "" }));
+  await page.route(`**${API}/lecture**`, (r) => r.fulfill({ status: 500, body: "" }));
   await choisirCommune(page, "Nant", "Nantes");
   await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();

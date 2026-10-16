@@ -5,8 +5,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
-import { PLANS, Cadre, DUREE_FILM } from "@/components/prototypes/fut50/c/PlansDossier";
-import c from "@/components/prototypes/fut50/c/c.module.css";
+import { PLANS, Cadre, DUREE_FILM } from "@/components/accueil/PlansDossier";
+import c from "@/components/accueil/accueil.module.css";
 
 export default function StoryboardDossier() {
   if (process.env.NODE_ENV === "production") notFound();

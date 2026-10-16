@@ -1,4 +1,4 @@
-// FUT-50 · VERSION C · LE RESTE DE L'ACCUEIL, RECOMPOSÉ À PARTIR DE L'EXISTANT. DEV UNIQUEMENT.
+// FUT-50 · VERSION C · LE RESTE DE L'ACCUEIL, RECOMPOSÉ À PARTIR DE L'EXISTANT. Monté par `/` et par le prototype.
 //
 // Rien n'est un second manifeste ni un bloc éditorial de plus : chaque section reprend une section de
 // `FutureELanding.tsx`, plus courte et dans la grammaire « Le relevé ». Les textes repris mot pour mot sont
@@ -9,8 +9,8 @@ import { GlypheGrain, type GrainCle } from "@/components/releve/primitives";
 import { CookieSettingsLink } from "@/components/CookieSettingsLink";
 import { FilmDossier, type Film } from "./FilmDossier";
 import { PLANS, Cadre, DUREE_FILM } from "./PlansDossier";
-import { fr } from "../commun";
-import c from "./c.module.css";
+import { fr } from "@/lib/accueil/fr";
+import c from "./accueil.module.css";
 
 // ── Pourquoi futur•e (existant, raccourci, remonté sous le hero) ─────────────────────────────────
 

@@ -1,5 +1,5 @@
 "use client";
-// FUT-50 · LE LECTEUR DU MINI-FILM « DOSSIER ADRESSE ». DEV UNIQUEMENT.
+// FUT-50 · LE LECTEUR DU MINI-FILM « DOSSIER ADRESSE ». Sans film validé (FUT-56), rien n'est monté dans l'accueil public.
 //
 // LA SOLUTION TECHNIQUE RETENUE : une vidéo native, muette, sans dépendance.
 //   - le film est TOURNÉ à partir des vrais composants « Le relevé » nourris par la fixture FUT-56 (une route
@@ -15,7 +15,7 @@
 // Tant que le film n'existe pas (`film` nul), le lecteur montre le POSTER DE MAQUETTE, identifié comme tel,
 // et aucun contrôle factice. Dans l'accueil public, la section reste absente tant que le film n'est pas validé.
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import c from "./c.module.css";
+import c from "./accueil.module.css";
 
 export type Film = { mp4: string; mp4Vertical?: string; poster: string; posterVertical?: string; sousTitres?: string };
 

@@ -8,13 +8,14 @@
 //
 // Aucun chiffre ni seuil n'est écrit ici : tout vient de la lecture (`lireClimatOutremer`) et de la définition de
 // l'indicateur (`seuilDe`). Module pur, testé dans `outremer.test.ts`.
-import { indicateurOutremer, seuilDe, type EntiteOutremer, type IndicateurOutremer, type LectureClimatOutremer, type TerritoireOutremer } from "../../../../lib/outremer/climat-outremer.ts";
+import { indicateurOutremer, seuilDe, type EntiteOutremer, type IndicateurOutremer, type LectureClimatOutremer, type TerritoireOutremer } from "../outremer/climat-outremer.ts";
 import type { LecturePastille, Lieu, MesureChaleur } from "./pastilles.ts";
 
-const SUITE = (lieu: Lieu) => ({
-  libelle: lieu.type === "adresse" ? "Faire examiner cette adresse" : `Examiner une adresse à ${lieu.commune}`,
-  href: "/dossier",
-});
+// LE PÉRIMÈTRE COMMERCIAL V1 (décision du 16/10/2026) : l'Hexagone et la Corse. Aucun dossier payant n'est proposé
+// pour un territoire d'outre-mer : la lecture gratuite s'arrête sur ce constat, sans bouton vers `/dossier`. Le
+// blocage côté serveur des achats ultramarins relève de FUT-18 ; les dossiers ultramarins, de FUT-106 et FUT-107.
+export const HORS_OFFRE_OUTREMER = "Les dossiers de futur•e couvrent pour l'instant l'Hexagone et la Corse. Ils ne sont pas encore proposés pour ce territoire.";
+export const SUITE_OUTREMER: LecturePastille["suite"] = { horsOffre: HORS_OFFRE_OUTREMER };
 
 /** 5,4 · 47 · 0,1 : une décimale sous 10 (sauf si elle est nulle), l'entier au-delà. */
 export function nombre(v: number): string {
@@ -45,7 +46,7 @@ function axe(l: Extract<LectureClimatOutremer, { statut: "integree" }>, code: st
 }
 
 const indisponible = (lieu: Lieu, cle: LecturePastille["cle"], texte: string, aVerifier: string): LecturePastille => ({
-  cle, commune: lieu.commune, fait: null, pourVous: { signal: "indisponible", texte }, aVerifier, suite: SUITE(lieu),
+  cle, commune: lieu.commune, fait: null, pourVous: { signal: "indisponible", texte }, aVerifier, suite: SUITE_OUTREMER,
 });
 
 /** La chaleur d'une commune ultramarine. `lecture` : celle de `lireClimatOutremer` pour son code. */
@@ -99,7 +100,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
     },
     methode,
     aVerifier: `${limites.join(" ")} La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit.`,
-    suite: SUITE(lieu),
+    suite: SUITE_OUTREMER,
   };
 }
 
@@ -133,7 +134,7 @@ export function lireTailleOutremer(lieu: Lieu, entite: EntiteOutremer, t: Territ
       texte: "Ce critère se lit à l'échelle de l'agglomération, que futur•e ne mesure pas encore pour l'outre-mer : la population de la commune seule ne suffit pas à dire si elle correspond à une petite ville.",
     },
     aVerifier: "Le bassin de vie peut être bien plus large que la commune : services, emplois et trajets se lisent autour de l'adresse.",
-    suite: SUITE(lieu),
+    suite: SUITE_OUTREMER,
   };
 }
 
@@ -152,4 +153,17 @@ export function lireRisquesHorsGaspar(lieu: Lieu, t: TerritoireOutremer): Lectur
  *  Vérifié le 16/10/2026. La raison de cette absence (compétence propre de ces collectivités) n'est pas affirmée. */
 export function gasparCouvre(code: string): boolean {
   return !/^98/.test(code);
+}
+
+/**
+ * « Sans voiture » outre-mer : la question se lit à l'adresse, comme en métropole, mais aucun dossier ne la mesure
+ * encore ici. La phrase de l'Hexagone (« Le dossier les mesure autour de l'adresse ») n'est donc pas reprise.
+ */
+export function lireAdresseOutremer(lieu: Lieu, aCommune: (n: string) => string): LecturePastille {
+  return {
+    cle: "voiture", commune: lieu.commune, fait: null,
+    pourVous: { signal: "adresse", texte: "Cette question se lit à l'échelle de l'adresse, pas de la commune." },
+    aVerifier: `Les trajets, les transports à pied et les services proches dépendent de l'endroit précis où l'on vit ${aCommune(lieu.commune)}.`,
+    suite: SUITE_OUTREMER,
+  };
 }

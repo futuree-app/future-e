@@ -19,7 +19,7 @@
 // Écartée : « Avoir des services à proximité » (muette pour toutes les villes testées).
 // Aucune génération IA, à aucun clic.
 
-import { AGGLOMERATION_SIZE_CONVENTION } from "../../../../lib/decision/agglomeration-facts.ts";
+import { AGGLOMERATION_SIZE_CONVENTION } from "../decision/agglomeration-facts.ts";
 
 export type CleePastille = "chaleur" | "hivers" | "taille" | "voiture" | "risques";
 
@@ -96,8 +96,12 @@ export type LecturePastille = {
   /** L'explication de méthode, consultable (« Comment lire ce résultat ? »). Ne répète pas les chiffres affichés. */
   methode?: string[];
   aVerifier: string;
-  /** Le prochain geste : toujours un vrai parcours. */
-  suite: { libelle: string; href: string };
+  /**
+   * Le prochain geste : toujours un vrai parcours. `horsOffre` : aucun parcours payant n'existe pour ce lieu (V1 :
+   * Hexagone et Corse seulement, décision du 16/10/2026) ; la lecture le dit, sans bouton qui laisserait croire
+   * qu'un achat est possible.
+   */
+  suite: { libelle: string; href: string } | { horsOffre: string };
 };
 
 export const MOT_DU_SIGNAL: Record<Signal, string> = {

@@ -129,7 +129,7 @@ test("cache : durable 24 h au CDN ; une panne jamais, même en 200 ; paramètres
   const frag = politiqueCache({ statut: 200, durable: true }, ["insee", "cle", "commune"], PARAMETRES_LECTURE);
   assert.deepEqual(frag, { cacheControl: "no-store", raison: "parametres_superflus:commune" });
   assert.equal(politiqueCache({ statut: 200 }, ["insee"], PARAMETRES_COMMUNE).cacheControl, durable.cacheControl);
-  assert.match(sansCommentaires("src/lib/accueil/lecture-accueil.ts"), /ok\(lireRisques\(lieu, g\.risques\), !g\.panne,/, "la panne GASPAR rend la lecture non durable");
+  assert.match(sansCommentaires("src/lib/accueil/lecture-accueil.ts"), /const lecture = lireRisques\(lieu, g\.risques\);\s*return ok\(suite \? \{ \.\.\.lecture, suite \} : lecture, !g\.panne,/, "la panne GASPAR rend la lecture non durable");
 });
 
 // ── GASPAR ──────────────────────────────────────────────────────────────────────────────────────────────
@@ -165,4 +165,28 @@ test("GASPAR : réponse normale, vide valide, 4xx/5xx, délai, JSON malformé, r
   assert.equal(r.panne, true);
   assert.equal(r.risques, null, "une panne n'est jamais « aucun risque »");
   assert.ok(r.ms >= 290 && r.ms < 1000, `rendu en ${r.ms} ms`);
+});
+
+// ── L'accueil public (`/`) monte la version C, sans rien du prototype ──────────────────────────────────────────────
+test("accueil public : version C par les routes publiques, ni maquette, ni bandeau, ni route de développement", () => {
+  const page = readFileSync("src/app/(public)/page.tsx", "utf8");
+  const code = sansCommentaires("src/app/(public)/page.tsx");
+  assert.match(code, /from "@\/components\/accueil\/HeroLieu"/);
+  assert.match(code, /<HeroLieu \/>/, "le hero lit sa base par défaut, publique");
+  assert.match(code, /<DossierAdresse \/>/, "place réservée, sans maquette");
+  assert.doesNotMatch(code, /maquette|BandeauPrototype|prototypes\/|\/dev\/|FutureELanding/);
+  for (const s of ["<Pourquoi />", "<Echelles />", "<Offres />", "<Savoir />", "<Pied />"]) assert.ok(page.includes(s), s);
+  const hero = readFileSync("src/components/accueil/HeroLieu.tsx", "utf8");
+  assert.match(hero, /api = "\/api\/accueil"/);
+  assert.doesNotMatch(sansCommentaires("src/components/accueil/HeroLieu.tsx"), /\/dev\//, "aucune route de développement en dur");
+  // Le prototype garde ses routes de développement et sa maquette, avec les MÊMES composants.
+  const proto = sansCommentaires("src/app/dev/fut50/c/page.tsx");
+  assert.match(proto, /<HeroLieu composition=\{composition\} api="\/dev\/fut50\/api" \/>/);
+  assert.match(proto, /from "@\/components\/accueil\/SectionsAccueil"/);
+  assert.ok(existsSync("src/app/api/accueil/lecture/route.ts") && existsSync("src/app/api/accueil/commune/route.ts"));
+  // Aucun composant de production n'importe un prototype.
+  for (const f of readdirSync("src/components/accueil")) {
+    if (f.endsWith(".css")) continue;
+    assert.doesNotMatch(readFileSync(`src/components/accueil/${f}`, "utf8"), /from "[^"]*prototypes\//, f);
+  }
 });

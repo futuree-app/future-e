@@ -1,12 +1,14 @@
 // FUT-50 · VERSION C AFFINÉE · L'ACCUEIL COMPLET. DEV UNIQUEMENT : 404 en production.
+// Les composants sont ceux de l'accueil public (`src/components/accueil`) ; le prototype garde ses routes de
+// développement, la composition « mobilité » et la maquette du film.
 // `?pastilles=mobilite` affiche la composition de comparaison (la mobilité à la place des hivers).
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
-import { HeroLieu } from "@/components/prototypes/fut50/c/HeroLieu";
-import { Pourquoi, Echelles, DossierAdresse, Offres, Savoir, Pied } from "@/components/prototypes/fut50/c/SectionsC";
-import c from "@/components/prototypes/fut50/c/c.module.css";
+import { HeroLieu } from "@/components/accueil/HeroLieu";
+import { Pourquoi, Echelles, DossierAdresse, Offres, Savoir, Pied } from "@/components/accueil/SectionsAccueil";
+import c from "@/components/accueil/accueil.module.css";
 
 export default async function PrototypeAccueilC({ searchParams }: { searchParams: Promise<{ pastilles?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
@@ -20,7 +22,7 @@ export default async function PrototypeAccueilC({ searchParams }: { searchParams
         ) · <Link href="/dev/fut50/storyboard">storyboard du dossier</Link> · <Link href="/">accueil actuel</Link> · <Link href="/dev/fut50">index</Link>
       </BandeauPrototype>
       <div className={s.feuille}>
-        <HeroLieu composition={composition} />
+        <HeroLieu composition={composition} api="/dev/fut50/api" />
         <Pourquoi />
         <Echelles />
         <DossierAdresse maquette />
