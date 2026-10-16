@@ -43,6 +43,7 @@ test("Saint-Denis : 31 °C, référence 1991-2020, +2,0 °C régional, chiffres 
   assert.equal(n!.valeur, "69");
   assert.equal(n!.legende, "sans descendre sous 25 °C à l'horizon 2050, contre 16 sur 1991-2020");
   assert.equal(j!.bascule, undefined, "pas de bascule 30/35 °C outre-mer");
+  assert.equal(l.fait!.grain, "secteur", "un point de grille, pas la commune entière");
   assert.match(l.fait!.texte, /\+2,0 °C pour La Réunion, par rapport à 1850-1900/);
   assert.match(l.fait!.source, /SocleOM-Climat-2025, référence 1991-2020/);
   // Dispersion des simulations et variation géographique : deux phrases distinctes, jamais une « incertitude ».

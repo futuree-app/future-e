@@ -406,7 +406,7 @@ function Lecture({ lecture, onglets }: {
             ) : null}
             <span className={c.source}>
               <GlypheGrain grain={lecture.fait.grain} taille={11} />{" "}
-              {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : "à l'échelle de la commune"} · {lecture.fait.source}
+              {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : lecture.fait.grain === "secteur" ? "au point de grille le plus proche de la mairie" : "à l'échelle de la commune"} · {lecture.fait.source}
             </span>
           </div>
         ) : null}

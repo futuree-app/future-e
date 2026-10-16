@@ -79,7 +79,8 @@ export type LecturePastille = {
   fait: {
     texte: string;
     source: string;
-    grain: "commune" | "unite_urbaine";
+    /** `secteur` : une mesure plus fine que la commune (SocleOM, point de grille de ~3 km près de la mairie). */
+    grain: "commune" | "unite_urbaine" | "secteur";
     /**
      * LA DONNÉE PRINCIPALE, quand une mesure pertinente existe : affichée en grand, toujours avec son unité et sa
      * légende (libellé, période, contexte). Absente quand le fait n'est pas une valeur unique : on ne force pas.

@@ -92,7 +92,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
   const limites = lecture.limites.filter((x) => !/^Horizons définis/.test(x));
   return {
     cle: "chaleur", commune: lieu.commune,
-    fait: { texte, source: `Météo-France · SocleOM-Climat-2025, référence 1991-2020, horizon 2050 (+${niveau} pour ${t.designation})`, grain: "commune", mesures },
+    fait: { texte, source: `Météo-France · SocleOM-Climat-2025, référence 1991-2020, horizon 2050 (+${niveau} pour ${t.designation})`, grain: "secteur", mesures },
     pourVous: {
       signal: "information",
       texte: `Ces chiffres décrivent l'évolution projetée de la chaleur à ${lieu.commune}. futur•e ne les classe pas encore en favorable ou défavorable : les règles de lecture propres à ${t.designation} restent à établir.`,
