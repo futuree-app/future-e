@@ -10,7 +10,7 @@ import type { SanteFacts } from "./sante-facts.ts";
 import type { RadonFacts } from "./radon-facts.ts";
 import type { RankBand } from "./mismatch-facts.ts";
 import type { NamedAbsenceBasis, LocalNetworkAttestation, HigherEdAttestation } from "./absence-facts.ts";
-import type { FactComposition } from "./fact-composition.ts";
+import type { FactComposition, CompositionSide } from "./fact-composition.ts";
 import type { AutourFacts } from "./autour-facts.ts";
 import type { AgglomerationCategory } from "./agglomeration-facts.ts";
 import type { ConclusionNarrativePlan } from "./conclusion-plan.ts";
@@ -160,6 +160,14 @@ export type ConditionCheckFact = BaseFact & {
   capabilityReason: CapabilityReason;
   consequence: string;
   action?: DecisionAction;
+  /**
+   * FUT-20 (D4) : CE QUE L'ON SAIT DU LOGEMENT, quand la condition porte sur les fortes chaleurs et
+   * que le climat de la commune la contredit. Même brique que le côté logement des compositions
+   * chaleur (`chaleur-logement.ts`), au grain de l'adresse. Il ne pèse jamais sur `signal` : le
+   * diagnostic d'un logement ne rend pas une commune plus ou moins favorable. Le geste de la carte
+   * (`action`) est alors celui de ce côté. Absent des cartes produites avant FUT-20.
+   */
+  logement?: CompositionSide;
 };
 
 // « CONDITION RESPECTÉE ». Confirmée, tranchable, satisfaite : un constat sobre, jamais un bilan. Le couple
@@ -336,6 +344,27 @@ export type DecisionFact =
   IncompatibilityFact | CompromiseFact | UnknownFact | VerificationFact | MismatchFact | AlignmentFact
   | ConditionCheckFact | ConditionMetFact;
 
+// LE CONFORT D'ÉTÉ DOCUMENTÉ (FUT-20). Un niveau de preuve gouverne ce qu'on a le droit de dire :
+//   - `logement` (A) : l'indicateur réglementaire et les caractéristiques décrivent CE logement ;
+//   - `batiment` (B1) : le diagnostic décrit l'immeuble, ou ne renseigne pas le confort d'été ; ses
+//     caractéristiques ne s'attribuent pas au logement ;
+//   - `aucun` (C) : rien n'est attribué ; on ne qualifie rien.
+// UNE CARACTÉRISTIQUE NON RENSEIGNÉE N'EST PAS ABSENTE : `nonRenseignees` liste ce que le diagnostic
+// ne dit pas, pour en faire une vérification, jamais un défaut.
+export type ConfortEteCle = "traversant" | "protection" | "inertie" | "ventilation" | "brasseur" | "murs" | "menuiseries";
+export type ConfortEteFait = {
+  niveau: "logement" | "batiment" | "aucun";
+  /** Non nul SEULEMENT au niveau `logement`. */
+  indicateur: "bon" | "moyen" | "insuffisant" | null;
+  /** Au niveau `batiment` : le diagnostic est généré à l'immeuble, ou ne porte pas le bloc confort. */
+  methode: "immeuble" | "sans_bloc" | null;
+  caracteristiques: { cle: ConfortEteCle; libelle: string; sens: "favorable" | "defavorable" | "neutre" }[];
+  /** Ce que le diagnostic ne dit pas, parmi les deux leviers que le lecteur peut faire vérifier. */
+  nonRenseignees: ("traversant" | "protection")[];
+  /** AAAA-MM-JJ, telle que la base l'a publiée. */
+  dateDiagnostic: string | null;
+};
+
 export type LogementFacts = {
   dpe: "passoire" | "energivore" | "correct" | "absent"; // DPE SAUVEGARDÉ (persisté)
   dpeLabel: string | null; // classe exacte (F/G/E…)
@@ -349,6 +378,16 @@ export type LogementFacts = {
   // « insuffisant » ET que le DPE décrit bien CE logement — un DPE généré à l'immeuble ne dit rien
   // du confort d'un appartement en particulier, et `deriveThermalEvidence` rend alors `null`.
   confortEteInsuffisant: boolean;
+  /**
+   * LE CONFORT D'ÉTÉ TEL QUE LE DIAGNOSTIC LE DOCUMENTE (FUT-20). La SOURCE, et non un booléen
+   * précalculé : les compositions chaleur en tirent ce qu'elles peuvent dire du logement, selon le
+   * niveau de preuve (A logement / B1 bâtiment / C aucun). Dérivé par `confortEteDepuisDpe`, du même
+   * `deriveThermalEvidence` que `confortEteInsuffisant` : les deux ne peuvent pas diverger.
+   *
+   * OPTIONNEL : un producteur qui ne le fournit pas (la liste de contrôle client du module Logement)
+   * ne dit rien du logement, et aucune composition n'en parle. Jamais « aucun diagnostic » par défaut.
+   */
+  confortEte?: ConfortEteFait;
   /**
    * L'ADRESSE PORTE DES DIAGNOSTICS, ET AUCUN NE DÉCRIT CE LOGEMENT.
    *

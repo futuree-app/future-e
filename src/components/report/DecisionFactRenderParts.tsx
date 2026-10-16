@@ -4,6 +4,8 @@
 import Link from "next/link";
 import type { DecisionFact, VerificationActionType } from "@/lib/decision/decision-fact";
 import { evidenceHref, type EvidenceTargetKey } from "@/lib/decision/evidence-targets";
+import type { CompositionSide } from "@/lib/decision/fact-composition";
+import { bindOrphans } from "@/lib/typography";
 
 export function Chip({ label, value, href, color }: { label: string; value?: string; href?: string; color: string }) {
   const inner = (
@@ -134,6 +136,8 @@ export function EvidenceRow(
           ))}
         </div>
       ) : null}
+      {/* FUT-20 (D4) : le logement se lit après les preuves de la commune, avant le geste qu'il appelle. */}
+      {fact.role === "condition_check" && fact.logement ? <CoteLogement side={fact.logement} color={color} /> : null}
       {action ? <ActionCue label={action.label} color={color} type={action.type} /> : null}
     </div>
   );
@@ -195,6 +199,25 @@ export function factChecks(fact: DecisionFact): string[] {
   const action = fact.role === "verification" || fact.role === "unknown" || fact.role === "condition_check"
     ? fact.action : undefined;
   return action?.detail ? [action.detail] : [];
+}
+
+// FUT-20 (D4) : CE QUE L'ON SAIT DU LOGEMENT, sous une condition « des étés supportables ». Le geste de
+// la carte reste rendu une seule fois, par `EvidenceRow` (le côté n'en porte pas).
+function CoteLogement({ side, color }: { side: CompositionSide; color: string }) {
+  const chips = toChips(side.evidence);
+  return (
+    <div className="mt-1 pl-3 border-l border-[var(--border-2)]">
+      <p className="text-[13px] font-semibold text-muted mb-1.5">{side.label}</p>
+      {side.status ? <StatusTag label={side.status} color={color} /> : null}
+      <p className="text-label text-[15px] leading-[1.6]">{bindOrphans(side.statement)}</p>
+      {side.limitation ? <p className="text-muted/85 text-[13px] leading-[1.55] mt-1.5">{side.limitation}</p> : null}
+      {chips.length > 0 ? (
+        <div className="mt-2 flex items-center gap-2 flex-wrap">
+          {chips.map((c, i) => <Chip key={i} label={c.label} value={c.value} href={c.href} color={color} />)}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function FactBody({ fact, color }: { fact: DecisionFact; color?: string }) {
