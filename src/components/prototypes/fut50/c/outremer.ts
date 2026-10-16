@@ -70,7 +70,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
   });
   const mesures = [mesure(jours), ...(nuits ? [mesure(nuits)] : [])];
 
-  const texte = `À l'horizon 2050 (+${niveau} pour ${t.nom}, par rapport à 1850-1900) : ${nombre(jours.projete)} ${jours.p.unite(jours.projete)} ${jours.p.condition} (${ref(jours)})`
+  const texte = `À l'horizon 2050 (+${niveau} pour ${t.designation}, par rapport à 1850-1900) : ${nombre(jours.projete)} ${jours.p.unite(jours.projete)} ${jours.p.condition} (${ref(jours)})`
     + (nuits ? `, et ${nombre(nuits.projete)} ${nuits.p.unite(nuits.projete)} ${nuits.p.condition} (${ref(nuits)}).` : ".");
 
   // Deux plages distinctes, jamais réunies : la dispersion des simulations (q17-q83, un même réchauffement) et la
@@ -78,7 +78,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
   const q = jours.i.horizons["2050"].valeur!;
   const etendue = jours.i.etendueCommunale2050;
   const methode = [
-    `Météo-France mesure la chaleur de chaque territoire d'outre-mer avec ses propres seuils. Pour ${t.nom} : les journées ${jours.p.condition}${nuits ? ` et les nuits ${nuits.p.condition}` : ""}. Ces seuils ne se comparent pas à ceux de l'Hexagone (35 °C le jour, 20 °C la nuit).`,
+    `Météo-France mesure la chaleur de chaque territoire d'outre-mer avec ses propres seuils. Pour ${t.designation} : les journées ${jours.p.condition}${nuits ? ` et les nuits ${nuits.p.condition}` : ""}. Ces seuils ne se comparent pas à ceux de l'Hexagone (35 °C le jour, 20 °C la nuit).`,
     `L'horizon 2050 correspond ici à un réchauffement de +${niveau} dans la région, par rapport à 1850-1900. La référence est la moyenne de 1991-2020.`,
     ...(q.q17 != null && q.q83 != null
       ? [`Selon les modèles climatiques, entre ${nombre(q.q17)} et ${nombre(q.q83)} ${jours.p.unite(q.q83).replace(" par an", "")} en 2050 : c'est la plage centrale de l'ensemble des simulations, pour un même réchauffement, pas trois scénarios.`]
@@ -92,10 +92,10 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
   const limites = lecture.limites.filter((x) => !/^Horizons définis/.test(x));
   return {
     cle: "chaleur", commune: lieu.commune,
-    fait: { texte, source: `Météo-France · SocleOM-Climat-2025, référence 1991-2020, horizon 2050 (+${niveau} pour ${t.nom})`, grain: "commune", mesures },
+    fait: { texte, source: `Météo-France · SocleOM-Climat-2025, référence 1991-2020, horizon 2050 (+${niveau} pour ${t.designation})`, grain: "commune", mesures },
     pourVous: {
       signal: "information",
-      texte: `Ces chiffres décrivent l'évolution projetée de la chaleur à ${lieu.commune}. futur•e ne les classe pas encore en favorable ou défavorable : les règles de lecture propres à ${t.nom} restent à établir.`,
+      texte: `Ces chiffres décrivent l'évolution projetée de la chaleur à ${lieu.commune}. futur•e ne les classe pas encore en favorable ou défavorable : les règles de lecture propres à ${t.designation} restent à établir.`,
     },
     methode,
     aVerifier: `${limites.join(" ")} La chaleur ressentie dépend aussi du quartier et du logement : orientation, étage, isolation, possibilité d'aérer la nuit.`,
@@ -106,7 +106,7 @@ export function lireChaleurOutremer(lieu: Lieu, lecture: LectureClimatOutremer):
 /** Les hivers doux : un critère défini pour l'Hexagone, sans lecture validée outre-mer. */
 export function lireHiversOutremer(lieu: Lieu, t: TerritoireOutremer): LecturePastille {
   return indisponible(lieu, "hivers",
-    `Ce critère est défini pour l'Hexagone : la température moyenne de décembre à février, sur 1976-2005. Pour ${t.nom}, futur•e n'a pas encore de lecture validée de la saison fraîche : aucun chiffre n'est affiché.`,
+    `Ce critère est défini pour l'Hexagone : la température moyenne de décembre à février, sur 1976-2005. Pour ${t.designation}, futur•e n'a pas encore de lecture validée de la saison fraîche : aucun chiffre n'est affiché.`,
     "Le dossier de la commune présentera les températures disponibles pour ce territoire, avec leur période de référence.");
 }
 
@@ -140,7 +140,7 @@ export function lireTailleOutremer(lieu: Lieu, entite: EntiteOutremer, t: Territ
 /** Les risques hors du périmètre de GASPAR (Polynésie, Nouvelle-Calédonie, Wallis-et-Futuna). */
 export function lireRisquesHorsGaspar(lieu: Lieu, t: TerritoireOutremer): LecturePastille {
   return indisponible(lieu, "risques",
-    `La base nationale des risques (GASPAR) ne couvre pas ${t.nom}, qui a ses propres dispositifs de prévention. Son silence ne dit rien des risques du lieu : nous n'en tirons aucune conclusion.`,
+    `La base nationale des risques (GASPAR) ne couvre pas ${t.designation}, qui a ses propres dispositifs de prévention. Son silence ne dit rien des risques du lieu : nous n'en tirons aucune conclusion.`,
     "Les risques naturels de ce territoire se consultent auprès de ses autorités et de ses services de prévention.");
 }
 

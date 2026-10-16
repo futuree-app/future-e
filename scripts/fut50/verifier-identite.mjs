@@ -33,9 +33,16 @@ for (const insee of ["3018", "301890", "1A234", "2C004", "ABCDE", "", "30 189"])
   verifier(statut === 400 && !corps?.lecture, `malformé « ${insee} » → ${statut} ${corps?.error ?? ""}`);
 }
 // 7. Codes bien formés mais inconnus des référentiels : 404, aucune identité devinée.
-for (const [insee, quoi] of [["99999", "inexistant"], ["50173", "ancienne commune fusionnée"], ["97411", "outre-mer, hors index"]]) {
+for (const [insee, quoi] of [["99999", "inexistant"], ["50173", "ancienne commune fusionnée"], ["97999", "format ultramarin, absent du COG"]]) {
   const { statut, corps } = await lire(insee, "chaleur", "Nîmes");
   verifier(statut === 404 && corps?.error === "commune_inconnue" && !corps?.lecture, `${insee} (${quoi}) → ${statut} ${corps?.error ?? ""}`);
+}
+// 8. Outre-mer (FUT-104) : l'identité vient du COG embarqué, désambiguïsée, quel que soit le nom envoyé.
+for (const [insee, attendu] of [["97411", "Saint-Denis (La Réunion)"], ["97209", "Fort-de-France (Martinique)"], ["97611", "Mamoudzou (Mayotte)"],
+  ["97302", "Cayenne (Guyane)"], ["98818", "Nouméa (Nouvelle-Calédonie)"], ["98735", "Papeete (Polynésie française)"],
+  ["97801", "Saint-Martin"], ["97701", "Saint-Barthélemy"], ["98736", "Pirae (Polynésie française)"], ["97502", "Saint-Pierre (Saint-Pierre-et-Miquelon)"]]) {
+  const { statut, corps } = await lire(insee, "chaleur", "Nîmes");
+  verifier(statut === 200 && corps.lecture.commune === attendu, `${insee} → « ${corps?.lecture?.commune} » (attendu « ${attendu} »)`);
 }
 // Priorité inconnue.
 { const { statut } = await lire("30189", "inconnue", "Nîmes"); verifier(statut === 400, `priorité inconnue → ${statut}`); }

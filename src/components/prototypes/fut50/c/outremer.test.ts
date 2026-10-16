@@ -114,7 +114,7 @@ test("Les autres priorités outre-mer : jamais une lecture positive par défaut"
   assert.doesNotMatch(tout(t), /favorable|correspond à votre|ne correspond pas à votre/i, "aucune classification de taille");
   const r = lireRisquesHorsGaspar(lieu("98735"), pf);
   assert.equal(r.pourVous.signal, "indisponible");
-  assert.match(r.pourVous.texte, /ne couvre pas Polynésie française/);
+  assert.match(r.pourVous.texte, /ne couvre pas la Polynésie française/);
   assert.ok(gasparCouvre("97411") && gasparCouvre("97502") && gasparCouvre("97801"));
   assert.ok(!gasparCouvre("98735") && !gasparCouvre("98818") && !gasparCouvre("98613"));
 });
@@ -128,4 +128,12 @@ test("La route : identité par le COG, SocleOM pour la chaleur, aucune classific
   assert.match(branche, /lireChaleurOutremer\(lieu, lireClimatOutremer\(insee\)!\)/);
   assert.doesNotMatch(branche, /entreesChaleur|classifyClimateComfort|buildClimatFacts|getClimatDataCommune|entreesHivers|entreesTaille/);
   assert.doesNotMatch(get, /searchParams\.get\("(commune|libelle)"\)/, "le nom du navigateur n'est jamais lu");
+});
+
+test("Désignation : chaque territoire se dit avec son article dans une phrase", () => {
+  for (const t of Object.values(TERRITOIRES_OUTREMER)) assert.ok(t.designation && t.designation.length >= t.nom.length - 1, t.id);
+  assert.equal(TERRITOIRES_OUTREMER.martinique.designation, "la Martinique");
+  assert.equal(TERRITOIRES_OUTREMER.reunion.designation, "La Réunion");
+  assert.equal(TERRITOIRES_OUTREMER.mayotte.designation, "Mayotte");
+  assert.match(lireHiversOutremer(lieu("97209"), TERRITOIRES_OUTREMER.martinique).pourVous.texte, /Pour la Martinique, futur•e/);
 });

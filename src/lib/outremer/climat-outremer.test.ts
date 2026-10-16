@@ -252,7 +252,7 @@ test("Statuts : couverture partielle, point manquant, source non intégrée, sou
   for (const c of ["97501", "97502", "98411", "98901"]) assert.equal(statut(c), "source_indisponible", c);
   const nh = lireClimatOutremer("98731")!;
   assert.equal(nh.capaciteDecision, "aucune");
-  assert.ok(nh.statut !== "integree" && /une partie de Polynésie française/.test(nh.raison));
+  assert.ok(nh.statut !== "integree" && /une partie de la Polynésie française/.test(nh.raison));
   assert.equal("indicateurs" in nh, false, "une entité non couverte ne porte aucune valeur");
 });
 

@@ -135,6 +135,8 @@ export type LectureClimatOutremer =
 export type TerritoireOutremer = {
   id: TerritoireOutremerId;
   nom: string;
+  /** Le nom dans une phrase, avec son article : « la Martinique », « La Réunion », « Mayotte ». */
+  designation: string;
   /** Préfixe des codes du COG. */
   prefixe: string;
   statut: "DROM" | "COM" | "collectivité sui generis" | "TAOM" | "domaine public de l'État";
@@ -151,29 +153,29 @@ export type TerritoireOutremer = {
 const MF_OUTREMER = "https://meteofrance.com/changement-climatique/quel-climat-futur-pour-les-outre-mer";
 
 export const TERRITOIRES_OUTREMER: Record<TerritoireOutremerId, TerritoireOutremer> = {
-  guadeloupe: { id: "guadeloupe", nom: "Guadeloupe", prefixe: "971", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Guadeloupe"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
-  martinique: { id: "martinique", nom: "Martinique", prefixe: "972", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Martinique"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
-  guyane: { id: "guyane", nom: "Guyane", prefixe: "973", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Guyane"], reperes: { chaleurJour: "TX35D", chaleurNuit: "TN24D", source: MF_OUTREMER } },
-  reunion: { id: "reunion", nom: "La Réunion", prefixe: "974", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Reunion"], reperes: { chaleurJour: "TX31D", chaleurNuit: "TN25D", source: MF_OUTREMER } },
-  "saint-pierre-et-miquelon": { id: "saint-pierre-et-miquelon", nom: "Saint-Pierre-et-Miquelon", prefixe: "975", statut: "COM", uniteGeographique: "commune", couverture: "source_indisponible", zones: [] },
-  mayotte: { id: "mayotte", nom: "Mayotte", prefixe: "976", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Mayotte"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN25D", source: MF_OUTREMER } },
-  "saint-barthelemy": { id: "saint-barthelemy", nom: "Saint-Barthélemy", prefixe: "977", statut: "COM", uniteGeographique: "collectivité unique", couverture: "complete", zones: ["SaintMartinBarthelemy"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
-  "saint-martin": { id: "saint-martin", nom: "Saint-Martin", prefixe: "978", statut: "COM", uniteGeographique: "collectivité unique", couverture: "complete", zones: ["SaintMartinBarthelemy"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
-  taaf: { id: "taaf", nom: "Terres australes et antarctiques françaises", prefixe: "984", statut: "TAOM", uniteGeographique: "district", couverture: "source_indisponible", zones: [] },
-  "wallis-et-futuna": { id: "wallis-et-futuna", nom: "Wallis-et-Futuna", prefixe: "986", statut: "COM", uniteGeographique: "circonscription territoriale", couverture: "source_non_integree", zones: [] },
-  "polynesie-francaise": { id: "polynesie-francaise", nom: "Polynésie française", prefixe: "987", statut: "COM", uniteGeographique: "commune", couverture: "partielle", zones: ["PF-Societe", "PF-Tuamotu", "PF-Australe"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN26D", source: "nomenclature Découverte SocleOM (Polynésie)" } },
-  "nouvelle-caledonie": { id: "nouvelle-caledonie", nom: "Nouvelle-Calédonie", prefixe: "988", statut: "collectivité sui generis", uniteGeographique: "commune", couverture: "complete", zones: ["NouvelleCaledonie"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN24D", source: MF_OUTREMER } },
-  clipperton: { id: "clipperton", nom: "Clipperton", prefixe: "989", statut: "domaine public de l'État", uniteGeographique: "île", couverture: "source_indisponible", zones: [] },
+  guadeloupe: { id: "guadeloupe", nom: "Guadeloupe", designation: "la Guadeloupe", prefixe: "971", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Guadeloupe"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
+  martinique: { id: "martinique", nom: "Martinique", designation: "la Martinique", prefixe: "972", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Martinique"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
+  guyane: { id: "guyane", nom: "Guyane", designation: "la Guyane", prefixe: "973", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Guyane"], reperes: { chaleurJour: "TX35D", chaleurNuit: "TN24D", source: MF_OUTREMER } },
+  reunion: { id: "reunion", nom: "La Réunion", designation: "La Réunion", prefixe: "974", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Reunion"], reperes: { chaleurJour: "TX31D", chaleurNuit: "TN25D", source: MF_OUTREMER } },
+  "saint-pierre-et-miquelon": { id: "saint-pierre-et-miquelon", nom: "Saint-Pierre-et-Miquelon", designation: "Saint-Pierre-et-Miquelon", prefixe: "975", statut: "COM", uniteGeographique: "commune", couverture: "source_indisponible", zones: [] },
+  mayotte: { id: "mayotte", nom: "Mayotte", designation: "Mayotte", prefixe: "976", statut: "DROM", uniteGeographique: "commune", couverture: "complete", zones: ["Mayotte"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN25D", source: MF_OUTREMER } },
+  "saint-barthelemy": { id: "saint-barthelemy", nom: "Saint-Barthélemy", designation: "Saint-Barthélemy", prefixe: "977", statut: "COM", uniteGeographique: "collectivité unique", couverture: "complete", zones: ["SaintMartinBarthelemy"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
+  "saint-martin": { id: "saint-martin", nom: "Saint-Martin", designation: "Saint-Martin", prefixe: "978", statut: "COM", uniteGeographique: "collectivité unique", couverture: "complete", zones: ["SaintMartinBarthelemy"], reperes: { chaleurJour: "TX33D", chaleurNuit: "TN25D", source: "nomenclature Découverte SocleOM (Antilles)" } },
+  taaf: { id: "taaf", nom: "Terres australes et antarctiques françaises", designation: "les Terres australes et antarctiques françaises", prefixe: "984", statut: "TAOM", uniteGeographique: "district", couverture: "source_indisponible", zones: [] },
+  "wallis-et-futuna": { id: "wallis-et-futuna", nom: "Wallis-et-Futuna", designation: "Wallis-et-Futuna", prefixe: "986", statut: "COM", uniteGeographique: "circonscription territoriale", couverture: "source_non_integree", zones: [] },
+  "polynesie-francaise": { id: "polynesie-francaise", nom: "Polynésie française", designation: "la Polynésie française", prefixe: "987", statut: "COM", uniteGeographique: "commune", couverture: "partielle", zones: ["PF-Societe", "PF-Tuamotu", "PF-Australe"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN26D", source: "nomenclature Découverte SocleOM (Polynésie)" } },
+  "nouvelle-caledonie": { id: "nouvelle-caledonie", nom: "Nouvelle-Calédonie", designation: "la Nouvelle-Calédonie", prefixe: "988", statut: "collectivité sui generis", uniteGeographique: "commune", couverture: "complete", zones: ["NouvelleCaledonie"], reperes: { chaleurJour: "TX32D", chaleurNuit: "TN24D", source: MF_OUTREMER } },
+  clipperton: { id: "clipperton", nom: "Clipperton", designation: "Clipperton", prefixe: "989", statut: "domaine public de l'État", uniteGeographique: "île", couverture: "source_indisponible", zones: [] },
 };
 
 const PAR_PREFIXE = new Map(Object.values(TERRITOIRES_OUTREMER).map((t) => [t.prefixe, t]));
 
 const RAISONS: Record<Exclude<StatutClimatOutremer, "integree">, (t: TerritoireOutremer) => string> = {
-  hors_grille: (t) => `Météo-France publie des indicateurs pour une partie de ${t.nom} seulement ; cette commune est hors des zones couvertes.`,
+  hors_grille: (t) => `Météo-France publie des indicateurs pour une partie de ${t.designation} seulement ; cette commune est hors des zones couvertes.`,
   point_de_reference_manquant: () => "La grille couvre la commune, mais sa mairie n'est pas localisée et son relief est trop contrasté pour qu'un point au centre la décrive.",
   point_de_reference_non_verifie: () => "La localisation publiée de la mairie tombe sur un relief, et aucune seconde source ne la confirme : la valeur décrirait la montagne, pas le bourg.",
-  source_non_integree: (t) => `Météo-France publie pour ${t.nom} des séries quotidiennes, pas d'indicateurs : rien n'est encore calculé ni intégré.`,
-  source_indisponible: (t) => `Aucune projection climatique SocleOM n'est publiée pour ${t.nom}.`,
+  source_non_integree: (t) => `Météo-France publie pour ${t.designation} des séries quotidiennes, pas d'indicateurs : rien n'est encore calculé ni intégré.`,
+  source_indisponible: (t) => `Aucune projection climatique SocleOM n'est publiée pour ${t.designation}.`,
 };
 
 // ─── Données ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -317,7 +319,7 @@ export function creerLecteurOutremer(climatBrut: unknown, communesBrut: unknown)
 
     const limites = [
       `Valeur au point de grille (environ ${zone.pas_grille_deg >= 0.03 ? "3" : "2,5"} km) ${entite.point?.type === "centroide" ? "du centre de la commune" : "de la mairie"} : elle ne décrit ni toute la commune ni un logement.`,
-      `Horizons définis par niveau de réchauffement régional propre à ${territoire.nom} (2050 = +${String(niveaux["2050"]).replace(".", ",")} °C par rapport à 1850-1900), moyennés sur 20 ans ; la référence est 1991-2020.`,
+      `Horizons définis par niveau de réchauffement régional propre à ${territoire.designation} (2050 = +${String(niveaux["2050"]).replace(".", ",")} °C par rapport à 1850-1900), moyennés sur 20 ans ; la référence est 1991-2020.`,
       "Projections d'un ensemble de modèles à fortes émissions, corrigées sur des observations locales : une tendance probable, pas une prévision.",
     ];
     const tmm = brut.indicateurs.TMm?.etendue_reference;
