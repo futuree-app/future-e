@@ -11,6 +11,8 @@ import { NextResponse } from "next/server";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { codeGaspar } from "@/lib/georisques-flags";
 import { getCommuneEntry } from "@/lib/comparateur-vie";
+import { estCodeOutremer, getEntiteOutremer, lireClimatOutremer, TERRITOIRES_OUTREMER } from "@/lib/outremer";
+import { gasparCouvre, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer } from "@/components/prototypes/fut50/c/outremer";
 import { villePLM } from "@/lib/territoire/plm-communal";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction, buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS, CLIMAT_HORIZON } from "@/lib/decision/climat-facts";
@@ -138,6 +140,12 @@ const FORMAT_INSEE = /^(?:\d{2}|2[AB])\d{3}$/;
  * ne couvre pas). On ne devine jamais une identité.
  */
 async function communeCanonique(insee: string): Promise<{ insee: string; nom: string } | null> {
+  // OUTRE-MER (FUT-104) : l'identité vient du COG embarqué (`@/lib/outremer`), jamais de l'index du comparateur, qui
+  // ne contient que l'Hexagone et la Corse, et jamais du navigateur. Le nom est désambiguïsé : « Saint-Denis (La Réunion) ».
+  if (estCodeOutremer(insee)) {
+    const e = getEntiteOutremer(insee);
+    return e ? { insee: e.code, nom: e.nomComplet } : null;
+  }
   const plm = villePLM(insee);
   if (plm) return { insee, nom: plm.nom };
   const entree = await getCommuneEntry(insee).catch(() => null);
@@ -161,7 +169,17 @@ export async function GET(req: Request) {
   };
   const debut = Date.now();
   let lecture;
-  if (cle === "chaleur") {
+  const om = estCodeOutremer(insee) ? getEntiteOutremer(insee) : null;
+  if (om) {
+    // OUTRE-MER : SocleOM pour la chaleur, aucune règle métropolitaine (ni DRIAS, ni classifyClimateComfort, ni
+    // dossier fondé sur l'index du comparateur) ; une indisponibilité dite quand aucune lecture n'est validée.
+    const t = TERRITOIRES_OUTREMER[om.territoire];
+    if (cle === "chaleur") lecture = lireChaleurOutremer(lieu, lireClimatOutremer(insee)!);
+    else if (cle === "hivers") lecture = lireHiversOutremer(lieu, t);
+    else if (cle === "taille") lecture = lireTailleOutremer(lieu, om, t);
+    else if (cle === "risques") lecture = gasparCouvre(insee) ? lireRisques(lieu, await risquesGaspar(insee)) : lireRisquesHorsGaspar(lieu, t);
+    else lecture = lireAdresse("voiture", lieu, aCommune);
+  } else if (cle === "chaleur") {
     lecture = lireChaleur(lieu, await entreesChaleur(insee));
   } else if (cle === "hivers") {
     lecture = lireHivers(lieu, (await entreesHivers(insee)).e);

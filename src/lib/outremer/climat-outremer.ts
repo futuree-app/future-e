@@ -396,3 +396,16 @@ export function creerLecteurOutremer(climatBrut: unknown, communesBrut: unknown)
 }
 
 export type LecteurOutremer = ReturnType<typeof creerLecteurOutremer>;
+
+/**
+ * LE SEUIL D'UN INDICATEUR DE CHALEUR, LU DANS SON LIBELLÉ OFFICIEL (« … température maximale quotidienne ≥ 31 °C »).
+ * Le comparateur compte : ≥ et > ne sont pas interchangeables (TN25D compte les nuits ≥ 25 °C, TR25D celles > 25 °C).
+ * `null` pour un indicateur qui n'est pas un comptage au-dessus d'un seuil de température.
+ */
+export function seuilDe(indicateur: Pick<IndicateurOutremer, "libelle" | "famille">):
+  { comparateur: "≥" | ">"; valeurC: number; grandeur: "maximale" | "minimale" } | null {
+  if (indicateur.famille !== "chaleur_jour" && indicateur.famille !== "chaleur_nuit") return null;
+  const m = indicateur.libelle.match(/température (maximale|minimale) quotidienne\)? (≥|>) ?(\d+(?:,\d+)?) ?°C/);
+  if (!m) return null;
+  return { grandeur: m[1] as "maximale" | "minimale", comparateur: m[2] as "≥" | ">", valeurC: Number(m[3].replace(",", ".")) };
+}
