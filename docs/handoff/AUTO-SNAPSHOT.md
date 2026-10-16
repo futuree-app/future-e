@@ -4,19 +4,19 @@
 > Le récit complet de reprise est dans `docs/handoff/CURRENT.md` (commande /handoff).
 > Si CURRENT.md est plus ancien que ce snapshot, le récit peut être en retard d'un pas.
 
-- **Horodatage** : 2026-09-22 12:04:21 +0200
-- **Branche** : `main`
+- **Horodatage** : 2026-10-16 05:23:13 +0200
+- **Branche** : `feat/fut-50-socleom-integration`
 
 ## Derniers commits
 ```
-55426d75 Le budget journalier passe à mille, parce que 300 gênait d'abord son auteur
-d445f576 Une requête invalide pouvait vider le quota du jour et couper la prose pour tous
-7a23f077 Six routes appelaient un modèle payant, sans authentification ni limite
-7b371b59 Cinq médecins à la même adresse ne font pas « un cabinet »
-0c1a6172 Le module savait un médecin à 553 m, le dossier répondait « 20 % des communes »
-bf4085fc Un square de 900 m² masquait le parc Charruyer, et c'était la règle qui voulait ça
-831d7fe2 Une surface enherbée n'est pas un parc, et un terrain de loisirs n'est pas vert
-78db43b3 Une pelouse de quatre cents mètres carrés s'annonçait comme l'espace vert du quartier
+4ecd1b71 FUT-50 × FUT-104 : référence de commit dans le rapport
+facabb4c FUT-50 × FUT-104 : grain « point de grille », captures et rapport d'intégration
+e103275f FUT-50 × FUT-104 : territoires nommés avec leur article, banc d'identité ultramarin
+8bafdfed FUT-50 × FUT-104 : la chaleur d'une commune ultramarine lue dans SocleOM, sans verdict
+11b54673 Intégration FUT-50 × FUT-104 : chemins data/data_climat.json et comparaison dite « Hexagone et Corse »
+70a066c0 Intégration : FUT-50 (accueil, version C) dans la consolidation FUT-104
+cf8ea2f1 FUT-104 consolidation (3/3) : purge SQL préparée (non exécutée) et rapport de consolidation
+d73ccd3f FUT-104 consolidation (2/3) : SocleOM, des pixels correctement situés et un pipeline qui échoue au lieu de mentir
 ```
 
 ## Modifications non commitées
