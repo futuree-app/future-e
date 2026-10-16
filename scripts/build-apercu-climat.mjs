@@ -34,6 +34,11 @@ export const CLES_APERCU = [
   "NORTX35D_yr", "ATX35D_yr", // jours au-dessus de 35 °C
   "NORTR_yr", "ATR_yr", // nuits tropicales
   "NORIFM40_yr", "AIFM40_yr", // jours d'indice forêt-météo supérieur à 40
+  // FUT-50 : la lecture de l'accueil lit le MÊME extrait (un seul extrait DRIAS, pas deux). Elle y ajoute la bascule
+  // 30 °C et la température moyenne de l'hiver (décembre à février), valeur et écart, pour reconstruire la
+  // référence 1976-2005 comme le dossier (`construireFaitsCommune`, `reconstructReference`).
+  "NORTX30D_yr", "ATX30D_yr", // jours au-dessus de 30 °C
+  "NORTMm_seas_DJF", "ATMm_seas_DJF", // température moyenne de l'hiver
 ];
 export const HORIZONS_APERCU = ["gwl15", "gwl20", "gwl30"];
 

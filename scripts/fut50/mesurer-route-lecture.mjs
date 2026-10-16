@@ -1,7 +1,10 @@
-// FUT-50 · Mesure, à froid puis à chaud, de ce que coûte chaque source de la route de lecture.
-// Chaque mesure à froid tourne dans un PROCESSUS NEUF (aucun cache hérité). Machine locale, Node, hors Next :
-// ces chiffres comparent les sources entre elles ; ils ne prédisent pas exactement une fonction serverless.
-// Usage : node scripts/fut50/mesurer-route-lecture.mjs            (lance toutes les mesures)
+// FUT-50 · AVANT / APRÈS : ce que coûte chaque lecture de l'accueil, sources complètes contre sources légères.
+//
+// Chaque mesure tourne dans un PROCESSUS NEUF (aucun cache hérité), avec le MÊME service
+// (`src/lib/accueil/lecture-accueil.ts`) : seules les sources changent (`sourcesCompletes` = l'ancienne route ;
+// `sourcesLegeres` = la nouvelle). Machine locale, Node, hors Next : ces chiffres comparent deux chemins entre eux,
+// ils ne prédisent pas une fonction Vercel. La mémoire inclut le chargement des modules (dont jiti).
+// Usage : node scripts/fut50/mesurer-route-lecture.mjs           (tout)
 //         node scripts/fut50/mesurer-route-lecture.mjs <mesure>  (une seule, dans ce processus)
 import { createJiti } from "jiti";
 import { spawnSync } from "node:child_process";
@@ -10,69 +13,61 @@ import { fileURLToPath } from "node:url";
 
 const racine = process.cwd() + "/";
 const mesure = process.argv[2];
+const PARCOURS = [
+  ["identite", "Identité métropolitaine", "30189", "17300"],
+  ["chaleur", "Chaleur métropolitaine", "30189", "17300"],
+  ["hivers", "Hivers doux", "30189", "17300"],
+  ["taille", "Petite ville", "30189", "17300"],
+  ["risques", "Risques (GASPAR)", "30189", "17300"],
+  ["om-chaleur", "Chaleur ultramarine couverte", "97411", "97209"],
+  ["om-sans", "Chaleur ultramarine non couverte", "98736", "98713"],
+];
 
 if (!mesure) {
-  const toutes = ["index", "drias", "outremer", "outremer-sans-index", "dossier-taille", "gaspar", "identite-om", "identite-metro"];
-  for (const m of toutes) {
-    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), m], { encoding: "utf8", cwd: process.cwd(), timeout: 180000 });
+  console.log("| Parcours | Sources | À froid | À chaud | Mémoire | Fichiers de données ouverts | Appels réseau |");
+  console.log("|---|---|---|---|---|---|---|");
+  for (const [cle] of PARCOURS) for (const src of ["completes", "legeres"]) {
+    if (cle.startsWith("om") && src === "completes") continue; // l'outre-mer n'a qu'un chemin (COG, SocleOM)
+    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), `${cle}:${src}`], { encoding: "utf8", cwd: process.cwd(), timeout: 180000 });
     process.stdout.write((r.stdout || "").split("\n").filter((l) => l.startsWith("|")).join("\n") + "\n");
-    if (r.status !== 0) process.stdout.write(`| ${m} | ÉCHEC | ${(r.stderr || "").split("\n").find((l) => /Error/.test(l)) ?? ""} |\n`);
+    if (r.status !== 0) process.stdout.write(`| ${cle} | ${src} | ÉCHEC | ${(r.stderr || "").split("\n").find((l) => /Error/.test(l)) ?? ""} | | | |\n`);
   }
   process.exit(0);
 }
 
-const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
-const mo = () => Math.round(process.memoryUsage().rss / 1048576);
-const t = async (f) => { const d = performance.now(); const v = await f(); return [Math.round(performance.now() - d), v]; };
-// Espion de lecture de fichiers : quels gros fichiers une mesure ouvre-t-elle vraiment ?
-const lus = new Set();
-for (const nom of ["readFile", "readFileSync", "createReadStream"]) {
-  const o = fs[nom]; fs[nom] = function (p, ...a) { if (typeof p === "string" && /data\/|\.json|\.gz/.test(p)) lus.add(p.replace(racine, "")); return o.call(this, p, ...a); };
-  if (nom === "readFile") { const op = fs.promises.readFile; fs.promises.readFile = function (p, ...a) { if (typeof p === "string") lus.add(p.replace(racine, "")); return op.call(this, p, ...a); }; }
+// Espions : fichiers de données ouverts (lecture fs ou module JSON), appels réseau.
+const fichiers = new Set();
+for (const nom of ["readFileSync", "readFile"]) {
+  const o = fs[nom];
+  fs[nom] = function (p, ...a) { if (typeof p === "string" && /\.(json|gz)$/.test(p) && /data\//.test(p)) fichiers.add(p.replace(racine, "")); return o.call(this, p, ...a); };
 }
-const ligne = (nom, froid, chaud, memoire, note = "") => console.log(`| ${nom} | ${froid} ms | ${chaud} ms | +${memoire} Mo | ${[...lus].filter((f) => /data|json|gz/.test(f)).map((f) => `\`${f}\``).join(", ") || "aucun gros fichier"} | ${note} |`);
+const op = fs.promises.readFile;
+fs.promises.readFile = function (p, ...a) { if (typeof p === "string" && /\.(json|gz)$/.test(p) && /data\//.test(p)) fichiers.add(p.replace(racine, "")); return op.call(this, p, ...a); };
+const appels = [];
+const of = globalThis.fetch;
+globalThis.fetch = (u, ...a) => { appels.push(String(u).replace(/^https?:\/\/([^/?]+).*/, "$1")); return of(u, ...a); };
 
+const [cle, src] = mesure.split(":");
+const [, nom, a, b] = PARCOURS.find((p) => p[0] === cle);
+const mo = () => process.memoryUsage().rss / 1048576;
 const m0 = mo();
-if (mesure === "index") {
-  const { getCommuneEntry } = await jiti.import(racine + "src/lib/comparateur-vie.ts");
-  const [f] = await t(() => getCommuneEntry("30189"));
-  const [c] = await t(() => getCommuneEntry("17300"));
-  ligne("Index des communes (identité métropolitaine, taille)", f, c, mo() - m0);
-} else if (mesure === "drias") {
-  const { getClimatDataCommune } = await jiti.import(racine + "src/lib/drias-json.ts");
-  const [f] = await t(() => getClimatDataCommune("30189"));
-  const [c] = await t(() => getClimatDataCommune("17300"));
-  ligne("DRIAS (chaleur métropolitaine)", f, c, mo() - m0);
-} else if (mesure === "outremer") {
-  const L = await jiti.import(racine + "src/lib/outremer/index.ts");
-  const [f] = await t(() => L.lireClimatOutremer("97411"));
-  const [c] = await t(() => L.lireClimatOutremer("97209"));
-  ligne("SocleOM (chaleur ultramarine)", f, c, mo() - m0);
-} else if (mesure === "outremer-sans-index" || mesure === "identite-om") {
-  const { communeCanonique } = await jiti.import(racine + "src/components/prototypes/fut50/c/identite.ts");
-  const [f, v] = await t(() => communeCanonique("97411"));
-  const [c] = await t(() => communeCanonique("98735"));
-  const indexLu = [...lus].some((p) => /comparateur-index/.test(p));
-  ligne("Identité ultramarine (COG embarqué)", f, c, mo() - m0, `« ${v?.nom} » ; index métropolitain chargé : ${indexLu ? "OUI" : "non"}`);
-} else if (mesure === "identite-metro") {
-  const { communeCanonique } = await jiti.import(racine + "src/components/prototypes/fut50/c/identite.ts");
-  const [f, v] = await t(() => communeCanonique("30189"));
-  const [c] = await t(() => communeCanonique("17300"));
-  ligne("Identité métropolitaine (index)", f, c, mo() - m0, `« ${v?.nom} »`);
-} else if (mesure === "dossier-taille") {
-  const { buildCommuneDossier } = await jiti.import(racine + "src/lib/decision/territory-facts.ts");
-  const { projetDeTest } = await jiti.import(racine + "src/app/dev/fut87/projet-de-test.ts");
-  const appels = [];
-  const of = globalThis.fetch; globalThis.fetch = (u, ...a) => { appels.push(String(u).replace(/\?.*/, "")); return of(u, ...a); };
-  const [f] = await t(() => buildCommuneDossier("30189", projetDeTest("eviter_grandes_villes:2").projet, { hasAddress: false }));
-  const n1 = appels.length;
-  const [c] = await t(() => buildCommuneDossier("17300", projetDeTest("eviter_grandes_villes:2").projet, { hasAddress: false }));
-  ligne("Moteur complet pour « Petite ville »", f, c, mo() - m0, `${n1} appels réseau à froid (${[...new Set(appels)].map((a) => a.replace(/^https?:\/\//, "")).join(", ")})`);
-} else if (mesure === "gaspar") {
-  const d = [];
-  for (const c of ["30189", "17300", "30189"]) {
-    const [ms, r] = await t(() => fetch(`https://georisques.gouv.fr/api/v1/gaspar/risques?code_insee=${c}`, { signal: AbortSignal.timeout(8000) }).then((x) => x.status).catch((e) => e.name));
-    d.push(`${c} ${ms} ms (${r})`);
-  }
-  ligne("GASPAR (risques, réseau)", d[0], d[1], mo() - m0, `sans cache hors Next ; 3e appel (même commune) : ${d[2]}`);
-}
+const debut = performance.now();
+const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
+const S = await jiti.import(racine + "src/lib/accueil/lecture-accueil.ts");
+const sources = src === "completes" ? await S.sourcesCompletes() : S.sourcesLegeres;
+const lire = async (code) => {
+  if (cle === "identite") return S.communeCanonique(code, sources);
+  const c = cle.startsWith("om") ? "chaleur" : cle;
+  return S.lireAccueil(code, c, { sources });
+};
+const t0 = performance.now();
+const r1 = await lire(a);
+const froid = performance.now() - debut; // import compris : c'est le vrai coût d'une instance neuve
+const appelsFroid = appels.length;
+const t1 = performance.now();
+await lire(b);
+const chaud = performance.now() - t1;
+const taille = [...fichiers].map((f) => { try { return `\`${f}\` (${(fs.statSync(racine + f).size / 1048576).toFixed(1)} Mo)`; } catch { return `\`${f}\``; } });
+const json = (await jiti.import(racine + "src/lib/accueil/donnees-legeres.ts").then(() => true).catch(() => false)) && src === "legeres" ? " + modules JSON empaquetés (2,7 + 4,6 Mo)" : "";
+void t0; void r1;
+console.log(`| ${nom} | ${src === "completes" ? "avant (complètes)" : "après (légères)"} | ${Math.round(froid)} ms | ${chaud < 1 ? chaud.toFixed(1) : Math.round(chaud)} ms | +${Math.round(mo() - m0)} Mo | ${taille.join(", ") || "aucun"}${json} | ${appelsFroid} (${[...new Set(appels)].join(", ") || "—"}) |`);

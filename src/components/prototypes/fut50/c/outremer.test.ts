@@ -122,20 +122,10 @@ test("Les autres priorités outre-mer : jamais une lecture positive par défaut"
   assert.ok(!gasparCouvre("98735") && !gasparCouvre("98818") && !gasparCouvre("98613"));
 });
 
-test("La route : identité par le COG, SocleOM pour la chaleur, aucune classification métropolitaine outre-mer", () => {
+test("La route : déléguée au service de l'accueil (garde-fous ultramarins vérifiés dans src/lib/accueil/accueil-public.test.ts)", () => {
   const r = readFileSync("src/app/dev/fut50/api/lecture/route.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
-  // L'identité vit dans un module partagé par la confirmation de commune et les lectures (`c/identite.ts`).
-  const id = readFileSync("src/components/prototypes/fut50/c/identite.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
-  const canon = id.slice(id.indexOf("async function communeCanonique"));
-  assert.ok(canon.indexOf("estCodeOutremer(insee)") > 0 && canon.indexOf("estCodeOutremer(insee)") < canon.indexOf("getCommuneEntry"), "l'outre-mer ne passe pas par l'index du comparateur");
-  for (const route of ["src/app/dev/fut50/api/lecture/route.ts", "src/app/dev/fut50/api/commune/route.ts"]) {
-    assert.match(readFileSync(route, "utf8"), /import \{ FORMAT_INSEE, communeCanonique \} from "@\/components\/prototypes\/fut50\/c\/identite"/, `${route} résout par le module partagé`);
-  }
-  const get = r.slice(r.indexOf("export async function GET"));
-  const branche = get.slice(get.indexOf("if (om) {"), get.indexOf("} else if (cle === \"chaleur\")"));
-  assert.match(branche, /lireChaleurOutremer\(lieu, lireClimatOutremer\(insee\)!\)/);
-  assert.doesNotMatch(branche, /entreesChaleur|classifyClimateComfort|buildClimatFacts|getClimatDataCommune|entreesHivers|entreesTaille/);
-  assert.doesNotMatch(get, /searchParams\.get\("(commune|libelle)"\)/, "le nom du navigateur n'est jamais lu");
+  assert.match(r, /lireAccueil\(/);
+  assert.doesNotMatch(r, /searchParams\.get\("(commune|libelle)"\)/, "le nom du navigateur n'est jamais lu");
 });
 
 test("Désignation : chaque territoire se dit avec son article dans une phrase", () => {

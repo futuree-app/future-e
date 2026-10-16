@@ -107,6 +107,17 @@ export function exclusionsAvecPerimetres(c: HardConstraints) {
   };
 }
 
+/**
+ * L'ANNUAIRE N'EST LU QUE PAR TROIS CONTRAINTES : « près de… » (`nearPlace`), « hors de… » (`excludePlace`) et la
+ * taille relative (`sizeRelativeTo`). Sans elles, `hydrateHardConstraints(hc, null)` rend exactement ce que
+ * rendrait `hydrateHardConstraints(hc, annuaire)` : charger l'annuaire (l'index complet du comparateur) est alors
+ * un coût sans effet. Les mêmes trois conditions que les gardes `&& dir` ci-dessous.
+ */
+export function annuaireNecessaire(hc: HardConstraints | undefined | null): boolean {
+  const c = hc ?? {};
+  return Boolean(c.nearPlace?.label) || excludePlaceDeclares(c.excludePlace).length > 0 || Boolean(c.sizeRelativeTo?.label);
+}
+
 export function hydrateHardConstraints(
   hc: HardConstraints | undefined | null,
   dir: PlaceDirectory | null,

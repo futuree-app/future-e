@@ -85,6 +85,32 @@ for (const [saisie, repere, attendu] of [
   await ctx.close();
 }
 
+// 4. Annulation : les requêtes d'une commune quittée sont INTERROMPUES (pas seulement ignorées), sans flash.
+{
+  const { ctx, p } = await page();
+  const annulees = [];
+  p.on("requestfailed", (r) => { if (/\/api\/(lecture|commune)/.test(r.url())) annulees.push(`${new URL(r.url()).searchParams.get("insee")}:${new URL(r.url()).searchParams.get("cle") ?? "identité"} (${r.failure()?.errorText})`); });
+  await p.route("**/dev/fut50/api/lecture?**", async (route) => { await new Promise((r) => setTimeout(r, 2000)); await route.continue().catch(() => {}); });
+  await choisir(p, "Nîmes", "Nîmes");
+  await p.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();
+  await p.getByRole("button", { name: "Avoir des hivers doux" }).click(); // même commune : ne doit rien annuler
+  await p.waitForTimeout(300);
+  const avantChangement = annulees.length;
+  await p.getByRole("button", { name: "Changer de commune" }).click();
+  await choisir(p, "La Rochelle", "La Rochelle");
+  let flash = false;
+  const surveiller = setInterval(async () => { const t = await p.locator('[aria-live="polite"]').innerText().catch(() => ""); if (/Nîmes|\b14\b jours/.test(t)) flash = true; }, 100);
+  await p.waitForFunction(() => /La Rochelle/.test(document.querySelector('[aria-live="polite"] article h2')?.textContent ?? ""), null, { timeout: 15000 });
+  await p.waitForTimeout(2500);
+  clearInterval(surveiller);
+  const nimes = annulees.filter((a) => a.startsWith("30189"));
+  verifier(avantChangement === 0, `deux priorités de la même commune : ${avantChangement} annulation`);
+  verifier(nimes.length >= 2 && nimes.every((a) => /ABORTED/.test(a)), `changement de commune : requêtes de Nîmes interrompues (${nimes.join(", ")})`);
+  verifier(!flash, "aucun chiffre ni nom de Nîmes affiché après le changement");
+  verifier(!annulees.some((a) => a.startsWith("17300")), "aucune requête de La Rochelle annulée");
+  await ctx.close();
+}
+
 await nav.close();
 console.log(echecs ? `\n${echecs} échec(s)` : "\nTout est conforme.");
 process.exit(echecs ? 1 : 0);

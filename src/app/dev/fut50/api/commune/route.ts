@@ -1,9 +1,10 @@
-// FUT-50 · LA CONFIRMATION D'UNE COMMUNE : son nom canonique, dès la sélection, sans attendre une priorité. DEV.
+// FUT-50 · LA CONFIRMATION D'UNE COMMUNE, POUR LE PROTOTYPE. DEV UNIQUEMENT : 404 en production.
 //
-// Même résolution que les lectures (`communeCanonique`) : COG ultramarin embarqué (sans charger l'index métropolitain),
-// puis Paris/Lyon/Marseille, puis l'index des communes. 400 si le code est malformé, 404 s'il est inconnu.
+// Le même service que la route publique `/api/accueil/commune` : COG ultramarin, Paris/Lyon/Marseille, puis les
+// données légères de l'accueil (sans charger l'index du comparateur). 400 si le code est malformé, 404 s'il est
+// inconnu.
 import { NextResponse } from "next/server";
-import { FORMAT_INSEE, communeCanonique } from "@/components/prototypes/fut50/c/identite";
+import { FORMAT_INSEE, communeCanonique } from "@/lib/accueil/lecture-accueil";
 
 export async function GET(req: Request) {
   if (process.env.NODE_ENV === "production") return new NextResponse(null, { status: 404 });

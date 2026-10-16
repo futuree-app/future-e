@@ -74,6 +74,13 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
   // le nom canonique (COG, index des communes) le remplace. Le jeton écarte toute réponse arrivée après qu'une autre
   // commune a été choisie, ou que la saisie a repris.
   const jetonIdentite = useRef(0);
+  // L'ANNULATION : une requête devenue inutile est interrompue, pas seulement ignorée. Les lectures de la commune
+  // affichée continuent (elles restent utiles d'une priorité à l'autre) ; celles d'une commune quittée s'arrêtent.
+  const lecturesEnVol = useRef(new Map<string, AbortController>());
+  const identiteEnVol = useRef<AbortController | null>(null);
+  const abandonner = (garder: string | null) => {
+    for (const [k, c] of lecturesEnVol.current) if (!garder || !k.startsWith(`${garder}|`)) { c.abort(); lecturesEnVol.current.delete(k); }
+  };
   const [identite, setIdentite] = useState<"provisoire" | "canonique" | "inconnue">("provisoire");
   const [choisies, setChoisies] = useState<CleePastille[]>([]);
   const [focale, setFocale] = useState<CleePastille | null>(null);
@@ -127,6 +134,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
       return;
     }
     setAidePlm("");
+    abandonner(s.insee);
     setLieu(s);
     setSaisie(s.libelle);
     confirmerIdentite(s.insee);
@@ -140,9 +148,11 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
   async function confirmerIdentite(insee: string) {
     const jeton = ++jetonIdentite.current;
+    identiteEnVol.current?.abort();
+    const controle = (identiteEnVol.current = new AbortController());
     setIdentite("provisoire");
     try {
-      const res = await fetch(`/dev/fut50/api/commune?insee=${encodeURIComponent(insee)}`);
+      const res = await fetch(`/dev/fut50/api/commune?insee=${encodeURIComponent(insee)}`, { signal: controle.signal });
       if (jeton !== jetonIdentite.current) return;
       if (res.status === 404) { setIdentite("inconnue"); return; }
       if (!res.ok) return; // le nom de la recherche reste affiché, marqué provisoire ; les lectures portent le leur
@@ -158,6 +168,9 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
   function oublierIdentite() {
     jetonIdentite.current++;
+    identiteEnVol.current?.abort();
+    identiteEnVol.current = null;
+    abandonner(null);
     setIdentite("provisoire");
   }
 
@@ -171,19 +184,30 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
 
   async function charger(l: Lieu, cle: CleePastille) {
     const k = `${l.insee}|${cle}`;
+    if (lecturesEnVol.current.has(k)) return; // déjà demandée : la réponse en cours servira
+    const controle = new AbortController();
+    lecturesEnVol.current.set(k, controle);
     setLectures((m) => ({ ...m, [k]: "chargement" }));
     try {
-      const q = new URLSearchParams({ insee: l.insee, cle, type: l.type, commune: l.commune, libelle: l.libelle });
-      const res = await fetch(`/dev/fut50/api/lecture?${q}`);
+      // Le code et la priorité, rien d'autre : l'identité vient du serveur, et une URL minimale est une seule entrée
+      // de cache CDN par commune et par priorité.
+      const q = new URLSearchParams({ insee: l.insee, cle });
+      const res = await fetch(`/dev/fut50/api/lecture?${q}`, { signal: controle.signal });
       // Commune absente des référentiels du produit : un état à part, sans « Réessayer » qui ne changerait rien.
       if (res.status === 404) { setLectures((m) => ({ ...m, [k]: "inconnue" })); return; }
       if (!res.ok) throw new Error(String(res.status));
       const { lecture } = (await res.json()) as { lecture: LecturePastille };
       setLectures((m) => ({ ...m, [k]: lecture }));
     } catch {
-      setLectures((m) => ({ ...m, [k]: "erreur" }));
+      // Une requête ANNULÉE n'est pas une erreur : la commune a changé, rien ne s'affiche pour elle.
+      if (!controle.signal.aborted) setLectures((m) => ({ ...m, [k]: "erreur" }));
+    } finally {
+      if (lecturesEnVol.current.get(k) === controle) lecturesEnVol.current.delete(k);
     }
   }
+
+  // Au démontage, plus rien ne doit tourner pour un composant disparu.
+  useEffect(() => () => { abandonner(null); identiteEnVol.current?.abort(); }, []);
 
   function basculer(cle: CleePastille) {
     if (choisies.includes(cle)) {
