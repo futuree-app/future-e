@@ -66,6 +66,7 @@ console.log(`  lectures rendues identiques : ${compte.lectures}/${codes.length *
 const nbEcarts = Object.values(ecarts).reduce((s, l) => s + l.length, 0);
 for (const [q, l] of Object.entries(ecarts)) console.log(`  ✖ ${q} : ${l.length} écart(s), ex. ${JSON.stringify(l[0]).slice(0, 600)}`);
 
+let ecartsReseau = 0;
 if (process.argv.includes("--reseau")) {
   const vrai = await S.sourcesCompletes();
   const panel = ["30189", "17300", "44109", "74010", "23096", "2A004", "75111", "69381", "13201", "75056", "56260", "05023"];
@@ -73,9 +74,10 @@ if (process.argv.includes("--reseau")) {
   for (const code of panel) {
     for (const f of [S.entreesTaille, S.entreesHivers]) {
       const [a, b] = [sansFonctions(await f(code, vrai)), sansFonctions(await f(code, leger))];
-      if (isDeepStrictEqual(a, b)) ok++; else { console.log(`  ✖ réseau ${code} ${f.name}`, JSON.stringify(a).slice(0, 300), JSON.stringify(b).slice(0, 300)); }
+      if (isDeepStrictEqual(a, b)) ok++; else { ecartsReseau++; console.log(`  ✖ réseau ${code} ${f.name}`, JSON.stringify(a).slice(0, 300), JSON.stringify(b).slice(0, 300)); }
     }
   }
   console.log(`Panel EN LIGNE (vrai buildCommuneDossier, Géorisques et radon compris) : ${ok}/${panel.length * 2} identiques`);
+  if (ecartsReseau) console.error(`✖ ${ecartsReseau} divergence(s) sur le panel en ligne : vérification en échec`);
 }
-process.exit(nbEcarts ? 1 : 0);
+process.exit(nbEcarts + ecartsReseau ? 1 : 0);
