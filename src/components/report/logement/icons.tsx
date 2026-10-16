@@ -28,7 +28,7 @@ export function IconClock({ size = 13 }: { size?: number }) {
   return <Svg size={size}><circle cx="8" cy="8" r="5.6" /><path d="M8 4.8V8l2.2 1.4" /></Svg>;
 }
 
-// Soleil — « dans le climat futur » (chaleur à venir).
+// Soleil — chaleur.
 export function IconSun({ size = 13 }: { size?: number }) {
   return (
     <Svg size={size}>
