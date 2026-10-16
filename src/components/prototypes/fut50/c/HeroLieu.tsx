@@ -70,6 +70,11 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
   const [erreurRecherche, setErreurRecherche] = useState("");
   const [aidePlm, setAidePlm] = useState("");
   const [lieu, setLieu] = useState<Lieu | null>(null);
+  // L'IDENTITÉ CONFIRMÉE PAR LE SERVEUR : le nom de la recherche n'est qu'une étiquette de saisie. Dès la sélection,
+  // le nom canonique (COG, index des communes) le remplace. Le jeton écarte toute réponse arrivée après qu'une autre
+  // commune a été choisie, ou que la saisie a repris.
+  const jetonIdentite = useRef(0);
+  const [identite, setIdentite] = useState<"provisoire" | "canonique" | "inconnue">("provisoire");
   const [choisies, setChoisies] = useState<CleePastille[]>([]);
   const [focale, setFocale] = useState<CleePastille | null>(null);
   const [lectures, setLectures] = useState<Record<string, EtatLecture>>({});
@@ -124,6 +129,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     setAidePlm("");
     setLieu(s);
     setSaisie(s.libelle);
+    confirmerIdentite(s.insee);
     setOuvert(false);
     setSuggestions([]);
     // Les priorités cochées portent sur ce qui compte, pas sur le lieu : elles restent, et leur lecture se refait
@@ -132,7 +138,31 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     for (const cle of choisies) charger(s, cle);
   }
 
+  async function confirmerIdentite(insee: string) {
+    const jeton = ++jetonIdentite.current;
+    setIdentite("provisoire");
+    try {
+      const res = await fetch(`/dev/fut50/api/commune?insee=${encodeURIComponent(insee)}`);
+      if (jeton !== jetonIdentite.current) return;
+      if (res.status === 404) { setIdentite("inconnue"); return; }
+      if (!res.ok) return; // le nom de la recherche reste affiché, marqué provisoire ; les lectures portent le leur
+      const canon = (await res.json()) as { insee: string; nom: string };
+      if (jeton !== jetonIdentite.current) return;
+      setIdentite("canonique");
+      setSaisie(canon.nom);
+      setLieu((l) => (l && l.insee === insee ? { ...l, libelle: canon.nom, commune: canon.nom } : l));
+    } catch {
+      /* réseau : idem, rien n'est inventé */
+    }
+  }
+
+  function oublierIdentite() {
+    jetonIdentite.current++;
+    setIdentite("provisoire");
+  }
+
   function changerDeCommune() {
+    oublierIdentite();
     setLieu(null);
     setSaisie("");
     setLectures({});
@@ -165,16 +195,18 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
     setChoisies([...choisies, cle]);
     setFocale(cle);
     if (lieu && !lectures[`${lieu.insee}|${cle}`]) charger(lieu, cle);
-    // Écran étroit : la lecture s'affiche sous les priorités ; on l'amène doucement en vue si besoin, jamais en
-    // mouvement réduit.
+    // Écran étroit : la lecture s'affiche sous les priorités ; on l'amène en vue si besoin. En mouvement réduit, le
+    // déplacement est INSTANTANÉ, pas supprimé : sans lui, à 390 px, la lecture naissait hors de l'écran (mesuré le
+    // 16/10 : titre à 1 076 px dans une fenêtre de 844 px) et rien n'indiquait qu'elle était apparue.
     requestAnimationFrame(() => {
       const el = lectureRef.current;
-      if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!el) return;
+      const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       // L'en-tête du site est fixe : on vise le haut de la lecture SOUS lui, jamais derrière.
       const r = el.getBoundingClientRect();
       if (r.top > window.innerHeight - 120 || r.top < 0) {
         const entete = document.querySelector("nav")?.closest("header, nav")?.getBoundingClientRect().bottom ?? 64;
-        window.scrollTo({ top: window.scrollY + r.top - entete - 16, behavior: "smooth" });
+        window.scrollTo({ top: window.scrollY + r.top - entete - 16, behavior: reduit ? "auto" : "smooth" });
       }
     });
   }
@@ -221,7 +253,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
               autoComplete="off"
               placeholder="Nom de la commune"
               value={saisie}
-              onChange={(e) => { setSaisie(e.target.value); if (lieu) { setLieu(null); setLectures({}); } if (e.target.value.trim().length < 2) { setSuggestions([]); setOuvert(false); } }}
+              onChange={(e) => { setSaisie(e.target.value); if (lieu) { oublierIdentite(); setLieu(null); setLectures({}); } if (e.target.value.trim().length < 2) { setSuggestions([]); setOuvert(false); } }}
               onKeyDown={clavier}
               onFocus={() => { if (suggestions.length > 0 && !lieu) setOuvert(true); }}
             />
@@ -266,7 +298,7 @@ export function HeroLieu({ composition = "recommandee" }: { composition?: Compos
         {lieu ? (
           <div className={c.lieu} key={lieu.insee}>
             <svg className={c.coche} width="20" height="20" viewBox="0 0 20 20" aria-hidden><path d="M4 10.5 L8.2 14.5 L16 6" fill="none" stroke="var(--reg-alignement)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            <span className={c.lieuNom}>{lieu.libelle}</span>
+            <span className={c.lieuNom} data-identite={identite}>{lieu.libelle}</span>
             <button type="button" className={c.lienTexte} onClick={changerDeCommune} style={{ fontSize: 15 }}>Changer de commune</button>
           </div>
         ) : null}
@@ -406,7 +438,7 @@ function Lecture({ lecture, onglets }: {
             ) : null}
             <span className={c.source}>
               <GlypheGrain grain={lecture.fait.grain} taille={11} />{" "}
-              {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : lecture.fait.grain === "secteur" ? "au point de grille le plus proche de la mairie" : "à l'échelle de la commune"} · {lecture.fait.source}
+              {lecture.fait.grain === "unite_urbaine" ? "à l'échelle de l'agglomération" : lecture.fait.grain === "secteur" ? "au point de grille le plus proche de la mairie" : "à l'échelle de la commune"} · {fr(lecture.fait.source)}
             </span>
           </div>
         ) : null}

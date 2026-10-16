@@ -8,12 +8,11 @@
 // À l'intégration, cette route devra devenir une route publique légère et mise en cache par commune ; elle
 // n'appelle que des sources déjà lues par l'accueil ou par le dossier (cf. compte rendu FUT-50 C).
 import { NextResponse } from "next/server";
+import { FORMAT_INSEE, communeCanonique } from "@/components/prototypes/fut50/c/identite";
 import { buildCommuneDossier } from "@/lib/decision/territory-facts";
 import { codeGaspar } from "@/lib/georisques-flags";
-import { getCommuneEntry } from "@/lib/comparateur-vie";
 import { estCodeOutremer, getEntiteOutremer, lireClimatOutremer, TERRITOIRES_OUTREMER } from "@/lib/outremer";
 import { gasparCouvre, lireChaleurOutremer, lireHiversOutremer, lireRisquesHorsGaspar, lireTailleOutremer } from "@/components/prototypes/fut50/c/outremer";
-import { villePLM } from "@/lib/territoire/plm-communal";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { summerComfortAction, buildClimatFacts, classifyClimateComfort, reconstructReference, CLIMAT_METRICS, CLIMAT_HORIZON } from "@/lib/decision/climat-facts";
 import { classifyAgglomerationSize, categoryStatementFragment } from "@/lib/decision/agglomeration-facts";
@@ -126,30 +125,6 @@ async function entreesHivers(insee: string): Promise<{ nom: string | null; e: En
       temperatureValeur: ref != null ? formatTemperature(ref) : null,
     },
   };
-}
-
-/** Cinq chiffres, ou 2A / 2B suivis de trois chiffres (Corse). L'ancienne forme acceptait « 1A234 ». */
-const FORMAT_INSEE = /^(?:\d{2}|2[AB])\d{3}$/;
-
-/**
- * LA COMMUNE CANONIQUE D'UN CODE INSEE, par les référentiels du produit, sans réseau :
- *   - Paris, Lyon, Marseille (75056, 69123, 13055) : `villePLM`, la règle du dossier Territoire (FUT-43) ;
- *   - toute autre commune, arrondissements compris : l'index des communes (`getCommuneEntry`), celui du moteur et
- *     des dossiers, chargé une fois et gardé en mémoire.
- * `null` : code absent de ces référentiels (inexistant, ancien code d'une commune fusionnée, outre-mer que l'index
- * ne couvre pas). On ne devine jamais une identité.
- */
-async function communeCanonique(insee: string): Promise<{ insee: string; nom: string } | null> {
-  // OUTRE-MER (FUT-104) : l'identité vient du COG embarqué (`@/lib/outremer`), jamais de l'index du comparateur, qui
-  // ne contient que l'Hexagone et la Corse, et jamais du navigateur. Le nom est désambiguïsé : « Saint-Denis (La Réunion) ».
-  if (estCodeOutremer(insee)) {
-    const e = getEntiteOutremer(insee);
-    return e ? { insee: e.code, nom: e.nomComplet } : null;
-  }
-  const plm = villePLM(insee);
-  if (plm) return { insee, nom: plm.nom };
-  const entree = await getCommuneEntry(insee).catch(() => null);
-  return entree ? { insee: entree.insee, nom: entree.nom } : null;
 }
 
 export async function GET(req: Request) {

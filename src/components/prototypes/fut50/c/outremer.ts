@@ -140,12 +140,16 @@ export function lireTailleOutremer(lieu: Lieu, entite: EntiteOutremer, t: Territ
 /** Les risques hors du périmètre de GASPAR (Polynésie, Nouvelle-Calédonie, Wallis-et-Futuna). */
 export function lireRisquesHorsGaspar(lieu: Lieu, t: TerritoireOutremer): LecturePastille {
   return indisponible(lieu, "risques",
-    `La base nationale des risques (GASPAR) ne couvre pas ${t.designation}, qui a ses propres dispositifs de prévention. Son silence ne dit rien des risques du lieu : nous n'en tirons aucune conclusion.`,
+    `La base nationale des risques (GASPAR) ne couvre pas ${t.designation} : son édition officielle n'y recense aucune commune. Cette absence ne dit rien des risques du lieu : nous n'en tirons aucune conclusion.`,
     "Les risques naturels de ce territoire se consultent auprès de ses autorités et de ses services de prévention.");
 }
 
-/** GASPAR couvre les DROM, Saint-Pierre-et-Miquelon, Saint-Barthélemy et Saint-Martin (vérifié le 16/10/2026 :
- *  97411, 97209, 97302, 97611, 97801, 97701, 97502 répondent ; 98735, 98818, 98613, 98736 répondent 0 résultat). */
+/** GASPAR couvre les DROM, Saint-Pierre-et-Miquelon, Saint-Barthélemy et Saint-Martin, et pas les collectivités du
+ *  Pacifique (codes 98). Preuve DOCUMENTAIRE, pas seulement une réponse vide de l'API : l'édition officielle de la base
+ *  (files.georisques.fr/GASPAR/gaspar.zip, publiée sur data.gouv.fr, millésime 2026-10-05) contient des communes 971 à
+ *  976, 975, 977 et 978 dans ses tables, et AUCUN code 98 dans aucune de ses huit tables (risques recensés, arrêtés
+ *  CatNat, AZI, DICRIM, TIM, PPRN, PPRM, PPRT). L'API concorde : 98735, 98818, 98613, 98736 répondent 0 résultat.
+ *  Vérifié le 16/10/2026. La raison de cette absence (compétence propre de ces collectivités) n'est pas affirmée. */
 export function gasparCouvre(code: string): boolean {
   return !/^98/.test(code);
 }

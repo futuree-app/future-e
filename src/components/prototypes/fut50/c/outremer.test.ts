@@ -115,15 +115,22 @@ test("Les autres priorités outre-mer : jamais une lecture positive par défaut"
   assert.doesNotMatch(tout(t), /favorable|correspond à votre|ne correspond pas à votre/i, "aucune classification de taille");
   const r = lireRisquesHorsGaspar(lieu("98735"), pf);
   assert.equal(r.pourVous.signal, "indisponible");
-  assert.match(r.pourVous.texte, /ne couvre pas la Polynésie française/);
+  assert.match(r.pourVous.texte, /ne couvre pas la Polynésie française : son édition officielle n'y recense aucune commune/);
+  assert.doesNotMatch(r.pourVous.texte, /propres dispositifs/, "aucune raison non vérifiée");
+  assert.doesNotMatch(tout(r), /aucun risque|sans risque/i, "jamais une absence de risque");
   assert.ok(gasparCouvre("97411") && gasparCouvre("97502") && gasparCouvre("97801"));
   assert.ok(!gasparCouvre("98735") && !gasparCouvre("98818") && !gasparCouvre("98613"));
 });
 
 test("La route : identité par le COG, SocleOM pour la chaleur, aucune classification métropolitaine outre-mer", () => {
   const r = readFileSync("src/app/dev/fut50/api/lecture/route.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
-  const canon = r.slice(r.indexOf("async function communeCanonique"));
-  assert.ok(canon.indexOf("estCodeOutremer(insee)") < canon.indexOf("getCommuneEntry"), "l'outre-mer ne passe pas par l'index du comparateur");
+  // L'identité vit dans un module partagé par la confirmation de commune et les lectures (`c/identite.ts`).
+  const id = readFileSync("src/components/prototypes/fut50/c/identite.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
+  const canon = id.slice(id.indexOf("async function communeCanonique"));
+  assert.ok(canon.indexOf("estCodeOutremer(insee)") > 0 && canon.indexOf("estCodeOutremer(insee)") < canon.indexOf("getCommuneEntry"), "l'outre-mer ne passe pas par l'index du comparateur");
+  for (const route of ["src/app/dev/fut50/api/lecture/route.ts", "src/app/dev/fut50/api/commune/route.ts"]) {
+    assert.match(readFileSync(route, "utf8"), /import \{ FORMAT_INSEE, communeCanonique \} from "@\/components\/prototypes\/fut50\/c\/identite"/, `${route} résout par le module partagé`);
+  }
   const get = r.slice(r.indexOf("export async function GET"));
   const branche = get.slice(get.indexOf("if (om) {"), get.indexOf("} else if (cle === \"chaleur\")"));
   assert.match(branche, /lireChaleurOutremer\(lieu, lireClimatOutremer\(insee\)!\)/);
