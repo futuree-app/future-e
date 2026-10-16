@@ -26,7 +26,7 @@ Le worktree `fut50-socleom` part de la consolidation, puis fusionne FUT-50 (`70a
 |---|---|
 | `8bafdfed` | `src/components/prototypes/fut50/c/outremer.ts` (nouveau, pur) et `outremer.test.ts` ; `src/app/dev/fut50/api/lecture/route.ts` ; `src/lib/outremer/climat-outremer.ts` (`seuilDe`) |
 | `e103275f` | `climat-outremer.ts` (`designation`), tests, banc d'identité |
-| `79…` (ce commit) | `pastilles.ts` (grain `secteur`), `HeroLieu.tsx` (libellé du grain, une ligne), captures, ce rapport |
+| `facabb4c` | `pastilles.ts` (grain `secteur`), `HeroLieu.tsx` (libellé du grain, une ligne), captures, ce rapport |
 
 La direction artistique, les textes validés, les animations, les trois états, les quatre priorités et la lecture métropolitaine ne sont pas touchés.
 
