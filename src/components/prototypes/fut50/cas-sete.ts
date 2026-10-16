@@ -10,7 +10,7 @@
 //   merConfirmeeSansChaleur  les deux changements à la fois
 //
 // Deux contrôles empêchent la fixture de mentir en silence :
-//   - `cas-sete.test.ts` (hors ligne) : les valeurs DRIAS figées sont celles de `public/data_climat.json`,
+//   - `cas-sete.test.ts` (hors ligne) : les valeurs DRIAS figées sont celles de `data/data_climat.json`,
 //     et les chiffres écrits dans les phrases sont ceux qui s'en déduisent ;
 //   - `scripts/fut50/verifier-cas-sete.mjs` (réseau, Géorisques n'accepte que les IP françaises) : rejoue
 //     la chaîne complète et compare chaque phrase. À relancer avant toute mise en production d'un accueil
@@ -59,7 +59,7 @@ export const CAS_SETE = {
       limite: "Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement.",
       geste: "Renseignez votre adresse pour descendre au niveau du logement",
       preuve: { libelle: "Climat · Sète", valeur: "80 nuits à l'horizon 2050", source: "DRIAS · Météo-France", grain: "commune" as const },
-      // Valeurs DRIAS brutes (nuits/an), `public/data_climat.json` : NORTR_yr (valeur projetée) et ATR_yr (écart
+      // Valeurs DRIAS brutes (nuits/an), `data/data_climat.json` : NORTR_yr (valeur projetée) et ATR_yr (écart
       // à la référence). La référence se déduit : 79,8 − 37,1 = 42,7, que le moteur écrit « 42 ».
       drias: {
         gwl15: { NORTR_yr: 66.6, ATR_yr: 25.4 },

@@ -11,8 +11,8 @@ import { HORIZONS } from "../../../lib/horizons.ts";
 
 const COL = { NORTR_yr: "column10", ATR_yr: "column25" } as const;
 
-test("les valeurs DRIAS figées sont celles de public/data_climat.json", () => {
-  const lignes = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
+test("les valeurs DRIAS figées sont celles de data/data_climat.json", () => {
+  const lignes = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, string | number>[];
   for (const [gwl, valeurs] of Object.entries(CAS_SETE.faits.nuits.drias)) {
     const ligne = lignes.find((r) => String(r.insee_code).padStart(5, "0") === CAS_SETE.insee && r.scenario === gwl);
     assert.ok(ligne, `ligne ${gwl} absente`);

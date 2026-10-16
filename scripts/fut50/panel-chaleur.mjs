@@ -6,7 +6,7 @@ const racine = process.cwd() + "/";
 const jiti = createJiti(racine, { alias: { "server-only": racine + "scripts/mer/etude-courbe/vide.mjs", "@/": racine + "src/" } });
 const { lireChaleur, MOT_DU_SIGNAL } = await jiti.import(racine + "src/components/prototypes/fut50/c/pastilles.ts");
 const { buildClimatFacts, classifyClimateComfort, reconstructReference } = await jiti.import(racine + "src/lib/decision/climat-facts.ts");
-const L = JSON.parse(readFileSync("public/data_climat.json", "utf8"));
+const L = JSON.parse(readFileSync("data/data_climat.json", "utf8"));
 const COL = { NORTX35D_yr: "column08", NORTX30D_yr: "column09", NORTR_yr: "column10", ATX35D_yr: "column23", ATX30D_yr: "column24", ATR_yr: "column25" };
 const un = (v) => (v == null ? "–" : v.toLocaleString("fr-FR", { maximumFractionDigits: 2 }));
 for (const insee of process.argv.slice(2)) {

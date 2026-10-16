@@ -340,7 +340,7 @@ test("réponse de l'API : valide et vide, incomplète, panne ; trois issues dist
 // ── La chaleur : données réelles, frontières exactes, même lecture pour toutes les communes ──────────────
 
 const COL = { NORTX35D_yr: "column08", ATX35D_yr: "column23", NORTX30D_yr: "column09", ATX30D_yr: "column24", NORTR_yr: "column10", ATR_yr: "column25" } as const;
-const DRIAS = JSON.parse(readFileSync("public/data_climat.json", "utf8")) as Record<string, string | number>[];
+const DRIAS = JSON.parse(readFileSync("data/data_climat.json", "utf8")) as Record<string, string | number>[];
 function entreesReelles(insee: string): EntreesChaleur {
   const sc: Record<string, { h: string; v: Record<string, number> }> = {};
   for (const r of DRIAS.filter((r) => String(r.insee_code).padStart(5, "0") === insee)) {

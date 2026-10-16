@@ -166,10 +166,10 @@ export function Offres() {
           <div className={c.prix}>14 € <span className={c.prixUnite}>une fois</span></div>
           <p className={c.prixNote}>Intégralement déduits si vous poursuivez ensuite sur une adresse</p>
           <p className={c.offreTexte}>Une commune examinée depuis votre projet. La première des trois échelles.</p>
-          {/* corrigé : « parmi les 34 000 communes » (le total réel est de 35 006 ; jamais un rond faux). */}
+          {/* corrigé : « parmi les 34 000 communes » (le total réel est de 34 788, Hexagone et Corse, FUT-104 ; jamais un rond faux). */}
           <ul className={c.offreListe}>
             <li>La commune en entier : climat, risques, cadre de vie, ce qui la transforme</li>
-            <li>Sa position parmi les communes françaises, critère par critère</li>
+            <li>Sa position parmi les communes de l&apos;Hexagone et de Corse, critère par critère</li>
             <li>AskFuture : 3 questions incluses</li>
             <li>Chaque constat daté et sourcé, ce qui manque est nommé</li>
           </ul>
