@@ -4,7 +4,9 @@ import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
-import { formatGesM2, formatKwhEpM2, libelleObjet, parcoursAudit } from "@/lib/audit-record";
+import { formatGesM2, formatKwhEpM2 } from "@/lib/audit-record";
+import type { VoixAudit } from "@/lib/audit-lecture";
+import { AuditEnergetiqueBlock } from "./AuditEnergetiqueBlock";
 import { dateFr } from "@/lib/decision/autour-permis";
 import { phraseAttribution, vueSectionDpe } from "@/lib/dpe-selection-vue";
 
@@ -33,7 +35,8 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 }
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, auditStatus, candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
+  dpeStatus, dpe, audit, auditStatus, autresAudits = [], autresAuditsIncomplets = false, voixAudit = "neutre", auditDetailsOuverts = false,
+  candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
   onPick, onNotInList, onReselect, onPickParNumero,
 }: {
   dpeStatus: DpeUiStatus;
@@ -41,6 +44,13 @@ export function EnergieSection({
   audit: LogementReport["audit"];
   /** FUT-65 : `unavailable` dit que l'audit n'a pas pu être vérifié ; `undefined` (rapport ancien) ne dit rien. */
   auditStatus?: LogementReport["auditStatus"];
+  /** FUT-62 : les autres audits publiés pour la même adresse, et si leur liste est incomplète. */
+  autresAudits?: NonNullable<LogementReport["autresAudits"]>;
+  autresAuditsIncomplets?: boolean;
+  /** FUT-62 : à qui parlent les vérifications de l'audit (relation déclarée à ce bien). */
+  voixAudit?: VoixAudit;
+  /** Banc de revue seulement : les parcours de l'audit rendus dépliés. */
+  auditDetailsOuverts?: boolean;
   /** Tous les diagnostics rattachés à l'adresse, attribués ou non. */
   candidates: DpeRecord[];
   /** FUT-65 : la base des diagnostics n'a pas répondu et n'a rien rendu. La liste vide ne prouve rien. */
@@ -71,6 +81,23 @@ export function EnergieSection({
   // n'en porte aucun, et on le dit sans prétendre qu'il n'en existe pas.
   // La vue se décide dans `vueSectionDpe` (pur, testé) : ses cinq états ne se confondent jamais.
   const vue = vueSectionDpe({ statut: dpeStatus, dpeRetenu: dpe != null, candidats: candidates.length, baseMuette: dpeNonVerifiable });
+
+  // FUT-62 : l'audit est trouvé par l'adresse, pas par le diagnostic. Il se lit donc dans TOUS les états
+  // de la section, et pas seulement quand un diagnostic est attribué. Seul le diagnostic RETENU (jamais un
+  // candidat) peut le relier à ce logement, par le numéro que la source publie.
+  const blocAudit = (
+    <AuditEnergetiqueBlock
+      audit={audit}
+      autres={autresAudits}
+      autresIncomplets={autresAuditsIncomplets}
+      auditStatus={auditStatus}
+      dpe={vue === "attribue" && dpe ? { numero: dpe.id_dpe, conso_ep_m2: dpe.conso_ep_m2 } : null}
+      voix={voixAudit}
+      detailsOuverts={auditDetailsOuverts}
+    />
+  );
+  const auditVisible = auditStatus === "unavailable"
+    || (audit != null && audit.correspondance === "exact_address" && audit.scenarios.length > 0);
 
   if (vue !== "attribue" || !dpe) {
     const saisie = (
@@ -152,6 +179,7 @@ export function EnergieSection({
               </div>
             </div>
           )}
+          {auditVisible && <div style={{ marginTop: 20 }}>{blocAudit}</div>}
         </GlassCard>
       </ReportSection>
     );
@@ -194,68 +222,8 @@ export function EnergieSection({
           {dpe.type_batiment && <Block label="Type" value={dpe.type_batiment} />}
         </div>
 
-        {/* FUT-65 : la base des audits n'a pas répondu. On ne sait pas s'il en existe un : on le dit, une
-            fois, là où l'audit se serait affiché. Absent ou rapport ancien : rien, comme avant. */}
-        {auditStatus === "unavailable" && (
-          <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
-            Audit énergétique non vérifiable pour le moment : la base ADEME n&apos;a pas répondu lors de cette collecte.
-          </p>
-        )}
-        {/* Un audit ne s'affiche que s'il est rattaché par l'identifiant BAN de l'adresse (FUT-59). */}
-        {audit && audit.correspondance === "exact_address" && audit.scenarios.length > 0 && (() => {
-          // FUT-67 : les lignes de la source rangées en parcours (cf. `parcoursAudit`) : un point de
-          // départ, puis chaque parcours de travaux avec ses étapes dans l'ordre. Rien n'est ajouté à
-          // la source : ni classe déduite, ni coût, ni gain.
-          const lecture = parcoursAudit(audit.scenarios);
-          return (
-          <div style={{ paddingTop: 16, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent-dim, #7a6e60)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Audit énergétique{lecture.parcours.length > 0 ? ` · ${lecture.parcours.length} parcours de travaux` : ""}
-            </div>
-            {/* FUT-59 : l'objet audité, lu dans les surfaces de la source. Un audit trouvé par
-                l'adresse peut porter sur l'immeuble entier : il ne passe pas pour celui du logement. */}
-            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>{libelleObjet(audit.objet)}</p>
-            {lecture.depart?.conso_ep_m2 != null && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-                <span style={{ fontSize: 14, color: "var(--fg-2)" }}>Point de départ, avant travaux</span>
-                <span style={{ fontSize: 14, color: "var(--fg-1)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  {formatKwhEpM2(lecture.depart.conso_ep_m2)}
-                </span>
-              </div>
-            )}
-            {/* Revue FUT-67 : un autre état initial donné par la source reste visible, hors des parcours. */}
-            {lecture.autresDeparts.map((s, i) => s.conso_ep_m2 != null && (
-              <div key={`depart-${i}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-                <span style={{ fontSize: 13, color: "var(--fg-3)" }}>Autre état avant travaux donné par l&apos;audit</span>
-                <span style={{ fontSize: 13, color: "var(--fg-2)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                  {formatKwhEpM2(s.conso_ep_m2)}
-                </span>
-              </div>
-            ))}
-            {lecture.parcours.map((p) => (
-              <div key={p.cle} style={{ padding: "12px 14px", background: "var(--bg-elev)", border: "1px solid var(--border-1)", borderRadius: 10, display: "grid", gap: 8 }}>
-                <div style={{ fontSize: 14, color: "var(--fg-hi)", fontWeight: 500 }}>{p.titre}</div>
-                <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 }}>
-                  {p.etapes.map(({ libelle, scenario: s }, i) => (
-                    <li key={`${p.cle}-${i}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-                      <span style={{ fontSize: 13, color: "var(--fg-2)" }}>{libelle}</span>
-                      {/* Valeur PAR M² (source `ep_conso_5_usages_m2`). Avant FUT-59 : le total annuel, sous l'unité par m². */}
-                      {s.conso_ep_m2 != null && (
-                        <span style={{ fontSize: 13, color: "var(--fg-1)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                          {formatKwhEpM2(s.conso_ep_m2)}
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
-            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>
-              Consommations estimées par l&apos;auditeur après chaque étape, en énergie primaire. Le coût des travaux et l&apos;étiquette visée ne figurent pas ici.
-            </p>
-          </div>
-          );
-        })()}
+        {/* FUT-62 : l'audit énergétique, lu pour décider (cf. `AuditEnergetiqueBlock`). */}
+        {blocAudit}
       </div>
       </GlassCard>
     </ReportSection>

@@ -57,11 +57,15 @@ test("T2 : un audit de logement garde sa valeur, correctement écrite", () => {
 test("T3 : l'écran écrit l'unité de la grandeur lue, par le même formatter pour l'audit et le DPE", () => {
   assert.match(formatKwhEpM2(1), /kWh EP\/m²\/an$/);
   const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.match(ecran, /formatKwhEpM2\(s\.conso_ep_m2\)/);
+  // FUT-62 : l'audit se rend dans son propre bloc, avec le même formatter.
+  const bloc = readFileSync("src/components/report/logement/AuditEnergetiqueBlock.tsx", "utf8");
+  assert.match(bloc, /formatKwhEpM2\(e\.conso_ep_m2\)/);
   assert.match(ecran, /formatKwhEpM2\(dpe\.conso_ep_m2\)/);
   // Plus aucune unité écrite à la main derrière une valeur brute.
-  assert.doesNotMatch(ecran, /\}\s*kWh/);
-  assert.doesNotMatch(ecran, /s\.conso_ep\b(?!_m2)/);
+  for (const src of [ecran, bloc]) {
+    assert.doesNotMatch(src, /\}\s*kWh/);
+    assert.doesNotMatch(src, /[se]\.conso_ep\b(?!_m2)/);
+  }
 });
 
 // ── T4 : précision ──────────────────────────────────────────────────────────────────────────────────
@@ -86,8 +90,8 @@ test("T5 : null, champ manquant ou valeur non finie ne deviennent jamais un nomb
     assert.equal(s.emission_ges_m2, null);
   }
   // L'écran ne rend une valeur que si elle existe.
-  const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.match(ecran, /s\.conso_ep_m2 != null &&/);
+  const ecran = readFileSync("src/components/report/logement/AuditEnergetiqueBlock.tsx", "utf8");
+  assert.match(ecran, /e\.conso_ep_m2 != null &&/);
   // Sans surface publiée, l'objet audité n'est pas deviné.
   assert.equal(a.objet, null);
   assert.equal(libelleObjet(null), "Objet audité non précisé par la source");
@@ -104,8 +108,11 @@ test("T6 : un audit d'immeuble n'est jamais présenté comme celui du logement",
   assert.doesNotMatch(l, /ce logement/);
   // La surface du logement prime quand elle est publiée : c'est à elle que se rapportent les valeurs par m².
   assert.deepEqual(objetAudite({ n_audit: "x", surface_habitable_logement: 55, surface_habitable_immeuble: 900 }), { grain: "logement", surface_m2: 55 });
-  const ecran = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
-  assert.match(ecran, /libelleObjet\(audit\.objet\)/);
+  // FUT-62 : l'écran dit le grain par la lecture de décision (`lireAuditPourDecision`), qui le lit dans
+  // le même `objet` ; la phrase d'un audit d'immeuble est testée dans audit-lecture.test.ts.
+  const ecran = readFileSync("src/components/report/logement/AuditEnergetiqueBlock.tsx", "utf8");
+  assert.match(ecran, /lireAuditPourDecision\(\{ audit,/);
+  assert.match(ecran, /\{bindOrphans\(l\.portee\)\}/);
 });
 
 // ── T7 : usages frères ──────────────────────────────────────────────────────────────────────────────
@@ -114,9 +121,11 @@ test("T7 : les émissions suivent le même contrat, et le chargeur ne relit pas 
   assert.equal(a.scenarios[0].emission_ges_m2, 512.345678901234 / 6);
   const chargeur = readFileSync("src/lib/audit.ts", "utf8");
   // Chaque requête porte SA liste de colonnes : les valeurs pour l'adresse exacte, aucune pour le voisin.
-  assert.match(chargeur, /\{ qs: `identifiant_ban:"\$\{banId\}"`, size: "20" \}, AUDIT_SELECT\)/);
+  // FUT-62 : 60 lignes (environ dix audits) au lieu de 20, et la coupure est dite à `lectureAudit`.
+  assert.match(chargeur, /\{ qs: `identifiant_ban:"\$\{banId\}"`, size: String\(AUDIT_LIGNES_MAX\) \}, AUDIT_SELECT\)/);
+  assert.match(chargeur, /lectureAudit\(rows, banId, rows != null && rows\.length >= AUDIT_LIGNES_MAX\)/);
   assert.match(chargeur, /\{ bbox, size: "20" \}, AUDIT_PROCHE_SELECT\)/);
-  assert.match(chargeur, /lectureAudit\(rows, banId\)/);
+
   assert.doesNotMatch(chargeur, /ep_conso_5_usages|emission_ges_5_usages/);
   // Le contrat du rapport Logement est celui-ci, et pas une copie.
   assert.match(readFileSync("src/lib/logement-report-types.ts", "utf8"), /audit\?: AuditRecord \| null;/);

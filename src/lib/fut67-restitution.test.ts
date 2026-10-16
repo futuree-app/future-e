@@ -11,6 +11,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { formatGesM2, formatSurfaceM2, parcoursAudit, type AuditScenario } from "./audit-record.ts";
+import { departAudit } from "./audit-lecture.ts";
 import { dateFr } from "./decision/autour-permis.ts";
 
 const lire = (p: string) => readFileSync(p, "utf8");
@@ -71,13 +72,19 @@ test("A3. variantes, intermédiaires multiples, catégories inconnues et absence
 });
 
 test("A4. l'écran rend les parcours, plus jamais les libellés bruts de la source", () => {
-  const ecran = code("src/components/report/logement/EnergieSection.tsx");
-  contient(ecran, /const lecture = parcoursAudit\(audit\.scenarios\);/, "EnergieSection");
-  neContientPas(ecran, /\{s\.categorie\}|\{s\.etape\}/, "EnergieSection");
-  neContientPas(ecran, /audit\.scenarios\.length\} scénarios/, "EnergieSection");
+  // FUT-62 : le rendu de l'audit vit dans `AuditEnergetiqueBlock`, et sa lecture dans `lireAuditPourDecision`,
+  // qui part toujours de `parcoursAudit` (audit-lecture.ts).
+  const ecran = code("src/components/report/logement/AuditEnergetiqueBlock.tsx");
+  contient(ecran, /lireAuditPourDecision\(\{ audit,/, "AuditEnergetiqueBlock");
+  contient(code("src/lib/audit-lecture.ts"), /const lecture = parcoursAudit\(a\.scenarios\);/, "audit-lecture");
+  for (const f of ["EnergieSection", "AuditEnergetiqueBlock"]) {
+    const src = code(`src/components/report/logement/${f}.tsx`);
+    neContientPas(src, /\{s\.categorie\}|\{s\.etape\}|\.categorie\}|scenario\.etape\}/, f);
+    neContientPas(src, /audit\.scenarios\.length\} scénarios/, f);
+  }
   // Ce qui borne la lecture reste à côté d'elle : l'objet audité, et ce que le bloc ne montre pas.
-  contient(ecran, /libelleObjet\(audit\.objet\)/, "EnergieSection");
-  contient(ecran, /Le coût des travaux et l&apos;étiquette visée ne figurent pas ici\./, "EnergieSection");
+  contient(ecran, /\{bindOrphans\(l\.portee\)\}/, "AuditEnergetiqueBlock");
+  contient(ecran, /Le coût des travaux, les aides et l&apos;étiquette visée ne figurent pas ici\./, "AuditEnergetiqueBlock");
 });
 
 test("F1. les valeurs du logement s'écrivent à la française", () => {
@@ -145,10 +152,10 @@ test("R3. deux catégories qui donnent le même titre restent deux parcours, ave
   assert.equal(new Set(l.parcours.map((p) => p.cle)).size, 2, "clés de rendu uniques");
   assert.equal(new Set(l.parcours.map((p) => p.titre)).size, 2, "titres lisibles distincts");
   for (const p of l.parcours) assert.match(p.titre, /^Rénovation par étapes · /);
-  const ecran = code("src/components/report/logement/EnergieSection.tsx");
-  contient(ecran, /<div key=\{p\.cle\}/, "EnergieSection");
-  contient(ecran, /<li key=\{`\$\{p\.cle\}-\$\{i\}`\}/, "EnergieSection");
-  neContientPas(ecran, /key=\{p\.titre\}|key=\{`\$\{p\.titre\}/, "EnergieSection");
+  const ecran = code("src/components/report/logement/AuditEnergetiqueBlock.tsx");
+  contient(ecran, /<details key=\{p\.cle\}/, "AuditEnergetiqueBlock");
+  contient(ecran, /<li key=\{`\$\{p\.cle\}-\$\{i\}`\}/, "AuditEnergetiqueBlock");
+  neContientPas(ecran, /key=\{p\.titre\}|key=\{`\$\{p\.titre\}/, "AuditEnergetiqueBlock");
 });
 
 test("R4. une seconde ligne d'état initial n'est pas perdue, et ne compte pas comme un parcours", () => {
@@ -160,6 +167,7 @@ test("R4. une seconde ligne d'état initial n'est pas perdue, et ne compte pas c
   assert.deepEqual(l.parcours.map((p) => p.titre), ["Rénovation en une seule fois"]);
   const rendues = [l.depart!, ...l.autresDeparts, ...l.parcours.flatMap((p) => p.etapes.map((e) => e.scenario))];
   assert.deepEqual(new Set(rendues), new Set(doubles));
-  const ecran = code("src/components/report/logement/EnergieSection.tsx");
-  contient(ecran, /lecture\.autresDeparts\.map\(/, "EnergieSection");
+  // FUT-62 : les deux départs se lisent ensemble au premier niveau (« 500 ou 480 »), jamais un seul.
+  assert.deepEqual(departAudit(l), { statut: "multiple", valeurs: [500, 480] });
+  contient(code("src/components/report/logement/AuditEnergetiqueBlock.tsx"), /d\.valeurs\.map\(nombreSeul\)/, "AuditEnergetiqueBlock");
 });
