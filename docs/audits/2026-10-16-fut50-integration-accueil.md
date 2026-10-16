@@ -102,4 +102,31 @@ Les temps sont stables. La mémoire au repos augmente d'environ 40 Mo. Next 16 p
 
 ## 7. Prévisualisation Vercel
 
-Voir le compte rendu de la PR : prévisualisation de la branche, mesures à froid et à chaud, `x-vercel-cache`, comportement d'une panne.
+Prévisualisation de la branche, sans aucun déploiement en production :
+- déploiement : `dpl_44oosGWak7YEovDsQZRgJdvjtjLM`, `future-lhffelht0-futuree-apps-projects.vercel.app`, commit `2d3c078d` ;
+- région : `cdg1` ;
+- accès : la prévisualisation est protégée par l'authentification Vercel. Elle a été lue avec `vercel curl` (contournement officiel pour le propriétaire du projet). Le connecteur Vercel du poste répond 403 sur l'équipe `futuree-apps-projects` ; la CLI, elle, y a accès.
+
+**Durées vues du client**, depuis Paris, réseau et TLS compris (environ 80 ms de trajet aller-retour) :
+
+| Mesure | Résultat |
+|---|---|
+| Premiers appels après le déploiement (8 parcours) | identité 109 ms ; chaleur 411 ms (instance froide) ; hivers 151 ms ; taille 103 ms ; risques 273 ms ; chaleur ultramarine 259 ms et 123 ms ; `/` 474 ms (`PRERENDER`) |
+| 50 lectures (10 communes, Corse et Martinique comprises, × 5 priorités), premier passage | 50 `MISS`, p50 110 ms, p95 169 ms, max 309 ms ; risques 145 à 309 ms |
+| Les mêmes, second passage | **50 `HIT`**, p50 83 ms, p95 102 ms |
+| `/` | `PRERENDER`, puis `HIT` |
+
+Hors réseau, la fonction répond donc en 20 à 30 ms, ou 70 à 80 ms avec GASPAR. Ces durées sont cohérentes avec le build local.
+
+**Cache, vérifié deux fois de suite** :
+- les lectures durables passent de `MISS` à `HIT` ;
+- un paramètre superflu ou une requête invalide (400) restent `MISS` aux deux passages : jamais servis depuis le cache ;
+- une commune inconnue (404) devient `HIT`, comme prévu (1 h, structurelle) ;
+- GASPAR hors couverture (98735) est durable, puis `HIT`.
+
+**Exposition** : `/data_climat.json`, `/accueil-communes.json`, `/apercu-climat-communes.json`, `/data/data_climat.json`, `/dev/fut50/c` et `/dev/fut50/api/lecture` répondent tous 404 sur Vercel.
+
+**Non mesurable ici** :
+- **panne GASPAR réelle** : aucune ne s'est produite, et la production n'a pas de point d'injection. Le `no-store` d'une panne est prouvé par les tests du service et de la politique de cache ;
+- **mémoire et durée d'une instance** : à relever dans *Observability → Functions* (non exposé par la CLI) ;
+- **`stale-while-revalidate`** : son comportement demande d'attendre 24 h.
