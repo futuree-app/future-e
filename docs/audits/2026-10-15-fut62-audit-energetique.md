@@ -60,12 +60,12 @@ Inspecté : 3 000 lignes ADEME (audits de janvier-février 2025), 3 000 et 5 000
 - Valeur après rénovation complète : **seulement si chaque parcours finit sur une étape finale** ; plage si les fins diffèrent ; sinon « non établie ».
 
 **Écran (`AuditEnergetiqueBlock.tsx`, monté par `EnergieSection` dans tous ses états)**
-1. *Le fait* : « Un audit énergétique existe pour cet immeuble / ce logement / un logement de cette adresse », ou « est publié pour cette adresse » (objet inconnu) ; sa portée ; sa date.
+1. *Le fait* : « Un audit énergétique concerne un immeuble à cette adresse », « existe pour ce logement » (seulement si la source le rattache au DPE retenu), « existe pour un logement de cette adresse », ou « est publié pour cette adresse » (objet inconnu) ; sa portée ; sa date.
 2. Deux valeurs côte à côte, visuellement distinctes : avant travaux (trait plein, relevé) et après la rénovation complète proposée (pointillés, « estimation de l'auditeur, pas une garantie »).
 3. Le nombre et la nature des parcours, puis le lien avec le DPE du logement.
 4. Les parcours **repliés** (`<details>` natif, accessible au clavier) : étapes dans l'ordre de la source, consommation, travaux de l'étape.
 5. Les autres audits de l'adresse, attribués à personne.
-6. *À vérifier avant d'acheter* (ou « À suivre » pour un habitant, « À vérifier avant de vous engager » sans relation déclarée) : une à trois questions concrètes.
+6. *À vérifier avant d'acheter* : une à trois questions concrètes. Le titre suit la voix canonique du dossier (`voixDuLecteur`) : « À vérifier avant d'acheter » sur un achat déclaré, « À vérifier avant de vous engager » pour un autre engagement (location, étude du bien), « À connaître et à surveiller » pour un habitant (le titre que le dossier lui donne déjà), « À vérifier » quand rien n'est déclaré.
 
 ## 5. Comment les travaux ADEME sont interprétés
 
@@ -94,12 +94,13 @@ Captures dans `docs/audits/fut62-captures/`, prises sur le banc `/dev/audit-ener
 | Trois audits à l'adresse | `avant-plusieurs-desktop.jpg` | `apres-plusieurs-desktop.jpg`, `apres-plusieurs-lie-desktop.jpg`, `…-mobile.jpg` |
 | DPE pas encore choisi | `avant-sans-dpe-desktop.jpg` (aucun audit) | `apres-sans-dpe-desktop.jpg` |
 | Copropriété immatriculée, habitant, panne | — | `apres-copro-…`, `apres-habitant-…`, `apres-panne-…` |
+| **Vrai `LogementModule`** (achat, habitant, logement, trois audits, DPE pas encore choisi) | — | `module-*-desktop.jpg`, `module-*-mobile.jpg` |
 
 Mobile (390 px) : aucun débordement horizontal.
 
 ## 7. Tests
 
-- `src/lib/audit-lecture.test.ts` (20 tests) : les dix cas obligatoires (C1 à C10), le rattachement des travaux à la bonne étape et au bon parcours, la forme inchangée d'un audit sans les nouveaux champs, et les garde-fous (G1 à G4 : aucune surinterprétation dans aucune voix, l'immeuble jamais « ce logement », la voix jamais devinée, l'unité).
+- `src/lib/audit-lecture.test.ts` (21 tests) : les dix cas obligatoires (C1 à C10), le rattachement des travaux à la bonne étape et au bon parcours, la forme inchangée d'un audit sans les nouveaux champs, et les garde-fous (G1 à G4 : aucune surinterprétation dans aucune voix, l'immeuble jamais « ce logement », la voix jamais devinée, l'unité).
 - Tests existants recibles sur le nouveau composant (ils lisaient le source d'`EnergieSection`), intention inchangée : `audit-record.test.ts` (T3, T5, T6, T7), `fut67-restitution.test.ts` (A4, R3, R4), `logement-source-indisponible.test.ts` (A8, A13, A14).
 
 ## 8. Limites et ambiguïtés non résolues
@@ -109,4 +110,15 @@ Mobile (390 px) : aucun débordement horizontal.
 - **Un « immeuble » d'un seul logement de 55 m²** existe dans la source (`methode_application_dpe` = immeuble collectif, `nb_appartement` = 1). Le contrat de la source est suivi tel quel.
 - **Copropriété** : absente de 84 % des audits d'immeuble ; la phrase reste conditionnelle dans ce cas. Le RNIC (FUT-83) pourrait l'établir.
 - Les émissions par étape (`emission_ges_m2`) ne sont toujours pas affichées : ce n'était pas nécessaire à la décision et aurait ajouté une seconde colonne de chiffres.
-- Le banc de revue ne passe pas par un vrai dossier : la relation déclarée (voix) et le DPE retenu y sont fixés à la main. Le câblage réel (`LogementModule` → `voixAudit(relationDeLAdresse(dossier))`) est vérifié par test de source, pas en navigateur sur un dossier réel.
+- Le vrai `LogementModule` a été vérifié en navigateur sur une version de rapport figée (`/dev/audit-energetique/module`), pas sur un dossier du compte : aucun dossier existant ne porte ces cas, et en ouvrir un aurait déclenché une collecte réelle.
+- L'identifiant BAN prouve l'adresse, pas le bâtiment : un audit d'immeuble reste « un immeuble à cette adresse » tant que la source ne le rattache pas au DPE retenu. Le RNB (`id_rnb`, publié par l'ADEME) pourrait un jour l'établir.
+
+## 9. Revue du 16/10/2026 : trois corrections
+
+**A. Adresse n'est pas bâtiment.** L'identifiant BAN prouve une correspondance d'adresse ; une adresse peut regrouper plusieurs bâtiments (trois audits au 1 rue Saint-Dominique). « Un audit énergétique existe pour cet immeuble » devient « Un audit énergétique concerne un immeuble à cette adresse », la portée dit que la source n'établit pas qu'il s'agit du bâtiment de ce logement, les autres phrases parlent de « l'immeuble audité », et une vérification demande au vendeur ou au syndic si l'audit porte sur ce bâtiment. La réserve tombe seulement quand la source rattache l'audit au DPE retenu (`numero_dpe`).
+
+**B. Un audit coupé n'est jamais lu comme complet.** Sur une page pleine, le dernier audit est désormais toujours écarté des audits lus en entier ; s'il est le seul, il est rendu marqué `lecture_partielle` : aucune fin de parcours, aucune valeur « après la rénovation complète », et une phrase dit que des étapes peuvent manquer (test C8d).
+
+**C. La voix est celle du dossier.** `voixAudit` appelle `voixDuLecteur` (relation-au-lieu.ts) au lieu d'une règle à part : « j'étudie ce bien » + « mieux connaître le logement où je vis » reste neutre. La voix canonique `engagement` n'est précisée en `achat` que sur un achat déclaré (objectif « acheter », ou intention d'achat du projet sans objectif pour ce bien). Le test G3 vérifie, sur toutes les combinaisons d'intention, de relation et d'objectif, que la voix de l'audit ne contredit jamais la voix canonique. Le module lui passe désormais l'intention du projet.
+
+**Test dans le vrai module Logement.** `/dev/audit-energetique/module` monte `LogementModule` tel quel avec une version de rapport (FUT-13 : affichée sans appeler aucune source) et un dossier fictif dont le DPE est déjà retenu (aucune écriture). Huit combinaisons vérifiées en navigateur (desktop et 390 px, sans débordement). La seule requête tentée est la synthèse, bloquée pendant la vérification ; le serveur du banc n'a de toute façon ni clé de modèle ni base réelle : aucune génération payante possible.

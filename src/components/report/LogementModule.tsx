@@ -570,7 +570,7 @@ export default function LogementModule({
               auditStatus={result.auditStatus}
               autresAudits={result.autresAudits ?? []}
               autresAuditsIncomplets={result.autresAuditsIncomplets === true}
-              voixAudit={voixAudit(relationDeLAdresse(dossier))}
+              voixAudit={voixAudit(project?.intent, relationDeLAdresse(dossier))}
               candidates={dpeCandidates}
               dpeNonVerifiable={dpeNonVerifiable}
               listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}

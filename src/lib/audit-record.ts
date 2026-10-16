@@ -88,6 +88,11 @@ export type AuditRecord = {
   copropriete?: string | null;
   /** FUT-62 : le nombre de logements de l'immeuble audité, tel que publié (`nb_appartement`). */
   nb_logements?: number | null;
+  /**
+   * FUT-62 (revue) : la source a coupé la réponse dans les lignes de CET audit. Des étapes peuvent manquer :
+   * aucune conclusion sur la rénovation complète ne se tire de lui. Absent = lu en entier.
+   */
+  lecture_partielle?: true;
 };
 
 /** Les colonnes lues. Les totaux (`ep_conso_5_usages`, `emission_ges_5_usages`) n'en font PAS partie. */
@@ -404,14 +409,18 @@ export type AuditLookup =
  */
 export function lectureAudit(rows: AuditApiRow[] | null, banId: string, tronquee = false): AuditLookup {
   if (rows == null) return { status: "unavailable" };
-  let lignes = rows;
-  if (tronquee && rows.length > 0) {
-    const dernier = rows[rows.length - 1].n_audit;
-    const sans = rows.filter((r) => r.n_audit !== dernier);
-    if (sans.some((r) => r.identifiant_ban === banId)) lignes = sans;
+  if (!tronquee || rows.length === 0) {
+    const [audit, ...autres] = toAuditRecords(rows, banId);
+    return audit ? { status: "present", audit, autres, autresIncomplets: false } : { status: "absent" };
   }
-  const [audit, ...autres] = toAuditRecords(lignes, banId);
-  return audit ? { status: "present", audit, autres, autresIncomplets: tronquee } : { status: "absent" };
+  // Page pleine : le dernier audit de la page est TOUJOURS écarté des audits lus en entier (revue FUT-62 :
+  // il était gardé quand il était seul, donc lu comme complet). S'il ne reste rien d'autre, il est rendu,
+  // mais marqué `lecture_partielle` : on sait qu'un audit existe, pas où mènent ses parcours.
+  const dernier = rows[rows.length - 1].n_audit;
+  const [audit, ...autres] = toAuditRecords(rows.filter((r) => r.n_audit !== dernier), banId);
+  if (audit) return { status: "present", audit, autres, autresIncomplets: true };
+  const coupe = toAuditRecord(rows, banId);
+  return coupe ? { status: "present", audit: { ...coupe, lecture_partielle: true }, autres: [], autresIncomplets: true } : { status: "absent" };
 }
 
 /**

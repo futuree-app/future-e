@@ -12,6 +12,7 @@ import {
   arriveeAudit, choisirAudit, departAudit, lireAuditPourDecision, lireTravaux, parcoursLus, phrasePostes,
   phraseTravaux, voixAudit, type LectureDecisionAudit, type VoixAudit,
 } from "./audit-lecture.ts";
+import { voixDuLecteur } from "./relation-au-lieu.ts";
 import { lectureAudit, parcoursAudit, toAuditRecord, toAuditRecords, type AuditApiRow, type AuditRecord } from "./audit-record.ts";
 import {
   BAN_FIXTURE, DEUX_ETATS_INITIAUX, DPE_APPARTEMENT, DPE_MAISON, IMMEUBLE, IMMEUBLE_COPRO, INCOMPLET, LOGEMENT, PLUSIEURS,
@@ -85,28 +86,30 @@ test("C3/C4. chaque étape porte les travaux de SA ligne, dans le bon parcours",
 
 test("C2. audit d'immeuble : le fait, sa portée, et ce qu'il ne dit pas du logement", () => {
   const l = lireAuditPourDecision({ audit: rec(IMMEUBLE), dpe: { numero: "2500E0000AUTRE", conso_ep_m2: 418.3 }, voix: "achat" });
-  assert.equal(l.titre, "Un audit énergétique existe pour cet immeuble.");
-  assert.equal(l.portee, "Il porte sur l'immeuble entier (4 logements, 434 m² habitables), pas sur ce seul logement.");
+  // Revue : l'identifiant BAN prouve l'adresse, pas le bâtiment. Jamais « cet immeuble ».
+  assert.equal(l.titre, "Un audit énergétique concerne un immeuble à cette adresse.");
+  assert.equal(l.portee, "Il porte sur un immeuble entier (4 logements, 434 m² habitables), pas sur ce seul logement. Il est rattaché à l'adresse : la source n'établit pas qu'il s'agit du bâtiment de ce logement.");
   assert.equal(l.date, "Établi le 30 mai 2025");
   assert.deepEqual(l.depart, { statut: "unique", valeur: 503.5 });
   assert.deepEqual(l.arrivee, { statut: "unique", valeur: 53 });
   assert.equal(l.phraseParcours, "Deux parcours de travaux sont documentés : rénovation par étapes (3 étapes) et rénovation en une seule fois.");
   // Le lien avec le DPE du logement, attendu depuis FUT-67, sans jamais en tirer une étiquette future.
-  assert.match(l.lienDpe!, /^Ces valeurs décrivent l'immeuble entier\. Pour ce logement, le diagnostic retenu indique 418,3\skWh EP\/m²\/an : l'audit ne le remplace pas/);
+  assert.match(l.lienDpe!, /^Ces valeurs décrivent l'immeuble audité\. Pour ce logement, le diagnostic retenu indique 418,3\skWh EP\/m²\/an : l'audit ne le remplace pas/);
   assert.match(l.lienDpe!, /ne dit pas quelle étiquette ce logement aurait après travaux/);
   assert.equal(l.titreVerifications, "À vérifier avant d'acheter");
   // Sans immatriculation publiée, la copropriété reste une hypothèse : la phrase est conditionnelle.
   assert.deepEqual(l.verifications, [
-    "L'audit propose des travaux pour l'immeuble entier. Si l'immeuble est en copropriété, leur réalisation dépend de décisions collectives : demandez au vendeur ou au syndic lesquels ont été votés, financés ou planifiés.",
+    "Demandez au vendeur ou au syndic si cet audit porte sur le bâtiment de ce logement : il décrit un immeuble de 4 logements, 434 m² habitables.",
+    "L'audit propose des travaux pour l'immeuble audité. S'il est en copropriété, leur réalisation dépend de décisions collectives : demandez au vendeur ou au syndic lesquels ont été votés, financés ou planifiés.",
   ]);
   assert.equal(l.rattacheAuDpe, false);
 });
 
 test("C2b. immeuble immatriculé comme copropriété : le fait publié remplace l'hypothèse", () => {
   const l = lireAuditPourDecision({ audit: rec(IMMEUBLE_COPRO), voix: "achat" });
-  assert.equal(l.verifications.length, 1);
-  assert.match(l.verifications[0], /^L'immeuble est immatriculé comme copropriété \(n° AA0000000\) : les travaux que propose l'audit s'y décident en assemblée générale\. Demandez au vendeur ou au syndic lesquels ont été votés, financés ou planifiés/);
-  assert.doesNotMatch(l.verifications[0], /Si l'immeuble est en copropriété/);
+  assert.equal(l.verifications.length, 2);
+  assert.match(l.verifications[1], /^L'immeuble audité est immatriculé comme copropriété \(n° AA0000000\) : les travaux que propose l'audit s'y décident en assemblée générale\. Demandez au vendeur ou au syndic lesquels ont été votés, financés ou planifiés/);
+  assert.doesNotMatch(l.verifications[1], /S'il est en copropriété/);
   // Sans DPE retenu, l'immeuble n'est rapproché d'aucune valeur du logement.
   assert.match(l.lienDpe!, /elles ne disent ni la consommation de ce logement, ni l'étiquette qu'il aurait après travaux/);
 });
@@ -194,7 +197,7 @@ test("C8. plusieurs audits : un ordre écrit, les autres dits, le DPE rattaché 
 
   // Sans DPE rattaché : l'immeuble, et les deux autres audits nommés, attribués à personne.
   const l = lireAuditPourDecision({ audit: lu.audit, autres: lu.autres, dpe: { numero: "2500E0000AUTRE", conso_ep_m2: 418.3 }, voix: "achat" });
-  assert.equal(l.titre, "Un audit énergétique existe pour cet immeuble.");
+  assert.equal(l.titre, "Un audit énergétique concerne un immeuble à cette adresse.");
   assert.equal(l.autresAudits, "Cette adresse porte aussi 2 autres audits : un audit d'immeuble (55 m², établi le 30 mai 2025) et un audit de logement (195 m², établi le 30 mai 2025). Aucun n'est attribué à ce bien.");
   assert.ok(l.verifications.includes("Plusieurs audits sont publiés pour cette adresse : demandez au vendeur lequel concerne ce bien."));
 
@@ -231,6 +234,26 @@ test("C8b. une liste coupée par la source : le dernier audit (peut-être tronqu
   assert.deepEqual(remplace.map((a) => a.n_audit), ["A00FUT62LOG01"]);
 });
 
+test("C8d. revue : une page pleine qui ne porte qu'UN audit ne le fait jamais passer pour complet", () => {
+  // La source a coupé dans les lignes de l'unique audit : l'étape finale et la rénovation en une fois manquent.
+  const coupe = IMMEUBLE.filter((r) => r.etape_travaux !== "étape finale");
+  const lu = lectureAudit(coupe, BAN_FIXTURE, true);
+  assert.equal(lu.status, "present", "un audit existe : ce n'est ni une absence ni une panne");
+  if (lu.status !== "present") return;
+  assert.equal(lu.audit.lecture_partielle, true);
+  const l = lireAuditPourDecision({ audit: lu.audit, autres: lu.autres, autresIncomplets: lu.autresIncomplets });
+  assert.deepEqual(l.arrivee, { statut: "non_etablie" });
+  assert.ok(l.parcours.every((p) => p.arrivee == null), "aucune fin de parcours affichée");
+  assert.match(l.phraseParcours!, /La source n'a pas pu être lue en entier : des étapes peuvent manquer\.$/);
+  // Même si les lignes reçues contiennent une étape finale, un audit coupé ne conclut pas.
+  const complet = lectureAudit(IMMEUBLE, BAN_FIXTURE, true);
+  assert.equal(complet.status === "present" && complet.audit.lecture_partielle, true);
+  assert.deepEqual(complet.status === "present" && lireAuditPourDecision({ audit: complet.audit }).arrivee, { statut: "non_etablie" });
+  // Une page qui n'est pas pleine est lue en entier, sans marque.
+  const entier = lectureAudit(IMMEUBLE, BAN_FIXTURE, false);
+  assert.equal(entier.status === "present" && entier.audit.lecture_partielle, undefined);
+});
+
 // ── C9, C10 : voisin et source muette ────────────────────────────────────────────────────────────────
 
 test("C9. un audit voisin n'atteint jamais la lecture, ni l'écran", () => {
@@ -255,7 +278,7 @@ test("C10. audit non vérifiable : une phrase, dans tous les états de la sectio
 // ── Garde-fous : aucune surinterprétation, quelle que soit la voix ───────────────────────────────────
 
 test("G1. aucune sortie n'affirme une classe future, un coût, une aide, une date, un vote ou une garantie", () => {
-  const voix: VoixAudit[] = ["achat", "habitant", "neutre"];
+  const voix: VoixAudit[] = ["achat", "engagement", "habitant", "neutre"];
   const cas = [IMMEUBLE, IMMEUBLE_COPRO, LOGEMENT, INCOMPLET, DEUX_ETATS_INITIAUX];
   for (const rows of cas) for (const v of voix) for (const dpe of [null, { numero: DPE_MAISON, conso_ep_m2: 380 }]) {
     const t = texteDe(lireAuditPourDecision({ audit: rec(rows), dpe, voix: v }));
@@ -276,28 +299,47 @@ test("G1. aucune sortie n'affirme une classe future, un coût, une aide, une dat
 
 test("G2. un audit d'immeuble ne devient jamais celui de l'appartement, même rattaché au DPE retenu", () => {
   const imm = rec(IMMEUBLE.map((r) => ({ ...r, numero_dpe: "2500E0000IMM" })));
-  for (const v of ["achat", "habitant", "neutre"] as VoixAudit[]) {
+  for (const v of ["achat", "engagement", "habitant", "neutre"] as VoixAudit[]) {
     const l = lireAuditPourDecision({ audit: imm, dpe: { numero: "2500E0000IMM", conso_ep_m2: 300 }, voix: v });
-    assert.equal(l.titre, "Un audit énergétique existe pour cet immeuble.");
+    assert.equal(l.titre, "Un audit énergétique concerne un immeuble à cette adresse.");
     assert.match(l.portee, /pas sur ce seul logement/);
+    // Rattaché au DPE retenu, le lien au bâtiment est établi par la source : la réserve d'adresse tombe.
+    assert.match(l.portee, /établi à partir du diagnostic retenu ici/);
+    assert.doesNotMatch(l.portee, /n'établit pas/);
     assert.doesNotMatch(texteDe(l), /pour ce logement\./);
   }
 });
 
-test("G3. la voix suit la relation DÉCLARÉE au bien, jamais devinée", () => {
-  assert.equal(voixAudit({ relation: "studying", objectif: "buy" }), "achat");
-  assert.equal(voixAudit({ relation: "lives_here", objectif: null }), "habitant");
-  assert.equal(voixAudit({ relation: null, objectif: "understand" }), "habitant");
-  assert.equal(voixAudit({ relation: "studying", objectif: "rent" }), "neutre");
-  assert.equal(voixAudit({ relation: null, objectif: null }), "neutre");
-  assert.equal(voixAudit(null), "neutre");
+test("G3. la voix est celle du dossier (`voixDuLecteur`), précisée en « achat » seulement sur un achat déclaré", () => {
+  const adresse = (relation: "lives_here" | "studying" | null, objectif: "buy" | "rent" | "understand" | "other" | null) =>
+    ({ echelle: "adresse" as const, relation, objectif });
+  // Pour chaque combinaison, la voix de l'audit RÉDUIT la voix canonique, sans jamais la contredire.
+  const relations = ["lives_here", "studying", null] as const;
+  const objectifs = ["buy", "rent", "understand", "other", null] as const;
+  for (const intent of ["achat", "location", null]) for (const r of relations) for (const o of objectifs) {
+    const canon = voixDuLecteur(intent, adresse(r, o));
+    const v = voixAudit(intent, adresse(r, o));
+    assert.equal(v === "achat" ? "engagement" : v, canon, `${intent}/${r}/${o}`);
+  }
+  // Revue : « j'étudie ce bien » + « mieux connaître le logement où je vis » se contredisent → neutre.
+  assert.equal(voixAudit(null, adresse("studying", "understand")), "neutre");
+  assert.equal(voixAudit(null, adresse(null, "understand")), "habitant");
+  assert.equal(voixAudit(null, adresse("studying", "buy")), "achat");
+  assert.equal(voixAudit(null, adresse("studying", "rent")), "engagement");
+  assert.equal(voixAudit("achat", adresse("studying", null)), "achat");
+  assert.equal(voixAudit("location", adresse("studying", null)), "engagement");
+  assert.equal(voixAudit(null, adresse("studying", null)), "engagement", "étudier ce bien engage, sans dire achat");
+  assert.equal(voixAudit(null, adresse(null, null)), "neutre");
+  assert.equal(voixAudit(null, null), "neutre");
   const habitant = lireAuditPourDecision({ audit: rec(IMMEUBLE), voix: "habitant" });
-  assert.equal(habitant.titreVerifications, "À suivre");
+  assert.equal(habitant.titreVerifications, "À connaître et à surveiller");
   assert.doesNotMatch(texteDe(habitant), /vendeur|acheter/);
-  assert.match(habitant.verifications[0], /demandez au syndic lesquels/);
-  assert.equal(lireAuditPourDecision({ audit: rec(IMMEUBLE) }).titreVerifications, "À vérifier avant de vous engager");
-  // L'écran lit la relation du dossier, par la même fonction.
-  assert.match(readFileSync("src/components/report/LogementModule.tsx", "utf8"), /voixAudit=\{voixAudit\(relationDeLAdresse\(dossier\)\)\}/);
+  assert.match(habitant.verifications[1], /demandez au syndic lesquels/);
+  assert.equal(lireAuditPourDecision({ audit: rec(IMMEUBLE), voix: "engagement" }).titreVerifications, "À vérifier avant de vous engager");
+  assert.equal(lireAuditPourDecision({ audit: rec(IMMEUBLE) }).titreVerifications, "À vérifier");
+  // L'écran lit l'intention du projet et la relation du dossier, par la même fonction.
+  assert.match(readFileSync("src/components/report/LogementModule.tsx", "utf8"), /voixAudit=\{voixAudit\(project\?\.intent, relationDeLAdresse\(dossier\)\)\}/);
+  assert.match(readFileSync("src/lib/audit-lecture.ts", "utf8"), /const voix = voixDuLecteur\(intent, relation\);/);
 });
 
 test("G4. les valeurs restent en kWh EP/m²/an, par le formatter commun", () => {

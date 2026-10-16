@@ -31,6 +31,7 @@ import {
   type AuditRecord, type AuditScenario, type LectureAudit,
 } from "./audit-record.ts";
 import { dateFr } from "./decision/autour-permis.ts";
+import { objectifDeLAnalyse, voixDuLecteur, type RelationAuLieu } from "./relation-au-lieu.ts";
 
 // ── 1. LES TRAVAUX D'UNE ÉTAPE ─────────────────────────────────────────────────────────────────────
 
@@ -188,10 +189,11 @@ export function choisirAudit(
 // ── 4. LA LECTURE EN TROIS TEMPS ───────────────────────────────────────────────────────────────────
 
 /**
- * QUI LIT. La relation déclarée à ce bien (FUT-10, FUT-26) règle le titre et l'adresse des vérifications.
- * Jamais devinée : sans déclaration, la voix est neutre.
+ * QUI LIT. C'est la voix canonique du dossier (`voixDuLecteur`, FUT-10/FUT-26), jamais une règle à part :
+ * `engagement` y est seulement précisé en `achat` quand l'achat est DÉCLARÉ (objectif « je souhaite
+ * l'acheter », ou, sans objectif pour ce bien, l'intention d'achat du projet).
  */
-export type VoixAudit = "achat" | "habitant" | "neutre";
+export type VoixAudit = "achat" | "engagement" | "habitant" | "neutre";
 
 export type DepartLu =
   | { statut: "unique"; valeur: number }
@@ -268,6 +270,11 @@ function surfaceCourte(a: AuditRecord): string {
   return a.objet ? formatSurfaceM2(Math.round(a.objet.surface_m2)) : "surface non précisée";
 }
 
+function detailImmeuble(a: AuditRecord): string {
+  const n = a.nb_logements;
+  return n != null && n > 1 ? `${n} logements, ${surfaceCourte(a)} habitables` : `${surfaceCourte(a)} habitables`;
+}
+
 function decrireAutre(a: AuditRecord): string {
   const quoi = a.objet?.grain === "immeuble" ? "un audit d'immeuble" : a.objet?.grain === "logement" ? "un audit de logement" : "un audit sans objet précisé";
   const date = a.date_audit ? dateFr(a.date_audit) : null;
@@ -286,16 +293,20 @@ export function phraseAutresAudits(autres: AuditRecord[], incomplets: boolean): 
   return `${tete} : ${listeFr(montres)}${reste}. ${n === 1 ? "Il n'est" : "Aucun n'est"} attribué à ce bien.`;
 }
 
-export function voixAudit(relation: { relation?: string | null; objectif?: string | null } | null | undefined): VoixAudit {
-  if (relation?.objectif === "buy") return "achat";
-  if (relation?.relation === "lives_here" || relation?.objectif === "understand") return "habitant";
-  return "neutre";
+export function voixAudit(intent: string | null | undefined, relation: RelationAuLieu | null | undefined): VoixAudit {
+  const voix = voixDuLecteur(intent, relation);
+  if (voix !== "engagement") return voix;
+  const objectif = objectifDeLAnalyse(relation);
+  return objectif === "buy" || (objectif == null && intent === "achat") ? "achat" : "engagement";
 }
 
 const TITRE_VERIFICATIONS: Record<VoixAudit, string> = {
   achat: "À vérifier avant d'acheter",
-  habitant: "À suivre",
-  neutre: "À vérifier avant de vous engager",
+  engagement: "À vérifier avant de vous engager",
+  // Le titre que le dossier donne à un habitant (`decision-assembler.ts`).
+  habitant: "À connaître et à surveiller",
+  // Voix neutre : ni engagement ni résidence supposés (relation-au-lieu.ts).
+  neutre: "À vérifier",
 };
 
 /** Le diagnostic retenu pour ce logement, tel que la section l'a : son numéro et sa consommation. */
@@ -317,7 +328,9 @@ export function lireAuditPourDecision({
   const choix = choisirAudit(audit, autres, dpe?.numero ?? null);
   const a = choix.retenu;
   const lecture = parcoursAudit(a.scenarios);
-  const parcours = parcoursLus(lecture);
+  // Revue FUT-62 : un audit coupé par la source ne mène nulle part de certain. Aucune fin de parcours,
+  // donc aucune valeur « après la rénovation complète ».
+  const parcours = a.lecture_partielle ? parcoursLus(lecture).map((p) => ({ ...p, arrivee: null })) : parcoursLus(lecture);
   const date = a.date_audit ? dateFr(a.date_audit) : null;
   const grain = a.objet?.grain ?? null;
   const dpeAutre = !choix.rattacheAuDpe && dpe?.numero && a.numero_dpe && a.numero_dpe !== dpe.numero ? a.numero_dpe : null;
@@ -326,11 +339,13 @@ export function lireAuditPourDecision({
   let titre: string;
   let portee: string;
   if (grain === "immeuble") {
-    titre = "Un audit énergétique existe pour cet immeuble.";
-    const n = a.nb_logements;
-    const detail = n != null && n > 1 ? `${n} logements, ${surfaceCourte(a)} habitables` : `${surfaceCourte(a)} habitables`;
-    portee = `Il porte sur l'immeuble entier (${detail}), pas sur ce seul logement.`;
-    if (choix.rattacheAuDpe) portee += ` Il a été établi à partir du diagnostic retenu ici (n° ${a.numero_dpe}).`;
+    // REVUE FUT-62 : l'identifiant BAN prouve l'ADRESSE, pas le bâtiment. Une adresse peut regrouper
+    // plusieurs bâtiments, et plusieurs audits d'immeuble (1 rue Saint-Dominique) : jamais « cet immeuble ».
+    titre = "Un audit énergétique concerne un immeuble à cette adresse.";
+    portee = `Il porte sur un immeuble entier (${detailImmeuble(a)}), pas sur ce seul logement.`;
+    portee += choix.rattacheAuDpe
+      ? ` Il a été établi à partir du diagnostic retenu ici (n° ${a.numero_dpe}).`
+      : " Il est rattaché à l'adresse : la source n'établit pas qu'il s'agit du bâtiment de ce logement.";
   } else if (grain === "logement" && choix.rattacheAuDpe) {
     titre = "Un audit énergétique existe pour ce logement.";
     portee = `Il porte sur un logement de ${surfaceCourte(a)}, et a été établi à partir du diagnostic retenu pour ce logement (n° ${a.numero_dpe}).`;
@@ -348,8 +363,8 @@ export function lireAuditPourDecision({
   let lienDpe: string | null = null;
   if (grain === "immeuble") {
     lienDpe = dpe?.conso_ep_m2 != null
-      ? `Ces valeurs décrivent l'immeuble entier. Pour ce logement, le diagnostic retenu indique ${formatKwhEpM2(dpe.conso_ep_m2)} : l'audit ne le remplace pas, et ne dit pas quelle étiquette ce logement aurait après travaux.`
-      : "Ces valeurs décrivent l'immeuble entier : elles ne disent ni la consommation de ce logement, ni l'étiquette qu'il aurait après travaux.";
+      ? `Ces valeurs décrivent l'immeuble audité. Pour ce logement, le diagnostic retenu indique ${formatKwhEpM2(dpe.conso_ep_m2)} : l'audit ne le remplace pas, et ne dit pas quelle étiquette ce logement aurait après travaux.`
+      : "Ces valeurs décrivent l'immeuble audité : elles ne disent ni la consommation de ce logement, ni l'étiquette qu'il aurait après travaux.";
   } else if (grain === "logement" && !choix.rattacheAuDpe && dpe?.conso_ep_m2 != null) {
     lienDpe = `Pour comparaison, le diagnostic retenu pour ce bien indique ${formatKwhEpM2(dpe.conso_ep_m2)}.`;
   }
@@ -366,11 +381,15 @@ export function lireAuditPourDecision({
   }
   if (choix.autres.length > 0 && voix !== "habitant") {
     verifications.push("Plusieurs audits sont publiés pour cette adresse : demandez au vendeur lequel concerne ce bien.");
+  } else if (grain === "immeuble" && !choix.rattacheAuDpe) {
+    verifications.push(voix === "habitant"
+      ? `Le syndic peut confirmer que cet audit porte sur votre bâtiment (${detailImmeuble(a)}).`
+      : `Demandez ${aupres} si cet audit porte sur le bâtiment de ce logement : il décrit un immeuble de ${detailImmeuble(a)}.`);
   }
   if (grain === "immeuble" && parcours.length > 0) {
     verifications.push(a.copropriete
-      ? `L'immeuble est immatriculé comme copropriété (n° ${a.copropriete}) : les travaux que propose l'audit s'y décident en assemblée générale. Demandez ${aupres} lesquels ont été votés, financés ou planifiés, et les procès-verbaux des dernières assemblées.`
-      : `L'audit propose des travaux pour l'immeuble entier. Si l'immeuble est en copropriété, leur réalisation dépend de décisions collectives : demandez ${aupres} lesquels ont été votés, financés ou planifiés.`);
+      ? `L'immeuble audité est immatriculé comme copropriété (n° ${a.copropriete}) : les travaux que propose l'audit s'y décident en assemblée générale. Demandez ${aupres} lesquels ont été votés, financés ou planifiés, et les procès-verbaux des dernières assemblées.`
+      : `L'audit propose des travaux pour l'immeuble audité. S'il est en copropriété, leur réalisation dépend de décisions collectives : demandez ${aupres} lesquels ont été votés, financés ou planifiés.`);
   } else if (grain === "logement" && parcours.length > 0) {
     verifications.push(voix === "habitant"
       ? `L'audit décrit l'état du logement${date ? ` au ${date}` : ""} : les travaux réalisés depuis n'y figurent pas.`
@@ -383,7 +402,9 @@ export function lireAuditPourDecision({
     date: date ? `Établi le ${date}` : null,
     depart: departAudit(lecture),
     arrivee: arriveeAudit(parcours),
-    phraseParcours: phraseParcoursAudit(parcours),
+    phraseParcours: a.lecture_partielle
+      ? [phraseParcoursAudit(parcours), "La source n'a pas pu être lue en entier : des étapes peuvent manquer."].filter(Boolean).join(" ")
+      : phraseParcoursAudit(parcours),
     parcours,
     lienDpe,
     autresAudits: phraseAutresAudits(choix.autres, autresIncomplets),
