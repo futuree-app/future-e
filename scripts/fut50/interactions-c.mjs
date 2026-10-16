@@ -116,7 +116,7 @@ for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2], [360, 740,
     return { titreHaut: Math.round(t.top), champGauche: Math.round(b.left) };
   });
   // Données préchauffées : la bande d'images montre le geste, pas le chargement.
-  await page.evaluate(() => fetch(`${API}/lecture?insee=44109&cle=hivers&type=commune&commune=Nantes&libelle=Nantes`));
+  await page.evaluate((api) => fetch(`${api}/lecture?insee=44109&cle=hivers&type=commune&commune=Nantes&libelle=Nantes`), API);
   await page.getByRole("button", { name: "Avoir des hivers doux" }).click();
   let ecoule = 0;
   for (const t of [120, 300, 480, 700]) {
@@ -306,7 +306,7 @@ for (const reduit of [false, true]) {
 {
   const { ctx, page } = await ouvrir(1440, 900, 1);
   // Code inconnu des référentiels : la route refuse d'inventer une identité (404), plus de lecture devinée.
-  const r = await page.evaluate(async () => { const x = await fetch(`${API}/lecture?insee=99999&cle=chaleur&commune=Inconnue`); return { statut: x.status, corps: await x.json() }; });
+  const r = await page.evaluate(async (api) => { const x = await fetch(`${api}/lecture?insee=99999&cle=chaleur&commune=Inconnue`); return { statut: x.status, corps: await x.json() }; }, API);
   constats.push(`code inconnu (99999) : ${r.statut} ${r.corps.error ?? ""}`);
   await ctx.close();
 }
@@ -328,8 +328,8 @@ for (const reduit of [false, true]) {
   await ctx.close();
 }
 
-// ── Composition de comparaison (mobilité) ────────────────────────────────────────────────────
-{
+// ── Composition de comparaison (mobilité) : prototype seulement ─────────────────────────────
+if (PAGE.startsWith("/dev/")) {
   const { ctx, page } = await ouvrir(1440, 900, 1, {}, `${URL_C}?pastilles=mobilite`);
   await choisirCommune(page, "Nant", "Nantes");
   await page.keyboard.press("Enter");
@@ -391,8 +391,8 @@ for (const reduit of [false, true]) {
   await ctx.close();
 }
 
-// ── Storyboard et section Dossier Adresse ────────────────────────────────────────────────────
-for (const [largeur, hauteur, dpr] of [[1440, 900, 1], [390, 844, 2]]) {
+// ── Storyboard et section Dossier Adresse : prototype seulement (l'accueil public n'a pas de film) ──
+for (const [largeur, hauteur, dpr] of PAGE.startsWith("/dev/") ? [[1440, 900, 1], [390, 844, 2]] : []) {
   const { ctx, page } = await ouvrir(largeur, hauteur, dpr, {}, `${base}/dev/fut50/storyboard`);
   await page.screenshot({ path: `${IMG}/c3-storyboard-${largeur}-page.jpg`, type: "jpeg", quality: 78, fullPage: true });
   await page.goto(`${URL_C}#dossier-adresse`, { waitUntil: "networkidle" });

@@ -92,7 +92,7 @@ for (const [saisie, repere, attendu] of [
 {
   const { ctx, p } = await page();
   const annulees = [];
-  p.on("requestfailed", (r) => { if (/\/api\/(lecture|commune)/.test(r.url())) annulees.push(`${new URL(r.url()).searchParams.get("insee")}:${new URL(r.url()).searchParams.get("cle") ?? "identité"} (${r.failure()?.errorText})`); });
+  p.on("requestfailed", (r) => { if (/\/api\/(accueil\/)?(lecture|commune)\?/.test(r.url())) annulees.push(`${new URL(r.url()).searchParams.get("insee")}:${new URL(r.url()).searchParams.get("cle") ?? "identité"} (${r.failure()?.errorText})`); });
   await p.route(`**${API}/lecture?**`, async (route) => { await new Promise((r) => setTimeout(r, 2000)); await route.continue().catch(() => {}); });
   await choisir(p, "Nîmes", "Nîmes");
   await p.getByRole("button", { name: "Éviter les fortes chaleurs" }).click();

@@ -69,9 +69,16 @@ const prete = (p) => p.waitForFunction(() => document.querySelector('[aria-live=
   verifier(r.n > 0 && ouvert === true && r.a.contour !== "none", `détail « ${r.a.texte} » : atteint, Entrée ouvre, contour ${r.a.contour}`);
   await p.keyboard.press("Enter");
   // Les liens d'action, puis la sortie du hero : aucun piège.
-  r = await tabJusqua(p, (a) => a.tag === "A" && /Examiner une adresse/.test(a.texte));
-  const href = await p.evaluate(() => document.activeElement?.getAttribute("href"));
-  verifier(r.n > 0 && href === "/dossier", `CTA « ${r.a.texte} » atteint, href ${href}`);
+  // Périmètre V1 (Hexagone et Corse) : une lecture ultramarine n'a pas de bouton vers `/dossier`, elle dit le constat.
+  const horsOffre = await p.evaluate(() => /couvrent\s+pour\s+l'instant\s+l'Hexagone\s+et\s+la\s+Corse/.test(document.querySelector('[aria-live="polite"]')?.textContent ?? ""));
+  if (horsOffre) {
+    const liens = await p.evaluate(() => [...document.querySelectorAll('[aria-live="polite"] a')].map((a) => a.getAttribute("href")));
+    verifier(!liens.includes("/dossier"), `outre-mer (V1) : aucun lien vers /dossier dans la lecture, constat affiché ; liens ${liens.join(", ")}`);
+  } else {
+    r = await tabJusqua(p, (a) => a.tag === "A" && /Examiner une adresse/.test(a.texte));
+    const href = await p.evaluate(() => document.activeElement?.getAttribute("href"));
+    verifier(r.n > 0 && href === "/dossier", `CTA « ${r.a.texte} » atteint, href ${href}`);
+  }
   r = await tabJusqua(p, (a) => a.tag === "A" && /Chercher des communes/.test(a.texte));
   verifier(r.n > 0, `lien « ${r.a.texte} » atteint`);
   const avant = await p.evaluate(() => document.activeElement?.getBoundingClientRect().top + scrollY);
