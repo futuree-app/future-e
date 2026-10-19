@@ -19,13 +19,16 @@ import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import { normalizeUserProject, type UserProject } from "@/lib/user-project";
 import { communeVendable, ensembleVendable } from "@/lib/commerce/eligibilite-territoriale";
 import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
+import { PACK_DECISION_AMOUNT_CENTS } from "@/lib/commerce/preuve-paiement-pack";
 
 export const runtime = "nodejs";
 
 // Server-side price map — client-provided amounts are never trusted
 const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string }> = {
   "one-shot":      { amountEur: 14, stripePriceId: process.env.STRIPE_RAPPORT_PRICE_ID ?? "" },
-  "pack-decision": { amountEur: 39, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
+  // FUT-115 : le montant vient de la constante que l'octroi vérifie : un changement de prix ne peut pas
+  // rendre un comparatif payé impossible à ouvrir.
+  "pack-decision": { amountEur: PACK_DECISION_AMOUNT_CENTS / 100, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
   // Le montant réel est calculé par `quoteForDossier` (39 € ou 25 € selon le territoire déjà
   // payé) : cette entrée sert à RECONNAÎTRE le produit, son `amountEur` n'est jamais facturé.
   //
@@ -412,7 +415,7 @@ export async function POST(request: Request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
       );
-      await admin.from("pack_snapshots").upsert(
+      const { error: snapshotError } = await admin.from("pack_snapshots").upsert(
         {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user.id,
@@ -430,6 +433,13 @@ export async function POST(request: Request) {
         },
         { onConflict: "stripe_payment_intent_id" },
       );
+      // FUT-115 : SANS INSTANTANÉ, LE COMPARATIF NE POURRA JAMAIS ÊTRE OUVERT (l'octroi exige l'instantané qui
+      // concorde avec le paiement). L'erreur était ignorée : le `clientSecret` partait, la carte était débitée,
+      // et rien ne pouvait être livré. On échoue avant que la carte ne le soit.
+      if (snapshotError) {
+        console.error("[create-payment-intent] pack_snapshots", snapshotError.message);
+        return NextResponse.json({ error: "Préparation du comparatif impossible." }, { status: 500 });
+      }
     }
 
     const posthog = getPostHogClient();

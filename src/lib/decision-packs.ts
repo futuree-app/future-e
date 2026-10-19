@@ -2,6 +2,9 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ParsedProject } from "@/lib/comparateur-vie";
+import {
+  preuvePaiementPack, type InstantanePack, type MotifRefus, type PaiementStripe,
+} from "@/lib/commerce/preuve-paiement-pack";
 
 // trio_key : les 3 INSEE triés, joints par '-'. Identité de l'achat (un trio).
 // Robuste à l'ordre des colonnes : Annecy/Chambéry/Grenoble et Grenoble/Annecy/
@@ -64,28 +67,44 @@ export async function resolvePackOwnership(
   };
 }
 
-// Octroi du pack depuis le snapshot en staging (pack_snapshots), idempotent.
-// `admin` doit être un client service-role (bypass RLS). Si `expectedUserId` est
-// fourni, on vérifie que le snapshot appartient bien à cet utilisateur (sécurité
-// quand l'appel vient de la page de retour, pas du webhook signé). `email` permet
-// de poser les entitlements one_shot (report_access complete) sans clobber : tout
-// utilisateur connecté a déjà sa ligne user_accounts, l'upsert est un UPDATE.
-// Retourne le trio_key octroyé, ou null si rien à faire.
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// OCTROI DU COMPARATIF, SUR PREUVE DE PAIEMENT SEULEMENT (FUT-115).
+//
+// `paiement` est un PaymentIntent LU CHEZ STRIPE PAR LE SERVEUR : l'objet signé du webhook, ou la réponse de
+// `paymentIntents.retrieve`. Jamais un identifiant ni un statut venus d'une URL. Sans `preuvePaiementPack`,
+// rien n'est écrit : un futur appelant ne peut pas reproduire la faille de la page de retour, qui ouvrait le
+// comparatif sur `?redirect_status=succeeded` alors que l'instantané existe dès la création du paiement.
+//
+// IDEMPOTENT : trois upserts sur leurs clés naturelles, rejouables autant de fois que le webhook ou la page
+// le demandent. UNE ÉCRITURE ÉCHOUÉE LÈVE : l'erreur était ignorée, le webhook répondait 200 et Stripe ne le
+// rejouait jamais, donc un comparatif payé pouvait rester fermé pour toujours. En levant, le webhook répond
+// 500 et Stripe réessaie ; la page de retour, elle, montre l'attente.
+//
+// `admin` doit être un client service-role (bypass RLS). `attendu` : le compte de la session quand l'appel
+// vient d'une page. `email` permet de poser les entitlements one_shot sans clobber.
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+export type OctroiPack = { ok: true; trioKey: string } | { ok: false; motif: MotifRefus };
+
 export async function grantDecisionPackFromSnapshot(
   admin: SupabaseClient,
-  paymentIntentId: string,
-  expectedUserId?: string,
-  email?: string,
-): Promise<string | null> {
-  const { data: snap } = await admin
+  paiement: PaiementStripe,
+  opts: { attendu?: string; email?: string } = {},
+): Promise<OctroiPack> {
+  const { data: snap, error: lectureError } = await admin
     .from("pack_snapshots")
     .select("*")
-    .eq("stripe_payment_intent_id", paymentIntentId)
+    .eq("stripe_payment_intent_id", paiement.id)
     .maybeSingle();
-  if (!snap || !snap.user_id) return null;
-  if (expectedUserId && snap.user_id !== expectedUserId) return null;
+  if (lectureError) throw new Error(`pack_snapshots : lecture impossible (${lectureError.message})`);
 
-  await admin.from("decision_packs").upsert(
+  const preuve = preuvePaiementPack(paiement, snap as InstantanePack | null, opts.attendu);
+  if (!preuve.ok) return preuve;
+
+  const echec = (quoi: string, e: { message: string } | null) => {
+    if (e) throw new Error(`${quoi} : écriture impossible (${e.message})`);
+  };
+
+  const { error: packError } = await admin.from("decision_packs").upsert(
     {
       user_id: snap.user_id,
       trio_key: snap.trio_key,
@@ -98,10 +117,11 @@ export async function grantDecisionPackFromSnapshot(
       commune_3: snap.commune_3,
       projet_label: snap.projet_label,
       parsed_snapshot: snap.parsed_snapshot,
-      stripe_payment_intent_id: paymentIntentId,
+      stripe_payment_intent_id: paiement.id,
     },
     { onConflict: "user_id,trio_key" },
   );
+  echec("decision_packs", packError);
 
   // Un report_grant par commune RÉELLE (2 ou 3 ; insee_3 nullable en mode choix).
   const grants = [
@@ -109,35 +129,37 @@ export async function grantDecisionPackFromSnapshot(
     { insee: snap.insee_2, commune: snap.commune_2 },
     { insee: snap.insee_3, commune: snap.commune_3 },
   ].filter((t) => t.insee);
-  await admin.from("report_grants").upsert(
+  const { error: grantsError } = await admin.from("report_grants").upsert(
     grants.map((t, i) => ({
       user_id: snap.user_id,
       insee: t.insee,
       commune: t.commune,
       source: "pack_decision",
       rank: i + 1,
-      stripe_payment_intent_id: paymentIntentId,
+      stripe_payment_intent_id: paiement.id,
     })),
     { onConflict: "user_id,insee" },
   );
+  echec("report_grants", grantsError);
 
   // Entitlements one_shot au niveau compte. Ce qui ouvre les rapports du Pack, ce sont les trois
   // `report_grants` écrits juste au-dessus : depuis l'alignement du 30/07, la lecture d'un
   // territoire se demande à `canAccessTerritory`, jamais au plan. Le plan reste nécessaire pour ce
   // qui n'est pas territorial, AskFuture en tête (api/ask bloque le plan free).
   // email requis seulement à l'INSERT (la ligne existe déjà).
-  if (email) {
-    await admin.from("user_accounts").upsert(
+  if (opts.email) {
+    const { error: compteError } = await admin.from("user_accounts").upsert(
       {
         user_id: snap.user_id,
-        email,
+        email: opts.email,
         plan: "one_shot",
         status: "active",
         report_access: "complete",
       },
       { onConflict: "user_id" },
     );
+    echec("user_accounts", compteError);
   }
 
-  return snap.trio_key as string;
+  return { ok: true, trioKey: snap.trio_key as string };
 }

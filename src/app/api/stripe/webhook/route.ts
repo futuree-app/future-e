@@ -455,7 +455,14 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
   // utiliser AskFuture). Puis mail de confirmation, et on s'arrête (pas de
   // territoire actif, le pack gère son propre déblocage).
   if (productType === "pack-decision") {
-    await grantDecisionPackFromSnapshot(supabaseAdmin, paymentIntent.id, undefined, userEmail || undefined);
+    // FUT-115 : l'objet signé de l'événement EST la preuve. Un refus (instantané absent, montant ou compte qui
+    // ne concordent pas) sur un paiement encaissé est une anomalie, pas un cas dégradé : on LÈVE, comme pour une
+    // intention de dossier introuvable, pour que la route réponde 500 et que Stripe rejoue l'événement pendant
+    // trois jours au lieu de le croire traité. Une écriture échouée lève de la même façon.
+    const octroi = await grantDecisionPackFromSnapshot(supabaseAdmin, paymentIntent, { email: userEmail || undefined });
+    if (!octroi.ok) {
+      throw new Error(`comparatif non octroyé pour ${paymentIntent.id} : ${octroi.motif}`);
+    }
     await supabaseAdmin.from("payments").upsert(
       {
         user_id: userId && userId !== "anonymous" ? userId : null,
