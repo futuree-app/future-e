@@ -427,14 +427,14 @@ test("trois conditions confirmées : chaque carte a son sens, le verdict les ran
 
 // ── L'ARTEFACT SÉRIALISÉ ─────────────────────────────────────────────────────────────────────────
 
-test("artefact : la carte corrigée traverse la sérialisation, sous le moteur engine-5", () => {
+test("artefact : la carte corrigée traverse la sérialisation, sous le moteur courant (engine-5 depuis FUT-110, engine-6 depuis FUT-17)", () => {
   const p = confirme(projet({ acces_soins: 3 }), "acces_soins");
   const { d } = dossier(p, { rangs: { acces_soins: FAVORABLE }, faits: { autour: MEDECIN } });
-  assert.equal(ENGINE_VERSION, "engine-5");
+  assert.equal(ENGINE_VERSION, "engine-6");
   const a = buildDecisionArtifact(d, p, "2026-10-16T10:00:00.000Z", PRODUCT_CONVENTIONS_VERSION);
   const relu = parseDecisionArtifact(JSON.parse(JSON.stringify(a)));
   assert.ok(relu);
-  assert.equal(relu.engineVersion, "engine-5");
+  assert.equal(relu.engineVersion, "engine-6");
   const k = carte(relu.dossier, "acces_soins")!;
   assert.equal(k.status, "Ouverte · plutôt favorable");
   assert.match(k.statement, /550 m/);

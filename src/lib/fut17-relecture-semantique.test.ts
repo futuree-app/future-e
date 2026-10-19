@@ -21,6 +21,10 @@ import { readFileSync } from "node:fs";
 //      projet » : une évolution que la classification ne lit pas (elle lit un niveau à 2050), et une saison
 //      entière là où l'indicateur compte des jours au-dessus de 35 °C ou des nuits tropicales.
 //
+// Une règle retirée sur arbitrage du porteur (D7, engine-6) : le compromis transports × chaleur disait la
+// priorité chaleur « moins bien satisfaite » sur 2 796 communes que la règle chaleur classe sous le seuil
+// (section 5).
+//
 // LES ARTEFACTS FIGÉS (`__fixtures__/fut17-artefacts-avant.json`) ont été générés par main 5358667f, avant
 // ces corrections. Ils ne sont jamais régénérés : ils sont ce qui a pu être vendu, et ils doivent se relire
 // à l'identique. Aucun réseau, aucun appel Anthropic.
@@ -116,6 +120,8 @@ const COMMUNES = {
   larochelle: { insee: "17300", nom: "La Rochelle", dept: "17", lat: 46.16, lon: -1.15, pop: 78_000 },
   briancon: { insee: "05023", nom: "Briançon", dept: "05", lat: 44.9, lon: 6.64, pop: 11_000 },
   salers: { insee: "15209", nom: "Salers", dept: "15", lat: 45.14, lon: 2.49, pop: 330 },
+  strasbourg: { insee: "67482", nom: "Strasbourg", dept: "67", lat: 48.58, lon: 7.75, pop: 291_000 },
+  nantes: { insee: "44109", nom: "Nantes", dept: "44", lat: 47.22, lon: -1.55, pop: 320_000 },
 } as const;
 
 type Opts = {
@@ -307,21 +313,27 @@ test("Artefacts figés avant FUT-17 : relus et rendus mot pour mot, verdict et e
   assert.match(FIGES["commune-compromis"]!.attendu.heros, /: l'exposition aux fortes chaleurs\.$/);
 });
 
-test("Nouvelle génération des mêmes entrées : seules les deux formulations corrigées changent", async () => {
+test("Nouvelle génération des mêmes entrées : seules les deux formulations corrigées et le retrait de D7 changent", async () => {
   // Le reste du dossier est identique au figé : verdict (étiquette, ton, détail), orientation, état de
-  // conclusion, couverture, registre des critères, cartes et sections, gestes, compositions. Les décisions
-  // métier sont préservées ; seuls le titre sans logement et le sujet du compromis changent.
+  // conclusion, couverture, issues du registre des critères, cartes et sections, gestes, compositions. Les
+  // décisions métier sont préservées ; seuls le titre sans logement et le sujet du compromis changent, et la
+  // règle transports × chaleur retirée (engine-6) quitte la trace du registre : aucune de ces entrées ne
+  // déclare les transports, elle y figurait sans s'appliquer.
   const corrige = (s: string) => s
     .replaceAll("Des étés plus difficiles à concilier avec votre projet", "De fortes chaleurs projetées à l'horizon 2050")
     .replaceAll("\"headlineSubject\":\"l'exposition aux fortes chaleurs\"", "\"headlineSubject\":\"des étés supportables\"")
-    .replaceAll("vos priorités : l'exposition aux fortes chaleurs.", "vos priorités : des étés supportables.");
+    .replaceAll("vos priorités : l'exposition aux fortes chaleurs.", "vos priorités : des étés supportables.")
+    .replaceAll("\"territoire.compromis-transport-chaleur\",", "");
   for (const [nom, o] of Object.entries(ENTREES)) {
     const { d, project } = await dossier(o);
     const neuf = D.buildDecisionArtifact(d, project, "2026-10-19T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION);
     const fige = FIGES[nom]!.artefact;
     const json = (x: unknown) => JSON.stringify(x);
     assert.equal(json(neuf.dossier), corrige(json(fige.dossier)), nom);
-    for (const k of ["engineVersion", "conventionsVersion", "projectSnapshot"]) assert.deepEqual(neuf[k], fige[k], `${nom} : ${k}`);
+    // Le moteur a changé ce qu'il conclut ailleurs (D7) : le nouvel artefact le dit, le figé garde sa version.
+    assert.equal(neuf.engineVersion, "engine-6", nom);
+    assert.equal(fige.engineVersion, "engine-5", nom);
+    for (const k of ["conventionsVersion", "projectSnapshot"]) assert.deepEqual(neuf[k], fige[k], `${nom} : ${k}`);
   }
 });
 
@@ -419,4 +431,108 @@ test("FUT-112 : aucune progression des nuits chaudes n'est affirmée dans le dos
     const { vu } = await dossier(o);
     assert.doesNotMatch(vu, /progression|de plus en plus|s'accél|deviennent plus nombreuses/, o.commune);
   }
+});
+
+// ═══════════════════════ 5. D7 RETIRÉE : LA TENSION TRANSPORTS × CHALEUR (engine-6) ═════════════════
+//
+// La règle jugeait la chaleur sur un indice interne (≤ 40), sous une autre convention que la règle chaleur
+// (DRIAS : 8 jours au-dessus de 35 °C, 25 nuits tropicales à 2050). Les scores ci-dessous sont les scores
+// RÉELS de l'index. `__fixtures__/fut17-artefacts-d7-avant.json` fige trois dossiers produits par main
+// 5358667f, avec la carte : ils sont ce qui a pu être vendu, et ne sont jamais régénérés.
+
+const FIGES_D7 = JSON.parse(readFileSync("src/lib/__fixtures__/fut17-artefacts-d7-avant.json", "utf8")) as Record<string, M>;
+const DEUX_PRIORITES = { acces_transports: 3, faible_chaleur: 3 };
+const issue = (d: M, cle: string): string | undefined => d.criteria.registry.find((r: M) => r.criterionKey === cle)?.outcome;
+
+test("D7 figée : un dossier vendu avec la carte transports × chaleur se relit mot pour mot, sous engine-5", () => {
+  for (const [nom, { artefact, attendu }] of Object.entries(FIGES_D7).filter(([k]) => !k.startsWith("_"))) {
+    const art = D.parseDecisionArtifact(JSON.parse(JSON.stringify(artefact)));
+    assert.ok(art, nom);
+    assert.equal(art.engineVersion, "engine-5", nom);
+    assert.ok(art.dossier.sections.some((s: M) => s.cards.some((c: M) => c.kind === "fact" && c.fact.ruleId === "territoire.compromis-transport-chaleur")), nom);
+    // Le rendu courant d'un artefact figé est celui que main produisait : rien n'est réécrit.
+    assert.equal(texte(rendreSection(art.dossier)), attendu.vu, nom);
+    assert.equal(art.dossier.narrativePlan.verdict.headline.text, attendu.heros, nom);
+    assert.equal(D.buildConclusionHash(art.dossier.narrativePlan), attendu.hash, nom);
+  }
+  assert.match(FIGES_D7["commune-d7-contradiction"]!.attendu.vu, /Votre priorité de faible exposition à la chaleur est moins bien satisfaite ici/);
+  assert.equal(FIGES_D7["commune-d7-contradiction"]!.attendu.heros, "Le principal point à contrôler à Strasbourg : la tension entre transports et chaleur.");
+});
+
+// Le rang RÉEL de Strasbourg pour les transports (index, sur 10 000). Sans lui, l'entrée synthétique du harnais
+// ne donne rien aux règles de rang, et c'est D7 seule qui faisait passer la priorité pour examinée. Sur l'index
+// réel, la sonde avant/après de FUT-17 n'a trouvé aucune priorité devenue non examinée (4 932 communes).
+const STRASBOURG_RANG = { rankBands: { acces_transports: [9750, 9850] } };
+
+test("D7 retirée : Strasbourg (contradiction) ne dit plus une priorité chaleur que la règle chaleur ne retient pas", async () => {
+  for (const nom of ["commune-d7-contradiction", "adresse-d7-contradiction"]) {
+    const { run, d, vu, project } = await dossier({ ...(FIGES_D7[nom]!.entree as Opts), entry: STRASBOURG_RANG });
+    assert.equal(run.facts.some((f: M) => f.role === "compromise"), false, nom);
+    assert.doesNotMatch(vu, /transports et chaleur|moins bien satisfaite|tirent en sens opposés/, nom);
+    // La chaleur suit sa règle canonique : sous les deux seuils DRIAS, la priorité est satisfaite. Ce
+    // n'est pas une absence lue comme une bonne nouvelle : les deux axes sont mesurés (sinon `indeterminate`).
+    const chaleur = run.evaluations.find((e: M) => e.ruleId === "territoire.climat-chaleur");
+    assert.equal(chaleur.outcome, "satisfied", nom);
+    assert.equal(issue(d, "faible_chaleur"), "favorable", nom);
+    assert.deepEqual(d.criteria.registry.find((r: M) => r.criterionKey === "faible_chaleur").ruleIds, ["territoire.climat-chaleur"], nom);
+    // Les transports restent examinés par leurs propres règles (rang, gare), sur leur propre convention.
+    assert.equal(d.criteria.registry.find((r: M) => r.criterionKey === "acces_transports").coverage, "examined", nom);
+    assert.equal(issue(d, "acces_transports"), "favorable", nom);
+    assert.equal(D.buildDecisionArtifact(d, project, "2026-10-19T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION).engineVersion, "engine-6", nom);
+  }
+  const { d } = await dossier({ ...(FIGES_D7["commune-d7-contradiction"]!.entree as Opts), entry: STRASBOURG_RANG });
+  assert.equal(d.narrativePlan.verdict.headline.text, "Strasbourg répond à deux de vos priorités, dont l'accès au train.");
+});
+
+test("D7 retirée : là où la chaleur dépasse le seuil (Nîmes, Montpellier), l'écart reste dit, preuves DRIAS à l'appui", async () => {
+  const cas: [keyof typeof COMMUNES, Record<string, number>][] = [
+    ["nimes", FIGES_D7["commune-d7-doublon"]!.entree.scores],
+    ["montpellier", { acces_transports: 90, faible_chaleur: 4 }],
+  ];
+  for (const [commune, scores] of cas) {
+    const { run, d, vu } = await dossier({ commune, logement: null, prefs: DEUX_PRIORITES, scores });
+    assert.equal(run.facts.some((f: M) => f.role === "compromise"), false, commune);
+    assert.ok(composition(d, "climate_comfort"), commune);
+    assert.equal(issue(d, "faible_chaleur"), "mismatch", commune);
+    assert.match(d.narrativePlan.verdict.headline.text, /des étés supportables/, commune);
+    assert.match(vu, /De fortes chaleurs projetées à l'horizon 2050/, commune);
+    assert.doesNotMatch(vu, /transports et chaleur/, commune);
+  }
+});
+
+test("D7 retirée : La Rochelle et Nantes, juste au-dessus de l'indice 40, n'étaient pas concernées et restent lues par la règle chaleur", async () => {
+  const cas: [keyof typeof COMMUNES, Record<string, number>][] = [
+    ["larochelle", { acces_transports: 73, faible_chaleur: 40.5 }],
+    ["nantes", { acces_transports: 96, faible_chaleur: 42.75 }],
+  ];
+  for (const [commune, scores] of cas) {
+    const { run, d, vu } = await dossier({ commune, logement: null, prefs: DEUX_PRIORITES, scores });
+    assert.equal(run.evaluations.some((e: M) => e.ruleId === "territoire.compromis-transport-chaleur"), false, commune);
+    assert.deepEqual(d.criteria.registry.find((r: M) => r.criterionKey === "faible_chaleur").ruleIds, ["territoire.climat-chaleur"], commune);
+    assert.notEqual(issue(d, "faible_chaleur"), "indeterminate", commune);
+    assert.doesNotMatch(vu, /transports et chaleur|moins bien satisfaite/, commune);
+  }
+});
+
+test("Plusieurs analyses, deux moteurs : chaque version se sert telle qu'elle a été figée, la version du moteur ne choisit rien", async () => {
+  const v1 = FIGES_D7["commune-d7-contradiction"]!.artefact;
+  const { d, project } = await dossier(FIGES_D7["commune-d7-contradiction"]!.entree as Opts);
+  const v2 = D.buildDecisionArtifact(d, project, "2026-10-20T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION);
+  const ligne = (version: number, status: string, payload: unknown) => ({ version, status, generatedAt: null, createdAt: "2026-10-20T10:00:00.000Z", payload });
+  // Une v2 engine-6 prête : c'est elle qui se sert, la v1 engine-5 reste en base telle quelle.
+  const deux = D.etatArtefact([ligne(1, "ready", v1), ligne(2, "ready", v2)]);
+  assert.equal(deux.servedVersion, 2);
+  assert.equal(deux.artifact.engineVersion, "engine-6");
+  // Une v2 en cours ou échouée ne masque jamais la v1 vendue, qui se rend mot pour mot.
+  for (const statut of ["generating", "failed"]) {
+    const e = D.etatArtefact([ligne(1, "ready", v1), ligne(2, statut, null)]);
+    assert.equal(e.servedVersion, 1, statut);
+    assert.equal(e.artifact.engineVersion, "engine-5", statut);
+    const servi = D.dossierAServir(e, d);
+    assert.equal(servi.source, "artefact", statut);
+    assert.equal(texte(rendreSection(servi.dossier)), FIGES_D7["commune-d7-contradiction"]!.attendu.vu, statut);
+  }
+  // Une autre commune du même lecteur, sous engine-6 : aucune interférence entre les deux.
+  const autre = D.etatArtefact([ligne(1, "ready", v2)]);
+  assert.equal(texte(rendreSection(D.dossierAServir(autre, null).dossier)), texte(rendreSection(d)));
 });
