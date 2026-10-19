@@ -33,6 +33,14 @@ import { consequenceDuSignal, etatDuSignal } from "./hard-constraint-rules.ts";
 import { PREFERENCE_LABELS } from "../comparateur-labels.ts";
 import { deCommune } from "../typography.ts";
 import { kmLisible, aEnviron } from "../hard-constraints.ts";
+import { lectureChaleurLogement, RULE_CONFORT_ETE } from "./chaleur-logement.ts";
+
+// FUT-20 (D4) · LA CONDITION « DES ÉTÉS SUPPORTABLES » ET CE LOGEMENT. Quand le lecteur a fait de la
+// chaleur une condition et que le climat de la commune la contredit (le mismatch chaleur est réuni ici),
+// la carte reçoit le même côté logement que les cartes chaleur (`chaleur-logement.ts`) et son geste
+// ciblé ; le constat « Confort d'été insuffisant » y est réuni. Ce côté NE PÈSE PAS sur le signal : il
+// n'entre ni dans `reunis`, ni dans la lecture (FUT-110). Littéral : les règles importent ce module.
+const RULE_CHALEUR_DECLAREE = "territoire.climat-chaleur";
 
 const territoireHref = "/rapport/quartier";
 
@@ -243,6 +251,10 @@ export function conditionsDePreference(
     const ordonnes = [...lecture.orientants, ...lecture.aConfirmer];
     const action = actionDe(ordonnes);
     const mer = key === "proximite_mer" ? mesureMer(f) : null;
+    const faitConfort = facts.find((x): x is VerificationFact => x.role === "verification" && x.ruleId === RULE_CONFORT_ETE);
+    const chaleur = key === "faible_chaleur" && reunis.some((r) => r.role === "mismatch" && r.ruleId === RULE_CHALEUR_DECLAREE)
+      ? lectureChaleurLogement(f, project, faitConfort)
+      : null;
     const carte: ConditionCheckFact = {
       id: `${f.insee}:condition:${key}`,
       ruleId: `condition.${key}`,
@@ -263,10 +275,11 @@ export function conditionsDePreference(
       whyNotDecided: pourquoiDe(key, lecture),
       capabilityReason: capacite.reason,
       consequence: consequenceDe(lecture),
-      ...(action ? { action } : {}),
+      ...(chaleur ? { action: action ?? chaleur.action, logement: chaleur.cote } : action ? { action } : {}),
     };
     cartes.push(carte);
     for (const r of reunis) reunisIds.add(r.id);
+    if (chaleur && faitConfort) reunisIds.add(faitConfort.id);
     ajoutees.push({
       ruleId: carte.ruleId, projectKeys: [key], outcome: "condition_check", facts: [carte],
       reason: "condition confirmée, appréciable seulement",

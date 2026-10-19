@@ -197,7 +197,7 @@ export function factsNonNarresParLaFace(
 ): DecisionFact[] {
   const narres = new Set(
     composition.kind === "tradeoff"
-      ? [...composition.favorableSide.factIds, ...composition.unfavorableSide.factIds]
+      ? [...composition.favorableSide.factIds, ...composition.unfavorableSide.factIds, ...(composition.logement?.factIds ?? [])]
       : composition.kind === "grouped_verification"
         ? composition.items.flatMap((i) => i.factIds)
         // climate_comfort : sa face narre le mismatch absorbé (le summary EST son statement), rien ne reste

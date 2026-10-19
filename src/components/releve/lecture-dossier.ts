@@ -243,9 +243,17 @@ function fondementDe(f: DecisionFact): FondementLu | undefined {
   return undefined;
 }
 
+function coteLu(x: CompositionSide): CoteLu {
+  return {
+    libelle: x.label, enonce: x.statement, ...trier(x.evidence),
+    ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
+    ...(x.action ? { geste: geste(x.action) } : {}),
+  };
+}
+
 function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
-  const refs = refsDuFait(f);
-  const { preuves, sources } = trier(refs);
+  const refs = [...refsDuFait(f), ...(f.role === "condition_check" && f.logement ? f.logement.evidence : [])];
+  const { preuves, sources } = trier(refsDuFait(f));
   const action = f.role === "verification" || f.role === "unknown" || f.role === "condition_check" ? f.action : undefined;
   const aVerifier: string[] = action?.detail ? [action.detail] : [];
   const methode: string[] = [];
@@ -274,6 +282,8 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
     ...(action ? { geste: geste(action) } : {}),
     cotes: f.role === "compromise"
       ? f.sides.map((x) => ({ libelle: "", enonce: x.statement, ...trier(x.evidence) }))
+      // FUT-20 (D4) : la condition « des étés supportables » porte ce que l'on sait du logement.
+      : f.role === "condition_check" && f.logement ? [coteLu(f.logement)]
       : [],
     limites,
     aVerifier,
@@ -303,20 +313,17 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
   const detailles = factsNonNarresParLaFace(c, absorbes).map((f) => lireFait(f, false));
   // Les grains d'une composition : ceux de ses propres preuves, puis ceux des faits qu'elle absorbe.
   const refsPropres: EvidenceRef[] =
-    c.kind === "tradeoff" ? [...c.favorableSide.evidence, ...c.unfavorableSide.evidence]
+    c.kind === "tradeoff" ? [...c.favorableSide.evidence, ...c.unfavorableSide.evidence, ...(c.logement?.evidence ?? [])]
       : c.kind === "grouped_verification" ? c.items.flatMap((x) => x.evidence)
-        : c.kind === "mismatch_with_action" ? c.evidence
+        : c.kind === "mismatch_with_action" ? [...c.evidence, ...(c.logement?.evidence ?? [])]
           : c.sharedEvidence;
   const toutes = [...refsPropres, ...absorbes.flatMap(refsDuFait)];
   const grains = grainsDe(toutes);
   const base = { ancre: dossierAnchorId(c.id), nature: c.kind, sujet: c.title, horsPriorites: horsPriorites(card), grains, echelles: echellesDe(toutes), detailles };
-  const cote = (x: CompositionSide): CoteLu => ({
-    libelle: x.label, enonce: x.statement, ...trier(x.evidence),
-    ...(x.limitation ? { nuance: x.limitation } : {}), ...(x.status ? { statut: x.status } : {}),
-    ...(x.action ? { geste: geste(x.action) } : {}),
-  });
+  const cote = coteLu;
   if (c.kind === "tradeoff") {
-    return { ...base, enonce: c.summary, preuves: [], sources: [], cotes: [cote(c.favorableSide), cote(c.unfavorableSide)], ...zonesDesCotes([c.favorableSide, c.unfavorableSide]) };
+    const cotes = [c.favorableSide, c.unfavorableSide, ...(c.logement ? [c.logement] : [])];
+    return { ...base, enonce: c.summary, preuves: [], sources: [], cotes: cotes.map(cote), ...zonesDesCotes(cotes) };
   }
   if (c.kind === "grouped_verification") {
     return {
@@ -328,7 +335,7 @@ function lireCarte(dossier: Dossier, card: DossierCard, horsPriorites: (c: Dossi
     const f0 = absorbes.map(fondementDe).find(Boolean);
     return {
       ...base, enonce: c.summary, ...(c.limitation ? { nuance: c.limitation } : {}),
-      ...trier(c.evidence), geste: geste(c.action), cotes: [],
+      ...trier(c.evidence), geste: geste(c.action), cotes: c.logement ? [cote(c.logement)] : [],
       ...zones(c.action.detail ? [c.action.detail] : [], []),
       ...(f0 ? { fondement: f0 } : {}),
     };

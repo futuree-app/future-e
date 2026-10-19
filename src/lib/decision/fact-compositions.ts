@@ -11,7 +11,8 @@ import { RULE_EXPOSITION_BATI, RULE_ZONE_REGLEMENTEE } from "./logement-rules.ts
 import { preferenceWeight } from "./project-view.ts";
 import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
-import { RULE_CHALEUR, RULE_FEU } from "./materiality-rules.ts";
+import { RULE_CHALEUR, RULE_CHALEUR_AMBIANTE, RULE_FEU } from "./materiality-rules.ts";
+import { lectureChaleurLogement, RULE_CONFORT_ETE, type LectureChaleurLogement } from "./chaleur-logement.ts";
 import { summerComfortAction, wildfireExposureAction } from "./climat-facts.ts";
 import { TERRITORY_SIZE_FACT_ID, SIZE_SUBJECTS } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
@@ -39,6 +40,21 @@ function evaluation(run: RunResult, ruleId: string): RuleEvaluation | null {
 // L'issue de la règle (`outcome`) se lit toujours dans l'évaluation ; le FAIT à composer, ici seulement.
 function emittedFact(run: RunResult, ruleId: string, role: DecisionFact["role"]): DecisionFact | undefined {
   return run.facts.find((f) => f.ruleId === ruleId && f.role === role);
+}
+
+// FUT-20 · LE LOGEMENT, LU AVEC LA CHALEUR. Les trois cartes chaleur (l'écart déclaré, le compromis
+// hivers doux / étés chauds, le constat non demandé) reçoivent le même côté « à cette adresse »
+// (`chaleur-logement.ts`), et absorbent la carte « Confort d'été insuffisant » quand elle a été émise :
+// une seule lecture, un seul geste. Le constat absorbé reste au dépliable, avec ses preuves.
+//
+// Ce côté ne DÉCLENCHE jamais rien : il ne s'ajoute qu'à une carte chaleur déjà émise au-dessus des
+// seuils du moteur. Sous le seuil (La Rochelle), sans adresse ou sans donnée, rien ne change.
+function logementChaleur(run: RunResult, facts: ModuleFacts, project: UserProject): {
+  lecture: LectureChaleurLogement; absorbe: VerificationFact | undefined;
+} | null {
+  const absorbe = emittedFact(run, RULE_CONFORT_ETE, "verification") as VerificationFact | undefined;
+  const lecture = lectureChaleurLogement(facts, project, absorbe);
+  return lecture ? { lecture, absorbe } : null;
 }
 
 // LA PREUVE DU CÔTÉ SATISFAIT. Un satisfied n'émet aucun fait : sa preuve est construite ici, depuis la
@@ -72,6 +88,8 @@ function composeSeasonalClimateTradeoff(
   if (!chaleurFact) return null;
   const favorableEvidence = buildWinterMildnessEvidence(facts);
   if (!favorableEvidence) return null; // invariant 9 : preuve non fabricable = patron non déclenché
+  const lg = logementChaleur(run, facts, project);
+  const absorbeLogement = lg?.absorbe ? [lg.absorbe.id] : [];
 
   return {
     id: `${facts.insee}:composition-climat-saisons`,
@@ -95,12 +113,14 @@ function composeSeasonalClimateTradeoff(
       ruleIds: [RULE_CHALEUR],
       factIds: [chaleurFact.id],
       // L'ACTION NE VIENT PLUS DU FAIT : un mismatch n'en porte pas. Le renvoi au confort du logement est
-      // restauré ICI, au grain adresse, par la source de vérité partagée (summerComfortAction).
-      action: summerComfortAction(facts.hasAddress),
+      // restauré ICI, au grain adresse, par la source de vérité partagée (summerComfortAction). FUT-20 :
+      // quand le logement est lu, le geste CIBLÉ passe sur son côté, et celui-ci n'en porte plus.
+      ...(lg ? {} : { action: summerComfortAction(facts.hasAddress) }),
       ...(chaleurFact.limitation ? { limitation: chaleurFact.limitation } : {}),
     },
-    absorbedFactIds: [chaleurFact.id],
-    referencedRuleIds: [RULE_DOUCEUR, RULE_CHALEUR],
+    ...(lg ? { logement: { ...lg.lecture.cote, action: lg.lecture.action } } : {}),
+    absorbedFactIds: [chaleurFact.id, ...absorbeLogement],
+    referencedRuleIds: [RULE_DOUCEUR, RULE_CHALEUR, ...(lg?.absorbe ? [RULE_CONFORT_ETE] : [])],
     materialityTier: chaleurFact.materialityTier, // la douceur n'aggrave jamais la réserve
     displaySection: "compromises",
   };
@@ -118,19 +138,22 @@ function composeClimateComfort(
   // ni un mismatch déjà réuni dans une carte condition (FUT-90).
   const chaleurFact = emittedFact(run, RULE_CHALEUR, "mismatch") as MismatchFact | undefined;
   if (!chaleurFact) return null;
+  const lg = logementChaleur(run, facts, project);
 
   return {
     id: `${facts.insee}:composition-confort-ete`,
     kind: "mismatch_with_action",
     patternId: "climate_comfort",
-    title: "Des étés plus difficiles à concilier avec votre projet",
+    // FUT-20 : avec le logement, le titre dit la RELATION ; la section porte déjà le jugement au projet.
+    title: lg?.lecture.titre ?? "Des étés plus difficiles à concilier avec votre projet",
     headlineSubject: chaleurFact.headlineSubject, // « des étés supportables », hérité du mismatch
     summary: chaleurFact.statement,
     evidence: chaleurFact.evidence,
-    action: summerComfortAction(facts.hasAddress),
+    action: lg?.lecture.action ?? summerComfortAction(facts.hasAddress),
     ...(chaleurFact.limitation ? { limitation: chaleurFact.limitation } : {}),
-    absorbedFactIds: [chaleurFact.id],
-    referencedRuleIds: [RULE_CHALEUR],
+    ...(lg ? { logement: lg.lecture.cote } : {}),
+    absorbedFactIds: [chaleurFact.id, ...(lg?.absorbe ? [lg.absorbe.id] : [])],
+    referencedRuleIds: [RULE_CHALEUR, ...(lg?.absorbe ? [RULE_CONFORT_ETE] : [])],
     materialityTier: chaleurFact.materialityTier,
     displaySection: "mismatches",
   };
@@ -289,6 +312,43 @@ function composeClayRegulationGrouped(run: RunResult, facts: ModuleFacts): Group
   };
 }
 
+// FUT-20 · LA CHALEUR NON DEMANDÉE, LUE À CE LOGEMENT (D5). Le constat ambiant (seuil plus exigeant,
+// `secondary`, aucune priorité rattachée) reste ce qu'il est ; la carte « À contrôler » qui le porte
+// reçoit le logement en second item, et le geste ciblé remplace le renvoi générique. Sans adresse : rien
+// (le constat garde sa carte et son geste « renseignez votre adresse »).
+function composeAmbientHeatHousing(run: RunResult, facts: ModuleFacts, project: UserProject): GroupedVerificationComposition | null {
+  const ambiant = emittedFact(run, RULE_CHALEUR_AMBIANTE, "verification") as VerificationFact | undefined;
+  if (!ambiant) return null;
+  const lg = logementChaleur(run, facts, project);
+  if (!lg) return null;
+  const tier: MaterialityTier = lg.absorbe && TIER_ORDER[lg.absorbe.materialityTier] < TIER_ORDER[ambiant.materialityTier]
+    ? lg.absorbe.materialityTier : ambiant.materialityTier;
+  return {
+    id: `${facts.insee}:composition-chaleur-logement`,
+    kind: "grouped_verification",
+    patternId: "ambient_heat_housing",
+    title: lg.lecture.titre,
+    headlineSubject: "le confort d'été face aux fortes chaleurs",
+    summary: lg.lecture.resume(facts.nom),
+    items: [
+      {
+        label: "À l'échelle de la commune",
+        statement: ambiant.statement,
+        evidence: ambiant.evidence,
+        ruleIds: [ambiant.ruleId],
+        factIds: [ambiant.id],
+        ...(ambiant.limitation ? { limitation: ambiant.limitation } : {}),
+        ...(ambiant.signalConvention ? { signalConvention: ambiant.signalConvention } : {}),
+      },
+      { ...lg.lecture.cote, action: lg.lecture.action },
+    ],
+    absorbedFactIds: [ambiant.id, ...(lg.absorbe ? [lg.absorbe.id] : [])],
+    referencedRuleIds: [RULE_CHALEUR_AMBIANTE, ...(lg.absorbe ? [RULE_CONFORT_ETE] : [])],
+    materialityTier: tier,
+    displaySection: "verifications",
+  };
+}
+
 // LE VALIDATEUR : l'assembleur ne fait pas confiance au constructeur (même doctrine qu'assertFactValid).
 // Jette : un patron futur qui absorberait deux fois une carte ou masquerait un fait inexistant doit
 // exploser en développement, jamais rendre une UI silencieusement incohérente.
@@ -345,6 +405,10 @@ export function composeFacts(run: RunResult, facts: ModuleFacts, project: UserPr
     const comfort = composeClimateComfort(run, facts, project);
     if (comfort) out.push(comfort);
   }
+  // Le constat NON DEMANDÉ et l'écart déclaré s'excluent dans les règles (poids 0 contre poids >= 1) :
+  // une seule carte chaleur par dossier, donc une seule absorption du constat logement.
+  const ambientHeat = composeAmbientHeatHousing(run, facts, project);
+  if (ambientHeat) out.push(ambientHeat);
   // LE FEU EST INDÉPENDANT DES PATRONS CHALEUR. L'invariant « une seule composition climatique par
   // dossier » vise la CHALEUR : le tradeoff saisonnier et le fallback confort absorbent le MÊME mismatch,
   // donc ils s'excluent. Le danger d'incendie est un autre phénomène, que le lecteur peut prioriser
