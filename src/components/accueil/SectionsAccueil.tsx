@@ -154,7 +154,8 @@ export function Offres() {
               promettaient un questionnaire que le moteur ne lit pas entièrement (FUT-28). « Le climat déjà observé »
               était faux : l'accueil affiche des projections. « 3 pages Savoir » : elles sont toutes en accès libre. */}
           <ul className={c.offreListe}>
-            <li>Regarder une commune avec vos priorités, ici même</li>
+            {/* FUT-113 : « avec vos priorités » désignait les quatre pastilles comme si c'était tout le Projet. */}
+            <li>Un premier aperçu d&apos;une commune sur quatre sujets, ici même</li>
             <li>Décrire votre projet et voir les territoires qui y répondent</li>
             <li>Les articles et les guides pratiques, en accès libre</li>
           </ul>
