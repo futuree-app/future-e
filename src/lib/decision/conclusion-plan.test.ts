@@ -769,7 +769,8 @@ function tradeoff(tier: MaterialityTier = "structuring"): FactComposition {
   return {
     id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
-    headlineSubject: "l'exposition aux fortes chaleurs",
+    // FUT-17 : la priorité du lecteur, héritée du mismatch, comme le vrai patron.
+    headlineSubject: "des étés supportables",
     summary: "Les hivers d'Antibes comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.",
     favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [], ruleIds: ["r1"], factIds: [] },
     // Le côté défavorable porte l'ACTION (le vrai patron la restaure au grain adresse : un mismatch
@@ -838,7 +839,9 @@ test("héros : une composition en tête nomme son headlineSubject, jamais son ti
   const plan = buildConclusionPlan(baseInput({
     coverage: "complete", orientation: "minor_reserves", hasFavorable: false,
     shownFacts: [verification("f9", "secondary")],
-    shownCompositions: [tradeoff("decision_critical")],
+    // Entrée que le vrai moteur ne produit pas (un tradeoff structurant oriente toujours vers l'arbitrage,
+    // FUT-17) : on ne teste ici que le mécanisme titre / sujet du gabarit des réserves.
+    shownCompositions: [{ ...tradeoff("decision_critical"), headlineSubject: "l'exposition aux fortes chaleurs" } as FactComposition],
     reservesShown: 2, majorReserveCount: 1,
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
@@ -998,7 +1001,7 @@ test("arbitrage : une composition climate_comfort est candidate au headline (« 
   // branche, le héros retomberait en posture alors qu'une carte visible nomme l'enjeu (Issue 2, lot C).
   const comp = {
     id: "31555:composition-confort-ete", kind: "mismatch_with_action", patternId: "climate_comfort",
-    title: "Des étés plus difficiles à concilier avec votre projet",
+    title: "De fortes chaleurs projetées à l'horizon 2050",
     headlineSubject: "des étés supportables", summary: "résumé chaleur",
     evidence: [], action: { type: "renseigner_adresse", label: "Renseignez votre adresse" },
     absorbedFactIds: ["ch1"], referencedRuleIds: ["territoire.climat-chaleur"],
@@ -1014,13 +1017,13 @@ test("arbitrage : une composition climate_comfort est candidate au headline (« 
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["31555:composition-confort-ete"]);
 });
 
-test("arbitrage : le tradeoff saisonnier est candidat au headline (« l'exposition aux fortes chaleurs »), le mismatch absorbé n'est pas une réserve « par ailleurs »", () => {
+test("arbitrage : le tradeoff saisonnier est candidat au headline (« des étés supportables »), le mismatch absorbé n'est pas une réserve « par ailleurs »", () => {
   const plan = buildConclusionPlan(baseInput({
     orientation: "arbitration", shownFacts: [], shownCompositions: [tradeoff("structuring")],
     mismatchTotal: 1, mismatchShown: 1, reservesShown: 0, hasFavorable: true, favorableCount: 1,
   }));
   assert.equal(plan.verdict.headline.kind, "named_issues");
-  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : l'exposition aux fortes chaleurs.");
+  assert.equal(plan.verdict.headline.text, "Toulouse répond moins bien à une de vos priorités : des étés supportables.");
   assert.deepEqual(plan.verdict.headline.consumedFactIds, ["f-ch"]);
   assert.deepEqual(plan.verdict.headline.consumedCompositionIds, ["06004:composition-climat-saisons"]);
   assert.doesNotMatch(plan.verdict.detail, /par ailleurs à contrôler/);

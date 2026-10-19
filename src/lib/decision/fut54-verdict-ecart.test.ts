@@ -178,7 +178,7 @@ function base(over: Partial<ConclusionPlanInput>): ConclusionPlanInput {
 }
 const TRADEOFF: FactComposition = {
   id: "06004:composition-climat-saisons", kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
-  title: "Des hivers doux, avec une exposition estivale à arbitrer", headlineSubject: "l'exposition aux fortes chaleurs",
+  title: "Des hivers doux, avec une exposition estivale à arbitrer", headlineSubject: "des étés supportables",
   summary: "s", favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [], ruleIds: ["r1"], factIds: [] },
   unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [], ruleIds: ["r2"], factIds: ["f-ch"] },
   absorbedFactIds: ["f-ch"], referencedRuleIds: ["r1", "r2"], materialityTier: "secondary", displaySection: "compromises",
@@ -187,7 +187,7 @@ const TRADEOFF: FactComposition = {
 test("F. l'écart absorbé dans une composition est nommé par son sujet, et ses faits sont consommés", () => {
   const p = buildConclusionPlan(base({ shownCompositions: [TRADEOFF] }));
   assert.equal(p.verdict.label, "Correspondance avec un écart");
-  assert.match(p.verdict.headline.text, /moins bien à une autre : l'exposition aux fortes chaleurs\.$/);
+  assert.match(p.verdict.headline.text, /moins bien à une autre : des étés supportables\.$/);
   assert.deepEqual(p.verdict.headline.consumedFactIds, ["f-ch"]);
   assert.deepEqual(p.verdict.headline.consumedCompositionIds, [TRADEOFF.id]);
 });

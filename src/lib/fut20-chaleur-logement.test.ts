@@ -585,8 +585,11 @@ test("Artefact : la carte enrichie traverse la sérialisation, et le texte relu 
 test("Artefact engine-5 d'avant FUT-20 : relu et rendu exactement comme avant", async () => {
   // Une composition figée avant FUT-20 n'a pas de côté logement : le rendu courant doit être celui
   // de main (8d02e190), épinglé ici mot pour mot.
-  const { d, project } = await dossier("nimes", { chaleur: 3, avant: true });
-  const art = D.parseDecisionArtifact(JSON.parse(JSON.stringify(D.buildDecisionArtifact(d, project, "2026-10-01T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION))));
+  // FUT-17 : l'artefact est RELU depuis sa forme figée (générée par main 5358667f), plus régénéré : le titre
+  // sans logement a changé pour les nouvelles générations, et un artefact vendu garde le sien.
+  const { readFileSync } = await import("node:fs");
+  const figes = JSON.parse(readFileSync("src/lib/__fixtures__/fut17-artefacts-avant.json", "utf8"));
+  const art = D.parseDecisionArtifact(figes["adresse-confort-ete-avant-fut20"].artefact);
   const c = carteChaleur(art.dossier)!;
   assert.equal(c.logement, undefined);
   assert.equal(texte(rendreComposition(c, [])), RENDU_MAIN_CONFORT_ETE);
