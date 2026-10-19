@@ -9,17 +9,21 @@ import { getApercuTerritoire } from "@/lib/quartier-preview";
 import { TerritoryUnlockPanel } from "./TerritoryUnlockPanel";
 import { TerritoryUnlockPreview } from "./TerritoryUnlockPreview";
 import { PersonalTouch } from "./PersonalTouch";
+import { communeVendable } from "@/lib/commerce/eligibilite-territoriale";
+import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
 
 // Paywall de territoire : ouvre le dossier d'une commune explorée depuis le
 // comparateur (parcours « territoires découverts »). Distinct du checkout
 // produit générique : il est orienté territoire, pas profil personnel, et ne
 // passe jamais par le wizard (doctrine de parcours 5.12).
 
-const INSEE_RE = /^[0-9AB][0-9]{4}$/i;
-
+// FUT-114 : la page ne s'ouvre que sur une commune VENDABLE (métropole, Corse comprise, connue de l'index).
+// Elle n'offre rien à payer ailleurs : un code ultramarin ou inconnu rend une 404, et la route de paiement
+// refuse de son côté le même code, quelle que soit la page qui l'appelle. L'ancienne garde
+// (`^[0-9AB][0-9]{4}$`) rendait aussi une 404 sur toute commune corse.
 function cleanInsee(raw: string): string | null {
-  const v = raw.trim().toUpperCase();
-  return INSEE_RE.test(v) ? v : null;
+  const verdict = communeVendable(raw, communeDuReferentiel);
+  return verdict.ok ? verdict.insee : null;
 }
 
 export async function generateMetadata({

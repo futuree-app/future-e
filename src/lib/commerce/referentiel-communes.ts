@@ -1,0 +1,14 @@
+// FUT-114 · LE RÉFÉRENTIEL DES COMMUNES VENDABLES, côté serveur.
+//
+// `src/data/accueil-communes.json` est la projection compacte de l'index du comparateur (mêmes 34 788 codes,
+// Hexagone et Corse, arrondissements PLM compris), empaquetée avec la fonction : aucun chemin à tracer, et le
+// prebuild refuse un fichier périmé (`scripts/accueil/donnees-accueil.mjs`). Lire l'index complet (11 Mo
+// compressés, ~1 s d'analyse) dans la route de paiement coûterait un démarrage à froid pour une seule question :
+// ce code existe-t-il ?
+import "server-only";
+import communesBrutes from "@/data/accueil-communes.json";
+import type { CommuneConnue } from "./eligibilite-territoriale.ts";
+
+const communes = (communesBrutes as unknown as { communes: Record<string, unknown> }).communes;
+
+export const communeDuReferentiel: CommuneConnue = (insee) => Object.hasOwn(communes, insee);
