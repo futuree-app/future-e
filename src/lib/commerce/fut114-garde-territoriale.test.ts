@@ -294,3 +294,70 @@ test("route · comparatif mixte ou falsifié : refusé entièrement, sans Stripe
   aucunEffet("comparatif mixte");
   assert.equal(journal.getUser, 0, "refusé avant même la lecture de la session");
 });
+
+// ─── Le parcours 14 € depuis les Tarifs : commune choisie → offre → paiement → retour après connexion ──
+const { cheminOffreTerritoire, SOURCE_TARIFS } = await import("./parcours-territoire.ts");
+const { destinationApresConnexion } = await import("../auth-destination.ts");
+
+// Ce que fait `/territoire/[insee]/debloquer` d'une URL : la commune vérifiée et le retour d'authentification
+// (`backHref`, recopié de la page), puis le corps que `TerritoryUnlockPanel` envoie au paiement.
+function offreDepuisChemin(chemin: string) {
+  const url = new URL(chemin, "http://localhost");
+  const m = url.pathname.match(/^\/territoire\/([^/]+)\/debloquer$/);
+  assert.ok(m, chemin);
+  const verdict = communeVendable(decodeURIComponent(m[1]!), connue);
+  if (!verdict.ok) return null;
+  const back = new URLSearchParams();
+  for (const k of ["nom", "rank", "source"]) { const v = url.searchParams.get(k); if (v) back.set(k, v); }
+  const backHref = `/territoire/${verdict.insee}/debloquer${back.toString() ? `?${back}` : ""}`;
+  return {
+    insee: verdict.insee, nom: url.searchParams.get("nom"), backHref,
+    connexion: `/connexion?next=${encodeURIComponent(backHref)}`,
+    paiement: { productType: "one-shot", targetInsee: verdict.insee, targetCommune: url.searchParams.get("nom"), source: "comparateur_vie", rank: null },
+  };
+}
+
+for (const [nom, code] of [["Nantes", "44109"], ["Ajaccio", "2A004"], ["Bastia", "2B033"], ["Paris", "75056"], ["Lyon", "69123"], ["Marseille", "13055"]] as const) {
+  test(`parcours · ${nom} : choix, offre, paiement de 14 € sur ${code}, même territoire après connexion`, async () => {
+    // 1-2. Les Tarifs mènent au choix de la commune ; le choix donne l'offre de cette commune.
+    const chemin = cheminOffreTerritoire({ code, nom });
+    assert.equal(chemin, `/territoire/${code}/debloquer?nom=${encodeURIComponent(nom)}&source=${SOURCE_TARIFS}`);
+    // 3. L'offre s'ouvre sur la bonne commune.
+    const offre = offreDepuisChemin(chemin!);
+    assert.ok(offre, `${code} : l'offre doit s'ouvrir`);
+    assert.equal(offre.insee, code);
+    assert.equal(offre.nom, nom);
+    // 5. L'aller-retour de connexion revient exactement sur la même offre, commune et nom compris.
+    const next = new URL(offre.connexion, "http://localhost").searchParams.get("next");
+    assert.equal(destinationApresConnexion(next), offre.backHref);
+    assert.deepEqual(offreDepuisChemin(destinationApresConnexion(next))?.paiement, offre.paiement);
+    // 4. Le paiement préparé : 14 €, rattaché au code INSEE choisi, transmis au webhook.
+    const r = await appeler(offre.paiement);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    assert.equal(journal.stripeCreate.length, 1);
+    assert.equal(metadata().amount, 1400);
+    assert.equal(metadata().metadata.targetInsee, code);
+    assert.equal(metadata().metadata.targetCommune, nom);
+  });
+}
+
+test("parcours · une commune ultramarine choisie n'ouvre aucune offre, et aucun paiement ne se prépare", async () => {
+  for (const [nom, code] of [["Saint-Denis", "97411"], ["Fort-de-France", "97209"], ["Nouméa", "98818"]]) {
+    assert.equal(cheminOffreTerritoire({ code, nom }), null, nom);
+    // Même en forgeant l'URL de l'offre : la page la refuse (404), la route aussi.
+    assert.equal(offreDepuisChemin(`/territoire/${code}/debloquer?nom=${nom}`), null, nom);
+    const r = await appeler({ productType: "one-shot", targetInsee: code, targetCommune: nom });
+    assert.equal(r.body.code, "TERRITORY_NOT_ELIGIBLE", nom);
+  }
+  assert.equal(cheminOffreTerritoire({ code: "7510", nom: "?" }), null);
+  aucunEffet("outre-mer depuis les Tarifs");
+});
+
+test("parcours · l'ancienne page ne prépare plus aucun paiement sans commune", async () => {
+  const page = readFileSync(new URL("../../app/(public)/checkout/[product]/page.tsx", import.meta.url), "utf8");
+  assert.ok(page.includes("<ChoixCommuneTerritoire"), "la page propose le choix de la commune");
+  assert.ok(!page.includes("PaymentWrapper") && !page.includes("CheckoutPaymentPanel"), "aucun paiement sur cette page");
+  const r = await appeler({ productType: "one-shot" });
+  assert.equal(r.body.code, "TERRITORY_UNVERIFIED");
+  aucunEffet("paiement sans commune");
+});

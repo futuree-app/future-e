@@ -61,13 +61,14 @@ le droit territorial sont simulés et journalisés. Contre la route d'origine, 7
 
 ## 4. Limites
 
-1. **`/checkout/rapport-complet` ne vend plus rien.** Ce parcours (CTA 14 € de l'accueil, de l'ancienne
-   landing et du teaser wizard) créait un paiement sans commune : le webhook n'ouvrait aucun territoire. Il est
-   désormais refusé au paiement avec un message. Le CTA reste à rediriger vers le choix d'une commune : décision
-   produit.
-2. **Hors géographie, signalé :** le retour Stripe de `/comparateur/pack-decision` octroie le pack sur la seule
-   foi de `?payment_intent=…&redirect_status=succeeded`, sans demander à Stripe si le paiement a abouti. Les
-   instantanés n'existent plus hors métropole, mais le contournement de paiement demeure.
+1. **Réglé dans ce lot (décision porteur) :** `/checkout/rapport-complet` (CTA 14 € de l'accueil, de l'ancienne
+   landing et du teaser wizard) créait un paiement sans commune, donc sans droit territorial. La page ne porte
+   plus de paiement : elle fait choisir la commune (`CommuneSearch`), puis mène à `/territoire/[insee]/debloquer`,
+   seule porte du 14 €, dont l'aller-retour de connexion conserve la commune. Une commune ultramarine choisie
+   affiche le périmètre V1 sans ouvrir d'offre. `CheckoutPaymentPanel`, sans autre appelant, est supprimé.
+   Banc navigateur : `scripts/fut114/parcours-territoire.mjs` (Nantes, Ajaccio, Marseille, refus).
+2. **Hors géographie, suivi dans FUT-115 :** le retour Stripe de `/comparateur/pack-decision` octroie le pack
+   sur la seule foi de `?payment_intent=…&redirect_status=succeeded`. Non traité ici.
 3. La regex anti-Corse subsiste hors du paiement : `comparateur/page.tsx`, `comparateur/pack-decision/page.tsx`,
    `rapport/territoire/route.ts`, `api/territoire/activer`, `accueil/qna.ts`. Un comparatif corse ne se forme
    donc pas depuis l'interface.

@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { CheckoutPaymentPanel } from "@/components/CheckoutPaymentPanel";
 import { getCheckoutProduct, type CheckoutProductSlug } from "@/lib/checkout-products";
-import { createClient } from "@/lib/supabase/server";
 import { CheckoutViewedTracker } from "./CheckoutViewedTracker";
+import { ChoixCommuneTerritoire } from "./ChoixCommuneTerritoire";
 
 type Theme = {
   accent: string;
@@ -87,18 +86,21 @@ const COPY: Record<CheckoutProductSlug, {
       { n: "04", title: "La marche suivante, déduite", body: "Les échelles Autour et Logement demandent un dossier d'adresse, à 39 €. Ces 14 € en sont déduits : si vous le prenez ensuite sur cette commune, il vous reste 25 € à payer. Entrer par le territoire ne coûte donc rien de plus." },
     ],
     timeline: [
-      { n: "01", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
+      // FUT-114 : le dossier porte sur une commune, choisie avant tout paiement.
+      { n: "01", title: "Votre commune", body: "Choisissez-la, puis voyez ce que son dossier contient avant de payer." },
+      { n: "02", title: "Paiement sécurisé", body: "Stripe, moins de 2 minutes, carte bancaire ou Apple/Google Pay." },
       // « Envoyé par email sous 24 heures ouvrées » : retiré le 29/07/2026. La phrase datait d'un
       // produit livré à la main, en PDF. Le webhook Stripe pose les droits en base dès le paiement
       // confirmé et les trois modules se lisent en ligne : rien n'est produit en différé, rien
       // n'est envoyé. La promesse faisait donc attendre un acheteur qui pouvait déjà lire, et
       // lui laissait croire qu'il achetait un document plutôt qu'un dossier qui s'ouvre.
-      { n: "02", title: "Accès immédiat", body: "Votre dossier s'ouvre dès le paiement confirmé. Rien à attendre, rien à recevoir par email." },
       // « ACCÈS PERMANENT » ENGAGEAIT SANS RIEN DÉFINIR : ce qui arrive si futur•e ferme, change
       // d'infrastructure ou supprime les comptes n'était dit nulle part, et la formule contredisait
       // les CGV. La durée annoncée ici et celle des CGV doivent être la même, sinon l'acheteur lit
       // deux contrats.
-      { n: "03", title: "Consultable depuis votre compte", body: "Votre dossier se rouvre à tout moment depuis votre espace, pendant au moins trois ans. Paiement unique, sans abonnement." },
+      // FUT-114 : accès et conservation réunis en une étape, pour en garder trois après l'ajout du choix
+      // de la commune (la grille en compte trois).
+      { n: "03", title: "Accès immédiat, puis durable", body: "Votre dossier s'ouvre dès le paiement confirmé, puis se rouvre depuis votre espace pendant au moins trois ans. Paiement unique, sans abonnement." },
     ],
     faqs: [
       { q: "Ce dossier couvre-t-il aussi mon quartier et mon logement ?", a: "Non. Celui-ci couvre la commune. Le secteur autour de votre adresse et le logement demandent un dossier d'adresse, à 39 €, dont ces 14 € sont déduits : 25 € si vous l'ouvrez ensuite sur cette même commune." },
@@ -133,11 +135,6 @@ export default async function CheckoutPage({
 
   if (!product) notFound();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const checkoutPath = `/checkout/${product.slug}`;
   const theme = THEMES[product.slug];
   const copy = COPY[product.slug];
 
@@ -684,86 +681,9 @@ export default async function CheckoutPage({
                 </p>
               </div>
 
-              {/* Action */}
-              {user ? (
-                <CheckoutPaymentPanel product={product} userEmail={user.email} />
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--text-kicker)",
-                      letterSpacing: "var(--tracking-kicker)",
-                      textTransform: "uppercase",
-                      color: "var(--fg-4)",
-                      margin: 0,
-                    }}
-                  >
-                    Avant de payer
-                  </p>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 26,
-                      lineHeight: 1.2,
-                      letterSpacing: "var(--tracking-display)",
-                      margin: 0,
-                      color: "var(--fg-hi)",
-                    }}
-                  >
-                    Ouvrez d&apos;abord votre espace.
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: 14,
-                      lineHeight: "var(--lh-body)",
-                      color: "var(--fg-3)",
-                      margin: 0,
-                    }}
-                  >
-                    Le paiement doit être rattaché à un compte pour ouvrir votre dossier de territoire.
-                  </p>
-                  <Link
-                    href={`/inscription?next=${encodeURIComponent(checkoutPath)}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "16px 24px",
-                      background: theme.accent,
-                      color: "#0b0e1a",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--text-meta)",
-                      letterSpacing: "var(--tracking-kicker)",
-                      textTransform: "uppercase",
-                      fontWeight: 600,
-                      borderRadius: "var(--radius-md)",
-                      textDecoration: "none",
-                      boxShadow: "var(--shadow-card)",
-                      marginTop: 4,
-                    }}
-                  >
-                    Créer mon compte puis payer
-                  </Link>
-                  <Link
-                    href={`/connexion?next=${encodeURIComponent(checkoutPath)}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "14px 24px",
-                      border: "1px solid var(--border-2)",
-                      color: "var(--fg-2)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 14,
-                      borderRadius: "var(--radius-md)",
-                      textDecoration: "none",
-                    }}
-                  >
-                    J&apos;ai déjà un compte
-                  </Link>
-                </div>
-              )}
+              {/* Action. FUT-114 : plus de paiement sans commune (le webhook n'ouvrait alors aucun territoire).
+                  La commune se choisit ici ; son offre, sa connexion et son paiement vivent sur /debloquer. */}
+              <ChoixCommuneTerritoire accent={theme.accent} />
 
               {/* Trust row */}
               <div
