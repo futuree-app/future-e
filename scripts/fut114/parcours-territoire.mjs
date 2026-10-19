@@ -20,17 +20,28 @@ const preparer = (corps) => page.evaluate(async (c) => {
   return { status: r.status, ...(await r.json()) };
 }, corps);
 
-async function choisir(saisie, nom) {
+// Le choix se fait comme un visiteur le ferait, jamais par un événement simulé : un vrai clic de souris,
+// Entrée après les flèches, ou Espace après une tabulation (revue de la PR #67 : la sélection ne répondait
+// qu'au `mousedown`, que l'ancien banc simulait précisément).
+async function choisir(saisie, nom, mode) {
   const champ = page.getByPlaceholder("Nantes, Ajaccio, Lyon…");
   await champ.fill("");
   await champ.pressSequentially(saisie, { delay: 30 });
   const ligne = page.locator("button.cs-row", { hasText: nom }).first();
   await ligne.waitFor({ timeout: 10_000 });
-  await ligne.dispatchEvent("mousedown");
+  if (mode === "clic") return ligne.click();
+  await page.keyboard.press(mode === "entree" ? "ArrowDown" : "Tab");
+  for (let i = 0; i < 8; i += 1) {
+    const focus = await page.evaluate(() => document.activeElement?.textContent ?? "");
+    if (focus.includes(nom)) break;
+    await page.keyboard.press("ArrowDown");
+  }
+  ok((await page.evaluate(() => document.activeElement?.textContent ?? "")).includes(nom), `${mode} : « ${nom} » a le focus clavier`);
+  await page.keyboard.press(mode === "entree" ? "Enter" : "Space");
 }
 
-async function parcours(saisie, nom, insee) {
-  console.log(`\n— ${nom} (${insee})`);
+async function parcours(saisie, nom, insee, mode) {
+  console.log(`\n— ${nom} (${insee}), choix par ${mode}`);
   // 1. L'accueil, section Tarifs.
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   const cta = page.getByRole("link", { name: "Ouvrir un dossier de territoire · 14 €" });
@@ -40,7 +51,7 @@ async function parcours(saisie, nom, insee) {
   ok(await page.getByText("Quelle commune voulez-vous examiner").isVisible(), "le bouton mène au choix de la commune");
   ok(await page.locator("iframe[src*='stripe']").count() === 0, "aucun formulaire de paiement avant le choix");
   // 2. Le choix de la commune.
-  await choisir(saisie, nom);
+  await choisir(saisie, nom, mode);
   await page.waitForURL(new RegExp(`/territoire/${insee}/debloquer\\?`), { timeout: 15_000 });
   const url = new URL(page.url());
   ok(url.searchParams.get("nom") === nom && url.searchParams.get("source") === "tarifs", `offre ouverte : ${url.pathname}${url.search}`);
@@ -61,14 +72,23 @@ async function parcours(saisie, nom, insee) {
   ok(r.status === 401 && r.code === "AUTH_REQUIRED", `paiement ${insee} : garde passée, connexion demandée (${r.status} ${r.code})`);
 }
 
-await parcours("Nantes", "Nantes", "44109");
-await parcours("Ajacc", "Ajaccio", "2A004");
-await parcours("Marseille", "Marseille", "13055");
+await parcours("Nantes", "Nantes", "44109", "entree");
+await parcours("Ajacc", "Ajaccio", "2A004", "clic");
+await parcours("Marseille", "Marseille", "13055", "espace");
+
+console.log("\n— Clavier : Échap");
+await page.goto(`${BASE}/checkout/rapport-complet`, { waitUntil: "domcontentloaded" });
+await page.getByPlaceholder("Nantes, Ajaccio, Lyon…").pressSequentially("Nant", { delay: 30 });
+await page.locator("button.cs-row").first().waitFor();
+await page.keyboard.press("ArrowDown");
+await page.keyboard.press("Escape");
+ok(await page.locator("button.cs-row").count() === 0, "Échap ferme la liste");
+ok(await page.evaluate(() => document.activeElement?.tagName) === "INPUT", "Échap rend le focus au champ");
 
 console.log("\n— Refus");
 await page.goto(`${BASE}/checkout/rapport-complet`, { waitUntil: "domcontentloaded" });
 ok(page.url().endsWith("/checkout/rapport-complet"), "ancienne URL ouverte en direct : la page de choix s'affiche");
-await choisir("Fort-de-France", "Fort-de-France");
+await choisir("Fort-de-France", "Fort-de-France", "clic");
 await page.getByRole("status").waitFor({ timeout: 5_000 });
 ok((await page.getByRole("status").textContent()).includes("France métropolitaine, Corse comprise"), "commune ultramarine : message, aucune offre");
 ok(page.url().endsWith("/checkout/rapport-complet"), "commune ultramarine : on reste sur le choix");
