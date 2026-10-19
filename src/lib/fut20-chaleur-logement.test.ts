@@ -241,14 +241,16 @@ test("Nîmes, A : une seule carte réunit commune, logement, projet, limite et u
   const t = texte(html);
   // Ce que le lecteur lit, dans l'ordre : le titre qui relie, la commune, le logement, la limite, le geste.
   const attendu = [
-    "Des étés très chauds, dans un logement au confort d'été insuffisant",
+    "De fortes chaleurs projetées, et un confort d'été classé insuffisant",
     "À l'échelle de la commune",
     "Les jours au-dessus de 35 °C passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050. Les nuits tropicales, elles, passeraient de 33 à 69 par an",
     "À cette adresse",
     "Confort d'été insuffisant",
     "Le diagnostic de ce logement, daté du 18 mars 2024, classe son confort d'été comme insuffisant. Le logement n'est pas traversant et son inertie est légère. Le diagnostic ne dit pas si le logement dispose de protections solaires. Face aux fortes chaleurs projetées ici, ce classement et ces caractéristiques méritent une attention particulière.",
     "ne prédit pas la température que vous connaîtrez à l'intérieur",
-    "Demandez si le logement est protégé du soleil et aérable la nuit",
+    "Demandez si les fenêtres ont des volets ou des stores",
+    "Demandez aussi si l'on peut aérer les chambres la nuit.",
+    "L'aération de nuit ne rafraîchit que lorsque l'air extérieur est plus frais qu'à l'intérieur.",
   ];
   let pos = -1;
   for (const a of attendu) {
@@ -279,13 +281,13 @@ test("Nîmes, B1 : les caractéristiques de l'immeuble, jamais attribuées au lo
   const { d } = await dossier("nimes", { chaleur: 3, logement: "immeuble" });
   const c = carteChaleur(d)!;
   const t = texte(rendreComposition(c, []));
-  assert.match(t, /Des étés très chauds, et ce que l'on ne sait pas encore de ce logement/);
+  assert.match(t, /De fortes chaleurs projetées, et un confort d'été encore à vérifier/);
   assert.match(t, /Le diagnostic retrouvé, daté du 7 novembre 2023, a été généré à partir des données de l'immeuble : il décrit le bâtiment \(inertie lourde, VMC simple flux, isolation des murs : insuffisante, menuiseries : moyenne\), pas ce logement, et ne qualifie pas son confort d'été\./);
   assert.match(t, /Il ne dit ni si le logement est traversant, ni s'il dispose de protections solaires\./);
   // Rien du bâtiment n'est dit DU logement, et aucun indicateur n'est cité.
   assert.doesNotMatch(t, /Le logement (n'est pas|est) traversant|son inertie est|classe son confort d'été|confort d'été (bon|moyen|insuffisant)/);
-  assert.match(t, /Demandez si le logement est traversant et protégé du soleil/);
-  assert.match(t, /Demandez aussi s'il est aérable la nuit et sous les toits/);
+  assert.match(t, /Demandez si le logement est traversant/);
+  assert.match(t, /Demandez si le logement est traversant Données et limites À vérifier Un logement traversant permet de créer un courant d'air d'une façade à l'autre\. Demandez aussi si les fenêtres ont des volets ou des stores, si l'on peut aérer les chambres la nuit et si le logement est sous les toits\. L'aération de nuit ne rafraîchit que lorsque l'air extérieur est plus frais qu'à l'intérieur\./);
   assert.equal(c.logement.evidence[0].observedValue, "diagnostic établi à l'immeuble");
   assert.equal(c.logement.evidence[0].observedAt, "2023-11-07");
   // Aucun constat « Confort d'été insuffisant » n'a été émis (B1) : rien à absorber.
@@ -298,9 +300,35 @@ test("Nîmes, C : aucun confort qualifié, le manque devient une vérification p
   const t = texte(rendreComposition(carteChaleur(d)!, []));
   assert.match(t, /Aucun diagnostic rattaché à ce logement ne qualifie son confort d'été : on ne sait ni si le logement est traversant, ni s'il dispose de protections solaires\./);
   assert.match(t, /Ce qui n'est pas renseigné n'est pas absent/);
-  assert.match(t, /Demandez si le logement est traversant et protégé du soleil/);
+  assert.match(t, /Demandez si le logement est traversant/);
   assert.doesNotMatch(t, /inertie|confort d'été (bon|moyen|insuffisant)|n'est pas traversant/);
-  assert.equal(carteChaleur(d)!.logement.evidence[0].observedValue, undefined, "C : une source nommée, aucune valeur");
+});
+
+test("C : aucune preuve ADEME n'est présentée comme retrouvée (provenance et limites visibles)", async () => {
+  // Revue PR #64 : en C, la carte citait « Source : Base DPE (ADEME) » (persisted_snapshot) sans aucun
+  // diagnostic rattaché. Les trois cartes chaleur et la condition sont vérifiées sur leur rendu.
+  const cas: [string, Opts][] = [
+    ["écart déclaré", { chaleur: 3 }], ["constat non demandé", { chaleur: 0 }],
+    ["compromis", { chaleur: 3, douceur: true }], ["condition", { chaleur: 3, confirme: true }],
+  ];
+  for (const [nom, o] of cas) {
+    const { d, run } = await dossier("nimes", { ...o, logement: "sans-dpe" });
+    const c = carteChaleur(d);
+    const cond = run.facts.find((f: M) => f.id === "30189:condition:faible_chaleur");
+    const cote = c ? (c.logement ?? c.items[1]) : cond.logement;
+    assert.deepEqual(cote.evidence, [], `${nom} : aucune preuve DPE`);
+    const t = c ? texte(rendreComposition(c, [])) : texte(rendreFait(cond));
+    assert.doesNotMatch(t, /Base DPE|ADEME|daté du|confort d'été (bon|moyen|insuffisant)/, nom);
+    assert.match(t, /Aucun diagnostic n'étant rattaché à ce logement, futur•e ne qualifie pas son confort d'été\./, nom);
+    // Le dossier ne se fonde sur aucune preuve DPE fabriquée.
+    assert.ok(!d.conclusionBasis.evidence.some((e: M) => e.factId === "logement.confort-ete"), nom);
+  }
+  // A et B1 gardent leur preuve datée, rattachée à un diagnostic précis.
+  for (const [cas2, valeur, date] of [["temoin", "confort d'été insuffisant", "2024-03-18"], ["immeuble", "diagnostic établi à l'immeuble", "2023-11-07"]] as const) {
+    const e = carteChaleur((await dossier("nimes", { chaleur: 3, logement: cas2 })).d)!.logement.evidence;
+    assert.equal(e.length, 1);
+    assert.deepEqual([e[0].label, e[0].observedValue, e[0].observedAt, e[0].sourceMode, e[0].grain], ["Base DPE (ADEME)", valeur, date, "persisted_snapshot", "adresse"]);
+  }
 });
 
 test("Nîmes, A « bon » : le logement ne corrige jamais la commune", async () => {
@@ -310,7 +338,7 @@ test("Nîmes, A « bon » : le logement ne corrige jamais la commune", async () 
   const t = texte(rendreComposition(c, []));
   assert.match(t, /classe son confort d'été comme bon\. Le logement est traversant, son inertie est lourde et des protections solaires sont renseignées\./);
   assert.match(t, /Ce classement ne change rien à l'exposition de la commune aux fortes chaleurs\./);
-  assert.match(t, /Demandez si le logement est aérable la nuit/);
+  assert.match(t, /De fortes chaleurs projetées, et ce qu'en dit le diagnostic.*Demandez si l'on peut aérer les chambres la nuit/);
   assert.doesNotMatch(t, INTERDIT_VECU);
 });
 
@@ -334,7 +362,7 @@ test("Compromis hivers doux / étés chauds : le logement porte le seul geste, s
   const c = carteChaleur(d)!;
   assert.equal(c.patternId, "seasonal_climate_tradeoff");
   assert.equal(c.unfavorableSide.action, undefined, "le côté défavorable ne porte plus de geste");
-  assert.equal(c.logement.action.label, "Demandez si le logement est protégé du soleil et aérable la nuit");
+  assert.equal(c.logement.action.label, "Demandez si les fenêtres ont des volets ou des stores");
   assert.ok(c.absorbedFactIds.includes("logement:confort-ete"));
   assert.ok(!idsVisibles(d).includes("logement:confort-ete"));
   const t = texte(rendreComposition(c, []));
@@ -381,11 +409,11 @@ test("Condition confirmée (D4) : la carte condition porte le logement et le ges
   const cond = run.facts.find((f: M) => f.id === "30189:condition:faible_chaleur");
   assert.equal(cond.signal, "defavorable", "le logement ne pèse pas sur le signal (FUT-110)");
   assert.ok(cond.logement);
-  assert.equal(cond.action.label, "Demandez si le logement est protégé du soleil et aérable la nuit");
+  assert.equal(cond.action.label, "Demandez si les fenêtres ont des volets ou des stores");
   assert.ok(!idsVisibles(d).includes("logement:confort-ete"), "le constat logement est réuni, pas répété");
   const t = texte(rendreFait(cond));
   assert.match(t, /À cette adresse.*Confort d'été insuffisant.*daté du 18 mars 2024/);
-  assert.equal((t.match(/Demandez si le logement est protégé du soleil/g) ?? []).length, 1, "un seul geste");
+  assert.equal((t.match(/Demandez si les fenêtres ont des volets/g) ?? []).length, 1, "un seul geste");
   // Le constat de la carte est celui d'avant : seul le côté logement s'ajoute.
   const avant = (await dossier("nimes", { chaleur: 3, confirme: true, avant: true })).run.facts.find((f: M) => f.id === "30189:condition:faible_chaleur");
   for (const k of ["statement", "signal", "status", "whyNotDecided", "consequence", "materialityTier"]) assert.deepEqual(cond[k], avant[k], k);
@@ -564,6 +592,11 @@ test("Artefact engine-5 d'avant FUT-20 : relu et rendu exactement comme avant", 
   assert.equal(texte(rendreComposition(c, [])), RENDU_MAIN_CONFORT_ETE);
   const { d: dt } = await dossier("nimes", { chaleur: 3, douceur: true, avant: true });
   assert.equal(texte(rendreComposition(carteChaleur(dt)!, [])), RENDU_MAIN_COMPROMIS);
+  // La carte condition d'avant FUT-20 (sans côté logement) : le rendu de main, à l'identique.
+  const { run: rc } = await dossier("nimes", { chaleur: 3, confirme: true, avant: true });
+  const cond = rc.facts.find((f: M) => f.id === "30189:condition:faible_chaleur");
+  assert.equal(cond.logement, undefined);
+  assert.equal(texte(rendreFait(cond)), RENDU_MAIN_CONDITION);
 });
 
 test("Relevé (lecture-dossier) : la carte expose les deux échelles, ses preuves datées et un seul geste", async () => {
@@ -575,7 +608,7 @@ test("Relevé (lecture-dossier) : la carte expose les deux échelles, ses preuve
   assert.equal(e.cotes.length, 1);
   assert.equal(e.cotes[0].libelle, "À cette adresse");
   assert.equal(e.cotes[0].geste, undefined, "le côté ne porte pas de second geste");
-  assert.equal(e.geste.libelle, "Demandez si le logement est protégé du soleil et aérable la nuit");
+  assert.equal(e.geste.libelle, "Demandez si les fenêtres ont des volets ou des stores");
   assert.equal(e.cotes[0].preuves[0].date, "2024-03-18");
 });
 
@@ -594,6 +627,7 @@ test("La conclusion de l'artefact suit ce qui est affiché (FUT-20 ne compte pas
 // Le rendu de main 8d02e190 (FactCompositionCard d'avant FUT-20), relevé le 16/10/2026 sur ces mêmes
 // compositions : il épingle la rétrocompatibilité des artefacts engine-5 déjà vendus.
 const RENDU_MAIN_CONFORT_ETE = "Des étés plus difficiles à concilier avec votre projet Les jours au-dessus de 35 °C passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050. Les nuits tropicales, elles, passeraient de 33 à 69 par an : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer. Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement. Preuve · 14 jours à l'horizon 2050 Preuve · 69 nuits à l'horizon 2050 Regardez comment le logement tient l'été Données et limites À vérifier L'orientation, l'étage, l'épaisseur des murs, les protections solaires et la possibilité d'ouvrir la nuit pèsent sur l'inconfort ressenti.";
+const RENDU_MAIN_CONDITION = "des étés plus frais Ouverte · plutôt défavorable Les jours au-dessus de 35 °C passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050. Les nuits tropicales, elles, passeraient de 33 à 69 par an : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer. Preuve · 14 jours à l'horizon 2050 Preuve · 69 nuits à l'horizon 2050";
 const RENDU_MAIN_COMPROMIS = "Des hivers doux, avec une exposition estivale à arbitrer Ce qui correspond Les températures moyennes d'hiver figurent parmi les plus douces à l'échelle nationale. Preuve · parmi les 20 % de communes aux hivers les plus doux (référence 1976-2005) Ce qui appelle un arbitrage Les jours au-dessus de 35 °C passeraient de 3 par an sur la période de référence 1976-2005 à 14 à l'horizon 2050. Les nuits tropicales, elles, passeraient de 33 à 69 par an : des nuits où la température ne redescend pas sous 20 °C, et où le corps peine à récupérer. Cette trajectoire est lue à l'échelle de la commune, pas de l'adresse ni du logement. Preuve · 14 jours à l'horizon 2050 Preuve · 69 nuits à l'horizon 2050 Regardez comment le logement tient l'été Données et limites À vérifier L'orientation, l'étage, l'épaisseur des murs, les protections solaires et la possibilité d'ouvrir la nuit pèsent sur l'inconfort ressenti.";
 
 // ══════════════════════════════ 6. LE CONTRAT DU FAIT LOGEMENT ═════════════════════════════════

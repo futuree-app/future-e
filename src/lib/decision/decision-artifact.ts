@@ -46,6 +46,13 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // à vérifier. Un médecin à 550 m, une gare, un secteur moins motorisé n'orientent plus le signal ; seules les
 // expositions établies (inondation, pluies, air, bruit, industrie) le font. Un dossier engine-4 a pu dire
 // « plutôt défavorable » sur une commune parmi les plus favorables : il reste tel qu'il a été vendu.
+// PAS D'INCRÉMENT POUR FUT-20 (19/10/2026), et c'est délibéré. FUT-20 réunit la carte chaleur et la carte
+// « Confort d'été insuffisant » en une seule, avec un geste ciblé : il change la PRÉSENTATION (cartes, gestes,
+// compte des contrôles affichés, et donc le plan narratif), pas ce que le moteur CONCLUT. Verdict, orientation,
+// registre des critères et écarts sont identiques avant et après (matrice de `fut20-chaleur-logement.test.ts`),
+// et le comparatif ne rapproche que les registres. Un artefact figé avant FUT-20 garde ses cartes et son plan, et
+// se rend à l'identique : le côté `logement` est optionnel, absent de ces artefacts. Si une évolution future
+// devait changer un verdict ou un registre à partir du logement, elle exigerait, elle, `engine-6`.
 export const ENGINE_VERSION = "engine-5";
 
 export type DecisionArtifactV1 = {
