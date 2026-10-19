@@ -2,8 +2,8 @@
 // FUT-50 · VERSION C · LE HERO DE L'ACCUEIL, EN TROIS ÉTATS. Monté par `/` (lectures par `/api/accueil/*`) et par
 // le prototype `/dev/fut50/c` (mêmes lectures, par les routes de développement, branchées sur le même service).
 //
-//   A · vierge     le titre, une promesse courte, un champ de COMMUNE, quelques communes à essayer, et une porte
-//                  séparée pour une adresse précise. Aucun résultat, aucun exemple.
+//   A · vierge     le titre, une promesse courte, un champ de COMMUNE, et deux portes distinctes :
+//                  recherche selon le Projet ou analyse d'adresse. Aucun résultat ni commune préremplie.
 //   B · commune    la commune confirmée (une coche se trace), les priorités facultatives, une invitation.
 //                  Toujours aucun résultat : rien d'une autre commune, aucun panneau vide.
 //   C · priorité   UNE lecture de la commune choisie : le fait (source, horizon, grain), ce qu'il implique pour
@@ -43,13 +43,6 @@ function versSuggestion(f: FeatureBan): Suggestion | null {
   if (!p.citycode || !nom) return null;
   return { id: p.id ?? p.citycode, type: "commune", libelle: nom, commune: nom, insee: p.citycode, contexte: [p.postcode, p.context].filter(Boolean).join(" · ") };
 }
-
-// Des communes réelles, aux lectures contrastées, pour qui ne sait pas quoi chercher.
-const EXEMPLES: Lieu[] = [
-  { type: "commune", libelle: "Nantes", commune: "Nantes", insee: "44109" },
-  { type: "commune", libelle: "Annecy", commune: "Annecy", insee: "74010" },
-  { type: "commune", libelle: "Guéret", commune: "Guéret", insee: "23096" },
-];
 
 const TEINTE: Record<Signal, string> = {
   defavorable: TEINTE_REGISTRE.mismatches!,
@@ -324,17 +317,6 @@ export function HeroLieu({ composition = "recommandee", api = "/api/accueil" }: 
           ) : null}
           {erreurRecherche ? <p className={c.aide} role="alert">{erreurRecherche}</p> : null}
           {aidePlm ? <p className={c.aide} role="status">{aidePlm}</p> : null}
-          {etat === "vierge" ? (
-            <p className={c.exemples}>
-              Par exemple{" "}
-              {EXEMPLES.map((e, i) => (
-                <span key={e.insee}>
-                  <button type="button" className={c.lienTexte} onClick={() => choisir(e)}>{e.commune}</button>
-                  {i < EXEMPLES.length - 1 ? <span aria-hidden> · </span> : null}
-                </span>
-              ))}
-            </p>
-          ) : null}
         </div>
 
         {lieu ? (
