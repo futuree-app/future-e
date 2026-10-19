@@ -62,7 +62,9 @@
   .ouvertureFraiche .lectureEntete, .ouvertureFraiche .lectureContenu > * { animation: none; }
 }
 .priorites { display: grid; gap: 12px; }
-.porteAdresse { margin: 4px 0 0; padding-top: 18px; border-top: 1px solid var(--r-filet); font-size: 16px; color: var(--r-discret); }
+/* Les deux autres départs (FUT-113) : le Projet et l'adresse, sous un même filet. */
+.portes { display: grid; gap: 10px; margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--r-filet); }
+.porte { margin: 0; font-size: 16px; color: var(--r-discret); }
 .titre {
   font-variation-settings: "wdth" 116;
   font-weight: 500;

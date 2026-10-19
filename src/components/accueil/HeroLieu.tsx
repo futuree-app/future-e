@@ -19,6 +19,7 @@
 // `urlRechercheCommunes`, 250 ms, annulation, aide Paris / Lyon / Marseille). Aucune génération IA, aucun
 // Projet enregistré.
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { urlRechercheCommunes } from "@/lib/geocodeur-ban";
 import { estCodeOutremer } from "@/lib/outremer/code-outremer";
@@ -61,6 +62,16 @@ const TEINTE: Record<Signal, string> = {
 };
 
 type EtatLecture = LecturePastille | "chargement" | "erreur" | "inconnue";
+
+// FUT-113 : deux événements, rien d'autre. Ce qu'on choisit parmi les quatre sujets, et qui prend la porte du
+// Projet (et depuis quel état). La mesure n'est jamais bloquante.
+function mesurer(evenement: "accueil_sujet_choisi" | "accueil_porte_projet_clicked", props: Record<string, string>) {
+  try {
+    posthog.capture(evenement, props);
+  } catch {
+    /* posthog non prêt : la mesure n'est pas critique */
+  }
+}
 
 /**
  * `api` : la base des deux lectures (`/commune`, `/lecture`). L'accueil public lit `/api/accueil` ; le prototype, ses
@@ -224,6 +235,7 @@ export function HeroLieu({ composition = "recommandee", api = "/api/accueil" }: 
     }
     setChoisies([...choisies, cle]);
     setFocale(cle);
+    mesurer("accueil_sujet_choisi", { cle });
     if (lieu && !lectures[`${lieu.insee}|${cle}`]) charger(lieu, cle);
     // Écran étroit : la lecture s'affiche sous les priorités ; on l'amène en vue si besoin. En mouvement réduit, le
     // déplacement est INSTANTANÉ, pas supprimé : sans lui, à 390 px, la lecture naissait hors de l'écran (mesuré le
@@ -335,7 +347,10 @@ export function HeroLieu({ composition = "recommandee", api = "/api/accueil" }: 
 
         {lieu ? (
           <div className={c.priorites} key={`priorites-${lieu.insee}`}>
-            <p className={c.question} id="question-priorites">Qu&apos;est-ce qui compte pour vous ?</p>
+            {/* FUT-113 : le titre dit ce que sont les pastilles, un premier aperçu. « Qu'est-ce qui compte pour vous ? »
+                appartient au Projet (`/ou-vivre`, checkout du dossier) : posée ici, la question semblait n'avoir que
+                quatre réponses. Aucune aide dessous : les boutons disent eux-mêmes qu'il faut en choisir un. */}
+            <p className={c.question} id="question-priorites">Quatre sujets pour un premier aperçu</p>
             <ul className={c.pastilles} aria-labelledby="question-priorites">
               {pastilles.map((p, i) => (
                 <li key={p.cle} className={c.pastilleEntree} style={{ animationDelay: `${i * 40}ms` } as CSSProperties}>
@@ -346,18 +361,29 @@ export function HeroLieu({ composition = "recommandee", api = "/api/accueil" }: 
                 </li>
               ))}
             </ul>
-            {/* L'invitation ne sert qu'avant le premier choix ; ensuite, la lecture parle d'elle-même. */}
-            {etat === "commune" ? <p className={c.aide}>Choisissez-en une : la lecture s&apos;affiche aussitôt. Rien n&apos;est enregistré.</p> : null}
           </div>
         ) : null}
 
-        {/* LA PORTE DE L'ADRESSE : séparée, discrète, là tant qu'elle mène quelque part. Une adresse précise relève du
-            dossier payant ; son parcours explique le périmètre et le prix. Pour une commune d'outre-mer, aucun dossier
-            n'est encore proposé (V1 : Hexagone et Corse) : la porte se retire plutôt que d'y inviter. */}
+        {/* LES DEUX AUTRES DÉPARTS (FUT-113), sous un même filet, de même poids, à tous les états :
+              · le PROJET : `/ou-vivre` cherche des COMMUNES à partir d'un projet écrit. Il ne relit pas la commune
+                choisie ici et n'enregistre rien : le libellé du lien le dit (revue du 15/10), l'amorce seule change
+                avec l'état (sans commune : « pas encore de commune en tête » ; avec : « autre chose compte »).
+              · l'ADRESSE : le dossier payant, dont le parcours explique le périmètre et le prix.
+            Pour une commune d'outre-mer, les deux se retirent : aucun dossier n'y est proposé (V1 : Hexagone et Corse),
+            et la recherche ne parcourt que l'Hexagone et la Corse, quand l'amorce laisserait croire qu'elle cherche
+            autour de cette commune. Sans commune choisie, la recherche reste offerte. */}
         {lieu && estCodeOutremer(lieu.insee) ? null : (
-          <p className={c.porteAdresse}>
-            Vous avez déjà une adresse précise ? <Link href="/dossier" className={c.lienFleche}>Examiner cette adresse</Link>
-          </p>
+          <div className={c.portes}>
+            <p className={c.porte}>
+              {lieu ? "Autre chose compte pour vous ? " : "Pas encore de commune en tête ? "}
+              <Link href="/ou-vivre" className={c.lienFleche} onClick={() => mesurer("accueil_porte_projet_clicked", { etat })}>
+                Chercher des communes selon mon{" "}projet
+              </Link>
+            </p>
+            <p className={c.porte}>
+              Vous avez déjà une adresse précise ? <Link href="/dossier" className={c.lienFleche}>Examiner cette{" "}adresse</Link>
+            </p>
+          </div>
         )}
       </div>
 
@@ -498,8 +524,13 @@ function Lecture({ lecture, onglets }: {
             ? <p className={c.tempsTexteDoux}>{fr(lecture.suite.horsOffre)}</p>
             : <Link href={lecture.suite.href} className={c.boutonMarque}>{lecture.suite.libelle} <span aria-hidden>→</span></Link>}
           {/* La destination fait ce que le libellé annonce : `/ou-vivre` cherche des COMMUNES à partir d'un projet
-              écrit ; il ne poursuit pas la lecture de celle-ci (revue du 15/10). */}
-          <Link href="/ou-vivre" className={c.lienFleche}>Chercher des communes selon mon projet</Link>
+              écrit ; il ne poursuit pas la lecture de celle-ci (revue du 15/10). Hors offre (outre-mer), la recherche
+              ne couvrirait pas ce lieu : le lien se retire avec les portes (FUT-113). */}
+          {"horsOffre" in lecture.suite ? null : (
+            <Link href="/ou-vivre" className={c.lienFleche} onClick={() => mesurer("accueil_porte_projet_clicked", { etat: "fin_de_lecture" })}>
+              Chercher des communes selon mon{" "}projet
+            </Link>
+          )}
         </div>
       </div>
     </article>
