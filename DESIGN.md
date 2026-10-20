@@ -240,8 +240,8 @@ Toute valeur numérique est en chiffres tabulaires (`font-variant-numeric: tabul
 comparables s'alignent verticalement sur leur unité. Un libellé peut wrapper ; une valeur ne wrappe
 jamais (`white-space: nowrap`).
 
-**Deux tailles, deux dessins (v3.0).** Une valeur **mise en avant** (`Chiffre`) est en Archivo élargie
-(`wdth` 125, `--r-t-chiffre`), à l'encre, suivie de son unité en mono discret ; elle est toujours
+**Deux tailles, deux dessins (v3.0).** Une valeur **mise en avant** (`Chiffre`) est en Archivo 500,
+chiffres tabulaires (`--r-t-chiffre`), à l'encre, suivie de son unité en mono discret ; elle est toujours
 accompagnée de sa référence ou de son horizon dans la ligne suivante. Une valeur **dans la marge, un
 tableau ou une unité** est en `--font-mono`.
 
@@ -487,7 +487,7 @@ les cartes, est tranchée à la migration des modules (lots R3 à R5).
 
 ### 6.3 Le badge, la pastille et le surtitre (remplacé, v3.0)
 
-**Le surtitre** nomme un mouvement de la page : Archivo `wdth` 88, 600, `--r-t-surtitre`, **casse
+**Le surtitre** nomme un mouvement de la page : Archivo 600, `--r-t-surtitre`, **casse
 normale**, précédé d'un numéro citable en mono (`Surtitre`). **Le mono n'est jamais en capitales
 espacées.** Les surtitres à pastille colorée sortent du canon.
 
@@ -747,28 +747,34 @@ gris (`--fg-hi` à `--fg-4`) et les teintes de registre portent une part de la h
 dessin ne porte plus. Un titre en `--fg-hi`, un corps en `--fg-2`, une source en `--ghost` créent
 trois plans lisibles avant même que la graisse intervienne.
 
+**Archivo en largeur normale (v3.0, correctif du 20/10).** La référence typographique est Archivo telle
+que l'accueil l'affiche : **en largeur normale**. Le fichier servi (`/fonts/Archivo-Variable.woff2`) n'a
+qu'un axe de graisse ; les réglages `wdth` qu'avait posés FUT-87 étaient ignorés par le navigateur et ont
+été retirés. La hiérarchie tient à la taille, à la graisse, à l'encre et aux espacements. Aucun
+`font-variation-settings` de largeur n'est écrit (test K6) : un élargissement demanderait de servir une
+autre police **et** d'amender ce document.
+
 **L'échelle de rôles du Relevé (v3.0).** Une taille par **usage**, jamais par niveau de titre HTML.
 Les jetons `--r-t-*` vivent dans `design-tokens.css` ; les classes qui les composent (graisse, axe de
 largeur, interligne, couleur) dans `releve.module.css`. **Tout nouvel écran les emploie.**
 
 | Rôle | Jeton | Réglage | Ce que le texte fait |
 | --- | --- | --- | --- |
-| Display | `--r-t-display` | Archivo `wdth` 118, 500, `clamp(34px, 4.4vw, 58px)`, −0,02 em | titre d'écran ; un par écran |
+| Display | `--r-t-display` | Archivo 500, `clamp(34px, 4.4vw, 58px)`, −0,02 em | titre d'écran ; un par écran |
 | Verdict | `--r-t-verdict` | idem, `clamp(27px, 3.6vw, 46px)` | le verdict dans la plaque |
-| Titre | `--r-t-titre` | `wdth` 108, 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement |
+| Titre | `--r-t-titre` | 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement |
 | Sous-titre | `--r-t-sous-titre` | 600, 17 px | sujet d'un fait, nom d'une possibilité |
 | Chapô | `--r-t-chapo` | 400, 18 px / 1,55 | introduction d'un écran |
 | Corps | `--r-t-corps` | 400, 16 px / 1,62 | prose suivie |
 | Dense | `--r-t-dense` | 400, 14,5 px / 1,58 | corps d'un fait, d'une liste, d'un tableau |
 | Nuance | `--r-t-nuance` | 400, 13,5 px, `--r-discret` | limite, portée, méthode |
-| Surtitre | `--r-t-surtitre` + `--r-t-numero` | `wdth` 88, 600, 13,5 px, casse normale ; numéro mono 11,5 px | nomme un mouvement |
-| Étiquette | `--r-t-etiquette` | `wdth` 88, 600, 12,5 px | libellé, statut, en-tête de tableau |
-| Chiffre | `--r-t-chiffre` + `--r-t-unite` | `wdth` 125, 500, tabulaire ; unité mono 13 px | une valeur mise en avant |
+| Surtitre | `--r-t-surtitre` + `--r-t-numero` | 600, 13,5 px, casse normale ; numéro mono 11,5 px | nomme un mouvement |
+| Étiquette | `--r-t-etiquette` | 600, 12,5 px | libellé, statut, en-tête de tableau |
+| Chiffre | `--r-t-chiffre` + `--r-t-unite` | 500, tabulaire ; unité mono 13 px | une valeur mise en avant |
 | Marge | `--r-t-marge` / `--r-t-marge-etroite` | JetBrains Mono 12 px, 13 px sous 900 px | grain, preuve, source, date |
 
 **Planchers de lisibilité** (mobile et écrans non-Retina, FUT-77) : rien sous 10,5 px, et 10,5 px
-seulement pour une légende d'axe ; jamais de graisse 400 sous 13 px sur fond sombre ; jamais de `wdth`
-inférieur à 88 sous 13 px ; `--ghost` (4,69:1 sur la plaque) jamais sous 12 px.
+seulement pour une légende d'axe ; jamais de graisse 400 sous 13 px sur fond sombre ; `--ghost` (4,69:1 sur la plaque) jamais sous 12 px.
 
 **L'échelle historique `--text-*`** ci-dessous reste en place pour les surfaces qui ne sont pas encore
 migrées : la modifier changerait leur rendu. Elle ne s'emploie dans aucun nouvel écran, et disparaît
@@ -850,11 +856,20 @@ survivent à un changement de technologie, celles-ci non.
   code légitime en capitales ; oublis : capitales posées par `text-transform`, `backdrop-blur`, rayons,
   couleurs en dur, halos, animations). Un passage au vert ne vaut pas conformité.
   - **Exception légitime** : une entrée dans `heritage-exceptions.json` (fichier, marqueur, nombre,
-    motif d'au moins une phrase), relue en revue ; K1b vérifie le motif et retire d'office une
-    exception devenue inutile. Aucune exception dans le Relevé lui-même.
+    motif d'au moins une phrase), relue en revue. K1b vérifie le motif et **détecte** une exception
+    devenue inutile : le test échoue tant qu'on ne l'a pas retirée à la main. Aucune exception dans le
+    Relevé lui-même.
   - **La référence** (`heritage-reference.json`) ne se modifie jamais à la main. Elle se régénère après
-    un lot qui retire des marqueurs (`node scripts/fut118/heritage-reference.ts`, qui refuse toute
-    hausse), et son total est plafonné dans le test (603 au lot R0), plafond qui ne fait que baisser.
+    un lot qui retire des marqueurs (`node scripts/fut118/heritage-reference.ts`), et son total est
+    plafonné dans le test (603 au lot R0).
+  - **Ce qui est garanti automatiquement, et ce qui repose sur la revue.** Automatique : aucun fichier ne
+    dépasse sa référence (plus ses exceptions) ; aucun fichier nouveau n'a de marqueur ; le total de la
+    référence ne dépasse pas le plafond ; le script de régénération refuse toute hausse par fichier ; une
+    exception sans motif ou inutile fait échouer le test. **Revue GitHub** : une modification manuelle
+    de `heritage-reference.json` qui resterait sous le plafond (par exemple une référence descendue à 580
+    puis remontée à 600) n'est pas détectée par les tests ; abaisser le plafond après un lot de
+    migration est un geste manuel ; la légitimité d'une exception se juge en revue. Toute modification de
+    ces deux fichiers JSON et du plafond se relit donc explicitement dans la PR.
 - **Contrastes.** K4 vérifie que les jetons de texte et le texte sur la couleur de marque tiennent
   4,5:1 sur le fond et la plaque, dans les deux thèmes.
 - **Preuve d'absence de changement visible.** Un lot qui ne doit rien changer à l'écran le prouve par
@@ -899,7 +914,7 @@ PR R0, après relecture du porteur) :
 | --- | --- |
 | en-tête, § 0 · le Relevé canon, `kit.tsx` déprécié, statut stable / hypothèse | Trois sources se contredisaient (`DESIGN.md` v2.1, `kit.tsx` « source unique », primitives annoncées « prototype » mais employées en production) ; une interface nouvelle ne savait laquelle suivre |
 | § 1, § 2.1 à 2.3 · grille à marge, plaque, séparation sans verre | La preuve à côté de ce qu'elle prouve ; une surface élevée par mouvement, une seule forme de surface |
-| § 3.1, § 3.2 · source en marge, chiffre mis en avant en Archivo élargie | Le Relevé appliqué dans Ma décision (FUT-91) et l'accueil (FUT-50) |
+| § 3.1, § 3.2 · source en marge, chiffre mis en avant en Archivo 500 tabulaire | Le Relevé appliqué dans Ma décision (FUT-91) et l'accueil (FUT-50) |
 | § 3.3 · le tracé suit la nature de la donnée | Horizons et paliers jamais reliés (FUT-87 V2) ; une série continue réelle peut être une courbe, avec son incertitude (revue du 20/10 : ne pas interdire une représentation utile) |
 | § 5.1, § 5.3, § 5.4, § 5.5 · verre retiré, donnée à l'encre, incident sans registre, trait de registre, verdict dans la plaque, texte sur la marque | `.boutonMarque` tombait à 2,57:1 en thème clair ; `--r-sur-marque` tient dans les deux thèmes |
 | § 6.1 à 6.3 · la ligne de relevé, les dix rôles documentaires, le surtitre en casse normale | Remplacent la carte de verre, le filet de carte et la pastille |
@@ -910,6 +925,7 @@ PR R0, après relecture du porteur) :
 | § 10 · une seule source de jetons, cliquet, contrastes, preuve d'absence de changement | Empêcher de recréer une seconde grammaire pendant la migration par lots |
 | § 13, § 14 · centre de décision (principes et hypothèses), limites connues, validations obligatoires | Revue du 20/10 : ne pas figer la comparaison ; documenter les limites mobiles visibles ; R0 n'est pas une validation de l'interface |
 | § 10 · trois niveaux de composants (primitives, métier, parcours) ; le cliquet comme garde-fou, ses limites, ses exceptions motivées, son plafond | Revue de R0 : une seule grammaire ne veut pas dire un seul répertoire ; un test approximatif ne doit ni juger l'esthétique ni se desserrer en silence |
+| § 3.2, § 6.3, § 9.1 · **Archivo en largeur normale** ; les réglages `wdth` et les jetons de largeur retirés (erratum à FUT-87) | Le fichier servi n'a pas d'axe de largeur : un même texte mesure la même largeur à `wdth` 62, 100 et 125. Les réglages étaient ignorés, et le produit validé à l'écran a toujours été en largeur normale. Choix du porteur : garder ce rendu |
 | § 0, § 15 · le mouvement : FUT-75 seule source, trois niveaux, écarts constatés | Revue de R0 : le Relevé définit le langage visuel, FUT-75 le comportement dans le temps ; la première version de la grammaire esquissait une seconde classification (« quatre sens »), retirée |
 
 **v2.1, 04/08/2026** (intégration de la charte de marque v1.7) :

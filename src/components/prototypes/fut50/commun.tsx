@@ -109,7 +109,7 @@ export function DescenteEchelles({ titre, intro, avecDecision = true, numerote =
   return (
     <section className={f.echelles} aria-labelledby="echelles-titre">
       <div className={f.demoEntete}>
-        <h2 id="echelles-titre" style={{ fontVariationSettings: '"wdth" 108', fontWeight: 600, fontSize: "clamp(25px, 2.6vw, 34px)", lineHeight: 1.15, color: "var(--r-encre)", margin: 0 }}>{titre}</h2>
+        <h2 id="echelles-titre" style={{ fontWeight: 600, fontSize: "clamp(25px, 2.6vw, 34px)", lineHeight: 1.15, color: "var(--r-encre)", margin: 0 }}>{titre}</h2>
         <div style={{ fontSize: 17, lineHeight: 1.6, color: "var(--r-texte)" }}>{intro}</div>
       </div>
       <ol className={f.echelleListe}>

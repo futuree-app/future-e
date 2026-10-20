@@ -42,7 +42,7 @@
    puis le reste), sans défilement horizontal. */
 .tableau { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .tableau caption { text-align: left; padding-bottom: 12px; }
-.tableau th { text-align: left; font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 12.5px; color: var(--r-discret); padding: 0 12px 10px 0; border-bottom: 1px solid var(--r-filet-fort); }
+.tableau th { text-align: left; font-weight: 600; font-size: 12.5px; color: var(--r-discret); padding: 0 12px 10px 0; border-bottom: 1px solid var(--r-filet-fort); }
 .tableau td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--r-filet); vertical-align: top; color: var(--r-texte); }
 .tableau .nombre { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--r-encre); white-space: nowrap; }
 .tableau th.nombre { font-family: inherit; }
@@ -75,7 +75,7 @@
    Un vrai champ, grand, à filet, rayon documentaire. L'accueil en a un (`accueil.module.css`),
    la qualification d'adresse en a un autre (arrondi 10 px) : un seul doit rester. */
 .champ { display: grid; gap: 8px; }
-.champLibelle { font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 13.5px; color: var(--r-texte); }
+.champLibelle { font-weight: 600; font-size: 13.5px; color: var(--r-texte); }
 .champSaisie {
   width: 100%;
   min-height: 52px;

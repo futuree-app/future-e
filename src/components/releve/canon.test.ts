@@ -17,8 +17,9 @@ type Exception = { fichier: string; marqueur: string; nombre: number; motif: str
 const EXCEPTIONS: Exception[] = JSON.parse(readFileSync("src/components/releve/heritage-exceptions.json", "utf8"));
 const JETONS = readFileSync("src/app/design-tokens.css", "utf8");
 
-// LE PLAFOND DE LA RÉFÉRENCE (603 marqueurs au lot R0, 20/10/2026). Il ne fait que baisser : on le
-// rabaisse après un lot de migration qui en retire. L'augmenter demanderait de modifier deux fichiers à
+// LE PLAFOND DE LA RÉFÉRENCE (603 marqueurs au lot R0, 20/10/2026). On le rabaisse, à la main, après un
+// lot de migration qui en retire. Il BORNE le total ; il ne garantit pas qu'il baisse : une remontée
+// manuelle de la référence sous le plafond ne se voit qu'en revue (DESIGN.md § 10). L'augmenter demanderait de modifier deux fichiers à
 // la main, ce qu'une revue doit refuser : la dette visuelle ne grossit pas en silence.
 const PLAFOND_REFERENCE = 603;
 
@@ -122,6 +123,25 @@ test("K4. les jetons de texte du Relevé tiennent 4,5:1 sur le fond et la plaque
     if (c < 4.5) echecs.push(`${nom} · --r-sur-marque sur --orange : ${c.toFixed(2)}`);
   }
   assert.deepEqual(echecs, []);
+});
+
+test("K6. Archivo en largeur normale : aucun réglage de l'axe wdth, que la police servie n'a pas", () => {
+  // Le fichier servi (`public/fonts/Archivo-Variable.woff2`) n'a qu'un axe de graisse : un réglage `wdth`
+  // y est ignoré, et le jour où une autre police serait servie, il élargirait le texte sans décision.
+  const fautifs: string[] = [];
+  const parcourir = (d: string) => {
+    for (const n of readdirSync(d)) {
+      const p = join(d, n);
+      if (statSync(p).isDirectory()) parcourir(p);
+      else if (/\.(tsx?|css)$/.test(p) && !/\.test\.tsx?$/.test(p)) {
+        const t = readFileSync(p, "utf8");
+        if (/font-variation-settings\s*:[^;]*wdth|fontVariationSettings\s*:[^,}]*wdth|font-stretch\s*:\s*(?!normal)/.test(t)) fautifs.push(p);
+      }
+    }
+  };
+  parcourir("src");
+  assert.deepEqual(fautifs, []);
+  assert.doesNotMatch(JETONS, /--r-(large|titre|semi|chiffre)\s*:/, "jetons de largeur retirés");
 });
 
 test("K5. les primitives se déclarent canon ; le kit historique se déclare déprécié", () => {

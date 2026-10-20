@@ -36,7 +36,10 @@ et que deux domaines au moins en ont besoin.
   espacées, titre à suite en italique d'accent, emoji, couleur propre à une échelle ou à un module.
   Le test-cliquet `src/components/releve/canon.test.ts` (K1) échoue si un fichier en gagne. C'est un
   garde-fou approximatif, pas un juge esthétique : un faux positif se déclare dans
-  `heritage-exceptions.json`, avec son motif ; la référence ne se modifie jamais à la main.
+  `heritage-exceptions.json`, avec son motif ; la référence ne se modifie jamais à la main (une
+  remontée sous le plafond n'est pas détectée par les tests : elle se refuse en revue).
+- **Typographie** : Archivo en largeur normale. Aucun réglage `wdth` (la police servie n'a pas cet axe ;
+  test K6).
 - Les règles marquées **hypothèse** dans `DESIGN.md` (notamment la forme de la comparaison, § 13) se
   suivent par défaut et s'écartent en le justifiant ; les règles **stables** s'appliquent.
 - Un lot censé ne rien changer à l'écran le prouve : `scripts/fut118/empreinte-visuelle.mjs` avant et

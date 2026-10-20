@@ -25,7 +25,6 @@
 }
 
 .promesse {
-  font-variation-settings: "wdth" var(--r-large);
   font-weight: 500;
   font-size: clamp(36px, 4.4vw, 60px);
   line-height: 1.02;
@@ -72,7 +71,6 @@
   color: var(--r-encre);
 }
 .porteAction {
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600;
   font-size: 13.5px;
   color: var(--r-discret);
@@ -218,13 +216,11 @@
 /* Le verdict : la plaque de la lecture. */
 .verdictLabel {
   display: inline-flex; align-items: center; gap: 9px;
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600; font-size: 14px;
   color: var(--r-teinte, var(--r-encre));
 }
 .verdictLabel::before { content: ""; width: 9px; height: 9px; background: var(--r-teinte, var(--r-encre)); }
 .verdictTitre {
-  font-variation-settings: "wdth" 112;
   font-weight: 500;
   font-size: clamp(24px, 2.6vw, 34px);
   line-height: 1.16;
@@ -237,7 +233,6 @@
 .groupeLecture { display: grid; gap: 0; padding-top: 28px; }
 .groupeTitre {
   display: flex; align-items: baseline; gap: 10px;
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600; font-size: 14px; color: var(--r-discret);
   padding-bottom: 12px;
   border-bottom: 1px solid var(--r-filet-fort);
@@ -254,7 +249,6 @@
 .maillon { display: grid; gap: 4px; }
 @media (min-width: 640px) { .maillon { grid-template-columns: 150px minmax(0, 1fr); gap: 16px; } }
 .maillonRole {
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600; font-size: 13px; color: var(--r-meta);
   padding-top: 2px;
 }

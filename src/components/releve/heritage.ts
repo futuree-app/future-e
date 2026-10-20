@@ -7,7 +7,9 @@
 //
 // La référence (`heritage-reference.json`) se régénère avec `node scripts/fut118/heritage-reference.ts`,
 // SEULEMENT quand un lot de migration retire des marqueurs (le nombre baisse) : jamais pour en ajouter.
-// Elle ne se modifie jamais à la main ; son total est en plus plafonné dans `canon.test.ts` (K1b).
+// Elle ne se modifie jamais à la main ; son total est en plus plafonné dans `canon.test.ts` (K1b). Le
+// plafond borne le total, il ne garantit pas qu'il baisse : une remontée manuelle sous le plafond n'est
+// visible qu'en revue (DESIGN.md § 10, « ce qui est garanti automatiquement »).
 //
 // UN GARDE-FOU, PAS UN JUGE ESTHÉTIQUE. Ces expressions sont des approximations :
 //   faux positifs  le mot « glass » dans un commentaire ou un texte ; un emoji ou un symbole (☀, ✓) dans

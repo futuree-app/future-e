@@ -54,8 +54,8 @@ function Atlas() {
       </svg>
       <div style={{ position: "relative", display: "grid", gap: 14 }}>
         <p className={s.mono} style={{ fontSize: 10.5, color: "var(--r-meta)", letterSpacing: "0.08em" }}>43°50′ N · 4°21′ E · FEUILLE 30189</p>
-        <p style={{ fontVariationSettings: '"wdth" 70', fontWeight: 600, fontSize: 13, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--r-discret)" }}>Nîmes · Gard</p>
-        <h3 style={{ fontVariationSettings: '"wdth" 75', fontWeight: 600, fontSize: 34, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: "0.01em", color: "var(--r-encre)", margin: 0, maxWidth: 520 }}>{VERDICT}</h3>
+        <p style={{ fontWeight: 600, fontSize: 13, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--r-discret)" }}>Nîmes · Gard</p>
+        <h3 style={{ fontWeight: 600, fontSize: 34, lineHeight: 1.05, textTransform: "uppercase", letterSpacing: "0.01em", color: "var(--r-encre)", margin: 0, maxWidth: 520 }}>{VERDICT}</h3>
         <p className={s.dense} style={{ maxWidth: 520 }}>{DETAIL}</p>
         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "center", marginTop: 10, paddingTop: 14, borderTop: "1px solid var(--r-filet-fort)" }}>
           <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden>{[6, 12, 18].map((r) => <circle key={r} cx="22" cy="22" r={r} fill="none" stroke="var(--fg-hi)" strokeWidth={r === 18 ? 1.4 : 0.7} />)}</svg>

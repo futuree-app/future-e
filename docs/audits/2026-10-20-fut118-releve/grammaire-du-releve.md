@@ -41,7 +41,7 @@ parcours qui fait reconnaître futur•e, pas leur présence obligatoire partout
 | 3 | **La plaque** et ses deux coins de coupe | ce que futur•e conclut ou ce que la personne achète ; la surface dominante d'un mouvement | `Plaque` |
 | 4 | **Le trait de registre** de 3 px | la relation d'un fait au Projet ; la seule couleur de jugement | `Registre`, `TEINTE_REGISTRE` |
 | 5 | **La règle du temps** | des dates et des horizons posés sur un axe linéaire ; jamais une continuité inventée | `RegleDuTemps` |
-| 6 | **Archivo et son axe de largeur**, le mono pour ce qui s'aligne | un instrument de mesure, pas un magazine | rôles typographiques (§ 2) |
+| 6 | **Archivo en largeur normale**, le mono pour ce qui s'aligne | un instrument de mesure, pas un magazine | rôles typographiques (§ 2) |
 | 7 | **Le fond sombre, les filets, l'absence de verre** | un document technique, pas un tableau de bord | jetons `--r-*` |
 
 Et une règle de voix qui est aussi une règle visuelle : **l'absence se dit** (un tiret et une phrase,
@@ -59,7 +59,13 @@ jamais un zéro, une case vide ou un silence).
 
 ## 2. Typographie
 
-Une famille d'interface, **Archivo** variable (axe `wdth` 62 à 125, déjà servi, 0 octet ajouté), et
+> **Erratum du 20/10/2026.** La première version de cette grammaire, reprenant FUT-87, faisait de l'axe de
+> largeur d'Archivo (`wdth` 118, 108, 88, 125) un signe de l'identité. Le fichier servi par le site n'a pas
+> cet axe : les réglages étaient ignorés, et l'interface a toujours été rendue en largeur normale. Choix du
+> porteur : **Archivo en largeur normale, telle que l'accueil l'affiche, est la référence** ; la hiérarchie
+> tient à la taille, à la graisse, à l'encre et aux espacements. Les réglages ont été retirés du code (R0).
+
+Une famille d'interface, **Archivo**, en **largeur normale**, et
 **JetBrains Mono** seulement là où l'alignement compte. Pas de serif. **Le mono n'est jamais en capitales
 espacées.** Aucune italique de couleur.
 
@@ -67,28 +73,28 @@ espacées.** Aucune italique de couleur.
 
 Trois échelles coexistent aujourd'hui : les dix rôles `--text-*` de `DESIGN.md` (que le Relevé n'appelle
 pas), les tailles du Relevé écrites en px dans le module, et une troisième échelle propre à l'accueil
-(titre `wdth` 116 de 34 à 50 px, corps de 13 à 21 px). La table ci-dessous les fond, sous les jetons `--r-t-*` créés
+(titre de 34 à 50 px, corps de 13 à 21 px). La table ci-dessous les fond, sous les jetons `--r-t-*` créés
 au lot R0 (`design-tokens.css`) ; l'accueil s'y range en migrant. L'échelle historique `--text-*` reste
 en place pour les surfaces non migrées : la changer modifierait leur rendu.
 
 | Rôle (jeton) | Réglage | Usage | Remplace |
 | --- | --- | --- | --- |
-| `--r-t-display` | Archivo `wdth` 118, 500, `clamp(34px, 4.4vw, 58px)`, interligne 1,04, −0,02 em | le titre d'écran ou le verdict, **un par écran** | `.display`, `.titre` accueil (116), `--text-display` |
+| `--r-t-display` | Archivo 500, `clamp(34px, 4.4vw, 58px)`, interligne 1,04, −0,02 em | le titre d'écran ou le verdict, **un par écran** | `.display`, `.titre` accueil (116), `--text-display` |
 | `--r-t-verdict` | idem, `clamp(27px, 3.6vw, 46px)` | le verdict dans la plaque | `.verdict` |
-| `--r-t-titre` | `wdth` 108, 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement | `.titre`, `--text-title` |
+| `--r-t-titre` | 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement | `.titre`, `--text-title` |
 | `--r-t-sous-titre` | 600, 17 px, interligne 1,35 | sujet d'un fait, nom d'une possibilité | `.sousTitre`, `--text-section` |
 | `--r-t-chapo` | 400, 18 px / 1,55 | chapô | `.chapo` |
 | `--r-t-corps` | 400, 16 px / 1,62 | prose suivie | `.corps` |
 | `--r-t-dense` | 400, 14,5 px / 1,58 | corps de fait, de liste, de tableau | `.dense`, `--text-dense` (14) |
 | `--r-t-nuance` | 400, 13,5 px / 1,55, `--fg-3` | limite, portée, méthode | `.nuance`, `--text-caption` |
-| `--r-t-surtitre` | `wdth` 88, 600, 13,5 px, casse normale, précédé d'un numéro mono 11,5 px | nomme un mouvement | `.surtitre` ; **supprime** `--text-kicker` (mono capitales 11 px) |
-| `--r-t-etiquette` | `wdth` 88, 600, 12,5 px | libellé de champ, statut, en-tête de tableau | `.etiquette` |
-| `--r-t-chiffre` | `wdth` 125, 500, tabulaire, `clamp(30px, 3.4vw, 44px)` + unité mono 13 px | une valeur mise en avant | `.chiffre` |
+| `--r-t-surtitre` | 600, 13,5 px, casse normale, précédé d'un numéro mono 11,5 px | nomme un mouvement | `.surtitre` ; **supprime** `--text-kicker` (mono capitales 11 px) |
+| `--r-t-etiquette` | 600, 12,5 px | libellé de champ, statut, en-tête de tableau | `.etiquette` |
+| `--r-t-chiffre` | 500, tabulaire, `clamp(30px, 3.4vw, 44px)` + unité mono 13 px | une valeur mise en avant | `.chiffre` |
 | `--r-t-marge` | JetBrains Mono 12 px (13 px sous 900 px), casse normale | grain, preuve, source, date | `.marge`, `--text-meta` |
 
 ### 2.2 Chiffres, titres, preuves et textes longs
 
-- **Un chiffre mis en avant** est en Archivo élargie, à l'encre, suivi de son unité en mono discret ;
+- **Un chiffre mis en avant** est en Archivo 500 tabulaire, à l'encre, suivi de son unité en mono discret ;
   il est toujours accompagné d'une comparaison ou d'une référence dans la ligne d'en dessous (« contre 14
   en 1976-2005 »). Un chiffre seul est interdit.
 - **Un chiffre dans le texte** reste dans la police du texte. **Un chiffre dans la marge** est en mono,
@@ -106,7 +112,7 @@ déduites des mesures de FUT-87 et de la doctrine.
 
 - Plancher : **12 px** pour le mono (13 px sous 900 px), **13,5 px** pour un texte courant en `--fg-3`.
   Rien sous 10,5 px, et 10,5 px seulement pour les légendes d'axe (`RegleDeRang`, `Seuils`).
-- Sous 13 px, jamais de graisse 400 sur fond sombre (`--weight-meta` 500) et jamais de `wdth` < 88.
+- Sous 13 px, jamais de graisse 400 sur fond sombre (`--weight-meta` 500).
 - Les filets restent à 1 px CSS : à une densité de 1, un demi-pixel disparaît.
 - Les captures de contrôle se font **aussi à `deviceScaleFactor: 1`**, pas seulement en Retina.
 
@@ -334,7 +340,7 @@ change. **Remplacé** : la section est réécrite à partir de ce document. **Su
 | 2.3 | ce qui sépare | **amendé** | marge, filet, fond ; **le verre sort de la liste** | § 4.2 |
 | 2.4 | numérotation citable | conservé | précise le surtitre numéroté | § 2.1 |
 | 3.1 | les quatre états d'une valeur | **amendé** | valeur mesurée : la source passe **dans la marge**, plus sous la valeur | § 5 |
-| 3.2 | l'alignement au chiffre (« toute valeur en mono ») | **amendé** | le chiffre **mis en avant** est en Archivo `wdth` 125 tabulaire ; le mono reste pour la marge, les tableaux et les unités | § 2.1, § 2.2 |
+| 3.2 | l'alignement au chiffre (« toute valeur en mono ») | **amendé** | le chiffre **mis en avant** est en Archivo 500 tabulaire ; le mono reste pour la marge, les tableaux et les unités | § 2.1, § 2.2 |
 | 3.3 | la trajectoire | **amendé** | « le tracé suit la nature de la donnée » : horizons et paliers jamais reliés, série continue permise avec son incertitude | § 6 |
 | 3.4 à 3.6 | incertitude, comparaison, position avant couleur | conservé | | |
 | 4 | la voix | conservé | | |

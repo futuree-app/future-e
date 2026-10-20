@@ -2,7 +2,7 @@
    LE RELEVÉ · LA GRAMMAIRE VISUELLE CANONIQUE DE FUTUR•E (FUT-87, canon depuis FUT-118 R0).
 
    Utilisée en production par l'accueil, et par Ma décision sous `DECISION_RELEVE`. Les JETONS (couleurs
-   dérivées, géométrie, largeurs d'Archivo, rôles typographiques `--r-t-*`) vivent dans
+   dérivées, géométrie, rôles typographiques `--r-t-*`) vivent dans
    `src/app/design-tokens.css` ; cette feuille porte les CLASSES qui les composent : une grille à marge
    de preuve, des filets plutôt que des cartes, une plaque par mouvement, trois glyphes de grain, une
    règle du temps.
@@ -79,7 +79,6 @@
 /* ── Typographie ─────────────────────────────────────────────────────────────────────────── */
 
 .display {
-  font-variation-settings: "wdth" var(--r-large);
   font-weight: 500;
   font-size: var(--r-t-display);
   line-height: 1.04;
@@ -89,7 +88,6 @@
   margin: 0;
 }
 .titre {
-  font-variation-settings: "wdth" var(--r-titre);
   font-weight: 600;
   font-size: var(--r-t-titre);
   line-height: 1.15;
@@ -111,13 +109,12 @@
 .nuance { font-size: var(--r-t-nuance); line-height: 1.55; color: var(--r-discret); margin: 0; }
 .encre { color: var(--r-encre); }
 
-/* Le surtitre : Archivo semi-condensée, en casse normale, précédé d'un numéro mono. Il remplace
+/* Le surtitre : Archivo 600, en casse normale, précédé d'un numéro mono. Il remplace
    les capitales mono espacées (379 occurrences dans le produit). */
 .surtitre {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600;
   font-size: var(--r-t-surtitre);
   letter-spacing: 0.01em;
@@ -126,23 +123,20 @@
 }
 .numero {
   font-family: var(--font-mono);
-  font-variation-settings: normal;
   font-weight: 500;
   font-size: var(--r-t-numero);
   color: var(--r-meta);
   font-variant-numeric: tabular-nums;
 }
 .etiquette {
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600;
   font-size: var(--r-t-etiquette);
   letter-spacing: 0.01em;
   color: var(--r-discret);
 }
 
-/* Les chiffres : grands en Archivo élargie (tabulaire), petits en mono. */
+/* Les chiffres : grands en Archivo tabulaire, petits en mono. */
 .chiffre {
-  font-variation-settings: "wdth" var(--r-chiffre);
   font-weight: 500;
   font-variant-numeric: tabular-nums lining-nums;
   font-size: var(--r-t-chiffre);
@@ -153,7 +147,6 @@
 }
 .unite {
   font-family: var(--font-mono);
-  font-variation-settings: normal;
   font-size: var(--r-t-unite);
   letter-spacing: 0;
   color: var(--r-discret);
@@ -225,7 +218,7 @@
 
 .regle { width: 100%; height: auto; display: block; overflow: visible; }
 .regle text { font-family: var(--font-mono); font-size: 11px; fill: var(--r-meta); }
-.regle .regleValeur { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 600; font-size: 15px; fill: var(--r-encre); }
+.regle .regleValeur { font-family: var(--font-sans); font-weight: 600; font-size: 15px; fill: var(--r-encre); }
 .regle .regleAxe { stroke: var(--r-filet-fort); }
 .regle .regleTic { stroke: var(--r-discret); }
 .regle .regleAujourdhui { stroke: var(--r-encre); stroke-dasharray: 2 3; }
@@ -286,7 +279,7 @@
 .pile { display: grid; gap: 12px; }
 .pileSerree { display: grid; gap: 6px; }
 .rangee { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
-.details summary { cursor: pointer; list-style: none; font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 13px; color: var(--r-discret); }
+.details summary { cursor: pointer; list-style: none; font-weight: 600; font-size: 13px; color: var(--r-discret); }
 .details summary::-webkit-details-marker { display: none; }
 .details summary::before { content: "+ "; font-family: var(--font-mono); }
 .details[open] summary::before { content: "− "; }

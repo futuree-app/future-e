@@ -485,11 +485,10 @@
   --r-gouttiere: 48px;
   --r-pas: 8px;
 
-  /* Largeurs d'Archivo (axe `wdth` du fichier variable déjà servi : 62 à 125). */
-  --r-large: 118;
-  --r-titre: 108;
-  --r-semi: 88;
-  --r-chiffre: 125;
+  /* PAS D'AXE DE LARGEUR (correctif du 20/10/2026). Le fichier Archivo servi (`/fonts/Archivo-Variable.woff2`)
+     n'a qu'un axe de graisse : les réglages `wdth` que FUT-87 posait (118, 108, 88, 125) étaient ignorés
+     par le navigateur. La référence est Archivo en largeur normale, telle qu'elle s'affiche ; la
+     hiérarchie tient à la taille, à la graisse, à l'encre et aux espacements. Test K6. */
 
   /* Les rôles typographiques (DESIGN.md v3.0 § 9.1). Une taille par USAGE. */
   --r-t-display: clamp(34px, 4.4vw, 58px); /* titre d'écran */
