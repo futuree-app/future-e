@@ -16,3 +16,9 @@ Doctrine à respecter dans toute critique :
 - aucun gagnant automatique ;
 - une information absente ne donne jamais d'avantage ;
 - aucun verdict inventé par un modèle de langage.
+
+## V2 · direction D, « La planche » (20 octobre 2026)
+
+- `../README-v2.md` : diagnostic de la V1, direction D, évaluation critique, recommandation et arbitrages UX.
+- `../prototype-v2.html` : le prototype interactif V2 (menu « Données fictives » pour changer de situation).
+- `../captures-v2/` : 26 captures (bureau, tablette, mobile 390 et 360, sombre et clair).

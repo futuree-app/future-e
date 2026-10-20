@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma recherche · futur•e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   FUT-41 / FUT-22 · DIRECTION D, « LA PLANCHE ». Prototype de revue, données fictives.
+   Jetons : ceux de design-tokens.css et de releve.module.css (fond, plaque, encre, six registres,
+   mouvement FUT-75). Aucune couleur nouvelle. Les règles visuelles nouvelles sont listées comme
+   propositions à soumettre à FUT-118 dans README-v2.md, jamais adoptées ici.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+  --r-fond: #060812; --r-plaque: #0d1322; --r-plaque-bord: rgba(255,255,255,0.12);
+  --r-encre: #f6f4ef; --r-texte: #c6cfdb; --r-discret: #9ba3b4; --r-meta: #788095;
+  --r-filet: rgba(255,255,255,0.08); --r-filet-fort: rgba(255,255,255,0.14);
+  --r-elev: rgba(255,255,255,0.04); --r-elev-2: rgba(255,255,255,0.07);
+  --marque: #E8823A;
+  --reg-incompatibilite: #FF9AA4; --reg-alignement: #7BD3A5; --reg-compromis: #E8823A;
+  --reg-ecart: #C2A5EB; --reg-non-su: #B8BFCC; --reg-controle: #82B4E8;
+  --f-sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --m-pression: 90ms; --m-geste: 120ms; --m-bascule: 180ms; --m-etat: 240ms;
+  --m-releve: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --r-fond: #faf8f3; --r-plaque: #f2ede4; --r-plaque-bord: rgba(26,29,40,0.14);
+    --r-encre: #1a1d28; --r-texte: #3d4456; --r-discret: #5b6373; --r-meta: #646c7f;
+    --r-filet: rgba(26,29,40,0.09); --r-filet-fort: rgba(26,29,40,0.17);
+    --r-elev: rgba(26,29,40,0.035); --r-elev-2: rgba(26,29,40,0.06);
+    --marque: #994000;
+    --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+    --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --r-fond: #faf8f3; --r-plaque: #f2ede4; --r-plaque-bord: rgba(26,29,40,0.14);
+  --r-encre: #1a1d28; --r-texte: #3d4456; --r-discret: #5b6373; --r-meta: #646c7f;
+  --r-filet: rgba(26,29,40,0.09); --r-filet-fort: rgba(26,29,40,0.17);
+  --r-elev: rgba(26,29,40,0.035); --r-elev-2: rgba(26,29,40,0.06);
+  --marque: #994000;
+  --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+  --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-pression: 0ms; --m-geste: 0ms; --m-bascule: 0ms; --m-etat: 0ms; }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--r-fond); color: var(--r-texte); font-family: var(--f-sans); font-size: 16px; line-height: 1.5; }
+body.sheet-ouverte { overflow: hidden; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+p { margin: 0; }
+h1, h2, h3, h4 { margin: 0; color: var(--r-encre); text-wrap: balance; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app { max-width: 1240px; margin: 0 auto; padding: 0 16px 80px; }
+@media (min-width: 640px) { .app { padding: 0 28px 96px; } }
+
+/* ── Typographie du Relevé ─────────────────────────────────────────────────────────────── */
+.surtitre { display: flex; align-items: baseline; gap: 10px; font-variation-settings: "wdth" 88; font-weight: 600; font-size: 13.5px; letter-spacing: 0.01em; color: var(--r-discret); }
+.surtitre .num { font-family: var(--f-mono); font-variation-settings: normal; font-weight: 500; font-size: 11.5px; color: var(--r-meta); }
+.etiquette { font-variation-settings: "wdth" 88; font-weight: 600; font-size: 12.5px; letter-spacing: 0.01em; color: var(--r-discret); }
+.nuance { font-size: 13.5px; line-height: 1.5; color: var(--r-discret); }
+.meta { font-family: var(--f-mono); font-size: 12px; color: var(--r-meta); }
+.encre { color: var(--r-encre); }
+
+/* ── Boutons ───────────────────────────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 14px; border-radius: 3px; border: 1px solid var(--r-filet-fort); background: transparent; color: var(--r-encre); font-weight: 600; font-size: 14px; line-height: 1.25; text-align: left; transition: border-color var(--m-geste) ease, background-color var(--m-geste) ease, transform var(--m-pression) ease; }
+.btn:hover { border-color: var(--r-encre); }
+.btn:active { transform: translateY(1px); }
+.btn[aria-pressed="true"] { background: var(--r-elev-2); border-color: var(--r-encre); }
+.btn-plein { background: var(--r-encre); border-color: var(--r-encre); color: var(--r-fond); }
+.btn-plein:hover { background: var(--r-texte); border-color: var(--r-texte); }
+.btn-lien { border: 0; padding: 4px 0; min-height: 32px; background: none; color: var(--r-encre); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); font-weight: 600; font-size: 14px; text-align: left; }
+.btn-lien:hover { text-decoration-color: var(--r-encre); }
+.btn-lien.meta { font-weight: 400; font-size: 12px; color: var(--r-discret); }
+.sim { font-family: var(--f-mono); font-weight: 400; font-size: 11px; color: var(--r-meta); border: 1px dashed var(--r-filet-fort); border-radius: 2px; padding: 1px 5px; white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 10px; }
+
+/* ── Barre ─────────────────────────────────────────────────────────────────────────────── */
+.barre { display: flex; align-items: center; gap: 18px; min-height: 60px; border-bottom: 1px solid var(--r-filet); }
+.marque-mot { font-variation-settings: "wdth" 100; font-weight: 600; font-size: 21px; letter-spacing: -0.01em; color: var(--r-encre); }
+.marque-mot b { color: var(--marque); font-weight: 600; }
+.barre nav { display: flex; gap: 16px; }
+.barre nav span { font-size: 14px; color: var(--r-discret); }
+.barre nav span[aria-current] { color: var(--r-encre); font-weight: 600; box-shadow: inset 0 -2px 0 var(--r-encre); padding-bottom: 4px; }
+.barre .droite { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
+.fictif { font-family: var(--f-mono); font-size: 11.5px; color: var(--r-discret); border: 1px dashed var(--r-filet-fort); border-radius: 3px; padding: 6px 9px; background: none; min-height: 36px; }
+.fictif:hover { color: var(--r-encre); border-color: var(--r-discret); }
+.icone-btn { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--r-filet-fort); border-radius: 50%; background: none; color: var(--r-encre); }
+.menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; width: min(340px, calc(100vw - 32px)); background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: 3px; padding: 8px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0,0,0,0.28); }
+.menu[hidden] { display: none; }
+.menu p { padding: 6px 8px 8px; }
+.menu button { text-align: left; background: none; border: 0; border-radius: 2px; padding: 9px 10px; display: grid; gap: 1px; }
+.menu button:hover { background: var(--r-elev-2); }
+.menu button[aria-current="true"] { background: var(--r-elev-2); box-shadow: inset 2px 0 0 var(--r-encre); }
+.menu button b { font-weight: 600; font-size: 14.5px; color: var(--r-encre); }
+.menu button span { font-size: 12.5px; color: var(--r-discret); }
+@media (max-width: 639px) { .barre nav { display: none; } .fictif .long { display: none; } }
+
+/* ── Le Projet ─────────────────────────────────────────────────────────────────────────── */
+.projet { padding: 22px 0 18px; display: grid; gap: 14px; }
+.projet-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.projet-titre { font-variation-settings: "wdth" 112; font-weight: 600; font-size: clamp(23px, 2.8vw, 36px); line-height: 1.1; letter-spacing: -0.015em; color: var(--r-encre); }
+.lentilles { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: flex-start; }
+.lot { display: grid; gap: 7px; }
+.lot-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lentille { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 7px 12px; border-radius: 3px; border: 1px solid var(--r-filet-fort); background: transparent; color: var(--r-texte); font-size: 14.5px; font-weight: 500; transition: background-color var(--m-geste) ease, color var(--m-geste) ease, border-color var(--m-geste) ease; }
+.lentille:hover { border-color: var(--r-discret); color: var(--r-encre); }
+.lentille[aria-pressed="true"] { background: var(--r-encre); color: var(--r-fond); border-color: var(--r-encre); }
+.lentille .poids { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; }
+.lentille .poids i { width: 3px; background: currentColor; }
+.lentille .poids i.vide { opacity: 0.25; }
+.lentille.sans { border-color: var(--r-discret); }
+.lentille .verrou { width: 10px; height: 12px; border: 1.5px solid currentColor; border-radius: 1px; position: relative; }
+.lentille .verrou::after { content: ""; position: absolute; left: 1.5px; right: 1.5px; top: 3.5px; height: 1.5px; background: currentColor; }
+.lentille.cote > span:nth-child(2) { text-decoration: line-through; }
+.non-mesure { font-size: 13.5px; color: var(--r-discret); }
+.non-mesure b { color: var(--r-texte); font-weight: 600; }
+.lecture-lentille { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; border-left: 3px solid var(--r-encre); background: var(--r-elev); }
+.lecture-lentille p { font-size: 14.5px; color: var(--r-texte); }
+.lecture-lentille .formes { display: inline-flex; gap: 6px; color: var(--r-encre); }
+.revs { display: grid; border-top: 1px solid var(--r-filet); }
+.revs > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--r-filet); font-size: 14px; }
+@media (max-width: 639px) { .revs > div { grid-template-columns: 1fr; } }
+
+/* ── Depuis votre dernière visite ──────────────────────────────────────────────────────── */
+.depuis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 8px 0; border-top: 1px solid var(--r-filet); border-bottom: 1px solid var(--r-filet); }
+.depuis-regle { position: relative; flex: 1 1 200px; min-width: 140px; height: 22px; }
+.depuis-regle .axe { position: absolute; left: 0; right: 0; top: 11px; height: 1px; background: var(--r-filet-fort); }
+.depuis-regle .auj { position: absolute; top: 1px; bottom: 1px; width: 0; border-left: 1px dashed var(--r-encre); }
+.depuis-regle .evt { position: absolute; top: 7px; width: 9px; height: 9px; margin-left: -4.5px; background: var(--r-encre); }
+.depuis-regle .evt.futur { background: var(--r-fond); border: 1.5px solid var(--r-encre); }
+.depuis-regle .evt.projet { border-radius: 50%; }
+.journal { display: grid; padding: 4px 0 2px; }
+.journal > div { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--r-filet); font-size: 14px; }
+.journal > div:first-child { border-top: 0; }
+
+/* ── Corps : planche à gauche, panneau à droite ───────────────────────────────────────── */
+.corps { display: grid; gap: 28px; padding-top: 22px; }
+@media (min-width: 1024px) { .corps { grid-template-columns: minmax(0, 1fr) 372px; gap: 44px; align-items: start; } }
+.panneau { display: grid; align-content: start; }
+@media (min-width: 1024px) { .panneau { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; padding-right: 6px; scrollbar-width: thin; } }
+
+/* ── La planche ────────────────────────────────────────────────────────────────────────── */
+.planche-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 10px; }
+.filtre { background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 2px; min-height: 36px; font-size: 13.5px; color: var(--r-discret); }
+.filtre[aria-pressed="true"] { color: var(--r-encre); border-bottom-color: var(--r-encre); font-weight: 600; }
+.indice { font-size: 13.5px; color: var(--r-discret); min-height: 20px; margin-top: 4px; }
+.groupes { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 26px; padding-top: 14px; }
+@media (max-width: 639px) { .groupes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; } }
+.groupe { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.groupe svg { width: 100%; max-width: 230px; height: auto; display: block; overflow: visible; }
+.groupe .forme { cursor: pointer; }
+.groupe .forme-trait { fill: none; stroke: var(--r-encre); stroke-width: 1.6; transition: stroke var(--m-etat) var(--m-releve), stroke-width var(--m-etat) var(--m-releve), opacity var(--m-etat) var(--m-releve); vector-effect: non-scaling-stroke; }
+.groupe .forme-trait.pointille { stroke-dasharray: 5 5; stroke: var(--r-discret); }
+.groupe .forme-trait.points { stroke-dasharray: 1.5 4.5; stroke-linecap: round; stroke-width: 2.2; stroke: var(--r-discret); }
+.groupe .forme-trait.leger { stroke: var(--r-meta); stroke-width: 1; stroke-dasharray: 3 5; }
+.groupe .forme:hover .forme-trait { stroke-width: 2.6; }
+.groupe .grad { stroke: var(--r-meta); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.groupe .fond-forme { fill: transparent; }
+.groupe .coin { fill: none; stroke: var(--r-encre); stroke-width: 2; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity var(--m-etat) var(--m-releve); }
+.groupe .sel .coin { opacity: 1; }
+.groupe .barre-bloq { stroke: var(--reg-incompatibilite); stroke-width: 2.6; vector-effect: non-scaling-stroke; }
+.groupe .q { font-family: var(--f-mono); font-size: 15px; fill: var(--r-discret); }
+/* Lentille : la forme qui répond prend le trait de son registre ; celle qui ne répond pas s'efface. */
+.planche[data-lentille] .forme-trait { opacity: 0.3; }
+.planche[data-lentille] .forme-trait[data-reg] { opacity: 1; stroke-width: 3.4; stroke-dasharray: none; }
+.planche[data-lentille] .forme-trait[data-reg="controle"] { stroke-dasharray: 6 4; }
+.planche[data-lentille] .forme-trait[data-reg="libre"] { stroke-dasharray: 1.5 5; stroke-linecap: round; }
+.planche[data-lentille] .grad { opacity: 0.4; }
+.forme-trait[data-reg="alignement"] { stroke: var(--reg-alignement) !important; }
+.forme-trait[data-reg="compromis"] { stroke: var(--reg-compromis) !important; }
+.forme-trait[data-reg="ecart"] { stroke: var(--reg-ecart) !important; }
+.forme-trait[data-reg="incompatibilite"] { stroke: var(--reg-incompatibilite) !important; }
+.forme-trait[data-reg="controle"] { stroke: var(--reg-controle) !important; }
+.forme-trait[data-reg="non-su"], .forme-trait[data-reg="libre"] { stroke: var(--reg-non-su) !important; }
+.commune-nom { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.lieux { display: grid; gap: 2px; }
+.lieu { display: grid; gap: 1px; text-align: left; background: none; border: 0; border-left: 2px solid var(--r-filet-fort); padding: 6px 8px; border-radius: 0 2px 2px 0; min-height: 44px; transition: background-color var(--m-geste) ease, border-color var(--m-geste) ease; }
+.lieu:hover { background: var(--r-elev); border-left-color: var(--r-discret); }
+.lieu[aria-pressed="true"] { background: var(--r-elev-2); border-left-color: var(--r-encre); }
+.lieu .n { font-size: 15px; font-weight: 600; color: var(--r-encre); line-height: 1.3; }
+.lieu .s { font-size: 12.5px; color: var(--r-discret); line-height: 1.35; }
+.lieu .i { font-size: 12.5px; line-height: 1.35; display: flex; gap: 6px; align-items: baseline; color: var(--r-texte); margin-top: 2px; }
+.lieu .i::before { content: ""; flex: none; width: 3px; height: 0.9em; transform: translateY(0.1em); background: var(--t, var(--r-meta)); }
+.ecartees { margin-top: 26px; padding-top: 14px; border-top: 1px dashed var(--r-filet-fort); }
+.ecartees .groupes { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.ecartees .groupe svg { max-width: 130px; }
+.ajout { display: grid; place-items: center; align-content: center; gap: 10px; min-height: 150px; border: 1px dashed var(--r-filet-fort); border-radius: 3px; background: none; color: var(--r-discret); font-weight: 600; font-size: 14px; padding: 16px; align-self: start; aspect-ratio: 1 / 1; max-width: 230px; }
+.ajout:hover { color: var(--r-encre); border-color: var(--r-discret); }
+.ajout svg { width: 34px; height: 34px; }
+.choix-ajout { grid-column: 1 / -1; border: 1px solid var(--r-plaque-bord); background: var(--r-plaque); border-radius: 3px; padding: 16px; display: grid; gap: 10px; }
+.choix-ajout .opts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* ── Panneau : Maintenant ──────────────────────────────────────────────────────────────── */
+.panneau-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--r-filet-fort); }
+.guide { display: grid; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--r-filet); }
+.guide h3 { font-size: 15.5px; font-weight: 600; line-height: 1.38; display: flex; gap: 10px; }
+.guide h3::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.18em); background: var(--t, var(--r-meta)); }
+.guide .pourquoi { font-size: 13.5px; color: var(--r-discret); padding-left: 13px; }
+.guide .actions { padding-left: 13px; margin-top: 4px; }
+.mes-verifs { padding: 14px 0; display: grid; gap: 8px; }
+.mes-verifs ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+
+/* ── Panneau : une possibilité ─────────────────────────────────────────────────────────── */
+.fiche { display: grid; gap: 20px; }
+.fiche-tete { display: grid; gap: 6px; }
+.fiche-tete h2 { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(22px, 2.2vw, 27px); line-height: 1.15; letter-spacing: -0.01em; }
+.fiche-tete h2:focus { outline: none; }
+.fiche-emb { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 16px; align-items: center; }
+.fiche-emb > svg { width: 124px; height: 124px; overflow: visible; }
+.fiche-emb .forme { cursor: pointer; }
+.echelles-etat { display: grid; }
+.echelles-etat button { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 1px 10px; align-items: center; text-align: left; background: none; border: 0; border-top: 1px solid var(--r-filet); padding: 7px 6px; min-height: 44px; color: var(--r-encre); }
+.echelles-etat button:first-child { border-top: 0; }
+.echelles-etat button:hover { background: var(--r-elev); }
+.echelles-etat button[aria-pressed="true"] { background: var(--r-elev-2); box-shadow: inset 2px 0 0 var(--r-encre); }
+.echelles-etat b { font-size: 14px; font-weight: 600; }
+.echelles-etat .e { grid-column: 2; font-size: 12.5px; color: var(--r-discret); }
+.conds { display: grid; }
+.cond { border-top: 1px solid var(--r-filet); }
+.cond > button { width: 100%; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; background: none; border: 0; padding: 10px 4px; min-height: 48px; }
+.cond > button:hover { background: var(--r-elev); }
+.cond .lab { font-size: 14.5px; color: var(--r-encre); line-height: 1.35; }
+.cond .lab small { display: block; font-size: 11.5px; color: var(--r-meta); font-family: var(--f-mono); }
+.cond .iss { font-size: 13px; text-align: right; justify-content: flex-end; color: var(--r-texte); }
+.cond.actif > button { box-shadow: inset 2px 0 0 var(--r-encre); background: var(--r-elev); }
+.cond .ouvert { padding: 4px 0 14px 32px; display: grid; gap: 10px; }
+.contexte-ecart { border-left: 3px solid var(--reg-non-su); padding: 4px 0 4px 14px; display: grid; gap: 8px; }
+.contexte-ecart.change { border-left-color: var(--reg-controle); }
+.form-mini { display: grid; gap: 8px; padding: 12px; margin-top: 8px; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
+.form-mini textarea { width: 100%; min-height: 64px; background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: 3px; padding: 8px 10px; resize: vertical; }
+.form-mini select { background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: 3px; padding: 8px 10px; min-height: 40px; }
+.note-perso { display: grid; gap: 2px; padding: 6px 0 6px 12px; border-left: 2px solid var(--r-filet-fort); font-size: 14px; }
+
+/* ── Preuve ────────────────────────────────────────────────────────────────────────────── */
+.preuve { display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; color: var(--r-discret); border-left: 1px solid var(--r-filet-fort); padding-left: 12px; }
+.preuve .v { color: var(--r-encre); font-family: var(--f-sans); font-size: 14.5px; line-height: 1.45; }
+.preuve .ligne { display: flex; gap: 7px; align-items: center; }
+.verif { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--r-filet-fort); border-left: 3px solid var(--reg-controle); border-radius: 0 3px 3px 0; }
+.verif p { font-size: 14px; color: var(--r-texte); }
+
+/* ── Glyphes ───────────────────────────────────────────────────────────────────────────── */
+.g { display: inline-block; vertical-align: -1px; flex: none; }
+.reg-t { display: inline-flex; align-items: baseline; gap: 6px; }
+.reg-t::before { content: ""; flex: none; width: 3px; height: 0.9em; transform: translateY(0.1em); background: var(--t, var(--r-meta)); }
+
+/* ── Le rapprochement ──────────────────────────────────────────────────────────────────── */
+.rapp-zone { margin-top: 40px; scroll-margin-top: 12px; }
+.plaque { position: relative; background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: 3px; padding: 22px 16px 24px; }
+@media (min-width: 640px) { .plaque { padding: 30px 34px 34px; } }
+.plaque::before, .plaque::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--r-discret); border-style: solid; pointer-events: none; }
+.plaque::before { top: -7px; left: -7px; border-width: 1px 0 0 1px; }
+.plaque::after { bottom: -7px; right: -7px; border-width: 0 1px 1px 0; }
+.rapp-tete { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: end; }
+.pole { display: grid; gap: 4px; min-width: 0; justify-items: start; }
+.pole.b { text-align: right; justify-items: end; }
+.pole svg { width: 76px; height: 76px; overflow: visible; }
+.pole h3 { font-variation-settings: "wdth" 106; font-size: clamp(17px, 2vw, 25px); line-height: 1.15; font-weight: 600; overflow-wrap: anywhere; }
+.pole h3:focus { outline: none; }
+.pole .s { font-size: 12.5px; color: var(--r-discret); }
+.centre-tete { display: grid; justify-items: center; gap: 4px; padding-bottom: 8px; }
+.centre-tete .meta { white-space: nowrap; }
+.rapp-phrase { margin-top: 18px; font-size: clamp(16px, 1.55vw, 19px); line-height: 1.45; color: var(--r-encre); }
+.rapp-outils { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--r-filet-fort); }
+.decompte { display: flex; flex-wrap: wrap; gap: 6px; }
+.decompte button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 5px 10px; border: 1px solid var(--r-filet-fort); border-radius: 3px; background: none; font-size: 13.5px; color: var(--r-texte); }
+.decompte button:hover { border-color: var(--r-discret); }
+.decompte button[aria-pressed="true"] { background: var(--r-encre); color: var(--r-fond); border-color: var(--r-encre); }
+.decompte b { font-family: var(--f-mono); font-weight: 500; }
+.bandeau-cadre { margin-top: 16px; display: grid; gap: 8px; padding: 12px 14px; border: 1px dashed var(--r-filet-fort); border-radius: 3px; font-size: 14.5px; }
+.bande { margin-top: 24px; }
+.bande-tete { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--r-filet-fort); color: var(--r-encre); }
+.bande-tete b { font-variation-settings: "wdth" 108; font-size: 17px; font-weight: 600; }
+.socle { display: grid; gap: 8px; padding: 14px 0 6px; }
+.socle-trait { position: relative; height: 26px; }
+.socle-trait::before { content: ""; position: absolute; left: 6%; right: 6%; top: 12px; height: 3px; background: var(--r-encre); }
+.socle-trait span { position: absolute; top: 4px; width: 18px; height: 18px; border: 1.6px solid var(--r-encre); border-radius: 50%; background: var(--r-plaque); }
+.rang { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 10px 0 6px; border-bottom: 1px solid var(--r-filet); }
+@media (min-width: 760px) { .rang { grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; } }
+.rang.focus { background: var(--r-elev-2); box-shadow: -12px 0 0 var(--r-elev-2), 12px 0 0 var(--r-elev-2); }
+.rang-lab { display: grid; gap: 2px; padding-top: 2px; }
+.rang-lab .c { font-size: 15px; font-weight: 600; color: var(--r-encre); line-height: 1.3; }
+.rang-lab .k { font-variation-settings: "wdth" 88; font-weight: 600; font-size: 12.5px; color: var(--r-discret); }
+.rang-lab .k.fort { color: var(--r-encre); }
+.piste { position: relative; height: 64px; width: 100%; background: none; border: 0; padding: 0; display: block; border-radius: 2px; }
+.piste:hover { background: var(--r-elev); }
+.piste .pl { position: absolute; top: 14px; height: 0; border-top: 1.5px solid var(--r-encre); }
+.piste .pl.tirets { border-top: 1.5px dashed var(--r-discret); }
+.piste .pl.points { border-top: 2px dotted var(--reg-controle); }
+.piste .pl.fort { border-top-width: 3px; top: 13px; }
+.piste .mk { position: absolute; top: 4px; width: 20px; height: 20px; margin-left: -10px; }
+.piste .mk svg { display: block; overflow: visible; }
+.piste .tx { position: absolute; top: 31px; font-size: 12.5px; line-height: 1.3; color: var(--r-texte); max-width: 42%; }
+.piste .tx.ga { left: 0; text-align: left; }
+.piste .tx.dr { right: 0; text-align: right; }
+.piste .tx.ce { left: 50%; transform: translateX(-50%); text-align: center; max-width: 50%; color: var(--r-discret); }
+.piste .coupure { position: absolute; top: 6px; left: 50%; width: 14px; height: 17px; margin-left: -7px; }
+.piste .coupure::before, .piste .coupure::after { content: ""; position: absolute; top: 0; bottom: 0; width: 1.5px; background: var(--r-encre); transform: skewX(-20deg); }
+.piste .coupure::before { left: 3px; } .piste .coupure::after { right: 3px; }
+.preuves { display: grid; gap: 14px; padding: 8px 0 14px; }
+@media (min-width: 640px) { .preuves { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.pourrait { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--r-filet-fort); display: grid; gap: 10px; }
+.pourrait ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pourrait li { display: grid; gap: 4px; }
+.vide-rapp { padding: 18px 0; color: var(--r-discret); font-size: 14.5px; }
+.arrive { animation: arrive var(--m-bascule) var(--m-releve) both; }
+@keyframes arrive { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .arrive { animation: none; } }
+
+/* ── Condition par condition ───────────────────────────────────────────────────────────── */
+.partition-zone { margin-top: 52px; }
+.partition-wrap { overflow-x: auto; margin-top: 12px; }
+.partition { display: grid; min-width: min-content; }
+.partition .ligne-p { display: grid; align-items: center; border-bottom: 1px solid var(--r-filet); min-height: 46px; }
+.partition .ligne-p.focus { background: var(--r-elev-2); }
+.partition .tete-p { align-items: end; border-bottom: 1px solid var(--r-filet-fort); padding-bottom: 6px; }
+.partition .tete-p span.v { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12.5px; color: var(--r-discret); max-height: 136px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; justify-self: center; }
+.partition .lab-p { font-size: 14px; color: var(--r-encre); padding-right: 12px; }
+.partition .cel { display: grid; place-items: center; width: 100%; height: 44px; background: none; border: 0; border-radius: 2px; }
+.partition .cel:hover { background: var(--r-elev-2); }
+
+/* ── Feuille mobile ────────────────────────────────────────────────────────────────────── */
+.sheet { position: fixed; inset: 0; z-index: 30; background: var(--r-fond); overflow: auto; overscroll-behavior: contain; padding: 0 16px 56px; }
+.sheet[hidden] { display: none; }
+.sheet-barre { position: sticky; top: 0; z-index: 2; background: var(--r-fond); display: flex; align-items: center; gap: 12px; min-height: 58px; border-bottom: 1px solid var(--r-filet); margin: 0 -16px 18px; padding: 0 16px; }
+.sheet .rapp-zone { margin-top: 0; }
+
+/* ── Petits écrans : le Projet se resserre pour que la planche entre dans le premier écran ── */
+@media (max-width: 639px) {
+  .projet { padding: 14px 0 12px; gap: 10px; }
+  .projet-titre { font-size: 23px; }
+  .lentilles { gap: 8px 14px; }
+  .lot { gap: 5px; }
+  .lot-chips { gap: 5px; }
+  .lentille { min-height: 36px; padding: 5px 9px; font-size: 13.5px; gap: 6px; }
+  .non-mesure { font-size: 12.5px; }
+  .depuis-regle { display: none; }
+  .depuis { justify-content: space-between; padding: 6px 0; }
+  .corps { padding-top: 16px; }
+  .groupes { padding-top: 10px; }
+}
+/* ── Note d'état ───────────────────────────────────────────────────────────────────────── */
+.note { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50; width: min(620px, calc(100vw - 24px)); background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: 3px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 14px 34px rgba(0,0,0,0.3); font-size: 14px; color: var(--r-texte); }
+.note[hidden] { display: none; }
+.note p { flex: 1; }
+.pied { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--r-filet); }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="barre">
+    <span class="marque-mot">futur<b>•</b>e</span>
+    <nav aria-label="Navigation principale"><span>Où vivre</span><span aria-current="page">Ma recherche</span><span>Mes dossiers</span></nav>
+    <div class="droite">
+      <button class="fictif" id="btn-situations" data-act="situations" aria-expanded="false" aria-controls="menu-situations">Données fictives<span class="long"> · <span id="situation-courante">situation</span></span> ▾</button>
+      <button class="icone-btn" data-act="theme" aria-label="Changer de thème"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button>
+      <div id="menu-situations" class="menu" hidden></div>
+    </div>
+  </header>
+  <section class="projet" id="projet" aria-label="Votre Projet"></section>
+  <div id="depuis"></div>
+  <div class="corps">
+    <section class="planche" id="planche" aria-labelledby="titre-planche"></section>
+    <aside class="panneau" id="panneau" aria-label="Maintenant"></aside>
+  </div>
+  <section id="rapp" class="rapp-zone" aria-label="Rapprochement" hidden></section>
+  <section id="partition" class="partition-zone" aria-label="Condition par condition"></section>
+  <footer class="pied"><p class="meta">Prototype de revue FUT-41 / FUT-22. Lieux, adresses, dates, analyses et preuves sont inventés. Rien n'est enregistré, acheté ni analysé.</p></footer>
+</div>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-titre" hidden></div>
+<div id="note" class="note" role="status" hidden></div>
+<script>
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// DONNÉES DE DÉMONSTRATION. Même forme que la V1 : une analyse = { échelle, révision du Projet,
+// moteur, date, issues { critère → CriterionOutcome } }, plus une preuve fictive par issue.
+// Aucune ne décrit un lieu réel.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const AUJ = "2026-10-20";
+const REV = {
+  r1: { id: "r1", n: 1, date: "2026-09-08", gare: 20 },
+  r2: { id: "r2", n: 2, date: "2026-10-08", gare: 30, cause: "Après la visite du 4 octobre : « 25 minutes nous paraissent acceptables »." },
+};
+const REV_COURANTE = "r2";
+const gareMax = () => REV[REV_COURANTE].gare;
+
+const ECH = {
+  territoire: { nom: "Territoire", grain: "la commune", forme: "cercle", lu: "à la commune" },
+  autour: { nom: "Autour de l'adresse", grain: "le voisinage", forme: "carre", lu: "aux abords de l'adresse" },
+  logement: { nom: "Logement", grain: "le bâtiment", forme: "losange", lu: "dans le logement" },
+};
+const CRITERES = [
+  { cle: "mer", sans: true, ech: ["territoire"], lab: () => "la mer à moins de 15 km", court: () => "La mer à 15 km" },
+  { cle: "soins", sans: true, ech: ["territoire"], lab: () => "un médecin disponible", court: () => "Un médecin disponible" },
+  { cle: "gare", poids: 3, ech: ["territoire", "autour"], lab: () => `une gare à moins de ${gareMax()} min`, court: () => `Une gare à ${gareMax()} min` },
+  { cle: "chaleur", poids: 2, ech: ["territoire", "logement"], lab: () => "des nuits fraîches l'été", court: () => "Des nuits fraîches" },
+  { cle: "calme", poids: 2, ech: ["territoire", "autour"], lab: () => "le calme", court: () => "Le calme" },
+  { cle: "vie", poids: 1, ech: ["territoire"], lab: () => "une vie de quartier", court: () => "Une vie de quartier" },
+];
+const CRIT = Object.fromEntries(CRITERES.map((c) => [c.cle, c]));
+
+const SRC = {
+  ign: "IGN, BD Carto · 2025", ameli: "Ameli, annuaire santé · 2025", sncf: "SNCF Réseau, OpenStreetMap · 2026",
+  drias: "DRIAS, TRACC +2,7 °C · 2025", bruit: "Cerema, cartes de bruit · 2024", bpe: "INSEE BPE, RNA · 2024",
+  dpe: "ADEME, DPE · 2025", osm: "OpenStreetMap · 2026",
+};
+// [issue, valeur observée, source]
+const ANALYSES = {
+  "t:port-anvel": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-09", i: {
+    mer: ["favorable", "Littoral à 3 km du centre-bourg", SRC.ign],
+    soins: ["to_confirm", "4 généralistes pour 5 200 habitants ; l'accueil de nouveaux patients n'est pas publié", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 12 min en voiture", SRC.sncf],
+    chaleur: ["favorable", "Nuits tropicales : 2 par an (1976-2005), 7 à l'horizon 2050", SRC.drias],
+    calme: ["reserve", "Une départementale à fort trafic traverse le bourg", SRC.bruit],
+    vie: ["favorable", "Commerces et associations au-dessus de la médiane des communes de même taille", SRC.bpe] } },
+  "t:saint-aurec": { ech: "territoire", rev: "r1", moteur: "engine-4", date: "2026-09-17", i: {
+    mer: ["favorable", "Littoral à 9 km", SRC.ign],
+    soins: ["to_confirm", "2 généralistes pour 3 100 habitants ; l'accueil de nouveaux patients n'est pas publié", SRC.ameli],
+    gare: ["mismatch", "Gare de référence à 24 min, au-delà de 20 min (révision 1)", SRC.sncf],
+    chaleur: ["reserve", "Nuits tropicales : 3 par an (1976-2005), 12 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée sur la commune", SRC.bruit],
+    vie: ["favorable", "Commerces du quotidien et marché hebdomadaire", SRC.bpe] },
+    apres: { gare: ["favorable", "Gare de référence à 24 min, en deçà de 30 min (révision 2)", SRC.sncf] } },
+  "t:landeven": { ech: "territoire", rev: "r1", moteur: "engine-4", date: "2026-09-10", i: {
+    mer: ["favorable", "Littoral à 6 km", SRC.ign],
+    soins: ["to_confirm", "1 généraliste pour 1 900 habitants", SRC.ameli],
+    gare: ["mismatch", "Gare de référence à 26 min, au-delà de 20 min (révision 1)", SRC.sncf],
+    chaleur: ["favorable", "Nuits tropicales : 1 par an (1976-2005), 5 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit],
+    vie: ["reserve", "Peu de commerces à moins de dix minutes à pied du centre", SRC.bpe] } },
+  "t:ploubrec": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-12", i: {
+    mer: ["favorable", "Littoral à 1 km", SRC.ign], soins: ["to_confirm", "3 généralistes pour 4 000 habitants", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 17 min", SRC.sncf], chaleur: ["favorable", "Nuits tropicales : 1 par an (1976-2005), 6 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["reserve", "Commerces saisonniers, fermés d'octobre à avril", SRC.bpe] } },
+  "t:locmaner": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-13", i: {
+    mer: ["favorable", "Littoral à 5 km", SRC.ign], soins: ["favorable", "Maison de santé, 7 généralistes", SRC.ameli],
+    gare: ["reserve", "Gare de référence à 28 min, proche de votre limite", SRC.sncf], chaleur: ["mismatch", "Nuits tropicales : 4 par an (1976-2005), 19 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["favorable", "Centre commerçant actif", SRC.bpe] } },
+  "t:brehan": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-14", i: {
+    mer: ["incompatible", "Littoral à 31 km", SRC.ign], soins: ["favorable", "Pôle de santé, 9 généralistes", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 6 min", SRC.sncf], chaleur: ["favorable", "Nuits tropicales : 2 par an (1976-2005), 8 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["favorable", "Centre commerçant actif", SRC.bpe] } },
+  "a:sternes": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-09", i: {
+    gare: ["favorable", "Arrêt de car à 350 m ; gare à 11 min en voiture", SRC.osm],
+    calme: ["reserve", "Ligne de bus devant la façade, un passage toutes les 20 min", SRC.bruit],
+    chaleur: ["to_confirm", "DPE D, séjour orienté sud ; confort d'été non documenté", SRC.dpe] } },
+  "a:kervily": { ech: "adresse", rev: "r1", moteur: "engine-4", date: "2026-09-19", i: {
+    gare: ["reserve", "Gare à 22 min depuis l'adresse, au-delà de 20 min (révision 1)", SRC.osm],
+    calme: ["favorable", "Aucune voie bruyante à moins de 300 m", SRC.bruit],
+    chaleur: ["favorable", "Maison en pierre, murs de 50 cm ; DPE C", SRC.dpe] },
+    apres: { gare: ["favorable", "Gare à 22 min depuis l'adresse, en deçà de 30 min (révision 2)", SRC.osm] } },
+  "a:goelands": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-16", i: {
+    gare: ["favorable", "Gare à 9 min en voiture", SRC.osm],
+    calme: ["favorable", "En retrait de la départementale, côté jardin", SRC.bruit],
+    chaleur: ["reserve", "Appartement sous toiture, DPE E ; confort d'été jugé insuffisant par le diagnostic", SRC.dpe] } },
+  "a:thoniers": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-17", i: {
+    gare: ["favorable", "Gare à 25 min depuis l'adresse", SRC.osm],
+    calme: ["reserve", "Terrasses saisonnières autorisées jusqu'à minuit sur le quai", SRC.bruit],
+    chaleur: ["favorable", "Maison traversante, DPE C", SRC.dpe] } },
+};
+const COMMUNES = {
+  "port-anvel": { nom: "Port-Anvel", analyse: "t:port-anvel" },
+  "saint-aurec": { nom: "Saint-Aurec", analyse: "t:saint-aurec" },
+  "kermoal": { nom: "Kermoal", libre: { mer: ["favorable", "Littoral à 4 km", SRC.ign], chaleur: ["mismatch", "Nuits tropicales : 15 à l'horizon 2050", SRC.drias], soins: ["to_confirm", "Accès aux soins non établi dans l'aperçu gratuit", SRC.ameli] } },
+  "landeven": { nom: "Landéven", analyse: "t:landeven" },
+  "ploubrec": { nom: "Ploubrec", analyse: "t:ploubrec" },
+  "locmaner": { nom: "Locmaner", analyse: "t:locmaner" },
+  "brehan": { nom: "Bréhan-Coët", analyse: "t:brehan" },
+  "kerlavan": { nom: "Kerlavan" },
+};
+const POSS = {
+  sternes: { type: "bien", nom: "T3, 12 rue des Sternes", court: "12 rue des Sternes", commune: "port-anvel", adr: "a:sternes", etat: "en_course", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-01" },
+  kervily: { type: "bien", nom: "Maison, 31 route de Kervily", court: "31 route de Kervily", commune: "saint-aurec", adr: "a:kervily", etat: "en_course", relation: "Je visite ce bien pour l'acheter", ajout: "2026-09-17", visite: "2026-10-24" },
+  lavoir: { type: "bien", nom: "Maison, impasse du Lavoir", court: "Impasse du Lavoir", commune: "port-anvel", adr: null, sansAdresse: true, etat: "a_considerer", relation: "Annonce sans adresse exacte", ajout: "2026-10-15" },
+  kermoal: { type: "commune", nom: "Kermoal", court: "Kermoal", commune: "kermoal", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-09-29" },
+  landeven: { type: "commune", nom: "Landéven", court: "Landéven", commune: "landeven", etat: "ecarte", relation: "J'envisage d'y vivre", ajout: "2026-09-08",
+    ecart: { date: "2026-09-24", rev: "r1", critere: "gare", motif: "« La gare est à 26 min, au-delà de nos 20 min. »" } },
+  ploubrec: { type: "commune", nom: "Ploubrec", court: "Ploubrec", commune: "ploubrec", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-12" },
+  locmaner: { type: "commune", nom: "Locmaner", court: "Locmaner", commune: "locmaner", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-13" },
+  brehan: { type: "commune", nom: "Bréhan-Coët", court: "Bréhan-Coët", commune: "brehan", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-14" },
+  goelands: { type: "bien", nom: "Appartement, 5 allée des Goélands", court: "5 allée des Goélands", commune: "port-anvel", adr: "a:goelands", etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-16" },
+  thoniers: { type: "bien", nom: "Maison, 8 quai des Thoniers", court: "8 quai des Thoniers", commune: "saint-aurec", adr: "a:thoniers", etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-17" },
+  // Ajouts de démonstration : rien n'est examiné.
+  kerlavan: { type: "commune", nom: "Kerlavan", court: "Kerlavan", commune: "kerlavan", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: AUJ, demo: true },
+  ecluse: { type: "bien", nom: "Maison, 4 rue de l'Écluse", court: "4 rue de l'Écluse", commune: "saint-aurec", adr: null, adresseConnue: true, etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: AUJ, demo: true },
+};
+const OBS = [
+  { pid: "sternes", crit: "calme", date: "2026-10-04", origine: "observé par vous", texte: "Un samedi, de 21 h 40 à 22 h 10 : rue calme côté chambre ; un bus toutes les 20 min côté séjour." },
+  { pid: "sternes", crit: "chaleur", date: "2026-10-04", origine: "déclaré par l'agent", texte: "« Les fenêtres de la chambre restent ouvertes l'été. »" },
+];
+const VERIF = {
+  soins: "Appeler deux cabinets de la commune : acceptent-ils de nouveaux patients ?",
+  chaleur: "À la visite : la chambre peut-elle rester ouverte la nuit, compte tenu du bruit côté rue ? Demander les températures relevées l'été dernier.",
+  gare: "Faire le trajet jusqu'à la gare à l'heure où vous partiriez.",
+  calme: "Revenir un soir de semaine et un samedi soir.",
+};
+const JOURNAL = [
+  { date: "2026-09-08", type: "projet", qui: null, texte: "Projet créé (révision 1)." },
+  { date: "2026-09-08", type: "ajout", qui: "landeven", texte: "Landéven ajoutée." },
+  { date: "2026-09-10", type: "examen", qui: "landeven", texte: "Landéven examinée à la commune." },
+  { date: "2026-09-17", type: "examen", qui: "kervily", texte: "Saint-Aurec examinée à la commune." },
+  { date: "2026-09-19", type: "examen", qui: "kervily", texte: "31 route de Kervily examinée à l'adresse." },
+  { date: "2026-09-24", type: "ecarte", qui: "landeven", texte: "Landéven écartée : « La gare est à 26 min, au-delà de nos 20 min. »" },
+  { date: "2026-09-29", type: "ajout", qui: "kermoal", texte: "Kermoal ajoutée, sans examen." },
+  { date: "2026-10-01", type: "ajout", qui: "sternes", texte: "12 rue des Sternes ajouté depuis une annonce." },
+  { date: "2026-10-04", type: "visite", qui: "sternes", texte: "Visite du 12 rue des Sternes, deux observations notées." },
+  { date: "2026-10-08", type: "projet", qui: null, texte: "Projet révisé : une gare à moins de 30 min au lieu de 20." },
+  { date: "2026-10-09", type: "examen", qui: "sternes", texte: "12 rue des Sternes et Port-Anvel examinés." },
+  { date: "2026-10-12", type: "examen", qui: "ploubrec", texte: "Ploubrec examinée à la commune." },
+  { date: "2026-10-13", type: "examen", qui: "locmaner", texte: "Locmaner examinée à la commune." },
+  { date: "2026-10-14", type: "examen", qui: "brehan", texte: "Bréhan-Coët examinée à la commune." },
+  { date: "2026-10-15", type: "ajout", qui: "lavoir", texte: "Impasse du Lavoir ajoutée depuis une annonce, adresse inconnue." },
+  { date: "2026-10-16", type: "examen", qui: "goelands", texte: "5 allée des Goélands examiné à l'adresse." },
+  { date: "2026-10-17", type: "examen", qui: "thoniers", texte: "8 quai des Thoniers examiné à l'adresse." },
+  { date: "2026-10-19", type: "moteur", qui: null, texte: "Le moteur de futur•e passe à engine-6. Vos analyses restent celles d'engine-4." },
+  { date: "2026-10-24", type: "visite", qui: "kervily", texte: "Visite prévue du 31 route de Kervily.", futur: true },
+];
+const BASE = ["landeven", "kervily", "kermoal", "sternes", "lavoir"];
+const SITUATIONS = [
+  { cle: "recherche", lib: "Votre recherche", d: "Cinq possibilités, une écartée", ids: BASE, derniere: "2026-10-15" },
+  { cle: "une", lib: "Une seule possibilité", d: "Le prolongement d'un dossier d'adresse", ids: ["sternes"], derniere: "2026-10-15", sel: ["sternes"] },
+  { cle: "deux", lib: "Deux possibilités", d: "Deux biens en course, déjà rapprochés", ids: ["kervily", "sternes"], derniere: "2026-10-15", sel: ["sternes", "kervily"] },
+  { cle: "dix", lib: "Dix possibilités", d: "Six communes, quatre biens", ids: [...BASE, "ploubrec", "locmaner", "brehan", "goelands", "thoniers"], derniere: "2026-10-15" },
+  { cle: "meme", lib: "Deux logements, même commune", d: "Un socle territorial commun", ids: ["sternes", "goelands"], derniere: "2026-10-15", sel: ["sternes", "goelands"] },
+  { cle: "libre", lib: "Une commune non débloquée", d: "Aperçu partiel face à un bien examiné", ids: ["kermoal", "sternes"], derniere: "2026-10-15", sel: ["sternes", "kermoal"] },
+  { cle: "horscadre", lib: "Deux analyses hors cadre", d: "Deux versions du Projet", ids: BASE, derniere: "2026-10-15", sel: ["sternes", "kervily"] },
+  { cle: "mois", lib: "Retour après un mois", d: "Dernière visite le 19 septembre", ids: BASE, derniere: "2026-09-19" },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// ÉTAT LOCAL. Rien n'est persistant : la page repart de zéro à chaque ouverture.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const S = {
+  situation: "recherche", ids: [...BASE], derniere: "2026-10-15",
+  sel: [], lentille: null, cote: new Set(), cadre: false,
+  filtre: "toutes", filtreRapp: "tout", echelleFiche: null, condOuverte: null, rangOuvert: null,
+  verifs: new Set(), notes: [], etats: {}, ecartsLocaux: {},
+  menus: { situations: false, ajout: false, depuis: false, revs: false, guidePlus: false, ecarter: null, note: null },
+};
+const ETAB = new Set(["favorable", "reserve", "mismatch", "incompatible"]);
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+const dc = (iso) => { const [, m, d] = iso.split("-"); return `${+d}${+d === 1 ? "er" : ""} ${MOIS[+m - 1]}`; };
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const $ = (s, r = document) => r.querySelector(s);
+const mobile = () => matchMedia("(max-width: 759px)").matches;
+const reduit = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Une possibilité, avec son état éventuellement modifié dans la session (écartée, reprise).
+function P(id) {
+  const p = POSS[id];
+  return { id, ...p, etat: S.etats[id] ?? p.etat, ecart: S.ecartsLocaux[id] ?? p.ecart };
+}
+const actives = () => S.ids.map(P).filter((p) => p.etat !== "ecarte");
+const ecartees = () => S.ids.map(P).filter((p) => p.etat === "ecarte");
+
+// L'analyse telle qu'on la lit : figée, ou « mise au même cadre » (simulation, analyses en jeu seulement).
+function lireAnalyse(cle, pid) {
+  const a = ANALYSES[cle];
+  if (!a) return null;
+  const enJeu = !pid || P(pid).etat !== "ecarte";
+  if (S.cadre && a.rev !== REV_COURANTE && enJeu) {
+    return { ...a, rev: REV_COURANTE, moteur: "engine-6", date: AUJ, simule: true, i: { ...a.i, ...(a.apres ?? {}) } };
+  }
+  return a;
+}
+
+// Ce qu'on sait d'une possibilité, pour un critère, à une échelle.
+// issue : favorable | reserve | mismatch | incompatible | to_confirm | indeterminate
+//         | piste (rien n'est lu) | non_lu (aperçu muet sur ce point)
+//         | sans_adresse (annonce sans adresse) | adresse_non_examinee | commune_seule (une commune n'a pas d'abords)
+function lire(p, critCle, ech) {
+  const c = COMMUNES[p.commune];
+  if (ech === "territoire") {
+    if (c.libre) { const v = c.libre[critCle]; return v ? { issue: v[0], valeur: v[1], source: v[2], libre: true } : { issue: "non_lu", libre: true }; }
+    if (!c.analyse) return { issue: "piste" };
+    const a = lireAnalyse(c.analyse, p.id); const v = a.i[critCle];
+    return v ? { issue: v[0], valeur: v[1], source: v[2], a } : { issue: "indeterminate", a };
+  }
+  if (p.type === "commune") return { issue: "commune_seule" };
+  if (p.sansAdresse) return { issue: "sans_adresse" };
+  if (!p.adr) return { issue: "adresse_non_examinee" };
+  const a = lireAnalyse(p.adr, p.id); const v = a.i[critCle];
+  return v ? { issue: v[0], valeur: v[1], source: v[2], a } : { issue: "indeterminate", a };
+}
+// L'échelle la plus fine où un critère a reçu une réponse pour cette possibilité.
+function lirePlusFin(p, critCle) {
+  for (const e of [...CRIT[critCle].ech].reverse()) {
+    const r = lire(p, critCle, e);
+    if (e === "territoire" || ETAB.has(r.issue) || r.issue === "to_confirm") return { ...r, ech: e };
+  }
+  return { ...lire(p, critCle, "territoire"), ech: "territoire" };
+}
+
+const REG = {
+  favorable: { mot: "correspond", reg: "alignement" },
+  reserve: { mot: "compromis", reg: "compromis" },
+  mismatch: { mot: "moins bien que demandé", reg: "ecart" },
+  incompatible: { mot: "condition non tenue", reg: "incompatibilite" },
+  to_confirm: { mot: "à vérifier", reg: "controle" },
+  indeterminate: { mot: "indéterminé", reg: "non-su" },
+  piste: { mot: "rien n'est encore lu", reg: null },
+  non_lu: { mot: "non lu par l'aperçu", reg: null },
+  sans_adresse: { mot: "adresse inconnue", reg: null },
+  adresse_non_examinee: { mot: "adresse non examinée", reg: null },
+  commune_seule: { mot: "il faut une adresse", reg: null },
+};
+const motDe = (r) => REG[r.issue].mot + (r.libre && REG[r.issue].reg ? " (aperçu)" : "");
+const regVar = (r) => (r.libre && REG[r.issue].reg ? "libre" : REG[r.issue]?.reg);
+const teinte = (reg) => (reg && reg !== "libre" ? `var(--reg-${reg})` : "var(--r-meta)");
+
+function niveau(p) {
+  const c = COMMUNES[p.commune];
+  if (p.type === "commune") return c.libre ? "Aperçu gratuit seulement" : c.analyse ? "Commune examinée" : "Piste : rien n'est encore lu";
+  if (p.sansAdresse) return "Commune examinée · adresse inconnue";
+  if (!p.adr) return c.analyse ? "Commune examinée · adresse non examinée" : "Rien n'est encore lu";
+  return "Commune, abords et logement examinés";
+}
+const ETAT_LIB = { en_course: "En course", a_considerer: "À considérer", ecarte: "Écartée" };
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// GLYPHES. La forme dit l'échelle (cercle, carré, losange) ; le trait dit le registre ; le
+// remplissage dit qu'une réponse est établie. Une absence est dessinée en pointillé, jamais vide.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function forme(f, t, attrs) {
+  const c = t / 2, m = 1.6;
+  if (f === "cercle") return `<circle cx="${c}" cy="${c}" r="${c - m}" ${attrs}/>`;
+  if (f === "carre") return `<rect x="${m}" y="${m}" width="${t - 2 * m}" height="${t - 2 * m}" rx="${t / 9}" ${attrs}/>`;
+  const s = t * 0.66;
+  return `<rect x="${c - s / 2}" y="${c - s / 2}" width="${s}" height="${s}" rx="${t / 14}" transform="rotate(45 ${c} ${c})" ${attrs}/>`;
+}
+function glyphe(ech, taille = 14) {
+  return `<svg class="g" width="${taille}" height="${taille}" viewBox="0 0 ${taille} ${taille}" aria-hidden="true">${forme(ECH[ech].forme, taille, `fill="none" stroke="currentColor" stroke-width="1.4"`)}</svg>`;
+}
+// Une marque d'issue : forme de l'échelle, teinte du registre.
+function marque(r, ech, taille = 18) {
+  const col = teinte(REG[r.issue].reg);
+  let attrs;
+  if (ETAB.has(r.issue) && !r.libre) attrs = `fill="${col}" stroke="${col}" stroke-width="1.4"`;
+  else if (r.libre && REG[r.issue].reg) attrs = `fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="1.2 3" stroke-linecap="round"`;
+  else if (r.issue === "to_confirm") attrs = `fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="3 2.4"`;
+  else if (r.issue === "indeterminate") attrs = `fill="none" stroke="${col}" stroke-width="1.6"`;
+  else attrs = `fill="none" stroke="var(--r-meta)" stroke-width="1.3" stroke-dasharray="2.4 3"`;
+  const bloq = r.issue === "incompatible" && !r.libre ? `<line x1="3" y1="${taille - 3}" x2="${taille - 3}" y2="3" stroke="var(--r-plaque)" stroke-width="2"/>` : "";
+  return `<svg class="g" width="${taille}" height="${taille}" viewBox="0 0 ${taille} ${taille}" aria-hidden="true">${forme(ECH[ech].forme, taille, attrs)}${bloq}</svg>`;
+}
+
+// L'emblème d'une possibilité seule (panneau, pôles du rapprochement) : trois formes emboîtées,
+// pleines quand l'échelle est examinée, pointillées sinon.
+function emblemeSeul(p, taille, cliquable) {
+  const V = 120, c = 60;
+  const com = COMMUNES[p.commune];
+  const terr = com.analyse ? "plein" : com.libre ? "points" : "pointille";
+  const adr = p.type === "bien" && p.adr ? "plein" : "pointille";
+  const st = (e, ech) => {
+    const fort = S.echelleFiche === ech && cliquable;
+    const base = e === "plein" ? `stroke="var(--r-encre)" stroke-width="${fort ? 2.8 : 1.5}"` : e === "points" ? `stroke="var(--r-discret)" stroke-width="2" stroke-dasharray="1.2 4" stroke-linecap="round"` : `stroke="var(--r-meta)" stroke-width="${fort ? 1.8 : 1}" stroke-dasharray="3 4"`;
+    return `${base} vector-effect="non-scaling-stroke"`;
+  };
+  const grads = terr === "plein" ? Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2, r1 = 54, r2 = i % 4 === 0 ? 59 : 57; return `<line x1="${(c + Math.cos(a) * r1).toFixed(2)}" y1="${(c + Math.sin(a) * r1).toFixed(2)}" x2="${(c + Math.cos(a) * r2).toFixed(2)}" y2="${(c + Math.sin(a) * r2).toFixed(2)}" stroke="var(--r-meta)" stroke-width="1"/>`; }).join("") : "";
+  const clic = (ech) => (cliquable ? `class="forme" data-act="echelle" data-ech="${ech}"` : "");
+  return `<svg viewBox="-6 -6 ${V + 12} ${V + 12}" width="${taille}" height="${taille}" aria-hidden="true">${grads}
+    <g ${clic("territoire")}><circle cx="${c}" cy="${c}" r="50" fill="transparent" ${st(terr, "territoire")}/></g>
+    <g ${clic("autour")}><rect x="${c - 29}" y="${c - 29}" width="58" height="58" rx="7" fill="transparent" ${st(adr, "autour")}/></g>
+    <g ${clic("logement")}><rect x="${c - 13}" y="${c - 13}" width="26" height="26" rx="3" transform="rotate(45 ${c} ${c})" fill="transparent" ${st(adr, "logement")}/></g>
+    <circle cx="${c}" cy="${c}" r="1.8" fill="var(--r-encre)"/></svg>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE RAPPROCHEMENT : LA RÈGLE. Pour une condition et une échelle, deux lectures donnent une
+// classe. Déterministe, sans total, sans tri des lieux.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const NON_EXAMINE = new Set(["piste", "sans_adresse", "adresse_non_examinee", "commune_seule", "non_lu"]);
+function communEch(a, b, crit) {
+  for (const e of [...CRIT[crit].ech].reverse()) if (!NON_EXAMINE.has(lire(a, crit, e).issue) && !NON_EXAMINE.has(lire(b, crit, e).issue)) return e;
+  return "territoire";
+}
+function classePaire(pa, pb, crit, ech) {
+  if (ech === "territoire" && pa.commune === pb.commune) return "socle";
+  const a = lire(pa, crit, ech), b = lire(pb, crit, ech);
+  if (CRIT[crit].sans && ((a.issue === "incompatible" && !a.libre) || (b.issue === "incompatible" && !b.libre))) return "bloquant";
+  if (a.libre || b.libre) return "partiel";
+  const ea = ETAB.has(a.issue), eb = ETAB.has(b.issue);
+  if (ea && eb) {
+    if (a.issue === b.issue) return "commun";
+    return a.a?.rev !== b.a?.rev ? "hors_cadre" : "separe";
+  }
+  if (ea || eb) return NON_EXAMINE.has((ea ? b : a).issue) ? "profondeur" : "incertain";
+  if (NON_EXAMINE.has(a.issue) !== NON_EXAMINE.has(b.issue)) return "profondeur";
+  if (a.issue === "to_confirm" && b.issue === "to_confirm") return "a_verifier";
+  if (NON_EXAMINE.has(a.issue) && NON_EXAMINE.has(b.issue)) return "rien";
+  return "inconnu";
+}
+const CLASSE = {
+  bloquant: { mot: "Condition non tenue", fort: true }, separe: { mot: "Les sépare", fort: true },
+  hors_cadre: { mot: "Pas au même cadre", fort: true }, incertain: { mot: "Pourrait les séparer", fort: false },
+  a_verifier: { mot: "À vérifier des deux côtés", fort: false }, inconnu: { mot: "Aucune ne le dit", fort: false },
+  commun: { mot: "En commun", fort: false }, socle: { mot: "Même commune", fort: false },
+  profondeur: { mot: "Une seule est examinée ici", fort: false }, partiel: { mot: "Aperçu partiel, hors départage", fort: false },
+  rien: { mot: "Aucune n'est examinée ici", fort: false },
+};
+const FAMILLE = { bloquant: "separe", separe: "separe", hors_cadre: "horscadre", incertain: "incertain", a_verifier: "incertain", inconnu: "incertain", commun: "commun", socle: "commun", profondeur: "profondeur", partiel: "profondeur", rien: "profondeur" };
+const liste = (xs) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} et ${xs.at(-1)}`);
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// MAINTENANT. Les prochaines actions naissent de l'état de la recherche, chacune avec sa raison.
+// Aucune urgence, aucune offre : une inconnue n'est jamais un bouton d'achat.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function analysesHorsCadre() {
+  const out = [];
+  for (const p of actives()) {
+    const c = COMMUNES[p.commune];
+    if (c.analyse && lireAnalyse(c.analyse, p.id).rev !== REV_COURANTE && !out.some((o) => o.cle === c.analyse)) out.push({ cle: c.analyse, nom: c.nom, pid: p.id });
+    if (p.adr && lireAnalyse(p.adr, p.id).rev !== REV_COURANTE) out.push({ cle: p.adr, nom: p.court, pid: p.id });
+  }
+  return out;
+}
+function auCadre(p) {
+  const c = COMMUNES[p.commune];
+  return (!c.analyse || lireAnalyse(c.analyse, p.id).rev === REV_COURANTE) && (!p.adr || lireAnalyse(p.adr, p.id).rev === REV_COURANTE);
+}
+function guides() {
+  const g = [];
+  const acts = actives();
+  for (const p of acts) {
+    for (const c of CRITERES.filter((c) => c.sans)) {
+      const r = lire(p, c.cle, "territoire");
+      if (r.issue === "incompatible" && !r.libre) g.push({ k: "bloq-" + p.id, t: "incompatibilite", titre: `${p.court} ne tient pas une condition sans compromis : ${c.lab()}.`, pourquoi: `${r.valeur}. Aucun autre point ne compense une condition sans compromis.`, actions: [["Voir pourquoi", "sel-seul", p.id], ["Écarter…", "ecarter-ouvrir", p.id]] });
+    }
+  }
+  const hc = analysesHorsCadre();
+  if (hc.length && acts.length > 1) {
+    const cible = P(hc[0].pid);
+    const autre = acts.find((p) => p.id !== cible.id && p.type === cible.type && auCadre(p)) ?? acts.find((p) => p.id !== cible.id);
+    g.push({ k: "cadre", t: "non-su", titre: `${hc.length > 1 ? `${hc.length} de vos analyses répondent` : "Une de vos analyses répond"} à l'ancienne version de votre Projet.`, pourquoi: `${hc.map((x) => x.nom).join(", ")} : ${hc.length > 1 ? "analyses produites" : "analyse produite"} avant le 8 oct., quand la gare devait être à moins de 20 min. Leurs écarts avec vos autres possibilités ne s'interprètent pas encore.`, actions: [["Voir l'écart", "paire", `${autre.id},${cible.id}`], ["Mettre au même cadre", "cadre", ""]] });
+  }
+  for (const p of ecartees()) {
+    if (p.ecart?.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare" && REV[p.ecart.rev].gare !== gareMax()) {
+      g.push({ k: "ecart-" + p.id, t: "controle", titre: `${p.nom} a été écartée pour une raison que votre Projet a changée depuis.`, pourquoi: `Écartée le ${dc(p.ecart.date)} sous « moins de ${REV[p.ecart.rev].gare} min » ; votre Projet dit maintenant « moins de ${gareMax()} min ». futur•e ne peut pas dire si elle y correspondrait sans nouvelle analyse.`, actions: [[`Revoir ${p.nom}`, "sel-seul", p.id]] });
+    }
+  }
+  for (const p of acts.filter((p) => p.visite && p.visite >= AUJ)) {
+    const n = CRITERES.filter((c) => lirePlusFin(p, c.cle).issue === "to_confirm").length;
+    g.push({ k: "visite-" + p.id, t: "controle", titre: `Visite du ${dc(p.visite)} : ${n} point${n > 1 ? "s restent" : " reste"} à vérifier au ${p.court}.`, pourquoi: "Ce que futur•e n'a pas pu établir pour ce bien, et qui pourrait changer votre avis.", actions: [["Préparer la visite", "visite", p.id]] });
+  }
+  // Les inconnues qui restent, hors biens déjà couverts par une visite prévue.
+  const inconnues = acts.filter((p) => !(p.visite && p.visite >= AUJ) && !COMMUNES[p.commune].libre)
+    .flatMap((p) => CRITERES.filter((c) => lirePlusFin(p, c.cle).issue === "to_confirm").map((c) => ({ p, c })));
+  if (inconnues.length && acts.length > 1) {
+    const parLieu = [...new Set(inconnues.map((x) => x.p.id))].map((id) => `${P(id).court} (${inconnues.filter((x) => x.p.id === id).map((x) => x.c.lab()).join(", ")})`);
+    g.push({ k: "inconnues", t: "controle", titre: `${inconnues.length} point${inconnues.length > 1 ? "s restent" : " reste"} à vérifier, et pourrai${inconnues.length > 1 ? "ent" : "t"} changer votre arbitrage.`, pourquoi: `${liste(parLieu)}. futur•e ne peut pas les établir ; une visite ou un appel le peut.`, actions: [["Voir quoi vérifier", "visite", inconnues[0].p.id]] });
+  }
+  const enCourse = acts.filter((p) => p.etat === "en_course");
+  if (enCourse.length === 2) {
+    const [a, b] = enCourse; const cl = classePaire(a, b, "gare", communEch(a, b, "gare"));
+    if (cl === "commun" || cl === "a_verifier" || cl === "inconnu") g.push({ k: "prio", t: "non-su", titre: `Vos deux biens en course restent difficiles à départager sur votre priorité principale, ${CRIT.gare.lab()}.`, pourquoi: "Sur ce point, ils disent la même chose. Ce qui les sépare se trouve ailleurs.", actions: [["Voir ce qui les sépare", "paire", `${a.id},${b.id}`]] });
+  }
+  for (const p of acts.filter((p) => p.sansAdresse)) {
+    const voisin = acts.find((q) => q.id !== p.id && q.commune === p.commune && q.adr);
+    g.push({ k: "adr-" + p.id, t: "non-su", titre: `${p.court} : sans adresse, ni les abords ni le logement ne sont lisibles.`, pourquoi: voisin ? `Elle partage la lecture de ${COMMUNES[p.commune].nom} avec le ${voisin.court}. Ce qui pourrait les distinguer se joue à l'adresse.` : "Seule la commune est lue.", actions: [["Voir ce qui manque", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => p.adresseConnue && !p.adr)) {
+    g.push({ k: "adrc-" + p.id, t: "non-su", titre: `Le territoire de ${COMMUNES[p.commune].nom} est déjà lu : il manque les abords et le logement du ${p.court}.`, pourquoi: "La commune a été examinée pour un autre bien. Rien n'est encore lu à cette adresse.", actions: [["Voir", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => p.type === "commune" && !COMMUNES[p.commune].analyse && !COMMUNES[p.commune].libre)) {
+    g.push({ k: "piste-" + p.id, t: "non-su", titre: `${p.nom} est une piste : rien n'est encore lu.`, pourquoi: "Elle n'entre dans aucune comparaison tant qu'elle n'est pas examinée.", actions: [["Voir", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => COMMUNES[p.commune].libre)) {
+    g.push({ k: "libre-" + p.id, t: "non-su", titre: `${p.nom} n'est lue que par l'aperçu gratuit.`, pourquoi: "Trois constats, aucun départage : elle n'est comparée sur rien tant qu'elle n'est pas examinée.", actions: [["Voir l'aperçu", "sel-seul", p.id]] });
+  }
+  if (acts.length === 1) g.push({ k: "seule", t: "non-su", titre: "Une seule possibilité : rien à départager encore.", pourquoi: "Ajoutez une commune ou un bien pour voir ce qui les sépare, et ce qu'ils partagent.", actions: [["Ajouter une possibilité", "ajout", ""]] });
+  return g;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LA PLANCHE. Une commune = un cercle ; les biens de cette commune = des carrés DANS le cercle ;
+// un logement examiné = un losange dans son carré. Deux biens d'une même commune partagent le même
+// cercle : leur socle territorial commun se voit avant d'être dit.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function groupes(ps) {
+  const g = new Map();
+  for (const p of ps) {
+    if (!g.has(p.commune)) g.set(p.commune, { commune: p.commune, biens: [], communeP: null });
+    const x = g.get(p.commune);
+    if (p.type === "commune") x.communeP = p; else x.biens.push(p);
+  }
+  return [...g.values()];
+}
+const POSITIONS = {
+  1: [[100, 100, 92]], 2: [[64, 100, 56], [136, 100, 56]],
+  3: [[100, 64, 50], [64, 132, 50], [136, 132, 50]], 4: [[66, 66, 48], [134, 66, 48], [66, 134, 48], [134, 134, 48]],
+};
+function coins(x, y, w, h, k = 9) {
+  const g = 5;
+  return `<path class="coin" d="M${x - g} ${y - g + k}V${y - g}H${x - g + k} M${x + w + g - k} ${y - g}H${x + w + g}V${y - g + k} M${x + w + g} ${y + h + g - k}V${y + h + g}H${x + w + g - k} M${x - g + k} ${y + h + g}H${x - g}V${y + h + g - k}"/>`;
+}
+// Une condition sans compromis non tenue se voit sur la planche, lentille ou non : rien ne la compense.
+const bloquants = (p) => CRITERES.filter((c) => c.sans).filter((c) => { const r = lire(p, c.cle, "territoire"); return r.issue === "incompatible" && !r.libre; });
+function svgGroupe(gr) {
+  const c = COMMUNES[gr.commune];
+  const cls = c.analyse ? "" : c.libre ? "points" : "pointille";
+  // Graduée = mesurée : seule une commune examinée porte la rose de relevé.
+  const grads = c.analyse ? Array.from({ length: 48 }, (_, i) => { const a = (i / 48) * Math.PI * 2, r1 = 93, r2 = i % 4 === 0 ? 101 : 97; return `<line class="grad" x1="${(100 + Math.cos(a) * r1).toFixed(2)}" y1="${(100 + Math.sin(a) * r1).toFixed(2)}" x2="${(100 + Math.cos(a) * r2).toFixed(2)}" y2="${(100 + Math.sin(a) * r2).toFixed(2)}"/>`; }).join("") : "";
+  let interieur = "";
+  const pc = gr.communeP;
+  if (pc) {
+    // Une commune seule : le carré et le losange restent en pointillé léger. Sans adresse, ces échelles ne s'appliquent pas.
+    interieur += `<rect class="forme-trait leger" x="54" y="54" width="92" height="92" rx="10" pointer-events="none"/><rect class="forme-trait leger" x="79" y="79" width="42" height="42" rx="5" transform="rotate(45 100 100)" pointer-events="none"/>`;
+  }
+  const pos = POSITIONS[Math.min(4, gr.biens.length)] ?? [];
+  gr.biens.slice(0, 4).forEach((b, i) => {
+    const [x, y, s] = pos[i];
+    const d = s * 0.46;
+    interieur += `<g class="forme" data-pid="${b.id}" data-act="sel" data-arg="${b.id}">
+      <rect class="fond-forme" x="${x - s / 2}" y="${y - s / 2}" width="${s}" height="${s}"/>
+      <rect class="forme-trait ${b.adr ? "" : "pointille"}" data-pid-trait="${b.id}" data-ech="autour" x="${x - s / 2}" y="${y - s / 2}" width="${s}" height="${s}" rx="${s / 9}"/>
+      <rect class="forme-trait ${b.adr ? "" : "leger"}" data-pid-trait="${b.id}" data-ech="logement" x="${x - d / 2}" y="${y - d / 2}" width="${d}" height="${d}" rx="${s / 16}" transform="rotate(45 ${x} ${y})"/>
+      ${b.sansAdresse ? `<text class="q" x="${x}" y="${y + 5}" text-anchor="middle">?</text>` : ""}
+      ${coins(x - s / 2, y - s / 2, s, s)}
+    </g>`;
+  });
+  const circ = `<circle class="forme-trait ${cls}" data-ech="territoire" ${pc ? `data-pid-trait="${pc.id}"` : `data-commune="${gr.commune}"`} cx="100" cy="100" r="88"/>`;
+  const circG = pc ? `<g class="forme" data-pid="${pc.id}" data-act="sel" data-arg="${pc.id}"><circle class="fond-forme" cx="100" cy="100" r="88"/>${circ}${coins(12, 12, 176, 176, 16)}</g>` : circ;
+  const bloq = [...(pc ? [pc] : []), ...gr.biens].some((p) => bloquants(p).length) ? `<line class="barre-bloq" x1="38" y1="162" x2="162" y2="38"/>` : "";
+  return `<svg viewBox="-12 -12 224 224" aria-hidden="true">${grads}${circG}${interieur}${bloq}${gr.biens.length ? "" : `<circle cx="100" cy="100" r="2" fill="var(--r-encre)"/>`}</svg>`;
+}
+function ligneLieu(p) {
+  let iss = "";
+  if (S.lentille) {
+    const r = lirePlusFin(p, S.lentille);
+    iss = `<span class="i" style="--t:${teinte(REG[r.issue].reg)}">${cap(motDe(r))}${ETAB.has(r.issue) || r.issue === "to_confirm" ? ` · ${{ territoire: "commune", autour: "abords", logement: "logement" }[r.ech]}` : ""}</span>`;
+  }
+  const bq = bloquants(p);
+  if (!S.lentille && bq.length) iss = `<span class="i" style="--t:var(--reg-incompatibilite)">Condition non tenue : ${bq.map((c) => c.lab()).join(", ")}</span>`;
+  const sous = p.etat === "ecarte" ? `Écartée le ${dc(p.ecart.date)}` : `${niveau(p)}${p.visite ? ` · visite le ${dc(p.visite)}` : ""}`;
+  return `<button class="lieu" data-act="sel" data-arg="${p.id}" data-fk="lieu-${p.id}" aria-pressed="${S.sel.includes(p.id)}"><span class="n">${esc(p.type === "bien" ? p.court : p.nom)}</span><span class="s">${ETAT_LIB[p.etat]} · ${sous}</span>${iss}</button>`;
+}
+function htmlGroupe(gr) {
+  const c = COMMUNES[gr.commune];
+  const ps = [...(gr.communeP ? [gr.communeP] : []), ...gr.biens];
+  const titre = gr.communeP ? "" : `<div class="commune-nom"><span class="etiquette">${c.nom}</span><span class="meta">${gr.biens.length > 1 ? `${gr.biens.length} biens, une commune` : "commune"}</span></div>`;
+  return `<div class="groupe" data-groupe="${gr.commune}">${svgGroupe(gr)}${titre}<div class="lieux">${ps.map(ligneLieu).join("")}</div></div>`;
+}
+let clePlanche = "";
+function rendrePlanche() {
+  const el = $("#planche");
+  const acts = actives();
+  const filtres = [["toutes", `Toutes · ${acts.length}`], ["en_course", "En course"], ["a_considerer", "À considérer"]];
+  const visibles = acts.filter((p) => S.filtre === "toutes" || p.etat === S.filtre);
+  const ecs = ecartees();
+  const indice = S.sel.length === 0 ? "Touchez un lieu pour l'examiner, deux pour les rapprocher."
+    : S.sel.length === 1 ? `${P(S.sel[0]).court} est ouvert. Touchez un deuxième lieu pour les rapprocher.`
+      : "Deux lieux rapprochés. Touchez un autre lieu pour recommencer.";
+  const ajoutsPossibles = ["kerlavan", "ecluse"].filter((id) => !S.ids.includes(id));
+  const cle = JSON.stringify([S.ids, S.etats, S.filtre, S.sel, S.lentille, S.cadre, S.menus.ajout, S.situation]);
+  if (cle === clePlanche) return;
+  clePlanche = cle;
+  el.innerHTML = `
+    <div class="planche-tete">
+      <h2 class="surtitre" id="titre-planche"><span>Vos possibilités</span></h2>
+      ${acts.length > 4 ? `<div class="filtres" role="group" aria-label="Filtrer les possibilités">${filtres.map(([k, l]) => `<button class="filtre" data-act="filtre" data-arg="${k}" data-fk="filtre-${k}" aria-pressed="${S.filtre === k}">${l}</button>`).join("")}</div>` : ""}
+    </div>
+    <p class="indice" aria-live="polite">${indice}</p>
+    <div class="groupes">
+      ${groupes(visibles).map(htmlGroupe).join("")}
+      ${ajoutsPossibles.length ? `<button class="ajout" data-act="ajout" data-fk="ajout" aria-expanded="${S.menus.ajout}"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15" fill="none" stroke="currentColor" stroke-dasharray="3 4"/><path d="M17 10v14M10 17h14" stroke="currentColor" stroke-width="1.6"/></svg>Ajouter une possibilité</button>` : ""}
+      ${S.menus.ajout ? `<div class="choix-ajout arrive"><p class="encre"><b>Ajouter une possibilité</b> <span class="sim">démonstration</span></p><p class="nuance">Dans le produit, vous ajouteriez une commune, une adresse ou une annonce. Ici, deux ajouts préparés montrent ce qu'une possibilité non examinée change à la planche. Rien n'est analysé.</p><div class="opts">${ajoutsPossibles.map((id) => `<button class="btn" data-act="ajouter" data-arg="${id}">${id === "kerlavan" ? "Une commune : Kerlavan" : "Une adresse : 4 rue de l'Écluse, Saint-Aurec"}</button>`).join("")}<button class="btn-lien" data-act="ajout">Annuler</button></div></div>` : ""}
+    </div>
+    ${ecs.length ? `<div class="ecartees"><h3 class="surtitre"><span>Écartées</span><span class="num">${ecs.length}</span></h3><div class="groupes">${groupes(ecs).map(htmlGroupe).join("")}</div></div>` : ""}`;
+}
+// La lentille recolore les formes en place : le trait change de registre sans que la planche soit redessinée.
+function appliquerLentillePlanche() {
+  const el = $("#planche");
+  if (S.lentille) el.dataset.lentille = S.lentille; else delete el.dataset.lentille;
+  el.querySelectorAll(".forme-trait").forEach((f) => {
+    f.removeAttribute("data-reg");
+    if (!S.lentille || !f.dataset.ech || !CRIT[S.lentille].ech.includes(f.dataset.ech)) return;
+    let r = null;
+    if (f.dataset.pidTrait) r = lire(P(f.dataset.pidTrait), S.lentille, f.dataset.ech);
+    else if (f.dataset.commune) { const repr = S.ids.map(P).find((p) => p.commune === f.dataset.commune); r = repr ? lire(repr, S.lentille, "territoire") : null; }
+    const reg = r && regVar(r);
+    if (reg) f.setAttribute("data-reg", reg);
+  });
+  el.querySelectorAll(".forme[data-pid]").forEach((g) => g.classList.toggle("sel", S.sel.includes(g.dataset.pid)));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE PROJET. Les conditions sont des lentilles : en toucher une recolore la planche, réordonne le
+// rapprochement et ouvre ses preuves. Le Projet n'est jamais modifié depuis cet écran.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function chip(c) {
+  const poids = c.poids ? `<span class="poids" aria-hidden="true">${[1, 2, 3].map((n) => `<i class="${n <= c.poids ? "" : "vide"}" style="height:${4 + n * 2.6}px"></i>`).join("")}</span>` : `<span class="verrou" aria-hidden="true"></span>`;
+  return `<button class="lentille ${c.sans ? "sans" : ""} ${S.cote.has(c.cle) ? "cote" : ""}" data-act="lentille" data-arg="${c.cle}" data-fk="lentille-${c.cle}" aria-pressed="${S.lentille === c.cle}">${poids}<span>${c.court()}</span><span class="sr">${c.sans ? ", condition sans compromis" : `, poids ${c.poids} sur 3`}</span></button>`;
+}
+function lectureLentille() {
+  if (!S.lentille) return "";
+  const c = CRIT[S.lentille];
+  const ou = c.ech.map((e) => ECH[e].lu).join(" et ");
+  const qui = c.ech.length === 1 ? "seuls les cercles répondent" : c.ech.includes("autour") ? "les cercles et les carrés répondent" : "les cercles et les losanges répondent";
+  const cote = c.sans
+    ? `<p class="nuance">Condition sans compromis : elle ne se met pas de côté. Pour la changer, il faut réviser votre Projet.</p>`
+    : `<button class="btn-lien" data-act="cote" data-arg="${c.cle}" data-fk="cote-${c.cle}">${S.cote.has(c.cle) ? "Remettre cette priorité dans la comparaison" : "Et si je mettais cette priorité de côté ?"}</button>`;
+  return `<div class="lecture-lentille arrive"><span class="formes" aria-hidden="true">${c.ech.map((e) => glyphe(e, 15)).join("")}</span><p><b class="encre">${cap(c.lab())}</b> se lit ${ou} : ${qui}.</p>${cote}</div>`;
+}
+let cleLentille = null;
+function rendreProjet() {
+  const sans = CRITERES.filter((c) => c.sans), prio = CRITERES.filter((c) => !c.sans);
+  const anciennes = analysesHorsCadre();
+  $("#projet").innerHTML = `
+    <div class="projet-tete">
+      <h1 class="projet-titre">Vivre près de la mer, avec un médecin à portée.</h1>
+      <div class="projet-rev"><button class="btn-lien meta" data-act="revs" data-fk="revs" aria-expanded="${S.menus.revs}">Votre Projet · révision 2 du 8 oct.</button></div>
+    </div>
+    ${S.menus.revs ? `<div class="revs">
+      <div><span class="meta">Révision 2 · 8 oct.</span><span>Une gare à moins de <b class="encre">30 min</b> au lieu de 20. ${REV.r2.cause}</span></div>
+      <div><span class="meta">Révision 1 · 8 sept.</span><span>Projet créé. ${anciennes.length ? `Répondent encore à cette version : ${anciennes.map((x) => x.nom).join(", ")}.` : "Plus aucune analyse en jeu ne répond à cette version."}</span></div>
+    </div>` : ""}
+    <div class="lentilles">
+      <div class="lot"><span class="etiquette">Sans compromis</span><div class="lot-chips">${sans.map(chip).join("")}</div></div>
+      <div class="lot"><span class="etiquette">Vos priorités, par poids déclaré</span><div class="lot-chips">${prio.map(chip).join("")}</div></div>
+    </div>
+    <p class="non-mesure"><b>Surtout : un budget de 320 000 €.</b> futur•e ne le mesure pour aucun lieu ; aucune possibilité ne gagne à son silence.</p>
+    ${lectureLentille()}
+    ${S.cote.size ? `<p class="nuance"><span class="sim">simulation d'affichage</span> Mis de côté dans cette vue : ${[...S.cote].map((k) => CRIT[k].lab()).join(", ")}. Votre Projet n'est pas modifié.</p>` : ""}`;
+  if (cleLentille === S.lentille) $("#projet .lecture-lentille")?.classList.remove("arrive");
+  cleLentille = S.lentille;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// DEPUIS VOTRE DERNIÈRE VISITE. Une règle courte, de la dernière visite à la prochaine échéance.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function evenementsDepuis() {
+  return JOURNAL.filter((j) => (j.qui === null || S.ids.includes(j.qui)) && (j.date > S.derniere || (j.date === S.derniere && j.type === "ajout")) && (j.date <= AUJ || j.futur));
+}
+function rendreDepuis() {
+  const ev = evenementsDepuis();
+  const passes = ev.filter((e) => !e.futur);
+  const debut = Date.parse(S.derniere), fin = Date.parse(ev.some((e) => e.futur) ? "2026-10-26" : AUJ);
+  const x = (iso) => Math.max(0, Math.min(100, ((Date.parse(iso) - debut) / Math.max(1, fin - debut)) * 100));
+  $("#depuis").innerHTML = `<div class="depuis">
+    <span class="etiquette">Depuis votre visite du ${dc(S.derniere)}</span>
+    <div class="depuis-regle" aria-hidden="true"><div class="axe"></div>${ev.map((e) => `<span class="evt ${e.futur ? "futur" : ""} ${e.type === "projet" ? "projet" : ""}" style="left:${x(e.date)}%"></span>`).join("")}<span class="auj" style="left:${x(AUJ)}%"></span></div>
+    <button class="btn-lien" data-act="depuis" data-fk="depuis" aria-expanded="${S.menus.depuis}">${passes.length} changement${passes.length > 1 ? "s" : ""}${ev.length > passes.length ? ", 1 à venir" : ""}</button>
+  </div>
+  ${S.menus.depuis ? `<div class="journal">${ev.map((e) => `<div><span class="meta">${dc(e.date)}${e.futur ? " · prévu" : ""}</span><span>${e.texte}</span>${e.qui && S.ids.includes(e.qui) ? `<button class="btn-lien" data-act="sel-seul" data-arg="${e.qui}">Voir</button>` : "<span></span>"}</div>`).join("")}</div>` : ""}`;
+}
+
+function htmlGuide(x) {
+  return `<div class="guide" style="--t:${teinte(x.t)}"><h3>${x.titre}</h3><p class="pourquoi">${x.pourquoi}</p><div class="actions">${x.actions.map(([l, a, arg], i) => `<button class="btn" data-act="${a}" data-arg="${arg}" data-fk="g-${x.k}-${i}">${l}${a === "cadre" ? ` <span class="sim">simulation</span>` : ""}</button>`).join("")}</div></div>`;
+}
+function htmlMaintenant() {
+  const g = guides();
+  const vis = S.menus.guidePlus ? g : g.slice(0, 3);
+  const verifs = [...S.verifs].map((k) => { const [pid, crit] = k.split(":"); return { p: P(pid), crit }; });
+  return `<div class="panneau-tete"><h2 class="surtitre"><span>Maintenant</span></h2><span class="meta">${g.length} point${g.length > 1 ? "s" : ""}</span></div>
+    ${vis.map(htmlGuide).join("") || `<p class="vide-rapp">Rien ne demande votre attention.</p>`}
+    ${g.length > 3 ? `<button class="btn-lien" style="margin-top:8px" data-act="guidePlus" data-fk="guidePlus">${S.menus.guidePlus ? "Montrer moins" : `Voir les ${g.length - 3} autres`}</button>` : ""}
+    ${verifs.length ? `<div class="mes-verifs"><span class="etiquette">Mes vérifications · ${verifs.length}</span><ul>${verifs.map((v) => `<li>${esc(v.p.court)} · ${CRIT[v.crit].lab()} : ${VERIF[v.crit] ?? "à vérifier sur place."}</li>`).join("")}</ul></div>` : ""}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// UNE POSSIBILITÉ. L'emblème dit ce qui a été examiné ; ses formes filtrent les conditions.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function htmlPreuve(r, p, ech) {
+  if (!r.valeur) return `<div class="preuve"><span class="ligne">${glyphe(ech, 11)} ${esc(p.court)} · ${ECH[ech].lu}</span><span class="v">${cap(motDe(r))}.</span></div>`;
+  const a = r.a;
+  return `<div class="preuve"><span class="ligne">${glyphe(ech, 11)} ${esc(p.court)} · ${ECH[ech].lu}</span><span class="v">${esc(r.valeur)}</span><span>Source : ${r.source}</span>${a ? `<span>Analyse ${a.moteur} · révision ${a.rev.slice(1)} · ${dc(a.date)}${a.simule ? ` <span class="sim">simulation</span>` : ""}</span>` : r.libre ? "<span>Aperçu gratuit, commune non débloquée</span>" : ""}</div>`;
+}
+function htmlObs(pid, crit) {
+  const os = [...OBS, ...S.notes].filter((o) => o.pid === pid && o.crit === crit);
+  if (!os.length) return "";
+  return os.map((o) => `<div class="note-perso"><span class="meta">${o.origine} · ${dc(o.date)}</span><span>${esc(o.texte)}</span></div>`).join("") + `<p class="meta">Vos notes ne modifient aucune issue.</p>`;
+}
+function htmlVerif(p, crit) {
+  const k = `${p.id}:${crit}`; const on = S.verifs.has(k);
+  return `<div class="verif"><span class="etiquette">À vérifier · ${esc(p.court)}</span><p>${VERIF[crit] ?? "À vérifier sur place."}</p><div><button class="btn" data-act="verif" data-arg="${k}" data-fk="verif-${k}" aria-pressed="${on}">${on ? "Dans mes vérifications ✓" : p.visite ? `Ajouter à la visite du ${dc(p.visite)}` : "Ajouter à mes vérifications"}</button></div></div>`;
+}
+function htmlFiche(p) {
+  const c = COMMUNES[p.commune];
+  const ta = c.analyse ? lireAnalyse(c.analyse, p.id) : null;
+  const aa = p.adr ? lireAnalyse(p.adr, p.id) : null;
+  const examine = {
+    territoire: ta ? `examiné · révision ${ta.rev.slice(1)} · ${dc(ta.date)}` : c.libre ? "aperçu gratuit seulement" : "rien n'est lu",
+    autour: p.type === "commune" ? "il faut une adresse" : p.sansAdresse ? "adresse inconnue" : aa ? `examiné · révision ${aa.rev.slice(1)} · ${dc(aa.date)}` : "adresse non examinée",
+  };
+  examine.logement = p.type === "commune" ? "il faut une adresse" : aa ? "examiné avec l'adresse" : examine.autour;
+  const conds = CRITERES.filter((k) => !S.echelleFiche || k.ech.includes(S.echelleFiche));
+  const lignes = conds.map((k) => {
+    const echs = S.echelleFiche ? [S.echelleFiche] : k.ech;
+    const fin = S.echelleFiche ? { ...lire(p, k.cle, S.echelleFiche), ech: S.echelleFiche } : lirePlusFin(p, k.cle);
+    const ouvert = S.condOuverte === k.cle || S.lentille === k.cle;
+    return `<div class="cond ${S.lentille === k.cle ? "actif" : ""}">
+      <button data-act="cond" data-arg="${k.cle}" data-fk="cond-${k.cle}" aria-expanded="${ouvert}">${marque(fin, fin.ech, 16)}<span class="lab">${cap(k.lab())}<small>${k.sans ? "sans compromis" : `poids ${k.poids}`} · ${ECH[fin.ech].lu}</small></span><span class="iss reg-t" style="--t:${teinte(REG[fin.issue].reg)}">${cap(motDe(fin))}</span></button>
+      ${ouvert ? `<div class="ouvert">${echs.map((e) => htmlPreuve(lire(p, k.cle, e), p, e)).join("")}${fin.issue === "to_confirm" ? htmlVerif(p, k.cle) : ""}${htmlObs(p.id, k.cle)}</div>` : ""}
+    </div>`;
+  }).join("");
+  const ecart = p.etat === "ecarte" ? (() => {
+    const change = p.ecart.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare";
+    const ditAlors = p.ecart.critere === "gare" ? `une gare à moins de ${REV[p.ecart.rev ?? REV_COURANTE].gare} min` : p.ecart.critere ? CRIT[p.ecart.critere].lab() : "une autre raison";
+    return `<div class="contexte-ecart ${change ? "change" : ""}"><span class="etiquette">Écartée le ${dc(p.ecart.date)}</span><p class="encre">${esc(p.ecart.motif)}</p>
+      <p class="nuance">Votre Projet disait alors : ${ditAlors} (révision ${(p.ecart.rev ?? REV_COURANTE).slice(1)}).${change ? ` Il dit maintenant : à moins de ${gareMax()} min. L'analyse de ${p.nom} répond à l'ancienne version : futur•e ne peut pas dire si elle y correspondrait.` : ""}</p>
+      <div class="actions"><button class="btn" data-act="reprendre" data-arg="${p.id}" data-fk="reprendre">Reprendre cette piste</button><button class="btn-lien" data-act="fermer">Laisser écartée</button></div></div>`;
+  })() : "";
+  const manque = p.type === "commune" && !c.analyse
+    ? `<div class="verif" style="border-left-color:var(--r-meta)"><span class="etiquette">${c.libre ? "Ce que l'aperçu ne dit pas" : "Ce qu'un examen lirait"}</span><p>${c.libre ? `L'aperçu gratuit montre trois constats sur six conditions. Les trois autres (${CRITERES.filter((k) => !c.libre[k.cle]).map((k) => k.lab()).join(", ")}) ne sont pas lus. Tant qu'elle n'est pas examinée, ${p.nom} n'entre dans aucun départage.` : `Un examen de la commune lirait vos six conditions à l'échelle de ${p.nom}. Les abords et le logement demandent une adresse.`}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">Examiner ${p.nom} <span class="sim">simulation</span></button></div></div>`
+    : p.type === "bien" && !p.adr ? `<div class="verif" style="border-left-color:var(--r-meta)"><span class="etiquette">Ce qui manque</span><p>${p.sansAdresse ? "Sans adresse exacte, futur•e lit seulement la commune. Les abords (la gare, le calme) et le logement (les nuits fraîches) restent illisibles : rien ne permet de dire qu'ils sont bons ou mauvais." : "L'adresse est connue mais pas encore examinée : seule la commune est lue."}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">${p.sansAdresse ? "Préciser l'adresse" : "Examiner cette adresse"} <span class="sim">simulation</span></button></div></div>` : "";
+  const hist = JOURNAL.filter((j) => j.qui === p.id);
+  const autres = S.ids.map(P).filter((q) => q.id !== p.id);
+  return `<div class="fiche arrive">
+    <div class="fiche-tete"><span class="etiquette">${p.type === "bien" ? COMMUNES[p.commune].nom : "Commune"} · ${ETAT_LIB[p.etat]}</span><h2 id="titre-fiche" tabindex="-1">${esc(p.nom)}</h2><p class="nuance">${p.relation}${p.visite ? ` · visite prévue le ${dc(p.visite)}` : ""}</p></div>
+    ${ecart}
+    <div class="fiche-emb">${emblemeSeul(p, 132, true)}<div class="echelles-etat" role="group" aria-label="Filtrer les conditions par échelle">${["territoire", "autour", "logement"].map((e) => `<button data-act="echelle" data-ech="${e}" data-fk="ech-${e}" aria-pressed="${S.echelleFiche === e}">${glyphe(e, 14)}<b>${ECH[e].nom}</b><span class="e">${examine[e]}</span></button>`).join("")}</div></div>
+    ${manque}
+    <div><div class="panneau-tete" style="padding-bottom:6px"><span class="etiquette">${S.echelleFiche ? `Vos conditions ${ECH[S.echelleFiche].lu}` : "Vos conditions, à l'échelle la plus fine lue"}</span>${S.echelleFiche ? `<button class="btn-lien meta" data-act="echelle" data-ech="${S.echelleFiche}">Toutes les échelles</button>` : ""}</div><div class="conds">${lignes || `<p class="vide-rapp">Aucune de vos conditions ne se lit à cette échelle.</p>`}</div></div>
+    <div><span class="etiquette">Noter une observation</span>${S.menus.note === p.id ? `<form class="form-mini" data-form="note" data-pid="${p.id}" style="margin-top:8px"><label class="meta" for="note-crit">Sur</label><select id="note-crit" name="crit">${CRITERES.map((k) => `<option value="${k.cle}">${k.lab()}</option>`).join("")}</select><label class="meta" for="note-texte">Ce que vous avez vu ou entendu</label><textarea id="note-texte" name="texte" required></textarea><div class="actions" style="margin-top:0"><button class="btn btn-plein" type="submit">Garder la note</button><button class="btn-lien" type="button" data-act="note" data-arg="${p.id}">Annuler</button></div><p class="meta">Gardée le temps de cette page. Une note ne modifie aucune issue.</p></form>` : `<div class="actions" style="margin-top:6px"><button class="btn" data-act="note" data-arg="${p.id}" data-fk="note">Ajouter une note</button></div>`}</div>
+    ${autres.length ? `<div><span class="etiquette">Rapprocher avec</span><div class="actions" style="margin-top:6px">${autres.map((q) => `<button class="btn" data-act="paire" data-arg="${p.id},${q.id}">${esc(q.court)}</button>`).join("")}</div></div>` : ""}
+    ${p.etat !== "ecarte" ? `<div>${S.menus.ecarter === p.id ? `<form class="form-mini" data-form="ecarter" data-pid="${p.id}"><label class="meta" for="ec-crit">Pour quelle raison ?</label><select id="ec-crit" name="crit">${CRITERES.map((k) => `<option value="${k.cle}">${cap(k.lab())}</option>`).join("")}<option value="autre">Une autre raison</option></select><label class="meta" for="ec-motif">En quelques mots</label><textarea id="ec-motif" name="motif"></textarea><div class="actions" style="margin-top:0"><button class="btn btn-plein" type="submit">Écarter</button><button class="btn-lien" type="button" data-act="ecarter" data-arg="${p.id}">Annuler</button></div><p class="meta">La raison et la version du Projet sont gardées : vous pourrez revenir sur ce choix.</p></form>` : `<button class="btn-lien" data-act="ecarter" data-arg="${p.id}" data-fk="ecarter">Écarter cette possibilité…</button>`}</div>` : ""}
+    <div><span class="etiquette">Son histoire</span><div class="journal">${hist.map((j) => `<div><span class="meta">${dc(j.date)}${j.futur ? " · prévu" : ""}</span><span>${j.texte}</span><span></span></div>`).join("") || `<div><span class="meta">${dc(p.ajout)}</span><span>Ajoutée aujourd'hui, rien n'est encore lu.</span><span></span></div>`}</div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE RAPPROCHEMENT. Chaque condition est une piste tendue entre les deux lieux. Ce qu'ils
+// partagent se pose au milieu, ce qui les sépare est tiré vers chaque bord. Les pistes sont
+// rangées par échelle, du large au précis. Rien n'est additionné, aucun lieu n'est classé.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function piste(cl, a, b, ech, k) {
+  const A = 7, B = 93, C = 50;
+  const mk = (r, x, kk) => `<span class="mk" data-k="${k}-${kk}" style="left:${x}%">${marque(r, ech, 20)}</span>`;
+  const tx = (cls, txt) => `<span class="tx ${cls}">${txt}</span>`;
+  const ligne = (g, d, cls = "") => `<span class="pl ${cls}" style="left:${g}%;right:${100 - d}%"></span>`;
+  const ma = cap(motDe(a)), mb = cap(motDe(b));
+  switch (cl) {
+    case "commun": return ligne(A, B) + mk(a, C, "a") + mk(b, C, "b") + tx("ce", `${ma}, tous deux`);
+    case "socle": return ligne(A, B, "fort") + mk(a, C, "a") + mk(b, C, "b") + tx("ce", `${ma} · une seule lecture`);
+    case "separe": return ligne(A, 44) + ligne(56, B) + `<span class="coupure"></span>` + mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+    case "bloquant": return mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb) + tx("ce", "rien ne compense");
+    case "hors_cadre": return ligne(A, B, "tirets") + mk(a, A, "a") + mk(b, B, "b") + tx("ga", `${ma} · rév. ${a.a.rev.slice(1)}`) + tx("dr", `${mb} · rév. ${b.a.rev.slice(1)}`);
+    case "incertain": case "a_verifier": case "inconnu": return ligne(A, B, "points") + mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+    default: return mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+  }
+}
+function rangsPaire(pa, pb) {
+  const out = [];
+  for (const ech of ["territoire", "autour", "logement"]) {
+    for (const c of CRITERES) {
+      if (!c.ech.includes(ech) || S.cote.has(c.cle)) continue;
+      out.push({ ech, c, cl: classePaire(pa, pb, c.cle, ech), a: lire(pa, c.cle, ech), b: lire(pb, c.cle, ech) });
+    }
+  }
+  return out;
+}
+function phrasePaire(pa, pb, rangs) {
+  const sep = rangs.filter((r) => r.cl === "separe");
+  const hc = rangs.filter((r) => r.cl === "hors_cadre");
+  const blq = rangs.filter((r) => r.cl === "bloquant");
+  const ou = (rs) => [...new Set(rs.map((r) => r.ech))].map((e) => ({ territoire: "à la commune", autour: "aux abords", logement: "dans le logement" })[e]);
+  const morceaux = [];
+  if (blq.length) { const r = blq[0]; morceaux.push(`${r.a.issue === "incompatible" ? pa.court : pb.court} ne tient pas votre condition sur ${r.c.lab()} : rien d'autre ne la compense.`); }
+  if (pa.commune === pb.commune) morceaux.push("Même commune : le territoire leur est commun.");
+  if (rangs.some((r) => r.cl === "partiel")) morceaux.push(`${COMMUNES[pa.commune].libre ? pa.court : pb.court} n'est lue que par l'aperçu gratuit : elle n'entre dans aucun départage.`);
+  if (sep.length) morceaux.push(`Ce qui les sépare se lit ${liste(ou(sep))} : ${liste([...new Set(sep.map((r) => r.c.lab()))])}.`);
+  else if (!hc.length && !blq.length) morceaux.push("Rien d'établi ne les sépare dans le même cadre.");
+  if (hc.length) morceaux.push(`${hc.length} différence${hc.length > 1 ? "s" : ""} ne s'interprète${hc.length > 1 ? "nt" : ""} pas encore : leurs analyses répondent à deux versions de votre Projet.`);
+  return morceaux.join(" ");
+}
+function htmlRapprochement(ids) {
+  const [pa, pb] = ids.map(P);
+  const rangs = rangsPaire(pa, pb);
+  const fam = (f) => rangs.filter((r) => FAMILLE[r.cl] === f).length;
+  const filtres = [["tout", "Tout", rangs.length], ["separe", "Les sépare", fam("separe")], ["horscadre", "Pas au même cadre", fam("horscadre")], ["incertain", "Incertain", fam("incertain")], ["commun", "En commun", fam("commun")], ["profondeur", "Non examiné", fam("profondeur")]].filter(([k, , n]) => k === "tout" || n > 0 || S.filtreRapp === k);
+  const montrer = (r) => S.filtreRapp === "tout" || FAMILLE[r.cl] === S.filtreRapp;
+  const hc = rangs.some((r) => r.cl === "hors_cadre");
+  const lent = S.lentille && !S.cote.has(S.lentille) ? S.lentille : null;
+  // La condition sous lentille passe en tête de sa bande, preuves ouvertes.
+  const ordre = (rs) => (lent ? [...rs.filter((r) => r.c.cle === lent), ...rs.filter((r) => r.c.cle !== lent)] : rs);
+  const bandes = ["territoire", "autour", "logement"].map((ech) => {
+    const rs = ordre(rangs.filter((r) => r.ech === ech && montrer(r)));
+    if (!rs.length) return "";
+    const tete = `<div class="bande-tete">${glyphe(ech, 16)}<b>${ECH[ech].nom}</b><span class="meta">${ECH[ech].grain}</span></div>`;
+    // Même commune : le Territoire est une seule lecture, repliée en un socle.
+    if (ech === "territoire" && pa.commune === pb.commune && S.rangOuvert !== "socle" && !lent) {
+      return `<div class="bande">${tete}<div class="socle"><div class="socle-trait" aria-hidden="true"><span style="left:calc(6% - 9px)"></span><span style="right:calc(6% - 9px)"></span></div><p class="encre">${COMMUNES[pa.commune].nom} : une seule lecture pour les deux, ${rs.length} conditions identiques par construction.</p><div><button class="btn-lien" data-act="rang" data-arg="socle" data-fk="socle">Déplier le socle commun</button></div></div></div>`;
+    }
+    return `<div class="bande">${tete}${rs.map((r) => {
+      const k = `${r.ech}-${r.c.cle}`; const ouvert = S.rangOuvert === k || lent === r.c.cle;
+      const lab = cap(r.c.lab());
+      const lu = `${pa.court} : ${motDe(r.a)} ; ${pb.court} : ${motDe(r.b)}`;
+      return `<div class="rang ${lent === r.c.cle ? "focus" : ""}">
+        <div class="rang-lab"><span class="c">${lab}</span><span class="k ${CLASSE[r.cl].fort ? "fort" : ""}">${CLASSE[r.cl].mot}${r.c.sans ? " · sans compromis" : ""}</span></div>
+        <div><button class="piste" data-act="rang" data-arg="${k}" data-fk="rang-${k}" aria-expanded="${ouvert}" aria-label="${esc(`${lab}. ${CLASSE[r.cl].mot}. ${lu}. ${ouvert ? "Masquer" : "Voir"} les preuves.`)}">${piste(r.cl, r.a, r.b, r.ech, k)}</button>
+        ${ouvert ? `<div class="preuves">${htmlPreuve(r.a, pa, r.ech)}${htmlPreuve(r.b, pb, r.ech)}${r.cl === "hors_cadre" ? `<p class="nuance" style="grid-column:1/-1">L'une répond à la révision ${r.a.a.rev.slice(1)} de votre Projet, l'autre à la révision ${r.b.a.rev.slice(1)}. Tant qu'elles ne sont pas mises au même cadre, cet écart peut tenir à votre Projet plutôt qu'aux lieux.</p>` : ""}${[[pa, r.a], [pb, r.b]].filter(([, x]) => x.issue === "to_confirm" && !x.libre).map(([p]) => htmlVerif(p, r.c.cle)).join("")}${htmlObs(pa.id, r.c.cle)}${htmlObs(pb.id, r.c.cle)}</div>` : ""}</div>
+      </div>`;
+    }).join("")}</div>`;
+  }).join("");
+  const incertains = rangs.filter((r) => r.cl === "incertain" || r.cl === "a_verifier");
+  return `<div class="plaque arrive" data-paire="${pa.id},${pb.id}">
+    <div class="rapp-tete">
+      <div class="pole">${emblemeSeul(pa, 78, false)}<h3 id="titre-rapp" tabindex="-1">${esc(pa.court)}</h3><span class="s">${pa.type === "bien" ? COMMUNES[pa.commune].nom + " · " : ""}${ETAT_LIB[pa.etat]}</span></div>
+      <div class="centre-tete"><span class="meta">en commun</span><svg width="44" height="10" aria-hidden="true"><path d="M2 5H42" stroke="var(--r-encre)" stroke-width="1.5"/><path d="M2 1V9M42 1V9" stroke="var(--r-encre)" stroke-width="1.5"/></svg></div>
+      <div class="pole b">${emblemeSeul(pb, 78, false)}<h3>${esc(pb.court)}</h3><span class="s">${pb.type === "bien" ? COMMUNES[pb.commune].nom + " · " : ""}${ETAT_LIB[pb.etat]}</span></div>
+    </div>
+    <p class="rapp-phrase">${phrasePaire(pa, pb, rangs)}</p>
+    ${hc ? `<div class="bandeau-cadre"><p><b class="encre">Leurs analyses ne répondent pas à la même version de votre Projet.</b> Les mettre au même cadre produirait, dans le produit, une nouvelle version de chaque analyse ; les précédentes resteraient lisibles.</p><div><button class="btn" data-act="cadre" data-fk="cadre-rapp">Mettre au même cadre <span class="sim">simulation</span></button></div></div>` : S.cadre ? `<div class="bandeau-cadre"><p><span class="sim">simulation</span> Analyses lues comme si elles avaient été actualisées sous la révision 2 et engine-6. Aucune analyse n'a été produite.</p><div><button class="btn-lien" data-act="cadre" data-fk="cadre-rapp">Revenir aux analyses figées</button></div></div>` : ""}
+    <div class="rapp-outils">
+      <div class="decompte" role="group" aria-label="Filtrer les conditions">${filtres.map(([k, l, n]) => `<button data-act="filtreRapp" data-arg="${k}" data-fk="fr-${k}" aria-pressed="${S.filtreRapp === k}">${l} <b>${n}</b></button>`).join("")}</div>
+      <button class="btn-lien" data-act="fermer" data-fk="fermer-rapp">Fermer le rapprochement</button>
+    </div>
+    ${bandes || `<p class="vide-rapp">Aucune condition dans ce filtre.</p>`}
+    ${incertains.length ? `<div class="pourrait"><span class="etiquette">Ce qui pourrait changer votre avis</span><ul>${incertains.map((r) => { const qui = r.a.issue === "to_confirm" ? pa : pb; return `<li><span class="reg-t" style="--t:var(--reg-controle)"><b class="encre">${cap(r.c.lab())}</b>&nbsp;· ${r.cl === "a_verifier" ? "à vérifier des deux côtés" : `à vérifier pour ${esc(qui.court)}`}</span><span class="nuance">${VERIF[r.c.cle] ?? ""}</span></li>`; }).join("")}</ul></div>` : ""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// CONDITION PAR CONDITION. Toutes les possibilités en jeu, dans l'ordre où vous les avez
+// ajoutées. Une forme dit l'échelle de la réponse ; aucune colonne n'est totalisée.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function rendrePartition() {
+  const ps = actives();
+  if (ps.length < 2) { $("#partition").innerHTML = ""; return; }
+  const cols = `minmax(150px, 260px) repeat(${ps.length}, 52px)`;
+  const crits = CRITERES.filter((c) => !S.cote.has(c.cle));
+  $("#partition").innerHTML = `<h2 class="surtitre"><span>Condition par condition</span></h2>
+    <p class="nuance" style="margin-top:6px">Une forme dit où la réponse a été lue : un cercle à la commune, un carré aux abords, un losange dans le logement. Un cercle et un carré ne se comparent pas directement : rapprochez les deux lieux pour voir.</p>
+    <div class="partition-wrap"><div class="partition" role="table" aria-label="Vos conditions pour chaque possibilité">
+      <div class="ligne-p tete-p" role="row" style="grid-template-columns:${cols}"><span role="columnheader"><span class="sr">Condition</span></span>${ps.map((p) => `<span role="columnheader" class="v" title="${esc(p.nom)}">${esc(p.court)}</span>`).join("")}</div>
+      ${crits.map((c) => `<div class="ligne-p ${S.lentille === c.cle ? "focus" : ""}" role="row" style="grid-template-columns:${cols}"><span class="lab-p" role="rowheader">${cap(c.lab())}</span>${ps.map((p) => { const r = lirePlusFin(p, c.cle); return `<span role="cell"><button class="cel" data-act="cellule" data-arg="${p.id},${c.cle}" aria-label="${esc(`${p.court}, ${c.lab()} : ${motDe(r)}, lu ${ECH[r.ech].lu}`)}">${marque(r, r.ech, 18)}</button></span>`; }).join("")}</div>`).join("")}
+    </div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// RENDU ET GESTES
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+let derniereCle = "";
+function rendrePanneauEtRapp() {
+  const m = mobile();
+  const sheet = $("#sheet"), panneau = $("#panneau"), rapp = $("#rapp");
+  const fiche = S.sel.length === 1 ? htmlFiche(P(S.sel[0])) : "";
+  const paire = S.sel.length === 2 ? htmlRapprochement(S.sel) : "";
+  // FLIP : une marque qui change de place (mise au même cadre) glisse de l'ancienne à la nouvelle.
+  const avant = new Map([...document.querySelectorAll("[data-k]")].map((e) => [e.dataset.k, e.getBoundingClientRect().left]));
+  if (m) {
+    panneau.innerHTML = htmlMaintenant();
+    rapp.hidden = true; rapp.innerHTML = "";
+    if (S.sel.length) {
+      const titre = S.sel.length === 1 ? P(S.sel[0]).court : "Rapprochement";
+      sheet.innerHTML = `<div class="sheet-barre"><button class="btn" data-act="fermer" data-fk="fermer-sheet">← Retour</button><span id="sheet-titre" class="etiquette">${esc(titre)}</span></div>${fiche}${paire ? `<div class="rapp-zone">${paire}</div>` : ""}`;
+      sheet.hidden = false; document.body.classList.add("sheet-ouverte"); $("#app").inert = true;
+    } else { sheet.hidden = true; sheet.innerHTML = ""; document.body.classList.remove("sheet-ouverte"); $("#app").inert = false; }
+  } else {
+    sheet.hidden = true; sheet.innerHTML = ""; document.body.classList.remove("sheet-ouverte"); $("#app").inert = false;
+    if (S.sel.length === 2) {
+      const [pa, pb] = S.sel.map(P);
+      panneau.innerHTML = `<div class="panneau-tete"><h2 class="surtitre"><span>Rapprochement en cours</span></h2><button class="btn-lien meta" data-act="fermer">Fermer</button></div><p style="padding:12px 0 16px" class="nuance">${esc(pa.court)} et ${esc(pb.court)} sont rapprochés sous la planche.</p>${htmlMaintenant()}`;
+    } else panneau.innerHTML = fiche ? `<div class="panneau-tete"><button class="btn-lien meta" data-act="fermer" data-fk="retour-maintenant">← Maintenant · ${guides().length}</button></div><div style="padding-top:14px">${fiche}</div>` : htmlMaintenant();
+    rapp.hidden = !paire; rapp.innerHTML = paire;
+  }
+  if (!reduit()) {
+    document.querySelectorAll("[data-k]").forEach((e) => {
+      const x0 = avant.get(e.dataset.k); if (x0 == null) return;
+      const dx = x0 - e.getBoundingClientRect().left; if (Math.abs(dx) < 1) return;
+      e.style.transition = "none"; e.style.transform = `translateX(${dx}px)`; e.getBoundingClientRect();
+      e.style.transition = "transform var(--m-etat) var(--m-releve)"; e.style.transform = "";
+    });
+  }
+  // Une fiche ou une plaque qui reste la même ne rejoue pas son arrivée à chaque geste.
+  const cle = S.sel.join(",");
+  if (cle === derniereCle) document.querySelectorAll(".plaque.arrive, .fiche.arrive").forEach((e) => e.classList.remove("arrive"));
+  derniereCle = cle;
+}
+function rendreMenu() {
+  const m = $("#menu-situations");
+  m.hidden = !S.menus.situations;
+  $("#btn-situations").setAttribute("aria-expanded", S.menus.situations);
+  $("#situation-courante").textContent = SITUATIONS.find((s) => s.cle === S.situation).lib.toLowerCase();
+  m.innerHTML = `<p class="nuance">Situations de démonstration. Tout est fictif ; rien n'est enregistré.</p>${SITUATIONS.map((s) => `<button data-act="situation" data-arg="${s.cle}" aria-current="${S.situation === s.cle}"><b>${s.lib}</b><span>${s.d}</span></button>`).join("")}`;
+}
+function rendre() {
+  const fk = document.activeElement?.dataset?.fk;
+  rendreMenu(); rendreProjet(); rendreDepuis(); rendrePlanche(); appliquerLentillePlanche(); rendrePanneauEtRapp(); rendrePartition();
+  if (fk) { const el = document.querySelector(`[data-fk="${CSS.escape(fk)}"]`); if (el) el.focus({ preventScroll: true }); }
+}
+function note(html, ms = 6000) {
+  const n = $("#note");
+  n.innerHTML = `<p>${html}</p><button class="btn-lien" data-act="note-fermer">Fermer</button>`;
+  n.hidden = false; clearTimeout(note.h); note.h = setTimeout(() => (n.hidden = true), ms);
+}
+function selectionner(id) {
+  if (S.sel.includes(id)) S.sel = S.sel.filter((x) => x !== id);
+  else if (S.sel.length === 1) S.sel = [S.sel[0], id];
+  else S.sel = [id];
+  S.echelleFiche = null; S.condOuverte = null; S.rangOuvert = null; S.filtreRapp = "tout";
+}
+function apresSelection() {
+  rendre();
+  if (mobile() && S.sel.length) { $("#sheet").scrollTop = 0; $(S.sel.length === 2 ? "#titre-rapp" : "#titre-fiche")?.focus({ preventScroll: true }); return; }
+  if (S.sel.length === 2) { $("#rapp").scrollIntoView({ behavior: reduit() ? "auto" : "smooth", block: "start" }); $("#titre-rapp")?.focus({ preventScroll: true }); }
+}
+function chargerSituation(cle) {
+  const s = SITUATIONS.find((x) => x.cle === cle);
+  Object.assign(S, { situation: cle, ids: [...s.ids], derniere: s.derniere, sel: [...(s.sel ?? [])], lentille: null, cadre: false, filtre: "toutes", filtreRapp: "tout", echelleFiche: null, condOuverte: null, rangOuvert: null, etats: {}, ecartsLocaux: {} });
+  S.cote = new Set(); S.verifs = new Set(); S.notes = [];
+  S.menus = { situations: false, ajout: false, depuis: cle === "mois", revs: false, guidePlus: false, ecarter: null, note: null };
+  clePlanche = "";
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-act]");
+  if (!t) { if (S.menus.situations && !e.target.closest("#menu-situations")) { S.menus.situations = false; rendreMenu(); } return; }
+  const act = t.dataset.act, arg = t.dataset.arg;
+  switch (act) {
+    case "sel": selectionner(arg); return apresSelection();
+    case "sel-seul": S.sel = [arg]; S.echelleFiche = null; S.condOuverte = null; return apresSelection();
+    case "paire": S.sel = arg.split(","); S.rangOuvert = null; S.filtreRapp = "tout"; return apresSelection();
+    case "visite": S.sel = [arg]; S.echelleFiche = null; S.condOuverte = CRITERES.find((c) => lirePlusFin(P(arg), c.cle).issue === "to_confirm")?.cle ?? null; return apresSelection();
+    case "cellule": { const [pid, crit] = arg.split(","); S.sel = [pid]; S.lentille = crit; S.condOuverte = crit; S.echelleFiche = null; return apresSelection(); }
+    case "ecarter-ouvrir": S.sel = [arg]; S.menus.ecarter = arg; return apresSelection();
+    case "fermer": S.sel = []; rendre(); document.querySelector(".lieu")?.focus({ preventScroll: true }); return;
+    case "lentille": S.lentille = S.lentille === arg ? null : arg; break;
+    case "cote": if (S.cote.has(arg)) S.cote.delete(arg); else S.cote.add(arg); break;
+    case "cadre": S.cadre = !S.cadre; clePlanche = ""; note(S.cadre ? `<span class="sim">simulation</span> Analyses lues comme si elles avaient été actualisées sous la révision 2 et engine-6. Dans le produit, chacune deviendrait une version n+1 ; ici, aucune analyse n'est produite.` : "Retour aux analyses figées."); break;
+    case "echelle": S.echelleFiche = S.echelleFiche === t.dataset.ech ? null : t.dataset.ech; break;
+    case "cond": S.condOuverte = S.condOuverte === arg ? null : arg; break;
+    case "rang": S.rangOuvert = S.rangOuvert === arg ? null : arg; break;
+    case "filtre": S.filtre = arg; break;
+    case "filtreRapp": S.filtreRapp = arg; break;
+    case "verif": if (S.verifs.has(arg)) S.verifs.delete(arg); else S.verifs.add(arg); break;
+    case "ajout": S.menus.ajout = !S.menus.ajout; clePlanche = ""; if (S.sel.length && mobile()) S.sel = []; break;
+    case "ajouter": S.ids = [...S.ids, arg]; S.menus.ajout = false; S.sel = [arg]; clePlanche = ""; note(`<span class="sim">démonstration</span> ${POSS[arg].nom} ajoutée à la planche. Rien n'est analysé.`); return apresSelection();
+    case "reprendre": S.etats[arg] = "a_considerer"; clePlanche = ""; note(`${P(arg).nom} revient parmi vos possibilités. Son analyse répond toujours à la révision ${(P(arg).ecart?.rev ?? REV_COURANTE).slice(1)} : elle reste hors cadre tant qu'elle n'est pas mise au même cadre.`); break;
+    case "ecarter": S.menus.ecarter = S.menus.ecarter === arg ? null : arg; break;
+    case "note": S.menus.note = S.menus.note === arg ? null : arg; break;
+    case "examiner": note(`<span class="sim">simulation</span> Dans le produit, ce geste ouvrirait ${POSS[arg].type === "commune" ? "le dossier de territoire" : "l'analyse de l'adresse"}, avec son prix et son périmètre expliqués. Ici, rien n'est acheté ni analysé.`, 8000); return;
+    case "situations": S.menus.situations = !S.menus.situations; rendreMenu(); if (S.menus.situations) $("#menu-situations button")?.focus(); return;
+    case "situation": chargerSituation(arg); rendre(); if (S.sel.length) apresSelection(); else window.scrollTo({ top: 0 }); $("#btn-situations").focus({ preventScroll: true }); return;
+    case "theme": { const r = document.documentElement; const sombre = r.dataset.theme ? r.dataset.theme === "dark" : !matchMedia("(prefers-color-scheme: light)").matches; r.dataset.theme = sombre ? "light" : "dark"; try { localStorage.setItem("fut41-v2-theme", r.dataset.theme); } catch {} return; }
+    case "depuis": S.menus.depuis = !S.menus.depuis; break;
+    case "revs": S.menus.revs = !S.menus.revs; break;
+    case "guidePlus": S.menus.guidePlus = !S.menus.guidePlus; break;
+    case "note-fermer": $("#note").hidden = true; return;
+  }
+  rendre();
+});
+document.addEventListener("submit", (e) => {
+  const f = e.target.closest("form[data-form]"); if (!f) return;
+  e.preventDefault();
+  const d = new FormData(f); const pid = f.dataset.pid;
+  if (f.dataset.form === "note") {
+    S.notes.push({ pid, crit: d.get("crit"), date: AUJ, origine: "noté par vous", texte: String(d.get("texte")).trim() });
+    S.menus.note = null; S.condOuverte = d.get("crit"); note("Note gardée pour cette page. Elle ne modifie aucune issue.");
+  } else if (f.dataset.form === "ecarter") {
+    const crit = d.get("crit"); const motif = String(d.get("motif") || "").trim();
+    S.etats[pid] = "ecarte"; S.ecartsLocaux[pid] = { date: AUJ, rev: REV_COURANTE, critere: crit === "autre" ? null : crit, motif: motif ? `« ${motif} »` : crit === "autre" ? "Une autre raison." : `Raison : ${CRIT[crit].lab()}.` };
+    S.menus.ecarter = null; clePlanche = ""; note(`${P(pid).court} est écartée. La raison et la version du Projet sont gardées.`);
+  }
+  rendre();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (S.menus.situations) { S.menus.situations = false; rendreMenu(); $("#btn-situations").focus(); return; }
+  if (S.sel.length) { S.sel = []; rendre(); document.querySelector(".lieu")?.focus({ preventScroll: true }); }
+});
+matchMedia("(max-width: 759px)").addEventListener("change", () => rendre());
+try { const th = localStorage.getItem("fut41-v2-theme"); if (th) document.documentElement.dataset.theme = th; } catch {}
+const depart = new URLSearchParams(location.search).get("situation");
+chargerSituation(SITUATIONS.some((s) => s.cle === depart) ? depart : "recherche");
+rendre();
+</script>
+</body>
+</html>
