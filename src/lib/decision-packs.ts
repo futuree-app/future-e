@@ -75,7 +75,7 @@ export async function resolvePackOwnership(
 // rien n'est écrit : un futur appelant ne peut pas reproduire la faille de la page de retour, qui ouvrait le
 // comparatif sur `?redirect_status=succeeded` alors que l'instantané existe dès la création du paiement.
 //
-// IDEMPOTENT : trois upserts sur leurs clés naturelles, rejouables autant de fois que le webhook ou la page
+// IDEMPOTENT : trois upserts sur leurs clés naturelles (droits territoriaux, compte, puis le comparatif), rejouables autant de fois que le webhook ou la page
 // le demandent. UNE ÉCRITURE ÉCHOUÉE LÈVE : l'erreur était ignorée, le webhook répondait 200 et Stripe ne le
 // rejouait jamais, donc un comparatif payé pouvait rester fermé pour toujours. En levant, le webhook répond
 // 500 et Stripe réessaie ; la page de retour, elle, montre l'attente.
@@ -104,25 +104,6 @@ export async function grantDecisionPackFromSnapshot(
     if (e) throw new Error(`${quoi} : écriture impossible (${e.message})`);
   };
 
-  const { error: packError } = await admin.from("decision_packs").upsert(
-    {
-      user_id: snap.user_id,
-      trio_key: snap.trio_key,
-      mode: snap.mode === "choix" ? "choix" : "replay",
-      insee_1: snap.insee_1,
-      insee_2: snap.insee_2,
-      insee_3: snap.insee_3,
-      commune_1: snap.commune_1,
-      commune_2: snap.commune_2,
-      commune_3: snap.commune_3,
-      projet_label: snap.projet_label,
-      parsed_snapshot: snap.parsed_snapshot,
-      stripe_payment_intent_id: paiement.id,
-    },
-    { onConflict: "user_id,trio_key" },
-  );
-  echec("decision_packs", packError);
-
   // Un report_grant par commune RÉELLE (2 ou 3 ; insee_3 nullable en mode choix).
   const grants = [
     { insee: snap.insee_1, commune: snap.commune_1 },
@@ -143,7 +124,7 @@ export async function grantDecisionPackFromSnapshot(
   echec("report_grants", grantsError);
 
   // Entitlements one_shot au niveau compte. Ce qui ouvre les rapports du Pack, ce sont les trois
-  // `report_grants` écrits juste au-dessus : depuis l'alignement du 30/07, la lecture d'un
+  // `report_grants` écrits juste avant : depuis l'alignement du 30/07, la lecture d'un
   // territoire se demande à `canAccessTerritory`, jamais au plan. Le plan reste nécessaire pour ce
   // qui n'est pas territorial, AskFuture en tête (api/ask bloque le plan free).
   // email requis seulement à l'INSERT (la ligne existe déjà).
@@ -160,6 +141,30 @@ export async function grantDecisionPackFromSnapshot(
     );
     echec("user_accounts", compteError);
   }
+
+  // LE COMPARATIF EN DERNIER (revue FUT-115). `resolvePackOwnership` tient la ligne `decision_packs` pour la
+  // preuve que l'achat est livré : la page ne retente plus rien dès qu'elle existe. Écrite en premier, une
+  // panne sur les droits territoriaux ou le compte laissait un comparatif « acquis » aux droits incomplets.
+  // Écrite en dernier, elle n'existe que si CET écrivain a déjà posé tous les droits ; un webhook et un retour
+  // concurrents suivent chacun cet ordre, et chaque upsert porte sur une clé unique : aucun doublon possible.
+  const { error: packError } = await admin.from("decision_packs").upsert(
+    {
+      user_id: snap.user_id,
+      trio_key: snap.trio_key,
+      mode: snap.mode === "choix" ? "choix" : "replay",
+      insee_1: snap.insee_1,
+      insee_2: snap.insee_2,
+      insee_3: snap.insee_3,
+      commune_1: snap.commune_1,
+      commune_2: snap.commune_2,
+      commune_3: snap.commune_3,
+      projet_label: snap.projet_label,
+      parsed_snapshot: snap.parsed_snapshot,
+      stripe_payment_intent_id: paiement.id,
+    },
+    { onConflict: "user_id,trio_key" },
+  );
+  echec("decision_packs", packError);
 
   return { ok: true, trioKey: snap.trio_key as string };
 }

@@ -24,7 +24,6 @@ const MOCKS: Record<string, string[]> = {
   "@/lib/active-territory": ["hasPaidTerritory"],
   "@/lib/server/intention-dossier-store": ["storeIntentionsSupabase"],
   "@/lib/resend": ["getResend"],
-  "@/lib/server/email-log": ["ouvrirEnvoi", "fermerEnvoi"],
   "@/lib/server/invoice-store": ["issueInvoice"],
   "@/lib/server/invoice-pdf": ["renderInvoicePdf"],
   "@/lib/server/generate-decision-artifact": ["generateDecisionArtifact"],
@@ -101,8 +100,23 @@ function fausseBase() {
           }
           return { error: null };
         },
-        update: () => ({ eq: async () => ({ error: null }) }),
-        insert: async () => ({ error: null }),
+        // Lecture d'une liste (`await from(t).select().eq()…`), utilisée par `dejaEnvoye`.
+        then: (resoudre: (r: unknown) => void) => {
+          const lignes = (tables[table] ?? []).filter((r) => filtres.every(([c, v]) => r[c] === v));
+          resoudre({ data: structuredClone(lignes), error: null });
+        },
+        update: (valeurs: Ligne) => ({
+          eq: async (col: string, v: unknown) => {
+            for (const r of tables[table] ?? []) if (r[col] === v) Object.assign(r, valeurs);
+            return { error: null };
+          },
+        }),
+        insert: (ligne: Ligne) => {
+          const id = `id_${table}_${(tables[table] ?? []).length + 1}`;
+          (tables[table] ??= []).push({ id, ...ligne });
+          const r = { data: { id }, error: null };
+          return { select: () => ({ single: async () => r }), then: (f: (x: unknown) => void) => f({ error: null }) };
+        },
       };
       return q;
     },
@@ -118,6 +132,8 @@ let paiements: Map<string, PaiementStripe>;
 let compteurPi = 0;
 let signature: string | null = null;
 let courriels: unknown[];
+let evenements: string[];
+let resendEnPanne = false;
 const ALICE = { id: "00000000-0000-4000-8000-0000000000a1", email: "alice@example.invalid", user_metadata: { full_name: "Alice Test" } };
 const BOB = { id: "00000000-0000-4000-8000-0000000000b2", email: "bob@example.invalid", user_metadata: { full_name: "Bob Test" } };
 let session: typeof ALICE | null = ALICE;
@@ -155,9 +171,17 @@ const base = fausseBase();
           },
         };
       case "next/headers": return Promise.resolve(new Map([["stripe-signature", signature]].filter(([, v]) => v != null) as [string, string][]));
-      case "@/lib/posthog-server": return { capture: () => {}, shutdown: async () => {} };
-      case "@/lib/resend": return { emails: { send: async (m: unknown) => { courriels.push(m); return { data: { id: "em_test" }, error: null }; } } };
-      case "@/lib/server/email-log": return fn === "ouvrirEnvoi" ? Promise.resolve(null) : Promise.resolve();
+      case "@/lib/posthog-server": return { capture: (e: { event: string }) => evenements.push(e.event), shutdown: async () => {} };
+      case "@/lib/resend":
+        return {
+          emails: {
+            send: async (m: unknown) => {
+              if (resendEnPanne) return { data: null, error: { name: "application_error", message: "indisponible" } };
+              courriels.push(m);
+              return { data: { id: `em_${courriels.length}` }, error: null };
+            },
+          },
+        };
       case "@/lib/server/invoice-store": return Promise.reject(new Error("facture hors test"));
       default: throw new Error(`mock absent : ${module}.${fn}(${args.length})`);
     }
@@ -170,7 +194,8 @@ const { traiterRetourPaiementPack } = await import("../server/retour-paiement-pa
 const { grantDecisionPackFromSnapshot, resolvePackOwnership } = await import("../decision-packs.ts");
 
 beforeEach(() => {
-  tables = {}; ecrituresTentees = {}; pannes = new Set(); paiements = new Map(); courriels = [];
+  tables = {}; ecrituresTentees = {}; pannes = new Set(); paiements = new Map(); courriels = []; evenements = [];
+  resendEnPanne = false;
   session = ALICE; signature = null;
 });
 
@@ -418,4 +443,148 @@ test("preuve · chaque champ compte", () => {
   assert.equal(preuvePaiementPack({ ...pi, metadata: { ...pi.metadata, userId: "u2" } }, snap).ok, false, "payeur ≠ instantané");
   assert.equal(preuvePaiementPack({ ...pi, id: "pi_b" }, snap).ok, false, "autre paiement");
   assert.equal(preuvePaiementPack(pi, snap, "u2").ok, false, "session ≠ payeur");
+});
+
+// ═══ Revue de la PR #69 : livraisons partielles et effets des rejeux ══════════════════════════════════════
+// Ce que fait `page.tsx`, dans le même ordre : comparatif possédé ? sinon traiter le retour de Stripe.
+async function visiterPage(pi: string | undefined, compte: { id: string; email?: string | null } = ALICE) {
+  let pack = await resolvePackOwnership(base as never, compte.id, TRIO);
+  if (pack) return "comparatif";
+  const etat = pi ? await retourPage(pi, compte) : "aucun";
+  if (etat === "octroye") pack = await resolvePackOwnership(base as never, compte.id, TRIO);
+  if (pack) return "comparatif";
+  return etat === "en_attente" ? "attente" : "apercu";
+}
+const confirmations = () => courriels.length;
+const paiementsComptes = () => evenements.filter((e) => e === "payment_completed").length;
+function etatStable() {
+  return JSON.stringify(DROITS.map((t) => tables[t] ?? []).concat([tables.payments ?? []]));
+}
+
+test("page · elle suit l'ordre testé ici : possession d'abord, retour de Stripe seulement si rien n'est ouvert", () => {
+  const page = readFileSync(new URL("../../app/(public)/comparateur/pack-decision/page.tsx", import.meta.url), "utf8");
+  const possession = page.indexOf("let pack = user ? await resolvePackOwnership");
+  const retour = page.indexOf("if (!pack && user && paymentIntent)");
+  const attente = page.indexOf('if (!pack && etatRetour === "en_attente")');
+  assert.ok(possession > 0 && retour > possession && attente > retour, "possession → retour → attente");
+});
+
+test("octroi · le comparatif est écrit APRÈS tous les droits", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  const ordre: string[] = [];
+  const espion = {
+    from: (t: string) => {
+      const q = base.from(t);
+      const u = q.upsert;
+      q.upsert = async (v: Ligne | Ligne[]) => { ordre.push(t); return u(v); };
+      return q;
+    },
+  };
+  assert.equal((await grantDecisionPackFromSnapshot(espion as never, paiements.get(pi)!, { email: ALICE.email })).ok, true);
+  assert.deepEqual(ordre, ["report_grants", "user_accounts", "decision_packs"]);
+});
+
+for (const enPanne of ["report_grants", "user_accounts", "decision_packs"] as const) {
+  test(`livraison partielle · ${enPanne} échoue : rien n'est tenu pour livré, le rejeu complète, sans doublon`, async () => {
+    // 1. Stripe confirme.
+    const pi = await commanderComparatif();
+    stripeConfirme(pi);
+    // 2. Une écriture échoue pendant le webhook.
+    pannes.add(enPanne);
+    assert.equal(await livrerWebhook(pi), 500, "le webhook échoue : Stripe rejouera");
+    assert.equal((tables.decision_packs ?? []).length, 0, "aucun comparatif tenu pour acquis tant qu'un droit manque");
+    // 3-4. Le lecteur revient : la page retente, échoue encore, et attend au lieu de déclarer l'achat livré.
+    assert.equal(await visiterPage(pi), "attente");
+    assert.equal((tables.decision_packs ?? []).length, 0);
+    assert.equal(confirmations(), 0, "aucune confirmation tant que l'achat n'est pas livré");
+    // 5-6. La panne cesse, Stripe rejoue : tout est livré.
+    pannes.delete(enPanne);
+    assert.equal(await livrerWebhook(pi), 200);
+    droitsAlice();
+    assert.equal(confirmations(), 1);
+    assert.equal(paiementsComptes(), 1);
+    // 7. Visites et rejeux suivants : rien ne change, rien n'est renvoyé.
+    const avant = etatStable();
+    for (let i = 0; i < 2; i += 1) {
+      assert.equal(await visiterPage(pi), "comparatif");
+      assert.equal(await livrerWebhook(pi), 200);
+    }
+    assert.equal(etatStable(), avant, "aucun doublon");
+    assert.equal(confirmations(), 1, "une seule confirmation");
+    assert.equal(paiementsComptes(), 1, "un seul payment_completed");
+  });
+}
+
+test("livraison partielle · le retour du lecteur complète lui-même ce que le webhook a laissé inachevé", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  pannes.add("decision_packs");
+  assert.equal(await livrerWebhook(pi), 500);
+  assert.ok((tables.report_grants ?? []).length > 0 && (tables.decision_packs ?? []).length === 0, "droits posés, comparatif pas encore");
+  pannes.delete("decision_packs");
+  assert.equal(await visiterPage(pi), "comparatif", "le retour, arrivé entre deux écritures, termine la livraison");
+  droitsAlice();
+  assert.equal(await livrerWebhook(pi), 200, "le rejeu de Stripe passe ensuite");
+  droitsAlice();
+  assert.equal(confirmations(), 1);
+});
+
+test("concurrence · webhook et retour simultanés : tout est livré une fois", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  const [statut, vue] = await Promise.all([livrerWebhook(pi), visiterPage(pi)]);
+  assert.equal(statut, 200);
+  assert.equal(vue, "comparatif");
+  droitsAlice();
+  assert.equal(confirmations(), 1);
+  assert.equal(paiementsComptes(), 1);
+});
+
+test("rejeux · trois webhooks identiques : une confirmation, un payment_completed, un paiement enregistré", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  for (let i = 0; i < 3; i += 1) assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(confirmations(), 1);
+  assert.equal(paiementsComptes(), 1);
+  assert.equal(tables.payments?.length, 1);
+});
+
+test("rejeux · confirmation refusée par le fournisseur : le rejeu suivant la renvoie, elle n'est pas perdue", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  resendEnPanne = true;
+  assert.equal(await livrerWebhook(pi), 200, "un échec d'e-mail ne fait pas rejouer Stripe (doctrine d'email-log)");
+  assert.equal(confirmations(), 0);
+  assert.deepEqual((tables.email_deliveries ?? []).map((l) => l.status), ["failed"]);
+  resendEnPanne = false;
+  assert.equal(await livrerWebhook(pi), 200, "rejeu (Stripe, ou renvoi depuis le tableau de bord)");
+  assert.equal(confirmations(), 1, "la confirmation part au rejeu");
+  assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(confirmations(), 1, "et une seule fois");
+  assert.equal(paiementsComptes(), 1);
+});
+
+test("rejeux · retour du lecteur AVANT le webhook : paiement enregistré, confirmation et mesure ont bien lieu", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  assert.equal(await visiterPage(pi), "comparatif");
+  assert.equal(confirmations(), 0, "la page n'envoie rien");
+  assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(tables.payments?.length, 1);
+  assert.equal(confirmations(), 1);
+  assert.equal(paiementsComptes(), 1);
+});
+
+test("rejeux · enregistrement du paiement impossible : 500, puis rejeu qui enregistre et confirme une fois", async () => {
+  const pi = await commanderComparatif();
+  stripeConfirme(pi);
+  pannes.add("payments");
+  assert.equal(await livrerWebhook(pi), 500);
+  assert.equal(confirmations(), 0);
+  pannes.delete("payments");
+  assert.equal(await livrerWebhook(pi), 200);
+  assert.equal(tables.payments?.length, 1);
+  assert.equal(confirmations(), 1);
+  assert.equal(paiementsComptes(), 1);
 });

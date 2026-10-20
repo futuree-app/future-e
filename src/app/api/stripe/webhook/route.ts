@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { getResend } from "@/lib/resend";
-import { ouvrirEnvoi, fermerEnvoi, type EmailKind } from "@/lib/server/email-log";
+import { ouvrirEnvoi, fermerEnvoi, dejaEnvoye, type EmailKind } from "@/lib/server/email-log";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe";
 import { getPostHogClient } from "@/lib/posthog-server";
@@ -175,6 +175,12 @@ async function envoyerEmail(
 ): Promise<void> {
   const destinataire = Array.isArray(message.to) ? message.to.join(", ") : String(message.to);
   const journal = { pi: contexte.pi, quoi: contexte.quoi, destinataire };
+  // Revue FUT-115 : un webhook rejoué ne renvoie pas une confirmation que le fournisseur a déjà acceptée. Un
+  // envoi échoué ou interrompu, lui, est retenté (cf. `dejaEnvoye`).
+  if (await dejaEnvoye(contexte.supabase, contexte.pi, contexte.kind)) {
+    console.log("[email] déjà envoyé, rejeu ignoré", journal);
+    return;
+  }
   const trace = await ouvrirEnvoi(contexte.supabase, {
     paymentIntentId: contexte.pi, kind: contexte.kind, toEmail: destinataire,
   });
@@ -463,7 +469,16 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
     if (!octroi.ok) {
       throw new Error(`comparatif non octroyé pour ${paymentIntent.id} : ${octroi.motif}`);
     }
-    await supabaseAdmin.from("payments").upsert(
+    // Revue FUT-115 : un paiement déjà enregistré signale un REJEU. Il sert à n'émettre `payment_completed`
+    // qu'une fois ; l'e-mail, lui, se garde sur sa propre trace (`dejaEnvoye`), qui seule sait s'il est parti.
+    const { data: dejaEnregistre } = await supabaseAdmin
+      .from("payments")
+      .select("status")
+      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .maybeSingle();
+    // L'écriture est vérifiée : ignorée, elle laissait un achat livré sans trace de paiement, et c'est cette
+    // table que l'on relit pour rapprocher les comparatifs de leurs encaissements.
+    const { error: paiementError } = await supabaseAdmin.from("payments").upsert(
       {
         user_id: userId && userId !== "anonymous" ? userId : null,
         stripe_payment_intent_id: paymentIntent.id,
@@ -474,6 +489,7 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
       },
       { onConflict: "stripe_payment_intent_id" },
     );
+    if (paiementError) throw new Error(`payments : écriture impossible pour ${paymentIntent.id} (${paiementError.message})`);
     if (userEmail) {
       const attachments = await buildInvoiceAttachment(paymentIntent, "pack-decision", null);
       const email = renderPurchaseConfirmationEmail({
@@ -489,13 +505,17 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
         attachments,
       }, { pi: paymentIntent.id, quoi: "pack décision", kind: "pack", supabase: supabaseAdmin });
     }
-    const posthog = getPostHogClient();
-    posthog.capture({
-      distinctId,
-      event: "payment_completed",
-      properties: { product_type: productType, amount: paymentIntent.amount / 100 },
-    });
-    await posthog.shutdown();
+    // Une seule fois par paiement. Une interruption entre l'enregistrement et cet envoi perd l'événement :
+    // une mesure manquante vaut mieux qu'un achat compté deux fois.
+    if (!dejaEnregistre) {
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId,
+        event: "payment_completed",
+        properties: { product_type: productType, amount: paymentIntent.amount / 100 },
+      });
+      await posthog.shutdown();
+    }
     return;
   }
 

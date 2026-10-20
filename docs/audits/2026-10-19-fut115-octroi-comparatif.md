@@ -76,7 +76,48 @@ Suites `src/lib/**`, décision, proxy : 2 534/2 534. `tsc`, `eslint`, `next buil
 - Dossier d'adresse : dossier créé par le webhook seul ; la page de retour interroge `/api/dossier/statut` en
   lecture. Pas de faille équivalente.
 
-## F. Risques ouverts
+## F. Revue de la PR #69 (20/10/2026)
+
+**Octroi partiel.** `decision_packs` était écrit en premier. Une panne sur `report_grants` ou `user_accounts`
+levait bien, mais la ligne du comparatif existait déjà : `resolvePackOwnership` la tenait pour un achat livré,
+et la page ne retentait plus rien. Correctif : `report_grants`, puis `user_accounts`, puis `decision_packs` en
+dernier. Chaque écrivain (webhook, retour) suit cet ordre, donc « comparatif présent ⇒ droits présents », y
+compris en concurrence : chaque upsert porte sur une clé unique, atomique en base, sans doublon possible. Ni
+transaction, ni migration. Cas vérifiés : même trio déjà possédé ou racheté, panne sur chacune des trois
+écritures, rejeu après écriture partielle, retour entre deux écritures, webhook et retour simultanés.
+
+**Effets des rejeux.** Chaque rejeu renvoyait la confirmation et `payment_completed`. Correctifs minimaux :
+- `dejaEnvoye` (`email-log.ts`) : `envoyerEmail` ne renvoie pas une confirmation que le fournisseur a déjà
+  acceptée pour ce paiement et ce type (`sent` et au-delà, lu dans `email_deliveries`). Un envoi `failed` ou
+  resté `pending` est retenté au rejeu suivant. S'applique aux trois confirmations du webhook (comparatif,
+  dossier, territoire), exposées au même rejeu.
+- `payment_completed` n'est émis qu'au premier enregistrement de `payments` pour ce paiement.
+- L'écriture `payments` du comparatif est vérifiée et lève : ignorée, elle laissait un achat livré sans trace.
+
+La facture était déjà idempotente (`allocate_invoice` par PaymentIntent).
+
+**Tests ajoutés (11, total 32)** : ordre des écritures ; panne de `report_grants`, `user_accounts`,
+`decision_packs` dans la vraie chaîne (webhook en 500, page en attente sans comparatif acquis, rejeu qui livre,
+puis visites et rejeux sans aucun changement ni nouvel envoi) ; retour qui complète une livraison inachevée ;
+webhook et retour simultanés ; trois webhooks identiques (une confirmation, un événement, un paiement) ;
+confirmation refusée puis renvoyée au rejeu ; retour avant webhook ; `payments` en panne puis rejeu.
+Contre-épreuve sur le code de la PR avant cette passe : 8 de ces tests échouent (comparatif acquis avec un droit
+manquant, trois confirmations pour trois webhooks).
+
+Suites 2 545/2 545, `tsc`, `eslint`, `next build` verts.
+
+**Limites assumées.**
+- Une interruption entre l'enregistrement du paiement et l'envoi de `payment_completed` perd l'événement (une
+  mesure manquante plutôt qu'un achat compté deux fois).
+- Deux rejeux strictement simultanés pourraient chacun lire « pas encore envoyé » : Stripe espace ses rejeux,
+  et la garantie stricte demanderait une contrainte d'unicité sur `email_deliveries` (migration, à arbitrer).
+- Un échec du fournisseur d'e-mail ne déclenche pas de rejeu (doctrine d'`email-log`) : la confirmation part
+  au prochain rejeu s'il y en a un, sinon par le renvoi manuel existant. Le reçu Stripe reste envoyé.
+- Les comparatifs ouverts avant ce correctif avec des droits incomplets (ancien ordre) restent tels quels :
+  la lecture seule proposée en G les fait apparaître.
+- Les branches dossier et territoire émettent encore `payment_completed` à chaque rejeu (hors périmètre).
+
+## G. Risques ouverts
 
 - Des comparatifs ont pu être ouverts sans paiement avant ce correctif. Lecture seule à faire, sur accord :
   `decision_packs` dont le `stripe_payment_intent_id` n'a pas de ligne `payments` au statut `succeeded`. Ce sont
