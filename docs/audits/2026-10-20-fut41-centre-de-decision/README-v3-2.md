@@ -262,8 +262,10 @@ limites », la comparaison, ses preuves, chaque lien de « Faire le point ». Il
   dessinée quand la comparaison n'est pas fiable, Échap, clavier, mouvement réduit, aucun
   `font-variation-settings`.
 
-**Résultat à 1440 px : aucune erreur.** Le passage complet aux cinq largeurs (1440, 1024, 820, 390,
-360) tournait au moment du dépôt ; son résultat est ajouté ci-dessous dès qu'il est connu.
+**Résultat aux cinq largeurs (1440, 1024, 820, 390, 360) : aucune erreur.** Le même passage a relevé
+une régression : à 360 × 780, dans une recherche enrichie, le nom du premier lieu tombait 5 px sous le
+pli (785 px). Le haut de page a été resserré sur mobile ; mesure refaite : 770 px à 360 × 780, 750 px à
+390 × 844, au-dessus du pli dans toutes les situations.
 
 **Défauts trouvés et corrigés pendant la passe** : la navigation marquait « Où vivre » comme page
 courante ; « une constat » ; la pastille « depuis votre dossier » chevauchait l'état de la tuile ; une
@@ -286,9 +288,9 @@ reste, sans bruit.
 **Ce qui coûte en lisibilité.**
 - La marge ajoute une ou deux lignes mono par constat : la fiche d'un lieu passe de 2 195 à 2 483 px à
   390 px de large (+13 %), de 2 164 à 2 311 px sur ordinateur (+7 %).
-- Sur mobile, une recherche enrichie montre son premier lieu **plus bas** qu'en V3.1 (nom à 764 px
-  contre 711 à 390 × 844) : le titre-phrase est plus long que l'ancien titre-Projet. Il reste au-dessus
-  du pli. Sur ordinateur, c'est l'inverse (653 contre 782 px).
+- Sur mobile, une recherche enrichie montre son premier lieu **plus bas** qu'en V3.1 (nom à 750 px
+  contre 711 à 390 × 844 ; 770 px à 360 × 780, soit 10 px de marge seulement) : le titre-phrase est plus
+  long que l'ancien titre-Projet. Sur ordinateur, c'est l'inverse (653 contre 782 px).
 - Les surtitres de 13,5 px repèrent moins vite que les titres de la V3.1 quand on fait défiler une
   longue page : on y gagne la parenté, on y perd du balisage.
 - L'emblème de 46 px sur les tuiles est petit : ses graduations se voient, son carré pointillé à peine.
