@@ -128,7 +128,7 @@ h1, h2, h3, h4 { margin: 0; color: var(--r-encre); text-wrap: balance; }
 .lentille.cote > span:nth-child(2) { text-decoration: line-through; }
 .non-mesure { font-size: 13.5px; color: var(--r-discret); }
 .non-mesure b { color: var(--r-texte); font-weight: 600; }
-.lecture-lentille { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; border-left: 3px solid var(--r-encre); background: var(--r-elev); }
+.lecture-lentille { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 14px; background: var(--r-elev); border-radius: 3px; }
 .lecture-lentille p { font-size: 14.5px; color: var(--r-texte); }
 .lecture-lentille .formes { display: inline-flex; gap: 6px; color: var(--r-encre); }
 .revs { display: grid; border-top: 1px solid var(--r-filet); }
@@ -239,7 +239,7 @@ h1, h2, h3, h4 { margin: 0; color: var(--r-encre); text-wrap: balance; }
 .cond .iss { font-size: 13px; text-align: right; justify-content: flex-end; color: var(--r-texte); }
 .cond.actif > button { box-shadow: inset 2px 0 0 var(--r-encre); background: var(--r-elev); }
 .cond .ouvert { padding: 4px 0 14px 32px; display: grid; gap: 10px; }
-.contexte-ecart { border-left: 3px solid var(--reg-non-su); padding: 4px 0 4px 14px; display: grid; gap: 8px; }
+.contexte-ecart { padding: 0 0 14px; border-bottom: 1px solid var(--r-filet); display: grid; gap: 8px; }
 .contexte-ecart.change { border-left-color: var(--reg-controle); }
 .form-mini { display: grid; gap: 8px; padding: 12px; margin-top: 8px; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
 .form-mini textarea { width: 100%; min-height: 64px; background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: 3px; padding: 8px 10px; resize: vertical; }
@@ -250,7 +250,7 @@ h1, h2, h3, h4 { margin: 0; color: var(--r-encre); text-wrap: balance; }
 .preuve { display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; color: var(--r-discret); border-left: 1px solid var(--r-filet-fort); padding-left: 12px; }
 .preuve .v { color: var(--r-encre); font-family: var(--f-sans); font-size: 14.5px; line-height: 1.45; }
 .preuve .ligne { display: flex; gap: 7px; align-items: center; }
-.verif { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--r-filet-fort); border-left: 3px solid var(--reg-controle); border-radius: 0 3px 3px 0; }
+.verif { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
 .verif p { font-size: 14px; color: var(--r-texte); }
 
 /* ── Glyphes ───────────────────────────────────────────────────────────────────────────── */
@@ -987,7 +987,7 @@ function htmlObs(pid, crit) {
 }
 function htmlVerif(p, crit) {
   const k = `${p.id}:${crit}`; const on = S.verifs.has(k);
-  return `<div class="verif"><span class="etiquette">À vérifier · ${esc(p.court)}</span><p>${VERIF[crit] ?? "À vérifier sur place."}</p><div><button class="btn" data-act="verif" data-arg="${k}" data-fk="verif-${k}" aria-pressed="${on}">${on ? "Dans mes vérifications ✓" : p.visite ? `Ajouter à la visite du ${dc(p.visite)}` : "Ajouter à mes vérifications"}</button></div></div>`;
+  return `<div class="verif"><span class="etiquette reg-t" style="--t:var(--reg-controle)">À vérifier · ${esc(p.court)}</span><p>${VERIF[crit] ?? "À vérifier sur place."}</p><div><button class="btn" data-act="verif" data-arg="${k}" data-fk="verif-${k}" aria-pressed="${on}">${on ? "Dans mes vérifications ✓" : p.visite ? `Ajouter à la visite du ${dc(p.visite)}` : "Ajouter à mes vérifications"}</button></div></div>`;
 }
 function htmlFiche(p) {
   const c = COMMUNES[p.commune];
@@ -1011,13 +1011,13 @@ function htmlFiche(p) {
   const ecart = p.etat === "ecarte" ? (() => {
     const change = p.ecart.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare";
     const ditAlors = p.ecart.critere === "gare" ? `une gare à moins de ${REV[p.ecart.rev ?? REV_COURANTE].gare} min` : p.ecart.critere ? CRIT[p.ecart.critere].lab() : "une autre raison";
-    return `<div class="contexte-ecart ${change ? "change" : ""}"><span class="etiquette">Écartée le ${dc(p.ecart.date)}</span><p class="encre">${esc(p.ecart.motif)}</p>
+    return `<div class="contexte-ecart"><span class="etiquette reg-t" style="--t:${change ? "var(--reg-controle)" : "var(--reg-non-su)"}">Écartée le ${dc(p.ecart.date)}${change ? " · raison changée depuis" : ""}</span><p class="encre">${esc(p.ecart.motif)}</p>
       <p class="nuance">Votre Projet disait alors : ${ditAlors} (révision ${(p.ecart.rev ?? REV_COURANTE).slice(1)}).${change ? ` Il dit maintenant : à moins de ${gareMax()} min. L'analyse de ${p.nom} répond à l'ancienne version : futur•e ne peut pas dire si elle y correspondrait.` : ""}</p>
       <div class="actions"><button class="btn" data-act="reprendre" data-arg="${p.id}" data-fk="reprendre">Reprendre cette piste</button><button class="btn-lien" data-act="fermer">Laisser écartée</button></div></div>`;
   })() : "";
   const manque = p.type === "commune" && !c.analyse
-    ? `<div class="verif" style="border-left-color:var(--r-meta)"><span class="etiquette">${c.libre ? "Ce que l'aperçu ne dit pas" : "Ce qu'un examen lirait"}</span><p>${c.libre ? `L'aperçu gratuit montre trois constats sur six conditions. Les trois autres (${CRITERES.filter((k) => !c.libre[k.cle]).map((k) => k.lab()).join(", ")}) ne sont pas lus. Tant qu'elle n'est pas examinée, ${p.nom} n'entre dans aucun départage.` : `Un examen de la commune lirait vos six conditions à l'échelle de ${p.nom}. Les abords et le logement demandent une adresse.`}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">Examiner ${p.nom} <span class="sim">simulation</span></button></div></div>`
-    : p.type === "bien" && !p.adr ? `<div class="verif" style="border-left-color:var(--r-meta)"><span class="etiquette">Ce qui manque</span><p>${p.sansAdresse ? "Sans adresse exacte, futur•e lit seulement la commune. Les abords (la gare, le calme) et le logement (les nuits fraîches) restent illisibles : rien ne permet de dire qu'ils sont bons ou mauvais." : "L'adresse est connue mais pas encore examinée : seule la commune est lue."}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">${p.sansAdresse ? "Préciser l'adresse" : "Examiner cette adresse"} <span class="sim">simulation</span></button></div></div>` : "";
+    ? `<div class="verif"><span class="etiquette reg-t">${c.libre ? "Ce que l'aperçu ne dit pas" : "Ce qu'un examen lirait"}</span><p>${c.libre ? `L'aperçu gratuit montre trois constats sur six conditions. Les trois autres (${CRITERES.filter((k) => !c.libre[k.cle]).map((k) => k.lab()).join(", ")}) ne sont pas lus. Tant qu'elle n'est pas examinée, ${p.nom} n'entre dans aucun départage.` : `Un examen de la commune lirait vos six conditions à l'échelle de ${p.nom}. Les abords et le logement demandent une adresse.`}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">Examiner ${p.nom} <span class="sim">simulation</span></button></div></div>`
+    : p.type === "bien" && !p.adr ? `<div class="verif"><span class="etiquette reg-t">Ce qui manque</span><p>${p.sansAdresse ? "Sans adresse exacte, futur•e lit seulement la commune. Les abords (la gare, le calme) et le logement (les nuits fraîches) restent illisibles : rien ne permet de dire qu'ils sont bons ou mauvais." : "L'adresse est connue mais pas encore examinée : seule la commune est lue."}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">${p.sansAdresse ? "Préciser l'adresse" : "Examiner cette adresse"} <span class="sim">simulation</span></button></div></div>` : "";
   const hist = JOURNAL.filter((j) => j.qui === p.id);
   const autres = S.ids.map(P).filter((q) => q.id !== p.id);
   return `<div class="fiche arrive">
