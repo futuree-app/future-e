@@ -34,3 +34,12 @@ Doctrine à respecter dans toute critique :
 - `../README-v3-1.md` : les trois moments d'une recherche, ce qui change depuis la V3, les preuves en trois niveaux, l'audit FUT-118 / FUT-75, les questions métier (comparabilité, cache) et les arbitrages W1 à W7.
 - `../prototype-v3-1.html` : lien direct https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/prototype-v3-1.html (bande « Démonstration » : 0, 1, 2, 3).
 - `../captures-v3-1/` : 34 captures.
+
+## V3.2 · la continuité avec le Relevé (20 octobre 2026)
+
+- `../README-v3-2.md` : l'audit visuel V3.1 face au Relevé (FUT-87, FUT-91, FUT-118, FUT-75), les compositions proposées (« Faire le point » en plaque, place du Projet selon la maturité), W3 (marques A et B), les états de connaissance d'un lieu (enregistré, aperçu, analysé) après audit du produit réel, la preuve au premier niveau, les contrôles, l'autocritique et les décisions restantes.
+- `../prototype-v3-2.html` : lien direct https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/prototype-v3-2.html (bande « Démonstration » : 0 à 3 ; « Depuis un rapport » : commune, adresse ; « Marques » : A, B).
+- `../planche-continuite-v3-2.html` : la planche côte à côte, du rapport à la recherche. Lien direct https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/planche-continuite-v3-2.html
+- `../note-fut22-comparabilite.md`, `../note-fut41-validite-point.md` : les deux notes métier.
+- `../protocole-test-trois-personnes.md` : le protocole de test, non mené.
+- `../captures-v3-2/` : captures V3.2 ; `reference/` contient des captures réelles de FUT-87, FUT-91, FUT-118 et de la production, copiées pour comparaison.

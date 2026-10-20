@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planche de continuité · FUT-41 V3.2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root { color-scheme: dark; --bg: #060812; --plaque: #0d1322; --encre: #f6f4ef; --texte: #c6cfdb; --discret: #9ba3b4; --meta: #788095; --filet: rgba(255,255,255,0.08); --filet-fort: rgba(255,255,255,0.12);
+  --alignement: #7BD3A5; --compromis: #E8823A; --ecart: #C2A5EB; --incompat: #FF9AA4; --controle: #82B4E8; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { color-scheme: light; --bg: #faf8f3; --plaque: #f2ede4; --encre: #1a1d28; --texte: #3d4456; --discret: #5b6373; --meta: #646c7f; --filet: rgba(26,29,40,0.08); --filet-fort: rgba(26,29,40,0.12); --alignement: #236844; --compromis: #994000; --ecart: #64428E; --incompat: #8F2E3A; --controle: #285B91; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--texte); font-family: "Archivo", system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+.feuille { max-width: 1400px; margin: 0 auto; padding: 32px 20px 96px; }
+h1 { font-weight: 500; font-size: clamp(30px, 3.6vw, 46px); line-height: 1.08; letter-spacing: -0.02em; color: var(--encre); margin: 6px 0 14px; }
+h2 { font-weight: 600; font-size: 22px; color: var(--encre); margin: 0 0 6px; }
+h3 { font-weight: 600; font-size: 15px; color: var(--encre); margin: 0 0 6px; }
+p { margin: 0 0 8px; }
+.mono { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--meta); }
+.surtitre { display: flex; gap: 10px; align-items: baseline; font-weight: 600; font-size: 13.5px; color: var(--discret); }
+.surtitre .n { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--meta); font-weight: 500; }
+section { padding: 48px 0; border-top: 1px solid var(--filet); }
+.parcours { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 28px 22px; margin-top: 22px; }
+figure { margin: 0; display: grid; gap: 8px; align-content: start; }
+figure img { width: 100%; height: auto; display: block; border: 1px solid var(--filet-fort); border-radius: 3px; }
+.coupe img { height: auto; max-height: 420px; object-fit: cover; object-position: top left; }
+figcaption { font-size: 13.5px; color: var(--texte); }
+figcaption b { color: var(--encre); font-weight: 600; }
+figcaption .mono { display: block; margin-bottom: 2px; }
+.cote { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; margin-top: 22px; }
+.cote .coupe img { height: auto; max-height: 980px; }
+table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px 12px 0; border-top: 1px solid var(--filet); }
+th { font-weight: 600; font-size: 12.5px; color: var(--discret); }
+td:first-child { font-weight: 600; color: var(--encre); width: 15%; }
+.t { display: inline-flex; gap: 8px; align-items: baseline; }
+.t::before { content: ""; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--c, var(--meta)); }
+.w3 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; margin-top: 18px; }
+.w3 .mob { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.w3 img { border: 1px solid var(--filet-fort); }
+@media (max-width: 760px) { .w3 { grid-template-columns: 1fr; } .coupe img { max-height: 300px; } .cote .coupe img { height: auto; } }
+</style>
+</head>
+<body>
+<main class="feuille">
+  <p class="mono">FUT-41 / FUT-22 · V3.2 · 20 octobre 2026 · données fictives, sauf les captures marquées FUT-91 / FUT-87 / FUT-118</p>
+  <h1>Du rapport à la recherche : la même voix, deux usages</h1>
+  <p>Le rapport est un document à lire, le centre de décision un espace à utiliser. Cette planche montre ce qu'ils partagent, ce qui les distingue pour une raison d'usage, et ce qui crée encore une rupture.</p>
+
+  <section id="parcours">
+    <p class="surtitre"><span class="n">01</span>Le parcours de continuité, depuis le rapport d'une commune</p>
+    <h2>Dix écrans, un seul fil</h2>
+    <p>Port-Anvel est lue dans son rapport, retrouvée dans Ma recherche, puis comparée à une commune ajoutée, d'abord seulement enregistrée, puis connue par l'aperçu, puis analysée (démonstration, aucun achat).</p>
+    <div class="parcours">
+      <figure class="coupe"><img src="captures-v3-2/c01-rapport-commune-releve.png" alt="Le rapport de Port-Anvel reconstitué dans la grammaire du Relevé"><figcaption><span class="mono">1 · rapport</span><b>Le rapport de Port-Anvel</b>, reconstitué dans la grammaire du Relevé (FUT-91). En bas, le pont proposé vers Ma recherche.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c02-ma-recherche-depuis-le-rapport.png" alt="Ma recherche"><figcaption><span class="mono">2 · Ma recherche</span><b>La commune retrouvée</b>, avec son emblème et « vient de votre dossier du 9 oct. ».</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c03-fiche-port-anvel-memes-constats.png" alt="La fiche de Port-Anvel"><figcaption><span class="mono">3 · le lieu</span><b>Les mêmes constats</b>, avec leur marge (échelle, source) et la même règle de rang.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c05-ploubrec-enregistree.png" alt="Ploubrec enregistrée"><figcaption><span class="mono">4 · ajouter</span><b>Ploubrec est enregistrée</b> : rien n'en est lu, elle ne se compare pas, emblème en pointillé.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c06-ploubrec-apercu-et-ce-que-l-analyse-ajouterait.png" alt="Aperçu et analyse"><figcaption><span class="mono">4 bis · aperçu</span><b>L'aperçu gratuit</b> lit trois conditions à la commune ; l'analyse est expliquée, sans prix inventé.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c08-comparer-port-anvel-ploubrec.png" alt="Comparer"><figcaption><span class="mono">5 · comparer</span><b>Deux communes analysées</b> sous le même Projet : la comparaison s'ouvre, emblèmes en regard.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c09-une-preuve-ouverte.png" alt="Une preuve"><figcaption><span class="mono">6 · la preuve</span><b>« Données et limites »</b>, le mot du rapport, et la même marge mono.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c10-faire-le-point.png" alt="Faire le point"><figcaption><span class="mono">7 · faire le point</span><b>Le relevé de la recherche</b> : une plaque, la rangée des lieux, quatre blocs, sa provenance au pied.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/a01-rapport-adresse-releve.png" alt="Dossier d'adresse"><figcaption><span class="mono">A · adresse</span><b>Le dossier du 12 rue des Sternes</b> : trois échelles pleines dans l'emblème.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/a03-fiche-sternes-memes-constats.png" alt="Fiche Sternes"><figcaption><span class="mono">A · le lieu</span><b>Les trois échelles se retrouvent</b> : cercle, carré, losange dans chaque marge.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="cote">
+    <p class="surtitre"><span class="n">02</span>Côte à côte</p>
+    <h2>Le vrai Relevé, sa reconstitution, la V3.1 et la V3.2</h2>
+    <p>À gauche, le rendu réel de FUT-91 (Nîmes, banc de développement, derrière <span class="mono">DECISION_RELEVE</span>). Puis la reconstitution sur les données du prototype, la fiche V3.1, et la fiche V3.2.</p>
+    <div class="cote">
+      <figure class="coupe"><img src="captures-v3-2/reference/fut91-dossier-communal-1440.jpg" alt="FUT-91 dossier communal"><figcaption><span class="mono">FUT-91 · réel</span><b>Dossier communal</b> : plaque, sommaire, emblème, balance, marges.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/c01-rapport-commune-releve.png" alt="Reconstitution"><figcaption><span class="mono">V3.2 · reconstitution</span><b>Même grammaire</b>, données fictives ; le carré du verdict remplacé par un trait (R2 de FUT-118).</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-1/04-parcours-1-fiche-du-lieu.png" alt="V3.1 fiche"><figcaption><span class="mono">V3.1 · avant</span><b>La fiche</b> : titres de rubrique en grand, provenance cachée derrière deux clics, aucune marge, aucun emblème.</figcaption></figure>
+      <figure class="coupe"><img src="captures-v3-2/p04-fiche-du-lieu.png" alt="V3.2 fiche"><figcaption><span class="mono">V3.2 · après</span><b>La fiche</b> : surtitres numérotés, marge de preuve au premier niveau, emblème, « Données et limites ».</figcaption></figure>
+    </div>
+    <table>
+      <thead><tr><th>Dimension</th><th>Commun</th><th>Différent, et justifié par l'usage</th><th>Rupture restante</th><th>Correction proposée</th></tr></thead>
+      <tbody>
+        <tr><td>Typographie</td><td>Archivo largeur normale, mêmes rôles, mono pour la marge</td><td>le rapport a un verdict en grand ; la recherche n'en a pas, son titre dit où elle en est</td><td>« votre projet » (rapport) contre « votre Projet » (centre)</td><td>une seule graphie, décidée dans FUT-118</td></tr>
+        <tr><td>Rythme</td><td>mouvements à filet, surtitres numérotés (V3.2)</td><td>tuiles en grille : on parcourt des lieux, on ne lit pas un texte</td><td>aucune</td><td>rien à corriger</td></tr>
+        <tr><td>Surfaces</td><td>plaque à coins de coupe, une par écran (V3.2 : « Faire le point »)</td><td>pas de bande de balance dans le centre : la balance compare deux côtés d'un arbitrage, jamais deux lieux</td><td>formulaires encadrés (note, écarter)</td><td>composant « champ » de FUT-118 (manquant au canon)</td></tr>
+        <tr><td>Registres</td><td>trait de 3 px devant le sujet, mêmes six teintes</td><td>rien à corriger</td><td>W3 : pastilles colorées sur les pistes (variante A)</td><td>variante B</td></tr>
+        <tr><td>Échelles</td><td>cercle, carré, losange ; emblème emboîté (V3.2)</td><td>emblème petit sur les tuiles, grand dans la fiche</td><td>V3.1 colorait les formes sous une lentille</td><td>retiré en V3.2</td></tr>
+        <tr><td>Données dessinées</td><td>règle de rang reprise à l'identique</td><td>les pistes du centre ne dessinent aucune grandeur : deux positions fixes, une coupure</td><td>la ligne entre deux marques peut suggérer un écart mesuré</td><td>à tester (protocole, tâche 8)</td></tr>
+        <tr><td>Preuve</td><td>marge mono : échelle, source ; « Données et limites »</td><td>sous 900 px, une ligne compacte sans filet pointillé</td><td>millésime caché dans le centre, visible dans le rapport</td><td>assumé : niveau 3 dans le centre</td></tr>
+        <tr><td>Vocabulaire</td><td>« Données et limites », « à la commune », « correspond »</td><td>« Comparer », « Faire le point », « enregistré », propres au centre</td><td>« À contrôler » (rapport) contre « À vérifier » (centre)</td><td>un seul mot, à trancher</td></tr>
+        <tr><td>Interactions</td><td>FUT-75 : 120, 180, 240 ms, rien sans mouvement réduit</td><td>le centre se manipule (choisir, comparer, ajouter) ; le rapport se lit</td><td>aucune</td><td>rien à corriger</td></tr>
+        <tr><td>Signature</td><td>plaque, emblème, marge, surtitres</td><td>la rangée d'emblèmes du point est propre au centre</td><td>la règle du temps n'apparaît pas dans le centre</td><td>l'histoire d'un lieu pourrait la prendre (non fait)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="w3">
+    <p class="surtitre"><span class="n">03</span>W3 · les marques de piste</p>
+    <h2>A, pastilles colorées ; B, forme d'échelle à l'encre et trait de registre</h2>
+    <p>Mêmes données, même cadrage. En haut, deux communes ; en bas, deux adresses de la même commune.</p>
+    <div class="w3">
+      <figure><img src="captures-v3-2/w3-deux-communes-A-sombre-1440.png" alt=""><figcaption><span class="mono">A · sombre</span></figcaption></figure>
+      <figure><img src="captures-v3-2/w3-deux-communes-B-sombre-1440.png" alt=""><figcaption><span class="mono">B · sombre</span></figcaption></figure>
+      <figure><img src="captures-v3-2/w3-deux-communes-A-clair-1440.png" alt=""><figcaption><span class="mono">A · clair</span></figcaption></figure>
+      <figure><img src="captures-v3-2/w3-deux-communes-B-clair-1440.png" alt=""><figcaption><span class="mono">B · clair</span></figcaption></figure>
+      <div class="mob"><figure><img src="captures-v3-2/w3-deux-adresses-A-sombre-360.png" alt=""><figcaption><span class="mono">A · 360</span></figcaption></figure><figure><img src="captures-v3-2/w3-deux-adresses-A-clair-360.png" alt=""><figcaption><span class="mono">A · 360 clair</span></figcaption></figure></div>
+      <div class="mob"><figure><img src="captures-v3-2/w3-deux-adresses-B-sombre-360.png" alt=""><figcaption><span class="mono">B · 360</span></figcaption></figure><figure><img src="captures-v3-2/w3-deux-adresses-B-clair-360.png" alt=""><figcaption><span class="mono">B · 360 clair</span></figcaption></figure></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
