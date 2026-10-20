@@ -15,7 +15,6 @@ import { libelleRestrictions } from "@/lib/restrictions-eau";
 import type { LittoralSummary, LittoralFacade } from "@/lib/littoral";
 import type { DemographieCardData, CouvertCardData } from "@/lib/territory-identity";
 import type { Era5Trend } from "@/lib/era5-trend";
-import type { TerritoryType } from "@/lib/territory-mood";
 
 // Façade maritime → libellé (le composant est client : on duplique le libellé
 // plutôt que d'importer une valeur depuis littoral.ts, server-only).
@@ -113,9 +112,8 @@ type SharedProps = {
   // projection » dans le drawer Températures. Le passé ne porte pas la face
   // avant (ce serait saboter le moat projection), il sert de preuve.
   era5?: Era5Trend | null;
-  // Archétype climatique (déterministe, dérivé du département) : ancre le récit
-  // « Ce que cela raconte » du drawer Températures dans le caractère du lieu.
-  climatType?: TerritoryType | null;
+  // FUT-116 : plus d'archétype (`climatType`). Il choisissait le récit des volets climat sur un
+  // classement administratif (Littoral, Montagne…), sans rapport avec la donnée affichée.
 };
 
 // ─── Thèmes de lecture ────────────────────────────────────────────────────────
@@ -257,59 +255,98 @@ function trajectoryBreakdown(
   return out;
 }
 
-// Récit « Ce que cela raconte » des drawers climat, ancré dans le caractère
-// climatique du lieu (archétype déterministe) plutôt qu'une phrase passe-partout.
-// Identitaire mais sobre ; échelle territoire (pas la vie de l'utilisateur, pas
-// le logement ni la santé), non catastrophiste. Variantes par thème ; on ne
-// décline « temperature » et « chaleur » que pour l'instant.
-function buildClimatWhy(
-  theme: "temperature" | "chaleur" | "nuits",
-  communeName: string,
-  type: TerritoryType,
-  signals: { summerAnom?: number | null; winterAnom?: number | null },
-): string {
-  if (theme === "nuits") {
-    const core: Record<TerritoryType, string> = {
-      // FUT-33 : aucune cause maritime affirmée sans donnée climatique ; le type ne dit que « commune littorale ».
-      littoral_atlantique: `À ${communeName}, les nuits d'été gardent de plus en plus la chaleur du jour.`,
-      mediterraneen: `À ${communeName}, les nuits chaudes font déjà partie de l'été méditerranéen ; elles deviennent plus nombreuses et la saison s'étire.`,
-      montagne: `À ${communeName}, l'altitude a longtemps garanti des nuits fraîches ; elles commencent à céder lors des étés les plus chauds.`,
-      plaine: `À ${communeName}, les nuits suivent le jour : quand les étés chauffent, elles cessent plus souvent de rafraîchir.`,
-    };
-    return core[type];
-  }
-  if (theme === "chaleur") {
-    const core: Record<TerritoryType, string> = {
-      littoral_atlantique: `À ${communeName}, les fortes chaleurs deviennent peu à peu une part ordinaire de l'été.`,
-      mediterraneen: `À ${communeName}, les fortes chaleurs font déjà partie de l'été ; ce qui change, c'est leur nombre et la longueur des épisodes.`,
-      montagne: `À ${communeName}, l'altitude a longtemps tenu les fortes chaleurs à distance ; elles gagnent désormais les étés.`,
-      plaine: `À ${communeName}, les fortes chaleurs s'installent plus tôt et durent plus longtemps.`,
-    };
-    return `${core[type]} La progression s'accélère, elle ne fait pas que monter.`;
+// Ce que dit un compte annuel projeté (jours chauds, nuits tropicales) à un horizon : LA RÈGLE DE LA
+// FACE, et le récit du volet la lit aussi (FUT-116). On RAISONNE SUR LA VALEUR BRUTE (non arrondie) :
+// sous le plancher, la rareté ; sinon une hausse si l'écart arrondi atteint 2, un écart faible s'il
+// reste sous 1,5 en valeur absolue. Sans colonne d'écart, l'évolution est inconnue, jamais « faible ».
+type LectureCompte = "absent" | "rare" | "hausse_nette" | "baisse_nette" | "ecart_faible" | "ecart_inconnu";
+function lireCompte(absRaw: number | null | undefined, deltaRaw: number | null | undefined): LectureCompte {
+  if (absRaw == null) return "absent";
+  if (absRaw < 1.5) return "rare";
+  if (deltaRaw == null) return "ecart_inconnu";
+  if (Math.round(deltaRaw) >= 2) return "hausse_nette";
+  if (deltaRaw <= -1.5) return "baisse_nette";
+  return "ecart_faible";
+}
+
+// Récit « Ce que cela raconte » des volets climat. FUT-116 : il ne dit QUE ce que le volet mesure,
+// à l'horizon choisi, par rapport à la référence 1976-2005 (« fin du XXe siècle », comme la
+// trajectoire). Il se choisissait sur l'archétype du lieu (Littoral, Montagne…) et affirmait des
+// accélérations, des tendances continues, des durées d'épisodes et des causes qu'aucune colonne ne
+// porte : DRIAS-TRACC donne trois paliers de réchauffement, pas une série, et l'archétype est un
+// classement administratif, pas une donnée climatique (Latour-de-France, « montagne », compte ≈ 25
+// jours chauds de référence). La convention est celle de la face (`lireCompte`) : les deux disent le
+// même mouvement, sans seuil propre au récit.
+type SignauxClimat = {
+  year: string;
+  /** chaleur / nuits : compte projeté à l'horizon et son écart à la référence, bruts. */
+  abs?: number | null;
+  delta?: number | null;
+  /** temperature : écarts saisonniers à l'horizon. */
+  summerAnom?: number | null;
+  winterAnom?: number | null;
+};
+function buildClimatWhy(theme: "temperature" | "chaleur" | "nuits", communeName: string, signals: SignauxClimat): string {
+  // Ton du Relevé (revue PR #70) : le chiffre donne la précision, le récit donne le sens. Le
+  // conditionnel porte la projection ; la période de référence est nommée une fois.
+  const { year } = signals;
+  const REF = "la période 1976-2005";
+  if (theme === "chaleur" || theme === "nuits") {
+    const jours = theme === "chaleur";
+    const objet = jours ? "jours au-dessus de 30 °C" : "nuits tropicales";
+    const lecture = lireCompte(signals.abs, signals.delta);
+    switch (lecture) {
+      case "rare":
+        return `À ${communeName}, les ${objet} resteraient très rares à l'horizon ${year} : moins de deux par an en moyenne dans les projections.`;
+      case "ecart_faible":
+        return `À ${communeName}, le nombre de ${objet} bougerait peu à l'horizon ${year} : l'écart avec ${REF} resterait inférieur à deux par an dans les projections.`;
+      case "hausse_nette":
+      case "baisse_nette": {
+        const ecart = Math.round(Math.abs(signals.delta!));
+        const sens = lecture === "hausse_nette" ? "de plus" : "de moins";
+        // LA LIMITE DU COMPTE : un total annuel ne dit pas si les journées (ou les nuits) se suivent.
+        const limite = jours
+          ? "On ne sait toutefois pas si ces journées seraient isolées ou concentrées dans plusieurs épisodes."
+          : "On ne sait toutefois pas si ces nuits seraient isolées ou successives.";
+        const compte = jours ? `${ecart} jours ${sens} par an au-dessus de 30 °C` : `${ecart} nuits tropicales ${sens} par an`;
+        return `À ${communeName}, les projections indiquent environ ${compte} à l'horizon ${year}, par rapport à ${REF}. ${limite}`;
+      }
+      case "ecart_inconnu":
+        return `À ${communeName}, les projections donnent environ ${Math.round(signals.abs!)} ${objet} par an à l'horizon ${year}. Faute d'écart publié avec ${REF}, on ne peut pas dire s'il y en aurait plus ou moins qu'avant.`;
+      case "absent":
+        return `À ${communeName}, la projection n'est pas disponible à l'horizon ${year}.`;
+    }
   }
 
-  // theme === "temperature" : la nuance été/hiver n'est ajoutée que si l'écart
-  // est net (>0,3 °C), pour ne jamais affirmer une généralité fausse (ex. à la
-  // montagne l'été se réchauffe plus vite que l'hiver).
-  const core: Record<TerritoryType, string> = {
-    littoral_atlantique: `À ${communeName}, les saisons se réchauffent l'une après l'autre, et les extrêmes gagnent du terrain.`,
-    mediterraneen: `À ${communeName}, la chaleur fait déjà partie du climat ; ce qui change, c'est son intensité et sa durée au fil de l'année.`,
-    montagne: `À ${communeName}, le froid d'altitude a longtemps marqué le climat ; il devient moins présent, saison après saison.`,
-    plaine: `À ${communeName}, le climat se réchauffe saison après saison.`,
-  };
-  let seasonClause = "";
+  // theme === "temperature" : le réchauffement ne se dit que si les deux écarts (ou celui de l'été,
+  // seul publié) sont positifs ; la nuance été/hiver n'est ajoutée que si l'écart est net (>0,3 °C),
+  // pour ne jamais affirmer une généralité fausse (ex. à la montagne l'été se réchauffe plus vite).
   const { summerAnom, winterAnom } = signals;
-  if (summerAnom != null && winterAnom != null) {
-    if (winterAnom - summerAnom > 0.3) seasonClause = " Ici, l'hiver se réchauffe plus vite que l'été.";
-    else if (summerAnom - winterAnom > 0.3) seasonClause = " Ici, l'été se réchauffe plus vite que l'hiver.";
+  let core = `À ${communeName}, la trajectoire ci-dessus montre l'été moyen projeté à chaque horizon.`;
+  if (summerAnom != null && summerAnom > 0 && winterAnom != null && winterAnom > 0) {
+    core = `À ${communeName}, les projections indiquent un été et un hiver plus chauds à l'horizon ${year} que sur ${REF}.`;
+  } else if (summerAnom != null && summerAnom > 0 && winterAnom == null) {
+    core = `À ${communeName}, les projections indiquent un été plus chaud à l'horizon ${year} que sur ${REF}.`;
   }
-  return core[type] + seasonClause;
+  let seasonClause = "";
+  if (summerAnom != null && winterAnom != null && summerAnom > 0 && winterAnom > 0) {
+    if (winterAnom - summerAnom > 0.3) seasonClause = " Ici, l'hiver se réchaufferait plus vite que l'été.";
+    else if (summerAnom - winterAnom > 0.3) seasonClause = " Ici, l'été se réchaufferait plus vite que l'hiver.";
+  }
+  return core + seasonClause;
+}
+
+// Note « Observé » du volet Températures : l'écart de température moyenne annuelle entre la norme
+// 1961-1990 et les dix dernières années complètes de la réanalyse, signé tel quel.
+function noteEra5(era5: Era5Trend): string {
+  const fin = era5.data_through_year;
+  return `Température moyenne annuelle ${fin - 9}-${fin} : ${signed(era5.delta_c)} °C par rapport à 1961-1990 (réanalyse Copernicus / ERA5-Land).`;
 }
 
 // Face avant « mouvement » d'un phénomène compté en jours/nuits, avec garde-fou :
 // en climat froid (montagne) le phénomène est quasi absent (« +0 nuits » = effet
-// bug). On RAISONNE SUR LA VALEUR BRUTE (non arrondie) : sous le plancher on dit la
-// rareté ; sinon mouvement si le delta est net, à défaut le niveau absolu.
+// bug). Sous le plancher on dit la rareté ; sinon mouvement si le delta est net,
+// à défaut le niveau absolu. La règle vit dans `lireCompte`, partagée avec le récit.
 function movementOrLevel(
   absRaw: number | null | undefined,
   deltaRaw: number | null | undefined,
@@ -317,13 +354,14 @@ function movementOrLevel(
   rareLabel: string,
   year: string,
 ): string {
-  if (absRaw == null) return "—";
-  if (absRaw < 1.5) return rareLabel;
-  if (deltaRaw != null && Math.round(deltaRaw) >= 2) return `${signedInt(deltaRaw)} ${unit} d'ici ${year}`;
-  return `${Math.round(absRaw)} ${unit}/an en ${year}`;
+  const lecture = lireCompte(absRaw, deltaRaw);
+  if (lecture === "absent") return "—";
+  if (lecture === "rare") return rareLabel;
+  if (lecture === "hausse_nette") return `${signedInt(deltaRaw!)} ${unit} d'ici ${year}`;
+  return `${Math.round(absRaw!)} ${unit}/an en ${year}`;
 }
 
-function buildFactors(
+export function buildFactors(
   scenarios: GwlScenarios | null,
   horizonKey: HorizonKey,
   georisques: GeorisquesSummary | null,
@@ -341,7 +379,6 @@ function buildFactors(
   logementVacancePct?: number | null,
   eloignementServicesPct?: number | null,
   era5?: Era5Trend | null,
-  climatType?: TerritoryType | null,
   catnatVille?: string | null,
 ): Factor[] {
   const meta = HORIZON_META[horizonKey] ?? HORIZON_META.gwl20;
@@ -371,14 +408,16 @@ function buildFactors(
   const hotRef = reconstructReference(scenarios, "NORTX30D_yr", "ATX30D_yr");
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
-        eyebrow: "Des étés qui s'intensifient",
+        // FUT-116 : surtitre et sous-titre DÉCRIVENT le compte, sans tendance : ils s'affichent aussi sous
+        // « Restent rares » et sous un écart faible. Le mouvement, quand il existe, est dit par le récit.
+        eyebrow: "Le seuil des 30 °C",
         title: "Chaleurs estivales",
         // Option A : référence → horizon sélectionné (colle exactement à la face).
         headline:
           hotRef != null
             ? `≈ ${Math.round(hotRef)} → ${hotDays} jours chauds par an d'ici ${meta.year}`
             : `${hotDays} jours chauds par an en ${meta.year}`,
-        subhead: "Le nombre de jours de forte chaleur suit l'intensification des étés, indépendamment d'une canicule isolée.",
+        subhead: "Combien de jours par an dépasseraient 30 °C ?",
         accent: "var(--orange)",
         breakdownLabel: "Jours au-dessus de 30°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTX30D_yr", {
@@ -396,7 +435,7 @@ function buildFactors(
           heatDays != null && heatDays >= 1
             ? [{ label: "Jours au-dessus de 35°C", value: `Environ ${heatDays} par an en ${meta.year}` }]
             : undefined,
-        why: buildClimatWhy("chaleur", communeName, climatType ?? "plaine", {}),
+        why: buildClimatWhy("chaleur", communeName, { year: meta.year, abs: gwlData?.["NORTX30D_yr"], delta: hotDaysAnom }),
         whyLabel: "Ce que cela raconte",
         askPrefill: `Comment la chaleur va-t-elle évoluer dans ma commune d'ici ${HORIZON_META.gwl30.year} ?`,
         sources: "Projections DRIAS-TRACC, Météo-France · jours de forte chaleur (Tmax > 30°C), période de référence 1976-2005",
@@ -415,13 +454,14 @@ function buildFactors(
   const showTropicalDetail = tropicalNights != null && tropicalNightsMax >= 3;
   const tropicalNightsDetail: CardDetail | undefined = showTropicalDetail
     ? {
-        eyebrow: "Des nuits qui ne retombent plus",
+        eyebrow: "Le seuil des 20 °C",
         title: "Nuits tropicales",
         headline:
           tropicalNightsRef != null
             ? `≈ ${Math.round(tropicalNightsRef)} → ${tropicalNights} nuits par an d'ici ${meta.year}`
             : `${tropicalNights} nuits par an en ${meta.year}`,
-        subhead: "Des nuits où la chaleur ne retombe pas sous 20°C : même après le coucher du soleil, l'air ne se rafraîchit plus.",
+        // FUT-116 : une nuit tropicale peut se rafraîchir ; seule sa température minimale reste au-dessus de 20 °C.
+        subhead: "Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C.",
         accent: "var(--orange)",
         breakdownLabel: "Nuits au-dessus de 20°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTR_yr", {
@@ -431,16 +471,17 @@ function buildFactors(
           withBars: true,
           selectedHorizon: horizonKey,
         }),
-        why: buildClimatWhy("nuits", communeName, climatType ?? "plaine", {}),
+        why: buildClimatWhy("nuits", communeName, { year: meta.year, abs: gwlData?.["NORTR_yr"], delta: tropicalNightsAnom }),
         whyLabel: "Ce que cela raconte",
         askPrefill: "Les nuits tropicales vont-elles augmenter dans ma commune ?",
         sources: "Projections DRIAS-TRACC, Météo-France · nuits tropicales (Tmin > 20°C), période de référence 1976-2005",
       }
     : undefined;
 
-  // ── Carte « Sécheresse des sols » → drawer : un territoire qui s'assèche ──────
-  // Trois temps (présent, terrain, futur) racontés en langage utilisateur ; les
-  // noms de bases (VigiEau, ONDE, DRIAS) descendent en pied de drawer.
+  // ── Carte « Sécheresse des sols » → drawer : trois lectures, jamais confondues ──
+  // Restriction du moment (VigiEau), relevé de terrain (ONDE), sols secs projetés (DRIAS) : trois
+  // sources, trois natures. FUT-116 : aucune ne dit une tendance (le composant ne lit aucun écart de
+  // sécheresse), et l'une ne se déduit pas des autres. Les noms de bases restent en pied de drawer.
   const hasDroughtStory = drySoilDays != null || !!vigieau?.maxLevel || !!drought?.isDry;
   // « Vigilance » est le niveau le plus bas de VigiEau : c'est de la
   // sensibilisation, pas une restriction d'usage. La nommer « restriction »
@@ -466,10 +507,14 @@ function buildFactors(
     // n'invente pas une réassurance (« pas de tension ») qui contredirait une
     // restriction en cours.
     ...(drought
-      ? [{ label: "Sur le terrain", value: drought.isDry ? "Cours d'eau à sec par endroits" : "Pas de cours d'eau à sec" }]
+      // FUT-116 : un relevé ponctuel porte sa date, comme la consultation VigiEau ci-dessus.
+      ? [{
+          label: drought.lastObservationDate ? `Relevé de terrain du ${formatFrDate(drought.lastObservationDate)}` : "Sur le terrain",
+          value: drought.isDry ? "Cours d'eau à sec par endroits" : "Pas de cours d'eau à sec",
+        }]
       : []),
     ...(drySoilDays != null
-      ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours secs par an` }]
+      ? [{ label: `À l'horizon ${meta.year}`, value: `Environ ${drySoilDays} jours de sols secs par an` }]
       : []),
   ];
   const droughtFacts =
@@ -481,22 +526,29 @@ function buildFactors(
       : undefined;
   const droughtDetail: CardDetail | undefined = hasDroughtStory
     ? {
-        eyebrow: "Un territoire qui s'assèche",
+        eyebrow: "L'eau et les sols",
         title: "Sécheresse des sols",
         headline:
           drySoilDays != null
-            ? `Environ ${drySoilDays} jours secs par an d'ici ${meta.year}`
+            ? `Environ ${drySoilDays} jours de sols secs par an à l'horizon ${meta.year}`
             : restrictions.etat === "en_vigueur"
               // MÊME PHRASE QUE LA LIGNE DU FIL, et c'est le but : deux formulations d'un même
               // état obligeaient le lecteur à vérifier qu'elles disaient bien la même chose.
               ? restrictions.texte
-              : "Cours d'eau à sec observé",
-        subhead: "Le manque durable d'eau dans les sols, même en dehors des périodes de restriction.",
+              // FUT-116 : l'observation ne se dit QUE si ONDE l'a relevée. Elle était la branche par
+              // défaut : toute ouverture du volet sans sols secs ni restriction l'aurait affirmée.
+              : drought?.isDry
+                ? "Cours d'eau à sec observé"
+                : restrictions.texte,
+        subhead: "Restrictions d'eau, cours d'eau et sols : trois lectures à ne pas confondre.",
         accent: "var(--orange)",
         breakdownLabel: "Le fil de la sécheresse",
         breakdown: droughtRows,
         facts: droughtFacts && droughtFacts.length > 0 ? droughtFacts : undefined,
-        why: "La sécheresse ne se voit pas d'un coup, elle s'installe. L'eau qu'on restreint l'été, les cours d'eau qui faiblissent, la terre qui se rétracte : ces phénomènes racontent un même mouvement du territoire, du présent vers l'avenir. C'est un changement de fond qui s'inscrit dans la durée.",
+        // FUT-116 : le récit affirmait « des cours d'eau qui faiblissent » (même sous « Pas de cours d'eau
+        // à sec »), « la terre qui se rétracte » (aucune donnée ici) et « un changement de fond ». Il dit
+        // désormais comment lire les trois lignes, et ce qu'elles ne permettent pas de conclure.
+        why: "Une restriction est une décision préfectorale prise pour la période en cours. L'état d'un cours d'eau est un relevé ponctuel sur le terrain. Les jours de sols secs sont une moyenne annuelle projetée. L'une de ces lectures ne permet pas de déduire les autres.",
         askPrefill: "Ma commune est-elle exposée à la sécheresse ?",
         sources: "VigiEau (arrêtés préfectoraux) · réseau ONDE, Hub'Eau (cours d'eau) · projections DRIAS, Météo-France",
       }
@@ -526,7 +578,7 @@ function buildFactors(
       detail: tropicalNightsDetail,
       tip: showTropicalDetail
         ? undefined
-        : "Quand la chaleur ne retombe pas la nuit, l'air ne rafraîchit plus le territoire. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
+        : "Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. La carte en donne le nombre moyen par an, selon les projections.",
     },
     {
       // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.
@@ -744,22 +796,24 @@ function buildFactors(
               summerAnom != null && winterAnom != null
                 ? `Été ${signed(summerAnom)} °C d'ici ${meta.year}\nHiver ${signed(winterAnom)} °C`
                 : `${frFloat(summerTraj[summerTraj.length - 1].v)} °C l'été à l'horizon ${HORIZON_META.gwl30.year}`,
-            subhead: "Le climat de fond du territoire : la moyenne des saisons, qui transforme le paysage bien au-delà des pics ponctuels.",
+            subhead: "Comment les températures d'été et d'hiver pourraient évoluer.",
             accent: "var(--orange)",
             breakdownLabel: "Été moyen, par horizon",
             breakdown: summerBreakdown,
             facts: tempFacts.length > 0 ? tempFacts : undefined,
-            why: buildClimatWhy("temperature", communeName, climatType ?? "plaine", { summerAnom, winterAnom }),
+            why: buildClimatWhy("temperature", communeName, { year: meta.year, summerAnom, winterAnom }),
             whyLabel: "Ce que cela raconte",
             ...(era5
               ? {
-                  noteLabel: "Déjà observé",
-                  note: `${signed(era5.delta_c)} °C depuis 1961-1990 (réanalyse Copernicus / ERA5-Land). Le réchauffement projeté a déjà commencé.`,
+                  // FUT-116 : la mesure observée et ses deux périodes, sans conclure : un écart observé ne
+                  // valide pas une projection, et son signe n'est pas garanti.
+                  noteLabel: "Observé",
+                  note: noteEra5(era5),
                 }
               : {}),
             askPrefill: "Comment les températures évoluent-elles dans ma commune ?",
             sources: era5
-              ? "Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (tendance observée)"
+              ? "Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (écart observé)"
               : "Projections DRIAS-TRACC, Météo-France · moyennes saisonnières (juin-août, décembre-février), période de référence 1976-2005",
           }
         : undefined,
@@ -1128,10 +1182,10 @@ const REGISTER_TONE: Record<RegisterKey, string> = {
   verifications: "var(--reg-controle)",
 };
 
-export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5, climatType }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
+export function QuartierAside({ registres, communeName, scenarios, georisques, territoire, vigieau, drought, catnat, catnatInondation, catnatMisAJour, catnatVille, littoral, demographie, couvertNaturel, saisonnalitePct, logementVacancePct, eloignementServicesPct, era5 }: SharedProps & { registres?: Map<EvidenceTargetKey, Set<RegisterKey>> }) {
   const [horizon] = useHorizon();
   const [openDetail, setOpenDetail] = useState<CardDetail | null>(null);
-  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, climatType ?? null, catnatVille ?? null);
+  const factors = buildFactors(scenarios, horizon, georisques, territoire, vigieau ?? null, drought ?? null, communeName, catnat ?? null, catnatInondation ?? null, catnatMisAJour ?? null, littoral ?? null, demographie ?? null, couvertNaturel ?? null, saisonnalitePct ?? null, logementVacancePct ?? null, eloignementServicesPct ?? null, era5 ?? null, catnatVille ?? null);
 
   // FUT-69 : ARRIVÉE PAR LA PASTILLE DU DOSSIER. Une carte qui porte son chiffre dans le volet
   // (`arrivee`) l'ouvre quand l'ancre de la page est la sienne : le lecteur retrouve le compte

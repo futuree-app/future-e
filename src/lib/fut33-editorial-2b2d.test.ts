@@ -81,7 +81,7 @@ test("la position se dit par la distance : carte d'identité, raison de carte, D
 
 test("textes climat : aucune cause maritime affirmée sans donnée", () => {
   const climat = lire("src/components/report/QuartierClimatData.tsx");
-  const bloc = climat.slice(climat.indexOf("function buildClimatWhy"), climat.indexOf("return core[type] + seasonClause;"));
+  const bloc = climat.slice(climat.indexOf("function buildClimatWhy"), climat.indexOf("return core + seasonClause;"));
   assert.ok(bloc.length > 500);
   // Les TEXTES (gabarits entre accents graves), pas les clés de type (`littoral_atlantique` reste un identifiant).
   const textes = (bloc.match(/`[^`]*`/g) ?? []).join("\n");
