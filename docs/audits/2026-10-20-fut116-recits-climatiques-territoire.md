@@ -137,12 +137,46 @@ que le correctif ne doit pas changer.
 - **Historique** : le récit n'est stocké nulle part (snapshot, empreinte, artefact, synthèse) ; aucun dossier, aucune synthèse Anthropic à régénérer, aucune migration. Les acheteurs verront le nouveau récit en rouvrant la page, ce qui est l'objet du correctif.
 - **Commercial** : aucun prix, droit, Stripe ni garde touchés.
 
-## E. Verdict
+## E. Passe 2 : le panneau entier (revue PR #70, 20/10/2026)
 
-**GO** pour la fiabilité des récits « Ce que cela raconte » des trois volets climat du module Territoire.
+La revue a relevé que le récit était juste, mais que **les textes au-dessus de lui** dans les mêmes volets
+affirmaient encore une tendance, quel que soit le signal. Corrigés dans la même PR, sans nouvelle donnée :
 
-Limites restantes, hors `buildClimatWhy`, **non corrigées** (à arbitrer, voir ci-dessous) :
-1. **Surtitres des volets** : « Des étés qui s'intensifient » (Chaleur) et « Des nuits qui ne retombent plus » (Nuits) restent fixes. Le second s'affiche aussi sous « Quasi inexistantes » (2 858 communes en 2030).
-2. **Sous-titre Chaleur** : « Le nombre de jours de forte chaleur suit l'intensification des étés » est une relation générale, posée sans condition.
-3. **Note ERA5** (Températures) : « Le réchauffement projeté a déjà commencé. » suit `delta_c` sans vérifier son signe ; la table est en base, non relue ici.
-4. **Écart avec l'audit FUT-17 sur les nuits** : 102 communes non reproduites (167 à écart < 1 en 2030 avec le volet ouvert). Probablement une autre typologie ou un autre index au moment de la sonde.
+| Emplacement | Avant | Après |
+|---|---|---|
+| Chaleur · surtitre | « Des étés qui s'intensifient » | « Jours de forte chaleur » |
+| Chaleur · sous-titre | « Le nombre de jours de forte chaleur suit l'intensification des étés, indépendamment d'une canicule isolée. » | « Le nombre moyen de jours par an où la température maximale dépasse 30 °C, selon les projections. » |
+| Nuits · surtitre | « Des nuits qui ne retombent plus » (aussi sous « Quasi inexistantes ») | « Nuits chaudes » |
+| Nuits · sous-titre | « […] même après le coucher du soleil, l'air ne se rafraîchit plus. » (faux : une nuit à Tmin > 20 °C peut se rafraîchir) | « Le nombre moyen de nuits par an où la température minimale reste au-dessus de 20 °C, selon les projections. » |
+| Nuits · infobulle (carte sans volet, ex. Jausiers) | « […] l'air ne rafraîchit plus le territoire. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi. » | « Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. La carte en donne le nombre moyen par an, selon les projections. » |
+| Températures · sous-titre | « […] la moyenne des saisons, qui transforme le paysage bien au-delà des pics ponctuels. » | « La température moyenne de l'été et de l'hiver, selon les projections. » |
+| Températures · note ERA5 | « Déjà observé : {±x} °C depuis 1961-1990 […]. Le réchauffement projeté a déjà commencé. » (sans examen du signe ; une observation ne valide pas une projection) | « Observé : Température moyenne annuelle {N−9}-{N} : {±x} °C par rapport à 1961-1990 (réanalyse Copernicus / ERA5-Land). » Signe restitué tel quel. Source : « écart observé » au lieu de « tendance observée ». |
+
+**Tests du panneau entier** (4 ajoutés) : texte intégral du volet épinglé pour Cherbourg 2030 (nuits « Quasi
+inexistantes »), Jausiers 2050 (chaleur « Restent rares », plus l'infobulle des nuits), Nîmes 2100 (hausse forte,
+trajectoire intacte) et la note ERA5 sur trois **fixtures synthétiques déclarées** (+1,42 / −0,3 / 0 °C : ERA5 vit en
+base, hors d'un test sans réseau). Le contrôle global couvre désormais aussi les infobulles.
+
+**Contre-épreuve** : ces tests sur le commit précédent de la PR (8c55e60e) : **5 échecs sur 17** (les 4 panneaux et
+le contrôle global), sur les phrases « Des étés qui s'intensifient », « Des nuits qui ne retombent plus », « l'air ne
+se rafraîchit plus », « suit l'intensification des étés », « Le réchauffement projeté a déjà commencé ». Après : 17/17.
+
+**Commande de test reproductible** : `npm test`, ajouté à `package.json` :
+`node --test "src/**/*.test.ts" "scripts/**/*.test.mjs"`. Elle ne sélectionne que les vrais fichiers de test et
+n'exécute donc jamais les scripts d'intégration protégés ni les fixtures `*-de-test.ts`.
+
+| Vérification (passe 2) | Résultat |
+|---|---|
+| `npm test` | **2 843 / 2 843**, 0 échec (les 2 841 de la passe 1 comptaient 2 fichiers sans test, `projet-de-test.ts` et `schema-de-test.mjs` ; + 4 tests de panneau) |
+| `tsc --noEmit` | 0 erreur |
+| ESLint, fichiers touchés | 0 erreur |
+| `next build` | réussi ; la copie locale de `.env.local` a ensuite été supprimée du worktree (jamais suivie par git) |
+
+## F. Verdict
+
+**GO** pour la fiabilité de tous les textes des volets Chaleurs estivales, Nuits tropicales et Températures
+moyennes du module Territoire : surtitre, sous-titre, trajectoire, récit, note, infobulle.
+
+Limites restantes, **non corrigées** :
+1. **Écart avec l'audit FUT-17 sur les nuits** : 102 communes non reproduites (167 à écart < 1 en 2030 avec le volet ouvert). Probablement une autre typologie ou un autre index au moment de la sonde.
+2. **Volet Sécheresse des sols** (même groupe « Le climat », hors périmètre FUT-116) : surtitre « Un territoire qui s'assèche » et récit « […] C'est un changement de fond qui s'inscrit dans la durée. », fixes, alors que ce composant ne lit aucun écart projeté de sécheresse (`ASWI04_yr` n'est mappé que pour l'accueil). Même classe de défaut ; à arbitrer.

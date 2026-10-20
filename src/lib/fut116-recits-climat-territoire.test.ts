@@ -62,7 +62,8 @@ type Scenarios = Record<string, { h: string; v: Record<string, number> }>;
 type Detail = { eyebrow: string; headline: string; why: string; breakdown?: { label: string; value: string }[] };
 type Facteur = { label: string; val: string; detail?: Detail };
 
-let facteurs: (scenarios: Scenarios | null, horizon: Horizon, commune: string) => Facteur[];
+type Era5 = { delta_c: number; baseline_mean_c: number; recent_mean_c: number; data_through_year: number };
+let facteurs: (scenarios: Scenarios | null, horizon: Horizon, commune: string, era5?: Era5 | null) => Facteur[];
 let volet: (detail: Detail) => string;
 let grille: (scenarios: Scenarios | null, commune: string) => string;
 let drias: (insee: string) => Promise<Scenarios>;
@@ -74,10 +75,10 @@ before(async () => {
   const mod = await import("../components/report/QuartierClimatData.tsx");
   const { MetricDrawer } = await import("../components/MetricDrawer.tsx");
   // Mêmes arguments que `QuartierAside` : seules les données climat sont fournies, le reste est absent.
-  facteurs = (scenarios, horizon, commune) =>
+  facteurs = (scenarios, horizon, commune, era5 = null) =>
     (mod.buildFactors as (...a: unknown[]) => Facteur[])(
       scenarios, horizon, null, null, null, null, commune,
-      null, null, null, null, null, null, null, null, null, null, null,
+      null, null, null, null, null, null, null, null, null, era5, null,
     );
   volet = (detail) => texteRendu(renderToStaticMarkup(createElement(MetricDrawer, { detail: detail as never, onClose: () => {} })));
   // La page rend la grille à l'horizon par défaut (2050) : c'est ce que voit le lecteur en arrivant.
@@ -96,7 +97,7 @@ function texteRendu(html: string): string {
   return html
     .replace(/<style[^>]*>[\s\S]*?<\/style>/g, "")
     .replace(/<[^>]+>/g, " ")
-    .replace(/&#x27;|&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&")
+    .replace(/&#x27;|&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&")
     .replace(/\s+/g, " ").trim();
 }
 
@@ -113,6 +114,9 @@ const NON_DEMONTRE = new RegExp([
   "plus tôt", "durent plus longtemps", "longueur des épisodes", "la saison s'étire", "sa durée",
   "font déjà partie", "fait déjà partie", "désormais", "commencent à céder", "étés les plus chauds",
   "a longtemps", "plus souvent", "les extrêmes gagnent", "l'une après l'autre",
+  // Surtitres, sous-titres, infobulle et note du même volet (revue PR #70).
+  "s'intensifi", "intensification", "ne retombent plus", "rafraîchit plus", "a déjà commencé", "climat qui change",
+  "transforme le paysage",
 ].join("|"), "i");
 
 const TOUS_LES_HORIZONS: Horizon[] = ["gwl15", "gwl20", "gwl30"];
@@ -160,7 +164,8 @@ test("Aucun volet climat n'affirme une accélération, une tendance, une durée 
   for (const [insee, nom] of TEMOINS) {
     const s = await drias(insee);
     for (const h of TOUS_LES_HORIZONS) {
-      for (const f of facteurs(s, h, nom)) {
+      for (const f of facteurs(s, h, nom) as (Facteur & { tip?: string })[]) {
+        if (f.tip) assert.doesNotMatch(f.tip, NON_DEMONTRE, `${nom} · ${ANNEE[h]} · ${f.label} (infobulle)`);
         if (!f.detail) continue;
         assert.doesNotMatch(volet(f.detail), NON_DEMONTRE, `${nom} · ${ANNEE[h]} · ${f.label}`);
       }
@@ -264,6 +269,60 @@ test("Températures moyennes : le récit date le réchauffement et garde la nuan
   );
   const r = facteurs(await drias("17300"), "gwl20", "La Rochelle");
   assert.equal(recit(r, TEMP), "À La Rochelle, les projections donnent, à l'horizon 2050, un été et un hiver plus chauds qu'à la fin du XXe siècle.");
+});
+
+// ── 6 bis. LE PANNEAU ENTIER (revue PR #70) : surtitre, sous-titre, trajectoire, récit, note ────────
+// Le récit était juste, mais le surtitre et le sous-titre AU-DESSUS de lui disaient encore « Des étés qui
+// s'intensifient », « Des nuits qui ne retombent plus », « l'air ne se rafraîchit plus », et la note ERA5
+// concluait « Le réchauffement projeté a déjà commencé » quel que soit le signe de l'écart. On épingle donc
+// le TEXTE ENTIER du volet : une phrase ajoutée ou modifiée n'importe où le fait échouer.
+const PIED_CHALEUR = "Méthodologie et sources Projections DRIAS-TRACC, Météo-France · jours de forte chaleur (Tmax > 30°C), période de référence 1976-2005 Poser une question à futur•e →";
+const PIED_NUITS = "Méthodologie et sources Projections DRIAS-TRACC, Météo-France · nuits tropicales (Tmin > 20°C), période de référence 1976-2005 Poser une question à futur•e →";
+const SOUS_TITRE_CHALEUR = "Le nombre moyen de jours par an où la température maximale dépasse 30 °C, selon les projections.";
+const SOUS_TITRE_NUITS = "Le nombre moyen de nuits par an où la température minimale reste au-dessus de 20 °C, selon les projections.";
+
+test("Panneau entier · Cherbourg-en-Cotentin 2030, nuits « Quasi inexistantes »", async () => {
+  const fs = facteurs(await drias("50129"), "gwl15", "Cherbourg-en-Cotentin");
+  assert.equal(
+    volet(carte(fs, NUITS).detail!),
+    `✕ Nuits chaudes Nuits tropicales ≈ 0 → 1 nuits par an d'ici 2030 ${SOUS_TITRE_NUITS} Nuits au-dessus de 20°C, par an Fin du XXe siècle ≈ 0 nuits Horizon 2030 1 nuits Horizon 2050 3 nuits Horizon 2100 8 nuits Ce que cela raconte À Cherbourg-en-Cotentin, les nuits au-dessus de 20 °C restent quasi inexistantes dans les projections à l'horizon 2030 : moins de deux par an en moyenne. ${PIED_NUITS}`,
+  );
+});
+
+test("Panneau entier · Jausiers 2050, chaleur « Restent rares » ; et l'infobulle des nuits sans volet", async () => {
+  const fs = facteurs(await drias("04096"), "gwl20", "Jausiers");
+  assert.equal(
+    volet(carte(fs, CHALEUR).detail!),
+    `✕ Jours de forte chaleur Chaleurs estivales ≈ 0 → 0 jours chauds par an d'ici 2050 ${SOUS_TITRE_CHALEUR} Jours au-dessus de 30°C, par an Fin du XXe siècle ≈ 0 jours Horizon 2030 0 jours Horizon 2050 0 jours Horizon 2100 0 jours Ce que cela raconte À Jausiers, les jours au-dessus de 30 °C restent rares dans les projections à l'horizon 2050 : moins de deux par an en moyenne. ${PIED_CHALEUR}`,
+  );
+  // Sans volet, la carte des nuits porte une infobulle : elle disait « l'air ne rafraîchit plus le territoire »
+  // et « un climat qui change près de chez soi » sous « Quasi inexistantes ».
+  assert.equal(
+    (carte(fs, NUITS) as Facteur & { tip?: string }).tip,
+    "Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. La carte en donne le nombre moyen par an, selon les projections.",
+  );
+});
+
+test("Panneau entier · Nîmes 2100, hausse forte : la trajectoire et le chiffre restent intacts", async () => {
+  const fs = facteurs(await drias("30189"), "gwl30", "Nîmes");
+  assert.equal(
+    volet(carte(fs, CHALEUR).detail!),
+    `✕ Jours de forte chaleur Chaleurs estivales ≈ 36 → 89 jours chauds par an d'ici 2100 ${SOUS_TITRE_CHALEUR} Jours au-dessus de 30°C, par an Fin du XXe siècle ≈ 36 jours Horizon 2030 56 jours Horizon 2050 68 jours Horizon 2100 89 jours Jours au-dessus de 35°C Environ 31 par an en 2100 Ce que cela raconte À Nîmes, les projections comptent 52 jours au-dessus de 30 °C de plus par an à l'horizon 2100 qu'à la fin du XXe siècle. Ce compte annuel ne dit ni à quel moment de l'été ces journées surviennent, ni combien de temps durent les épisodes. ${PIED_CHALEUR}`,
+  );
+});
+
+// ERA5 vient de Supabase (`commune_era5_trend`), hors de portée d'un test sans réseau : les trois écarts
+// ci-dessous sont des FIXTURES SYNTHÉTIQUES déclarées, pour couvrir les signes que la note doit restituer tels quels.
+test("Panneau entier · note ERA5 (fixtures synthétiques) : la mesure et ses périodes, signe compris, sans conclusion", async () => {
+  const s = await drias("30189");
+  const panneau = (delta_c: number) =>
+    volet(carte(facteurs(s, "gwl20", "Nîmes", { delta_c, baseline_mean_c: 14, recent_mean_c: 14 + delta_c, data_through_year: 2024 }), TEMP).detail!);
+  const attendu = (ecart: string) =>
+    `✕ Trajectoire climatique Températures moyennes Été +2,4 °C d'ici 2050 Hiver +1,9 °C La température moyenne de l'été et de l'hiver, selon les projections. Été moyen, par horizon Fin du XXe siècle 23,3 °C Horizon 2030 25 °C Horizon 2050 25,7 °C Horizon 2100 27,4 °C Été 2050 25,7 °C (+2,4) Hiver 2050 8,6 °C (+1,9) Ce que cela raconte À Nîmes, les projections donnent, à l'horizon 2050, un été et un hiver plus chauds qu'à la fin du XXe siècle. Ici, l'été se réchauffe plus vite que l'hiver. Observé Température moyenne annuelle 2015-2024 : ${ecart} °C par rapport à 1961-1990 (réanalyse Copernicus / ERA5-Land). Méthodologie et sources Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (écart observé) Poser une question à futur•e →`;
+  assert.equal(panneau(1.42), attendu("+1,4"));
+  assert.equal(panneau(-0.3), attendu("-0,3"));
+  assert.equal(panneau(0), attendu("+0"));
+  for (const d of [1.42, -0.3, 0]) assert.doesNotMatch(panneau(d), /déjà|a commencé|valide|confirme/i);
 });
 
 // ── 7. Données absentes ou incomplètes : jamais une situation favorable implicite ───────────────

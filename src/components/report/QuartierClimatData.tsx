@@ -332,6 +332,13 @@ function buildClimatWhy(theme: "temperature" | "chaleur" | "nuits", communeName:
   return core + seasonClause;
 }
 
+// Note « Observé » du volet Températures : l'écart de température moyenne annuelle entre la norme
+// 1961-1990 et les dix dernières années complètes de la réanalyse, signé tel quel.
+function noteEra5(era5: Era5Trend): string {
+  const fin = era5.data_through_year;
+  return `Température moyenne annuelle ${fin - 9}-${fin} : ${signed(era5.delta_c)} °C par rapport à 1961-1990 (réanalyse Copernicus / ERA5-Land).`;
+}
+
 // Face avant « mouvement » d'un phénomène compté en jours/nuits, avec garde-fou :
 // en climat froid (montagne) le phénomène est quasi absent (« +0 nuits » = effet
 // bug). Sous le plancher on dit la rareté ; sinon mouvement si le delta est net,
@@ -397,14 +404,16 @@ export function buildFactors(
   const hotRef = reconstructReference(scenarios, "NORTX30D_yr", "ATX30D_yr");
   const heatDetail: CardDetail | undefined = hotDays != null
     ? {
-        eyebrow: "Des étés qui s'intensifient",
+        // FUT-116 : surtitre et sous-titre DÉCRIVENT le compte, sans tendance : ils s'affichent aussi sous
+        // « Restent rares » et sous un écart faible. Le mouvement, quand il existe, est dit par le récit.
+        eyebrow: "Jours de forte chaleur",
         title: "Chaleurs estivales",
         // Option A : référence → horizon sélectionné (colle exactement à la face).
         headline:
           hotRef != null
             ? `≈ ${Math.round(hotRef)} → ${hotDays} jours chauds par an d'ici ${meta.year}`
             : `${hotDays} jours chauds par an en ${meta.year}`,
-        subhead: "Le nombre de jours de forte chaleur suit l'intensification des étés, indépendamment d'une canicule isolée.",
+        subhead: "Le nombre moyen de jours par an où la température maximale dépasse 30 °C, selon les projections.",
         accent: "var(--orange)",
         breakdownLabel: "Jours au-dessus de 30°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTX30D_yr", {
@@ -441,13 +450,14 @@ export function buildFactors(
   const showTropicalDetail = tropicalNights != null && tropicalNightsMax >= 3;
   const tropicalNightsDetail: CardDetail | undefined = showTropicalDetail
     ? {
-        eyebrow: "Des nuits qui ne retombent plus",
+        eyebrow: "Nuits chaudes",
         title: "Nuits tropicales",
         headline:
           tropicalNightsRef != null
             ? `≈ ${Math.round(tropicalNightsRef)} → ${tropicalNights} nuits par an d'ici ${meta.year}`
             : `${tropicalNights} nuits par an en ${meta.year}`,
-        subhead: "Des nuits où la chaleur ne retombe pas sous 20°C : même après le coucher du soleil, l'air ne se rafraîchit plus.",
+        // FUT-116 : une nuit tropicale peut se rafraîchir ; seule sa température minimale reste au-dessus de 20 °C.
+        subhead: "Le nombre moyen de nuits par an où la température minimale reste au-dessus de 20 °C, selon les projections.",
         accent: "var(--orange)",
         breakdownLabel: "Nuits au-dessus de 20°C, par an",
         breakdown: trajectoryBreakdown(scenarios, "NORTR_yr", {
@@ -552,7 +562,7 @@ export function buildFactors(
       detail: tropicalNightsDetail,
       tip: showTropicalDetail
         ? undefined
-        : "Quand la chaleur ne retombe pas la nuit, l'air ne rafraîchit plus le territoire. C'est l'un des signes les plus parlants d'un climat qui change près de chez soi.",
+        : "Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. La carte en donne le nombre moyen par an, selon les projections.",
     },
     {
       // Registre B (niveau) : le chiffre porte son échelle, on garde l'absolu.
@@ -770,7 +780,7 @@ export function buildFactors(
               summerAnom != null && winterAnom != null
                 ? `Été ${signed(summerAnom)} °C d'ici ${meta.year}\nHiver ${signed(winterAnom)} °C`
                 : `${frFloat(summerTraj[summerTraj.length - 1].v)} °C l'été à l'horizon ${HORIZON_META.gwl30.year}`,
-            subhead: "Le climat de fond du territoire : la moyenne des saisons, qui transforme le paysage bien au-delà des pics ponctuels.",
+            subhead: "La température moyenne de l'été et de l'hiver, selon les projections.",
             accent: "var(--orange)",
             breakdownLabel: "Été moyen, par horizon",
             breakdown: summerBreakdown,
@@ -779,13 +789,15 @@ export function buildFactors(
             whyLabel: "Ce que cela raconte",
             ...(era5
               ? {
-                  noteLabel: "Déjà observé",
-                  note: `${signed(era5.delta_c)} °C depuis 1961-1990 (réanalyse Copernicus / ERA5-Land). Le réchauffement projeté a déjà commencé.`,
+                  // FUT-116 : la mesure observée et ses deux périodes, sans conclure : un écart observé ne
+                  // valide pas une projection, et son signe n'est pas garanti.
+                  noteLabel: "Observé",
+                  note: noteEra5(era5),
                 }
               : {}),
             askPrefill: "Comment les températures évoluent-elles dans ma commune ?",
             sources: era5
-              ? "Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (tendance observée)"
+              ? "Projections DRIAS-TRACC, Météo-France (moyennes saisonnières, période de référence 1976-2005) · réanalyse ERA5-Land, Copernicus (écart observé)"
               : "Projections DRIAS-TRACC, Météo-France · moyennes saisonnières (juin-août, décembre-février), période de référence 1976-2005",
           }
         : undefined,
