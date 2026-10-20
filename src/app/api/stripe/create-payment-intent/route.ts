@@ -17,13 +17,18 @@ import { colonnesIntention, lireContexteCheckout, projetVuEstACour } from "@/lib
 import { enregistrerIntention, statutStripeModifiable } from "@/lib/verrou-intention-dossier";
 import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import { normalizeUserProject, type UserProject } from "@/lib/user-project";
+import { communeVendable, ensembleVendable } from "@/lib/commerce/eligibilite-territoriale";
+import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
+import { PACK_DECISION_AMOUNT_CENTS } from "@/lib/commerce/preuve-paiement-pack";
 
 export const runtime = "nodejs";
 
 // Server-side price map — client-provided amounts are never trusted
 const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string }> = {
   "one-shot":      { amountEur: 14, stripePriceId: process.env.STRIPE_RAPPORT_PRICE_ID ?? "" },
-  "pack-decision": { amountEur: 39, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
+  // FUT-115 : le montant vient de la constante que l'octroi vérifie : un changement de prix ne peut pas
+  // rendre un comparatif payé impossible à ouvrir.
+  "pack-decision": { amountEur: PACK_DECISION_AMOUNT_CENTS / 100, stripePriceId: process.env.STRIPE_PACK_PRICE_ID    ?? "" },
   // Le montant réel est calculé par `quoteForDossier` (39 € ou 25 € selon le territoire déjà
   // payé) : cette entrée sert à RECONNAÎTRE le produit, son `amountEur` n'est jamais facturé.
   //
@@ -57,13 +62,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // Territoire ciblé (parcours comparateur). Optionnel : sans lui, achat sur
-    // la commune de résidence (comportement historique). On valide un vrai code
-    // INSEE à 5 caractères pour ne jamais propager un code postal (piège connu).
-    const cleanInsee =
-      typeof targetInsee === "string" && /^[0-9AB][0-9]{4}$/i.test(targetInsee.trim())
-        ? targetInsee.trim().toUpperCase()
-        : "";
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    // FUT-114 · LA COMMUNE VENDUE EST VÉRIFIÉE ICI, AVANT TOUT EFFET DE BORD.
+    //
+    // La V1 ne vend qu'en métropole, Corse comprise. Le dossier de territoire (14 €) porte sur la commune
+    // `targetInsee`, qui devient le `report_grant` au webhook : elle est OBLIGATOIRE et doit figurer dans le
+    // référentiel. Le parcours « sans commune » (achat sur la résidence) ne posait aucun droit territorial :
+    // il encaissait 14 € sans rien ouvrir, il est refusé. Le Pack et le dossier d'adresse sont gardés plus
+    // bas, sur leurs propres communes. Aucun de ces refus n'a besoin d'un compte : un appel direct est
+    // refusé de la même façon, avant même la lecture de la session.
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    let cleanInsee = "";
+    if (productType.trim() === "one-shot") {
+      const territoire = communeVendable(targetInsee, communeDuReferentiel);
+      if (!territoire.ok) {
+        return NextResponse.json({ error: territoire.error, code: territoire.code }, { status: 422 });
+      }
+      cleanInsee = territoire.insee;
+    }
+    // Le comparatif : TOUTES ses communes, une seule refusée refuse l'ensemble. Les codes vérifiés
+    // remplacent ceux du client dans la suite (forme du COG, Corse comprise).
+    let packInseesVerifies: string[] = [];
+    if (productType.trim() === "pack-decision") {
+      const brut: unknown[] = Array.isArray(pack?.trio) ? pack.trio : [];
+      const ensemble = ensembleVendable(
+        brut.map((t) => (t && typeof t === "object" ? (t as { insee?: unknown }).insee : t)),
+        communeDuReferentiel,
+      );
+      if (!ensemble.ok) {
+        return NextResponse.json({ error: ensemble.error, code: ensemble.code }, { status: 422 });
+      }
+      packInseesVerifies = ensemble.insees;
+    }
     const cleanCommune =
       typeof targetCommune === "string" ? targetCommune.trim().slice(0, 120) : "";
     const cleanSource =
@@ -198,6 +228,12 @@ export async function POST(request: Request) {
           { status: 422 },
         );
       }
+      // FUT-114 : la commune du bien, celle que la BAN a rendue (arrondissement pour Paris, Lyon, Marseille),
+      // jamais celle que le client a déclarée. Avant le tarif, avant Stripe, avant l'intention.
+      const communeDuBien = communeVendable(canonical.citycode, communeDuReferentiel);
+      if (!communeDuBien.ok) {
+        return NextResponse.json({ error: communeDuBien.error, code: communeDuBien.code }, { status: 422 });
+      }
 
       // TOUTES les valeurs viennent de la feature canonique. Sécuriser le type en gardant les
       // coordonnées du client analyserait un point choisi par le client.
@@ -240,10 +276,10 @@ export async function POST(request: Request) {
     let packProjetLabel = "";
     if (isPack) {
       const raw = Array.isArray(pack?.trio) ? pack.trio : [];
+      // Chaque code a déjà passé `ensembleVendable` (FUT-114) : on reprend sa forme vérifiée.
       packTrio = raw
-        .map((t: { insee?: string; commune?: string }) => ({
-          insee: typeof t?.insee === "string" && /^[0-9AB][0-9]{4}$/i.test(t.insee.trim())
-            ? t.insee.trim().toUpperCase() : "",
+        .map((t: { insee?: string; commune?: string }, i: number) => ({
+          insee: packInseesVerifies[i] ?? "",
           commune: typeof t?.commune === "string" ? t.commune.trim().slice(0, 120) : "",
         }))
         .filter((t: { insee: string }) => t.insee)
@@ -379,7 +415,7 @@ export async function POST(request: Request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
       );
-      await admin.from("pack_snapshots").upsert(
+      const { error: snapshotError } = await admin.from("pack_snapshots").upsert(
         {
           stripe_payment_intent_id: paymentIntent.id,
           user_id: user.id,
@@ -397,6 +433,13 @@ export async function POST(request: Request) {
         },
         { onConflict: "stripe_payment_intent_id" },
       );
+      // FUT-115 : SANS INSTANTANÉ, LE COMPARATIF NE POURRA JAMAIS ÊTRE OUVERT (l'octroi exige l'instantané qui
+      // concorde avec le paiement). L'erreur était ignorée : le `clientSecret` partait, la carte était débitée,
+      // et rien ne pouvait être livré. On échoue avant que la carte ne le soit.
+      if (snapshotError) {
+        console.error("[create-payment-intent] pack_snapshots", snapshotError.message);
+        return NextResponse.json({ error: "Préparation du comparatif impossible." }, { status: 500 });
+      }
     }
 
     const posthog = getPostHogClient();

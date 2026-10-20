@@ -80,11 +80,46 @@ export function CommuneSearch({
     });
   }
 
+  // ════════════════════════════════════════════════════════════════════════════════════════════════
+  // LA SOURIS ET LE CLAVIER CHOISISSENT DE LA MÊME FAÇON (FUT-114, revue de la PR #67).
+  //
+  // La ligne se choisissait au `mousedown` seul : Entrée ou Espace sur une suggestion ne faisaient rien, et
+  // la liste se fermait 180 ms après que le champ perdait le focus, donc avant qu'une tabulation l'atteigne.
+  // Or ce champ est désormais le passage obligé du dossier de territoire à 14 €. La sélection passe par
+  // `click` (souris, Entrée, Espace) ; le `mousedown` est seulement neutralisé pour que le champ garde le
+  // focus pendant le clic ; la liste ne se ferme que lorsque le focus quitte le composant entier.
+  // ════════════════════════════════════════════════════════════════════════════════════════════════
+  function fermerSiFocusSort(e: React.FocusEvent) {
+    if (!wrapRef.current?.contains(e.relatedTarget as Node | null)) setOpen(false);
+  }
+
+  function lignes(): HTMLButtonElement[] {
+    return Array.from(wrapRef.current?.querySelectorAll<HTMLButtonElement>('button.cs-row') ?? []);
+  }
+
+  function naviguer(e: React.KeyboardEvent) {
+    if (e.key === 'Escape') {
+      // Le focus d'abord (son `onFocus` rouvre la liste), la fermeture ensuite : la dernière mise à jour l'emporte.
+      wrapRef.current?.querySelector<HTMLInputElement>('input')?.focus();
+      setOpen(false);
+      return;
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const liste = lignes();
+    if (liste.length === 0) return;
+    e.preventDefault();
+    const i = liste.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === 'ArrowDown') liste[Math.min(i + 1, liste.length - 1)]?.focus();
+    else if (i <= 0) wrapRef.current?.querySelector<HTMLInputElement>('input')?.focus();
+    else liste[i - 1]?.focus();
+  }
+
   return (
     <>
       <style>{`
         .cs-input:focus { border-color: ${accent}80 !important; background: var(--bg-elev-3) !important; outline: none; }
         .cs-row:hover { background: var(--bg-elev-2) !important; }
+        .cs-row:focus-visible { background: var(--bg-elev-2) !important; outline: 2px solid ${accent}; outline-offset: -2px; }
         @keyframes cs-progress {
           0%   { width: 0%;   opacity: 1; }
           60%  { width: 75%;  opacity: 1; }
@@ -125,7 +160,8 @@ export function CommuneSearch({
             value={value}
             onChange={handleChange}
             onFocus={() => results.length > 0 && setOpen(true)}
-            onBlur={() => setTimeout(() => setOpen(false), 180)}
+            onBlur={fermerSiFocusSort}
+            onKeyDown={naviguer}
             placeholder={placeholder}
             autoComplete="off"
             style={{
@@ -176,8 +212,12 @@ export function CommuneSearch({
             {results.map((commune) => (
               <button
                 key={commune.code}
+                type="button"
                 className="cs-row"
-                onMouseDown={() => handleSelect(commune)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleSelect(commune)}
+                onBlur={fermerSiFocusSort}
+                onKeyDown={naviguer}
                 style={{
                   width: '100%',
                   display: 'flex',
