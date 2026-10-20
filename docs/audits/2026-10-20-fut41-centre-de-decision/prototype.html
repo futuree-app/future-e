@@ -1,0 +1,710 @@
+<title>Centre de décision futur•e</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : la feuille du Relevé. Énoncé à gauche, preuve dans la marge, filets plutôt que cartes.
+   Sombre d'abord (la DA de futur•e), clair en second thème. Six registres gravés (DESIGN.md § 5.4). */
+:root {
+  color-scheme: dark;
+  --fond: #060812;
+  --plaque: #0d1322;
+  --encre: #f6f4ef;
+  --texte: #c6cfdb;
+  --discret: #9ba3b4;
+  --meta: #788095;
+  --filet: rgba(255,255,255,0.08);
+  --filet-fort: rgba(255,255,255,0.14);
+  --marque: #E8823A;
+  --reg-incompatibilite: #FF9AA4;
+  --reg-alignement: #7BD3A5;
+  --reg-compromis: #E8823A;
+  --reg-ecart: #C2A5EB;
+  --reg-non-su: #B8BFCC;
+  --reg-controle: #82B4E8;
+  --vous: #e9d8a6;
+  --f-sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --marge: 240px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --fond: #faf8f3; --plaque: #f2ede4; --encre: #1a1d28; --texte: #3d4456; --discret: #5b6373; --meta: #646c7f;
+    --filet: rgba(26,29,40,0.10); --filet-fort: rgba(26,29,40,0.18); --marque: #994000;
+    --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+    --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91; --vous: #6b5410;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --fond: #faf8f3; --plaque: #f2ede4; --encre: #1a1d28; --texte: #3d4456; --discret: #5b6373; --meta: #646c7f;
+  --filet: rgba(26,29,40,0.10); --filet-fort: rgba(26,29,40,0.18); --marque: #994000;
+  --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+  --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91; --vous: #6b5410;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--fond); color: var(--texte); font-family: var(--f-sans); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--fond); }
+.feuille { max-width: 1100px; margin: 0 auto; }
+h1, h2, h3 { color: var(--encre); margin: 0; text-wrap: balance; }
+h1 { font-variation-settings: "wdth" 118; font-weight: 500; font-size: clamp(30px, 4vw, 50px); line-height: 1.05; letter-spacing: -0.02em; }
+h2 { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(21px, 2.3vw, 27px); line-height: 1.2; letter-spacing: -0.01em; }
+h3 { font-weight: 600; font-size: 17px; line-height: 1.35; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); }
+.meta { font-family: var(--f-mono); font-size: 12px; color: var(--meta); letter-spacing: 0.02em; }
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--marque); outline-offset: 2px; }
+a { color: var(--encre); text-underline-offset: 3px; text-decoration-color: var(--filet-fort); }
+
+/* Bandeau d'avertissement : données fictives */
+.avertissement { border: 1px dashed var(--filet-fort); border-radius: 3px; padding: 10px 14px; margin: 20px 0 0; font-family: var(--f-mono); font-size: 12.5px; color: var(--discret); }
+.avertissement strong { color: var(--encre); font-weight: 500; }
+
+/* En-tête et onglets */
+.tete { display: grid; gap: 14px; padding: 36px 0 18px; border-bottom: 1px solid var(--filet); }
+.surtitre { font-family: var(--f-mono); font-size: 12px; color: var(--meta); letter-spacing: 0.08em; text-transform: uppercase; }
+.onglets { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--fond); border-bottom: 1px solid var(--filet); display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.onglet { background: none; border: 0; border-bottom: 2px solid transparent; padding: 14px 14px 12px; cursor: pointer; white-space: nowrap; color: var(--discret); font-size: 15px; display: grid; gap: 2px; text-align: left; }
+.onglet small { font-family: var(--f-mono); font-size: 11px; color: var(--meta); }
+.onglet[aria-selected="true"] { color: var(--encre); border-bottom-color: var(--marque); }
+.vue { padding-top: 28px; }
+
+/* Ligne du Relevé : énoncé + marge de preuve */
+.mouvement { display: grid; gap: 18px; padding: 28px 0; border-bottom: 1px solid var(--filet); }
+.mouvement > header { display: grid; gap: 6px; }
+.num { font-family: var(--f-mono); font-size: 12px; color: var(--meta); }
+.ligne { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; padding: 14px 0; border-top: 1px solid var(--filet); }
+.ligne:first-of-type { border-top: 0; }
+@media (min-width: 900px) { .ligne { grid-template-columns: minmax(0,1fr) var(--marge); gap: 44px; } }
+.enonce { display: grid; gap: 8px; min-width: 0; }
+.enonce p { color: var(--encre); font-size: 17px; line-height: 1.5; }
+.enonce .glose { color: var(--texte); font-size: 15px; }
+.marge { font-family: var(--f-mono); font-size: 12px; line-height: 1.6; color: var(--discret); display: grid; gap: 6px; align-content: start; min-width: 0; }
+@media (max-width: 899px) { .marge { border-top: 1px dashed var(--filet-fort); padding-top: 8px; font-size: 12.5px; } }
+@media (min-width: 900px) { .marge { border-left: 1px solid var(--filet); padding-left: 16px; } }
+.marge-l { display: flex; gap: 7px; align-items: baseline; flex-wrap: wrap; }
+.marge-l .qui { color: var(--encre); }
+
+/* Registres : un trait et un libellé, jamais un fond seul */
+.reg { display: inline-flex; align-items: baseline; gap: 6px; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.02em; white-space: nowrap; }
+.reg::before { content: ""; width: 10px; height: 2px; background: currentColor; transform: translateY(-3px); flex: none; }
+.r-favorable { color: var(--reg-alignement); }
+.r-reserve { color: var(--reg-compromis); }
+.r-mismatch { color: var(--reg-ecart); }
+.r-incompatible { color: var(--reg-incompatibilite); }
+.r-to_confirm { color: var(--reg-controle); }
+.r-indeterminate, .r-unexamined, .r-absent, .r-libre { color: var(--reg-non-su); }
+.r-vous { color: var(--vous); }
+.surligne { background: color-mix(in srgb, var(--marque) 18%, transparent); border-radius: 2px; }
+.nom { cursor: pointer; border-bottom: 1px dotted var(--filet-fort); }
+.nom:hover { color: var(--marque); }
+
+/* Glyphes de grain : la forme dit l'échelle */
+.grain { display: inline-block; width: 10px; height: 10px; flex: none; transform: translateY(1px); border: 1.4px solid currentColor; }
+.g-commune { border-radius: 50%; }
+.g-adresse { border-radius: 1px; }
+.g-logement { transform: translateY(1px) rotate(45deg) scale(0.82); }
+
+/* Boutons */
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--filet-fort); background: none; border-radius: 3px; padding: 7px 12px; cursor: pointer; font-size: 14px; color: var(--encre); }
+.btn:hover { border-color: var(--marque); }
+.btn.fort { background: var(--marque); border-color: var(--marque); color: var(--fond); font-weight: 600; }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Plaque : la seule surface élevée d'un mouvement */
+.plaque { background: var(--plaque); border: 1px solid var(--filet-fort); border-radius: 3px; padding: 18px 20px; display: grid; gap: 10px; }
+
+/* Registre des possibilités (A) */
+.registre { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.registre-wrap { overflow-x: auto; }
+.registre th { text-align: left; font-family: var(--f-mono); font-weight: 400; font-size: 11.5px; color: var(--meta); padding: 8px 12px 8px 0; border-bottom: 1px solid var(--filet-fort); white-space: nowrap; }
+.registre td { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--filet); vertical-align: top; }
+.registre td:first-child { color: var(--encre); min-width: 200px; }
+.groupe td { font-family: var(--f-mono); font-size: 12px; color: var(--meta); padding-top: 18px; }
+.ecarte td { color: var(--discret) !important; }
+
+/* Coupe « rapprocher » */
+.coupe { display: grid; gap: 0; }
+.coupe-tete, .coupe-l { display: grid; grid-template-columns: minmax(120px, 1.1fr) minmax(0,1fr) minmax(0,1fr); gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--filet); align-items: baseline; }
+.coupe-tete { font-family: var(--f-mono); font-size: 12px; color: var(--meta); border-bottom-color: var(--filet-fort); }
+.coupe-l .crit { color: var(--encre); font-size: 14.5px; }
+.pli { font-family: var(--f-mono); font-size: 12px; color: var(--meta); padding: 10px 0; }
+
+/* Atelier (B) */
+.atelier { display: grid; gap: 22px; }
+.lentilles { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lentille { border: 1px solid var(--filet-fort); border-radius: 999px; background: none; padding: 5px 12px; font-size: 13.5px; cursor: pointer; color: var(--texte); }
+.lentille[aria-pressed="true"] { border-color: var(--encre); color: var(--encre); background: color-mix(in srgb, var(--encre) 8%, transparent); }
+.zones { display: grid; grid-template-columns: minmax(0,1fr); gap: 18px; }
+@media (min-width: 900px) { .zones { grid-template-columns: 1.5fr 1fr 1fr; } }
+.zone { border-top: 2px solid var(--filet-fort); padding-top: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.zone h3 { font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+.fiche { border: 1px solid var(--filet); border-radius: 3px; padding: 12px 14px; display: grid; gap: 7px; cursor: pointer; background: none; text-align: left; transition: border-color .15s, opacity .2s; }
+.fiche:hover { border-color: var(--filet-fort); }
+.fiche[aria-pressed="true"] { border-color: var(--marque); }
+.fiche .titre-f { color: var(--encre); font-size: 15px; font-weight: 600; }
+.fiche.eteinte { opacity: 0.38; }
+.fiche .verdict-lentille { min-height: 18px; }
+.zone .vide { font-size: 13.5px; color: var(--meta); }
+
+/* Trajectoire (C) */
+.traj { display: grid; gap: 22px; }
+.axe-wrap { overflow-x: auto; border-top: 1px solid var(--filet); border-bottom: 1px solid var(--filet); }
+.axe { position: relative; min-width: 760px; padding: 14px 0 10px; }
+.axe-ligne { display: grid; grid-template-columns: 170px 1fr; align-items: center; min-height: 34px; }
+.axe-ligne .lbl { font-size: 13.5px; color: var(--encre); padding-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.piste { position: relative; height: 22px; }
+.piste .vie { position: absolute; top: 10px; height: 2px; background: var(--filet-fort); }
+.piste .vie.ecart { background: repeating-linear-gradient(90deg, var(--filet-fort) 0 4px, transparent 4px 8px); }
+.evt { position: absolute; top: 4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; border: 1.5px solid var(--encre); background: var(--fond); cursor: pointer; padding: 0; }
+.evt.e-ecarte { border-color: var(--reg-incompatibilite); }
+.evt.e-visite { border-color: var(--reg-controle); border-radius: 2px; }
+.evt.e-obs { border-color: var(--vous); transform: rotate(45deg) scale(.85); border-radius: 1px; }
+.evt.e-projet { border-color: var(--marque); background: var(--marque); }
+.evt.e-futur { border-style: dashed; }
+.epoque { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--marque); }
+.epoque span { position: absolute; top: -2px; left: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--marque); white-space: nowrap; }
+.curseur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--encre); pointer-events: none; }
+.dates { display: grid; grid-template-columns: 170px 1fr; }
+.dates .echelle { position: relative; height: 18px; }
+.dates .echelle span { position: absolute; transform: translateX(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--meta); white-space: nowrap; }
+.reglage { display: grid; gap: 6px; }
+.reglage input { width: 100%; }
+.journal { display: grid; gap: 0; }
+.journal .j { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 14px; padding: 10px 0; border-top: 1px solid var(--filet); }
+.journal .j .d { font-family: var(--f-mono); font-size: 12px; color: var(--meta); }
+.deux-col { display: grid; gap: 28px; grid-template-columns: minmax(0,1fr); }
+@media (min-width: 900px) { .deux-col { grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); } }
+
+/* Scénario */
+.grille-cas { display: grid; gap: 12px; grid-template-columns: minmax(0,1fr); }
+@media (min-width: 700px) { .grille-cas { grid-template-columns: 1fr 1fr; } }
+.cas { border-top: 1px solid var(--filet-fort); padding-top: 10px; display: grid; gap: 4px; }
+.cas b { color: var(--encre); font-weight: 600; }
+ul.sobre { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--plaque); border: 1px solid var(--filet-fort); color: var(--encre); padding: 10px 16px; border-radius: 3px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="feuille">
+  <header class="tete">
+    <span class="surtitre">FUT-41 · FUT-22 · cadrage du 20 octobre 2026</span>
+    <h1>Le centre de décision, en trois directions</h1>
+    <p style="max-width:62ch">La même recherche, rendue trois fois. Chaque énoncé « ce qui départage » est calculé à l'ouverture par la règle proposée dans le cadrage, sur des issues de critères de la forme exacte des artefacts du moteur.</p>
+    <p class="avertissement"><strong>Données de démonstration.</strong> Les communes, adresses, dates et issues sont inventées pour illustrer les cas. Aucune ne décrit un lieu réel. Aucun prix, aucun droit, aucune donnée de compte.</p>
+  </header>
+
+  <nav class="onglets" role="tablist" aria-label="Directions">
+    <button class="onglet" role="tab" id="t-scenario" aria-controls="v-scenario" aria-selected="true"><span>La recherche</span><small>scénario et Projet</small></button>
+    <button class="onglet" role="tab" id="t-a" aria-controls="v-a" aria-selected="false"><span>A · Le dossier vivant</span><small>direction recommandée</small></button>
+    <button class="onglet" role="tab" id="t-b" aria-controls="v-b" aria-selected="false"><span>B · L'atelier</span><small>manipuler, rapprocher</small></button>
+    <button class="onglet" role="tab" id="t-c" aria-controls="v-c" aria-selected="false"><span>C · La trajectoire</span><small>le chemin parcouru</small></button>
+  </nav>
+
+  <section class="vue" id="v-scenario" role="tabpanel" aria-labelledby="t-scenario"></section>
+  <section class="vue" id="v-a" role="tabpanel" aria-labelledby="t-a" hidden></section>
+  <section class="vue" id="v-b" role="tabpanel" aria-labelledby="t-b" hidden></section>
+  <section class="vue" id="v-c" role="tabpanel" aria-labelledby="t-c" hidden></section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// DONNÉES DE DÉMONSTRATION. La forme suit le moteur : une analyse = { revision du Projet, moteur,
+// date, registre { critère → issue } }. Les issues sont celles de CriterionOutcome, plus `absent`
+// (critère non examiné à ce niveau). Rien ici ne décrit un lieu réel.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const AUJOURDHUI = "2026-10-20";
+
+const REVISIONS = {
+  r1: { id: "r1", date: "2026-09-08", gareMax: 20,
+        resume: "La mer à moins de 15 km et un médecin disponible, sans compromis ; une gare à moins de 20 min ; des nuits fraîches l'été ; le calme ; une vie de quartier. Surtout : un budget de 320 000 €." },
+  r2: { id: "r2", date: "2026-10-08", gareMax: 30, cause: "Après la visite du 4 octobre : « 25 minutes nous paraissent acceptables ».",
+        resume: "La mer à moins de 15 km et un médecin disponible, sans compromis ; une gare à moins de 30 min ; des nuits fraîches l'été ; le calme ; une vie de quartier. Surtout : un budget de 320 000 €." },
+};
+let revCourante = "r2";
+
+// Critères du Projet, dans l'ordre du Projet : conditions confirmées, puis poids déclaré.
+const CRITERES = [
+  { cle: "mer", label: "la mer à moins de 15 km", kind: "condition", poids: null, echelles: ["commune"] },
+  { cle: "soins", label: "un médecin disponible", kind: "condition", poids: null, echelles: ["commune"] },
+  { cle: "gare", label: (r) => `une gare à moins de ${REVISIONS[r].gareMax} min`, kind: "preference", poids: 3, echelles: ["commune", "adresse"] },
+  { cle: "chaleur", label: "la fraîcheur des nuits d'été", kind: "preference", poids: 2, echelles: ["commune", "logement"] },
+  { cle: "calme", label: "le calme", kind: "preference", poids: 2, echelles: ["commune", "adresse"] },
+  { cle: "vie", label: "la vie de quartier", kind: "preference", poids: 1, echelles: ["commune"] },
+];
+const NON_MESURE = { terme: "un budget de 320 000 €", insistance: "surtout" };
+const labelDe = (c) => typeof c.label === "function" ? c.label(revCourante) : c.label;
+
+// Les analyses figées. `apres` = ce que produirait « mettre au même cadre » (simulé).
+const ANALYSES = {
+  "c:port-anvel": { grain: "commune", rev: "r2", moteur: "engine-4", date: "2026-10-09",
+    registre: { mer: "favorable", soins: "to_confirm", gare: "favorable", chaleur: "favorable", calme: "reserve", vie: "favorable" } },
+  "c:saint-aurec": { grain: "commune", rev: "r1", moteur: "engine-4", date: "2026-09-17",
+    registre: { mer: "favorable", soins: "to_confirm", gare: "mismatch", chaleur: "reserve", calme: "favorable", vie: "favorable" },
+    apres: { gare: "reserve" } },
+  "c:landeven": { grain: "commune", rev: "r1", moteur: "engine-4", date: "2026-09-10",
+    registre: { mer: "favorable", soins: "to_confirm", gare: "mismatch", chaleur: "favorable", calme: "favorable", vie: "reserve" } },
+  "a:sternes": { grain: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-09",
+    registre: { gare: "favorable", calme: "reserve", chaleur: "to_confirm" } },
+  "a:kervily": { grain: "adresse", rev: "r1", moteur: "engine-4", date: "2026-09-19",
+    registre: { gare: "reserve", calme: "favorable", chaleur: "favorable" } },
+};
+// Lecture libre (commune non débloquée) : le triptyque gratuit, jamais un registre complet.
+const LIBRE = { "c:kermoal": { correspond: "mer", contredit: "chaleur", inconnu: "soins" } };
+
+// Les possibilités. L'ordre est celui du lecteur. `commune` = la commune du lieu ; `analyses` = ce qui existe.
+const POSSIBILITES = [
+  { id: "sternes", type: "bien", nom: "T3, 12 rue des Sternes", commune: "Port-Anvel", insee: "c:port-anvel", adresse: "a:sternes",
+    etat: "en_course", relation: "je visite ce bien pour l'acheter" },
+  { id: "kervily", type: "bien", nom: "Maison, 31 route de Kervily", commune: "Saint-Aurec", insee: "c:saint-aurec", adresse: "a:kervily",
+    etat: "en_course", relation: "je visite ce bien pour l'acheter", visitePrevue: "2026-10-24" },
+  { id: "lavoir", type: "bien", nom: "Maison, impasse du Lavoir (annonce)", commune: "Port-Anvel", insee: "c:port-anvel", adresse: null,
+    etat: "a_considerer", relation: "annonce sans adresse exacte", lien: "annonce saisie par vous" },
+  { id: "kermoal", type: "commune", nom: "Kermoal", commune: "Kermoal", insee: "c:kermoal", adresse: null, etat: "a_considerer", relation: "j'envisage d'y vivre" },
+  { id: "landeven", type: "commune", nom: "Landéven", commune: "Landéven", insee: "c:landeven", adresse: null, etat: "ecarte",
+    relation: "j'envisage d'y vivre",
+    ecart: { date: "2026-09-24", rev: "r1", critere: "gare", motif: "« La gare est à 26 min, au-delà de nos 20 min. »", analyse: "engine-4 du 10 septembre" } },
+];
+
+const OBSERVATIONS = [
+  { possibilite: "sternes", critere: "calme", date: "2026-10-04", origine: "observé par vous", contexte: "un samedi, de 21 h 40 à 22 h 10",
+    texte: "Rue calme côté chambre ; un bus passe toutes les 20 min côté séjour." },
+  { possibilite: "sternes", critere: "chaleur", date: "2026-10-04", origine: "déclaré par l'agent", contexte: "pendant la visite",
+    texte: "« Les fenêtres de la chambre restent ouvertes l'été. »" },
+];
+
+const JOURNAL = [
+  { date: "2026-09-08", type: "projet", texte: "Projet créé (révision 1).", qui: null },
+  { date: "2026-09-10", type: "examen", texte: "Landéven examinée à la commune.", qui: "landeven" },
+  { date: "2026-09-17", type: "examen", texte: "Saint-Aurec examinée à la commune.", qui: "kervily" },
+  { date: "2026-09-19", type: "examen", texte: "31 route de Kervily examinée à l'adresse.", qui: "kervily" },
+  { date: "2026-09-24", type: "ecarte", texte: "Landéven écartée : « La gare est à 26 min, au-delà de nos 20 min. »", qui: "landeven" },
+  { date: "2026-09-29", type: "ajout", texte: "Kermoal ajoutée, sans examen.", qui: "kermoal" },
+  { date: "2026-10-01", type: "ajout", texte: "12 rue des Sternes ajouté depuis une annonce.", qui: "sternes" },
+  { date: "2026-10-04", type: "visite", texte: "Visite du 12 rue des Sternes.", qui: "sternes" },
+  { date: "2026-10-04", type: "obs", texte: "Deux observations ajoutées (calme, ventilation de la chambre).", qui: "sternes" },
+  { date: "2026-10-08", type: "projet", texte: "Projet révisé (révision 2) : gare à moins de 30 min au lieu de 20.", qui: null },
+  { date: "2026-10-09", type: "examen", texte: "12 rue des Sternes examiné à l'adresse ; Port-Anvel à la commune.", qui: "sternes" },
+  { date: "2026-10-15", type: "ajout", texte: "Impasse du Lavoir ajoutée depuis une annonce, adresse inconnue.", qui: "lavoir" },
+  { date: "2026-10-19", type: "moteur", texte: "Le moteur de futur•e passe à engine-6 (règle transports × chaleur retirée).", qui: null },
+  { date: "2026-10-24", type: "visite", texte: "Visite prévue du 31 route de Kervily.", qui: "kervily", futur: true },
+];
+const DERNIERE_VISITE = "2026-10-15";
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LA RÈGLE : « CE QUI DÉPARTAGE », À N POSSIBILITÉS. Déterministe, sans total, sans tri des lieux.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const ETABLIES = new Set(["favorable", "reserve", "mismatch", "incompatible"]);
+let cadreAligne = false; // « mettre au même cadre » effectué
+
+function analyse(cle) {
+  const a = ANALYSES[cle];
+  if (!a) return null;
+  if (!cadreAligne || !a.apres) return cadreAligne ? { ...a, rev: revCourante, moteur: "engine-6", date: AUJOURDHUI } : a;
+  return { ...a, rev: revCourante, moteur: "engine-6", date: AUJOURDHUI, registre: { ...a.registre, ...a.apres } };
+}
+function cadreDe(a) { return a ? `${a.rev}|${a.moteur}` : null; }
+
+// Une colonne = un lieu au grain lu. Au grain commune, deux biens d'une même commune ne font qu'une colonne.
+function colonnes(grain, inclureEcartes) {
+  const vues = new Map();
+  for (const p of POSSIBILITES) {
+    if (p.etat === "ecarte" && !inclureEcartes) continue;
+    if (grain === "commune") {
+      // Une commune non débloquée n'a que le triptyque gratuit : elle n'entre dans aucun départage.
+      if (LIBRE[p.insee]) continue;
+      if (vues.has(p.insee)) { vues.get(p.insee).possibilites.push(p); continue; }
+      vues.set(p.insee, { cle: p.insee, nom: p.commune, possibilites: [p], analyse: analyse(p.insee), libre: false, grain: "commune" });
+    } else if (p.type === "bien") {
+      vues.set(p.id, { cle: p.id, nom: p.nom.replace(" (annonce)", ""), possibilites: [p], analyse: p.adresse ? analyse(p.adresse) : null, libre: false, grain: "adresse", profondeurManquante: !p.adresse });
+    }
+  }
+  return [...vues.values()];
+}
+
+function issueDe(col, critere) {
+  if (col.libre) return "libre";
+  if (!col.analyse) return "absent";
+  return col.analyse.registre[critere] ?? "absent";
+}
+
+function ceQuiDepartage(grain, inclureEcartes = false) {
+  const cols = colonnes(grain, inclureEcartes);
+  const lignes = [];
+  for (const c of CRITERES) {
+    if (grain === "adresse" && !c.echelles.some((e) => e === "adresse" || e === "logement")) continue;
+    const etats = cols.map((col) => ({ col, issue: issueDe(col, c.cle) }));
+    const etablis = etats.filter((e) => ETABLIES.has(e.issue));
+    const nonEtablis = etats.filter((e) => !ETABLIES.has(e.issue));
+    const issuesDistinctes = new Set(etablis.map((e) => e.issue));
+    const cadres = new Set(etablis.map((e) => cadreDe(e.col.analyse)));
+    const profondeur = nonEtablis.filter((e) => e.issue === "absent" && e.col.profondeurManquante);
+    let classe;
+    if (etablis.length === 0) classe = "sans_reponse";
+    else if (issuesDistinctes.size >= 2 && cadres.size > 1) classe = "hors_cadre";
+    else if (issuesDistinctes.size >= 2) classe = "departage";
+    else if (nonEtablis.length > 0 && profondeur.length === nonEtablis.length) classe = "effet_de_profondeur";
+    else if (nonEtablis.length > 0) classe = "departage_possible";
+    else classe = "accord";
+    lignes.push({ critere: c, classe, etats, etablis, nonEtablis, profondeur });
+  }
+  return { cols, lignes };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LES ÉNONCÉS : un gabarit par classe, aucune phrase générée. Ils nomment les lieux, jamais un gagnant.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// « à » + article : à le → au, à les → aux.
+const aDe = (lab) => lab.startsWith("le ") ? "au " + lab.slice(3) : lab.startsWith("les ") ? "aux " + lab.slice(4) : "à " + lab;
+const VERBE = {
+  favorable: (n, lab) => `correspond${n > 1 ? "ent" : ""} ${aDe(lab)}`,
+  reserve: (n, lab) => `${n > 1 ? "demandent" : "demande"} un compromis sur ${lab}`,
+  mismatch: (n, lab) => `correspond${n > 1 ? "ent" : ""} moins bien que demandé ${aDe(lab)}`,
+  incompatible: (n, lab) => `ne ${n > 1 ? "respectent" : "respecte"} pas votre condition sur ${lab}`,
+};
+const LIB_ISSUE = {
+  favorable: "correspond", reserve: "compromis", mismatch: "correspond moins bien", incompatible: "condition non tenue",
+  to_confirm: "à confirmer", indeterminate: "indéterminé", absent: "non examiné à ce niveau", libre: "lecture partielle",
+};
+function nomHTML(col) { return `<span class="nom" data-lieu="${col.cle}">${col.nom}</span>`; }
+function liste(cols) {
+  const n = cols.map(nomHTML);
+  return n.length <= 1 ? n.join("") : `${n.slice(0, -1).join(", ")} et ${n.at(-1)}`;
+}
+function enonce(l) {
+  const lab = labelDe(l.critere);
+  const parIssue = new Map();
+  for (const e of l.etablis) { if (!parIssue.has(e.issue)) parIssue.set(e.issue, []); parIssue.get(e.issue).push(e.col); }
+  const morceaux = [...parIssue.entries()].map(([iss, cols]) => `${liste(cols)} ${VERBE[iss](cols.length, lab)}`);
+  // Deux natures d'inconnu, deux phrases : ce qui reste à vérifier, et ce qui n'est pas examiné à ce niveau.
+  const aVerifier = l.nonEtablis.filter((e) => !l.profondeur.includes(e)).map((e) => e.col);
+  const profonds = l.profondeur.map((e) => e.col);
+  const suiteVerif = aVerifier.length ? `, mais ${liste(aVerifier)} ${aVerifier.length > 1 ? "restent" : "reste"} à vérifier` : "";
+  switch (l.classe) {
+    case "departage": return `Sur ${lab}, vos possibilités se séparent : ${morceaux.join(" ; ")}${suiteVerif}.`;
+    case "hors_cadre": return `Sur ${lab}, ${liste(l.etablis.map((e) => e.col))} diffèrent, mais leurs analyses ne répondent pas à la même version de votre Projet. L'écart ne s'interprète pas encore.`;
+    case "departage_possible": return `Sur ${lab}, rien n'est encore tranché : ${morceaux.join(" ; ")}${suiteVerif}.`;
+    case "effet_de_profondeur": return `Sur ${lab}, ${morceaux.join(" ; ")}. Pour ${liste(profonds)}, la réponse dépend de la profondeur de l'analyse : ${profonds.length > 1 ? "ces biens ne sont examinés" : "ce bien n'est examiné"} qu'à la commune.`;
+    case "sans_reponse": return `Sur ${lab}, aucune de vos possibilités ne permet encore de conclure.`;
+    case "accord": return `Sur ${lab}, vos possibilités disent la même chose.`;
+  }
+}
+const capital = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function margeLigne(l) {
+  return l.etats.map((e) => {
+    const a = e.col.analyse;
+    const ver = a ? `${a.moteur} · rév. ${a.rev.slice(1)} · ${dateCourte(a.date)}` : e.col.libre ? "non débloquée" : "aucune analyse";
+    return `<div class="marge-l"><span class="grain g-${e.col.grain === "commune" ? "commune" : (l.critere.cle === "chaleur" ? "logement" : "adresse")}"></span><span class="qui">${e.col.nom}</span><span class="reg r-${e.issue}">${LIB_ISSUE[e.issue] ?? e.issue}</span><span>${ver}</span></div>`;
+  }).join("");
+}
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+function dateCourte(iso) { const [, m, d] = iso.split("-"); return `${+d} ${MOIS[+m - 1]}`; }
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// VUES
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const $ = (s, r = document) => r.querySelector(s);
+const ETATS = { en_course: "en course", a_considerer: "à considérer", ecarte: "écartée", retenu: "retenue" };
+function niveauDExamen(p) {
+  if (p.adresse) return { code: "adresse", lib: "adresse examinée" };
+  if (LIBRE[p.insee]) return { code: "libre", lib: "lecture partielle (non débloquée)" };
+  return { code: "commune", lib: "commune examinée" + (p.type === "bien" ? ", adresse inconnue" : "") };
+}
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 3200); }
+
+// ── Scénario ──────────────────────────────────────────────────────────────────────────────
+function vueScenario() {
+  $("#v-scenario").innerHTML = `
+  <div class="mouvement" style="border-top:0;padding-top:0">
+    <header><span class="num">La recherche</span><h2>Un couple quitte Nantes pour la côte, et hésite depuis six semaines.</h2></header>
+    <div class="ligne"><div class="enonce">
+      <p>${REVISIONS[revCourante].resume}</p>
+      <p class="glose">Le Projet a été révisé une fois, le 8 octobre, après une visite : la limite de trajet vers la gare est passée de 20 à 30 minutes. Une analyse produite avant cette date répond à la révision 1.</p>
+    </div><div class="marge"><div class="marge-l"><span class="qui">Révision 1</span><span>${dateCourte(REVISIONS.r1.date)}</span></div><div class="marge-l"><span class="qui">Révision 2</span><span>${dateCourte(REVISIONS.r2.date)} · courante</span></div><div class="marge-l"><span class="reg r-libre">non mesuré</span><span>« surtout » un budget</span></div></div></div>
+  </div>
+  <div class="mouvement">
+    <header><span class="num">Les cinq possibilités</span><h2>Trois biens, deux communes, quatre profondeurs d'examen</h2></header>
+    <div class="registre-wrap"><table class="registre"><thead><tr><th>Possibilité</th><th>Commune</th><th>Niveau d'examen</th><th>État</th></tr></thead><tbody>
+      ${POSSIBILITES.map((p) => `<tr class="${p.etat === "ecarte" ? "ecarte" : ""}"><td>${p.nom}</td><td>${p.commune}</td><td>${niveauDExamen(p).lib}</td><td>${ETATS[p.etat]}</td></tr>`).join("")}
+    </tbody></table></div>
+  </div>
+  <div class="mouvement">
+    <header><span class="num">Ce que la maquette éprouve</span><h2>Les sept cas du cadrage, sur une seule recherche</h2></header>
+    <div class="grille-cas">
+      ${[
+        ["Cas 2 · deux biens, une commune", "Rue des Sternes et impasse du Lavoir partagent Port-Anvel : au grain commune, une seule colonne."],
+        ["Cas 3 · profondeurs mixtes", "Une adresse examinée, une annonce sans adresse, une commune non débloquée."],
+        ["Cas 4 · le Projet change", "Saint-Aurec et Kervily répondent à la révision 1 : leurs écarts restent hors cadre tant qu'on ne les met pas au même cadre."],
+        ["Cas 5 · moteurs historiques", "Toutes les analyses sont engine-4 ; le moteur courant est engine-6."],
+        ["Cas 6 · écarter, revenir", "Landéven écartée pour la gare sous la révision 1 ; le Projet a changé depuis sur ce point."],
+        ["Cas 7 · ce que vous avez vu", "Deux observations de visite, d'origines différentes, qui ne changent aucune issue publique."],
+      ].map(([t, d]) => `<div class="cas"><b>${t}</b><span>${d}</span></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+// ── Direction A ───────────────────────────────────────────────────────────────────────────
+let rapproches = [];
+function vueA() {
+  const terr = ceQuiDepartage("commune");
+  const adr = ceQuiDepartage("adresse");
+  const decisives = (ls) => ls.filter((l) => ["departage", "hors_cadre", "effet_de_profondeur"].includes(l.classe));
+  const ouvertes = [...terr.lignes, ...adr.lignes].filter((l) => l.classe === "departage_possible" || (l.classe === "sans_reponse" && l.critere.kind === "condition"));
+  const accords = terr.lignes.filter((l) => l.classe === "accord");
+  const horsCadre = [...terr.lignes, ...adr.lignes].some((l) => l.classe === "hors_cadre");
+  const lignesHTML = (ls) => ls.map((l) => `<div class="ligne"><div class="enonce"><p>${enonce(l)}</p>${l.classe === "hors_cadre" ? `<div class="actions"><button class="btn" data-action="cadre">Mettre ces analyses au même cadre</button></div>` : ""}</div><div class="marge">${margeLigne(l)}</div></div>`).join("");
+  const landeven = POSSIBILITES.find((p) => p.id === "landeven");
+  const changeDepuis = landeven.ecart.rev !== revCourante && REVISIONS[landeven.ecart.rev].gareMax !== REVISIONS[revCourante].gareMax;
+
+  $("#v-a").innerHTML = `
+  <div class="mouvement" style="border-top:0;padding-top:0">
+    <header><span class="num">Depuis votre dernière visite, le ${dateCourte(DERNIERE_VISITE)}</span></header>
+    <div class="ligne"><div class="enonce">
+      <p>Une annonce ajoutée (impasse du Lavoir), et un moteur plus récent : vos analyses restent celles d'engine-4.${cadreAligne ? " Vos analyses en course ont été mises au même cadre aujourd'hui." : ""}</p>
+    </div><div class="marge"><div class="marge-l"><span class="qui">Ajout</span><span>15 oct.</span></div><div class="marge-l"><span class="qui">engine-6</span><span>19 oct.</span></div></div></div>
+  </div>
+
+  <div class="mouvement">
+    <header><span class="num">01 · Ce que vous cherchez</span><h2>Vivre près de la mer, avec un médecin à portée, sans dépasser votre budget.</h2></header>
+    <div class="ligne"><div class="enonce">
+      <p class="glose">${REVISIONS[revCourante].resume}</p>
+      <div class="actions"><button class="btn">Modifier mon Projet</button></div>
+    </div><div class="marge"><div class="marge-l"><span class="qui">Révision 2</span><span>8 oct.</span></div><div class="marge-l"><span>Deux conditions sans compromis, confirmées par vous</span></div></div></div>
+  </div>
+
+  <div class="mouvement">
+    <header><span class="num">02 · Ce qui départage vos possibilités</span><h2>Au territoire</h2><p class="glose">Comparées à la commune. Les deux biens de Port-Anvel partagent la même lecture territoriale ; Kermoal, non débloquée, n'entre dans aucun départage.</p></header>
+    ${lignesHTML(decisives(terr.lignes)) || `<p class="glose">Rien ne départage vos communes en course sur les critères examinés.</p>`}
+    ${accords.length ? `<p class="pli">Ne départagent pas : ${accords.map((l) => labelDe(l.critere)).join(", ")}.</p>` : ""}
+    <div class="ligne"><div class="enonce"><p class="glose">Kermoal, non débloquée : la lecture gratuite montre une correspondance (la mer), un écart (la fraîcheur des nuits d'été) et une inconnue (un médecin disponible). Elle n'entre dans aucun départage.</p><div class="actions"><button class="btn">Examiner Kermoal</button></div></div><div class="marge"><div class="marge-l"><span class="grain g-commune"></span><span class="qui">Kermoal</span><span class="reg r-libre">lecture partielle</span></div></div></div>
+    <header style="margin-top:14px"><h2>À l'adresse et dans le logement</h2><p class="glose">Comparés entre biens seulement. Une commune n'y est jamais « sans défaut » : elle n'y est pas examinée. L'annonce de l'impasse du Lavoir, sans adresse exacte, n'entre dans aucune ligne ci-dessous.</p></header>
+    ${lignesHTML(decisives(adr.lignes))}
+  </div>
+
+  <div class="mouvement">
+    <header><span class="num">03 · Ce qui pourrait encore changer votre avis</span></header>
+    ${ouvertes.map((l) => `<div class="ligne"><div class="enonce"><p>${enonce(l)}</p>${l.critere.kind === "condition" ? `<p class="glose">C'est une condition sans compromis : futur•e l'apprécie sans pouvoir l'établir. Vérification : demander aux cabinets de la commune s'ils prennent de nouveaux patients.</p>` : l.critere.cle === "chaleur" ? `<p class="glose">Vérification à la prochaine visite : la chambre peut-elle rester ouverte la nuit, compte tenu du bruit côté rue ?</p>` : ""}${obsHTML(l.critere.cle)}</div><div class="marge">${margeLigne(l)}</div></div>`).join("")}
+    <div class="ligne"><div class="enonce"><p>Votre demande principale, ${NON_MESURE.terme}, n'est mesurée par futur•e pour aucune de vos possibilités.</p><p class="glose">Vous l'avez dite avec « ${NON_MESURE.insistance} ». Elle reste à vérifier annonce par annonce ; aucune de vos possibilités ne gagne à son silence.</p></div><div class="marge"><div class="marge-l"><span class="reg r-libre">non mesuré</span><span>toutes les possibilités</span></div></div></div>
+  </div>
+
+  <div class="mouvement">
+    <header><span class="num">04 · Vos possibilités</span><h2>Dans l'ordre où vous les avez ajoutées</h2><p class="glose">Cochez deux possibilités pour les rapprocher : seules les lignes qui diffèrent restent dépliées.</p></header>
+    <div class="registre-wrap"><table class="registre"><thead><tr><th></th><th>Possibilité</th><th>Niveau d'examen</th><th>État</th><th>Prochaine action</th></tr></thead><tbody>
+      ${registreA()}
+    </tbody></table></div>
+    <div id="coupe"></div>
+  </div>
+
+  <div class="mouvement">
+    <header><span class="num">05 · Écartées</span></header>
+    <div class="ligne"><div class="enonce"><p>Landéven, écartée le ${dateCourte(landeven.ecart.date)} : ${landeven.ecart.motif}</p>
+      ${changeDepuis ? `<p class="glose">Écartée quand votre limite de trajet vers la gare était ${REVISIONS[landeven.ecart.rev].gareMax} min. Votre Projet accepte maintenant ${REVISIONS[revCourante].gareMax} min. futur•e ne sait pas encore si Landéven y correspondrait : son analyse répond à l'ancienne version.</p>
+      <div class="actions"><button class="btn" data-action="reprendre">Reprendre cette piste</button><button class="btn">Laisser écartée</button></div>` : ""}
+    </div><div class="marge"><div class="marge-l"><span class="qui">Motif</span><span>gare · rév. 1</span></div><div class="marge-l"><span class="qui">Analyse</span><span>${landeven.ecart.analyse}</span></div></div></div>
+  </div>`;
+  brancherA();
+}
+function obsHTML(critere) {
+  const os = OBSERVATIONS.filter((o) => o.critere === critere);
+  if (!os.length) return "";
+  return os.map((o) => `<p class="glose"><span class="reg r-vous">${o.origine}</span> ${dateCourte(o.date)}, ${o.contexte} : ${o.texte}</p>`).join("") +
+    `<p class="glose" style="color:var(--meta)">Ces informations sont les vôtres. Elles ne modifient pas l'issue publique.</p>`;
+}
+function registreA() {
+  const parCommune = new Map();
+  for (const p of POSSIBILITES.filter((p) => p.etat !== "ecarte")) { if (!parCommune.has(p.commune)) parCommune.set(p.commune, []); parCommune.get(p.commune).push(p); }
+  let html = "";
+  for (const [commune, ps] of parCommune) {
+    if (ps.length > 1) html += `<tr class="groupe"><td></td><td colspan="4">${commune} · ${ps.length} biens, une lecture territoriale commune</td></tr>`;
+    for (const p of ps) {
+      const n = niveauDExamen(p);
+      const action = p.visitePrevue ? `Visite le ${dateCourte(p.visitePrevue)}` : n.code === "libre" ? "Examiner cette commune" : n.code === "commune" && p.type === "bien" ? "Préciser l'adresse" : "Vérifier le confort d'été";
+      html += `<tr><td><input type="checkbox" id="rap-${p.id}" data-rap="${p.id}" ${rapproches.includes(p.id) ? "checked" : ""} aria-label="Rapprocher ${p.nom}"></td><td>${p.nom}<div class="meta">${p.relation}</div></td><td>${n.lib}</td><td>${ETATS[p.etat]}</td><td>${action}</td></tr>`;
+    }
+  }
+  return html;
+}
+function brancherA() {
+  document.querySelectorAll("#v-a [data-action=cadre]").forEach((b) => b.addEventListener("click", mettreAuMemeCadre));
+  document.querySelectorAll("#v-a [data-action=reprendre]").forEach((b) => b.addEventListener("click", () => toast("Landéven reprise. Son analyse répond à la révision 1 : proposition de la mettre au même cadre.")));
+  document.querySelectorAll("#v-a [data-rap]").forEach((cb) => cb.addEventListener("change", () => {
+    const id = cb.dataset.rap;
+    rapproches = cb.checked ? [...rapproches.filter((x) => x !== id), id].slice(-2) : rapproches.filter((x) => x !== id);
+    vueA(); if (rapproches.length === 2) $("#coupe").scrollIntoView({ block: "nearest" });
+  }));
+  document.querySelectorAll("#v-a .nom").forEach((n) => n.addEventListener("click", () => {
+    const k = n.dataset.lieu; const on = !n.classList.contains("surligne");
+    document.querySelectorAll("#v-a .nom").forEach((m) => m.classList.toggle("surligne", on && m.dataset.lieu === k));
+  }));
+  if (rapproches.length === 2) $("#coupe").innerHTML = coupeHTML(rapproches[0], rapproches[1]);
+}
+function coupeHTML(idA, idB) {
+  const [pa, pb] = [idA, idB].map((id) => POSSIBILITES.find((p) => p.id === id));
+  const memeCommune = pa.insee === pb.insee;
+  const lire = (p, cle) => {
+    const ia = p.adresse ? analyse(p.adresse)?.registre[cle] : undefined;
+    if (ia) return { issue: ia, grain: cle === "chaleur" ? "logement" : "adresse" };
+    if (LIBRE[p.insee]) return { issue: "libre", grain: "commune" };
+    return { issue: analyse(p.insee)?.registre[cle] ?? "absent", grain: "commune" };
+  };
+  const cadreA = cadreDe(analyse(pa.adresse ?? pa.insee)), cadreB = cadreDe(analyse(pb.adresse ?? pb.insee));
+  let pliees = [];
+  const rangs = CRITERES.map((c) => {
+    const a = lire(pa, c.cle), b = lire(pb, c.cle);
+    if (a.issue === b.issue && ETABLIES.has(a.issue) && a.grain === b.grain) { pliees.push(labelDe(c)); return ""; }
+    const note = a.grain !== b.grain ? "grains différents : tient à la profondeur" : (!ETABLIES.has(a.issue) || !ETABLIES.has(b.issue)) ? "à vérifier d'un côté au moins" : cadreA !== cadreB ? "hors cadre commun" : "différence dans le même cadre";
+    const cel = (x) => `<span class="grain g-${x.grain}"></span> <span class="reg r-${x.issue}">${LIB_ISSUE[x.issue]}</span>`;
+    return `<div class="coupe-l"><span class="crit">${capital(labelDe(c))}<div class="meta">${note}</div></span><span>${cel(a)}</span><span>${cel(b)}</span></div>`;
+  }).join("");
+  return `<div class="plaque" style="margin-top:18px"><span class="num">Rapprochement</span>
+    <h3>${pa.nom} et ${pb.nom}</h3>
+    ${memeCommune ? `<p class="glose">Même commune : le territoire ne les départage pas. Ce qui les sépare se joue à l'adresse et dans le logement.</p>` : ""}
+    ${cadreA !== cadreB ? `<p class="glose">Leurs analyses répondent à deux versions de votre Projet. <button class="btn" data-action="cadre2">Mettre au même cadre</button></p>` : ""}
+    <div class="coupe"><div class="coupe-tete"><span>Critère</span><span>${pa.nom}</span><span>${pb.nom}</span></div>${rangs}</div>
+    ${pliees.length ? `<p class="pli">Repliés, identiques des deux côtés : ${pliees.join(", ")}.</p>` : ""}
+  </div>`;
+}
+document.addEventListener("click", (e) => { if (e.target.closest("[data-action=cadre2]")) mettreAuMemeCadre(); });
+
+function mettreAuMemeCadre() {
+  if (cadreAligne) return;
+  const cibles = Object.entries(ANALYSES).filter(([k, a]) => a.rev !== revCourante && !k.includes("landeven"));
+  cadreAligne = true;
+  toast(`${cibles.length} analyses actualisées sous la révision 2 et engine-6. Les versions précédentes restent lisibles.`);
+  rendreTout();
+}
+
+// ── Direction B ───────────────────────────────────────────────────────────────────────────
+let lentille = null, lacher = false, selB = [];
+function issuePourFiche(p, cle) {
+  if (LIBRE[p.insee]) {
+    const t = LIBRE[p.insee];
+    return t.correspond === cle ? "favorable" : t.contredit === cle ? "mismatch" : t.inconnu === cle ? "to_confirm" : "libre";
+  }
+  const ia = p.adresse ? analyse(p.adresse)?.registre[cle] : undefined;
+  return ia ?? analyse(p.insee)?.registre[cle] ?? "absent";
+}
+function vueB() {
+  const zones = [["en_course", "En course"], ["a_considerer", "À considérer"], ["ecarte", "Écartées"]];
+  const c = lentille && CRITERES.find((x) => x.cle === lentille);
+  $("#v-b").innerHTML = `<div class="atelier">
+    <div class="plaque"><span class="num">Votre Projet · révision ${revCourante.slice(1)}</span><p style="color:var(--encre)">${REVISIONS[revCourante].resume}</p></div>
+    <div><p class="meta" style="margin-bottom:8px">Passer une lentille : les possibilités qui ne répondent pas à ce critère s'estompent. Aucun classement.</p>
+      <div class="lentilles">${CRITERES.map((x) => `<button class="lentille" data-lentille="${x.cle}" aria-pressed="${lentille === x.cle}">${capital(labelDe(x))}</button>`).join("")}
+      ${lentille === "gare" ? `<button class="btn" data-lacher aria-pressed="${lacher}">Et si je lâchais ce critère ?</button>` : ""}</div>
+      ${c ? `<p class="glose" style="margin-top:10px">${lentilleTexte(c)}</p>` : ""}
+    </div>
+    <div class="zones">${zones.map(([code, titre]) => {
+      const ps = POSSIBILITES.filter((p) => p.etat === code);
+      return `<div class="zone"><h3><span>${titre}</span><span class="meta">${ps.length}</span></h3>${ps.map(ficheHTML).join("") || `<p class="vide">Aucune.</p>`}</div>`;
+    }).join("")}</div>
+    <p class="meta">Touchez deux fiches pour les rapprocher.</p>
+    <div id="coupe-b">${selB.length === 2 ? coupeHTML(selB[0], selB[1]) : ""}</div>
+  </div>`;
+  document.querySelectorAll("[data-lentille]").forEach((b) => b.addEventListener("click", () => { lentille = lentille === b.dataset.lentille ? null : b.dataset.lentille; lacher = false; vueB(); }));
+  document.querySelectorAll("[data-lacher]").forEach((b) => b.addEventListener("click", () => { lacher = !lacher; vueB(); }));
+  document.querySelectorAll(".fiche").forEach((f) => f.addEventListener("click", () => {
+    const id = f.dataset.id; selB = selB.includes(id) ? selB.filter((x) => x !== id) : [...selB, id].slice(-2); vueB();
+    if (selB.length === 2) $("#coupe-b").scrollIntoView({ block: "nearest" });
+  }));
+}
+function lentilleTexte(c) {
+  if (c.cle === "gare" && lacher) return "Lâcher ce critère, à l'essai : rien n'est écrit dans votre Projet. Landéven a été écartée sur ce point ; son analyse répond à une limite de 20 min, futur•e ne peut pas dire si elle reviendrait sans la mettre au même cadre.";
+  if (c.kind === "condition") return "Condition sans compromis, confirmée par vous.";
+  return `Poids que vous lui avez donné : ${c.poids} sur 3.`;
+}
+function ficheHTML(p) {
+  const n = niveauDExamen(p);
+  let issueL = "", eteinte = false;
+  if (lentille) {
+    const iss = issuePourFiche(p, lentille);
+    eteinte = !lacher && ["incompatible", "mismatch"].includes(iss);
+    if (lacher && p.etat === "ecarte") eteinte = false;
+    issueL = `<span class="reg r-${iss}">${LIB_ISSUE[iss]}</span>`;
+  }
+  const extra = p.etat === "ecarte" ? `<span class="meta">Écartée le ${dateCourte(p.ecart.date)} : ${p.ecart.motif}</span>` : p.visitePrevue ? `<span class="meta">Visite prévue le ${dateCourte(p.visitePrevue)}</span>` : "";
+  return `<button class="fiche ${eteinte ? "eteinte" : ""}" data-id="${p.id}" aria-pressed="${selB.includes(p.id)}">
+    <span class="titre-f">${p.nom}</span><span class="meta">${p.type === "bien" ? p.commune + " · " : ""}${n.lib}</span>
+    <span class="verdict-lentille">${issueL}</span>${extra}</button>`;
+}
+
+// ── Direction C ───────────────────────────────────────────────────────────────────────────
+const DEBUT = Date.parse("2026-09-05"), FIN = Date.parse("2026-10-28");
+const pos = (iso) => ((Date.parse(iso) - DEBUT) / (FIN - DEBUT)) * 100;
+let dateC = AUJOURDHUI;
+function vueC() {
+  const lignesC = [{ id: null, nom: "Votre Projet" }, ...POSSIBILITES.map((p) => ({ id: p.id, nom: p.nom.replace(" (annonce)", "") }))];
+  const naissance = (id) => (JOURNAL.find((j) => j.qui === id)?.date) ?? "2026-09-08";
+  const evtType = (j) => j.futur ? "e-futur e-visite" : { ecarte: "e-ecarte", visite: "e-visite", obs: "e-obs", projet: "e-projet" }[j.type] ?? "";
+  const graduations = ["2026-09-08", "2026-09-22", "2026-10-06", "2026-10-20"];
+  const etat = etatAuJour(dateC);
+  $("#v-c").innerHTML = `<div class="traj">
+    <div><span class="num">Le chemin parcouru, du 5 septembre au 28 octobre</span></div>
+    <div class="axe-wrap"><div class="axe">
+      <div class="dates"><span></span><div class="echelle">${graduations.map((g) => `<span style="left:${pos(g)}%">${dateCourte(g)}</span>`).join("")}</div></div>
+      ${lignesC.map((l) => {
+        const evts = JOURNAL.filter((j) => (l.id === null ? j.qui === null && j.type === "projet" : j.qui === l.id));
+        const p = POSSIBILITES.find((x) => x.id === l.id);
+        const fin = p?.etat === "ecarte" ? p.ecart.date : AUJOURDHUI;
+        const vie = l.id ? `<div class="vie" style="left:${pos(naissance(l.id))}%;width:${pos(fin) - pos(naissance(l.id))}%"></div>${p?.etat === "ecarte" ? `<div class="vie ecart" style="left:${pos(fin)}%;width:${pos(AUJOURDHUI) - pos(fin)}%"></div>` : ""}` : `<div class="vie" style="left:${pos("2026-09-08")}%;width:${pos(AUJOURDHUI) - pos("2026-09-08")}%"></div>`;
+        return `<div class="axe-ligne"><span class="lbl">${l.nom}</span><div class="piste">${vie}${evts.map((j) => `<button class="evt ${evtType(j)}" style="left:${pos(j.date)}%" title="${dateCourte(j.date)} : ${j.texte.replace(/"/g, "&quot;")}" data-date="${j.date}" aria-label="${dateCourte(j.date)} : ${j.texte.replace(/"/g, "&quot;")}"></button>`).join("")}
+          ${l.id === null ? `<div class="epoque" style="left:${pos(REVISIONS.r2.date)}%"><span>révision 2</span></div>` : ""}
+          <div class="curseur" style="left:${pos(dateC)}%"></div></div></div>`;
+      }).join("")}
+    </div></div>
+    <div class="reglage"><label class="meta" for="curseur-date">Revenir à une date : ${dateLongue(dateC)}</label>
+      <input type="range" id="curseur-date" min="0" max="${Math.round((Date.parse(AUJOURDHUI) - DEBUT) / 864e5)}" value="${Math.round((Date.parse(dateC) - DEBUT) / 864e5)}"></div>
+    <div class="deux-col">
+      <div class="mouvement" style="padding-top:0;border:0">
+        <header><span class="num">Ce jour-là</span><h2>${etat.titre}</h2></header>
+        <div class="ligne"><div class="enonce"><p class="glose">${etat.projet}</p></div><div class="marge"><div class="marge-l"><span class="qui">Révision ${etat.rev.slice(1)}</span></div></div></div>
+        ${etat.lignes.map((t) => `<div class="ligne"><div class="enonce"><p class="glose">${t}</p></div></div>`).join("")}
+      </div>
+      <div><span class="num">Journal</span><div class="journal" style="margin-top:10px">
+        ${JOURNAL.filter((j) => j.date <= dateC || j.futur).map((j) => `<div class="j"><span class="d">${dateCourte(j.date)}${j.futur ? " · prévu" : ""}</span><span>${j.texte}</span></div>`).reverse().join("")}
+      </div></div>
+    </div>
+  </div>`;
+  $("#curseur-date").addEventListener("input", (e) => { dateC = new Date(DEBUT + e.target.value * 864e5).toISOString().slice(0, 10); vueC(); $("#curseur-date").focus(); });
+  document.querySelectorAll(".evt").forEach((b) => b.addEventListener("click", () => { dateC = b.dataset.date > AUJOURDHUI ? AUJOURDHUI : b.dataset.date; vueC(); }));
+}
+function dateLongue(iso) { const [y, m, d] = iso.split("-"); return `${+d} ${MOIS[+m - 1]} ${y}`; }
+function etatAuJour(iso) {
+  const rev = iso >= REVISIONS.r2.date ? "r2" : "r1";
+  const presentes = POSSIBILITES.filter((p) => (JOURNAL.find((j) => j.qui === p.id)?.date ?? "9999") <= iso);
+  const lignes = presentes.map((p) => {
+    if (p.etat === "ecarte" && p.ecart.date <= iso) return `${p.nom} : écartée le ${dateCourte(p.ecart.date)}, ${p.ecart.motif}${rev !== p.ecart.rev ? ` Depuis, votre Projet a changé sur ce point (${REVISIONS[p.ecart.rev].gareMax} → ${REVISIONS[rev].gareMax} min).` : ""}`;
+    const exam = JOURNAL.filter((j) => j.qui === p.id && j.type === "examen" && j.date <= iso);
+    return `${p.nom} : ${exam.length ? "examinée" : "ajoutée, pas encore examinée"}.`;
+  });
+  return {
+    rev, titre: iso === AUJOURDHUI ? "Aujourd'hui" : `Le ${dateLongue(iso)}`,
+    projet: `Vous cherchiez : ${REVISIONS[rev].resume}`,
+    lignes: lignes.length ? lignes : ["Aucune possibilité encore."],
+  };
+}
+
+// ── Onglets ───────────────────────────────────────────────────────────────────────────────
+function rendreTout() { vueScenario(); vueA(); vueB(); vueC(); }
+const tabs = [...document.querySelectorAll(".onglet")];
+function ouvrir(tab) {
+  tabs.forEach((t) => { const on = t === tab; t.setAttribute("aria-selected", on); $("#" + t.getAttribute("aria-controls")).hidden = !on; });
+  try { localStorage.setItem("fut41-onglet", tab.id); } catch {}
+}
+tabs.forEach((t) => t.addEventListener("click", () => ouvrir(t)));
+rendreTout();
+try { const s = localStorage.getItem("fut41-onglet"); if (s && $("#" + s)) ouvrir($("#" + s)); } catch {}
+const hash = location.hash.slice(1); if (["a", "b", "c"].includes(hash)) ouvrir($("#t-" + hash));
+</script>
