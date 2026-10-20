@@ -51,28 +51,29 @@ test("invariant : chaque fait porte ruleId + preuve", () => {
   }
 });
 
-test("règle compromis : deux côtés, chacun sa preuve", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }, { key: "faible_chaleur", weight: 2 }] });
-  const r = run(facts({ scores: { acces_transports: 80, faible_chaleur: 25 } }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.compromis-transport-chaleur");
-  assert.ok(f && f.role === "compromise");
-  assert.equal(f.sides.length, 2);
-  assert.ok(f.sides[0].evidence.length >= 1 && f.sides[1].evidence.length >= 1);
-  // LE SCORE INTERNE NE S'AFFICHE PLUS (11/08/2026). Il valait « 80/100 » en pastille « Preuve » :
-  // une note de qualité apparente, une précision artificielle entre deux constructions non
-  // comparables, et les faits de l'arbitrage masqués derrière un chiffre. Chaque côté garde une
-  // référence, sans valeur, qui nomme la dimension mesurée : `assertFactValid` exige une preuve par
-  // côté, et le lecteur garde une provenance.
-  assert.equal(f.sides[0].evidence[0].observedValue, undefined);
-  assert.match(f.sides[0].evidence[0].label, /accès aux transports/);
-  assert.match(f.sides[1].evidence[0].label, /exposition à la chaleur/);
-  assert.doesNotMatch(f.sides[0].statement + f.sides[1].statement, /meilleure|train/i);
+// LA RÈGLE « COMPROMIS TRANSPORTS × CHALEUR » EST RETIRÉE (FUT-17, D7, engine-6). Elle jugeait la chaleur sur
+// un indice interne, sous une autre convention que ruleChaleur, et la contredisait sur 2 796 communes. Les
+// entrées qui la déclenchaient (transports ≥ 60, chaleur ≤ 40, deux priorités déclarées) restent ici.
+const TENSION_D7 = { scores: { acces_transports: 80, faible_chaleur: 25 } };
+
+test("D7 retirée : la tension des deux indices ne produit plus de compromis, chaque priorité garde sa règle", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }, { key: "faible_chaleur", weight: 3 }] });
+  const r = run(facts(TENSION_D7), p);
+  assert.equal(r.evaluations.some((e) => e.ruleId === "territoire.compromis-transport-chaleur"), false);
+  assert.equal(r.facts.some((f) => f.role === "compromise"), false);
+  // Les deux priorités restent examinées, chacune par la règle qui la lit sur sa propre convention.
+  assert.ok(r.evaluations.some((e) => e.ruleId === "territoire.climat-chaleur" && e.projectKeys.includes("faible_chaleur")));
+  assert.ok(r.evaluations.some((e) => e.projectKeys.includes("acces_transports")));
 });
 
-test("règle compromis : rien si une seule dimension déclarée", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }] });
-  const r = run(facts({ scores: { acces_transports: 80, faible_chaleur: 25 } }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.compromis-transport-chaleur"), false);
+test("D7 retirée : sans mesure DRIAS, la chaleur reste non conclue, jamais favorable par défaut", () => {
+  // Supprimer la contradiction ne doit pas fabriquer une bonne nouvelle : l'indice interne défavorable
+  // ne pèse plus, mais ruleChaleur, sans donnée climatique, ne conclut pas.
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 2 }, { key: "faible_chaleur", weight: 2 }] });
+  const r = run(facts({ ...TENSION_D7, climat: null }), p);
+  const chaleur = r.evaluations.filter((e) => e.projectKeys.includes("faible_chaleur"));
+  assert.ok(chaleur.length >= 1);
+  assert.equal(chaleur.some((e) => e.outcome === "satisfied"), false);
 });
 
 test("règle inondation : vérification si exposition notable, texte acheteur", () => {

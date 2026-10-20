@@ -270,7 +270,7 @@ function tradeoffComp(id: string, absorbed: string[], tier: "secondary" | "struc
   return {
     id, kind: "tradeoff", patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
-    headlineSubject: "l'exposition aux fortes chaleurs",
+    headlineSubject: "des étés supportables",
     summary: "Hivers doux, exposition estivale à arbitrer.",
     favorableSide: { label: "Ce qui correspond", statement: "doux", evidence: [{ factId: "b", module: "territoire", label: "T", grain: "commune", observedValue: "parmi les 10 %" }], ruleIds: ["r"], factIds: [] },
     unfavorableSide: { label: "Ce qui appelle un arbitrage", statement: "chaud", evidence: [{ factId: "s", module: "territoire", label: "T", grain: "commune" }], ruleIds: ["r"], factIds: absorbed },
@@ -284,7 +284,7 @@ function runR(facts: DecisionFact[]): RunResult {
 function climateComfortComp(id: string, absorbed: string[], tier: "secondary" | "structuring"): FactComposition {
   return {
     id, kind: "mismatch_with_action", patternId: "climate_comfort",
-    title: "Des étés plus difficiles à concilier avec votre projet",
+    title: "De fortes chaleurs projetées à l'horizon 2050",
     headlineSubject: "des étés supportables",
     summary: "À Toulouse : jours au-dessus de 35 °C et nuits tropicales en hausse.",
     evidence: [{ factId: "s", module: "territoire", label: "Climat · Toulouse", grain: "commune", observedValue: "9 jours à l'horizon 2050" }],

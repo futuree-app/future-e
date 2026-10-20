@@ -23,8 +23,10 @@ export type TradeoffComposition = {
   title: string;
   // Le sujet à nommer dans le headline du verdict, en BAS DE CASSE (il se lit après un deux-points).
   // Un `title` de tradeoff annonce les DEUX côtés (« Des hivers doux, avec une exposition estivale à
-  // arbitrer ») : servi comme « le principal point à contrôler », il ferait des hivers doux un
-  // problème. Le sujet ne nomme donc que le côté qui appelle l'arbitrage.
+  // arbitrer ») : servi au héros, il ferait des hivers doux un problème. Le sujet ne nomme donc que le
+  // côté qui appelle l'arbitrage, et il le nomme comme une PRIORITÉ DU LECTEUR (« des étés
+  // supportables », hérité du mismatch) : le héros le sert dans « … répond moins bien à une de vos
+  // priorités : X » (FUT-17). « l'exposition aux fortes chaleurs » y inversait la priorité.
   headlineSubject: string;
   summary: string;
   favorableSide: CompositionSide;

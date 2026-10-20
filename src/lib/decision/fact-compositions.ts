@@ -13,7 +13,7 @@ import { rankPhrase, bandValide } from "./mismatch-facts.ts";
 import { mismatchRuleId } from "./mismatch-rules.ts";
 import { RULE_CHALEUR, RULE_CHALEUR_AMBIANTE, RULE_FEU } from "./materiality-rules.ts";
 import { lectureChaleurLogement, RULE_CONFORT_ETE, type LectureChaleurLogement } from "./chaleur-logement.ts";
-import { summerComfortAction, wildfireExposureAction } from "./climat-facts.ts";
+import { summerComfortAction, wildfireExposureAction, CLIMAT_HORIZON_LABEL } from "./climat-facts.ts";
 import { TERRITORY_SIZE_FACT_ID, SIZE_SUBJECTS } from "./agglomeration-rules.ts";
 import { WINTER_MILDNESS_CONVENTION } from "../climate/winter-mildness.ts";
 import { deCommune } from "../typography.ts";
@@ -96,7 +96,10 @@ function composeSeasonalClimateTradeoff(
     kind: "tradeoff",
     patternId: "seasonal_climate_tradeoff",
     title: "Des hivers doux, avec une exposition estivale à arbitrer",
-    headlineSubject: "l'exposition aux fortes chaleurs",
+    // FUT-17 : LA PRIORITÉ DU LECTEUR, héritée du mismatch, comme `climate_comfort`. Le héros sert ce sujet
+    // dans « … répond moins bien à une de vos priorités : X » : « l'exposition aux fortes chaleurs » y
+    // faisait de l'exposition la priorité du lecteur, soit l'inverse de ce qu'il a demandé.
+    headlineSubject: chaleurFact.headlineSubject,
     summary: `Les hivers ${deCommune(facts.nom)} comptent parmi les plus doux du pays, et l'exposition aux fortes chaleurs estivales y appelle un arbitrage.`,
     favorableProjectKey: "douceur_climat", // le côté favorable EST la douceur des hivers (RULE_DOUCEUR)
     favorableSide: {
@@ -145,7 +148,11 @@ function composeClimateComfort(
     kind: "mismatch_with_action",
     patternId: "climate_comfort",
     // FUT-20 : avec le logement, le titre dit la RELATION ; la section porte déjà le jugement au projet.
-    title: lg?.lecture.titre ?? "Des étés plus difficiles à concilier avec votre projet",
+    // FUT-17 : sans lui, le titre nomme le NIVEAU projeté, comme les titres FUT-20. « Des étés plus
+    // difficiles » disait une évolution que la classification ne lit pas, et une saison entière là où
+    // l'indicateur compte des jours au-dessus de 35 °C ou des nuits tropicales (Montpellier : les nuits
+    // seules). Un artefact figé garde le titre qu'il a enregistré.
+    title: lg?.lecture.titre ?? `De fortes chaleurs projetées à l'horizon ${CLIMAT_HORIZON_LABEL}`,
     headlineSubject: chaleurFact.headlineSubject, // « des étés supportables », hérité du mismatch
     summary: chaleurFact.statement,
     evidence: chaleurFact.evidence,

@@ -11,7 +11,7 @@
 import { voixDuLecteur } from "../relation-au-lieu.ts";
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
-  CompromiseFact, VerificationFact, MismatchFact, EvidenceRef,
+  VerificationFact, MismatchFact, EvidenceRef,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -63,62 +63,18 @@ import {
 
 const territoireHref = "/rapport/quartier";
 
-// ════════════════════════════════════════════════════════════════════════════════════════════
-// UN SCORE INTERNE NE DEVIENT JAMAIS UNE PREUVE VISIBLE (11/08/2026).
+// LA RÈGLE « COMPROMIS TRANSPORTS × CHALEUR » A DISPARU (FUT-17, D7 de FUT-85, 19/10/2026 ; engine-6).
 //
-// Cette fabrique affichait « 80/100 » en pastille « Preuve ». Trois défauts en un :
+// Elle tranchait la chaleur sur un indice interne (`scores.faible_chaleur <= 40`) que le lecteur ne voyait
+// pas, sous une autre convention que ruleChaleur, qui lit les mesures DRIAS. Sur 2 796 communes
+// (dont Strasbourg), ruleChaleur classait la commune sous le seuil pendant que cette règle affirmait « Votre
+// priorité de faible exposition à la chaleur est moins bien satisfaite ici », et le verdict en faisait
+// « le principal point à contrôler ». Sur les 2 136 autres communes où elle se déclenchait, la carte chaleur
+// disait déjà l'écart, preuves DRIAS à l'appui. Aligner les seuils aurait gardé un arbitrage fondé sur deux
+// indices sans démonstration de la desserte : la règle est retirée, sans remplacement. Les deux priorités
+// restent examinées, chacune par sa règle (ruleChaleur ; le rang et la gare pour les transports).
 //
-//   - la note se lit comme un jugement de qualité, ce que le produit refuse d'émettre ;
-//   - elle donne une précision artificielle à deux constructions qui ne sont pas comparables entre
-//     elles (l'accès aux transports et l'exposition à la chaleur n'ont ni la même échelle ni la
-//     même méthode) ;
-//   - elle masque les faits qui fondent réellement l'arbitrage.
-//
-// C'est le même geste que celui retiré à la règle inondation le même jour, et la doctrine y était
-// déjà écrite : « la preuve est opposable, jamais un score interne ». Le score continue de
-// DÉCLENCHER la règle ; il ne s'affiche plus.
-//
-// La référence demeure, sans valeur : `assertFactValid` exige une preuve par côté, et le lecteur
-// garde une provenance dans « Données et limites ». On ne fabrique pas de mesure de remplacement :
-// pour la chaleur, les mesures DRIAS existent mais ne sont pas portées ici ; pour les transports,
-// `ModuleFacts` ne conserve que le score, et une distance à la gare ne démontrerait pas la
-// desserte. Inventer une valeur pour combler la pastille serait le défaut d'à côté.
-// ════════════════════════════════════════════════════════════════════════════════════════════
-function scoreEvidence(nom: string, key: string): EvidenceRef {
-  return { factId: `scores.${key}`, module: "territoire", label: `Indice futur•e · ${LIBELLE_INDICE[key] ?? key}`, grain: "commune", href: territoireHref };
-}
-
-// Ce que l'indice mesure, dit au lecteur. Le libellé nomme la DIMENSION, jamais sa valeur.
-const LIBELLE_INDICE: Record<string, string> = {
-  acces_transports: "accès aux transports",
-  faible_chaleur: "exposition à la chaleur",
-};
-
-// Règle 4 : compromis transport × chaleur. Deux priorités déclarées qui tirent en sens opposés sur
-// cette commune. Texte honnête (pas de « meilleure », pas de « train »), preuve de chaque côté.
-const RULE_COMPROMIS = "territoire.compromis-transport-chaleur";
-const ruleCompromis: DecisionRule = {
-  id: RULE_COMPROMIS,
-  module: "territoire",
-  evaluate: (f, p): RuleEvaluation => {
-    const t = f.scores.acces_transports;
-    const c = f.scores.faible_chaleur;
-    if (preferenceWeight(p, "acces_transports") < 2 || preferenceWeight(p, "faible_chaleur") < 2 || t == null || c == null || !(t >= 60 && c <= 40)) {
-      return { ruleId: RULE_COMPROMIS, projectKeys: ["acces_transports", "faible_chaleur"], outcome: "not_applicable", facts: [], reason: "pas de tension déclarée" };
-    }
-    const fact: CompromiseFact = {
-      id: `${f.insee}:compromis-transport-chaleur`, ruleId: RULE_COMPROMIS,
-      sourceFactIds: ["scores.acces_transports", "scores.faible_chaleur"], module: "territoire",
-      role: "compromise", materialityTier: "structuring", topic: "la tension entre transports et chaleur",
-      statement: "Deux de vos priorités tirent en sens opposés sur cette commune.",
-      sides: [
-        { projectKey: "acces_transports", statement: "L'accès aux transports ressort favorablement à l'échelle de la commune.", evidence: [scoreEvidence(f.nom, "acces_transports")] },
-        { projectKey: "faible_chaleur", statement: "Votre priorité de faible exposition à la chaleur est moins bien satisfaite ici.", evidence: [scoreEvidence(f.nom, "faible_chaleur")] },
-      ],
-    };
-    return { ruleId: RULE_COMPROMIS, projectKeys: ["acces_transports", "faible_chaleur"], outcome: "compromise", facts: [fact], reason: "tension transport/chaleur" };
-  },
-};
+// `CompromiseFact` et son rendu restent : un artefact vendu sous engine-5 en porte un, et se relit tel quel.
 
 // Règle 4 : confort d'été non évaluable au grain bâtiment sans adresse. Inconnue SCOPÉE (ne bloque
 // Règle 5 : exposition inondation notable + priorité risque déclarée -> vérification. Croise le score
@@ -898,7 +854,7 @@ export const REGISTRY: DecisionRule[] = [
   // Les 11 contraintes dures, une règle par clé, toutes au-dessus de l'évaluateur PARTAGÉ avec le
   // comparateur. Le dossier n'en examinait que 3 (mer, taille, département).
   ...HARD_CONSTRAINT_RULES,
-  ruleCompromis,
+  // ruleCompromis A DISPARU (FUT-17, engine-6) : cf. plus haut.
   // ruleConfort A DISPARU. Elle DÉSACTIVAIT `faible_chaleur` dès qu'une adresse était renseignée
   // (`f.hasAddress` -> not_applicable) : le critère cessait d'être examiné au moment précis où le dossier
   // devenait le plus riche, et le lecteur lisait « priorité non couverte » sur un rapport complet. Son

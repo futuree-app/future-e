@@ -53,7 +53,13 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // et le comparatif ne rapproche que les registres. Un artefact figé avant FUT-20 garde ses cartes et son plan, et
 // se rend à l'identique : le côté `logement` est optionnel, absent de ces artefacts. Si une évolution future
 // devait changer un verdict ou un registre à partir du logement, elle exigerait, elle, `engine-6`.
-export const ENGINE_VERSION = "engine-5";
+// engine-6 (FUT-17, 19/10/2026) : la règle « compromis transports × chaleur » est retirée, sans remplacement. Elle
+// jugeait la chaleur sur un indice interne, sous une autre convention que la règle chaleur : sur 2 796 communes,
+// le dossier disait la priorité chaleur « moins bien satisfaite » là où la règle chaleur la classait sous le
+// seuil, et le verdict en faisait le principal point à contrôler. Le registre des critères change (règles,
+// issue de `faible_chaleur`), donc ce que le moteur CONCLUT. Un dossier engine-5 garde son compromis et son
+// verdict tels qu'ils ont été vendus, et se relit à l'identique.
+export const ENGINE_VERSION = "engine-6";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;
