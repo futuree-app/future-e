@@ -172,11 +172,58 @@ n'exécute donc jamais les scripts d'intégration protégés ni les fixtures `*-
 | ESLint, fichiers touchés | 0 erreur |
 | `next build` | réussi ; la copie locale de `.env.local` a ensuite été supprimée du worktree (jamais suivie par git) |
 
-## F. Verdict
+## F. Passe 3 : ton du Relevé et volet Sécheresse (revue PR #70, 20/10/2026)
 
-**GO** pour la fiabilité de tous les textes des volets Chaleurs estivales, Nuits tropicales et Températures
-moyennes du module Territoire : surtitre, sous-titre, trajectoire, récit, note, infobulle.
+**Règle éditoriale retenue** : le chiffre apporte la précision, le texte apporte le sens, la preuve apporte la
+confiance. La passe 2 avait rendu les textes exacts mais trop proches d'une fiche de données ; la passe 3 garde
+exactement les mêmes conditions (`lireCompte`, mêmes seuils, mêmes chiffres) et change le ton : conditionnel pour
+la projection, période de référence nommée une fois, limite dite comme une question ouverte.
+
+| Emplacement | Passe 2 | Passe 3 |
+|---|---|---|
+| Chaleur · surtitre / sous-titre | « Jours de forte chaleur » / « Le nombre moyen de jours par an où la température maximale dépasse 30 °C, selon les projections. » | « Le seuil des 30 °C » / « Combien de jours par an dépasseraient 30 °C ? » |
+| Nuits · surtitre / sous-titre | « Nuits chaudes » / « Le nombre moyen de nuits par an où la température minimale reste au-dessus de 20 °C, selon les projections. » | « Le seuil des 20 °C » / « Une nuit tropicale est une nuit où la température ne descend pas sous 20 °C. » |
+| Températures · sous-titre | « La température moyenne de l'été et de l'hiver, selon les projections. » | « Comment les températures d'été et d'hiver pourraient évoluer. » |
+| Récit · hausse (La Rochelle 2050) | « …les projections comptent 11 jours au-dessus de 30 °C de plus par an à l'horizon 2050 qu'à la fin du XXe siècle. Ce compte annuel ne dit ni à quel moment de l'été… » | « …les projections indiquent environ 11 jours de plus par an au-dessus de 30 °C à l'horizon 2050, par rapport à la période 1976-2005. On ne sait toutefois pas si ces journées seraient isolées ou concentrées dans plusieurs épisodes. » |
+| Récit · rare (Cherbourg 2030) | « …les nuits au-dessus de 20 °C restent quasi inexistantes dans les projections… » | « …les nuits tropicales resteraient très rares à l'horizon 2030 : moins de deux par an en moyenne dans les projections. » |
+| Récit · écart faible | « …reste proche de celui de la fin du XXe siècle : l'écart est inférieur à deux par an. » | « …bougerait peu à l'horizon {année} : l'écart avec la période 1976-2005 resterait inférieur à deux par an dans les projections. » |
+| Récit · écart non publié | « …L'écart avec la fin du XXe siècle n'est pas disponible ici : l'évolution ne peut pas être qualifiée. » | « …Faute d'écart publié avec la période 1976-2005, on ne peut pas dire s'il y en aurait plus ou moins qu'avant. » |
+| Récit · températures | « …les projections donnent, à l'horizon 2050, un été et un hiver plus chauds qu'à la fin du XXe siècle. » | « …les projections indiquent un été et un hiver plus chauds à l'horizon 2050 que sur la période 1976-2005. Ici, l'été se réchaufferait plus vite que l'hiver. » |
+
+**Sécheresse des sols** (même écran, même intention ; correction courte, sans toucher au modèle) :
+
+| Emplacement | Avant | Après |
+|---|---|---|
+| Surtitre | « Un territoire qui s'assèche » | « L'eau et les sols » |
+| Titre | « Environ N jours secs par an d'ici {année} » ; sinon la restriction ; **sinon, par défaut, « Cours d'eau à sec observé »** | « Environ N jours de sols secs par an à l'horizon {année} » ; sinon la restriction ; « Cours d'eau à sec observé » **seulement si ONDE l'a relevé** ; sinon le libellé VigiEau (ex. « État des restrictions non disponible ») |
+| Sous-titre | « Le manque durable d'eau dans les sols, même en dehors des périodes de restriction. » | « Restrictions d'eau, cours d'eau et sols : trois lectures à ne pas confondre. » |
+| Ligne ONDE | « Sur le terrain » (sans date) | « Relevé de terrain du {date} » quand la date existe |
+| Récit | « …les cours d'eau qui faiblissent, la terre qui se rétracte : […] C'est un changement de fond qui s'inscrit dans la durée. » (même sous « Pas de cours d'eau à sec » ; aucune donnée de retrait des argiles ici ; aucun écart de sécheresse lu) | « Une restriction est une décision préfectorale prise pour la période en cours. L'état d'un cours d'eau est un relevé ponctuel sur le terrain. Les jours de sols secs sont une moyenne annuelle projetée. L'une de ces lectures ne permet pas de déduire les autres. » |
+
+**Vérification du cas signalé par la revue** : avec VigiEau en « vigilance » seule, le titre était déjà « Vigilance
+sécheresse, sans restriction » (`libelleRestrictions` rend `en_vigueur`), pas « Cours d'eau à sec observé ». La
+phrase était en revanche la **branche par défaut** du titre : un registre VigiEau en panne portant un niveau (objet
+que `getVigieauSummary` ne produit pas aujourd'hui) l'affichait sans aucun relevé ONDE. Elle est désormais verrouillée
+sur `drought.isDry`.
+
+**Tests** (4 ajoutés, VigiEau et ONDE en fixtures synthétiques déclarées, DRIAS réelle) : VigiEau seule ; registre
+en panne portant un niveau ; ONDE seule réellement à sec (et ONDE non sèche seule : pas de volet) ; DRIAS seule
+(La Rochelle 2050). Contre-épreuve sur 4dfeb4c1 : **5 sur 5 en échec** (les 4 + le contrôle global, qui couvre
+désormais « s'assèche », « changement de fond », « dans la durée », « faiblissent », « se rétracte »). Après : 31/31
+(fichier FUT-116 + FUT-33).
+
+| Vérification (passe 3) | Résultat |
+|---|---|
+| `npm test` | **2 847 / 2 847** |
+| `tsc --noEmit` | 0 erreur |
+| ESLint, fichier touché | 0 erreur |
+| `next build` | réussi ; `.env.local` copié pour le build puis supprimé aussitôt |
+
+## G. Verdict
+
+**GO** pour la fiabilité de tous les textes des volets Chaleurs estivales, Nuits tropicales, Températures moyennes
+et Sécheresse des sols du module Territoire : surtitre, titre, sous-titre, lignes, récit, note, infobulle.
 
 Limites restantes, **non corrigées** :
 1. **Écart avec l'audit FUT-17 sur les nuits** : 102 communes non reproduites (167 à écart < 1 en 2030 avec le volet ouvert). Probablement une autre typologie ou un autre index au moment de la sonde.
-2. **Volet Sécheresse des sols** (même groupe « Le climat », hors périmètre FUT-116) : surtitre « Un territoire qui s'assèche » et récit « […] C'est un changement de fond qui s'inscrit dans la durée. », fixes, alors que ce composant ne lit aucun écart projeté de sécheresse (`ASWI04_yr` n'est mappé que pour l'accueil). Même classe de défaut ; à arbitrer.
+2. **Volet Jours de pluie intense** : relu, aucune tendance affirmée (surtitre « Quand la pluie se concentre », récit explicatif). Non modifié.
