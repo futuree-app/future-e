@@ -28,3 +28,9 @@ Doctrine à respecter dans toute critique :
 - `../README-v3.md` : diagnostic de hiérarchie de la V2, organisation V3, contrat déterministe de la synthèse, scénarios de synthèse (faits autorisés, phrases interdites), autocritique et arbitrages V1 à V7.
 - `../prototype-v3.html` : le prototype V3. Lien direct : https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/prototype-v3.html
 - `../captures-v3/` : 29 captures. Les « versions rédigées » sont des textes écrits à la main : aucune IA n'a été appelée.
+
+## V3.1 · consolidation UX (20 octobre 2026)
+
+- `../README-v3-1.md` : les trois moments d'une recherche, ce qui change depuis la V3, les preuves en trois niveaux, l'audit FUT-118 / FUT-75, les questions métier (comparabilité, cache) et les arbitrages W1 à W7.
+- `../prototype-v3-1.html` : lien direct https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/prototype-v3-1.html (bande « Démonstration » : 0, 1, 2, 3).
+- `../captures-v3-1/` : 34 captures.
