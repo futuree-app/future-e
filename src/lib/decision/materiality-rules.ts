@@ -66,8 +66,8 @@ const territoireHref = "/rapport/quartier";
 // LA RÈGLE « COMPROMIS TRANSPORTS × CHALEUR » A DISPARU (FUT-17, D7 de FUT-85, 19/10/2026 ; engine-6).
 //
 // Elle tranchait la chaleur sur un indice interne (`scores.faible_chaleur <= 40`) que le lecteur ne voyait
-// pas, sous une autre convention que ruleChaleur, qui lit les mesures DRIAS. Sur 2 796 communes (La
-// Rochelle), ruleChaleur classait la commune sous le seuil pendant que cette règle affirmait « Votre
+// pas, sous une autre convention que ruleChaleur, qui lit les mesures DRIAS. Sur 2 796 communes
+// (dont Strasbourg), ruleChaleur classait la commune sous le seuil pendant que cette règle affirmait « Votre
 // priorité de faible exposition à la chaleur est moins bien satisfaite ici », et le verdict en faisait
 // « le principal point à contrôler ». Sur les 2 136 autres communes où elle se déclenchait, la carte chaleur
 // disait déjà l'écart, preuves DRIAS à l'appui. Aligner les seuils aurait gardé un arbitrage fondé sur deux
