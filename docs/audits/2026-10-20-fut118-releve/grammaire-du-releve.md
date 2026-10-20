@@ -9,20 +9,38 @@ de `/dev/fut118` ont montré qu'il manquait.
 Références de code : `src/components/releve/primitives.tsx`, `releve.module.css`, `marge.ts`,
 `lecture-dossier.ts` ; mouvement : `src/app/design-tokens.css` (`--m-*`), `src/lib/motion.ts`.
 
+**Révision du 20/10, après la revue détaillée.** Chaque règle porte désormais son statut :
+
+- **Stable** : règle de la grammaire, prescriptive, qui ne change qu'avec un amendement daté.
+- **Hypothèse** : choix d'interface proposé ou illustré par un témoin, qui reste ouvert à
+  l'exploration (en particulier pour le centre de décision, § 8). Une hypothèse se suit par défaut,
+  et s'écarte en le disant et en le justifiant.
+
+Les règles absolues de la première version (trois signes sur chaque écran, une seule plaque par
+écran, aucune courbe) sont assouplies : la grammaire reste forte, elle n'interdit plus des
+représentations utiles.
+
+Par défaut : les § 0, 2, 3, 4, 5, 7 et 10, le § 8.1 et les composants existants du § 6 sont
+**stables** ; les composants marqués
+« manquant » au § 6 sont des **hypothèses** jusqu'à leur promotion (lot R1), qui leur donnera un statut
+stable avec leurs tests ; le § 8.2 est une **hypothèse**.
+
 ---
 
 ## 0. Ce qui définit visuellement futur•e
 
 Sept signes, et chacun vient du produit lui-même (un lieu à trois échelles, un temps de 1976 à 2100,
-une décision). Une personne doit en reconnaître au moins trois sur n'importe quel écran.
+une décision). Ils forment le vocabulaire commun : un écran en emploie **ceux qui servent son
+contenu** (une page de connexion n'a pas de marge de preuve), et c'est leur répétition à travers le
+parcours qui fait reconnaître futur•e, pas leur présence obligatoire partout. *(Stable.)*
 
 | # | Signe | Ce qu'il dit | Où il vit |
 | --- | --- | --- | --- |
 | 1 | **La marge de preuve** | chaque affirmation porte sa provenance à côté d'elle, pas en dessous | `Ligne` + `Marge` |
 | 2 | **Les trois glyphes** cercle, carré, losange | à quelle échelle un fait a été établi | `GlypheGrain`, `EmblemeEchelles`, `CoupeEchelles` |
-| 3 | **La plaque** et ses deux coins de coupe | ce que futur•e conclut ou ce que la personne achète ; une seule par écran | `Plaque` |
+| 3 | **La plaque** et ses deux coins de coupe | ce que futur•e conclut ou ce que la personne achète ; la surface dominante d'un mouvement | `Plaque` |
 | 4 | **Le trait de registre** de 3 px | la relation d'un fait au Projet ; la seule couleur de jugement | `Registre`, `TEINTE_REGISTRE` |
-| 5 | **La règle du temps** | des jalons isolés, jamais une courbe | `RegleDuTemps` |
+| 5 | **La règle du temps** | des dates et des horizons posés sur un axe linéaire ; jamais une continuité inventée | `RegleDuTemps` |
 | 6 | **Archivo et son axe de largeur**, le mono pour ce qui s'aligne | un instrument de mesure, pas un magazine | rôles typographiques (§ 2) |
 | 7 | **Le fond sombre, les filets, l'absence de verre** | un document technique, pas un tableau de bord | jetons `--r-*` |
 
@@ -91,6 +109,16 @@ déduites des mesures de FUT-87 et de la doctrine.
 - Les filets restent à 1 px CSS : à une densité de 1, un demi-pixel disparaît.
 - Les captures de contrôle se font **aussi à `deviceScaleFactor: 1`**, pas seulement en Retina.
 
+### 2.4 Limites mobiles constatées (non résolues)
+
+| Limite | Où | Preuve | Suite |
+| --- | --- | --- | --- |
+| **Libellés de la règle du temps qui se chevauchent à 360 px** : « sécheresse » et « inondation » se touchent dès quatre dates sur 33 ans ; « aujourd'hui » touche la valeur posée à 2030 | `RegleDuTemps` (témoin 03 ; prototype Logement) | `captures/limite-regle-du-temps-memoire-360.png`, `limite-regle-du-temps-plaque-360.png` | R1 : répartition des libellés sur plusieurs lignes ou regroupement par période sous une largeur donnée ; test de non-chevauchement |
+| **Densité de la comparaison à plusieurs lieux** : à 10 possibilités, quatre critères donnent 40 lignes d'issue en marge, puis 10 lignes empilées ; environ 4 400 px de haut à 360 px | témoin 04 | `captures/temoin-comparaison-10-360-page.jpg` | question ouverte pour FUT-41 (§ 8.2) : regroupement, repli des accords, rapprochement de deux possibilités |
+| **Écrans non-Retina** jamais contrôlés | tout le Relevé | captures faites à `deviceScaleFactor` 2 sur mobile, 1 sur ordinateur | captures à 1× sur mobile, et sur un écran externe réel (FUT-77) |
+| **Safari / WebKit** jamais testé | tout le Relevé | aucun moteur WebKit disponible dans cette session | iPhone réel et Safari macOS avant toute activation |
+| **Thème clair** jamais vu | tout le Relevé | le site impose `data-theme` : l'émulation du thème système ne suffit pas ; `.boutonMarque` échoue en clair (§ 3.2) | captures en forçant `data-theme="light"` |
+
 ## 3. Couleurs et surfaces
 
 ### 3.1 Fonds et surfaces
@@ -155,9 +183,12 @@ registre (R2).
 - **Rayon** : 3 px partout. Le cercle n'existe que comme glyphe.
 - **Rythme vertical** : pas de 8 px ; un mouvement = 56 px de haut et de bas et un filet (40 px en
   version serrée) ; les éléments d'une liste, 22 px et un filet.
-- **Plaque** : une par écran, deux coins de coupe ; elle porte ce que futur•e conclut (verdict, lecture
-  immédiate) ou ce que la personne achète. Ce qui vient d'un tiers (formulaire Stripe, carte) se pose
-  dans un **emplacement** à filet pointillé, sans coins.
+- **Plaque** *(stable)* : la surface dominante **d'un mouvement**, deux coins de coupe ; elle porte ce
+  que futur•e conclut (verdict, lecture immédiate) ou ce que la personne achète. Une page longue peut en
+  porter plusieurs ; deux plaques de même poids ne se font pas concurrence dans le même champ visuel
+  (`DESIGN.md` § 2.2), sauf quand l'écran les met **explicitement** en regard pour les comparer. Ce qui
+  vient d'un tiers (formulaire Stripe, carte) se pose dans un **emplacement** à filet pointillé, sans
+  coins.
 
 ### 4.3 Grilles et espaces blancs
 
@@ -185,7 +216,7 @@ Dix rôles, chacun avec une forme. **Aucune décoration ajoutée** : la différe
 | **Preuve** | la marge : grain, valeur, source, date, lien | `Marge` | le lien porte la provenance de l'artefact servi (`evidenceHref`) |
 | **Limite** | phrase en `--text-nuance` sous le fait | `.nuance` | dit ce que le fait ne dit pas ; jamais en italique, jamais en couleur |
 | **Interprétation** | corps de texte sous le fait, en `--fg-2` | `.corps` / `.dense` | jamais plus grand que le fait ; signalée comme lecture (« ce qui compte ici ») |
-| **Conclusion** | la plaque, le verdict en `--text-verdict` | `Plaque` + `ConclusionBlock` | une par écran ; le titre n'est jamais généré |
+| **Conclusion** | la plaque, le verdict en `--text-verdict` | `Plaque` + `ConclusionBlock` | une conclusion par dossier lu ; le titre n'est jamais généré |
 | **Vérification** | sujet à trait `contrôle`, geste à glyphe d'action, numérotée | `Registre` + `ActionCue` | dit quoi demander, à qui, et pourquoi |
 | **Projet** | phrase de lecteur dans une plaque ou en tête ; conditions sans compromis à trait `incompatibilité` | `Plaque`, `Registre` | le Projet est cité, jamais reformulé par l'écran |
 | **Arbitrage** | la balance : deux côtés en regard (deux colonnes ≥ 900 px) | `.deux`, `.bandeColonne` | **seulement** pour les deux côtés d'un même arbitrage, jamais pour comparer des lieux |
@@ -199,20 +230,20 @@ Deux motifs canoniques déjà présents dans le produit, à réutiliser tels que
 
 | Composant | État du canon | Règle |
 | --- | --- | --- |
-| **Bouton** | classes `.bouton`, `.boutonMarque` sans composant ; `BoutonAction` (FUT-75) pour les actions à état | trois variantes : marque (une par écran), trait, lien. Rayon 3 px, cible ≥ 40 px, focus 2 px `--fg-hi`. Casse normale. `.boutonMarque` à corriger en thème clair |
+| **Bouton** | classes `.bouton`, `.boutonMarque` sans composant ; `BoutonAction` (FUT-75) pour les actions à état | trois variantes : marque (une action principale dans le champ visuel), trait, lien. Rayon 3 px, cible ≥ 40 px, focus 2 px `--fg-hi`. Casse normale. `.boutonMarque` à corriger en thème clair |
 | **Champ de recherche** | **manquant** (l'accueil, la qualification et la connexion ont chacun le leur) | grand (≥ 52 px), filet `--border-2`, fond plaque, libellé visible au-dessus, aide en nuance. Témoin 05 |
 | **Sélecteur** (horizon, mode, nombre) | **manquant** ; `HorizonSwitch` (accueil ancien) et `HORIZON_PILLS` (Territoire) font le même travail | liens ou radios, repère de 2 px sous l'option courante, 180 ms (FUT-75 Q2), jamais une teinte. Témoins 03 et 04 |
 | **Filtres** | **manquant** | un filtre est une lentille : il masque, il ne trie pas et ne compte pas |
 | **Navigation** | `Navbar` hors Relevé (capitales mono) ; `CoupeEchelles`, `EchelleNavigator` dans le dossier | casse normale, lien d'évitement ; coordination FUT-86 |
 | **Cartes** | pas de carte générique | une « carte » est une `Ligne` ; une surface élevée est une `Plaque` |
 | **Tableaux** | **manquant** | filets, nombres à droite en mono tabulaire, aucune couleur par ligne ou colonne ; empilé sous 640 px. Témoins 03 et 04 |
-| **Comparaison** | voir § 8 | des lignes par critère, la marge par possibilité ; jamais une colonne par candidat |
+| **Comparaison** | voir § 8 | principes stables (preuve, registre, grain, aucun score) ; la forme reste une **hypothèse** ouverte à FUT-41 |
 | **Accordéons** | `details` natif, `.details` / `.detailsFluide` (FUT-75 Q4) | `+` / `−` en mono, contenu cherchable, ouverture 240 ms, instantanée sans `::details-content` |
 | **Modales** | **aucune dans le Relevé**, et c'est voulu | préférer une page ou un dépliable ; si une modale devient nécessaire : plaque sans coins, focus piégé, fermeture Échap |
-| **Erreur, chargement** | ligne d'état (FUT-75 Q5, FUT-93) ; **manquante** comme primitive | une ligne qui change de fonction ; l'échec dit ce qui a eu lieu et ce qui n'a pas eu lieu ; aucune teinte de registre ; indicateur seulement après 300 ms |
+| **Erreur, chargement** | ligne d'état (FUT-75 Q5, FUT-93) ; **manquante** comme primitive | une ligne qui change de fonction ; aucune teinte de registre ; indicateur seulement après 300 ms. **Elle n'affirme que ce que le serveur a confirmé** *(stable)* : « aucun montant n'a été prélevé », « paiement reçu », « dossier prêt » ne s'écrivent qu'à partir d'un état serveur établi (par exemple le statut du paiement relu côté serveur auprès de Stripe, ou l'événement reçu par le webhook). Une erreur générique, un délai ou une réponse réseau perdue ne prouvent rien : l'écran dit alors que la confirmation n'est pas encore connue, et ce que la personne peut faire sans risquer de payer deux fois |
 | **Parcours** (tunnel) | **manquant** | étapes numérotées en mono, nom en casse normale, étape courante à l'encre. Témoin 05 |
 | **Cartographie** | aucune carte dans le Relevé | trait seul, fond neutre, aucune teinte de risque inventée ; une carte est un **emplacement** (donnée d'un tiers) |
-| **Graphiques** | `RegleDuTemps`, `RegleDeRang`, `Seuils`, échelle DPE, barres d'audit, `TerritoryYearsBand` | jamais de courbe entre jalons, une échelle par mesure, le seuil affiché. `RegleDuTemps` superpose ses libellés au-delà de deux dates proches (témoin 03) : à corriger |
+| **Graphiques** | `RegleDuTemps`, `RegleDeRang`, `Seuils`, échelle DPE, barres d'audit, `TerritoryYearsBand` | une échelle par mesure, le seuil affiché, la source nommée. **Le tracé suit la nature de la donnée** *(stable)* : des horizons, des paliers de réchauffement ou des moyennes trentenaires sont des jalons isolés, **jamais reliés** (FUT-87 V2) ; une **série continue réellement mesurée ou modélisée à ce pas** (températures annuelles observées, série annuelle d'un même modèle) peut être une courbe, avec son enveloppe d'incertitude et sa source. `RegleDuTemps` superpose ses libellés à 360 px (§ 2.4) : à corriger avant tout usage |
 
 ## 7. Mouvement (FUT-75, sans ajout)
 
@@ -236,25 +267,45 @@ processeur ralenti six fois. Clavier : aucun mouvement ne déplace le focus.
 
 ## 8. Les objets du centre de décision (cadre pour FUT-41 / FUT-22)
 
-Ce cadre ne conçoit pas l'architecture du centre ; il dit comment ses objets s'écrivent. Témoin 04.
+Ce cadre ne conçoit pas l'architecture du centre. FUT-41 travaille sur une V2 plus visuelle,
+interactive et guidée ; ce qui suit sépare ce qu'elle doit tenir de ce qu'elle peut réinventer.
 
-| Objet | Traitement |
+### 8.1 Principes non négociables *(stable)*
+
+1. **La preuve** : toute issue, tout énoncé comparatif renvoie à sa source, à sa date d'analyse et à
+   la provenance de **cet** artefact. Rien n'est affirmé sans pouvoir être vérifié.
+2. **Le registre** : la seule couleur de jugement est celle des six registres, liée à une issue
+   **établie**. Une issue non établie (« à vérifier », « non examiné ») n'a **aucune valence** : ni
+   teinte, ni trait plein.
+3. **Le grain** : chaque issue dit à quelle échelle elle a été établie (cercle, carré, losange) ; une
+   différence de **profondeur d'examen** n'est jamais présentée comme un avantage du lieu.
+4. **Aucun score** : ni note, ni total, ni moyenne, ni « nombre de points favorables », ni tri par
+   mérite. Les seuls nombres sont des longueurs de liste recomptables à l'écran.
+5. **Une possibilité ne prend pas de couleur propre** : la couleur est réservée aux registres.
+6. **L'absence se dit** : une donnée manquante a une phrase et une raison.
+7. **La phrase dit ce que dit la marge** : un énoncé reprend l'issue exacte de chaque possibilité qu'il
+   nomme, et cela se teste sur le texte rendu (T4 et T5 des témoins).
+
+### 8.2 Hypothèses illustrées par le témoin 04 *(hypothèse)*
+
+Le témoin 04 en montre **une** écriture possible, compatible avec la direction A du cadrage FUT-41. Ce
+sont des exemples, pas des règles :
+
+| Objet | Écriture proposée par le témoin |
 | --- | --- |
-| **Projet** | phrase de lecteur en tête, dans la plaque ; date de révision en mono ; conditions sans compromis au trait `incompatibilité` |
-| **Possibilité** (commune, adresse, bien) | **identifiée par son nom seul** : ni couleur, ni pictogramme propre, ni position qui signifie un rang. Ordre d'ajout ou ordre du Projet, **dit à l'écran** |
-| **Niveau d'examen** | les trois glyphes, pleins pour les échelles examinées, discrets sinon. C'est une profondeur, jamais une qualité |
-| **Condition / critère** | une ligne par critère, dans l'ordre du Projet |
-| **Comparaison** | l'énoncé à gauche, **la marge porte l'issue de chaque possibilité** (nom + mot + trait). La liste s'allonge de 2 à 10 sans changer de forme ; au-delà, elle se groupe par commune. **Aucune grille à N colonnes**, aucune colonne par candidat |
-| **Issue** | établie : trait de registre + mot (« tient », « ne tient pas ») ; non établie : pointillé + mot (« à vérifier », « non examiné »), **sans teinte**. La phrase reprend le mot de la marge |
-| **Contradiction** | motif « pourquoi elles ne disent pas la même chose » : les deux lectures en regard, avec leurs grains |
-| **Inconnue** | gris non su, pointillé, phrase qui dit pourquoi on ne sait pas |
-| **Preuve** | la marge, avec la date de l'analyse et le lien de provenance de **cet** artefact |
-| **Arbitrage** | la balance, seulement pour deux côtés d'un même arbitrage |
-| **Vérification** | registre `contrôle`, numérotée, avec le nom de la possibilité concernée |
-| **Historique** | liste datée en mono, repliée ; sur un axe, `RegleDuTemps` (jalons isolés) |
+| **Projet** | phrase de lecteur en tête, dans une plaque ; date de révision en mono ; conditions sans compromis au trait `incompatibilité` |
+| **Possibilité** | identifiée par son nom ; ordre d'ajout ou du Projet dit à l'écran |
+| **Niveau d'examen** | les trois glyphes, pleins pour les échelles examinées |
+| **Critère** | une ligne par critère, dans l'ordre du Projet |
+| **Comparaison** | l'énoncé à gauche, l'issue de chaque possibilité en marge ; une forme qui ne change pas de 2 à 10 possibilités. D'autres formes restent ouvertes : colonnes par candidat, table manipulable, disposition spatiale, parcours guidé, **à condition de tenir les principes du § 8.1** (une position ou une colonne ne doit pas se lire comme un rang ; une disposition spatiale dit ce que ses axes signifient) |
+| **Issue** | trait de registre + mot ; pointillé + mot pour une issue non établie |
+| **Contradiction** | le motif « pourquoi elles ne disent pas la même chose » |
+| **Arbitrage** | la balance pour deux côtés d'un même arbitrage |
+| **Vérification** | registre `contrôle`, avec le nom de la possibilité |
+| **Historique** | liste datée repliée, ou `RegleDuTemps` |
 
-Interdits propres au centre : note, total, moyenne, « nombre de points favorables », tri par mérite,
-couleur de fond par fiche, axe spatial signifiant, carte de tableau de bord.
+La densité de cette écriture à 360 px est une limite constatée (§ 2.4) : c'est l'une des questions que
+la V2 de FUT-41 doit résoudre, pas une contrainte qu'elle hérite.
 
 ## 9. De `DESIGN.md` v2.1 à v3.0, section par section
 
@@ -272,7 +323,7 @@ change. **Remplacé** : la section est réécrite à partir de ce document. **Su
 | 2.4 | numérotation citable | conservé | précise le surtitre numéroté | § 2.1 |
 | 3.1 | les quatre états d'une valeur | conservé | | |
 | 3.2 | l'alignement au chiffre (« toute valeur en mono ») | **amendé** | le chiffre **mis en avant** est en Archivo `wdth` 125 tabulaire ; le mono reste pour la marge, les tableaux et les unités | § 2.1, § 2.2 |
-| 3.3 à 3.6 | trajectoire, incertitude, comparaison, position avant couleur | conservé | 3.3 gagne « des jalons, jamais une courbe » (`RegleDuTemps`) | § 6 |
+| 3.3 à 3.6 | trajectoire, incertitude, comparaison, position avant couleur | conservé | 3.3 gagne « le tracé suit la nature de la donnée » : horizons et paliers jamais reliés, série continue permise avec son incertitude | § 6 |
 | 4 | la voix | conservé | | |
 | 5.1 | le fond (« fond profond, verre translucide, grain ») | **amendé** | fond profond conservé, orbes déjà supprimés ; **le verre translucide n'est plus une signature** | § 3.1 |
 | 5.2 | la palette close | conservé | | |

@@ -3,7 +3,7 @@
 // Aujourd'hui le lecteur passe de l'accueil (Relevé) à une qualification sobre mais en capitales
 // mono, puis à une connexion en verre et halos, puis à une page de déblocage en italique orange et
 // cartes arrondies, puis au dossier. Ce témoin montre le même tunnel sans changer d'univers :
-// qualification, paiement, attente, échec, confirmation, retour au contenu.
+// qualification, paiement, attente, refus confirmé, état inconnu, confirmation, retour au contenu.
 //
 // TOUT EST FICTIF : adresse témoin, aucun appel à Stripe (l'emplacement du formulaire est un cadre
 // vide), aucune écriture. Le prix affiché est celui de la page publique, il n'est pas modifié ici.
@@ -23,20 +23,20 @@ const ETAPES = [
   { cle: "attente", nom: "La préparation" },
   { cle: "confirme", nom: "Votre dossier" },
 ] as const;
-type Cle = (typeof ETAPES)[number]["cle"] | "echec";
+type Cle = (typeof ETAPES)[number]["cle"] | "refuse" | "inconnu";
 
 export default async function TemoinPaiement({ searchParams }: { searchParams: Promise<{ etape?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
   const sp = await searchParams;
-  const etape: Cle = (["qualification", "paiement", "attente", "echec", "confirme"] as const).find((x) => x === sp.etape) ?? "qualification";
-  const courante = etape === "echec" ? "paiement" : etape;
+  const etape: Cle = (["qualification", "paiement", "attente", "refuse", "inconnu", "confirme"] as const).find((x) => x === sp.etape) ?? "qualification";
+  const courante = etape === "refuse" || etape === "inconnu" ? "paiement" : etape;
 
   return (
     <div className={s.releve}>
       <Navbar />
       <BandeauPrototype>
         FUT-118 · témoin 05 · tunnel d&apos;achat · adresse fictive · aucun appel Stripe · états :{" "}
-        {(["qualification", "paiement", "attente", "echec", "confirme"] as const).map((x) => (
+        {(["qualification", "paiement", "attente", "refuse", "inconnu", "confirme"] as const).map((x) => (
           <span key={x}><Link href={`?etape=${x}`} aria-current={x === etape ? "page" : undefined}>{x}</Link>{" "}</span>
         ))}
         · <Link href="/dev/fut118">index</Link>
@@ -80,32 +80,50 @@ export default async function TemoinPaiement({ searchParams }: { searchParams: P
               </>
             ) : null}
 
-            {etape === "paiement" || etape === "echec" ? (
+            {etape === "paiement" || etape === "refuse" || etape === "inconnu" ? (
               <>
-                {etape === "echec" ? (
-                  // MANQUE 7 : l'échec dit ce qui a eu lieu et ce qui n'a pas eu lieu, sans teinte de registre.
+                {/* MANQUE 7 : la ligne d'état n'affirme QUE ce que le serveur a confirmé, sans teinte de registre.
+                    `refuse` suppose un statut de paiement relu côté serveur auprès de Stripe (refus établi) :
+                    c'est seulement alors que « il n'a pas été prélevé » peut s'écrire. `inconnu` couvre
+                    l'erreur générique, le délai, la réponse perdue : rien n'y est garanti, l'écran le dit et
+                    protège contre un second paiement. */}
+                {etape === "refuse" ? (
                   <p className={t.etat} data-etat="echec" role="status">
                     <span className={t.etatRepere} aria-hidden />
-                    <span className={s.dense}>Le paiement n&apos;a pas abouti. Aucun montant n&apos;a été prélevé et votre adresse est conservée.</span>
+                    <span className={s.dense}>Votre banque a refusé le paiement : il n&apos;a pas été prélevé. Votre adresse est conservée.</span>
                   </p>
                 ) : null}
-                <section aria-labelledby="p1" className={s.pile} style={{ gap: 16 }}>
-                  <Surtitre numero="02" id="p1">Le paiement</Surtitre>
-                  {/* MANQUE 8 : ce qui n'appartient pas à futur•e se pose dans un cadre neutre, sans coins de plaque. */}
-                  <div className={t.emplacement}>Emplacement du formulaire de paiement Stripe. Il n&apos;est pas chargé dans ce prototype.</div>
-                  <p className={s.nuance}>Paiement unique, accès immédiat. TVA non applicable, art. 293 B du CGI.</p>
-                </section>
-                <div className={s.rangee}>
-                  <Link href="?etape=attente" className={`${s.bouton} ${s.boutonMarque}`}>Payer 39 €</Link>
-                  <Link href="?etape=qualification" className={s.lien}>Modifier l&apos;adresse</Link>
-                </div>
+                {etape === "inconnu" ? (
+                  <p className={t.etat} data-etat="attente" role="status" aria-live="polite">
+                    <span className={t.etatRepere} aria-hidden />
+                    <span className={s.dense}>Nous n&apos;avons pas encore la confirmation de votre paiement. Ne le relancez pas : cette page se mettra à jour dès que la réponse arrivera.</span>
+                  </p>
+                ) : null}
+                {/* Tant que l'issue d'un paiement est inconnue, aucun moyen de payer à nouveau n'est montré :
+                    la page ne demanderait pas « ne le relancez pas » au-dessus d'un bouton « Payer ». */}
+                {etape !== "inconnu" ? (
+                  <>
+                    <section aria-labelledby="p1" className={s.pile} style={{ gap: 16 }}>
+                      <Surtitre numero="02" id="p1">Le paiement</Surtitre>
+                      {/* MANQUE 8 : ce qui n'appartient pas à futur•e se pose dans un cadre neutre, sans coins de plaque. */}
+                      <div className={t.emplacement}>Emplacement du formulaire de paiement Stripe. Il n&apos;est pas chargé dans ce prototype.</div>
+                      <p className={s.nuance}>Paiement unique, accès immédiat. TVA non applicable, art. 293 B du CGI.</p>
+                    </section>
+                    <div className={s.rangee}>
+                      <Link href="?etape=attente" className={`${s.bouton} ${s.boutonMarque}`}>Payer 39 €</Link>
+                      <Link href="?etape=qualification" className={s.lien}>Modifier l&apos;adresse</Link>
+                    </div>
+                  </>
+                ) : null}
               </>
             ) : null}
 
             {etape === "attente" ? (
+              // « Paiement confirmé » suppose l'état serveur établi (webhook reçu ou statut relu), jamais le
+              // seul retour du formulaire.
               <p className={t.etat} data-etat="attente" role="status" aria-live="polite">
                 <span className={t.etatRepere} aria-hidden />
-                <span className={s.dense}>Paiement reçu. Le dossier lit la commune, puis l&apos;adresse : la première lecture s&apos;affichera dès qu&apos;elle sera prête, sans attendre la suite.</span>
+                <span className={s.dense}>Paiement confirmé. Le dossier lit la commune, puis l&apos;adresse : la première lecture s&apos;affichera dès qu&apos;elle sera prête, sans attendre la suite.</span>
               </p>
             ) : null}
 
