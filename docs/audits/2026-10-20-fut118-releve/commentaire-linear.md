@@ -15,7 +15,7 @@ Branche `feat/fut-118-convergence-releve` (worktree `fut118-releve`, depuis `mai
 
 **Hors périmètre** : le nom de commune pris dans l'URL du déblocage est suivi dans **FUT-119** (High), non corrigé ici. Textes « ce territoiresera », « ce territoire est-elle » : lot Q.
 
-**Arbitrages du 20/10** : Relevé unique grammaire canonique ; `DESIGN.md` v3.0 privilégiée, adoption après relecture (correspondance section par section : grammaire § 9, 5 sections remplacées, 15 amendées) ; habillage complet de Ma décision avant activation ; activation progressive par compte ; tunnel avant modules ; puis Logement, Territoire, Autour ; FUT-41 / FUT-22 adoptent le canon dès validation ; **aucune activation de `DECISION_RELEVE`**.
+**Arbitrages du 20/10** : Relevé unique grammaire canonique ; `DESIGN.md` v3.0 privilégiée, adoption après relecture (correspondance section par section : grammaire § 9, 5 sections remplacées, 19 amendées, 2 ajoutées) ; habillage complet de Ma décision avant activation ; activation progressive par compte ; tunnel avant modules ; puis Logement, Territoire, Autour ; FUT-41 / FUT-22 adoptent le canon dès validation ; **aucune activation de `DECISION_RELEVE`**.
 
 **Synchronisation** : branche rebasée sur `main` après FUT-116 (`3da725e3`), suite 2852/2852 deux fois, `tsc` et lint OK. Restent à faire : Safari, thème clair, écrans connectés réels, vérifications 1 à 12 du § 6.2 (lots R2 / R2b).
 

@@ -1,7 +1,19 @@
 # DESIGN.md · Le langage visuel de futur•e
 
-**Version 2.1 · 4 août 2026 · prescriptif.**
+**Version 3.0 · 20 octobre 2026 · prescriptif à la fusion de la PR FUT-118 R0**, après relecture du
+porteur. Tant qu'elle n'est pas fusionnée, la v2.1 reste en vigueur sur `main`.
 
+> **v3.0** : **le Relevé devient l'unique grammaire visuelle canonique de futur•e** (FUT-87, FUT-118).
+> Une page se compose d'énoncés et de leur **marge de preuve**, se sépare par des **filets** plutôt que
+> par des cartes, élève **une plaque par mouvement**, dit l'échelle par **la forme** (cercle, carré,
+> losange) et le jugement par **le trait de registre**. Le verre, les surtitres en capitales mono, les
+> pastilles et le filet coloré en haut de carte quittent le canon. Les primitives vivent dans
+> `src/components/releve/`, les jetons dans `design-tokens.css`. Chaque règle porte un statut :
+> **stable** (prescriptive) ou **hypothèse** (ouverte à l'exploration, notamment pour le centre de
+> décision, § 13). Les surfaces historiques migrent par lots ; d'ici là, un test-cliquet interdit
+> d'ajouter un marqueur de l'ancienne grammaire (§ 10). Rationale, audit et preuves :
+> `docs/audits/2026-10-20-fut118-releve.md` et `docs/audits/2026-10-20-fut118-releve/grammaire-du-releve.md`.
+>
 > **v2.1** : la charte de marque v1.7 entre dans le produit. **Le logo n'est plus une police** :
 > c'est un dessin vectoriel, dans `components/Logo.tsx`, et Instrument Serif comme `--font-brand`
 > ont quitté le dépôt (§ 9.1). L'orange de marque devient `#E8823A` (§ 5). Les **six registres de
@@ -43,6 +55,13 @@ Trois couches de documents gouvernent le design de futur•e, et elles ne se rem
 | Décision datée | `docs/vault/adr/ADR-0005-direction-artistique.md` | la DA est arrêtée, et quand |
 | Doctrine vivante | `docs/vault/doctrine/design.md`, `interface.md`, `editoriale.md` | le **pourquoi**, verrouillé |
 | Application | **ce document** | le **comment**, écran par écran |
+| Implémentation canonique | `src/components/releve/` (primitives) et `src/app/design-tokens.css` (jetons `--r-*`) | le **comment**, en code ; tout nouvel écran part d'ici |
+| Déprécié | `src/components/report/kit.tsx` (`GlassCard`, `ReportSection`) | ne s'emploie plus ; disparaît avec la migration des modules |
+
+**Stable ou hypothèse.** Sauf mention contraire, une règle de ce document est **stable** : elle
+s'applique, et ne change que par un amendement daté (§ 12). Une règle marquée **hypothèse** décrit une
+forme proposée et éprouvée par un écran témoin, qui reste ouverte : on la suit par défaut, on s'en
+écarte en le disant et en le justifiant.
 
 En cas de contradiction, la doctrine du vault gagne. Une seule exception est prise ici, et elle est
 justifiée au § 5.1, comme `doctrine/design.md` l'exige de toute proposition contraire.
@@ -61,8 +80,8 @@ mélanger.
 
 **A · La charpente : le dossier d'instruction.**
 Le rapport d'expertise remis avant une signature. Filet et marge comme unités de séparation, une
-seule surface élevée par écran, colonne de lecture fixée à l'échelle de la page, métadonnées en
-marge, numérotation citable. A gouverne la **structure de tout écran**, sans exception.
+seule surface élevée par mouvement (la plaque), colonne de lecture fixée à l'échelle de la page,
+**preuve en marge** de ce qu'elle fonde, numérotation citable. A gouverne la **structure de tout écran**, sans exception.
 
 **B · La donnée : l'instrument de mesure.**
 Grille visible, valeurs alignées au chiffre, signal porté par la position et la longueur avant le
@@ -121,25 +140,45 @@ ligne. Règle complète et historique du diagnostic dans `doctrine/interface.md 
 
 Le padding horizontal du conteneur est `px-5` sous 640 px et `px-7` au-delà.
 
+**La grille à marge (v3.0).** Dans un dossier, une page de donnée ou toute page qui affirme un fait,
+la piste de prose se double d'une **marge de preuve** : texte `minmax(0, 1fr)`, marge de 232 px
+(`--r-marge`), gouttière de 48 px (`--r-gouttiere`), à partir de 900 px. La marge porte le grain, la
+valeur observée, la source, la date et le lien de preuve de l'affirmation qui est à sa gauche, alignés
+sur sa première ligne. Sous 900 px, la marge passe sous le texte, derrière un filet pointillé
+(`Ligne` et `Marge`). Une **colonne d'appui** de 280 px peut accompagner la lecture (repère des
+échelles, sommaire) : c'est une vraie colonne, collante sous la navigation, jamais un calque posé sur
+le contenu.
+
+**Les seuils de mise en page d'un composant suivent son conteneur, pas l'écran** (`@container`) : un
+composant posé dans une colonne étroite ne doit pas prendre la mise en page prévue pour toute la
+largeur. Écart connu : `CoupeEchelles` (à corriger au lot R1).
+
 ### 2.2 Une seule surface dominante à la fois
 
-Une surface élevée est un bloc qui sort du plan : verre, ombre portée, fond distinct.
+Une surface élevée est un bloc qui sort du plan. **Depuis la v3.0, elle a une seule forme : la
+plaque** (`Plaque`) : fond `--r-plaque` (`--bg-deep`), filet `--r-plaque-bord`, rayon de 3 px, deux
+repères de coupe en coin. Le verre translucide et l'ombre portée ne sont plus des surfaces du canon.
 
-**Une seule surface dominante par viewport, ou par mouvement majeur de la page.** Deux surfaces
-élevées de même poids ne se font jamais concurrence dans le même champ visuel. Une page longue,
-un guide Agir, un rapport de plusieurs milliers de pixels ont le droit d'en porter plusieurs, à
-condition qu'elles ne coexistent pas à l'écran.
+**Une seule surface dominante par mouvement de la page.** Deux plaques de même poids ne se font pas
+concurrence dans le même champ visuel, sauf quand l'écran les met **explicitement en regard** pour les
+comparer. Une page longue, un guide Agir, un rapport de plusieurs milliers de pixels ont le droit d'en
+porter plusieurs.
 
-La surface dominante désigne ce qui compte le plus dans son mouvement : le verdict dans le rapport,
-le formulaire dans un parcours, la carte d'identité en tête de module.
+La plaque porte ce que futur•e **conclut** (le verdict, une lecture immédiate) ou ce que la personne
+**achète**. Ce qui vient d'un tiers (formulaire de paiement, carte) se pose dans un **emplacement** :
+filet pointillé, sans coins de plaque.
 
 Tout le reste se sépare par un **filet** (1 px, `--border-1`) et par de la **marge**. Une page où
-chaque bloc est une carte de verre n'a plus de hiérarchie, elle a une texture.
+chaque bloc est une carte n'a plus de hiérarchie, elle a une texture.
 
 ### 2.3 Ce qui sépare
 
-Par ordre de préférence : la marge, puis le filet, puis le fond, puis le verre. On descend d'un
-cran seulement quand le cran précédent ne suffit pas.
+Par ordre de préférence : la marge, puis le filet, puis le fond (une bande de mouvement, une plaque).
+On descend d'un cran seulement quand le cran précédent ne suffit pas. Le verre ne fait plus partie de
+la liste.
+
+**Le rythme vertical** : un pas de 8 px ; un mouvement de page = 56 px au-dessus et au-dessous et un
+filet (40 px en version resserrée) ; les éléments d'une liste, 22 px et un filet.
 
 ### 2.4 La numérotation citable
 
@@ -156,7 +195,7 @@ Toute valeur affichée est dans l'un de ces quatre états, et son traitement vis
 
 | État | Traitement |
 | --- | --- |
-| **Mesurée** | valeur pleine, mono tabulaire, source sous la valeur |
+| **Mesurée** | valeur pleine, tabulaire, source **dans la marge** à côté de l'affirmation (sous elle sur mobile) |
 | **Projetée** | valeur pleine + horizon nommé (« en 2050 ») + scénario France (« +2,7 °C ») |
 | **Absente** | tiret `—`, couleur `--fg-absent`, mention explicite de l'absence |
 | **Non applicable** | la carte n'est pas rendue du tout |
@@ -190,9 +229,14 @@ AA avant tout estompage. Il porte aujourd'hui les sources et les surtitres. À r
 
 ### 3.2 L'alignement au chiffre
 
-Toute valeur numérique est en `--font-mono` avec `font-variant-numeric: tabular-nums`. Deux valeurs
+Toute valeur numérique est en chiffres tabulaires (`font-variant-numeric: tabular-nums`). Deux valeurs
 comparables s'alignent verticalement sur leur unité. Un libellé peut wrapper ; une valeur ne wrappe
 jamais (`white-space: nowrap`).
+
+**Deux tailles, deux dessins (v3.0).** Une valeur **mise en avant** (`Chiffre`) est en Archivo élargie
+(`wdth` 125, `--r-t-chiffre`), à l'encre, suivie de son unité en mono discret ; elle est toujours
+accompagnée de sa référence ou de son horizon dans la ligne suivante. Une valeur **dans la marge, un
+tableau ou une unité** est en `--font-mono`.
 
 ### 3.3 La trajectoire
 
@@ -202,6 +246,13 @@ jours de chaleur est beaucoup.
 
 Le référentiel de réchauffement s'affiche toujours à l'échelle France : +2 / +2,7 / +4 °C, jamais le
 global. Voir `doctrine/data.md`.
+
+**Le tracé suit la nature de la donnée (v3.0).** Des horizons (2030, 2050, 2100), des paliers de
+réchauffement ou des moyennes trentenaires ne sont pas les points d'une série : ce sont des **jalons
+isolés**, jamais reliés par une ligne qui laisserait croire que l'entre-deux est connu (`RegleDuTemps`,
+FUT-87 V2). Une **série continue réellement mesurée ou modélisée à ce pas** (températures annuelles
+observées, série annuelle d'un même modèle) peut, elle, être tracée en courbe, avec son enveloppe
+d'incertitude et sa source. La question à se poser : la donnée existe-t-elle entre deux points ?
 
 ### 3.4 L'incertitude
 
@@ -252,8 +303,10 @@ pas. Liste des verbes bannis dans `doctrine/editoriale.md`.
 
 ### 5.1 Le fond
 
-Fond profond `#060812`, verre translucide, grain de bruit léger. Cette part de la direction
-artistique est conservée.
+Fond profond `#060812`, grain de bruit léger. Cette part de la direction artistique est conservée.
+**Le verre translucide n'est plus une signature (v3.0)** : le Relevé tient la promesse esthétique par
+le fond profond, la plaque `--bg-deep`, les filets et la géométrie propre du produit. Il reste dans les
+surfaces historiques jusqu'à leur migration, et n'entre dans aucun nouvel écran (test-cliquet, § 10).
 
 **Les orbes flous en `position: fixed` sont supprimés.** Amendement explicite à
 `doctrine/design.md`, qui inscrivait « mesh gradients animés » dans la DA verrouillée. Justification,
@@ -293,6 +346,14 @@ ornement, et l'ornement coloré est interdit.
 Test à appliquer avant de poser une couleur : **si toutes les occurrences visibles portent la même
 teinte, aucune ne doit la porter.** Une couleur qui ne distingue rien ne signifie rien.
 
+**La donnée est à l'encre (v3.0).** Barres, rangs, jalons, valeurs : `--r-encre`, sans teinte. Seule
+exception, la couleur réglementaire du DPE, dont la position sur l'échelle A à G porte le sens.
+
+**Un incident technique ne prend jamais une teinte de registre (v3.0).** Un registre juge un lieu ; un
+paiement refusé, une source sans réponse ou une génération indisponible sont des incidents. Ils se
+disent à l'encre, par une phrase qui dit ce qui a eu lieu, et **seulement ce que le serveur a
+confirmé** (§ 9.1, ligne d'état).
+
 ### 5.4 Les six registres du dossier
 
 Le dossier de décision porte six registres, et cette correspondance est gravée. **Depuis le
@@ -314,6 +375,12 @@ propre surface sémantique : la même valeur porte donc le texte, le filet et la
 existait parce que les couleurs génériques échouaient sur le fond crème, et ce n'est plus le cas ici.
 Chaque registre a en plus une `--reg-*-surface`, pour un fond sémantique. **Un fond sémantique ne
 porte jamais le sens seul** : garder le libellé et un filet de la teinte.
+
+**Comment le registre se porte (v3.0) : un trait de 3 px devant le SUJET** d'un fait (`Registre`),
+jamais un fond de carte, une bordure, un chiffre coloré ni une pastille. Le titre de section reprend
+le même trait. Une issue **non établie** (« à vérifier », « non examiné ») n'a ni teinte ni trait
+plein : un trait pointillé, sans valence. Ce trait remplace le filet coloré en haut de carte de la
+v1.4 (§ 6.2).
 
 **Deux registres ont changé de teinte le 04/08/2026, et le changement porte du sens.**
 
@@ -362,51 +429,64 @@ gagne.**
 
 ### 5.5 Le verdict ne porte jamais l'accent de marque
 
-`.card-verdict` prend le ton de ce qu'elle annonce (`--tone`). Un dossier bloqué ne s'auréole pas de
-vert, et il ne s'auréole pas d'orange parce que l'orange est la couleur du produit.
+**Réécrit en v3.0.** Le verdict vit dans la **plaque** (`Plaque` + `ConclusionBlock`, variante
+`releve`). Son ton se porte comme tout registre, par un trait devant son libellé, jamais par un halo,
+une auréole ni une forme d'échelle (le carré qui marque aujourd'hui le ton de la plaque est le glyphe
+du secteur ; il est remplacé au lot R2). Un dossier bloqué ne s'auréole pas de vert, et il ne prend pas
+l'orange parce que l'orange est la couleur du produit.
+
+**L'orange de marque** (`#E8823A`) : le point du logo et **une action principale dans le champ
+visuel** (porte de l'accueil, « Payer », « Commencer »). Jamais sur une donnée, un statut, un titre ni
+une lueur. Le texte posé dessus prend `--r-sur-marque`, qui tient 4,5:1 dans les deux thèmes.
+`.card-verdict` reste dans la présentation classique de Ma décision jusqu'à sa suppression.
 
 ---
 
 ## 6. Conditions d'usage
 
-### 6.1 La carte
+### 6.1 La ligne de relevé (remplace « la carte », v3.0)
 
-Une carte existe quand son contenu est **une unité que le lecteur peut isoler** : un phénomène, un
-fait, un module. Un paragraphe dans une carte est un paragraphe avec une bordure inutile.
+L'unité d'un écran qui affirme est la **ligne de relevé** (`Ligne`) : un énoncé à gauche, sa preuve
+dans la marge, un filet avant la ligne suivante. Elle remplace la carte. Une « carte » ne reste
+légitime que pour un objet que le lecteur manipule comme tel (une possibilité qu'il déplace, une
+offre qu'il choisit), et elle n'est alors ni en verre ni arrondie au-delà de 3 px.
 
-### 6.2 Le filet coloré en haut de carte
+Les dix rôles documentaires et leur forme :
 
-**Le filet dit la relation de cette donnée au projet du lecteur, et rien d'autre.** Il porte la
-teinte du registre du dossier auquel cette donnée participe (§ 5.4). Il est interdit en décor, et
-interdit pour dire un thème, une échelle ou un état technique. *(Arbitrages du porteur, 30/07/2026.)*
+| Rôle | Forme | Primitive |
+| --- | --- | --- |
+| **Fait** | un énoncé complet, au présent, à gauche de la marge | `Ligne` |
+| **Valeur** | chiffre à l'encre + unité mono ; dans la marge, mono tabulaire | `Chiffre`, `Marge` |
+| **Provenance** | glyphe de grain + mot | `Grain` |
+| **Preuve** | la marge : grain, valeur, source, date, lien qui porte la provenance de l'artefact servi | `Marge` |
+| **Limite** | une phrase `--r-t-nuance` en `--r-discret` sous le fait ; jamais en italique ni en couleur | `.nuance` |
+| **Interprétation** | corps de texte sous le fait, jamais plus grand que lui | `.corps`, `.dense` |
+| **Conclusion** | la plaque, verdict en `--r-t-verdict` ; le titre n'est jamais généré | `Plaque` + `ConclusionBlock` |
+| **Vérification** | sujet au trait `contrôle`, geste à glyphe d'action, numéroté | `Registre` + `ActionCue` |
+| **Projet** | phrase de lecteur, citée et jamais reformulée ; conditions sans compromis au trait `incompatibilité` | `Plaque`, `Registre` |
+| **Arbitrage** | la balance : deux côtés en regard (deux colonnes dès 900 px), pour **deux côtés d'un même arbitrage** | `.deux`, `.bandeColonne` |
 
-Règle testable : dans une grille où toutes les cartes visibles porteraient le même filet, **aucune
-ne le porte**. Une couleur qui ne distingue rien ne signifie rien.
+Deux motifs du produit sont canoniques : **« pourquoi elles ne disent pas la même chose »** (deux
+lectures de grains différents en regard, Logement), forme de toute **contradiction** ; et **la ligne
+d'état unique** (FUT-75 Q5), forme de tout contenu **en attente** qui ne remplace rien.
 
-Motif : le filet automatique sur chaque carte est l'un des signes les plus reconnaissables d'une
-interface générée. Ce qui le rend tel est sa répétition, non sa forme. En le liant au dossier, il
-devient rare par construction : une carte doit réellement participer à la décision pour en porter un.
+### 6.2 Le filet coloré en haut de carte (remplacé, v3.0)
 
-**Les quatre règles de sélection** (implémentées et testées dans
-`src/lib/decision/evidence-registers.ts`) :
+Remplacé par le **trait de registre devant le sujet** (§ 5.4). Les quatre règles de sélection de la
+v1.4 (`src/lib/decision/evidence-registers.ts` : pas de filet sans projet, sans citation, ni quand
+plusieurs registres se disputent une carte sauf l'incompatibilité) restent **en vigueur pour les
+surfaces historiques** qui portent encore ce filet ; leur transposition au trait, ou leur retrait avec
+les cartes, est tranchée à la migration des modules (lots R3 à R5).
 
-1. Sans projet, donc sans dossier, aucune carte n'a de filet.
-2. Une carte dont aucun phénomène n'est cité par le dossier n'en a pas.
-3. Une carte dont les phénomènes cités convergent vers un seul registre porte sa teinte.
-4. Une carte citée par plusieurs registres différents n'en a pas, **sauf** si l'un d'eux est
-   l'incompatibilité, qui l'emporte toujours parce qu'elle bloque le dossier.
+### 6.3 Le badge, la pastille et le surtitre (remplacé, v3.0)
 
-La règle 4 n'invente pas de priorité : le code donne déjà à l'incompatibilité un statut à part
-(`dossier-view.ts` lui fait absorber les autres sections). Effacer un blocage parce qu'un alignement
-coexiste sur la même carte perdrait l'information la plus grave de l'écran.
+**Le surtitre** nomme un mouvement de la page : Archivo `wdth` 88, 600, `--r-t-surtitre`, **casse
+normale**, précédé d'un numéro citable en mono (`Surtitre`). **Le mono n'est jamais en capitales
+espacées.** Les surtitres à pastille colorée sortent du canon.
 
-### 6.3 Le badge et la pastille
-
-Un badge dit un **état qui varie** (disponible, verrouillé, à venir). Un badge dont la valeur est
-constante sur tous les éléments d'une liste est supprimé : il n'informe personne.
-
-Une pastille colorée accompagne un surtitre pour porter la couleur d'un groupe. Une page ne porte
-pas plus de **trois** surtitres à pastille. Au-delà, le motif devient un tic.
+Un **badge** reste permis pour un **état qui varie** (disponible, verrouillé, à venir), en `.etiquette`,
+sans fond coloré. Un badge dont la valeur est constante sur toute une liste est supprimé : il
+n'informe personne.
 
 ### 6.4 Le graphique
 
@@ -450,8 +530,13 @@ modèle : une forme, une donnée réelle, et un vide qui signifie « commune ép
 ### 6.6 Les tableaux et grilles denses
 
 Toute grille descend à une ou deux colonnes sous 768 px. Une grille figée à trois ou quatre colonnes
-est un défaut de livraison. Une table large scrolle dans son propre conteneur ; la page ne scrolle
-jamais horizontalement.
+est un défaut de livraison. La page ne scrolle jamais horizontalement.
+
+**Le tableau de relevé (v3.0)** : des filets, aucun fond par ligne ni couleur par colonne, les nombres
+à droite en mono tabulaire, une `caption` qui dit ce que le tableau compare et sur quelle population.
+**Sous 640 px, chaque ligne s'empile** (libellé et valeur sur une ligne, le reste dessous) plutôt que
+de défiler dans son conteneur ; le défilement interne reste un dernier recours, signalé, pour une
+table dont l'empilement détruirait la comparaison. *(Hypothèse jusqu'à la primitive `Tableau`, lot R1.)*
 
 ---
 
@@ -466,8 +551,13 @@ contredire la précédente.
 | Autour | le secteur autour du point |
 | Logement | le bâtiment |
 
-**Une échelle se reconnaît d'abord à son nom, sa position dans l'ordre et son grain. Une teinte
-éventuelle ne fait que confirmer cette identité, et elle ne touche jamais une donnée ni un verdict.**
+**Une échelle se reconnaît à son nom, sa position dans l'ordre, son grain et sa forme.** Depuis la
+v3.0, la forme est l'identité visuelle d'une échelle, et elle seule : **cercle** pour la commune (cercle
+à point pour l'agglomération), **carré** pour le secteur, **losange** pour le bâtiment (plein) ou
+l'adresse (vide), les formes exactes de `echelle-geometry.ts`. Trois états de trait : plein (des
+constats), fin (examinée, rien d'affiché), pointillé (non examinée dans cette lecture). **Ces trois
+formes sont réservées aux échelles** : aucune autre fonction (statut, puce, ton) ne les emploie.
+Aucune teinte n'identifie une échelle.
 
 ### 7.1 Pourquoi la couleur ne peut pas identifier une échelle
 
@@ -499,9 +589,8 @@ couleur.
 - Le filet vert des cartes du module Autour (`AutourModule`, `borderTop: 2px solid var(--green)`)
   tombe **déjà** sous l'interdit du § 6.2 : toutes les cartes du module portent la même teinte,
   donc elle ne distingue rien.
-- Une teinte d'échelle reste tolérée dans la **chrome de navigation** d'un module (surtitre,
-  bandeau de tête), jamais sur une carte de donnée, jamais dans un écran qui affiche des registres
-  de décision.
+- ~~Une teinte d'échelle reste tolérée dans la chrome de navigation d'un module.~~ **Supprimé en
+  v3.0** : la forme suffit, la tolérance entretenait le ton par module de `report/kit.tsx`.
 
 **Dépendance à régler d'abord** : faire porter l'identité par le rang suppose que le décompte soit
 juste. Aujourd'hui le rapport annonce « six angles » dans son hero, « trois échelles » dans la
@@ -547,6 +636,11 @@ précis reviendrait à retenir un lecteur qui doute, ce que la doctrine interdit
 `/territoire/[insee]/debloquer` montent déjà la `Navbar` complète : cette règle décrit l'existant,
 elle ne le change pas.
 
+**v3.0** : la navigation passe en **casse normale** (plus de capitales mono espacées) et gagne un
+**lien d'évitement** vers le contenu ; sur `/rapport`, la navigation collante réserve sa hauteur
+(`scroll-padding-top`) pour qu'aucun focus ni aucune ancre ne finisse dessous. Chantier coordonné avec
+FUT-86.
+
 ### 8.2 La fraîcheur
 
 Toute page qui affiche de la donnée vivante affiche sa date de lecture, **calculée**, jamais écrite
@@ -563,12 +657,38 @@ donnée est réellement communale. Cette règle doit être tenue avant toute ouv
 
 ### 9.1 Validés, à réutiliser
 
-`ConclusionBlock` et `.card-verdict` · le vocabulaire chromatique des cinq registres · les règles
-d'anti-redondance de `DossierDecisionSection` (un grain affiché une seule fois, une section effacée
-quand le verdict la porte déjà) · `FactBody`, `EvidenceRow`, `MethodDetails`, `Chip` ·
-`[data-visee]` comme repère d'arrivée qui s'efface · le rendu de la donnée absente · `HorizonBar` et
-`HorizonSwitch` · `MetricDrawer` (référence de composant responsive) · le tiret `—` comme marqueur
-d'absence · le trio typographique et ses trois rôles.
+**Réécrit en v3.0. Les primitives du Relevé** (`src/components/releve/primitives.tsx`, classes de
+`releve.module.css`) :
+
+| Primitive | Rôle |
+| --- | --- |
+| `releve` / `releveSection` | la racine d'une page ou d'une section du Relevé |
+| `Surtitre` | nomme un mouvement : numéro mono + nom en casse normale |
+| `Ligne` + `Marge` | un énoncé et sa preuve (grain, valeur, source, date, lien) |
+| `Grain`, `GlypheGrain` | l'échelle d'un fait, dite par la forme |
+| `Registre`, `TEINTE_REGISTRE` | le sujet d'un fait, précédé du trait de son registre |
+| `Chiffre` | une valeur mise en avant, avec son unité |
+| `Plaque` | la surface dominante d'un mouvement |
+| `RegleDuTemps` | dates et horizons sur un axe linéaire, jalons isolés *(chevauchement à 360 px, § 14)* |
+| `RegleDeRang`, `Seuils` | une position parmi les communes, un seuil de signalement, dessinés à l'encre |
+| `EmblemeEchelles`, `CoupeEchelles` | les trois échelles et la navigation entre elles |
+| classes `.bouton`, `.boutonMarque`, `.lien`, `.porte`, `.details`, `.detailsFluide` | actions, liens, dépliables (FUT-75 Q4) |
+
+Restent validés : les règles d'anti-redondance de `DossierDecisionSection` (un grain affiché une seule
+fois, une section effacée quand le verdict la porte déjà) · `lireDossier` comme seul adaptateur du
+dossier vers le Relevé (rien perdu, rien inventé, testé) · `[data-visee]` comme repère d'arrivée qui
+s'efface · le tiret `—` comme marqueur d'absence · `TerritoryYearsBand` · `BoutonAction` (FUT-75) ·
+`PriorityControlActions` · `EchelleNavigator` (à passer en casse normale) · `MetricDrawer` (référence
+de composant responsive).
+
+**Manquants, à créer dans `src/components/releve/` (lot R1)** *(hypothèses jusque-là ; formes
+éprouvées par les témoins de `/dev/fut118`)* : `Selecteur` (horizon, mode : remplace `HorizonSwitch`
+et `HORIZON_PILLS`), `Tableau`, `Champ`, `Bouton`, `Parcours`, `LigneEtat`, `Emplacement`, et pour le
+centre de décision `Issue` et `NiveauExamen`. **La ligne d'état n'affirme que ce que le serveur a
+confirmé** *(stable)* : « aucun montant n'a été prélevé », « paiement reçu », « dossier prêt » ne
+s'écrivent qu'à partir d'un état serveur établi ; une erreur générique, un délai ou une réponse perdue
+ne prouvent rien, et l'écran dit alors que la confirmation n'est pas encore connue, sans offrir de
+payer une seconde fois.
 
 **Un tracking négatif ne s'hérite jamais.** Il est calibré pour la taille du titre qui le porte. Un
 texte plus petit imbriqué dans ce titre (un grain, une précision, une unité) doit remettre
@@ -605,7 +725,7 @@ séparent plus que par la taille, la graisse et la couleur.
 | `--weight-body` / `--weight-lede` | `400` | corps et chapô |
 | `--weight-strong` | `500` | mise en avant **dans** un texte, jamais un titre |
 | `--weight-meta` | `500` | petit texte : sous 13 px, 400 s'efface sur fond sombre |
-| `--weight-kicker` | `600` | surtitre mono capitales |
+| `--weight-kicker` | `600` | ~~surtitre mono capitales~~ : surfaces historiques seulement, disparaît avec elles |
 
 **Deux crans séparent toujours un titre de son texte**, 600 contre 400. Un seul cran ne se voit pas
 sur une grotesque, il se lit comme une erreur de rendu.
@@ -619,10 +739,34 @@ gris (`--fg-hi` à `--fg-4`) et les teintes de registre portent une part de la h
 dessin ne porte plus. Un titre en `--fg-hi`, un corps en `--fg-2`, une source en `--ghost` créent
 trois plans lisibles avant même que la graisse intervienne.
 
-**L'échelle de rôles.** Dix rôles, et aucune autre taille. Un nom dit un **usage**, jamais un niveau
-de titre HTML ni une valeur. S'écrit `text-[length:var(--text-role)]`.
+**L'échelle de rôles du Relevé (v3.0).** Une taille par **usage**, jamais par niveau de titre HTML.
+Les jetons `--r-t-*` vivent dans `design-tokens.css` ; les classes qui les composent (graisse, axe de
+largeur, interligne, couleur) dans `releve.module.css`. **Tout nouvel écran les emploie.**
 
-| Rôle | Valeur | Ce que le texte fait |
+| Rôle | Jeton | Réglage | Ce que le texte fait |
+| --- | --- | --- | --- |
+| Display | `--r-t-display` | Archivo `wdth` 118, 500, `clamp(34px, 4.4vw, 58px)`, −0,02 em | titre d'écran ; un par écran |
+| Verdict | `--r-t-verdict` | idem, `clamp(27px, 3.6vw, 46px)` | le verdict dans la plaque |
+| Titre | `--r-t-titre` | `wdth` 108, 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement |
+| Sous-titre | `--r-t-sous-titre` | 600, 17 px | sujet d'un fait, nom d'une possibilité |
+| Chapô | `--r-t-chapo` | 400, 18 px / 1,55 | introduction d'un écran |
+| Corps | `--r-t-corps` | 400, 16 px / 1,62 | prose suivie |
+| Dense | `--r-t-dense` | 400, 14,5 px / 1,58 | corps d'un fait, d'une liste, d'un tableau |
+| Nuance | `--r-t-nuance` | 400, 13,5 px, `--r-discret` | limite, portée, méthode |
+| Surtitre | `--r-t-surtitre` + `--r-t-numero` | `wdth` 88, 600, 13,5 px, casse normale ; numéro mono 11,5 px | nomme un mouvement |
+| Étiquette | `--r-t-etiquette` | `wdth` 88, 600, 12,5 px | libellé, statut, en-tête de tableau |
+| Chiffre | `--r-t-chiffre` + `--r-t-unite` | `wdth` 125, 500, tabulaire ; unité mono 13 px | une valeur mise en avant |
+| Marge | `--r-t-marge` / `--r-t-marge-etroite` | JetBrains Mono 12 px, 13 px sous 900 px | grain, preuve, source, date |
+
+**Planchers de lisibilité** (mobile et écrans non-Retina, FUT-77) : rien sous 10,5 px, et 10,5 px
+seulement pour une légende d'axe ; jamais de graisse 400 sous 13 px sur fond sombre ; jamais de `wdth`
+inférieur à 88 sous 13 px ; `--ghost` (4,69:1 sur la plaque) jamais sous 12 px.
+
+**L'échelle historique `--text-*`** ci-dessous reste en place pour les surfaces qui ne sont pas encore
+migrées : la modifier changerait leur rendu. Elle ne s'emploie dans aucun nouvel écran, et disparaît
+avec la dernière surface migrée (lot R12).
+
+| Rôle (historique) | Valeur | Ce que le texte fait |
 | --- | --- | --- |
 | `--text-display` | `clamp(34px, 4vw, 54px)` | titre de page, **un seul par écran** |
 | `--text-title` | `clamp(26px, 3vw, 38px)` | titre de section |
@@ -650,6 +794,12 @@ intention.
 Le fil d'Ariane maison en tête de page (remplacé par la `Navbar`) · la feuille de style injectée par
 page · l'objet `styles` en JavaScript.
 
+**v3.0** : `report/kit.tsx` (`GlassCard`, `ReportSection`, ton par module) · la classe `.glass` et
+`.card-verdict` · `Chip` (« PREUVE · … » en capitales mono) et `EvidenceRow` sous sa forme de
+pastilles · `FamilyHeading` coloré · `HorizonSwitch` · l'échelle `--text-*` et `--weight-kicker`. Ils
+restent dans les surfaces historiques jusqu'à leur migration ; aucun nouvel écran ne les emploie
+(test-cliquet, § 10).
+
 ### 9.3 Interdits
 
 Les orbes flous en `position: fixed` · les emoji comme icônes (déjà interdits par
@@ -657,6 +807,12 @@ Les orbes flous en `position: fixed` · les emoji comme icônes (déjà interdit
 · le pricing coché à couleur par plan · toute animation sur une donnée · la pastille à valeur
 constante répétée · le `fontFamily` en dur · la couleur hexadécimale en dur · un `max-w` de
 paragraphe plus étroit que son bloc.
+
+**v3.0** : les capitales mono espacées · le titre à suite en italique orange (ou de toute couleur) ·
+une lueur ou un halo autour d'un paiement ou d'une action · les formes d'échelle (cercle, carré,
+losange) employées à autre chose qu'une échelle · une couleur propre à une échelle, un module, une
+offre ou une possibilité · une ligne qui relie des horizons ou des paliers de réchauffement · un
+message de paiement ou de livraison qui affirme ce que le serveur n'a pas confirmé.
 
 ---
 
@@ -666,7 +822,22 @@ Cette section porte des règles de code. Elle est séparée à dessein : les rè
 survivent à un changement de technologie, celles-ci non.
 
 - **Tokens.** Toute couleur, police, ombre et rayon vient de `src/app/design-tokens.css`. Les
-  composants consomment `var(--token)`.
+  composants consomment `var(--token)`. Les jetons du Relevé (`--r-*`, `--r-t-*`, `--r-sur-marque`) y
+  sont déclarés **une seule fois** ; aucun module ne les redéclare (test K2), et tout jeton `--r-*`
+  employé y est défini (K3).
+- **Le Relevé d'abord.** Un nouvel écran se compose avec `src/components/releve/`. Un composant qui
+  manque s'y ajoute, avec ses tests, plutôt que dans un module. Les styles propres à un module
+  consomment les jetons et les rôles ; ils ne redéfinissent ni taille ni couleur.
+- **Le cliquet.** `src/components/releve/canon.test.ts` (K1) compte les marqueurs de l'identité
+  historique (verre, kit déprécié, capitales mono, italique d'accent, emoji) fichier par fichier : un
+  fichier ne peut qu'en perdre, un fichier nouveau n'en contient aucun. La référence
+  (`heritage-reference.json`) ne se régénère qu'après un lot qui en retire
+  (`node scripts/fut118/heritage-reference.ts`, qui refuse toute hausse).
+- **Contrastes.** K4 vérifie que les jetons de texte et le texte sur la couleur de marque tiennent
+  4,5:1 sur le fond et la plaque, dans les deux thèmes.
+- **Preuve d'absence de changement visible.** Un lot qui ne doit rien changer à l'écran le prouve par
+  `scripts/fut118/empreinte-visuelle.mjs` puis `comparer-empreintes.mjs` (captures et styles calculés,
+  avant et après, sur l'accueil, Ma décision dans ses deux présentations, les modules et les tunnels).
 - **Tailwind v4**, breakpoints par défaut (`sm` 640, `md` 768, `lg` 1024). Le responsive s'écrit en
   variantes, jamais en media query manuelle dans une page.
 - **Une seule feuille de style.** Le CSS d'une page ne s'injecte pas par
@@ -681,19 +852,41 @@ survivent à un changement de technologie, celles-ci non.
 
 ## 11. Ce qui reste ouvert
 
-Quatre points sont volontairement non tranchés dans cette version :
+Points non tranchés dans cette version :
 
-1. **La collision de l'orange** (accent de marque et registre « compromis »), § 5.4. C'est le
-   dernier reste du problème réglé au § 7 : la couleur ne dit plus le grain, elle dit encore deux
-   choses à la fois sur cette seule teinte.
+1. ~~La collision de l'orange~~ **(v3.0, réglée)** : dans le dossier, l'orange n'est que la teinte du
+   registre « compromis » ; la marque n'y apparaît que sur une action principale, et jamais sur une
+   donnée ni un statut (§ 5.5).
 2. **Le décompte des échelles** : « six angles », « trois échelles » et « Module 01 » cohabitent
    dans le rapport. Le § 7.2 en dépend, puisqu'il fait porter l'identité par le rang.
 3. **La navigation de niveau 1** : proposition en annexe de
    `docs/audits/2026-07-30-famille-editoriale.md`, non tranchée par le porteur.
-4. **Le système de composants éditoriaux partagés** qui remplacera les feuilles de style par page,
-   reporté après le lancement.
+4. **Le système de composants éditoriaux partagés** : c'est désormais le Relevé ; les composants
+   manquants sont créés au lot R1, les surfaces migrent par lots (plan dans
+   `docs/audits/2026-10-20-fut118-releve.md`, § E).
+5. **Le filet de carte de la v1.4** : transposé au trait de registre, ou retiré avec les cartes (§ 6.2).
+6. **Le thème clair du Relevé** : jamais vérifié à l'écran ; les contrastes des jetons sont testés
+   (K4), pas le rendu.
 
 ## 12. Journal des amendements
+
+**v3.0, 20/10/2026** (FUT-118 : le Relevé devient la grammaire canonique ; adoption à la fusion de la
+PR R0, après relecture du porteur) :
+
+| Amendement | Motif |
+| --- | --- |
+| en-tête, § 0 · le Relevé canon, `kit.tsx` déprécié, statut stable / hypothèse | Trois sources se contredisaient (`DESIGN.md` v2.1, `kit.tsx` « source unique », primitives annoncées « prototype » mais employées en production) ; une interface nouvelle ne savait laquelle suivre |
+| § 1, § 2.1 à 2.3 · grille à marge, plaque, séparation sans verre | La preuve à côté de ce qu'elle prouve ; une surface élevée par mouvement, une seule forme de surface |
+| § 3.1, § 3.2 · source en marge, chiffre mis en avant en Archivo élargie | Le Relevé appliqué dans Ma décision (FUT-91) et l'accueil (FUT-50) |
+| § 3.3 · le tracé suit la nature de la donnée | Horizons et paliers jamais reliés (FUT-87 V2) ; une série continue réelle peut être une courbe, avec son incertitude (revue du 20/10 : ne pas interdire une représentation utile) |
+| § 5.1, § 5.3, § 5.4, § 5.5 · verre retiré, donnée à l'encre, incident sans registre, trait de registre, verdict dans la plaque, texte sur la marque | `.boutonMarque` tombait à 2,57:1 en thème clair ; `--r-sur-marque` tient dans les deux thèmes |
+| § 6.1 à 6.3 · la ligne de relevé, les dix rôles documentaires, le surtitre en casse normale | Remplacent la carte de verre, le filet de carte et la pastille |
+| § 6.6 · le tableau s'empile sous 640 px | Le défilement interne cachait la comparaison sur mobile |
+| § 7 · l'échelle dite par la forme, formes réservées | Le carré de ton de la plaque se lisait comme le glyphe du secteur |
+| § 8.1 · casse normale, lien d'évitement | Avec FUT-86 |
+| § 9 · primitives du Relevé, rôles `--r-t-*`, manquants nommés, ligne d'état fidèle au serveur | Revue du 20/10 : un message de paiement ne dit que ce que le serveur a confirmé |
+| § 10 · une seule source de jetons, cliquet, contrastes, preuve d'absence de changement | Empêcher de recréer une seconde grammaire pendant la migration par lots |
+| § 13, § 14 · centre de décision (principes et hypothèses), limites connues | Revue du 20/10 : ne pas figer la comparaison ; documenter les limites mobiles visibles |
 
 **v2.1, 04/08/2026** (intégration de la charte de marque v1.7) :
 
@@ -754,3 +947,45 @@ Quatre points sont volontairement non tranchés dans cette version :
 
 Deux précisions du même passage : les largeurs sont des **maxima**, et la `Navbar` vaut aussi dans
 les tunnels transactionnels, par décision motivée.
+
+---
+
+## 13. Les interfaces nouvelles, et le centre de décision (v3.0)
+
+Toute interface nouvelle naît dans le Relevé. Pour le centre de décision (FUT-41, FUT-22), qui
+prépare une interface plus visuelle, interactive et guidée, ce document sépare ce qui ne se négocie
+pas de ce qui reste à inventer.
+
+**Principes non négociables** *(stable)* :
+
+1. **La preuve.** Toute issue, tout énoncé comparatif renvoie à sa source, à la date de l'analyse et à
+   la provenance de **cet** artefact.
+2. **Le registre.** La seule couleur de jugement est celle des six registres, liée à une issue
+   **établie**. Une issue non établie (« à vérifier », « non examiné ») n'a aucune valence : ni teinte,
+   ni trait plein.
+3. **Le grain.** Chaque issue dit à quelle échelle elle a été établie ; une différence de profondeur
+   d'examen n'est jamais présentée comme un avantage du lieu.
+4. **Aucun score.** Ni note, ni total, ni moyenne, ni « nombre de points favorables », ni tri par
+   mérite. Les seuls nombres sont des longueurs de liste recomptables à l'écran.
+5. **Une possibilité ne prend pas de couleur propre** : la couleur est réservée aux registres.
+6. **L'absence se dit**, avec sa raison.
+7. **La phrase dit ce que dit la marge.** Un énoncé reprend l'issue exacte de chaque possibilité qu'il
+   nomme, et cela se teste sur le texte rendu, pas seulement sur la classe (leçon du 25/07,
+   `AGENTS.md`).
+
+**Hypothèses** *(ouvertes)* : les critères en lignes et les issues de chaque possibilité en marge
+(écran témoin `/dev/fut118/comparaison`) ; l'absence de colonnes par candidat ; l'absence de
+disposition spatiale ; la direction « dossier de décision vivant » du cadrage FUT-41. Ce sont des
+exemples. Des colonnes, une table manipulable, une disposition spatiale ou un parcours guidé restent
+possibles **s'ils tiennent les sept principes** : une position ou une colonne ne se lit pas comme un
+rang, et un axe dit ce qu'il signifie.
+
+## 14. Limites connues (v3.0)
+
+| Limite | Suite |
+| --- | --- |
+| `RegleDuTemps` superpose ses libellés à 360 px dès quatre dates rapprochées, et « aujourd'hui » touche une valeur voisine | lot R1, avant tout usage en production |
+| La comparaison à plusieurs lieux est très dense à 360 px (témoin : 10 lieux, environ 4 400 px de haut) | question ouverte pour FUT-41 |
+| Écrans non-Retina, Safari / WebKit et thème clair jamais vérifiés à l'écran pour le Relevé | contrôles requis avant toute activation (`DECISION_RELEVE`) |
+| `CoupeEchelles` suit l'écran et non son conteneur | lot R1 |
+| Le ton de la plaque du verdict est un carré, glyphe du secteur | lot R2 |

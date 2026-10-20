@@ -1,4 +1,9 @@
-// FUT-87 · PRIMITIVES DU PROTOTYPE « LE RELEVÉ ». DEV UNIQUEMENT.
+// LE RELEVÉ · PRIMITIVES CANONIQUES DE FUTUR•E (FUT-87 ; canon depuis FUT-118 R0, DESIGN.md v3.0).
+//
+// Utilisées en production par l'accueil, et par Ma décision sous `DECISION_RELEVE`. Toute nouvelle
+// interface (dont le centre de décision) part d'ici ; un composant qui manque s'ajoute ici, avec ses
+// tests, plutôt que dans un module. `BandeauPrototype` est la seule exception : il ne sert qu'aux
+// bancs de développement.
 //
 // Neuf rôles, et pas un composant par carte. Chacun dit un USAGE de l'information :
 //   Surtitre       désigne un mouvement de la page (numéro citable + nom en casse normale)

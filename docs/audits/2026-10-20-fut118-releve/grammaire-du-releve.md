@@ -53,7 +53,7 @@ jamais un zéro, une case vide ou un silence).
 | --- | --- |
 | `src/components/releve/` | **canon** des primitives ; l'en-tête « prototype, dev uniquement » est retiré (l'accueil de production l'importe déjà) |
 | `design-tokens.css` | **canon** des jetons ; les jetons `--r-*` et les rôles typographiques y montent (aujourd'hui confinés au module CSS) |
-| `DESIGN.md` | **canon** du texte, en v3.0 ; § 6.2 (filet de carte), § 6.3 (pastille), § 9.1 (`.card-verdict`, `Chip`, surtitre mono capitales, `HorizonSwitch`) sont réécrits ici |
+| `DESIGN.md` | **canon** du texte, en v3.0 (PR R0) ; la correspondance section par section est au § 9 |
 | `src/components/report/kit.tsx` | **déprécié** (`GlassCard`, `ReportSection`, ton par module). Il se déclare « SOURCE UNIQUE du langage visuel des modules » : l'en-tête est corrigé |
 | `accueil.module.css` | **module** : garde sa mise en page, mais ses tailles passent par les rôles (§ 2) |
 
@@ -67,23 +67,24 @@ espacées.** Aucune italique de couleur.
 
 Trois échelles coexistent aujourd'hui : les dix rôles `--text-*` de `DESIGN.md` (que le Relevé n'appelle
 pas), les tailles du Relevé écrites en px dans le module, et une troisième échelle propre à l'accueil
-(titre `wdth` 116 de 34 à 50 px, corps de 13 à 21 px). La table ci-dessous les fond : mêmes noms d'usage
-que `DESIGN.md`, valeurs du Relevé, et l'accueil s'y range.
+(titre `wdth` 116 de 34 à 50 px, corps de 13 à 21 px). La table ci-dessous les fond, sous les jetons `--r-t-*` créés
+au lot R0 (`design-tokens.css`) ; l'accueil s'y range en migrant. L'échelle historique `--text-*` reste
+en place pour les surfaces non migrées : la changer modifierait leur rendu.
 
 | Rôle (jeton) | Réglage | Usage | Remplace |
 | --- | --- | --- | --- |
-| `--text-display` | Archivo `wdth` 118, 500, `clamp(34px, 4.4vw, 58px)`, interligne 1,04, −0,02 em | le titre d'écran ou le verdict, **un par écran** | `.display`, `.titre` accueil (116), `--text-display` |
-| `--text-verdict` | idem, `clamp(27px, 3.6vw, 46px)` | le verdict dans la plaque | `.verdict` |
-| `--text-title` | `wdth` 108, 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement | `.titre`, `--text-title` |
-| `--text-section` | 600, 17 px, interligne 1,35 | sujet d'un fait, nom d'une possibilité | `.sousTitre`, `--text-section` |
-| `--text-lede` | 400, 18 px / 1,55 | chapô | `.chapo` |
-| `--text-body` | 400, 16 px / 1,62 | prose suivie | `.corps` |
-| `--text-dense` | 400, 14,5 px / 1,58 | corps de fait, de liste, de tableau | `.dense`, `--text-dense` (14) |
-| `--text-nuance` | 400, 13,5 px / 1,55, `--fg-3` | limite, portée, méthode | `.nuance`, `--text-caption` |
-| `--text-surtitre` | `wdth` 88, 600, 13,5 px, casse normale, précédé d'un numéro mono 11,5 px | nomme un mouvement | `.surtitre` ; **supprime** `--text-kicker` (mono capitales 11 px) |
-| `--text-etiquette` | `wdth` 88, 600, 12,5 px | libellé de champ, statut, en-tête de tableau | `.etiquette` |
-| `--text-chiffre` | `wdth` 125, 500, tabulaire, `clamp(30px, 3.4vw, 44px)` + unité mono 13 px | une valeur mise en avant | `.chiffre` |
-| `--text-marge` | JetBrains Mono 12 px (13 px sous 900 px), casse normale | grain, preuve, source, date | `.marge`, `--text-meta` |
+| `--r-t-display` | Archivo `wdth` 118, 500, `clamp(34px, 4.4vw, 58px)`, interligne 1,04, −0,02 em | le titre d'écran ou le verdict, **un par écran** | `.display`, `.titre` accueil (116), `--text-display` |
+| `--r-t-verdict` | idem, `clamp(27px, 3.6vw, 46px)` | le verdict dans la plaque | `.verdict` |
+| `--r-t-titre` | `wdth` 108, 600, `clamp(23px, 2.5vw, 31px)` | titre de mouvement | `.titre`, `--text-title` |
+| `--r-t-sous-titre` | 600, 17 px, interligne 1,35 | sujet d'un fait, nom d'une possibilité | `.sousTitre`, `--text-section` |
+| `--r-t-chapo` | 400, 18 px / 1,55 | chapô | `.chapo` |
+| `--r-t-corps` | 400, 16 px / 1,62 | prose suivie | `.corps` |
+| `--r-t-dense` | 400, 14,5 px / 1,58 | corps de fait, de liste, de tableau | `.dense`, `--text-dense` (14) |
+| `--r-t-nuance` | 400, 13,5 px / 1,55, `--fg-3` | limite, portée, méthode | `.nuance`, `--text-caption` |
+| `--r-t-surtitre` | `wdth` 88, 600, 13,5 px, casse normale, précédé d'un numéro mono 11,5 px | nomme un mouvement | `.surtitre` ; **supprime** `--text-kicker` (mono capitales 11 px) |
+| `--r-t-etiquette` | `wdth` 88, 600, 12,5 px | libellé de champ, statut, en-tête de tableau | `.etiquette` |
+| `--r-t-chiffre` | `wdth` 125, 500, tabulaire, `clamp(30px, 3.4vw, 44px)` + unité mono 13 px | une valeur mise en avant | `.chiffre` |
+| `--r-t-marge` | JetBrains Mono 12 px (13 px sous 900 px), casse normale | grain, preuve, source, date | `.marge`, `--text-meta` |
 
 ### 2.2 Chiffres, titres, preuves et textes longs
 
@@ -214,9 +215,9 @@ Dix rôles, chacun avec une forme. **Aucune décoration ajoutée** : la différe
 | **Valeur** | chiffre à l'encre + unité mono ; dans la marge, mono tabulaire | `Chiffre`, `Marge` (`valeur`) | toujours avec sa référence ou son horizon ; jamais animée |
 | **Provenance** | glyphe de grain + mot | `Grain` | dit **où** le fait a été établi, pas d'où vient la donnée |
 | **Preuve** | la marge : grain, valeur, source, date, lien | `Marge` | le lien porte la provenance de l'artefact servi (`evidenceHref`) |
-| **Limite** | phrase en `--text-nuance` sous le fait | `.nuance` | dit ce que le fait ne dit pas ; jamais en italique, jamais en couleur |
+| **Limite** | phrase en `--r-t-nuance` sous le fait | `.nuance` | dit ce que le fait ne dit pas ; jamais en italique, jamais en couleur |
 | **Interprétation** | corps de texte sous le fait, en `--fg-2` | `.corps` / `.dense` | jamais plus grand que le fait ; signalée comme lecture (« ce qui compte ici ») |
-| **Conclusion** | la plaque, le verdict en `--text-verdict` | `Plaque` + `ConclusionBlock` | une conclusion par dossier lu ; le titre n'est jamais généré |
+| **Conclusion** | la plaque, le verdict en `--r-t-verdict` | `Plaque` + `ConclusionBlock` | une conclusion par dossier lu ; le titre n'est jamais généré |
 | **Vérification** | sujet à trait `contrôle`, geste à glyphe d'action, numérotée | `Registre` + `ActionCue` | dit quoi demander, à qui, et pourquoi |
 | **Projet** | phrase de lecteur dans une plaque ou en tête ; conditions sans compromis à trait `incompatibilité` | `Plaque`, `Registre` | le Projet est cité, jamais reformulé par l'écran |
 | **Arbitrage** | la balance : deux côtés en regard (deux colonnes ≥ 900 px) | `.deux`, `.bandeColonne` | **seulement** pour les deux côtés d'un même arbitrage, jamais pour comparer des lieux |
@@ -309,25 +310,26 @@ la V2 de FUT-41 doit résoudre, pas une contrainte qu'elle hérite.
 
 ## 9. De `DESIGN.md` v2.1 à v3.0, section par section
 
-Relu le 20/10 sur `main` (`3da725e3`). **Conservé** : inchangé. **Amendé** : le principe reste, une règle
+Relu le 20/10 sur `main` (`3da725e3`) et appliqué dans la PR R0. Bilan : **5 sections remplacées, 19 amendées, 2 ajoutées**, les autres conservées. **Conservé** : inchangé. **Amendé** : le principe reste, une règle
 change. **Remplacé** : la section est réécrite à partir de ce document. **Supprimé** : la règle disparaît.
 
 | § v2.1 | Sujet | Sort en v3.0 | Ce qui change | Source ici |
 | --- | --- | --- | --- | --- |
 | en-tête et § 12 journal | historique des versions | **amendé** | entrée v3.0 : le Relevé devient la grammaire canonique | § 1 |
 | 0 | les trois couches de documents | **amendé** | ajoute `src/components/releve/` comme canon des primitives et `kit.tsx` comme déprécié | § 1 |
-| 1 | les trois registres A / B / C | conservé | | |
+| 1 | les trois registres A / B / C | **amendé** | registre A : « une seule surface élevée par mouvement (la plaque) », « preuve en marge » | § 4.2 |
 | 2.1 | grille de page, deux pistes, conteneurs 680 / 920 / 1100 | **amendé** | ajoute la **grille à marge** (texte `1fr`, marge de preuve 232 px, gouttière 48 px dès 900 px) et la colonne d'appui de 280 px ; la règle « pas de `max-w` plus étroit que son bloc » reste | § 4.3 |
 | 2.2 | une seule surface dominante | **amendé** | la surface dominante devient **la plaque** (fond `--bg-deep`, coins de coupe) ; « verre, ombre portée » retirés de la définition | § 3.1, § 4.2 |
 | 2.3 | ce qui sépare | **amendé** | marge, filet, fond ; **le verre sort de la liste** | § 4.2 |
 | 2.4 | numérotation citable | conservé | précise le surtitre numéroté | § 2.1 |
-| 3.1 | les quatre états d'une valeur | conservé | | |
+| 3.1 | les quatre états d'une valeur | **amendé** | valeur mesurée : la source passe **dans la marge**, plus sous la valeur | § 5 |
 | 3.2 | l'alignement au chiffre (« toute valeur en mono ») | **amendé** | le chiffre **mis en avant** est en Archivo `wdth` 125 tabulaire ; le mono reste pour la marge, les tableaux et les unités | § 2.1, § 2.2 |
-| 3.3 à 3.6 | trajectoire, incertitude, comparaison, position avant couleur | conservé | 3.3 gagne « le tracé suit la nature de la donnée » : horizons et paliers jamais reliés, série continue permise avec son incertitude | § 6 |
+| 3.3 | la trajectoire | **amendé** | « le tracé suit la nature de la donnée » : horizons et paliers jamais reliés, série continue permise avec son incertitude | § 6 |
+| 3.4 à 3.6 | incertitude, comparaison, position avant couleur | conservé | | |
 | 4 | la voix | conservé | | |
 | 5.1 | le fond (« fond profond, verre translucide, grain ») | **amendé** | fond profond conservé, orbes déjà supprimés ; **le verre translucide n'est plus une signature** | § 3.1 |
 | 5.2 | la palette close | conservé | | |
-| 5.3 | le statut de la couleur | conservé | ajoute : un incident technique ne prend jamais une teinte de registre | § 3.3 |
+| 5.3 | le statut de la couleur | **amendé** | ajoute : la donnée est à l'encre ; un incident technique ne prend jamais une teinte de registre et ne dit que ce que le serveur a confirmé | § 3.3, § 6 |
 | 5.4 | les six registres | **amendé** | la teinte se porte par **un trait de 3 px devant le sujet**, plus par une pastille ni un filet de carte | § 3.3 |
 | 5.5 | le verdict ne porte jamais l'accent (`.card-verdict`) | **remplacé** | le verdict vit dans la plaque ; son ton par le trait, plus par un halo ni un carré | § 4.1, § 5 |
 | 5.6 | encre et surface | conservé | ajoute le contraste de `.boutonMarque` en thème clair | § 3.2 |
@@ -345,7 +347,9 @@ change. **Remplacé** : la section est réécrite à partir de ce document. **Su
 | 9.2 | dépréciés | **amendé** | ajoute `GlassCard`, `ReportSection`, `.glass` dans le rapport, `Chip`, `FamilyHeading` coloré, `HorizonSwitch` | rapport § C.4 |
 | 9.3 | interdits | **amendé** | ajoute : capitales mono espacées, titre à suite en italique orange, lueur autour d'un paiement, formes d'échelle employées à autre chose | § 2, § 3.4, § 4.1 |
 | 10 | conventions d'implémentation | **amendé** | les jetons `--r-*` et les rôles vivent dans `design-tokens.css` ; un nouveau fichier ne peut contenir aucun marqueur hérité (test-cliquet) | rapport § C.5 |
-| 11 | ce qui reste ouvert | **amendé** | point 1 (collision de l'orange) tranché par § 3.4 ; point 4 (système de composants partagés) devient le lot R1 | § 3.4 |
+| 11 | ce qui reste ouvert | **amendé** | point 1 (collision de l'orange) tranché par § 3.4 ; point 4 (système de composants partagés) devient le lot R1 ; ajoute le filet de carte et le thème clair | § 3.4 |
+| 13 (nouveau) | les interfaces nouvelles et le centre de décision | **ajouté** | principes non négociables et hypothèses | § 8 |
+| 14 (nouveau) | limites connues | **ajouté** | chevauchement de `RegleDuTemps`, densité à 360 px, non-Retina, Safari, thème clair | § 2.4 |
 
 ## 10. Accessibilité
 

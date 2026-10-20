@@ -13,6 +13,20 @@ Règle :
 - Un `max-w-[NNNpx]` sur du texte n'est légitime que pour : le conteneur de page (`mx-auto`), un sous-titre de hero **mesuré en espace ouvert** sous un grand H1, ou un texte en **flex-row** qui partage sa ligne avec un autre élément (bouton, image).
 - Robustesse typo FR : sur les phrases importantes, lier les petits mots (`le, les, leur, et, à, de…`) au mot suivant par une espace insécable (cf. `bindOrphans` dans `OuVivreClient.tsx`). `text-wrap: pretty` ne suffit pas (Safari l'ignore).
 
+# Interface : une seule grammaire, le Relevé
+
+`DESIGN.md` v3.0 fait du Relevé la grammaire visuelle canonique. Tout nouvel écran se compose avec
+`src/components/releve/` (primitives) et les jetons `--r-*` / `--r-t-*` de `src/app/design-tokens.css`.
+Un composant qui manque s'ajoute dans `src/components/releve/`, avec ses tests, jamais dans un module.
+
+- Ne pas employer : `.glass`, `GlassCard`, `ReportSection` (`report/kit.tsx`, déprécié), capitales mono
+  espacées, titre à suite en italique d'accent, emoji, couleur propre à une échelle ou à un module.
+  Le test-cliquet `src/components/releve/canon.test.ts` échoue si un fichier en gagne.
+- Les règles marquées **hypothèse** dans `DESIGN.md` (notamment la forme de la comparaison, § 13) se
+  suivent par défaut et s'écartent en le justifiant ; les règles **stables** s'appliquent.
+- Un lot censé ne rien changer à l'écran le prouve : `scripts/fut118/empreinte-visuelle.mjs` avant et
+  après, puis `scripts/fut118/comparer-empreintes.mjs`.
+
 # Sous-agents : ne jamais perdre leur travail si la session coupe
 
 Le résultat d'un sous-agent ne vit que dans le transcript de la session. Une coupure (limite de session) pendant qu'il tourne, ou juste après son retour mais avant relais, fait perdre tout son calcul (des dizaines de milliers de tokens). Deux protections **systématiques** pour tout lancement de 2 sous-agents ou plus (audits, fan-out) :
