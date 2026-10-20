@@ -1,0 +1,1781 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma recherche · futur•e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   FUT-41 / FUT-22 · V3, « LA PLANCHE » RESSERRÉE ET « FAIRE LE POINT ». Prototype de revue, données fictives.
+   Jetons : ceux de design-tokens.css et de releve.module.css (fond, plaque, encre, six registres,
+   mouvement FUT-75). Aucune couleur nouvelle. Les règles visuelles nouvelles sont listées comme
+   propositions à soumettre à FUT-118 dans README-v3.md, jamais adoptées ici.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+  --r-fond: #060812; --r-plaque: #0d1322; --r-plaque-bord: rgba(255,255,255,0.12);
+  --r-encre: #f6f4ef; --r-texte: #c6cfdb; --r-discret: #9ba3b4; --r-meta: #788095;
+  --r-filet: rgba(255,255,255,0.08); --r-filet-fort: rgba(255,255,255,0.14);
+  --r-elev: rgba(255,255,255,0.04); --r-elev-2: rgba(255,255,255,0.07);
+  --marque: #E8823A;
+  --reg-incompatibilite: #FF9AA4; --reg-alignement: #7BD3A5; --reg-compromis: #E8823A;
+  --reg-ecart: #C2A5EB; --reg-non-su: #B8BFCC; --reg-controle: #82B4E8;
+  --f-sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --m-pression: 90ms; --m-geste: 120ms; --m-bascule: 180ms; --m-etat: 240ms;
+  --m-releve: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --r-fond: #faf8f3; --r-plaque: #f2ede4; --r-plaque-bord: rgba(26,29,40,0.14);
+    --r-encre: #1a1d28; --r-texte: #3d4456; --r-discret: #5b6373; --r-meta: #646c7f;
+    --r-filet: rgba(26,29,40,0.09); --r-filet-fort: rgba(26,29,40,0.17);
+    --r-elev: rgba(26,29,40,0.035); --r-elev-2: rgba(26,29,40,0.06);
+    --marque: #994000;
+    --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+    --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --r-fond: #faf8f3; --r-plaque: #f2ede4; --r-plaque-bord: rgba(26,29,40,0.14);
+  --r-encre: #1a1d28; --r-texte: #3d4456; --r-discret: #5b6373; --r-meta: #646c7f;
+  --r-filet: rgba(26,29,40,0.09); --r-filet-fort: rgba(26,29,40,0.17);
+  --r-elev: rgba(26,29,40,0.035); --r-elev-2: rgba(26,29,40,0.06);
+  --marque: #994000;
+  --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+  --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-pression: 0ms; --m-geste: 0ms; --m-bascule: 0ms; --m-etat: 0ms; }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--r-fond); color: var(--r-texte); font-family: var(--f-sans); font-size: 16px; line-height: 1.5; }
+body.sheet-ouverte { overflow: hidden; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+p { margin: 0; }
+h1, h2, h3, h4 { margin: 0; color: var(--r-encre); text-wrap: balance; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app { max-width: 1240px; margin: 0 auto; padding: 0 16px 80px; }
+@media (min-width: 640px) { .app { padding: 0 28px 96px; } }
+
+/* ── Typographie du Relevé ─────────────────────────────────────────────────────────────── */
+.surtitre { display: flex; align-items: baseline; gap: 10px; font-variation-settings: "wdth" 88; font-weight: 600; font-size: 13.5px; letter-spacing: 0.01em; color: var(--r-discret); }
+.surtitre .num { font-family: var(--f-mono); font-variation-settings: normal; font-weight: 500; font-size: 11.5px; color: var(--r-meta); }
+.etiquette { font-variation-settings: "wdth" 88; font-weight: 600; font-size: 12.5px; letter-spacing: 0.01em; color: var(--r-discret); }
+.nuance { font-size: 13.5px; line-height: 1.5; color: var(--r-discret); }
+.meta { font-family: var(--f-mono); font-size: 12px; color: var(--r-meta); }
+.encre { color: var(--r-encre); }
+
+/* ── Boutons ───────────────────────────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 14px; border-radius: 3px; border: 1px solid var(--r-filet-fort); background: transparent; color: var(--r-encre); font-weight: 600; font-size: 14px; line-height: 1.25; text-align: left; transition: border-color var(--m-geste) ease, background-color var(--m-geste) ease, transform var(--m-pression) ease; }
+.btn:hover { border-color: var(--r-encre); }
+.btn:active { transform: translateY(1px); }
+.btn[aria-pressed="true"] { background: var(--r-elev-2); border-color: var(--r-encre); }
+.btn-plein { background: var(--r-encre); border-color: var(--r-encre); color: var(--r-fond); }
+.btn-plein:hover { background: var(--r-texte); border-color: var(--r-texte); }
+.btn-lien { border: 0; padding: 4px 0; min-height: 32px; background: none; color: var(--r-encre); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); font-weight: 600; font-size: 14px; text-align: left; }
+.btn-lien:hover { text-decoration-color: var(--r-encre); }
+.btn-lien.meta { font-weight: 400; font-size: 12px; color: var(--r-discret); }
+.sim { font-family: var(--f-mono); font-weight: 400; font-size: 11px; color: var(--r-meta); border: 1px dashed var(--r-filet-fort); border-radius: 2px; padding: 1px 5px; white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 10px; }
+
+/* ── Barre ─────────────────────────────────────────────────────────────────────────────── */
+.barre { display: flex; align-items: center; gap: 18px; min-height: 60px; border-bottom: 1px solid var(--r-filet); }
+.marque-mot { font-variation-settings: "wdth" 100; font-weight: 600; font-size: 21px; letter-spacing: -0.01em; color: var(--r-encre); }
+.marque-mot b { color: var(--marque); font-weight: 600; }
+.barre nav { display: flex; gap: 16px; }
+.barre nav span { font-size: 14px; color: var(--r-discret); }
+.barre nav span[aria-current] { color: var(--r-encre); font-weight: 600; box-shadow: inset 0 -2px 0 var(--r-encre); padding-bottom: 4px; }
+.barre .droite { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
+.fictif { font-family: var(--f-mono); font-size: 11.5px; color: var(--r-discret); border: 1px dashed var(--r-filet-fort); border-radius: 3px; padding: 6px 9px; background: none; min-height: 36px; }
+.fictif:hover { color: var(--r-encre); border-color: var(--r-discret); }
+.icone-btn { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--r-filet-fort); border-radius: 50%; background: none; color: var(--r-encre); }
+.menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; width: min(340px, calc(100vw - 32px)); background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: 3px; padding: 8px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0,0,0,0.28); }
+.menu[hidden] { display: none; }
+.menu p { padding: 6px 8px 8px; }
+.menu button { text-align: left; background: none; border: 0; border-radius: 2px; padding: 9px 10px; display: grid; gap: 1px; }
+.menu button:hover { background: var(--r-elev-2); }
+.menu button[aria-current="true"] { background: var(--r-elev-2); box-shadow: inset 2px 0 0 var(--r-encre); }
+.menu button b { font-weight: 600; font-size: 14.5px; color: var(--r-encre); }
+.menu button span { font-size: 12.5px; color: var(--r-discret); }
+@media (max-width: 639px) { .barre nav { display: none; } .fictif .long { display: none; } }
+/* ── Panneau : une possibilité ─────────────────────────────────────────────────────────── */
+.fiche { display: grid; gap: 20px; }
+.fiche-tete { display: grid; gap: 6px; }
+.fiche-tete h2 { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(22px, 2.2vw, 27px); line-height: 1.15; letter-spacing: -0.01em; }
+.fiche-tete h2:focus { outline: none; }
+.fiche-emb { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 16px; align-items: center; }
+.fiche-emb > svg { width: 124px; height: 124px; overflow: visible; }
+.fiche-emb .forme { cursor: pointer; }
+.echelles-etat { display: grid; }
+.echelles-etat button { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 1px 10px; align-items: center; text-align: left; background: none; border: 0; border-top: 1px solid var(--r-filet); padding: 7px 6px; min-height: 44px; color: var(--r-encre); }
+.echelles-etat button:first-child { border-top: 0; }
+.echelles-etat button:hover { background: var(--r-elev); }
+.echelles-etat button[aria-pressed="true"] { background: var(--r-elev-2); box-shadow: inset 2px 0 0 var(--r-encre); }
+.echelles-etat b { font-size: 14px; font-weight: 600; }
+.echelles-etat .e { grid-column: 2; font-size: 12.5px; color: var(--r-discret); }
+.conds { display: grid; }
+.cond { border-top: 1px solid var(--r-filet); }
+.cond > button { width: 100%; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; background: none; border: 0; padding: 10px 4px; min-height: 48px; }
+.cond > button:hover { background: var(--r-elev); }
+.cond .lab { font-size: 14.5px; color: var(--r-encre); line-height: 1.35; }
+.cond .lab small { display: block; font-size: 11.5px; color: var(--r-meta); font-family: var(--f-mono); }
+.cond .iss { font-size: 13px; text-align: right; justify-content: flex-end; color: var(--r-texte); }
+.cond.actif > button { box-shadow: inset 2px 0 0 var(--r-encre); background: var(--r-elev); }
+.cond .ouvert { padding: 4px 0 14px 32px; display: grid; gap: 10px; }
+.contexte-ecart { padding: 0 0 14px; border-bottom: 1px solid var(--r-filet); display: grid; gap: 8px; }
+.contexte-ecart.change { border-left-color: var(--reg-controle); }
+.form-mini { display: grid; gap: 8px; padding: 12px; margin-top: 8px; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
+.form-mini textarea { width: 100%; min-height: 64px; background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: 3px; padding: 8px 10px; resize: vertical; }
+.form-mini select { background: var(--r-fond); border: 1px solid var(--r-filet-fort); border-radius: 3px; padding: 8px 10px; min-height: 40px; }
+.note-perso { display: grid; gap: 2px; padding: 6px 0 6px 12px; border-left: 2px solid var(--r-filet-fort); font-size: 14px; }
+
+/* ── Preuve ────────────────────────────────────────────────────────────────────────────── */
+.preuve { display: grid; gap: 3px; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; color: var(--r-discret); border-left: 1px solid var(--r-filet-fort); padding-left: 12px; }
+.preuve .v { color: var(--r-encre); font-family: var(--f-sans); font-size: 14.5px; line-height: 1.45; }
+.preuve .ligne { display: flex; gap: 7px; align-items: center; }
+.verif { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
+.verif p { font-size: 14px; color: var(--r-texte); }
+
+/* ── Glyphes ───────────────────────────────────────────────────────────────────────────── */
+.g { display: inline-block; vertical-align: -1px; flex: none; }
+.reg-t { display: inline-flex; align-items: baseline; gap: 6px; }
+.reg-t::before { content: ""; flex: none; width: 3px; height: 0.9em; transform: translateY(0.1em); background: var(--t, var(--r-meta)); }
+.bande { margin-top: 24px; }
+.bande-tete { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--r-filet-fort); color: var(--r-encre); }
+.bande-tete b { font-variation-settings: "wdth" 108; font-size: 17px; font-weight: 600; }
+.socle { display: grid; gap: 8px; padding: 14px 0 6px; }
+.socle-trait { position: relative; height: 26px; }
+.socle-trait::before { content: ""; position: absolute; left: 6%; right: 6%; top: 12px; height: 3px; background: var(--r-encre); }
+.socle-trait span { position: absolute; top: 4px; width: 18px; height: 18px; border: 1.6px solid var(--r-encre); border-radius: 50%; background: var(--r-plaque); }
+.piste { position: relative; height: 64px; width: 100%; background: none; border: 0; padding: 0; display: block; border-radius: 2px; }
+.piste:hover { background: var(--r-elev); }
+.piste .pl { position: absolute; top: 14px; height: 0; border-top: 1.5px solid var(--r-encre); }
+.piste .pl.tirets { border-top: 1.5px dashed var(--r-discret); }
+.piste .pl.points { border-top: 2px dotted var(--reg-controle); }
+.piste .pl.fort { border-top-width: 3px; top: 13px; }
+.piste .mk { position: absolute; top: 4px; width: 20px; height: 20px; margin-left: -10px; }
+.piste .mk svg { display: block; overflow: visible; }
+.piste .tx { position: absolute; top: 31px; font-size: 12.5px; line-height: 1.3; color: var(--r-texte); max-width: 42%; }
+.piste .tx.ga { left: 0; text-align: left; }
+.piste .tx.dr { right: 0; text-align: right; }
+.piste .tx.ce { left: 50%; transform: translateX(-50%); text-align: center; max-width: 50%; color: var(--r-discret); }
+.piste .coupure { position: absolute; top: 6px; left: 50%; width: 14px; height: 17px; margin-left: -7px; }
+.piste .coupure::before, .piste .coupure::after { content: ""; position: absolute; top: 0; bottom: 0; width: 1.5px; background: var(--r-encre); transform: skewX(-20deg); }
+.piste .coupure::before { left: 3px; } .piste .coupure::after { right: 3px; }
+.preuves { display: grid; gap: 14px; padding: 8px 0 14px; }
+@media (min-width: 640px) { .preuves { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.pourrait { margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--r-filet-fort); display: grid; gap: 10px; }
+.pourrait ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pourrait li { display: grid; gap: 4px; }
+.vide-rapp { padding: 18px 0; color: var(--r-discret); font-size: 14.5px; }
+.arrive { animation: arrive var(--m-bascule) var(--m-releve) both; }
+@keyframes arrive { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .arrive { animation: none; } }
+/* ── Condition par condition ───────────────────────────────────────────────────────────── */
+.partition-zone { margin-top: 52px; }
+.partition-wrap { overflow-x: auto; margin-top: 12px; }
+.partition { display: grid; min-width: min-content; }
+.partition .ligne-p { display: grid; align-items: center; border-bottom: 1px solid var(--r-filet); min-height: 46px; }
+.partition .ligne-p.focus { background: var(--r-elev-2); }
+.partition .tete-p { align-items: end; border-bottom: 1px solid var(--r-filet-fort); padding-bottom: 6px; }
+.partition .tete-p span.v { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12.5px; color: var(--r-discret); max-height: 136px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; justify-self: center; }
+.partition .lab-p { font-size: 14px; color: var(--r-encre); padding-right: 12px; }
+.partition .cel { display: grid; place-items: center; width: 100%; height: 44px; background: none; border: 0; border-radius: 2px; }
+.partition .cel:hover { background: var(--r-elev-2); }
+/* ── Feuille mobile ────────────────────────────────────────────────────────────────────── */
+.sheet { position: fixed; inset: 0; z-index: 30; background: var(--r-fond); overflow: auto; overscroll-behavior: contain; padding: 0 16px 56px; }
+.sheet[hidden] { display: none; }
+.sheet-barre { position: sticky; top: 0; z-index: 2; background: var(--r-fond); display: flex; align-items: center; gap: 12px; min-height: 58px; border-bottom: 1px solid var(--r-filet); margin: 0 -16px 18px; padding: 0 16px; }
+/* ── Note d'état ───────────────────────────────────────────────────────────────────────── */
+.note { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50; width: min(620px, calc(100vw - 24px)); background: var(--r-plaque); border: 1px solid var(--r-plaque-bord); border-radius: 3px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 14px 34px rgba(0,0,0,0.3); font-size: 14px; color: var(--r-texte); }
+.note[hidden] { display: none; }
+.note p { flex: 1; }
+
+/* ── Le Projet, en une bande ───────────────────────────────────────────────────────────── */
+.projet { padding: 18px 0 14px; display: grid; gap: 8px; border-bottom: 1px solid var(--r-filet); }
+.projet-l1 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.projet-phrase { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(22px, 2.3vw, 29px); line-height: 1.15; letter-spacing: -0.01em; }
+.lentilles-l { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lentille { position: relative; display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 5px 10px; border-radius: 3px; border: 1px solid var(--r-filet-fort); background: transparent; color: var(--r-texte); font-size: 13.5px; font-weight: 500; transition: background-color var(--m-geste) ease, color var(--m-geste) ease, border-color var(--m-geste) ease; }
+.lentille:hover { border-color: var(--r-discret); color: var(--r-encre); }
+.lentille[aria-pressed="true"] { background: var(--r-encre); color: var(--r-fond); border-color: var(--r-encre); }
+.lentille .poids { display: inline-flex; gap: 2px; align-items: flex-end; height: 11px; }
+.lentille .poids i { width: 3px; background: currentColor; }
+.lentille .poids i.vide { opacity: 0.25; }
+.lentille.sans { border-color: var(--r-discret); }
+.lentille .verrou { width: 9px; height: 11px; border: 1.5px solid currentColor; border-radius: 1px; position: relative; }
+.lentille .verrou::after { content: ""; position: absolute; left: 1.5px; right: 1.5px; top: 3px; height: 1.5px; background: currentColor; }
+.lentille.cote > span:nth-child(2) { text-decoration: line-through; }
+.projet-l1 .non-mesure { margin-left: auto; }
+.non-mesure.m { display: none; }
+.non-mesure { font-size: 12.5px; color: var(--r-discret); border: 1px dashed var(--r-filet-fort); border-radius: 3px; padding: 6px 9px; }
+.lecture-lentille { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 8px 0 2px; }
+.lecture-lentille p { flex: 1 1 320px; font-size: 14px; }
+.lecture-lentille .formes { display: inline-flex; gap: 5px; color: var(--r-encre); }
+.revs { display: grid; border-top: 1px solid var(--r-filet); margin-top: 4px; }
+.revs > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--r-filet); font-size: 14px; }
+@media (max-width: 639px) { .revs > div { grid-template-columns: 1fr; } }
+
+/* ── Corps : la planche à gauche, la lecture à droite ──────────────────────────────────── */
+.corps { display: grid; gap: 22px; padding-top: 20px; grid-template-areas: "lecture" "planche" "suite"; }
+.planche { grid-area: planche; } .lecture { grid-area: lecture; } .suite { grid-area: suite; min-width: 0; }
+.suite[hidden] { display: none; }
+.suite-in { display: grid; gap: 16px; }
+@media (min-width: 1024px) {
+  .corps { grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); grid-template-areas: "planche lecture" "planche suite"; grid-template-rows: auto 1fr; gap: 20px 44px; align-items: start; }
+  .planche { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; padding-right: 8px; scrollbar-width: thin; }
+}
+.lecture { min-width: 0; container-type: inline-size; }
+
+/* ── La planche resserrée ──────────────────────────────────────────────────────────────── */
+.planche-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.legende { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 12.5px; color: var(--r-discret); }
+.legende > span { display: inline-flex; align-items: center; gap: 5px; }
+.legende .g { color: var(--r-encre); }
+.legende .sep { color: var(--r-meta); }
+.filtres { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.filtre { background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 1px; min-height: 34px; font-size: 13.5px; color: var(--r-discret); }
+.filtre[aria-pressed="true"] { color: var(--r-encre); border-bottom-color: var(--r-encre); font-weight: 600; }
+.indice { font-size: 13px; color: var(--r-discret); margin-top: 8px; padding: 8px 0; border-top: 1px solid var(--r-filet); }
+.liste-l, .sous-l { list-style: none; margin: 0; padding: 0; display: grid; }
+.lieu-l { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--r-filet); }
+.lieu { flex: 1; min-width: 0; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; background: none; border: 0; padding: 9px 6px; min-height: 56px; border-radius: 2px; transition: background-color var(--m-geste) ease; }
+.lieu:hover { background: var(--r-elev); }
+.lieu-l.sel .lieu { background: var(--r-elev-2); }
+.lieu .txt { display: grid; gap: 1px; min-width: 0; }
+.lieu .n { font-size: 15px; font-weight: 600; color: var(--r-encre); line-height: 1.3; }
+.lieu .s { font-size: 12.5px; color: var(--r-discret); line-height: 1.35; }
+.lieu .i { font-size: 12.5px; line-height: 1.35; display: flex; gap: 6px; align-items: baseline; color: var(--r-texte); margin-top: 2px; }
+.lieu .i::before { content: ""; flex: none; width: 3px; height: 0.9em; transform: translateY(0.1em); background: var(--t, var(--r-meta)); }
+.lieu .i.hc::before { width: 0; border-left: 2px dashed var(--r-meta); background: none; }
+.rapprocher { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 10px; margin-right: 2px; border: 1px solid var(--r-filet-fort); border-radius: 3px; background: none; color: var(--r-encre); font-size: 13px; font-weight: 600; transition: border-color var(--m-geste) ease; }
+.rapprocher:hover { border-color: var(--r-encre); }
+.groupe-l { border-bottom: 1px solid var(--r-filet); padding-top: 8px; }
+.commune-l { display: flex; align-items: center; gap: 8px; padding: 2px 6px 4px; color: var(--r-encre); }
+.commune-l b { font-size: 13.5px; font-weight: 600; }
+.sous-l { margin-left: 12px; padding-left: 10px; box-shadow: inset 1px 0 0 var(--r-filet-fort); }
+.sous-l .lieu-l:last-child { border-bottom: 0; }
+.ecartees-l { margin-top: 18px; opacity: 0.85; }
+.ecartees-l .etiquette { display: block; padding-bottom: 4px; }
+.choix-ajout { margin-top: 10px; border: 1px solid var(--r-plaque-bord); background: var(--r-plaque); border-radius: 3px; padding: 12px; display: grid; gap: 8px; }
+.choix-ajout .opts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* L'emblème : trois formes, pleines si l'échelle est lue. */
+.mini { overflow: visible; display: block; }
+.mini .tr { fill: none; stroke: var(--r-encre); stroke-width: 1.3; vector-effect: non-scaling-stroke; transition: stroke var(--m-etat) var(--m-releve), opacity var(--m-etat) var(--m-releve); }
+.mini .tr.pointille { stroke: var(--r-discret); stroke-dasharray: 2.2 2.4; }
+.mini .tr.points { stroke: var(--r-discret); stroke-dasharray: 0.8 2.6; stroke-linecap: round; stroke-width: 1.8; }
+.mini .pt { fill: var(--r-encre); }
+.mini .q { font-family: var(--f-mono); font-size: 9px; fill: var(--r-discret); }
+.mini .barre-bloq { stroke: var(--reg-incompatibilite); stroke-width: 2; }
+.planche[data-lentille] .mini .tr { opacity: 0.28; }
+.planche[data-lentille] .mini .tr[data-reg] { opacity: 1; stroke-width: 2.6; stroke-dasharray: none; }
+.planche[data-lentille] .mini .tr[data-reg="controle"] { stroke-dasharray: 3 2; }
+.planche[data-lentille] .mini .tr[data-reg="libre"], .planche[data-lentille] .mini .tr[data-reg="horscadre"] { stroke-dasharray: 1 2.6; stroke-linecap: round; stroke-width: 1.8; }
+.tr[data-reg="alignement"] { stroke: var(--reg-alignement) !important; }
+.tr[data-reg="compromis"] { stroke: var(--reg-compromis) !important; }
+.tr[data-reg="ecart"] { stroke: var(--reg-ecart) !important; }
+.tr[data-reg="incompatibilite"] { stroke: var(--reg-incompatibilite) !important; }
+.tr[data-reg="controle"] { stroke: var(--reg-controle) !important; }
+.tr[data-reg="non-su"], .tr[data-reg="libre"], .tr[data-reg="horscadre"] { stroke: var(--r-discret) !important; }
+
+/* ── La lecture : accueil ──────────────────────────────────────────────────────────────── */
+.accueil { display: grid; gap: 16px; }
+.etat { display: grid; gap: 8px; }
+.etat p { font-size: clamp(17px, 1.6vw, 20px); line-height: 1.45; color: var(--r-encre); }
+.etat p + p { font-size: 16px; color: var(--r-texte); }
+.etat .lien-p { font-weight: inherit; }
+.reg-bloc { display: flex; gap: 10px; }
+.reg-bloc::before { content: ""; flex: none; width: 3px; height: 1em; transform: translateY(0.2em); background: var(--t); }
+.geste-point { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.btn-plein { min-height: 44px; padding: 10px 18px; font-size: 15px; }
+.depliant { display: inline-flex; align-items: baseline; gap: 8px; background: none; border: 0; padding: 8px 0; min-height: 40px; color: var(--r-encre); font-weight: 600; font-size: 14px; text-align: left; }
+.depliant .pm { font-family: var(--f-mono); font-weight: 500; color: var(--r-discret); width: 10px; }
+.depliant .num { font-family: var(--f-mono); font-weight: 500; font-size: 12px; color: var(--r-meta); }
+.depliant:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); }
+.depuis-l { border-top: 1px solid var(--r-filet); }
+.journal { display: grid; padding: 4px 0 2px; }
+.journal > div { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--r-filet); font-size: 14px; }
+.journal > div:first-child { border-top: 0; }
+.pas { display: grid; gap: 4px; border-top: 1px solid var(--r-filet); padding-top: 12px; }
+.pas ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+.pas li { display: grid; gap: 2px; padding: 8px 0 8px 13px; position: relative; border-bottom: 1px solid var(--r-filet); }
+.pas li::before { content: ""; position: absolute; left: 0; top: 13px; width: 3px; height: 0.95em; background: var(--t, var(--r-meta)); }
+.pas li p { font-size: 14.5px; color: var(--r-encre); line-height: 1.4; }
+.mes-verifs { display: grid; gap: 6px; }
+.mes-verifs ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+
+/* ── Le fil de retour ──────────────────────────────────────────────────────────────────── */
+.fil { display: flex; align-items: center; gap: 12px; min-height: 44px; padding-bottom: 8px; margin-bottom: 18px; border-bottom: 1px solid var(--r-filet-fort); }
+.fil .droite-fil { margin-left: auto; }
+.fil .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Faire le point ────────────────────────────────────────────────────────────────────── */
+.point { display: grid; gap: 18px; }
+.point-tete { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 20px; }
+.point-tete h2 { font-variation-settings: "wdth" 108; font-weight: 600; font-size: clamp(23px, 2.5vw, 31px); line-height: 1.15; }
+.point-tete h2:focus { outline: none; }
+.modes { display: inline-flex; border: 1px solid var(--r-filet-fort); border-radius: 3px; }
+.modes button { background: none; border: 0; min-height: 38px; padding: 6px 12px; font-size: 13.5px; color: var(--r-discret); display: inline-flex; gap: 8px; align-items: center; }
+.modes button + button { border-left: 1px solid var(--r-filet-fort); }
+.modes button[aria-pressed="true"] { color: var(--r-encre); font-weight: 600; box-shadow: inset 0 -2px 0 var(--r-encre); }
+.sec-p { display: grid; gap: 4px; }
+.sec-p > .etiquette { padding-bottom: 6px; border-bottom: 1px solid var(--r-filet-fort); }
+.enonces { list-style: none; margin: 0; padding: 0; display: grid; }
+.enonce { display: grid; gap: 6px 32px; padding: 12px 0; border-bottom: 1px solid var(--r-filet); scroll-margin-top: 80px; transition: background-color var(--m-etat) ease; }
+@container (min-width: 700px) { .enonce:not(.avancer) { grid-template-columns: minmax(0, 1fr) 210px; } }
+.enonce > p { font-size: 15.5px; line-height: 1.6; color: var(--r-texte); }
+.enonce.fort > p { color: var(--r-encre); padding-left: 13px; position: relative; }
+.enonce.fort > p::before { content: ""; position: absolute; left: 0; top: 0.32em; width: 3px; height: 1em; background: var(--t); }
+.num-e { margin-right: 8px; }
+.marge-p { display: grid; gap: 4px; align-content: start; font-family: var(--f-mono); font-size: 12px; line-height: 1.45; color: var(--r-discret); }
+.marge-d { display: none; font-size: 12.5px; color: var(--r-discret); }
+.marge-d summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 12px; }
+.marge-d .marge-p { display: grid; padding-top: 4px; }
+@container (max-width: 699px) { .enonce > .marge-p { display: none; } .marge-d { display: block; } }
+.ref { display: flex; gap: 6px; align-items: baseline; }
+.ref .g { transform: translateY(1px); color: var(--r-discret); }
+.ref-p { flex: none; width: 9px; height: 1px; background: var(--r-meta); transform: translateY(-3px); }
+.eclaire { background: var(--r-elev-2); }
+.lien-p { display: inline; background: none; border: 0; padding: 0; color: var(--r-encre); font-weight: 600; text-decoration: underline; text-decoration-color: var(--r-filet-fort); text-underline-offset: 3px; text-decoration-thickness: 1px; text-align: left; font-size: inherit; line-height: inherit; }
+.lien-p:hover { text-decoration-color: var(--r-encre); }
+.verifs-p { list-style: none; margin: 0; padding: 0; display: grid; }
+.verifs-p > li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--r-filet); }
+.verifs-p > li:last-child { border-bottom: 0; }
+.verifs-p p { font-size: 15px; color: var(--r-encre); line-height: 1.45; }
+.enonce.avancer { padding: 0; border: 0; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 0; }
+.enonce.avancer > .num-e { padding-top: 12px; }
+.redige { display: grid; gap: 14px; }
+.avert-r { font-size: 13px; color: var(--r-discret); padding: 10px 12px; border: 1px dashed var(--r-filet-fort); border-radius: 3px; }
+.para-r { font-size: 17px; line-height: 1.65; color: var(--r-encre); }
+.appel { font-family: var(--f-mono); font-size: 11px; line-height: 0; margin-left: 2px; }
+.appel button { background: none; border: 0; padding: 2px 2px; min-width: 16px; min-height: 22px; color: var(--r-discret); text-decoration: underline; text-underline-offset: 2px; font: inherit; }
+.appel button:hover { color: var(--r-encre); }
+.appel .manque { color: var(--reg-incompatibilite); }
+.perime { padding: 14px; border: 1px dashed var(--r-filet-fort); border-radius: 3px; display: grid; gap: 8px; font-size: 14.5px; }
+.tableau-d { border-top: 1px solid var(--r-filet); }
+.pied-p { padding-top: 10px; border-top: 1px solid var(--r-filet); }
+
+/* ── Le rapprochement ──────────────────────────────────────────────────────────────────── */
+.rapp { display: grid; gap: 22px; }
+.rapp-tete { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--r-filet-fort); }
+.pole { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.pole:last-child { flex-direction: row-reverse; text-align: right; }
+.pole h2, .pole h3 { font-variation-settings: "wdth" 106; font-size: clamp(17px, 1.8vw, 22px); line-height: 1.15; font-weight: 600; overflow-wrap: anywhere; }
+.pole h2:focus { outline: none; }
+.pole .s { font-size: 12px; color: var(--r-discret); font-family: var(--f-mono); }
+.entre { font-size: 20px; color: var(--r-discret); }
+.emplacement-hc { display: grid; gap: 8px; padding: 14px; border: 1px dashed var(--r-discret); border-radius: 3px; font-size: 14.5px; }
+.rapp-phrase { display: grid; gap: 6px; }
+.rapp-phrase p { font-size: clamp(16px, 1.5vw, 18px); line-height: 1.5; color: var(--r-encre); }
+.sec-r { display: grid; }
+.sec-titre { display: flex; align-items: baseline; gap: 10px; font-variation-settings: "wdth" 88; font-weight: 600; font-size: 14px; color: var(--r-encre); padding-bottom: 6px; border-bottom: 1px solid var(--r-filet-fort); }
+.sec-titre .num { font-family: var(--f-mono); font-variation-settings: normal; font-weight: 500; font-size: 12px; color: var(--r-meta); }
+.sec-r > .depliant { border-bottom: 1px solid var(--r-filet-fort); }
+.resume-commun { padding: 8px 0 0; }
+.rang { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 10px 0 6px; border-bottom: 1px solid var(--r-filet); scroll-margin-top: 90px; }
+@container (min-width: 620px) { .rang { grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: start; } }
+.rang.focus { background: var(--r-elev-2); box-shadow: -10px 0 0 var(--r-elev-2), 10px 0 0 var(--r-elev-2); }
+.rang-lab { display: grid; gap: 2px; padding-top: 2px; }
+.rang-lab .c { display: flex; gap: 7px; align-items: center; font-size: 15px; font-weight: 600; color: var(--r-encre); line-height: 1.3; }
+.rang-lab .k { font-size: 12.5px; color: var(--r-discret); }
+.piste .neq { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-family: var(--f-mono); font-size: 15px; color: var(--r-discret); }
+.rang.hc .piste .tx { color: var(--r-discret); font-family: var(--f-mono); font-size: 12px; }
+.hc-note { grid-column: 1 / -1; }
+.sans-l { list-style: none; margin: 0; padding: 0; display: grid; }
+.sans-l li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--r-filet); }
+.bloc-bloq { font-size: 14.5px; }
+.cadre-l { display: grid; gap: 8px; padding: 12px 14px; border: 1px dashed var(--r-filet-fort); border-radius: 3px; }
+.fiche-tete .mini { margin-bottom: 4px; }
+.histoire .journal > div { grid-template-columns: 76px minmax(0, 1fr); }
+.rapp-avec { display: grid; gap: 6px; } .rapp-avec .actions { margin-top: 0; } .rapp-avec .btn { min-height: 38px; padding: 6px 12px; font-size: 13.5px; }
+@container (max-width: 560px) { .rang.hc .piste .tx.ce { display: none; } .rang.hc .piste .tx { max-width: 46%; } }
+.sheet .fil { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; flex: 1; min-width: 0; }
+.pied { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--r-filet); }
+@media (max-width: 639px) {
+  .projet { padding: 12px 0 10px; gap: 6px; }
+  .projet-phrase { font-size: 21px; }
+  .lentilles-l { flex-wrap: nowrap; overflow-x: auto; margin: 2px -16px 0; padding: 2px 16px 6px; scrollbar-width: none; }
+  .lentilles-l > .etiquette { display: none; }
+  .chips { flex-wrap: nowrap; }
+  .lentille, .non-mesure { white-space: nowrap; flex: none; }
+  .corps { padding-top: 14px; gap: 18px; }
+  .etat p { font-size: 16px; }
+  .etat p + p { font-size: 14.5px; }
+  .accueil { gap: 12px; }
+  .geste-point .nuance, .legende .sep { display: none; }
+  .projet-l1 .non-mesure { display: none; }
+  .non-mesure.m { display: inline-block; }
+  .indice { font-size: 12.5px; }
+  .rapprocher { padding: 6px 8px; }
+  .rapprocher span[aria-hidden] { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="barre">
+    <span class="marque-mot">futur<b>•</b>e</span>
+    <nav aria-label="Navigation principale"><span>Où vivre</span><span aria-current="page">Ma recherche</span><span>Mes dossiers</span></nav>
+    <div class="droite">
+      <button class="fictif" id="btn-situations" data-act="situations" aria-expanded="false" aria-controls="menu-situations">Données fictives<span class="long"> · <span id="situation-courante">situation</span></span> ▾</button>
+      <button class="icone-btn" data-act="theme" aria-label="Changer de thème"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg></button>
+      <div id="menu-situations" class="menu" hidden></div>
+    </div>
+  </header>
+  <section class="projet" id="projet" aria-label="Votre Projet"></section>
+  <div class="corps">
+    <section class="planche" id="planche" aria-labelledby="titre-planche"></section>
+    <main class="lecture" id="lecture" aria-label="Lecture"></main>
+    <aside class="suite" id="suite" aria-label="Prochains pas"></aside>
+  </div>
+  <footer class="pied"><p class="meta">Prototype de revue FUT-41 / FUT-22, V3. Lieux, adresses, dates, analyses, preuves et versions rédigées sont inventés. Rien n'est enregistré, acheté ni analysé ; aucune IA n'est appelée.</p></footer>
+</div>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-titre" hidden></div>
+<div id="note" class="note" role="status" hidden></div>
+<script>
+"use strict";
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// DONNÉES DE DÉMONSTRATION. Même forme que la V1 : une analyse = { échelle, révision du Projet,
+// moteur, date, issues { critère → CriterionOutcome } }, plus une preuve fictive par issue.
+// Aucune ne décrit un lieu réel.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const AUJ = "2026-10-20";
+const REV = {
+  r1: { id: "r1", n: 1, date: "2026-09-08", gare: 20 },
+  r2: { id: "r2", n: 2, date: "2026-10-08", gare: 30, cause: "Après la visite du 4 octobre : « 25 minutes nous paraissent acceptables »." },
+};
+const REV_COURANTE = "r2";
+const gareMax = () => REV[REV_COURANTE].gare;
+
+const ECH = {
+  territoire: { nom: "Territoire", grain: "la commune", forme: "cercle", lu: "à la commune" },
+  autour: { nom: "Autour de l'adresse", grain: "le voisinage", forme: "carre", lu: "aux abords de l'adresse" },
+  logement: { nom: "Logement", grain: "le bâtiment", forme: "losange", lu: "dans le logement" },
+};
+const CRITERES = [
+  { cle: "mer", sans: true, ech: ["territoire"], lab: () => "la mer à moins de 15 km", court: () => "La mer à 15 km" },
+  { cle: "soins", sans: true, ech: ["territoire"], lab: () => "un médecin disponible", court: () => "Un médecin disponible" },
+  { cle: "gare", poids: 3, ech: ["territoire", "autour"], lab: () => `une gare à moins de ${gareMax()} min`, court: () => `Une gare à ${gareMax()} min` },
+  { cle: "chaleur", poids: 2, ech: ["territoire", "logement"], lab: () => "des nuits fraîches l'été", court: () => "Des nuits fraîches" },
+  { cle: "calme", poids: 2, ech: ["territoire", "autour"], lab: () => "le calme", court: () => "Le calme" },
+  { cle: "vie", poids: 1, ech: ["territoire"], lab: () => "une vie de quartier", court: () => "Une vie de quartier" },
+];
+const CRIT = Object.fromEntries(CRITERES.map((c) => [c.cle, c]));
+
+const SRC = {
+  ign: "IGN, BD Carto · 2025", ameli: "Ameli, annuaire santé · 2025", sncf: "SNCF Réseau, OpenStreetMap · 2026",
+  drias: "DRIAS, TRACC +2,7 °C · 2025", bruit: "Cerema, cartes de bruit · 2024", bpe: "INSEE BPE, RNA · 2024",
+  dpe: "ADEME, DPE · 2025", osm: "OpenStreetMap · 2026",
+};
+// [issue, valeur observée, source]
+const ANALYSES = {
+  "t:port-anvel": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-09", i: {
+    mer: ["favorable", "Littoral à 3 km du centre-bourg", SRC.ign],
+    soins: ["to_confirm", "4 généralistes pour 5 200 habitants ; l'accueil de nouveaux patients n'est pas publié", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 12 min en voiture", SRC.sncf],
+    chaleur: ["favorable", "Nuits tropicales : 2 par an (1976-2005), 7 à l'horizon 2050", SRC.drias],
+    calme: ["reserve", "Une départementale à fort trafic traverse le bourg", SRC.bruit],
+    vie: ["favorable", "Commerces et associations au-dessus de la médiane des communes de même taille", SRC.bpe] } },
+  "t:saint-aurec": { ech: "territoire", rev: "r1", moteur: "engine-4", date: "2026-09-17", i: {
+    mer: ["favorable", "Littoral à 9 km", SRC.ign],
+    soins: ["to_confirm", "2 généralistes pour 3 100 habitants ; l'accueil de nouveaux patients n'est pas publié", SRC.ameli],
+    gare: ["mismatch", "Gare de référence à 24 min, au-delà de 20 min (révision 1)", SRC.sncf],
+    chaleur: ["reserve", "Nuits tropicales : 3 par an (1976-2005), 12 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée sur la commune", SRC.bruit],
+    vie: ["favorable", "Commerces du quotidien et marché hebdomadaire", SRC.bpe] },
+    apres: { gare: ["favorable", "Gare de référence à 24 min, en deçà de 30 min (révision 2)", SRC.sncf] } },
+  "t:landeven": { ech: "territoire", rev: "r1", moteur: "engine-4", date: "2026-09-10", i: {
+    mer: ["favorable", "Littoral à 6 km", SRC.ign],
+    soins: ["to_confirm", "1 généraliste pour 1 900 habitants", SRC.ameli],
+    gare: ["mismatch", "Gare de référence à 26 min, au-delà de 20 min (révision 1)", SRC.sncf],
+    chaleur: ["favorable", "Nuits tropicales : 1 par an (1976-2005), 5 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit],
+    vie: ["reserve", "Peu de commerces à moins de dix minutes à pied du centre", SRC.bpe] } },
+  "t:ploubrec": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-12", i: {
+    mer: ["favorable", "Littoral à 1 km", SRC.ign], soins: ["to_confirm", "3 généralistes pour 4 000 habitants", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 17 min", SRC.sncf], chaleur: ["favorable", "Nuits tropicales : 1 par an (1976-2005), 6 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["reserve", "Commerces saisonniers, fermés d'octobre à avril", SRC.bpe] } },
+  "t:locmaner": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-13", i: {
+    mer: ["favorable", "Littoral à 5 km", SRC.ign], soins: ["favorable", "Maison de santé, 7 généralistes", SRC.ameli],
+    gare: ["reserve", "Gare de référence à 28 min, proche de votre limite", SRC.sncf], chaleur: ["mismatch", "Nuits tropicales : 4 par an (1976-2005), 19 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["favorable", "Centre commerçant actif", SRC.bpe] } },
+  "t:brehan": { ech: "territoire", rev: "r2", moteur: "engine-4", date: "2026-10-14", i: {
+    mer: ["incompatible", "Littoral à 31 km", SRC.ign], soins: ["favorable", "Pôle de santé, 9 généralistes", SRC.ameli],
+    gare: ["favorable", "Gare de référence à 6 min", SRC.sncf], chaleur: ["favorable", "Nuits tropicales : 2 par an (1976-2005), 8 à l'horizon 2050", SRC.drias],
+    calme: ["favorable", "Aucune infrastructure bruyante recensée", SRC.bruit], vie: ["favorable", "Centre commerçant actif", SRC.bpe] } },
+  "a:sternes": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-09", i: {
+    gare: ["favorable", "Arrêt de car à 350 m ; gare à 11 min en voiture", SRC.osm],
+    calme: ["reserve", "Ligne de bus devant la façade, un passage toutes les 20 min", SRC.bruit],
+    chaleur: ["to_confirm", "DPE D, séjour orienté sud ; confort d'été non documenté", SRC.dpe] } },
+  "a:kervily": { ech: "adresse", rev: "r1", moteur: "engine-4", date: "2026-09-19", i: {
+    gare: ["reserve", "Gare à 22 min depuis l'adresse, au-delà de 20 min (révision 1)", SRC.osm],
+    calme: ["favorable", "Aucune voie bruyante à moins de 300 m", SRC.bruit],
+    chaleur: ["favorable", "Maison en pierre, murs de 50 cm ; DPE C", SRC.dpe] },
+    apres: { gare: ["favorable", "Gare à 22 min depuis l'adresse, en deçà de 30 min (révision 2)", SRC.osm] } },
+  "a:goelands": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-16", i: {
+    gare: ["favorable", "Gare à 9 min en voiture", SRC.osm],
+    calme: ["favorable", "En retrait de la départementale, côté jardin", SRC.bruit],
+    chaleur: ["reserve", "Appartement sous toiture, DPE E ; confort d'été jugé insuffisant par le diagnostic", SRC.dpe] } },
+  "a:thoniers": { ech: "adresse", rev: "r2", moteur: "engine-4", date: "2026-10-17", i: {
+    gare: ["favorable", "Gare à 25 min depuis l'adresse", SRC.osm],
+    calme: ["reserve", "Terrasses saisonnières autorisées jusqu'à minuit sur le quai", SRC.bruit],
+    chaleur: ["favorable", "Maison traversante, DPE C", SRC.dpe] } },
+};
+const COMMUNES = {
+  "port-anvel": { nom: "Port-Anvel", analyse: "t:port-anvel" },
+  "saint-aurec": { nom: "Saint-Aurec", analyse: "t:saint-aurec" },
+  "kermoal": { nom: "Kermoal", libre: { mer: ["favorable", "Littoral à 4 km", SRC.ign], chaleur: ["mismatch", "Nuits tropicales : 15 à l'horizon 2050", SRC.drias], soins: ["to_confirm", "Accès aux soins non établi dans l'aperçu gratuit", SRC.ameli] } },
+  "landeven": { nom: "Landéven", analyse: "t:landeven" },
+  "ploubrec": { nom: "Ploubrec", analyse: "t:ploubrec" },
+  "locmaner": { nom: "Locmaner", analyse: "t:locmaner" },
+  "brehan": { nom: "Bréhan-Coët", analyse: "t:brehan" },
+  "kerlavan": { nom: "Kerlavan" },
+};
+const POSS = {
+  sternes: { type: "bien", nom: "T3, 12 rue des Sternes", court: "12 rue des Sternes", commune: "port-anvel", adr: "a:sternes", etat: "en_course", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-01" },
+  kervily: { type: "bien", nom: "Maison, 31 route de Kervily", court: "31 route de Kervily", commune: "saint-aurec", adr: "a:kervily", etat: "en_course", relation: "Je visite ce bien pour l'acheter", ajout: "2026-09-17", visite: "2026-10-24" },
+  lavoir: { type: "bien", nom: "Maison, impasse du Lavoir", court: "Impasse du Lavoir", commune: "port-anvel", adr: null, sansAdresse: true, etat: "a_considerer", relation: "Annonce sans adresse exacte", ajout: "2026-10-15" },
+  kermoal: { type: "commune", nom: "Kermoal", court: "Kermoal", commune: "kermoal", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-09-29" },
+  landeven: { type: "commune", nom: "Landéven", court: "Landéven", commune: "landeven", etat: "ecarte", relation: "J'envisage d'y vivre", ajout: "2026-09-08",
+    ecart: { date: "2026-09-24", rev: "r1", critere: "gare", motif: "« La gare est à 26 min, au-delà de nos 20 min. »" } },
+  ploubrec: { type: "commune", nom: "Ploubrec", court: "Ploubrec", commune: "ploubrec", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-12" },
+  locmaner: { type: "commune", nom: "Locmaner", court: "Locmaner", commune: "locmaner", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-13" },
+  brehan: { type: "commune", nom: "Bréhan-Coët", court: "Bréhan-Coët", commune: "brehan", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: "2026-10-14" },
+  goelands: { type: "bien", nom: "Appartement, 5 allée des Goélands", court: "5 allée des Goélands", commune: "port-anvel", adr: "a:goelands", etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-16" },
+  thoniers: { type: "bien", nom: "Maison, 8 quai des Thoniers", court: "8 quai des Thoniers", commune: "saint-aurec", adr: "a:thoniers", etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: "2026-10-17" },
+  // Ajouts de démonstration : rien n'est examiné.
+  kerlavan: { type: "commune", nom: "Kerlavan", court: "Kerlavan", commune: "kerlavan", etat: "a_considerer", relation: "J'envisage d'y vivre", ajout: AUJ, demo: true },
+  ecluse: { type: "bien", nom: "Maison, 4 rue de l'Écluse", court: "4 rue de l'Écluse", commune: "saint-aurec", adr: null, adresseConnue: true, etat: "a_considerer", relation: "Je visite ce bien pour l'acheter", ajout: AUJ, demo: true },
+};
+const OBS = [
+  { pid: "sternes", crit: "calme", date: "2026-10-04", origine: "observé par vous", texte: "Un samedi, de 21 h 40 à 22 h 10 : rue calme côté chambre ; un bus toutes les 20 min côté séjour." },
+  { pid: "sternes", crit: "chaleur", date: "2026-10-04", origine: "déclaré par l'agent", texte: "« Les fenêtres de la chambre restent ouvertes l'été. »" },
+];
+const VERIF = {
+  soins: "Appeler deux cabinets de la commune : acceptent-ils de nouveaux patients ?",
+  chaleur: "À la visite : la chambre peut-elle rester ouverte la nuit, compte tenu du bruit côté rue ? Demander les températures relevées l'été dernier.",
+  gare: "Faire le trajet jusqu'à la gare à l'heure où vous partiriez.",
+  calme: "Revenir un soir de semaine et un samedi soir.",
+};
+const JOURNAL = [
+  { date: "2026-09-08", type: "projet", qui: null, texte: "Projet créé (révision 1)." },
+  { date: "2026-09-08", type: "ajout", qui: "landeven", texte: "Landéven ajoutée." },
+  { date: "2026-09-10", type: "examen", qui: "landeven", texte: "Landéven examinée à la commune." },
+  { date: "2026-09-17", type: "examen", qui: "kervily", texte: "Saint-Aurec examinée à la commune." },
+  { date: "2026-09-19", type: "examen", qui: "kervily", texte: "31 route de Kervily examinée à l'adresse." },
+  { date: "2026-09-24", type: "ecarte", qui: "landeven", texte: "Landéven écartée : « La gare est à 26 min, au-delà de nos 20 min. »" },
+  { date: "2026-09-29", type: "ajout", qui: "kermoal", texte: "Kermoal ajoutée, sans examen." },
+  { date: "2026-10-01", type: "ajout", qui: "sternes", texte: "12 rue des Sternes ajouté depuis une annonce." },
+  { date: "2026-10-04", type: "visite", qui: "sternes", texte: "Visite du 12 rue des Sternes, deux observations notées." },
+  { date: "2026-10-08", type: "projet", qui: null, texte: "Projet révisé : une gare à moins de 30 min au lieu de 20." },
+  { date: "2026-10-09", type: "examen", qui: "sternes", texte: "12 rue des Sternes et Port-Anvel examinés." },
+  { date: "2026-10-12", type: "examen", qui: "ploubrec", texte: "Ploubrec examinée à la commune." },
+  { date: "2026-10-13", type: "examen", qui: "locmaner", texte: "Locmaner examinée à la commune." },
+  { date: "2026-10-14", type: "examen", qui: "brehan", texte: "Bréhan-Coët examinée à la commune." },
+  { date: "2026-10-15", type: "ajout", qui: "lavoir", texte: "Impasse du Lavoir ajoutée depuis une annonce, adresse inconnue." },
+  { date: "2026-10-16", type: "examen", qui: "goelands", texte: "5 allée des Goélands examiné à l'adresse." },
+  { date: "2026-10-17", type: "examen", qui: "thoniers", texte: "8 quai des Thoniers examiné à l'adresse." },
+  { date: "2026-10-19", type: "moteur", qui: null, texte: "Le moteur de futur•e passe à engine-6. Vos analyses restent celles d'engine-4." },
+  { date: "2026-10-24", type: "visite", qui: "kervily", texte: "Visite prévue du 31 route de Kervily.", futur: true },
+];
+const BASE = ["landeven", "kervily", "kermoal", "sternes", "lavoir"];
+const SITUATIONS = [
+  { cle: "recherche", lib: "Votre recherche", d: "Cinq possibilités, une écartée", ids: BASE, derniere: "2026-10-15" },
+  { cle: "une", lib: "Une seule possibilité", d: "Le prolongement d'un dossier d'adresse", ids: ["sternes"], derniere: "2026-10-15" },
+  { cle: "deux", lib: "Deux possibilités comparables", d: "Deux communes lues sous la même version du Projet", ids: ["ploubrec", "locmaner"], derniere: "2026-10-15" },
+  { cle: "horscadre", lib: "Deux analyses hors cadre", d: "Deux biens en course, deux versions du Projet", ids: ["kervily", "sternes"], derniere: "2026-10-15" },
+  { cle: "meme", lib: "Deux logements, même commune", d: "Un socle territorial commun", ids: ["sternes", "goelands"], derniere: "2026-10-15" },
+  { cle: "libre", lib: "Une commune non débloquée", d: "Aperçu partiel face à un bien examiné", ids: ["kermoal", "sternes"], derniere: "2026-10-15" },
+  { cle: "bloquant", lib: "Condition sans compromis non tenue", d: "Une commune loin de la mer", ids: ["ploubrec", "brehan", "locmaner"], derniere: "2026-10-15" },
+  { cle: "dix", lib: "Dix possibilités", d: "Six communes, quatre biens", ids: [...BASE, "ploubrec", "locmaner", "brehan", "goelands", "thoniers"], derniere: "2026-10-15" },
+  { cle: "mois", lib: "Retour après un mois", d: "Dernière visite le 19 septembre", ids: BASE, derniere: "2026-09-19" },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// VERSIONS RÉDIGÉES : SIMULATION. Textes écrits à la main pour la revue, un par situation. Aucune
+// IA n'est appelée et le navigateur n'écrit rien : il affiche ces phrases telles quelles.
+// Chaque phrase porte la liste des énoncés de la lecture établie qui la fondent ; un renvoi vers
+// un énoncé absent s'affiche comme une erreur. Chaque texte porte la clé de l'état pour lequel il
+// a été préparé (cleLecture) : si la recherche change, il n'est plus montré.
+// Syntaxe des liens : [[argument|texte]], les mêmes arguments que les liens des énoncés.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const REDIGE = {
+  recherche: { cle: "r2|kermoal:|kervily:r1/r1|lavoir:r2|sternes:r2/r2|obs2|cote:|ec:landeven", paras: [
+    [["Deux biens restent en course, le [[fiche:kervily|31 route de Kervily]] et le [[fiche:sternes|12 rue des Sternes]], et deux pistes sont à considérer, Kermoal et l'impasse du Lavoir.", ["jeu"]],
+     ["Les deux biens ne peuvent pas encore être départagés : le premier a été lu sous l'ancienne version de votre Projet, quand la gare devait être à moins de 20 minutes, et aucun écart entre eux ne peut être attribué aux lieux plutôt qu'à ce changement.", ["horscadre"]]],
+    [["L'impasse du Lavoir partage la commune du 12 rue des Sternes ; sans adresse exacte, rien ne l'en distingue encore.", ["socle-port-anvel", "sansadr-lavoir"]],
+     ["Kermoal n'est connue que par l'aperçu gratuit : ce qu'il ne lit pas reste inconnu, ni bon ni mauvais signe.", ["apercu-kermoal"]]],
+    [["Le point le plus lourd reste ouvert : un médecin disponible, condition sans compromis, n'est établi ni à Port-Anvel ni à Saint-Aurec. La fraîcheur des nuits dépend, rue des Sternes, du logement lui-même.", ["inconnues"]],
+     ["Votre visite du 24 octobre au 31 route de Kervily permet d'en [[visite:kervily|vérifier une partie]].", ["avancer"]]],
+    [["Landéven a été écartée pour la gare sous l'ancienne limite de 20 minutes ; vous acceptez désormais 30 minutes, et futur•e ne peut pas dire si elle y correspondrait sans nouvelle analyse.", ["ecart-landeven"]],
+     ["Vos notes de visite et votre budget n'entrent dans aucune de ces lectures.", ["obs", "budget"]]],
+  ] },
+  une: { cle: "r2|sternes:r2/r2|obs2|cote:|ec:", paras: [
+    [["Le 12 rue des Sternes est pour l'instant votre seule possibilité : il n'y a rien à départager.", ["jeu"]],
+     ["Il répond à votre souhait de vivre près de la mer, la gare reste à portée depuis ses abords et la commune offre une vie de quartier. Le calme y demande un compromis : une ligne de bus passe devant la façade.", ["seul"]]],
+    [["Deux points restent ouverts : un médecin disponible à Port-Anvel, condition sans compromis, et la fraîcheur des nuits dans le logement lui-même.", ["inconnues"]],
+     ["Les deux vérifications proposées portent sur ces points ; [[ajout|ajouter une autre possibilité]] permettrait de situer celle-ci.", ["avancer", "seul"]],
+     ["Vos observations du 4 octobre restent des notes, et votre budget n'est pas mesuré.", ["obs", "budget"]]],
+  ] },
+  deux: { cle: "r2|locmaner:r2|ploubrec:r2|obs0|cote:|ec:", paras: [
+    [["Ploubrec et Locmaner sont lues sous la même version de votre Projet : elles se comparent.", ["jeu", "separe"]],
+     ["Elles se rejoignent sur la mer et sur le calme.", ["commun"]]],
+    [["Ce qui les sépare dessine un compromis. La [[paire:ploubrec,locmaner:gare:territoire|gare]] correspond à Ploubrec et demande un compromis à Locmaner ; les [[paire:ploubrec,locmaner:chaleur:territoire|nuits fraîches]] correspondent à Ploubrec et moins bien que demandé à Locmaner ; la [[paire:ploubrec,locmaner:vie:territoire|vie de quartier]], à l'inverse, correspond à Locmaner et demande un compromis à Ploubrec.", ["separe"]],
+     ["Vous avez déclaré la gare et les nuits fraîches plus importantes que la vie de quartier ; futur•e ne fait pas ce calcul à votre place.", ["separe"]]],
+    [["Le médecin reste incertain : établi à Locmaner, à vérifier à Ploubrec. Appeler deux cabinets de Ploubrec est la [[verif:ploubrec:soins|vérification proposée]].", ["incertain", "avancer"]],
+     ["Votre budget n'est mesuré pour aucune des deux.", ["budget"]]],
+  ] },
+  horscadre: { cle: "r2|kervily:r1/r1|sternes:r2/r2|obs2|cote:|ec:", paras: [
+    [["Vos deux biens en course, le 31 route de Kervily et le 12 rue des Sternes, ne peuvent pas encore être comparés.", ["jeu", "horscadre"]],
+     ["Le premier a été lu les 17 et 19 septembre, sous la version de votre Projet où la gare devait être à moins de 20 minutes ; le second, sous la version actuelle. Sur les huit lectures où ils se croisent, un écart comme un accord peut tenir à ce changement plutôt qu'aux lieux.", ["horscadre"]],
+     ["[[cadre|Les relire sous la même version]] rendrait la comparaison possible ; d'ici là, leurs issues restent consultables, chacune à sa date.", ["horscadre"]]],
+    [["Un médecin disponible reste à vérifier dans les deux communes, et la fraîcheur des nuits dans le logement du 12 rue des Sternes.", ["inconnues"]],
+     ["Votre visite du 24 octobre au 31 route de Kervily permet d'en [[visite:kervily|vérifier une partie sur place]].", ["avancer"]],
+     ["Vos notes du 4 octobre et votre budget n'entrent dans aucune de ces lectures.", ["obs", "budget"]]],
+  ] },
+  meme: { cle: "r2|goelands:r2/r2|sternes:r2/r2|obs2|cote:|ec:", paras: [
+    [["Le 12 rue des Sternes et le 5 allée des Goélands sont tous deux à Port-Anvel : ce qui se lit à la commune leur est commun et ne peut pas les départager.", ["socle"]],
+     ["Tous deux restent à portée de la gare.", ["commun"]]],
+    [["Leur différence se joue à l'adresse. Aux abords, le [[paire:sternes,goelands:calme:autour|calme]] demande un compromis rue des Sternes, avec une ligne de bus devant la façade ; il correspond allée des Goélands, en retrait de la départementale.", ["separe"]],
+     ["Dans le logement, la [[paire:sternes,goelands:chaleur:logement|fraîcheur des nuits]] ne tranche pas encore : elle demande un compromis aux Goélands, un appartement sous toiture, et reste à vérifier rue des Sternes.", ["incertain"]]],
+    [["Un médecin disponible, condition sans compromis, reste à [[verif:sternes:soins|vérifier à Port-Anvel]], pour les deux.", ["inconnues", "avancer"]],
+     ["Vos observations et votre budget n'entrent dans aucune de ces lectures.", ["obs", "budget"]]],
+  ] },
+  libre: { cle: "r2|kermoal:|sternes:r2/r2|obs2|cote:|ec:", paras: [
+    [["Kermoal et le 12 rue des Sternes ne se lisent pas à la même profondeur : le second est examiné jusqu'au logement, Kermoal n'est connue que par l'aperçu gratuit.", ["jeu", "apercu-kermoal"]],
+     ["Aucune comparaison n'est donc possible. Ce que l'aperçu ne lit pas reste inconnu, et n'est ni un avantage ni un défaut de Kermoal.", ["apercu-kermoal"]]],
+    [["Pour le 12 rue des Sternes, un médecin disponible et la fraîcheur des nuits restent à vérifier.", ["inconnues", "avancer"]],
+     ["Vos notes et votre budget n'entrent dans aucune lecture.", ["obs", "budget"]]],
+  ] },
+  bloquant: { cle: "r2|brehan:r2|locmaner:r2|ploubrec:r2|obs0|cote:|ec:", paras: [
+    [["[[fiche:brehan|Bréhan-Coët]] ne tient pas votre condition de vivre à moins de 15 kilomètres de la mer : le littoral y est à 31 kilomètres, et rien d'autre ne compense ce constat.", ["bloq-brehan"]]],
+    [["Ploubrec et Locmaner restent comparables entre elles, lues sous la même version de votre Projet.", ["jeu", "ensemble"]],
+     ["Elles se rejoignent sur la mer et le calme, et ne disent pas la même chose sur la gare, les nuits fraîches et la vie de quartier ; [[paire:ploubrec,locmaner|les rapprocher]] montre ce que chacune dit de ces points.", ["ensemble", "rapprocher"]]],
+    [["Un médecin disponible reste à vérifier à Ploubrec ; votre budget n'est mesuré pour aucune.", ["inconnues", "budget"]]],
+  ] },
+  dix: { cle: "r2|brehan:r2|goelands:r2/r2|kermoal:|kervily:r1/r1|lavoir:r2|locmaner:r2|ploubrec:r2|sternes:r2/r2|thoniers:r1/r2|obs2|cote:|ec:landeven", paras: [
+    [["Neuf possibilités restent en jeu, et toutes ne se lisent pas de la même façon.", ["jeu"]],
+     ["Bréhan-Coët ne tient pas votre condition sur la mer, et rien ne la compense.", ["bloq-brehan"]],
+     ["Saint-Aurec répond encore à l'ancienne version de votre Projet, et avec elle le 31 route de Kervily et le 8 quai des Thoniers ; Kermoal n'est connue que par l'aperçu gratuit, et l'impasse du Lavoir n'a pas d'adresse.", ["horscadre", "apercu-kermoal", "sansadr-lavoir"]]],
+    [["Ce qui reste comparable se resserre. À la commune, Port-Anvel, Ploubrec et Locmaner se rejoignent sur la mer et ne disent pas la même chose sur la gare, les nuits fraîches, le calme et la vie de quartier. À l'adresse, le 12 rue des Sternes et le 5 allée des Goélands partagent leur commune.", ["ensemble", "socle-port-anvel"]],
+     ["Deux rapprochements sont possibles dans le même cadre : [[paire:sternes,goelands|12 rue des Sternes et 5 allée des Goélands]], ou [[paire:ploubrec,locmaner|Ploubrec et Locmaner]].", ["rapprocher"]]],
+    [["Landéven, écartée sous l'ancienne limite de gare, n'a pas été relue depuis.", ["ecart-landeven"]],
+     ["Un médecin disponible reste à vérifier dans trois communes ; vos notes et votre budget n'entrent dans aucune lecture.", ["inconnues", "obs", "budget"]]],
+  ] },
+  mois: { cle: "r2|kermoal:|kervily:r1/r1|lavoir:r2|sternes:r2/r2|obs2|cote:|ec:landeven|vu:2026-09-19", paras: [
+    [["Depuis votre dernière visite, le 19 septembre, votre Projet a changé : vous acceptez désormais une gare à 30 minutes au lieu de 20. Trois possibilités sont entrées dans votre recherche, le 12 rue des Sternes a été visité puis examiné, et Landéven a été écartée.", ["depuis"]],
+     ["Le moteur de futur•e a évolué le 19 octobre, mais vos analyses n'ont pas été relues : le temps écoulé n'en change aucune.", ["depuis"]]],
+    [["Votre révision a une conséquence directe : le 31 route de Kervily et Saint-Aurec, lus avant elle, ne se comparent plus au 12 rue des Sternes tant qu'ils ne sont pas relus, et Landéven a été écartée sous l'ancienne limite.", ["horscadre", "ecart-landeven"]],
+     ["L'impasse du Lavoir partage la commune du 12 rue des Sternes, sans adresse exacte, et Kermoal n'est connue que par l'aperçu gratuit.", ["socle-port-anvel", "sansadr-lavoir", "apercu-kermoal"]]],
+    [["Un médecin disponible reste à vérifier à Port-Anvel et à Saint-Aurec, comme la fraîcheur des nuits rue des Sternes ; la visite du 24 octobre au 31 route de Kervily est la prochaine occasion d'en [[visite:kervily|vérifier une partie]].", ["inconnues", "avancer"]],
+     ["Vos notes et votre budget n'entrent dans aucune lecture.", ["obs", "budget"]]],
+  ] },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// ÉTAT LOCAL. Rien n'est persistant : la page repart de zéro à chaque ouverture.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const S = {
+  situation: "recherche", ids: [...BASE], derniere: "2026-10-15",
+  sel: [], lentille: null, cote: new Set(), cadre: false,
+  // point : « Faire le point » est ouvert ; redige : la version rédigée est affichée à la place de la lecture établie ;
+  // depuisPoint : la fiche ou le rapprochement a été ouvert depuis une phrase du point (le retour y ramène).
+  point: false, redige: false, depuisPoint: false,
+  filtre: "toutes", echelleFiche: null, condOuverte: null, rangOuvert: null,
+  verifs: new Set(), notes: [], etats: {}, ecartsLocaux: {},
+  menus: { situations: false, ajout: false, depuis: false, revs: false, guidePlus: false, ecarter: null, note: null, commun: false, toutes: false, fondements: false, tableau: false },
+};
+const ETAB = new Set(["favorable", "reserve", "mismatch", "incompatible"]);
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+const dc = (iso) => { const [, m, d] = iso.split("-"); return `${+d}${+d === 1 ? "er" : ""} ${MOIS[+m - 1]}`; };
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const $ = (s, r = document) => r.querySelector(s);
+const mobile = () => matchMedia("(max-width: 1023px)").matches;
+const reduit = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Une possibilité, avec son état éventuellement modifié dans la session (écartée, reprise).
+function P(id) {
+  const p = POSS[id];
+  return { id, ...p, etat: S.etats[id] ?? p.etat, ecart: S.ecartsLocaux[id] ?? p.ecart };
+}
+const actives = () => S.ids.map(P).filter((p) => p.etat !== "ecarte");
+const ecartees = () => S.ids.map(P).filter((p) => p.etat === "ecarte");
+
+// L'analyse telle qu'on la lit : figée, ou « mise au même cadre » (simulation, analyses en jeu seulement).
+function lireAnalyse(cle, pid) {
+  const a = ANALYSES[cle];
+  if (!a) return null;
+  const enJeu = !pid || P(pid).etat !== "ecarte";
+  if (S.cadre && a.rev !== REV_COURANTE && enJeu) {
+    return { ...a, rev: REV_COURANTE, moteur: "engine-6", date: AUJ, simule: true, i: { ...a.i, ...(a.apres ?? {}) } };
+  }
+  return a;
+}
+
+// Ce qu'on sait d'une possibilité, pour un critère, à une échelle.
+// issue : favorable | reserve | mismatch | incompatible | to_confirm | indeterminate
+//         | piste (rien n'est lu) | non_lu (aperçu muet sur ce point)
+//         | sans_adresse (annonce sans adresse) | adresse_non_examinee | commune_seule (une commune n'a pas d'abords)
+function lire(p, critCle, ech) {
+  const c = COMMUNES[p.commune];
+  if (ech === "territoire") {
+    if (c.libre) { const v = c.libre[critCle]; return v ? { issue: v[0], valeur: v[1], source: v[2], libre: true } : { issue: "non_lu", libre: true }; }
+    if (!c.analyse) return { issue: "piste" };
+    const a = lireAnalyse(c.analyse, p.id); const v = a.i[critCle];
+    return v ? { issue: v[0], valeur: v[1], source: v[2], a } : { issue: "indeterminate", a };
+  }
+  if (p.type === "commune") return { issue: "commune_seule" };
+  if (p.sansAdresse) return { issue: "sans_adresse" };
+  if (!p.adr) return { issue: "adresse_non_examinee" };
+  const a = lireAnalyse(p.adr, p.id); const v = a.i[critCle];
+  return v ? { issue: v[0], valeur: v[1], source: v[2], a } : { issue: "indeterminate", a };
+}
+// L'échelle la plus fine où un critère a reçu une réponse pour cette possibilité.
+function lirePlusFin(p, critCle) {
+  for (const e of [...CRIT[critCle].ech].reverse()) {
+    const r = lire(p, critCle, e);
+    if (e === "territoire" || ETAB.has(r.issue) || r.issue === "to_confirm") return { ...r, ech: e };
+  }
+  return { ...lire(p, critCle, "territoire"), ech: "territoire" };
+}
+
+const REG = {
+  favorable: { mot: "correspond", reg: "alignement" },
+  reserve: { mot: "compromis", reg: "compromis" },
+  mismatch: { mot: "moins bien que demandé", reg: "ecart" },
+  incompatible: { mot: "condition non tenue", reg: "incompatibilite" },
+  to_confirm: { mot: "à vérifier", reg: "controle" },
+  indeterminate: { mot: "indéterminé", reg: "non-su" },
+  piste: { mot: "rien n'est encore lu", reg: null },
+  non_lu: { mot: "non lu par l'aperçu", reg: null },
+  sans_adresse: { mot: "adresse inconnue", reg: null },
+  adresse_non_examinee: { mot: "adresse non examinée", reg: null },
+  commune_seule: { mot: "il faut une adresse", reg: null },
+};
+const motDe = (r) => REG[r.issue].mot + (r.libre && REG[r.issue].reg ? " (aperçu)" : "");
+const regVar = (r) => (r.libre && REG[r.issue].reg ? "libre" : REG[r.issue]?.reg);
+const teinte = (reg) => (reg && reg !== "libre" ? `var(--reg-${reg})` : "var(--r-meta)");
+
+function niveau(p) {
+  const c = COMMUNES[p.commune];
+  if (p.type === "commune") return c.libre ? "Aperçu gratuit seulement" : c.analyse ? "Commune examinée" : "Piste : rien n'est encore lu";
+  if (p.sansAdresse) return "Commune examinée · adresse inconnue";
+  if (!p.adr) return c.analyse ? "Commune examinée · adresse non examinée" : "Rien n'est encore lu";
+  return "Commune, abords et logement examinés";
+}
+const ETAT_LIB = { en_course: "En course", a_considerer: "À considérer", ecarte: "Écartée" };
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// GLYPHES. La forme dit l'échelle (cercle, carré, losange) ; le trait dit le registre ; le
+// remplissage dit qu'une réponse est établie. Une absence est dessinée en pointillé, jamais vide.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function forme(f, t, attrs) {
+  const c = t / 2, m = 1.6;
+  if (f === "cercle") return `<circle cx="${c}" cy="${c}" r="${c - m}" ${attrs}/>`;
+  if (f === "carre") return `<rect x="${m}" y="${m}" width="${t - 2 * m}" height="${t - 2 * m}" rx="${t / 9}" ${attrs}/>`;
+  const s = t * 0.66;
+  return `<rect x="${c - s / 2}" y="${c - s / 2}" width="${s}" height="${s}" rx="${t / 14}" transform="rotate(45 ${c} ${c})" ${attrs}/>`;
+}
+function glyphe(ech, taille = 14) {
+  return `<svg class="g" width="${taille}" height="${taille}" viewBox="0 0 ${taille} ${taille}" aria-hidden="true">${forme(ECH[ech].forme, taille, `fill="none" stroke="currentColor" stroke-width="1.4"`)}</svg>`;
+}
+// Une marque d'issue : forme de l'échelle, teinte du registre.
+function marque(r, ech, taille = 18) {
+  const col = teinte(REG[r.issue].reg);
+  let attrs;
+  if (ETAB.has(r.issue) && !r.libre) attrs = `fill="${col}" stroke="${col}" stroke-width="1.4"`;
+  else if (r.libre && REG[r.issue].reg) attrs = `fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="1.2 3" stroke-linecap="round"`;
+  else if (r.issue === "to_confirm") attrs = `fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="3 2.4"`;
+  else if (r.issue === "indeterminate") attrs = `fill="none" stroke="${col}" stroke-width="1.6"`;
+  else attrs = `fill="none" stroke="var(--r-meta)" stroke-width="1.3" stroke-dasharray="2.4 3"`;
+  const bloq = r.issue === "incompatible" && !r.libre ? `<line x1="3" y1="${taille - 3}" x2="${taille - 3}" y2="3" stroke="var(--r-plaque)" stroke-width="2"/>` : "";
+  return `<svg class="g" width="${taille}" height="${taille}" viewBox="0 0 ${taille} ${taille}" aria-hidden="true">${forme(ECH[ech].forme, taille, attrs)}${bloq}</svg>`;
+}
+
+// L'emblème d'une possibilité seule (panneau, pôles du rapprochement) : trois formes emboîtées,
+// pleines quand l'échelle est examinée, pointillées sinon.
+function emblemeSeul(p, taille, cliquable) {
+  const V = 120, c = 60;
+  const com = COMMUNES[p.commune];
+  const terr = com.analyse ? "plein" : com.libre ? "points" : "pointille";
+  const adr = p.type === "bien" && p.adr ? "plein" : "pointille";
+  const st = (e, ech) => {
+    const fort = S.echelleFiche === ech && cliquable;
+    const base = e === "plein" ? `stroke="var(--r-encre)" stroke-width="${fort ? 2.8 : 1.5}"` : e === "points" ? `stroke="var(--r-discret)" stroke-width="2" stroke-dasharray="1.2 4" stroke-linecap="round"` : `stroke="var(--r-meta)" stroke-width="${fort ? 1.8 : 1}" stroke-dasharray="3 4"`;
+    return `${base} vector-effect="non-scaling-stroke"`;
+  };
+  const grads = terr === "plein" ? Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2, r1 = 54, r2 = i % 4 === 0 ? 59 : 57; return `<line x1="${(c + Math.cos(a) * r1).toFixed(2)}" y1="${(c + Math.sin(a) * r1).toFixed(2)}" x2="${(c + Math.cos(a) * r2).toFixed(2)}" y2="${(c + Math.sin(a) * r2).toFixed(2)}" stroke="var(--r-meta)" stroke-width="1"/>`; }).join("") : "";
+  const clic = (ech) => (cliquable ? `class="forme" data-act="echelle" data-ech="${ech}"` : "");
+  return `<svg viewBox="-6 -6 ${V + 12} ${V + 12}" width="${taille}" height="${taille}" aria-hidden="true">${grads}
+    <g ${clic("territoire")}><circle cx="${c}" cy="${c}" r="50" fill="transparent" ${st(terr, "territoire")}/></g>
+    <g ${clic("autour")}><rect x="${c - 29}" y="${c - 29}" width="58" height="58" rx="7" fill="transparent" ${st(adr, "autour")}/></g>
+    <g ${clic("logement")}><rect x="${c - 13}" y="${c - 13}" width="26" height="26" rx="3" transform="rotate(45 ${c} ${c})" fill="transparent" ${st(adr, "logement")}/></g>
+    <circle cx="${c}" cy="${c}" r="1.8" fill="var(--r-encre)"/></svg>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE RAPPROCHEMENT : LA RÈGLE. Pour une condition et une échelle, deux lectures donnent une
+// classe. Déterministe, sans total, sans tri des lieux.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const NON_EXAMINE = new Set(["piste", "sans_adresse", "adresse_non_examinee", "commune_seule", "non_lu"]);
+function communEch(a, b, crit) {
+  for (const e of [...CRIT[crit].ech].reverse()) if (!NON_EXAMINE.has(lire(a, crit, e).issue) && !NON_EXAMINE.has(lire(b, crit, e).issue)) return e;
+  return "territoire";
+}
+function classePaire(pa, pb, crit, ech) {
+  if (ech === "territoire" && pa.commune === pb.commune) return "socle";
+  const a = lire(pa, crit, ech), b = lire(pb, crit, ech);
+  if (CRIT[crit].sans && ((a.issue === "incompatible" && !a.libre) || (b.issue === "incompatible" && !b.libre))) return "bloquant";
+  if (a.libre || b.libre) return "partiel";
+  // V3 : deux analyses produites sous deux versions du Projet ne se comparent pas, même quand
+  // leurs issues coïncident. Seul « à vérifier des deux côtés » reste dit : ce n'est pas une comparaison.
+  if (a.a && b.a && a.a.rev !== b.a.rev && !(a.issue === "to_confirm" && b.issue === "to_confirm")) return "hors_cadre";
+  const ea = ETAB.has(a.issue), eb = ETAB.has(b.issue);
+  if (ea && eb) return a.issue === b.issue ? "commun" : "separe";
+  if (ea || eb) return NON_EXAMINE.has((ea ? b : a).issue) ? "profondeur" : "incertain";
+  if (NON_EXAMINE.has(a.issue) !== NON_EXAMINE.has(b.issue)) return "profondeur";
+  if (a.issue === "to_confirm" && b.issue === "to_confirm") return "a_verifier";
+  if (NON_EXAMINE.has(a.issue) && NON_EXAMINE.has(b.issue)) return "rien";
+  return "inconnu";
+}
+const CLASSE = {
+  bloquant: { mot: "Condition non tenue", fort: true }, separe: { mot: "Les sépare", fort: true },
+  hors_cadre: { mot: "Deux versions du Projet", fort: false }, incertain: { mot: "Pourrait les séparer", fort: false },
+  a_verifier: { mot: "À vérifier des deux côtés", fort: false }, inconnu: { mot: "Aucune ne le dit", fort: false },
+  commun: { mot: "En commun", fort: false }, socle: { mot: "Même commune", fort: false },
+  profondeur: { mot: "Une seule est examinée ici", fort: false }, partiel: { mot: "Aperçu partiel, hors départage", fort: false },
+  rien: { mot: "Aucune n'est examinée ici", fort: false },
+};
+const FAMILLE = { bloquant: "separe", separe: "separe", hors_cadre: "horscadre", incertain: "incertain", a_verifier: "incertain", inconnu: "incertain", commun: "commun", socle: "commun", profondeur: "profondeur", partiel: "profondeur", rien: "profondeur" };
+const liste = (xs) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} et ${xs.at(-1)}`);
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// MAINTENANT. Les prochaines actions naissent de l'état de la recherche, chacune avec sa raison.
+// Aucune urgence, aucune offre : une inconnue n'est jamais un bouton d'achat.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function analysesHorsCadre() {
+  const out = [];
+  for (const p of actives()) {
+    const c = COMMUNES[p.commune];
+    if (c.analyse && lireAnalyse(c.analyse, p.id).rev !== REV_COURANTE && !out.some((o) => o.cle === c.analyse)) out.push({ cle: c.analyse, nom: c.nom, pid: p.id });
+    if (p.adr && lireAnalyse(p.adr, p.id).rev !== REV_COURANTE) out.push({ cle: p.adr, nom: p.court, pid: p.id });
+  }
+  return out;
+}
+function auCadre(p) {
+  const c = COMMUNES[p.commune];
+  return (!c.analyse || lireAnalyse(c.analyse, p.id).rev === REV_COURANTE) && (!p.adr || lireAnalyse(p.adr, p.id).rev === REV_COURANTE);
+}
+function guides() {
+  const g = [];
+  const acts = actives();
+  for (const p of acts) {
+    for (const c of CRITERES.filter((c) => c.sans)) {
+      const r = lire(p, c.cle, "territoire");
+      if (r.issue === "incompatible" && !r.libre) g.push({ k: "bloq-" + p.id, t: "incompatibilite", titre: `${p.court} ne tient pas une condition sans compromis : ${c.lab()}.`, pourquoi: `${r.valeur}. Aucun autre point ne compense une condition sans compromis.`, actions: [["Voir pourquoi", "sel-seul", p.id], ["Écarter…", "ecarter-ouvrir", p.id]] });
+    }
+  }
+  const hc = analysesHorsCadre();
+  if (hc.length && acts.length > 1) {
+    const cible = P(hc[0].pid);
+    const autre = acts.find((p) => p.id !== cible.id && p.type === cible.type && auCadre(p)) ?? acts.find((p) => p.id !== cible.id);
+    g.push({ k: "cadre", t: "non-su", titre: `${hc.length > 1 ? `${hc.length} de vos analyses répondent` : "Une de vos analyses répond"} à l'ancienne version de votre Projet.`, pourquoi: `${hc.map((x) => x.nom).join(", ")} : ${hc.length > 1 ? "analyses produites" : "analyse produite"} avant le 8 oct., quand la gare devait être à moins de 20 min. Leurs écarts avec vos autres possibilités ne s'interprètent pas encore.`, actions: [["Voir l'écart", "paire", `${autre.id},${cible.id}`], ["Mettre au même cadre", "cadre", ""]] });
+  }
+  for (const p of ecartees()) {
+    if (p.ecart?.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare" && REV[p.ecart.rev].gare !== gareMax()) {
+      g.push({ k: "ecart-" + p.id, t: "controle", titre: `${p.nom} a été écartée pour une raison que votre Projet a changée depuis.`, pourquoi: `Écartée le ${dc(p.ecart.date)} sous « moins de ${REV[p.ecart.rev].gare} min » ; votre Projet dit maintenant « moins de ${gareMax()} min ». futur•e ne peut pas dire si elle y correspondrait sans nouvelle analyse.`, actions: [[`Revoir ${p.nom}`, "sel-seul", p.id]] });
+    }
+  }
+  for (const p of acts.filter((p) => p.visite && p.visite >= AUJ)) {
+    const n = CRITERES.filter((c) => lirePlusFin(p, c.cle).issue === "to_confirm").length;
+    g.push({ k: "visite-" + p.id, t: "controle", titre: `Visite du ${dc(p.visite)} : ${n} point${n > 1 ? "s restent" : " reste"} à vérifier au ${p.court}.`, pourquoi: "Ce que futur•e n'a pas pu établir pour ce bien, et qui pourrait changer votre avis.", actions: [["Préparer la visite", "visite", p.id]] });
+  }
+  // Les inconnues qui restent, hors biens déjà couverts par une visite prévue.
+  const inconnues = acts.filter((p) => !(p.visite && p.visite >= AUJ) && !COMMUNES[p.commune].libre)
+    .flatMap((p) => CRITERES.filter((c) => lirePlusFin(p, c.cle).issue === "to_confirm").map((c) => ({ p, c })));
+  if (inconnues.length && acts.length > 1) {
+    const parLieu = [...new Set(inconnues.map((x) => x.p.id))].map((id) => `${P(id).court} (${inconnues.filter((x) => x.p.id === id).map((x) => x.c.lab()).join(", ")})`);
+    g.push({ k: "inconnues", t: "controle", titre: `${inconnues.length} point${inconnues.length > 1 ? "s restent" : " reste"} à vérifier, et pourrai${inconnues.length > 1 ? "ent" : "t"} changer votre arbitrage.`, pourquoi: `${liste(parLieu)}. futur•e ne peut pas les établir ; une visite ou un appel le peut.`, actions: [["Voir quoi vérifier", "visite", inconnues[0].p.id]] });
+  }
+  const enCourse = acts.filter((p) => p.etat === "en_course");
+  if (enCourse.length === 2) {
+    const [a, b] = enCourse; const cl = classePaire(a, b, "gare", communEch(a, b, "gare"));
+    if (cl === "commun" || cl === "a_verifier" || cl === "inconnu") g.push({ k: "prio", t: "non-su", titre: `Vos deux biens en course restent difficiles à départager sur votre priorité principale, ${CRIT.gare.lab()}.`, pourquoi: "Sur ce point, ils disent la même chose. Ce qui les sépare se trouve ailleurs.", actions: [["Voir ce qui les sépare", "paire", `${a.id},${b.id}`]] });
+  }
+  for (const p of acts.filter((p) => p.sansAdresse)) {
+    const voisin = acts.find((q) => q.id !== p.id && q.commune === p.commune && q.adr);
+    g.push({ k: "adr-" + p.id, t: "non-su", titre: `${p.court} : sans adresse, ni les abords ni le logement ne sont lisibles.`, pourquoi: voisin ? `Elle partage la lecture de ${COMMUNES[p.commune].nom} avec le ${voisin.court}. Ce qui pourrait les distinguer se joue à l'adresse.` : "Seule la commune est lue.", actions: [["Voir ce qui manque", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => p.adresseConnue && !p.adr)) {
+    g.push({ k: "adrc-" + p.id, t: "non-su", titre: `Le territoire de ${COMMUNES[p.commune].nom} est déjà lu : il manque les abords et le logement du ${p.court}.`, pourquoi: "La commune a été examinée pour un autre bien. Rien n'est encore lu à cette adresse.", actions: [["Voir", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => p.type === "commune" && !COMMUNES[p.commune].analyse && !COMMUNES[p.commune].libre)) {
+    g.push({ k: "piste-" + p.id, t: "non-su", titre: `${p.nom} est une piste : rien n'est encore lu.`, pourquoi: "Elle n'entre dans aucune comparaison tant qu'elle n'est pas examinée.", actions: [["Voir", "sel-seul", p.id]] });
+  }
+  for (const p of acts.filter((p) => COMMUNES[p.commune].libre)) {
+    g.push({ k: "libre-" + p.id, t: "non-su", titre: `${p.nom} n'est lue que par l'aperçu gratuit.`, pourquoi: "Trois constats, aucun départage : elle n'est comparée sur rien tant qu'elle n'est pas examinée.", actions: [["Voir l'aperçu", "sel-seul", p.id]] });
+  }
+  if (acts.length === 1) g.push({ k: "seule", t: "non-su", titre: "Une seule possibilité : rien à départager encore.", pourquoi: "Ajoutez une commune ou un bien pour voir ce qui les sépare, et ce qu'ils partagent.", actions: [["Ajouter une possibilité", "ajout", ""]] });
+  return g;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LA PLANCHE RESSERRÉE. Une ligne par possibilité, rangée sous sa commune. L'emblème est petit
+// et toujours le même : le cercle dit la commune, le carré les abords, le losange le logement ;
+// plein si l'échelle est lue, pointillé sinon. La grande composition ne revient que dans la
+// fiche d'un lieu, là où l'on manipule ses échelles.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// Une condition sans compromis non tenue se voit sur la planche, lentille ou non : rien ne la compense.
+const bloquants = (p) => CRITERES.filter((c) => c.sans).filter((c) => { const r = lire(p, c.cle, "territoire"); return r.issue === "incompatible" && !r.libre; });
+const horsCadreP = (p) => versionsDe(p).some((v) => v.rev !== REV_COURANTE);
+// Sous une lentille, une analyse d'une autre version du Projet ne prend aucune teinte : posée à côté
+// des autres, elle se lirait comme un avantage ou un défaut actuel.
+function regPlanche(p, crit, ech) {
+  const r = lire(p, crit, ech);
+  if (r.a && r.a.rev !== REV_COURANTE) return "horscadre";
+  return regVar(r);
+}
+function mini(p, t = 34) {
+  const com = COMMUNES[p.commune];
+  const terr = com.analyse ? "plein" : com.libre ? "points" : "pointille";
+  const adr = p.type === "bien" && p.adr ? "plein" : "pointille";
+  const c = t / 2;
+  const at = (etat, ech) => `class="tr ${etat}" data-ech="${ech}" data-pid-trait="${p.id}"`;
+  let s = `<circle ${at(terr, "territoire")} cx="${c}" cy="${c}" r="${c - 1.5}"/>`;
+  if (p.type === "bien") {
+    const q = t * 0.5, d = t * 0.24;
+    s += `<rect ${at(adr, "autour")} x="${c - q / 2}" y="${c - q / 2}" width="${q}" height="${q}" rx="1.5"/>`;
+    s += `<rect ${at(adr, "logement")} x="${c - d / 2}" y="${c - d / 2}" width="${d}" height="${d}" rx="1" transform="rotate(45 ${c} ${c})"/>`;
+    if (p.sansAdresse) s += `<text class="q" x="${c}" y="${c + 3.5}" text-anchor="middle">?</text>`;
+  } else s += `<circle cx="${c}" cy="${c}" r="1.6" class="pt"/>`;
+  if (bloquants(p).length) s += `<line class="barre-bloq" x1="${t * 0.18}" y1="${t * 0.82}" x2="${t * 0.82}" y2="${t * 0.18}"/>`;
+  return `<svg class="mini" width="${t}" height="${t}" viewBox="0 0 ${t} ${t}" aria-hidden="true">${s}</svg>`;
+}
+// La ligne d'état d'un lieu : une seule, la plus importante. Sous une lentille, l'issue de la condition.
+function statutLieu(p) {
+  const ech3 = { territoire: "commune", autour: "abords", logement: "logement" };
+  if (S.lentille) {
+    const r = lirePlusFin(p, S.lentille);
+    if (r.a && r.a.rev !== REV_COURANTE) return { t: `Lu sous la révision ${r.a.rev.slice(1)} · ne se compare pas`, cls: "hc" };
+    return { t: `${cap(motDe(r))}${ETAB.has(r.issue) || r.issue === "to_confirm" ? ` · ${ech3[r.ech]}` : ""}`, reg: REG[r.issue].reg && !r.libre ? REG[r.issue].reg : null };
+  }
+  const bq = bloquants(p);
+  if (bq.length) return { t: `Ne tient pas : ${bq.map((c) => c.lab()).join(", ")}`, reg: "incompatibilite" };
+  if (p.etat === "ecarte") {
+    const change = p.ecart.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare";
+    return { t: `Écartée le ${dc(p.ecart.date)}${change ? " · raison changée depuis" : ""}`, reg: change ? "controle" : null };
+  }
+  if (horsCadreP(p)) return { t: "Lu sous l'ancienne version du Projet", cls: "hc" };
+  const n = CRITERES.filter((c) => !S.cote.has(c.cle) && lirePlusFin(p, c.cle).issue === "to_confirm" && !COMMUNES[p.commune].libre).length;
+  if (n) return { t: `${n} ${pl(n, "point")} à vérifier`, reg: "controle" };
+  return null;
+}
+const PROF = { apercu: "aperçu gratuit seulement", piste: "rien n'est encore lu", sans_adresse: "adresse inconnue", adresse_non_examinee: "adresse non examinée", examine: null };
+function ligneLieu(p, sousCommune) {
+  const st = statutLieu(p);
+  const lec = lectureDe(p);
+  const prof = PROF[lec] ?? (p.type === "bien" ? "lu aux trois échelles" : "commune lue");
+  const sous = [p.etat === "ecarte" ? null : ETAT_LIB[p.etat], !sousCommune && p.type === "bien" ? COMMUNES[p.commune].nom : null, prof, p.visite && p.etat !== "ecarte" ? `visite le ${dc(p.visite)}` : null].filter(Boolean).join(" · ");
+  const sel = S.sel.includes(p.id);
+  const proposer = S.sel.length === 1 && !sel && p.etat !== "ecarte";
+  return `<li class="lieu-l ${sel ? "sel" : ""}" data-pid="${p.id}">
+    <button class="lieu" data-act="ouvrir" data-arg="${p.id}" data-fk="lieu-${p.id}" aria-pressed="${sel}">${mini(p)}<span class="txt"><span class="n">${esc(p.type === "bien" ? p.court : p.nom)}</span><span class="s">${sous}</span>${st ? `<span class="i ${st.cls ?? ""}" style="--t:${st.reg ? `var(--reg-${st.reg})` : "var(--r-meta)"}">${st.t}</span>` : ""}</span></button>
+    ${proposer ? `<button class="rapprocher" data-act="paire" data-arg="${S.sel[0]},${p.id}" data-fk="rapp-${p.id}" aria-label="Rapprocher ${esc(p.court)} de ${esc(P(S.sel[0]).court)}"><span aria-hidden="true">⟷</span> Rapprocher</button>` : ""}
+  </li>`;
+}
+function htmlGroupes(ps) {
+  const g = new Map();
+  for (const p of ps) { if (!g.has(p.commune)) g.set(p.commune, []); g.get(p.commune).push(p); }
+  return [...g.entries()].map(([com, xs]) => {
+    const biens = xs.filter((p) => p.type === "bien");
+    if (biens.length < 2) return xs.map((p) => ligneLieu(p, false)).join("");
+    const c = COMMUNES[com];
+    const a = c.analyse ? lireAnalyse(c.analyse, biens[0].id) : null;
+    return `<li class="groupe-l"><div class="commune-l">${glyphe("territoire", 13)}<b>${c.nom}</b><span class="meta">${biens.length} biens · ${a ? `commune lue, révision ${a.rev.slice(1)}` : "commune non lue"}</span></div><ul class="sous-l">${xs.map((p) => ligneLieu(p, true)).join("")}</ul></li>`;
+  }).join("");
+}
+let clePlanche = "";
+function rendrePlanche() {
+  const el = $("#planche");
+  const acts = actives();
+  const visibles = acts.filter((p) => S.filtre === "toutes" || p.etat === S.filtre);
+  const ecs = ecartees();
+  const cle = JSON.stringify([S.ids, S.etats, S.filtre, S.sel, S.lentille, S.cadre, S.menus.ajout, S.situation, [...S.cote]]);
+  if (cle === clePlanche) return;
+  clePlanche = cle;
+  const indice = S.sel.length === 0 ? "Ouvrez un lieu pour le lire, puis rapprochez-le d'un autre pour voir ce qui les sépare."
+    : S.sel.length === 1 ? `<b class="encre">${esc(P(S.sel[0]).court)}</b> est ouvert. « Rapprocher » sur un autre lieu pour voir ce qui les sépare.`
+      : `<b class="encre">${esc(P(S.sel[0]).court)}</b> et <b class="encre">${esc(P(S.sel[1]).court)}</b> sont rapprochés.`;
+  const ajouts = ["kerlavan", "ecluse"].filter((id) => !S.ids.includes(id));
+  const filtres = [["toutes", "Toutes"], ["en_course", "En course"], ["a_considerer", "À considérer"]];
+  el.innerHTML = `
+    <div class="planche-tete">
+      <h2 class="surtitre" id="titre-planche"><span>Vos possibilités</span><span class="num">${acts.length}</span></h2>
+      ${ajouts.length ? `<button class="btn-lien meta" data-act="ajout" data-fk="ajout" aria-expanded="${S.menus.ajout}">+ Ajouter</button>` : ""}
+    </div>
+    <p class="legende"><span>${glyphe("territoire", 12)} commune</span><span>${glyphe("autour", 12)} abords</span><span>${glyphe("logement", 12)} logement</span><span class="sep">trait plein : lu · pointillé : pas encore</span></p>
+    ${S.menus.ajout ? `<div class="choix-ajout arrive"><p class="nuance"><span class="sim">démonstration</span> Dans le produit : une commune, une adresse ou une annonce. Ici, deux ajouts préparés ; rien n'est analysé.</p><div class="opts">${ajouts.map((id) => `<button class="btn" data-act="ajouter" data-arg="${id}">${id === "kerlavan" ? "Une commune : Kerlavan" : "Une adresse : 4 rue de l'Écluse, Saint-Aurec"}</button>`).join("")}<button class="btn-lien" data-act="ajout">Annuler</button></div></div>` : ""}
+    ${acts.length > 4 ? `<div class="filtres" role="group" aria-label="Filtrer les possibilités">${filtres.map(([k, l]) => `<button class="filtre" data-act="filtre" data-arg="${k}" data-fk="filtre-${k}" aria-pressed="${S.filtre === k}">${l}</button>`).join("")}</div>` : ""}
+    <p class="indice" aria-live="polite">${indice}</p>
+    <ul class="liste-l">${htmlGroupes(visibles)}</ul>
+    ${ecs.length ? `<div class="ecartees-l"><h3 class="etiquette">Écartées · ${ecs.length}</h3><ul class="liste-l">${ecs.map((p) => ligneLieu(p, false)).join("")}</ul></div>` : ""}`;
+}
+// La lentille recolore les formes en place, sans redessiner la liste.
+function appliquerLentillePlanche() {
+  const el = $("#planche");
+  if (S.lentille) el.dataset.lentille = S.lentille; else delete el.dataset.lentille;
+  el.querySelectorAll(".mini .tr").forEach((f) => {
+    f.removeAttribute("data-reg");
+    if (!S.lentille || !CRIT[S.lentille].ech.includes(f.dataset.ech)) return;
+    const reg = regPlanche(P(f.dataset.pidTrait), S.lentille, f.dataset.ech);
+    if (reg) f.setAttribute("data-reg", reg);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE PROJET, EN UNE BANDE. Sa phrase, sa révision, et ses conditions comme lentilles.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function chip(c) {
+  const poids = c.poids ? `<span class="poids" aria-hidden="true">${[1, 2, 3].map((n) => `<i class="${n <= c.poids ? "" : "vide"}" style="height:${3 + n * 2.4}px"></i>`).join("")}</span>` : `<span class="verrou" aria-hidden="true"></span>`;
+  return `<button class="lentille ${c.sans ? "sans" : ""} ${S.cote.has(c.cle) ? "cote" : ""}" data-act="lentille" data-arg="${c.cle}" data-fk="lentille-${c.cle}" aria-pressed="${S.lentille === c.cle}">${poids}<span>${c.court()}</span><span class="sr">${c.sans ? ", condition sans compromis" : `, poids ${c.poids} sur 3`}</span></button>`;
+}
+function lectureLentille() {
+  if (!S.lentille) return "";
+  const c = CRIT[S.lentille];
+  const ou = c.ech.map((e) => ECH[e].lu).join(" et ");
+  const cote = c.sans
+    ? `<span class="nuance">Sans compromis : elle ne se met pas de côté.</span>`
+    : `<button class="btn-lien meta" data-act="cote" data-arg="${c.cle}" data-fk="cote-${c.cle}">${S.cote.has(c.cle) ? "Remettre cette priorité" : "Et si je la mettais de côté ?"}</button>`;
+  return `<div class="lecture-lentille"><span class="formes" aria-hidden="true">${c.ech.map((e) => glyphe(e, 13)).join("")}</span><p><span class="etiquette reg-t" style="--t:var(--r-encre)">Lecture selon ${c.lab()}</span> <span class="nuance">se lit ${ou}. Un lieu lu sous une autre version du Projet reste sans teinte.</span></p>${cote}<button class="btn-lien meta" data-act="lentille" data-arg="${c.cle}">Retirer</button></div>`;
+}
+function rendreProjet() {
+  const anciennes = analysesHorsCadre();
+  $("#projet").innerHTML = `
+    <div class="projet-l1"><span class="etiquette">Votre Projet</span><button class="btn-lien meta" data-act="revs" data-fk="revs" aria-expanded="${S.menus.revs}">révision 2 du 8 oct. · historique</button><span class="non-mesure" title="Votre budget n'est mesuré pour aucun lieu">Budget 320 000 € · non mesuré</span></div>
+    <h1 class="projet-phrase">Vivre près de la mer, avec un médecin à portée.</h1>
+    ${S.menus.revs ? `<div class="revs arrive" id="revs">
+      <div><span class="meta">Révision 2 · 8 oct.</span><span>Une gare à moins de <b class="encre">30 min</b> au lieu de 20. ${REV.r2.cause}</span></div>
+      <div><span class="meta">Révision 1 · 8 sept.</span><span>Projet créé. ${anciennes.length ? `Répondent encore à cette version : ${anciennes.map((x) => x.nom).join(", ")}. Leurs écarts avec les autres ne se comparent pas.` : "Plus aucune analyse en jeu ne répond à cette version."}</span></div>
+    </div>` : ""}
+    <div class="lentilles-l"><span class="etiquette">Lire vos lieux selon</span><div class="chips" role="group" aria-label="Vos conditions">${CRITERES.map(chip).join("")}</div><span class="non-mesure m" aria-hidden="true">Budget 320 000 € · non mesuré</span></div>
+    ${lectureLentille()}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// L'ACCUEIL DE LA LECTURE. Deux phrases tirées du point, le geste « Faire le point », et deux
+// prochains pas au plus. Le reste est à un geste.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function evenementsDepuis() {
+  return JOURNAL.filter((j) => (j.qui === null || S.ids.includes(j.qui)) && (j.date > S.derniere || (j.date === S.derniere && j.type === "ajout")) && (j.date <= AUJ || j.futur));
+}
+function htmlAccueil() {
+  const ct = contrat();
+  const acc = accroche(ct);
+  return `<div class="accueil arrive">
+    <h2 class="surtitre"><span>Où en est votre recherche</span><span class="num">${dc(AUJ)}</span></h2>
+    <div class="etat">${acc.map((e) => `<p class="${e.fort ? "fort reg-bloc" : ""}" ${e.fort ? `style="--t:var(--reg-${e.fort})"` : ""}><span>${e.html}</span></p>`).join("")}</div>
+    <div class="geste-point"><button class="btn btn-plein" data-act="point" data-fk="point">Faire le point</button><span class="nuance">Ce qui est établi, ce qui reste ouvert, ce qui ferait avancer.</span></div>
+  </div>`;
+}
+function htmlSuite() {
+  const g = guides().filter((x) => !x.k.startsWith("bloq-"));
+  const vis = S.menus.guidePlus ? g : g.slice(0, 2);
+  const ev = evenementsDepuis(), passes = ev.filter((e) => !e.futur);
+  const verifs = [...S.verifs].map((k) => { const [pid, crit] = k.split(":"); return { p: P(pid), crit }; });
+  return `<div class="suite-in">
+    ${passes.length || ev.length ? `<div class="depuis-l"><button class="depliant" data-act="depuis" data-fk="depuis" aria-expanded="${S.menus.depuis}"><span class="pm" aria-hidden="true">${S.menus.depuis ? "−" : "+"}</span>Depuis votre visite du ${dc(S.derniere)} : ${passes.length} ${pl(passes.length, "changement")}${ev.length > passes.length ? ", 1 à venir" : ""}</button>
+      ${S.menus.depuis ? `<div class="journal">${ev.map((e) => `<div><span class="meta">${dc(e.date)}${e.futur ? " · prévu" : ""}</span><span>${e.texte}</span>${e.qui && S.ids.includes(e.qui) ? `<button class="btn-lien meta" data-act="ouvrir" data-arg="${e.qui}">Voir</button>` : "<span></span>"}</div>`).join("")}</div>` : ""}</div>` : ""}
+    ${vis.length ? `<div class="pas"><h3 class="etiquette">Prochain pas</h3><ul>${vis.map((x) => `<li style="--t:${teinte(x.t)}"><p>${x.titre}</p><button class="btn-lien" data-act="${x.actions[0][1]}" data-arg="${x.actions[0][2]}" data-fk="g-${x.k}">${x.actions[0][0]}${x.actions[0][1] === "cadre" ? ` <span class="sim">simulation</span>` : ""}</button></li>`).join("")}</ul>${g.length > 2 ? `<button class="btn-lien meta" data-act="guidePlus" data-fk="guidePlus">${S.menus.guidePlus ? "Montrer moins" : `${g.length - 2} ${pl(g.length - 2, "autre")}`}</button>` : ""}</div>` : ""}
+    ${verifs.length ? `<div class="mes-verifs"><h3 class="etiquette">Mes vérifications · ${verifs.length}</h3><ul>${verifs.map((v) => `<li>${esc(v.p.court)} · ${CRIT[v.crit].lab()} : ${VERIF[v.crit] ?? "à vérifier sur place."}</li>`).join("")}</ul></div>` : ""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// FAIRE LE POINT. Deux étapes, séparées dans le code comme elles le seraient dans le produit.
+//
+// 1. contrat() : l'état structuré de la recherche, calculé sans rédaction. Il fixe ce que toute
+//    lecture a le droit de dire : candidats, versions d'analyse, issues établies, différences
+//    comparables, différences hors cadre, inconnues, non-mesuré, observations, vérifications.
+// 2. lecture(ct) : des énoncés déterministes, chacun avec ses fondements (analyse, version du
+//    Projet, observation, vérification). La « version rédigée » n'est qu'une reformulation de ces
+//    énoncés : dans ce prototype, un texte écrit à la main pour chaque situation, qui cite les
+//    énoncés sur lesquels chaque phrase repose. Aucune IA n'est appelée.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+const NOMBRES = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze"];
+const nb = (n, fem = true) => (n === 1 && !fem ? "un" : NOMBRES[n] ?? String(n));
+const pl = (n, s, p = s + "s") => (n > 1 ? p : s);
+const OU = { territoire: "à la commune", autour: "aux abords", logement: "dans le logement" };
+const ordreCrit = (a, b) => (b.sans ? 9 : b.poids) - (a.sans ? 9 : a.poids);
+
+function lectureDe(p) {
+  const c = COMMUNES[p.commune];
+  if (c.libre) return "apercu";
+  if (!c.analyse) return "piste";
+  if (p.sansAdresse) return "sans_adresse";
+  if (p.type === "bien" && !p.adr) return "adresse_non_examinee";
+  return "examine";
+}
+function versionsDe(p) {
+  const c = COMMUNES[p.commune], out = [];
+  for (const [cle, ech, nom] of [[c.analyse, "territoire", c.nom], [p.adr, "autour", p.court]]) {
+    if (!cle) continue;
+    const a = lireAnalyse(cle, p.id);
+    out.push({ cle, ech, nom, rev: a.rev, moteur: a.moteur, date: a.date, simule: !!a.simule });
+  }
+  return out;
+}
+const refAnalyse = (v) => ({ g: v.ech, t: `${v.nom} · révision ${v.rev.slice(1)} · ${v.moteur} · ${dc(v.date)}${v.simule ? " · simulation" : ""}` });
+const refProjet = (rev = REV_COURANTE) => ({ g: null, t: `Votre Projet · révision ${rev.slice(1)} · ${dc(REV[rev].date)}` });
+const refsIssue = (p, crit, ech) => { const r = lire(p, crit, ech); return r.a ? [refAnalyse(versionsDe(p).find((v) => v.cle === (ech === "territoire" ? COMMUNES[p.commune].analyse : p.adr)))] : []; };
+const uniq = (refs) => refs.filter((r, i) => refs.findIndex((x) => x.t === r.t) === i);
+
+// ── Étape 1 : le contrat ─────────────────────────────────────────────────────────────────────
+function contrat() {
+  const cands = actives().map((p) => {
+    const versions = versionsDe(p);
+    return {
+      p, lecture: lectureDe(p), versions,
+      horsCadre: versions.some((v) => v.rev !== REV_COURANTE),
+      bloq: bloquants(p),
+      aVerifier: CRITERES.filter((c) => !S.cote.has(c.cle)).map((c) => ({ c, r: lirePlusFin(p, c.cle) })).filter((x) => x.r.issue === "to_confirm" && !x.r.libre),
+    };
+  });
+  return {
+    rev: REV_COURANTE, cands,
+    comparables: cands.filter((c) => !c.horsCadre && !c.bloq.length && (c.lecture === "examine" || c.lecture === "sans_adresse" || c.lecture === "adresse_non_examinee")),
+    ecartees: ecartees(),
+    evts: evenementsDepuis(),
+    obs: [...OBS, ...S.notes].filter((o) => S.ids.includes(o.pid) && P(o.pid).etat !== "ecarte"),
+    cote: [...S.cote],
+  };
+}
+// Clé de cache d'une lecture rédigée : révision du Projet, candidats, versions de leurs analyses,
+// observations et priorités mises de côté. Une lentille, une sélection ou un clic n'en font pas partie.
+function cleLecture(ct) {
+  return [ct.rev, ...ct.cands.map((c) => `${c.p.id}:${c.versions.map((v) => v.rev + (v.simule ? "s" : "")).join("/")}`).sort(), `obs${ct.obs.length}`, `cote:${ct.cote.join("/")}`, `ec:${ct.ecartees.map((p) => p.id).join("/")}`, ...(enoncesDepuis(ct).length ? [`vu:${S.derniere}`] : [])].join("|");
+}
+
+// ── Étape 2 : les énoncés ────────────────────────────────────────────────────────────────────
+// Un lien d'énoncé ouvre ce qu'il nomme : une piste du rapprochement, une fiche, une vérification.
+const go = (arg, txt) => `<button class="lien-p" data-act="go" data-arg="${esc(arg)}">${txt}</button>`;
+const nomL = (p) => esc(p.court);
+
+function enoncesJeu(ct) {
+  const out = [];
+  const n = ct.cands.length;
+  const noms = (cs) => liste(cs.map((c) => go("fiche:" + c.p.id, esc(c.p.type === "bien" ? c.p.court : c.p.nom))));
+  const groupe = (cs, mot) => (cs.length === n ? `${noms(cs)}, ${n === 2 ? "toutes deux" : "toutes"} ${mot}` : `${nb(cs.length)} ${mot}${cs.length <= 3 ? ` (${noms(cs)})` : ""}`);
+  const enCourse = ct.cands.filter((c) => c.p.etat === "en_course");
+  const aConsiderer = ct.cands.filter((c) => c.p.etat !== "en_course");
+  let t;
+  if (n === 0) t = "Aucune possibilité n'est en jeu.";
+  else if (n === 1) t = `Une seule possibilité est en jeu : ${go("fiche:" + ct.cands[0].p.id, nomL(ct.cands[0].p))}. Rien n'est à départager ; ce point porte sur ce lieu seul.`;
+  else t = `${cap(nb(n))} possibilités sont en jeu : ${[enCourse.length ? groupe(enCourse, "en course") : null, aConsiderer.length ? groupe(aConsiderer, "à considérer") : null].filter(Boolean).join(" et ")}.`;
+  if (ct.ecartees.length) t += ` ${ct.ecartees.length > 1 ? `${cap(nb(ct.ecartees.length))} autres sont écartées` : "Une autre est écartée"}.`;
+  out.push({ k: "jeu", sec: "jeu", html: t, refs: [refProjet()] });
+  for (const c of ct.cands.filter((c) => c.bloq.length)) {
+    for (const k of c.bloq) {
+      const r = lire(c.p, k.cle, "territoire");
+      out.push({ k: "bloq-" + c.p.id, sec: "jeu", fort: "incompatibilite", html: `${go("fiche:" + c.p.id, nomL(c.p))} ne tient pas une condition sans compromis, ${k.lab()} : ${r.valeur.charAt(0).toLowerCase() + r.valeur.slice(1)}. Aucune autre correspondance ne compense ce constat.`, refs: [refProjet(), ...refsIssue(c.p, k.cle, "territoire")] });
+    }
+  }
+  for (const p of ct.ecartees) {
+    if (p.ecart?.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare" && REV[p.ecart.rev].gare !== gareMax()) {
+      out.push({ k: "ecart-" + p.id, sec: "jeu", html: `${go("fiche:" + p.id, esc(p.nom))} a été écartée le ${dc(p.ecart.date)} pour la gare, sous une limite de ${REV[p.ecart.rev].gare} min que vous avez portée depuis à ${gareMax()} min. Sans nouvelle analyse, futur•e ne peut pas dire si elle y correspondrait.`, refs: [refProjet(p.ecart.rev), refProjet()] });
+    }
+  }
+  return out;
+}
+
+// Une paire de lieux : ce qui les sépare dans le même cadre, ce qu'ils partagent.
+function enoncesPaire(pa, pb) {
+  const out = [];
+  const rangs = rangsPaire(pa, pb);
+  const de = (rs) => [...new Map(rs.map((r) => [r.c.cle, r])).values()].sort((x, y) => ordreCrit(x.c, y.c));
+  const lien = (r, txt) => go(`paire:${pa.id},${pb.id}:${r.c.cle}:${r.ech}`, txt);
+  if (pa.commune === pb.commune) {
+    out.push({ k: "socle", sec: "compare", html: `${nomL(pa)} et ${nomL(pb)} partagent la lecture de ${COMMUNES[pa.commune].nom} : une seule analyse de la commune, qui vaut pour les deux.`, refs: refsIssue(pa, "mer", "territoire") });
+  }
+  const sep = de(rangs.filter((r) => r.cl === "separe"));
+  const uneEch = (rs) => new Set(rs.map((r) => r.ech)).size === 1;
+  const elles = pa.type === "commune" && pb.type === "commune" ? "Elles" : "Ils";
+  if (sep.length) {
+    const u = uneEch(sep);
+    out.push({ k: "separe", sec: "compare", html: `Ce qui les sépare${u ? `, ${OU[sep[0].ech]}` : ""} : ${sep.map((r) => `${lien(r, r.c.lab())}${u ? "" : " " + OU[r.ech]} (${nomL(pa)} : ${motDe(r.a)} ; ${nomL(pb)} : ${motDe(r.b)})`).join(", ")}.`, refs: uniq(sep.flatMap((r) => [...refsIssue(pa, r.c.cle, r.ech), ...refsIssue(pb, r.c.cle, r.ech)])) });
+  }
+  const com = de(rangs.filter((r) => r.cl === "commun"));
+  if (com.length) out.push({ k: "commun", sec: "compare", html: `${elles} se rejoignent sur ${liste(com.map((r) => lien(r, r.c.lab())))}.`, refs: uniq(com.flatMap((r) => [...refsIssue(pa, r.c.cle, r.ech), ...refsIssue(pb, r.c.cle, r.ech)])) });
+  const inc = de(rangs.filter((r) => r.cl === "incertain"));
+  if (inc.length) out.push({ k: "incertain", sec: "ouvert", html: `Établi d'un seul côté, donc sans départage : ${inc.map((r) => `${lien(r, r.c.lab())} ${OU[r.ech]} (${nomL(pa)} : ${motDe(r.a)} ; ${nomL(pb)} : ${motDe(r.b)})`).join(", ")}.`, refs: uniq(inc.flatMap((r) => [...refsIssue(pa, r.c.cle, r.ech), ...refsIssue(pb, r.c.cle, r.ech)])) });
+  const hc = rangs.filter((r) => r.cl === "hors_cadre");
+  if (hc.length) {
+    const vieilles = [pa, pb].flatMap(versionsDe).filter((v) => v.rev !== REV_COURANTE);
+    out.push({ k: "horscadre", sec: "ouvert", html: `Leurs analyses ne répondent pas à la même version de votre Projet : ${liste(vieilles.map((v) => v.nom))} ${vieilles.length > 1 ? "ont été lus" : "a été lu"} sous la ${go("revs", "révision 1")}, quand la gare devait être à moins de ${REV.r1.gare} min. Sur ces ${nb(hc.length, false) === "un" ? "une" : nb(hc.length)} ${pl(hc.length, "lecture")}, un écart comme un accord peut tenir à votre Projet plutôt qu'aux lieux : futur•e ne les compare pas. Les relire sous la révision 2 le permettrait (${go("cadre", "voir ce que cela changerait")}).`, refs: uniq([refProjet("r1"), refProjet(), ...[pa, pb].flatMap(versionsDe).map(refAnalyse)]) });
+  }
+  return { out, rangs };
+}
+
+function enoncesCompare(ct) {
+  const out = [];
+  const n = ct.cands.length;
+  if (n === 1) {
+    const c = ct.cands[0], p = c.p;
+    if (c.lecture !== "examine" && c.lecture !== "sans_adresse") return out;
+    const parReg = {};
+    for (const k of CRITERES.filter((k) => !S.cote.has(k.cle))) {
+      const r = lirePlusFin(p, k.cle);
+      if (!ETAB.has(r.issue)) continue;
+      (parReg[r.issue] ??= []).push(`${go(`fiche:${p.id}:${k.cle}`, k.lab())}${r.ech !== "territoire" ? " " + OU[r.ech] : ""}`);
+    }
+    const morceaux = [["favorable", "correspond"], ["reserve", "compromis"], ["mismatch", "moins bien que demandé"], ["incompatible", "condition non tenue"]].filter(([i]) => parReg[i]).map(([i, m]) => `${m} pour ${liste(parReg[i])}`);
+    out.push({ k: "seul", sec: "compare", html: `Pour ${nomL(p)}, futur•e établit : ${morceaux.join(" ; ")}. Aucun autre lieu ne permet encore de le situer : ${go("ajout", "ajouter une possibilité")} montrerait ce qui l'en distingue.`, refs: c.versions.map(refAnalyse) });
+    return out;
+  }
+  if (n === 2) {
+    const [a, b] = ct.cands.map((c) => c.p);
+    return enoncesPaire(a, b).out;
+  }
+  // Trois possibilités ou plus : une lecture d'ensemble, jamais une mini-synthèse par lieu.
+  const comp = ct.comparables.map((c) => c.p);
+  if (comp.length < 2) {
+    out.push({ k: "aucune-paire", sec: "compare", html: "Aucune paire de possibilités n'est encore comparable dans un même cadre : les raisons sont ci-dessous.", refs: [refProjet()] });
+    return out;
+  }
+  const communes = [...new Map(comp.map((p) => [p.commune, p])).values()];
+  if (communes.length >= 2) {
+    const diff = CRITERES.filter((k) => !S.cote.has(k.cle)).filter((k) => {
+      const iss = communes.map((p) => lire(p, k.cle, "territoire").issue).filter((i) => ETAB.has(i));
+      return new Set(iss).size > 1;
+    });
+    const memes = CRITERES.filter((k) => !S.cote.has(k.cle) && !diff.includes(k)).filter((k) => communes.every((p) => ETAB.has(lire(p, k.cle, "territoire").issue)));
+    out.push({ k: "ensemble", sec: "compare", html: `À la commune, ${liste(communes.map((p) => COMMUNES[p.commune].nom))} sont lues sous la même version de votre Projet. ${diff.length ? `Elles ne disent pas la même chose sur ${liste(diff.map((k) => go("lent:" + k.cle, k.lab())))}` : "Elles disent la même chose sur toutes vos conditions établies"}${memes.length ? ` ; elles se rejoignent sur ${liste(memes.map((k) => k.lab()))}` : ""}.`, refs: uniq(communes.flatMap((p) => versionsDe(p).filter((v) => v.ech === "territoire").map(refAnalyse))) });
+  }
+  // Les biens d'une même commune partagent un socle : on le dit une fois.
+  const parCommune = Object.values(Object.groupBy(comp.filter((p) => p.type === "bien"), (p) => p.commune)).filter((g) => g.length > 1);
+  for (const g of parCommune) {
+    const avecAdr = g.filter((p) => p.adr);
+    const sansAdr = g.filter((p) => !p.adr);
+    out.push({ k: "socle-" + g[0].commune, sec: "compare", html: `${liste(g.map(nomL))} partagent la lecture de ${COMMUNES[g[0].commune].nom}. ${avecAdr.length >= 2 ? `Ce qui peut distinguer ${liste(avecAdr.map(nomL))} se lit aux abords et dans le logement${sansAdr.length ? ` ; ${liste(sansAdr.map(nomL))}, sans adresse, ne s'y lit pas encore` : ""}.` : `Sans adresse pour ${liste(sansAdr.map(nomL))}, rien ne les distingue encore.`}`, refs: versionsDe(g[0]).filter((v) => v.ech === "territoire").map(refAnalyse) });
+  }
+  // Des paires à rapprocher : même type, toutes deux au cadre, dans l'ordre d'ajout. Aucun mérite n'est classé.
+  const paires = [];
+  for (const type of ["bien", "commune"]) {
+    const xs = comp.filter((p) => p.type === type && (type === "commune" || p.adr));
+    if (xs.length >= 2) paires.push([xs[0], xs[1]]);
+  }
+  if (paires.length) out.push({ k: "rapprocher", sec: "compare", html: `Pour voir ce qui sépare deux lieux, rapprochez-les : ${paires.map(([a, b]) => go(`paire:${a.id},${b.id}`, `${nomL(a)} et ${nomL(b)}`)).join(", ou ")}.`, refs: [] });
+  return out;
+}
+
+function enoncesOuvert(ct, dejaHc, dejaDits = new Set()) {
+  const out = [];
+  const hcs = ct.cands.filter((c) => c.horsCadre);
+  if (hcs.length && !dejaHc && ct.cands.length > 1) {
+    const vieilles = hcs.flatMap((c) => c.versions.filter((v) => v.rev !== REV_COURANTE));
+    const noms = [...new Set(vieilles.map((v) => v.nom))];
+    const touches = hcs.filter((c) => !noms.includes(c.p.court)).map((c) => c.p).filter((p) => p.type === "bien" && !noms.includes(p.court));
+    const autre = ct.cands.find((c) => !c.horsCadre && c.p.type === hcs[0].p.type && c.lecture === "examine") ?? ct.cands.find((c) => !c.horsCadre);
+    out.push({ k: "horscadre", sec: "ouvert", html: `${liste(noms.map(esc))} ${noms.length > 1 ? "sont lus" : "est lu"} sous la ${go("revs", "révision 1")} de votre Projet, quand la gare devait être à moins de ${REV.r1.gare} min. Tant qu'ils ne sont pas relus sous la révision 2, leurs écarts avec vos autres possibilités ne disent rien des lieux${touches.length ? `. Cela vaut aussi pour ${liste(touches.map(nomL))}, dont la commune est ${liste([...new Set(touches.map((p) => COMMUNES[p.commune].nom))])}` : ""}${autre ? ` : ${go(`paire:${autre.p.id},${hcs[0].p.id}`, "voir ce qui ne se compare pas")}` : ""}.`, refs: uniq([refProjet("r1"), refProjet(), ...vieilles.map(refAnalyse)]) });
+  }
+  // Les inconnues, regroupées par condition, avec l'échelle où elles se posent.
+  const parCrit = new Map();
+  for (const c of ct.cands) for (const x of c.aVerifier) {
+    if (dejaDits.has(x.c.cle)) continue;
+    if (!parCrit.has(x.c.cle)) parCrit.set(x.c.cle, { c: x.c, ou: [] });
+    const qui = x.r.ech === "territoire" ? `à ${COMMUNES[c.p.commune].nom}` : `${OU[x.r.ech]} du ${c.p.court}`;
+    const e = parCrit.get(x.c.cle);
+    if (!e.ou.some((o) => o.qui === qui)) e.ou.push({ qui, p: c.p, ech: x.r.ech });
+  }
+  if (parCrit.size) {
+    const items = [...parCrit.values()].sort((x, y) => ordreCrit(x.c, y.c)).map((e) => `${go(`verif:${e.ou[0].p.id}:${e.c.cle}`, e.c.lab())}${e.c.sans ? ", condition sans compromis," : ""} ${liste(e.ou.map((o) => esc(o.qui)))}`);
+    out.push({ k: "inconnues", sec: "ouvert", html: `Restent à vérifier, et futur•e ne peut pas les établir : ${items.join(" ; ")}.`, refs: uniq(ct.cands.filter((c) => c.aVerifier.length).flatMap((c) => c.versions.map(refAnalyse))) });
+  }
+  for (const c of ct.cands) {
+    const nom = go("fiche:" + c.p.id, esc(c.p.type === "bien" ? c.p.court : c.p.nom));
+    if (c.lecture === "apercu") out.push({ k: "apercu-" + c.p.id, sec: "ouvert", html: `${nom} n'est lue que par l'aperçu gratuit : ${Object.keys(COMMUNES[c.p.commune].libre).length} de vos ${CRITERES.length} conditions y sont lues, sans départage possible. Ce que l'aperçu ne lit pas reste inconnu ; ce n'est ni bon ni mauvais signe.`, refs: [{ g: "territoire", t: `${c.p.nom} · aperçu gratuit` }] });
+    if (c.lecture === "piste") out.push({ k: "piste-" + c.p.id, sec: "ouvert", html: `${nom} est une piste : rien n'y est encore lu.`, refs: [] });
+    if (c.lecture === "sans_adresse") out.push({ k: "sansadr-" + c.p.id, sec: "ouvert", html: `${nom} : sans adresse exacte, seule la commune est lue ; les abords et le logement restent inconnus.`, refs: c.versions.map(refAnalyse) });
+    if (c.lecture === "adresse_non_examinee") out.push({ k: "adrne-" + c.p.id, sec: "ouvert", html: `${nom} : la commune est lue, l'adresse pas encore.`, refs: c.versions.map(refAnalyse) });
+  }
+  if (ct.obs.length) {
+    const lieux = [...new Set(ct.obs.map((o) => o.pid))];
+    out.push({ k: "obs", sec: "ouvert", html: `Vos ${ct.obs.length > 1 ? `${nb(ct.obs.length, false)} observations` : "observation"} (${liste(lieux.map((id) => go("fiche:" + id, nomL(P(id)))))}) ${ct.obs.length > 1 ? "restent des notes" : "reste une note"} : ${ct.obs.length > 1 ? "elles ne modifient" : "elle ne modifie"} aucune issue.`, refs: ct.obs.map((o) => ({ g: null, t: `${cap(o.origine)} · ${dc(o.date)}` })) });
+  }
+  out.push({ k: "budget", sec: "ouvert", html: "Votre budget de 320 000 € n'est mesuré pour aucun lieu : rien dans cette lecture n'en tient compte.", refs: [refProjet()] });
+  if (ct.cote.length) out.push({ k: "cote", sec: "ouvert", html: `Mis de côté dans cette vue : ${liste(ct.cote.map((k) => CRIT[k].lab()))}. Votre Projet n'est pas modifié.`, refs: [] });
+  return out;
+}
+
+function enoncesAvancer(ct) {
+  const out = [];
+  const actions = [];
+  for (const c of ct.cands.filter((c) => c.p.visite && c.p.visite >= AUJ)) {
+    actions.push({ txt: `Préparer la visite du ${dc(c.p.visite)} au ${c.p.court}`, arg: `verif:${c.p.id}:${c.aVerifier[0]?.c.cle ?? ""}` });
+  }
+  for (const c of ct.cands) for (const x of c.aVerifier) {
+    if (actions.length >= 3) break;
+    if (c.p.visite && c.p.visite >= AUJ) continue;
+    const deja = actions.some((a) => a.crit === x.c.cle && x.r.ech === "territoire" && a.commune === c.p.commune);
+    if (!deja) actions.push({ txt: VERIF[x.c.cle] ?? `Vérifier : ${x.c.lab()}`, arg: `verif:${c.p.id}:${x.c.cle}`, crit: x.c.cle, commune: c.p.commune, qui: x.r.ech === "territoire" ? COMMUNES[c.p.commune].nom : c.p.court });
+  }
+  if (actions.length) out.push({ k: "avancer", sec: "avancer", liste: actions, html: "", refs: [] });
+  return out;
+}
+
+function enoncesDepuis(ct) {
+  const ev = ct.evts.filter((e) => !e.futur);
+  if (!ev.length || Date.parse(AUJ) - Date.parse(S.derniere) < 14 * 864e5) return [];
+  const proj = ev.filter((e) => e.type === "projet");
+  const de = (type) => [...new Set(ev.filter((e) => e.type === type && e.qui).map((e) => e.qui))].map((id) => esc(P(id).type === "bien" ? P(id).court : P(id).nom));
+  const morceaux = [];
+  if (proj.length) morceaux.push(`votre Projet a été révisé le ${dc(proj[0].date)} (une gare à moins de 30 min au lieu de 20)`);
+  const mot = ev.find((e) => e.type === "moteur");
+  const aj = de("ajout"), exa = de("examen"), vis = de("visite"), eca = de("ecarte");
+  for (const [xs, un, des] of [[aj, "un ajout", "ajouts"], [exa, "un examen", "examens"], [vis, "une visite", "visites"], [eca, "un lieu écarté", "lieux écartés"]]) {
+    if (xs.length) morceaux.push(`${xs.length > 1 ? `${nb(xs.length, false)} ${des}` : un} (${liste(xs)})`);
+  }
+  const t = `Depuis votre visite du ${dc(S.derniere)} : ${morceaux.join(" ; ")}.${mot ? ` Le moteur de futur•e est passé à engine-6 le ${dc(mot.date)} ; vos analyses restent celles d'engine-4 et ne sont pas relues d'elles-mêmes.` : ""} Le temps écoulé ne change aucune analyse.`;
+  return [{ k: "depuis", sec: "depuis", html: t, refs: [{ g: null, t: `Journal · ${ev.length} entrées, du ${dc(ev[0].date)} au ${dc(ev.at(-1).date)}` }] }];
+}
+
+function lecture(ct) {
+  const jeu = enoncesJeu(ct);
+  const compare = enoncesCompare(ct);
+  const dits = new Set(ct.cands.length === 2 ? rangsPaire(ct.cands[0].p, ct.cands[1].p).filter((r) => r.cl === "incertain").map((r) => r.c.cle) : []);
+  const ouvert = [...compare.filter((e) => e.sec === "ouvert"), ...enoncesOuvert(ct, compare.some((e) => e.k === "horscadre"), dits)];
+  return [
+    { cle: "depuis", titre: "Ce qui a changé", es: enoncesDepuis(ct) },
+    { cle: "jeu", titre: "Ce qui reste en jeu", es: jeu },
+    { cle: "compare", titre: ct.cands.length === 1 ? "Ce qui est établi" : "Ce qui se compare", es: compare.filter((e) => e.sec === "compare") },
+    { cle: "ouvert", titre: "Ce qui ne peut pas encore être conclu", es: ouvert },
+    { cle: "avancer", titre: "Ce qui ferait avancer", es: enoncesAvancer(ct) },
+  ].filter((s) => s.es.length);
+}
+
+// La lecture d'accueil : une ou deux phrases, tirées des mêmes énoncés, jamais un autre texte.
+function accroche(ct) {
+  const sections = lecture(ct);
+  const tous = sections.flatMap((s) => s.es);
+  const prem = tous.find((e) => e.k === "jeu");
+  const limite = tous.find((e) => e.k.startsWith("bloq-")) ?? tous.find((e) => e.k === "horscadre") ?? tous.find((e) => e.k === "aucune-paire") ?? tous.find((e) => e.k.startsWith("apercu-")) ?? tous.find((e) => e.k === "separe" || e.k === "ensemble" || e.k === "seul");
+  return [prem, limite].filter(Boolean);
+}
+
+// ── Rendu ────────────────────────────────────────────────────────────────────────────────────
+function htmlRefs(refs) {
+  if (!refs.length) return `<span class="meta">Votre recherche</span>`;
+  return refs.map((r) => `<span class="ref">${r.g ? glyphe(r.g, 11) : `<i class="ref-p" aria-hidden="true"></i>`}<span>${esc(r.t)}</span></span>`).join("");
+}
+function htmlEnonce(e, n) {
+  if (e.liste) {
+    return `<li class="enonce avancer" id="en-${e.k}"><span class="num-e meta">${n}</span><ol class="verifs-p">${e.liste.map((a, i) => `<li><span class="meta">${i + 1}</span><div><p>${esc(a.txt)}</p>${a.qui ? `<span class="nuance">${esc(a.qui)}</span>` : ""}</div>${go(a.arg, "Ouvrir")}</li>`).join("")}</ol></li>`;
+  }
+  return `<li class="enonce ${e.fort ? "fort" : ""}" id="en-${e.k}" ${e.fort ? `style="--t:var(--reg-${e.fort})"` : ""}><p><span class="num-e meta">${n}</span>${e.html}</p><div class="marge-p" aria-label="Sur quoi repose l'énoncé ${n}">${htmlRefs(e.refs)}</div><details class="marge-d"><summary>Sur quoi cela repose · ${e.refs.length || 1}</summary><div class="marge-p">${htmlRefs(e.refs)}</div></details></li>`;
+}
+function htmlPoint() {
+  const ct = contrat();
+  const sections = lecture(ct);
+  const cle = cleLecture(ct);
+  const red = REDIGE[S.situation];
+  const aJour = red && red.cle === cle;
+  let n = 0;
+  const num = {};
+  sections.forEach((s) => s.es.forEach((e) => { num[e.k] = ++n; }));
+  const etabli = sections.map((s) => `<section class="sec-p"><h3 class="etiquette">${s.titre}</h3><ol class="enonces">${s.es.map((e) => htmlEnonce(e, num[e.k])).join("")}</ol></section>`).join("");
+  // La version rédigée cite ses énoncés : un appel absent du contrat est une erreur, affichée comme telle.
+  const lier = (txt) => txt.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, (_, arg, t) => go(arg, t));
+  const redige = !red ? "" : red.paras.map((par) => `<p class="para-r">${par.map(([brut, refs]) => {
+    const txt = lier(brut);
+    return `${txt}${refs.length ? `<sup class="appel">${refs.map((k) => (num[k] ? `<button data-act="appel" data-arg="${k}" aria-label="Énoncé ${num[k]}">${num[k]}</button>` : `<span class="manque" data-manque="${k}">?</span>`)).join(" ")}</sup>` : ""}`;
+  }).join(" ")}</p>`).join("");
+  const modes = `<div class="modes" role="group" aria-label="Forme de la lecture">
+    <button data-act="mode" data-arg="etabli" aria-pressed="${!S.redige}" data-fk="mode-etabli">Lecture établie</button>
+    <button data-act="mode" data-arg="redige" aria-pressed="${S.redige}" data-fk="mode-redige">Version rédigée <span class="sim">simulation</span></button>
+  </div>`;
+  const corps = S.redige
+    ? (aJour
+      ? `<div class="redige arrive"><p class="avert-r"><span class="sim">simulation</span> Texte écrit à la main pour cette revue, à partir des énoncés numérotés de la lecture établie. Dans le produit, une IA pourrait reformuler ces énoncés, sans rien y ajouter. Aucune IA n'a été appelée.</p>${redige}<p class="nuance">Chaque numéro renvoie à l'énoncé et à ses fondements. ${go("mode:etabli", "Revenir à la lecture établie")}</p></div>`
+      : `<div class="redige perime"><p><b class="encre">La version rédigée ne correspond plus à votre recherche.</b> Elle a été préparée pour un autre état (révision du Projet, possibilités, versions des analyses ou observations). Dans le produit, elle serait reformulée une fois, à la demande, à partir de la nouvelle lecture établie ; jamais à chaque geste.</p><p class="nuance">La lecture établie, elle, est toujours à jour. ${go("mode:etabli", "Lire la lecture établie")}</p></div>`)
+    : `<div class="etabli">${etabli}</div>`;
+  return `<div class="point arrive">
+    <div class="point-tete"><div><h2 id="titre-point" tabindex="-1">Faire le point</h2><p class="meta">Au ${dc(AUJ)} · Projet, révision ${REV_COURANTE.slice(1)} · ${ct.cands.length} ${pl(ct.cands.length, "possibilité")} en jeu</p></div>${modes}</div>
+    ${corps}
+    ${ct.cands.length > 1 ? `<div class="tableau-d"><button class="depliant" data-act="tableau" data-fk="tableau" aria-expanded="${S.menus.tableau}"><span class="pm" aria-hidden="true">${S.menus.tableau ? "−" : "+"}</span>Toutes vos conditions, lieu par lieu</button>${S.menus.tableau ? htmlPartition() : ""}</div>` : ""}
+    <p class="meta pied-p">Ce point ne classe aucun lieu et ne décide pas à votre place. Il dit ce qui est établi, ce qui ne l'est pas, et ce que vous pourriez vérifier.</p>
+  </div>`;
+}
+
+// ═══ UNE POSSIBILITÉ (fiche reprise de la V2, conditions dans l'ordre du Projet) ═══
+function htmlPreuve(r, p, ech) {
+  if (!r.valeur) return `<div class="preuve"><span class="ligne">${glyphe(ech, 11)} ${esc(p.court)} · ${ECH[ech].lu}</span><span class="v">${cap(motDe(r))}.</span></div>`;
+  const a = r.a;
+  return `<div class="preuve"><span class="ligne">${glyphe(ech, 11)} ${esc(p.court)} · ${ECH[ech].lu}</span><span class="v">${esc(r.valeur)}</span><span>Source : ${r.source}</span>${a ? `<span>Analyse ${a.moteur} · révision ${a.rev.slice(1)} · ${dc(a.date)}${a.simule ? ` <span class="sim">simulation</span>` : ""}</span>` : r.libre ? "<span>Aperçu gratuit, commune non débloquée</span>" : ""}</div>`;
+}
+function htmlObs(pid, crit) {
+  const os = [...OBS, ...S.notes].filter((o) => o.pid === pid && o.crit === crit);
+  if (!os.length) return "";
+  return os.map((o) => `<div class="note-perso"><span class="meta">${o.origine} · ${dc(o.date)}</span><span>${esc(o.texte)}</span></div>`).join("") + `<p class="meta">Vos notes ne modifient aucune issue.</p>`;
+}
+function htmlVerif(p, crit) {
+  const k = `${p.id}:${crit}`; const on = S.verifs.has(k);
+  return `<div class="verif"><span class="etiquette reg-t" style="--t:var(--reg-controle)">À vérifier · ${esc(p.court)}</span><p>${VERIF[crit] ?? "À vérifier sur place."}</p><div><button class="btn" data-act="verif" data-arg="${k}" data-fk="verif-${k}" aria-pressed="${on}">${on ? "Dans mes vérifications ✓" : p.visite ? `Ajouter à la visite du ${dc(p.visite)}` : "Ajouter à mes vérifications"}</button></div></div>`;
+}
+function htmlFiche(p) {
+  const c = COMMUNES[p.commune];
+  const ta = c.analyse ? lireAnalyse(c.analyse, p.id) : null;
+  const aa = p.adr ? lireAnalyse(p.adr, p.id) : null;
+  const examine = {
+    territoire: ta ? `examiné · révision ${ta.rev.slice(1)} · ${dc(ta.date)}` : c.libre ? "aperçu gratuit seulement" : "rien n'est lu",
+    autour: p.type === "commune" ? "il faut une adresse" : p.sansAdresse ? "adresse inconnue" : aa ? `examiné · révision ${aa.rev.slice(1)} · ${dc(aa.date)}` : "adresse non examinée",
+  };
+  examine.logement = p.type === "commune" ? "il faut une adresse" : aa ? "examiné avec l'adresse" : examine.autour;
+  const conds = CRITERES.filter((k) => !S.echelleFiche || k.ech.includes(S.echelleFiche)).sort(ordreCrit);
+  const lignes = conds.map((k) => {
+    const echs = S.echelleFiche ? [S.echelleFiche] : k.ech;
+    const fin = S.echelleFiche ? { ...lire(p, k.cle, S.echelleFiche), ech: S.echelleFiche } : lirePlusFin(p, k.cle);
+    const ouvert = S.condOuverte === k.cle || S.lentille === k.cle;
+    return `<div class="cond ${S.lentille === k.cle ? "actif" : ""}" id="cond-${k.cle}">
+      <button data-act="cond" data-arg="${k.cle}" data-fk="cond-${k.cle}" aria-expanded="${ouvert}">${marque(fin, fin.ech, 16)}<span class="lab">${cap(k.lab())}<small>${k.sans ? "sans compromis" : `poids ${k.poids}`} · ${ECH[fin.ech].lu}${fin.a && fin.a.rev !== REV_COURANTE ? ` · révision ${fin.a.rev.slice(1)}` : ""}</small></span><span class="iss reg-t" style="--t:${teinte(REG[fin.issue].reg)}">${cap(motDe(fin))}</span></button>
+      ${ouvert ? `<div class="ouvert">${echs.map((e) => htmlPreuve(lire(p, k.cle, e), p, e)).join("")}${fin.issue === "to_confirm" ? htmlVerif(p, k.cle) : ""}${htmlObs(p.id, k.cle)}</div>` : ""}
+    </div>`;
+  }).join("");
+  const ecart = p.etat === "ecarte" ? (() => {
+    const change = p.ecart.rev && p.ecart.rev !== REV_COURANTE && p.ecart.critere === "gare";
+    const ditAlors = p.ecart.critere === "gare" ? `une gare à moins de ${REV[p.ecart.rev ?? REV_COURANTE].gare} min` : p.ecart.critere ? CRIT[p.ecart.critere].lab() : "une autre raison";
+    return `<div class="contexte-ecart"><span class="etiquette reg-t" style="--t:${change ? "var(--reg-controle)" : "var(--reg-non-su)"}">Écartée le ${dc(p.ecart.date)}${change ? " · raison changée depuis" : ""}</span><p class="encre">${esc(p.ecart.motif)}</p>
+      <p class="nuance">Votre Projet disait alors : ${ditAlors} (révision ${(p.ecart.rev ?? REV_COURANTE).slice(1)}).${change ? ` Il dit maintenant : à moins de ${gareMax()} min. L'analyse de ${p.nom} répond à l'ancienne version : futur•e ne peut pas dire si elle y correspondrait.` : ""}</p>
+      <div class="actions"><button class="btn" data-act="reprendre" data-arg="${p.id}" data-fk="reprendre">Reprendre cette piste</button><button class="btn-lien" data-act="fermer">Laisser écartée</button></div></div>`;
+  })() : "";
+  const manque = p.type === "commune" && !c.analyse
+    ? `<div class="verif"><span class="etiquette reg-t">${c.libre ? "Ce que l'aperçu ne dit pas" : "Ce qu'un examen lirait"}</span><p>${c.libre ? `L'aperçu gratuit montre trois constats sur six conditions. Les trois autres (${CRITERES.filter((k) => !c.libre[k.cle]).map((k) => k.lab()).join(", ")}) ne sont pas lus. Tant qu'elle n'est pas examinée, ${p.nom} n'entre dans aucun départage.` : `Un examen de la commune lirait vos six conditions à l'échelle de ${p.nom}. Les abords et le logement demandent une adresse.`}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">Examiner ${p.nom} <span class="sim">simulation</span></button></div></div>`
+    : p.type === "bien" && !p.adr ? `<div class="verif"><span class="etiquette reg-t">Ce qui manque</span><p>${p.sansAdresse ? "Sans adresse exacte, futur•e lit seulement la commune. Les abords (la gare, le calme) et le logement (les nuits fraîches) restent illisibles : rien ne permet de dire qu'ils sont bons ou mauvais." : "L'adresse est connue mais pas encore examinée : seule la commune est lue."}</p><div><button class="btn" data-act="examiner" data-arg="${p.id}">${p.sansAdresse ? "Préciser l'adresse" : "Examiner cette adresse"} <span class="sim">simulation</span></button></div></div>` : "";
+  const hist = JOURNAL.filter((j) => j.qui === p.id);
+  const autres = actives().filter((q) => q.id !== p.id);
+  return `<div class="fiche arrive">
+    <div class="fiche-tete">${mini(p, 28)}<span class="etiquette">${p.type === "bien" ? COMMUNES[p.commune].nom : "Commune"} · ${ETAT_LIB[p.etat]}</span><h2 id="titre-fiche" tabindex="-1">${esc(p.nom)}</h2><p class="nuance">${p.relation}${p.visite ? ` · visite prévue le ${dc(p.visite)}` : ""}</p></div>
+    ${autres.length && p.etat !== "ecarte" ? `<div class="rapp-avec"><span class="etiquette">Rapprocher avec</span><div class="actions">${autres.map((q) => `<button class="btn" data-act="paire" data-arg="${p.id},${q.id}" data-fk="avec-${q.id}"><span aria-hidden="true">⟷</span> ${esc(q.court)}</button>`).join("")}</div></div>` : ""}
+    ${ecart}
+    ${p.etat !== "ecarte" && horsCadreP(p) ? `<div class="cadre-l"><span class="etiquette reg-t" style="--t:var(--r-meta)">Lu sous la révision 1 de votre Projet</span><p class="nuance">${versionsDe(p).filter((v) => v.rev !== REV_COURANTE).map((v) => v.nom).join(" et ")} : analyse produite quand la gare devait être à moins de ${REV.r1.gare} min. Les issues ci-dessous sont celles de cette date ; elles ne se comparent pas à celles de vos autres lieux.</p><div><button class="btn" data-act="cadre">Relire sous la révision 2 <span class="sim">simulation</span></button></div></div>` : ""}
+    ${bloquants(p).length ? `<p class="bloc-bloq reg-t" style="--t:var(--reg-incompatibilite)"><span><b class="encre">Condition sans compromis non tenue : ${bloquants(p).map((c) => c.lab()).join(", ")}.</b> Aucune autre correspondance ne la compense.</span></p>` : ""}
+    <div class="fiche-emb">${emblemeSeul(p, 112, true)}<div class="echelles-etat" role="group" aria-label="Filtrer les conditions par échelle">${["territoire", "autour", "logement"].map((e) => `<button data-act="echelle" data-ech="${e}" data-fk="ech-${e}" aria-pressed="${S.echelleFiche === e}">${glyphe(e, 14)}<b>${ECH[e].nom}</b><span class="e">${examine[e]}</span></button>`).join("")}</div></div>
+    ${manque}
+    <div><div class="panneau-tete" style="padding-bottom:6px"><span class="etiquette">${S.echelleFiche ? `Vos conditions ${ECH[S.echelleFiche].lu}` : "Vos conditions, à l'échelle la plus fine lue"}</span>${S.echelleFiche ? `<button class="btn-lien meta" data-act="echelle" data-ech="${S.echelleFiche}">Toutes les échelles</button>` : ""}</div><div class="conds">${lignes || `<p class="vide-rapp">Aucune de vos conditions ne se lit à cette échelle.</p>`}</div></div>
+    <div><span class="etiquette">Noter une observation</span>${S.menus.note === p.id ? `<form class="form-mini" data-form="note" data-pid="${p.id}" style="margin-top:8px"><label class="meta" for="note-crit">Sur</label><select id="note-crit" name="crit">${CRITERES.map((k) => `<option value="${k.cle}">${k.lab()}</option>`).join("")}</select><label class="meta" for="note-texte">Ce que vous avez vu ou entendu</label><textarea id="note-texte" name="texte" required></textarea><div class="actions" style="margin-top:0"><button class="btn btn-plein" type="submit">Garder la note</button><button class="btn-lien" type="button" data-act="note" data-arg="${p.id}">Annuler</button></div><p class="meta">Gardée le temps de cette page. Une note ne modifie aucune issue.</p></form>` : `<div class="actions" style="margin-top:6px"><button class="btn" data-act="note" data-arg="${p.id}" data-fk="note">Ajouter une note</button></div>`}</div>
+    ${p.etat !== "ecarte" ? `<div>${S.menus.ecarter === p.id ? `<form class="form-mini" data-form="ecarter" data-pid="${p.id}"><label class="meta" for="ec-crit">Pour quelle raison ?</label><select id="ec-crit" name="crit">${CRITERES.map((k) => `<option value="${k.cle}">${cap(k.lab())}</option>`).join("")}<option value="autre">Une autre raison</option></select><label class="meta" for="ec-motif">En quelques mots</label><textarea id="ec-motif" name="motif"></textarea><div class="actions" style="margin-top:0"><button class="btn btn-plein" type="submit">Écarter</button><button class="btn-lien" type="button" data-act="ecarter" data-arg="${p.id}">Annuler</button></div><p class="meta">La raison et la version du Projet sont gardées : vous pourrez revenir sur ce choix.</p></form>` : `<button class="btn-lien" data-act="ecarter" data-arg="${p.id}" data-fk="ecarter">Écarter cette possibilité…</button>`}</div>` : ""}
+    <div class="histoire"><span class="etiquette">Son histoire</span><div class="journal">${hist.map((j) => `<div><span class="meta">${dc(j.date)}${j.futur ? " · prévu" : ""}</span><span>${j.texte}</span><span></span></div>`).join("") || `<div><span class="meta">${dc(p.ajout)}</span><span>Ajoutée aujourd'hui, rien n'est encore lu.</span><span></span></div>`}</div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// LE RAPPROCHEMENT, DANS L'ORDRE DES QUESTIONS. D'abord ce qui les départage, puis ce qui ne
+// peut pas être conclu, vos conditions sans compromis, ce qu'ils partagent ; toutes les pistes
+// échelle par échelle restent à un geste. Les conditions sont rangées comme dans le Projet
+// (sans compromis, puis par poids), toutes échelles confondues : un compromis aux abords n'attend
+// plus derrière six lignes de Territoire. Les nombres sont des longueurs de liste, rien d'autre.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function piste(cl, a, b, ech, k) {
+  const A = 7, B = 93, C = 50;
+  const mk = (r, x, kk, neutre) => `<span class="mk" data-k="${k}-${kk}" style="left:${x}%">${neutre ? marqueNeutre(ech) : marque(r, ech, 20)}</span>`;
+  const tx = (cls, txt) => `<span class="tx ${cls}">${txt}</span>`;
+  const ligne = (g, d, cls = "") => `<span class="pl ${cls}" style="left:${g}%;right:${100 - d}%"></span>`;
+  const ma = cap(motDe(a)), mb = cap(motDe(b));
+  switch (cl) {
+    case "commun": return ligne(A, B) + mk(a, C, "a") + mk(b, C, "b") + tx("ce", `${ma}, tous deux`);
+    case "socle": return ligne(A, B, "fort") + mk(a, C, "a") + mk(b, C, "b") + tx("ce", `${ma} · une seule lecture`);
+    case "separe": return ligne(A, 44) + ligne(56, B) + `<span class="coupure"></span>` + mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+    case "bloquant": return mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb) + tx("ce", "rien ne compense");
+    // Hors cadre : aucune ligne, aucune teinte, aucun mot d'issue. Seulement la version de chaque lecture.
+    case "hors_cadre": return mk(a, A, "a", true) + mk(b, B, "b", true) + `<span class="neq" aria-hidden="true">≠</span>` + tx("ga", `Révision ${a.a.rev.slice(1)} · ${dc(a.a.date)}`) + tx("dr", `Révision ${b.a.rev.slice(1)} · ${dc(b.a.date)}`) + tx("ce", "ne se compare pas");
+    case "incertain": case "a_verifier": case "inconnu": return ligne(A, B, "points") + mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+    default: return mk(a, A, "a") + mk(b, B, "b") + tx("ga", ma) + tx("dr", mb);
+  }
+}
+function marqueNeutre(ech) {
+  return `<svg class="g" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">${forme(ECH[ech].forme, 20, `fill="none" stroke="var(--r-discret)" stroke-width="1.4" stroke-dasharray="2 2.6"`)}</svg>`;
+}
+function rangsPaire(pa, pb) {
+  const out = [];
+  for (const ech of ["territoire", "autour", "logement"]) {
+    for (const c of CRITERES) {
+      if (!c.ech.includes(ech) || S.cote.has(c.cle)) continue;
+      out.push({ ech, c, cl: classePaire(pa, pb, c.cle, ech), a: lire(pa, c.cle, ech), b: lire(pb, c.cle, ech) });
+    }
+  }
+  return out;
+}
+const RAISON = { hors_cadre: "Deux versions du Projet", incertain: "Établi d'un seul côté", a_verifier: "À vérifier des deux côtés", inconnu: "Aucune ne le dit", profondeur: "Une seule est examinée ici", partiel: "Aperçu gratuit, hors départage", rien: "Aucune n'est examinée ici" };
+function htmlRang(r, pa, pb, opts = {}) {
+  const k = `${r.ech}-${r.c.cle}`;
+  const lent = S.lentille && !S.cote.has(S.lentille) ? S.lentille : null;
+  const ouvert = S.rangOuvert === k || (lent === r.c.cle && opts.lentilleOuvre !== false);
+  const lab = cap(r.c.lab());
+  const hc = r.cl === "hors_cadre";
+  const lu = hc ? `${pa.court} : révision ${r.a.a.rev.slice(1)} ; ${pb.court} : révision ${r.b.a.rev.slice(1)} ; ne se compare pas` : `${pa.court} : ${motDe(r.a)} ; ${pb.court} : ${motDe(r.b)}`;
+  const etiquette = opts.raison ? RAISON[r.cl] ?? CLASSE[r.cl].mot : CLASSE[r.cl].mot;
+  return `<div class="rang ${lent === r.c.cle ? "focus" : ""} ${hc ? "hc" : ""}" id="rang-${k}">
+    <div class="rang-lab"><span class="c">${glyphe(r.ech, 12)} ${lab}</span><span class="k">${r.c.sans ? "sans compromis · " : ""}${OU[r.ech]}${opts.raison ? ` · ${etiquette}` : ""}</span></div>
+    <div><button class="piste" data-act="rang" data-arg="${k}" data-fk="rang-${k}" aria-expanded="${ouvert}" aria-label="${esc(`${lab}, ${OU[r.ech]}. ${etiquette}. ${lu}. ${ouvert ? "Masquer" : "Voir"} les preuves.`)}">${piste(r.cl, r.a, r.b, r.ech, k)}</button>
+    ${ouvert ? `<div class="preuves arrive">${hc ? `<p class="nuance hc-note">États historiques de chaque analyse, à leur date. L'une répond à la révision ${r.a.a.rev.slice(1)} de votre Projet, l'autre à la révision ${r.b.a.rev.slice(1)} : leur écart peut tenir à votre Projet plutôt qu'aux lieux, et ne dit pas lequel convient mieux aujourd'hui.</p>` : ""}${htmlPreuve(r.a, pa, r.ech, hc)}${htmlPreuve(r.b, pb, r.ech, hc)}${[[pa, r.a], [pb, r.b]].filter(([, x]) => x.issue === "to_confirm" && !x.libre).map(([p]) => htmlVerif(p, r.c.cle)).join("")}${htmlObs(pa.id, r.c.cle)}${htmlObs(pb.id, r.c.cle)}</div>` : ""}</div>
+  </div>`;
+}
+function htmlSection(titre, rs, pa, pb, vide, opts) {
+  return `<section class="sec-r"><h4 class="sec-titre"><span>${titre}</span><span class="num">${rs.length}</span></h4>${rs.length ? rs.map((r) => htmlRang(r, pa, pb, opts)).join("") : `<p class="vide-rapp">${vide}</p>`}</section>`;
+}
+function htmlRapprochement(ids) {
+  const [pa, pb] = ids.map(P);
+  const rangs = rangsPaire(pa, pb);
+  const lent = S.lentille && !S.cote.has(S.lentille) ? S.lentille : null;
+  const tri = (rs) => [...rs].sort((x, y) => (lent ? (y.c.cle === lent) - (x.c.cle === lent) : 0) || ordreCrit(x.c, y.c) || ["territoire", "autour", "logement"].indexOf(y.ech) - ["territoire", "autour", "logement"].indexOf(x.ech));
+  const departage = tri(rangs.filter((r) => r.cl === "separe" || r.cl === "bloquant"));
+  const ouverts = tri(rangs.filter((r) => ["hors_cadre", "incertain", "a_verifier", "inconnu", "partiel", "profondeur"].includes(r.cl)));
+  const sans = rangs.filter((r) => r.c.sans && r.cl !== "bloquant");
+  const communs = tri(rangs.filter((r) => r.cl === "commun" && !r.c.sans));
+  const socle = rangs.filter((r) => r.cl === "socle");
+  const hc = rangs.some((r) => r.cl === "hors_cadre");
+  const blq = departage.filter((r) => r.cl === "bloquant");
+  const nomA = esc(pa.court), nomB = esc(pb.court);
+  // La phrase d'arbitrage : celle du point, pour cette paire. Une seule source de texte.
+  const en = enoncesPaire(pa, pb).out;
+  const phrase = [blq.length ? `${blq[0].a.issue === "incompatible" ? nomA : nomB} ne tient pas votre condition sans compromis, ${blq[0].c.lab()} : rien d'autre ne la compense.` : null,
+    ...en.filter((e) => e.k === "separe" || e.k === "socle").map((e) => e.html),
+    !en.some((e) => e.k === "separe") && !hc && !blq.length ? "Rien d'établi ne les sépare dans le même cadre." : null].filter(Boolean);
+  const bandes = ["territoire", "autour", "logement"].map((ech) => {
+    const rs = rangs.filter((r) => r.ech === ech);
+    if (!rs.length) return "";
+    return `<div class="bande"><div class="bande-tete">${glyphe(ech, 15)}<b>${ECH[ech].nom}</b><span class="meta">${ECH[ech].grain}</span></div>${rs.map((r) => htmlRang(r, pa, pb, { raison: true, lentilleOuvre: false })).join("")}</div>`;
+  }).join("");
+  const vers = (p) => { const vs = versionsDe(p); if (!vs.length) return COMMUNES[p.commune].libre ? "aperçu gratuit" : "aucune analyse"; const revs = [...new Set(vs.map((v) => v.rev))]; return revs.length === 1 ? `révision ${revs[0].slice(1)}` : vs.map((v) => `${v.ech === "territoire" ? "commune" : "adresse"} rév. ${v.rev.slice(1)}`).join(", "); };
+  return `<div class="rapp arrive" data-paire="${pa.id},${pb.id}">
+    <div class="rapp-tete">
+      <div class="pole">${mini(pa, 30)}<div><h2 id="titre-rapp" tabindex="-1">${nomA}</h2><span class="s">${pa.type === "bien" ? COMMUNES[pa.commune].nom + " · " : ""}${vers(pa)}</span></div></div>
+      <span class="entre" aria-hidden="true">⟷</span>
+      <div class="pole">${mini(pb, 30)}<div><h3>${nomB}</h3><span class="s">${pb.type === "bien" ? COMMUNES[pb.commune].nom + " · " : ""}${vers(pb)}</span></div></div>
+    </div>
+    ${hc ? `<div class="emplacement-hc"><p><b class="encre">Ces deux lectures ne se comparent pas encore.</b> ${liste([pa, pb].flatMap(versionsDe).filter((v) => v.rev !== REV_COURANTE).map((v) => esc(v.nom)))} ${[pa, pb].flatMap(versionsDe).filter((v) => v.rev !== REV_COURANTE).length > 1 ? "ont été lus" : "a été lu"} sous la révision 1 de votre Projet, quand la gare devait être à moins de 20 min. Leurs issues sont consultables, à leur date ; elles ne disent pas lequel convient mieux aujourd'hui.</p><div class="actions"><button class="btn" data-act="cadre" data-fk="cadre-rapp">Relire sous la révision 2 <span class="sim">simulation</span></button><button class="btn-lien" data-act="revs">Voir les deux versions du Projet</button></div></div>` : S.cadre ? `<div class="emplacement-hc"><p><span class="sim">simulation</span> Analyses lues comme si elles avaient été actualisées sous la révision 2 et engine-6. Aucune analyse n'a été produite.</p><div><button class="btn-lien" data-act="cadre" data-fk="cadre-rapp">Revenir aux analyses figées</button></div></div>` : ""}
+    ${phrase.length ? `<div class="rapp-phrase">${phrase.map((t) => `<p>${t}</p>`).join("")}</div>` : ""}
+    ${blq.length || departage.length || !hc ? htmlSection("Ce qui les départage", departage, pa, pb, hc ? "Rien ne peut encore les départager dans le même cadre." : "Rien d'établi ne les sépare.", {}) : ""}
+    ${htmlSection(hc ? "Ce qui ne peut pas encore être conclu" : "Ce qui reste à établir", ouverts, pa, pb, "Tout ce qui se lit des deux côtés est établi.", { raison: true })}
+    ${sans.length ? `<section class="sec-r"><h4 class="sec-titre"><span>Vos conditions sans compromis</span><span class="num">${sans.length + blq.length}</span></h4><ul class="sans-l">${[...blq, ...sans].map((r) => `<li><span class="reg-t" style="--t:${r.cl === "bloquant" ? "var(--reg-incompatibilite)" : r.cl === "commun" || r.cl === "socle" ? "var(--reg-alignement)" : "var(--r-meta)"}"><b class="encre">${cap(r.c.lab())}</b></span><span class="nuance">${r.cl === "bloquant" ? "non tenue : rien ne compense" : r.cl === "commun" || r.cl === "socle" ? "tenue des deux côtés" : r.cl === "hors_cadre" ? `${nomA} : ${motDe(r.a)}, selon la révision ${r.a.a.rev.slice(1)} ; ${nomB} : ${motDe(r.b)}, selon la révision ${r.b.a.rev.slice(1)}` : r.cl === "a_verifier" ? "à vérifier des deux côtés" : `${nomA} : ${motDe(r.a)} ; ${nomB} : ${motDe(r.b)}`}</span>${r.cl === "a_verifier" || r.cl === "incertain" ? `<button class="btn-lien meta" data-act="rang" data-arg="${r.ech}-${r.c.cle}" data-fk="sans-${r.c.cle}">Quoi vérifier</button>` : ""}</li>`).join("")}</ul>${sans.some((r) => S.rangOuvert === `${r.ech}-${r.c.cle}`) ? sans.filter((r) => S.rangOuvert === `${r.ech}-${r.c.cle}`).map((r) => `<div class="preuves">${htmlPreuve(r.a, pa, r.ech)}${htmlPreuve(r.b, pb, r.ech)}${[[pa, r.a], [pb, r.b]].filter(([, x]) => x.issue === "to_confirm" && !x.libre).map(([p]) => htmlVerif(p, r.c.cle)).join("")}</div>`).join("") : ""}</section>` : ""}
+    <section class="sec-r"><button class="depliant" data-act="commun" data-fk="commun" aria-expanded="${S.menus.commun}"><span class="pm" aria-hidden="true">${S.menus.commun ? "−" : "+"}</span>Ce qu'ils ont en commun <span class="num">${communs.length + (socle.length ? 1 : 0)}</span></button>
+      ${S.menus.commun ? `<div class="arrive">${socle.length ? `<div class="socle"><p><b class="encre">${COMMUNES[pa.commune].nom} : une seule lecture pour les deux.</b> ${socle.length} conditions identiques par construction ; on ne les répète pas.</p></div>` : ""}${communs.map((r) => htmlRang(r, pa, pb)).join("")}${!communs.length && !socle.length ? `<p class="vide-rapp">Rien d'établi en commun.</p>` : ""}</div>` : `<p class="nuance resume-commun">${socle.length ? `Même commune, ${COMMUNES[pa.commune].nom}. ` : ""}${communs.length ? liste([...new Set(communs.map((r) => r.c.lab()))]) + "." : socle.length ? "" : "Rien d'établi en commun."}</p>`}
+    </section>
+    <section class="sec-r"><button class="depliant" data-act="toutes" data-fk="toutes" aria-expanded="${S.menus.toutes}"><span class="pm" aria-hidden="true">${S.menus.toutes ? "−" : "+"}</span>Toutes les conditions, échelle par échelle <span class="num">${rangs.length}</span></button>${S.menus.toutes ? `<div class="arrive">${bandes}</div>` : ""}</section>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// CONDITION PAR CONDITION. Dans « Faire le point », à la demande. Aucune colonne n'est totalisée.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function htmlPartition() {
+  const ps = actives();
+  const cols = `minmax(140px, 220px) repeat(${ps.length}, 46px)`;
+  const crits = CRITERES.filter((c) => !S.cote.has(c.cle));
+  return `<p class="nuance" style="margin-top:8px">Une forme dit où la réponse a été lue. Une marque en pointillé gris vient d'une analyse d'une autre version du Projet : elle ne se compare pas aux autres.</p>
+    <div class="partition-wrap"><div class="partition" role="table" aria-label="Vos conditions pour chaque possibilité">
+      <div class="ligne-p tete-p" role="row" style="grid-template-columns:${cols}"><span role="columnheader"><span class="sr">Condition</span></span>${ps.map((p) => `<span role="columnheader" class="v" title="${esc(p.nom)}">${esc(p.court)}</span>`).join("")}</div>
+      ${crits.map((c) => `<div class="ligne-p ${S.lentille === c.cle ? "focus" : ""}" role="row" style="grid-template-columns:${cols}"><span class="lab-p" role="rowheader">${cap(c.lab())}</span>${ps.map((p) => { const r = lirePlusFin(p, c.cle); const hc = r.a && r.a.rev !== REV_COURANTE; return `<span role="cell"><button class="cel" data-act="cellule" data-arg="${p.id},${c.cle}" aria-label="${esc(`${p.court}, ${c.lab()} : ${hc ? `lu sous la révision ${r.a.rev.slice(1)}, ne se compare pas` : motDe(r)}, ${ECH[r.ech].lu}`)}">${hc ? marqueNeutre(r.ech) : marque(r, r.ech, 18)}</button></span>`; }).join("")}</div>`).join("")}
+    </div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// RENDU. Une seule zone de lecture à droite de la planche : l'accueil, « Faire le point », une
+// fiche ou un rapprochement. Le fil de retour remonte d'un niveau à la fois. Sur un écran
+// étroit, la lecture passe dans une feuille plein écran ; l'accueil reste au-dessus de la liste.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+function htmlFil() {
+  const ici = S.sel.length === 2 ? "Rapprochement" : S.sel.length === 1 ? P(S.sel[0]).court : "Faire le point";
+  const retour = S.sel.length && S.point ? "Faire le point" : "Ma recherche";
+  return `<nav class="fil" aria-label="Où vous êtes"><button class="btn-lien" data-act="retour" data-fk="retour">← ${retour}</button><span class="meta" id="sheet-titre">${esc(ici)}</span>${!S.point ? `<button class="btn-lien meta droite-fil" data-act="point" data-fk="point-fil">Faire le point</button>` : ""}</nav>`;
+}
+function contenuLecture() {
+  if (S.sel.length === 2) return htmlRapprochement(S.sel);
+  if (S.sel.length === 1) return htmlFiche(P(S.sel[0]));
+  if (S.point) return htmlPoint();
+  return "";
+}
+let derniereCle = "";
+let flipCadre = false;
+function rendreLecture() {
+  const m = mobile();
+  const sheet = $("#sheet"), lec = $("#lecture");
+  const avant = new Map([...document.querySelectorAll("[data-k]")].map((e) => [e.dataset.k, e.getBoundingClientRect().left]));
+  const c = contenuLecture();
+  if (m) {
+    lec.innerHTML = htmlAccueil(); $("#suite").innerHTML = htmlSuite(); $("#suite").hidden = false;
+    if (c) {
+      sheet.innerHTML = `<div class="sheet-barre">${htmlFil()}</div>${c}`;
+      sheet.hidden = false; document.body.classList.add("sheet-ouverte"); $("#app").inert = true;
+    } else { sheet.hidden = true; sheet.innerHTML = ""; document.body.classList.remove("sheet-ouverte"); $("#app").inert = false; }
+  } else {
+    sheet.hidden = true; sheet.innerHTML = ""; document.body.classList.remove("sheet-ouverte"); $("#app").inert = false;
+    lec.innerHTML = c ? htmlFil() + c : htmlAccueil();
+    $("#suite").innerHTML = c ? "" : htmlSuite(); $("#suite").hidden = !!c;
+  }
+  // Mise au même cadre : une marque qui change de place glisse de l'ancienne à la nouvelle.
+  if (flipCadre && !reduit()) {
+    document.querySelectorAll("[data-k]").forEach((e) => {
+      const x0 = avant.get(e.dataset.k); if (x0 == null) return;
+      const dx = x0 - e.getBoundingClientRect().left; if (Math.abs(dx) < 1) return;
+      e.style.transition = "none"; e.style.transform = `translateX(${dx}px)`; e.getBoundingClientRect();
+      e.style.transition = "transform var(--m-etat) var(--m-releve)"; e.style.transform = "";
+    });
+  }
+  flipCadre = false;
+  // Ce qui reste affiché ne rejoue pas son arrivée à chaque geste.
+  const cle = `${S.sel.join(",")}|${S.point}|${S.redige}`;
+  if (cle === derniereCle) document.querySelectorAll(".arrive").forEach((e) => e.classList.remove("arrive"));
+  derniereCle = cle;
+}
+function rendreMenu() {
+  const m = $("#menu-situations");
+  m.hidden = !S.menus.situations;
+  $("#btn-situations").setAttribute("aria-expanded", S.menus.situations);
+  $("#situation-courante").textContent = SITUATIONS.find((s) => s.cle === S.situation).lib.toLowerCase();
+  m.innerHTML = `<p class="nuance">Situations de démonstration. Tout est fictif ; rien n'est enregistré.</p>${SITUATIONS.map((s) => `<button data-act="situation" data-arg="${s.cle}" aria-current="${S.situation === s.cle}"><b>${s.lib}</b><span>${s.d}</span></button>`).join("")}`;
+}
+function rendre() {
+  const fk = document.activeElement?.dataset?.fk;
+  rendreMenu(); rendreProjet(); rendrePlanche(); appliquerLentillePlanche(); rendreLecture();
+  if (fk) { const el = document.querySelector(`[data-fk="${CSS.escape(fk)}"]`); if (el && !el.closest("[inert]")) el.focus({ preventScroll: true }); }
+}
+function note(html, ms = 6000) {
+  const n = $("#note");
+  n.innerHTML = `<p>${html}</p><button class="btn-lien" data-act="note-fermer">Fermer</button>`;
+  n.hidden = false; clearTimeout(note.h); note.h = setTimeout(() => (n.hidden = true), ms);
+}
+function reinitLecture() { S.echelleFiche = null; S.condOuverte = null; S.rangOuvert = null; S.menus.commun = false; S.menus.toutes = false; S.menus.ecarter = null; S.menus.note = null; }
+// Après un geste qui change la lecture : on la montre et on y porte le focus.
+function montrer(cible) {
+  rendre();
+  const titre = S.sel.length === 2 ? "#titre-rapp" : S.sel.length === 1 ? "#titre-fiche" : S.point ? "#titre-point" : null;
+  if (mobile()) { const sh = $("#sheet"); if (!sh.hidden) sh.scrollTop = 0; }
+  else { const l = $("#lecture"); if (l.getBoundingClientRect().top < 0) l.scrollIntoView({ block: "start", behavior: reduit() ? "auto" : "smooth" }); }
+  if (titre) $(titre)?.focus({ preventScroll: true });
+  if (cible) {
+    const el = document.getElementById(cible);
+    if (el) { el.scrollIntoView({ block: "center", behavior: reduit() ? "auto" : "smooth" }); el.classList.add("eclaire"); setTimeout(() => el.classList.remove("eclaire"), 1600); }
+  }
+}
+function chargerSituation(cle) {
+  const s = SITUATIONS.find((x) => x.cle === cle);
+  Object.assign(S, { situation: cle, ids: [...s.ids], derniere: s.derniere, sel: [], lentille: null, cadre: false, point: false, redige: false, filtre: "toutes", echelleFiche: null, condOuverte: null, rangOuvert: null, etats: {}, ecartsLocaux: {} });
+  S.cote = new Set(); S.verifs = new Set(); S.notes = [];
+  S.menus = { situations: false, ajout: false, depuis: false, revs: false, guidePlus: false, ecarter: null, note: null, commun: false, toutes: false, fondements: false, tableau: false };
+  clePlanche = "";
+}
+// Un lien d'énoncé : il ouvre exactement ce qu'il nomme.
+function suivre(arg) {
+  const [type, a, crit, ech] = arg.split(":");
+  switch (type) {
+    case "fiche": reinitLecture(); S.sel = [a]; S.condOuverte = crit || null; return montrer(crit ? null : null);
+    case "visite":
+    case "verif": {
+      reinitLecture(); S.sel = [a];
+      S.condOuverte = crit || CRITERES.find((c) => lirePlusFin(P(a), c.cle).issue === "to_confirm")?.cle || null;
+      return montrer(S.condOuverte ? "cond-" + S.condOuverte : null);
+    }
+    case "paire": {
+      reinitLecture(); S.sel = a.split(",");
+      if (crit) { S.lentille = crit; S.rangOuvert = `${ech}-${crit}`; }
+      return montrer(crit ? `rang-${ech}-${crit}` : null);
+    }
+    case "lent": S.lentille = crit ?? a; if (mobile()) S.point = false; rendre(); $("#planche").scrollIntoView({ block: "start", behavior: reduit() ? "auto" : "smooth" }); return;
+    case "revs": S.menus.revs = true; S.sel = []; if (mobile()) S.point = false; rendre(); window.scrollTo({ top: 0, behavior: reduit() ? "auto" : "smooth" }); $("[data-fk='revs']")?.focus({ preventScroll: true }); return;
+    case "cadre": if (!S.cadre) basculerCadre(); rendre(); return;
+    case "ajout": S.point = false; S.sel = []; S.menus.ajout = true; clePlanche = ""; rendre(); $("[data-fk='ajout']")?.focus(); return;
+    case "mode": S.redige = a === "redige"; return montrer();
+  }
+}
+function basculerCadre() {
+  S.cadre = !S.cadre; clePlanche = ""; flipCadre = true;
+  note(S.cadre ? `<span class="sim">simulation</span> Analyses lues comme si elles avaient été relues sous la révision 2 et engine-6. Dans le produit, chacune deviendrait une nouvelle version, l'ancienne restant lisible ; ici, aucune analyse n'est produite.` : "Retour aux analyses figées.");
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-act]");
+  if (!t) { if (S.menus.situations && !e.target.closest("#menu-situations")) { S.menus.situations = false; rendreMenu(); } return; }
+  const act = t.dataset.act, arg = t.dataset.arg;
+  switch (act) {
+    case "ouvrir": reinitLecture(); S.sel = S.sel.length === 1 && S.sel[0] === arg ? [] : [arg]; return montrer();
+    case "sel-seul": reinitLecture(); S.sel = [arg]; return montrer();
+    case "paire": reinitLecture(); S.sel = arg.split(","); return montrer();
+    case "visite": return suivre(`verif:${arg}`);
+    case "go": return suivre(arg);
+    case "cellule": { const [pid, crit] = arg.split(","); reinitLecture(); S.sel = [pid]; S.condOuverte = crit; return montrer("cond-" + crit); }
+    case "ecarter-ouvrir": reinitLecture(); S.sel = [arg]; S.menus.ecarter = arg; return montrer();
+    case "point": reinitLecture(); S.sel = []; S.point = true; return montrer();
+    case "fermer": case "retour": {
+      const etaitSel = S.sel.length;
+      if (etaitSel) { S.sel = []; reinitLecture(); } else S.point = false;
+      rendre();
+      (S.point ? $("#titre-point") : document.querySelector(".lieu"))?.focus({ preventScroll: true });
+      return;
+    }
+    case "appel": S.redige = false; return montrer("en-" + arg);
+    case "mode": S.redige = arg === "redige"; break;
+    case "lentille": S.lentille = S.lentille === arg ? null : arg; break;
+    case "cote": if (S.cote.has(arg)) S.cote.delete(arg); else S.cote.add(arg); clePlanche = ""; break;
+    case "cadre": basculerCadre(); break;
+    case "echelle": S.echelleFiche = S.echelleFiche === t.dataset.ech ? null : t.dataset.ech; break;
+    case "cond": S.condOuverte = S.condOuverte === arg ? null : arg; break;
+    case "rang": S.rangOuvert = S.rangOuvert === arg ? null : arg; break;
+    case "commun": S.menus.commun = !S.menus.commun; break;
+    case "toutes": S.menus.toutes = !S.menus.toutes; break;
+    case "tableau": S.menus.tableau = !S.menus.tableau; break;
+    case "filtre": S.filtre = arg; break;
+    case "verif": if (S.verifs.has(arg)) S.verifs.delete(arg); else S.verifs.add(arg); break;
+    case "ajout": S.menus.ajout = !S.menus.ajout; clePlanche = ""; if (mobile()) { S.sel = []; S.point = false; } break;
+    case "ajouter": S.ids = [...S.ids, arg]; S.menus.ajout = false; reinitLecture(); S.sel = [arg]; clePlanche = ""; note(`<span class="sim">démonstration</span> ${POSS[arg].nom} ajoutée. Rien n'est analysé.`); return montrer();
+    case "reprendre": S.etats[arg] = "a_considerer"; clePlanche = ""; note(`${P(arg).nom} revient parmi vos possibilités. Son analyse répond toujours à la révision ${(P(arg).ecart?.rev ?? REV_COURANTE).slice(1)} : elle ne se compare pas aux autres tant qu'elle n'est pas relue.`); break;
+    case "ecarter": S.menus.ecarter = S.menus.ecarter === arg ? null : arg; break;
+    case "note": S.menus.note = S.menus.note === arg ? null : arg; break;
+    case "examiner": note(`<span class="sim">simulation</span> Dans le produit, ce geste ouvrirait ${POSS[arg].type === "commune" ? "le dossier de territoire" : "l'analyse de l'adresse"}, avec son prix et son périmètre expliqués. Ici, rien n'est acheté ni analysé.`, 8000); return;
+    case "situations": S.menus.situations = !S.menus.situations; rendreMenu(); if (S.menus.situations) $("#menu-situations button")?.focus(); return;
+    case "situation": chargerSituation(arg); rendre(); window.scrollTo({ top: 0 }); $("#btn-situations").focus({ preventScroll: true }); return;
+    case "theme": { const r = document.documentElement; const sombre = r.dataset.theme ? r.dataset.theme === "dark" : !matchMedia("(prefers-color-scheme: light)").matches; r.dataset.theme = sombre ? "light" : "dark"; try { localStorage.setItem("fut41-v3-theme", r.dataset.theme); } catch {} return; }
+    case "depuis": S.menus.depuis = !S.menus.depuis; break;
+    case "revs": S.menus.revs = !S.menus.revs; if (S.menus.revs && mobile()) { S.sel = []; S.point = false; } break;
+    case "guidePlus": S.menus.guidePlus = !S.menus.guidePlus; break;
+    case "note-fermer": $("#note").hidden = true; return;
+  }
+  rendre();
+});
+document.addEventListener("submit", (e) => {
+  const f = e.target.closest("form[data-form]"); if (!f) return;
+  e.preventDefault();
+  const d = new FormData(f); const pid = f.dataset.pid;
+  if (f.dataset.form === "note") {
+    S.notes.push({ pid, crit: d.get("crit"), date: AUJ, origine: "noté par vous", texte: String(d.get("texte")).trim() });
+    S.menus.note = null; S.condOuverte = d.get("crit"); note("Note gardée pour cette page. Elle ne modifie aucune issue.");
+  } else if (f.dataset.form === "ecarter") {
+    const crit = d.get("crit"); const motif = String(d.get("motif") || "").trim();
+    S.etats[pid] = "ecarte"; S.ecartsLocaux[pid] = { date: AUJ, rev: REV_COURANTE, critere: crit === "autre" ? null : crit, motif: motif ? `« ${motif} »` : crit === "autre" ? "Une autre raison." : `Raison : ${CRIT[crit].lab()}.` };
+    S.menus.ecarter = null; clePlanche = ""; note(`${P(pid).court} est écartée. La raison et la version du Projet sont gardées.`);
+  }
+  rendre();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (S.menus.situations) { S.menus.situations = false; rendreMenu(); $("#btn-situations").focus(); return; }
+  if (S.sel.length || S.point) $("[data-act='retour']")?.click();
+});
+matchMedia("(max-width: 1023px)").addEventListener("change", () => rendre());
+try { const th = localStorage.getItem("fut41-v3-theme"); if (th) document.documentElement.dataset.theme = th; } catch {}
+const depart = new URLSearchParams(location.search).get("situation");
+chargerSituation(SITUATIONS.some((s) => s.cle === depart) ? depart : "recherche");
+rendre();
+</script>
+</body>
+</html>
