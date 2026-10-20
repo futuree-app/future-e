@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
-import { resolvePackOwnership, grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
+import { resolvePackOwnership } from "@/lib/decision-packs";
+import { getStripe } from "@/lib/stripe";
+import { traiterRetourPaiementPack, type EtatRetourPack } from "@/lib/server/retour-paiement-pack";
+import { PackPaiementEnAttente } from "./PackPaiementEnAttente";
 import { matchProjects, seedComparaison, truncateComparaison } from "@/lib/comparateur-vie";
 import { PackConvictionView } from "./PackConvictionView";
 import { ChoixConvictionView } from "./ChoixConvictionView";
@@ -63,8 +66,8 @@ export default async function PackDecisionPage({
 }: {
   searchParams: Promise<{ communes?: string; mode?: string; payment_intent?: string; redirect_status?: string }>;
 }) {
-  const { communes: rawCommunes, mode: rawMode, payment_intent: paymentIntent, redirect_status: redirectStatus } =
-    await searchParams;
+  // `redirect_status` n'est volontairement PAS lu (FUT-115) : un paramètre d'URL ne prouve aucun paiement.
+  const { communes: rawCommunes, mode: rawMode, payment_intent: paymentIntent } = await searchParams;
   const insees = parseCommunes(rawCommunes);
   // mode demandé par l'URL (porte choix) ; le mode RÉEL d'un pack possédé prime (pack.mode).
   const requestedMode: "replay" | "choix" = rawMode === "choix" ? "choix" : "replay";
@@ -75,19 +78,39 @@ export default async function PackDecisionPage({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Retour de Stripe : confirmPayment redirige ici avec ?payment_intent. On octroie
-  // le pack de façon optimiste (idempotent avec le webhook) AVANT le contrôle de
-  // possession, pour afficher le complet sans attendre le webhook. Sécurité : la
-  // fonction vérifie que le snapshot appartient bien à l'utilisateur courant.
-  if (user && paymentIntent && redirectStatus === "succeeded") {
-    const admin = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  let pack = user ? await resolvePackOwnership(supabase, user.id, insees) : null;
+
+  // ════════════════════════════════════════════════════════════════════════════════════════════════
+  // RETOUR DE STRIPE (FUT-115). L'ancien code octroyait le comparatif dès que l'URL portait
+  // `redirect_status=succeeded`, or l'instantané existe dès la CRÉATION du paiement et son identifiant
+  // est dans le `clientSecret` remis au navigateur : recopier l'URL de retour suffisait. Désormais
+  // `payment_intent` n'est qu'une clé : le serveur relit le paiement chez Stripe, et l'octroi exige la
+  // preuve (statut, montant, devise, produit, compte, communes). Un comparatif déjà ouvert (webhook
+  // arrivé, page rechargée) ne redemande rien à Stripe.
+  // ════════════════════════════════════════════════════════════════════════════════════════════════
+  let etatRetour: EtatRetourPack = "aucun";
+  if (!pack && user && paymentIntent) {
+    etatRetour = await traiterRetourPaiementPack(
+      {
+        lirePaiement: (id) => getStripe().paymentIntents.retrieve(id),
+        admin: createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!),
+      },
+      paymentIntent,
+      { id: user.id, email: user.email },
     );
-    await grantDecisionPackFromSnapshot(admin, paymentIntent, user.id, user.email ?? undefined);
+    if (etatRetour === "octroye") pack = await resolvePackOwnership(supabase, user.id, insees);
   }
 
-  const pack = user ? await resolvePackOwnership(supabase, user.id, insees) : null;
+  if (!pack && etatRetour === "en_attente") {
+    return (
+      <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+        <Navbar />
+        <main style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px 120px" }}>
+          <PackPaiementEnAttente />
+        </main>
+      </div>
+    );
+  }
 
   if (pack) {
     // POSSÉDÉ : on reconstruit la matrice côté serveur, jamais via une API publique.

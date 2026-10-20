@@ -18,6 +18,39 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type EmailKind = "dossier" | "pack" | "territoire" | "facture_renvoi";
 
+/**
+ * CE MESSAGE EST-IL DÉJÀ PARTI POUR CET ACHAT ? (revue FUT-115)
+ *
+ * Stripe livre un webhook « au moins une fois » et le rejoue après toute réponse non 2xx : sans ce contrôle,
+ * chaque rejeu renvoyait la confirmation d'achat. Vrai seulement si le fournisseur a ACCEPTÉ un message de ce
+ * type pour ce paiement (`sent` et au-delà). Un envoi `failed`, ou resté `pending` parce que la fonction a été
+ * interrompue, n'empêche rien : le rejeu le retente, la confirmation n'est pas perdue. Une lecture impossible
+ * rend `false` (règle du module : la trace ne bloque jamais un envoi), au prix d'un doublon possible.
+ */
+export async function dejaEnvoye(
+  supabase: SupabaseClient,
+  paymentIntentId: string,
+  kind: EmailKind,
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from("email_deliveries")
+      .select("status")
+      .eq("stripe_payment_intent_id", paymentIntentId)
+      .eq("kind", kind);
+    if (error) {
+      console.error("[email-log] lecture impossible", { paymentIntentId, kind, error });
+      return false;
+    }
+    return ((data ?? []) as { status: string }[]).some((l) =>
+      ["sent", "delivered", "bounced", "complained"].includes(l.status),
+    );
+  } catch (error) {
+    console.error("[email-log] lecture impossible", { paymentIntentId, kind, error });
+    return false;
+  }
+}
+
 /** Ouvre la ligne AVANT l'appel au fournisseur : une ligne restée `pending` dit qu'une fonction a
  *  été interrompue en plein vol, ce qu'aucun journal ne montrait. Rend l'id, ou `null` si la trace
  *  n'a pas pu être ouverte (l'envoi, lui, continue). */
