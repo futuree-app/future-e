@@ -13,20 +13,41 @@ import { join } from "node:path";
 import { releverHeritage } from "./heritage.ts";
 
 const REFERENCE: Record<string, Record<string, number>> = JSON.parse(readFileSync("src/components/releve/heritage-reference.json", "utf8"));
+type Exception = { fichier: string; marqueur: string; nombre: number; motif: string };
+const EXCEPTIONS: Exception[] = JSON.parse(readFileSync("src/components/releve/heritage-exceptions.json", "utf8"));
 const JETONS = readFileSync("src/app/design-tokens.css", "utf8");
 
-test("K1. le cliquet : aucun marqueur historique ne s'ajoute, nulle part", () => {
+// LE PLAFOND DE LA RÉFÉRENCE (603 marqueurs au lot R0, 20/10/2026). Il ne fait que baisser : on le
+// rabaisse après un lot de migration qui en retire. L'augmenter demanderait de modifier deux fichiers à
+// la main, ce qu'une revue doit refuser : la dette visuelle ne grossit pas en silence.
+const PLAFOND_REFERENCE = 603;
+
+test("K1. le cliquet : aucun marqueur historique ne s'ajoute, nulle part (sauf exception motivée)", () => {
   const actuel = releverHeritage();
+  const exception = (f: string, m: string) => EXCEPTIONS.filter((e) => e.fichier === f && e.marqueur === m).reduce((s, e) => s + e.nombre, 0);
   const hausses: string[] = [];
   for (const [f, c] of Object.entries(actuel)) {
     for (const [m, n] of Object.entries(c)) {
-      const permis = REFERENCE[f]?.[m] ?? 0;
-      if (n > permis) hausses.push(`${f} · ${m} : ${n} (référence ${permis})`);
+      const permis = (REFERENCE[f]?.[m] ?? 0) + exception(f, m);
+      if (n > permis) hausses.push(`${f} · ${m} : ${n} (référence ${REFERENCE[f]?.[m] ?? 0}, exceptions ${exception(f, m)})`);
     }
   }
-  assert.deepEqual(hausses, [], "Un écran nouveau ou modifié emploie la grammaire historique ; utilisez src/components/releve/ (DESIGN.md v3.0).");
-  // Le canon lui-même n'en porte aucun.
+  assert.deepEqual(hausses, [], "Un écran nouveau ou modifié emploie la grammaire historique ; utilisez le Relevé (DESIGN.md v3.0). Faux positif ? Déclarez-le dans heritage-exceptions.json, avec son motif.");
+  // Le canon lui-même n'en porte aucun, même par exception.
   for (const f of Object.keys(actuel)) assert.ok(!/^src\/components\/(releve|accueil)\//.test(f), `${f} : le canon contient un marqueur historique`);
+});
+
+test("K1b. la référence ne se desserre pas, et chaque exception est motivée et sert encore", () => {
+  const total = Object.values(REFERENCE).reduce((s, c) => s + Object.values(c).reduce((a, b) => a + b, 0), 0);
+  assert.ok(total <= PLAFOND_REFERENCE, `la référence compte ${total} marqueurs, au-delà du plafond ${PLAFOND_REFERENCE}`);
+  const actuel = releverHeritage();
+  for (const e of EXCEPTIONS) {
+    assert.ok(e.motif && e.motif.trim().length >= 30, `${e.fichier} · ${e.marqueur} : motif absent ou trop court`);
+    assert.ok(Number.isInteger(e.nombre) && e.nombre > 0, `${e.fichier} · ${e.marqueur} : nombre invalide`);
+    assert.ok(!/^src\/components\/(releve|accueil)\//.test(e.fichier), `${e.fichier} : pas d'exception dans le canon`);
+    const reste = (actuel[e.fichier]?.[e.marqueur] ?? 0) - (REFERENCE[e.fichier]?.[e.marqueur] ?? 0);
+    assert.ok(reste >= e.nombre, `${e.fichier} · ${e.marqueur} : exception inutile (${reste} au-delà de la référence), à retirer`);
+  }
 });
 
 test("K2. les jetons du Relevé ne sont déclarés que dans design-tokens.css", () => {

@@ -246,25 +246,36 @@ Deux motifs canoniques déjà présents dans le produit, à réutiliser tels que
 | **Cartographie** | aucune carte dans le Relevé | trait seul, fond neutre, aucune teinte de risque inventée ; une carte est un **emplacement** (donnée d'un tiers) |
 | **Graphiques** | `RegleDuTemps`, `RegleDeRang`, `Seuils`, échelle DPE, barres d'audit, `TerritoryYearsBand` | une échelle par mesure, le seuil affiché, la source nommée. **Le tracé suit la nature de la donnée** *(stable)* : des horizons, des paliers de réchauffement ou des moyennes trentenaires sont des jalons isolés, **jamais reliés** (FUT-87 V2) ; une **série continue réellement mesurée ou modélisée à ce pas** (températures annuelles observées, série annuelle d'un même modèle) peut être une courbe, avec son enveloppe d'incertitude et sa source. `RegleDuTemps` superpose ses libellés à 360 px (§ 2.4) : à corriger avant tout usage |
 
-## 7. Mouvement (FUT-75, sans ajout)
+## 7. Mouvement : FUT-75 est la seule source
 
-La grammaire est celle de `design-tokens.css` et `lib/motion.ts` : 90 ms (pression), 120 ms (survol,
-focus), 240 ms (transition d'état), 180 ms (arrivée d'un contenu, fondu et flou de 2 px **sans
-déplacement**), coche de confirmation en 260 ms après la réponse, micro-ressort réservé aux commandes.
-**Le repère bouge, la donnée reste.**
+**Révision du 20/10 (revue de R0).** La première version de cette section listait « quatre sens » permis
+au mouvement. C'était, sans le vouloir, une seconde classification à côté de celle de FUT-75. Elle est
+retirée : **le Relevé définit le langage visuel, FUT-75 définit le comportement dans le temps.** La
+règle complète est dans `DESIGN.md` § 15, et ses sources sont `src/lib/motion.ts`, `motion.test.ts`
+(G1 alignement TypeScript / CSS, G2 mouvement réduit, Q4) et
+`docs/audits/2026-10-12-fut75-integration-1.md`.
 
-Le mouvement n'est permis que pour quatre sens :
+Rappel des trois niveaux de FUT-75 : **geste** (90 ms pression, 120 ms survol et focus, micro-ressort
+sur les seules commandes), **état** (180 ms bascule, fondu et flou de 2 px sans déplacement ; 240 ms
+transition d'état), **structure** (navigation, dévoilement, déclenchée par le lecteur, 900 ms au plus).
+**Le repère bouge, la donnée reste.** En mouvement réduit, aucun déplacement ni ressort, l'état final
+tout de suite.
 
-| Sens | Exemple | Forme |
+Les exemples du Relevé se rangent dans ces niveaux, sans en ajouter :
+
+| Exemple | Niveau FUT-75 | Forme |
 | --- | --- | --- |
-| **Changement d'échelle** | passer de Territoire à Logement | la coupe garde sa place, le repère courant glisse ; rien ne zoome |
-| **Transition temporelle réelle** | changer d'horizon | le repère du sélecteur glisse (180 ms) ; les valeurs changent d'un coup, sans compteur |
-| **Fait et preuve** | ouvrir « Données et limites » | la zone s'ouvre (240 ms), le titre et la commande ne bougent pas |
-| **Évolution d'un arbitrage** | une analyse mise à jour | l'ancienne version reste lisible pendant l'attente ; la nouvelle arrive en bascule, annoncée |
+| changer d'horizon | état | le repère du sélecteur glisse (180 ms, Q2) ; les valeurs changent d'un coup, sans compteur |
+| ouvrir « Données et limites » | état | la zone s'ouvre (240 ms, Q4) ; le titre et la commande ne bougent pas |
+| une lecture enrichie qui se prépare | état | une ligne d'état unique (Q5) ; rien n'est remplacé d'office |
+| une analyse mise à jour | état, puis geste | `BoutonAction` (Q1) : l'ancienne version reste lisible pendant l'attente, la coche arrive après la réponse |
+| passer d'une échelle à l'autre | structure | la coupe garde sa place, le repère courant change ; rien ne zoome |
 
-Interdits : apparition au défilement, parallaxe, compteurs, entrées décalées de cartes, toute animation
-d'une valeur. `prefers-reduced-motion` met **toutes** les durées à zéro (test G2). Budget : ≥ 30 i/s
-processeur ralenti six fois. Clavier : aucun mouvement ne déplace le focus.
+*Vocabulaire* : dans ce document, un « mouvement » de page est une section de lecture (`.mouvement`),
+pas une animation.
+
+Les écarts constatés le 20/10 (animations qui ignorent le mouvement réduit, durées écrites en dur) sont
+listés et rattachés à leurs lots dans `DESIGN.md` § 15.4.
 
 ## 8. Les objets du centre de décision (cadre pour FUT-41 / FUT-22)
 
@@ -310,7 +321,7 @@ la V2 de FUT-41 doit résoudre, pas une contrainte qu'elle hérite.
 
 ## 9. De `DESIGN.md` v2.1 à v3.0, section par section
 
-Relu le 20/10 sur `main` (`3da725e3`) et appliqué dans la PR R0. Bilan : **5 sections remplacées, 19 amendées, 2 ajoutées**, les autres conservées. **Conservé** : inchangé. **Amendé** : le principe reste, une règle
+Relu le 20/10 sur `main` (`3da725e3`) et appliqué dans la PR R0. Bilan : **5 sections remplacées, 19 amendées, 3 ajoutées**, les autres conservées. **Conservé** : inchangé. **Amendé** : le principe reste, une règle
 change. **Remplacé** : la section est réécrite à partir de ce document. **Supprimé** : la règle disparaît.
 
 | § v2.1 | Sujet | Sort en v3.0 | Ce qui change | Source ici |
@@ -349,7 +360,8 @@ change. **Remplacé** : la section est réécrite à partir de ce document. **Su
 | 10 | conventions d'implémentation | **amendé** | les jetons `--r-*` et les rôles vivent dans `design-tokens.css` ; un nouveau fichier ne peut contenir aucun marqueur hérité (test-cliquet) | rapport § C.5 |
 | 11 | ce qui reste ouvert | **amendé** | point 1 (collision de l'orange) tranché par § 3.4 ; point 4 (système de composants partagés) devient le lot R1 ; ajoute le filet de carte et le thème clair | § 3.4 |
 | 13 (nouveau) | les interfaces nouvelles et le centre de décision | **ajouté** | principes non négociables et hypothèses | § 8 |
-| 14 (nouveau) | limites connues | **ajouté** | chevauchement de `RegleDuTemps`, densité à 360 px, non-Retina, Safari, thème clair | § 2.4 |
+| 14 (nouveau) | limites connues | **ajouté** | chevauchement de `RegleDuTemps`, densité à 360 px, non-Retina, Safari, thème clair, animations qui ignorent le mouvement réduit ; validations obligatoires avant activation | § 2.4 |
+| 15 (nouveau) | le mouvement : FUT-75 | **ajouté** | l'articulation Relevé / FUT-75 : trois niveaux, principes, sources, écarts constatés | § 7 |
 
 ## 10. Accessibilité
 

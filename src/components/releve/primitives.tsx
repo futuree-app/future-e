@@ -1,9 +1,12 @@
 // LE RELEVÉ · PRIMITIVES CANONIQUES DE FUTUR•E (FUT-87 ; canon depuis FUT-118 R0, DESIGN.md v3.0).
 //
-// Utilisées en production par l'accueil, et par Ma décision sous `DECISION_RELEVE`. Toute nouvelle
-// interface (dont le centre de décision) part d'ici ; un composant qui manque s'ajoute ici, avec ses
-// tests, plutôt que dans un module. `BandeauPrototype` est la seule exception : il ne sert qu'aux
-// bancs de développement.
+// Utilisées en production par l'accueil, et par Ma décision sous `DECISION_RELEVE`. Ce fichier porte
+// les PRIMITIVES VISUELLES PARTAGÉES : des formes qui expriment la grammaire sans rien savoir d'un
+// domaine. Les composants MÉTIER (Logement, Territoire, comparaison, paiement…) restent dans leur
+// domaine et composent ces primitives et les jetons `--r-*` ; les pages assemblent librement les deux.
+// Une forme entre ici quand elle ne dépend d'aucun domaine et que deux domaines au moins en ont besoin.
+// Le comportement dans le temps vient de `src/lib/motion.ts` (FUT-75), jamais d'ici.
+// `BandeauPrototype` ne sert qu'aux bancs de développement.
 //
 // Neuf rôles, et pas un composant par carte. Chacun dit un USAGE de l'information :
 //   Surtitre       désigne un mouvement de la page (numéro citable + nom en casse normale)

@@ -40,14 +40,17 @@ témoins de développement).
 **0 propriété différente sur 52 captures** : le style calculé est entièrement déterministe. Trois
 captures portent un bruit de pixels sans aucune différence de style : l'accueil à 390 px en sombre
 (photographie chargée en différé, 241 152 pixels), la connexion à 1440 px en sombre et à 390 px en clair
-(fond animé hors CSS, 171 551 et 124 777 pixels). D'une passe à l'autre, ce bruit se déplace : on le
-retrouve aussi, en moindre quantité, sur la page commune et sur Ma décision (4 à 48 176 pixels, toujours
-sans aucune différence de style).
+(171 551 et 124 777 pixels : le rendu de trois **flous de 90 px**, `.auth-shell-orb`, varie d'une passe à
+l'autre ; ces orbes sont immobiles). D'une passe à l'autre, ce bruit se déplace : on le retrouve aussi,
+en moindre quantité, sur la page commune et sur Ma décision (4 à 48 176 pixels, toujours sans aucune
+différence de style).
 
-Constat au passage, hors R0 : les fonds animés de la connexion, des pages commune et du gabarit de
-`/rapport` **continuent de bouger en mouvement réduit** (`prefers-reduced-motion`). À traiter avec les
-lots du tunnel (R6) et de Ma décision (R2).
-
+**Correction du 20/10 (revue de R0).** La première version de ce document affirmait que les fonds de la
+connexion, des pages commune et du gabarit de `/rapport` « continuent de bouger en mouvement réduit ».
+Vérification faite dans le code, c'est vrai pour les **pages commune** seulement : leurs orbes `breathe`
+bougent en boucle sans garde. Les orbes de la connexion et de `/rapport` sont **immobiles** ; leur bruit de
+pixels vient du rendu de leur flou. La liste exacte des animations qui ignorent le mouvement réduit, et
+leurs lots de rattachement (R2, R6, R7, R8, R9, R11), est dans `DESIGN.md` § 15.4.
 ## Résultat : avant R0 → après R0
 
 | Capture | Pixels différents | Éléments | Propriétés différentes |
@@ -142,8 +145,25 @@ pointillé de 1 px, qui décale le reste de la page d'un pixel. Ce bandeau n'exi
 | `next start` | `/` 200 ; `/dev/fut118`, `/dev/fut118/paiement`, `/dev/fut91` : 404 |
 | Mutations | jeton clair rétabli à `#faf8f3` → K4 échoue (2,57:1) ; fichier nouveau avec `glass` → K1 échoue ; jeton redéclaré dans le module → K2 échoue |
 
-## Limites
+## Seconde passe (relecture de R0, conventions)
 
+La passe de relecture ne modifie, dans le code de rendu, que des commentaires (`primitives.tsx`,
+`heritage.ts`) ; le reste touche des tests (`canon.test.ts`, `heritage-exceptions.json`) et des
+documents. Empreinte refaite et comparée au même « avant » : **même résultat**. Le style calculé est
+identique sur 50 captures sur 52 ; les deux autres sont le bouton de marque du témoin, en thème clair, comme
+ci-dessus. Les pixels diffèrent seulement par le bruit déjà mesuré (connexion : flou ; Ma décision
+classique : 4 et 10 pixels). Suite complète, lancée seule deux fois : **2858 / 2858** (+ K1b) ; tests du
+mouvement (G1, G2, Q4) et du canon (K1 à K5, K1b) au vert ; `tsc` et ESLint sans erreur.
+
+## Limites : ce que cette preuve ne valide pas
+
+**Elle prouve qu'R0 ne change rien à l'écran. Elle ne valide pas l'interface.** Les contrôles suivants
+restent obligatoires avant l'activation publique de chaque surface migrée (`DESIGN.md` § 14, plan du
+rapport § E) : Safari / WebKit, thème clair relu à l'œil, écrans connectés avec une vraie session et de
+vrais dossiers, mouvement réduit, mobile 360 et 390 px, écran non-Retina, clavier.
+
+- Les captures sont faites **animations figées** : elles ne disent rien du comportement en mouvement,
+  normal ou réduit.
 - Mesure sur **Chrome** seulement ; Safari et Firefox non mesurés (aucun moteur WebKit disponible).
 - Serveur de **développement** : le build de production a été vérifié séparément (compilation, présence
   des jetons, 404 des bancs), pas capturé.

@@ -7,6 +7,21 @@
 //
 // La référence (`heritage-reference.json`) se régénère avec `node scripts/fut118/heritage-reference.ts`,
 // SEULEMENT quand un lot de migration retire des marqueurs (le nombre baisse) : jamais pour en ajouter.
+// Elle ne se modifie jamais à la main ; son total est en plus plafonné dans `canon.test.ts` (K1b).
+//
+// UN GARDE-FOU, PAS UN JUGE ESTHÉTIQUE. Ces expressions sont des approximations :
+//   faux positifs  le mot « glass » dans un commentaire ou un texte ; un emoji ou un symbole (☀, ✓) dans
+//                  un contenu ; « italic » et « orange » sur une même ligne sans lien ; des capitales mono
+//                  pour un code légitime (un code INSEE, une référence de parcelle).
+//   oublis         des capitales posées par `text-transform` dans un module CSS ou par `style=` ; un
+//                  verre écrit `backdrop-blur` ; les rayons larges, les couleurs en dur, les halos et
+//                  orbes, les animations qui ignorent le mouvement réduit. Rien de cela n'est compté.
+// Un passage au vert ne vaut donc pas conformité : la revue de design reste nécessaire.
+//
+// LES EXCEPTIONS LÉGITIMES se déclarent dans `heritage-exceptions.json`, une entrée par fichier et par
+// marqueur : { fichier, marqueur, nombre, motif }. Le motif dit pourquoi ce n'est pas l'identité
+// historique (faux positif, ou usage justifié) ; K1 vérifie qu'il est écrit, et qu'une exception sert
+// encore (une exception devenue inutile fait échouer le test, pour qu'on la retire).
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 

@@ -8,7 +8,9 @@ porteur. Tant qu'elle n'est pas fusionnée, la v2.1 reste en vigueur sur `main`.
 > par des cartes, élève **une plaque par mouvement**, dit l'échelle par **la forme** (cercle, carré,
 > losange) et le jugement par **le trait de registre**. Le verre, les surtitres en capitales mono, les
 > pastilles et le filet coloré en haut de carte quittent le canon. Les primitives vivent dans
-> `src/components/releve/`, les jetons dans `design-tokens.css`. Chaque règle porte un statut :
+> `src/components/releve/`, les jetons dans `design-tokens.css`. **Le Relevé définit le langage visuel ;
+> FUT-75 (`src/lib/motion.ts`, jetons `--m-*`) définit le comportement dans le temps** : les deux forment
+> un seul système, et le mouvement n'a pas d'autre source (§ 15). Chaque règle porte un statut :
 > **stable** (prescriptive) ou **hypothèse** (ouverte à l'exploration, notamment pour le centre de
 > décision, § 13). Les surfaces historiques migrent par lots ; d'ici là, un test-cliquet interdit
 > d'ajouter un marqueur de l'ancienne grammaire (§ 10). Rationale, audit et preuves :
@@ -56,6 +58,7 @@ Trois couches de documents gouvernent le design de futur•e, et elles ne se rem
 | Doctrine vivante | `docs/vault/doctrine/design.md`, `interface.md`, `editoriale.md` | le **pourquoi**, verrouillé |
 | Application | **ce document** | le **comment**, écran par écran |
 | Implémentation canonique | `src/components/releve/` (primitives) et `src/app/design-tokens.css` (jetons `--r-*`) | le **comment**, en code ; tout nouvel écran part d'ici |
+| Mouvement (FUT-75) | `src/lib/motion.ts` (+ `motion.test.ts`), jetons `--m-*` de `design-tokens.css`, `docs/audits/2026-10-12-fut75-integration-1.md` | le comportement **dans le temps** ; seule source des durées, courbes et règles du mouvement (§ 15) |
 | Déprécié | `src/components/report/kit.tsx` (`GlassCard`, `ReportSection`) | ne s'emploie plus ; disparaît avec la migration des modules |
 
 **Stable ou hypothèse.** Sauf mention contraire, une règle de ce document est **stable** : elle
@@ -158,6 +161,10 @@ largeur. Écart connu : `CoupeEchelles` (à corriger au lot R1).
 Une surface élevée est un bloc qui sort du plan. **Depuis la v3.0, elle a une seule forme : la
 plaque** (`Plaque`) : fond `--r-plaque` (`--bg-deep`), filet `--r-plaque-bord`, rayon de 3 px, deux
 repères de coupe en coin. Le verre translucide et l'ombre portée ne sont plus des surfaces du canon.
+
+*Vocabulaire.* Dans ce document, un **mouvement de page** est une **section de lecture** (au sens
+éditorial : un temps du document, séparé par un filet, `.mouvement`). Il n'a rien à voir avec le
+**mouvement animé**, qui relève de FUT-75 (§ 15).
 
 **Une seule surface dominante par mouvement de la page.** Deux plaques de même poids ne se font pas
 concurrence dans le même champ visuel, sauf quand l'écran les met **explicitement en regard** pour les
@@ -683,8 +690,9 @@ de composant responsive).
 
 **Manquants, à créer dans `src/components/releve/` (lot R1)** *(hypothèses jusque-là ; formes
 éprouvées par les témoins de `/dev/fut118`)* : `Selecteur` (horizon, mode : remplace `HorizonSwitch`
-et `HORIZON_PILLS`), `Tableau`, `Champ`, `Bouton`, `Parcours`, `LigneEtat`, `Emplacement`, et pour le
-centre de décision `Issue` et `NiveauExamen`. **La ligne d'état n'affirme que ce que le serveur a
+et `HORIZON_PILLS`), `Tableau`, `Champ`, `Bouton`, `Parcours`, `LigneEtat`, `Emplacement`. Les formes
+`Issue` et `NiveauExamen` du témoin de comparaison sont des **composants métier possibles du centre de
+décision**, à sa discrétion (§ 13), pas des primitives à créer. **La ligne d'état n'affirme que ce que le serveur a
 confirmé** *(stable)* : « aucun montant n'a été prélevé », « paiement reçu », « dossier prêt » ne
 s'écrivent qu'à partir d'un état serveur établi ; une erreur générique, un délai ou une réponse perdue
 ne prouvent rien, et l'écran dit alors que la confirmation n'est pas encore connue, sans offrir de
@@ -825,14 +833,28 @@ survivent à un changement de technologie, celles-ci non.
   composants consomment `var(--token)`. Les jetons du Relevé (`--r-*`, `--r-t-*`, `--r-sur-marque`) y
   sont déclarés **une seule fois** ; aucun module ne les redéclare (test K2), et tout jeton `--r-*`
   employé y est défini (K3).
-- **Le Relevé d'abord.** Un nouvel écran se compose avec `src/components/releve/`. Un composant qui
-  manque s'y ajoute, avec ses tests, plutôt que dans un module. Les styles propres à un module
-  consomment les jetons et les rôles ; ils ne redéfinissent ni taille ni couleur.
-- **Le cliquet.** `src/components/releve/canon.test.ts` (K1) compte les marqueurs de l'identité
-  historique (verre, kit déprécié, capitales mono, italique d'accent, emoji) fichier par fichier : un
-  fichier ne peut qu'en perdre, un fichier nouveau n'en contient aucun. La référence
-  (`heritage-reference.json`) ne se régénère qu'après un lot qui en retire
-  (`node scripts/fut118/heritage-reference.ts`, qui refuse toute hausse).
+- **Une grammaire, trois niveaux de composants.** Une seule grammaire ne veut pas dire un seul
+  répertoire.
+  - **Primitives visuelles partagées** : `src/components/releve/`. Une forme y entre quand elle exprime
+    la grammaire sans rien savoir d'un domaine, et que deux domaines au moins en ont besoin (ligne et
+    marge, plaque, registre, grain, sélecteur, tableau, champ…). Elles ont leurs tests.
+  - **Composants métier** : dans leur domaine (Logement, Territoire, comparaison, paiement, centre de
+    décision…). Ils composent les primitives et consomment les jetons et les rôles ; leurs styles
+    propres ne créent ni couleur, ni taille de texte, ni rayon hors jetons.
+  - **Compositions de parcours** : les pages et les routes, qui assemblent librement les deux.
+- **Le cliquet, un garde-fou, pas un juge esthétique.** `src/components/releve/canon.test.ts` (K1)
+  compte les marqueurs de l'identité historique (verre, kit déprécié, capitales mono, italique
+  d'accent, emoji) fichier par fichier : un fichier ne peut qu'en perdre, un fichier nouveau n'en
+  contient aucun. Ses expressions sont des **approximations**, dont les limites sont écrites dans
+  `heritage.ts` (faux positifs : un mot « glass » dans un commentaire, un symbole dans un contenu, un
+  code légitime en capitales ; oublis : capitales posées par `text-transform`, `backdrop-blur`, rayons,
+  couleurs en dur, halos, animations). Un passage au vert ne vaut pas conformité.
+  - **Exception légitime** : une entrée dans `heritage-exceptions.json` (fichier, marqueur, nombre,
+    motif d'au moins une phrase), relue en revue ; K1b vérifie le motif et retire d'office une
+    exception devenue inutile. Aucune exception dans le Relevé lui-même.
+  - **La référence** (`heritage-reference.json`) ne se modifie jamais à la main. Elle se régénère après
+    un lot qui retire des marqueurs (`node scripts/fut118/heritage-reference.ts`, qui refuse toute
+    hausse), et son total est plafonné dans le test (603 au lot R0), plafond qui ne fait que baisser.
 - **Contrastes.** K4 vérifie que les jetons de texte et le texte sur la couleur de marque tiennent
   4,5:1 sur le fond et la plaque, dans les deux thèmes.
 - **Preuve d'absence de changement visible.** Un lot qui ne doit rien changer à l'écran le prouve par
@@ -886,7 +908,9 @@ PR R0, après relecture du porteur) :
 | § 8.1 · casse normale, lien d'évitement | Avec FUT-86 |
 | § 9 · primitives du Relevé, rôles `--r-t-*`, manquants nommés, ligne d'état fidèle au serveur | Revue du 20/10 : un message de paiement ne dit que ce que le serveur a confirmé |
 | § 10 · une seule source de jetons, cliquet, contrastes, preuve d'absence de changement | Empêcher de recréer une seconde grammaire pendant la migration par lots |
-| § 13, § 14 · centre de décision (principes et hypothèses), limites connues | Revue du 20/10 : ne pas figer la comparaison ; documenter les limites mobiles visibles |
+| § 13, § 14 · centre de décision (principes et hypothèses), limites connues, validations obligatoires | Revue du 20/10 : ne pas figer la comparaison ; documenter les limites mobiles visibles ; R0 n'est pas une validation de l'interface |
+| § 10 · trois niveaux de composants (primitives, métier, parcours) ; le cliquet comme garde-fou, ses limites, ses exceptions motivées, son plafond | Revue de R0 : une seule grammaire ne veut pas dire un seul répertoire ; un test approximatif ne doit ni juger l'esthétique ni se desserrer en silence |
+| § 0, § 15 · le mouvement : FUT-75 seule source, trois niveaux, écarts constatés | Revue de R0 : le Relevé définit le langage visuel, FUT-75 le comportement dans le temps ; la première version de la grammaire esquissait une seconde classification (« quatre sens »), retirée |
 
 **v2.1, 04/08/2026** (intégration de la charte de marque v1.7) :
 
@@ -952,9 +976,16 @@ les tunnels transactionnels, par décision motivée.
 
 ## 13. Les interfaces nouvelles, et le centre de décision (v3.0)
 
-Toute interface nouvelle naît dans le Relevé. Pour le centre de décision (FUT-41, FUT-22), qui
-prépare une interface plus visuelle, interactive et guidée, ce document sépare ce qui ne se négocie
-pas de ce qui reste à inventer.
+**Une identité commune, une vraie liberté d'invention dans les parcours.** Toute interface nouvelle
+parle le Relevé (langage visuel) et FUT-75 (mouvement), mais n'a pas à reproduire la composition d'un
+rapport documentaire. Le centre de décision (FUT-41, FUT-22) peut devenir une interface interactive,
+visuelle et guidée. Ce document sépare ce qui ne se négocie pas de ce qui reste à inventer ; ses
+composants propres sont des composants métier (§ 10), dans son domaine.
+
+Ses libertés de composition respectent : la **traçabilité et les preuves** ; les **registres** et les
+**échelles** ; l'**absence de score composite ou de classement implicite** ; la **fidélité des
+formulations aux données** ; la **grammaire visuelle du Relevé** (jetons, rôles, formes, registre,
+plaque) ; la **grammaire du mouvement de FUT-75** (§ 15).
 
 **Principes non négociables** *(stable)* :
 
@@ -978,7 +1009,11 @@ pas de ce qui reste à inventer.
 disposition spatiale ; la direction « dossier de décision vivant » du cadrage FUT-41. Ce sont des
 exemples. Des colonnes, une table manipulable, une disposition spatiale ou un parcours guidé restent
 possibles **s'ils tiennent les sept principes** : une position ou une colonne ne se lit pas comme un
-rang, et un axe dit ce qu'il signifie.
+rang, et un axe dit ce qu'il signifie. Un écart à une hypothèse se dit et se justifie ; il ne demande
+pas d'amender ce document. Les règles **stables** des § 2 à 9 s'entendent pour ce qu'elles décrivent
+(une forme de surface, un rôle typographique, une couleur) et ne prescrivent pas de mise en page à un
+parcours : la balance, par exemple, signifie un arbitrage ; elle n'interdit pas de mettre deux lieux
+en colonnes.
 
 ## 14. Limites connues (v3.0)
 
@@ -989,3 +1024,75 @@ rang, et un axe dit ce qu'il signifie.
 | Écrans non-Retina, Safari / WebKit et thème clair jamais vérifiés à l'écran pour le Relevé | contrôles requis avant toute activation (`DECISION_RELEVE`) |
 | `CoupeEchelles` suit l'écran et non son conteneur | lot R1 |
 | Le ton de la plaque du verdict est un carré, glyphe du secteur | lot R2 |
+| **Animations qui ignorent le mouvement réduit** (constat du 20/10, détail au § 15.4) | lots R2, R6, R7, R8, R9, R11 |
+
+**Les validations restent obligatoires.** Le lot R0 prouve qu'il ne change rien à l'écran (52
+empreintes) ; il ne valide pas l'interface. Avant l'activation publique de toute surface migrée :
+Safari / WebKit (iPhone réel et macOS), thème clair relu à l'œil, écrans connectés avec une vraie
+session et de vrais dossiers (anciens compris), mobile 360 et 390 px, écran non-Retina, clavier,
+**mouvement réduit**. Le plan de migration en fait une condition de sortie de chaque lot.
+
+---
+
+## 15. Le mouvement : FUT-75 (v3.0)
+
+**Le Relevé définit le langage visuel ; FUT-75 définit le comportement dans le temps.** Il n'existe pas
+de seconde grammaire d'animation. Sources, dans cet ordre : `src/lib/motion.ts` (durées, courbes,
+ressort, délai de l'indicateur) et `motion.test.ts`, qui aligne ces valeurs sur les jetons `--m-*` de
+`design-tokens.css` (G1) et vérifie leur mise à zéro en mouvement réduit (G2) ; puis la décision
+d'intégration `docs/audits/2026-10-12-fut75-integration-1.md`. Les prototypes de la branche
+`feat/fut-75-motion-releve` restent la référence artistique.
+
+### 15.1 Les trois niveaux *(stable)*
+
+| Niveau | Ce qu'il fait | Durées et jetons |
+| --- | --- | --- |
+| **Geste** | la réaction immédiate à la main : pression, survol, focus. Seul niveau qui admet le **micro-ressort** (≈ 2 % de dépassement), et seulement sur une **commande** (bouton, indicateur), jamais sur une donnée | 90 ms `--m-pression`, 120 ms `--m-geste`, ressort `--m-ressort` sur 200 ms `--m-ressort-duree` |
+| **État** | la continuité entre deux présentations d'un même élément : une zone qui s'ouvre, un bouton qui devient attente, un contenu qui s'échange | 180 ms `--m-bascule` (fondu et flou de 2 px, sans déplacement), 240 ms `--m-etat` ; courbe `--m-releve` |
+| **Structure** | la compréhension d'ensemble : navigation, dévoilement, **déclenchée par le lecteur** | 900 ms au plus (`DUREES.plafond`) |
+
+### 15.2 Les principes *(stable)*
+
+- **Le repère bouge, la donnée reste.** Aucune valeur ne défile, aucune barre ne s'étire, aucun résultat
+  scientifique ne s'anime. Une valeur nouvelle arrive entière.
+- **Mouvement réduit** (`prefers-reduced-motion: reduce`) : aucun déplacement, aucun ressort, l'état
+  final est appliqué tout de suite ; seule une teinte peut encore changer. Les jetons `--m-*` tombent
+  à 0 ms et le ressort perd son dépassement, pour tout le site.
+- **Interruption** : une transition repart de l'état courant ; aucune séquence ne se joue contre le
+  lecteur. Le focus clavier ne bouge jamais du fait d'une animation.
+- **L'indicateur d'attente** n'apparaît qu'après 300 ms (`DELAI_INDICATEUR`) ; aucun pourcentage ni temps
+  restant inventé.
+- **Budget** : au moins 30 images par seconde avec le processeur ralenti six fois, sinon un repli plus
+  simple. Aucune dépendance d'animation.
+
+### 15.3 Ce que le Relevé y ajoute, et ce qu'il n'y ajoute pas
+
+Rien de nouveau : aucune durée, aucune courbe, aucun niveau. Les exemples du Relevé se rangent dans les
+trois niveaux : changer d'horizon (le repère du sélecteur glisse, état, 180 ms ; les valeurs changent
+d'un coup) ; ouvrir « Données et limites » (état, `.detailsFluide`, Q4) ; une lecture enrichie qui se
+prépare (ligne d'état, Q5) ; une analyse mise à jour (`BoutonAction`, Q1) ; passer d'une échelle à
+l'autre (structure, déclenché par le lecteur). Un écran nouveau, centre de décision compris, emploie
+ces niveaux ; un besoin qu'ils ne couvrent pas s'ajoute à `motion.ts`, avec son test, jamais en local.
+
+### 15.4 Écarts constatés le 20/10 (antérieurs à la v3.0, non corrigés dans R0)
+
+**Animations qui ignorent le mouvement réduit**, à corriger dans le lot qui migre chaque surface :
+
+| Animation | Où | Lot |
+| --- | --- | --- |
+| orbes `breathe` (`.orb`, boucle infinie de 14 s, déplacement et agrandissement), style injecté sans garde | 22 pages : hubs et pages commune chaleur (3), inondation (4), voiture (2) ; Savoir (6) ; Agir (7) ; hors liste, Pourquoi et Professionnels sont gardés | R8 (pages commune et hubs), R9 (Savoir, Agir) |
+| barre de chargement de route (`RouteLoadingBar`, balayage infini en style en ligne, hors de la garde qui couvre ses autres animations) | toutes les routes, pendant une navigation | R7 (navigation et chrome globale) |
+| point pulsé `animate-pulse` | Ma décision classique (analyse d'adresse en cours) | R2 (le Relevé le remplace déjà par un repère fixe) |
+| texte pulsé `animate-pulse` pendant le chargement du paiement | `PaymentWrapper` | R6 (tunnel) |
+| points pulsés `animate-pulse` | Où vivre (4), comparateur (`ModeChoixAsk`) | R9, R11 |
+
+Non concernés, vérifié : les orbes de la connexion et de `/rapport` sont **immobiles** (le bruit de
+pixels relevé par les empreintes vient du rendu de leur flou, pas d'une animation) ; `BoutonAction`,
+`QuartierSynthesis`, `EchelleNavigator`, `.detailsFluide`, le héros de l'accueil et `RouteLoadingBar`
+pour ses autres états sont gardés.
+
+**Durées écrites en dur**, conformes aux plages de FUT-75 mais hors jetons : transitions de 160 ms
+(`releve.module.css`, liens, boutons, coupe, signe des groupes), 180 ms (`EchelleNavigator`), séquence de
+l'accueil (420 ms pour la grille, 320 ms pour la planche, retards de 280 à 640 ms, niveau structure), coche
+de confirmation de 260 ms (`BoutonAction`, décision FUT-75 sans jeton). Aucune ne contredit les principes ;
+leur rattachement aux jetons (ou l'ajout d'un jeton de structure à `motion.ts`) relève du lot R1.
