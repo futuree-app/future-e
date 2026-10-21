@@ -6,7 +6,8 @@ import { PaymentWrapper } from "@/components/PaymentWrapper";
 
 type Props = {
   insee: string;
-  commune: string | null;
+  /** Le nom officiel du code, résolu par la page côté serveur (FUT-119) : jamais un nom venu de l'URL. */
+  commune: string;
   rank: number | null;
   amount: number;
   submitLabel?: string;
@@ -31,7 +32,7 @@ export function TerritoryUnlockPanel({ insee, commune, rank, amount, submitLabel
             await fetch("/api/territoire/activer", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ insee, commune: commune ?? "" }),
+              body: JSON.stringify({ insee }),
             });
           } catch {
             // Le webhook posera le territoire actif de toute façon.

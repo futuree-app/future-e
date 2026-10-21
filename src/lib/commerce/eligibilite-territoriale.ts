@@ -32,6 +32,9 @@ export type VerdictEnsemble = { ok: true; insees: string[] } | RefusTerritorial;
 
 /** Le référentiel : `true` si l'index du dossier connaît ce code (arrondissements PLM compris). */
 export type CommuneConnue = (insee: string) => boolean;
+/** FUT-119 · Le nom officiel d'un code, ou `null` si le référentiel ne sait pas le nommer. */
+export type NomDeCommune = (insee: string) => string | null;
+export type CommuneIdentifiee = { ok: true; insee: string; nom: string } | RefusTerritorial;
 
 // Le format du COG : cinq chiffres, ou 2A/2B suivis de trois chiffres pour la Corse. L'ancienne garde de la
 // route (`^[0-9AB][0-9]{4}$`) refusait tout code corse, donc toute commune corse.
@@ -76,6 +79,18 @@ export function communeVendable(brut: unknown, connue: CommuneConnue): VerdictTe
   if (estCodeOutremer(insee)) return REFUS_OUTREMER;
   if (arrondissementsDe(insee).length > 0 || connue(insee)) return { ok: true, insee };
   return REFUS_NON_IDENTIFIE;
+}
+
+/**
+ * FUT-119 · Une commune vendable ET nommée par le serveur. C'est la seule identité qu'un écran de vente, un
+ * paiement ou une activation peut porter : un nom reçu du client n'est jamais lu. Un code vendable que le
+ * référentiel ne sait pas nommer est refusé, plutôt que vendu sous un nom qu'on ne peut pas garantir.
+ */
+export function communeIdentifiee(brut: unknown, connue: CommuneConnue, nomDe: NomDeCommune): CommuneIdentifiee {
+  const verdict = communeVendable(brut, connue);
+  if (!verdict.ok) return verdict;
+  const nom = nomDe(verdict.insee);
+  return nom ? { ok: true, insee: verdict.insee, nom } : REFUS_NON_IDENTIFIE;
 }
 
 /**
