@@ -508,6 +508,23 @@
   --r-t-marge-etroite: 13px;               /* la même sous 900 px (lisibilité mobile, FUT-87 V2) */
 }
 
+/* UN CONTENEUR QUI FIXE SON THÈME (FUT-118, activation de Ma décision). Une propriété qui en cite une
+   autre se résout là où elle est DÉCLARÉE : déclarés sur `:root`, les `--r-*` gardent les couleurs du thème
+   de la racine, même sous un élément `data-theme="dark"`. Ils sont donc redérivés sur tout conteneur
+   qui porte son propre thème. Aucun ne le fait en dehors de `/rapport` sous le relevé (cf. sa page). */
+[data-theme]:not(:root) {
+  --r-fond: var(--bg);
+  --r-plaque: var(--bg-deep);
+  --r-plaque-bord: var(--border-2);
+  --r-encre: var(--fg-hi);
+  --r-texte: var(--fg-2);
+  --r-discret: var(--fg-3);
+  --r-meta: var(--ghost);
+  --r-filet: var(--border-1);
+  --r-filet-fort: var(--border-2);
+  --r-trame: color-mix(in srgb, var(--fg-hi) 4%, transparent);
+}
+
 /* LE TEXTE SUR LA COULEUR DE MARQUE. `.boutonMarque` posait `--bg` sur l'orange : 7,3:1 en thème sombre,
    mais 2,57:1 en thème clair, où `--bg` devient crème (échec AA, mesuré le 20/10). Une encre sombre tient
    dans les deux thèmes ; la valeur du thème sombre est inchangée. Aucune page de production n'emploie

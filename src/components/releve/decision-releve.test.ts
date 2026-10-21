@@ -22,7 +22,9 @@ import type { Dossier } from "../../lib/decision/decision-fact.ts";
 import { PRODUCT_CONVENTIONS_VERSION, type EvaluationContext } from "../../lib/hard-constraints.ts";
 import { hydrateHardConstraints } from "../../lib/hard-constraints-hydrate.ts";
 import type { PlaceDirectory } from "../../lib/hard-constraints-resolve.ts";
-import { presentationDuDossier } from "./activation.ts";
+import { presentationPour, comptesDuReleve } from "./activation.ts";
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { margeDe } from "./marge.ts";
 import { lireDossier, lireCarteDuDossier, lectureDesEchelles, type PreuveLue } from "./lecture-dossier.ts";
 
@@ -54,12 +56,78 @@ const code = (p: string) => readFileSync(p, "utf8").split("\n").filter((l) => !l
 
 // ── A. Activation ─────────────────────────────────────────────────────────────────────────────
 
-test("A1. livrée éteinte : sans DECISION_RELEVE=true, la production garde l'écran actuel", () => {
-  assert.equal(presentationDuDossier(undefined, {}), "classique");
-  assert.equal(presentationDuDossier(undefined, { DECISION_RELEVE: "1" }), "classique", "seule la valeur « true » active");
-  assert.equal(presentationDuDossier(undefined, { DECISION_RELEVE: "true" }), "releve");
-  assert.equal(presentationDuDossier("classique", { DECISION_RELEVE: "true" }), "classique", "une prop explicite gagne");
-  assert.equal(presentationDuDossier("releve", {}), "releve");
+test("A1. livrée éteinte : sans bascule, la production garde l'écran actuel ; DECISION_RELEVE=true bascule tout le monde", () => {
+  const moi = "0b6c4a1e-3f2d-4c5b-9a8e-7d6f5e4c3b2a";
+  assert.equal(presentationPour(moi, {}), "classique");
+  assert.equal(presentationPour(null, {}), "classique");
+  assert.equal(presentationPour(moi, { DECISION_RELEVE: "1" }), "classique", "seule la valeur « true » active");
+  assert.equal(presentationPour(moi, { DECISION_RELEVE: "true" }), "releve");
+  assert.equal(presentationPour(null, { DECISION_RELEVE: "true" }), "releve");
+});
+
+test("A1b. palier par compte : seuls les identifiants listés voient le relevé, sans droit ni e-mail", () => {
+  const moi = "0b6c4a1e-3f2d-4c5b-9a8e-7d6f5e4c3b2a";
+  const autre = "11111111-2222-4333-8444-555555555555";
+  const env = { DECISION_RELEVE_COMPTES: ` ${moi.toUpperCase()} ,\n${autre}; pas-un-uuid ` };
+  assert.equal(presentationPour(moi, env), "releve", "insensible à la casse et aux espaces");
+  assert.equal(presentationPour(autre, env), "releve");
+  assert.equal(presentationPour("99999999-2222-4333-8444-555555555555", env), "classique");
+  assert.equal(presentationPour(null, env), "classique", "sans compte, la liste n'ouvre rien");
+  assert.deepEqual([...comptesDuReleve(env)].sort(), [moi, autre].sort(), "un identifiant mal formé est ignoré");
+  assert.equal(comptesDuReleve({ DECISION_RELEVE_COMPTES: "quelquun@example.com" }).size, 0, "un e-mail n'est pas un identifiant");
+  assert.equal(presentationPour(moi, { DECISION_RELEVE_COMPTES: "" }), "classique");
+  // La liste ne lit ni les droits d'administration ni les achats.
+  assert.doesNotMatch(code("src/components/releve/activation.ts"), /FUTUREE_ADMIN_EMAILS|isAdmin|claims|entitlement|purchase/i);
+});
+
+test("A2. résolue une fois par requête : la page /rapport décide, chaque point de montage reçoit la même valeur", () => {
+  const page = code("src/app/(account)/rapport/page.tsx");
+  assert.equal((page.match(/presentationPour\(/g) ?? []).length, 1, "un seul appel, dans la page");
+  assert.match(page, /const presentation = presentationPour\(user\.id\);/);
+  for (const [motif, n] of [
+    [/<DossierDecisionSection\s+presentation=\{presentation\}/g, 2],
+    [/<ControlesDuDossier presentation=\{presentation\}/g, 2],
+    [/<DossierAvecLogement\s+presentation=\{presentation\}/g, 1],
+  ] as const) {
+    assert.equal((page.match(motif) ?? []).length, n, `${motif} : ${n} point(s) de montage`);
+  }
+  assert.equal((page.match(/<DossierDecisionSection\b/g) ?? []).length, 2, "aucun point de montage sans présentation");
+  assert.equal((page.match(/<ControlesDuDossier\b/g) ?? []).length, 2);
+  const avec = code("src/components/report/DossierAvecLogement.tsx");
+  assert.match(avec, /<DossierDecisionSection\s+presentation=\{presentation\}/);
+  assert.match(avec, /<ControlesDuDossier\s+presentation=\{presentation\}/);
+  // Aucun composant ne lit la bascule lui-même, ni ne la devine par défaut.
+  for (const f of ["src/components/report/DossierDecisionSection.tsx", "src/components/report/ControlesDuDossier.tsx", "src/components/report/DossierAvecLogement.tsx", "src/components/releve/DossierDecisionReleve.tsx", "src/components/releve/ControlesReleve.tsx"]) {
+    const c = code(f);
+    assert.doesNotMatch(c, /DECISION_RELEVE|presentationPour|process\.env/, `${f} ne résout pas la présentation`);
+    assert.doesNotMatch(c, /presentation\?:\s*PresentationDossier/, `${f} : la présentation n'est pas optionnelle`);
+  }
+  // Dans tout le code de production, seule la page appelle la résolution.
+  const appelants: string[] = [];
+  const parcourir = (d: string) => {
+    for (const n of readdirSync(d)) {
+      const p = join(d, n);
+      if (statSync(p).isDirectory()) { if (!p.startsWith(join("src", "app", "dev"))) parcourir(p); }
+      else if (/\.tsx?$/.test(p) && !/\.test\.tsx?$/.test(p) && !p.endsWith("activation.ts") && /presentationPour\(|DECISION_RELEVE/.test(code(p))) appelants.push(p);
+    }
+  };
+  parcourir("src");
+  assert.deepEqual(appelants, [join("src", "app", "(account)", "rapport", "page.tsx")]);
+});
+
+test("A3. thème clair : sur /rapport, le relevé garde le thème sombre de la page ; le classique ne change pas", () => {
+  // La page est peinte en couleurs fixes (`bg-canvas`, `text-label`) : en thème clair elle reste sombre.
+  // Sans ancrage, le relevé (jetons de thème) y posait des plaques crème et une encre sombre sur fond sombre.
+  const page = code("src/app/(account)/rapport/page.tsx");
+  assert.match(page, /data-theme=\{presentation === "releve" \? "dark" : undefined\}/, "seulement sous le relevé");
+  assert.equal((page.match(/data-theme=/g) ?? []).length, 1);
+  // Les jetons du relevé sont redérivés sur un conteneur qui fixe son thème : déclarés sur `:root`, ils
+  // garderaient sinon les couleurs du thème de la racine.
+  const jetons = readFileSync("src/app/design-tokens.css", "utf8");
+  const bloc = jetons.slice(jetons.indexOf("[data-theme]:not(:root) {"), jetons.indexOf("}", jetons.indexOf("[data-theme]:not(:root) {")));
+  for (const j of ["--r-fond", "--r-plaque", "--r-plaque-bord", "--r-encre", "--r-texte", "--r-discret", "--r-meta", "--r-filet", "--r-filet-fort", "--r-trame"]) {
+    assert.match(bloc, new RegExp(`${j}:`), `${j} redérivé`);
+  }
 });
 
 // ── B. Liens de preuve ────────────────────────────────────────────────────────────────────────
@@ -151,13 +219,13 @@ test("D2. l'emblème compte aussi les contrôles hors minute : une échelle n'es
 
 test("E1. la bascule se fait AVANT le rendu classique et transmet toutes les props", () => {
   const src = code("src/components/report/DossierDecisionSection.tsx");
-  const bascule = src.indexOf('presentationDuDossier(presentation) === "releve"');
+  const bascule = src.indexOf('presentation === "releve"');
   assert.ok(bascule > 0 && bascule < src.indexOf("const structured"), "bascule avant le corps classique");
   const appel = src.slice(bascule, src.indexOf("/>", bascule));
   for (const p of ["dossier", "logement", "logementStatus", "insee", "scopeKey", "provenance", "projetAChange", "voisinageAChange", "contexteAChange", "generatedAt", "espacement", "titre", "supportingPane", "controles"]) {
     assert.match(appel, new RegExp(`\\b${p}=\\{${p}\\}`), `prop ${p} transmise`);
   }
-  assert.match(code("src/components/report/ControlesDuDossier.tsx"), /presentationDuDossier\(presentation\) === "releve"\) return <ControlesReleve dossier=\{dossier\} provenance=\{provenance\} \/>/);
+  assert.match(code("src/components/report/ControlesDuDossier.tsx"), /presentation === "releve"\) return <ControlesReleve dossier=\{dossier\} provenance=\{provenance\} \/>/);
 });
 
 test("E2. la lecture enrichie est intacte : gating, prefetch, hash, cache, génération, validation ; la présentation traverse les quatre chemins", () => {

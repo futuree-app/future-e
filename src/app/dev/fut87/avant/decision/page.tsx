@@ -31,6 +31,7 @@ export default async function AvantDecision({ searchParams }: { searchParams: Pr
       <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24 pt-10">
         <p className="mb-6 font-mono text-[11px] text-ghost">Rendu actuel (composants de production) · même dossier que le prototype FUT-87</p>
         <DossierDecisionSection
+          presentation="classique"
           dossier={resultat.dossier}
           logementStatus="pending"
           insee={insee}
@@ -39,7 +40,7 @@ export default async function AvantDecision({ searchParams }: { searchParams: Pr
           titre={TITRE_VERDICT}
           supportingPane={<EchelleNavigator territoireHref="#" autourHref="#" logementHref="#" addressAvailable commune={resultat.dossier.narrativePlan.communeNom} inseeCode={insee} />}
         />
-        <ControlesDuDossier dossier={resultat.dossier} />
+        <ControlesDuDossier presentation="classique" dossier={resultat.dossier} />
       </div>
     </>
   );

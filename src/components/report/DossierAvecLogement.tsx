@@ -32,10 +32,11 @@ import type { Face3Snapshot, PermisSnapshot } from "@/lib/logement-autour-types"
 import type { ReactNode } from "react";
 import { TemoinDeRendu } from "@/components/interaction/TemoinDeRendu";
 import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
+import type { PresentationDossier } from "@/components/releve/activation";
 
 export async function DossierAvecLogement({
   project, address, savedDpe, selectionDpeChangeeLe, permis, snapshotAutour, relationAdresse, communeFacts, communeDossier, logementLink, insee,
-  scopeKey, hard, userId, espacement, titre, supportingPane,
+  scopeKey, hard, userId, espacement, titre, supportingPane, presentation,
 }: {
   project: UserProject;
   address: ResolvedAddress;
@@ -85,6 +86,8 @@ export async function DossierAvecLogement({
   supportingPane?: ReactNode;
   /** FUT-26 : la relation déclarée à ce bien (`place_relation`). Absente = inconnue. */
   relationAdresse?: RelationAuLieu | null;
+  /** FUT-118 : la présentation résolue une fois par la page, transmise telle quelle à la section et aux contrôles. */
+  presentation: PresentationDossier;
 }) {
   // L'ARTEFACT PASSE AVANT L'ASSEMBLAGE (05/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -230,6 +233,7 @@ export async function DossierAvecLogement({
         <p className={`${espacement ?? "mt-14"} text-[13px] leading-relaxed text-muted glass rounded-xl px-4 py-3`}>{avis}</p>
       ) : null}
       <DossierDecisionSection
+        presentation={presentation}
         dossier={vue.dossier} logement={logementLink} logementStatus={vue.status}
         insee={insee} scopeKey={vue.scope} generatedAt={servi.generatedAt} espacement={avis ? "mt-4" : espacement} titre={titre}
         // FUT-93 : le numéro de la version figée servie, seulement quand on sert une version figée.
@@ -259,6 +263,7 @@ export async function DossierAvecLogement({
         // d'annoncer. Elle passe par la section (FUT-92), qui la pose juste après elle.
         controles={(
           <ControlesDuDossier
+            presentation={presentation}
             dossier={vue.dossier}
             provenance={servi.source === "artefact" ? scopeKey : undefined}
           />

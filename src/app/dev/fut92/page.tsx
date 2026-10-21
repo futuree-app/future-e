@@ -83,7 +83,7 @@ export default async function BancFut92({ searchParams }: { searchParams: Promis
       <div className="fixed bottom-[-100px] right-[-100px] w-[420px] h-[420px] rounded-full bg-amethyst/[0.12] blur-[90px] opacity-28 pointer-events-none z-0" />
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24" data-theme={vue === "releve" ? "dark" : undefined}>
         <BandeauPrototype>
           Banc FUT-92 · gabarit de /rapport · {vue === "releve" ? "Le relevé" : "présentation classique"} ·{" "}
           {avecAdresse ? `dossier d'adresse${t.statutAdresse === "unavailable" ? " (repli communal)" : ""}` : `dossier communal ${t.insee}`}

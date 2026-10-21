@@ -209,6 +209,7 @@ export default async function DevDossierPage({
 
           {/* LE DOSSIER, rendu par le composant de production. */}
           <DossierDecisionSection
+            presentation="classique"
             dossier={result.dossier}
             insee={insee}
             scopeKey="commune"

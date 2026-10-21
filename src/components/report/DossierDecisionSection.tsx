@@ -14,7 +14,7 @@ import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { dossierAnchorId } from "@/lib/decision/dossier-anchors";
 import { dateFr } from "@/lib/decision/autour-permis";
 import { DossierDecisionReleve } from "@/components/releve/DossierDecisionReleve";
-import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
+import type { PresentationDossier } from "@/components/releve/activation";
 import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 import { AnnonceVersion } from "@/components/report/AnnonceVersion";
 
@@ -106,10 +106,11 @@ export function DossierDecisionSection({
   presentation,
 }: {
   /**
-   * FUT-91 : la présentation « Le relevé ». Absente, elle suit le drapeau serveur `DECISION_RELEVE`
-   * (éteint par défaut). Mêmes props, mêmes états, même conclusion : seule la composition change.
+   * FUT-91 : la présentation « Le relevé ». Mêmes props, mêmes états, même conclusion : seule la
+   * composition change. OBLIGATOIRE (FUT-118) : la page la résout une fois par requête
+   * (`presentationPour`) et la passe à chaque point de montage ; aucun composant ne la devine seul.
    */
-  presentation?: PresentationDossier;
+  presentation: PresentationDossier;
   dossier: Dossier;
   /**
    * La date de génération de l'artefact, quand le dossier affiché en vient un.
@@ -181,7 +182,7 @@ export function DossierDecisionSection({
    */
   controles?: ReactNode;
 }) {
-  if (presentationDuDossier(presentation) === "releve") {
+  if (presentation === "releve") {
     return (
       <DossierDecisionReleve
         dossier={dossier} logement={logement} logementStatus={logementStatus} insee={insee} scopeKey={scopeKey}
