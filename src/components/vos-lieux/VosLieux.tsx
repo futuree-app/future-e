@@ -53,7 +53,7 @@ function Conclusion({ c }: { c: ConclusionLieu }) {
       <div className={v.conclusion}>
         <p className={s.etiquette}>Ce que conclut votre dossier</p>
         <Registre teinte={c.ton ? TEINTE_TON[c.ton] : undefined} className={v.verdict}>{bindOrphans(c.texte)}</Registre>
-        <p className={s.nuance}>{c.miseAJour ? "Analyse mise à jour le " : "Analyse réalisée le "}{date(c.generatedAt)}</p>
+        <p className={s.nuance}>Analyse réalisée le {date(c.generatedAt)}</p>
         {c.actualite === "projet_change" ? (
           <p className={v.ancienne}>Votre projet a changé depuis cette analyse. Cette conclusion reflète vos anciens critères.</p>
         ) : (

@@ -57,7 +57,7 @@ suit le thème.
 | Retour | Correction |
 | --- | --- |
 | Métadonnées trop techniques | la colonne de droite (« une adresse », « Conclusion », « version N ») est retirée ; la version reste dans les données et le dossier |
-| Sens des dates | une seule date au premier niveau : « Analyse réalisée le … », ou « Analyse mise à jour le … » quand la version servie en suit une autre ; « Acheté le » (qui lisait `created_at`) est retiré |
+| Sens des dates | une seule date au premier niveau : « Analyse réalisée le … » systématiquement : une V2 peut suivre une V1 échouée ; « Acheté le » (qui lisait `created_at`) est retiré |
 | Commune trop discrète | la commune est le titre de chaque lieu ; l'adresse suit, sans répéter code postal et commune |
 | Emblème éteint, état « inconnu » converti en « non examiné » | l'emblème suit le calcul du Relevé (`lireDossier` + `lectureDesEchelles` + contrôles, comme `DossierDecisionReleve`) : plein si des constats y sont retenus, fin si examinée sans constat, pointillé si non examinée ; **sans dossier lisible, il n'est pas dessiné** ; formes à l'encre, 80 px (56 sur mobile) |
 | « Projet » et message d'actualisation | « projet » en minuscule dans les phrases ; « Votre projet a changé depuis cette analyse. Cette conclusion reflète vos anciens critères. » ; bouton « Ouvrir le dossier pour le mettre à jour » (le dossier propose bien « Mettre à jour l'analyse », pour un territoire comme pour une adresse) ; le nombre d'analyses concernées est dit en tête de page |
@@ -80,3 +80,57 @@ suit le thème.
   d'écran.
 
 Captures : `captures/vos-lieux-{1440,390,360}-{sombre,clair}.png`.
+
+
+## Finalisation — 21 octobre 2026
+
+Reprise de la branche existante `74a4e34`, fusion ordinaire de `main` `9c1437b` (FUT-118 PR #76),
+sans conflit ni réécriture de l’historique partagé. Les bascules d’activation progressive, les jetons,
+les droits, les paiements, le moteur et le stockage des conclusions ne changent pas.
+
+### Correction ciblée
+
+La recette à l’écran confirme l’emblème éteint. Le viewBox de 256 unités réduisait le trait de
+0,9 à 0,28 px à 80 px et 0,20 px sur mobile à 56 px. La primitive commune garde sa géométrie
+et ses dimensions : seuls les trois tracés métier reçoivent `non-scaling-stroke`.
+
+- Avec constats : trait plein à l’encre de 1,8 px écran.
+- Examinée sans constat : trait plein à l’encre de 1 px écran.
+- Non examinée : trait pointillé discret de 1 px écran, tirets 2/3 px.
+- Inconnue : aucune forme inventée ; texte « Échelles examinées non connues » inchangé.
+
+Les graduations décoratives restent secondaires. Aucun filtre, opacité forcée ou seconde primitive.
+
+La date affiche systématiquement « Analyse réalisée le… ». `miseAJour = servedVersion > 1`
+est supprimé. Le test V1 échouée / V2 prête conserve le texte, la date et le numéro de version
+et vérifie que l’historique n’est pas modifié.
+
+### Preuves
+
+- 2 924 tests réussis ; TypeScript, ESLint ciblé et build réussis.
+- Chrome for Testing et WebKit : 12 configurations avant + 12 après (1440 / 390 / 360 px ×
+  sombre / clair × deux moteurs). Captures pleine page et par état, incluant les quatre états demandés.
+- Les mesures du DOM vérifient une épaisseur minimale de 1 px indépendamment de la réduction.
+- Aucun débordement, aucune conclusion recomposée (l’ancienne conserve « 20 min »), rapport
+  Territoire et deux adresses de Nîmes distincts, aucun préchargement des routes qui écrivent.
+- 32 contrôles complémentaires : autres usages de l’emblème (accueil Relevé, paiement, storyboard)
+  et navigation clavier, à 1440 / 390 px, sombre / clair, sur les deux moteurs.
+- Prévisualisation existante : clic « Vos lieux » sans session → /connexion, observé dans le
+  navigateur intégré. Aucun compte réel utilisé.
+- Fixtures seulement, clés Supabase fictives et URL locale injoignable, requêtes tierces bloquées
+  côté navigateur. Aucun achat, écriture utilisateur ou appel Anthropic.
+
+Les scripts permanents sont dans `outils/recette-matrice.cjs` et `outils/recette-compat.cjs`.
+Les mesures et exemples sont dans `captures-recette/`. L’archive complète remise au porteur
+contient 144 captures et les trois fichiers de résultats. Les anciennes captures du premier lot
+restent dans `captures/` pour l’historique.
+
+Exécution sur le banc dev (inaccessible en production) :
+
+```sh
+node docs/audits/2026-10-21-fut41-vos-lieux/outils/recette-matrice.cjs http://127.0.0.1:3141 /tmp/recette apres
+```
+
+Les restrictions du premier environnement local ont été résolues par un banc Vercel Sandbox
+éphémère, sans credentials réels, et une inspection complémentaire dans le navigateur intégré.
+Ce banc n’est pas un déploiement de production.

@@ -18,8 +18,8 @@ const out = process.argv[3];
     if (w === 1440 && theme === 'dark') {
       // Le texte rendu : chaque conclusion figée est affichée mot pour mot ; l'ancienne garde « 20 min ».
       const t = await p.evaluate(() => document.querySelector('main').innerText.replace(/\u00a0/g, ' '));
-      for (const attendu of ['une gare à moins de 20 min aux abords', 'Votre projet a changé depuis cette analyse', 'lecture gratuite', "Aucune analyse n'est enregistrée", "Une nouvelle version de l'analyse est en préparation", 'ouvert par futur•e', 'Ajaccio', 'Analyse réalisée le', 'Analyse mise à jour le', 'Ouvrir le dossier pour le mettre à jour', '(non examinée)', 'Rapport de territoire', 'reflète d\'anciens critères']) if (!t.includes(attendu)) errs.push(`texte absent : ${attendu}`);
-      for (const banni of [/version \d/, /Acheté le/, /Votre Projet/, /\bConclusion ·/]) if (banni.test(t)) errs.push(`texte à retirer encore présent : ${banni}`);
+      for (const attendu of ['une gare à moins de 20 min aux abords', 'Votre projet a changé depuis cette analyse', 'lecture gratuite', "Aucune analyse n'est enregistrée", "Une nouvelle version de l'analyse est en préparation", 'ouvert par futur•e', 'Ajaccio', 'Analyse réalisée le', 'Ouvrir le dossier pour le mettre à jour', '(non examinée)', 'Rapport de territoire', 'reflète d\'anciens critères']) if (!t.includes(attendu)) errs.push(`texte absent : ${attendu}`);
+      for (const banni of [/Analyse mise à jour le/, /version \d/, /Acheté le/, /Votre Projet/, /\bConclusion ·/]) if (banni.test(t)) errs.push(`texte à retirer encore présent : ${banni}`);
       if (/30 min/.test(t)) errs.push('une conclusion ancienne cite la valeur actuelle');
       // Liens : des <a> natifs vers les routes d'ouverture, aucun <Link> préchargé.
       const liens = await p.evaluate(() => [...document.querySelectorAll('main a')].map(a => a.getAttribute('href')));

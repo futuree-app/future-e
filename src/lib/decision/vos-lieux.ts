@@ -72,8 +72,6 @@ export type ConclusionLieu =
       /** `a_jour` : même signature décisionnelle ; `projet_change` : le Projet a changé depuis ;
        *  `inconnue` : l'artefact ne porte pas de Projet (avant le 05/08/2026), ou aucun Projet actuel. */
       actualite: "a_jour" | "projet_change" | "inconnue";
-      /** La version servie succède à une autre : l'analyse a été mise à jour. */
-      miseAJour: boolean;
       /** Une version plus récente est en préparation, ou a échoué : la version servie reste celle-ci. */
       tentativePlusRecente: "en_preparation" | "echouee" | null;
     }
@@ -160,7 +158,6 @@ function conclusionDe(stocke: StoredArtifact | undefined, projetActuel: UserProj
     generatedAt: a.generatedAt,
     moteur: a.engineVersion,
     actualite,
-    miseAJour: stocke.servedVersion > 1,
     tentativePlusRecente: tentative,
   };
 }

@@ -107,9 +107,21 @@ test("l'adresse ne répète pas le code postal ni la commune déjà affichés", 
   assert.equal(adresseCourte("30000 Nîmes", "Nîmes"), "30000 Nîmes");
 });
 
-test("une version servie qui en suit une autre se dit mise à jour", () => {
-  const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")], artefacts: new Map([[cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "V2" }), 2)]]) }));
-  assert.equal(l!.conclusion.etat === "disponible" && l!.conclusion.miseAJour, true);
+test("une V2 prête après une V1 échouée ne prouve pas une actualisation antérieure", () => {
+  const historique = [
+    { version: 1, status: "failed" as const, generatedAt: null, createdAt: null, payload: null },
+    { version: 2, status: "ready" as const, generatedAt: null, createdAt: null, payload: artefact({ texte: "Première analyse réussie" }) },
+  ];
+  const avant = structuredClone(historique);
+  const stocke = etatArtefact(historique)!;
+  const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")], artefacts: new Map([[cleArtefact("30189", `logement:${ID_A}`), stocke]]) }));
+  assert.equal(l!.conclusion.etat, "disponible");
+  if (l!.conclusion.etat !== "disponible") throw new Error("analyse absente");
+  assert.equal(l!.conclusion.version, 2);
+  assert.equal(l!.conclusion.texte, "Première analyse réussie");
+  assert.equal(l!.conclusion.generatedAt, "2026-09-21T10:00:00.000Z");
+  assert.equal("miseAJour" in l!.conclusion, false);
+  assert.deepEqual(historique, avant, "l'historique reste intact");
 });
 
 test("une conclusion dépassée par le projet oriente vers la mise à jour proposée dans le dossier", () => {
