@@ -38,7 +38,7 @@ export function useRouter() { return { push: (u) => globalThis.__fut119.navigati
   "@/components/Navbar": "export default function Navbar() { return null; }",
   "@/components/PaymentWrapper": "export function PaymentWrapper(p) { globalThis.__fut119.paiementUi.push(p); return null; }",
   "@/lib/supabase/server": proxy("@/lib/supabase/server", ["createClient"]),
-  "@/lib/user-account": proxy("@/lib/user-account", ["requireCurrentUser"]),
+  "@/lib/user-account": proxy("@/lib/user-account", ["requireCurrentUser", "getCurrentSessionUser"]),
   "@/lib/stripe": proxy("@/lib/stripe", ["getStripe"]),
   "@/lib/posthog-server": proxy("@/lib/posthog-server", ["getPostHogClient"]),
   "@/lib/ban": proxy("@/lib/ban", ["fetchBanFeaturesByLabel"]),
@@ -144,7 +144,7 @@ const S = {
       case "@supabase/supabase-js": return base;
       case "@/lib/supabase/server": return Promise.resolve({ ...base, auth: { getUser: async () => ({ data: { user: session } }) } });
       case "@/lib/user-account": return Promise.resolve({ supabase: base, user: session });
-      case "@/lib/active-territory": return Promise.resolve(fn === "loadTerritoryClaims" ? claims : false);
+      case "@/lib/active-territory": return Promise.resolve(fn === "loadTerritoryClaims" ? [...claims, ...(tables.report_grants ?? []).filter((g) => g.user_id === USER.id).map((g) => ({ kind: "grant", insee: g.insee }))] : false);
       case "next/headers": return Promise.resolve(new Map([["stripe-signature", "sig-valide"]]));
       case "@/lib/posthog-server": return { capture: () => {}, shutdown: async () => {} };
       case "@/lib/resend": return { emails: { send: async (m: never) => { S.courriels.push(m); return { data: { id: "em" }, error: null }; } } };
@@ -168,6 +168,7 @@ const S = {
 
 const { renderToStaticMarkup } = await import("react-dom/server");
 const page = await import("../../app/(public)/territoire/[insee]/debloquer/page.tsx");
+const pageOuverture = await import("../../app/(public)/territoire/[insee]/ouvrir/page.tsx");
 const { POST: activer } = await import("../../app/api/territoire/activer/route.ts");
 const { POST: creerPaiement } = await import("../../app/api/stripe/create-payment-intent/route.ts");
 const { POST: webhook } = await import("../../app/api/stripe/webhook/route.ts");
@@ -332,29 +333,29 @@ test("page · plus de faute d'accord sur la commune (« ce territoire est-elle �
 });
 
 // ═══ 3. L'activation : ce que le bouton envoie, ce que la route écrit ═════════════════════════════════════
-test("activation · après paiement, le panneau n'envoie que le code, et la base reçoit le nom officiel", async () => {
+test("activation · les deux retours de paiement attendent les droits sur la même page", async () => {
   const o = await ouvrir("/territoire/30189/debloquer?nom=La%20Rochelle");
   assert.ok(!o.introuvable);
   if (o.introuvable) return;
-  const envoyes: { url: string; corps: unknown }[] = [];
-  const fetchOrigine = globalThis.fetch;
-  globalThis.fetch = (async (url: string, init: { body: string }) => {
-    envoyes.push({ url, corps: JSON.parse(init.body) });
-    return appelerActiver(JSON.parse(init.body)).then((r) => new Response(JSON.stringify(r.body), { status: r.status }));
-  }) as never;
-  try {
-    // Le `onSuccess` que la page a confié à `PaymentWrapper`, appelé comme après une confirmation Stripe.
-    await (o.paiement!.onSuccess as () => Promise<void>)();
-  } finally {
-    globalThis.fetch = fetchOrigine;
-  }
-  assert.deepEqual(envoyes, [{ url: "/api/territoire/activer", corps: { insee: "30189" } }]);
-  assert.deepEqual(S.navigations, ["/rapport"]);
-  assert.equal(profil().active_insee_code, "30189");
-  assert.equal(profil().active_commune, "Nîmes");
+  assert.equal(o.paiement!.returnUrl, "/territoire/30189/ouvrir");
+  await (o.paiement!.onSuccess as () => void)();
+  assert.deepEqual(S.navigations, ["/territoire/30189/ouvrir"]);
+  assert.equal(profil().active_insee_code, null);
+});
+
+test("ouverture · retour Stripe falsifié : écran d'attente, aucun accès ni écriture ; connexion conserve la destination", async () => {
+  const props = { params: Promise.resolve({ insee: "30189" }), searchParams: Promise.resolve({ redirect_status: "succeeded", payment_intent: "pi_faux", nom: "La Rochelle" }) };
+  const html = renderToStaticMarkup(await pageOuverture.default(props));
+  assert.match(texte(html), /Votre rapport : Nîmes/);
+  assert.match(texte(html), /Nous vérifions votre accès/);
+  assert.doesNotMatch(texte(html), /La Rochelle|déjà ouvert/);
+  assert.equal(profil().active_insee_code, null);
+  session = null;
+  await assert.rejects(() => pageOuverture.default(props), (e: unknown) => (e as { redirect: string }).redirect === "/connexion?next=%2Fterritoire%2F30189%2Fouvrir");
 });
 
 test("activation · un appel direct avec un nom contradictoire écrit le nom officiel ; un code non identifié n'écrit rien", async () => {
+  claims = CAS.map(([insee]) => ({ kind: "grant", insee }));
   for (const [code, nom, faux] of CAS) {
     const r = await appelerActiver({ insee: code, commune: faux });
     assert.equal(r.status, 200, `${code} ${JSON.stringify(r.body)}`);
@@ -424,6 +425,10 @@ test("bout en bout · page → paiement → webhook → activation : aucune lign
   assert.equal((await appelerPaiement({ productType: o.paiement!.productType, ...g, targetCommune: "La Rochelle" })).status, 200);
   const pi = [...paiements.values()][0]!;
   pi.status = "succeeded"; pi.amount_received = pi.amount;
+  // Confirmation Stripe simulée, mais webhook retardé : aucun droit, aucune écriture.
+  const avant = structuredClone(profil());
+  assert.equal((await appelerActiver({ insee: "30189", rapportComplet: true, redirect_status: "succeeded", payment_intent: pi.id })).status, 403);
+  assert.deepEqual(profil(), avant);
   assert.equal((await webhook(new Request("http://localhost/api/stripe/webhook", { method: "POST", body: JSON.stringify({ type: "payment_intent.succeeded", data: { object: pi } }) }))).status, 200);
   assert.equal((await appelerActiver({ insee: "30189", commune: "La Rochelle" })).status, 200);
   const toutesLesLignes = JSON.stringify(tables);
