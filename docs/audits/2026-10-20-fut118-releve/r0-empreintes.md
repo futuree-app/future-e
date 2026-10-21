@@ -7,7 +7,7 @@
 
 | Fichier | Changement | Effet attendu à l'écran |
 | --- | --- | --- |
-| `src/app/design-tokens.css` | les jetons `--r-*` montent du module CSS vers `:root`, **aux mêmes valeurs** ; ajout des rôles `--r-t-*`, des largeurs `--r-titre` et `--r-chiffre`, et de `--r-sur-marque` | aucun |
+| `src/app/design-tokens.css` | les jetons `--r-*` montent du module CSS vers `:root`, **aux mêmes valeurs** ; ajout des rôles `--r-t-*` et de `--r-sur-marque` (les jetons de largeur ajoutés alors, `--r-titre` et `--r-chiffre`, ont été retirés à la troisième passe : la police servie n'a pas cet axe) | aucun |
 | `src/components/releve/releve.module.css` | ne déclare plus les jetons ; consomme les rôles `--r-t-*` (mêmes valeurs) ; `.boutonMarque` prend `--r-sur-marque` ; en-tête « canon » | aucun, **sauf** le texte du bouton de marque en thème clair (contraste 2,57:1 → 6,15:1) |
 | `src/components/releve/primitives.tsx`, `src/components/report/kit.tsx` | commentaires d'en-tête (canon ; déprécié) | aucun |
 | `src/components/releve/heritage.ts`, `heritage-reference.json`, `canon.test.ts` | test-cliquet, source unique des jetons, jetons définis, contrastes, en-têtes | aucun (tests) |
@@ -23,7 +23,7 @@ témoins de développement).
 - **13 pages × 2 largeurs (1440, 390) × 2 thèmes (sombre, clair forcé par `data-theme`) = 52 captures**,
   pleine page, densité 1.
 - Pour chaque capture : **les pixels** (tolérance zéro) et **le style calculé de chaque élément visible**
-  (couleur, fond, police, graisse, axe de largeur, taille, interligne, espacement des lettres, casse,
+  (couleur, fond, police, graisse, réglages de variation (`font-variation-settings`), taille, interligne, espacement des lettres, casse,
   marges, bordures, rayon, ombre, opacité, affichage, grille, contour, boîte, pseudo-éléments).
 - Pages : l'accueil de production ; **Ma décision classique** et **Ma décision sous le Relevé**, chacune
   au repos et avec un projet changé et une adresse indisponible (composants de production sur un
