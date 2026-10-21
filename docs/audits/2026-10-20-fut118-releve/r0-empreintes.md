@@ -155,6 +155,26 @@ ci-dessus. Les pixels diffèrent seulement par le bruit déjà mesuré (connexio
 classique : 4 et 10 pixels). Suite complète, lancée seule deux fois : **2858 / 2858** (+ K1b) ; tests du
 mouvement (G1, G2, Q4) et du canon (K1 à K5, K1b) au vert ; `tsc` et ESLint sans erreur.
 
+## Troisième passe : Archivo en largeur normale (21/10)
+
+Le fichier Archivo servi par le site n'a pas d'axe de largeur (un même texte mesure 668 px à `wdth` 62,
+100 et 125 ; l'Archivo de Google Fonts varie de 453 à 851 px). Les 32 réglages `wdth` et les 4 jetons de
+largeur, inopérants, sont retirés ; la référence devient Archivo en largeur normale (choix du porteur).
+
+Retirer `font-variation-settings` change **volontairement** une propriété calculée : l'identité absolue
+des styles n'est donc pas attendue. Comparaison avant / après (52 captures) :
+
+- **Pixels** : identiques sur toutes les captures, hors bruit déjà mesuré (connexion, flou ; 59 pixels sur
+  une capture de Ma décision sous le Relevé à 390 px en clair). Dimensions de page, retours à la ligne et
+  compositions inchangés (les boîtes de chaque élément sont comparées et identiques).
+- **Styles calculés** : toutes les différences portent sur **une seule propriété**,
+  `font-variation-settings` (`"wdth" 118` et autres → `normal`), sur l'accueil (8 éléments par capture),
+  Ma décision sous le Relevé et le gabarit `/rapport` (30), le prototype Logement (31) et les témoins.
+  Aucune autre propriété ne change.
+
+Contrôles : suite complète lancée seule deux fois, **2859 / 2859** (+ K6) ; `tsc` et ESLint sans erreur ;
+K6 vérifié par mutation (un réglage `wdth` réintroduit fait échouer le test).
+
 ## Limites : ce que cette preuve ne valide pas
 
 **Elle prouve qu'R0 ne change rien à l'écran. Elle ne valide pas l'interface.** Les contrôles suivants
