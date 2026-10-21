@@ -264,7 +264,35 @@ une, et il pose l'objet « lieu » sur lequel tout le reste s'appuie.
 
 ## 10. Contrôles
 
-*(complété en fin de passe)*
+**Parcours automatique V3.3** (`outils/tour33.cjs`, Chrome) : 14 situations, 5 largeurs (1440, 1024,
+820, 390, 360). **Résultat : aucune erreur.** En plus des contrôles de la V3.2 (marges fidèles aux
+données, états de connaissance, aucun bouton d'achat, débordement, vocabulaire, clavier, mouvement
+réduit), il vérifie que :
+
+- **A** : aucune piste n'est dessinée hors des échelles qui se comparent ; le geste « Comparer » n'est
+  proposé que si quelque chose se compare ; une adresse enregistrée dans la même commune ne propose pas
+  « Comparer » et titre « Ce que dit la commune » ; le périmètre « Se compare : la commune » est dit
+  pour deux communes ;
+- **C** : en face-à-face, aucune ligne n'est dessinée ;
+- **B** : l'explication des formes est repliée par défaut dans « Faire le point » ;
+- **E** : pour chaque lieu analysé, la conclusion de la fiche est **exactement** celle du Relevé, le
+  Relevé ouvert est celui du même lieu, et le fil ramène à la même fiche ; la conclusion d'un dossier
+  ancien est datée (« répond à votre Projet du 8 sept. ») et ne contient pas la valeur actuelle
+  (« 30 min ») ;
+- **résidence** : le geste ouvre le Relevé ; ni « Faire le point » ni « Comparer » ne sont proposés.
+
+**Premier écran mobile** : mesuré séparément (`mesure-pli-v3-3.txt`), § 5 D.
+
+**Confrontation au moteur réel** : § 4 ; script rejouable.
+
+**Non vérifiés** : un parcours connecté sur un vrai compte (décision Y9) ; Safari ; lecteur d'écran ;
+écran non Retina ; la compréhension par des personnes réelles (protocole prêt, non mené).
+
+**Défauts trouvés et corrigés pendant la passe** : une conclusion ancienne était réécrite avec la valeur
+actuelle du Projet (« 30 min » au lieu de « 20 min ») ; la fiche d'une adresse enregistrée présentait les
+résultats de la commune sous « Ce qu'il faut retenir » ; une phrase « Même commune » répétait le
+périmètre ; un lien en fin de phrase laissait un point seul sur une ligne à 360 px ; le test de la
+V3.2 supposait encore qu'un aperçu se compare.
 
 ## 11. Décisions qui vous reviennent
 
