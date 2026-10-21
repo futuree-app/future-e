@@ -9,8 +9,8 @@ import { getApercuTerritoire } from "@/lib/quartier-preview";
 import { TerritoryUnlockPanel } from "./TerritoryUnlockPanel";
 import { TerritoryUnlockPreview } from "./TerritoryUnlockPreview";
 import { PersonalTouch } from "./PersonalTouch";
-import { communeVendable } from "@/lib/commerce/eligibilite-territoriale";
-import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
+import { communeIdentifiee } from "@/lib/commerce/eligibilite-territoriale";
+import { communeDuReferentiel, nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
 
 // Paywall de territoire : ouvre le dossier d'une commune explorée depuis le
 // comparateur (parcours « territoires découverts »). Distinct du checkout
@@ -21,20 +21,23 @@ import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
 // Elle n'offre rien à payer ailleurs : un code ultramarin ou inconnu rend une 404, et la route de paiement
 // refuse de son côté le même code, quelle que soit la page qui l'appelle. L'ancienne garde
 // (`^[0-9AB][0-9]{4}$`) rendait aussi une 404 sur toute commune corse.
-function cleanInsee(raw: string): string | null {
-  const verdict = communeVendable(raw, communeDuReferentiel);
-  return verdict.ok ? verdict.insee : null;
+//
+// FUT-119 : le NOM vient du référentiel, comme le code. Le paramètre `nom` de l'URL n'est plus lu : il
+// laissait `/territoire/30189/debloquer?nom=La%20Rochelle` vendre les faits de Nîmes sous le nom de La
+// Rochelle, jusqu'au paiement et au territoire actif. Les liens qui le portent encore restent valides.
+function communeOfferte(raw: string) {
+  const verdict = communeIdentifiee(raw, communeDuReferentiel, nomDuReferentiel);
+  return verdict.ok ? verdict : null;
 }
 
 export async function generateMetadata({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ nom?: string }>;
+  params: Promise<{ insee: string }>;
 }): Promise<Metadata> {
-  const { nom } = await searchParams;
-  const commune = typeof nom === "string" && nom.trim() ? nom.trim() : "ce territoire";
+  const commune = communeOfferte((await params).insee);
   return {
-    title: `Ouvrir le dossier ${deCommune(commune)} · futur•e`,
+    title: commune ? `Ouvrir le dossier ${deCommune(commune.nom)} · futur•e` : "Dossier de territoire · futur•e",
     robots: { index: false, follow: false },
   };
 }
@@ -44,16 +47,14 @@ export default async function TerritoryUnlockPage({
   searchParams,
 }: {
   params: Promise<{ insee: string }>;
-  searchParams: Promise<{ nom?: string; rank?: string; source?: string }>;
+  searchParams: Promise<{ rank?: string; source?: string }>;
 }) {
   const { insee: rawInsee } = await params;
-  const { nom, rank: rawRank, source: rawSource } = await searchParams;
+  const { rank: rawRank, source: rawSource } = await searchParams;
 
-  const insee = cleanInsee(rawInsee);
-  if (!insee) notFound();
-
-  const commune = typeof nom === "string" && nom.trim() ? nom.trim().slice(0, 120) : null;
-  const displayName = commune ?? "ce territoire";
+  const offerte = communeOfferte(rawInsee);
+  if (!offerte) notFound();
+  const { insee, nom: displayName } = offerte;
   const rank = rawRank && /^[1-3]$/.test(rawRank) ? Number.parseInt(rawRank, 10) : null;
 
   const product = getCheckoutProduct("rapport-complet")!;
@@ -65,11 +66,11 @@ export default async function TerritoryUnlockPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Conserve nom + rank + source dans le retour d'auth : sinon l'aller-retour
-  // inscription/connexion ampute l'attribution (rang et provenance perdus).
+  // Conserve rank + source dans le retour d'auth : sinon l'aller-retour
+  // inscription/connexion ampute l'attribution (rang et provenance perdus). Le nom n'y est plus : la page le
+  // retrouve depuis le code (FUT-119).
   const source = typeof rawSource === "string" && /^[a-z0-9_]{1,40}$/i.test(rawSource) ? rawSource : null;
   const backParams = new URLSearchParams();
-  if (commune) backParams.set("nom", commune);
   if (rank) backParams.set("rank", String(rank));
   if (source) backParams.set("source", source);
   const backQuery = backParams.toString();
@@ -162,7 +163,7 @@ export default async function TerritoryUnlockPage({
           </h2>
           <ul className="flex flex-col gap-2.5">
             {[
-              `${displayName} est-elle adaptée à mon projet ?`,
+              `Est-ce que ${displayName} convient à mon projet ?`,
               "Quels sont les compromis les plus importants ?",
               "Quels risques regarder avant d'acheter ou de louer ?",
               "Que faudrait-il vérifier sur place ?",
@@ -188,8 +189,8 @@ export default async function TerritoryUnlockPage({
             Pourquoi ce dossier est payant ?
           </p>
           <p className="max-w-[60ch] text-[15px] leading-[1.75] text-muted">
-            Dire que {displayName} sera exposée à la chaleur ne vous apprend rien : c&apos;est vrai
-            presque partout. Ce qui décide, c&apos;est de savoir où elle se situe parmi les 34 000
+            Dire que la chaleur va augmenter à {displayName} ne vous apprend rien : c&apos;est vrai
+            presque partout. Ce qui décide, c&apos;est de savoir où cette commune se situe parmi les 34 000
             communes de l&apos;Hexagone et de Corse, et sur quels critères précisément. Cette position se calcule avant
             qu&apos;on vous la demande, sur toutes les communes à la fois, avec la même méthode.
             C&apos;est ce travail que vous payez, pas l&apos;accès à des données publiques et
@@ -241,7 +242,7 @@ export default async function TerritoryUnlockPage({
             {user ? (
               <TerritoryUnlockPanel
                 insee={insee}
-                commune={commune}
+                commune={displayName}
                 rank={rank}
                 amount={product.amount}
                 submitLabel={`Ouvrir le dossier ${deCommune(displayName)}`}
