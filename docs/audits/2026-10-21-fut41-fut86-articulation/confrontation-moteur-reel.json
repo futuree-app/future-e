@@ -1,0 +1,379 @@
+{
+ "projets": {
+  "P1": "posture=recherche§intent=§structure=true§hard=§prefs=acces_soins:2|faible_chaleur:3|faible_risque_inondation:2|nature:2|vie_locale:2§conditions=",
+  "P2": "posture=recherche§intent=§structure=true§hard=§prefs=acces_soins:2|faible_chaleur:3|faible_risque_inondation:2|nature:2|vie_locale:3§conditions=",
+  "P3": "posture=recherche§intent=§structure=true§hard=§prefs=acces_soins:2|faible_chaleur:3|faible_risque_inondation:2|nature:2|vie_locale:2§conditions=preference:faible_chaleur"
+ },
+ "s1_territoire": {
+  "verdict": {
+   "label": "Arbitrage",
+   "titre": "Nîmes répond moins bien à une de vos priorités : des étés supportables.",
+   "scope": "commune",
+   "date": "2026-09-21T10:00:00.000Z",
+   "moteur": "engine-6"
+  },
+  "fiche": [
+   {
+    "critere": "faible_chaleur",
+    "issue": "mismatch/examined",
+    "faits": "composition",
+    "grains": "commune",
+    "sources": "Climat · Nîmes",
+    "dessin": false
+   },
+   {
+    "critere": "vie_locale",
+    "issue": "favorable/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Territoire · Nîmes",
+    "dessin": true
+   },
+   {
+    "critere": "acces_soins",
+    "issue": "favorable/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Territoire · Nîmes",
+    "dessin": true
+   },
+   {
+    "critere": "nature",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "faible_risque_inondation",
+    "issue": "reserve/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Reconnaissances CatNat inondation (GASPAR), position en France métropolitaine | Reconnaiss",
+    "dessin": false
+   }
+  ]
+ },
+ "s2_adresse": {
+  "lieu": "1 Place de l'Hôtel de Ville 30000 Nîmes",
+  "status": "done",
+  "voisinage": "calculé (9 champs, permis lus)",
+  "verdict": {
+   "label": "Arbitrage",
+   "titre": "Nîmes répond moins bien à une de vos priorités : des étés supportables.",
+   "scope": "commune+adresse",
+   "date": "2026-10-09T10:00:00.000Z",
+   "moteur": "engine-6"
+  },
+  "fiche": [
+   {
+    "critere": "faible_chaleur",
+    "issue": "mismatch/examined",
+    "faits": "composition",
+    "grains": "commune",
+    "sources": "Climat · Nîmes",
+    "dessin": false
+   },
+   {
+    "critere": "vie_locale",
+    "issue": "favorable/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Territoire · Nîmes",
+    "dessin": true
+   },
+   {
+    "critere": "acces_soins",
+    "issue": "reserve/examined",
+    "faits": "carte,carte",
+    "grains": "commune,adresse",
+    "sources": "Territoire · Nîmes | Équipements de santé · autour de l'adresse | Base permanente des équi",
+    "dessin": true
+   },
+   {
+    "critere": "nature",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "faible_risque_inondation",
+    "issue": "reserve/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Reconnaissances CatNat inondation (GASPAR), position en France métropolitaine | Reconnaiss",
+    "dessin": false
+   }
+  ]
+ },
+ "s3_deux_adresses": {
+  "b": "Place de la Maison Carrée 30000 Nîmes",
+  "statusB": "done",
+  "verdictB": {
+   "label": "Arbitrage",
+   "titre": "Nîmes répond moins bien à une de vos priorités : des étés supportables.",
+   "scope": "commune+adresse",
+   "date": "2026-10-12T10:00:00.000Z",
+   "moteur": "engine-6"
+  },
+  "comparaison": {
+   "memeCadre": true,
+   "reserves": [],
+   "lignes": [
+    "faible_chaleur:mismatch|mismatch→meme_lecture",
+    "vie_locale:favorable|favorable→meme_lecture",
+    "acces_soins:reserve|reserve→meme_lecture",
+    "nature:indeterminate|indeterminate→indetermine_ici",
+    "faible_risque_inondation:reserve|reserve→meme_lecture"
+   ],
+   "nonPartages": []
+  }
+ },
+ "s3b_adresse_vs_commune": {
+  "memeCadre": false,
+  "reserves": [
+   "Les deux dossiers ne portent pas sur la même échelle : l'un s'arrête à la commune, l'autre descend à l'adresse."
+  ],
+  "lignes": [
+   "faible_chaleur:mismatch|mismatch→meme_lecture",
+   "vie_locale:favorable|favorable→meme_lecture",
+   "acces_soins:reserve|favorable→difference_hors_cadre_commun",
+   "nature:indeterminate|indeterminate→indetermine_ici",
+   "faible_risque_inondation:reserve|reserve→meme_lecture"
+  ],
+  "nonPartages": []
+ },
+ "s3c_deux_communes": {
+  "memeCadre": true,
+  "reserves": [],
+  "lignes": [
+   "faible_chaleur:mismatch|mismatch→meme_lecture",
+   "vie_locale:favorable|favorable→meme_lecture",
+   "acces_soins:favorable|favorable→meme_lecture",
+   "nature:indeterminate|indeterminate→indetermine_ici",
+   "faible_risque_inondation:reserve|reserve→meme_lecture"
+  ],
+  "nonPartages": []
+ },
+ "s5_projet_change": {
+  "poids": {
+   "memeCadre": false,
+   "reserves": [
+    "Les deux dossiers ne répondent pas au même projet : les critères examinés ne sont pas les mêmes, ou pas dans la même posture."
+   ],
+   "lignes": [
+    "faible_chaleur:mismatch|mismatch→meme_lecture",
+    "vie_locale:favorable|favorable→meme_lecture",
+    "acces_soins:favorable|favorable→meme_lecture",
+    "nature:indeterminate|indeterminate→indetermine_ici",
+    "faible_risque_inondation:reserve|reserve→meme_lecture"
+   ],
+   "nonPartages": []
+  },
+  "confirmation": {
+   "memeCadre": false,
+   "reserves": [
+    "Les deux dossiers ne répondent pas au même projet : les critères examinés ne sont pas les mêmes, ou pas dans la même posture."
+   ],
+   "lignes": [
+    "faible_chaleur:mismatch|to_confirm→indetermine_ici",
+    "vie_locale:favorable|favorable→meme_lecture",
+    "acces_soins:favorable|favorable→meme_lecture",
+    "nature:indeterminate|indeterminate→indetermine_ici",
+    "faible_risque_inondation:reserve|reserve→meme_lecture"
+   ],
+   "nonPartages": []
+  },
+  "memeLieuP1P2": [
+   "faible_chaleur:mismatch/examined→mismatch/examined",
+   "vie_locale:favorable/examined→favorable/examined",
+   "acces_soins:favorable/examined→favorable/examined",
+   "nature:indeterminate/examined→indeterminate/examined",
+   "faible_risque_inondation:reserve/examined→reserve/examined"
+  ],
+  "memeLieuP1P3": [
+   "faible_chaleur:mismatch/examined→to_confirm/examined",
+   "vie_locale:favorable/examined→favorable/examined",
+   "acces_soins:favorable/examined→favorable/examined",
+   "nature:indeterminate/examined→indeterminate/examined",
+   "faible_risque_inondation:reserve/examined→reserve/examined"
+  ]
+ },
+ "s5b_moteur": {
+  "memeCadre": false,
+  "reserves": [
+   "Les deux analyses n'ont pas été produites par le même moteur (engine-6 et engine-5). Un écart peut venir des règles autant que des lieux."
+  ],
+  "lignes": [
+   "faible_chaleur:mismatch|mismatch→meme_lecture",
+   "vie_locale:favorable|favorable→meme_lecture",
+   "acces_soins:favorable|favorable→meme_lecture",
+   "nature:indeterminate|indeterminate→indetermine_ici",
+   "faible_risque_inondation:reserve|reserve→meme_lecture"
+  ],
+  "nonPartages": []
+ },
+ "s3d_adresses_preferences_locales": {
+  "ficheA": [
+   {
+    "critere": "faible_chaleur",
+    "issue": "mismatch/examined",
+    "faits": "composition",
+    "grains": "commune",
+    "sources": "Climat · Nîmes",
+    "dessin": false
+   },
+   {
+    "critere": "calme_sonore",
+    "issue": "indeterminate/unexamined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "acces_transports",
+    "issue": "reserve/examined",
+    "faits": "carte",
+    "grains": "adresse",
+    "sources": "Gares · autour de l'adresse | Base permanente des équipements (INSEE), millésime 2025",
+    "dessin": false
+   },
+   {
+    "critere": "acces_soins",
+    "issue": "reserve/examined",
+    "faits": "carte,carte",
+    "grains": "commune,adresse",
+    "sources": "Territoire · Nîmes | Équipements de santé · autour de l'adresse | Base permanente des équi",
+    "dessin": true
+   },
+   {
+    "critere": "proximite_mer",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   }
+  ],
+  "ficheB": [
+   {
+    "critere": "faible_chaleur",
+    "issue": "mismatch/examined",
+    "faits": "composition",
+    "grains": "commune",
+    "sources": "Climat · Nîmes",
+    "dessin": false
+   },
+   {
+    "critere": "calme_sonore",
+    "issue": "indeterminate/unexamined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "acces_transports",
+    "issue": "reserve/examined",
+    "faits": "carte",
+    "grains": "adresse",
+    "sources": "Gares · autour de l'adresse | Base permanente des équipements (INSEE), millésime 2025",
+    "dessin": false
+   },
+   {
+    "critere": "acces_soins",
+    "issue": "reserve/examined",
+    "faits": "carte,carte",
+    "grains": "commune,adresse",
+    "sources": "Territoire · Nîmes | Équipements de santé · autour de l'adresse | Base permanente des équi",
+    "dessin": true
+   },
+   {
+    "critere": "proximite_mer",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   }
+  ],
+  "ficheCommune": [
+   {
+    "critere": "faible_chaleur",
+    "issue": "mismatch/examined",
+    "faits": "composition",
+    "grains": "commune",
+    "sources": "Climat · Nîmes",
+    "dessin": false
+   },
+   {
+    "critere": "calme_sonore",
+    "issue": "favorable/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "acces_transports",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   },
+   {
+    "critere": "acces_soins",
+    "issue": "favorable/examined",
+    "faits": "carte",
+    "grains": "commune",
+    "sources": "Territoire · Nîmes",
+    "dessin": true
+   },
+   {
+    "critere": "proximite_mer",
+    "issue": "indeterminate/examined",
+    "faits": "",
+    "grains": "",
+    "sources": "",
+    "dessin": false
+   }
+  ],
+  "comparaison": {
+   "memeCadre": true,
+   "reserves": [],
+   "lignes": [
+    "faible_chaleur:mismatch|mismatch→meme_lecture",
+    "calme_sonore:indeterminate|indeterminate→indetermine_ici",
+    "acces_transports:reserve|reserve→meme_lecture",
+    "acces_soins:reserve|reserve→meme_lecture",
+    "proximite_mer:indeterminate|indeterminate→indetermine_ici"
+   ],
+   "nonPartages": []
+  },
+  "verdictA": {
+   "label": "Arbitrage",
+   "titre": "Nîmes répond moins bien à une de vos priorités : des étés supportables.",
+   "scope": "commune+adresse",
+   "date": "2026-10-09T10:00:00.000Z",
+   "moteur": "engine-6"
+  },
+  "verdictB": {
+   "label": "Arbitrage",
+   "titre": "Nîmes répond moins bien à une de vos priorités : des étés supportables.",
+   "scope": "commune+adresse",
+   "date": "2026-10-12T10:00:00.000Z",
+   "moteur": "engine-6"
+  }
+ },
+ "s6_ancien": {
+  "genereLe": "2026-09-21T10:00:00.000Z",
+  "projetAChange_P2": true,
+  "projetAChange_memeProjet": false,
+  "verdictFige": "Nîmes répond moins bien à une de vos priorités : des étés supportables."
+ }
+}

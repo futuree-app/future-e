@@ -1,0 +1,112 @@
+premier · avec bande démo
+  320×568: lieu 763✗ · geste 593✗
+  360×640: lieu 665✗ · geste 495
+  360×780: lieu 665 (marge 115) · geste 495
+  375×667: lieu 665 (marge 2) · geste 495
+  390×844: lieu 665 (marge 179) · geste 495
+  414×896: lieu 665 (marge 231) · geste 495
+premier · sans bande (produit)
+  320×568: lieu 621✗ · geste 451
+  360×640: lieu 565 (marge 75) · geste 395
+  360×780: lieu 565 (marge 215) · geste 395
+  375×667: lieu 565 (marge 102) · geste 395
+  390×844: lieu 565 (marge 279) · geste 395
+  414×896: lieu 565 (marge 331) · geste 395
+premier · noms longs · avec bande démo
+  320×568: lieu 811✗ · geste 619✗
+  360×640: lieu 713✗ · geste 521
+  360×780: lieu 713 (marge 67) · geste 521
+  375×667: lieu 713✗ · geste 521
+  390×844: lieu 713 (marge 131) · geste 521
+  414×896: lieu 713 (marge 183) · geste 521
+premier · noms longs · sans bande (produit)
+  320×568: lieu 669✗ · geste 477
+  360×640: lieu 613 (marge 27) · geste 421
+  360×780: lieu 613 (marge 167) · geste 421
+  375×667: lieu 613 (marge 54) · geste 421
+  390×844: lieu 613 (marge 231) · geste 421
+  414×896: lieu 613 (marge 283) · geste 421
+deuxieme · avec bande démo
+  320×568: lieu 779✗ · geste 522
+  360×640: lieu 712✗ · geste 454
+  360×780: lieu 712 (marge 68) · geste 454
+  375×667: lieu 712✗ · geste 454
+  390×844: lieu 683 (marge 161) · geste 454
+  414×896: lieu 683 (marge 213) · geste 454
+deuxieme · sans bande (produit)
+  320×568: lieu 637✗ · geste 380
+  360×640: lieu 612 (marge 28) · geste 354
+  360×780: lieu 612 (marge 168) · geste 354
+  375×667: lieu 612 (marge 55) · geste 354
+  390×844: lieu 583 (marge 261) · geste 354
+  414×896: lieu 583 (marge 313) · geste 354
+deuxieme · noms longs · avec bande démo
+  320×568: lieu 805✗ · geste 522
+  360×640: lieu 737✗ · geste 454
+  360×780: lieu 737 (marge 43) · geste 454
+  375×667: lieu 737✗ · geste 454
+  390×844: lieu 708 (marge 136) · geste 454
+  414×896: lieu 708 (marge 188) · geste 454
+deuxieme · noms longs · sans bande (produit)
+  320×568: lieu 663✗ · geste 380
+  360×640: lieu 637 (marge 3) · geste 354
+  360×780: lieu 637 (marge 143) · geste 354
+  375×667: lieu 637 (marge 30) · geste 354
+  390×844: lieu 608 (marge 236) · geste 354
+  414×896: lieu 608 (marge 288) · geste 354
+enrichie · avec bande démo
+  320×568: lieu 861✗ · geste 589✗
+  360×640: lieu 770✗ · geste 498
+  360×780: lieu 770 (marge 10) · geste 498
+  375×667: lieu 750✗ · geste 498
+  390×844: lieu 750 (marge 94) · geste 498
+  414×896: lieu 750 (marge 146) · geste 498
+enrichie · sans bande (produit)
+  320×568: lieu 719✗ · geste 447
+  360×640: lieu 670✗ · geste 398
+  360×780: lieu 670 (marge 110) · geste 398
+  375×667: lieu 650 (marge 17) · geste 398
+  390×844: lieu 650 (marge 194) · geste 398
+  414×896: lieu 650 (marge 246) · geste 398
+enrichie · noms longs · avec bande démo
+  320×568: lieu 954✗ · geste 614✗
+  360×640: lieu 840✗ · geste 524
+  360×780: lieu 840✗ · geste 524
+  375×667: lieu 820✗ · geste 524
+  390×844: lieu 798 (marge 46) · geste 524
+  414×896: lieu 798 (marge 98) · geste 524
+enrichie · noms longs · sans bande (produit)
+  320×568: lieu 812✗ · geste 472
+  360×640: lieu 740✗ · geste 424
+  360×780: lieu 740 (marge 40) · geste 424
+  375×667: lieu 720✗ · geste 424
+  390×844: lieu 698 (marge 146) · geste 424
+  414×896: lieu 698 (marge 198) · geste 424
+bloquant · avec bande démo
+  320×568: lieu 836✗ · geste 563
+  360×640: lieu 770✗ · geste 498
+  360×780: lieu 770 (marge 10) · geste 498
+  375×667: lieu 726✗ · geste 474
+  390×844: lieu 726 (marge 118) · geste 474
+  414×896: lieu 726 (marge 170) · geste 474
+bloquant · sans bande (produit)
+  320×568: lieu 694✗ · geste 421
+  360×640: lieu 670✗ · geste 398
+  360×780: lieu 670 (marge 110) · geste 398
+  375×667: lieu 626 (marge 41) · geste 374
+  390×844: lieu 626 (marge 218) · geste 374
+  414×896: lieu 626 (marge 270) · geste 374
+bloquant · noms longs · avec bande démo
+  320×568: lieu 836✗ · geste 563
+  360×640: lieu 770✗ · geste 498
+  360×780: lieu 770 (marge 10) · geste 498
+  375×667: lieu 726✗ · geste 474
+  390×844: lieu 726 (marge 118) · geste 474
+  414×896: lieu 726 (marge 170) · geste 474
+bloquant · noms longs · sans bande (produit)
+  320×568: lieu 694✗ · geste 421
+  360×640: lieu 670✗ · geste 398
+  360×780: lieu 670 (marge 110) · geste 398
+  375×667: lieu 626 (marge 41) · geste 374
+  390×844: lieu 626 (marge 218) · geste 374
+  414×896: lieu 626 (marge 270) · geste 374

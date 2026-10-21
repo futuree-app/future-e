@@ -43,3 +43,8 @@ Doctrine à respecter dans toute critique :
 - `../note-fut22-comparabilite.md`, `../note-fut41-validite-point.md` : les deux notes métier.
 - `../protocole-test-trois-personnes.md` : le protocole de test, non mené.
 - `../captures-v3-2/` : captures V3.2 ; `reference/` contient des captures réelles de FUT-87, FUT-91, FUT-118 et de la production, copiées pour comparaison.
+
+## V3.3 · le Relevé, les dossiers achetés et Ma décision (21 octobre 2026)
+
+- `../../2026-10-21-fut41-fut86-articulation/README.md` : la navigation actuelle et la navigation cible, la matrice des parcours, la confrontation au moteur réel (communes et bâtiments publics), les corrections de la V3.3, les conventions à soumettre à FUT-118, le cadrage par lots et le premier lot recommandé.
+- `../prototype-v3-3.html` : lien direct https://raw.githack.com/futuree-app/future-e/explore/fut-41-centre-decision/docs/audits/2026-10-20-fut41-centre-de-decision/prototype-v3-3.html (bande « Démonstration » : « Depuis un rapport : commune, adresse, résidence » ; « Pistes : face-à-face, ligne »).
