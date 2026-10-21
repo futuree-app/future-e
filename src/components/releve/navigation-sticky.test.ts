@@ -33,12 +33,12 @@ function dansMedia(media: string, selecteur: string): string | null {
 
 test("N1. les trois points de montage de /rapport passent la liste complète par `controles`", () => {
   const page = code("src/app/(account)/rapport/page.tsx");
-  const viaSlot = page.match(/controles=\{<ControlesDuDossier dossier=\{dossier\} provenance=\{provenanceCommune\} \/>\}/g) ?? [];
+  const viaSlot = page.match(/controles=\{<ControlesDuDossier presentation=\{presentation\} dossier=\{dossier\} provenance=\{provenanceCommune\} \/>\}/g) ?? [];
   assert.equal(viaSlot.length, 2, "repli du Suspense et dossier communal seul");
   assert.equal((page.match(/<ControlesDuDossier\b/g) ?? []).length, 2, "aucune liste posée en frère de la section");
   const adresse = code("src/components/report/DossierAvecLogement.tsx");
   const slot = adresse.slice(adresse.indexOf("controles={("), adresse.indexOf(")}", adresse.indexOf("controles={(")));
-  assert.match(slot, /<ControlesDuDossier\s+dossier=\{vue\.dossier\}\s+provenance=\{servi\.source === "artefact" \? scopeKey : undefined\}/,
+  assert.match(slot, /<ControlesDuDossier\s+presentation=\{presentation\}\s+dossier=\{vue\.dossier\}\s+provenance=\{servi\.source === "artefact" \? scopeKey : undefined\}/,
     "même dossier et même provenance que la minute");
   assert.equal((adresse.match(/<ControlesDuDossier\b/g) ?? []).length, 1);
   // Chaque montage qui porte la liste porte aussi la colonne d'appui : la grille couvre les deux.
@@ -88,7 +88,7 @@ test("N4. le repère colle par CSS seul, sous la navigation principale, et seule
 
 test("N5. la racine de /rapport ne change qu'avec le relevé, et seulement là où la colonne existe", () => {
   const page = code("src/app/(account)/rapport/page.tsx");
-  assert.match(page, /const debordement = presentationDuDossier\(undefined\) === "releve" \? "overflow-hidden lg:overflow-clip" : "overflow-hidden";/);
+  assert.match(page, /const debordement = presentation === "releve" \? "overflow-hidden lg:overflow-clip" : "overflow-hidden";/);
   assert.match(page, /className=\{`min-h-screen bg-canvas text-label relative \$\{debordement\}`\}/);
   assert.equal((page.match(/overflow-clip/g) ?? []).length, 1);
 });

@@ -43,7 +43,7 @@ import type { ResolvedAddress } from "@/lib/server/logement-decision-data";
 import { hasWizardContent, type WizardAnswers } from "@/components/wizard/types";
 import { Logo } from "@/components/Logo";
 import { EchelleNavigator } from "@/components/report/EchelleNavigator";
-import { presentationDuDossier } from "@/components/releve/activation";
+import { presentationPour } from "@/components/releve/activation";
 
 // LE VERDICT EST LE TITRE DE CET ÉCRAN (12/08/2026), aux TROIS points de montage : le repli
 // communal du Suspense, le chemin adresse et le chemin commune seule. En oublier un ferait changer
@@ -67,6 +67,10 @@ const TITRE_VERDICT = {
 
 export default async function RapportPage() {
   const { supabase, user } = await requireCurrentUser();
+  // FUT-118 · LA PRÉSENTATION DE MA DÉCISION EST RÉSOLUE ICI, UNE FOIS, pour toute la requête : la
+  // racine (débordement de la colonne collante) et les trois points de montage du dossier reçoivent la
+  // même valeur. Aucun composant ne la résout seul (cf. `activation.ts`).
+  const presentation = presentationPour(user.id);
   const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select(`${TERRITORY_SELECT}, wizard_answers, user_project, active_dossier_id`)
@@ -330,8 +334,8 @@ export default async function RapportPage() {
   //   - Seulement à partir de `lg`, là où la colonne d'appui existe : sur mobile, rien ne doit flotter
   //     au-dessus du verdict ou des preuves, et la page garde sa racine actuelle.
   //   - Seulement avec le relevé : la présentation classique garde sa racine, et donc son
-  //     comportement, tant que `DECISION_RELEVE` n'est pas activé.
-  const debordement = presentationDuDossier(undefined) === "releve" ? "overflow-hidden lg:overflow-clip" : "overflow-hidden";
+  //     comportement, tant que le relevé n'est pas activé pour ce compte.
+  const debordement = presentation === "releve" ? "overflow-hidden lg:overflow-clip" : "overflow-hidden";
 
   return (
     <div
@@ -349,7 +353,12 @@ export default async function RapportPage() {
           dossier ; la liste des biens garde son lien, dans la barre. */}
       <Navbar ctas={{ secondary: { href: "/compte", label: "Mon compte" }, primary: { href: "/dossier", label: "Analyser une adresse" } }} />
 
-      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24">
+      {/* FUT-118 · LE RELEVÉ RESTE SOMBRE SUR CETTE PAGE, COMME ELLE. La racine et l'habillage de `/rapport`
+          (`bg-canvas`, `text-label`, cartes) sont peints en couleurs fixes : en thème clair, la page reste
+          sombre. Le relevé, lui, suit le thème par ses jetons : sans cet ancrage, il posait des plaques
+          crème et une encre sombre sur ce fond sombre (illisible). Il garde donc le thème de la page ; le
+          thème clair de Ma décision viendra avec son habillage (lot R2). Le classique est inchangé. */}
+      <div className="relative z-[2] max-w-[1100px] mx-auto px-5 sm:px-7 pb-24" data-theme={presentation === "releve" ? "dark" : undefined}>
 
         {/* Persiste les réponses du wizard (sessionStorage → profil) à la 1re
             page authentifiée, si elles ne sont pas déjà en base. */}
@@ -480,6 +489,7 @@ export default async function RapportPage() {
                   // pendant tout le temps d'attente.
                   <>
                     <DossierDecisionSection
+                      presentation={presentation}
                       dossier={dossier}
                       logement={dossierLogementLink}
                       logementStatus="pending"
@@ -492,12 +502,13 @@ export default async function RapportPage() {
                       espacement="mt-6"
                       titre={TITRE_VERDICT}
                       supportingPane={renderEchelleNavigator()}
-                      controles={<ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />}
+                      controles={<ControlesDuDossier presentation={presentation} dossier={dossier} provenance={provenanceCommune} />}
                     />
                   </>
                 }
               >
                 <DossierAvecLogement
+                  presentation={presentation}
                   project={userProject!}
                   address={dossierAddress}
                   savedDpe={logementForCommune.selected_dpe_snapshot}
@@ -526,6 +537,7 @@ export default async function RapportPage() {
               // et cette promesse ne dépend pas de la présence d'une adresse.
               <>
                 <DossierDecisionSection
+                  presentation={presentation}
                   dossier={dossier}
                   logement={dossierLogementLink}
                   logementStatus="none"
@@ -538,7 +550,7 @@ export default async function RapportPage() {
                   espacement="mt-6"
                   titre={TITRE_VERDICT}
                   supportingPane={renderEchelleNavigator()}
-                  controles={<ControlesDuDossier dossier={dossier} provenance={provenanceCommune} />}
+                  controles={<ControlesDuDossier presentation={presentation} dossier={dossier} provenance={provenanceCommune} />}
                 />
                 {/* La lecture s'est arrêtée à la commune, et elle vient de finir. Le repère du haut
                     porte la même destination, mais il précède la lecture : celui-ci la suit. */}

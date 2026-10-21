@@ -318,7 +318,7 @@ test("câblage : un bien acheté sans projet s'affiche factuel, sans repli perso
 
 test("câblage : le bandeau « lien modifié » existe aussi dans Le relevé, avec la même priorité", () => {
   const s = lire("src/components/report/DossierDecisionSection.tsx");
-  const bascule = s.slice(s.indexOf('presentationDuDossier(presentation) === "releve"'), s.indexOf("const structured ="));
+  const bascule = s.slice(s.indexOf('presentation === "releve"'), s.indexOf("const structured ="));
   assert.match(bascule, /contexteAChange=\{contexteAChange\}/);
   const r = lire("src/components/releve/DossierDecisionReleve.tsx");
   assert.match(r, /\(projetAChange \|\| contexteAChange \|\| voisinageAChange\) && insee/);
