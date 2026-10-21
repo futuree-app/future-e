@@ -1,0 +1,27 @@
+/* « Vos lieux » : mise en page locale, sur les jetons et les classes du Relevé (FUT-118 R0).
+   Aucune valeur nouvelle : tailles des rôles --r-t-*, filets, rayon du canon. */
+.page { display: grid; gap: 14px; padding: 48px 0 24px; }
+.chapo { margin-bottom: 18px; }
+.chapoAncienne { color: var(--r-encre); }
+.lieu { padding: 28px 0 !important; }
+.tete { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 0 20px; align-items: start; }
+/* L'emblème à l'encre : ses formes pleines se lisent comme des échelles examinées, pas comme un décor. */
+.emblemeCol { width: 80px; color: var(--r-encre); }
+.identite { display: grid; gap: 4px; min-width: 0; align-content: start; padding-top: 6px; }
+/* La commune d'abord, l'adresse juste dessous : deux lignes d'un même titre. */
+.commune { margin: 0; display: grid; gap: 2px; font-weight: 600; font-size: var(--r-t-titre); line-height: 1.15; letter-spacing: -0.012em; color: var(--r-encre); overflow-wrap: anywhere; }
+.adresse { font-weight: 500; font-size: var(--r-t-sous-titre); line-height: 1.35; letter-spacing: 0; color: var(--r-encre); }
+.conclusion { display: grid; gap: 6px; margin-top: 18px; }
+.verdict { font-size: var(--r-t-sous-titre); line-height: 1.4; }
+/* Une conclusion qui reflète d'anciens critères : dite à l'encre, avec un trait pointillé neutre (un état, pas un jugement). */
+.ancienne { display: flex; gap: 10px; align-items: baseline; font-size: var(--r-t-dense); line-height: 1.5; color: var(--r-encre); margin: 0; }
+.ancienne::before { content: ""; flex: none; width: 0; height: 0.95em; transform: translateY(0.12em); border-left: 3px dotted var(--r-discret); }
+.gestes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 16px; }
+.parEchelle { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.echelleLien { white-space: nowrap; }
+@media (max-width: 639px) {
+  .tete { grid-template-columns: 56px minmax(0, 1fr); gap: 0 14px; }
+  .emblemeCol { width: 56px; }
+  .identite { padding-top: 2px; }
+  .page { padding-top: 32px; }
+}

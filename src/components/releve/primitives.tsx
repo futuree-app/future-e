@@ -326,7 +326,7 @@ export function EmblemeEchelles({ renvois, etiquette, etats }: {
   etiquette: string;
   /**
    * L'état de chaque forme. `constats` : trait plein ; `examinee` (examinée, aucun constat affiché) :
-   * trait fin et discret ; `non_examinee` : pointillé, la forme est là mais cette lecture ne l'a pas
+   * trait fin à l'encre ; `non_examinee` : pointillé, la forme est là mais cette lecture ne l'a pas
    * parcourue. Absent : les trois formes en trait plein (accueil).
    */
   etats?: { commune: EtatTrace; secteur: EtatTrace; batiment: EtatTrace };
@@ -334,11 +334,15 @@ export function EmblemeEchelles({ renvois, etiquette, etats }: {
   const V = ECHELLE_VIEWBOX;
   const c = ECHELLE_CENTRE;
   const marge = renvois ? 70 : 16;
-  const trace = (e: EtatTrace | undefined, epaisseur: number) => (
-    e === "non_examinee" ? { stroke: "var(--r-discret)", strokeWidth: 0.9, strokeDasharray: "3 4" }
-      : e === "examinee" ? { stroke: "var(--r-discret)", strokeWidth: 0.9 }
-        : { stroke: "currentColor", strokeWidth: epaisseur }
-  );
+  // Les épaisseurs sont en pixels ÉCRAN : à 56 px, le viewBox réduisait un trait de 0,9 à 0,20 px.
+  // Sans constat reste examiné, donc à l'encre ; le nombre de constats ne décide pas de la visibilité.
+  // Le pointillé conserve le sens « non examiné ». Les graduations restent un décor secondaire.
+  const trace = (e: EtatTrace | undefined, epaisseur: number) => ({
+    vectorEffect: "non-scaling-stroke" as const,
+    ...(e === "non_examinee" ? { stroke: "var(--r-discret)", strokeWidth: 1, strokeDasharray: "2 3" }
+      : e === "examinee" ? { stroke: "currentColor", strokeWidth: 1 }
+        : { stroke: "currentColor", strokeWidth: epaisseur }),
+  });
   return (
     <figure style={{ margin: 0 }} aria-label={etiquette}>
       <svg viewBox={`${-marge} ${-16} ${V + marge * 2} ${V + 32}`} style={{ width: "100%", height: "auto", display: "block", color: "var(--r-encre)" }} aria-hidden focusable="false">
@@ -349,9 +353,9 @@ export function EmblemeEchelles({ renvois, etiquette, etats }: {
           const r2 = CERCLE_TERRITOIRE.r + (i % 4 === 0 ? 11 : 7);
           return <line key={i} x1={c + Math.cos(a) * r1} y1={c + Math.sin(a) * r1} x2={c + Math.cos(a) * r2} y2={c + Math.sin(a) * r2} stroke="var(--r-discret)" strokeWidth={0.6} />;
         })}
-        <circle {...CERCLE_TERRITOIRE} fill="none" {...trace(etats?.commune, 1.1)} />
-        <rect {...CARRE_AUTOUR} fill="none" {...trace(etats?.secteur, 1.1)} />
-        <rect {...LOSANGE_LOGEMENT} fill="none" {...trace(etats?.batiment, 1.3)} />
+        <circle {...CERCLE_TERRITOIRE} fill="none" {...trace(etats?.commune, 1.8)} />
+        <rect {...CARRE_AUTOUR} fill="none" {...trace(etats?.secteur, 1.8)} />
+        <rect {...LOSANGE_LOGEMENT} fill="none" {...trace(etats?.batiment, 1.8)} />
         <circle cx={c} cy={c} r={2.2} fill="currentColor" />
         {renvois ? (
           <>
