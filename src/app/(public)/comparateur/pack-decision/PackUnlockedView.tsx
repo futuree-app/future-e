@@ -29,21 +29,11 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
   const router = useRouter();
   const [opening, setOpening] = useState<string | null>(null);
 
-  // Ouvrir le rapport d'une commune du trio = poser ce territoire en lecture
-  // active (l'accès est garanti par le report_grant du pack) puis aller au
-  // rapport. Même flux que le déblocage 14 € (TerritoryUnlockPanel).
-  async function openReport(insee: string, commune: string) {
+  // Le comparatif peut s'ouvrir avant l'écriture des grants par le webhook.
+  // Attendre l'activation autorisée, comme pour l'achat d'un territoire seul.
+  function openReport(insee: string) {
     setOpening(insee);
-    try {
-      await fetch("/api/territoire/activer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ insee, commune }),
-      });
-    } catch {
-      // Le rapport résout de toute façon le territoire actif côté serveur.
-    }
-    router.push("/rapport");
+    router.push(`/territoire/${insee}/ouvrir`);
   }
 
   return (
@@ -60,7 +50,7 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
         {trio.map((r) => (
           <button
             key={r.insee}
-            onClick={() => openReport(r.insee, r.nom)}
+            onClick={() => openReport(r.insee)}
             disabled={opening !== null}
             className="glass rounded-xl p-4 flex items-center justify-between hover:border-[var(--border-hi)] border border-[var(--border-2)] transition-colors text-left disabled:opacity-60"
           >
