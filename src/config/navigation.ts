@@ -72,7 +72,9 @@ export const NAV_ITEMS: NavItem[] = [
   //
   // Sans session, la page redirige vers la connexion : c'est déjà le sort de « Mon rapport », posé
   // ici sans condition, et la navbar est un composant client qui ne connaît pas la session.
-  { label: 'Mes biens', href: '/rapport/dossiers' },
+  // FUT-41 (21/10/2026) : la page liste désormais chaque lieu accessible (biens, territoires achetés
+  // seuls, résidence) avec la conclusion de son dossier. Son nom suit ce qu'elle montre : « Vos lieux ».
+  { label: 'Vos lieux', href: '/rapport/dossiers' },
   { label: 'Comparateur', href: '/comparateur' },
   { label: 'Pourquoi futur•e', href: '/pourquoi' },
 ];

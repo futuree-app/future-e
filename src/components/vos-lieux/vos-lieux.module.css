@@ -1,0 +1,19 @@
+/* « Vos lieux » : mise en page locale, sur les jetons et les classes du Relevé (FUT-118 R0).
+   Aucune valeur nouvelle : rythme de 8 px, filets, rayon 3 px viennent du canon. */
+.page { display: grid; gap: 14px; padding: 48px 0 24px; }
+.chapo { margin-bottom: 18px; }
+.lieu { padding: 28px 0 !important; }
+.tete { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 0 18px; align-items: start; }
+.emblemeCol { width: 64px; padding-top: 2px; }
+.identite { display: grid; gap: 4px; min-width: 0; }
+.nom { overflow-wrap: anywhere; }
+.echelles { margin-top: 4px; }
+.conclusion { display: grid; gap: 6px; margin-top: 18px; }
+.verdict { font-size: var(--r-t-sous-titre); line-height: 1.4; }
+.gestes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 16px; }
+.parEchelle { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+@media (max-width: 639px) {
+  .tete { grid-template-columns: 44px minmax(0, 1fr); gap: 0 14px; }
+  .emblemeCol { width: 44px; }
+  .page { padding-top: 32px; }
+}
