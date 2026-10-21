@@ -28,7 +28,7 @@ import { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
 export { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
 import styles from "./ControlesDuDossier.module.css";
 import { ControlesReleve } from "@/components/releve/ControlesReleve";
-import { presentationDuDossier, type PresentationDossier } from "@/components/releve/activation";
+import type { PresentationDossier } from "@/components/releve/activation";
 
 // La couleur des contrôles, la même que leur section dans la minute : une même nature de constat se
 // peint pareil d'un bout à l'autre de la page.
@@ -43,9 +43,9 @@ export function ControlesDuDossier(
      *  aucune version figée à désigner. */
     provenance,
     presentation,
-  }: { dossier: Dossier; provenance?: string; /** FUT-91, cf. `DossierDecisionSection`. */ presentation?: PresentationDossier },
+  }: { dossier: Dossier; provenance?: string; /** FUT-91, résolue par la page, cf. `DossierDecisionSection`. */ presentation: PresentationDossier },
 ) {
-  if (presentationDuDossier(presentation) === "releve") return <ControlesReleve dossier={dossier} provenance={provenance} />;
+  if (presentation === "releve") return <ControlesReleve dossier={dossier} provenance={provenance} />;
   const groupes = controlesParEchelle(dossier);
   // CE QUE NOS SOURCES N'ONT PAS PU LIRE : une ligne, pas une rubrique (cf. `phraseVerificationsNonRealisees`).
   const nonRealisees = phraseVerificationsNonRealisees(dossier);
