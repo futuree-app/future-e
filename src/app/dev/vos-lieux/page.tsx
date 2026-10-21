@@ -23,10 +23,25 @@ function artefact(texte: string, o: { label?: string; tone?: string; scope?: str
     schemaVersion: 1, generatedAt: o.date ?? "2026-10-09T10:00:00.000Z", engineVersion: "engine-6", conventionsVersion: "conv",
     projectSnapshot: o.projet ?? P2,
     dossier: {
-      scope: o.scope ?? "commune", conclusion: "", conclusionState: "ok", sections: [], controlesTitle: "", compositions: [], absorbedFacts: [],
-      narrativePlan: { verdictLabel: o.label ?? "Arbitrage", verdictTone: o.tone ?? "caution", verdict: { headline: { text: texte } } },
+      scope: o.scope ?? "commune", conclusion: "", conclusionState: "ok", criteria: { registry: [], openConditions: [] }, sections: [], controlesTitle: "", compositions: [], absorbedFacts: [],
+      narrativePlan: { scope: o.scope ?? "commune", communeNom: "Commune", blocks: [], verdictLabel: o.label ?? "Arbitrage", verdictTone: o.tone ?? "caution", verdict: { headline: { text: texte } } },
     },
   };
+}
+// Un constat de la forme réelle d'un dossier (accès aux soins, grain commune), retenu dans la minute :
+// l'emblème le compte comme le Relevé le fait.
+function avecConstat<T extends { dossier: { sections: unknown[]; narrativePlan: Record<string, unknown> } }>(a: T, insee: string): T {
+  const id = `${insee}:alignment-acces_soins`;
+  a.dossier.sections = [{ key: "alignments", title: "Ce qui correspond", cards: [{ kind: "fact", fact: {
+    id, ruleId: "territoire.alignment-acces_soins", sourceFactIds: ["relativePosition.acces_soins"], module: "territoire", role: "alignment",
+    projectKey: "acces_soins", materialityTier: "secondary", topic: "l'accès aux soins", headlineSubject: "l'accès aux soins",
+    statement: "Pour l'accès aux soins, la commune se situe parmi les 20 % de communes où il est le plus favorable.",
+    faceStatement: "Parmi les 20 % de communes où il est le plus favorable",
+    basis: { kind: "relative_position", rankLow: 0.8451, rankHigh: 0.855, universe: "communes_france", distributionVersion: "mismatch-dist-2026-07-15" },
+    evidence: [{ factId: "relativePosition.acces_soins", module: "territoire", label: "Territoire", grain: "commune", href: "/rapport/quartier" }],
+  } }] }];
+  a.dossier.narrativePlan.minute = [id];
+  return a;
 }
 const servi = (payload: unknown, version = 1, tete?: "generating"): StoredArtifact => etatArtefact([
   ...(tete ? [{ version: version + 1, status: tete, generatedAt: null, createdAt: null, payload: null }] : []),
@@ -48,11 +63,12 @@ export default function BancVosLieux({ searchParams }: { searchParams: Promise<{
     bien(5, "13055", "4 quai des Thoniers 13002 Marseille", "Marseille", "2026-08-02T09:00:00.000Z"),
   ];
   const artefacts = new Map<string, StoredArtifact>([
-    [cleArtefact("30189", `logement:${ID(1)}`), servi(artefact("12 rue des Sternes répond à votre projet, avec un compromis : le calme aux abords.", { scope: "commune+adresse" }), 2)],
+    [cleArtefact("30189", `logement:${ID(1)}`), servi(avecConstat(artefact("12 rue des Sternes répond à votre projet, avec un compromis : le calme aux abords.", { scope: "commune+adresse" }), "30189"), 2)],
     [cleArtefact("30189", `logement:${ID(2)}`), servi(artefact("5 allée des Goélands répond à votre projet.", { scope: "commune+adresse", label: "Correspondance", tone: "positive" }), 1, "generating")],
     [cleArtefact("34172", `logement:${ID(3)}`), servi(artefact("31 route de Kervily répond à votre projet, avec un compromis : une gare à moins de 20 min aux abords.", { scope: "commune+adresse", projet: P1, date: "2026-09-19T10:00:00.000Z" }))],
     [cleArtefact("75118", `logement:${ID(4)}`), servi(artefact("8 rue d'Exemple ne tient pas votre condition sans compromis : des étés supportables.", { scope: "commune", label: "Condition non tenue", tone: "critical" }))],
-    [cleArtefact("2A004", "commune"), servi(artefact("Ajaccio répond moins bien à une de vos priorités : des étés supportables."))],
+    [cleArtefact("30189", "commune"), servi(avecConstat(artefact("Nîmes répond moins bien à une de vos priorités : des étés supportables."), "30189"))],
+    [cleArtefact("2A004", "commune"), servi(avecConstat(artefact("Ajaccio répond moins bien à une de vos priorités : des étés supportables."), "2A004"))],
   ]);
   const lieux = assemblerVosLieux({
     biens,

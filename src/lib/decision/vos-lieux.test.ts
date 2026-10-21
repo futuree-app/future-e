@@ -2,7 +2,7 @@
 // Fixtures anonymisées : communes publiques, adresses inventées, identifiants fictifs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { assemblerVosLieux, cleArtefact, type BienPossede, type EntreeVosLieux } from "./vos-lieux.ts";
+import { assemblerVosLieux, adresseCourte, cleArtefact, type BienPossede, type EntreeVosLieux } from "./vos-lieux.ts";
 import { lireVosLieux } from "./vos-lieux-lecture.ts";
 import { etatArtefact, type StoredArtifact } from "./decision-artifact.ts";
 import { projetDeTest } from "./projet-de-test.ts";
@@ -20,8 +20,8 @@ function artefact(o: { texte: string; label?: string; tone?: string; scope?: "co
     projectSnapshot: o.projet ?? P1,
     dossier: {
       scope: o.scope ?? "commune", conclusion: "x", conclusionState: "ok",
-      sections: [], controlesTitle: "Contrôles", compositions: [], absorbedFacts: [],
-      narrativePlan: { verdictLabel: o.label ?? "Arbitrage", verdictTone: o.tone ?? "caution", verdict: { headline: { text: o.texte } } },
+      criteria: { registry: [], openConditions: [] }, sections: [], controlesTitle: "Contrôles", compositions: [], absorbedFacts: [],
+      narrativePlan: { scope: o.scope ?? "commune", communeNom: "Commune", blocks: [], verdictLabel: o.label ?? "Arbitrage", verdictTone: o.tone ?? "caution", verdict: { headline: { text: o.texte } } },
     },
   };
 }
@@ -42,7 +42,9 @@ test("un territoire acheté seul : une commune, sa conclusion figée, la seule �
   const artefacts = new Map([[cleArtefact("30189", "commune"), servi(artefact({ texte: "Nîmes répond moins bien à une de vos priorités : des étés supportables." }))]]);
   const [l] = assemblerVosLieux(entree({ territoires: [{ insee: "30189", commune: "Nîmes", createdAt: "2026-09-21T10:00:00.000Z" }], artefacts }));
   assert.equal(l!.type, "commune");
-  assert.equal(l!.titre, "Nîmes");
+  assert.equal(l!.commune, "Nîmes");
+  assert.equal(l!.adresse, null);
+  // Un dossier communal : la commune examinée (sans carte dans cette fixture), le reste hors périmètre.
   assert.deepEqual(l!.echelles, { territoire: "examinee", autour: "non_examinee", logement: "non_examinee" });
   assert.equal(l!.conclusion.etat, "disponible");
   assert.equal(l!.conclusion.etat === "disponible" && l!.conclusion.texte, "Nîmes répond moins bien à une de vos priorités : des étés supportables.");
@@ -57,23 +59,64 @@ test("un dossier d'adresse : trois échelles examinées, l'accès passe par la r
   assert.deepEqual(l!.echelles, { territoire: "examinee", autour: "examinee", logement: "examinee" });
   assert.equal(l!.principal.href, `/rapport/dossiers/ouvrir?id=${ID_A}&vers=dossier`);
   assert.deepEqual(l!.parEchelle.map((e) => e.href.split("vers=")[1]), ["commune", "autour", "logement"]);
+  assert.deepEqual(l!.parEchelle.map((e) => e.examinee), [true, true, true]);
 });
 
 test("un dossier d'adresse servi au périmètre commune ne prétend pas avoir lu l'adresse", () => {
   const b = bien(ID_A, "30189", "1 rue d'Exemple", "Nîmes");
   const artefacts = new Map([[cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "V", scope: "commune" }))]]);
-  assert.deepEqual(assemblerVosLieux(entree({ biens: [b], artefacts }))[0]!.echelles, { territoire: "examinee", autour: "non_examinee", logement: "non_examinee" });
+  const [l] = assemblerVosLieux(entree({ biens: [b], artefacts }));
+  assert.deepEqual(l!.echelles, { territoire: "examinee", autour: "non_examinee", logement: "non_examinee" });
+  // Les pages d'échelle restent ouvrables, mais chacune dit qu'elle n'a pas été examinée.
+  assert.deepEqual(l!.parEchelle.map((e) => e.examinee), [true, false, false]);
 });
 
-test("deux adresses dans la même commune : deux lignes, deux conclusions, et le territoire ne s'ajoute pas", () => {
+test("deux adresses dans la même commune : deux lignes, deux conclusions, jamais fusionnées", () => {
   const biens = [bien(ID_A, "30189", "1 rue A", "Nîmes"), bien(ID_B, "30189", "2 rue B", "Nîmes")];
   const artefacts = new Map([
     [cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "Conclusion de A", scope: "commune+adresse" }))],
     [cleArtefact("30189", `logement:${ID_B}`), servi(artefact({ texte: "Conclusion de B, différente", scope: "commune+adresse" }))],
   ]);
-  const lieux = assemblerVosLieux(entree({ biens, territoires: [{ insee: "30189", commune: "Nîmes", createdAt: "2026-09-01T00:00:00.000Z" }], artefacts }));
+  const lieux = assemblerVosLieux(entree({ biens, artefacts }));
   assert.equal(lieux.length, 2);
   assert.deepEqual(lieux.map((l) => l.conclusion.etat === "disponible" ? l.conclusion.texte : null), ["Conclusion de A", "Conclusion de B, différente"]);
+});
+
+test("un rapport de territoire puis un dossier d'adresse dans la même commune : les deux conclusions restent trouvables", () => {
+  const artefacts = new Map([
+    [cleArtefact("30189", "commune"), servi(artefact({ texte: "Conclusion du rapport de territoire (14 €)" }))],
+    [cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "Conclusion du dossier d'adresse (25 €)", scope: "commune+adresse" }))],
+  ]);
+  const lieux = assemblerVosLieux(entree({
+    biens: [bien(ID_A, "30189", "1 rue A 30000 Nîmes", "Nîmes", true, "2026-10-05T00:00:00.000Z")],
+    territoires: [{ insee: "30189", commune: "Nîmes", createdAt: "2026-09-01T00:00:00.000Z" }],
+    artefacts,
+  }));
+  // Regroupés par commune : le rapport de territoire d'abord, puis l'adresse.
+  assert.deepEqual(lieux.map((l) => [l.type, l.conclusion.etat === "disponible" && l.conclusion.texte, l.principal.href]), [
+    ["commune", "Conclusion du rapport de territoire (14 €)", "/rapport/territoire?insee=30189"],
+    ["adresse", "Conclusion du dossier d'adresse (25 €)", `/rapport/dossiers/ouvrir?id=${ID_A}&vers=dossier`],
+  ]);
+  assert.equal(lieux[1]!.adresse, "1 rue A");
+});
+
+test("l'adresse ne répète pas le code postal ni la commune déjà affichés", () => {
+  assert.equal(adresseCourte("12 rue des Sternes 30000 Nîmes", "Nîmes"), "12 rue des Sternes");
+  assert.equal(adresseCourte("8 rue d'Exemple, 75018 Paris", "Paris"), "8 rue d'Exemple");
+  assert.equal(adresseCourte("Lieu-dit Kerlavan", "Port-Anvel"), "Lieu-dit Kerlavan");
+  assert.equal(adresseCourte("30000 Nîmes", "Nîmes"), "30000 Nîmes");
+});
+
+test("une version servie qui en suit une autre se dit mise à jour", () => {
+  const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")], artefacts: new Map([[cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "V2" }), 2)]]) }));
+  assert.equal(l!.conclusion.etat === "disponible" && l!.conclusion.miseAJour, true);
+});
+
+test("une conclusion dépassée par le projet oriente vers la mise à jour proposée dans le dossier", () => {
+  const artefacts = new Map([[cleArtefact("30189", `logement:${ID_A}`), servi(artefact({ texte: "T", projet: P1 }))]]);
+  const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")], artefacts, projetActuel: P2 }));
+  assert.equal(l!.principal.label, "Ouvrir le dossier pour le mettre à jour");
+  assert.equal(l!.principal.href, `/rapport/dossiers/ouvrir?id=${ID_A}&vers=dossier`);
 });
 
 test("plusieurs dossiers sur des communes différentes : chacun lit son propre artefact", () => {
@@ -83,7 +126,7 @@ test("plusieurs dossiers sur des communes différentes : chacun lit son propre a
     [cleArtefact("34172", `logement:${ID_B}`), servi(artefact({ texte: "Montpellier B" }))],
   ]);
   const lieux = assemblerVosLieux(entree({ biens, artefacts }));
-  assert.deepEqual(lieux.map((l) => [l.inseeCommune, l.conclusion.etat === "disponible" && l.conclusion.texte]), [["30189", "Nîmes A"], ["34172", "Montpellier B"]]);
+  assert.deepEqual(lieux.map((l) => [l.inseeCommune, l.conclusion.etat === "disponible" && l.conclusion.texte]).sort(), [["30189", "Nîmes A"], ["34172", "Montpellier B"]]);
 });
 
 test("la résidence sans droit reste une lecture gratuite, même si un artefact existait pour la commune", () => {
@@ -104,10 +147,23 @@ test("la résidence couverte par un droit n'est pas listée deux fois, et le lie
   assert.equal(lieux[0]!.estResidence, true);
 });
 
+test("l'emblème suit la lecture du Relevé : une échelle avec constats n'est pas une échelle examinée sans constat", () => {
+  // Une carte de la forme réelle d'un dossier (Nîmes, accès aux soins), au grain commune.
+  const carte = { kind: "fact", fact: { id: "30189:alignment-acces_soins", ruleId: "territoire.alignment-acces_soins", sourceFactIds: ["relativePosition.acces_soins"], module: "territoire", role: "alignment", projectKey: "acces_soins", materialityTier: "secondary", topic: "l'accès aux soins", headlineSubject: "l'accès aux soins", statement: "Pour l'accès aux soins, la commune se situe parmi les 20 % de communes où il est le plus favorable.", faceStatement: "Parmi les 20 % de communes où il est le plus favorable", basis: { kind: "relative_position", rankLow: 0.8451, rankHigh: 0.855, universe: "communes_france", distributionVersion: "mismatch-dist-2026-07-15" }, evidence: [{ factId: "relativePosition.acces_soins", module: "territoire", label: "Territoire · Nîmes", grain: "commune", href: "/rapport/quartier" }] } };
+  const a = artefact({ texte: "Avec un constat", scope: "commune+adresse" }) as { dossier: { sections: unknown[] } };
+  a.dossier.sections = [{ key: "alignments", title: "Ce qui correspond", cards: [carte] }];
+  // La minute que le verdict annonce : c'est elle que le Relevé affiche, et donc compte.
+  (a.dossier as unknown as { narrativePlan: { minute: string[] } }).narrativePlan.minute = ["30189:alignment-acces_soins"];
+  const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")], artefacts: new Map([[cleArtefact("30189", `logement:${ID_A}`), servi(a)]]) }));
+  assert.deepEqual(l!.echelles, { territoire: "constats", autour: "examinee", logement: "examinee" });
+});
+
 test("un dossier sans artefact : un état explicite, rien n'est recomposé", () => {
   const [l] = assemblerVosLieux(entree({ biens: [bien(ID_A, "30189", "1 rue A", "Nîmes")] }));
   assert.equal(l!.conclusion.etat, "absente");
   assert.deepEqual(l!.echelles, { territoire: "inconnue", autour: "inconnue", logement: "inconnue" });
+  // L'inconnu n'est pas présenté comme « non examiné » : aucune échelle n'est déclarée lue ou non lue.
+  assert.deepEqual(l!.parEchelle.map((e) => e.examinee), [null, null, null]);
 });
 
 test("une conclusion ancienne garde son texte d'origine et se dit dépassée par le Projet", () => {
@@ -229,7 +285,7 @@ test("lecture : deux comptes, aucune fuite ; le dossier révoqué disparaît ; l
   const lieux = await lireVosLieux(sb, USER_A, pasDeRepli);
   const texte = JSON.stringify(lieux);
   for (const fuite of ["Conclusion du compte B", "Marseille", "2 rue de B", "Dossier révoqué", "9 rue Révoquée"]) assert.ok(!texte.includes(fuite), fuite);
-  assert.deepEqual(lieux.map((l) => l.titre), ["1 rue A", "Montpellier", "La Rochelle"]);
+  assert.deepEqual(lieux.map((l) => l.adresse ?? l.commune), ["1 rue A", "Montpellier", "La Rochelle"]);
   assert.equal(lieux[0]!.conclusion.etat === "disponible" && lieux[0]!.conclusion.texte, "Conclusion du compte A, gare à 20 min");
   assert.equal(lieux[0]!.conclusion.etat === "disponible" && lieux[0]!.conclusion.actualite, "projet_change");
   assert.equal(lieux[1]!.conclusion.etat === "disponible" && lieux[1]!.conclusion.texte, "Montpellier, v2");
@@ -260,5 +316,6 @@ test("lecture : une version candidate illisible passe la main à la relecture pa
     return servi(artefact({ texte: "Montpellier, v1 relue" }), 1);
   });
   assert.equal(appels, 1);
-  assert.equal(lieux.find((l) => l.titre === "Montpellier")!.conclusion.etat === "disponible" && (lieux.find((l) => l.titre === "Montpellier")!.conclusion as { texte: string }).texte, "Montpellier, v1 relue");
+  const mtp = lieux.find((l) => l.commune === "Montpellier")!;
+  assert.equal(mtp.conclusion.etat === "disponible" && mtp.conclusion.texte, "Montpellier, v1 relue");
 });

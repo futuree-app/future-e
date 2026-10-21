@@ -5,6 +5,11 @@ import { artifactScopeKey } from "./decision-artifact.ts";
 import { projetAChangeMateriellement } from "./projet-materiel.ts";
 import { communeParent } from "../plm.ts";
 import { decideTerritoryAccess, type TerritoryClaim } from "../territory-claims.ts";
+// Le calcul des échelles du Relevé (FUT-91), réutilisé tel quel : « examinée » vient du périmètre du
+// dossier, « avec constats » du nombre de cartes qui la touchent. Aucune seconde définition.
+import { lireDossier, lireCarteDuDossier, lectureDesEchelles } from "../../components/releve/lecture-dossier.ts";
+import { controlesParEchelle } from "./dossier-view.ts";
+import type { Dossier } from "./decision-fact.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « VOS LIEUX » : CE QUE CHAQUE LIEU ACCESSIBLE A LE DROIT DE MONTRER (FUT-41, premier lot).
@@ -49,7 +54,9 @@ export type EntreeVosLieux = {
   projetActuel: UserProject | null;
 };
 
-export type EtatEchelle = "examinee" | "non_examinee" | "inconnue";
+/** `constats` : examinée, des constats y sont retenus ; `examinee` : examinée, aucun constat retenu ;
+ *  `non_examinee` : hors du périmètre lu ; `inconnue` : sans dossier lisible, on ne sait pas. */
+export type EtatEchelle = "constats" | "examinee" | "non_examinee" | "inconnue";
 
 export type ConclusionLieu =
   | {
@@ -65,6 +72,8 @@ export type ConclusionLieu =
       /** `a_jour` : même signature décisionnelle ; `projet_change` : le Projet a changé depuis ;
        *  `inconnue` : l'artefact ne porte pas de Projet (avant le 05/08/2026), ou aucun Projet actuel. */
       actualite: "a_jour" | "projet_change" | "inconnue";
+      /** La version servie succède à une autre : l'analyse a été mise à jour. */
+      miseAJour: boolean;
       /** Une version plus récente est en préparation, ou a échoué : la version servie reste celle-ci. */
       tentativePlusRecente: "en_preparation" | "echouee" | null;
     }
@@ -73,18 +82,17 @@ export type ConclusionLieu =
   | { etat: "illisible" }
   | { etat: "lecture_gratuite" };
 
-export type LienLieu = { href: string; label: string };
+export type LienLieu = { href: string; label: string; /** pour une échelle : examinée par le dossier servi ? */ examinee?: boolean | null };
 
 export type LieuAffiche = {
   cle: string;
   type: "adresse" | "commune" | "residence";
-  /** L'adresse, ou le nom de la commune. */
-  titre: string;
-  /** La commune, pour une adresse. */
-  commune: string | null;
+  /** La commune : le premier repère de chaque lieu, adresse comprise. */
+  commune: string;
+  /** L'adresse, sans le code postal ni la commune qu'elle répète ; nulle pour une commune seule. */
+  adresse: string | null;
   /** Le code de la commune de l'artefact (grain commune : arrondissements remontés). */
   inseeCommune: string;
-  depuis: string | null;
   /** Comment ce lieu est accessible. `ouvert` : dossier ouvert par futur•e sans paiement. */
   acces: "achete" | "ouvert" | "lecture_gratuite";
   estResidence: boolean;
@@ -102,25 +110,24 @@ export function cleArtefact(insee: string, scopeKey: string): string {
 
 /** Les clés que la page doit lire : un artefact par bien, un par territoire sans bien. */
 export function clesALire(biens: BienPossede[], territoires: TerritoirePossede[]): { insee: string; scopeKey: string }[] {
-  const territoiresSeuls = territoiresSansBien(biens, territoires);
   return [
     ...biens.map((b) => ({ insee: communeParent(b.insee), scopeKey: artifactScopeKey(b.id) })),
-    ...territoiresSeuls.map((t) => ({ insee: communeParent(t.insee), scopeKey: artifactScopeKey(null) })),
+    ...territoiresAchetes(territoires).map((t) => ({ insee: communeParent(t.insee), scopeKey: artifactScopeKey(null) })),
   ];
 }
 
 /**
- * Les territoires qu'aucun bien ne porte, UN PAR COMMUNE : deux droits sur deux arrondissements de
- * Paris désignent le même artefact communal (75056), donc une seule ligne. Le plus ancien droit date
- * la ligne. Même règle que `listTerritoiresSansBien` (les communes portées par un bien s'effacent :
- * le bien est la porte la plus riche).
+ * Les territoires achetés, UN PAR COMMUNE : deux droits sur deux arrondissements de Paris désignent le
+ * même artefact communal (75056), donc une seule ligne. Le plus ancien droit date la ligne.
+ *
+ * UN TERRITOIRE RESTE LISTÉ MÊME QUAND UN BIEN EXISTE DANS SA COMMUNE (revue du 21/10/2026). Le rapport
+ * de territoire (14 €) et le dossier d'adresse (25 €) ont chacun leur conclusion, figée sous leur propre
+ * scope (`commune`, `logement:<id>`) : effacer l'un rendait une conclusion achetée introuvable.
  */
-function territoiresSansBien(biens: BienPossede[], territoires: TerritoirePossede[]): TerritoirePossede[] {
-  const avecBien = new Set(biens.map((b) => communeParent(b.insee)));
+function territoiresAchetes(territoires: TerritoirePossede[]): TerritoirePossede[] {
   const parCommune = new Map<string, TerritoirePossede>();
   for (const t of territoires) {
     const c = communeParent(t.insee);
-    if (avecBien.has(c)) continue;
     const deja = parCommune.get(c);
     if (!deja || t.createdAt < deja.createdAt) parCommune.set(c, t);
   }
@@ -153,74 +160,105 @@ function conclusionDe(stocke: StoredArtifact | undefined, projetActuel: UserProj
     generatedAt: a.generatedAt,
     moteur: a.engineVersion,
     actualite,
+    miseAJour: stocke.servedVersion > 1,
     tentativePlusRecente: tentative,
   };
 }
 
-/** Les échelles examinées, lues dans le périmètre de l'artefact SERVI ; sans lui, on ne sait pas. */
-function echellesDe(conclusionStockee: StoredArtifact | undefined, type: "adresse" | "commune"): LieuAffiche["echelles"] {
-  const scope = conclusionStockee?.artifact?.dossier?.scope;
-  if (type === "commune") return { territoire: scope ? "examinee" : "inconnue", autour: "non_examinee", logement: "non_examinee" };
-  if (scope === "commune+adresse") return { territoire: "examinee", autour: "examinee", logement: "examinee" };
-  // Un dossier d'adresse servi au périmètre commune : l'adresse n'a pas pu être lue (repli de production).
-  if (scope === "commune") return { territoire: "examinee", autour: "non_examinee", logement: "non_examinee" };
-  return { territoire: "inconnue", autour: "inconnue", logement: "inconnue" };
+/** Les échelles, lues dans le dossier SERVI par la fonction du Relevé ; sans dossier lisible, on ne sait pas. */
+function echellesDe(stocke: StoredArtifact | undefined): LieuAffiche["echelles"] {
+  const dossier = stocke?.artifact?.dossier as Dossier | undefined;
+  if (!dossier) return { territoire: "inconnue", autour: "inconnue", logement: "inconnue" };
+  try {
+    // Le même appel que le Relevé (`DossierDecisionReleve`) : la minute ET la liste complète des contrôles.
+    const autres = controlesParEchelle(dossier).flatMap((g) => g.cards.map((c) => lireCarteDuDossier(dossier, c)));
+    const parEchelle = Object.fromEntries(lectureDesEchelles(lireDossier(dossier), autres).map((e) => [e.echelle, e.etat === "non_examinee" ? "non_examinee" : e.constats > 0 ? "constats" : "examinee"])) as Record<string, EtatEchelle>;
+    return { territoire: parEchelle.territoire ?? "inconnue", autour: parEchelle.quartier ?? "inconnue", logement: parEchelle.logement ?? "inconnue" };
+  } catch {
+    // Un dossier ancien dont la forme ne se relit pas : on le dit inconnu, on ne l'invente pas.
+    return { territoire: "inconnue", autour: "inconnue", logement: "inconnue" };
+  }
+}
+
+/** L'adresse sans sa fin « 30000 Nîmes » quand elle répète la commune affichée au-dessus. */
+export function adresseCourte(label: string, commune: string | null): string {
+  if (!commune) return label;
+  const fin = new RegExp(`[\\s,]+\\d{5}\\s+${commune.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i");
+  const court = label.replace(fin, "").trim();
+  return court.length > 0 ? court : label;
 }
 
 /**
- * LES LIEUX, DANS L'ORDRE : les biens (le plus récent d'abord, comme la page d'avant), puis les
- * territoires achetés seuls, puis la commune de résidence quand aucun droit ne la couvre.
+ * LES LIEUX, REGROUPÉS PAR COMMUNE. Dans chaque commune : le rapport de territoire s'il a été acheté,
+ * puis ses biens (le plus récent d'abord). Les communes viennent dans l'ordre de leur lieu le plus
+ * récent. La commune de résidence sans droit ferme la liste.
  *
  * Les liens mènent aux routes existantes, qui vérifient elles-mêmes le droit et posent le lieu lu.
  * Ce sont des Route Handlers : la page les rend en `<a>` natifs, jamais préchargés.
  */
 export function assemblerVosLieux(e: EntreeVosLieux): LieuAffiche[] {
-  const out: LieuAffiche[] = [];
   const residenceCommune = e.residence.insee ? communeParent(e.residence.insee) : null;
+  const groupes = new Map<string, { recent: string; commune: LieuAffiche[]; biens: { lieu: LieuAffiche; cree: string }[] }>();
+  const groupe = (insee: string, date: string) => {
+    const g = groupes.get(insee) ?? { recent: date, commune: [], biens: [] };
+    if (date > g.recent) g.recent = date;
+    groupes.set(insee, g);
+    return g;
+  };
+  const principal = (href: string, c: ConclusionLieu): LienLieu =>
+    ({ href, label: c.etat === "disponible" && c.actualite === "projet_change" ? "Ouvrir le dossier pour le mettre à jour" : "Ouvrir le dossier" });
 
   for (const b of e.biens) {
     const insee = communeParent(b.insee);
     const stocke = e.artefacts.get(cleArtefact(insee, artifactScopeKey(b.id)));
+    const echelles = echellesDe(stocke);
+    const conclusion = conclusionDe(stocke, e.projetActuel);
     const id = encodeURIComponent(b.id);
-    out.push({
+    const lue = (x: EtatEchelle) => (x === "inconnue" ? null : x !== "non_examinee");
+    const commune = b.city ?? `Commune ${insee}`;
+    groupe(insee, b.created_at).biens.push({ cree: b.created_at, lieu: {
       cle: `bien:${b.id}`,
       type: "adresse",
-      titre: b.address_label,
-      commune: b.city,
+      commune,
+      adresse: adresseCourte(b.address_label, b.city),
       inseeCommune: insee,
-      depuis: b.created_at,
       acces: b.stripe_payment_intent_id ? "achete" : "ouvert",
       estResidence: residenceCommune === insee,
-      echelles: echellesDe(stocke, "adresse"),
-      conclusion: conclusionDe(stocke, e.projetActuel),
-      principal: { href: `/rapport/dossiers/ouvrir?id=${id}&vers=dossier`, label: "Ouvrir le dossier" },
+      echelles,
+      conclusion,
+      principal: principal(`/rapport/dossiers/ouvrir?id=${id}&vers=dossier`, conclusion),
+      // Les pages d'échelle restent ouvrables (droit acquis) ; chacune dit si le dossier servi l'a examinée.
       parEchelle: [
-        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=commune`, label: "Territoire" },
-        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=autour`, label: "Autour de l'adresse" },
-        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=logement`, label: "Logement" },
+        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=commune`, label: "Territoire", examinee: lue(echelles.territoire) },
+        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=autour`, label: "Autour de l'adresse", examinee: lue(echelles.autour) },
+        { href: `/rapport/dossiers/ouvrir?id=${id}&vers=logement`, label: "Logement", examinee: lue(echelles.logement) },
       ],
-    });
+    } });
   }
 
-  for (const t of territoiresSansBien(e.biens, e.territoires)) {
+  for (const t of territoiresAchetes(e.territoires)) {
     const insee = communeParent(t.insee);
     const stocke = e.artefacts.get(cleArtefact(insee, artifactScopeKey(null)));
-    out.push({
+    const conclusion = conclusionDe(stocke, e.projetActuel);
+    groupe(insee, t.createdAt).commune.push({
       cle: `territoire:${insee}`,
       type: "commune",
-      titre: t.commune ?? `Commune ${insee}`,
-      commune: null,
+      commune: t.commune ?? `Commune ${insee}`,
+      adresse: null,
       inseeCommune: insee,
-      depuis: t.createdAt,
       acces: "achete",
       estResidence: residenceCommune === insee,
-      echelles: echellesDe(stocke, "commune"),
-      conclusion: conclusionDe(stocke, e.projetActuel),
+      echelles: echellesDe(stocke),
+      conclusion,
       // Le nom n'est plus transmis : `/rapport/territoire` le lit dans le référentiel (FUT-119).
-      principal: { href: `/rapport/territoire?insee=${encodeURIComponent(t.insee)}`, label: "Ouvrir le dossier" },
+      principal: principal(`/rapport/territoire?insee=${encodeURIComponent(t.insee)}`, conclusion),
       parEchelle: [],
     });
   }
+
+  const out = [...groupes.values()]
+    .sort((a, b) => b.recent.localeCompare(a.recent))
+    .flatMap((g) => [...g.commune, ...g.biens.sort((x, y) => y.cree.localeCompare(x.cree)).map((x) => x.lieu)]);
 
   // LA RÉSIDENCE N'EST UN DOSSIER QUE SI UN DROIT LA COUVRE (FUT-120). Sinon, elle se montre pour ce
   // qu'elle est : la lecture gratuite et partielle de sa commune, sans conclusion de dossier.
@@ -233,10 +271,9 @@ export function assemblerVosLieux(e: EntreeVosLieux): LieuAffiche[] {
       out.push({
         cle: `residence:${residenceCommune}`,
         type: "residence",
-        titre: e.residence.commune ?? `Commune ${residenceCommune}`,
-        commune: null,
+        commune: e.residence.commune ?? `Commune ${residenceCommune}`,
+        adresse: null,
         inseeCommune: residenceCommune,
-        depuis: null,
         acces: "lecture_gratuite",
         estResidence: true,
         echelles: { territoire: "non_examinee", autour: "non_examinee", logement: "non_examinee" },

@@ -1,4 +1,4 @@
-import { releve as s, Surtitre, Ligne, Marge, Registre, EmblemeEchelles, type EtatTrace, type ElementDeMarge } from "@/components/releve/primitives";
+import { releve as s, Surtitre, Registre, EmblemeEchelles, type EtatTrace } from "@/components/releve/primitives";
 import type { LieuAffiche, EtatEchelle, ConclusionLieu } from "@/lib/decision/vos-lieux";
 import type { VerdictTone } from "@/lib/decision/conclusion-plan";
 import { bindOrphans } from "@/lib/typography";
@@ -16,7 +16,7 @@ import v from "./vos-lieux.module.css";
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 const DATE = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-const date = (iso: string | null) => (iso ? DATE.format(new Date(iso)) : null);
+const date = (iso: string) => DATE.format(new Date(iso));
 
 // Le ton du verdict, porté par le trait de registre (jamais une pastille) : FUT-118 § 3.3.
 const TEINTE_TON: Record<VerdictTone, string> = {
@@ -26,23 +26,25 @@ const TEINTE_TON: Record<VerdictTone, string> = {
   positive: "var(--reg-alignement)",
 };
 
-const TRACE: Record<EtatEchelle, EtatTrace> = { examinee: "constats", non_examinee: "non_examinee", inconnue: "non_examinee" };
+// Les trois états de trait de l'emblème, dans leur sens canonique (FUT-118 R0) : plein = des constats y sont
+// retenus ; fin = examinée sans constat ; pointillé = non examinée. L'état « inconnu » n'a pas de trait :
+// sans dossier lisible, l'emblème n'est pas dessiné du tout (on ne l'éteint ni ne l'allume à tort).
+const TRACE: Record<Exclude<EtatEchelle, "inconnue">, EtatTrace> = { constats: "constats", examinee: "examinee", non_examinee: "non_examinee" };
 
-function echellesEnMots(l: LieuAffiche): string {
-  const e = l.echelles;
-  if (l.type === "residence") return "Lecture gratuite et partielle de la commune";
-  if (e.territoire === "inconnue") return "Échelles examinées : non connues, faute de conclusion enregistrée";
-  if (e.autour === "examinee" && e.logement === "examinee") return "Commune, abords de l'adresse et logement examinés";
-  if (l.type === "adresse") return "Commune examinée ; l'adresse n'a pas pu être lue";
-  return "Commune examinée";
+function natureEnMots(l: LieuAffiche): string {
+  if (l.type === "residence") return "Votre commune de résidence · lecture gratuite et partielle";
+  const base = l.type === "commune" ? "Rapport de territoire" : l.acces === "ouvert" ? "Dossier d'adresse ouvert par futur•e" : "Dossier d'adresse";
+  return l.estResidence && l.type === "commune" ? `${base} · votre commune de résidence` : base;
 }
 
-function accesEnMots(l: LieuAffiche): string {
-  const depuis = date(l.depuis);
-  const base = l.acces === "achete" ? (depuis ? `Acheté le ${depuis}` : "Acheté")
-    : l.acces === "ouvert" ? (depuis ? `Ouvert par futur•e le ${depuis}` : "Ouvert par futur•e")
-      : "Votre commune de résidence";
-  return l.estResidence && l.type !== "residence" ? `${base} · votre commune de résidence` : base;
+function echellesEnMots(l: LieuAffiche): string | null {
+  const e = l.echelles;
+  if (l.type === "residence") return null;
+  if (e.territoire === "inconnue") return "Échelles examinées non connues";
+  const lu = (x: EtatEchelle) => x === "constats" || x === "examinee";
+  if (lu(e.autour) && lu(e.logement)) return "Commune, abords et logement examinés";
+  if (l.type === "adresse") return "Commune examinée ; l'adresse n'a pas pu être lue";
+  return "Commune examinée";
 }
 
 function Conclusion({ c }: { c: ConclusionLieu }) {
@@ -51,35 +53,30 @@ function Conclusion({ c }: { c: ConclusionLieu }) {
       <div className={v.conclusion}>
         <p className={s.etiquette}>Ce que conclut votre dossier</p>
         <Registre teinte={c.ton ? TEINTE_TON[c.ton] : undefined} className={v.verdict}>{bindOrphans(c.texte)}</Registre>
-        <p className={s.nuance}>
-          {c.actualite === "a_jour" ? "Cette conclusion répond à votre Projet actuel."
-            : c.actualite === "projet_change" ? "Votre Projet a changé depuis : cette conclusion répond à votre Projet d'alors. Le dossier permet de la mettre à jour."
-              : "Ce dossier ne dit pas à quel Projet il répondait : impossible de vérifier s'il est à jour."}
-          {c.tentativePlusRecente === "en_preparation" ? " Une nouvelle version est en préparation." : ""}
-        </p>
+        <p className={s.nuance}>{c.miseAJour ? "Analyse mise à jour le " : "Analyse réalisée le "}{date(c.generatedAt)}</p>
+        {c.actualite === "projet_change" ? (
+          <p className={v.ancienne}>Votre projet a changé depuis cette analyse. Cette conclusion reflète vos anciens critères.</p>
+        ) : (
+          <p className={s.nuance}>
+            {c.actualite === "a_jour" ? "Elle correspond à votre projet actuel." : "Impossible de savoir si elle correspond à votre projet actuel."}
+          </p>
+        )}
+        {c.tentativePlusRecente === "en_preparation" ? <p className={s.nuance}>Une nouvelle version de l&apos;analyse est en préparation.</p> : null}
       </div>
     );
   }
   const texte = {
-    absente: "Aucune conclusion n'est enregistrée pour ce dossier. Rien n'est généré depuis cette page ; le dossier reste consultable.",
-    en_preparation: "La conclusion de ce dossier est en préparation.",
-    illisible: "La conclusion enregistrée de ce dossier ne peut pas être affichée ici. Le dossier, lui, reste consultable.",
-    lecture_gratuite: "Lecture gratuite : elle ne comporte pas de conclusion de dossier.",
+    absente: "Aucune analyse n'est enregistrée pour ce dossier. Le dossier reste consultable.",
+    en_preparation: "L'analyse de ce lieu est en préparation.",
+    illisible: "L'analyse enregistrée ne peut pas être affichée ici. Le dossier reste consultable.",
+    lecture_gratuite: "Une lecture gratuite ne comporte pas de conclusion de dossier.",
   }[c.etat];
   return <div className={v.conclusion}><p className={s.dense}>{texte}</p></div>;
 }
 
-function margeDe(l: LieuAffiche): ElementDeMarge[] {
-  const c = l.conclusion;
-  const out: ElementDeMarge[] = [{ type: "grain", grain: l.type === "adresse" ? "adresse" : "commune", libelle: l.type === "adresse" ? "une adresse" : "une commune" }];
-  if (c.etat === "disponible") {
-    out.push({ type: "valeur", libelle: "Conclusion", valeur: `version ${c.version}`, date: date(c.generatedAt) ?? undefined });
-  }
-  return out;
-}
-
 export function VosLieux({ lieux }: { lieux: LieuAffiche[] }) {
   const n = lieux.filter((l) => l.type !== "residence").length;
+  const anciennes = lieux.filter((l) => l.conclusion.etat === "disponible" && l.conclusion.actualite === "projet_change").length;
   return (
     <section aria-labelledby="titre-vos-lieux" className={v.page}>
       <Surtitre>Ma décision</Surtitre>
@@ -88,24 +85,34 @@ export function VosLieux({ lieux }: { lieux: LieuAffiche[] }) {
         {n === 0 ? "Aucun dossier pour l'instant."
           : n === 1 ? "Votre lieu, et ce que conclut son dossier."
             : `Vos ${n} lieux, et ce que conclut le dossier de chacun.`}
+        {anciennes > 0 ? <span className={v.chapoAncienne}> {anciennes > 1 ? `${anciennes} analyses reflètent` : "Une analyse reflète"} d&apos;anciens critères de votre projet.</span> : null}
       </p>
       {lieux.length > 0 ? (
         <ul className={s.liste}>
-          {lieux.map((l) => (
-            <li key={l.cle} className={v.lieu}>
-              <Ligne marge={<Marge elements={margeDe(l)} etiquette="D'où vient cette conclusion" />}>
+          {lieux.map((l) => {
+            const inconnue = l.echelles.territoire === "inconnue";
+            return (
+              <li key={l.cle} className={v.lieu}>
                 <div className={v.tete}>
                   <div className={v.emblemeCol} aria-hidden>
-                    <EmblemeEchelles
-                      etiquette=""
-                      etats={{ commune: TRACE[l.echelles.territoire], secteur: TRACE[l.echelles.autour], batiment: TRACE[l.echelles.logement] }}
-                    />
+                    {inconnue ? null : (
+                      <EmblemeEchelles
+                        etiquette=""
+                        etats={{
+                          commune: TRACE[l.echelles.territoire as Exclude<EtatEchelle, "inconnue">],
+                          secteur: TRACE[l.echelles.autour as Exclude<EtatEchelle, "inconnue">],
+                          batiment: TRACE[l.echelles.logement as Exclude<EtatEchelle, "inconnue">],
+                        }}
+                      />
+                    )}
                   </div>
                   <div className={v.identite}>
-                    {l.commune ? <p className={s.etiquette}>{l.commune}</p> : null}
-                    <h2 className={`${s.sousTitre} ${v.nom}`}>{l.titre}</h2>
-                    <p className={s.nuance}>{accesEnMots(l)}</p>
-                    <p className={`${s.nuance} ${v.echelles}`}>{echellesEnMots(l)}</p>
+                    <h2 className={v.commune}>
+                      {l.commune}
+                      {l.adresse ? <span className={v.adresse}>{l.adresse}</span> : null}
+                    </h2>
+                    <p className={s.nuance}>{natureEnMots(l)}</p>
+                    {echellesEnMots(l) ? <p className={s.nuance}>{echellesEnMots(l)}</p> : null}
                   </div>
                 </div>
                 <Conclusion c={l.conclusion} />
@@ -114,13 +121,18 @@ export function VosLieux({ lieux }: { lieux: LieuAffiche[] }) {
                   {l.parEchelle.length > 0 ? (
                     <span className={v.parEchelle}>
                       <span className={s.nuance}>Ou une échelle :</span>
-                      {l.parEchelle.map((e) => <a key={e.href} href={e.href} className={s.lien}>{e.label}</a>)}
+                      {l.parEchelle.map((e) => (
+                        <span key={e.href} className={v.echelleLien}>
+                          <a href={e.href} className={s.lien}>{e.label}</a>
+                          {e.examinee === false ? <span className={s.nuance}> (non examinée)</span> : null}
+                        </span>
+                      ))}
                     </span>
                   ) : null}
                 </div>
-              </Ligne>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </section>

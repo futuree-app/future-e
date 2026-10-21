@@ -52,12 +52,25 @@ FUT-118. En attendant, le retour passe par la barre de navigation.
 (`#060812`) qui reste sombre en thème clair. « Vos lieux » utilise le fond du Relevé (`--r-fond`), qui
 suit le thème.
 
+## Passe de revue du 21/10/2026
+
+| Retour | Correction |
+| --- | --- |
+| Métadonnées trop techniques | la colonne de droite (« une adresse », « Conclusion », « version N ») est retirée ; la version reste dans les données et le dossier |
+| Sens des dates | une seule date au premier niveau : « Analyse réalisée le … », ou « Analyse mise à jour le … » quand la version servie en suit une autre ; « Acheté le » (qui lisait `created_at`) est retiré |
+| Commune trop discrète | la commune est le titre de chaque lieu ; l'adresse suit, sans répéter code postal et commune |
+| Emblème éteint, état « inconnu » converti en « non examiné » | l'emblème suit le calcul du Relevé (`lireDossier` + `lectureDesEchelles` + contrôles, comme `DossierDecisionReleve`) : plein si des constats y sont retenus, fin si examinée sans constat, pointillé si non examinée ; **sans dossier lisible, il n'est pas dessiné** ; formes à l'encre, 80 px (56 sur mobile) |
+| « Projet » et message d'actualisation | « projet » en minuscule dans les phrases ; « Votre projet a changé depuis cette analyse. Cette conclusion reflète vos anciens critères. » ; bouton « Ouvrir le dossier pour le mettre à jour » (le dossier propose bien « Mettre à jour l'analyse », pour un territoire comme pour une adresse) ; le nombre d'analyses concernées est dit en tête de page |
+| Territoire et adresse dans la même commune | le rapport de territoire reste listé à côté du dossier d'adresse ; regroupement par commune ; les deux conclusions et les deux accès sont trouvables (test) |
+| Liens vers des échelles non examinées | les pages d'échelle restent ouvrables ; chacune non examinée par le dossier servi est suivie de « (non examinée) » |
+| Actualisation groupée | non développée ; analyse portée à FUT-122 (ticket existant) |
+
 ## Contrôles
 
-- Tests : `src/lib/decision/vos-lieux.test.ts`, 16 tests (assembleur et lecture sur une base simulée :
+- Tests : `src/lib/decision/vos-lieux.test.ts`, 21 tests après la passe de revue (16 au premier envoi) (assembleur et lecture sur une base simulée :
   deux comptes sans fuite, dossier révoqué, sans artefact, version en préparation, version illisible,
   conclusion ancienne, résidence, Paris, Corse, aucune écriture, nombre de requêtes). Suite complète :
-  2 916 tests, 0 échec (avant l'ajout du banc).
+  2 921 tests, 0 échec.
 - TypeScript (`tsc --noEmit`) : 0 erreur. Lint ciblé : 0 erreur. Build de production : réussi.
 - Recette visuelle sur le banc `/dev/vos-lieux` (404 en production), lieux fictifs assemblés par la
   fonction de production : 1440, 390 et 360 px, sombre et clair, aucun débordement, chaque lien
