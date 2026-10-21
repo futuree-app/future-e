@@ -17,8 +17,10 @@ import { colonnesIntention, lireContexteCheckout, projetVuEstACour } from "@/lib
 import { enregistrerIntention, statutStripeModifiable } from "@/lib/verrou-intention-dossier";
 import { storeIntentionsSupabase } from "@/lib/server/intention-dossier-store";
 import { normalizeUserProject, type UserProject } from "@/lib/user-project";
-import { communeVendable, ensembleVendable } from "@/lib/commerce/eligibilite-territoriale";
-import { communeDuReferentiel } from "@/lib/commerce/referentiel-communes";
+import {
+  communeIdentifiee, communeVendable, ensembleVendable, REFUS_NON_IDENTIFIE,
+} from "@/lib/commerce/eligibilite-territoriale";
+import { communeDuReferentiel, nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
 import { PACK_DECISION_AMOUNT_CENTS } from "@/lib/commerce/preuve-paiement-pack";
 
 export const runtime = "nodejs";
@@ -43,7 +45,7 @@ const PRODUCT_PRICES: Record<string, { amountEur: number; stripePriceId: string 
 export async function POST(request: Request) {
   try {
     const {
-      productType, targetInsee, targetCommune, source, rank, pack,
+      productType, targetInsee, source, rank, pack,
       phDistinctId: phDistinctIdRaw, address, checkoutAttemptId, promoCode, dossierContext,
     } = await request.json();
 
@@ -72,13 +74,19 @@ export async function POST(request: Request) {
     // bas, sur leurs propres communes. Aucun de ces refus n'a besoin d'un compte : un appel direct est
     // refusé de la même façon, avant même la lecture de la session.
     // ════════════════════════════════════════════════════════════════════════════════════════════
+    //
+    // FUT-119 : le NOM de la commune est celui du référentiel, jamais `targetCommune`. Il part dans les
+    // métadonnées, donc dans le grant, le territoire actif, la facture et le courriel : un nom contradictoire
+    // reçu du client y aurait décrit une autre commune que celle payée.
     let cleanInsee = "";
+    let cleanCommune = "";
     if (productType.trim() === "one-shot") {
-      const territoire = communeVendable(targetInsee, communeDuReferentiel);
+      const territoire = communeIdentifiee(targetInsee, communeDuReferentiel, nomDuReferentiel);
       if (!territoire.ok) {
         return NextResponse.json({ error: territoire.error, code: territoire.code }, { status: 422 });
       }
       cleanInsee = territoire.insee;
+      cleanCommune = territoire.nom;
     }
     // Le comparatif : TOUTES ses communes, une seule refusée refuse l'ensemble. Les codes vérifiés
     // remplacent ceux du client dans la suite (forme du COG, Corse comprise).
@@ -93,9 +101,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: ensemble.error, code: ensemble.code }, { status: 422 });
       }
       packInseesVerifies = ensemble.insees;
+      // FUT-119 : chaque commune du comparatif est nommée par le référentiel, comme le 14 €.
+      if (packInseesVerifies.some((insee) => !nomDuReferentiel(insee))) {
+        return NextResponse.json({ error: REFUS_NON_IDENTIFIE.error, code: REFUS_NON_IDENTIFIE.code }, { status: 422 });
+      }
     }
-    const cleanCommune =
-      typeof targetCommune === "string" ? targetCommune.trim().slice(0, 120) : "";
     const cleanSource =
       source === "comparateur_vie" || source === "pack_decision" ? source : "direct";
     const cleanRank =
@@ -278,9 +288,9 @@ export async function POST(request: Request) {
       const raw = Array.isArray(pack?.trio) ? pack.trio : [];
       // Chaque code a déjà passé `ensembleVendable` (FUT-114) : on reprend sa forme vérifiée.
       packTrio = raw
-        .map((t: { insee?: string; commune?: string }, i: number) => ({
+        .map((_: unknown, i: number) => ({
           insee: packInseesVerifies[i] ?? "",
-          commune: typeof t?.commune === "string" ? t.commune.trim().slice(0, 120) : "",
+          commune: nomDuReferentiel(packInseesVerifies[i] ?? "") ?? "",
         }))
         .filter((t: { insee: string }) => t.insee)
         .slice(0, 3);

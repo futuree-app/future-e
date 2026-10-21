@@ -308,12 +308,14 @@ function offreDepuisChemin(chemin: string) {
   const verdict = communeVendable(decodeURIComponent(m[1]!), connue);
   if (!verdict.ok) return null;
   const back = new URLSearchParams();
-  for (const k of ["nom", "rank", "source"]) { const v = url.searchParams.get(k); if (v) back.set(k, v); }
+  // FUT-119 : le nom ne fait plus le voyage, la page le retrouve depuis le code (fut119-identite-commune.test.ts).
+  for (const k of ["rank", "source"]) { const v = url.searchParams.get(k); if (v) back.set(k, v); }
   const backHref = `/territoire/${verdict.insee}/debloquer${back.toString() ? `?${back}` : ""}`;
   return {
     insee: verdict.insee, nom: url.searchParams.get("nom"), backHref,
     connexion: `/connexion?next=${encodeURIComponent(backHref)}`,
-    paiement: { productType: "one-shot", targetInsee: verdict.insee, targetCommune: url.searchParams.get("nom"), source: "comparateur_vie", rank: null },
+    // Sans `targetCommune` : la route nomme la commune depuis le code (FUT-119), c'est ce que vérifie l'étape 4.
+    paiement: { productType: "one-shot", targetInsee: verdict.insee, source: "comparateur_vie", rank: null },
   };
 }
 
@@ -327,7 +329,7 @@ for (const [nom, code] of [["Nantes", "44109"], ["Ajaccio", "2A004"], ["Bastia",
     assert.ok(offre, `${code} : l'offre doit s'ouvrir`);
     assert.equal(offre.insee, code);
     assert.equal(offre.nom, nom);
-    // 5. L'aller-retour de connexion revient exactement sur la même offre, commune et nom compris.
+    // 5. L'aller-retour de connexion revient exactement sur la même offre (le nom se relit depuis le code).
     const next = new URL(offre.connexion, "http://localhost").searchParams.get("next");
     assert.equal(destinationApresConnexion(next), offre.backHref);
     assert.deepEqual(offreDepuisChemin(destinationApresConnexion(next))?.paiement, offre.paiement);

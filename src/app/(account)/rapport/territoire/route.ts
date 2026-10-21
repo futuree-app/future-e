@@ -24,6 +24,8 @@ import { requireCurrentUser } from "@/lib/user-account";
 import { loadTerritoryClaims } from "@/lib/active-territory";
 import { decideTerritoryAccess } from "@/lib/territory-claims";
 import { communeParent } from "@/lib/plm";
+import { normaliserCodeCommune } from "@/lib/commerce/eligibilite-territoriale";
+import { nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
 
 export const runtime = "nodejs";
 
@@ -31,13 +33,12 @@ export async function GET(request: NextRequest) {
   const { supabase, user } = await requireCurrentUser();
 
   const url = new URL(request.url);
-  const demande = (url.searchParams.get("insee") ?? "").trim().toUpperCase();
-  const nom = (url.searchParams.get("nom") ?? "").trim().slice(0, 120);
+  const demande = normaliserCodeCommune(url.searchParams.get("insee"));
   const retour = NextResponse.redirect(new URL("/rapport/dossiers", request.url));
 
   // Un vrai code INSEE, jamais un code postal : le piège est connu et il échoue en silence côté
-  // sources (ADEME, DRIAS, Hub'Eau) plutôt que de lever.
-  if (!/^[0-9AB][0-9]{4}$/i.test(demande)) return retour;
+  // sources (ADEME, DRIAS, Hub'Eau) plutôt que de lever. Corse comprise (2A/2B), que l'ancienne garde refusait.
+  if (!demande) return retour;
 
   const claims = await loadTerritoryClaims(supabase, user.id);
   if (!decideTerritoryAccess(claims, demande)) return retour;
@@ -45,11 +46,15 @@ export async function GET(request: NextRequest) {
   // Le territoire actif est au grain COMMUNE : poser un arrondissement ferait lire « Paris 18e » à
   // tous les écrans de commune. Le code local, lui, reste dans le grant, où `codeDeLectureLocal`
   // ira le chercher pour LIRE les faits.
+  //
+  // FUT-119 : le nom vient du référentiel, au même grain que le code posé. Le paramètre `nom` de l'URL n'est
+  // plus lu : il pouvait nommer une autre commune que celle ouverte.
+  const actif = communeParent(demande);
   const { error } = await supabase
     .from("user_profiles")
     .update({
-      active_insee_code: communeParent(demande),
-      active_commune: nom || null,
+      active_insee_code: actif,
+      active_commune: nomDuReferentiel(actif),
       // LE BIEN ACTIF EST OUBLIÉ, sans quoi le hub rouvrirait un bien d'une autre commune. Le
       // territoire demandé n'en a pas : c'est la définition même de ce parcours.
       active_dossier_id: null,

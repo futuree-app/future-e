@@ -10,6 +10,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { sanitizeDistinctId } from "@/lib/posthog-identity";
 import { grantDecisionPackFromSnapshot } from "@/lib/decision-packs";
 import { communeParent } from "@/lib/plm";
+import { nomDuReferentiel } from "@/lib/commerce/referentiel-communes";
 import { issueInvoice } from "@/lib/server/invoice-store";
 import { renderInvoicePdf } from "@/lib/server/invoice-pdf";
 import { invoiceFileName, type InvoiceProductType } from "@/lib/invoice";
@@ -249,7 +250,12 @@ async function handleSucceededPayment(paymentIntent: Stripe.PaymentIntent) {
 
   // Territoire ciblé (parcours comparateur). Vide = achat sur la résidence.
   const insee = typeof targetInsee === "string" ? targetInsee.trim() : "";
-  const commune = typeof targetCommune === "string" ? targetCommune.trim() : "";
+  // FUT-119 : le nom est relu depuis le code, pas depuis les métadonnées. La route de paiement y écrit déjà le
+  // nom du référentiel ; un PaymentIntent créé avant ce correctif porte encore le nom envoyé par le navigateur,
+  // et ce nom allait au grant, au territoire actif et à la facture.
+  const commune = insee
+    ? (nomDuReferentiel(insee) ?? "")
+    : typeof targetCommune === "string" ? targetCommune.trim() : "";
   const source = grantSource || "direct";
   const rank = grantRank ? Number.parseInt(grantRank, 10) : null;
   const resend = getResend();
