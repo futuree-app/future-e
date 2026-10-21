@@ -1,5 +1,15 @@
 # FUT-87 · Directions artistiques, recommandation, design system et migration
 
+> **Erratum du 20/10/2026 (FUT-118 R0).** Ce document dit qu'Archivo est employée « avec son axe de
+> largeur (déjà dans le fichier servi, 0 octet ajouté) », et sa table typographique donne des réglages
+> `wdth` (118, 108, 88, 125, 70 à 75 pour la direction A). Le fichier **servi par le site**
+> (`public/fonts/Archivo-Variable.woff2`) n'a pas d'axe de largeur : mesuré dans Chrome, un même texte a la
+> même largeur à `wdth` 62, 100 et 125 (l'Archivo de Google Fonts varie, elle, de 453 à 851 px). Ces
+> réglages étaient ignorés ; les prototypes et les captures de cette revue montraient Archivo en largeur
+> normale, et c'est ce rendu qui a été validé. Les réglages ont été retirés du code et la référence est
+> Archivo en largeur normale (`DESIGN.md` v3.0, § 9.1). Le texte ci-dessous est conservé tel qu'il a été
+> écrit.
+
 Date : 11 octobre 2026 · Statut : **direction de travail validée par le porteur (revue du 11/10) ;
 version achevée et migration non validées.** Rien de ce document n'est appliqué au site public. Les
 prototypes vivent sous `/dev/fut87` (404 en production) ; l'audit qui les fonde est

@@ -1,0 +1,349 @@
+<title>Socle commun de futur•e</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@100..900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* La page est écrite dans la grammaire qu'elle décrit : énoncé à gauche, preuve en marge, filets,
+   une plaque, glyphes d'échelle, trait de registre. Sombre d'abord (comme le produit), clair en miroir. */
+:root {
+  --fond: #060812; --plaque: #0d1322; --encre: #f6f4ef; --texte: #c6cfdb; --discret: #9ba3b4; --meta: #788095;
+  --filet: rgba(255,255,255,0.08); --filet-fort: rgba(255,255,255,0.14); --elev: rgba(255,255,255,0.03);
+  --marque: #E8823A; --sur-marque: #060812;
+  --reg-incompatibilite: #FF9AA4; --reg-alignement: #7BD3A5; --reg-compromis: #E8823A;
+  --reg-ecart: #C2A5EB; --reg-non-su: #B8BFCC; --reg-controle: #82B4E8;
+  --sans: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --fond: #faf8f3; --plaque: #f2ede4; --encre: #1a1d28; --texte: #3d4456; --discret: #5b6373; --meta: #646c7f;
+  --filet: rgba(26,29,40,0.08); --filet-fort: rgba(26,29,40,0.16); --elev: rgba(26,29,40,0.03);
+  --sur-marque: #1a1d28;
+  --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+  --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+  color-scheme: light;
+} }
+:root[data-theme="light"] {
+  --fond: #faf8f3; --plaque: #f2ede4; --encre: #1a1d28; --texte: #3d4456; --discret: #5b6373; --meta: #646c7f;
+  --filet: rgba(26,29,40,0.08); --filet-fort: rgba(26,29,40,0.16); --elev: rgba(26,29,40,0.03);
+  --sur-marque: #1a1d28;
+  --reg-incompatibilite: #8F2E3A; --reg-alignement: #236844; --reg-compromis: #994000;
+  --reg-ecart: #64428E; --reg-non-su: #505662; --reg-controle: #285B91;
+  color-scheme: light;
+}
+
+body { background: var(--fond); color: var(--texte); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.feuille { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 96px; }
+@media (min-width: 640px) { .feuille { padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); } }
+a { color: var(--encre); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--filet-fort); }
+a:hover { text-decoration-color: var(--encre); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--encre); outline-offset: 2px; }
+code { font-family: var(--mono); font-size: 0.86em; color: var(--encre); }
+
+/* Typographie : les rôles du Relevé. */
+.surtitre { display: flex; gap: 12px; align-items: baseline; margin: 0; font-weight: 600; font-size: 13.5px; letter-spacing: 0.01em; color: var(--discret); }
+.numero { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--meta); font-variant-numeric: tabular-nums; }
+h1 { margin: 14px 0 0; font-weight: 500; font-size: clamp(34px, 5vw, 58px); line-height: 1.04; letter-spacing: -0.02em; color: var(--encre); text-wrap: balance; }
+h2 { margin: 0; font-weight: 600; font-size: clamp(23px, 2.6vw, 31px); line-height: 1.15; letter-spacing: -0.012em; color: var(--encre); text-wrap: balance; }
+.chapo { margin: 18px 0 0; font-size: 18px; line-height: 1.55; max-width: 46em; }
+.sujet { margin: 0; font-weight: 600; font-size: 17px; line-height: 1.35; color: var(--encre); }
+.dense { margin: 0; font-size: 14.5px; line-height: 1.58; }
+.nuance { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--discret); }
+
+/* La plaque : une seule, elle porte le principe. */
+.plaque { position: relative; margin-top: 36px; background: var(--plaque); border: 1px solid var(--filet-fort); border-radius: 3px; padding: 26px 22px; display: grid; gap: 18px; }
+@media (min-width: 760px) { .plaque { padding: 36px 40px; grid-template-columns: 1fr 1fr; gap: 0; } .plaque > div + div { border-left: 1px solid var(--filet-fort); padding-left: 36px; } .plaque > div:first-child { padding-right: 36px; } }
+.plaque::before, .plaque::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--discret); border-style: solid; }
+.plaque::before { top: -7px; left: -7px; border-width: 1px 0 0 1px; }
+.plaque::after { bottom: -7px; right: -7px; border-width: 0 1px 1px 0; }
+.plaque .grand { margin: 6px 0 0; font-weight: 500; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; color: var(--encre); }
+
+/* Mouvements de page (sections de lecture) et grille à marge. */
+.mouvement { padding-block: 52px 8px; border-top: 1px solid var(--filet); margin-top: 52px; }
+.mouvement > header { display: grid; gap: 10px; margin-bottom: 22px; }
+.ligne { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 18px; border-top: 1px solid var(--filet); }
+.ligne:first-of-type { border-top: 0; padding-top: 0; }
+@media (min-width: 900px) { .ligne { grid-template-columns: minmax(0, 1fr) 232px; gap: 48px; } }
+.texte { display: grid; gap: 8px; min-width: 0; }
+.marge { font-family: var(--mono); font-size: 13px; line-height: 1.55; color: var(--discret); display: grid; gap: 6px; align-content: start; border-top: 1px dashed var(--filet-fort); padding-top: 8px; }
+@media (min-width: 900px) { .marge { font-size: 12px; border-top: 0; padding-top: 0; border-left: 1px solid var(--filet); padding-left: 16px; } }
+.marge .valeur { color: var(--encre); }
+
+/* Statut : stable / hypothèse. Un mot, jamais une couleur de registre. */
+.statut { font-family: var(--mono); font-size: 11.5px; color: var(--meta); }
+.statut[data-s="hypothese"] { color: var(--discret); border-bottom: 1px dashed var(--discret); }
+
+/* Le trait de registre, devant le sujet. */
+.registre { display: flex; gap: 10px; align-items: baseline; }
+.registre::before { content: ""; flex: none; width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--t, var(--meta)); }
+.registre[data-etabli="non"]::before { background: none; border-left: 1px dashed var(--discret); width: 0; margin-left: 1px; }
+
+/* Les sept signes. */
+.signes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.signes li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 14px; padding-block: 14px; border-top: 1px solid var(--filet); }
+.signes li:first-child { border-top: 0; padding-top: 0; }
+.signes svg { color: var(--encre); margin-top: 3px; }
+.registres { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 14px; }
+
+/* Tableaux de relevé : filets, nombres alignés, empilés sur mobile. */
+.tableau-cadre { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+caption { text-align: left; padding-bottom: 10px; font-size: 13.5px; color: var(--discret); }
+th { text-align: left; font-weight: 600; font-size: 12.5px; color: var(--discret); padding: 0 14px 10px 0; border-bottom: 1px solid var(--filet-fort); }
+td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--filet); vertical-align: top; }
+td.m { font-family: var(--mono); font-size: 13px; color: var(--encre); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.nom { color: var(--encre); font-weight: 600; }
+@media (max-width: 639px) {
+  thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  tr { display: grid; gap: 2px; padding-block: 12px; border-bottom: 1px solid var(--filet); }
+  td { padding: 0; border: 0; white-space: normal !important; }
+}
+
+.liste { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+.liste li::marker { color: var(--meta); font-family: var(--mono); }
+.deux { display: grid; gap: 28px; }
+@media (min-width: 900px) { .deux { grid-template-columns: 1fr 1fr; gap: 0; } .deux > * + * { border-left: 1px solid var(--filet); padding-left: 36px; } .deux > *:first-child { padding-right: 36px; } }
+.pied { margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--filet-fort); display: grid; gap: 8px; font-size: 13.5px; color: var(--discret); }
+.pied p { margin: 0; }
+</style>
+
+<div class="feuille">
+  <header>
+    <p class="surtitre"><span class="numero">DESIGN.md v3.0</span><span>En revue, non fusionné (PR #71, brouillon)</span></p>
+    <h1>Socle commun de futur•e</h1>
+    <p class="chapo">Ce que tout écran de futur•e partage, du premier aperçu au dossier payé et au futur centre de décision. Chaque règle porte son statut : <span class="statut">stable</span> s'applique, <span class="statut" data-s="hypothese">hypothèse</span> se suit par défaut et peut s'écarter en se justifiant.</p>
+  </header>
+
+  <section class="plaque" aria-label="Le principe d'ensemble">
+    <div>
+      <p class="surtitre">Le langage visuel</p>
+      <p class="grand">Le Relevé</p>
+      <p class="dense" style="margin-top:8px">Des énoncés et leur marge de preuve, des filets, une plaque par section, trois formes pour les échelles, un trait pour le jugement.</p>
+    </div>
+    <div>
+      <p class="surtitre">Le comportement dans le temps</p>
+      <p class="grand">FUT-75</p>
+      <p class="dense" style="margin-top:8px">Trois niveaux de mouvement, des jetons communs. Le repère bouge, la donnée reste. Il n'existe pas de seconde grammaire d'animation.</p>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s1">
+    <header><p class="surtitre"><span class="numero">01</span><span id="s1">Ce qui fait reconnaître futur•e</span></p><h2>Sept signes, tous tirés du produit</h2></header>
+    <div class="ligne">
+      <div class="texte">
+        <ul class="signes">
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><line x1="13" y1="3" x2="13" y2="19" stroke="currentColor" stroke-width="1.2"/><line x1="2" y1="7" x2="10" y2="7" stroke="currentColor" stroke-width="1.6"/><line x1="2" y1="11" x2="10" y2="11" stroke="currentColor" stroke-width="1.6"/><line x1="16" y1="7" x2="21" y2="7" stroke="currentColor" stroke-width="1"/></svg><div><p class="sujet">La marge de preuve</p><p class="dense">Chaque affirmation porte sa source à côté d'elle : grain, valeur, source, date, lien.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="5" cy="11" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="7.5" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="18" y="9" width="4" height="4" transform="rotate(45 20 11)" fill="currentColor"/></svg><div><p class="sujet">Trois formes réservées aux échelles</p><p class="dense">Cercle pour la commune, carré pour le secteur, losange pour le bâtiment. Rien d'autre ne les emploie.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="5" width="16" height="12" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M1 3.5 H5 M1.5 3 V7 M21 18.5 H17 M20.5 19 V15" stroke="currentColor" stroke-width="1"/></svg><div><p class="sujet">La plaque</p><p class="dense">La surface dominante d'une section de lecture, avec deux coins de coupe. Elle porte ce que futur•e conclut, ou ce que la personne achète.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="5" width="3" height="12" fill="var(--reg-alignement)"/><line x1="10" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="1.6"/><line x1="10" y1="13" x2="17" y2="13" stroke="currentColor" stroke-width="1"/></svg><div><p class="sujet">Le trait de registre, 3 px</p><p class="dense">La seule couleur de jugement, posée devant le sujet d'un fait. Jamais un fond, une bordure de carte ni un chiffre coloré.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><line x1="1" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="1"/><line x1="5" y1="17" x2="5" y2="11" stroke="currentColor" stroke-width="1.2"/><line x1="12" y1="17" x2="12" y2="8" stroke="currentColor" stroke-width="1.2"/><line x1="19" y1="17" x2="19" y2="4" stroke="currentColor" stroke-width="1.2"/></svg><div><p class="sujet">La règle du temps</p><p class="dense">Les horizons 2030, 2050, 2100 sont des jalons isolés, jamais reliés. Une série continue réellement mesurée peut, elle, être une courbe avec son incertitude.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><text x="1" y="16" font-family="Archivo, sans-serif" font-size="14" font-weight="600" fill="currentColor">Aa</text></svg><div><p class="sujet">Archivo, en largeur normale</p><p class="dense">Une seule famille, hiérarchisée par la taille, la graisse et l'encre ; le mono pour ce qui s'aligne (valeurs, sources, dates). Jamais de capitales mono espacées.</p></div></li>
+          <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><line x1="1" y1="7" x2="21" y2="7" stroke="currentColor" stroke-width="1"/><line x1="1" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="1"/></svg><div><p class="sujet">Fond sombre, filets, pas de verre</p><p class="dense">Un document technique, pas un tableau de bord.</p></div></li>
+        </ul>
+        <p class="nuance">Et une règle de voix qui est aussi une règle visuelle : l'absence se dit, avec un tiret et une phrase, jamais un zéro ni une case vide. Un écran emploie les signes qui servent son contenu ; c'est leur répétition à travers le parcours qui fait reconnaître futur•e.</p>
+      </div>
+      <aside class="marge" aria-label="Source"><span>DESIGN.md § 0, § 7</span><span>grammaire-du-releve.md § 0</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s2">
+    <header><p class="surtitre"><span class="numero">02</span><span id="s2">Couleur</span></p><h2>La couleur juge, l'encre mesure</h2></header>
+    <div class="ligne">
+      <div class="texte">
+        <p class="registre sujet" style="--t: var(--reg-alignement)">La donnée est à l'encre</p>
+        <p class="dense">Barres, rangs, jalons, valeurs : aucune teinte. Seule exception, la couleur réglementaire du DPE, dont la position sur l'échelle A à G porte le sens.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 5.3</span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">Six registres, seules couleurs de jugement</p>
+        <ul class="registres" aria-label="Les six registres">
+          <li class="registre" style="--t: var(--reg-incompatibilite)">incompatibilité</li>
+          <li class="registre" style="--t: var(--reg-alignement)">alignement</li>
+          <li class="registre" style="--t: var(--reg-compromis)">compromis</li>
+          <li class="registre" style="--t: var(--reg-ecart)">écart</li>
+          <li class="registre" style="--t: var(--reg-non-su)">non su</li>
+          <li class="registre" style="--t: var(--reg-controle)">contrôle</li>
+        </ul>
+        <p class="registre dense" data-etabli="non">Une issue non établie (« à vérifier », « non examiné ») n'a aucune valence : un trait pointillé, sans teinte.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 5.4</span><span>jetons <span class="valeur">--reg-*</span></span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">L'orange est la marque, pas un jugement</p>
+        <p class="dense">Le point du logo et une action principale dans le champ visuel. Jamais sur une donnée, un statut, un titre ni une lueur.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 5.5</span><span>texte sur la marque <span class="valeur">6,15:1</span> en clair</span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">Un incident n'est pas un registre</p>
+        <p class="dense">Un paiement refusé, une source sans réponse : à l'encre, sans couleur de jugement, et seulement ce que le serveur a confirmé. Une erreur générique ne prouve pas qu'aucun montant n'a été prélevé.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 5.3, § 9.1</span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">4,5:1 dans les deux thèmes</p>
+        <p class="dense">Les jetons de texte et le texte posé sur la marque sont testés sur le fond et la plaque, en sombre et en clair.</p>
+      </div>
+      <aside class="marge"><span>test <span class="valeur">K4</span></span><span>canon.test.ts</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s3">
+    <header><p class="surtitre"><span class="numero">03</span><span id="s3">Typographie</span></p><h2>Une taille par usage</h2></header>
+    <div class="ligne">
+      <div class="texte tableau-cadre">
+        <table>
+          <caption>Les rôles du Relevé, jetons <code>--r-t-*</code> de design-tokens.css</caption>
+          <thead><tr><th scope="col">Rôle</th><th scope="col">Réglage</th><th scope="col">Usage</th></tr></thead>
+          <tbody>
+            <tr><td class="nom">Display</td><td class="m">500 · 34–58 px</td><td>titre d'écran, un par écran</td></tr>
+            <tr><td class="nom">Verdict</td><td class="m">500 · 27–46 px</td><td>le verdict dans la plaque</td></tr>
+            <tr><td class="nom">Titre</td><td class="m">600 · 23–31 px</td><td>titre de section</td></tr>
+            <tr><td class="nom">Sous-titre</td><td class="m">600 · 17 px</td><td>sujet d'un fait</td></tr>
+            <tr><td class="nom">Chapô · corps · dense</td><td class="m">400 · 18 · 16 · 14,5 px</td><td>texte</td></tr>
+            <tr><td class="nom">Nuance</td><td class="m">400 · 13,5 px</td><td>limite, portée, méthode</td></tr>
+            <tr><td class="nom">Surtitre · étiquette</td><td class="m">600 · 13,5 · 12,5 px</td><td>nomme une section, un statut</td></tr>
+            <tr><td class="nom">Chiffre</td><td class="m">500 · 30–44 px</td><td>une valeur mise en avant</td></tr>
+            <tr><td class="nom">Marge</td><td class="m">mono · 12 px (13 sous 900)</td><td>grain, preuve, source, date</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 9.1</span><span>planchers : rien sous <span class="valeur">10,5 px</span> ; jamais de graisse 400 sous 13 px sur fond sombre</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s4">
+    <header><p class="surtitre"><span class="numero">04</span><span id="s4">Géométrie et mise en page</span></p><h2>Des filets, une marge, peu de surfaces</h2></header>
+    <div class="ligne">
+      <div class="texte">
+        <ul class="liste">
+          <li>Rayon de 3 px partout. Le cercle n'existe que comme glyphe.</li>
+          <li>Filets plutôt que cartes ; rythme vertical par pas de 8 px.</li>
+          <li>Grille à marge : le texte, puis une marge de 232 px dès 900 px ; en dessous, la marge passe sous le texte.</li>
+          <li>Une plaque par section ; deux plaques de même poids ne se concurrencent pas, sauf mises en regard pour comparer.</li>
+          <li>La mise en page d'un composant suit son conteneur, pas l'écran.</li>
+        </ul>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 2</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s5">
+    <header><p class="surtitre"><span class="numero">05</span><span id="s5">Grammaire documentaire</span></p><h2>Dix rôles, dix formes</h2></header>
+    <div class="ligne">
+      <div class="texte tableau-cadre">
+        <table>
+          <thead><tr><th scope="col">Rôle</th><th scope="col">Forme</th></tr></thead>
+          <tbody>
+            <tr><td class="nom">Fait</td><td>un énoncé complet, à gauche de la marge</td></tr>
+            <tr><td class="nom">Valeur</td><td>chiffre à l'encre et son unité ; en marge, mono tabulaire</td></tr>
+            <tr><td class="nom">Provenance</td><td>glyphe de grain et mot</td></tr>
+            <tr><td class="nom">Preuve</td><td>la marge : grain, valeur, source, date, lien de l'artefact servi</td></tr>
+            <tr><td class="nom">Limite</td><td>une phrase discrète sous le fait, sans italique ni couleur</td></tr>
+            <tr><td class="nom">Interprétation</td><td>corps de texte, jamais plus grand que le fait</td></tr>
+            <tr><td class="nom">Conclusion</td><td>la plaque ; le titre n'est jamais généré</td></tr>
+            <tr><td class="nom">Vérification</td><td>sujet au trait « contrôle », geste, numérotée</td></tr>
+            <tr><td class="nom">Projet</td><td>la phrase du lecteur, citée, jamais reformulée</td></tr>
+            <tr><td class="nom">Arbitrage</td><td>la balance : deux côtés d'un même arbitrage, en regard</td></tr>
+          </tbody>
+        </table>
+        <p class="nuance">Deux motifs canoniques : « pourquoi elles ne disent pas la même chose » pour une contradiction entre deux lectures, et la ligne d'état unique pour une attente qui ne remplace rien.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 6.1</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s6">
+    <header><p class="surtitre"><span class="numero">06</span><span id="s6">Mouvement · FUT-75</span></p><h2>Le repère bouge, la donnée reste</h2></header>
+    <div class="ligne">
+      <div class="texte tableau-cadre">
+        <table>
+          <caption>Les trois niveaux, jetons <code>--m-*</code> alignés sur <code>src/lib/motion.ts</code></caption>
+          <thead><tr><th scope="col">Niveau</th><th scope="col">Ce qu'il fait</th><th scope="col">Durées</th></tr></thead>
+          <tbody>
+            <tr><td class="nom">Geste</td><td>réaction immédiate à la main ; micro-ressort sur les seules commandes</td><td class="m">90 · 120 ms</td></tr>
+            <tr><td class="nom">État</td><td>continuité entre deux présentations d'un même élément</td><td class="m">180 · 240 ms</td></tr>
+            <tr><td class="nom">Structure</td><td>navigation, dévoilement, déclenchés par le lecteur</td><td class="m">≤ 900 ms</td></tr>
+          </tbody>
+        </table>
+        <p class="dense">En mouvement réduit : aucun déplacement ni ressort, l'état final tout de suite. Aucune valeur, barre ou résultat ne s'anime. Une « section de lecture » du Relevé n'est pas une animation.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 15</span><span>tests <span class="valeur">G1 · G2</span></span><span>FUT-75, intégration n° 1</span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">Écarts constatés, rattachés à leurs lots</p>
+        <p class="dense">Des orbes animés sur 22 pages de contenu, la barre de chargement de route et quelques points pulsés ignorent le mouvement réduit. Ils seront corrigés par le lot qui migre chaque surface.</p>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 15.4</span><span>lots R2, R6, R7, R8, R9, R11</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s7">
+    <header><p class="surtitre"><span class="numero">07</span><span id="s7">Organisation des composants</span></p><h2>Une grammaire, trois niveaux</h2></header>
+    <div class="ligne">
+      <div class="texte">
+        <ul class="liste">
+          <li><strong style="color:var(--encre)">Primitives partagées</strong> dans <code>src/components/releve/</code> : elles ignorent tout domaine, et deux domaines au moins en ont besoin.</li>
+          <li><strong style="color:var(--encre)">Composants métier</strong> dans leur domaine (Logement, Territoire, paiement, centre de décision) : ils composent les primitives et les jetons, sans créer de couleur, de taille ni de rayon.</li>
+          <li><strong style="color:var(--encre)">Compositions de parcours</strong> : les pages assemblent librement les deux.</li>
+        </ul>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 10</span><span>AGENTS.md</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s8">
+    <header><p class="surtitre"><span class="numero">08</span><span id="s8">Centre de décision</span></p><h2>Une identité commune, une vraie liberté d'invention</h2></header>
+    <div class="ligne">
+      <div class="texte deux">
+        <div class="texte">
+          <p class="sujet">Non négociable</p>
+          <ul class="liste">
+            <li>la preuve et sa provenance</li>
+            <li>la couleur réservée aux registres et aux issues établies</li>
+            <li>le grain ; la profondeur d'examen n'est jamais un avantage</li>
+            <li>aucun score, aucun classement implicite</li>
+            <li>l'absence dite</li>
+            <li>la phrase fidèle à la donnée et à la marge</li>
+            <li>le Relevé et FUT-75</li>
+          </ul>
+        </div>
+        <div class="texte">
+          <p class="sujet">Hypothèses ouvertes</p>
+          <p class="dense">La forme de la comparaison : issues en marge, colonnes par candidat, table manipulable, disposition spatiale, parcours guidé. Toutes possibles si elles tiennent les principes : une position ne se lit pas comme un rang, un axe dit ce qu'il signifie.</p>
+        </div>
+      </div>
+      <aside class="marge"><span>DESIGN.md § 13</span><span class="statut">stable</span><span class="statut" data-s="hypothese">hypothèse</span></aside>
+    </div>
+  </section>
+
+  <section class="mouvement" aria-labelledby="s9">
+    <header><p class="surtitre"><span class="numero">09</span><span id="s9">Garde-fous</span></p><h2>Ce qui empêche une seconde grammaire</h2></header>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">Le test-cliquet</p>
+        <p class="dense">Les marqueurs de l'ancienne identité ne peuvent que baisser, fichier par fichier, et un fichier nouveau n'en contient aucun. C'est un garde-fou approximatif, pas un juge esthétique : une exception se déclare avec son motif, et la référence ne se modifie jamais à la main.</p>
+      </div>
+      <aside class="marge"><span>référence <span class="valeur">603</span> marqueurs, 104 fichiers</span><span>tests K1 · K1b</span><span class="statut">stable</span></aside>
+    </div>
+    <div class="ligne">
+      <div class="texte">
+        <p class="sujet">Les validations restent obligatoires</p>
+        <p class="dense">Le lot R0 prouve qu'il ne change rien à l'écran ; il ne valide pas l'interface. Avant d'activer une surface : Safari et iPhone réels, thème clair relu, vraie session et vrais dossiers, mouvement réduit, mobile 360 et 390 px, écran non-Retina, clavier.</p>
+      </div>
+      <aside class="marge"><span>52 empreintes avant / après</span><span>DESIGN.md § 14</span><span class="statut">stable</span></aside>
+    </div>
+  </section>
+
+  <footer class="pied">
+    <p>Texte de référence : <code>DESIGN.md</code> v3.0, branche <code>feat/fut-118-convergence-releve</code>, <a href="https://github.com/futuree-app/future-e/pull/71">PR #71</a> en brouillon. Adoption à la fusion, après relecture.</p>
+    <p>Justification règle par règle : <a href="https://github.com/futuree-app/future-e/blob/feat/fut-118-convergence-releve/docs/audits/2026-10-20-fut118-releve/grammaire-du-releve.md">grammaire du Relevé</a> · audit : <a href="https://github.com/futuree-app/future-e/blob/feat/fut-118-convergence-releve/docs/audits/2026-10-20-fut118-releve.md">rapport FUT-118</a>.</p>
+  </footer>
+</div>

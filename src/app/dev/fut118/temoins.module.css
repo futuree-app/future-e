@@ -1,0 +1,123 @@
+/* ════════════════════════════════════════════════════════════════════════════════════════════
+   FUT-118 · ÉCRANS TÉMOINS. DEV UNIQUEMENT.
+
+   Les écrans témoins sont construits avec les primitives de `src/components/releve/` et RIEN
+   d'autre, sauf les classes ci-dessous. Chacune marque un MANQUE du canon : un composant
+   fonctionnel dont un vrai écran a eu besoin et que le Relevé ne fournit pas encore. Elles sont
+   listées dans le rapport (§ C, « à créer ») et n'ont pas vocation à rester ici : le lot R1 les
+   promeut, avec leurs tests, ou les abandonne.
+
+   Toutes les valeurs viennent des jetons `--r-*` (posés par `.releve`) et `--m-*` (FUT-75).
+   Aucune couleur ajoutée, aucun rayon au-delà de `--r-rayon`.
+   ════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.page { padding-bottom: 96px; }
+.tete { padding: 48px 0 32px; display: grid; gap: 16px; }
+@media (min-width: 640px) { .tete { padding: 64px 0 40px; } }
+
+/* ── MANQUE 1 · Le sélecteur (FUT-75 Q2) ─────────────────────────────────────────────────────
+   Un groupe d'options exclusives : horizon, nombre de possibilités, étape. Liens ou radios, un
+   repère de 2 px sous l'option courante, jamais une teinte. Remplacerait `HorizonSwitch` et les
+   `HORIZON_PILLS` du module Territoire. */
+.selecteur { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--r-filet); }
+.option {
+  position: relative;
+  padding: 10px 14px 12px;
+  min-height: 40px;
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  color: var(--r-discret);
+  text-decoration: none;
+}
+.option:hover { color: var(--r-encre); }
+.option[aria-current="true"], .option[aria-current="page"] { color: var(--r-encre); font-weight: 600; }
+.option[aria-current="true"]::after, .option[aria-current="page"]::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: var(--r-encre);
+}
+.option:focus-visible { outline: 2px solid var(--r-encre); outline-offset: -2px; }
+
+/* ── MANQUE 2 · Le tableau de relevé ─────────────────────────────────────────────────────────
+   Des lignes, des filets, des nombres alignés à droite en chiffres tabulaires. Aucun fond par
+   ligne, aucune couleur par colonne. Sous 640 px, chaque ligne devient une pile (libellé, valeur,
+   puis le reste), sans défilement horizontal. */
+.tableau { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.tableau caption { text-align: left; padding-bottom: 12px; }
+.tableau th { text-align: left; font-weight: 600; font-size: 12.5px; color: var(--r-discret); padding: 0 12px 10px 0; border-bottom: 1px solid var(--r-filet-fort); }
+.tableau td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--r-filet); vertical-align: top; color: var(--r-texte); }
+.tableau .nombre { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--r-encre); white-space: nowrap; }
+.tableau th.nombre { font-family: inherit; }
+@media (max-width: 639px) {
+  .tableau thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tableau tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 14px 0; border-bottom: 1px solid var(--r-filet); }
+  .tableau td { display: block; padding: 0; border: 0; }
+  .tableau td.plein { grid-column: 1 / -1; }
+}
+
+/* ── MANQUE 3 · L'issue d'une possibilité (centre de décision) ───────────────────────────────
+   Ce qu'un critère du Projet donne pour UNE possibilité : un trait de registre de 3 px (la seule
+   couleur, et seulement pour une issue établie), le nom de la possibilité, le mot de l'issue.
+   Une issue non établie a un trait en pointillé et AUCUNE teinte : elle n'a pas de valence. */
+.issues { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.issue { display: grid; grid-template-columns: 3px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; }
+.issueTrait { width: 3px; height: 0.95em; transform: translateY(0.12em); background: var(--r-teinte, transparent); }
+.issue[data-etablie="non"] .issueTrait { background: none; border-left: 1px dashed var(--r-discret); width: 0; margin-left: 1px; }
+.issueNom { color: var(--r-encre); font-weight: 500; }
+.issueMot { font-family: var(--font-mono); font-size: 12px; color: var(--r-discret); white-space: nowrap; }
+.issue[data-etablie="oui"] .issueMot { color: var(--r-texte); }
+
+/* ── MANQUE 4 · Le niveau d'examen ───────────────────────────────────────────────────────────
+   Les trois glyphes d'échelle, pleins pour une échelle examinée, en pointillé sinon (même
+   convention que l'emblème compté de FUT-92). Dit la PROFONDEUR d'une analyse, jamais sa qualité. */
+.examen { display: inline-flex; gap: 6px; align-items: center; color: var(--r-encre); }
+.examen [data-examinee="non"] { color: var(--r-meta); opacity: 0.7; }
+
+/* ── MANQUE 5 · Le champ ─────────────────────────────────────────────────────────────────────
+   Un vrai champ, grand, à filet, rayon documentaire. L'accueil en a un (`accueil.module.css`),
+   la qualification d'adresse en a un autre (arrondi 10 px) : un seul doit rester. */
+.champ { display: grid; gap: 8px; }
+.champLibelle { font-weight: 600; font-size: 13.5px; color: var(--r-texte); }
+.champSaisie {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 17px;
+  color: var(--r-encre);
+  background: var(--r-plaque);
+  border: 1px solid var(--r-filet-fort);
+  border-radius: var(--r-rayon);
+}
+.champSaisie:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; border-color: var(--r-encre); }
+.champAide { font-size: 13.5px; color: var(--r-discret); margin: 0; }
+
+/* ── MANQUE 6 · Le parcours (étapes d'un tunnel) ─────────────────────────────────────────────
+   Numéros mono, noms en casse normale, l'étape courante en encre et soulignée. Une étape passée
+   reste lisible (rien ne se raye). */
+.parcours { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 0; padding: 0 0 14px; list-style: none; border-bottom: 1px solid var(--r-filet); font-size: 14px; color: var(--r-discret); }
+.parcours li { display: inline-flex; gap: 8px; align-items: baseline; }
+.parcours li[aria-current="step"] { color: var(--r-encre); font-weight: 600; }
+.parcoursNumero { font-family: var(--font-mono); font-size: 11.5px; color: var(--r-meta); font-weight: 500; }
+
+/* ── MANQUE 7 · La ligne d'état (attente, échec, confirmation) ───────────────────────────────
+   Reprise de FUT-75 Q5 et de FUT-93 : une seule ligne qui change de fonction. L'échec ne prend
+   PAS une teinte de registre (un registre juge un lieu, pas un incident technique) : encre, et
+   une phrase qui dit ce qui a eu lieu et ce qui n'a pas eu lieu. */
+.etat { display: flex; gap: 12px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--r-filet); border-bottom: 1px solid var(--r-filet); }
+.etatRepere { flex: none; width: 9px; height: 9px; border: 1px solid var(--r-encre); transform: translateY(1px) rotate(45deg); }
+.etat[data-etat="attente"] .etatRepere { border-style: dashed; }
+.etat[data-etat="confirme"] .etatRepere { background: var(--r-encre); }
+
+/* ── MANQUE 8 · L'emplacement d'un tiers ─────────────────────────────────────────────────────
+   Ce qui n'appartient pas à futur•e (formulaire Stripe, carte) se pose dans un cadre neutre, sans
+   coins de plaque : la plaque est réservée à ce que futur•e affirme. */
+.emplacement { border: 1px dashed var(--r-filet-fort); border-radius: var(--r-rayon); padding: 20px; color: var(--r-discret); font-size: 14px; }
+
+/* Mise en page des témoins (n'est pas proposée au canon). */
+.colonnes { display: grid; gap: 40px; }
+@media (min-width: 960px) { .colonnes { grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: start; } }
+.indexListe { list-style: none; margin: 0; padding: 0; display: grid; }
+.indexListe > li { border-top: 1px solid var(--r-filet); }
+.indexListe > li:last-child { border-bottom: 1px solid var(--r-filet); }
+.indexLien { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 6px 16px; padding: 20px 4px; text-decoration: none; color: var(--r-texte); }
+.indexLien:hover { background: var(--bg-elev); }
+.indexLien:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }

@@ -1,0 +1,378 @@
+{
+  "src/app/(account)/compte/QuartierWorkbook.tsx": {
+    "verre": 3,
+    "emoji": 1
+  },
+  "src/app/(account)/compte/memoire/page.tsx": {
+    "capitalesMono": 2
+  },
+  "src/app/(account)/compte/page.tsx": {
+    "verre": 5,
+    "capitalesMono": 15,
+    "italiqueAccent": 1
+  },
+  "src/app/(account)/dossier/merci/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(account)/rapport/dossiers/page.tsx": {
+    "verre": 3,
+    "capitalesMono": 3
+  },
+  "src/app/(account)/rapport/page.tsx": {
+    "capitalesMono": 5,
+    "italiqueAccent": 1
+  },
+  "src/app/(account)/rapport/quartier/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(auth)/connexion/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(auth)/inscription/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/agir/cadmium/page.tsx": {
+    "capitalesMono": 10,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/agir/canicule/page.tsx": {
+    "capitalesMono": 8,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/agir/dependance-auto/page.tsx": {
+    "capitalesMono": 11,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/agir/feux-forets/page.tsx": {
+    "capitalesMono": 10,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/agir/inondation/page.tsx": {
+    "capitalesMono": 10,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/agir/pollutions-invisibles/page.tsx": {
+    "capitalesMono": 12,
+    "italiqueAccent": 1,
+    "emoji": 5
+  },
+  "src/app/(public)/agir/voiture-electrique/page.tsx": {
+    "capitalesMono": 11,
+    "italiqueAccent": 1,
+    "emoji": 4
+  },
+  "src/app/(public)/chaleur/[insee_code]/page.tsx": {
+    "capitalesMono": 6,
+    "emoji": 1
+  },
+  "src/app/(public)/chaleur/page.tsx": {
+    "capitalesMono": 8
+  },
+  "src/app/(public)/chaleur/villes-les-plus-exposees/page.tsx": {
+    "capitalesMono": 4
+  },
+  "src/app/(public)/checkout/dossier/ContexteDuDossier.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/checkout/dossier/DossierCheckoutPanel.tsx": {
+    "verre": 1,
+    "capitalesMono": 2
+  },
+  "src/app/(public)/checkout/dossier/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/comparateur/ModeChoixAsk.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/comparateur/ModeChoixSearch.tsx": {
+    "verre": 2
+  },
+  "src/app/(public)/comparateur/ModeChoixSynthese.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/comparateur/ThemeExplorer.tsx": {
+    "verre": 1,
+    "capitalesMono": 3
+  },
+  "src/app/(public)/comparateur/ThemeMatrix.tsx": {
+    "capitalesMono": 2
+  },
+  "src/app/(public)/comparateur/pack-decision/ChoixConvictionView.tsx": {
+    "verre": 3,
+    "capitalesMono": 4,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/comparateur/pack-decision/PackConvictionView.tsx": {
+    "verre": 4,
+    "capitalesMono": 4,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/comparateur/pack-decision/PackUnlockedView.tsx": {
+    "verre": 2,
+    "capitalesMono": 2,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/comparateur/page.tsx": {
+    "verre": 2,
+    "capitalesMono": 4,
+    "italiqueAccent": 2
+  },
+  "src/app/(public)/dossier/DossierQualificationClient.tsx": {
+    "capitalesMono": 3
+  },
+  "src/app/(public)/dossier/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/inondation/[insee_code]/page.tsx": {
+    "capitalesMono": 6
+  },
+  "src/app/(public)/inondation/page.tsx": {
+    "capitalesMono": 8
+  },
+  "src/app/(public)/inondation/villes-les-plus-exposees-submersion/page.tsx": {
+    "capitalesMono": 4
+  },
+  "src/app/(public)/inondation/villes-les-plus-exposees/page.tsx": {
+    "capitalesMono": 4
+  },
+  "src/app/(public)/j-utilise-beaucoup-ma-voiture/page.tsx": {
+    "capitalesMono": 9
+  },
+  "src/app/(public)/j-utilise-beaucoup-ma-voiture/villes-les-plus-dependantes/page.tsx": {
+    "capitalesMono": 3
+  },
+  "src/app/(public)/ou-vivre/AnchorAmorce.tsx": {
+    "verre": 1,
+    "capitalesMono": 1,
+    "emoji": 1
+  },
+  "src/app/(public)/ou-vivre/ComparaisonCompleteView.tsx": {
+    "verre": 1,
+    "capitalesMono": 2,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/ou-vivre/OuVivreClient.tsx": {
+    "verre": 5,
+    "capitalesMono": 14,
+    "italiqueAccent": 4,
+    "emoji": 4
+  },
+  "src/app/(public)/pourquoi/page.tsx": {
+    "verre": 7
+  },
+  "src/app/(public)/professionnels/page.tsx": {
+    "capitalesMono": 4,
+    "emoji": 4
+  },
+  "src/app/(public)/savoir/cadmium/page.tsx": {
+    "capitalesMono": 8,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/savoir/chaleur-sante-mentale/page.tsx": {
+    "capitalesMono": 9,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/savoir/dependance-auto/page.tsx": {
+    "capitalesMono": 9,
+    "italiqueAccent": 1
+  },
+  "src/app/(public)/savoir/maladies-emergentes/page.tsx": {
+    "capitalesMono": 12,
+    "italiqueAccent": 1,
+    "emoji": 6
+  },
+  "src/app/(public)/savoir/pollutions-invisibles/page.tsx": {
+    "capitalesMono": 9,
+    "italiqueAccent": 1,
+    "emoji": 4
+  },
+  "src/app/(public)/savoir/preparation-catastrophes/page.tsx": {
+    "capitalesMono": 8,
+    "italiqueAccent": 1,
+    "emoji": 6
+  },
+  "src/app/(public)/territoire/[insee]/debloquer/TerritoryUnlockPreview.tsx": {
+    "capitalesMono": 1
+  },
+  "src/app/(public)/territoire/[insee]/debloquer/page.tsx": {
+    "capitalesMono": 6,
+    "italiqueAccent": 1
+  },
+  "src/app/api/comparateur-vie/synthesize/route.ts": {
+    "emoji": 2
+  },
+  "src/app/globals.css": {
+    "verre": 6
+  },
+  "src/app/merci/page.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/AccountNav.tsx": {
+    "capitalesMono": 2
+  },
+  "src/components/AskFuture.tsx": {
+    "emoji": 2
+  },
+  "src/components/AuthForms.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/CeQueLeDossierExamine.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/CommuneSetupBanner.tsx": {
+    "verre": 2,
+    "capitalesMono": 1
+  },
+  "src/components/FutureELanding.tsx": {
+    "verre": 14,
+    "emoji": 6
+  },
+  "src/components/LocalTensionContext.tsx": {
+    "verre": 1
+  },
+  "src/components/MemoireForm.tsx": {
+    "verre": 4,
+    "capitalesMono": 5
+  },
+  "src/components/MetricDrawer.tsx": {
+    "emoji": 1
+  },
+  "src/components/PaymentWrapper.tsx": {
+    "capitalesMono": 2
+  },
+  "src/components/ProjectionsIndisponibles.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/ask-future.css": {
+    "emoji": 2
+  },
+  "src/components/report/AdminDossierCreator.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/AnalyseAncienProjet.tsx": {
+    "verre": 1
+  },
+  "src/components/report/AutourModule.tsx": {
+    "verre": 1,
+    "kitDeprecie": 22,
+    "capitalesMono": 2
+  },
+  "src/components/report/ConclusionBlock.tsx": {
+    "capitalesMono": 2
+  },
+  "src/components/report/ControlesDuDossier.tsx": {
+    "verre": 1,
+    "capitalesMono": 1
+  },
+  "src/components/report/CriteresDuProjet.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/DecisionFactRenderParts.tsx": {
+    "capitalesMono": 6
+  },
+  "src/components/report/DossierAvecLogement.tsx": {
+    "verre": 1
+  },
+  "src/components/report/DossierDecisionSection.tsx": {
+    "verre": 6,
+    "capitalesMono": 7
+  },
+  "src/components/report/EchelleNavigator.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/EnTeteDossier.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/FactCompositionCard.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/HorizonBar.tsx": {
+    "verre": 1,
+    "capitalesMono": 1
+  },
+  "src/components/report/LectureFactuelleDuBien.tsx": {
+    "verre": 1,
+    "capitalesMono": 1
+  },
+  "src/components/report/LienAvecCeBien.tsx": {
+    "verre": 1,
+    "capitalesMono": 3
+  },
+  "src/components/report/LogementModule.tsx": {
+    "verre": 1,
+    "kitDeprecie": 10,
+    "capitalesMono": 2,
+    "italiqueAccent": 1
+  },
+  "src/components/report/LogementSynthesis.tsx": {
+    "kitDeprecie": 3
+  },
+  "src/components/report/ProjectSummaryCard.tsx": {
+    "verre": 5,
+    "capitalesMono": 8
+  },
+  "src/components/report/QuartierClimatData.tsx": {
+    "verre": 2,
+    "capitalesMono": 2
+  },
+  "src/components/report/QuartierSynthesis.tsx": {
+    "verre": 2,
+    "capitalesMono": 4
+  },
+  "src/components/report/RepriseRecherche.tsx": {
+    "verre": 1
+  },
+  "src/components/report/TerritoryIdentityCard.tsx": {
+    "capitalesMono": 4
+  },
+  "src/components/report/TerritoryYearsBand.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/report/ThermalComfortSection.tsx": {
+    "kitDeprecie": 3
+  },
+  "src/components/report/kit.tsx": {
+    "verre": 3,
+    "kitDeprecie": 3,
+    "capitalesMono": 1
+  },
+  "src/components/report/logement/AutourSection.tsx": {
+    "kitDeprecie": 6
+  },
+  "src/components/report/logement/DecisionChecklist.tsx": {
+    "kitDeprecie": 6
+  },
+  "src/components/report/logement/EnergieSection.tsx": {
+    "kitDeprecie": 10
+  },
+  "src/components/report/logement/InondationSection.tsx": {
+    "kitDeprecie": 6
+  },
+  "src/components/report/logement/PropertyPassport.tsx": {
+    "capitalesMono": 3
+  },
+  "src/components/report/logement/RegulatorySection.tsx": {
+    "kitDeprecie": 6
+  },
+  "src/components/report/logement/SinistraliteSection.tsx": {
+    "kitDeprecie": 6
+  },
+  "src/components/wizard/RapportPremiereLecture.tsx": {
+    "verre": 1,
+    "capitalesMono": 1
+  },
+  "src/components/wizard/ReportWizard.tsx": {
+    "capitalesMono": 1
+  },
+  "src/components/wizard/WizardStep.tsx": {
+    "capitalesMono": 2
+  },
+  "src/components/wizard/WizardTeaser.tsx": {
+    "capitalesMono": 5,
+    "italiqueAccent": 2,
+    "emoji": 1
+  },
+  "src/components/wizard/teaser-signaux.ts": {
+    "emoji": 7
+  }
+}

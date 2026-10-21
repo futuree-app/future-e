@@ -125,7 +125,7 @@ const CADRES: Record<string, () => ReactNode> = {
   fin: () => (
     <div className={c.cadreCorps} style={{ alignContent: "center", justifyItems: "start" }}>
       <span style={{ fontWeight: 600, fontSize: 20, color: "var(--r-encre)" }}>Dossier d&apos;adresse</span>
-      <span style={{ fontVariationSettings: '"wdth" 120', fontSize: 34, color: "var(--r-encre)" }}>39 €</span>
+      <span style={{ fontSize: 34, color: "var(--r-encre)" }}>39 €</span>
       <span className={c.cadreLegende}>ou 25 € après un dossier de territoire</span>
     </div>
   ),

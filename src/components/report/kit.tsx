@@ -1,11 +1,15 @@
 import type { ReactNode } from "react";
 
 // ════════════════════════════════════════════════════════════════════════════
-// Kit de cartes du rapport futur•e — SOURCE UNIQUE du langage visuel des modules.
-// Territoire est la référence (déjà en .glass) ; Logement adopte ici ; tout futur
-// module (Santé…) hérite. Règle : STRUCTURE partagée, ACCENT propre au module
-// (Territoire = info/bleu, Logement = taupe). Doctrine : docs/vault/recherches/
-// inventaire-design.md + spec 2026-07-03-harmonisation-rapport-kit-design.md.
+// DÉPRÉCIÉ (FUT-118 R0, DESIGN.md v3.0 § 9.2). Ce kit n'est plus la source du
+// langage visuel des modules : c'est le Relevé (`src/components/releve/`).
+// Ne l'employez dans aucun nouvel écran. Il reste en place tant que Territoire,
+// Autour et Logement l'utilisent, et disparaît avec leur migration (lots R3 à R5,
+// nettoyage R12). Le test-cliquet `canon.test.ts` interdit d'en ajouter un usage.
+//
+// Historique : kit de cartes du rapport (juillet 2026) ; verre `.glass`, accent
+// propre à chaque module (Territoire = info/bleu, Logement = taupe). Doctrine
+// d'alors : docs/vault/recherches/inventaire-design.md.
 // Primitives pures : aucune logique, aucun état, aucune lecture disque.
 // ════════════════════════════════════════════════════════════════════════════
 

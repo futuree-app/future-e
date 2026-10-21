@@ -1,5 +1,14 @@
 # FUT-87 · Audit visuel du produit réel
 
+> **Erratum du 20/10/2026 (FUT-118 R0).** Le point 7 de « Ce qui est déjà singulier » affirme que le fichier
+> variable d'Archivo « porte un axe de largeur (62 à 125 %) ». C'est faux pour le fichier **servi par le
+> site** (`public/fonts/Archivo-Variable.woff2`) : il n'a qu'un axe de graisse. Mesuré dans Chrome, un même
+> texte a la même largeur à `wdth` 62, 100 et 125 ; l'Archivo de Google Fonts, elle, varie de 453 à 851 px.
+> Les réglages `wdth` posés ensuite par FUT-87, FUT-91 et FUT-50 étaient donc ignorés : le produit a
+> toujours affiché Archivo en largeur normale, et c'est ce rendu qui a été validé à l'écran. Ils ont été
+> retirés, et la référence est désormais Archivo en largeur normale (`DESIGN.md` v3.0). Le texte ci-dessous
+> est conservé tel qu'il a été écrit.
+
 Date : 11 octobre 2026 · Branche : `feat/fut-87-direction-artistique`, rebasée sur `main` après la fusion de FUT-67 (#44) et FUT-26 (#45)
 Suite : `2026-10-11-fut87-direction-artistique.md` (directions, recommandation, design system, migration).
 Captures : `docs/audits/fut87-captures/` (planches avant / après, desktop et mobile).

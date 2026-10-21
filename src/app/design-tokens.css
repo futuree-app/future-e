@@ -447,3 +447,71 @@
     --m-ressort: linear(0, 1);
   }
 }
+
+/* ── LE RELEVÉ (FUT-87 ; canon depuis FUT-118 R0) ─────────────────────────────────────────────
+   La grammaire visuelle de futur•e (DESIGN.md v3.0). Ces jetons vivaient dans
+   `src/components/releve/releve.module.css`, posés sur `.releve` : un écran ne pouvait parler le Relevé
+   qu'en important ce module. Ils montent ici, AUX MÊMES VALEURS : aucun rendu ne change (preuve par
+   empreinte visuelle, docs/audits/2026-10-20-fut118-releve/r0-empreintes.md).
+
+   Ils DÉRIVENT des jetons de thème ci-dessus, résolus à la racine : aucun composant ne redéfinit
+   `--bg` ou `--fg-*` localement (vérifié le 20/10). S'il le faisait un jour, un `.releve` placé dedans ne
+   suivrait plus son parent : redéclarer alors les `--r-*` sur ce conteneur.
+
+   Les rôles typographiques `--r-t-*` sont ceux du Relevé. Ils ne remplacent PAS encore l'échelle
+   `--text-*` ci-dessus : elle porte les surfaces historiques, et la changer modifierait leur rendu.
+   Chaque surface passe des `--text-*` aux `--r-t-*` en migrant ; les `--text-*` disparaissent avec la
+   dernière (lot R12). */
+:root {
+  /* Fonds : le noir profond, la plaque un cran au-dessus. Aucun verre translucide ni halo. */
+  --r-fond: var(--bg);
+  --r-plaque: var(--bg-deep);
+  --r-plaque-bord: var(--border-2);
+
+  /* Texte : cinq niveaux existants, quatre rôles. */
+  --r-encre: var(--fg-hi);
+  --r-texte: var(--fg-2);
+  --r-discret: var(--fg-3);
+  --r-meta: var(--ghost);
+
+  /* Filets : la séparation par défaut. */
+  --r-filet: var(--border-1);
+  --r-filet-fort: var(--border-2);
+  --r-trame: color-mix(in srgb, var(--fg-hi) 4%, transparent);
+
+  /* Géométrie : rayon documentaire, grille à marge, pas de 8. */
+  --r-rayon: 3px;
+  --r-marge: 232px;
+  --r-gouttiere: 48px;
+  --r-pas: 8px;
+
+  /* PAS D'AXE DE LARGEUR (correctif du 20/10/2026). Le fichier Archivo servi (`/fonts/Archivo-Variable.woff2`)
+     n'a qu'un axe de graisse : les réglages `wdth` que FUT-87 posait (118, 108, 88, 125) étaient ignorés
+     par le navigateur. La référence est Archivo en largeur normale, telle qu'elle s'affiche ; la
+     hiérarchie tient à la taille, à la graisse, à l'encre et aux espacements. Test K6. */
+
+  /* Les rôles typographiques (DESIGN.md v3.0 § 9.1). Une taille par USAGE. */
+  --r-t-display: clamp(34px, 4.4vw, 58px); /* titre d'écran */
+  --r-t-verdict: clamp(27px, 3.6vw, 46px); /* le verdict dans la plaque */
+  --r-t-titre: clamp(23px, 2.5vw, 31px);   /* titre de mouvement */
+  --r-t-sous-titre: 17px;                  /* sujet d'un fait, nom d'une possibilité */
+  --r-t-chapo: 18px;
+  --r-t-corps: 16px;
+  --r-t-dense: 14.5px;                     /* corps d'un fait, d'une liste, d'un tableau */
+  --r-t-nuance: 13.5px;                    /* limite, portée, méthode */
+  --r-t-surtitre: 13.5px;                  /* casse normale, jamais de capitales espacées */
+  --r-t-etiquette: 12.5px;
+  --r-t-chiffre: clamp(30px, 3.4vw, 44px);
+  --r-t-unite: 13px;
+  --r-t-numero: 11.5px;                    /* numéro mono d'un surtitre */
+  --r-t-marge: 12px;                       /* la marge de preuve, en mono */
+  --r-t-marge-etroite: 13px;               /* la même sous 900 px (lisibilité mobile, FUT-87 V2) */
+}
+
+/* LE TEXTE SUR LA COULEUR DE MARQUE. `.boutonMarque` posait `--bg` sur l'orange : 7,3:1 en thème sombre,
+   mais 2,57:1 en thème clair, où `--bg` devient crème (échec AA, mesuré le 20/10). Une encre sombre tient
+   dans les deux thèmes ; la valeur du thème sombre est inchangée. Aucune page de production n'emploie
+   encore `.boutonMarque`. */
+:root, [data-theme="dark"] { --r-sur-marque: #060812; }
+[data-theme="light"] { --r-sur-marque: #1a1d28; }
+@media (prefers-color-scheme: light) { :root:not([data-theme]) { --r-sur-marque: #1a1d28; } }

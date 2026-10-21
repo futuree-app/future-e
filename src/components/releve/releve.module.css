@@ -1,47 +1,31 @@
 /* ════════════════════════════════════════════════════════════════════════════════════════════
-   FUT-87 · PROTOTYPE DE DIRECTION ARTISTIQUE « LE RELEVÉ ». DEV UNIQUEMENT.
+   LE RELEVÉ · LA GRAMMAIRE VISUELLE CANONIQUE DE FUTUR•E (FUT-87, canon depuis FUT-118 R0).
 
-   Feuille ISOLÉE (module CSS) : rien ici ne touche le site public. Les jetons sont posés sur la
-   racine `.releve` et dérivent des jetons existants (`design-tokens.css`) : la palette close, les
-   six registres et les deux thèmes restent la source. Ce qui change, c'est la COMPOSITION :
-   une grille à marge de preuve, des filets plutôt que des cartes, un seul plan élevé par
-   mouvement, trois glyphes de grain, une règle du temps, et l'axe de largeur d'Archivo.
+   Utilisée en production par l'accueil, et par Ma décision sous `DECISION_RELEVE`. Les JETONS (couleurs
+   dérivées, géométrie, rôles typographiques `--r-t-*`) vivent dans
+   `src/app/design-tokens.css` ; cette feuille porte les CLASSES qui les composent : une grille à marge
+   de preuve, des filets plutôt que des cartes, une plaque par mouvement, trois glyphes de grain, une
+   règle du temps.
 
-   Doctrine : DESIGN.md (§ 2 charpente, § 3 donnée, § 5 couleur, § 7 échelles) et la proposition
-   docs/audits/2026-10-11-fut87-direction-artistique.md.
+   Trois familles de classes cohabitent encore ici, dans cet ordre de lecture (l'ordre du fichier, lui,
+   n'est pas modifié, la cascade en dépend) :
+     · GRAMMAIRE  (canon) : racine, grille et marge, typographie, mouvements et filets, registre,
+                   plaque, grain, règle du temps, coupe des échelles, liens et boutons, utilitaires,
+                   `details` ;
+     · MODULES    : échelle DPE et barres d'audit (Logement) ; en-tête de dossier, titre d'adresse,
+                   verdict, sommaire, décompte des échelles, état du dossier, balance, groupes de
+                   contrôles (Ma décision) ;
+     · PROTOTYPES : `bandeauProto`, `cas` (bancs de développement seulement).
+   Leur séparation en fichiers distincts est faite au lot R1, avec les composants qui les emploient.
+
+   Doctrine : DESIGN.md v3.0. Rationale : docs/audits/2026-10-20-fut118-releve/grammaire-du-releve.md.
    ════════════════════════════════════════════════════════════════════════════════════════════ */
 
 /* `.releve` : une PAGE entière (prototypes) ; `.releveSection` : une section insérée dans une page
    existante (le vrai hub Ma décision, FUT-91), qui hérite du fond et de la hauteur de sa page. Les
    deux portent les mêmes jetons. */
 .releve, .releveSection {
-  /* Fonds : on garde le noir profond de la DA ; la « feuille » est le même fond, la plaque un cran
-     au-dessus. Aucun verre translucide ni halo dans le prototype. */
-  --r-fond: var(--bg);
-  --r-plaque: var(--bg-deep);
-  --r-plaque-bord: var(--border-2);
-
-  /* Texte : cinq niveaux existants, trois rôles. */
-  --r-encre: var(--fg-hi);
-  --r-texte: var(--fg-2);
-  --r-discret: var(--fg-3);
-  --r-meta: var(--ghost);
-
-  /* Filets : la séparation par défaut (DESIGN.md § 2.3). */
-  --r-filet: var(--border-1);
-  --r-filet-fort: var(--border-2);
-  --r-trame: color-mix(in srgb, var(--fg-hi) 4%, transparent);
-
-  /* Géométrie : rayons courts (documentaire), une grille à marge, un pas de 8. */
-  --r-rayon: 3px;
-  --r-marge: 232px;
-  --r-gouttiere: 48px;
-  --r-pas: 8px;
-
-  /* Largeurs d'Archivo (axe `wdth` du fichier variable déjà servi : 62 à 125). */
-  --r-large: 118;
-  --r-semi: 88;
-
+  /* Les jetons `--r-*` vivent dans `design-tokens.css` depuis FUT-118 R0 (mêmes valeurs). */
   color: var(--r-texte);
   font-family: var(--font-sans);
 }
@@ -73,11 +57,11 @@
   gap: 7px;
   align-content: start;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--r-t-marge);
   line-height: 1.55;
   color: var(--r-discret);
 }
-@media (max-width: 899px) { .marge { font-size: 13px; } }
+@media (max-width: 899px) { .marge { font-size: var(--r-t-marge-etroite); } }
 .margeEnLigne { border: 0 !important; padding: 0 !important; }
 .margeLigne { display: flex; gap: 7px; align-items: baseline; }
 .margeGlyphe { flex: none; color: var(--r-discret); }
@@ -95,9 +79,8 @@
 /* ── Typographie ─────────────────────────────────────────────────────────────────────────── */
 
 .display {
-  font-variation-settings: "wdth" var(--r-large);
   font-weight: 500;
-  font-size: clamp(34px, 4.4vw, 58px);
+  font-size: var(--r-t-display);
   line-height: 1.04;
   letter-spacing: -0.02em;
   color: var(--r-encre);
@@ -105,9 +88,8 @@
   margin: 0;
 }
 .titre {
-  font-variation-settings: "wdth" 108;
   font-weight: 600;
-  font-size: clamp(23px, 2.5vw, 31px);
+  font-size: var(--r-t-titre);
   line-height: 1.15;
   letter-spacing: -0.012em;
   color: var(--r-encre);
@@ -116,52 +98,48 @@
 }
 .sousTitre {
   font-weight: 600;
-  font-size: 17px;
+  font-size: var(--r-t-sous-titre);
   line-height: 1.35;
   color: var(--r-encre);
   margin: 0;
 }
-.chapo { font-size: 18px; line-height: 1.55; color: var(--r-texte); margin: 0; }
-.corps { font-size: 16px; line-height: 1.62; color: var(--r-texte); margin: 0; }
-.dense { font-size: 14.5px; line-height: 1.58; color: var(--r-texte); margin: 0; }
-.nuance { font-size: 13.5px; line-height: 1.55; color: var(--r-discret); margin: 0; }
+.chapo { font-size: var(--r-t-chapo); line-height: 1.55; color: var(--r-texte); margin: 0; }
+.corps { font-size: var(--r-t-corps); line-height: 1.62; color: var(--r-texte); margin: 0; }
+.dense { font-size: var(--r-t-dense); line-height: 1.58; color: var(--r-texte); margin: 0; }
+.nuance { font-size: var(--r-t-nuance); line-height: 1.55; color: var(--r-discret); margin: 0; }
 .encre { color: var(--r-encre); }
 
-/* Le surtitre : Archivo semi-condensée, en casse normale, précédé d'un numéro mono. Il remplace
+/* Le surtitre : Archivo 600, en casse normale, précédé d'un numéro mono. Il remplace
    les capitales mono espacées (379 occurrences dans le produit). */
 .surtitre {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: var(--r-t-surtitre);
   letter-spacing: 0.01em;
   color: var(--r-discret);
   margin: 0;
 }
 .numero {
   font-family: var(--font-mono);
-  font-variation-settings: normal;
   font-weight: 500;
-  font-size: 11.5px;
+  font-size: var(--r-t-numero);
   color: var(--r-meta);
   font-variant-numeric: tabular-nums;
 }
 .etiquette {
-  font-variation-settings: "wdth" var(--r-semi);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: var(--r-t-etiquette);
   letter-spacing: 0.01em;
   color: var(--r-discret);
 }
 
-/* Les chiffres : grands en Archivo élargie (tabulaire), petits en mono. */
+/* Les chiffres : grands en Archivo tabulaire, petits en mono. */
 .chiffre {
-  font-variation-settings: "wdth" 125;
   font-weight: 500;
   font-variant-numeric: tabular-nums lining-nums;
-  font-size: clamp(30px, 3.4vw, 44px);
+  font-size: var(--r-t-chiffre);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--r-encre);
@@ -169,8 +147,7 @@
 }
 .unite {
   font-family: var(--font-mono);
-  font-variation-settings: normal;
-  font-size: 13px;
+  font-size: var(--r-t-unite);
   letter-spacing: 0;
   color: var(--r-discret);
   margin-left: 6px;
@@ -241,7 +218,7 @@
 
 .regle { width: 100%; height: auto; display: block; overflow: visible; }
 .regle text { font-family: var(--font-mono); font-size: 11px; fill: var(--r-meta); }
-.regle .regleValeur { font-family: var(--font-sans); font-variation-settings: "wdth" 118; font-weight: 600; font-size: 15px; fill: var(--r-encre); }
+.regle .regleValeur { font-family: var(--font-sans); font-weight: 600; font-size: 15px; fill: var(--r-encre); }
 .regle .regleAxe { stroke: var(--r-filet-fort); }
 .regle .regleTic { stroke: var(--r-discret); }
 .regle .regleAujourdhui { stroke: var(--r-encre); stroke-dasharray: 2 3; }
@@ -292,7 +269,7 @@
   background: transparent;
 }
 .bouton:hover { border-color: var(--r-encre); }
-.boutonMarque { background: var(--orange); border-color: var(--orange); color: var(--bg); }
+.boutonMarque { background: var(--orange); border-color: var(--orange); color: var(--r-sur-marque); }
 .boutonMarque:hover { background: var(--orange-soft); border-color: var(--orange-soft); }
 
 /* ── Blocs utilitaires ───────────────────────────────────────────────────────────────────── */
@@ -302,7 +279,7 @@
 .pile { display: grid; gap: 12px; }
 .pileSerree { display: grid; gap: 6px; }
 .rangee { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
-.details summary { cursor: pointer; list-style: none; font-variation-settings: "wdth" var(--r-semi); font-weight: 600; font-size: 13px; color: var(--r-discret); }
+.details summary { cursor: pointer; list-style: none; font-weight: 600; font-size: 13px; color: var(--r-discret); }
 .details summary::-webkit-details-marker { display: none; }
 .details summary::before { content: "+ "; font-family: var(--font-mono); }
 .details[open] summary::before { content: "− "; }
@@ -413,7 +390,7 @@
 
 /* Le verdict : plus petit sur mobile, pour que le sommaire et le geste prioritaire entrent dans le
    premier écran ; plein format au-delà. */
-.verdict { font-size: clamp(27px, 3.6vw, 46px); line-height: 1.08; }
+.verdict { font-size: var(--r-t-verdict); line-height: 1.08; }
 .verdictDetail { font-size: 16px; }
 @media (min-width: 640px) { .verdictDetail { font-size: 18px; } }
 

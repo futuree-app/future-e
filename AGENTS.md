@@ -13,6 +13,39 @@ Règle :
 - Un `max-w-[NNNpx]` sur du texte n'est légitime que pour : le conteneur de page (`mx-auto`), un sous-titre de hero **mesuré en espace ouvert** sous un grand H1, ou un texte en **flex-row** qui partage sa ligne avec un autre élément (bouton, image).
 - Robustesse typo FR : sur les phrases importantes, lier les petits mots (`le, les, leur, et, à, de…`) au mot suivant par une espace insécable (cf. `bindOrphans` dans `OuVivreClient.tsx`). `text-wrap: pretty` ne suffit pas (Safari l'ignore).
 
+# Interface : une seule grammaire visuelle (le Relevé), une seule grammaire du mouvement (FUT-75)
+
+`DESIGN.md` v3.0 : **le Relevé définit le langage visuel, FUT-75 définit le comportement dans le temps.**
+Une seule grammaire ne veut pas dire un seul répertoire. Trois niveaux :
+
+- **Primitives visuelles partagées** (ligne et marge, plaque, registre, grain, sélecteur, tableau,
+  champ…) : `src/components/releve/`, sans connaissance d'un domaine, avec leurs tests.
+- **Composants métier** (Logement, Territoire, comparaison, paiement…) : dans leur domaine. Ils
+  composent les primitives et consomment les jetons `--r-*` / `--r-t-*` (`src/app/design-tokens.css`) ;
+  ils ne créent ni couleur, ni taille de texte, ni rayon hors jetons.
+- **Compositions de parcours** (pages, routes) : assemblent librement primitives et composants métier.
+
+Un composant devient une primitive quand il exprime la grammaire sans savoir de quel domaine il parle,
+et que deux domaines au moins en ont besoin.
+
+- **Mouvement** : `src/lib/motion.ts` et les jetons `--m-*` sont la seule source (niveaux geste, état,
+  structure ; le repère bouge, la donnée reste ; mouvement réduit = aucun déplacement ni ressort, état
+  final immédiat). Aucune durée ni courbe nouvelle sans passer par eux. Attention au vocabulaire : un
+  « mouvement » de page, dans le Relevé, est une **section de lecture**, pas une animation.
+- Ne pas employer : `.glass`, `GlassCard`, `ReportSection` (`report/kit.tsx`, déprécié), capitales mono
+  espacées, titre à suite en italique d'accent, emoji, couleur propre à une échelle ou à un module.
+  Le test-cliquet `src/components/releve/canon.test.ts` (K1) échoue si un fichier en gagne. C'est un
+  garde-fou approximatif, pas un juge esthétique : un faux positif se déclare dans
+  `heritage-exceptions.json`, avec son motif ; la référence ne se modifie jamais à la main (une
+  remontée sous le plafond n'est pas détectée par les tests : elle se refuse en revue).
+- **Typographie** : Archivo en largeur normale. Aucun réglage `wdth` (la police servie n'a pas cet axe ;
+  test K6).
+- Les règles marquées **hypothèse** dans `DESIGN.md` (notamment la forme de la comparaison, § 13) se
+  suivent par défaut et s'écartent en le justifiant ; les règles **stables** s'appliquent.
+- Un lot censé ne rien changer à l'écran le prouve : `scripts/fut118/empreinte-visuelle.mjs` avant et
+  après, puis `scripts/fut118/comparer-empreintes.mjs`. Cette preuve ne remplace pas les contrôles
+  requis avant d'activer une surface (Safari, thème clair, vraie session, mouvement réduit).
+
 # Sous-agents : ne jamais perdre leur travail si la session coupe
 
 Le résultat d'un sous-agent ne vit que dans le transcript de la session. Une coupure (limite de session) pendant qu'il tourne, ou juste après son retour mais avant relais, fait perdre tout son calcul (des dizaines de milliers de tokens). Deux protections **systématiques** pour tout lancement de 2 sous-agents ou plus (audits, fan-out) :
