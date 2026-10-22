@@ -1,0 +1,417 @@
+{
+ "adresse": {
+  "q": "10 Boulevard de la Mer 17340 Châtelaillon-Plage",
+  "label": "10 Boulevard de la Mer 17340 Châtelaillon-Plage",
+  "score": 0.9629445454545454,
+  "type": "housenumber",
+  "citycode": "17094",
+  "lat": 46.081957,
+  "lon": -1.096044
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 89406376,
+   "numero": "0879",
+   "feuille": 1,
+   "section": "AB",
+   "code_dep": "17",
+   "nom_com": "Châtelaillon-Plage",
+   "code_com": "094",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17094000AB0879",
+   "contenance": 189,
+   "code_insee": "17094"
+  },
+  "parcelCodeApp": "17094-000-AB-0879",
+  "idu": "17094000AB0879",
+  "repli": null
+ },
+ "v1_risques_latlon": {
+  "status": 200,
+  "ms": 65,
+  "body": {
+   "results": 2,
+   "page": 1,
+   "total_pages": 1,
+   "data": [
+    {
+     "risques_detail": [
+      {
+       "num_risque": "11",
+       "libelle_risque_long": "Inondation",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "117",
+       "libelle_risque_long": "Par submersion marine",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "12",
+       "libelle_risque_long": "Mouvement de terrain",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "127",
+       "libelle_risque_long": "Tassements différentiels",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "13",
+       "libelle_risque_long": "Séisme",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "17",
+       "libelle_risque_long": "Phénomène lié à l'atmosphère",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "172",
+       "libelle_risque_long": "Tempête et grains (vent)",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "24",
+       "libelle_risque_long": "Transport de marchandises dangereuses",
+       "zone_sismicite": null
+      }
+     ],
+     "code_insee": "17094",
+     "libelle_commune": "CHATELAILLON-PLAGE"
+    },
+    {
+     "risques_detail": [
+      {
+       "num_risque": "11",
+       "libelle_risque_long": "Inondation",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "117",
+       "libelle_risque_long": "Par submersion marine",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "12",
+       "libelle_risque_long": "Mouvement de terrain",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "121",
+       "libelle_risque_long": "Affaissements et effondrements d'origine anthropique (anciennes carrières souterraines, hors mines)",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "127",
+       "libelle_risque_long": "Tassements différentiels",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "13",
+       "libelle_risque_long": "Séisme",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "17",
+       "libelle_risque_long": "Phénomène lié à l'atmosphère",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "172",
+       "libelle_risque_long": "Tempête et grains (vent)",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "24",
+       "libelle_risque_long": "Transport de marchandises dangereuses",
+       "zone_sismicite": null
+      }
+     ],
+     "code_insee": "17420",
+     "libelle_commune": "SALLES-SUR-MER"
+    }
+   ],
+   "response_code": 200,
+   "message": null,
+   "next": null,
+   "previous": null
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 130,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100008",
+     "libPpr": "PPR Chatelaillon",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone rouge Rs3: zones naturelles en alea faible, modere, fort pour alea court terme et hors alea a court terme et en aleas modere, fort et tres fort pour alea long terme et zones urbanisees en alea modere, fort pour alea court terme",
+        "codeZone": "Rs3"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 47,
+  "body": {
+   "totalElements": 0,
+   "totalPages": 0,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": []
+  }
+ },
+ "v2_sismique_point": {
+  "status": 200,
+  "ms": 47,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "typeZone": "3",
+     "zoneSismicite": "3 - MODEREE"
+    }
+   ]
+  }
+ },
+ "v2_risques_point": {
+  "status": 200,
+  "ms": 106,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "uuid": "5752b72b-4d20-4728-abd1-5dcf90080d7e",
+     "idGaspar": "DDRM17",
+     "libelle": "Dossier Départemental de Risques Majeurs",
+     "libBassinRisques": null,
+     "dateModification": "17/02/2025",
+     "communes": [
+      {
+       "nom": "Châtelaillon-Plage",
+       "codeInsee": "17094",
+       "aleas": [
+        {
+         "codeGaspar": "11",
+         "libelle": "Inondation",
+         "sousAlea": [
+          {
+           "codeGaspar": "117",
+           "libelle": "Par submersion marine",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "12",
+         "libelle": "Mouvement de terrain",
+         "sousAlea": [
+          {
+           "codeGaspar": "127",
+           "libelle": "Tassements différentiels",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "13",
+         "libelle": "Séisme",
+         "sousAlea": [],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "17",
+         "libelle": "Phénomène lié à l'atmosphère",
+         "sousAlea": [
+          {
+           "codeGaspar": "172",
+           "libelle": "Tempête et grains (vent)",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": null
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 150,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100008",
+     "libPpr": "PPR Chatelaillon",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone orange Os: Ensemble des zones fortement urbanisees en alea modere a court terme",
+        "codeZone": "Os"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_risques_parcelle_formatApp": {
+  "status": 200,
+  "ms": 197,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "uuid": "5752b72b-4d20-4728-abd1-5dcf90080d7e",
+     "idGaspar": "DDRM17",
+     "libelle": "Dossier Départemental de Risques Majeurs",
+     "libBassinRisques": null,
+     "dateModification": "17/02/2025",
+     "communes": [
+      {
+       "nom": "Châtelaillon-Plage",
+       "codeInsee": "17094",
+       "aleas": [
+        {
+         "codeGaspar": "11",
+         "libelle": "Inondation",
+         "sousAlea": [
+          {
+           "codeGaspar": "117",
+           "libelle": "Par submersion marine",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "12",
+         "libelle": "Mouvement de terrain",
+         "sousAlea": [
+          {
+           "codeGaspar": "127",
+           "libelle": "Tassements différentiels",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "13",
+         "libelle": "Séisme",
+         "sousAlea": [],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "17",
+         "libelle": "Phénomène lié à l'atmosphère",
+         "sousAlea": [
+          {
+           "codeGaspar": "172",
+           "libelle": "Tempête et grains (vent)",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": null
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 56,
+  "body": {
+   "totalElements": 0,
+   "totalPages": 0,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": []
+  }
+ },
+ "v2_pprn_parcelle_idu": {
+  "status": 400,
+  "ms": 36,
+  "body": {
+   "code": "400",
+   "message": "[codesParcelle[0] : Le code parcelle doit être au format commune-préfixe-section-numéro (ex : 01002-000-AH-0456)]",
+   "timestamp": "2026-10-22T16:48:50.027203586Z"
+  }
+ },
+ "v2_rga_parcelle_idu": {
+  "status": 400,
+  "ms": 37,
+  "body": {
+   "code": "400",
+   "message": "[codesParcelle[0] : Le code parcelle doit être au format commune-préfixe-section-numéro (ex : 01002-000-AH-0456)]",
+   "timestamp": "2026-10-22T16:48:50.064401829Z"
+  }
+ }
+}

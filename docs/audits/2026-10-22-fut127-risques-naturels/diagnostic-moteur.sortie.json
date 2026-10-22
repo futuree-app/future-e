@@ -1,0 +1,744 @@
+[
+ {
+  "cas": "A1",
+  "note": "La Rochelle, dossier communal, acheteur, priorité inondation (poids 3)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Correspondance à nuancer · Le principal point à contrôler à La Rochelle : l'exposition à l'inondation.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   }
+  ],
+  "geo": null,
+  "lectureInondationModule": null
+ },
+ {
+  "cas": "A2",
+  "note": "La Rochelle, dossier communal, sans intention (voix neutre)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Correspondance à nuancer · Le principal point à contrôler à La Rochelle : l'exposition à l'inondation.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. L'état des risques précise ce qu'il en est à une adresse donnée. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   }
+  ],
+  "geo": null,
+  "lectureInondationModule": null
+ },
+ {
+  "cas": "A3",
+  "note": "La Rochelle, dossier communal, habitant",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Correspondance à nuancer · Le principal point à contrôler à La Rochelle : l'exposition à l'inondation.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée, à comprendre et surveiller au fil des épisodes. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques applicable à votre adresse [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   }
+  ],
+  "geo": null,
+  "lectureInondationModule": null
+ },
+ {
+  "cas": "A4",
+  "note": "La Rochelle, dossier communal, futur locataire",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Correspondance à nuancer · Le principal point à contrôler à La Rochelle : l'exposition à l'inondation.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   }
+  ],
+  "geo": null,
+  "lectureInondationModule": null
+ },
+ {
+  "cas": "B1",
+  "note": "La Rochelle, Dossier Adresse, Quai Duperré (zone orange Os1 du PPR littoral, relevé réel)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "verification (verification)",
+  "verdict": "Correspondance à nuancer · Deux points restent à contrôler avant de conclure sur La Rochelle.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Consultez l'état des risques (Géorisques)",
+     "ancre": "fait-17300-inondation-exposition"
+    },
+    {
+     "libelle": "Demandez l'historique des fissures et des sinistres",
+     "ancre": "fait-logement-exposition-bati"
+    }
+   ]
+  },
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:zone-reglementee",
+    "texte": "Plan applicable À cette adresse, un plan de prévention des risques s'applique : PPR La Rochelle. Consultez le règlement de la zone en mairie [détail du geste : Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [
+    {
+     "gasparId": "17DDTM20100014",
+     "plan": "PPR La Rochelle",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Os1",
+       "zoneName": "Zone orange Os1: ensemble des zones fortement urbanisees en alea faible a modere a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "parcelle": [
+    {
+     "gasparId": "17DDTM20100014",
+     "plan": "PPR La Rochelle",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Os1",
+       "zoneName": "Zone orange Os1: ensemble des zones fortement urbanisees en alea faible a modere a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "zonageLu": {
+    "kind": "zonage_autre"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "B2",
+  "note": "La Rochelle, Dossier Adresse, 12 rue du Palais (hors zone réglementée, relevé réel)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Correspondance à nuancer · Deux points restent à contrôler avant de conclure sur La Rochelle.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Consultez l'état des risques (Géorisques)",
+     "ancre": "fait-17300-inondation-exposition"
+    },
+    {
+     "libelle": "Demandez l'historique des fissures et des sinistres",
+     "ancre": "fait-logement-exposition-bati"
+    }
+   ]
+  },
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [],
+   "parcelle": [],
+   "zonageLu": {
+    "kind": "aucun_zonage"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "B3",
+  "note": "La Rochelle, Dossier Adresse, locataire, zone bleue Bs (relevé réel)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "verification (verification)",
+  "verdict": "Correspondance à nuancer · Deux points restent à contrôler avant de conclure sur La Rochelle.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Consultez l'état des risques (Géorisques)",
+     "ancre": "fait-17300-inondation-exposition"
+    },
+    {
+     "libelle": "Demandez au bailleur l'historique des fissures visibles",
+     "ancre": "fait-logement-exposition-bati"
+    }
+   ]
+  },
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:zone-reglementee",
+    "texte": "Plan applicable À cette adresse, un plan de prévention des risques s'applique : PPR La Rochelle. Demandez au bailleur les prescriptions qui s'appliquent [détail du geste : Demandez l'état des risques dès la première visite : il permet de repérer le zonage applicable, et le règlement précise ce qu'il impose au logement.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez au bailleur l'état des risques [détail du geste : Demandez-le dès la première visite, et demandez au bailleur ce qu'il sait des sinistres indemnisés déjà survenus dans le logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [
+    {
+     "gasparId": "17DDTM20100014",
+     "plan": "PPR La Rochelle",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "02",
+       "regime": "Prescriptions",
+       "zoneCode": "Bs1",
+       "zoneName": "Zone bleue Bs1: Ensemble des zones urbanisees en alea faible a court terme"
+      }
+     ],
+     "topRegimeRank": 2
+    }
+   ],
+   "parcelle": [
+    {
+     "gasparId": "17DDTM20100014",
+     "plan": "PPR La Rochelle",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "02",
+       "regime": "Prescriptions",
+       "zoneCode": "Bs2",
+       "zoneName": "Zone bleue Bs2: Ensemble des zones urbanisees comprises entre les limites des 2 aleas ainsi que les zones naturelles en alea nul court terme et faible long terme"
+      }
+     ],
+     "topRegimeRank": 2
+    }
+   ],
+   "zonageLu": {
+    "kind": "zonage_autre"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "C1",
+  "note": "Charron, dossier communal (3 reconnaissances inondation : rang 52)",
+  "commune": "Charron (17091)",
+  "indexInondation": {
+   "catnat": 3,
+   "tri": false,
+   "risque": 52
+  },
+  "issueRegleInondation": "satisfied (exposition non notable)",
+  "issueReglePpr": "not_applicable (rien à signaler)",
+  "verdict": "Bonne correspondance · Charron semble bien correspondre à votre projet.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [],
+  "geo": null,
+  "lectureInondationModule": null
+ },
+ {
+  "cas": "C2",
+  "note": "Charron, Dossier Adresse, zone ROUGE Rs2 « submersible aléa très fort » (relevé réel)",
+  "commune": "Charron (17091)",
+  "indexInondation": {
+   "catnat": 3,
+   "tri": false,
+   "risque": 52
+  },
+  "issueRegleInondation": "satisfied (exposition non notable)",
+  "issueReglePpr": "verification (verification)",
+  "verdict": "Bonne correspondance · Charron semble bien correspondre à votre projet.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Demandez l'historique des fissures et des sinistres",
+     "ancre": "fait-logement-exposition-bati"
+    },
+    {
+     "libelle": "Consultez le règlement de la zone en mairie",
+     "ancre": "fait-logement-zone-reglementee"
+    }
+   ]
+  },
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "logement:zone-reglementee",
+    "texte": "Plan applicable À cette adresse, un plan de prévention des risques s'applique : PPR Charron. Consultez le règlement de la zone en mairie [détail du geste : Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [
+    {
+     "gasparId": "17DDTM20100006",
+     "plan": "PPR Charron",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Rs2",
+       "zoneName": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "parcelle": [
+    {
+     "gasparId": "17DDTM20100006",
+     "plan": "PPR Charron",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Rs2",
+       "zoneName": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "zonageLu": {
+    "kind": "zonage_autre"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "3 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "C3",
+  "note": "Charron, Dossier Adresse, inondation CONFIRMÉE comme condition",
+  "commune": "Charron (17091)",
+  "indexInondation": {
+   "catnat": 3,
+   "tri": false,
+   "risque": 52
+  },
+  "issueRegleInondation": "satisfied (exposition non notable)",
+  "issueReglePpr": "verification (verification)",
+  "verdict": "Condition ouverte · Une condition sans compromis reste ouverte à Charron : un faible risque d'inondation.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Demandez l'historique des fissures et des sinistres",
+     "ancre": "fait-logement-exposition-bati"
+    },
+    {
+     "libelle": "Consultez le règlement de la zone en mairie",
+     "ancre": "fait-logement-zone-reglementee"
+    }
+   ]
+  },
+  "condition": [
+   {
+    "signal": "favorable",
+    "texte": "un faible risque d'inondation Ouverte · plutôt favorable À l'échelle de la commune, rien de défavorable n'apparaît pour un faible risque d'inondation."
+   }
+  ],
+  "cartes": [
+   {
+    "section": "incompatibilities",
+    "id": "17091:condition:faible_risque_inondation",
+    "texte": "un faible risque d'inondation Ouverte · plutôt favorable À l'échelle de la commune, rien de défavorable n'apparaît pour un faible risque d'inondation."
+   },
+   {
+    "section": "verifications",
+    "id": "logement:zone-reglementee",
+    "texte": "Plan applicable À cette adresse, un plan de prévention des risques s'applique : PPR Charron. Consultez le règlement de la zone en mairie [détail du geste : Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [
+    {
+     "gasparId": "17DDTM20100006",
+     "plan": "PPR Charron",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Rs2",
+       "zoneName": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "parcelle": [
+    {
+     "gasparId": "17DDTM20100006",
+     "plan": "PPR Charron",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Rs2",
+       "zoneName": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "zonageLu": {
+    "kind": "zonage_autre"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "3 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "C4",
+  "note": "Châtelaillon, 10 bd de la Mer : rouge Rs3 au point, orange Os à la parcelle (relevé réel)",
+  "commune": "Châtelaillon-Plage (17094)",
+  "indexInondation": {
+   "catnat": 4,
+   "tri": false,
+   "risque": 66
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "verification (verification)",
+  "verdict": "Correspondance à nuancer · Deux points restent à contrôler avant de conclure sur Châtelaillon-Plage.",
+  "priorites": {
+   "titre": "À contrôler en priorité",
+   "gestes": [
+    {
+     "libelle": "Consultez l'état des risques (Géorisques)",
+     "ancre": "fait-17094-inondation-exposition"
+    },
+    {
+     "libelle": "Consultez le règlement de la zone en mairie",
+     "ancre": "fait-logement-zone-reglementee"
+    }
+   ]
+  },
+  "condition": [],
+  "cartes": [
+   {
+    "section": "verifications",
+    "id": "17094:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 4 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 4 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:zone-reglementee",
+    "texte": "Plan applicable À cette adresse, un plan de prévention des risques s'applique : PPR Chatelaillon. Consultez le règlement de la zone en mairie [détail du geste : Il fixe ce qui est autorisé en cas de travaux ou d'extension, et ce qu'il impose au bâti existant.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "point": [
+    {
+     "gasparId": "17DDTM20100008",
+     "plan": "PPR Chatelaillon",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Rs3",
+       "zoneName": "Zone rouge Rs3: zones naturelles en alea faible, modere, fort pour alea court terme et hors alea a court terme et en aleas modere, fort et tres fort pour alea long terme et zones urbanisees en alea modere, fort pour alea court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "parcelle": [
+    {
+     "gasparId": "17DDTM20100008",
+     "plan": "PPR Chatelaillon",
+     "hazardModel": "PPRN-L",
+     "zoneRegExists": true,
+     "updatedAt": "19/02/2025",
+     "zones": [
+      {
+       "regimeCode": "03",
+       "regime": "Interdiction",
+       "zoneCode": "Os",
+       "zoneName": "Zone orange Os: Ensemble des zones fortement urbanisees en alea modere a court terme"
+      }
+     ],
+     "topRegimeRank": 1
+    }
+   ],
+   "zonageLu": {
+    "kind": "zonage_autre"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À cette adresse",
+     "lignes": [
+      "Aucun plan de prévention des inondations ne réglemente ce point. D'autres plans s'y appliquent, pour d'autres phénomènes."
+     ]
+    },
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "4 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Le zonage est une règle d'urbanisme au point de l'adresse ; les reconnaissances et les indemnisations retracent des épisodes passés, à l'échelle de la commune. L'absence de plan ne signifie pas une absence de risque. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ },
+ {
+  "cas": "D1",
+  "note": "La Rochelle, Dossier Adresse, Géorisques sans réponse (point et parcelle)",
+  "commune": "La Rochelle (17300)",
+  "indexInondation": {
+   "catnat": 7,
+   "tri": false,
+   "risque": 89
+  },
+  "issueRegleInondation": "verification (exposition inondation notable)",
+  "issueReglePpr": "unknown (unknown)",
+  "verdict": "Correspondance à nuancer · Le principal point à contrôler à La Rochelle : l'exposition à l'inondation.",
+  "priorites": null,
+  "condition": [],
+  "cartes": [
+   {
+    "section": "unknowns",
+    "id": "logement:zone-reglementee:unknown",
+    "texte": "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse."
+   },
+   {
+    "section": "verifications",
+    "id": "17300:inondation-exposition",
+    "texte": "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité). Cette exposition est lue à l'échelle de la commune, pas de l'adresse. Preuve · 7 reconnaissances liées aux inondations depuis 1982 Consultez l'état des risques (Géorisques) [détail du geste : Le service ERRIAL de Géorisques permet de préparer gratuitement l'état des risques à partir de l'adresse.] [limite : Cette exposition est lue à l'échelle de la commune, pas de l'adresse.]"
+   },
+   {
+    "section": "verifications",
+    "id": "logement:sinistralite",
+    "texte": "Indemnisations recensées À l'échelle de la commune, des indemnisations liées à la sécheresse ou aux inondations sont recensées. Ces données ne permettent pas d'établir l'historique de ce logement. Demandez l'état des risques et les sinistres indemnisés [détail du geste : Demandez-le dès la première visite, et demandez au vendeur quels sinistres indemnisés au titre d'une catastrophe naturelle ou technologique ont concerné ce logement.] [limite : Ces données ne permettent pas d'établir l'historique de ce logement.]"
+   }
+  ],
+  "geo": {
+   "zonageLu": {
+    "kind": "indisponible"
+   }
+  },
+  "lectureInondationModule": {
+   "groupes": [
+    {
+     "titre": "À l'échelle de la commune",
+     "lignes": [
+      "7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
+      "Des sinistres d'inondation indemnisés sont recensés sur 1995-2021, dans un échantillon de contrats assurés."
+     ]
+    }
+   ],
+   "pourquoi": "Les reconnaissances sont des actes administratifs, les indemnisations un échantillon de contrats assurés : toutes deux retracent des épisodes passés, à l'échelle de la commune. Aucune de ces lectures ne dit si ce logement a déjà été sinistré."
+  }
+ }
+]

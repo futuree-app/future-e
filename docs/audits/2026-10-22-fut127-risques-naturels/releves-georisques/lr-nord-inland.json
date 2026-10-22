@@ -1,0 +1,379 @@
+{
+ "adresse": {
+  "q": "20 Rue de Périgny 17000 La Rochelle",
+  "label": "Rue de Périgny 17000 La Rochelle",
+  "score": 0.812858395721925,
+  "type": "street",
+  "citycode": "17300",
+  "lat": 46.158686,
+  "lon": -1.135223
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 27173409,
+   "numero": "0195",
+   "feuille": 1,
+   "section": "CY",
+   "code_dep": "17",
+   "nom_com": "La Rochelle",
+   "code_com": "300",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17300000CY0195",
+   "contenance": 177,
+   "code_insee": "17300"
+  },
+  "parcelCodeApp": "17300-000-CY-0195",
+  "idu": "17300000CY0195",
+  "repli": {
+   "rayon_m": 3,
+   "candidates": 2
+  }
+ },
+ "v1_risques_latlon": {
+  "status": 200,
+  "ms": 68,
+  "body": {
+   "results": 1,
+   "page": 1,
+   "total_pages": 1,
+   "data": [
+    {
+     "risques_detail": [
+      {
+       "num_risque": "11",
+       "libelle_risque_long": "Inondation",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "117",
+       "libelle_risque_long": "Par submersion marine",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "12",
+       "libelle_risque_long": "Mouvement de terrain",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "127",
+       "libelle_risque_long": "Tassements différentiels",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "13",
+       "libelle_risque_long": "Séisme",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "17",
+       "libelle_risque_long": "Phénomène lié à l'atmosphère",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "172",
+       "libelle_risque_long": "Tempête et grains (vent)",
+       "zone_sismicite": null
+      },
+      {
+       "num_risque": "24",
+       "libelle_risque_long": "Transport de marchandises dangereuses",
+       "zone_sismicite": null
+      }
+     ],
+     "code_insee": "17300",
+     "libelle_commune": "LA ROCHELLE"
+    }
+   ],
+   "response_code": 200,
+   "message": null,
+   "next": null,
+   "previous": null
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 120,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "02",
+        "libelle": "Prescriptions",
+        "nom": "Zone bleue Bs2: Ensemble des zones urbanisees comprises entre les limites des 2 aleas ainsi que les zones naturelles en alea nul court terme et faible long terme",
+        "codeZone": "Bs2"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 42,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "2",
+     "exposition": "Exposition moyenne"
+    }
+   ]
+  }
+ },
+ "v2_sismique_point": {
+  "status": 200,
+  "ms": 43,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "typeZone": "3",
+     "zoneSismicite": "3 - MODEREE"
+    }
+   ]
+  }
+ },
+ "v2_risques_point": {
+  "status": 200,
+  "ms": 117,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "uuid": "5752b72b-4d20-4728-abd1-5dcf90080d7e",
+     "idGaspar": "DDRM17",
+     "libelle": "Dossier Départemental de Risques Majeurs",
+     "libBassinRisques": null,
+     "dateModification": "17/02/2025",
+     "communes": [
+      {
+       "nom": "La Rochelle",
+       "codeInsee": "17300",
+       "aleas": [
+        {
+         "codeGaspar": "11",
+         "libelle": "Inondation",
+         "sousAlea": [
+          {
+           "codeGaspar": "117",
+           "libelle": "Par submersion marine",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "12",
+         "libelle": "Mouvement de terrain",
+         "sousAlea": [
+          {
+           "codeGaspar": "127",
+           "libelle": "Tassements différentiels",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "13",
+         "libelle": "Séisme",
+         "sousAlea": [],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "17",
+         "libelle": "Phénomène lié à l'atmosphère",
+         "sousAlea": [
+          {
+           "codeGaspar": "172",
+           "libelle": "Tempête et grains (vent)",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": null
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 105,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "02",
+        "libelle": "Prescriptions",
+        "nom": "Zone bleue Bs2: Ensemble des zones urbanisees comprises entre les limites des 2 aleas ainsi que les zones naturelles en alea nul court terme et faible long terme",
+        "codeZone": "Bs2"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_risques_parcelle_formatApp": {
+  "status": 200,
+  "ms": 173,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "uuid": "5752b72b-4d20-4728-abd1-5dcf90080d7e",
+     "idGaspar": "DDRM17",
+     "libelle": "Dossier Départemental de Risques Majeurs",
+     "libBassinRisques": null,
+     "dateModification": "17/02/2025",
+     "communes": [
+      {
+       "nom": "La Rochelle",
+       "codeInsee": "17300",
+       "aleas": [
+        {
+         "codeGaspar": "11",
+         "libelle": "Inondation",
+         "sousAlea": [
+          {
+           "codeGaspar": "117",
+           "libelle": "Par submersion marine",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "12",
+         "libelle": "Mouvement de terrain",
+         "sousAlea": [
+          {
+           "codeGaspar": "127",
+           "libelle": "Tassements différentiels",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "13",
+         "libelle": "Séisme",
+         "sousAlea": [],
+         "dateDernierePublication": "28/12/2007"
+        },
+        {
+         "codeGaspar": "17",
+         "libelle": "Phénomène lié à l'atmosphère",
+         "sousAlea": [
+          {
+           "codeGaspar": "172",
+           "libelle": "Tempête et grains (vent)",
+           "sousAlea": null,
+           "dateDernierePublication": "28/12/2007"
+          }
+         ],
+         "dateDernierePublication": null
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 48,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "2",
+     "exposition": "Exposition moyenne"
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_idu": {
+  "status": 400,
+  "ms": 36,
+  "body": {
+   "code": "400",
+   "message": "[codesParcelle[0] : Le code parcelle doit être au format commune-préfixe-section-numéro (ex : 01002-000-AH-0456)]",
+   "timestamp": "2026-10-22T16:48:47.926144345Z"
+  }
+ },
+ "v2_rga_parcelle_idu": {
+  "status": 400,
+  "ms": 36,
+  "body": {
+   "code": "400",
+   "message": "[codesParcelle[0] : Le code parcelle doit être au format commune-préfixe-section-numéro (ex : 01002-000-AH-0456)]",
+   "timestamp": "2026-10-22T16:48:47.962758293Z"
+  }
+ }
+}

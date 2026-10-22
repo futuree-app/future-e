@@ -1,0 +1,30 @@
+== 1. Le rang CatNat inondation de l'index
+règle « exposition élevée » (rang >= 66) : 16795 communes (48.3 %), 80.6 % de la population
+plus petit compte classé « élevé » : 4 reconnaissances depuis 1982
+  compte >= 4 : 16795 communes (48.3 %), 80.6 % de la population
+  compte >= 6 : 8190 communes (23.5 %), 62.1 % de la population
+  compte >= 8 : 3785 communes (10.9 %), 45.8 % de la population
+  compte >= 10 : 1682 communes (4.8 %), 32.3 % de la population
+  compte >= 12 : 719 communes (2.1 %), 23.2 % de la population
+champ `tri` vrai dans l'index : 0
+
+== 2. Taille de commune et compte
+Spearman population ~ compte : 0.407
+  0-500 hab. : n=18292, médiane 3.0, « élevée » 34 %
+  500-2000 hab. : n=11098, médiane 4.0, « élevée » 56 %
+  2000-10000 hab. : n=4373, médiane 6, « élevée » 76 %
+  10000-50000 hab. : n=864, médiane 8.0, « élevée » 90 %
+  50000-1000000000 hab. : n=144, médiane 12.0, « élevée » 99 %
+
+== 3. Les plans de prévention (export GASPAR pprn)
+modèles opposables : [('PPRN-I', 13216), ('PPRN-Multi', 5380), ('PPRN-Mvt', 1670), ('PPRN-RGA', 1635), ('PPRN-L', 378), ('PPRN-IF', 187), ('PPRN-S', 10), ('PPRN-Av', 8)]
+plans opposables portant un aléa inondation/submersion NON reconnus comme inondation : 1212 procédures, 1370 communes [('PPRN-Multi', 2362), ('PPRN-L', 244)]
+communes avec un PPR inondation opposable : 11186 communes (32.2 %), 57.1 % de la population
+  dont rang < 66 (règle « satisfied », signal favorable) : 3291 (29.4 %)
+communes avec un PPR submersion opposable : 468 | dont rang < 66 : 160 ['Amfreville', 'Angresse', 'Ars-en-Ré', 'Arvert', 'Arzon', 'Assérac', 'Aubermesnil-Beaumais', 'Barbâtre', 'Barzan', 'Batz-sur-Mer', 'Beaumont-le-Hareng', 'Beauval-en-Caux', 'Belmesnil', 'Bertreville-Saint-Ouen', 'Boismont', 'Bosc-le-Hard', 'Bray-Dunes', 'Breuville', 'Bricquebosq', 'Brix']
+communes « élevées » sans aucun PPR inondation opposable : 8900
+PPR opposable OU compte >= 8 : 12407 communes (35.7 %), 71.3 % de la population
+
+== 4. Les libellés des reconnaissances CatNat (export GASPAR catnat)
+libellés contenant « submersion » : 0
+Xynthia (27/02/2010, Charente-Maritime et Vendée), libellés : [('Inondations et/ou Coulées de Boue', 721), ("Chocs Mécaniques liés à l'action des Vagues", 721), ('Mouvement de Terrain', 721)]
