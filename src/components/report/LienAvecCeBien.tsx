@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { relireLaPage } from "@/components/interaction/relire-la-page";
 import type { AddressObjective, AddressRelation } from "@/lib/relation-au-lieu";
 import { OBJECTIF_LIBELLE, RELATION_LIBELLE, noteDuCouple } from "@/lib/dossier-contexte-ecran";
+import { releve as s, Selecteur } from "@/components/releve/primitives";
+import type { PresentationDossier } from "@/components/releve/activation";
+import d from "./autour-du-releve.module.css";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « CE BIEN » : déclarer ou corriger, après l'achat, pourquoi on examine ce logement et son lien avec
@@ -29,12 +32,16 @@ function classePuce(actif: boolean): string {
 }
 
 export function LienAvecCeBien({
-  dossierId, adresse, relationInitiale, objectifInitial,
+  dossierId, adresse, relationInitiale, objectifInitial, presentation = "classique", commune = null,
 }: {
   dossierId: string;
   adresse: string;
   relationInitiale: AddressRelation | null;
   objectifInitial: AddressObjective | null;
+  /** FUT-125 : sous le Relevé, mêmes gestes et même route, dans sa grammaire. Par défaut, rien ne change. */
+  presentation?: PresentationDossier;
+  /** La commune du bien, pour dire ce que ces réponses ne touchent pas (Relevé seulement). */
+  commune?: string | null;
 }) {
   const [relation, setRelation] = useState(relationInitiale);
   const [objectif, setObjectif] = useState(objectifInitial);
@@ -66,6 +73,52 @@ export function LienAvecCeBien({
   }
 
   const note = noteDuCouple(objectif, relation);
+
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  // FUT-125 · « CE BIEN » SOUS LE RELEVÉ. Trois choses distinctes, et l'écran les sépare :
+  //   · la RAISON d'examiner cette adresse (acheter, louer, connaître le logement où l'on vit…) ;
+  //   · la RELATION réelle avec ce logement (on y habite, on l'étudie) ;
+  //   · le PROJET résidentiel durable et le lien avec la COMMUNE, qui vivent dans « Votre projet ».
+  // Les deux premières sont deux sélecteurs côte à côte ; la troisième est dite en une phrase, parce que
+  // « J'y vis » (la commune) et « Vous y habitez déjà » (ce logement) peuvent coexister sans se contredire.
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  if (presentation === "releve") {
+    return (
+      <section aria-labelledby="lien-bien-titre" className={`${s.releveSection} ${d.bloc} ${d.blocSuivant}`}>
+        <div className={d.tete}>
+          <h2 id="lien-bien-titre" className={`${s.titre} ${s.titreBalance}`}>Ce bien</h2>
+          <p className={`${s.dense} ${s.encre}`}>{adresse}</p>
+        </div>
+        <div className={d.questions}>
+          <Selecteur
+            id="lien-bien-objectif" question="Pourquoi vous l'examinez"
+            options={OBJECTIFS.map((o) => ({ valeur: o, libelle: OBJECTIF_LIBELLE[o] }))}
+            valeur={objectif ?? undefined} desactive={busy}
+            onChoisir={(o) => { void enregistrer("objectif", objectif === o ? null : o); }}
+          />
+          <Selecteur
+            id="lien-bien-relation" question="Votre lien actuel avec ce logement"
+            options={RELATIONS.map((r) => ({ valeur: r, libelle: RELATION_LIBELLE[r] }))}
+            valeur={relation ?? undefined} desactive={busy}
+            onChoisir={(r) => { void enregistrer("relation", relation === r ? null : r); }}
+          />
+        </div>
+        <div className={d.notes}>
+          {note ? <p className={`${s.nuance} ${s.encre}`}>{note}</p> : null}
+          {objectif == null && relation == null ? (
+            <p className={s.nuance}>
+              Rien n&apos;est déclaré pour ce bien : le dossier ne suppose ni que vous y vivez, ni que vous
+              vous apprêtez à l&apos;acheter ou à le louer.
+            </p>
+          ) : null}
+          <p className={s.nuance}>
+            {`Re-cliquez une réponse pour l'effacer. Ces réponses ne valent que pour ce logement : votre projet${commune ? ` et votre lien avec ${commune}` : ""} n'en sont pas modifiés.`}
+          </p>
+          {erreur ? <p className={d.incident} role="alert">{erreur}</p> : null}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby="lien-bien-titre" className="glass rounded-2xl p-6 md:p-7">
