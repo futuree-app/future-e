@@ -47,6 +47,7 @@ const LA_ROCHELLE = "17300"; // 53 % des actifs en voiture, percentile 2 : parmi
 const PUILBOREAU = "17291"; //  83 % des actifs en voiture, percentile 29 : tiers favorable malgré tout
 const DONZERE = "26116"; //     95 % des actifs en voiture, percentile 89
 const ARMIX = "01019"; //       26 habitants, aucune donnée de mobilité
+const BOURCEFRANC = "17058"; // 88 % des actifs en voiture, percentile 52 : palier intermédiaire
 
 const ligne = (comparaison: any, id: string) => // eslint-disable-line @typescript-eslint/no-explicit-any
   comparaison.themes.flatMap((t: { lignes: unknown[] }) => t.lignes).find((l: { id: string }) => l.id === id);
@@ -58,6 +59,15 @@ test("C1. peu dépendante, fortement dépendante, donnée absente : trois palier
   assert.equal(sv.label, "Sans voiture"); // le souhait du lecteur reste le nom de la ligne
   assert.equal(par[LA_ROCHELLE].palier, "Moins de voiture qu'ailleurs pour aller travailler");
   assert.equal(par[DONZERE].palier, "Plus de voiture qu'ailleurs pour aller travailler");
+  // Le palier du milieu dit une POSITION intermédiaire parmi les communes, jamais une moyenne calculée.
+  const milieu = (await (await moteur()).seedComparaison([LA_ROCHELLE, BOURCEFRANC]))!;
+  const cMilieu = ligne(milieu.comparaison, "sans_voiture").cellules.find((c: { insee: string }) => c.insee === BOURCEFRANC);
+  assert.equal(cMilieu.palier, "Usage intermédiaire de la voiture pour aller travailler");
+  assert.doesNotMatch(cMilieu.palier, /moyenne/);
+  assert.equal(
+    PREFERENCE_TOOLTIP.faible_dependance_auto,
+    "Part des actifs qui vont travailler principalement en voiture, comparée aux autres communes.",
+  );
   // Donnée indisponible : la cellule le dit, aucun palier n'est inventé.
   assert.equal(par[ARMIX].disponible, false);
   assert.equal(par[ARMIX].palier, "Non concernée");
@@ -88,6 +98,10 @@ test("C3. transports du quotidien : la présence d'arrêts, jamais des horaires 
     PREFERENCE_TOOLTIP.mobilite_quotidienne,
     "Indique si des arrêts de bus, tram ou métro se trouvent autour du centre de la commune. Les horaires et la desserte de votre adresse restent à vérifier.",
   );
+  // Les paliers comptent des arrêts : ni « desserte partielle » ni « réseau présent ».
+  const paliers = tc.cellules.map((c: { insee: string; palier: string }) => [c.insee, c.palier]);
+  assert.deepEqual(Object.fromEntries(paliers)[LA_ROCHELLE], "Nombreux arrêts près du centre");
+  for (const [, p] of paliers) assert.match(p, /^(Nombreux arrêts|Quelques arrêts|Peu ou pas d'arrêts) près du centre$/);
   assert.doesNotMatch(`${tc.aide} ${PREFERENCE_TOOLTIP.mobilite_quotidienne}`, PROMESSE_EXCESSIVE);
 });
 
@@ -128,7 +142,9 @@ test("C5. le compromis « voiture » se dit en pratique domicile-travail compar�
 test("C6. signaux transmis aux réponses /qna : la desserte est située au centre de la commune, sans horaires", async () => {
   const m = await moteur();
   const lr = m.buildTerritorySignals(await m.getCommuneEntry(LA_ROCHELLE));
-  assert.equal(lr.transports_commun.niveau, "réseau dense près du centre de la commune");
+  assert.equal(lr.transports_commun.niveau, "nombreux arrêts autour du centre de la commune");
+  // Des arrêts, jamais un « réseau dense » ni une « desserte » : l'indicateur ne connaît pas le service.
+  assert.doesNotMatch(JSON.stringify(lr.transports_commun), /réseau|desserte (partielle|crédible)/);
   assert.equal(lr.transports_commun.mesure, "arrêts de bus, tram ou métro autour du centre de la commune ; ni horaires, ni fréquence, ni desserte à l'adresse");
   // Aucun réseau relevé : rien d'autre que l'absence.
   const sans = m.buildTerritorySignals(await m.getCommuneEntry(DONZERE));

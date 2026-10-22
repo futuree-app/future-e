@@ -96,6 +96,8 @@ test("commune fortement dépendante : l'écart porte sur la part des actifs qui 
   assert.equal(f.role, "mismatch");
   assert.equal(f.headlineSubject, "les trajets domicile-travail sans voiture");
   assert.equal(f.status, "10 % les moins favorables");
+  // Le topic nomme la mesure ; le subject (héros) nomme le souhait du lecteur, borné à ce qu'elle couvre.
+  assert.equal(f.topic, "l'usage de la voiture pour aller travailler");
   // LA PRIORITÉ DU LECTEUR reste dite telle qu'il l'a posée ; ce qui suit se borne à la mesure.
   assert.equal(
     f.statement,

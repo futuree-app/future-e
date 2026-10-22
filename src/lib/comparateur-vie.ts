@@ -839,7 +839,7 @@ export function buildTerritorySignals(c: IndexCommune, gares?: GaresCommune): Re
       desservie: true,
       tramway: c.reseauLocal.tram,
       metro: c.reseauLocal.metro,
-      niveau: a >= 70 ? "réseau dense près du centre de la commune" : a >= 40 ? "réseau correct près du centre de la commune" : "réseau limité",
+      niveau: a >= 70 ? "nombreux arrêts autour du centre de la commune" : a >= 40 ? "quelques arrêts autour du centre de la commune" : "peu d'arrêts autour du centre de la commune",
       // FUT-96 : des arrêts relevés autour du centre de la commune (OSM), jamais des horaires, une
       // fréquence ni la desserte d'une adresse. Dit au modèle, pour qu'il ne le promette pas.
       mesure: "arrêts de bus, tram ou métro autour du centre de la commune ; ni horaires, ni fréquence, ni desserte à l'adresse",
@@ -1396,7 +1396,7 @@ const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "culture", key: "acces_culture", bands: ["offre culturelle plus présente", "offre culturelle intermédiaire", "offre culturelle plus limitée"] },
   { id: "air", key: "air_sain", bands: ["air généralement plus sain", "qualité de l'air intermédiaire", "air généralement moins sain"] },
   { id: "transports", key: "acces_transports", bands: ["bien reliée par le train", "desserte ferroviaire intermédiaire", "peu reliée par le train"] },
-  { id: "mobilite_quotidienne", key: "mobilite_quotidienne", bands: ["transports du quotidien bien présents", "desserte du quotidien intermédiaire", "peu de transports du quotidien à pied"] },
+  { id: "mobilite_quotidienne", key: "mobilite_quotidienne", bands: ["nombreux arrêts de transports en commun autour du centre", "quelques arrêts de transports en commun autour du centre", "peu ou pas d'arrêts de transports en commun autour du centre"] },
   { id: "vie_etudiante", key: "vie_etudiante", bands: ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] },
   { id: "vie_locale", key: "vie_locale", bands: ["vie locale animée", "vie locale intermédiaire", "vie locale plus discrète"] },
   { id: "croissance_demographique", key: "croissance_demographique", bands: ["gagne des habitants", "population stable", "perd des habitants"] },
@@ -1460,9 +1460,11 @@ const DIMENSIONS: ComparaisonDim[] = [
   // palier est un rang national, et Puilboreau, où 83 % des actifs vont travailler en voiture, est dans le
   // tiers favorable. Jamais « voiture indispensable » ni des trajets du quotidien faisables : ni les
   // courses, ni l'école, ni les loisirs ne sont mesurés (FUT-96, étude La Rochelle du 13/10/2026).
-  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Moins de voiture qu'ailleurs pour aller travailler", "Usage de la voiture dans la moyenne", "Plus de voiture qu'ailleurs pour aller travailler"], gp: "la vie sans voiture", forte: "ses trajets domicile-travail moins souvent faits en voiture", aide: "La place de la voiture dans les trajets domicile-travail des habitants, comparée aux autres communes. Elle ne dit pas si vos propres déplacements peuvent se faire sans voiture.", risque: false, directionnel: true },
+  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Moins de voiture qu'ailleurs pour aller travailler", "Usage intermédiaire de la voiture pour aller travailler", "Plus de voiture qu'ailleurs pour aller travailler"], gp: "la vie sans voiture", forte: "ses trajets domicile-travail moins souvent faits en voiture", aide: "La place de la voiture dans les trajets domicile-travail des habitants, comparée aux autres communes. Elle ne dit pas si vos propres déplacements peuvent se faire sans voiture.", risque: false, directionnel: true },
   { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", forte: "sa desserte ferroviaire", aide: "La desserte par le train et les gares proches.", risque: false, directionnel: true },
-  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau de transports présent", "Desserte partielle", "Peu de transports en commun"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "La présence d'arrêts de bus, tram ou métro autour du centre de la commune. Les horaires et la desserte de votre adresse restent à vérifier.", risque: false, directionnel: true },
+  // TRANSPORTS DU QUOTIDIEN : `reseauLocal` pondère des arrêts OSM relevés autour du centroïde communal. Les
+  // paliers comptent des ARRÊTS, jamais une « desserte » : ni fréquence, ni horaires, ni qualité (FUT-96).
+  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Nombreux arrêts près du centre", "Quelques arrêts près du centre", "Peu ou pas d'arrêts près du centre"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "La présence d'arrêts de bus, tram ou métro autour du centre de la commune. Les horaires et la desserte de votre adresse restent à vérifier.", risque: false, directionnel: true },
   { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Bon accès aux soins", "Accès intermédiaire", "Accès aux soins limité"], gp: "l'accès aux soins", forte: "son accès aux soins", aide: "La facilité d'accès aux médecins.", risque: false, directionnel: true },
   // NIVEAU DE SERVICES, plus « Services ». Le libellé générique portait la plus grande autorité
   // apparente du thème à côté de quatre lignes qui, elles, mesurent, et il promettait une proximité
@@ -2159,7 +2161,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
     const r = c.reseauLocal;
     const mode = r?.metro ? "métro" : r?.tram ? "tram" : "bus";
     // Arrêts autour du centre de la commune : ni horaires ni desserte à l'adresse (FUT-96).
-    return `réseau de ${mode} près du centre de la commune`;
+    return `arrêts de ${mode} près du centre de la commune`;
   },
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
@@ -2200,7 +2202,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   faible_risque_inondation: "historique CatNat inondation plus marqué",
   faible_dependance_auto: "trajets domicile-travail plus souvent faits en voiture qu'ailleurs",
   acces_transports: "desserte ferroviaire limitée",
-  mobilite_quotidienne: "peu ou pas de transports en commun de proximité",
+  mobilite_quotidienne: "peu ou pas d'arrêts de transports en commun près du centre",
   eviter_grandes_villes: "grande agglomération",
   prefere_grande_ville: "petit bassin urbain",
   vie_etudiante: "présence étudiante limitée",

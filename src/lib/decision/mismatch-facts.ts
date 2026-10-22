@@ -98,8 +98,11 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
   // FUT-96 : la priorité reste celle du lecteur (projectPhrase) ; ce que le dossier en dit se borne à la
   // mesure, la part des actifs qui vont TRAVAILLER en voiture (MOBPRO 2022), classée parmi les communes.
   // Ni « possibilité de se déplacer sans voiture », ni tous les trajets du quotidien : la limitation le dit.
+  // Le topic NOMME la mesure (« l'usage de la voiture pour aller travailler ») ; le subject, lu après « répond
+  // (moins bien) à vos priorités : », nomme le SOUHAIT borné à ce qu'elle couvre. « L'usage de la voiture »
+  // en subject ferait lire au lecteur qu'il a demandé à prendre la voiture.
   faible_dependance_auto: {
-    topic: "la voiture dans les trajets domicile-travail",
+    topic: "l'usage de la voiture pour aller travailler",
     projectPhrase: "une faible dépendance à la voiture",
     indicator: "la part des actifs qui vont travailler en voiture",
     subject: "les trajets domicile-travail sans voiture",

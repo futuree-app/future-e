@@ -50,7 +50,7 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   croissance_demographique: "Évolution récente de la population (gagne ou perd des habitants). Mesure la trajectoire du territoire, pas sa désirabilité.",
   acces_transports: "Présence et fréquentation des gares à proximité.",
   mobilite_quotidienne: "Indique si des arrêts de bus, tram ou métro se trouvent autour du centre de la commune. Les horaires et la desserte de votre adresse restent à vérifier.",
-  faible_dependance_auto: "Part des trajets domicile-travail faits autrement qu'en voiture.",
+  faible_dependance_auto: "Part des actifs qui vont travailler principalement en voiture, comparée aux autres communes.",
   cadre_calme: "Environnement peu dense, propice à un rythme plus calme.",
   douceur_climat: "Hivers relativement doux à l'échelle nationale.",
   ensoleillement_recherche: "Plus ensoleillé.",
