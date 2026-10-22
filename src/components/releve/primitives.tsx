@@ -8,7 +8,7 @@
 // Le comportement dans le temps vient de `src/lib/motion.ts` (FUT-75), jamais d'ici.
 // `BandeauPrototype` ne sert qu'aux bancs de développement.
 //
-// Neuf rôles, et pas un composant par carte. Chacun dit un USAGE de l'information :
+// Dix rôles, et pas un composant par carte. Chacun dit un USAGE de l'information :
 //   Surtitre       désigne un mouvement de la page (numéro citable + nom en casse normale)
 //   Ligne          un énoncé et sa preuve, alignés : le texte à gauche, la marge à droite
 //   Marge          la preuve d'une affirmation : grain, valeur observée, source, date
@@ -18,6 +18,7 @@
 //   Plaque         la seule surface élevée d'un mouvement (le verdict, le passeport)
 //   RegleDuTemps   un axe 1980-2100 où se posent les dates et les horizons réels
 //   CoupeEchelles  la navigation entre Territoire, Autour et Logement
+//   Selecteur      une question et ses réponses, dont une au plus est retenue (FUT-125)
 //
 // Aucune logique métier ici : ces primitives reçoivent des textes déjà produits par le moteur ou
 // par les fixtures, et ne les reformulent pas.
@@ -417,6 +418,47 @@ export function CoupeEchelles({ courante, liens }: { courante?: CleEchelle; lien
         );
       })}
     </nav>
+  );
+}
+
+// ── Sélecteur ────────────────────────────────────────────────────────────────────────────────
+
+export type OptionSelecteur<V> = { valeur: V; libelle: string };
+
+/**
+ * LE SÉLECTEUR (FUT-125, forme du témoin FUT-75 Q2). Un groupe de réponses à une question, dont une au
+ * plus est retenue : chaque option est un bouton `aria-pressed`, soulignée d'un filet ; celle qui est
+ * retenue prend l'encre et un repère de 2 px. Jamais une teinte, jamais une puce pleine : la marque
+ * orange reste à l'action principale (DESIGN.md § 5.5). Ce que fait un clic (choisir, effacer en
+ * re-cliquant, enregistrer) appartient à l'appelant, qui le dit en toutes lettres.
+ *
+ * `id` nomme le groupe par sa question : un lecteur d'écran annonce « Pourquoi vous l'examinez,
+ * groupe », puis chaque réponse et son état.
+ */
+export function Selecteur<V extends string | null>({ id, question, options, valeur, onChoisir, desactive = false }: {
+  id: string;
+  question: ReactNode;
+  options: OptionSelecteur<V>[];
+  /** La réponse retenue ; `undefined` ou une valeur hors des options : aucune n'est marquée. */
+  valeur: V | undefined;
+  onChoisir: (v: V) => void;
+  desactive?: boolean;
+}) {
+  return (
+    <div className={s.champ}>
+      <p id={id} className={s.etiquette}>{question}</p>
+      <div role="group" aria-labelledby={id} className={s.selecteur}>
+        {options.map((o) => (
+          <button
+            key={String(o.valeur)} type="button" className={s.option}
+            aria-pressed={valeur !== undefined && o.valeur === valeur}
+            disabled={desactive} onClick={() => onChoisir(o.valeur)}
+          >
+            {o.libelle}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

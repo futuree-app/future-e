@@ -13,6 +13,9 @@ import { RapportPremiereLecture } from "@/components/wizard/RapportPremiereLectu
 import { WizardAnswersSync } from "@/components/wizard/WizardAnswersSync";
 import { ProjectSummaryCard } from "@/components/report/ProjectSummaryCard";
 import { EnTeteDossier } from "@/components/report/EnTeteDossier";
+import { EnTeteDossierReleve } from "@/components/report/EnTeteDossierReleve";
+import { releve as r } from "@/components/releve/primitives";
+import autour from "@/components/report/autour-du-releve.module.css";
 import { contenuDuHero, ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 import { normalizeUserProject } from "@/lib/user-project";
 import { getReportContext, resolveRelation } from "@/lib/report-context";
@@ -408,7 +411,10 @@ export default async function RapportPage() {
             <a> et non <Link> pour `/rapport/residence` : la cible est une Route Handler, et un
             <Link> vers une Route Handler ne navigue pas (le router attend du RSC, reçoit une
             redirection vers du HTML, et abandonne). */}
-        {!territory.isResidence || communesAilleurs.length > 0 ? (
+        {/* FUT-125 · SOUS LE RELEVÉ, UN DOSSIER OUVERT N'A PLUS CETTE LIGNE : son en-tête nomme le lieu une
+            fois, mène à « Vos lieux », et ne garde la résidence que lorsqu'elle diffère du lieu lu
+            (`EnTeteDossierReleve`). Un rapport partiel, sans en-tête de dossier, la garde. */}
+        {(presentation !== "releve" || !fullReport) && (!territory.isResidence || communesAilleurs.length > 0) ? (
           <p className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
             <span>
               Vous consultez <span className="text-label font-medium">{displayName}</span>
@@ -453,16 +459,29 @@ export default async function RapportPage() {
             : "lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-x-10 lg:items-start"}
           >
             <div>
-              <EnTeteDossier
-                lieu={displayName}
-                bienLabel={logementForCommune?.address_label ?? null}
-                bienAlternatif={choixDossier.autres.length > 0}
-                choixParDefaut={choixDossier.raison === "repli_plus_recent"}
-                intent={userProject?.intent ?? null}
-                nbPriorites={userProject?.parsed?.preferences?.length ?? null}
-                projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
-                contenu={heroContenu}
-              />
+              {presentation === "releve" ? (
+                <EnTeteDossierReleve
+                  lieu={displayName}
+                  bienLabel={logementForCommune?.address_label ?? null}
+                  choixParDefaut={choixDossier.raison === "repli_plus_recent" && choixDossier.autres.length > 0}
+                  residence={!territory.isResidence && territory.residenceCommune ? territory.residenceCommune : null}
+                  intent={userProject?.intent ?? null}
+                  nbPriorites={userProject?.parsed?.preferences?.length ?? null}
+                  projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
+                  contenu={heroContenu}
+                />
+              ) : (
+                <EnTeteDossier
+                  lieu={displayName}
+                  bienLabel={logementForCommune?.address_label ?? null}
+                  bienAlternatif={choixDossier.autres.length > 0}
+                  choixParDefaut={choixDossier.raison === "repli_plus_recent"}
+                  intent={userProject?.intent ?? null}
+                  nbPriorites={userProject?.parsed?.preferences?.length ?? null}
+                  projetRenseigne={Boolean(userProject?.parsed?.reformulation ?? userProject?.rawText)}
+                  contenu={heroContenu}
+                />
+              )}
             </div>
             {/* Quand aucun verdict ne peut recevoir la colonne d'appui, le repère reste associé à
                 l'en-tête. Dans le chemin normal, `DossierDecisionSection` le place à côté de la
@@ -554,7 +573,7 @@ export default async function RapportPage() {
                 />
                 {/* La lecture s'est arrêtée à la commune, et elle vient de finir. Le repère du haut
                     porte la même destination, mais il précède la lecture : celui-ci la suit. */}
-                <TrackedAddressCta commune={displayName} inseeCode={inseeCode} />
+                <TrackedAddressCta commune={displayName} inseeCode={inseeCode} presentation={presentation} />
               </>
             )
         ) : null}
@@ -653,6 +672,7 @@ export default async function RapportPage() {
             pour les ancres de cartes du dossier. */}
         <div id={ANCRE_PROJET} className="scroll-mt-24 mt-12">
           <ProjectSummaryCard
+            presentation={presentation}
             initial={userProject}
             criteres={vueCriteres(userProject)}
             // Le hero porte déjà « Décrire mon projet » dans cet état : la carte n'a pas à répéter
@@ -683,6 +703,8 @@ export default async function RapportPage() {
               adresse={logementForCommune.address_label}
               relationInitiale={isAddressRelation(logementForCommune.place_relation) ? logementForCommune.place_relation : null}
               objectifInitial={objectifDeLAnalyse(relationDeLAdresse(logementForCommune))}
+              presentation={presentation}
+              commune={displayName}
             />
           </div>
         ) : null}
@@ -704,6 +726,14 @@ export default async function RapportPage() {
         {/* Le CTA d'achat est gardé par `!fullReport`, comme celui du hero (l. 236-244) qui l'est
             depuis toujours. Ici il ne l'était pas : un lecteur ayant payé ce territoire lisait son
             rapport complet, puis se voyait proposer en pied de page de l'acheter. */}
+        {/* FUT-125 · le pied du dossier parle la langue du Relevé, avec les mêmes destinations. Un rapport
+            partiel (aucun Relevé au-dessus) garde le pied classique et son appel à ouvrir le dossier. */}
+        {presentation === "releve" && fullReport ? (
+          <div className={`${r.releveSection} ${autour.pied} mt-12 pt-7 border-t border-[var(--border-1)]`}>
+            <Link href="/compte" className={r.bouton}>Mon compte</Link>
+            <Link href="/" className={r.lien}>Retour au site</Link>
+          </div>
+        ) : (
         <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
           {!fullReport && (
             <TrackedUpgradeLink href="/#pricing" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-canvas font-semibold text-[14px] no-underline" style={{ fontFamily: "var(--font-sans)" }}>
@@ -717,6 +747,7 @@ export default async function RapportPage() {
             Retour au site
           </Link>
         </div>
+        )}
       </div>
 
       {/* Footer */}

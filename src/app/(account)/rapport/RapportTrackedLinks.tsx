@@ -4,6 +4,8 @@ import Link from "next/link";
 import posthog from "posthog-js";
 import { buildGeoProps } from "@/lib/posthog-props";
 import { bindOrphans } from "@/lib/typography";
+import { releve as s, Grain } from "@/components/releve/primitives";
+import type { PresentationDossier } from "@/components/releve/activation";
 
 export function TrackedUpgradeLink({
   href,
@@ -47,10 +49,38 @@ export function TrackedUpgradeLink({
 export function TrackedAddressCta({
   commune,
   inseeCode,
+  presentation = "classique",
 }: {
   commune?: string | null;
   inseeCode?: string | null;
+  /** FUT-125 : sous le Relevé, la même porte (même destination, même mesure), en ligne à filets. */
+  presentation?: PresentationDossier;
 }) {
+  const mesurer = () =>
+    posthog.capture("report_scale_address_required", {
+      requested_modules: ["autour", "logement"],
+      source: "hub",
+      surface: "fin_de_dossier",
+      ...buildGeoProps({ commune, inseeCode }),
+    });
+  // La forme de la porte qui clôt le dossier du Relevé sans colonne d'appui (`DossierDecisionReleve`) :
+  // le glyphe de l'adresse, un titre, une phrase, une flèche. Ni carte arrondie, ni orange.
+  if (presentation === "releve") {
+    return (
+      <div className={`${s.releveSection} mt-14 pt-10 border-t border-[var(--border-1)]`}>
+        <Link href="/dossier" onClick={mesurer} className={s.porte} style={{ borderTop: "1px solid var(--r-filet-fort)" }}>
+          <span style={{ color: "var(--r-encre)", paddingTop: 4 }}><Grain grain="adresse">{""}</Grain></span>
+          <span className={s.pileSerree}>
+            <span className={s.sousTitre}>Préciser cette lecture à une adresse</span>
+            <span className={s.dense}>
+              {bindOrphans("Ce dossier s'arrête au grain de la commune. Une adresse ouvre le secteur qui l'entoure et le bâtiment lui-même.")}
+            </span>
+          </span>
+          <span aria-hidden className={s.mono} style={{ color: "var(--r-encre)" }}>→</span>
+        </Link>
+      </div>
+    );
+  }
   // PAS DE `flex-wrap` SUR CETTE CARTE. Les autres cartes de geste du dossier en portent un, et sous
   // 420 px la flèche passe seule à la ligne, en bas à gauche, où elle ressemble à un caractère
   // égaré. Sans repli, elle garde sa colonne de 13 px à droite quelle que soit la largeur.
@@ -62,14 +92,7 @@ export function TrackedAddressCta({
     <div className="mt-14 pt-10 border-t border-[var(--border-1)]">
     <Link
       href="/dossier"
-      onClick={() =>
-        posthog.capture("report_scale_address_required", {
-          requested_modules: ["autour", "logement"],
-          source: "hub",
-          surface: "fin_de_dossier",
-          ...buildGeoProps({ commune, inseeCode }),
-        })
-      }
+      onClick={mesurer}
       className="group flex items-center justify-between gap-4 px-5 sm:px-6 py-5 rounded-xl no-underline border border-[var(--border-2)] bg-[var(--bg-elev)] hover:border-accent/40 hover:bg-[var(--bg-elev-2)] transition-colors"
     >
       <span className="flex min-w-0 flex-col gap-1.5">

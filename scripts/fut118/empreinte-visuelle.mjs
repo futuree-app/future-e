@@ -30,6 +30,9 @@ export const PAGES = [
   ["temoin-territoire", "/dev/fut118/territoire"],
   ["temoin-paiement", "/dev/fut118/paiement?etape=paiement"],
 ];
+// FUT-125 · UN LOT PEUT NE RELEVER QUE SES PAGES : `EMPREINTE_PAGES` (JSON, `[[nom, chemin], …]`) remplace la
+// liste ci-dessus, pour prouver qu'une présentation donnée (le classique) ne bouge pas sur les cas du lot.
+const PAGES_RELEVEES = process.env.EMPREINTE_PAGES ? JSON.parse(process.env.EMPREINTE_PAGES) : PAGES;
 const LARGEURS = [1440, 390];
 const THEMES = ["dark", "light"];
 
@@ -44,7 +47,7 @@ const navigateur = await chromium.launch({
   executablePath: process.env.CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
 });
-for (const [nom, chemin] of PAGES) {
+for (const [nom, chemin] of PAGES_RELEVEES) {
   for (const largeur of LARGEURS) {
     for (const theme of THEMES) {
       const page = await navigateur.newPage({ viewport: { width: largeur, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce" });

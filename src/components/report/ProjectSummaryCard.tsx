@@ -8,6 +8,9 @@ import { CriteresDuProjet } from "./CriteresDuProjet";
 import type { CritereVue } from "@/lib/decision/projet-criteres-vue";
 import type { UserProject, ProjectPosture, ProjectIntent } from "@/lib/user-project";
 import { enregistrerProjet } from "@/lib/projet-sauvegarde-client";
+import { releve as s, Selecteur } from "@/components/releve/primitives";
+import type { PresentationDossier } from "@/components/releve/activation";
+import d from "./autour-du-releve.module.css";
 // `import type` et rien d'autre : `lib/report-context.ts` est `server-only`, et une importation de
 // valeur depuis ce composant client casserait le build. Les types, eux, sont effacés à la compilation.
 import type { Relation, RelationSource } from "@/lib/report-context";
@@ -90,9 +93,15 @@ function ProjectEyebrow({ label }: { label: string }) {
 }
 
 export function ProjectSummaryCard({
-  initial, relation = null, ouvertDemblee = false, criteres = [],
+  initial, relation = null, ouvertDemblee = false, criteres = [], presentation = "classique",
 }: {
   initial: UserProject | null;
+  /**
+   * FUT-125 : sous le Relevé, la même carte (mêmes états, mêmes enregistrements) se rend dans sa
+   * grammaire. La page résout la présentation une fois et la transmet (`activation.ts`) ; par défaut,
+   * rien ne change.
+   */
+  presentation?: PresentationDossier;
   /** FUT-8 : les critères du projet, préparés par le serveur (vueCriteres). */
   criteres?: CritereVue[];
   relation?: RelationCommune | null;
@@ -249,6 +258,152 @@ export function ProjectSummaryCard({
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  // FUT-125 · LA MÊME CARTE, DANS LA GRAMMAIRE DU RELEVÉ.
+  //
+  // Mêmes quatre états, mêmes gestes, mêmes routes : seule la forme change. Plus de verre, de pastille
+  // orange ni de capitales mono : un titre de bloc, le projet en chapeau, les critères en liste à filets
+  // (`CriteresDuProjet`), les réponses en sélecteurs. L'orange ne reste qu'à l'action principale d'un
+  // écran sans projet ou en édition (« Décrire mon projet », « Enregistrer »), DESIGN.md § 5.5.
+  // ════════════════════════════════════════════════════════════════════════════════════════════
+  function ouvrirEditeur(depuis: UserProject | null) {
+    setText(depuis?.rawText ?? "");
+    if (depuis) { setPosture(depuis.posture); setIntent(depuis.intent ?? null); }
+    setError(null);
+    setEditing(true);
+  }
+
+  function relationReleve() {
+    if (!relation) return null;
+    const horsChoix = relationValeur == null || !RELATION_OPTIONS.some((o) => o.value === relationValeur);
+    return (
+      <div className={d.sousBloc}>
+        <Selecteur
+          id="projet-relation-commune"
+          question={`Votre lien avec ${relation.commune}`}
+          options={RELATION_OPTIONS.map((o) => ({ valeur: o.value, libelle: o.label }))}
+          valeur={horsChoix ? undefined : relationValeur}
+          onChoisir={(v) => { void enregistrerRelation(v); }}
+          desactive={relationBusy}
+        />
+        <div className={d.notes}>
+          {/* LA COMMUNE N'EST PAS LE LOGEMENT. « J'y vis » répond pour la commune entière ; le lien avec un
+              logement précis (« Vous y habitez déjà ») se déclare dans « Ce bien ». Les deux coexistent
+              sans se contredire : on peut vivre à La Rochelle et y étudier un autre logement. */}
+          <p className={s.nuance}>Pour la commune entière, quel que soit le logement étudié.</p>
+          {horsChoix ? (
+            <p className={s.nuance}>
+              Aucune relation déclarée pour cette commune : l&apos;analyse s&apos;adresse à quelqu&apos;un
+              qui envisage de s&apos;y installer.
+            </p>
+          ) : relationSource === "inferred" ? (
+            <p className={s.nuance}>
+              {relation.residence
+                ? `Déduit du fait que votre résidence est ${relation.residence}. Corrigez si besoin.`
+                : "Déduit de votre commune de résidence. Corrigez si besoin."}
+            </p>
+          ) : null}
+          {relationError ? <p className={d.incident} role="alert">{relationError}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  function releve() {
+    const titre = <h2 id="projet-titre" className={`${s.titre} ${s.titreBalance}`}>{eyebrowLabel}</h2>;
+    const avertir = avertissement ? <p className={`${s.dense} ${s.encre}`} role="status">{avertissement}</p> : null;
+
+    // Relevé · édition
+    if (editing) {
+      return (
+        <section aria-labelledby="projet-titre" className={`${s.releveSection} ${d.bloc}`}>
+          <div className={d.tete}>{titre}</div>
+          <div className={d.questions}>
+            <Selecteur
+              id="projet-posture" question="Vous êtes plutôt"
+              options={POSTURE_OPTIONS.map((o) => ({ valeur: o.value, libelle: o.label }))}
+              valeur={posture ?? undefined} onChoisir={(v) => setPosture(v)}
+            />
+            {/* Même libellé qu'en classique : il suit l'objectif (voir le bloc d'édition plus bas). */}
+            <Selecteur
+              id="projet-intention"
+              question={posture === "habitant" ? "Envisagez-vous d'acheter ou de louer ce logement" : "Vous comptez"}
+              options={INTENT_OPTIONS.map((o) => ({ valeur: o.value, libelle: o.label }))}
+              valeur={intent} onChoisir={(v) => setIntent(v)}
+            />
+            <div className={s.champ}>
+              <label htmlFor="projet-texte" className={s.etiquette}>
+                Vos priorités <span style={{ fontWeight: 400 }}>· facultatif</span>
+              </label>
+              <textarea
+                id="projet-texte" value={text} onChange={(e) => setText(e.target.value)} rows={3}
+                placeholder="Par exemple : nous cherchons une maison au calme, proche de la mer, avec une école à pied."
+                className={d.texte}
+              />
+            </div>
+          </div>
+          {error ? <p className={d.incident} role="alert">{error}</p> : null}
+          <div className={d.actions}>
+            <button type="button" onClick={save} disabled={busy || !posture} className={`${s.bouton} ${s.boutonMarque}`}>
+              {busy ? "Enregistrement…" : "Enregistrer"}
+            </button>
+            {project ? (
+              <button type="button" className={s.action} onClick={() => { setEditing(false); setError(null); }}>Annuler</button>
+            ) : null}
+          </div>
+          {relationReleve()}
+        </section>
+      );
+    }
+
+    // Relevé · aucun projet
+    if (!project) {
+      return (
+        <section aria-labelledby="projet-titre" className={`${s.releveSection} ${d.bloc}`}>
+          <div className={d.tete}>
+            {titre}
+            <p className={s.chapo}>Projet non encore défini.</p>
+            <p className={s.dense}>
+              Décrivez votre projet pour une lecture qui parle de votre situation, pas d&apos;une commune en général.
+            </p>
+          </div>
+          <div className={d.actions}>
+            <button type="button" onClick={() => ouvrirEditeur(null)} className={`${s.bouton} ${s.boutonMarque}`}>
+              Décrire mon projet
+            </button>
+            <RepriseRecherche />
+          </div>
+          {relationReleve()}
+        </section>
+      );
+    }
+
+    // Relevé · projet présent, avec ou sans priorités écrites
+    return (
+      <section aria-labelledby="projet-titre" className={`${s.releveSection} ${d.bloc}`}>
+        <div className={d.tete}>
+          {titre}
+          <p className={s.chapo}>{reformulation ?? cadrageDit(project)}</p>
+          {reformulation ? null : (
+            <p className={s.dense}>
+              Vos priorités ne sont pas encore écrites. Le dossier lit ce lieu, sans pouvoir le mettre
+              en regard de ce qui compte pour vous.
+            </p>
+          )}
+        </div>
+        {reformulation ? <CriteresDuProjet criteres={criteres} presentation="releve" /> : null}
+        {avertir}
+        <div className={d.actions}>
+          <button type="button" onClick={() => ouvrirEditeur(project)} className={s.bouton}>
+            {reformulation ? "Affiner mon projet" : "Ajouter mes priorités"}
+          </button>
+          <RepriseRecherche />
+        </div>
+        {relationReleve()}
+      </section>
+    );
+  }
+
   // « VOTRE PROJET » N'EST PAS LE MOT D'UN HABITANT. Quelqu'un qui a coché « j'y habite déjà » n'a pas
   // de projet : il a un lieu de vie et des questions dessus. Le titre suit donc la posture choisie,
   // comme le fait déjà le verdict et le titre des vérifications. Déclaré hors du rendu : une
@@ -256,6 +411,8 @@ export function ProjectSummaryCard({
   const eyebrowLabel = (project?.posture ?? posture) === "habitant" ? "Ce qui compte pour vous" : "Votre projet";
 
   const reformulation = project?.parsed?.reformulation ?? project?.rawText ?? null;
+
+  if (presentation === "releve") return releve();
 
   // ── Projet présent ──
   if (!editing && project && reformulation) {

@@ -14,6 +14,14 @@
 //   artefact=1               date et provenance d'un artefact figé
 // Plus `insee`, `prefs`, `confirmer`, `lieu` (adresse d'un bâtiment public) comme `/dev/fut91`.
 //
+// FUT-125 · l'en-tête et le bas de page, dans les cas de la recette :
+//   projet=recette|etats|sans    la carte « Votre projet » (voir `projet-recette.ts`)
+//   residence=<commune>          la commune de résidence diffère du territoire lu
+//   ailleurs=<n>                 nombre d'autres communes ouvertes au compte
+//   biens=2                      un autre bien existe dans cette commune ; `defaut=1` : bien deviné
+//   objectif=buy|rent|understand|other, lien=lives_here|studying   « Ce bien », valeurs initiales
+// Les gestes de ces blocs appellent les vraies routes, qui refusent sans session : rien ne s'écrit.
+//
 // Aucun appel au modèle : lancer le serveur avec `DOSSIER_NARRATIVE=false`.
 import Link from "next/link";
 import { Suspense, type ComponentProps } from "react";
@@ -32,6 +40,11 @@ import { MODULE_HREF } from "@/lib/product";
 import { releve as s, BandeauPrototype } from "@/components/releve/primitives";
 import { CAS_DECISION, DEFAUT } from "../fut87/projet-de-test";
 import { dossierDeTest } from "../fut87/dossier-de-test";
+import { projetRecette } from "./projet-recette";
+import { EnTeteDossierReleve } from "@/components/report/EnTeteDossierReleve";
+import autour from "@/components/report/autour-du-releve.module.css";
+import { LienAvecCeBien } from "@/components/report/LienAvecCeBien";
+import type { AddressObjective, AddressRelation } from "@/lib/relation-au-lieu";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +53,13 @@ const TITRE_VERDICT = {
   classe: "text-[length:clamp(23px,2.9vw,36px)] font-[var(--weight-display)] tracking-[-0.8px]",
 };
 
-type Params = { insee?: string; prefs?: string; adresse?: string; confirmer?: string; lieu?: string; vue?: string; etat?: string; flux?: string; artefact?: string };
+type Params = {
+  insee?: string; prefs?: string; adresse?: string; confirmer?: string; lieu?: string; vue?: string; etat?: string; flux?: string; artefact?: string;
+  projet?: string; residence?: string; ailleurs?: string; biens?: string; defaut?: string; objectif?: string; lien?: string;
+};
+
+const OBJECTIFS: AddressObjective[] = ["buy", "rent", "understand", "other"];
+const LIENS: AddressRelation[] = ["lives_here", "studying"];
 
 /** La lecture d'adresse qui se résout après un délai, comme `DossierAvecLogement` sous le `Suspense`. */
 async function AdresseResolue({ delai, ...props }: ComponentProps<typeof DossierDecisionSection> & { delai: number }) {
@@ -61,6 +80,14 @@ export default async function BancFut92({ searchParams }: { searchParams: Promis
   const artefact = sp.artefact === "1";
   const provenance = artefact ? "artefact-de-test" : undefined;
   const commune = t.dossier.narrativePlan.communeNom;
+  // La carte projet et l'en-tête lisent le projet de la recette quand il est demandé ; le dossier reste
+  // assemblé avec le projet de test (`prefs`), comme avant.
+  const projet = sp.projet ? projetRecette(sp.projet) : t.projet;
+  const ailleurs = Math.max(0, Math.min(Number(sp.ailleurs) || 0, 40));
+  const residence = sp.residence?.trim() || null;
+  const adresseBien = t.adresse?.label ?? null;
+  const objectif = OBJECTIFS.find((o) => o === sp.objectif) ?? null;
+  const lienBien = LIENS.find((l) => l === sp.lien) ?? null;
   const lien = (maj: Partial<Params>) => `/dev/fut92?${new URLSearchParams(Object.entries({ ...sp, prefs: sp.prefs ?? DEFAUT.prefs, ...maj }).filter((x): x is [string, string] => Boolean(x[1]))).toString()}`;
 
   // Les mêmes destinations que `/rapport` (`hrefModule`), avec un identifiant de dossier fictif.
@@ -99,14 +126,42 @@ export default async function BancFut92({ searchParams }: { searchParams: Promis
           </nav>
         </BandeauPrototype>
 
-        <p className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
-          <span>Vous consultez <span className="text-label font-medium">{commune}</span></span>
-        </p>
-        <EnTeteDossier
-          lieu={commune} bienLabel={t.adresse ? "Adresse de test (bâtiment public)" : null} bienAlternatif={false} choixParDefaut={false}
-          intent={t.projet.intent ?? null} nbPriorites={t.projet.parsed?.preferences?.length ?? null} projetRenseigne
-          contenu={contenuDuHero({ fullReport: true, project: t.projet, commune })}
-        />
+        {vue === "releve" ? (
+          <EnTeteDossierReleve
+            lieu={commune} bienLabel={adresseBien} choixParDefaut={sp.defaut === "1" && sp.biens === "2"} residence={residence}
+            intent={projet?.intent ?? null} nbPriorites={projet?.parsed?.preferences?.length ?? null}
+            projetRenseigne={Boolean(projet?.parsed?.reformulation ?? projet?.rawText)}
+            contenu={contenuDuHero({ fullReport: true, project: projet, commune })}
+          />
+        ) : null}
+        {vue !== "releve" && (residence || ailleurs > 0) ? (
+          <p className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
+            <span>Vous consultez <span className="text-label font-medium">{commune}</span></span>
+            {residence ? (
+              <>
+                <span aria-hidden className="text-ghost">·</span>
+                <span>votre résidence est {residence}</span>
+                <a href="#residence" className="underline underline-offset-2 decoration-[var(--border-2)] text-accent hover:decoration-current">Y revenir</a>
+              </>
+            ) : null}
+            {ailleurs > 0 ? (
+              <>
+                <span aria-hidden className="text-ghost">·</span>
+                <Link href="/rapport/dossiers" className="underline underline-offset-2 decoration-[var(--border-2)] text-accent hover:decoration-current">
+                  {ailleurs === 1 ? "1 autre commune vous est ouverte" : `${ailleurs} autres communes vous sont ouvertes`}
+                </Link>
+              </>
+            ) : null}
+          </p>
+        ) : null}
+        {vue !== "releve" ? (
+          <EnTeteDossier
+            lieu={commune} bienLabel={adresseBien} bienAlternatif={sp.biens === "2"} choixParDefaut={sp.defaut === "1"}
+            intent={projet?.intent ?? null} nbPriorites={projet?.parsed?.preferences?.length ?? null}
+            projetRenseigne={Boolean(projet?.parsed?.reformulation ?? projet?.rawText)}
+            contenu={contenuDuHero({ fullReport: true, project: projet, commune })}
+          />
+        ) : null}
 
         {flux ? (
           <Suspense fallback={<DossierDecisionSection {...commun} logementStatus="pending" scopeKey="commune" supportingPane={repere()} controles={controles} />}>
@@ -115,19 +170,35 @@ export default async function BancFut92({ searchParams }: { searchParams: Promis
         ) : (
           <>
             <DossierDecisionSection {...commun} logementStatus={etat} scopeKey={avecAdresse ? "logement:dossier-de-test" : "commune"} supportingPane={repere()} controles={controles} />
-            {avecAdresse ? null : <TrackedAddressCta commune={commune} inseeCode={t.insee} />}
+            {avecAdresse ? null : <TrackedAddressCta commune={commune} inseeCode={t.insee} presentation={vue} />}
           </>
         )}
 
         <div className="border-t border-[var(--border-1)]" />
         <div id="projet" className="scroll-mt-24 mt-12">
-          <ProjectSummaryCard initial={t.projet} criteres={vueCriteres(t.projet)} ouvertDemblee={false} relation={null} />
+          <ProjectSummaryCard
+            presentation={vue}
+            initial={projet} criteres={vueCriteres(projet)} ouvertDemblee={false}
+            relation={{ insee: t.insee, commune, valeur: residence ? "considering_living" : "current_residence", source: residence ? "inferred" : "confirmed_by_user", residence }}
+          />
         </div>
+        {adresseBien ? (
+          <div className="mt-6">
+            <LienAvecCeBien key={`${objectif}-${lienBien}`} dossierId="dossier-de-test" adresse={adresseBien} relationInitiale={lienBien} objectifInitial={objectif} presentation={vue} commune={commune} />
+          </div>
+        ) : null}
 
-        <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
-          <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">Mon compte</Link>
-          <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2 ml-auto">Retour au site</Link>
-        </div>
+        {vue === "releve" ? (
+          <div className={`${s.releveSection} ${autour.pied} mt-12 pt-7 border-t border-[var(--border-1)]`}>
+            <Link href="/compte" className={s.bouton}>Mon compte</Link>
+            <Link href="/" className={s.lien}>Retour au site</Link>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 flex-wrap mt-12 pt-7 border-t border-[var(--border-1)]">
+            <Link href="/compte" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--bg-elev-2)] text-muted text-[14px] no-underline border border-[var(--border-1)]">Mon compte</Link>
+            <Link href="/" className="font-mono text-[11px] tracking-[0.06em] uppercase text-ghost no-underline py-2 ml-auto">Retour au site</Link>
+          </div>
+        )}
       </div>
 
       <footer className="relative z-[2] border-t border-[var(--border-1)]">

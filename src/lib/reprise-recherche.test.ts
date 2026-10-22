@@ -90,6 +90,10 @@ test("9. /rapport avec un projet existant : le geste reste proposé (projet déc
   const declare = carte.slice(carte.indexOf("// ── Déclaré, sans priorités écrites ──"), carte.indexOf("// ── Aucun projet ──"));
   const aucun = carte.slice(carte.indexOf("// ── Aucun projet ──"), carte.indexOf("// ── Édition ──"));
   for (const [nom, bloc] of [["présent", present], ["déclaré", declare], ["aucun", aucun]]) assert.match(bloc!, /<RepriseRecherche/, nom);
+  // FUT-125 : sous le Relevé aussi (« présent » couvre le projet décrit ET le projet seulement déclaré).
+  const releveAucun = carte.slice(carte.indexOf("// Relevé · aucun projet"), carte.indexOf("// Relevé · projet présent"));
+  const relevePresent = carte.slice(carte.indexOf("// Relevé · projet présent"), carte.indexOf("// ── Projet présent ──"));
+  for (const [nom, bloc] of [["relevé aucun", releveAucun], ["relevé présent", relevePresent]]) assert.match(bloc!, /<RepriseRecherche/, nom);
 });
 
 test("10. après transfert : la même recherche n'est plus proposée ; une nouvelle, si", () => {

@@ -679,7 +679,9 @@ donnée est réellement communale. Cette règle doit être tenue avant toute ouv
 | `RegleDuTemps` | dates et horizons sur un axe linéaire, jalons isolés *(chevauchement à 360 px, § 14)* |
 | `RegleDeRang`, `Seuils` | une position parmi les communes, un seuil de signalement, dessinés à l'encre |
 | `EmblemeEchelles`, `CoupeEchelles` | les trois échelles et la navigation entre elles |
+| `Selecteur` | une question et ses réponses (`aria-pressed`), repère de 2 px à l'encre, cible de 44 px (FUT-125) |
 | classes `.bouton`, `.boutonMarque`, `.lien`, `.porte`, `.details`, `.detailsFluide` | actions, liens, dépliables (FUT-75 Q4) |
+| classe `.action` | le geste secondaire répété sur une liste (garder, écarter, retirer) : un mot souligné d'un filet, jamais en capitales ni à l'orange (FUT-125) |
 
 Restent validés : les règles d'anti-redondance de `DossierDecisionSection` (un grain affiché une seule
 fois, une section effacée quand le verdict la porte déjà) · `lireDossier` comme seul adaptateur du
@@ -689,8 +691,8 @@ s'efface · le tiret `—` comme marqueur d'absence · `TerritoryYearsBand` · `
 de composant responsive).
 
 **Manquants, à créer dans `src/components/releve/` (lot R1)** *(hypothèses jusque-là ; formes
-éprouvées par les témoins de `/dev/fut118`)* : `Selecteur` (horizon, mode : remplace `HorizonSwitch`
-et `HORIZON_PILLS`), `Tableau`, `Champ`, `Bouton`, `Parcours`, `LigneEtat`, `Emplacement`. Les formes
+éprouvées par les témoins de `/dev/fut118`)* : la forme « lien » de `Selecteur` (horizon, mode :
+remplace `HorizonSwitch` et `HORIZON_PILLS` ; la forme « bouton » existe depuis FUT-125), `Tableau`, `Champ`, `Bouton`, `Parcours`, `LigneEtat`, `Emplacement`. Les formes
 `Issue` et `NiveauExamen` du témoin de comparaison sont des **composants métier possibles du centre de
 décision**, à sa discrétion (§ 13), pas des primitives à créer. **La ligne d'état n'affirme que ce que le serveur a
 confirmé** *(stable)* : « aucun montant n'a été prélevé », « paiement reçu », « dossier prêt » ne
