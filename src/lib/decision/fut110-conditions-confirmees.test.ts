@@ -163,7 +163,7 @@ const S1: CasS1[] = [
   {
     nom: "voiture, secteur moins motorisé", key: "faible_dependance_auto", faits: { secteur: MOINS_MOTORISE },
     ruleId: "secteur.equipement-auto", factId: "17094:secteur-equipement-auto",
-    rang: /^Pour la possibilité de se déplacer sans voiture, Châtelaillon-Plage se situe parmi les 20 %/,
+    rang: /^Pour les trajets domicile-travail sans voiture, Châtelaillon-Plage se situe parmi les 20 % de communes de France où les actifs vont le moins souvent travailler en voiture/,
     constat: /Dans ce secteur, 45\s% des ménages disposent d'au moins une voiture, contre 70\s% dans l'ensemble de la commune/,
     echelle: /Le constat sur le secteur de l'adresse ne l'oriente pas/, limite: /ne dit pas, à elle seule, s'il est possible de se déplacer autrement/,
     geste: /trajets réels/, grain: "secteur", valeur: "45\u00a0% contre 70\u00a0% dans la commune",

@@ -892,9 +892,10 @@ function assertStatus(fact: { ruleId: string; status?: string }): void {
 
 // Invariants : protègent toutes les futures règles. JETTE (fail-fast) en cas de violation.
 // Les seuls critères dont un alignment peut porter une limitation (nuance MÉTHODOLOGIQUE de la mesure :
-// climatologie ERA5-Land 1991-2020, douceur 1976-2005, distance mer à vol d'oiseau). Tout autre critère
-// avec une limitation est un abus de portée.
-const ALIGNMENT_LIMITATION_KEYS = new Set<string>(["ensoleillement_recherche", "douceur_climat", "proximite_mer"]);
+// climatologie ERA5-Land 1991-2020, douceur 1976-2005, distance mer à vol d'oiseau, mode de transport
+// domicile-travail des actifs pour la voiture, FUT-96). Tout autre critère avec une limitation est un abus
+// de portée.
+const ALIGNMENT_LIMITATION_KEYS = new Set<string>(["ensoleillement_recherche", "douceur_climat", "proximite_mer", "faible_dependance_auto"]);
 
 /** Les références d'un fait, quel que soit son rôle : un compromis les range par côté. */
 function toutesLesPreuves(fact: DecisionFact): EvidenceRef[] {

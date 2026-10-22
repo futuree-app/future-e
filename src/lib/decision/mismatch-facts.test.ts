@@ -58,7 +58,9 @@ test("le subject nomme la PRIORITÉ du lecteur, jamais l'indicateur défavorable
   // Le lecteur a déclaré vouloir moins dépendre de la voiture. Nommer « la dépendance à la voiture »
   // comme sa priorité inverserait ce qu'il a demandé. Et « la FAIBLE dépendance à la voiture »
   // l'obligeait à inverser deux fois sous un « répond moins bien » : le sujet se dit en positif.
-  assert.equal(MISMATCH_LABELS.faible_dependance_auto!.subject, "la possibilité de se passer de la voiture");
+  // FUT-96 : le sujet reste positif et nomme la part de la priorité que la mesure couvre, les trajets
+  // domicile-travail, plutôt qu'une « possibilité de se passer de la voiture » qu'aucune donnée n'établit.
+  assert.equal(MISMATCH_LABELS.faible_dependance_auto!.subject, "les trajets domicile-travail sans voiture");
   assert.equal(MISMATCH_LABELS.faible_dependance_auto!.subject.includes("faible"), false);
 });
 

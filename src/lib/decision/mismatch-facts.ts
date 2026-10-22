@@ -95,7 +95,19 @@ export const MISMATCH_LABELS: Record<string, MismatchLabel> = {
   acces_soins: { topic: "l'accès aux soins", projectPhrase: "un bon accès aux soins", indicator: "l'accès aux soins", subject: "l'accès aux soins" },
   acces_culture: { topic: "l'accès à la culture", projectPhrase: "l'accès à une offre culturelle", indicator: "l'accès à l'offre culturelle", subject: "l'accès à l'offre culturelle" },
   acces_transports: { topic: "l'accès au train", projectPhrase: "l'accès au train et aux gares", indicator: "la desserte ferroviaire", subject: "l'accès au train" },
-  faible_dependance_auto: { topic: "la dépendance à la voiture", projectPhrase: "une faible dépendance à la voiture", indicator: "la possibilité de se déplacer sans voiture", subject: "la possibilité de se passer de la voiture" },
+  // FUT-96 : la priorité reste celle du lecteur (projectPhrase) ; ce que le dossier en dit se borne à la
+  // mesure, la part des actifs qui vont TRAVAILLER en voiture (MOBPRO 2022), classée parmi les communes.
+  // Ni « possibilité de se déplacer sans voiture », ni tous les trajets du quotidien : la limitation le dit.
+  // Le topic NOMME la mesure (« l'usage de la voiture pour aller travailler ») ; le subject, lu après « répond
+  // (moins bien) à vos priorités : », nomme le SOUHAIT borné à ce qu'elle couvre. « L'usage de la voiture »
+  // en subject ferait lire au lecteur qu'il a demandé à prendre la voiture.
+  faible_dependance_auto: {
+    topic: "l'usage de la voiture pour aller travailler",
+    projectPhrase: "une faible dépendance à la voiture",
+    indicator: "la part des actifs qui vont travailler en voiture",
+    subject: "les trajets domicile-travail sans voiture",
+    limitation: "Cette position porte sur le mode de transport principal des actifs de la commune pour aller travailler (recensement 2022). Les courses, l'école et les loisirs ne sont pas mesurés.",
+  },
   croissance_demographique: { topic: "la trajectoire démographique", projectPhrase: "un territoire qui gagne des habitants", indicator: "la trajectoire démographique", subject: "un territoire qui gagne des habitants" },
   vie_locale: { topic: "la vie locale", projectPhrase: "une vie locale animée", indicator: "l'intensité de la vie locale", subject: "une vie locale animée" },
   cadre_calme: { topic: "le cadre calme", projectPhrase: "un cadre calme", indicator: "le calme du cadre de vie", subject: "le calme" },
@@ -144,7 +156,7 @@ export const ALIGNMENT_LABELS: Record<string, AlignmentLabel> = {
   acces_transports: { headlineSubject: "l'accès au train", favorableStatusTemplate: "Parmi les {rank} de communes les mieux desservies par le train en France" },
   nature: { headlineSubject: "l'accès aux espaces naturels", favorableStatusTemplate: "Parmi les {rank} de communes où il est le plus favorable en France" },
   vie_locale: { headlineSubject: "la vie locale", favorableStatusTemplate: "Parmi les {rank} de communes les plus animées de France" },
-  faible_dependance_auto: { headlineSubject: "la possibilité de se déplacer sans voiture", favorableStatusTemplate: "Parmi les {rank} de communes où elle est la plus favorable en France" },
+  faible_dependance_auto: { headlineSubject: "les trajets domicile-travail sans voiture", favorableStatusTemplate: "Parmi les {rank} de communes de France où les actifs vont le moins souvent travailler en voiture" },
   croissance_demographique: { headlineSubject: "la trajectoire démographique", favorableStatusTemplate: "Parmi les {rank} de communes où la population progresse le plus en France" },
   viabilite_emploi: { headlineSubject: "le bassin d'emploi", favorableStatusTemplate: "Parmi les {rank} de communes aux bassins d'emploi les plus dynamiques de France" },
   cadre_calme: { headlineSubject: "le calme du cadre de vie", favorableStatusTemplate: "Parmi les {rank} de communes où le cadre de vie est le plus calme en France" },
