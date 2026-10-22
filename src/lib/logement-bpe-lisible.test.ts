@@ -190,3 +190,12 @@ test("un voisinage figé avant la correction ne dit plus « Halte ferroviaire »
   assert.equal(libelleCourant("Pharmacie"), "Pharmacie");
   assert.equal(libelleCourant(null), null);
 });
+
+test("FUT-99 : B104 garde sa distinction magasin/drive et son article", () => {
+  assert.equal(TYPEQU_LABEL.B104, "Hypermarché (magasin ou drive)");
+  assert.equal(avecArticle(TYPEQU_LABEL.B104!), "un hypermarché (magasin ou drive)");
+  assert.equal(TYPEQU_LABEL.B105, "Supermarché");
+  assert.equal(libelleCourant("Supermarché"), "Supermarché");
+  assert.deepEqual(preuveEquipement({ typeLabel: "Supermarché", distanceMeters: 264 }, null),
+    { nom: null, adresse: null, reserve: null });
+});

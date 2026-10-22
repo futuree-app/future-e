@@ -109,6 +109,9 @@ export const TYPEQU_LABEL: Record<string, string> = {
   D265: "Médecin généraliste",
   D307: "Pharmacie",
   // Alimentation
+  // FUT-99 : le producteur ne retient B104 que pour APET=4711F (hors grands magasins).
+  // La BPE inclut des drives dans cette activité ; elle ne garantit pas un magasin physique.
+  B104: "Hypermarché (magasin ou drive)",
   B105: "Supermarché",
   B201: "Supérette",
   B202: "Épicerie",
@@ -149,6 +152,7 @@ export const TYPEQU_LABEL: Record<string, string> = {
 const GENRE_PAR_LIBELLE: Record<string, "m" | "f"> = {
   "Médecin généraliste": "m",
   "Pharmacie": "f",
+  "Hypermarché (magasin ou drive)": "m",
   "Supermarché": "m",
   "Supérette": "f",
   "Épicerie": "f",
