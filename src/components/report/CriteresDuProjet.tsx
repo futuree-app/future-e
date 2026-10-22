@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { relireLaPage } from "@/components/interaction/relire-la-page";
 import type { CritereVue, OptionDePrecision, Portee } from "@/lib/decision/projet-criteres-vue";
+import { releve as s, Registre } from "@/components/releve/primitives";
+import type { PresentationDossier } from "@/components/releve/activation";
+import d from "./autour-du-releve.module.css";
+import { groupesDeCriteres } from "./criteres-groupes";
 
 // LES CRITÈRES DU PROJET, UN PAR LIGNE (FUT-8, §8.1).
 //
@@ -37,8 +41,9 @@ const lienAction = "font-mono text-[11px] tracking-[0.08em] uppercase text-accen
 const boutonChoix = "rounded-lg px-3.5 py-2 text-[13px] text-label bg-[var(--bg-elev-2)] border border-[var(--border-2)] hover:border-white/25 transition-colors disabled:opacity-40";
 const boutonPrincipal = "rounded-lg px-4 py-2 text-[13px] font-semibold bg-accent text-canvas hover:opacity-90 transition-opacity disabled:opacity-40";
 
-export function CriteresDuProjet({ criteres }: { criteres: CritereVue[] }) {
+export function CriteresDuProjet({ criteres, presentation = "classique" }: { criteres: CritereVue[]; presentation?: PresentationDossier }) {
   if (criteres.length === 0) return null;
+  if (presentation === "releve") return <CriteresReleve criteres={criteres} />;
   return (
     <ul className="mt-5 pt-5 border-t border-[var(--border-1)] space-y-4">
       {criteres.map((c) => <LigneCritere key={c.id} c={c} />)}
@@ -46,7 +51,43 @@ export function CriteresDuProjet({ criteres }: { criteres: CritereVue[] }) {
   );
 }
 
-function LigneCritere({ c }: { c: CritereVue }) {
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// FUT-125 · LES MÊMES CRITÈRES SOUS LE RELEVÉ : TROIS GROUPES, DES GESTES DISCRETS.
+//
+// La recette lisait cinq fois « Inspiré de Brest : … », chacun suivi de « GARDER CE CRITÈRE · ÇA NE
+// COMPTE PAS POUR MOI » en capitales orange : la liste se lisait comme une suite de boutons. Ici, l'origine
+// se dit une fois, en tête de son groupe, et chaque critère garde ses gestes, en mots courts soulignés
+// d'un filet. Leur nom accessible dit le critère (« Garder : une ville étudiante ») : un lecteur d'écran ne
+// lit pas cinq « Garder » identiques. Aucun geste n'est retiré, aucun n'est nouveau ; l'ordre des
+// critères dans chaque groupe est celui du serveur (`vueCriteres`).
+// ════════════════════════════════════════════════════════════════════════════════════════════
+function CriteresReleve({ criteres }: { criteres: CritereVue[] }) {
+  return (
+    <div className={d.groupes}>
+      {groupesDeCriteres(criteres).map((g) => (
+        <div key={g.cle} className={d.groupe}>
+          <h3 id={`criteres-${g.cle}`} className={s.surtitre}>{g.titre}</h3>
+          {g.note ? <p className={s.nuance}>{g.note}</p> : null}
+          <ul className={s.liste} aria-labelledby={`criteres-${g.cle}`}>
+            {g.criteres.map((c) => <LigneCritere key={c.id} c={c} releve sansOrigine={g.sansOrigine} />)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function capitale(t: string): string {
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function LigneCritere({ c, releve = false, sansOrigine = false }: {
+  c: CritereVue;
+  /** FUT-125 : la ligne se rend dans la grammaire du Relevé (mêmes états, mêmes gestes). */
+  releve?: boolean;
+  /** L'origine est dite par le groupe : la ligne montre le critère seul. */
+  sansOrigine?: boolean;
+}) {
   const router = useRouter();
   const [confirmation, setConfirmation] = useState(false);
   const [option, setOption] = useState<OptionDePrecision | null>(null);
@@ -95,6 +136,110 @@ function LigneCritere({ c }: { c: CritereVue }) {
       // La phrase montrée, gardée pour l'audit (hors empreinte).
       ...(phrase ? { interpretation: phrase } : {}),
     });
+  }
+
+  if (releve) {
+    const titre = sansOrigine ? capitale(c.court) : c.titre;
+    // Le nom accessible d'un geste nomme son critère : « Garder : une ville étudiante ».
+    const pour = (geste: string) => `${geste} : ${c.court}`;
+    const gestes: ReactNode[] = [];
+    if (c.etat === "inspire" && c.ancre) {
+      gestes.push(
+        <button key="garder" type="button" disabled={busy} className={s.action} aria-label={pour("Garder")} onClick={() => envoyer({ action: "adopter", seen: c.seenEffectif })}>Garder</button>,
+        <button key="ecarter" type="button" disabled={busy} className={s.action} aria-label={pour("Écarter, ça ne compte pas pour moi")} onClick={() => envoyer({ action: "rejeter", seen: c.seenEffectif })}>Écarter</button>,
+      );
+    }
+    if (c.etat === "rejete") {
+      gestes.push(<button key="reprendre" type="button" disabled={busy} className={s.action} aria-label={pour("Reprendre")} onClick={() => envoyer({ action: "adopter", seen: c.seenEffectif })}>Reprendre</button>);
+    }
+    if (c.etat === "condition") {
+      gestes.push(<button key="retirer" type="button" disabled={busy} className={s.action} aria-label={pour("Retirer la condition")} onClick={() => envoyer({ action: "retirer_condition" })}>Retirer la condition</button>);
+    }
+    if (c.etat === "a_revoir" && c.revoir) {
+      if (c.seenEffectif) gestes.push(<button key="garder-condition" type="button" disabled={busy} className={s.action} aria-label={pour("Garder la condition")} onClick={() => setConfirmation(true)}>La garder</button>);
+      gestes.push(<button key="retirer-condition" type="button" disabled={busy} className={s.action} aria-label={pour("Retirer la condition")} onClick={() => envoyer({ action: "retirer_condition" })}>La retirer</button>);
+    }
+    const suggestion = c.etat === "compris" && c.motFort && !suggestionEcartee && !confirmation;
+    if (suggestion) {
+      gestes.push(
+        <button key="oui" type="button" className={s.action} aria-label={pour("En faire une condition sans compromis")} onClick={() => setConfirmation(true)}>En faire une condition</button>,
+        <button key="non" type="button" className={s.action} aria-label={pour("Ne pas en faire une condition")} onClick={() => setSuggestionEcartee(true)}>Non</button>,
+      );
+    }
+    const compris = c.etat === "compris" && (!c.motFort || suggestionEcartee) && !confirmation;
+    if (compris) {
+      gestes.push(<button key="condition" type="button" className={s.action} aria-label={pour("En faire une condition sans compromis")} onClick={() => setConfirmation(true)}>En faire une condition sans compromis</button>);
+      // Un critère gardé reste retirable : le rejet retire l'adoption, et la ville ne le repropose plus.
+      if (c.adopte) gestes.push(<button key="plus" type="button" disabled={busy} className={s.action} aria-label={pour("Écarter, ça ne compte plus pour moi")} onClick={() => envoyer({ action: "rejeter", seen: c.seenEffectif })}>Écarter</button>);
+    }
+    return (
+      <li className={d.critere}>
+        <div className={d.ligneCritere}>
+          <div className={s.pileSerree}>
+            {c.etat === "condition" ? (
+              <>
+                <Registre teinte="var(--reg-incompatibilite)" className={`${s.dense} ${s.encre}`}>{titre}</Registre>
+                <p className={s.etiquette}>Condition sans compromis</p>
+              </>
+            ) : (
+              <p className={`${s.dense} ${c.etat === "rejete" ? d.critereEcarte : s.encre}`}>{titre}</p>
+            )}
+            {c.etat === "a_revoir" && c.revoir ? <p className={`${s.nuance} ${s.encre}`}>{c.revoir}</p> : null}
+            {suggestion ? <p className={s.nuance}>Vous avez écrit « {c.motFort} ». En faire une condition sans compromis ?</p> : null}
+            {compris && c.interpretation ? (
+              <details className={s.details}>
+                <summary>Comment futur•e l&apos;interprète</summary>
+                <p className={s.nuance} style={{ marginTop: 6 }}>{c.interpretation}</p>
+              </details>
+            ) : null}
+          </div>
+          {gestes.length > 0 ? <div className={d.gestes}>{gestes}</div> : null}
+        </div>
+
+        {confirmation ? (
+          <div className={d.confirmation}>
+            {besoinDePrecision ? (
+              <>
+                {c.confirmation.question ? <p className={`${s.dense} ${s.encre}`}>{c.confirmation.question}</p> : null}
+                {c.confirmation.saisieSeuil ? (
+                  <div className={d.reponses}>
+                    <input
+                      type="number" inputMode="decimal" min={1} value={seuil}
+                      onChange={(e) => setSeuil(e.target.value)}
+                      aria-label="Votre seuil" className={d.saisie}
+                    />
+                    {c.confirmation.saisieSeuil.unites.map((u) => (
+                      <button key={u.cle} type="button" className={s.bouton} onClick={() => choisirSeuil(u.cle, u.phrase, u.portee)}>{u.libelle}</button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={d.reponses}>
+                    {c.confirmation.options.map((o) => (
+                      <button key={o.label} type="button" className={s.bouton} onClick={() => setOption(o)}>{o.label}</button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {phrase ? <p className={`${s.dense} ${s.encre}`}>{phrase}</p> : null}
+                {PORTEE_DITE[portee] ? <p className={s.nuance}>{PORTEE_DITE[portee]}</p> : null}
+                <div className={d.reponses}>
+                  <button type="button" disabled={busy} className={`${s.bouton} ${s.boutonMarque}`} onClick={confirmer}>
+                    {phrase ? "Ça me convient" : "Confirmer"}
+                  </button>
+                </div>
+              </>
+            )}
+            <div>
+              <button type="button" className={s.action} onClick={() => { setConfirmation(false); setOption(null); setErreur(null); }}>Annuler</button>
+            </div>
+          </div>
+        ) : null}
+
+        {erreur ? <p className={d.incident} role="alert" style={{ marginTop: 8 }}>{erreur}</p> : null}
+      </li>
+    );
   }
 
   return (

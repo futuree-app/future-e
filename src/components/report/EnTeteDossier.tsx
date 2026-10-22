@@ -21,7 +21,7 @@ import { ANCRE_PROJET } from "@/lib/decision/premier-ecran";
 // cadrage de la réponse d'hier, ce que le bandeau d'obsolescence existe précisément pour éviter.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
-const INTENT_LABEL: Record<string, string> = { achat: "achat", location: "location" };
+export const INTENT_LABEL: Record<string, string> = { achat: "achat", location: "location" };
 
 /**
  * LE LIEU NE SE RÉPÈTE PAS QUAND L'ADRESSE LE PORTE DÉJÀ (12/08/2026). Le hub affichait
@@ -32,7 +32,7 @@ const INTENT_LABEL: Record<string, string> = { achat: "achat", location: "locati
 function replie(v: string): string {
   return v.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 }
-function adresseAvecLieu(bienLabel: string | null, lieu: string): string {
+export function adresseAvecLieu(bienLabel: string | null, lieu: string): string {
   if (!bienLabel) return lieu;
   return replie(bienLabel).includes(replie(lieu)) ? bienLabel : `${bienLabel}, ${lieu}`;
 }

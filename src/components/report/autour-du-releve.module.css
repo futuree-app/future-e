@@ -1,0 +1,74 @@
+/* FUT-125 · CE QUI ENTOURE LE RELEVÉ DANS « MA DÉCISION » : l'en-tête du dossier, « Votre projet » et
+   « Ce bien », sous la présentation `releve`. Mise en page locale, sur les jetons et les classes du
+   Relevé (`releve.module.css`) : aucune couleur, taille de texte ni rayon hors jetons. La présentation
+   classique ne lit pas ce fichier. */
+
+/* ── L'en-tête : un retour, un lieu, ce qui cadre la lecture ─────────────────────────────── */
+
+.entete { display: grid; gap: 6px; padding-top: 28px; }
+/* Le retour vers « Vos lieux » : au rôle du surtitre (casse normale, gris), une flèche, aucun soulignement
+   tant qu'on ne le survole pas. C'est la seule navigation de l'en-tête. */
+.retour {
+  justify-self: start;
+  display: inline-flex; align-items: baseline; gap: 8px;
+  margin-bottom: 10px; padding: 2px 0;
+  font-weight: 600; font-size: var(--r-t-surtitre); letter-spacing: 0.01em;
+  color: var(--r-discret); text-decoration: none;
+}
+.retour:hover { color: var(--r-encre); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--r-filet-fort); }
+.retour:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 3px; }
+@media (pointer: coarse) { .retour { min-height: 44px; align-items: center; margin-bottom: 0; } }
+/* Le lieu lu, une fois : l'adresse du dossier, ou la commune seule. Plus petit que le verdict (le h1). */
+.lieu {
+  margin: 0;
+  font-weight: 600; font-size: var(--r-t-sous-titre); line-height: 1.35;
+  color: var(--r-encre); overflow-wrap: anywhere;
+}
+.contexte { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; margin: 0; }
+
+/* ── Un bloc du bas de page : « Votre projet », « Ce bien » ─────────────────────────────────── */
+
+.bloc { display: grid; gap: 22px; }
+.blocSuivant { border-top: 1px solid var(--r-filet); padding-top: 40px; }
+.tete { display: grid; gap: 10px; }
+
+/* Les critères, en groupes : ce que le lecteur a demandé, ce qui est inspiré d'une commune, ce qu'il a
+   écarté. Un groupe est une liste à filets, sans fond ni carte. */
+.groupes { display: grid; gap: 28px; }
+.groupe { display: grid; gap: 4px; }
+.critere { padding: 14px 0 !important; }
+/* Le critère à gauche, ses gestes à droite ; sous 640 px, les gestes passent dessous. */
+.ligneCritere { display: grid; gap: 4px 24px; grid-template-columns: minmax(0, 1fr); align-items: baseline; }
+@media (min-width: 640px) { .ligneCritere { grid-template-columns: minmax(0, 1fr) auto; } }
+.gestes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 18px; }
+.critereEcarte { color: var(--r-discret); text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--r-filet-fort); }
+/* La confirmation d'une condition : une zone ouverte sous le critère, bordée d'un filet, sans fond. */
+.confirmation { display: grid; gap: 12px; margin-top: 12px; padding: 16px 18px; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon); }
+.reponses { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.saisie {
+  width: 96px; min-height: 44px; padding: 8px 12px;
+  font-family: inherit; font-size: var(--r-t-dense); color: var(--r-encre);
+  background: transparent; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon);
+}
+
+/* Les questions d'un bloc, l'une sous l'autre : chaque réponse tient sur la ligne de sa question. */
+.questions { display: grid; gap: 22px; }
+.sousBloc { display: grid; gap: 10px; border-top: 1px solid var(--r-filet); padding-top: 22px; }
+.notes { display: grid; gap: 6px; }
+
+/* Le texte du projet, en édition. */
+.texte {
+  width: 100%; min-height: 96px; padding: 12px 14px; resize: vertical;
+  font-family: inherit; font-size: var(--r-t-dense); line-height: 1.6; color: var(--r-encre);
+  background: transparent; border: 1px solid var(--r-filet-fort); border-radius: var(--r-rayon);
+}
+.texte::placeholder { color: var(--r-meta); }
+.texte:focus-visible, .saisie:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 1px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
+
+/* Un incident se dit à l'encre (DESIGN.md § 5.3) : ce qui n'a pas été enregistré, rien de plus. */
+.incident { margin: 0; font-size: var(--r-t-dense); font-weight: 600; line-height: 1.5; color: var(--r-encre); }
+
+/* Le pied de la page : mêmes gestes, au langage du Relevé. */
+.pied { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.pied > :last-child { margin-left: auto; }

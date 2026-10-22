@@ -32,6 +32,9 @@ export type CritereVue = {
   id: string;
   ref: CriterionRef;
   titre: string;
+  // FUT-125 : le même critère sans son origine (« une ville étudiante » pour « Inspiré de Brest : une ville
+  // étudiante »). Sert l'écran qui regroupe les suggestions d'une même ancre sous un seul intitulé.
+  court: string;
   // « Comment futur•e l'interprète », replié par défaut : jamais une question.
   interpretation: string | null;
   etat: "compris" | "inspire" | "condition" | "a_revoir" | "rejete";
@@ -168,7 +171,7 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
     });
     vues.push({
       id: `${ref.kind}:${ref.key}:${ref.instance ?? ""}`,
-      ref, titre: pres.titre,
+      ref, titre: pres.titre, court: pres.court,
       interpretation: pres.interpretation ?? null,
       etat: perimee ? "a_revoir" : confirme ? "condition" : ancre ? "inspire" : "compris",
       ancre, adopte: adoptee && (pref?.source ?? "ancre") !== "parse", motFort: confirme ? null : motFort,
@@ -193,7 +196,7 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
     const pres = presenterCritere(project, ref);
     if (!pres) continue;
     vues.push({
-      id: `rejet:${r.criterion.key}`, ref, titre: pres.titre, interpretation: null, etat: "rejete", adopte: false,
+      id: `rejet:${r.criterion.key}`, ref, titre: pres.titre, court: pres.court, interpretation: null, etat: "rejete", adopte: false,
       ancre: listeFr((project.parsed.communeAncre ?? []).map((a) => a.label).filter(Boolean)) || listeFr(r.origin.labels) || null, motFort: null,
       seenParsed: null, seenEffectif: `pref:${r.criterion.key}`,
       confirmation: { question: null, options: [], saisieSeuil: null, phrase: null, portee: "ne_pas_mesurer" },
@@ -205,9 +208,10 @@ export function vueCriteres(project: UserProject | null): CritereVue[] {
   for (const c of normalizeConditions(project.conditions)) {
     if (refs.some((r) => sameCriterion(r, c.criterion))) continue;
     const nom = c.criterion.instance ?? c.criterion.key;
+    const titre = c.criterion.key === "excludePlace" ? `Quitter ${nom.replace(/\b\w/g, (l) => l.toUpperCase())}` : "Une condition";
     vues.push({
       id: `orpheline:${c.criterion.kind}:${c.criterion.key}:${c.criterion.instance ?? ""}`,
-      ref: c.criterion, titre: c.criterion.key === "excludePlace" ? `Quitter ${nom.replace(/\b\w/g, (l) => l.toUpperCase())}` : "Une condition",
+      ref: c.criterion, titre, court: titre,
       interpretation: null, etat: "a_revoir", ancre: null, adopte: false, motFort: null, seenParsed: null, seenEffectif: null,
       confirmation: { question: null, options: [], saisieSeuil: null, phrase: null, portee: "ne_pas_mesurer" },
       revoir: "Votre projet n'en parle plus.",
