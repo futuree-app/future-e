@@ -3,7 +3,6 @@ import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
-import { readFileSync } from "node:fs";
 import { mapCommuneToModuleFacts } from "./decision/module-facts-map.ts";
 import { runRules } from "./decision/materiality-rules.ts";
 import { assembleDossier } from "./decision/decision-assembler.ts";
