@@ -839,7 +839,10 @@ export function buildTerritorySignals(c: IndexCommune, gares?: GaresCommune): Re
       desservie: true,
       tramway: c.reseauLocal.tram,
       metro: c.reseauLocal.metro,
-      niveau: a >= 70 ? "réseau dense à portée de marche" : a >= 40 ? "réseau correct à portée de marche" : "réseau limité",
+      niveau: a >= 70 ? "réseau dense près du centre de la commune" : a >= 40 ? "réseau correct près du centre de la commune" : "réseau limité",
+      // FUT-96 : des arrêts relevés autour du centre de la commune (OSM), jamais des horaires, une
+      // fréquence ni la desserte d'une adresse. Dit au modèle, pour qu'il ne le promette pas.
+      mesure: "arrêts de bus, tram ou métro autour du centre de la commune ; ni horaires, ni fréquence, ni desserte à l'adresse",
     };
   } else {
     s.transports_commun = { desservie: false };
@@ -1452,9 +1455,14 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "nature", label: "Espaces naturels", themeId: "cadre", key: "nature", paliers: ["Beaucoup de nature autour", "Nature présente", "Peu de nature autour"], gp: "les espaces naturels", forte: "ses espaces naturels", aide: "La présence d'espaces naturels autour du lieu de vie.", risque: false, directionnel: true },
   { id: "mer", label: "Mer", themeId: "cadre", key: "proximite_mer", paliers: ["Rivage marin proche", "Rivage marin à distance", "Rivage marin éloigné"], gp: "la proximité de la mer", forte: "sa proximité de la mer", aide: "Distance du centre de la commune au rivage marin, lagunes comprises.", risque: false, directionnel: true },
   { id: "cadre_calme", label: "Cadre de vie", themeId: "cadre", key: "cadre_calme", paliers: ["Cadre paisible et habitable", "Cadre intermédiaire", "Très urbain ou très isolé"], gp: "le cadre de vie", forte: "son cadre de vie paisible", aide: "À quel point le cadre est paisible et habitable, ni trop urbain et dense, ni trop isolé.", risque: false, directionnel: true },
-  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Peu dépendant de la voiture", "Dépendance modérée à la voiture", "Voiture indispensable"], gp: "la vie sans voiture", forte: "sa faible dépendance à la voiture", aide: "Part des trajets du quotidien faisables autrement qu'en voiture.", risque: false, directionnel: true },
+  // SANS VOITURE est le souhait du lecteur ; la ligne, elle, classe la part des actifs qui vont
+  // TRAVAILLER en voiture (MOBPRO 2022). Les paliers disent une pratique COMPARÉE (« qu'ailleurs ») : le
+  // palier est un rang national, et Puilboreau, où 83 % des actifs vont travailler en voiture, est dans le
+  // tiers favorable. Jamais « voiture indispensable » ni des trajets du quotidien faisables : ni les
+  // courses, ni l'école, ni les loisirs ne sont mesurés (FUT-96, étude La Rochelle du 13/10/2026).
+  { id: "sans_voiture", label: "Sans voiture", themeId: "mobilite", key: "faible_dependance_auto", paliers: ["Moins de voiture qu'ailleurs pour aller travailler", "Usage de la voiture dans la moyenne", "Plus de voiture qu'ailleurs pour aller travailler"], gp: "la vie sans voiture", forte: "ses trajets domicile-travail moins souvent faits en voiture", aide: "La place de la voiture dans les trajets domicile-travail des habitants, comparée aux autres communes. Elle ne dit pas si vos propres déplacements peuvent se faire sans voiture.", risque: false, directionnel: true },
   { id: "train", label: "Train / gares", themeId: "mobilite", key: "acces_transports", paliers: ["Bien relié par le train", "Gare accessible, desserte limitée", "Peu relié par le train"], gp: "le train", forte: "sa desserte ferroviaire", aide: "La desserte par le train et les gares proches.", risque: false, directionnel: true },
-  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau de transports présent", "Desserte partielle", "Peu de transports en commun"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "Un réseau de bus, tram ou métro pour se déplacer sans voiture au quotidien.", risque: false, directionnel: true },
+  { id: "tc_quotidien", label: "Transports du quotidien", themeId: "mobilite", key: "mobilite_quotidienne", paliers: ["Réseau de transports présent", "Desserte partielle", "Peu de transports en commun"], gp: "les transports du quotidien", forte: "ses transports du quotidien", aide: "La présence d'arrêts de bus, tram ou métro autour du centre de la commune. Les horaires et la desserte de votre adresse restent à vérifier.", risque: false, directionnel: true },
   { id: "soins", label: "Soins", themeId: "services", key: "acces_soins", paliers: ["Bon accès aux soins", "Accès intermédiaire", "Accès aux soins limité"], gp: "l'accès aux soins", forte: "son accès aux soins", aide: "La facilité d'accès aux médecins.", risque: false, directionnel: true },
   // NIVEAU DE SERVICES, plus « Services ». Le libellé générique portait la plus grande autorité
   // apparente du thème à côté de quatre lignes qui, elles, mesurent, et il promettait une proximité
@@ -1921,7 +1929,7 @@ const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
   calme_sonore: "l'environnement est plus bruyant",
   faible_exposition_industrielle: "les sites industriels sont plus présents",
   vie_locale: "la vie locale est plus discrète",
-  faible_dependance_auto: "la voiture y est plus indispensable",
+  faible_dependance_auto: "on y va plus souvent travailler en voiture",
 };
 
 // Écart minimal pour citer une commune de référence (« qu'à Briançon ») : en deçà,
@@ -2143,12 +2151,15 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
   faible_risque_inondation: "peu de reconnaissances CatNat inondation",
-  faible_dependance_auto: "peu dépendante de la voiture au quotidien",
+  // FUT-96 : la mesure est la part des actifs qui vont TRAVAILLER en voiture (MOBPRO), pas la
+  // faisabilité de tous les déplacements sans voiture. La raison dit la pratique, pas une promesse.
+  faible_dependance_auto: "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
   acces_transports: "bien reliée par le train",
   mobilite_quotidienne: (c) => {
     const r = c.reseauLocal;
     const mode = r?.metro ? "métro" : r?.tram ? "tram" : "bus";
-    return `réseau de ${mode} à portée de marche`;
+    // Arrêts autour du centre de la commune : ni horaires ni desserte à l'adresse (FUT-96).
+    return `réseau de ${mode} près du centre de la commune`;
   },
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
@@ -2187,7 +2198,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
   faible_risque_inondation: "historique CatNat inondation plus marqué",
-  faible_dependance_auto: "territoire où la voiture reste quasi indispensable",
+  faible_dependance_auto: "trajets domicile-travail plus souvent faits en voiture qu'ailleurs",
   acces_transports: "desserte ferroviaire limitée",
   mobilite_quotidienne: "peu ou pas de transports en commun de proximité",
   eviter_grandes_villes: "grande agglomération",

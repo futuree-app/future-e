@@ -59,6 +59,10 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // seuil, et le verdict en faisait le principal point à contrôler. Le registre des critères change (règles,
 // issue de `faible_chaleur`), donc ce que le moteur CONCLUT. Un dossier engine-5 garde son compromis et son
 // verdict tels qu'ils ont été vendus, et se relit à l'identique.
+// PAS D'INCRÉMENT POUR FUT-96 (22/10/2026), même doctrine que FUT-20. Les cartes « voiture » disent désormais
+// la part des actifs qui vont TRAVAILLER en voiture (« les trajets domicile-travail sans voiture »), plus « la
+// possibilité de se déplacer sans voiture ». Mêmes règles, mêmes rangs, mêmes issues, même registre : seule la
+// formulation change (`fut96-promesses-sans-voiture.test.ts`). Un dossier figé avant garde son texte.
 export const ENGINE_VERSION = "engine-6";
 
 export type DecisionArtifactV1 = {
