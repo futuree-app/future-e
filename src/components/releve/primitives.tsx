@@ -59,9 +59,14 @@ export function GlypheGrain({ grain, taille = 12 }: { grain: GrainCle; taille?: 
       {grain === "commune" ? (
         <circle cx={c} cy={c} r={c - trait} fill="none" stroke="currentColor" strokeWidth={trait} />
       ) : grain === "unite_urbaine" ? (
+        // FUT-126 · L'AGGLOMÉRATION EST UN CERCLE DOUBLÉ, plus jamais un cercle pointé : dans l'emblème
+        // des échelles, le point plein au centre désigne l'ADRESSE, et le pointé disait donc « plus
+        // précis » d'un grain plus LARGE que la commune. Deux anneaux disent « la commune, et ce qui
+        // l'entoure » ; aucun n'est plein, rien ne peut se lire comme le point de l'adresse. Les traits
+        // sont plus fins que celui de la commune, pour garder un jour net entre eux à 10 px.
         <>
-          <circle cx={c} cy={c} r={c - trait} fill="none" stroke="currentColor" strokeWidth={trait} />
-          <circle cx={c} cy={c} r={c / 2.6} fill="currentColor" />
+          <circle cx={c} cy={c} r={c - 0.6} fill="none" stroke="currentColor" strokeWidth={1} />
+          <circle cx={c} cy={c} r={c * 0.48} fill="none" stroke="currentColor" strokeWidth={1} />
         </>
       ) : grain === "secteur" ? (
         <rect x={trait} y={trait} width={t - 2 * trait} height={t - 2 * trait} rx={t / 6} fill="none" stroke="currentColor" strokeWidth={trait} />
@@ -491,9 +496,11 @@ export function RegleDeRang({ bas, haut, sujet }: { bas: number; haut: number; s
         ))}
         <div style={{ position: "absolute", left: `${g}%`, width: `${Math.max(1.5, d - g)}%`, top: 3, height: 9, background: "var(--r-encre)" }} />
       </div>
+      {/* FUT-126 · DEUX PÔLES, PAS DE MILIEU. « communes de France » posé au centre de l'axe se lisait comme
+          un point médian (une moyenne), ce que la règle ne mesure pas. L'univers de comparaison est dit par
+          la phrase de rang, juste au-dessus, et par le nom accessible de la figure. */}
       <figcaption className={s.mono} style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "var(--r-meta)", marginTop: 4 }}>
         <span>moins favorable</span>
-        <span>communes de France</span>
         <span>plus favorable</span>
       </figcaption>
     </figure>

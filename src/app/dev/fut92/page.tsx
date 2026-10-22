@@ -95,7 +95,7 @@ export default async function BancFut92({ searchParams }: { searchParams: Promis
   const repere = () => (
     <EchelleNavigator
       territoireHref={href("quartier")} autourHref={href("autour")} logementHref={href("logement")}
-      addressAvailable={avecAdresse} commune={commune} inseeCode={t.insee} className="lg:w-[280px]"
+      addressAvailable={avecAdresse} commune={commune} inseeCode={t.insee} className="lg:w-[280px]" presentation={vue}
     />
   );
   const commun = {

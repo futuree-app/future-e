@@ -320,6 +320,7 @@ export default async function RapportPage() {
       commune={displayName}
       inseeCode={inseeCode}
       className="lg:w-[280px]"
+      presentation={presentation}
     />
   );
 

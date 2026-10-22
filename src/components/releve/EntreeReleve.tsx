@@ -12,6 +12,8 @@ import type { VerificationActionType } from "@/lib/decision/decision-fact";
 import type { EntreeLue } from "./lecture-dossier";
 import { releve as s, Ligne, Marge, Registre, RegleDeRang, Seuils } from "./primitives";
 import { margeDe } from "./marge";
+import { definitionsPour } from "@/lib/decision/glossaire";
+import { statutAffiche } from "./statut-affiche";
 
 export { margeDe, teinteSection, teinteEntree } from "./marge";
 
@@ -22,20 +24,36 @@ const GESTE: Record<VerificationActionType, string> = {
   renseigner_adresse: "M2.5 8h10 M8.8 4.3 13 8l-4.2 3.7",
 };
 
-export function Geste({ libelle, type }: { libelle: string; type?: VerificationActionType }) {
+/**
+ * LE GESTE ET SON COMPLÉMENT (FUT-126). Le détail d'une action (« Faites contrôler les fondations si un
+ * doute subsiste ») est une PRÉCISION DU GESTE, pas une limite de la donnée : il se lit juste sous le
+ * geste, aligné sur son libellé. La présentation classique le range dans « Données et limites »
+ * (`MethodDetails`), où la recette l'a pris pour une limite ; le texte est le même, seule sa place change.
+ */
+export function Geste({ libelle, type, detail }: { libelle: string; type?: VerificationActionType; detail?: string }) {
   return (
-    <p className={s.dense} style={{ display: "flex", gap: 10, alignItems: "flex-start", color: "var(--r-encre)" }}>
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false" style={{ flex: "none", marginTop: 3 }}
-        fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <path d={GESTE[type ?? "renseigner_adresse"]} />
-      </svg>
-      <span>{libelle}</span>
-    </p>
+    <div className={s.pileSerree} style={{ gap: 2 }}>
+      <p className={s.dense} style={{ display: "flex", gap: 10, alignItems: "flex-start", color: "var(--r-encre)" }}>
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false" style={{ flex: "none", marginTop: 3 }}
+          fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+          <path d={GESTE[type ?? "renseigner_adresse"]} />
+        </svg>
+        <span>{libelle}</span>
+      </p>
+      {detail ? <p className={s.nuance} style={{ paddingLeft: 26 }}>{detail}</p> : null}
+    </div>
   );
 }
 
+/**
+ * « DONNÉES ET LIMITES » NE PORTE QUE CE QUI QUALIFIE LA DONNÉE (FUT-126) : la méthode du signal (convention,
+ * sens retenu, raison) et les constats détaillés d'une composition. La zone « À vérifier » de la
+ * production n'y figure plus : chacune de ses lignes est le détail d'un geste, désormais rendu sous ce
+ * geste (`Geste`), sur la carte, sur un de ses côtés ou dans un constat détaillé. Test : aucune ligne
+ * de `aVerifier` n'est perdue (`finitions-releve.test.ts`, G1).
+ */
 function DonneesEtLimites({ e, provenance }: { e: EntreeLue; provenance?: string }) {
-  if (e.aVerifier.length + e.methode.length + e.detailles.length === 0) return null;
+  if (e.methode.length + e.detailles.length === 0) return null;
   return (
     <details className={`${s.details} ${s.detailsFluide}`}>
       <summary>
@@ -44,13 +62,6 @@ function DonneesEtLimites({ e, provenance }: { e: EntreeLue; provenance?: string
           : "Données et limites"}
       </summary>
       <div className={s.pile} style={{ marginTop: 8, paddingLeft: 12, borderLeft: "1px solid var(--r-filet)" }}>
-        {/* Les deux zones de `MethodDetails`, dans le même ordre et sous les mêmes noms. */}
-        {e.aVerifier.length > 0 ? (
-          <div className={s.pileSerree}>
-            <p className={s.etiquette}>À vérifier</p>
-            {e.aVerifier.map((l, i) => <p key={i} className={s.nuance}>{l}</p>)}
-          </div>
-        ) : null}
         {e.methode.length > 0 ? (
           <div className={s.pileSerree}>
             <p className={s.etiquette}>Méthode du signal</p>
@@ -63,7 +74,7 @@ function DonneesEtLimites({ e, provenance }: { e: EntreeLue; provenance?: string
             <p className={s.dense}>{d.enonce}</p>
             {d.nuance ? <p className={s.nuance}>{d.nuance}</p> : null}
             <Marge elements={margeDe(d, provenance)} enLigne />
-            {d.geste ? <Geste libelle={d.geste.libelle} type={d.geste.type} /> : null}
+            {d.geste ? <Geste libelle={d.geste.libelle} type={d.geste.type} detail={d.geste.detail} /> : null}
           </div>
         ))}
       </div>
@@ -71,12 +82,21 @@ function DonneesEtLimites({ e, provenance }: { e: EntreeLue; provenance?: string
   );
 }
 
+/** Tout le texte qu'une carte affiche, pour y repérer un terme du glossaire. */
+function textesDe(e: EntreeLue): string[] {
+  return [
+    e.sujet, e.statut, e.enonce, e.nuance,
+    ...e.cotes.flatMap((c) => [c.enonce, c.nuance]),
+    ...e.detailles.flatMap((d) => [d.sujet, d.enonce, d.nuance]),
+  ].filter((t): t is string => Boolean(t));
+}
+
 function Corps({ e, teinte, compacte, provenance }: { e: EntreeLue; teinte: string; compacte: boolean; provenance?: string }) {
   return (
     <>
       {e.horsPriorites ? <p className={s.etiquette}>Au-delà de vos priorités</p> : null}
       {e.sujet ? <Registre teinte={teinte} as="h3">{e.sujet.charAt(0).toUpperCase() + e.sujet.slice(1)}</Registre> : null}
-      {e.statut ? <p className={`${s.etiquette} ${s.teinte}`} style={{ "--r-teinte": teinte } as CSSProperties}>{e.statut}</p> : null}
+      {e.statut ? <p className={`${s.etiquette} ${s.teinte}`} style={{ "--r-teinte": teinte } as CSSProperties}>{statutAffiche(e)}</p> : null}
       {e.sujet ? (
         <p className={compacte ? s.dense : s.corps}>{e.enonce}</p>
       ) : (
@@ -97,13 +117,19 @@ function Corps({ e, teinte, compacte, provenance }: { e: EntreeLue; teinte: stri
                 {c.preuves.length + c.sources.length > 0 ? (
                   <Marge elements={margeDe({ grains: [], preuves: c.preuves, sources: c.sources }, provenance)} enLigne />
                 ) : null}
-                {c.geste ? <Geste libelle={c.geste.libelle} type={c.geste.type} /> : null}
+                {c.geste ? <Geste libelle={c.geste.libelle} type={c.geste.type} detail={c.geste.detail} /> : null}
               </div>
             </li>
           ))}
         </ul>
       ) : null}
-      {e.geste ? <Geste libelle={e.geste.libelle} type={e.geste.type} /> : null}
+      {e.geste ? <Geste libelle={e.geste.libelle} type={e.geste.type} detail={e.geste.detail} /> : null}
+      {definitionsPour(textesDe(e)).map((d) => (
+        <details key={d.cle} className={`${s.details} ${s.detailsFluide}`}>
+          <summary>{d.question}</summary>
+          <p className={s.nuance} style={{ marginTop: 8, paddingLeft: 12, borderLeft: "1px solid var(--r-filet)" }}>{d.definition}</p>
+        </details>
+      ))}
       <DonneesEtLimites e={e} provenance={provenance} />
     </>
   );
