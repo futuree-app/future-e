@@ -368,6 +368,7 @@ export function DossierDecisionSection({
                           <li key={f.id}>
                             <p className="font-mono text-[11px] tracking-[0.08em] uppercase text-label mb-1">{cap(f.headlineSubject)}</p>
                             <p className="text-[15px] leading-[1.55] text-muted">{f.faceStatement}</p>
+                            {f.limitation ? <p className="text-[13px] leading-[1.5] text-ghost mt-2">{f.limitation}</p> : null}
                           </li>
                         );
                       })}

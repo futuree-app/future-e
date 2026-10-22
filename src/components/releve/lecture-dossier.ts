@@ -263,7 +263,7 @@ function lireFait(f: DecisionFact, horsPriorites: boolean): EntreeLue {
   const limites = [...aVerifier, ...methode];
   const sujet = "headlineSubject" in f && typeof f.headlineSubject === "string" ? f.headlineSubject : undefined;
   const statut = "status" in f && typeof f.status === "string" ? f.status : undefined;
-  const nuance = (f.role === "incompatibility" || f.role === "verification" || f.role === "mismatch") ? f.limitation : undefined;
+  const nuance = (f.role === "incompatibility" || f.role === "verification" || f.role === "mismatch" || f.role === "alignment") ? f.limitation : undefined;
   // UNE CORRESPONDANCE SE LIT EN DEUX LIGNES, comme en production : la priorité, puis la phrase de
   // rang que la règle a écrite (`faceStatement`). L'énoncé autonome (`statement`) n'y est pas montré.
   const enonce = f.role === "alignment" ? f.faceStatement : f.statement;
