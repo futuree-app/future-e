@@ -56,12 +56,97 @@ rendent les **composants de production** : `/dev/fut92` (le gabarit complet de `
 | 11 | Mesure | `PriorityControlActions` et `EchelleNavigator` sont les mêmes composants dans les deux présentations |
 | — | Console | seulement la mesure d'audience factice du serveur local |
 
-## 4. Ce qui n'est pas vérifié
+## 4. Les dossiers historiques (21/10/2026, avec l'accord du porteur)
 
-- **Artefacts réels en série** (§ 6.2, points 1 et 2 : 58 artefacts prêts, engine-1 à engine-6, cinq
-  comptes ; lectures enrichies stockées). Ils sont en base de production ; leur lecture, même en
-  lecture seule et anonymisée, attend l'accord du porteur. Les cas ci-dessus sont des dossiers du
-  moteur actuel, et les artefacts engine-5 figés du dépôt (`fut17-artefacts-*.json`) restent couverts
-  par les tests existants.
+### Méthode
+
+- **Lecture seule** des tables `decision_artifact` et `decision_narrative` de production (uniquement
+  des `select`), extraites dans un dossier temporaire local, **supprimé après la recette** ; aucune
+  donnée brute dans le dépôt, Linear ou ce rapport.
+- **Aucun effet de bord** : aucune écriture, aucune génération (`DOSSIER_NARRATIVE=false`, aucune clé
+  de modèle chargée), aucune variable Vercel touchée, aucun compte activé.
+- Chaque artefact prêt est rendu **tel qu'il a été enregistré** (`parseDecisionArtifact`, puis le
+  `dossier` figé), par les composants de production, dans les deux présentations, sur un banc local
+  supprimé après usage. Aucune conclusion n'est recalculée avec le moteur actuel.
+- **Lectures enrichies associées par leur identité exacte**, celle de la production : compte, commune,
+  périmètre (`scope_key`) et empreinte du plan (`input_hash = buildConclusionHash(plan)`), jamais par la
+  commune seule. Elles sont rendues comme un cache servi : blocs stockés, validés par
+  `validateGeneratedBlocks`, puis `ConclusionBlock` dans chaque variante.
+- Contrôles par artefact : titre et détail du verdict comparés **à l'artefact lui-même** ; chaque phrase
+  du classique **comptée** dans le texte complet du Relevé (une absence à un second endroit ne se cache
+  pas derrière la première occurrence) ; liens de preuve, sources externes, liens internes ; lecture
+  enrichie bloc par bloc ; exceptions d'exécution. Tout ce que le Relevé affiche en plus est relu et
+  rattaché à sa source.
+
+### Corpus
+
+58 artefacts prêts, **confirmé** (67 lignes au total : les 9 autres sont en échec, sans dossier ; la
+production retombe alors sur l'assemblage du jour, identique dans les deux présentations). Cinq comptes,
+du 11/08/2026 au 21/10/2026, 12 en commune seule et 46 en commune + adresse, 9 périmètres à plusieurs
+versions (jusqu'à la v19) ; 53 sont antérieurs à FUT-10 (sans contexte du bien). Aucun artefact
+engine-3 n'existe. 6 lectures enrichies en base, toutes au contrat `v16`.
+
+### Bilan
+
+| Moteur | Artefacts | Commune / adresse | Lectures enrichies retrouvées | Fidèlement restitués | Pertes ou altérations métier | Écarts constatés (tous non bloquants) |
+| --- | --- | --- | --- | --- | --- | --- |
+| engine-1 | 47 | 10 / 37 | 3 | **47** | **0** | intitulés « Méthode du signal » / « Données et limites » moins répétés ; 7 liens de preuve avec provenance en plus |
+| engine-2 | 1 | 0 / 1 | 0 | **1** | **0** | intitulés |
+| engine-4 | 8 | 2 / 6 | 0 | **8** | **0** | intitulés ; un résumé de composition stocké affiché par le Relevé seul |
+| engine-5 | 1 | 0 / 1 | 0 | **1** | **0** | — |
+| engine-6 | 1 | 0 / 1 | 0 | **1** | **0** | — |
+| **Total** | **58** | 12 / 46 | **3** | **58** | **0** | |
+
+- **Verdict** : titre et détail affichés = ceux de l'artefact, **58 / 58**, dans les deux présentations.
+- **Contenu** : 4 735 phrases du classique ; **aucune** n'apparaît moins souvent dans le Relevé, hors deux
+  intitulés de rubrique (ci-dessous). Aucune preuve, aucune source externe, aucune démarche perdue.
+- **Exceptions d'exécution** : aucune, dans aucune présentation (anciennes structures comprises).
+
+### Écarts, classés
+
+**Différences de présentation attendues**
+
+- *Intitulés.* Le classique range les sources d'une carte sous « Méthode du signal », dans « Données et
+  limites ». Le Relevé porte ces mêmes sources dans sa marge de preuve (« Source : … », même texte, même
+  nombre d'occurrences) : l'intitulé apparaît donc moins souvent, et le dépliant n'existe plus quand il
+  ne contiendrait que des sources. Reproduire : un dossier dont une carte n'a que des sources ; compter
+  « Méthode du signal » dans les deux présentations.
+- *Libellés de structure ajoutés.* Bande « D'où viennent ces constats » (compte par échelle, « examiné,
+  aucun constat affiché », « non examiné dans cette lecture »), légendes des jauges et des rangs, ligne
+  de marge « Territoire · commune », preuves regroupées sur une ligne (« Autorisations d'urbanisme ·
+  parcelles à moins de 50 m · 1 dossier non achevé · observée le … »). Tous dérivés de l'artefact.
+- *Sujets.* Le Relevé titre certains faits par le libellé de la priorité ou le sujet du titre enregistrés
+  dans l'artefact (`label`, `headlineSubject`), avec une majuscule.
+- *Ordre de la lecture enrichie.* Mêmes lignes dans les deux variantes ; le Relevé fait monter la démarche
+  prioritaire avant l'explication (FUT-91).
+
+**Défauts préexistants du classique, que le Relevé ne reproduit pas**
+
+- *Provenance absente de certains liens de preuve* (7 artefacts, cartes climat et feu de forêt d'une
+  composition) : le classique envoie vers la donnée courante (`/rapport/quartier#evidence-…`), le Relevé
+  vers la version achetée (`?preuve=<périmètre>#evidence-…`, comme `evidenceHref`). Même cible.
+- *Résumé de composition* (1 artefact engine-4) : le résumé enregistré d'une composition n'est affiché que
+  par le Relevé.
+
+**Comportement préexistant identique dans les deux présentations (hors périmètre du Relevé)**
+
+- *Lecture enrichie du bloc `compositions_found`* (3 artefacts engine-1) : le texte rédigé est stocké,
+  mais `ConclusionBlock` ne rend jamais ce bloc, ni enrichi ni déterministe, dans aucune présentation ;
+  les compositions restent affichées par leurs cartes (résumés présents 7 / 7 dans les deux). Aucune
+  information perdue ; un texte payé à la génération n'est simplement jamais montré. Reproduire : un
+  dossier avec une composition nommée hors tête ; le bloc figure dans `narrativePlan.blocks`, pas à
+  l'écran.
+
+**Régressions introduites par le Relevé : aucune.**
+
+**Impossible à vérifier**
+
+- 4 lectures enrichies sur 6 n'appartiennent à aucun périmètre servi par un artefact (dossiers assemblés
+  avant les artefacts) : elles passent par le même `ConclusionRedigee` dans les deux présentations,
+  mais n'ont pas pu être rendues sur leur dossier d'origine, qui n'est pas figé.
+- Les 9 artefacts en échec n'ont pas de dossier à rendre.
+
+## 5. Ce qui n'est pas vérifié
+
 - **`/rapport` réel avec une session** : se fait au palier 1, sur le compte du porteur.
 - Safari sur iPhone réel ; mise à jour d'analyse (Q1) sur prévisualisation ; performance (TTFB, LCP).
