@@ -63,7 +63,16 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // la part des actifs qui vont TRAVAILLER en voiture (« les trajets domicile-travail sans voiture »), plus « la
 // possibilité de se déplacer sans voiture ». Mêmes règles, mêmes rangs, mêmes issues, même registre : seule la
 // formulation change (`fut96-promesses-sans-voiture.test.ts`). Un dossier figé avant garde son texte.
-export const ENGINE_VERSION = "engine-6";
+// engine-7 (FUT-127, 22/10/2026) : l'inondation ne se conclut plus sur le rang du compte CatNat de la commune.
+// Ce rang qualifiait d'« exposition élevée » 48 % des communes (4 reconnaissances suffisaient) et rendait
+// `satisfied` en dessous, donc une bonne nouvelle : à Charron, en zone rouge submersible, « Bonne
+// correspondance ». Désormais, avec une adresse, la zone lue au point et à la parcelle gouverne (une zone
+// d'interdiction liée à l'inondation pèse `decision_critical`, une zone de prescriptions `structuring`) ; sans
+// adresse, la carte part des plans de prévention de la commune (base GASPAR) ; aucune lecture ne rend plus
+// `satisfied`. Le registre des critères, l'orientation et le verdict changent : c'est ce que le moteur
+// CONCLUT. Un dossier engine-6 garde sa carte et son verdict tels qu'ils ont été vendus ; l'écran le
+// contextualise (`lectureInondationAnterieure`), sans rien réécrire.
+export const ENGINE_VERSION = "engine-7";
 
 export type DecisionArtifactV1 = {
   schemaVersion: 1;

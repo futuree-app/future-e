@@ -571,7 +571,7 @@ test("Matrice : un fait de bâtiment n'est jamais dit du logement, un indicateur
 test("Artefact : la carte enrichie traverse la sérialisation, et le texte relu est le texte écrit", async () => {
   const { d, project } = await dossier("nimes", { chaleur: 3 });
   const art = D.buildDecisionArtifact(d, project, "2026-10-16T10:00:00.000Z", D.PRODUCT_CONVENTIONS_VERSION);
-  assert.equal(art.engineVersion, "engine-6"); // FUT-17 : le moteur courant
+  assert.equal(art.engineVersion, "engine-7"); // FUT-127 : le moteur courant
   const relu = D.parseDecisionArtifact(JSON.parse(JSON.stringify(art)));
   assert.ok(relu);
   assert.equal(toutLeTexte(relu.dossier), toutLeTexte(d));

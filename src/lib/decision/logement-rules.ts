@@ -1,11 +1,14 @@
 // Règles Logement (slice 1.5). Statut-aware : present -> verification, unavailable -> unknown scopée,
 // none -> rien. Les fabriques ne produisent QUE verification/unknown (jamais incompatibility).
 // Posture-aware. Chaque fait porte le constat établi (statement) + l'action propre.
+import type { UserProject } from "../user-project.ts";
+import type { ModuleFacts } from "./decision-fact.ts";
 import type { DecisionRule, VerificationFact, UnknownFact, EvidenceRef, RuleEvaluation, MaterialityTier, LogementFacts, SourceCoverage, VerificationActionType } from "./decision-fact.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 
 import { GESTES, bucketDuProjet, type Bucket, type ActionCopy } from "./logement-gestes.ts";
 import type { RelationAuLieu } from "../relation-au-lieu.ts";
+import { carteInondationPorteLePlan, libelleCourtDeZone, statutDeZone } from "./zonage-inondation.ts";
 
 // La dérivation vit dans `logement-gestes.ts` : une règle de territoire peut proposer un geste à
 // faire dans le logement (le radon), donc elle en a besoin aussi.
@@ -138,6 +141,8 @@ function coverageRule(cfg: {
   observedValue?: (l: LogementFacts) => string | undefined; unavailableStatement: string;
   /** Le nom de la vérification dans une énumération, quand la source ne répond pas. */
   nomVerification: string;
+  /** FUT-127 : un autre fait porte déjà ce constat (le même plan, la même adresse) ; la règle se tait. */
+  porteAilleurs?: (f: ModuleFacts, p: UserProject) => boolean;
 }): DecisionRule {
   const grain = cfg.grain ?? "adresse";
   POTENTIEL_DES_COUVERTURES.set(`logement.${cfg.id}`, { tier: cfg.tier, coverage: cfg.coverage, nom: cfg.nomVerification });
@@ -150,6 +155,9 @@ function coverageRule(cfg: {
       if (cfg.buckets && !cfg.buckets.includes(b)) return na(cfg.id);
       const cov = cfg.coverage(l);
       if (cov === "unavailable") return out(cfg.id, logementScopedUnknown(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, undefined, cfg.targetKey), cfg.topic(f.nom), cfg.unavailableStatement));
+      if (cov === "present" && cfg.flag(l) && cfg.porteAilleurs?.(f, p)) {
+        return { ruleId: `logement.${cfg.id}`, projectKeys: [], outcome: "not_applicable", facts: [], reason: "porté par la carte inondation à l'adresse" };
+      }
       if (cov === "present" && cfg.flag(l)) {
         return out(cfg.id, logementVerification(cfg.id, ev(`logement.${cfg.id}`, cfg.source, cfg.sourceMode ?? "live_fetch", grain, cfg.observedValue?.(l), cfg.targetKey), cfg.tier, cfg.topic(f.nom), cfg.statement(l), cfg.actionType, cfg.action[b], cfg.status, cfg.limitation));
       }
@@ -245,7 +253,18 @@ export const LOGEMENT_RULES: DecisionRule[] = [
     limitation: "L'exposition de la zone ne prouve pas un dommage sur ce bien.", actionType: "verifier_sur_place", action: GESTES.bati,
     unavailableStatement: "L'exposition du bâti (retrait-gonflement des argiles) n'a pas pu être vérifiée à cette adresse.", nomVerification: "le retrait-gonflement des argiles" }),
   coverageRule({ id: "zone-reglementee", tier: "structuring", source: SOURCES.georisquesGaspar, targetKey: "housing.regulated_zone", topic: () => "un plan de prévention des risques", status: "Plan applicable", coverage: (l) => l.pprn, flag: (l) => l.zoneReglementee,
-    statement: (l) => l.pprnLabel ? `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}.` : "À cette adresse, au moins un plan de prévention des risques s'applique.",
+    // FUT-127 : quand le plan applicable est celui que le zonage inondation a lu, la carte dit sa zone et
+    // son régime ; sans eux, « un plan s'applique » taisait une zone rouge submersible.
+    statement: (l) => {
+      const z = l.zonageInondation;
+      if (z && (z.etat === "zone" || z.etat === "alea_inconnu") && z.zone.plan && z.zone.plan === l.pprnLabel) {
+        const code = libelleCourtDeZone(z.zone);
+        const regime = z.zone.regimeCode ? ` (${statutDeZone(z.zone.regimeCode).toLowerCase()})` : "";
+        return `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}${code ? `, ${code}${regime}` : ""}.`;
+      }
+      return l.pprnLabel ? `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}.` : "À cette adresse, au moins un plan de prévention des risques s'applique.";
+    },
+    porteAilleurs: (f, p) => carteInondationPorteLePlan(f, p),
     actionType: "obtenir_document", action: GESTES.reglementaire,
     unavailableStatement: "Le zonage réglementaire (plans de prévention) n'a pas pu être vérifié à cette adresse.", nomVerification: "les plans de prévention" }),
   coverageRule({ id: "cavite", tier: "structuring", source: SOURCES.georisquesBrgm, topic: () => "les cavités souterraines proches", status: "Recensée à moins de 500 m", coverage: (l) => l.cavites, flag: (l) => l.caviteProche,

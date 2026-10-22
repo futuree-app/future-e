@@ -1,6 +1,8 @@
 // Contrats du dossier de décision (slice 1, v2). Types PURS.
 // DecisionFact = union discriminée : le TYPE impose la doctrine (un unknown a un impact,
 // un compromise a deux côtés avec preuve, une verification a une action).
+import type { ZonageInondationFait } from "./zonage-inondation.ts";
+import type { PlansInondationCommune } from "../data/gaspar-pprn-inondation.ts";
 import type { RelationAuLieu } from "../relation-au-lieu.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { UserProject, CriterionRef } from "../user-project.ts";
@@ -409,6 +411,13 @@ export type LogementFacts = {
    * règle n'émet que sur `true`.
    */
   diagnosticNonAttribue?: boolean;
+  /**
+   * FUT-127 : LE ZONAGE INONDATION DE L'ADRESSE, dérivé des plans lus au point et à la parcelle par
+   * `zonageInondationDeLAdresse` (la même fonction pour le moteur et pour le module). La règle
+   * inondation en part : elle ne conclut plus sur le compte communal quand l'adresse est lue.
+   * OPTIONNEL : absent d'un artefact antérieur, et la règle retombe alors sur la lecture communale.
+   */
+  zonageInondation?: ZonageInondationFait;
   addressLabel: string;
 };
 
@@ -442,7 +451,18 @@ export type ModuleFacts = CommuneAttributes & {
   // s'en sert donc que pour refuser de conclure « priorité satisfaite » là où l'État n'a rien recensé
   // et où le contexte, lui, appelle un regard. `null` = donnée absente.
   boisementPct: number | null;
+  // Le RANG du compte de reconnaissances CatNat inondation (0-100). FUT-127 : plus aucune règle ne
+  // s'en sert. Il qualifiait d'« exposition élevée » 48 % des communes (4 reconnaissances suffisaient)
+  // et fabriquait une bonne nouvelle sous ce seuil. Gardé dans les faits pour la lecture des
+  // artefacts, jamais pour conclure.
   inondationRisque: number | null;
+  /**
+   * FUT-127 : LES PLANS DE PRÉVENTION DES INONDATIONS DE LA COMMUNE (base GASPAR, export daté), approuvés,
+   * appliqués par anticipation ou prescrits. Chargés par l'APPELANT (fichier), comme le climat.
+   * `null` ou absent = table non chargée : la règle ne conclut pas. `plans: []` = aucun plan connu de
+   * la base, ce qui n'est pas une absence de risque.
+   */
+  plansInondation?: PlansInondationCommune | null;
   // La trajectoire climatique (DRIAS), chargée par l'APPELANT comme `tailleVille` : le mapping reste pur.
   // NULLABLE mais NON OPTIONNEL : `undefined` créerait un troisième état entre « la donnée est là » et
   // « on l'a cherchée sans la trouver », et une règle finirait par confondre les deux.

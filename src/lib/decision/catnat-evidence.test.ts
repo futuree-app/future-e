@@ -39,7 +39,9 @@ test("le jargon « CatNat » ne revient pas dans la phrase du lecteur", () => {
   // dit à personne. Le mot reste légitime dans le libellé de SOURCE, qui s'adresse à qui vérifie.
   assert.equal(libelleCatnatInondation(catnatInondationDepuisCompte(7)!).includes("CatNat"), false);
   assert.match(sourceCatnatInondation(catnatInondationDepuisCompte(7)!), /GASPAR/);
-  assert.match(sourceCatnatInondation(catnatInondationDepuisCompte(7)!), /submersion marine exclue/);
+  // FUT-127 : la mention « submersion marine exclue » était fausse (aucune reconnaissance n'a ce libellé).
+  assert.doesNotMatch(sourceCatnatInondation(catnatInondationDepuisCompte(7)!), /submersion/);
+  assert.match(sourceCatnatInondation(catnatInondationDepuisCompte(7)!), /liées aux inondations/);
 });
 
 test("la source porte la version de la convention", () => {

@@ -9,6 +9,7 @@ import type { RadonFacts } from "./radon-facts.ts";
 import { buildSanteFacts } from "./sante-facts.ts";
 import { merDeLaCommune } from "../commune-attributes.ts";
 import type { RankBand } from "./mismatch-facts.ts";
+import type { PlansInondationCommune } from "../data/gaspar-pprn-inondation.ts";
 
 export function mapCommuneToModuleFacts(
   entry: IndexCommune,
@@ -18,7 +19,7 @@ export function mapCommuneToModuleFacts(
   // de fermer (le comparateur jugeait la taille sur l'agglomération, le dossier sur la commune).
   // `climat` est chargé PAR L'APPELANT (les scénarios DRIAS vivent dans un fichier, et ce mapping doit
   // rester pur donc testable), exactement comme `tailleVille`.
-  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null },
+  opts: { hasAddress: boolean; tailleVille: number | null; tailleVilleSource: "urban_unit" | "commune" | null; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null; plansInondation?: PlansInondationCommune | null },
 ): ModuleFacts {
   return {
     insee: entry.insee,
@@ -45,6 +46,8 @@ export function mapCommuneToModuleFacts(
       return typeof f === "number" ? f : null;
     })(),
     inondationRisque: entry.inondation ? entry.inondation.risque : null,
+    // FUT-127 : chargés par l'appelant (un fichier), comme le climat. Absents = non chargés.
+    ...(opts.plansInondation !== undefined ? { plansInondation: opts.plansInondation } : {}),
     climat: opts.climat ?? null,
     // La santé se construit ICI, sans I/O : air, bruit et exposition industrielle sont déjà dans l'index.
     // (Le climat, lui, exige les scénarios DRIAS complets, qui vivent dans un fichier à part.)

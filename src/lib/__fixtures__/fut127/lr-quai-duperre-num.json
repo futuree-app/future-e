@@ -1,0 +1,140 @@
+{
+ "adresse": {
+  "q": "3 Quai Duperré 17000 La Rochelle",
+  "label": "Quai Duperré 17000 La Rochelle",
+  "score": 0.8263422580645161,
+  "type": "street",
+  "citycode": "17300",
+  "lat": 46.15822,
+  "lon": -1.152418
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 36671649,
+   "numero": "0248",
+   "feuille": 1,
+   "section": "EN",
+   "code_dep": "17",
+   "nom_com": "La Rochelle",
+   "code_com": "300",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17300000EN0248",
+   "contenance": 288,
+   "code_insee": "17300"
+  },
+  "parcelCodeApp": "17300-000-EN-0248",
+  "idu": "17300000EN0248",
+  "repli": {
+   "rayon_m": 3,
+   "candidates": 2
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 207,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone orange Os1: ensemble des zones fortement urbanisees en alea faible a modere a court terme",
+        "codeZone": "Os1"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 50,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 151,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone orange Os1: ensemble des zones fortement urbanisees en alea faible a modere a court terme",
+        "codeZone": "Os1"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 45,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ }
+}

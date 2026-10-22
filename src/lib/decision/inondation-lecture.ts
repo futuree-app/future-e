@@ -34,6 +34,14 @@ import {
   phraseConstatCatnatInondation, sourceCatnatInondation, type CatnatInondation,
 } from "./catnat-evidence.ts";
 import type { PerilState } from "../onrn-sinistralite.ts";
+import { natureInondation, phenomenesInondation, type PlanAlea, type RegulatoryZone } from "../pprn-zonage.ts";
+
+/**
+ * P0-D (FUT-127) : CE QUE NOS LECTURES NE SONT PAS. Écrite une fois, reprise par les cartes inondation
+ * du dossier (`materiality-rules.ts`) et par le bloc réglementaire du module (`RegulatorySection.tsx`).
+ */
+export const PORTEE_ETAT_DES_RISQUES =
+  "Cette lecture prépare celle de l'état des risques sans la remplacer : c'est ce document, remis par le vendeur ou le bailleur, qui fait foi pour le bien.";
 
 /** La période couverte par le jeu ONRN/CCR embarqué. Écrite une fois, affichée partout. */
 export const ONRN_PERIODE = "1995-2021";
@@ -46,7 +54,10 @@ export const ONRN_PERIODE = "1995-2021";
  * `aucun_zonage` ferait dire « aucun plan ne s'applique ici » là où un plan s'applique.
  */
 export type ZonageInondationPoint =
-  | { kind: "zone_inondation"; plans: string[] }
+  | { kind: "zone_inondation"; plans: string[]; phenomenes?: string[] }
+  // FUT-127 : un plan réglemente ce point, et la donnée reçue ne dit pas s'il porte sur l'inondation
+  // (plan littoral ou multirisque sans aléas lus). Ce n'est NI une zone inondation, NI « aucun plan ».
+  | { kind: "zonage_alea_inconnu"; plans: string[] }
   | { kind: "zonage_autre" }
   | { kind: "aucun_zonage" }
   | { kind: "indisponible" };
@@ -111,27 +122,22 @@ const SOURCE_ONRN =
  * `modeleProcedure` (PPRN-I, PPRN-SM) est le champ propre ; le nom du plan sert de repli, parce
  * qu'il manque sur une partie du parc (« PPRI de la Charente » sans modèle renseigné).
  */
-// « PPRI » est dans la liste parce que c'est ainsi que la majorité des plans se nomment dans
-// `libPpr` (« PPRI de la Charente »), sans que `modeleProcedure` soit toujours renseigné. Le mot
-// est cerné par des limites de mot : « PPRIF » (feux de forêt) ne doit pas entrer par cette porte.
-const ALEA_INONDATION = /\bPPRI\b|inondation|inondable|submersion|crue|ruissellement/i;
-
+// FUT-127 : LA NATURE DU PLAN VIENT DE `natureInondation` (pprn-zonage.ts), la même fonction que le
+// dossier. L'ancienne liste (modèles PPRN-I et PPRN-SM, ou un mot dans le nom) lisait les plans
+// littoraux (`PPRN-L`, « PPR La Rochelle ») et une partie des multirisques comme étrangers à
+// l'inondation : 1 212 plans opposables, dont celui de Charron, en zone rouge submersible.
 export function zonageInondationDepuisPlans(
-  plans: { plan: string | null; hazardModel: string | null }[] | null | undefined,
+  plans: ({ plan: string | null; hazardModel: string | null; aleas?: PlanAlea[] | null; zones?: Pick<RegulatoryZone, "zoneName">[] })[] | null | undefined,
 ): ZonageInondationPoint {
   if (plans == null) return { kind: "indisponible" };
-  const inondation = plans.filter(
-    (p) =>
-      p.hazardModel === "PPRN-I" ||
-      p.hazardModel === "PPRN-SM" ||
-      (p.plan != null && ALEA_INONDATION.test(p.plan)),
-  );
+  const noms = (ps: typeof plans) => ps.map((p) => p.plan).filter((p): p is string => Boolean(p));
+  const inondation = plans.filter((p) => natureInondation(p) === "inondation");
   if (inondation.length > 0) {
-    return {
-      kind: "zone_inondation",
-      plans: inondation.map((p) => p.plan).filter((p): p is string => Boolean(p)),
-    };
+    const phenomenes = [...new Set(inondation.flatMap((p) => phenomenesInondation(p)))];
+    return { kind: "zone_inondation", plans: noms(inondation), ...(phenomenes.length ? { phenomenes } : {}) };
   }
+  const inconnus = plans.filter((p) => natureInondation(p) === "inconnue");
+  if (inconnus.length > 0) return { kind: "zonage_alea_inconnu", plans: noms(inconnus) };
   return plans.length > 0 ? { kind: "zonage_autre" } : { kind: "aucun_zonage" };
 }
 
@@ -145,10 +151,20 @@ function constatZonage(z: ZonageInondationPoint): ConstatInondation | null {
   };
   if (z.kind === "zone_inondation") {
     const noms = z.plans.length > 0 ? ` : ${z.plans.join(", ")}` : "";
+    const phen = z.phenomenes && z.phenomenes.length > 0 ? ` (${z.phenomenes.map((p) => p.replace(/^(la|le|les|l') ?/, "")).join(", ")})` : "";
     return {
       ...base, signal: true,
-      enonce: `Un plan de prévention du risque inondation réglemente ce point${noms}.`,
-      court: `Un plan de prévention des inondations réglemente ce point${noms}.`,
+      enonce: `Un plan de prévention du risque inondation réglemente ce point${noms}${phen}.`,
+      court: `Un plan de prévention des inondations réglemente ce point${noms}${phen}.`,
+    };
+  }
+  if (z.kind === "zonage_alea_inconnu") {
+    // NI UN SIGNAL, NI UNE ABSENCE. On dit ce qui est su (un plan s'applique) et ce qui ne l'est pas.
+    const noms = z.plans.length > 0 ? ` : ${z.plans.join(", ")}` : "";
+    return {
+      ...base, signal: true,
+      court: `Un plan de prévention s'applique à ce point${noms}. La donnée reçue ne précise pas s'il porte sur l'inondation.`,
+      enonce: `Un plan de prévention s'applique à ce point${noms}. La donnée reçue ne précise pas s'il porte sur l'inondation : l'état des risques du bien et le règlement du plan le disent.`,
     };
   }
   // LES DEUX ABSENCES DISENT CE QU'UN ZONAGE EST, sans quoi « aucun » se lit « rien à craindre ».

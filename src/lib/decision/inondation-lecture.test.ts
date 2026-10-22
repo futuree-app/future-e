@@ -65,7 +65,8 @@ test("Ciré-d'Aunis : le compte affiché est celui de la preuve du dossier, mot 
   const l = construireLectureInondation(CIRE)!;
   const catnat = l.constats.find((c) => c.cle === "catnat_commune")!;
   assert.match(catnat.enonce, /^La commune compte 5 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982\./);
-  assert.match(catnat.source, /submersion marine exclue/);
+  assert.match(catnat.source, /base GASPAR/);
+  assert.doesNotMatch(catnat.source, /submersion marine exclue/); // FUT-127 : la mention était fausse
   assert.equal(catnat.periode, "depuis 1982");
 });
 

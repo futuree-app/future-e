@@ -1,6 +1,6 @@
 import "server-only";
 import { agregerLignesCatnat, codeGaspar, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
-import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
+import { avecDetail, buildRegulatoryPlans, detailDuPlan, type PlanDetail, type RawPprnDetail, type RegulatoryPlan } from "./pprn-zonage.ts";
 
 type GasparRiskDetail = {
   libelle_risque_long?: string | null;
@@ -204,6 +204,34 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
   }
 }
 
+// ── LE DÉTAIL D'UN PLAN (FUT-127) ──────────────────────────────────────────────────────────────
+// La réponse au point ne porte ni les aléas ni la date d'approbation d'un plan. Le détail les donne,
+// commune par commune. Un appel par plan DISTINCT, mis en cache par process : un plan ne change pas
+// d'aléas d'un dossier à l'autre. Une panne rend `null` (aléas inconnus), jamais une liste vide.
+const planDetailCache = new Map<string, Promise<RawPprnDetail | null>>();
+
+function rawPlanDetail(idGaspar: string): Promise<RawPprnDetail | null> {
+  if (!planDetailCache.has(idGaspar)) {
+    planDetailCache.set(
+      idGaspar,
+      fetchJsonV2<RawPprnDetail>(`/api/v2/gaspar/pprn/${encodeURIComponent(idGaspar)}`, new URLSearchParams())
+        .catch(() => {
+          planDetailCache.delete(idGaspar);
+          return null;
+        }),
+    );
+  }
+  return planDetailCache.get(idGaspar)!;
+}
+
+async function completerPlans(plans: RegulatoryPlan[], codeInsee: string | null): Promise<RegulatoryPlan[]> {
+  return Promise.all(plans.map(async (plan) => {
+    const raw = plan.gasparId ? await rawPlanDetail(plan.gasparId) : null;
+    const detail: PlanDetail | null = raw ? detailDuPlan(raw, codeInsee) : null;
+    return avecDetail(plan, detail);
+  }));
+}
+
 async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSummary> {
   const [gasparJson, seismicJson] = await Promise.all([
     // Même grain que les arrêtés (FUT-60) : GASPAR ne connaît que la commune (75056 recense
@@ -248,6 +276,7 @@ async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSumma
 async function loadGeorisquesAddressSummary(
   latitude: number,
   longitude: number,
+  codeInsee: string | null,
 ): Promise<GeorisquesAddressSummary> {
   const params = new URLSearchParams({
     latitude: String(latitude),
@@ -312,7 +341,7 @@ async function loadGeorisquesAddressSummary(
       labels: pprnLabels,
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
     },
-    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
+    regulatoryPlans: await completerPlans(buildRegulatoryPlans(pprnJson.content), codeInsee),
     rga: rga
       ? {
           code: rga.codeExposition || null,
@@ -404,7 +433,8 @@ async function loadGeorisquesParcelSummary(
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
       zones: pprnZones,
     },
-    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
+    // Le code parcelle commence par le code INSEE de sa commune (`17091-000-AM-0006`).
+    regulatoryPlans: await completerPlans(buildRegulatoryPlans(pprnJson.content), parcelCode.slice(0, 5)),
     rga: rga
       ? {
           code: rga.codeExposition || null,
@@ -439,13 +469,15 @@ export async function getGeorisquesSummary(inseeCode: string) {
 export async function getGeorisquesAddressSummary(
   latitude: number,
   longitude: number,
+  /** La commune du point (code BAN) : elle choisit les aléas du plan qui la concernent (FUT-127). */
+  codeInsee: string | null = null,
 ) {
-  const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+  const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)},${codeInsee ?? ""}`;
 
   if (!addressSummaryCache.has(cacheKey)) {
     addressSummaryCache.set(
       cacheKey,
-      loadGeorisquesAddressSummary(latitude, longitude),
+      loadGeorisquesAddressSummary(latitude, longitude, codeInsee),
     );
   }
 

@@ -301,15 +301,43 @@ test("bruit confirmé, infrastructure à portée : plutôt défavorable, textes 
   assert.equal(k.action?.label, "Écoutez sur place, à plusieurs heures");
 });
 
-test("inondation confirmée, exposition notable : plutôt défavorable, textes inchangés", () => {
+// FUT-127 (engine-7) : LE COMPTE CATNAT N'ORIENTE PLUS. Une commune couverte par un plan est un fait
+// communal, qui ne dit pas si l'adresse est en zone : la condition reste ouverte, sans sens. Seule une zone
+// inondation ÉTABLIE à l'adresse (liée explicitement, rattachement fiable) penche contre la condition.
+const PPR_CHATEL = { export: "2026-10-05", plans: [{ id: "17DDTM20100008", nom: "PPR Chatelaillon", modele: "PPRN-L", statut: "approuve" as const, date: "2019-04-01", aleas: ["Par submersion marine"] }] };
+
+test("inondation confirmée, commune couverte par un plan, sans adresse : condition ouverte, sans sens", () => {
   const { d } = dossier(confirme(projet({ faible_risque_inondation: 3 }), "faible_risque_inondation"), {
-    extra: { inondation: { risque: 90, catnat: null } },
+    adresse: false, extra: { inondation: { risque: 90, catnat: 4 } }, faits: { plansInondation: PPR_CHATEL },
+  });
+  const k = carte(d, "faible_risque_inondation")!;
+  assert.equal(k.signal, "neutre");
+  assert.match(k.statement, /plan de prévention des risques littoraux, « PPR Chatelaillon »/);
+  assert.doesNotMatch(toutLeTexte(k, d), /ressort élevée|exposition de la commune/);
+  assert.equal(k.consequence, CONSEQUENCE_NEUTRE);
+});
+
+test("inondation confirmée, adresse en zone d'interdiction submersible : plutôt défavorable", () => {
+  const zone = {
+    plan: "PPR Charron", gasparId: "17DDTM20100006", modele: "PPRN-L", phenomenes: ["la submersion marine"], autresPhenomenes: ["le recul du trait de côte"],
+    approbation: "2021-08-10", zoneCode: "Rs2", zoneNom: "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme",
+    regimeCode: "03", regime: "Interdiction",
+  };
+  const logement = {
+    dpe: "absent", dpeLabel: null, confortEteInsuffisant: false, rga: "none", expositionBati: false,
+    pprn: "present", zoneReglementee: true, pprnLabel: "PPR Charron", cavites: "none", caviteProche: false,
+    patrimoine: "none", perimetrePatrimonial: false, sinistralite: "none", sinistraliteActive: false,
+    addressLabel: "Rue du 19 Mars 1962, 17230 Charron",
+    zonageInondation: { etat: "zone", grain: "parcelle", zone, rattachement: "fiable", liaison: "explicite", divergence: null, parcelleParRepli: false },
+  } as ModuleFacts["logement"];
+  const { d } = dossier(confirme(projet({ faible_risque_inondation: 3 }), "faible_risque_inondation"), {
+    extra: { inondation: { risque: 52, catnat: 3 } }, faits: { plansInondation: PPR_CHATEL, logement },
   });
   const k = carte(d, "faible_risque_inondation")!;
   assert.equal(k.signal, "defavorable");
-  assert.match(k.statement, /exposition de la commune à l'inondation ressort élevée/);
-  assert.equal(k.whyNotDecided, POURQUOI_COMMUNE);
+  assert.match(k.statement, /zone Rs2 du plan de prévention « PPR Charron »/);
   assert.equal(k.consequence, CONSEQUENCE_CONTRE);
+  assert.doesNotMatch(toutLeTexte(k, d), /plutôt favorable|rien de défavorable/);
 });
 
 test("les identifiants déclarés orientants existent, et chacun rend bien `verification` sur une exposition", () => {
@@ -427,14 +455,14 @@ test("trois conditions confirmées : chaque carte a son sens, le verdict les ran
 
 // ── L'ARTEFACT SÉRIALISÉ ─────────────────────────────────────────────────────────────────────────
 
-test("artefact : la carte corrigée traverse la sérialisation, sous le moteur courant (engine-5 depuis FUT-110, engine-6 depuis FUT-17)", () => {
+test("artefact : la carte corrigée traverse la sérialisation, sous le moteur courant (engine-5 depuis FUT-110, engine-6 depuis FUT-17, engine-7 depuis FUT-127)", () => {
   const p = confirme(projet({ acces_soins: 3 }), "acces_soins");
   const { d } = dossier(p, { rangs: { acces_soins: FAVORABLE }, faits: { autour: MEDECIN } });
-  assert.equal(ENGINE_VERSION, "engine-6");
+  assert.equal(ENGINE_VERSION, "engine-7");
   const a = buildDecisionArtifact(d, p, "2026-10-16T10:00:00.000Z", PRODUCT_CONVENTIONS_VERSION);
   const relu = parseDecisionArtifact(JSON.parse(JSON.stringify(a)));
   assert.ok(relu);
-  assert.equal(relu.engineVersion, "engine-6");
+  assert.equal(relu.engineVersion, "engine-7");
   const k = carte(relu.dossier, "acces_soins")!;
   assert.equal(k.status, "Ouverte · plutôt favorable");
   assert.match(k.statement, /550 m/);

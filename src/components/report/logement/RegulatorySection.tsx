@@ -1,5 +1,7 @@
 import React from "react";
-import type { RegulatoryPlan } from "@/lib/pprn-zonage";
+import { autresPhenomenes, natureInondation, phenomenesInondation, type RegulatoryPlan } from "@/lib/pprn-zonage";
+import { dateLongue } from "@/lib/data/gaspar-pprn-inondation";
+import { PORTEE_ETAT_DES_RISQUES } from "@/lib/decision/inondation-lecture";
 import type { LogementReport } from "@/lib/logement-report-types";
 import type { HeritageProtection, HeritageStatus } from "@/lib/gpu-servitudes";
 import { ReportSection, GlassCard } from "@/components/report/kit";
@@ -37,6 +39,10 @@ const HAZARD_LABEL: Record<string, string> = {
   "PPRN-RGA": "Retrait-gonflement des argiles",
   "PPRN-MT": "Mouvements de terrain",
   "PPRN-SM": "Submersion marine",
+  // FUT-127 : sans ces deux modèles, le dépliable ne nommait aucun risque pour un plan littoral
+  // (La Rochelle, Charron) ou multirisque. Le libellé du modèle ne vaut que faute d'aléas lus.
+  "PPRN-L": "Risques littoraux (submersion marine, recul du trait de côte)",
+  "PPRN-Multi": "Plusieurs risques",
   "PPRN-F": "Feux de forêt",
   "PPRN-A": "Avalanches",
   "PPRN-S": "Séisme",
@@ -145,7 +151,11 @@ export function RegulatoryStatusBlock({
   heritage: HeritageStatus | null;
 }) {
   const g = georisques?.parcel ?? georisques?.address;
+  const grainLu: "parcelle" | "point" = georisques?.parcel ? "parcelle" : "point";
   const plans = g?.regulatoryPlans ?? [];
+  // FUT-127 : un plan qui réglemente l'inondation (ou dont l'aléa reste à confirmer) appelle la mention
+  // de portée : cette lecture n'est pas l'état des risques du bien.
+  const portee = plans.some((p) => natureInondation(p) !== "autre");
   const protections = heritage?.items ?? [];
   return (
     <ReportSection eyebrow="Statut réglementaire à cette adresse" tone="accent">
@@ -189,20 +199,36 @@ export function RegulatoryStatusBlock({
                   )}
                   {/* Niveau 3 : méthode et détail technique, repliés */}
                   <Disclosure summary="Comprendre ce classement">
-                    <div>Grain : adresse (la donnée répond au point géocodé, pas à la géométrie de la parcelle).</div>
+                    {/* FUT-127 : le grain dit la lecture RÉELLEMENT utilisée. La parcelle prime quand elle a
+                        répondu ; l'ancienne phrase disait « pas à la géométrie de la parcelle » dans ce cas. */}
+                    <div>{grainLu === "parcelle"
+                      ? "Grain : parcelle cadastrale rattachée à l'adresse. Une parcelle peut être traversée par plusieurs zones."
+                      : "Grain : point géocodé de l'adresse, pas la géométrie de la parcelle."}</div>
                     {plans.map((p, i) => {
-                      const hazard = p.hazardModel ? HAZARD_LABEL[p.hazardModel] ?? null : null;
+                      // FUT-127 : les aléas lus dans le détail du plan priment sur le libellé du modèle.
+                      const lus = [...phenomenesInondation(p), ...autresPhenomenes(p)];
+                      const hazard = lus.length > 0
+                        ? lus.join(", ")
+                        : p.hazardModel ? HAZARD_LABEL[p.hazardModel] ?? null : null;
+                      const approuve = dateLongue(p.approvedAt ?? null);
                       return (
                         <div key={i}>
                           {p.plan ?? "Plan"}
                           {hazard ? ` · risque concerné : ${hazard}` : ""}
                           {p.zones[0]?.regime ? ` · régime officiel : ${p.zones[0].regime}` : ""}
+                          {approuve ? ` · approuvé le ${approuve}` : ""}
                           {p.updatedAt ? ` · date de référence Géorisques : ${p.updatedAt}` : ""}
                         </div>
                       );
                     })}
                     <div>Géorisques (PPRN, information réglementaire). Le classement ne résume pas le règlement : les travaux autorisés ou interdits ne se lisent que dans le règlement officiel de la zone.</div>
                   </Disclosure>
+                  {portee ? (
+                    // P0-D (FUT-127) : la lecture ne se substitue pas au document de la transaction.
+                    <div style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55 }}>
+                      {PORTEE_ETAT_DES_RISQUES}
+                    </div>
+                  ) : null}
                 </>
               )}
               {protections.length > 0 && <HeritageBlock protections={protections} withDivider={plans.length > 0} />}
