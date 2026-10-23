@@ -27,8 +27,8 @@ Arbitrages du porteur du 22/10/2026 appliqués tels quels (option A, paliers, co
 
 ## Preuves
 
-- `npm test` : **2 985 tests, 0 échec** après la passe du 23/10. Avec la PR #82 (FUT-126) fusionnée à blanc : 2 997 tests, 0 échec, aucun conflit. `npx tsc --noEmit` et `eslint` sur les fichiers touchés : propres.
-- `src/lib/fut127-inondation-adresse.test.ts` (22 tests) : la vraie chaîne sur l'index réel, la table GASPAR et les relevés Géorisques réels figés dans `src/lib/__fixtures__/fut127/`. Cas couverts : Charron ; La Rochelle (commune, Os1, Minimes, rue du Palais) ; Châtelaillon ; Géorisques muet ; aléas non lus ; chaque modèle de plan ; quatre postures ; poids 1 ; priorité non déclarée ; liste « à vérifier » du module ; parité classique / Relevé ; bloc réglementaire rendu ; analyses figées relues à l'identique et contextualisées. Les textes des trois niveaux y sont figés.
+- `npm test` : **2 989 tests, 0 échec** après les arbitrages du 23/10. Avec la PR #82 (FUT-126) fusionnée à blanc : 3 001 tests, 0 échec, aucun conflit. `npx tsc --noEmit` et `eslint` sur les fichiers touchés : propres.
+- `src/lib/fut127-inondation-adresse.test.ts` (26 tests) : la vraie chaîne sur l'index réel, la table GASPAR et les relevés Géorisques réels figés dans `src/lib/__fixtures__/fut127/`. Cas couverts : Charron ; La Rochelle (commune, Os1, Minimes, rue du Palais) ; Châtelaillon ; Géorisques muet ; aléas non lus ; chaque modèle de plan ; quatre postures ; poids 1 ; priorité non déclarée ; liste « à vérifier » du module ; parité classique / Relevé ; bloc réglementaire rendu ; analyses figées relues à l'identique et contextualisées. Les textes des trois niveaux y sont figés.
 - `src/lib/fut127-georisques-appels.test.ts` (5 tests) : le nombre d'appels et le chronométrage, sur le vrai `georisques.ts` (voir « Performances »).
 - Captures : `captures/`, rendues par `/dev/fut127` (relevés réels, composants de production, aucune donnée client, `DOSSIER_NARRATIVE=false`, aucune clé). Script : `scripts/fut127/capturer.mjs` (`--deplier` ouvre « Données et limites »), puis conversion en WebP. Aucun débordement horizontal à 1440, 390 et 360 px.
 
@@ -82,9 +82,14 @@ La face garde une seule ligne de limite, celle qui empêche le contresens, et le
 
 **Ce que fait le moteur.** La zone d'interdiction pèse `decision_critical`. Le registre la classe « réserve » au palier critique. Le verdict la **nomme dans son titre** et la carte passe en tête des contrôles. Le moteur fonctionne donc. Le défaut était éditorial : le titre disait « le zonage inondation de l'adresse » sans dire qu'une zone réglementée avait été lue, et la carte ne disait pas que cela va contre la priorité. Les deux sont corrigés.
 
-**Ce qui reste faible, et ce que je soumets à arbitrage, sans l'avoir appliqué :**
-- **L'étiquette.** « Correspondance à nuancer » est la même pour une zone d'interdiction que pour une réserve ordinaire. Proposition : « Réserve majeure » (ton inchangé) quand une réserve `decision_critical` est affichée. Mesure faite par prototype, puis annulé : 0 test sur 2 985 ne change. Aujourd'hui, seule la zone inondation établie produit une réserve critique (les incompatibilités ont leur propre étiquette, « Condition non respectée »). Le changement ne toucherait donc que ce cas.
-- **L'ordre des sections.** Quand une autre priorité est favorable (cas simulé : zone Rs2 et accès aux soins favorable), la section « Ce qui correspond à votre projet » s'affiche **au-dessus** de la carte de la zone d'interdiction, dans les deux présentations. Le verdict reste celui des réserves (« Ces points pèsent dans votre décision. Par ailleurs, l'accès aux soins répond bien à votre projet. »). Proposition : faire passer les contrôles avant les correspondances quand une réserve critique est affichée. Ordre commun à tout le dossier : non modifié.
+**Arbitrages du porteur du 23/10, appliqués :**
+- **« Réserve majeure ».** Cette étiquette remplace « Correspondance à nuancer », ou « Lecture encore partielle », quand une réserve `decision_critical` est affichée (`reserveMajeureEtablie`, `conclusion-plan.ts`). Aujourd'hui, seule une zone inondation **établie** à l'adresse en produit une : liée explicitement à l'inondation, rattachement fiable, régime d'interdiction ou particulier. Le ton reste « caution » : une réserve n'est pas une incompatibilité.
+  - **Non concernés** : l'incertitude (risque concerné à confirmer), la donnée manquante (Géorisques muet, dossier communal), la divergence point / parcelle, le rattachement de repli, le hors zone. Ils gardent l'étiquette ordinaire.
+  - **Condition confirmée** : elle garde son verdict propre, « Condition ouverte », plutôt défavorable.
+  - **Arbitrage entre priorités** (un écart structurant en plus de la zone) : l'orientation reste « Arbitrage ». Ce cas n'est pas modifié.
+- **Le titre nomme l'enjeu.** « Le principal point à contrôler à Charron : la zone réglementée pour l'inondation où se trouve l'adresse. » Ni le verdict ni la carte ne parlent d'impossibilité d'habiter. La carte dit le contraire : « il ne rend pas le logement existant inhabitable ». Un test le vérifie.
+- **La réserve passe avant ce qui correspond.** Quand une carte de contrôle `decision_critical` est assemblée, la section des contrôles remonte juste après les conditions sans compromis (`avantLesCorrespondancesSiCritique`, `decision-assembler.ts`). « Ce qui correspond à votre projet » suit immédiatement : la balance reste visible, et le verdict la dit (« Par ailleurs, l'accès aux soins répond bien à votre projet »). Sans réserve décisive, l'ordre ne change pas : le test couvre le Quai Duperré, Châtelaillon, la commune et la rue du Palais.
+- **Cas d'essai** `reserve-favorable` (banc `/dev/fut127`) : le relevé réel de Charron lu sur la commune de La Rochelle, où l'accès aux soins est favorable. Captures `reserve-favorable-*` à 1440, 390 et 360 px, dans les deux présentations.
 
 ## 3. Performances
 
@@ -109,7 +114,7 @@ La face garde une seule ligne de limite, celle qui empêche le contresens, et le
 
 ## 4. Comparateur gratuit
 
-Ticket P0 distinct, lié à FUT-127 : **FUT-129**. 1 721 communes couvertes par un plan inondation approuvé ou anticipé y ressortent « Risque d'inondation faible » ou « peu de reconnaissances CatNat inondation ». Ce ticket contient le recensement des surfaces touchées, la solution recommandée, les arbitrages et les critères d'acceptation. Rien n'est modifié dans le comparateur par cette PR.
+Ticket P0 distinct, lié à FUT-127 : **FUT-129**. Le plafond n'a pas été validé. Les options y sont mesurées sur l'index complet : plafond, neutralisation, recul des communes à plan. La recommandation est la neutralisation, dite au lecteur. 1 721 communes couvertes par un plan inondation approuvé ou anticipé y ressortent « Risque d'inondation faible » ou « peu de reconnaissances CatNat inondation ». Ce ticket contient le recensement des surfaces touchées, la solution recommandée, les arbitrages et les critères d'acceptation. Rien n'est modifié dans le comparateur par cette PR.
 
 ## 5. Vérifications de la passe
 
@@ -119,4 +124,4 @@ Ticket P0 distinct, lié à FUT-127 : **FUT-129**. 1 721 communes couvertes par 
 - **FUT-126 / PR #82.** Aucun de ses fichiers touché. Fusion à blanc sans conflit, 2 997 tests verts.
 - **Analyses historiques.** Relues à l'identique, avertissement reformulé, tests verts.
 - **Garde-fou CatNat.** `/dev/fut127` réécrivait la phrase du compte : le test `la phrase du compte n'est écrite QUE dans catnat-evidence` échouait déjà sur le commit précédent de cette PR, contrairement à ce que j'avais annoncé (« 0 échec »). La page passe désormais par `phraseConstatCatnatInondation`.
-- **Captures.** 32 PNG (11 Mo) remplacés par 17 WebP (3,6 Mo) : les cas représentatifs, dont Charron à 1440, 390 et 360 px, Charron avec les preuves dépliées, Châtelaillon à 390 et 360 px, et les analyses figées. Les deux captures « avant » communales (`main`) sont conservées. Les anciennes PNG restent dans l'historique du commit précédent ; une fusion en « squash » ne les ferait pas entrer dans `main`.
+- **Captures.** 32 PNG (11 Mo) remplacés par 22 WebP (5,2 Mo) : les cas représentatifs, dont Charron à 1440, 390 et 360 px, Charron avec les preuves dépliées, Châtelaillon à 390 et 360 px, et les analyses figées. Les deux captures « avant » communales (`main`) sont conservées. Les anciennes PNG restent dans l'historique du commit précédent ; une fusion en « squash » ne les ferait pas entrer dans `main`.

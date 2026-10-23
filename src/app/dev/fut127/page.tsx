@@ -50,6 +50,9 @@ type Cas = {
 };
 const CAS: Cas[] = [
   { nom: "charron-adresse", titre: "Charron · Dossier Adresse, acheteur · zone rouge Rs2 « zones submersibles »", insee: "17091", adresse: "charron" },
+  // Cas d'essai (arbitrage du 23/10) : le relevé réel de Charron lu sur une commune où l'accès aux soins est
+  // favorable. Il montre une réserve majeure à côté d'une correspondance ; ce n'est pas une adresse réelle.
+  { nom: "reserve-favorable", titre: "Cas d'essai · zone rouge Rs2 (relevé de Charron) avec une priorité favorable (accès aux soins, commune de La Rochelle)", insee: "17300", adresse: "charron" },
   { nom: "charron-condition", titre: "Charron · Dossier Adresse · inondation confirmée comme condition", insee: "17091", adresse: "charron", confirme: true },
   { nom: "charron-commune", titre: "Charron · dossier communal, acheteur", insee: "17091", adresse: null },
   { nom: "lr-commune", titre: "La Rochelle · dossier communal, acheteur", insee: "17300", adresse: null },

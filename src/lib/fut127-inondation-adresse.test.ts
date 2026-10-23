@@ -91,6 +91,7 @@ before(async () => {
     ...(await import("./pprn-zonage.ts")),
     ...(await import("./data/gaspar-pprn-inondation.ts")),
     ...(await import("../components/releve/lecture-dossier.ts")),
+    ...(await import("./decision/dossier-view.ts")),
     ...(await import("./hard-constraints-hydrate.ts")),
     ...(await import("./hard-constraints.ts")),
     ...(await import("./user-project.ts")),
@@ -279,6 +280,61 @@ test("Charron, inondation confirmée comme condition : plutôt défavorable à l
   const sans = dossier("17091", { adresse: null, confirme: true });
   const k2 = sans.run.facts.find((f: M) => f.role === "condition_check" && f.criterion.key === "faible_risque_inondation");
   assert.equal(k2.signal, "neutre", "un plan communal ne dit pas où est l'adresse");
+});
+
+// ═══════════════════════════════════ 1 bis. LA RÉSERVE MAJEURE (arbitrage du 23/10/2026) ═══════════
+
+const ordreDeLecture = (d: M): string[] => D.lireDossier(d).sections.map((s: M) => s.cle);
+
+test("Réserve majeure : l'étiquette dit la zone d'interdiction établie, et le titre nomme l'enjeu", () => {
+  for (const o of [{ adresse: "charron" }, { adresse: "charron", intent: "location" }, { adresse: "charron", relation: { echelle: "adresse", relation: "j_y_habite" } }] as Opts[]) {
+    const v = verdict(dossier("17091", o).d);
+    assert.equal(v.etiquette, "Réserve majeure", JSON.stringify(o));
+    assert.equal(v.ton, "caution", "une réserve n'est pas une incompatibilité");
+    assert.equal(v.titre, "Le principal point à contrôler à Charron : la zone réglementée pour l'inondation où se trouve l'adresse.");
+    // Jamais une impossibilité d'habiter, ni dans le verdict ni dans la carte qu'il nomme.
+    const tout = `${v.titre} ${v.detail ?? ""} ${toutLeTexte(dossier("17091", o).d)}`;
+    assert.doesNotMatch(tout, /interdit d'habiter|ne peut pas être habité|impossible d'y vivre|logement inhabitable/);
+    assert.match(tout, /il ne rend pas le logement existant inhabitable/);
+  }
+});
+
+test("Réserve majeure, strictement : ni l'incertitude, ni la donnée manquante, ni la divergence point / parcelle", () => {
+  const cas: [string, string, Opts][] = [
+    ["divergence Châtelaillon (une des lectures interdit)", "17094", { adresse: "chatel" }],
+    ["risque concerné à confirmer (Quai Duperré)", "17300", { adresse: "lr-duperre" }],
+    ["rattachement de repli (Minimes)", "17300", { adresse: "lr-minimes" }],
+    ["Géorisques muet", "17300", { adresse: "lr-duperre", muet: true }],
+    ["dossier communal", "17091", { adresse: null }],
+    ["hors zone", "17300", { adresse: "lr-palais" }],
+  ];
+  for (const [nom, insee, o] of cas) {
+    const { d } = dossier(insee, o);
+    assert.notEqual(verdict(d).etiquette, "Réserve majeure", nom);
+    assert.equal(carteInondation(d)?.materialityTier === "decision_critical", false, nom);
+  }
+  // La condition confirmée garde son propre verdict (FUT-7) : « Condition ouverte », plutôt défavorable.
+  assert.equal(verdict(dossier("17091", { adresse: "charron", confirme: true }).d).etiquette, "Condition ouverte");
+});
+
+test("Réserve majeure avec une priorité favorable : la zone rouge passe avant, la correspondance reste visible", () => {
+  // Le relevé réel de Charron (zone rouge Rs2) lu sur une commune où l'accès aux soins est favorable.
+  const { d } = dossier("17300", { adresse: "charron" });
+  assert.equal(verdict(d).etiquette, "Réserve majeure");
+  assert.match(verdict(d).detail ?? "", /Par ailleurs, l'accès aux soins répond bien à votre projet\./, "la balance reste dite");
+  assert.deepEqual(ordreDeLecture(d), ["verifications", "alignments"], "le Relevé lit la réserve d'abord");
+  assert.deepEqual(D.sectionsDeLaMinute(d).map((s: M) => s.key), ["verifications", "alignments"], "la présentation classique aussi");
+  assert.equal(D.sectionsDeLaMinute(d)[0].cards[0].fact.ruleId, "territoire.inondation-exposition", "et la carte inondation ouvre les contrôles");
+  // Le dossier complet garde aussi la correspondance, juste après.
+  assert.ok(d.sections.some((s: M) => s.key === "alignments" && s.cards.length > 0));
+});
+
+test("Sans réserve décisive, l'ordre des sections ne change pas : les correspondances ouvrent toujours", () => {
+  for (const [insee, o] of [["17300", { adresse: "lr-duperre" }], ["17094", { adresse: "chatel" }], ["17300", { adresse: null }], ["17300", { adresse: "lr-palais" }]] as [string, Opts][]) {
+    const { d } = dossier(insee, o);
+    assert.equal(d.sections[0].key, "alignments", JSON.stringify(o));
+    assert.equal(ordreDeLecture(d)[0], "alignments", JSON.stringify(o));
+  }
 });
 
 // ═══════════════════════════════════ 2. LA ROCHELLE : LE RENVOI GÉNÉRIQUE ═══════════════════════════
