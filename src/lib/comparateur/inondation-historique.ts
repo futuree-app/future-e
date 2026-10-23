@@ -96,9 +96,10 @@ export function historiqueInondation(brut: HistoriqueInondationBrut): Historique
 // (une commune bien meilleure sur le reste reste devant) ; jamais positif. Trois intensités ont été
 // simulées sur l'index entier (0,1 / 0,2 / 0,3, cf. FUT-129).
 //
-// EN ATTENTE DE VALIDATION DU PORTEUR : 0,2 est la proposition argumentée dans FUT-129, pas une valeur
-// arrêtée. Elle donne 10 points à une priorité de poids 3 sur un projet de poids total 6, et 2,9 points
-// à une priorité de poids 1 sur un projet de poids total 7.
+// VALIDÉ PAR LE PORTEUR LE 23/10/2026, après simulation des trois intensités (FUT-129) : 0,2. C'est une
+// CONVENTION DE CLASSEMENT, jamais une estimation du risque, et elle ne s'affiche nulle part. Elle donne
+// 10 points à une priorité de poids 3 sur un projet de poids total 6, et 2,9 points à une priorité de
+// poids 1 sur un projet de poids total 7. Pas de plafond pour la priorité seule (elle passe en exploration).
 export const INTENSITE_RECUL_INONDATION = 0.2;
 
 export function reculInondation(o: {
@@ -157,7 +158,179 @@ export function limiteHistorique(h: HistoriqueInondation): string {
 /** La raison qui accompagne un recul dans les résultats. */
 export const RAISON_SINISTRES_FREQUENTS = "inondations indemnisées fréquentes de 1995 à 2021";
 
+/**
+ * QUAND L'INONDATION EST LA SEULE DEMANDE CLASSABLE (arbitrage du 23/10/2026) : pas de palmarès.
+ * L'ordre est annoncé tel qu'il est.
+ */
+export const PHRASE_EXPLORATION =
+  "Votre recherche ne porte que sur l'inondation : nous ne classons pas les communes sur cette seule demande. "
+  + "Voici des communes à explorer, rangées par nombre d'habitants, celles où les sinistres indemnisés ont été fréquents de 1995 à 2021 en dernier. "
+  + "Ajoutez ce qui compte pour vous (un cadre, des services, une région) pour obtenir des communes qui vous correspondent.";
+
+// ── LES COMPARATIFS PAYANTS DÉJÀ VENDUS ──────────────────────────────────────────────────────
+// Un Dossier comparatif n'est pas figé : il se recalcule à chaque visite. Celui qui a été acheté avant
+// cette lecture affichait, sur la ligne « Inondation », un palier tiré du nombre de reconnaissances
+// CatNat. On ne réécrit rien en base ; on dit, au-dessus du comparatif, que la ligne a changé.
+// À AJUSTER LE JOUR DE LA MISE EN PRODUCTION : la date à partir de laquelle la nouvelle lecture est servie.
+export const LECTURE_INONDATION_DEPUIS = "2026-10-23";
+
+export function avertissementPackAnterieur(createdAt: string | null | undefined): string | null {
+  if (!createdAt || !(createdAt.slice(0, 10) < LECTURE_INONDATION_DEPUIS)) return null;
+  return "Ce comparatif a été acheté avant une évolution de futur•e. La ligne « Inondation » ne classe plus les communes "
+    + "d'après le nombre de catastrophes naturelles reconnues : elle présente les sinistres indemnisés de 1995 à 2021 et les plans de prévention, "
+    + "sans désigner de commune sans risque. Votre comparatif est affiché avec cette lecture.";
+}
+
+/** Quand le classement a changé depuis l'achat : on garde les communes achetées, on le dit. */
+export const AVERTISSEMENT_TRIO_RECOMPOSE =
+  "Le classement a évolué depuis votre achat. Votre comparatif reste celui des communes que vous avez achetées ; "
+  + "il est présenté sans le classement de votre recherche d'origine.";
+
 /** Une fois par recherche, quand le lecteur a déclaré cette priorité. */
 export const PHRASE_TRANSPARENCE =
   "Pour l'inondation, nous faisons reculer les communes où les sinistres indemnisés ont été fréquents de 1995 à 2021. "
   + "Nous comparons des sinistres passés, pas la probabilité d'une inondation à venir : aucune donnée communale ne permet de désigner une commune sans risque. Cela se vérifie à l'adresse.";
+
+// ── LES PLANS DE PRÉVENTION : DES FAITS, JAMAIS UNE PÉNALITÉ ───────────────────────────────────
+// Présence, phénomène et statut, d'après l'export GASPAR (table `data/gaspar-pprn-inondation.json`,
+// reprise à l'identique de FUT-127). Arbitrage du porteur (23/10/2026) : aucune commune ne recule du
+// seul fait d'un plan, qui découpe des zones et ne dit rien d'une adresse. Les trois statuts restent
+// distincts : approuvé, appliqué par anticipation, prescrit (en préparation).
+export type StatutPlanInondation = "approuve" | "anticipe" | "prescrit";
+export type PlanInondationIndex = { statut: StatutPlanInondation; aleas: string[] };
+
+const PHENOMENE_COURT: Record<string, string> = {
+  "Par une crue à débordement lent de cours d'eau": "crues lentes de cours d'eau",
+  "Par une crue torrentielle ou à montée rapide de cours d'eau": "crues rapides",
+  "Par ruissellement et coulée de boue": "ruissellement",
+  "Par remontées de nappes naturelles": "remontées de nappe",
+  "Par submersion marine": "submersion marine",
+  "Par lave torrentielle (torrent et talweg)": "laves torrentielles",
+};
+
+const joinFr = (xs: string[]): string => (xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} et ${xs[xs.length - 1]}`);
+
+function phenomenes(plans: PlanInondationIndex[]): string {
+  const vus = [...new Set(plans.flatMap((p) => p.aleas.map((a) => PHENOMENE_COURT[a]).filter((x): x is string => Boolean(x))))];
+  return joinFr(vus);
+}
+
+const STATUT_EN_CLAIR: Record<StatutPlanInondation, string> = {
+  approuve: "approuvé",
+  anticipe: "appliqué par anticipation",
+  prescrit: "en préparation, zones pas encore fixées",
+};
+
+/**
+ * « Plan de prévention des inondations approuvé (submersion marine). » Un plan par statut, dans l'ordre
+ * approuvé, anticipé, prescrit. `null` quand la table n'a pas été lue : on ne dit pas « aucun plan ».
+ */
+export function phrasePlans(plans: PlanInondationIndex[] | null | undefined): string | null {
+  if (plans == null) return null;
+  if (plans.length === 0) return "Aucun plan de prévention des inondations recensé dans la commune.";
+  const ordre: StatutPlanInondation[] = ["approuve", "anticipe", "prescrit"];
+  const parties = ordre
+    .map((st) => {
+      const ps = plans.filter((p) => p.statut === st);
+      if (ps.length === 0) return null;
+      const phen = phenomenes(ps);
+      const nb = ps.length > 1 ? `${ps.length} plans de prévention des inondations` : "plan de prévention des inondations";
+      return `${nb} ${STATUT_EN_CLAIR[st]}${ps.length > 1 && st !== "prescrit" ? "s" : ""}${phen ? ` (${phen})` : ""}`;
+    })
+    .filter((x): x is string => x != null);
+  return `${cap(joinFr(parties))}.`;
+}
+
+const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** Le statut le plus avancé, en deux ou trois mots, pour une cellule ou une ligne courte. */
+export function plansCourt(plans: PlanInondationIndex[] | null | undefined): string | null {
+  if (plans == null) return null;
+  if (plans.some((p) => p.statut === "approuve")) return "plan de prévention approuvé";
+  if (plans.some((p) => p.statut === "anticipe")) return "plan appliqué par anticipation";
+  if (plans.some((p) => p.statut === "prescrit")) return "plan en préparation";
+  return "aucun plan de prévention";
+}
+
+// ── LES SURFACES DU COMPARATEUR ───────────────────────────────────────────────────────────────
+
+const COURT: Record<string, string> = {
+  "Entre 0 et 1 ‰": "Moins de 1 sinistre pour 1 000 biens par an",
+  "Entre 1 et 2 ‰": "1 à 2 sinistres pour 1 000 biens par an",
+  "Entre 2 et 5 ‰": "2 à 5 sinistres pour 1 000 biens par an",
+  "Entre 5 et 10 ‰": "Sinistres fréquents : 5 à 10 pour 1 000 biens par an",
+  "Plus de 10 ‰": "Sinistres fréquents : plus de 10 pour 1 000 biens par an",
+};
+
+/**
+ * LA CELLULE « INONDATION » DE LA COMPARAISON (3 communes, Dossier comparatif). Un fait par commune,
+ * jamais un palier « faible / modéré / élevé », jamais de gagnant. L'alerte (rouge) est réservée aux
+ * sinistres fréquents. Le qualificatif porte le plan de prévention.
+ */
+export function celluleInondation(h: HistoriqueInondation, plans: PlanInondationIndex[] | null | undefined): {
+  palier: string; qualifier: string | null; disponible: boolean; alerte: boolean;
+} {
+  const qualifier = plansCourt(plans);
+  switch (h.etat) {
+    case "sinistres_frequents":
+    case "frequence_mesuree":
+      return { palier: COURT[h.classe]!, qualifier, disponible: true, alerte: h.etat === "sinistres_frequents" };
+    case "aucun_sinistre":
+      return { palier: "Aucun sinistre répertorié", qualifier, disponible: true, alerte: false };
+    case "representativite_insuffisante":
+      return { palier: "Données trop partielles", qualifier, disponible: true, alerte: false };
+    case "indisponible":
+      return { palier: "Non disponible", qualifier, disponible: qualifier != null, alerte: false };
+  }
+}
+
+/** L'aide de la ligne « Inondation » : ce qui est comparé, et ce qui ne l'est pas. */
+export const AIDE_INONDATION =
+  "Les sinistres d'inondation indemnisés de 1995 à 2021, rapportés au nombre de biens assurés, et les plans de prévention de la commune. "
+  + "Ce sont des faits passés, pas une probabilité : aucune commune n'est désignée comme sans risque.";
+
+/** Le signal pour AskFuture (« et côté inondation ? ») : factuel, même quand il est bas. */
+export function signalInondation(h: HistoriqueInondation): string {
+  switch (h.etat) {
+    case "sinistres_frequents":
+      return `inondations indemnisées fréquentes de 1995 à 2021 (${EN_CLAIR[h.classe]} chaque année)`;
+    case "frequence_mesuree":
+      return `de 1995 à 2021, ${EN_CLAIR[h.classe]} chaque année après une inondation, ce qui ne garantit pas un faible risque`;
+    case "aucun_sinistre":
+      return "aucun sinistre d'inondation indemnisé répertorié de 1995 à 2021, ce qui ne prouve pas l'absence de risque";
+    case "representativite_insuffisante":
+      return "données des assureurs sur les inondations trop partielles pour être comparées";
+    case "indisponible":
+      return "pas de données des assureurs sur les inondations";
+  }
+}
+
+/** La ligne factuelle d'une carte de résultat, quand le lecteur a déclaré cette priorité. */
+export function ligneCarteInondation(h: HistoriqueInondation, plans: PlanInondationIndex[] | null | undefined): string {
+  const court = plansCourt(plans);
+  const histo = h.etat === "sinistres_frequents" || h.etat === "frequence_mesuree"
+    ? `${COURT[h.classe]!.replace(/^Sinistres fréquents : /, "")} (1995-2021)`
+    : h.etat === "aucun_sinistre" ? "aucun sinistre répertorié (1995-2021)"
+      : h.etat === "representativite_insuffisante" ? "données des assureurs trop partielles"
+        : "pas de données des assureurs";
+  return `Inondation : ${h.etat === "sinistres_frequents" ? "sinistres fréquents, " : ""}${histo.charAt(0).toLowerCase()}${histo.slice(1)}${court ? ` · ${court}` : ""}`;
+}
+
+/**
+ * CE QUE LA SYNTHÈSE RÉDIGÉE REÇOIT SUR L'INONDATION (route `comparateur-vie/synthesize`) : les deux
+ * phrases factuelles, rien d'autre. Elles viennent du navigateur : on n'accepte que des chaînes, bornées,
+ * et jamais une phrase qui qualifierait le risque de faible (défense en profondeur).
+ */
+export function champInondationSynthese(
+  brut: { historique?: unknown; plans?: unknown } | null | undefined,
+): { historique: string | null; plans: string | null } | null {
+  if (!brut || typeof brut !== "object") return null;
+  const propre = (v: unknown): string | null => {
+    if (typeof v !== "string") return null;
+    const t = v.trim().slice(0, 300);
+    return t && !/faible risque|risque faible|peu expos|sans risque|à l'abri|épargn/i.test(t) ? t : null;
+  };
+  const historique = propre(brut.historique);
+  const plans = propre(brut.plans);
+  return historique || plans ? { historique, plans } : null;
+}

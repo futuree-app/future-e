@@ -39,7 +39,10 @@ import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
 import {
-  historiqueInondation, reculInondation, scoreAvecRecul, RAISON_SINISTRES_FREQUENTS,
+  historiqueInondation, reculInondation, scoreAvecRecul, RAISON_SINISTRES_FREQUENTS, PHRASE_TRANSPARENCE,
+  celluleInondation, signalInondation, ligneCarteInondation, phraseHistorique, phrasePlans, AIDE_INONDATION,
+  PHRASE_EXPLORATION,
+  type PlanInondationIndex,
 } from "@/lib/comparateur/inondation-historique";
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
@@ -190,6 +193,9 @@ export type MatchResult = {
   region: string | null;
   compatibility: number; // 0–100
   reasons: string[];
+  // FUT-129 : les faits d'inondation de la commune, quand le lecteur a déclaré cette priorité. Une ligne
+  // pour la carte, et les phrases complètes pour la synthèse. Jamais un niveau de risque.
+  inondation?: { ligne: string; historique: string; plans: string | null; sinistresFrequents: boolean };
   // RETENUE, PAS CONFIRMÉE : le point de référence de cette commune tombe dans la bande de tolérance de la
   // géométrie (l'isochrone), et l'itinéraire n'a pas tranché pour elle. Elle est proposée (l'exclure
   // supprimerait une possibilité à cause d'une limite de mesure), et elle est marquée. Elle ne peut jamais
@@ -376,6 +382,10 @@ export type MatchOutcome = {
   // posé par le lecteur ; d'autres sont RETENUES sans avoir pu être tranchées (leur point de référence
   // tombe dans la bande de tolérance de la géométrie calculée). Annoncer « 31 résultats » sans distinguer
   // laisserait entendre que les 31 respectent la condition.
+  // FUT-129 : la priorité « faible risque d'inondation » a été déclarée. `transparence` dit ce qui est
+  // comparé (des sinistres passés, pas une probabilité). `exploration` : c'était la seule demande
+  // classable, les résultats ne sont pas un palmarès de correspondance ; `ordre` dit comment ils sont rangés.
+  inondation?: { transparence: string; exploration: boolean; ordre: string | null };
   boundaryNotice?: {
     confirmed: number; // communes dont la condition est ÉTABLIE (par l'isochrone ou par l'itinéraire)
     boundary: number; // communes RETENUES, mais que rien n'a su trancher
@@ -517,6 +527,9 @@ export type IndexCommune = {
   // du producteur, et représentativité de l'échantillon. Seule donnée d'inondation du CLASSEMENT
   // (cf. `comparateur/inondation-historique.ts`, scripts/populate-historique-inondation.mts). null = absente.
   historiqueInondation?: { frequence: string; representativite: string } | null;
+  // FUT-129 : plans de prévention des inondations de la commune (export GASPAR), statut et phénomènes.
+  // AFFICHÉS, jamais classés. [] = aucun plan recensé ; absent = table non lue.
+  plansInondation?: PlanInondationIndex[] | null;
   // Mobilité domicile-travail (cf. scripts/populate-mobilite.py, RP MOBPRO 2022). part_voiture
   // brut 0..1 (rapport futur) ; dependance = percentile national (haut = dépend de la voiture).
   mobilite?: {
@@ -1342,8 +1355,12 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
     case "acces_culture":
       return c.culture?.score ?? null; // percentile accès offre culturelle, pondéré proximité, rayon adapté
     case "faible_risque_inondation":
-      // risque faible -> score haut. Historique CatNat inondation, pas une garantie d'absence de crue.
-      return c.inondation == null ? null : 100 - c.inondation.risque;
+      // FUT-129 : PLUS DE SOUS-SCORE. Le rang du nombre de reconnaissances CatNat faisait de « peu de
+      // reconnaissances » un « risque faible » ; aucune donnée communale ne permet de le dire. La priorité
+      // agit dans le classement par son seul recul (`scorePreferences`), et partout ailleurs par des faits
+      // (`comparateur/inondation-historique.ts`). null : la découverte, les compromis, les signaux et la
+      // comparaison ne la lisent plus comme un score.
+      return null;
     case "faible_dependance_auto":
       // part voiture domicile-travail faible -> score haut. Usage contraint (MOBPRO), pas la possession.
       return c.mobilite == null ? null : 100 - c.mobilite.dependance;
@@ -1392,7 +1409,6 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
 type AmbientDim = { id: string; key: PreferenceKey; bands: [string, string, string] };
 // bands = [ >=66 favorable, 34-65 intermédiaire, <34 notable ]. Ordre = priorité de départage.
 const AMBIENT_DIMENSIONS: AmbientDim[] = [
-  { id: "inondation", key: "faible_risque_inondation", bands: ["historique d'inondation plus faible", "historique d'inondation intermédiaire", "historique d'inondation plus marqué"] },
   { id: "chaleur", key: "faible_chaleur", bands: ["étés généralement plus supportables", "étés intermédiaires", "étés généralement plus chauds"] },
   { id: "secheresse", key: "faible_secheresse", bands: ["sols moins exposés à la sécheresse", "exposition intermédiaire à la sécheresse", "sols plus exposés à la sécheresse"] },
   { id: "feu", key: "faible_risque_feu", bands: ["risque de feu plus faible", "risque de feu intermédiaire", "risque de feu plus marqué"] },
@@ -1435,7 +1451,10 @@ type ComparaisonDim = {
 // d'arbitrage (« Si la mobilité compte d'abord… »), sans parenthèses ni énumération.
 export const THEME_ORDER: { id: string; titre: string; gp: string; court: string }[] = [
   { id: "climat", titre: "Climat", gp: "le climat (chaleur, douceur, soleil)", court: "le climat" },
-  { id: "risques", titre: "Risques naturels", gp: "les risques naturels (inondation, feu, sécheresse)", court: "les risques naturels" },
+  // FUT-129 : l'inondation ne départage plus (ligne de faits, sans gagnant). La citer ici faisait lire « se
+  // distingue sur les risques naturels (inondation, feu, sécheresse) » pour une commune qui ne menait que
+  // sur le feu et la sécheresse.
+  { id: "risques", titre: "Risques naturels", gp: "les risques naturels (feu, sécheresse, pluies intenses)", court: "les risques naturels" },
   { id: "sante_env", titre: "Santé environnementale", gp: "la santé environnementale (air, bruit, industrie)", court: "la santé environnementale" },
   { id: "cadre", titre: "Nature & cadre", gp: "la nature et le cadre de vie (espaces naturels, mer)", court: "le cadre de vie" },
   { id: "mobilite", titre: "Mobilité", gp: "la mobilité (voiture, train, transports)", court: "la mobilité" },
@@ -1451,7 +1470,9 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "etes_frais", label: "Étés frais", themeId: "climat", key: "faible_chaleur", paliers: ["Étés frais", "Étés tempérés", "Étés chauds"], gp: "les étés frais", forte: "ses étés frais", aide: "Spécifiquement les étés : l'exposition aux fortes chaleurs, actuelle et future. Les hivers sont notés à part (Hivers doux).", risque: false, directionnel: true },
   { id: "douceur", label: "Hivers doux", themeId: "climat", key: "douceur_climat", paliers: ["Hivers parmi les plus doux", "Situation intermédiaire", "Hivers parmi les moins doux"], gp: "la douceur des hivers", forte: "la douceur de ses hivers", aide: "La douceur des hivers (température moyenne de décembre à février), à l'échelle nationale. Les étés sont notés à part (Étés frais).", risque: false, directionnel: true },
   { id: "ensoleillement", label: "Ensoleillement", themeId: "climat", key: "ensoleillement_recherche", paliers: ["Très ensoleillé", "Moyennement ensoleillé", "Peu ensoleillé"], gp: "l'ensoleillement", forte: "son ensoleillement", aide: "Le rayonnement solaire reçu au sol (ERA5), exprimé sans nombre d'heures. Affiché sans gagnant : l'ensoleillement idéal dépend de vos goûts.", risque: false, directionnel: false },
-  { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["Risque d'inondation faible", "Risque modéré", "Risque élevé"], gp: "le risque d'inondation", forte: "son faible risque d'inondation", aide: "Ce que dit l'historique d'inondations du territoire.", risque: true, directionnel: true },
+  // FUT-129 : une ligne de FAITS (sinistres indemnisés 1995-2021, plans de prévention), sans palier ni
+  // gagnant ; cf. `celluleInondation`. Les paliers ne sont plus lus (buildComparaisonComplete).
+  { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["", "", ""], gp: "l'historique des inondations", forte: "l'historique des inondations", aide: AIDE_INONDATION, risque: true, directionnel: false },
   { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
   { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", forte: "ses pluies intenses rares", aide: "La fréquence des épisodes de pluies très intenses.", risque: true, directionnel: true },
   { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["Sols peu exposés à la sécheresse", "Exposition modérée", "Sols très exposés"], gp: "la sécheresse", forte: "ses sols peu exposés à la sécheresse", aide: "À quel point les sols sont exposés au manque d'eau.", risque: true, directionnel: true },
@@ -1618,6 +1639,18 @@ export function buildComparaisonComplete(
   };
   const divCands: DivCand[] = [];
   for (const dim of DIMENSIONS) {
+    // FUT-129 : L'INONDATION EST UNE LIGNE DE FAITS. Les sinistres indemnisés de 1995 à 2021 et les plans
+    // de prévention, commune par commune : pas de palier « risque faible / élevé », pas de gagnant, pas de
+    // ligne de fracture. L'alerte (rouge) est réservée aux sinistres fréquents.
+    if (dim.id === "inondation") {
+      const cellules: ComparaisonCellule[] = trio.map((r, i) => {
+        const c = cols[i];
+        if (!c) return { insee: r.insee, palier: "Non disponible", qualifier: null, disponible: false, alerte: false };
+        return { insee: r.insee, ...celluleInondation(historiqueInondation(c.historiqueInondation), c.plansInondation) };
+      });
+      ligneByDim.set(dim.id, { id: dim.id, label: dim.label, aide: dim.aide, avantage: { type: "neutre" }, cellules });
+      continue;
+    }
     const raw = rawByDim.get(dim.id)!;
     // bande de favorabilité par commune (null = donnée absente, ou taille = factuel non bandé)
     const bands = trio.map((r, i) =>
@@ -1924,14 +1957,13 @@ function bandIndex(score: number): 0 | 1 | 2 {
 // RELATIF au groupe affiché, sinon « sans faiblesse marquée ». Jamais de chiffre,
 // jamais nommer un perdant (« que dans les autres options »).
 const COMPROMIS_KEYS: PreferenceKey[] = [
-  "faible_chaleur", "faible_secheresse", "faible_risque_inondation", "air_sain",
+  "faible_chaleur", "faible_secheresse", "air_sain",
   "acces_soins", "acces_services", "calme_sonore", "faible_exposition_industrielle",
   "vie_locale", "faible_dependance_auto",
 ];
 const COMPROMIS_NEG: Partial<Record<PreferenceKey, string>> = {
   faible_chaleur: "la chaleur estivale est plus marquée",
   faible_secheresse: "la sécheresse est plus présente",
-  faible_risque_inondation: "le risque d'inondation est plus présent",
   air_sain: "l'air de fond est un peu moins pur",
   acces_soins: "l'offre de soins est plus limitée",
   acces_services: "la commune concentre moins de services",
@@ -2120,6 +2152,10 @@ function assignSignaux(
       .slice(0, SIGNAUX_MAX);
     const signaux: Record<string, string> = {};
     for (const x of ranked) signaux[x.dim.id] = x.dim.bands[bandIndex(x.s)];
+    // FUT-129 : l'inondation n'est plus une bande de terciles (« historique d'inondation plus faible »),
+    // mais un fait daté, dit même quand il est bas, et jamais comme une réassurance. Hors cap ambiant.
+    const ci = cols[i];
+    if (ci) signaux["inondation"] = signalInondation(historiqueInondation(ci.historiqueInondation));
     // Signal narratif climatique (déjà calculé à l'assemblage, self-gated, hors cap ambiant).
     if (r.climatInondation) signaux["climat_inondation"] = r.climatInondation;
     r.signaux = signaux;
@@ -2159,7 +2195,9 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   nature: "forêts et espaces naturels à proximité",
   acces_ecoles: "collèges et lycées accessibles autour",
   acces_culture: "équipements culturels accessibles autour",
-  faible_risque_inondation: "peu de reconnaissances CatNat inondation",
+  // FUT-129 : jamais lu (la priorité n'a plus de sous-score, donc jamais de raison favorable). Un texte qui
+  // ne rassure pas, au cas où une future surface l'atteindrait.
+  faible_risque_inondation: "historique des inondations lu de 1995 à 2021",
   // FUT-96 : la mesure est la part des actifs qui vont TRAVAILLER en voiture (MOBPRO), pas la
   // faisabilité de tous les déplacements sans voiture. La raison dit la pratique, pas une promesse.
   faible_dependance_auto: "trajets domicile-travail moins souvent faits en voiture qu'ailleurs",
@@ -2206,7 +2244,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   nature: "peu d'espaces naturels à proximité",
   acces_ecoles: "établissements du secondaire plus éloignés",
   acces_culture: "offre culturelle accessible plus limitée",
-  faible_risque_inondation: "historique CatNat inondation plus marqué",
+  faible_risque_inondation: RAISON_SINISTRES_FREQUENTS,
   faible_dependance_auto: "trajets domicile-travail plus souvent faits en voiture qu'ailleurs",
   acces_transports: "desserte ferroviaire limitée",
   mobilite_quotidienne: "peu ou pas d'arrêts de transports en commun près du centre",
@@ -2280,17 +2318,16 @@ function pressionEcoNote(pe: { palier: "moderee" | "marquee"; secteur: string; a
 // communes, garde Nîmes (94/93) et Arles (88/79), exclut Lens (3/1) et Paris (4/8, crue de
 // Seine fluviale non captée par la tendance pluies extrêmes). Préférence : rare mais crédible.
 function buildClimatInondation(c: IndexCommune): string | null {
-  const inond = c.inondation;
-  if (!inond) return null;
   const tendance = c.pct.NORRx1d_yr; // Δ projeté des pluies extrêmes (percentile national)
   const niveau = c.pct.NORRRq99_yr; // niveau p99 journalier (percentile national)
   if (tendance == null || niveau == null) return null; // DRIAS manquant -> silence
   const pressionMarquee = tendance >= 88 && niveau >= 75;
   if (!pressionMarquee) return null; // le climat n'ajoute rien -> silence
-  const historiqueNotable = inond.risque >= 66; // beaucoup d'arrêtés CatNat observés
-  return historiqueNotable
-    ? "Historique d'inondation déjà présent ; les pluies extrêmes tendent à s'intensifier."
-    : "Peu d'inondations recensées à ce jour ; les pluies extrêmes tendent à s'intensifier.";
+  // FUT-129 : l'historique vient des sinistres indemnisés (ONRN, 1995-2021), plus du rang CatNat. Et
+  // l'absence de sinistres fréquents ne se dit plus « peu d'inondations recensées » : elle se tait.
+  return historiqueInondation(c.historiqueInondation).etat === "sinistres_frequents"
+    ? "Inondations indemnisées fréquentes de 1995 à 2021 ; les pluies extrêmes tendent à s'intensifier."
+    : "Les pluies extrêmes tendent à s'intensifier dans ce secteur.";
 }
 
 // Logement : niveau de prix RELATIF en libellé qualitatif (NARRATIF, hors score).
@@ -2965,6 +3002,23 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   });
 
 
+  // ── FUT-129 : L'INONDATION DÉCLARÉE, ET LE CAS OÙ ELLE EST LA SEULE DEMANDE CLASSABLE ──────────────
+  // Arbitrage du porteur (23/10/2026) : quand le lecteur ne demande qu'un faible risque d'inondation, le
+  // classement serait en réalité déterminé par les critères implicites (isolement, emploi) et le recul. Le
+  // présenter comme une réponse personnalisée serait trompeur. On passe alors en EXPLORATION : des
+  // communes rangées selon un ordre annoncé (nombre d'habitants, les sinistres fréquents en dernier), sans
+  // palier de correspondance, avec leurs faits. Une demande reste « classable » si un autre critère déclaré
+  // se mesure sur au moins une candidate, ou si une orientation géographique souple incline le classement.
+  // Un périmètre DUR (une zone, la montagne en filtre) borne l'exploration sans la classer.
+  const inondationDeclaree = prefs.some((p) => p.key === "faible_risque_inondation");
+  const orientationSouple = zone.soft.length > 0
+    || (montagne != null && montagne.strength !== "hard")
+    || (reliefProche != null && reliefProche.strength !== "hard");
+  const autreCritereClassable = prefs
+    .filter((p) => !p.baseline && p.key !== "faible_risque_inondation")
+    .some((p) => candidates.some((c) => subScore(p.key, c) != null));
+  const exploration = inondationDeclaree && !autreCritereClassable && !orientationSouple;
+
   const scored = candidates.map((c) => {
     // Score de base (préférences, inondation comprise par son seul recul : FUT-129), puis bonus d'ancre
     // souple (preferred / inspiration). On garde le score brut (non plafonné) pour le tri : sinon, quand
@@ -3024,9 +3078,20 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? REASON_NEG[tradeoffKey] : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
+    if (inondationDeclaree) {
+      const h = historiqueInondation(c.historiqueInondation);
+      built.inondation = {
+        ligne: ligneCarteInondation(h, c.plansInondation),
+        historique: phraseHistorique(h),
+        plans: phrasePlans(c.plansInondation),
+        sinistresFrequents: h.etat === "sinistres_frequents",
+      };
+    }
     return {
       cityKey: cityKey(c.insee),
-      sortScore: rawScore,
+      // En exploration, l'ordre est celui que la page annonce : les communes sans sinistres fréquents
+      // d'abord, puis le nombre d'habitants. Ce n'est plus un score de correspondance.
+      sortScore: exploration ? (recul > 0 ? 0 : 1e9) + (c.population ?? 0) : rawScore,
       boundary,
       pref,
       // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
@@ -3151,7 +3216,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   const message =
     candidates.length === 0
       ? emptyMessage
-      : perfect
+      : perfect || exploration
         ? null
         : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
 
@@ -3242,6 +3307,9 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     appliedExclusions: exclusion.applied,
     appliedPlaces: appliedPlaces.length ? appliedPlaces : undefined,
     unappliedConstraints: unapplied.length ? unapplied : undefined,
+    inondation: inondationDeclaree
+      ? { transparence: PHRASE_TRANSPARENCE, exploration, ordre: exploration ? PHRASE_EXPLORATION : null }
+      : undefined,
     // LE BANDEAU, APRÈS AFFINAGE. Il compte ce qui reste vraiment incertain, et il distingue les deux
     // raisons : le calcul a échoué, ou nous ne l'avons pas tenté (plafond). Un cap tu serait un mensonge
     // par omission.
@@ -3255,6 +3323,27 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
           }
         : undefined,
   };
+}
+
+// ── REJOUER UN COMPARATIF ACHETÉ (FUT-129) ──────────────────────────────────────────────────────
+// Un Dossier comparatif « replay » se recalcule depuis le projet acheté. Il prenait les trois premières
+// communes du NOUVEAU classement, sans vérifier qu'elles étaient celles achetées : toute évolution du
+// classement (celle de FUT-129, une mise à jour de l'index) pouvait montrer à l'acheteur un autre trio que
+// le sien. Les communes achetées priment désormais : si le classement ne les rend plus en tête, le
+// comparatif est reconstruit sur elles (comme un comparatif de communes nommées), et la page le dit.
+export async function rejouerPack(
+  parsed: ParsedProject,
+  insees: string[],
+): Promise<{ data: ComparaisonComplete; trio: MatchResult[]; pistes: MatchResult[]; trioRecompose: boolean } | null> {
+  const outcome = await matchProjects(parsed);
+  const tete = outcome.results.slice(0, insees.length).map((r) => r.insee);
+  const meme = tete.length === insees.length && insees.every((i) => tete.includes(i));
+  if (meme) {
+    return { data: outcome.comparaisonComplete, trio: outcome.results.slice(0, insees.length), pistes: outcome.pistes, trioRecompose: false };
+  }
+  const seeded = await seedComparaison(insees);
+  if (!seeded) return null;
+  return { data: seeded.comparaison, trio: seeded.trio, pistes: [], trioRecompose: true };
 }
 
 // Aperçu tronqué de la comparaison complète : on ne garde que les 2 premiers thèmes,

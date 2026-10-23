@@ -322,7 +322,7 @@ PRÉFÉRENCES DISPONIBLES (liste fermée)
 - faible_secheresse : sols moins exposés à la sécheresse
 - faible_risque_feu : faible risque d'incendie
 - faible_precip_extremes : moins de pluies intenses / orages violents / épisodes de précipitations extrêmes (PAS le risque d'inondation réel)
-- faible_risque_inondation : faible risque d'inondation fluviale/pluviale (historique d'arrêtés CatNat inondation). Pour « inondation », « inondable », « zone inondable », « crue », « débordement », « ruissellement », « sans risque d'inondation »
+- faible_risque_inondation : le souhait d'un faible risque d'inondation (crue, ruissellement, submersion ; lu par l'historique des sinistres indemnisés et les plans de prévention). Pour « inondation », « inondable », « zone inondable », « crue », « débordement », « ruissellement », « sans risque d'inondation »
 - proximite_mer : proche du littoral (version souple)
 - eloignement_mer : loin de la mer, dans les terres (version souple, SANS nombre). Jamais avec proximite_mer.
 - cadre_calme : moins dense, calme mais habitable

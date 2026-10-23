@@ -1,8 +1,11 @@
 #!/usr/bin/env -S npx tsx
-// FUT-129 : porte dans l'index du comparateur l'historique des sinistres d'inondation indemnisés (ONRN /
-// CCR, millésime 2025, période 1995-2021), labels VERBATIM du producteur :
+// FUT-129 : porte dans l'index du comparateur les deux faits d'inondation qu'il affiche ou classe :
 //
 //   c.historiqueInondation = { frequence: "Entre 5 et 10 ‰", representativite: "> 50%" }   ou   null
+//     l'historique des sinistres indemnisés (ONRN / CCR, millésime 2025, 1995-2021), labels VERBATIM ;
+//   c.plansInondation = [{ statut: "approuve", aleas: ["Par submersion marine"] }]   ([] = aucun plan)
+//     les plans de prévention des inondations de la commune (export GASPAR du 05/10/2026, table
+//     `data/gaspar-pprn-inondation.json` reprise à l'identique de FUT-127). Affichés, jamais classés.
 //
 // Source : `data/onrn-inondation.json`, déjà embarqué pour le module Logement (consolidé depuis
 // `files.georisques.fr/onrn/2025/ONRN_Frequence_INON_9521.xlsx` ; la représentativité y est la même dans
@@ -12,10 +15,11 @@
 // Il LIT et RÉÉCRIT la copie de travail en place, n'ajoute que ce champ, et REFUSE (exit 1) si un autre
 // champ d'une commune change, si la couverture s'effondre ou si un label est inconnu.
 //
-// Lancer : npm run index:unpack && npx tsx scripts/populate-historique-inondation.mts && npm run index:pack
+// Lancer : npm run index:unpack && node scripts/populate-inondation-comparateur.mts && npm run index:pack
 import fs from "node:fs/promises";
 import path from "node:path";
 import { CLASSES_FREQUENCE, CLASSES_REPRESENTATIVITE } from "../src/lib/comparateur/inondation-historique.ts";
+import { plansInondationDeLaCommune, type TablePlansInondation } from "../src/lib/data/gaspar-pprn-inondation.ts";
 import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
 
 assertIndexWorktree();
@@ -30,13 +34,19 @@ const brut = await fs.readFile(idxPath, "utf8");
 const idx = JSON.parse(brut) as { communes: Record<string, unknown>[] };
 const onrn = JSON.parse(await fs.readFile(path.join(process.cwd(), "data", "onrn-inondation.json"), "utf8")) as
   Record<string, { c: string; f: string; r: string }>;
+const plans = JSON.parse(await fs.readFile(path.join(process.cwd(), "data", "gaspar-pprn-inondation.json"), "utf8")) as TablePlansInondation;
 
 /** La commune sans le champ ajouté : ce qui doit rester identique, octet pour octet. */
-const sansLeChamp = (c: Record<string, unknown>) => JSON.stringify(c, (k, v) => (k === "historiqueInondation" ? undefined : v));
+const sansLeChamp = (c: Record<string, unknown>) =>
+  JSON.stringify(c, (k, v) => (k === "historiqueInondation" || k === "plansInondation" ? undefined : v));
 const avant = new Map(idx.communes.map((c) => [c.insee as string, sansLeChamp(c)]));
 
 let couvertes = 0;
+let avecPlan = 0;
 for (const c of idx.communes) {
+  const ps = plansInondationDeLaCommune(plans, c.insee as string)!.plans;
+  c.plansInondation = ps.map((p) => ({ statut: p.statut, aleas: p.aleas }));
+  if (ps.length > 0) avecPlan++;
   const o = onrn[c.insee as string];
   if (!o) { c.historiqueInondation = null; continue; }
   if (!(CLASSES_FREQUENCE as readonly string[]).includes(o.f)) die(`${c.insee} : classe de fréquence inconnue « ${o.f} »`);
@@ -55,3 +65,4 @@ const tmp = `${idxPath}.${process.pid}.tmp`;
 await fs.writeFile(tmp, JSON.stringify(idx));
 await fs.rename(tmp, idxPath);
 console.log(`historiqueInondation : ${couvertes}/${idx.communes.length} communes couvertes (absentes : null).`);
+console.log(`plansInondation : ${avecPlan} communes avec au moins un plan (export GASPAR du ${plans.meta.export}).`);

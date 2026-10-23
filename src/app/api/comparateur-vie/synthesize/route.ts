@@ -21,6 +21,7 @@ import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
+import { champInondationSynthese } from "@/lib/comparateur/inondation-historique";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -223,6 +224,23 @@ observé) ni avec les pluies extrêmes (projection, critère distinct). Le texte
 est déjà sobre, reprenez-en l'esprit (point de vigilance, jamais une alarme). Si le
 champ est absent ou nul, n'en parlez pas (ne le déduisez jamais vous-même).
 
+Si un champ "historique_inondation" est fourni pour un territoire (le lecteur a
+demandé un faible risque d'inondation), c'est un FAIT PASSÉ : les sinistres
+d'inondation indemnisés de 1995 à 2021, rapportés aux biens assurés, et les plans de
+prévention de la commune. RÈGLES STRICTES : ne présentez JAMAIS une commune comme
+« peu exposée », « à faible risque », « sûre » ou « épargnée » ; ne transformez jamais
+un historique bas, une absence de sinistre répertorié ou des données trop partielles
+en preuve d'un faible risque ; ne parlez jamais de probabilité ni d'avenir ; dites au
+plus, quand c'est le cas, que les sinistres y ont été fréquents, et rappelez que la
+situation d'un bien se vérifie à son adresse. Un plan de prévention n'est ni une
+alerte ni une garantie : il encadre certaines zones de la commune.
+
+Si "exploration_sans_classement" vaut true, l'inondation était la SEULE demande que
+le moteur pouvait classer : les communes ne sont PAS un classement qui répond à la
+demande. Ne dites jamais qu'elles « correspondent », « répondent » ou « conviennent »
+au projet ; présentez-les comme des communes à explorer avec leurs faits, et invitez
+à préciser ce qui compte (un cadre, des services, une région).
+
 Si un champ "evolution_demographique" est fourni pour un territoire, mentionnez-le UNE
 fois comme une nuance descriptive de la TRAJECTOIRE du territoire (gagne ou perd des
 habitants, part d'arrivants récents, renouvellement résidentiel). RÈGLES STRICTES :
@@ -259,9 +277,9 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null }[];
   heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
-  outcome?: { perfectMatch?: boolean; message?: string | null };
+  outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
   enrichment?: Record<string, unknown>; // extensible : eau / cadmium / sols suivis (à venir)
@@ -318,6 +336,7 @@ export async function POST(request: NextRequest) {
     orientation_geographique: orientation.length ? orientation : null,
     aucun_territoire_parfait: body.outcome?.perfectMatch === false,
     message_moteur: body.outcome?.message ?? null,
+    exploration_sans_classement: inondationDemandee && body.outcome?.exploration === true,
     territoires: results.map((r) => ({
       commune: r.nom,
       region: r.region ?? null,
@@ -325,6 +344,7 @@ export async function POST(request: NextRequest) {
       compromis: r.tradeoff ?? null,
       pression_climatique_economie: r.pressionEco ?? null,
       pression_climatique_inondation: inondationDemandee ? (r.climatInondation ?? null) : null,
+      historique_inondation: inondationDemandee ? champInondationSynthese(r.inondation) : null,
       evolution_demographique: croissanceDemandee ? (r.demographie ?? null) : null,
       calme_sonore: calmeSonoreDemande ? (r.calmeSonore ?? null) : null,
       exposition_industrielle: expoIndustrielleDemandee ? (r.expoIndustrielle ?? null) : null,

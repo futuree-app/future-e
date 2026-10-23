@@ -183,3 +183,135 @@ test("Charron recule, La Rochelle et Grenoble non (aucune ne devient favorable)"
     assert.ok(a <= n, `${insee} ne monte jamais`);
   }
 });
+
+// ═══════════════════════════════════ LES SURFACES DU COMPARATEUR ═══════════════════════════════════
+
+const INTERDIT = /faible risque d'inondation|risque d'inondation faible|risque faible|peu exposée?|à l'abri|sans risque d'inondation|épargnée?|Peu d'inondations recensées|reconnaissances CatNat/i;
+const projet = (preferences: M[], hardConstraints: M = {}) => ({ reformulation: "test", hardConstraints, preferences });
+
+test("plus aucun sous-score inondation : aucune surface ne lit le rang CatNat comme un niveau de risque", () => {
+  for (const c of COMMUNES) assert.equal(V.subScore("faible_risque_inondation", c), null, c.insee);
+});
+
+test("index entier : aucun texte d'inondation ne rassure (cellule, signal, ligne de carte, plans)", () => {
+  const etatsPlans = new Set<string>();
+  for (const c of COMMUNES) {
+    const h = H.historiqueInondation(c.historiqueInondation);
+    const cellule = H.celluleInondation(h, c.plansInondation);
+    const textes = [cellule.palier, cellule.qualifier ?? "", H.signalInondation(h), H.ligneCarteInondation(h, c.plansInondation), H.phrasePlans(c.plansInondation) ?? "", H.phraseHistorique(h)];
+    for (const t of textes) assert.doesNotMatch(t, INTERDIT, `${c.insee} : ${t}`);
+    assert.equal(cellule.alerte, h.etat === "sinistres_frequents", c.insee);
+    for (const p of c.plansInondation ?? []) etatsPlans.add(p.statut);
+  }
+  assert.deepEqual([...etatsPlans].sort(), ["anticipe", "approuve", "prescrit"], "les trois statuts sont présents dans l'index");
+  // Les trois statuts restent distincts dans les mots.
+  assert.match(H.phrasePlans([{ statut: "approuve", aleas: ["Par submersion marine"] }]), /approuvé \(submersion marine\)/);
+  assert.match(H.phrasePlans([{ statut: "anticipe", aleas: [] }]), /appliqué par anticipation/);
+  assert.match(H.phrasePlans([{ statut: "prescrit", aleas: [] }]), /en préparation, zones pas encore fixées/);
+  assert.equal(H.phrasePlans(null), null, "table non lue : on ne dit pas « aucun plan »");
+});
+
+test("comparaison de 3 communes : la ligne Inondation est une ligne de faits, sans gagnant", async () => {
+  const s = await V.seedComparaison(["17091", "17300", "38185"]);
+  const ligne = s.comparaison.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "inondation");
+  assert.deepEqual(ligne.avantage, { type: "neutre" });
+  const parInsee = Object.fromEntries(ligne.cellules.map((x: M) => [x.insee, x]));
+  assert.match(parInsee["17091"].palier, /^Sinistres fréquents : plus de 10 pour 1 000 biens par an$/);
+  assert.equal(parInsee["17091"].alerte, true);
+  assert.equal(parInsee["17091"].qualifier, "plan de prévention approuvé");
+  assert.equal(parInsee["17300"].palier, "1 à 2 sinistres pour 1 000 biens par an");
+  assert.equal(parInsee["17300"].alerte, false);
+  assert.equal(parInsee["38185"].palier, "Aucun sinistre répertorié", "Grenoble : une absence, jamais un « faible risque »");
+  assert.equal(parInsee["38185"].qualifier, "plan de prévention approuvé");
+  assert.match(ligne.aide, /pas une probabilité/);
+  // La ligne de fracture ne porte jamais l'inondation.
+  assert.ok(!s.comparaison.divergence || !/inondation/i.test(JSON.stringify(s.comparaison.divergence)));
+  assert.doesNotMatch(JSON.stringify(ligne), INTERDIT);
+  // Le résumé et l'arbitrage ne prêtent plus d'avantage sur l'inondation (« se distingue sur les risques
+  // naturels (inondation, …) » pour une commune qui ne menait que sur le feu).
+  for (const phrase of [...s.comparaison.resume, s.comparaison.arbitrage ?? "", ...s.comparaison.themes.map((t: M) => t.synthese)]) {
+    assert.doesNotMatch(phrase, /inondation/i, phrase);
+  }
+});
+
+test("recherche avec un autre critère : l'explication est donnée, chaque carte porte son fait, rien ne rassure", async () => {
+  const o = await V.matchProjects(projet([{ key: "faible_risque_inondation", weight: 3 }, { key: "acces_soins", weight: 2 }], { departements: ["17"] }));
+  assert.equal(o.inondation.exploration, false);
+  assert.match(o.inondation.transparence, /sinistres passés, pas la probabilité d'une inondation à venir/);
+  assert.ok(o.results.length >= 3);
+  for (const r of o.results.slice(0, 3)) {
+    assert.ok(r.inondation?.ligne.startsWith("Inondation : "), r.nom);
+    assert.equal(r.inondation.sinistresFrequents, false, `${r.nom} ne devrait pas être en tête avec des sinistres fréquents`);
+    assert.doesNotMatch(JSON.stringify(r), INTERDIT);
+    assert.ok(r.signaux?.inondation, `${r.nom} : le signal factuel d'AskFuture`);
+  }
+  // Yves, l'Île-d'Aix, La Couarde-sur-Mer : plus de 10 ‰, en tête de l'ancien classement, plus dans le trio.
+  assert.ok(!o.results.slice(0, 3).some((r: M) => ["17483", "17004", "17121"].includes(r.insee)));
+});
+
+test("recherche sans la priorité inondation : aucun fait ni explication ajoutés, classement inchangé", async () => {
+  const o = await V.matchProjects(projet([{ key: "acces_soins", weight: 2 }, { key: "nature", weight: 2 }], { departements: ["17"] }));
+  assert.equal(o.inondation, undefined);
+  for (const r of o.results) assert.equal(r.inondation, undefined);
+});
+
+test("inondation seule demande classable : exploration annoncée, pas de palmarès, ordre dit", async () => {
+  for (const hc of [{}, { departements: ["30"] }, { zones: [{ zone: "bretagne", strength: "hard" }] }]) {
+    const o = await V.matchProjects(projet([{ key: "faible_risque_inondation", weight: 3 }], hc));
+    assert.equal(o.inondation.exploration, true, JSON.stringify(hc));
+    assert.match(o.inondation.ordre, /nous ne classons pas les communes sur cette seule demande/);
+    assert.equal(o.message, null, "pas de « moins de compromis » : rien n'a été classé");
+    // L'ordre annoncé : les sinistres fréquents en dernier, puis le nombre d'habitants.
+    const rs = o.results;
+    const premierFrequent = rs.findIndex((r: M) => r.inondation.sinistresFrequents);
+    if (premierFrequent >= 0) assert.ok(rs.slice(premierFrequent).every((r: M) => r.inondation.sinistresFrequents), JSON.stringify(hc));
+    const pop = (r: M) => commune(r.insee).population ?? 0;
+    const sansFrequents = rs.filter((r: M) => !r.inondation.sinistresFrequents);
+    for (let i = 1; i < Math.min(3, sansFrequents.length); i++) {
+      assert.ok(pop(sansFrequents[i - 1]) >= pop(sansFrequents[i]), JSON.stringify(hc));
+    }
+  }
+});
+
+test("une orientation géographique souple reste une demande classable : pas d'exploration", async () => {
+  const o = await V.matchProjects(projet([{ key: "faible_risque_inondation", weight: 3 }], { zones: [{ zone: "bretagne", strength: "preferred" }] }));
+  assert.equal(o.inondation.exploration, false);
+});
+
+test("phrase climatique : plus jamais « peu d'inondations recensées »", async () => {
+  const o = await V.matchProjects(projet([{ key: "faible_risque_inondation", weight: 3 }, { key: "nature", weight: 2 }], { departements: ["30"] }));
+  for (const r of [...o.results, ...o.pistes]) {
+    if (r.climatInondation) assert.doesNotMatch(r.climatInondation, /Peu d'inondations recensées/);
+  }
+});
+
+test("synthèse rédigée : elle ne reçoit que les faits, filtrés, et le mode exploration (sans appel Anthropic)", () => {
+  assert.deepEqual(H.champInondationSynthese({ historique: "De 1995 à 2021, …", plans: "Plan de prévention des inondations approuvé." }),
+    { historique: "De 1995 à 2021, …", plans: "Plan de prévention des inondations approuvé." });
+  assert.equal(H.champInondationSynthese({ historique: "Commune à faible risque d'inondation", plans: 42 }), null, "une phrase rassurante injectée est rejetée");
+  assert.equal(H.champInondationSynthese(null), null);
+  const route = readFileSync("src/app/api/comparateur-vie/synthesize/route.ts", "utf8");
+  assert.match(route, /historique_inondation: inondationDemandee \? champInondationSynthese\(r\.inondation\) : null/);
+  assert.match(route, /exploration_sans_classement: inondationDemandee && body\.outcome\?\.exploration === true/);
+  assert.match(route, /ne présentez JAMAIS une commune comme\s+« peu exposée »/);
+});
+
+test("comparatifs vendus : le trio acheté prime sur le classement recalculé, et le changement est dit", async () => {
+  const p = projet([{ key: "faible_risque_inondation", weight: 3 }, { key: "acces_soins", weight: 2 }], { departements: ["17"] });
+  const o = await V.matchProjects(p);
+  const tete = o.results.slice(0, 3).map((r: M) => r.insee);
+  const meme = await V.rejouerPack(p, tete);
+  assert.equal(meme.trioRecompose, false);
+  assert.deepEqual(meme.trio.map((r: M) => r.insee), tete);
+  // Un trio acheté sous l'ancien classement (Yves, l'Île-d'Aix, La Couarde-sur-Mer) : il est conservé.
+  const ancien = ["17483", "17004", "17121"];
+  const r = await V.rejouerPack(p, ancien);
+  assert.equal(r.trioRecompose, true);
+  assert.deepEqual(r.trio.map((x: M) => x.insee), ancien);
+  assert.deepEqual(r.pistes, []);
+  assert.match(H.AVERTISSEMENT_TRIO_RECOMPOSE, /reste celui des communes que vous avez achetées/);
+  // L'avertissement daté : seulement pour un achat antérieur à la nouvelle lecture.
+  assert.match(H.avertissementPackAnterieur("2026-09-01T10:00:00Z"), /ne classe plus les communes d'après le nombre de catastrophes naturelles reconnues/);
+  assert.equal(H.avertissementPackAnterieur(`${H.LECTURE_INONDATION_DEPUIS}T08:00:00Z`), null);
+  assert.equal(H.avertissementPackAnterieur(null), null);
+});
