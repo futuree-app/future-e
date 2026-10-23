@@ -172,10 +172,14 @@ export const PHRASE_EXPLORATION =
 // cette lecture affichait, sur la ligne « Inondation », un palier tiré du nombre de reconnaissances
 // CatNat. On ne réécrit rien en base ; on dit, au-dessus du comparatif, que la ligne a changé.
 // À AJUSTER LE JOUR DE LA MISE EN PRODUCTION : la date à partir de laquelle la nouvelle lecture est servie.
-export const LECTURE_INONDATION_DEPUIS = "2026-10-23";
+// null pendant la préparation : renseigner le jour effectif de production avant livraison.
+export const LECTURE_INONDATION_DEPUIS: string | null = null;
 
-export function avertissementPackAnterieur(createdAt: string | null | undefined): string | null {
-  if (!createdAt || !(createdAt.slice(0, 10) < LECTURE_INONDATION_DEPUIS)) return null;
+export function avertissementPackAnterieur(
+  createdAt: string | null | undefined,
+  depuis: string | null = LECTURE_INONDATION_DEPUIS,
+): string | null {
+  if (!depuis || !createdAt || !/^\d{4}-\d{2}-\d{2}/.test(createdAt) || !(createdAt.slice(0, 10) < depuis)) return null;
   return "Ce comparatif a été acheté avant une évolution de futur•e. La ligne « Inondation » ne classe plus les communes "
     + "d'après le nombre de catastrophes naturelles reconnues : elle présente les sinistres indemnisés de 1995 à 2021 et les plans de prévention, "
     + "sans désigner de commune sans risque. Votre comparatif est affiché avec cette lecture.";
@@ -249,7 +253,7 @@ export function plansCourt(plans: PlanInondationIndex[] | null | undefined): str
   if (plans.some((p) => p.statut === "approuve")) return "plan de prévention approuvé";
   if (plans.some((p) => p.statut === "anticipe")) return "plan appliqué par anticipation";
   if (plans.some((p) => p.statut === "prescrit")) return "plan en préparation";
-  return "aucun plan de prévention";
+  return "aucun plan de prévention des inondations recensé";
 }
 
 // ── LES SURFACES DU COMPARATEUR ───────────────────────────────────────────────────────────────

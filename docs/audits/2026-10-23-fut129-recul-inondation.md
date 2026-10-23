@@ -145,16 +145,20 @@ La table GASPAR des plans (`data/gaspar-pprn-inondation.json`, `src/lib/data/gas
 > La page de l'ONRN sur Géorisques annonce ces jeux de données (« lien à venir »), et le SDES publie sur data.gouv.fr les mêmes indicateurs par EPCI. Pourriez-vous nous indiquer :
 > 1. s'il est possible d'accéder aux fichiers communaux, et sous quelle forme ;
 > 2. leur méthodologie et leur millésime (EAIP 2011, Fidéli 2021, recensement 2021) ;
-> 3. leurs conditions de réutilisation (licence, mention de la source).
+> 3. leurs conditions de réutilisation (licence, mention de la source) ;
+> 4. la couverture géographique, le référentiel communal (codes INSEE et millésime), ainsi que la disponibilité des effectifs et dénominateurs associés, des valeurs manquantes et des éventuelles restrictions de diffusion.
 >
-> Nous les présenterions comme une exposition potentielle aux inondations extrêmes, jamais comme une probabilité, avec la source et la période.
+> Nous les présenterions séparément pour chaque phénomène, comme une exposition potentielle aux inondations extrêmes, jamais comme une probabilité ni comme la mesure du risque d’un logement. Les limites de l’EAIP (qui ne couvre pas à elle seule tous les phénomènes, notamment le ruissellement et les remontées de nappe), la source et la période resteraient visibles.
 >
 > Merci par avance,
-> [nom], futur•e
+> Quentin Brache, fondateur de futur•e
+> https://futur-e.fr/
 
 **Destinataires vérifiés le 23/10/2026.**
 - **À :** `bem.sdie.sdes.cgdd@developpement-durable.gouv.fr`. C'est le contact « Affaire suivie par » de la fiche ONRN « Exposition des logements et des personnes au risque d'inondation par débordement de cours d'eau », version 2 du 11/12/2024 (SDES, producteur de l'indicateur).
 - **Copie :** `bipcp.srnh.dgpr@developpement-durable.gouv.fr`, contact DGPR des fiches ONRN.
+
+**Vérification complémentaire du 23/10 :** adresse SDES confirmée dans https://files.georisques.fr/onrn/2024_ONRN_Cours_eau.pdf ; copie DGPR confirmée dans https://files.georisques.fr/onrn/2025/ONRN_Frequence_Inon_9521.pdf.
 
 **Statut : NON ENVOYÉ.** Aucun canal d'envoi autorisé depuis le compte officiel de futur•e n'était disponible : la connexion Gmail n'est pas authentifiée, et elle n'est pas désignée comme compte officiel. Le message ci-dessus est un brouillon, à envoyer depuis le compte de futur•e.
 

@@ -16,7 +16,7 @@ const PROJET: ParsedProject = {
 
 type Cas = { nom: string; titre: string };
 const CAS: Cas[] = [
-  { nom: "pack-ancien", titre: "Dossier comparatif acheté le 1er septembre 2026, avant la nouvelle lecture, trio d'alors : Yves, Île-d'Aix, La Couarde-sur-Mer" },
+  { nom: "pack-ancien", titre: "Dossier comparatif acheté le 1er septembre 2026, avant une bascule simulée au 01/11, trio d'alors : Yves, Île-d'Aix, La Couarde-sur-Mer" },
   { nom: "pack-actuel", titre: "Dossier comparatif rejoué aujourd'hui sur le même projet (trio du classement actuel)" },
   { nom: "choix", titre: "Comparatif de communes nommées : Charron, La Rochelle, Grenoble" },
 ];
@@ -36,7 +36,7 @@ export default async function BancFut129({ searchParams }: { searchParams: Promi
     const r = await rejouerPack(PROJET, insees);
     if (r) {
       const avertissements = [
-        cas.nom === "pack-ancien" ? avertissementPackAnterieur("2026-09-01T10:00:00Z") : null,
+        cas.nom === "pack-ancien" ? avertissementPackAnterieur("2026-09-01T10:00:00Z", "2026-11-01") : null,
         r.trioRecompose && cas.nom === "pack-ancien" ? AVERTISSEMENT_TRIO_RECOMPOSE : null,
       ].filter((x): x is string => x != null);
       vue = <PackUnlockedView data={r.data} trio={r.trio} pistes={r.pistes} projetLabel="faible risque d'inondation, soins, Charente-Maritime" avertissements={avertissements} />;

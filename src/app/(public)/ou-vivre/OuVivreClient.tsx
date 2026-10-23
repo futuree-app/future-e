@@ -1202,7 +1202,7 @@ export function OuVivreClient() {
                   className="card-answer rounded-2xl p-7 flex flex-col"
                 >
                   {/* Identité : l'essence du lieu, en tête (remplace « Territoire N »). */}
-                  <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>
+                  {!outcome?.inondation?.exploration && <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>}
                   <h3
                     className="mt-2 font-normal text-[22px] text-label leading-[1.15]"
                     style={{ fontFamily: "var(--font-serif)" }}
@@ -1219,7 +1219,7 @@ export function OuVivreClient() {
                   {/* FUT-129 : en exploration, aucun palier de correspondance : rien n'a été classé sur la demande. */}
                   {!outcome?.inondation?.exploration && (
                     <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
-                      {matchTier(r.compatibility)}
+                      {matchTier(r.compatibility)}{outcome?.inondation ? " sur vos autres critères" : ""}
                     </p>
                   )}
                   {/* LA DURÉE ESTIMÉE. Ce n'est pas un temps réel : le moteur de routage calcule sur son
@@ -1242,7 +1242,7 @@ export function OuVivreClient() {
                       {r.boundaryReason === "routing" ? " · calcul indisponible" : ""}
                     </p>
                   )}
-                  {forces(r).length > 0 && (
+                  {!outcome?.inondation?.exploration && forces(r).length > 0 && (
                     <ul className="mt-2 flex flex-col gap-1.5">
                       {forces(r).map((f) => (
                         <li key={f} className="flex items-start gap-2 text-[13px] text-label/90 leading-snug">
@@ -1265,10 +1265,19 @@ export function OuVivreClient() {
                       envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
                       et vivent dans la synthèse, AskFuture et le rapport. */}
-                  {r.compromis && (
+                  {!outcome?.inondation?.exploration && r.compromis && (
                     <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-caption)] leading-[1.55] text-muted">
                       Compromis : {r.compromis}
                     </p>
+                  )}
+
+                  {outcome?.inondation?.exploration && (
+                    <details className="mt-4 text-[length:var(--text-caption)] leading-[1.55] text-muted">
+                      <summary className="cursor-pointer py-3">Autres caractéristiques de la commune</summary>
+                      <p>{r.identite}</p>
+                      {forces(r).length > 0 && <ul className="mt-2 list-disc pl-4">{forces(r).map((f) => <li key={f}>{cap(f)}</li>)}</ul>}
+                      {r.compromis && <p className="mt-2">À savoir aussi : {r.compromis}</p>}
+                    </details>
                   )}
 
                   <a

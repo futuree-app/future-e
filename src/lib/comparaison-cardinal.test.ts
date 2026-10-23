@@ -52,7 +52,7 @@ test("C5/C6/C7. deux résultats : pas de Pack (replay exige trois) ; jamais « l
 });
 
 test("C8. deux résultats : la matrice et la comparaison disent « deux »", () => {
-  assert.match(lire("src/app/(public)/comparateur/ThemeMatrix.tsx"), /les \{motCardinal\(n\)\} territoires se valent/);
+  assert.match(lire("src/app/(public)/comparateur/ThemeMatrix.tsx"), /même information pour les \{motCardinal\(n\)\} communes/);
   assert.match(lire("src/app/(public)/ou-vivre/ComparaisonCompleteView.tsx"), /Vous les avez retenus tous les \{motCardinal\(trio\.length\)\}\./);
   assert.match(MOTEUR, /Sur ce thème, les \$\{nMot\} territoires se ressemblent/);
 });

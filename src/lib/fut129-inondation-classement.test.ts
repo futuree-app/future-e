@@ -311,7 +311,15 @@ test("comparatifs vendus : le trio acheté prime sur le classement recalculé, e
   assert.deepEqual(r.pistes, []);
   assert.match(H.AVERTISSEMENT_TRIO_RECOMPOSE, /reste celui des communes que vous avez achetées/);
   // L'avertissement daté : seulement pour un achat antérieur à la nouvelle lecture.
-  assert.match(H.avertissementPackAnterieur("2026-09-01T10:00:00Z"), /ne classe plus les communes d'après le nombre de catastrophes naturelles reconnues/);
-  assert.equal(H.avertissementPackAnterieur(`${H.LECTURE_INONDATION_DEPUIS}T08:00:00Z`), null);
+  assert.match(H.avertissementPackAnterieur("2026-09-01T10:00:00Z", "2026-11-01"), /ne classe plus les communes d'après le nombre de catastrophes naturelles reconnues/);
+  assert.equal(H.avertissementPackAnterieur("2026-11-01T08:00:00Z", "2026-11-01"), null);
   assert.equal(H.avertissementPackAnterieur(null), null);
+});
+
+
+test("bascule : date de livraison fournie, préparation sans date fictive, après et avant", () => {
+  assert.equal(H.avertissementPackAnterieur("2026-10-01T00:00:00Z", null), null);
+  assert.ok(H.avertissementPackAnterieur("2026-10-31T23:59:59Z", "2026-11-01"));
+  assert.equal(H.avertissementPackAnterieur("2026-11-02T00:00:00Z", "2026-11-01"), null);
+  assert.equal(H.avertissementPackAnterieur("invalide", "2026-11-01"), null);
 });

@@ -1,0 +1,114 @@
+[
+  {
+    "cas": "charron-adresse",
+    "vue": "classique",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "charron-adresse",
+    "vue": "classique",
+    "width": 360,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "charron-adresse",
+    "vue": "releve",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "charron-adresse",
+    "vue": "releve",
+    "width": 360,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "lr-duperre",
+    "vue": "classique",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "lr-duperre",
+    "vue": "classique",
+    "width": 360,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "lr-duperre",
+    "vue": "releve",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "lr-duperre",
+    "vue": "releve",
+    "width": 360,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "chatel",
+    "vue": "classique",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "chatel",
+    "vue": "classique",
+    "width": 360,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "chatel",
+    "vue": "releve",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "chatel",
+    "vue": "releve",
+    "width": 360,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "ancien",
+    "vue": "classique",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "ancien",
+    "vue": "classique",
+    "width": 360,
+    "overflow": 0,
+    "clavier": false
+  },
+  {
+    "cas": "ancien",
+    "vue": "releve",
+    "width": 1440,
+    "overflow": 0,
+    "clavier": true
+  },
+  {
+    "cas": "ancien",
+    "vue": "releve",
+    "width": 360,
+    "overflow": 0,
+    "clavier": true
+  }
+]
