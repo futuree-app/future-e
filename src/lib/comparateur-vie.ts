@@ -38,6 +38,9 @@ import { travelThresholdLabel, ROUTABLE_MODES, kmLisible } from "@/lib/hard-cons
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
+import {
+  historiqueInondation, reculInondation, scoreAvecRecul, RAISON_SINISTRES_FREQUENTS,
+} from "@/lib/comparateur/inondation-historique";
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
@@ -510,6 +513,10 @@ export type IndexCommune = {
   // Risque inondation (cf. scripts/gaspar/collecter-catnat.mts). catnat = nb de reconnaissances CatNat (lignes GASPAR)
   // inondation (hors submersion marine) ; tri réservé (false en V1) ; risque 0-100 (haut = exposé).
   inondation?: { catnat: number; tri: boolean; risque: number } | null;
+  // FUT-129 : fréquence des sinistres d'inondation indemnisés (ONRN / CCR, 1995-2021), classes VERBATIM
+  // du producteur, et représentativité de l'échantillon. Seule donnée d'inondation du CLASSEMENT
+  // (cf. `comparateur/inondation-historique.ts`, scripts/populate-historique-inondation.mts). null = absente.
+  historiqueInondation?: { frequence: string; representativite: string } | null;
   // Mobilité domicile-travail (cf. scripts/populate-mobilite.py, RP MOBPRO 2022). part_voiture
   // brut 0..1 (rapport futur) ; dependance = percentile national (haut = dépend de la voiture).
   mobilite?: {
@@ -2211,6 +2218,33 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   calme_sonore: "environnement assez maillé d'infrastructures bruyantes",
   faible_exposition_industrielle: "à proximité de sites industriels à risque",
 };
+// ── LE SCORE DE PRÉFÉRENCES D'UNE COMMUNE (FUT-129) ─────────────────────────────────────────────
+// La priorité « un faible risque d'inondation » n'a plus de sous-score : aucune donnée communale ne permet
+// de dire qu'une commune est peu exposée. Elle est RETIRÉE du calcul (numérateur ET dénominateur : une
+// dimension laissée au dénominateur sans valeur compterait comme un 0), puis elle agit par son seul
+// RECUL, quand les sinistres indemnisés de 1995 à 2021 ont été fréquents. Par construction, le score
+// avec cette priorité n'est jamais supérieur au score sans elle (`fut129-inondation-classement.test.ts`).
+export type PreferencePonderee = { key: PreferenceKey; weight: number; baseline?: boolean };
+export function scorePreferences(c: IndexCommune, prefs: PreferencePonderee[]): {
+  subs: (PreferencePonderee & { s: number })[];
+  /** Le score sans la priorité inondation. */
+  reference: number;
+  recul: number;
+  base: number;
+} {
+  const classees = prefs.filter((p) => p.key !== "faible_risque_inondation");
+  const poidsInondation = prefs.filter((p) => p.key === "faible_risque_inondation").reduce((s, p) => s + p.weight, 0);
+  const poidsAutres = classees.reduce((s, p) => s + p.weight, 0);
+  const subs: (PreferencePonderee & { s: number })[] = [];
+  for (const p of classees) {
+    const s = subScore(p.key, c);
+    if (s != null) subs.push({ key: p.key, weight: p.weight, baseline: p.baseline, s });
+  }
+  const reference = poidsAutres > 0 ? subs.reduce((s, x) => s + x.weight * x.s, 0) / poidsAutres : 0;
+  const recul = reculInondation({ historique: historiqueInondation(c.historiqueInondation), poidsInondation, poidsAutres });
+  return { subs, reference, recul, base: scoreAvecRecul(reference, recul) };
+}
+
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
   return typeof r === "function" ? r(c) : r;
@@ -2920,7 +2954,6 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     prefs.push({ key: "eviter_isolement", weight: VIABILITY_BASELINE_SPLIT, baseline: true });
     prefs.push({ key: "viabilite_emploi", weight: VIABILITY_BASELINE_SPLIT, baseline: true });
   }
-  const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
 
   // Deux populations, jamais mélangées : celles dont la condition est CONFIRMÉE, et celles que le moteur
   // retient sans avoir pu trancher (le point tombe dans la bande de tolérance de la géométrie).
@@ -2932,18 +2965,12 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   });
 
 
-  type Sub = { key: PreferenceKey; weight: number; baseline?: boolean; s: number };
   const scored = candidates.map((c) => {
-    const subs: Sub[] = [];
-    for (const p of prefs) {
-      const s = subScore(p.key, c);
-      if (s != null) subs.push({ key: p.key, weight: p.weight, baseline: p.baseline, s });
-    }
-    // Score de base (préférences), puis bonus d'ancre souple (preferred / inspiration).
-    // On garde le score brut (non plafonné) pour le tri : sinon, quand les grandes
-    // villes saturent déjà à 100, le clamp écrase le bonus et l'ancre préférée ne
-    // départage plus. Le score affiché reste borné à 100.
-    const base = subs.reduce((s, x) => s + x.weight * x.s, 0) / totalW;
+    // Score de base (préférences, inondation comprise par son seul recul : FUT-129), puis bonus d'ancre
+    // souple (preferred / inspiration). On garde le score brut (non plafonné) pour le tri : sinon, quand
+    // les grandes villes saturent déjà à 100, le clamp écrase le bonus et l'ancre préférée ne départage
+    // plus. Le score affiché reste borné à 100.
+    const { subs, base, recul } = scorePreferences(c, prefs);
     // Bonus d'ancre souple. Au sein d'un axe : max (sémantique OU, ex. « Atlantique
     // ou Sud-Ouest »). Entre axes orthogonaux (zone vs altitude) : somme bornée, pour
     // que l'intersection (« le Sud-Ouest ET en altitude ») prime sans filtrer.
@@ -2991,8 +3018,10 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     const parForce = [...visible].sort((a, b) => b.weight * b.s - a.weight * a.s);
     if (reasons.length === 0) reasons = parForce.slice(0, 2).map((x) => reasonText(x.key, c));
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
-    const tradeoffKey: PreferenceKey | null = worst && worst.s < 50 ? worst.key : null;
-    const tradeoff = tradeoffKey ? REASON_NEG[tradeoffKey] : null;
+    // FUT-129 : une commune qui recule pour ses inondations indemnisées fréquentes le dit, en premier :
+    // c'est une priorité déclarée que les faits contredisent, et la seule raison de son recul.
+    const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < 50 ? worst.key : null;
+    const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? REASON_NEG[tradeoffKey] : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
     return {
