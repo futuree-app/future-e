@@ -150,21 +150,22 @@ function constatZonage(z: ZonageInondationPoint): ConstatInondation | null {
     source: SOURCE_PPRN,
   };
   if (z.kind === "zone_inondation") {
-    const noms = z.plans.length > 0 ? ` : ${z.plans.join(", ")}` : "";
-    const phen = z.phenomenes && z.phenomenes.length > 0 ? ` (${z.phenomenes.map((p) => p.replace(/^(la|le|les|l') ?/, "")).join(", ")})` : "";
+    // Passe éditoriale du 23/10 : le constat d'abord, en mots courants ; le nom du plan entre parenthèses.
+    const noms = z.plans.length > 0 ? ` (${z.plans.join(", ")})` : "";
+    const phen = z.phenomenes && z.phenomenes.length > 0 ? z.phenomenes.join(", ") : "l'inondation";
+    const court = `Cette adresse est dans une zone réglementée pour ${phen}${noms}.`;
     return {
-      ...base, signal: true,
-      enonce: `Un plan de prévention du risque inondation réglemente ce point${noms}${phen}.`,
-      court: `Un plan de prévention des inondations réglemente ce point${noms}${phen}.`,
+      ...base, signal: true, court,
+      enonce: `${court} Un zonage encadre la construction, il ne mesure pas ce que le lieu peut connaître.`,
     };
   }
   if (z.kind === "zonage_alea_inconnu") {
     // NI UN SIGNAL, NI UNE ABSENCE. On dit ce qui est su (un plan s'applique) et ce qui ne l'est pas.
-    const noms = z.plans.length > 0 ? ` : ${z.plans.join(", ")}` : "";
+    const noms = z.plans.length > 0 ? ` (${z.plans.join(", ")})` : "";
+    const court = `Cette adresse est dans une zone d'un plan de prévention${noms}, sans que la donnée dise si cette zone concerne l'inondation.`;
     return {
-      ...base, signal: true,
-      court: `Un plan de prévention s'applique à ce point${noms}. La donnée reçue ne précise pas s'il porte sur l'inondation.`,
-      enonce: `Un plan de prévention s'applique à ce point${noms}. La donnée reçue ne précise pas s'il porte sur l'inondation : l'état des risques du bien et le règlement du plan le disent.`,
+      ...base, signal: true, court,
+      enonce: `${court} L'état des risques du bien et le règlement du plan le disent.`,
     };
   }
   // LES DEUX ABSENCES DISENT CE QU'UN ZONAGE EST, sans quoi « aucun » se lit « rien à craindre ».

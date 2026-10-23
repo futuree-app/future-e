@@ -163,7 +163,7 @@ test("un zonage inondation au point est énoncé comme un fait, avec le nom du p
     onrn: { kind: "aucun" },
   })!;
   const z = l.constats.find((c) => c.cle === "zonage_point")!;
-  assert.match(z.enonce, /Un plan de prévention du risque inondation réglemente ce point : PPRI de la Charente\./);
+  assert.match(z.enonce, /^Cette adresse est dans une zone réglementée pour l'inondation \(PPRI de la Charente\)\./);
   assert.equal(z.signal, true);
 });
 

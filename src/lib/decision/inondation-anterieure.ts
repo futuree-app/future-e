@@ -34,15 +34,18 @@ function tousLesFaits(d: Dossier): DecisionFact[] {
 
 const EXPOSITION_ELEVEE = /exposition de la commune à l'inondation ressort élevée/;
 
+// Passe éditoriale du 23/10 : ce que le lecteur doit retenir d'abord (cette analyse n'applique plus
+// la lecture actuelle), puis pourquoi, puis ce qu'il peut faire. Sans le sigle CatNat.
+const SUITE = "Une nouvelle analyse lirait les plans de prévention de la commune et la zone de l'adresse. L'analyse ci-dessous reste celle qui vous a été remise.";
 const TEXTE: Record<LectureInondationAnterieure["motif"], string> = {
   exposition_elevee:
-    "Cette analyse a été produite avec une version antérieure de la lecture des inondations. Elle qualifiait l'exposition de la commune à partir du nombre de reconnaissances de catastrophe naturelle. "
-    + "Ce nombre retrace des décisions d'indemnisation : il n'indique ni la probabilité d'une inondation, ni la part du territoire exposée. "
-    + "futur•e lit désormais les plans de prévention de la commune et le zonage de l'adresse. L'analyse ci-dessous reste celle qui vous a été remise ; une nouvelle analyse appliquerait la lecture actuelle.",
+    "Cette analyse date d'une version antérieure de futur•e : sa lecture des inondations n'est plus celle que nous appliquons. "
+    + "Elle jugeait l'exposition de la commune d'après le nombre de catastrophes naturelles reconnues, qui retrace des indemnisations et ne mesure pas le risque. "
+    + SUITE,
   frequence_faible:
-    "Cette analyse a été produite avec une version antérieure de la lecture des inondations. Elle jugeait votre priorité « un faible risque d'inondation » favorable parce que la commune comptait peu de reconnaissances de catastrophe naturelle. "
-    + "Un faible nombre de reconnaissances ne démontre pas une faible exposition. "
-    + "futur•e lit désormais les plans de prévention de la commune et le zonage de l'adresse. L'analyse ci-dessous reste celle qui vous a été remise ; une nouvelle analyse appliquerait la lecture actuelle.",
+    "Cette analyse date d'une version antérieure de futur•e : sa lecture des inondations n'est plus celle que nous appliquons. "
+    + "Elle jugeait votre priorité, un faible risque d'inondation, satisfaite parce que la commune comptait peu de catastrophes naturelles reconnues, ce qui ne démontre pas un faible risque. "
+    + SUITE,
 };
 
 export function lectureInondationAnterieure(d: Dossier | null | undefined): LectureInondationAnterieure | null {

@@ -10,7 +10,7 @@
 // verdicts, un seul lecteur. cf. hard-constraint-rules.ts.
 import type {
   DecisionRule, DecisionFact, ModuleFacts, RunResult, RuleEvaluation, HardEvaluation,
-  VerificationFact, MismatchFact, EvidenceRef, DecisionAction,
+  VerificationFact, MismatchFact, EvidenceRef, DecisionAction, MaterialityTier,
 } from "./decision-fact.ts";
 import type { UserProject } from "../user-project.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
@@ -24,7 +24,7 @@ import { conditionsDePreference } from "./condition-rules.ts";
 import { LOGEMENT_RULES, SOURCES } from "./logement-rules.ts";
 import { bucketDuProjet, type Bucket } from "./logement-gestes.ts";
 import {
-  libelleCourtDeZone, nomLocalDeZone, palierDeZone, planEnPhrase, regimeEnPhrase, statutDeZone, joinFr,
+  libelleCourtDeZone, nomLocalDeZone, palierDeZone, planDate, planEnPhrase, regimeEnClair, regimeEnPhrase, statutDeZone, joinFr,
   type ZonageInondationFait,
 } from "./zonage-inondation.ts";
 import { dateLongue, type PlanInondationCommune, type PlansInondationCommune } from "../data/gaspar-pprn-inondation.ts";
@@ -116,10 +116,20 @@ export const RULE_INOND_LECTURE = "territoire.inondation-lecture";
 const KEY_INOND: PreferenceKey = "faible_risque_inondation";
 
 const LIMITE_CATNAT =
-  "Le nombre de reconnaissances retrace des décisions d'indemnisation : il n'indique ni la probabilité d'une inondation, ni la part du territoire exposée.";
+  "Ce nombre retrace des décisions d'indemnisation : il n'indique ni la probabilité d'une inondation, ni la part du territoire exposée.";
 // P0-D : la lecture ne remplace pas le document de la transaction. Dite sur chaque carte d'adresse, avec
 // la phrase même du module Logement (une seule source, `inondation-lecture.ts`).
 const LIMITE_ETAT_DES_RISQUES = PORTEE_ETAT_DES_RISQUES;
+
+// ── TROIS NIVEAUX DE LECTURE (passe éditoriale du 23/10/2026, demande du porteur) ───────────────
+// Un acheteur qui découvre futur•e doit comprendre la carte sans connaître PPR, CatNat ou « régime ».
+//   1. Le constat, en mots courants (statement, première phrase) : ce qu'est l'adresse ou la commune,
+//      sans code de zone ni sigle.
+//   2. Ce que cela change pour le projet (statement, phrase suivante).
+//   3. Les preuves et les limites (`signalConvention`, rendu dans « Données et limites ») : plan, zone,
+//      date, régime officiel, nom local, historique des reconnaissances, portée de la lecture.
+// La face garde une seule ligne de limite (`limitation`), celle qui empêche le contresens, et les
+// pastilles de preuve. Simplifier ne retire rien : chaque fait de l'ancienne carte est au niveau 3.
 
 /** Le zonage de l'adresse, quand l'adresse est lue (absent d'un artefact antérieur). */
 function zonageDeLAdresse(f: ModuleFacts): ZonageInondationFait | null {
@@ -132,12 +142,12 @@ function zoneEtablie(f: ModuleFacts): Extract<ZonageInondationFait, { etat: "zon
   return z && z.etat === "zone" && z.rattachement === "fiable" && z.liaison === "explicite" ? z : null;
 }
 
-/** L'historique communal, en une phrase : un contexte, jamais une conclusion. */
-function contexteCatnat(f: ModuleFacts): string {
+/** L'historique communal, avec ce qu'il ne dit pas : un contexte de niveau 3, jamais une conclusion. */
+function historiqueCatnat(f: ModuleFacts): string {
   const c = catnatInondationDepuisCompte(f.catnatInondation, f.insee);
   if (!c) return "";
   return c.count > 0
-    ? ` À l'échelle de la commune, ${phraseConstatCatnatInondation(c)}.`
+    ? ` À l'échelle de la commune, ${phraseConstatCatnatInondation(c)}. ${LIMITE_CATNAT}`
     : ` À l'échelle de la commune, ${phraseAucuneReconnaissanceInondation(c)}.`;
 }
 
@@ -180,14 +190,20 @@ const TYPE_DE_PLAN: Record<string, string> = {
   "PPRN-Multi": "un plan de prévention multirisque",
 };
 
-/** « un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine » */
+/** Les phénomènes d'inondation d'une liste de plans communaux, en mots courants ; à défaut, « l'inondation ». */
+function phenomenesDesPlans(plans: PlanInondationCommune[]): string {
+  const vus = [...new Set(plans.flatMap((p) => p.aleas.map((a) => PHENOMENE[a]).filter((x): x is string => Boolean(x))))];
+  return joinFr(vus) || "l'inondation";
+}
+
+/** Niveau 3 : « un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine » */
 function planCommuneEnPhrase(p: PlanInondationCommune): string {
   const type = TYPE_DE_PLAN[p.modele] ?? "un plan de prévention des risques naturels";
-  const phen = joinFr(p.aleas.map((a) => PHENOMENE[a]).filter((x): x is string => Boolean(x))) || "l'inondation";
+  const phen = phenomenesDesPlans([p]);
   const date = dateLongue(p.date);
   if (p.statut === "approuve") return `${type}, « ${p.nom} »,${date ? ` approuvé le ${date},` : " approuvé,"} réglemente ${phen}`;
   if (p.statut === "anticipe") return `${type}, « ${p.nom} », s'applique par anticipation${date ? ` depuis le ${date}` : ""} pour ${phen}`;
-  return `${type}, « ${p.nom} », est en cours d'élaboration${date ? ` depuis le ${date}` : ""} pour ${phen} : il n'a pas encore de zonage opposable`;
+  return `${type}, « ${p.nom} », est prescrit${date ? ` depuis le ${date}` : ""} pour ${phen} : il n'a pas encore de zonage opposable`;
 }
 
 function plansCommuneEnPhrase(f: ModuleFacts, plans: PlanInondationCommune[]): string {
@@ -198,52 +214,79 @@ function plansCommuneEnPhrase(f: ModuleFacts, plans: PlanInondationCommune[]): s
   return out;
 }
 
-const TOPIC_ADRESSE = "le zonage inondation de l'adresse";
-const TOPIC_COMMUNE = "les plans de prévention des inondations";
+// LES SUJETS NOMMENT CE QUE LE LECTEUR REGARDE, pas l'objet technique : le verdict les reprend tels
+// quels (« Le principal point à contrôler à Charron : la zone réglementée pour l'inondation où se
+// trouve l'adresse »). « Le zonage inondation de l'adresse » ne disait pas qu'une zone avait été lue.
+const TOPIC_ZONE_ETABLIE = "la zone réglementée pour l'inondation où se trouve l'adresse";
+const TOPIC_ADRESSE = "la zone de l'adresse face à l'inondation";
+const TOPIC_COMMUNE = "les zones réglementées pour l'inondation";
+const TOPIC_COMMUNE_PRESCRIT = "le plan inondation en préparation";
+
+/** Les phénomènes d'inondation de la zone, en mots courants ; à défaut, « l'inondation ». */
+const phenomeneDeZone = (z: { phenomenes: string[] }): string => joinFr(z.phenomenes) || "l'inondation";
+
+/** Niveau 2 : ce que l'exposition établie change pour la priorité déclarée. */
+function consequenceEtablie(tier: MaterialityTier): string {
+  return tier === "decision_critical"
+    ? "Cela va à l'encontre de votre priorité : un faible risque d'inondation."
+    : "C'est à prendre en compte pour votre priorité : un faible risque d'inondation.";
+}
+
+/** Niveau 2 : la lecture prudente, qui ne conclut pas, dans un sens ni dans l'autre. */
+const consequencePrudente = (ceQuiManque: string): string =>
+  `Tant que ${ceQuiManque}, rien ne permet de dire que cette adresse répond à votre priorité : un faible risque d'inondation.`;
+
+/** La ligne de face qui empêche le contresens « zone d'interdiction = logement inhabitable ». */
+function limiteDuRegime(regimeCode: string | null): string {
+  if (regimeCode === "05" || regimeCode === "06") {
+    return "Seul le règlement du plan dit ce que ce régime prévoit pour un logement existant. Le zonage ne dit pas si ce logement a déjà été inondé.";
+  }
+  return "Le plan encadre les constructions et les travaux : il ne rend pas le logement existant inhabitable, mais peut lui imposer des aménagements. Il ne dit pas si ce logement a déjà été inondé.";
+}
 
 type Gestes = Record<Bucket, DecisionAction>;
 
 function gesteZone(code: string): Gestes {
   return {
-    achat: { type: "obtenir_document", label: `Demandez l'état des risques et vérifiez qu'il indique la ${code}`, detail: `Demandez-le dès la première visite. Une zone différente de celle lue ici appelle une explication. Demandez aussi quels sinistres indemnisés ont touché ce logement, et lisez dans le règlement du plan ce qu'il impose en ${code} aux constructions existantes.` },
-    location: { type: "obtenir_document", label: `Demandez au bailleur l'état des risques et vérifiez la ${code}`, detail: "Demandez-le dès la première visite. Une zone différente de celle lue ici appelle une explication. Demandez aussi si le logement a déjà subi une inondation indemnisée." },
-    reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: `Il indique la zone de votre logement : comparez-la à la ${code} lue ici. Le règlement du plan dit ce qu'il impose avant des travaux.` },
-    neutre: { type: "obtenir_document", label: `Comparez la ${code} à l'état des risques du bien`, detail: "Le vendeur ou le bailleur le remet dès la première visite. Une zone différente de celle lue ici appelle une explication. Le règlement du plan dit ce que la zone impose." },
+    achat: { type: "obtenir_document", label: `Demandez l'état des risques et vérifiez qu'il indique la ${code}`, detail: `Le vendeur doit le remettre dès la première visite. S'il indique une autre zone, demandez pourquoi. Demandez aussi si le logement a déjà été inondé, et ce que le règlement du plan impose aux logements existants en ${code}.` },
+    location: { type: "obtenir_document", label: `Demandez au bailleur l'état des risques et vérifiez la ${code}`, detail: "Le bailleur doit le remettre dès la première visite. S'il indique une autre zone, demandez pourquoi. Demandez aussi si le logement a déjà été inondé." },
+    reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: `Il indique la zone de votre logement : comparez-la à la ${code} lue ici. Avant des travaux, le règlement du plan dit ce qu'il impose.` },
+    neutre: { type: "obtenir_document", label: `Comparez la ${code} à l'état des risques du bien`, detail: "Le vendeur ou le bailleur le remet dès la première visite. S'il indique une autre zone, demandez pourquoi." },
   };
 }
 
 const GESTE_ZONE_A_CONFIRMER: Gestes = {
-  achat: { type: "obtenir_document", label: "Demandez l'état des risques et vérifiez la zone du bien", detail: "Établi à la parcelle, il indique la zone qui s'applique au bien. Demandez-le dès la première visite, avec les sinistres indemnisés qui ont touché ce logement. Le règlement du plan dit quel phénomène fonde chaque zone." },
-  location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques et la zone du bien", detail: "Il indique la zone qui s'applique au logement. Demandez aussi si le logement a déjà subi une inondation indemnisée." },
-  reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: "Il indique la zone de votre logement, que la donnée publique ne permet pas de trancher ici." },
-  neutre: { type: "obtenir_document", label: "Demandez l'état des risques et vérifiez la zone du bien", detail: "Établi à la parcelle, il indique la zone qui s'applique au bien. Le règlement du plan dit quel phénomène fonde chaque zone." },
+  achat: { type: "obtenir_document", label: "Demandez l'état des risques et vérifiez la zone du bien", detail: "Il est établi pour le bien et indique sa zone. Le vendeur doit le remettre dès la première visite ; demandez aussi si le logement a déjà été inondé." },
+  location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques et la zone du bien", detail: "Il est établi pour le logement et indique sa zone. Demandez aussi si le logement a déjà été inondé." },
+  reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: "Il indique la zone de votre logement, que les données publiques ne permettent pas de trancher ici." },
+  neutre: { type: "obtenir_document", label: "Demandez l'état des risques et vérifiez la zone du bien", detail: "Il est établi pour le bien et indique sa zone." },
 };
 
 const GESTE_HORS_ZONE: Gestes = {
-  achat: { type: "demander_confirmation", label: "Demandez si le logement a déjà subi une inondation indemnisée", detail: "Demandez-le avec l'état des risques, dès la première visite : seul le vendeur connaît l'histoire de ce logement." },
-  location: { type: "demander_confirmation", label: "Demandez au bailleur si le logement a déjà été inondé", detail: "Demandez-le avec l'état des risques, dès la première visite : seul le bailleur connaît l'histoire de ce logement." },
-  reside: { type: "verifier_sur_place", label: "Notez les épisodes d'eau que le logement a connus", detail: "Avec leur date et leur cause : c'est ce qu'aucune donnée publique ne dit de ce logement." },
+  achat: { type: "demander_confirmation", label: "Demandez si le logement a déjà subi une inondation indemnisée", detail: "Posez la question avec l'état des risques, dès la première visite : seul le vendeur connaît l'histoire de ce logement." },
+  location: { type: "demander_confirmation", label: "Demandez au bailleur si le logement a déjà été inondé", detail: "Posez la question avec l'état des risques, dès la première visite : seul le bailleur connaît l'histoire de ce logement." },
+  reside: { type: "verifier_sur_place", label: "Notez les épisodes d'eau que le logement a connus", detail: "Avec leur date et leur cause : aucune donnée publique ne les dit pour ce logement." },
   neutre: { type: "demander_confirmation", label: "Demandez si le logement a déjà subi une inondation indemnisée", detail: "Le vendeur ou le bailleur connaît l'histoire de ce logement ; aucune donnée publique ne la dit." },
 };
 
 function gestesCommune(prescritsSeulement: boolean): Gestes {
   return {
     achat: prescritsSeulement
-      ? { type: "obtenir_document", label: "Demandez l'état des risques du bien avant de vous engager", detail: "Un plan en cours d'élaboration n'a pas encore de zonage opposable ; l'état des risques du bien le mentionne, avec les sinistres indemnisés que le vendeur connaît." }
-      : { type: "renseigner_adresse", label: "Ajoutez l'adresse du bien pour lire sa zone dans le plan", detail: "Avant une offre, l'état des risques remis par le vendeur indique si le bien est dans une zone du plan, et laquelle : c'est le document qui fait foi." },
-    location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques dès la visite", detail: "Il indique si le logement est dans une zone du plan, et laquelle." },
-    reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: "Il indique si votre logement est dans une zone du plan, et laquelle." },
+      ? { type: "obtenir_document", label: "Demandez l'état des risques du bien avant de vous engager", detail: "Le plan n'a pas encore fixé ses zones ; l'état des risques du bien le mentionne. Demandez aussi si le logement a déjà été inondé." }
+      : { type: "renseigner_adresse", label: "Ajoutez l'adresse du bien pour lire sa zone dans le plan", detail: "Avant une offre, l'état des risques remis par le vendeur dit si le bien est dans une de ces zones, et laquelle : c'est le document qui fait foi." },
+    location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques dès la visite", detail: "Il dit si le logement est dans une zone du plan, et laquelle." },
+    reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: "Il dit si votre logement est dans une zone du plan, et laquelle." },
     neutre: prescritsSeulement
-      ? { type: "obtenir_document", label: "Demandez l'état des risques d'un bien avant de vous engager", detail: "Un plan en cours d'élaboration n'a pas encore de zonage opposable ; l'état des risques d'un bien le mentionne." }
-      : { type: "renseigner_adresse", label: "Ajoutez l'adresse d'un bien pour lire sa zone dans le plan", detail: "L'état des risques remis par le vendeur ou le bailleur indique si un bien est dans une zone du plan, et laquelle : c'est le document qui fait foi." },
+      ? { type: "obtenir_document", label: "Demandez l'état des risques d'un bien avant de vous engager", detail: "Le plan n'a pas encore fixé ses zones ; l'état des risques d'un bien le mentionne." }
+      : { type: "renseigner_adresse", label: "Ajoutez l'adresse d'un bien pour lire sa zone dans le plan", detail: "L'état des risques remis par le vendeur ou le bailleur dit si un bien est dans une de ces zones, et laquelle : c'est le document qui fait foi." },
   };
 }
 
 const GESTE_ADRESSE_NON_LUE: Gestes = {
-  achat: { type: "obtenir_document", label: "Demandez l'état des risques du bien : il indique sa zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zonages connus." },
-  location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques : il indique la zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zonages connus." },
+  achat: { type: "obtenir_document", label: "Demandez l'état des risques du bien : il indique sa zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zones connues." },
+  location: { type: "obtenir_document", label: "Demandez au bailleur l'état des risques : il indique la zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zones connues." },
   reside: { type: "demander_confirmation", label: "Retrouvez l'état des risques remis à l'achat ou au bail", detail: "Il indique la zone de votre logement. Le rapport « Mes risques » de Géorisques la donne aussi pour une adresse." },
-  neutre: { type: "obtenir_document", label: "Demandez l'état des risques du bien : il indique sa zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zonages connus." },
+  neutre: { type: "obtenir_document", label: "Demandez l'état des risques du bien : il indique sa zone", detail: "Le rapport « Mes risques » de Géorisques donne aussi, pour une adresse, les zones connues." },
 };
 
 const retInond = (ruleId: string, outcome: RuleEvaluation["outcome"], facts: DecisionFact[], reason: string): RuleEvaluation =>
@@ -263,27 +306,41 @@ const ruleInondation: DecisionRule = {
     const zone = z.zone;
     const code = libelleCourtDeZone(zone) ?? "zone réglementée";
     const nomLocal = nomLocalDeZone(zone);
+    const tier = palierDeZone(zone.regimeCode);
     const b = bucketDuProjet(p, f.relationAuLieu);
+    const tousPhenomenes = [...zone.phenomenes, ...zone.autresPhenomenes];
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-exposition`, ruleId: RULE_INOND,
       sourceFactIds: ["logement.zonage-inondation", "inondation.catnat"], module: "logement",
-      role: "verification", materialityTier: palierDeZone(zone.regimeCode), topic: TOPIC_ADRESSE,
+      role: "verification", materialityTier: tier, topic: TOPIC_ZONE_ETABLIE,
       status: statutDeZone(zone.regimeCode),
+      // Niveaux 1 et 2 : ce qu'est l'adresse, puis ce que cela change pour la priorité déclarée.
       statement:
-        `Cette adresse est en ${code} du ${planEnPhrase(zone, dateLongue)}.`
-        + (nomLocal ? ` Le plan la décrit ainsi : « ${nomLocal} ».` : "")
-        + ` ${regimeEnPhrase(zone.regimeCode)}`
-        + contexteCatnat(f),
-      limitation:
-        "Ce régime encadre les projets de construction et de travaux ; il ne dit pas que le logement existant ne peut pas être habité. "
-        + "Le zonage et les reconnaissances ne disent pas si ce logement a déjà été inondé, ni si les travaux que le règlement prescrit y ont été faits. "
-        + LIMITE_ETAT_DES_RISQUES,
+        `Cette adresse est dans une zone réglementée pour ${phenomeneDeZone(zone)}. ${regimeEnClair(zone.regimeCode)} `
+        + consequenceEtablie(tier),
+      limitation: limiteDuRegime(zone.regimeCode),
+      // Niveau 3 : le plan, la zone, la date, le régime officiel, l'historique, la portée.
+      signalConvention:
+        `futur•e signale ce point parce que cette adresse est classée en ${code}`
+        + (nomLocal ? ` (« ${nomLocal} »)` : "")
+        + ` par le ${planDate(zone, dateLongue)}. ${regimeEnPhrase(zone.regimeCode)}`
+        + (tousPhenomenes.length > 0 ? ` Le plan réglemente ${joinFr(tousPhenomenes)}.` : "")
+        + historiqueCatnat(f)
+        + ` ${LIMITE_ETAT_DES_RISQUES}`,
       evidence: [preuveZonage(z), ...preuveCatnat(f)],
       action: gesteZone(code)[b],
     };
     return ret("verification", [fact], "zone inondation établie à l'adresse");
   },
 };
+
+/** Ce que la plus contraignante de deux lectures divergentes impose, dit au premier niveau. */
+function lectureContraignante(d: { regimePoint?: string | null; regimeParcelle?: string | null }): string {
+  const codes = [d.regimePoint ?? null, d.regimeParcelle ?? null];
+  if (codes.some((c) => c === "03" || c === "04")) return ", et l'une des deux interdit certaines constructions et certains travaux";
+  if (codes.some((c) => c === "05" || c === "06")) return ", et l'une des deux impose des règles particulières";
+  return "";
+}
 
 const ruleInondationLecture: DecisionRule = {
   id: RULE_INOND_LECTURE,
@@ -301,30 +358,41 @@ const ruleInondationLecture: DecisionRule = {
       const zone = z.zone;
       const code = libelleCourtDeZone(zone) ?? "une zone réglementée";
       const plan = planEnPhrase(zone, dateLongue);
+      // Niveau 1 (constat en clair) et niveau 3 (ce que disent exactement les données), par cas.
       let constat: string;
+      let precision: string;
       let status: string;
       if (z.etat === "alea_inconnu") {
-        constat = `Un plan de prévention s'applique à cette adresse : ${code} du ${plan}. La donnée reçue ne précise pas s'il porte sur l'inondation.`;
-        status = "Phénomène à confirmer";
+        constat = `Cette adresse est dans une zone d'un plan de prévention des risques, sans que la donnée dise si cette zone concerne l'inondation. ${regimeEnClair(zone.regimeCode)} `
+          + consequencePrudente("ce point n'est pas éclairci");
+        precision = `Cette adresse est classée en ${code} par le ${plan}. La donnée reçue ne précise pas si ce plan porte sur l'inondation. ${regimeEnPhrase(zone.regimeCode)}`;
+        status = "Risque concerné à confirmer";
       } else if (z.divergence) {
         const auPoint = z.divergence.point ? `en ${z.divergence.point}` : "hors des zones du plan";
         const aLaParcelle = z.divergence.parcelle ? `en ${z.divergence.parcelle}` : "hors des zones du plan";
-        constat = `Le point géocodé de cette adresse tombe ${auPoint}, la parcelle rattachée ${aLaParcelle}, au regard du ${plan}. `
+        constat = `Les données ne désignent pas la même zone pour cette adresse${lectureContraignante(z.divergence)}. `
+          + consequencePrudente("la zone du bien n'est pas confirmée");
+        precision = `Au regard du ${plan}, le point géocodé de l'adresse tombe ${auPoint}, la parcelle cadastrale rattachée ${aLaParcelle}. `
           + "Une parcelle peut être traversée par plusieurs zones, et le point peut tomber à côté du bâtiment : futur•e ne tranche pas entre les deux lectures.";
         status = "Zone à confirmer";
       } else if (z.rattachement === "ambigu") {
-        constat = `La ${code} du ${plan} est lue sur une parcelle voisine du point de cette adresse, faute de parcelle à ce point exact : le rattachement n'est pas certain.`;
+        constat = `La zone lue pour cette adresse vient de la parcelle la plus proche, qui peut être celle d'un voisin : elle est réglementée pour ${phenomeneDeZone(zone)}. ${regimeEnClair(zone.regimeCode)} `
+          + consequencePrudente("la zone du bien n'est pas confirmée");
+        precision = `Le point de cette adresse ne tombe sur aucune parcelle cadastrale : la ${code} du ${plan} est lue sur la parcelle la plus proche. ${regimeEnPhrase(zone.regimeCode)}`;
         status = "Zone à confirmer";
       } else {
-        constat = `Cette adresse est en ${code} du ${plan}. La donnée reçue ne dit pas lequel de ces phénomènes fonde cette zone. ${regimeEnPhrase(zone.regimeCode)}`;
-        status = "Phénomène à confirmer";
+        constat = `Cette adresse est dans une zone d'un plan qui réglemente ${joinFr([...zone.phenomenes, ...zone.autresPhenomenes])}, sans que la donnée dise lequel de ces risques la concerne. ${regimeEnClair(zone.regimeCode)} `
+          + consequencePrudente("ce point n'est pas éclairci");
+        precision = `Cette adresse est classée en ${code} par le ${plan}. La donnée reçue ne dit pas lequel de ces phénomènes fonde cette zone. ${regimeEnPhrase(zone.regimeCode)}`;
+        status = "Risque concerné à confirmer";
       }
       const fact: VerificationFact = {
         id: `${f.insee}:inondation-lecture`, ruleId: RULE_INOND_LECTURE,
         sourceFactIds: ["logement.zonage-inondation", "inondation.catnat"], module: "logement",
         role: "verification", materialityTier: "structuring", topic: TOPIC_ADRESSE, status,
-        statement: constat + contexteCatnat(f),
-        limitation: `Aucune de ces lectures ne permet de conclure que l'adresse est à l'abri. ${LIMITE_ETAT_DES_RISQUES}`,
+        statement: constat,
+        limitation: "Le zonage ne dit pas si ce logement a déjà été inondé.",
+        signalConvention: `${precision}${historiqueCatnat(f)} ${LIMITE_ETAT_DES_RISQUES}`,
         evidence: [preuveZonage(z), ...preuveCatnat(f)],
         action: GESTE_ZONE_A_CONFIRMER[b],
       };
@@ -335,14 +403,17 @@ const ruleInondationLecture: DecisionRule = {
       if (!preferenceSurfaced(p, KEY_INOND)) return ret("neutral", [], "adresse hors zone d'un plan inondation, non matérialisé à ce poids");
       const plans = f.plansInondation?.plans ?? [];
       const commune = plans.length === 1
-        ? ` La commune est couverte par le plan « ${plans[0]!.nom} » : son zonage ne classe pas ce point.`
-        : plans.length > 1 ? ` La commune est couverte par ${plans.length} plans de prévention des inondations : aucun ne classe ce point.` : "";
+        ? ` La commune est couverte par le plan « ${plans[0]!.nom} » : son zonage ne classe pas cette adresse.`
+        : plans.length > 1 ? ` La commune est couverte par ${plans.length} plans de prévention des inondations : aucun ne classe cette adresse.` : "";
       const fact: VerificationFact = {
         id: `${f.insee}:inondation-lecture`, ruleId: RULE_INOND_LECTURE,
         sourceFactIds: ["logement.zonage-inondation", "inondation.catnat"], module: "logement",
-        role: "verification", materialityTier: "secondary", topic: TOPIC_ADRESSE, status: "Hors zone d'un plan inondation",
-        statement: `Le ${z.grain === "parcelle" ? "zonage lu à la parcelle de cette adresse" : "point de cette adresse"} n'est dans aucune zone d'un plan de prévention des inondations.${commune}${contexteCatnat(f)}`,
-        limitation: `Être hors zone ne met pas à l'abri : un plan ne réglemente que les phénomènes qu'il a étudiés. ${LIMITE_ETAT_DES_RISQUES}`,
+        role: "verification", materialityTier: "secondary", topic: TOPIC_ADRESSE, status: "Hors zone inondation réglementée",
+        statement: "Cette adresse n'est dans aucune zone réglementée pour l'inondation.",
+        limitation: "Ce n'est pas une garantie : un plan ne couvre que les phénomènes qu'il a étudiés, et ne dit pas si ce logement a déjà été inondé.",
+        signalConvention:
+          (z.grain === "parcelle" ? "Lecture à la parcelle cadastrale rattachée à l'adresse." : "Lecture au point géocodé de l'adresse.")
+          + `${commune}${historiqueCatnat(f)} ${LIMITE_ETAT_DES_RISQUES}`,
         evidence: [
           {
             factId: "logement.zonage-inondation", module: "logement",
@@ -368,18 +439,29 @@ const ruleInondationLecture: DecisionRule = {
     }
     if (!preferenceSurfaced(p, KEY_INOND)) return ret("not_surfaced", [], "commune couverte par un plan inondation, non matérialisé à ce poids");
     const prescritsSeulement = plansCommune.plans.every((x) => x.statut === "prescrit");
+    const enVigueur = plansCommune.plans.filter((x) => x.statut !== "prescrit");
+    const ici = cap(aCommune(f.nom));
+    const constat = prescritsSeulement
+      ? `${ici}, un plan de prévention est en préparation pour ${phenomenesDesPlans(plansCommune.plans)} : ses zones ne sont pas encore fixées.`
+      : `${ici}, ${enVigueur.length > 1 ? "des plans de prévention réglementent" : "un plan de prévention réglemente"} certaines zones pour ${phenomenesDesPlans(enVigueur)}.`;
+    const consequence = adresseNonLue
+      ? (b === "reside" ? " La zone de votre logement reste à vérifier." : " Avant de vous engager, vérifiez dans quelle zone se trouve le bien.")
+      : prescritsSeulement
+        ? " Un bien de la commune pourra être concerné une fois le plan approuvé."
+        : " Selon l'adresse, un bien peut se trouver dans l'une de ces zones, ou en dehors.";
     const fact: VerificationFact = {
       id: `${f.insee}:inondation-lecture`, ruleId: RULE_INOND_LECTURE,
       sourceFactIds: ["inondation.ppr-commune", "inondation.catnat"], module: "territoire",
-      role: "verification", materialityTier: "structuring", topic: TOPIC_COMMUNE,
-      status: prescritsSeulement ? "Plan en cours d'élaboration" : "Commune couverte par un plan",
+      role: "verification", materialityTier: "structuring", topic: prescritsSeulement ? TOPIC_COMMUNE_PRESCRIT : TOPIC_COMMUNE,
+      status: prescritsSeulement ? "Plan inondation en préparation" : "Plan inondation sur la commune",
       statement:
-        (adresseNonLue ? "Le zonage de cette adresse n'a pas pu être lu : le service de l'État n'a pas répondu lors de la préparation du dossier. " : "")
-        + plansCommuneEnPhrase(f, plansCommune.plans)
-        + contexteCatnat(f)
-        + (prescritsSeulement ? "" : " Ces faits portent sur la commune : ils ne disent pas si une adresse se trouve dans une zone du plan, ni laquelle."),
-      limitation: `Un plan découpe des zones : une commune couverte n'est pas exposée partout. ${LIMITE_CATNAT}`,
-      signalConvention: `futur•e signale ce point quand la commune est couverte par un plan de prévention des inondations, approuvé, appliqué par anticipation ou prescrit (base GASPAR, export du ${dateLongue(plansCommune.export) ?? plansCommune.export}).`,
+        (adresseNonLue ? "La zone de cette adresse n'a pas pu être lue : le service de l'État n'a pas répondu. " : "")
+        + constat + consequence,
+      limitation: "Ces faits portent sur la commune : ils ne disent rien d'une adresse en particulier.",
+      signalConvention:
+        plansCommuneEnPhrase(f, plansCommune.plans)
+        + historiqueCatnat(f)
+        + ` futur•e signale ce point quand la commune est couverte par un plan de prévention des inondations, approuvé, appliqué par anticipation ou prescrit (base GASPAR, export du ${dateLongue(plansCommune.export) ?? plansCommune.export}).`,
       evidence: [preuvePlansCommune(f, plansCommune), ...preuveCatnat(f)],
       action: adresseNonLue ? GESTE_ADRESSE_NON_LUE[b] : gestesCommune(prescritsSeulement)[b],
     };

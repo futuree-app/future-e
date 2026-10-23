@@ -3,6 +3,7 @@
 // Usage : node scripts/fut127/capturer.mjs <url> <prefixe> <de> <a> [largeurs=1440,390,360] [--clair] [--ouvrir=<texte>]
 //   <de>, <a>   sélecteurs CSS : la capture va du haut du premier au bas du second (zone de lecture)
 //   --ouvrir    clique d'abord le bouton qui porte ce texte (ouvrir un éditeur : aucun envoi)
+//   --deplier   ouvre les dépliables « Données et limites » de la zone (preuves de niveau 3)
 //   MOTEUR=webkit  rend avec WebKit (moteur de Safari) au lieu de Chrome
 // Sortie : docs/audits/2026-10-22-fut127-correctifs/captures/<prefixe>-<largeur>[-clair].png
 // Mesure aussi le débordement horizontal (scrollWidth > innerWidth) et l'écrit sur la sortie standard.
@@ -13,6 +14,7 @@ const [url, prefixe, de, a, largeursBrutes = "1440,390,360", ...opts] = process.
 if (!url?.startsWith("http://localhost")) throw new Error("Captures locales seulement.");
 const clair = opts.includes("--clair");
 const ouvrir = opts.find((o) => o.startsWith("--ouvrir="))?.slice(9);
+const deplier = opts.includes("--deplier");
 const moteurWebkit = process.env.MOTEUR === "webkit";
 const dossier = "docs/audits/2026-10-22-fut127-correctifs/captures";
 mkdirSync(dossier, { recursive: true });
@@ -31,6 +33,7 @@ for (const largeur of largeursBrutes.split(",").map(Number)) {
   await page.waitForTimeout(Number(process.env.ATTENTE ?? 1200));
   await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" }).catch(() => {});
   if (ouvrir) { await page.getByRole("button", { name: ouvrir, exact: true }).click(); await page.waitForTimeout(400); }
+  if (deplier) { await page.evaluate(() => document.querySelectorAll("#fut127-dossier details").forEach((d) => { d.open = true; })); await page.waitForTimeout(300); }
   const debord = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   const haut = await page.locator(de).first().boundingBox();
   const bas = await page.locator(a).first().boundingBox();

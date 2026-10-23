@@ -223,21 +223,31 @@ test("Charron, Dossier Adresse, acheteur : plus de « Bonne correspondance », l
   assert.equal(f.ruleId, "territoire.inondation-exposition");
   assert.equal(f.materialityTier, "decision_critical");
   assert.equal(f.status, "Zone d'interdiction");
+  // NIVEAUX 1 ET 2, SUR LA FACE : ce qu'est l'adresse en mots courants, puis ce que cela change pour la
+  // priorité. Ni code de zone, ni sigle, ni « régime » dans le constat (passe éditoriale du 23/10).
+  assert.equal(f.statement,
+    "Cette adresse est dans une zone réglementée pour la submersion marine. Certaines constructions et certains travaux y sont interdits. "
+    + "Cela va à l'encontre de votre priorité : un faible risque d'inondation.");
+  assert.doesNotMatch(f.statement, /Rs2|PPR|CatNat|régime|zonage/);
+  // La ligne de limite empêche le contresens : interdire de construire n'est pas interdire d'habiter.
+  assert.match(f.limitation, /il ne rend pas le logement existant inhabitable, mais peut lui imposer des aménagements/);
   const t = texte(rendreFait(f));
+  for (const attendu of ["Zone d'interdiction", "Preuve · zone Rs2 · PPR Charron", "Preuve · 3 reconnaissances liées aux inondations depuis 1982"]) {
+    assert.ok(t.includes(attendu), `« ${attendu} » absent de : ${t}`);
+  }
+  // NIVEAU 3, DANS « DONNÉES ET LIMITES » : rien de l'ancienne carte n'a disparu.
   for (const attendu of [
-    "Cette adresse est en zone Rs2 du plan de prévention « PPR Charron », approuvé le 10 août 2021, qui réglemente la submersion marine et le recul du trait de côte.",
-    "Le plan la décrit ainsi : « ensemble des zones submersibles en alea tres fort a court terme ».",
+    "cette adresse est classée en zone Rs2 (« ensemble des zones submersibles en alea tres fort a court terme ») par le plan de prévention « PPR Charron », approuvé le 10 août 2021.",
     "Le plan range cette zone sous un régime d'interdiction",
+    "Le plan réglemente la submersion marine et le recul du trait de côte.",
     "À l'échelle de la commune, 3 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982.",
-    "Preuve · zone Rs2 · PPR Charron",
-  ]) assert.ok(t.includes(attendu), `« ${attendu} » absent de : ${t}`);
-  assert.match(f.limitation, /il ne dit pas que le logement existant ne peut pas être habité/);
-  assert.match(f.limitation, /prépare celle de l'état des risques sans la remplacer/);
+    "prépare celle de l'état des risques sans la remplacer",
+  ]) assert.ok(f.signalConvention.includes(attendu), `« ${attendu} » absent de : ${f.signalConvention}`);
   // Le geste est ciblé, et le renvoi générique a disparu.
   assert.equal(f.action.label, "Demandez l'état des risques et vérifiez qu'il indique la zone Rs2");
   // Le verdict NOMME la carte (c'est le constat critique) ; la ligne « À contrôler » ne la répète pas
   // (`dejaNommes`, conclusion-plan.ts), et aucun renvoi générique n'y entre.
-  assert.match(v.titre, /le zonage inondation de l'adresse/);
+  assert.equal(v.titre, "Le principal point à contrôler à Charron : la zone réglementée pour l'inondation où se trouve l'adresse.");
   assert.doesNotMatch(gestesPrioritaires(d).join(" "), /Géorisques|ERRIAL/);
   // Une seule carte pour ce plan : « un plan s'applique » se tait, la carte inondation le porte.
   assert.ok(!idsVisibles(d).includes("logement:zone-reglementee"));
@@ -254,8 +264,9 @@ test("Charron, sans adresse : la commune couverte par un plan, jamais « non not
   assert.notEqual(verdict(d).etiquette, "Bonne correspondance");
   const f = carteInondation(d)!;
   assert.equal(f.ruleId, "territoire.inondation-lecture");
-  assert.match(f.statement, /^À Charron, un plan de prévention des risques littoraux, « PPR Charron », approuvé le 10 août 2021, réglemente la submersion marine\./);
-  assert.match(f.statement, /ne disent pas si une adresse se trouve dans une zone du plan, ni laquelle/);
+  assert.equal(f.statement, "À Charron, un plan de prévention réglemente certaines zones pour la submersion marine. Selon l'adresse, un bien peut se trouver dans l'une de ces zones, ou en dehors.");
+  assert.match(f.limitation, /ils ne disent rien d'une adresse en particulier/);
+  assert.match(f.signalConvention, /^À Charron, un plan de prévention des risques littoraux, « PPR Charron », approuvé le 10 août 2021, réglemente la submersion marine\./);
   const c = d.criteria.registry.find((x: M) => x.criterionKey === "faible_risque_inondation");
   assert.notEqual(c.outcome, "favorable");
 });
@@ -277,9 +288,12 @@ test("La Rochelle, dossier communal : des faits datés à la place de « l'expos
   const t = toutLeTexte(d);
   assert.doesNotMatch(t, /ressort élevée|exposition de la commune/);
   assert.doesNotMatch(t, /submersion marine exclue/);
-  assert.match(t, /À La Rochelle, un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine\./);
-  assert.match(t, /7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982/);
-  assert.match(t, /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
+  assert.match(t, /À La Rochelle, un plan de prévention réglemente certaines zones pour la submersion marine\./);
+  assert.match(t, /Preuve · PPR La Rochelle, approuvé le 26 février 2019/);
+  assert.match(t, /Preuve · 7 reconnaissances liées aux inondations depuis 1982/);
+  const sc = carteInondation(d)!.signalConvention as string;
+  assert.match(sc, /À La Rochelle, un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine\./);
+  assert.match(sc, /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
   assert.doesNotMatch(gestesPrioritaires(d).join(" "), /Consultez l'état des risques \(Géorisques\)/);
 });
 
@@ -289,14 +303,16 @@ test("La Rochelle, Quai Duperré : la zone Os1 est dite, son phénomène reste �
   // Le plan réglemente la submersion ET le recul du trait de côte ; le nom de la zone ne dit pas lequel
   // fonde Os1 : la lecture est prudente, non orientante, et jamais favorable.
   assert.equal(f.ruleId, "territoire.inondation-lecture");
-  assert.equal(f.status, "Phénomène à confirmer");
+  assert.equal(f.status, "Risque concerné à confirmer");
   assert.equal(f.materialityTier, "structuring");
   const t = texte(rendreFait(f));
-  assert.ok(t.includes("Cette adresse est en zone Os1 du plan de prévention « PPR La Rochelle », approuvé le 26 février 2019, qui réglemente la submersion marine et le recul du trait de côte."), t);
-  assert.ok(t.includes("La donnée reçue ne dit pas lequel de ces phénomènes fonde cette zone."), t);
-  assert.ok(t.includes("Le plan range cette zone sous un régime d'interdiction"), t);
+  assert.ok(t.includes("Cette adresse est dans une zone d'un plan qui réglemente la submersion marine et le recul du trait de côte, sans que la donnée dise lequel de ces risques la concerne. Certaines constructions et certains travaux y sont interdits."), t);
+  assert.ok(t.includes("Tant que ce point n'est pas éclairci, rien ne permet de dire que cette adresse répond à votre priorité : un faible risque d'inondation."), t);
+  assert.ok(t.includes("Preuve · zone Os1 · PPR La Rochelle"), t);
+  assert.ok(f.signalConvention.includes("Cette adresse est classée en zone Os1 par le plan de prévention « PPR La Rochelle », approuvé le 26 février 2019, qui réglemente la submersion marine et le recul du trait de côte."), f.signalConvention);
+  assert.ok(f.signalConvention.includes("La donnée reçue ne dit pas lequel de ces phénomènes fonde cette zone."));
+  assert.ok(f.signalConvention.includes("Le plan range cette zone sous un régime d'interdiction"));
   assert.equal(f.action.label, "Demandez l'état des risques et vérifiez la zone du bien");
-  assert.match(f.limitation, /Aucune de ces lectures ne permet de conclure que l'adresse est à l'abri/);
   assert.doesNotMatch(gestesPrioritaires(d).join(" "), /Géorisques/);
   assert.notEqual(verdict(d).etiquette, "Bonne correspondance");
 });
@@ -307,18 +323,19 @@ test("La Rochelle, Minimes : point en Bs1, parcelle de repli en Bs2, futur•e n
   assert.equal(logement!.zonageInondation.parcelleParRepli, true);
   const f = carteInondation(d)!;
   assert.equal(f.status, "Zone à confirmer");
-  assert.match(f.statement, /Le point géocodé de cette adresse tombe en zone Bs1, la parcelle rattachée en zone Bs2/);
-  assert.match(f.statement, /futur•e ne tranche pas entre les deux lectures/);
+  assert.match(f.statement, /^Les données ne désignent pas la même zone pour cette adresse\. Tant que la zone du bien n'est pas confirmée, rien ne permet de dire/);
+  assert.match(f.signalConvention, /le point géocodé de l'adresse tombe en zone Bs1, la parcelle cadastrale rattachée en zone Bs2/);
+  assert.match(f.signalConvention, /futur•e ne tranche pas entre les deux lectures/);
 });
 
 test("La Rochelle, rue du Palais : hors zone, dit sans rassurer, et sans conclusion favorable", () => {
   const { d, run } = dossier("17300", { adresse: "lr-palais" });
   const f = carteInondation(d)!;
-  assert.equal(f.status, "Hors zone d'un plan inondation");
+  assert.equal(f.status, "Hors zone inondation réglementée");
   assert.equal(f.materialityTier, "secondary");
-  assert.match(f.statement, /n'est dans aucune zone d'un plan de prévention des inondations/);
-  assert.match(f.statement, /La commune est couverte par le plan « PPR La Rochelle » : son zonage ne classe pas ce point/);
-  assert.match(f.limitation, /Être hors zone ne met pas à l'abri/);
+  assert.equal(f.statement, "Cette adresse n'est dans aucune zone réglementée pour l'inondation.");
+  assert.match(f.limitation, /^Ce n'est pas une garantie : un plan ne couvre que les phénomènes qu'il a étudiés/);
+  assert.match(f.signalConvention, /La commune est couverte par le plan « PPR La Rochelle » : son zonage ne classe pas cette adresse/);
   const outcomes = run.evaluations.filter((e: M) => e.projectKeys.includes("faible_risque_inondation")).map((e: M) => e.outcome);
   assert.equal(outcomes.includes("satisfied"), false);
   assert.ok(outcomes.includes("neutral"));
@@ -331,10 +348,12 @@ test("Châtelaillon, 10 bd de la Mer : rouge Rs3 au point, orange Os à la parce
   const z = logement!.zonageInondation;
   assert.equal(z.etat, "zone");
   assert.equal(z.rattachement, "ambigu");
-  assert.deepEqual(z.divergence, { point: "zone Rs3", parcelle: "zone Os" });
+  assert.deepEqual(z.divergence, { point: "zone Rs3", parcelle: "zone Os", regimePoint: "03", regimeParcelle: "03" });
   const f = carteInondation(d)!;
   assert.equal(f.ruleId, "territoire.inondation-lecture", "un rattachement ambigu n'oriente pas");
-  assert.match(f.statement, /tombe en zone Rs3, la parcelle rattachée en zone Os/);
+  // Simplifier n'atténue pas : le premier niveau dit qu'une des deux lectures interdit des constructions.
+  assert.match(f.statement, /^Les données ne désignent pas la même zone pour cette adresse, et l'une des deux interdit certaines constructions et certains travaux\./);
+  assert.match(f.signalConvention, /tombe en zone Rs3, la parcelle cadastrale rattachée en zone Os/);
   assert.notEqual(f.materialityTier, "decision_critical");
 });
 
@@ -344,7 +363,8 @@ test("Géorisques muet : l'adresse n'est pas lue, la commune l'est, le renvoi of
   const { d } = dossier("17300", { adresse: "lr-duperre", muet: true });
   const f = carteInondation(d)!;
   assert.equal(f.ruleId, "territoire.inondation-lecture");
-  assert.match(f.statement, /^Le zonage de cette adresse n'a pas pu être lu : le service de l'État n'a pas répondu lors de la préparation du dossier\./);
+  assert.match(f.statement, /^La zone de cette adresse n'a pas pu être lue : le service de l'État n'a pas répondu\./);
+  assert.match(f.statement, /Avant de vous engager, vérifiez dans quelle zone se trouve le bien\.$/);
   assert.equal(f.action.label, "Demandez l'état des risques du bien : il indique sa zone");
   assert.match(f.action.detail, /Mes risques/);
   // L'inconnue de la source reste nommée à côté : jamais « aucun plan ».
@@ -360,7 +380,7 @@ test("Aléas du plan non lus (panne du détail, rapport antérieur) : jamais « 
   const l = D.construireLectureInondation({ zonage: zlr, catnat: D.catnatInondationDepuisCompte(7, "17300"), onrn: { kind: "aucun" } });
   const lignes = l.groupes.flatMap((g: M) => g.lignes).join(" ");
   assert.doesNotMatch(lignes, /Aucun plan de prévention des inondations/);
-  assert.match(lignes, /ne précise pas s'il porte sur l'inondation/);
+  assert.match(lignes, /sans que la donnée dise si cette zone concerne l'inondation/);
   // Charron sans aléas : le nom de la zone (« zones submersibles ») suffit.
   const ch = resumes("charron", { sansAleas: true });
   assert.equal(D.zonageInondationDepuisPlans(ch.parcelle!.regulatoryPlans).kind, "zone_inondation");
@@ -471,8 +491,10 @@ test("Analyse figée « exposition élevée » : relue telle quelle, et contextu
   assert.deepEqual(relu.dossier, a.dossier, "rien n'est réécrit");
   assert.match(toutLeTexte(relu.dossier), /ressort élevée/, "l'ancienne phrase reste lisible, telle qu'elle a été remise");
   const avert = texte(rendreAvertissement(relu.dossier));
-  assert.match(avert, /version antérieure de la lecture des inondations/);
-  assert.match(avert, /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
+  // Ce que le lecteur doit retenir d'abord, puis pourquoi, puis ce qui lui reste remis.
+  assert.match(avert, /^Cette analyse date d'une version antérieure de futur•e : sa lecture des inondations n'est plus celle que nous appliquons\./);
+  assert.match(avert, /nombre de catastrophes naturelles reconnues, qui retrace des indemnisations et ne mesure pas le risque/);
+  assert.match(avert, /L'analyse ci-dessous reste celle qui vous a été remise\.$/);
   assert.match(rendreAvertissement(relu.dossier), /data-fut127="lecture-inondation-anterieure:exposition_elevee"/);
 });
 
@@ -481,7 +503,7 @@ test("Analyse figée qui jugeait la priorité favorable sur un faible compte : c
   const relu = D.parseDecisionArtifact(JSON.parse(JSON.stringify(a)));
   assert.equal(relu.dossier.criteria.registry.find((x: M) => x.criterionKey === "faible_risque_inondation").outcome, "favorable");
   const avert = texte(rendreAvertissement(relu.dossier));
-  assert.match(avert, /Un faible nombre de reconnaissances ne démontre pas une faible exposition/);
+  assert.match(avert, /satisfaite parce que la commune comptait peu de catastrophes naturelles reconnues, ce qui ne démontre pas un faible risque/);
 });
 
 test("Analyse courante (engine-7) et analyses figées sans inondation : aucun avertissement", () => {

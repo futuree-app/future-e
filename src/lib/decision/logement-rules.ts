@@ -259,7 +259,7 @@ export const LOGEMENT_RULES: DecisionRule[] = [
       const z = l.zonageInondation;
       if (z && (z.etat === "zone" || z.etat === "alea_inconnu") && z.zone.plan && z.zone.plan === l.pprnLabel) {
         const code = libelleCourtDeZone(z.zone);
-        const regime = z.zone.regimeCode ? ` (${statutDeZone(z.zone.regimeCode).toLowerCase()})` : "";
+        const regime = z.zone.regimeCode ? ` (${statutDeZone(z.zone.regimeCode).replace(/^Z/, "z").replace(/^C/, "c")})` : "";
         return `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}${code ? `, ${code}${regime}` : ""}.`;
       }
       return l.pprnLabel ? `À cette adresse, un plan de prévention des risques s'applique : ${l.pprnLabel}.` : "À cette adresse, au moins un plan de prévention des risques s'applique.";

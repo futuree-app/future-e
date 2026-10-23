@@ -312,7 +312,7 @@ test("inondation confirmée, commune couverte par un plan, sans adresse : condit
   });
   const k = carte(d, "faible_risque_inondation")!;
   assert.equal(k.signal, "neutre");
-  assert.match(k.statement, /plan de prévention des risques littoraux, « PPR Chatelaillon »/);
+  assert.match(k.statement, /À Châtelaillon-Plage, un plan de prévention réglemente certaines zones pour la submersion marine\./);
   assert.doesNotMatch(toutLeTexte(k, d), /ressort élevée|exposition de la commune/);
   assert.equal(k.consequence, CONSEQUENCE_NEUTRE);
 });
@@ -335,7 +335,7 @@ test("inondation confirmée, adresse en zone d'interdiction submersible : plutô
   });
   const k = carte(d, "faible_risque_inondation")!;
   assert.equal(k.signal, "defavorable");
-  assert.match(k.statement, /zone Rs2 du plan de prévention « PPR Charron »/);
+  assert.match(k.statement, /^Cette adresse est dans une zone réglementée pour la submersion marine\. Certaines constructions et certains travaux y sont interdits\./);
   assert.equal(k.consequence, CONSEQUENCE_CONTRE);
   assert.doesNotMatch(toutLeTexte(k, d), /plutôt favorable|rien de défavorable/);
 });

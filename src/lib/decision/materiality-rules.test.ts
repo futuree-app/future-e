@@ -96,11 +96,13 @@ test("inondation, commune couverte par un plan : des faits réglementaires, jama
   const r = run(facts({ nom: "La Rochelle", inondationRisque: 89, catnatInondation: 7, plansInondation: PPR_LR }), p);
   const f = lecture(r);
   assert.ok(f && f.role === "verification");
-  assert.match(f.statement, /^À La Rochelle, un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine\./);
-  assert.match(f.statement, /7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982/);
-  assert.match(f.statement, /ne disent pas si une adresse se trouve dans une zone du plan, ni laquelle/);
-  assert.doesNotMatch(`${f.statement} ${f.limitation ?? ""}`, /élevée|exposition de la commune/);
-  assert.match(f.limitation ?? "", /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
+  // Niveau 1 : le constat en clair ; niveau 2 : ce que cela change ; niveau 3 : le plan, la date, le compte.
+  assert.equal(f.statement, "À La Rochelle, un plan de prévention réglemente certaines zones pour la submersion marine. Selon l'adresse, un bien peut se trouver dans l'une de ces zones, ou en dehors.");
+  assert.equal(f.limitation, "Ces faits portent sur la commune : ils ne disent rien d'une adresse en particulier.");
+  assert.match(f.signalConvention ?? "", /^À La Rochelle, un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine\./);
+  assert.match(f.signalConvention ?? "", /7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982/);
+  assert.match(f.signalConvention ?? "", /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
+  assert.doesNotMatch(`${f.statement} ${f.limitation ?? ""} ${f.signalConvention ?? ""}`, /élevée|exposition de la commune/);
   assert.match(f.signalConvention ?? "", /approuvé, appliqué par anticipation ou prescrit \(base GASPAR, export du 5 octobre 2026\)/);
   // L'acheteur sans adresse reçoit la seule manœuvre qui lève l'inconnue, et le document qui fait foi.
   assert.equal(f.action.type, "renseigner_adresse");
@@ -129,9 +131,10 @@ test("inondation, plan seulement prescrit : son état administratif est dit, san
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND }, { intent: "achat" });
   const f = lecture(run(facts({ nom: "Ville témoin", catnatInondation: 2, plansInondation: PRESCRIT }), p));
   assert.ok(f && f.role === "verification");
-  assert.match(f.statement, /est en cours d'élaboration depuis le 2 mai 2024 pour les crues lentes de cours d'eau : il n'a pas encore de zonage opposable/);
-  assert.equal(f.status, "Plan en cours d'élaboration");
-  assert.doesNotMatch(f.statement, /approuvé|réglemente/);
+  assert.equal(f.statement, "À Ville témoin, un plan de prévention est en préparation pour les crues lentes de cours d'eau : ses zones ne sont pas encore fixées. Un bien de la commune pourra être concerné une fois le plan approuvé.");
+  assert.match(f.signalConvention ?? "", /est prescrit depuis le 2 mai 2024 pour les crues lentes de cours d'eau : il n'a pas encore de zonage opposable/);
+  assert.equal(f.status, "Plan inondation en préparation");
+  assert.doesNotMatch(f.statement, /réglemente/);
   assert.equal(f.action.type, "obtenir_document");
 });
 

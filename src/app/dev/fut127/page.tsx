@@ -18,7 +18,7 @@ import { buildConfirmation } from "@/lib/decision/conditions";
 import { buildLogementFacts } from "@/lib/decision/logement-facts";
 import { deriveLogementCoverage } from "@/lib/decision/logement-coverage";
 import { construireLectureInondation, zonageInondationDepuisPlans } from "@/lib/decision/inondation-lecture";
-import { catnatInondationDepuisIndex } from "@/lib/decision/catnat-evidence";
+import { catnatInondationDepuisIndex, phraseConstatCatnatInondation } from "@/lib/decision/catnat-evidence";
 import { getCommuneEntry } from "@/lib/comparateur-vie";
 import { getPlansInondationCommune } from "@/lib/gaspar-pprn-commune";
 import { getOnrnSinistralite } from "@/lib/onrn-sinistralite";
@@ -111,7 +111,10 @@ async function casMonte(c: Cas): Promise<{ dossier: Dossier; georisques: Logemen
     dossier = JSON.parse(JSON.stringify(dossier)) as Dossier;
     for (const s of dossier.sections) for (const card of s.cards) {
       if (card.kind === "fact" && card.fact.ruleId === "territoire.inondation-lecture" && card.fact.role === "verification") {
-        card.fact.statement = "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager. La commune a connu 7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982 (comptage administratif, pas une probabilité).";
+        // Le compte vient de catnat-evidence (garde-fou : la phrase n'est écrite qu'à un endroit).
+        const compte = catnatInondationDepuisIndex({ insee: facts.insee, inondation: facts.catnatInondation != null ? { catnat: facts.catnatInondation } : null });
+        card.fact.statement = "L'exposition de la commune à l'inondation ressort élevée. Consultez l'état des risques avant de vous engager."
+          + (compte ? ` La commune a connu ${phraseConstatCatnatInondation(compte)} (comptage administratif, pas une probabilité).` : "");
       }
     }
   }

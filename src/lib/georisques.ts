@@ -171,7 +171,7 @@ async function fetchJson<T>(pathname: string, searchParams: URLSearchParams) {
   }
 }
 
-async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
+async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams, timeoutMs = REQUEST_TIMEOUT_MS) {
   const token = process.env.GEORISQUES_API_TOKEN;
 
   if (!token) {
@@ -179,7 +179,7 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(
@@ -208,13 +208,21 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
 // La réponse au point ne porte ni les aléas ni la date d'approbation d'un plan. Le détail les donne,
 // commune par commune. Un appel par plan DISTINCT, mis en cache par process : un plan ne change pas
 // d'aléas d'un dossier à l'autre. Une panne rend `null` (aléas inconnus), jamais une liste vide.
+//
+// UN DÉLAI COURT, PARCE QUE L'APPEL EST EN SÉRIE (passe du 23/10/2026). Le détail ne part qu'une fois la
+// liste des plans reçue : sa durée s'AJOUTE à celle de la lecture, que l'affichage coupe à 10 s
+// (`fetchLogementDecisionDataWithTimeout`), et au-delà toute l'analyse du logement passe « indisponible ».
+// Avec le délai commun de 8 s, un détail lent pouvait faire perdre la lecture entière. À 3 s, le pire cas
+// reste dans le budget, et un détail trop lent rend `null` : aléas inconnus, donc la lecture prudente
+// (« risque concerné à confirmer »), jamais une conclusion. Mesure : `fut127-georisques-appels.test.ts`.
+const PLAN_DETAIL_TIMEOUT_MS = 3000;
 const planDetailCache = new Map<string, Promise<RawPprnDetail | null>>();
 
 function rawPlanDetail(idGaspar: string): Promise<RawPprnDetail | null> {
   if (!planDetailCache.has(idGaspar)) {
     planDetailCache.set(
       idGaspar,
-      fetchJsonV2<RawPprnDetail>(`/api/v2/gaspar/pprn/${encodeURIComponent(idGaspar)}`, new URLSearchParams())
+      fetchJsonV2<RawPprnDetail>(`/api/v2/gaspar/pprn/${encodeURIComponent(idGaspar)}`, new URLSearchParams(), PLAN_DETAIL_TIMEOUT_MS)
         .catch(() => {
           planDetailCache.delete(idGaspar);
           return null;

@@ -55,8 +55,9 @@ export type ZonageInondationFait =
       rattachement: "fiable" | "ambigu";
       /** `explicite` : la zone ou le plan entier portent l'inondation. `plan` : le plan porte aussi d'autres phénomènes. */
       liaison: "explicite" | "plan";
-      /** Quand le point et la parcelle ne disent pas la même zone. */
-      divergence: { point: string | null; parcelle: string | null } | null;
+      /** Quand le point et la parcelle ne disent pas la même zone (avec le régime de chacune, pour dire
+       *  au premier niveau si l'une des deux lectures est contraignante). */
+      divergence: { point: string | null; parcelle: string | null; regimePoint?: string | null; regimeParcelle?: string | null } | null;
       parcelleParRepli: boolean;
     }
   | { etat: "alea_inconnu"; grain: "parcelle" | "point"; zone: ZoneInondationLue }
@@ -129,7 +130,9 @@ export function zonageInondationDeLAdresse(e: EntreeZonage): ZonageInondationFai
       || (auPoint && aLaParcelle && (auPoint.plan.gasparId !== aLaParcelle.plan.gasparId
         || (auPoint.zone?.zoneCode ?? null) !== (aLaParcelle.zone?.zoneCode ?? null)))
     );
-    const divergence = ecart ? { point: libellePoint, parcelle: libelleParcelle } : null;
+    const divergence = ecart
+      ? { point: libellePoint, parcelle: libelleParcelle, regimePoint: auPoint?.zone?.regimeCode ?? null, regimeParcelle: aLaParcelle?.zone?.regimeCode ?? null }
+      : null;
     // Une parcelle de repli que le point ne confirme pas n'est pas un rattachement sûr.
     const repliNonConfirme = parRepli && (auPoint == null || divergence != null);
     return {
@@ -156,13 +159,28 @@ export function palierDeZone(regimeCode: string | null): MaterialityTier {
   return "structuring";
 }
 
-/** L'état scannable (≤ 32 caractères, sans point). */
+/** L'état scannable (≤ 32 caractères, sans point), en mots que comprend un acheteur. */
 export function statutDeZone(regimeCode: string | null): string {
   if (regimeCode === "04") return "Zone d'interdiction stricte";
   if (regimeCode === "03") return "Zone d'interdiction";
-  if (regimeCode === "05" || regimeCode === "06") return "Zone à régime particulier";
-  if (regimeCode === "02" || regimeCode === "01") return "Zone de prescriptions";
+  if (regimeCode === "05" || regimeCode === "06") return "Zone à règles particulières";
+  if (regimeCode === "02" || regimeCode === "01") return "Constructible sous conditions";
   return "Zone réglementée";
+}
+
+/**
+ * CE QUE LE RÉGIME CHANGE, EN CLAIR, POUR LA FACE DE LA CARTE (FUT-127, passe éditoriale du 23/10).
+ * Une phrase courte, sans le mot « régime ». La version technique (`regimeEnPhrase`) descend dans
+ * « Données et limites ». Jamais une impossibilité d'habiter : le plan encadre les projets.
+ */
+export function regimeEnClair(regimeCode: string | null): string {
+  switch (regimeCode) {
+    case "04": return "La plupart des constructions et des travaux nouveaux y sont interdits.";
+    case "03": return "Certaines constructions et certains travaux y sont interdits.";
+    case "05": case "06": return "Des règles particulières s'y appliquent, que seul le règlement du plan détaille.";
+    case "02": case "01": return "Construire ou faire des travaux y reste possible, sous conditions.";
+    default: return "Le règlement du plan dit ce qui y est permis.";
+  }
 }
 
 /** Ce que le régime encadre, sans jamais en tirer une impossibilité d'habiter. */
@@ -197,6 +215,12 @@ export function planEnPhrase(z: Pick<ZoneInondationLue, "plan" | "phenomenes" | 
   const phen = [...z.phenomenes, ...z.autresPhenomenes];
   const reglemente = phen.length > 0 ? `, qui réglemente ${joinFr(phen)}` : "";
   return `${nom}${date ? `, approuvé le ${date}` : ""}${reglemente}`;
+}
+
+/** « plan de prévention « PPR Charron », approuvé le 10 août 2021 » (sans article ni phénomènes). */
+export function planDate(z: Pick<ZoneInondationLue, "plan" | "approbation">, dateLongue: (iso: string | null) => string | null): string {
+  const date = dateLongue(z.approbation);
+  return `${z.plan ? `plan de prévention « ${z.plan} »` : "plan de prévention des risques"}${date ? `, approuvé le ${date}` : ""}`;
 }
 
 export function joinFr(items: string[]): string {
