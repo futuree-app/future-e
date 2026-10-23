@@ -1,0 +1,114 @@
+[
+ {
+  "origine": "Lagord",
+  "geocode": [
+   "Mairie de Lagord"
+  ],
+  "lon": -1.153228,
+  "lat": 46.190787,
+  "valhalla_fastest_km": 4.4,
+  "valhalla_fastest_min": 15.9,
+  "valhalla_shortest_km": 3.9,
+  "valhalla_shortest_min": 16.6,
+  "osrm_fastest_km": 3.9,
+  "osrm_fastest_min": 14.2
+ },
+ {
+  "origine": "Puilboreau",
+  "geocode": [
+   "Mairie de Puilboreau"
+  ],
+  "lon": -1.119178,
+  "lat": 46.187859,
+  "valhalla_fastest_km": 6.2,
+  "valhalla_fastest_min": 18.3,
+  "valhalla_shortest_km": 5.0,
+  "valhalla_shortest_min": 22.2,
+  "osrm_fastest_km": 5.3,
+  "osrm_fastest_min": 15.6
+ },
+ {
+  "origine": "Périgny",
+  "geocode": [
+   "Mairie de Périgny"
+  ],
+  "lon": -1.093987,
+  "lat": 46.152828,
+  "valhalla_fastest_km": 9.6,
+  "valhalla_fastest_min": 22.8,
+  "valhalla_shortest_km": 6.4,
+  "valhalla_shortest_min": 28.4,
+  "osrm_fastest_km": 9.6,
+  "osrm_fastest_min": 22.0
+ },
+ {
+  "origine": "Aytré",
+  "geocode": [
+   "Mairie d'Aytré"
+  ],
+  "lon": -1.11424,
+  "lat": 46.133038,
+  "valhalla_fastest_km": 11.5,
+  "valhalla_fastest_min": 22.2,
+  "valhalla_shortest_km": 6.1,
+  "valhalla_shortest_min": 24.9,
+  "osrm_fastest_km": 6.7,
+  "osrm_fastest_min": 21.2
+ },
+ {
+  "origine": "Châtelaillon-Plage",
+  "geocode": [
+   "Cale"
+  ],
+  "lon": -1.0889,
+  "lat": 46.053648,
+  "valhalla_fastest_km": 22.6,
+  "valhalla_fastest_min": 32.9,
+  "valhalla_shortest_km": 16.0,
+  "valhalla_shortest_min": 60.4,
+  "osrm_fastest_km": 22.6,
+  "osrm_fastest_min": 31.8
+ },
+ {
+  "origine": "Rochefort",
+  "geocode": [
+   "Vieille Forme"
+  ],
+  "lon": -0.955656,
+  "lat": 45.944348,
+  "valhalla_fastest_km": 38.3,
+  "valhalla_fastest_min": 45.3,
+  "valhalla_shortest_km": 33.2,
+  "valhalla_shortest_min": 57.9,
+  "osrm_fastest_km": 38.2,
+  "osrm_fastest_min": 44.2
+ },
+ {
+  "origine": "Surgères",
+  "geocode": [
+   "Mairie de Surgères"
+  ],
+  "lon": -0.751292,
+  "lat": 46.10489,
+  "valhalla_fastest_km": 45.0,
+  "valhalla_fastest_min": 54.3,
+  "valhalla_shortest_km": 35.5,
+  "valhalla_shortest_min": 71.4,
+  "osrm_fastest_km": 42.4,
+  "osrm_fastest_min": 52.1
+ },
+ {
+  "origine": "Marans",
+  "geocode": [
+   "Mairie de Marans"
+  ],
+  "lon": -0.993344,
+  "lat": 46.309621,
+  "valhalla_fastest_km": 26.0,
+  "valhalla_fastest_min": 39.5,
+  "valhalla_shortest_km": 23.5,
+  "valhalla_shortest_min": 61.2,
+  "osrm_fastest_km": 23.9,
+  "osrm_fastest_min": 37.8
+ }
+]

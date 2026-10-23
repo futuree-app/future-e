@@ -1,0 +1,2952 @@
+{
+ "commune": {
+  "insee": "79191",
+  "nom": "Niort",
+  "departement": "79",
+  "epci": {
+   "code": "200041317",
+   "nom": "CA du Niortais"
+  },
+  "unite_urbaine": "79501",
+  "voisines": {
+   "79081": "Chauray",
+   "79003": "Aiffres",
+   "79034": "Bessines"
+  },
+  "origine_voisines": "automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3)"
+ },
+ "fiche": {
+  "chemin": "fiches/79191/fiche.json",
+  "sha256": "45ab568a0609c943e88314cdb2c14122bf9bb3ba80752e46711dadbe8f5c63ce",
+  "generee_le": "2026-10-13T10:41:34Z",
+  "jour_reference": "2026-10-13"
+ },
+ "dossier_genere_le": "2026-10-14T13:46:38Z",
+ "faits": [
+  {
+   "id": "mobpro.modes.pas_de_transport",
+   "fait": "Part des actifs qui ne se déplacent pas pour travailler (travail à domicile)",
+   "valeur": 0.026,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.022,
+    0.031
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.marche",
+   "fait": "Part des actifs qui vont travailler principalement à pied",
+   "valeur": 0.097,
+   "unite": "part",
+   "affichage": "10 %",
+   "intervalle_95": [
+    0.089,
+    0.106
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.velo",
+   "fait": "Part des actifs qui vont travailler principalement à vélo",
+   "valeur": 0.071,
+   "unite": "part",
+   "affichage": "7 %",
+   "intervalle_95": [
+    0.065,
+    0.079
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.deux_roues_mot",
+   "fait": "Part des actifs qui vont travailler principalement en deux-roues motorisé",
+   "valeur": 0.018,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.015,
+    0.022
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.voiture",
+   "fait": "Part des actifs qui vont travailler principalement en voiture",
+   "valeur": 0.701,
+   "unite": "part",
+   "affichage": "70 %",
+   "intervalle_95": [
+    0.688,
+    0.714
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.modes.tc",
+   "fait": "Part des actifs qui vont travailler principalement en transports en commun",
+   "valeur": 0.086,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.079,
+    0.094
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort, y compris ceux qui ne se déplacent pas",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Le dénominateur inclut « pas de transport » (travail à domicile)."
+   ],
+   "fait_de_la_fiche": "mobpro.modes"
+  },
+  {
+   "id": "mobpro.travaille_dans_commune",
+   "fait": "Part des actifs résidents qui travaillent à Niort même",
+   "valeur": 0.749,
+   "unite": "part",
+   "affichage": "75 %",
+   "intervalle_95": [
+    0.737,
+    0.761
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort",
+   "perimetre": "commune de résidence et de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024)."
+   ],
+   "fait_de_la_fiche": "mobpro.travaille_dans_commune"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.meme_commune",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent à Niort",
+   "valeur": 0.645,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.63,
+    0.661
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent à Niort",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent à Niort",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.communes_voisines",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent dans l'une de ces communes : Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "valeur": 0.845,
+   "unite": "part",
+   "affichage": "85 %",
+   "intervalle_95": [
+    0.806,
+    0.877
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent dans l'une de ces communes : Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent dans l'une de ces communes : Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "perimetre": "commune de travail : Chauray (79081), Aiffres (79003) et Bessines (79034) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.voiture_selon_destination.ailleurs",
+   "fait": "Part allant travailler en voiture, parmi les actifs résidents qui travaillent hors de Niort et hors de Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "valeur": 0.867,
+   "unite": "part",
+   "affichage": "87 %",
+   "intervalle_95": [
+    0.847,
+    0.885
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent hors de Niort et hors de Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort qui travaillent hors de Niort et hors de Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "perimetre": "commune de travail : toute commune autre que Niort, Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Groupes distincts de personnes : l'écart décrit des pratiques, pas l'effet d'un changement d'emploi.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "ecart.voiture_destination.voisines_moins_meme_commune",
+   "fait": "Écart de part de la voiture : travail dans Chauray (79081), Aiffres (79003) et Bessines (79034) moins travail à Niort",
+   "valeur": 20,
+   "unite": "points",
+   "affichage": "+20 points",
+   "intervalle_95": null,
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "deux groupes distincts (voir les deux faits)",
+   "perimetre": "commune de travail : Chauray (79081), Aiffres (79003) et Bessines (79034) (exactement ; origine de la liste : automatique : communes de la même unité urbaine, au plus les 6 plus peuplées (REPRODUCTIBILITE.md §3))",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.voiture_selon_destination"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_sans_voiture",
+   "fait": "Part des actifs dont le ménage n'a pas de voiture",
+   "valeur": 0.086,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.078,
+    0.094
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.actifs_menage_2_voitures_plus",
+   "fait": "Part des actifs dont le ménage a deux voitures ou plus",
+   "valeur": 0.448,
+   "unite": "part",
+   "affichage": "45 %",
+   "intervalle_95": [
+    0.435,
+    0.462
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "tous les actifs occupés de 15 ans ou plus résidant à Niort",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.posseder_utiliser.menage_motorise_mais_pas_en_voiture",
+   "fait": "Part des actifs dont le ménage a au moins une voiture et qui ne la déclarent pas comme mode principal pour aller travailler (y compris sans déplacement)",
+   "valeur": 0.249,
+   "unite": "part",
+   "affichage": "25 %",
+   "intervalle_95": [
+    0.237,
+    0.262
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort dont le ménage a au moins une voiture",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Parts d'ACTIFS, pas de ménages.",
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "Ne pas lire « ménages sans voiture » : voir la base IRIS Logement pour les ménages."
+   ],
+   "fait_de_la_fiche": "mobpro.posseder_utiliser"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.voiture",
+   "fait": "Part des actifs propriétaires qui vont travailler en voiture",
+   "valeur": 0.739,
+   "unite": "part",
+   "affichage": "74 %",
+   "intervalle_95": [
+    0.721,
+    0.756
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.velo",
+   "fait": "Part des actifs propriétaires qui vont travailler à vélo",
+   "valeur": 0.094,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.084,
+    0.106
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_sans_voiture",
+   "fait": "Part des actifs propriétaires qui ont un ménage sans voiture",
+   "valeur": 0.018,
+   "unite": "part",
+   "affichage": "2 %",
+   "intervalle_95": [
+    0.014,
+    0.024
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.proprietaires.menage_2_voitures_plus",
+   "fait": "Part des actifs propriétaires qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.611,
+   "unite": "part",
+   "affichage": "61 %",
+   "intervalle_95": [
+    0.591,
+    0.63
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, propriétaires de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.voiture",
+   "fait": "Part des actifs locataires du privé qui vont travailler en voiture",
+   "valeur": 0.677,
+   "unite": "part",
+   "affichage": "68 %",
+   "intervalle_95": [
+    0.654,
+    0.698
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.velo",
+   "fait": "Part des actifs locataires du privé qui vont travailler à vélo",
+   "valeur": 0.049,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.039,
+    0.06
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_sans_voiture",
+   "fait": "Part des actifs locataires du privé qui ont un ménage sans voiture",
+   "valeur": 0.152,
+   "unite": "part",
+   "affichage": "15 %",
+   "intervalle_95": [
+    0.135,
+    0.169
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_prive.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires du privé qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.296,
+   "unite": "part",
+   "affichage": "30 %",
+   "intervalle_95": [
+    0.275,
+    0.318
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires du privé de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.voiture",
+   "fait": "Part des actifs locataires HLM qui vont travailler en voiture",
+   "valeur": 0.635,
+   "unite": "part",
+   "affichage": "64 %",
+   "intervalle_95": [
+    0.597,
+    0.673
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.velo",
+   "fait": "Part des actifs locataires HLM qui vont travailler à vélo",
+   "valeur": 0.045,
+   "unite": "part",
+   "affichage": "5 %",
+   "intervalle_95": [
+    0.031,
+    0.065
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_sans_voiture",
+   "fait": "Part des actifs locataires HLM qui ont un ménage sans voiture",
+   "valeur": 0.196,
+   "unite": "part",
+   "affichage": "20 %",
+   "intervalle_95": [
+    0.166,
+    0.229
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.statut_occupation.locataires_hlm.menage_2_voitures_plus",
+   "fait": "Part des actifs locataires HLM qui ont un ménage à deux voitures ou plus",
+   "valeur": 0.227,
+   "unite": "part",
+   "affichage": "23 %",
+   "intervalle_95": [
+    0.195,
+    0.262
+   ],
+   "population": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM",
+   "denominateur": "actifs occupés de 15 ans ou plus résidant à Niort, locataires HLM de leur logement",
+   "perimetre": "commune de résidence : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs."
+   ],
+   "fait_de_la_fiche": "mobpro.statut_occupation"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.total",
+   "fait": "Nombre d'actifs qui travaillent à Niort",
+   "valeur": 48308,
+   "unite": "nombre",
+   "affichage": "environ 48 300",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "—",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Niort, de ceux qui habitent Niort",
+   "valeur": 0.401,
+   "unite": "part",
+   "affichage": "40 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Niort et habitent Niort",
+   "valeur": 0.645,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": [
+    0.63,
+    0.661
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent Niort",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.habitent_la_commune.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Niort et habitent Niort",
+   "valeur": 0.086,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": [
+    0.077,
+    0.095
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent Niort",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Niort, de ceux qui habitent une autre commune de l'unité urbaine INSEE 79501 (liste des communes non exposée par la fiche)",
+   "valeur": 0.067,
+   "unite": "part",
+   "affichage": "7 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Niort et habitent une autre commune de l'unité urbaine INSEE 79501 (liste des communes non exposée par la fiche)",
+   "valeur": 0.937,
+   "unite": "part",
+   "affichage": "94 %",
+   "intervalle_95": [
+    0.91,
+    0.956
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 79501 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.reste_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Niort et habitent une autre commune de l'unité urbaine INSEE 79501 (liste des communes non exposée par la fiche)",
+   "valeur": 0.028,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": [
+    0.016,
+    0.049
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent une autre commune de l'unité urbaine INSEE 79501 (liste des communes non exposée par la fiche)",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.part_des_emplois",
+   "fait": "Part, parmi les actifs qui travaillent à Niort, de ceux qui habitent hors de l'unité urbaine INSEE 79501",
+   "valeur": 0.532,
+   "unite": "part",
+   "affichage": "53 %",
+   "intervalle_95": null,
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.voiture",
+   "fait": "Part allant travailler en voiture, parmi les actifs qui travaillent à Niort et habitent hors de l'unité urbaine INSEE 79501",
+   "valeur": 0.944,
+   "unite": "part",
+   "affichage": "94 %",
+   "intervalle_95": [
+    0.936,
+    0.951
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 79501",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "mobpro.qui_vient_travailler.hors_unite_urbaine.tc",
+   "fait": "Part allant travailler en transports en commun, parmi les actifs qui travaillent à Niort et habitent hors de l'unité urbaine INSEE 79501",
+   "valeur": 0.036,
+   "unite": "part",
+   "affichage": "4 %",
+   "intervalle_95": [
+    0.03,
+    0.043
+   ],
+   "population": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence",
+   "denominateur": "actifs occupés qui travaillent à Niort, quel que soit leur lieu de résidence et qui habitent hors de l'unité urbaine INSEE 79501",
+   "perimetre": "commune de travail : Niort (79191)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Trajets domicile-travail des actifs seulement : ni achats, ni école, ni loisirs.",
+    "Pratiques du recensement 2022 (collectes 2020 à 2024).",
+    "Mode et lieu de travail issus d'un échantillon : intervalles indicatifs.",
+    "« Unité urbaine » = INSEE 2020, via l'index."
+   ],
+   "fait_de_la_fiche": "mobpro.qui_vient_travailler"
+  },
+  {
+   "id": "iris.voiture.min",
+   "fait": "Part de la voiture la plus basse parmi les secteurs : Centre (IRIS 791910101)",
+   "valeur": 0.489,
+   "unite": "part",
+   "affichage": "49 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Niort (79191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.voiture.max",
+   "fait": "Part de la voiture la plus élevée parmi les secteurs : Surimeau-Antes Cholette (IRIS 791910601)",
+   "valeur": 0.865,
+   "unite": "part",
+   "affichage": "87 %",
+   "intervalle_95": null,
+   "population": "actifs occupés résidant dans le secteur",
+   "denominateur": "actifs occupés de 15 ans ou plus du secteur",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Niort (79191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "ecart.iris.voiture.max_moins_min",
+   "fait": "Écart entre le secteur le plus haut et le plus bas (part de la voiture)",
+   "valeur": 38,
+   "unite": "points",
+   "affichage": "+38 points",
+   "intervalle_95": null,
+   "population": "actifs occupés",
+   "denominateur": "deux secteurs distincts",
+   "perimetre": "secteurs statistiques (IRIS) d'habitat de Niort (79191), au moins 300 actifs",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "écart des valeurs arrondies",
+   "usage": "oui",
+   "limites": [
+    "Exploitation complémentaire, estimations par sondage ; les petits écarts entre secteurs ne doivent pas être surinterprétés (aucune marge d'erreur par secteur n'est fournie : ne pas en écrire).",
+    "Libellés d'IRIS INSEE, pas toujours les noms d'usage des quartiers."
+   ],
+   "fait_de_la_fiche": "iris.ecart_voiture"
+  },
+  {
+   "id": "iris.menages_commune.menages_sans_voiture",
+   "fait": "Part des ménages sans voiture",
+   "valeur": 0.19,
+   "unite": "part",
+   "affichage": "19 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Niort",
+   "denominateur": "toutes les résidences principales de Niort",
+   "perimetre": "commune : Niort (79191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_2_voitures_plus",
+   "fait": "Part des ménages à deux voitures ou plus",
+   "valeur": 0.266,
+   "unite": "part",
+   "affichage": "27 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Niort",
+   "denominateur": "toutes les résidences principales de Niort",
+   "perimetre": "commune : Niort (79191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "iris.menages_commune.menages_stationnement_reserve",
+   "fait": "Part des ménages disposant d'un emplacement réservé au stationnement",
+   "valeur": 0.648,
+   "unite": "part",
+   "affichage": "65 %",
+   "intervalle_95": null,
+   "population": "ménages (résidences principales) de Niort",
+   "denominateur": "toutes les résidences principales de Niort",
+   "perimetre": "commune : Niort (79191)",
+   "source": "INSEE, RP 2022, bases infracommunales Activité des résidents et Logement",
+   "millesime": "2022",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Tous ménages (retraités, étudiants compris) : à ne pas comparer aux parts d'actifs de MOBPRO."
+   ],
+   "fait_de_la_fiche": "iris.menages_commune"
+  },
+  {
+   "id": "acces.79191.commerce_alim_500m",
+   "fait": "Part des adresses de Niort qui ont un commerce alimentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.75,
+   "unite": "part",
+   "affichage": "75 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.grande_surface_500m",
+   "fait": "Part des adresses de Niort qui ont une grande surface à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.381,
+   "unite": "part",
+   "affichage": "38 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.pharmacie_500m",
+   "fait": "Part des adresses de Niort qui ont une pharmacie à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.583,
+   "unite": "part",
+   "affichage": "58 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.medecin_generaliste_500m",
+   "fait": "Part des adresses de Niort qui ont un médecin généraliste à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.617,
+   "unite": "part",
+   "affichage": "62 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.ecole_elementaire_500m",
+   "fait": "Part des adresses de Niort qui ont une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.661,
+   "unite": "part",
+   "affichage": "66 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.college_1km",
+   "fait": "Part des adresses de Niort qui ont un collège à moins de 1 km (à vol d'oiseau)",
+   "valeur": 0.834,
+   "unite": "part",
+   "affichage": "83 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.gare_2km",
+   "fait": "Part des adresses de Niort qui ont une gare à moins de 2 km (à vol d'oiseau)",
+   "valeur": 0.631,
+   "unite": "part",
+   "affichage": "63 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.panier_quotidien_500m",
+   "fait": "Part des adresses de Niort qui ont à la fois un commerce alimentaire, une pharmacie et une école élémentaire à moins de 500 m (à vol d'oiseau)",
+   "valeur": 0.448,
+   "unite": "part",
+   "affichage": "45 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "",
+   "usage": "oui",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.bus_8h_7_9h",
+   "fait": "Part des adresses de Niort qui ont au moins 8 passages de bus par heure entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.746,
+   "unite": "part",
+   "affichage": "75 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.aucun_bus_7_9h",
+   "fait": "Part des adresses de Niort sans aucun passage de bus entre 7 h et 9 h à moins de 400 m",
+   "valeur": 0.03,
+   "unite": "part",
+   "affichage": "3 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "acces.79191.bus_4h_20_22h",
+   "fait": "Part des adresses de Niort qui ont au moins 4 passages de bus par heure entre 20 h et 22 h à moins de 400 m",
+   "valeur": 0.089,
+   "unite": "part",
+   "affichage": "9 %",
+   "intervalle_95": null,
+   "population": "adresses BAN de Niort",
+   "denominateur": "toutes les adresses BAN de Niort, chaque secteur (IRIS) pesant selon son nombre de ménages (poids d'une adresse = ménages de son IRIS / adresses de son IRIS)",
+   "perimetre": "adresses de Niort (79191)",
+   "source": "BAN ; INSEE BPE 2025 ; GTFS (auto : « Réseau urbain Tanlib » (https://transport.data.gouv.fr/datasets/arrets-horaires-et-parcours-theoriques-des-reseaux-naq-nio-nva-m-1), 1 candidat(s))",
+   "millesime": "BPE 2025, GTFS du jour 2026-10-13",
+   "statut": "en attente de validation",
+   "motif_statut": "réseau de bus et jour de référence non validés : ne pas écrire, même arrondi",
+   "usage": "non",
+   "limites": [
+    "Part d'adresses, pas de ménages ni d'habitants.",
+    "Proximité d'un équipement ≠ son usage.",
+    "Vol d'oiseau : la marche réelle peut être 1,3 à 6 fois plus longue à courte distance.",
+    "Point BPE = adresse de l'établissement, pas son entrée.",
+    "Offre de bus théorique d'un jour donné : ni ponctualité, ni temps de trajet."
+   ],
+   "fait_de_la_fiche": "acces.adresses"
+  },
+  {
+   "id": "carburant.gazole.prix",
+   "fait": "Prix médian du gazole, semaine du 2026-10-05",
+   "valeur": 2.328,
+   "unite": "€/L",
+   "affichage": "2,33 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.prix_un_an_avant",
+   "fait": "Prix médian du gazole, semaine du 2025-10-06",
+   "valeur": 1.559,
+   "unite": "€/L",
+   "affichage": "1,56 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.gazole.ecart",
+   "fait": "Hausse du prix médian du gazole en un an",
+   "valeur": 0.769,
+   "unite": "€/L",
+   "affichage": "0,77 €/L",
+   "intervalle_95": null,
+   "population": "19 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix",
+   "fait": "Prix médian du SP95-E10, semaine du 2026-10-05",
+   "valeur": 2.144,
+   "unite": "€/L",
+   "affichage": "2,14 €/L",
+   "intervalle_95": null,
+   "population": "14 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.prix_un_an_avant",
+   "fait": "Prix médian du SP95-E10, semaine du 2025-10-06",
+   "valeur": 1.628,
+   "unite": "€/L",
+   "affichage": "1,63 €/L",
+   "intervalle_95": null,
+   "population": "14 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  },
+  {
+   "id": "carburant.e10.ecart",
+   "fait": "Hausse du prix médian du SP95-E10 en un an",
+   "valeur": 0.516,
+   "unite": "€/L",
+   "affichage": "0,52 €/L",
+   "intervalle_95": null,
+   "population": "14 stations déclarantes",
+   "denominateur": "médiane entre stations du dernier prix déclaré dans la semaine",
+   "perimetre": "stations situées dans un rayon de 12 km (à vol d'oiseau) autour du centre de Niort (centre communal de geo.api.gouv.fr : [-0.4613, 46.3274])",
+   "source": "prix-carburants.gouv.fr, flux officiel (archives annuelles)",
+   "millesime": "2025 à 2026-10-13",
+   "statut": "utilisable",
+   "motif_statut": "réextraire la veille de la publication",
+   "usage": "oui",
+   "limites": [
+    "Le contrôle sur les mêmes stations (scripts/13) n'est pas fait par l'outil.",
+    "Pas un prix « du quartier » ; une station qui ne déclare rien une semaine n'y compte pas.",
+    "Une hausse passée ne dit rien de l'avenir."
+   ],
+   "fait_de_la_fiche": "carburant.evolution"
+  }
+ ],
+ "secteurs": [
+  {
+   "code": "791910101",
+   "nom": "Centre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2303,
+   "voiture": 0.489,
+   "velo": 0.097,
+   "tc": 0.146,
+   "marche": 0.202,
+   "menages_sans_voiture": 0.383,
+   "menages_stationnement_reserve": 0.303,
+   "panier_quotidien_500m": 0.998,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910401",
+   "nom": "Clou Bouchet Nord",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 490,
+   "voiture": 0.516,
+   "velo": 0.105,
+   "tc": 0.192,
+   "marche": 0.159,
+   "menages_sans_voiture": 0.37,
+   "menages_stationnement_reserve": 0.326,
+   "panier_quotidien_500m": 0.797,
+   "bus_8h_7_9h": 1.0,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910103",
+   "nom": "Hôpital",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 802,
+   "voiture": 0.536,
+   "velo": 0.085,
+   "tc": 0.099,
+   "marche": 0.255,
+   "menages_sans_voiture": 0.275,
+   "menages_stationnement_reserve": 0.508,
+   "panier_quotidien_500m": 0.962,
+   "bus_8h_7_9h": 0.793,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910102",
+   "nom": "Gare",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1193,
+   "voiture": 0.537,
+   "velo": 0.062,
+   "tc": 0.138,
+   "marche": 0.229,
+   "menages_sans_voiture": 0.334,
+   "menages_stationnement_reserve": 0.428,
+   "panier_quotidien_500m": 0.767,
+   "bus_8h_7_9h": 0.999,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910404",
+   "nom": "Clou Bouchet Sud",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 528,
+   "voiture": 0.539,
+   "velo": 0.058,
+   "tc": 0.212,
+   "marche": 0.117,
+   "menages_sans_voiture": 0.427,
+   "menages_stationnement_reserve": 0.139,
+   "panier_quotidien_500m": 0.87,
+   "bus_8h_7_9h": 0.917,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910301",
+   "nom": "Sud Ribray",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1604,
+   "voiture": 0.634,
+   "velo": 0.082,
+   "tc": 0.08,
+   "marche": 0.17,
+   "menages_sans_voiture": 0.144,
+   "menages_stationnement_reserve": 0.665,
+   "panier_quotidien_500m": 0.668,
+   "bus_8h_7_9h": 0.979,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910201",
+   "nom": "Nord Partie Inférieure",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1098,
+   "voiture": 0.635,
+   "velo": 0.091,
+   "tc": 0.07,
+   "marche": 0.176,
+   "menages_sans_voiture": 0.246,
+   "menages_stationnement_reserve": 0.588,
+   "panier_quotidien_500m": 0.461,
+   "bus_8h_7_9h": 0.999,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910303",
+   "nom": "Boucle Sèvre",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1578,
+   "voiture": 0.649,
+   "velo": 0.101,
+   "tc": 0.083,
+   "marche": 0.122,
+   "menages_sans_voiture": 0.222,
+   "menages_stationnement_reserve": 0.686,
+   "panier_quotidien_500m": 0.747,
+   "bus_8h_7_9h": 0.874,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910505",
+   "nom": "Zone d'Activités Technopole",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "791910202",
+   "nom": "Nord Partie Supérieure",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1203,
+   "voiture": 0.68,
+   "velo": 0.076,
+   "tc": 0.132,
+   "marche": 0.079,
+   "menages_sans_voiture": 0.261,
+   "menages_stationnement_reserve": 0.563,
+   "panier_quotidien_500m": 0.495,
+   "bus_8h_7_9h": 0.774,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910403",
+   "nom": "Four Chabot Gavacherie",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 590,
+   "voiture": 0.688,
+   "velo": 0.046,
+   "tc": 0.165,
+   "marche": 0.081,
+   "menages_sans_voiture": 0.379,
+   "menages_stationnement_reserve": 0.43,
+   "panier_quotidien_500m": 0.37,
+   "bus_8h_7_9h": 0.888,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910402",
+   "nom": "Venise Verte",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 829,
+   "voiture": 0.721,
+   "velo": 0.071,
+   "tc": 0.089,
+   "marche": 0.058,
+   "menages_sans_voiture": 0.131,
+   "menages_stationnement_reserve": 0.719,
+   "panier_quotidien_500m": 0.412,
+   "bus_8h_7_9h": 0.732,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910604",
+   "nom": "Champclairot",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1335,
+   "voiture": 0.725,
+   "velo": 0.094,
+   "tc": 0.081,
+   "marche": 0.061,
+   "menages_sans_voiture": 0.122,
+   "menages_stationnement_reserve": 0.731,
+   "panier_quotidien_500m": 0.466,
+   "bus_8h_7_9h": 0.701,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910302",
+   "nom": "Saint-Florent",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1153,
+   "voiture": 0.732,
+   "velo": 0.091,
+   "tc": 0.054,
+   "marche": 0.08,
+   "menages_sans_voiture": 0.098,
+   "menages_stationnement_reserve": 0.852,
+   "panier_quotidien_500m": 0.297,
+   "bus_8h_7_9h": 0.484,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910701",
+   "nom": "Champommier",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 2191,
+   "voiture": 0.773,
+   "velo": 0.057,
+   "tc": 0.059,
+   "marche": 0.057,
+   "menages_sans_voiture": 0.087,
+   "menages_stationnement_reserve": 0.777,
+   "panier_quotidien_500m": 0.325,
+   "bus_8h_7_9h": 0.772,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910602",
+   "nom": "Justices-Brizeaux",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 985,
+   "voiture": 0.78,
+   "velo": 0.048,
+   "tc": 0.071,
+   "marche": 0.055,
+   "menages_sans_voiture": 0.08,
+   "menages_stationnement_reserve": 0.76,
+   "panier_quotidien_500m": 0.052,
+   "bus_8h_7_9h": 0.613,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910702",
+   "nom": "Goise",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 900,
+   "voiture": 0.791,
+   "velo": 0.072,
+   "tc": 0.053,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.169,
+   "menages_stationnement_reserve": 0.813,
+   "panier_quotidien_500m": 0.042,
+   "bus_8h_7_9h": 0.602,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910603",
+   "nom": "Moulin à Vent-Souche",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 838,
+   "voiture": 0.797,
+   "velo": 0.048,
+   "tc": 0.089,
+   "marche": 0.009,
+   "menages_sans_voiture": 0.058,
+   "menages_stationnement_reserve": 0.85,
+   "panier_quotidien_500m": 0.0,
+   "bus_8h_7_9h": 0.573,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910203",
+   "nom": "Baticoop",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1103,
+   "voiture": 0.801,
+   "velo": 0.065,
+   "tc": 0.044,
+   "marche": 0.056,
+   "menages_sans_voiture": 0.161,
+   "menages_stationnement_reserve": 0.76,
+   "panier_quotidien_500m": 0.305,
+   "bus_8h_7_9h": 0.467,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910503",
+   "nom": "Sainte-Pezenne",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1142,
+   "voiture": 0.807,
+   "velo": 0.051,
+   "tc": 0.057,
+   "marche": 0.03,
+   "menages_sans_voiture": 0.069,
+   "menages_stationnement_reserve": 0.763,
+   "panier_quotidien_500m": 0.089,
+   "bus_8h_7_9h": 0.727,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910502",
+   "nom": "Coteau Saint-Hubert",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1355,
+   "voiture": 0.821,
+   "velo": 0.046,
+   "tc": 0.037,
+   "marche": 0.045,
+   "menages_sans_voiture": 0.071,
+   "menages_stationnement_reserve": 0.857,
+   "panier_quotidien_500m": 0.096,
+   "bus_8h_7_9h": 0.922,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910605",
+   "nom": "Zone d'Activités de Souche",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "791910703",
+   "nom": "Zone d'Activités de Saint-Florent",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  },
+  {
+   "code": "791910501",
+   "nom": "Saint-Liguaire-Nantes",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1136,
+   "voiture": 0.861,
+   "velo": 0.058,
+   "tc": 0.048,
+   "marche": 0.002,
+   "menages_sans_voiture": 0.033,
+   "menages_stationnement_reserve": 0.858,
+   "panier_quotidien_500m": 0.0,
+   "bus_8h_7_9h": 0.077,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910601",
+   "nom": "Surimeau-Antes Cholette",
+   "type": "habitat",
+   "statut": "utilisable",
+   "usage": "oui",
+   "motif": "",
+   "actifs": 1215,
+   "voiture": 0.865,
+   "velo": 0.041,
+   "tc": 0.05,
+   "marche": 0.014,
+   "menages_sans_voiture": 0.067,
+   "menages_stationnement_reserve": 0.86,
+   "panier_quotidien_500m": 0.0,
+   "bus_8h_7_9h": 0.016,
+   "bus_8h_7_9h_statut": "en attente de validation"
+  },
+  {
+   "code": "791910504",
+   "nom": "Zone d'Activités de Saint-Liguaire",
+   "type": "activité",
+   "statut": "absent",
+   "usage": "non",
+   "motif": "secteur d'activité, exclu"
+  }
+ ],
+ "destinations": [
+  {
+   "travail": "79191",
+   "nom": "Niort",
+   "lignes": 6148,
+   "fragilite": "ok",
+   "part_des_actifs": 0.749,
+   "pas_de_transport": 0.034,
+   "marche": 0.127,
+   "velo": 0.09,
+   "deux_roues_mot": 0.018,
+   "voiture": 0.645,
+   "tc": 0.086
+  },
+  {
+   "travail": "79081",
+   "nom": "Chauray",
+   "lignes": 538,
+   "fragilite": "ok",
+   "part_des_actifs": 0.065,
+   "pas_de_transport": 0.0,
+   "marche": 0.002,
+   "velo": 0.015,
+   "deux_roues_mot": 0.027,
+   "voiture": 0.853,
+   "tc": 0.103
+  },
+  {
+   "travail": "79048",
+   "nom": "La Crèche",
+   "lignes": 151,
+   "fragilite": "ok",
+   "part_des_actifs": 0.02,
+   "pas_de_transport": 0.0,
+   "marche": 0.007,
+   "velo": 0.018,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.938,
+   "tc": 0.037
+  },
+  {
+   "travail": "79034",
+   "nom": "Bessines",
+   "lignes": 85,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.01,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.028,
+   "deux_roues_mot": 0.006,
+   "voiture": 0.894,
+   "tc": 0.072
+  },
+  {
+   "travail": "79109",
+   "nom": "Échiré",
+   "lignes": 79,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.01,
+   "pas_de_transport": 0.0,
+   "marche": 0.006,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.953,
+   "tc": 0.042
+  },
+  {
+   "travail": "79216",
+   "nom": "Prahecq",
+   "lignes": 52,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.041,
+   "deux_roues_mot": 0.015,
+   "voiture": 0.903,
+   "tc": 0.04
+  },
+  {
+   "travail": "79270",
+   "nom": "Saint-Maixent-l'École",
+   "lignes": 66,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.007,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.949,
+   "tc": 0.051
+  },
+  {
+   "travail": "17300",
+   "nom": "La Rochelle",
+   "lignes": 51,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.019,
+   "velo": 0.0,
+   "deux_roues_mot": 0.026,
+   "voiture": 0.749,
+   "tc": 0.205
+  },
+  {
+   "travail": "79003",
+   "nom": "Aiffres",
+   "lignes": 51,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.038,
+   "velo": 0.055,
+   "deux_roues_mot": 0.096,
+   "voiture": 0.668,
+   "tc": 0.142
+  },
+  {
+   "travail": "79174",
+   "nom": "Melle",
+   "lignes": 46,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.0,
+   "velo": 0.0,
+   "deux_roues_mot": 0.0,
+   "voiture": 0.972,
+   "tc": 0.028
+  },
+  {
+   "travail": "86194",
+   "nom": "Poitiers",
+   "lignes": 44,
+   "fragilite": "fragile",
+   "part_des_actifs": 0.006,
+   "pas_de_transport": 0.0,
+   "marche": 0.011,
+   "velo": 0.03,
+   "deux_roues_mot": 0.083,
+   "voiture": 0.486,
+   "tc": 0.391
+  }
+ ],
+ "voisines": [
+  {
+   "insee": "79081",
+   "nom": "Chauray",
+   "voiture": 0.915,
+   "velo": 0.025,
+   "tc": 0.023,
+   "vers_commune_etudiee": {
+    "lignes": 329,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.945,
+     "bas": 0.906,
+     "haut": 0.968,
+     "lignes": 329,
+     "n_eff": 219
+    },
+    "velo": {
+     "p": 0.009,
+     "bas": 0.003,
+     "haut": 0.033,
+     "lignes": 329,
+     "n_eff": 219
+    }
+   }
+  },
+  {
+   "insee": "79003",
+   "nom": "Aiffres",
+   "voiture": 0.913,
+   "velo": 0.012,
+   "tc": 0.038,
+   "vers_commune_etudiee": {
+    "lignes": 221,
+    "fragilite": "ok",
+    "voiture": {
+     "p": 0.932,
+     "bas": 0.88,
+     "haut": 0.963,
+     "lignes": 221,
+     "n_eff": 147
+    },
+    "velo": {
+     "p": 0.018,
+     "bas": 0.006,
+     "haut": 0.055,
+     "lignes": 221,
+     "n_eff": 147
+    }
+   }
+  },
+  {
+   "insee": "79034",
+   "nom": "Bessines",
+   "voiture": 0.9,
+   "velo": 0.026,
+   "tc": 0.016,
+   "vers_commune_etudiee": {
+    "lignes": 88,
+    "fragilite": "fragile",
+    "voiture": {
+     "p": 0.92,
+     "bas": 0.823,
+     "haut": 0.966,
+     "lignes": 88,
+     "n_eff": 59
+    },
+    "velo": {
+     "p": 0.045,
+     "bas": 0.015,
+     "haut": 0.132,
+     "lignes": 88,
+     "n_eff": 59
+    }
+   }
+  }
+ ],
+ "acces_communes": {
+  "79191": {
+   "commerce_alim_500m": 0.75,
+   "grande_surface_500m": 0.381,
+   "pharmacie_500m": 0.583,
+   "medecin_generaliste_500m": 0.617,
+   "ecole_elementaire_500m": 0.661,
+   "college_1km": 0.834,
+   "gare_2km": 0.631,
+   "panier_quotidien_500m": 0.448,
+   "bus_8h_7_9h": 0.746,
+   "aucun_bus_7_9h": 0.03,
+   "bus_4h_20_22h": 0.089
+  },
+  "79081": {
+   "commerce_alim_500m": 0.484,
+   "grande_surface_500m": 0.233,
+   "pharmacie_500m": 0.201,
+   "medecin_generaliste_500m": 0.148,
+   "ecole_elementaire_500m": 0.375,
+   "college_1km": 0.193,
+   "gare_2km": 0.0,
+   "panier_quotidien_500m": 0.136,
+   "bus_8h_7_9h": 0.326,
+   "aucun_bus_7_9h": 0.104,
+   "bus_4h_20_22h": 0.0
+  },
+  "79003": {
+   "commerce_alim_500m": 0.39,
+   "grande_surface_500m": 0.118,
+   "pharmacie_500m": 0.444,
+   "medecin_generaliste_500m": 0.276,
+   "ecole_elementaire_500m": 0.242,
+   "college_1km": 0.0,
+   "gare_2km": 0.0,
+   "panier_quotidien_500m": 0.031,
+   "bus_8h_7_9h": 0.0,
+   "aucun_bus_7_9h": 0.259,
+   "bus_4h_20_22h": 0.0
+  },
+  "79034": {
+   "commerce_alim_500m": 0.485,
+   "grande_surface_500m": 0.082,
+   "pharmacie_500m": 0.0,
+   "medecin_generaliste_500m": 0.296,
+   "ecole_elementaire_500m": 0.25,
+   "college_1km": 0.0,
+   "gare_2km": 0.0,
+   "panier_quotidien_500m": 0.0,
+   "bus_8h_7_9h": 0.072,
+   "aucun_bus_7_9h": 0.184,
+   "bus_4h_20_22h": 0.0
+  }
+ },
+ "scenario_carburant": {
+  "hypotheses": {
+   "jours_trajet_an": 200,
+   "litres_100km": 6.0,
+   "km_aller": [
+    5,
+    15,
+    35
+   ],
+   "hausse": "hausse médiane de la fiche arrondie à 5 centimes"
+  },
+  "lignes": [
+   {
+    "id": "scenario.carburant.gazole.5km",
+    "carburant": "gazole",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 90
+   },
+   {
+    "id": "scenario.carburant.gazole.15km",
+    "carburant": "gazole",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 270
+   },
+   {
+    "id": "scenario.carburant.gazole.35km",
+    "carburant": "gazole",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.75,
+    "surcout_an_eur": 630
+   },
+   {
+    "id": "scenario.carburant.e10.5km",
+    "carburant": "SP95-E10",
+    "km_aller": 5,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 60
+   },
+   {
+    "id": "scenario.carburant.e10.15km",
+    "carburant": "SP95-E10",
+    "km_aller": 15,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 180
+   },
+   {
+    "id": "scenario.carburant.e10.35km",
+    "carburant": "SP95-E10",
+    "km_aller": 35,
+    "hausse_retenue_eur_l": 0.5,
+    "surcout_an_eur": 420
+   }
+  ]
+ },
+ "absents": [
+  {
+   "fait": "Rang, palmarès ou toute comparaison avec d'autres communes autre que le repère de la section 4 bis",
+   "raison": "seul ce repère est calculé, avec sa règle ; rien d'autre (vélo, rang, autre groupe)"
+  },
+  {
+   "fait": "Population totale de la commune, nombre de ménages de la commune",
+   "raison": "non exposés par la fiche"
+  },
+  {
+   "fait": "Composition de l'unité urbaine (liste et nombre de communes)",
+   "raison": "la fiche ne donne que son code"
+  },
+  {
+   "fait": "Part de la voiture pour un groupe de communes de travail autre que ceux listés",
+   "raison": "recalcul MOBPRO nécessaire (cf. scripts/10_incertitude.py)"
+  },
+  {
+   "fait": "Temps de trajet, kilomètres routiers, itinéraires à vélo",
+   "raison": "exploration seulement, résultats divergents selon le calcul"
+  },
+  {
+   "fait": "Autopartage, vélos en libre-service",
+   "raison": "flux GBFS propres à chaque réseau, non collectés"
+  },
+  {
+   "fait": "Usage réel des équipements (où l'on fait ses courses, où vont les enfants)",
+   "raison": "aucune source"
+  },
+  {
+   "fait": "Réaction des habitants à la hausse du carburant",
+   "raison": "les pratiques datent de 2022, les prix de 2025-2026"
+  },
+  {
+   "fait": "Contrôle de la hausse sur les mêmes stations",
+   "raison": "non fait par l'outil (scripts/13 pour La Rochelle)"
+  },
+  {
+   "fait": "Information documentaire non retenue : fréquences, amplitudes, premiers et derniers départs",
+   "raison": "lisibles dans les fiches, mais en tirer une fréquence serait un calcul non contrôlé ; relève des faits bus calculés, en attente de validation"
+  },
+  {
+   "fait": "Information documentaire non retenue : jours de circulation des navettes Centre-Ville et Colline Saint-André, des Tanlib Express et des lignes périurbaines",
+   "raison": "non vérifiés (fiches non consultées)"
+  },
+  {
+   "fait": "Information documentaire non retenue : gratuité de la ligne 140E vers La Rochelle",
+   "raison": "évoquée dans une délibération de Niort Agglo d'avril 2025 ; arrêts concernés et état actuel non confirmés sur le site du réseau ; recherche disproportionnée"
+  },
+  {
+   "fait": "Information documentaire non retenue : vélo (libre-service, location de vélos à assistance électrique, itinéraire vélo)",
+   "raison": "existence seule, sans information qui réponde à la question du logement"
+  },
+  {
+   "fait": "Information documentaire non retenue : gare",
+   "raison": "rien d'utile au-delà de la navette du dimanche soir"
+  }
+ ],
+ "visuels": [
+  {
+   "visuel": "Carte de la part de la voiture par secteur (IRIS)",
+   "etat": "réalisable",
+   "faits": "secteurs (tableau), iris.voiture.min/max",
+   "commande": "python visuels/generer_visuels.py --insee 79191 --fiche fiches/79191/fiche.json --contours <cache>/iris_ign_79191.json --incertitudes resultats/incertitudes_mobpro.csv --out <dossier> --classes 0.45",
+   "manuel": "poser les libellés des secteurs cités (--libelles CODE,… place au centre ; positions fines à la main) ; légende HTML et texte alternatif à relire"
+  },
+  {
+   "visuel": "Tableau accessible des secteurs (HTML et Markdown)",
+   "etat": "produit avec la carte",
+   "faits": "secteurs",
+   "commande": "idem",
+   "manuel": "aucun"
+  },
+  {
+   "visuel": "Barres : part de la voiture selon la commune de travail",
+   "etat": "réalisable, non automatisé",
+   "faits": "mobpro.voiture_selon_destination.* ou tableau des destinations (lignes utilisables seulement)",
+   "commande": "aucune : barres() de generer_visuels.py est écrite pour La Rochelle",
+   "manuel": "paramétrer groupes, intitulés et valeurs ; la liste exacte des communes figure dans l'intitulé de la barre"
+  },
+  {
+   "visuel": "Carte de situation : Niort et Chauray (79081), Aiffres (79003) et Bessines (79034)",
+   "etat": "réalisable, seulement à côté du graphique précédent",
+   "faits": "aucun (contours IGN)",
+   "commande": "generer_visuels.py … --communes 79081,79003,79034",
+   "manuel": "le sous-titre parle de « la seconde barre » : à n'utiliser qu'avec ce graphique, même liste exacte"
+  },
+  {
+   "visuel": "Tableau du scénario de surcoût de carburant",
+   "etat": "disponible (données ci-dessus)",
+   "faits": "scenario.carburant.*",
+   "commande": "aucune (tableau en Markdown dans l'article)",
+   "manuel": "aucun"
+  }
+ ],
+ "verifications_humaines": [
+  "`mobpro.voiture_selon_destination` : Le choix des voisines change le chiffre « communes voisines » : le relire. Concerne : mobpro.voiture_selon_destination.*, ecart.voiture_destination.*. Non bloquante : la liste est nommée et exacte ; relire l'intérêt du choix.",
+  "`iris.ecart_voiture` : Relire les libellés d'IRIS avant de les citer comme noms de quartiers. Concerne : noms de secteurs (section 3), iris.voiture.min/max. Non bloquante : relire avant d'écrire un libellé comme nom de quartier.",
+  "`acces.adresses` : Vérifier que le jour de référence est un jour ordinaire hors vacances scolaires, relire les lignes retenues (seuil de 10 courses/jour) et celles signalées à relire. Concerne : colonnes et faits bus (acces.*.bus_*, acces.*.aucun_bus_*). Bloquante : ces faits sont en attente de validation et ne s'écrivent pas ; les équipements ne sont pas concernés.",
+  "`carburant.evolution` : réextraire les prix la veille de la publication et contrôler la hausse sur les mêmes stations. Concerne : carburant.*, scenario.carburant.*. Non bloquante pour la rédaction, obligatoire avant publication."
+ ],
+ "complement_documentaire": {
+  "commune": "79191",
+  "consulte_le": "2026-10-14",
+  "sources_officielles": [
+   "https://www.tanlib.com (réseau Tanlib, Niort Agglo, exploitant Transdev)"
+  ],
+  "faits": [
+   {
+    "id": "doc.tanlib.gratuite",
+    "information": "Le réseau de bus Tanlib est gratuit pour tout le monde depuis le 1er septembre 2017. La page liste comme gratuits : lignes urbaines 1 à 10, Navette Centre-Ville, Navette Colline Saint-André, Tanlib Express 1, 2 et 3, lignes périurbaines 20, 21, 22, 24, 25 et 26, lignes scolaires, services Flex (sur réservation), lignes régionales 144 à 149 « à l'intérieur des communes de la Communauté d'Agglomération du Niortais ».",
+    "source": "tanlib.com, « Réseau de bus 100 % gratuit » : https://www.tanlib.com/a-reseau-de-bus-100-gratuit-7/",
+    "consulte_le": "2026-10-14",
+    "validite": "en vigueur à la consultation (depuis le 01/09/2017)",
+    "perimetre": "réseau Tanlib, communes de Niort Agglo",
+    "usage": "oui",
+    "consigne": "La gratuité porte sur le prix, pas sur la desserte : elle ne dit ni qu'une ligne passe près d'une adresse, ni qu'un trajet est faisable ou pratique."
+   },
+   {
+    "id": "doc.tanlib.gratuite.regionales",
+    "information": "Sur les lignes régionales 144 à 149, la gratuité ne vaut qu'à l'intérieur de l'agglomération. La ligne 140E (La Rochelle – Niort) n'est pas dans la liste de la page.",
+    "source": "même page que doc.tanlib.gratuite",
+    "consulte_le": "2026-10-14",
+    "validite": "en vigueur à la consultation",
+    "perimetre": "lignes régionales",
+    "usage": "avec ses conditions"
+   },
+   {
+    "id": "doc.tanlib.urbaines.jours",
+    "information": "Les fiches horaires des lignes urbaines 1 à 9 portent « Ne circule pas les dimanches et jours fériés » ; celle de la ligne 10, « Ne circule pas les week-end et jours fériés ».",
+    "source": "fiches horaires PDF https://www.tanlib.com/dl/ligne-1.pdf à https://www.tanlib.com/dl/ligne-10.pdf (fichiers du 02/10/2026)",
+    "consulte_le": "2026-10-14",
+    "validite": "« Horaires valables à partir du 1er septembre 2026 » (fiches 1 à 10)",
+    "perimetre": "lignes urbaines 1 à 10 ; navettes, Tanlib Express et lignes périurbaines non vérifiées",
+    "usage": "oui",
+    "consigne": "Ne pas étendre aux navettes ni aux lignes périurbaines."
+   },
+   {
+    "id": "doc.tanlib.fiches.periodes",
+    "information": "La fiche de la ligne 1 donne des grilles distinctes du lundi au vendredi et du samedi ; certaines courses ne circulent qu'en période scolaire, d'autres qu'en vacances scolaires. Elle précise : « Horaires indicatifs. La circulation et ses aléas peuvent modifier les horaires. »",
+    "source": "https://www.tanlib.com/dl/ligne-1.pdf",
+    "consulte_le": "2026-10-14",
+    "validite": "à partir du 01/09/2026",
+    "perimetre": "ligne 1 seulement : exemple de présentation, pas une règle vérifiée sur tout le réseau",
+    "usage": "oui",
+    "consigne": "Pour le réseau, écrire au plus que les horaires du samedi ou des vacances « peuvent différer » ; aucun chiffre de fréquence."
+   },
+   {
+    "id": "doc.tanlib.verifier",
+    "information": "Pour vérifier un trajet : calcul d'itinéraire en bus sur tanlib.com, fiches horaires par ligne, horaires en temps réel par QR code aux arrêts et dans l'appli Tanlib.",
+    "source": "https://www.tanlib.com/itineraire-bus/ ; https://www.tanlib.com/horaires-par-ligne/ ; fiche ligne 1 (encadré « Horaires temps réel »)",
+    "consulte_le": "2026-10-14",
+    "validite": "non précisée",
+    "perimetre": "réseau Tanlib",
+    "usage": "oui"
+   },
+   {
+    "id": "doc.tanlib.navette_gare_dimanche",
+    "information": "Navette du dimanche soir : départs de la gare de Niort le dimanche de 18 h à 21 h, vers les arrêts de la ville de Niort uniquement, horaires calés sur l'arrivée des trains ; gratuite et sans réservation.",
+    "source": "« Flex Gares et Navette Gare Niort du dimanche soir » : https://www.tanlib.com/a-services-gares-1012/",
+    "consulte_le": "2026-10-14",
+    "validite": "en vigueur à la consultation",
+    "perimetre": "gare de Niort vers les arrêts de Niort",
+    "usage": "avec ses conditions"
+   },
+   {
+    "id": "doc.tanlib.flex_actifs",
+    "information": "Service Flex Actifs : sur réservation, après une convention entre la personne, son employeur et Tanlib ; du lundi au vendredi de 4 h 45 à 23 h 30 (sauf jours fériés), vers les zones d'activités aux abords des arrêts Brèche et Hôpital ; l'arrêt Hôpital est aussi desservi le samedi et le dimanche pour le personnel hospitalier.",
+    "source": "https://www.tanlib.com/a-service-flex-actifs-1014/",
+    "consulte_le": "2026-10-14",
+    "validite": "en vigueur à la consultation",
+    "perimetre": "personnes dont l'employeur a signé la convention",
+    "usage": "avec ses conditions",
+    "consigne": "Ne rien dire des employeurs qui l'ont signée : la page ne le dit pas."
+   }
+  ],
+  "ecartes": [
+   {
+    "sujet": "fréquences, amplitudes, premiers et derniers départs",
+    "raison": "lisibles dans les fiches, mais en tirer une fréquence serait un calcul non contrôlé ; relève des faits bus calculés, en attente de validation"
+   },
+   {
+    "sujet": "jours de circulation des navettes Centre-Ville et Colline Saint-André, des Tanlib Express et des lignes périurbaines",
+    "raison": "non vérifiés (fiches non consultées)"
+   },
+   {
+    "sujet": "gratuité de la ligne 140E vers La Rochelle",
+    "raison": "évoquée dans une délibération de Niort Agglo d'avril 2025 ; arrêts concernés et état actuel non confirmés sur le site du réseau ; recherche disproportionnée"
+   },
+   {
+    "sujet": "vélo (libre-service, location de vélos à assistance électrique, itinéraire vélo)",
+    "raison": "existence seule, sans information qui réponde à la question du logement"
+   },
+   {
+    "sujet": "gare",
+    "raison": "rien d'utile au-delà de la navette du dimanche soir"
+   }
+  ],
+  "chemin": "redaction/79191/complement.json",
+  "sha256": "3d1456025173ad375b6a1e464e52cfe7a0d03852f1f6d90bc7cbf5fa0113b97c"
+ },
+ "comparaison": {
+  "commune": {
+   "insee": "79191",
+   "nom": "Niort",
+   "role": "principale",
+   "actifs": 25863,
+   "lignes": 8216,
+   "voiture": 0.7011
+  },
+  "definition": {
+   "indicateur": "part des actifs allant travailler principalement en voiture (TRANS = 5)",
+   "population": "actifs occupés de 15 ans ou plus résidant dans la commune, y compris ceux qui ne se déplacent pas (pondération IPONDI)",
+   "source": "INSEE, RP 2022, fichier détail Mobilités professionnelles (MOBPRO)",
+   "millesime": "2022 (collectes 2020 à 2024)"
+  },
+  "regle": {
+   "texte": "communes de même rôle que Niort (commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)), comptant de la moitié au double de ses actifs occupés résidents (de 12 932 à 51 726), avec au moins 150 lignes d'échantillon ; Niort exclue ; France métropolitaine",
+   "role": "commune principale de son unité urbaine (la plus grande par le nombre d'actifs occupés résidents)",
+   "taille": [
+    0.5,
+    2.0
+   ],
+   "bornes_actifs": [
+    12932,
+    51726
+   ],
+   "lignes_min": 150,
+   "groupe_min": 10,
+   "approximation_role": "commune la plus grande de son unité urbaine 2020 par les actifs occupés résidents, pas le statut INSEE de ville-centre",
+   "fixee_le": "2026-10-14"
+  },
+  "sources_fichiers": {
+   "mobpro": {
+    "chemin": "rp-mobpro-2022.parquet",
+    "sha256": "6b91385a79846e1a"
+   },
+   "index": {
+    "chemin": "comparateur-index.json.gz",
+    "sha256": "cc84bb87b9dc5ba3"
+   }
+  },
+  "genere_le": "2026-10-14T13:45:33Z",
+  "disponible": true,
+  "groupe": {
+   "n": 76,
+   "mediane_voiture": 0.6754,
+   "communes": [
+    {
+     "insee": "47001",
+     "nom": "Agen",
+     "actifs": 13478,
+     "voiture": 0.642
+    },
+    {
+     "insee": "2A004",
+     "nom": "Ajaccio",
+     "actifs": 31282,
+     "voiture": 0.7559
+    },
+    {
+     "insee": "81004",
+     "nom": "Albi",
+     "actifs": 17834,
+     "voiture": 0.7026
+    },
+    {
+     "insee": "80021",
+     "nom": "Amiens",
+     "actifs": 50204,
+     "voiture": 0.5688
+    },
+    {
+     "insee": "16015",
+     "nom": "Angoulême",
+     "actifs": 16572,
+     "voiture": 0.649
+    },
+    {
+     "insee": "74012",
+     "nom": "Annemasse",
+     "actifs": 16867,
+     "voiture": 0.4809
+    },
+    {
+     "insee": "13004",
+     "nom": "Arles",
+     "actifs": 19148,
+     "voiture": 0.7454
+    },
+    {
+     "insee": "62041",
+     "nom": "Arras",
+     "actifs": 16425,
+     "voiture": 0.6128
+    },
+    {
+     "insee": "89024",
+     "nom": "Auxerre",
+     "actifs": 13254,
+     "voiture": 0.6874
+    },
+    {
+     "insee": "84007",
+     "nom": "Avignon",
+     "actifs": 31281,
+     "voiture": 0.6473
+    },
+    {
+     "insee": "2B033",
+     "nom": "Bastia",
+     "actifs": 18177,
+     "voiture": 0.749
+    },
+    {
+     "insee": "64102",
+     "nom": "Bayonne",
+     "actifs": 24509,
+     "voiture": 0.6786
+    },
+    {
+     "insee": "60057",
+     "nom": "Beauvais",
+     "actifs": 20011,
+     "voiture": 0.6938
+    },
+    {
+     "insee": "90010",
+     "nom": "Belfort",
+     "actifs": 16728,
+     "voiture": 0.6285
+    },
+    {
+     "insee": "25056",
+     "nom": "Besançon",
+     "actifs": 47686,
+     "voiture": 0.558
+    },
+    {
+     "insee": "41018",
+     "nom": "Blois",
+     "actifs": 17025,
+     "voiture": 0.6567
+    },
+    {
+     "insee": "62160",
+     "nom": "Boulogne-sur-Mer",
+     "actifs": 14414,
+     "voiture": 0.6735
+    },
+    {
+     "insee": "01053",
+     "nom": "Bourg-en-Bresse",
+     "actifs": 15736,
+     "voiture": 0.6573
+    },
+    {
+     "insee": "18033",
+     "nom": "Bourges",
+     "actifs": 24724,
+     "voiture": 0.7284
+    },
+    {
+     "insee": "19031",
+     "nom": "Brive-la-Gaillarde",
+     "actifs": 18097,
+     "voiture": 0.7385
+    },
+    {
+     "insee": "34032",
+     "nom": "Béziers",
+     "actifs": 24205,
+     "voiture": 0.7667
+    },
+    {
+     "insee": "14118",
+     "nom": "Caen",
+     "actifs": 43167,
+     "voiture": 0.5765
+    },
+    {
+     "insee": "62193",
+     "nom": "Calais",
+     "actifs": 23291,
+     "voiture": 0.7608
+    },
+    {
+     "insee": "11069",
+     "nom": "Carcassonne",
+     "actifs": 16509,
+     "voiture": 0.7395
+    },
+    {
+     "insee": "81065",
+     "nom": "Castres",
+     "actifs": 15487,
+     "voiture": 0.7658
+    },
+    {
+     "insee": "71076",
+     "nom": "Chalon-sur-Saône",
+     "actifs": 17261,
+     "voiture": 0.6612
+    },
+    {
+     "insee": "73065",
+     "nom": "Chambéry",
+     "actifs": 25185,
+     "voiture": 0.5657
+    },
+    {
+     "insee": "08105",
+     "nom": "Charleville-Mézières",
+     "actifs": 15228,
+     "voiture": 0.6508
+    },
+    {
+     "insee": "28085",
+     "nom": "Chartres",
+     "actifs": 16156,
+     "voiture": 0.5875
+    },
+    {
+     "insee": "50129",
+     "nom": "Cherbourg-en-Cotentin",
+     "actifs": 33130,
+     "voiture": 0.7047
+    },
+    {
+     "insee": "49099",
+     "nom": "Cholet",
+     "actifs": 22354,
+     "voiture": 0.782
+    },
+    {
+     "insee": "51108",
+     "nom": "Châlons-en-Champagne",
+     "actifs": 16714,
+     "voiture": 0.6911
+    },
+    {
+     "insee": "36044",
+     "nom": "Châteauroux",
+     "actifs": 15621,
+     "voiture": 0.7246
+    },
+    {
+     "insee": "68066",
+     "nom": "Colmar",
+     "actifs": 27853,
+     "voiture": 0.6192
+    },
+    {
+     "insee": "60159",
+     "nom": "Compiègne",
+     "actifs": 15264,
+     "voiture": 0.6341
+    },
+    {
+     "insee": "59178",
+     "nom": "Douai",
+     "actifs": 13788,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "83050",
+     "nom": "Draguignan",
+     "actifs": 15388,
+     "voiture": 0.7907
+    },
+    {
+     "insee": "59183",
+     "nom": "Dunkerque",
+     "actifs": 31408,
+     "voiture": 0.6949
+    },
+    {
+     "insee": "83061",
+     "nom": "Fréjus",
+     "actifs": 22251,
+     "voiture": 0.8084
+    },
+    {
+     "insee": "05061",
+     "nom": "Gap",
+     "actifs": 16136,
+     "voiture": 0.6736
+    },
+    {
+     "insee": "67180",
+     "nom": "Haguenau",
+     "actifs": 16998,
+     "voiture": 0.7048
+    },
+    {
+     "insee": "85191",
+     "nom": "La Roche-sur-Yon",
+     "actifs": 22342,
+     "voiture": 0.7443
+    },
+    {
+     "insee": "17300",
+     "nom": "La Rochelle",
+     "actifs": 30550,
+     "voiture": 0.5328
+    },
+    {
+     "insee": "53130",
+     "nom": "Laval",
+     "actifs": 19809,
+     "voiture": 0.6742
+    },
+    {
+     "insee": "85194",
+     "nom": "Les Sables-d'Olonne",
+     "actifs": 16149,
+     "voiture": 0.7804
+    },
+    {
+     "insee": "87085",
+     "nom": "Limoges",
+     "actifs": 48515,
+     "voiture": 0.6996
+    },
+    {
+     "insee": "56121",
+     "nom": "Lorient",
+     "actifs": 22717,
+     "voiture": 0.6667
+    },
+    {
+     "insee": "77284",
+     "nom": "Meaux",
+     "actifs": 23761,
+     "voiture": 0.4646
+    },
+    {
+     "insee": "57463",
+     "nom": "Metz",
+     "actifs": 50936,
+     "voiture": 0.5651
+    },
+    {
+     "insee": "82121",
+     "nom": "Montauban",
+     "actifs": 24798,
+     "voiture": 0.7846
+    },
+    {
+     "insee": "26198",
+     "nom": "Montélimar",
+     "actifs": 15059,
+     "voiture": 0.7868
+    },
+    {
+     "insee": "68224",
+     "nom": "Mulhouse",
+     "actifs": 35491,
+     "voiture": 0.6112
+    },
+    {
+     "insee": "71270",
+     "nom": "Mâcon",
+     "actifs": 13117,
+     "voiture": 0.7119
+    },
+    {
+     "insee": "54395",
+     "nom": "Nancy",
+     "actifs": 43903,
+     "voiture": 0.4838
+    },
+    {
+     "insee": "11262",
+     "nom": "Narbonne",
+     "actifs": 19278,
+     "voiture": 0.7433
+    },
+    {
+     "insee": "45234",
+     "nom": "Orléans",
+     "actifs": 49354,
+     "voiture": 0.5278
+    },
+    {
+     "insee": "64445",
+     "nom": "Pau",
+     "actifs": 30140,
+     "voiture": 0.6678
+    },
+    {
+     "insee": "66136",
+     "nom": "Perpignan",
+     "actifs": 36885,
+     "voiture": 0.7311
+    },
+    {
+     "insee": "86194",
+     "nom": "Poitiers",
+     "actifs": 33952,
+     "voiture": 0.5927
+    },
+    {
+     "insee": "29232",
+     "nom": "Quimper",
+     "actifs": 27007,
+     "voiture": 0.7802
+    },
+    {
+     "insee": "76540",
+     "nom": "Rouen",
+     "actifs": 49112,
+     "voiture": 0.437
+    },
+    {
+     "insee": "22278",
+     "nom": "Saint-Brieuc",
+     "actifs": 17182,
+     "voiture": 0.6897
+    },
+    {
+     "insee": "35288",
+     "nom": "Saint-Malo",
+     "actifs": 17251,
+     "voiture": 0.6755
+    },
+    {
+     "insee": "44184",
+     "nom": "Saint-Nazaire",
+     "actifs": 28139,
+     "voiture": 0.7111
+    },
+    {
+     "insee": "02691",
+     "nom": "Saint-Quentin",
+     "actifs": 17220,
+     "voiture": 0.7042
+    },
+    {
+     "insee": "13103",
+     "nom": "Salon-de-Provence",
+     "actifs": 18741,
+     "voiture": 0.7669
+    },
+    {
+     "insee": "34301",
+     "nom": "Sète",
+     "actifs": 13916,
+     "voiture": 0.5967
+    },
+    {
+     "insee": "65440",
+     "nom": "Tarbes",
+     "actifs": 15277,
+     "voiture": 0.74
+    },
+    {
+     "insee": "57672",
+     "nom": "Thionville",
+     "actifs": 19332,
+     "voiture": 0.6725
+    },
+    {
+     "insee": "74281",
+     "nom": "Thonon-les-Bains",
+     "actifs": 16506,
+     "voiture": 0.6496
+    },
+    {
+     "insee": "10387",
+     "nom": "Troyes",
+     "actifs": 22143,
+     "voiture": 0.6432
+    },
+    {
+     "insee": "26362",
+     "nom": "Valence",
+     "actifs": 25309,
+     "voiture": 0.6173
+    },
+    {
+     "insee": "59606",
+     "nom": "Valenciennes",
+     "actifs": 16541,
+     "voiture": 0.6638
+    },
+    {
+     "insee": "56260",
+     "nom": "Vannes",
+     "actifs": 21270,
+     "voiture": 0.6754
+    },
+    {
+     "insee": "38544",
+     "nom": "Vienne",
+     "actifs": 13121,
+     "voiture": 0.6894
+    },
+    {
+     "insee": "27229",
+     "nom": "Évreux",
+     "actifs": 17632,
+     "voiture": 0.6818
+    }
+   ]
+  },
+  "ecart_points": 2,
+  "chemin": "fiches/79191/comparaison_voiture.json",
+  "faits": [
+   {
+    "id": "comparaison.voiture.commune",
+    "fait": "Part des actifs résidant à Niort qui vont travailler principalement en voiture (valeur comparée)",
+    "affichage": "70 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.mediane_groupe",
+    "fait": "Médiane des parts de la voiture des 76 communes du groupe (chaque commune compte une fois)",
+    "affichage": "68 %",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.ecart",
+    "fait": "Écart : Niort moins la médiane du groupe (valeurs arrondies)",
+    "affichage": "+2 points",
+    "usage": "oui"
+   },
+   {
+    "id": "comparaison.voiture.groupe_n",
+    "fait": "Nombre de communes du groupe",
+    "affichage": "76",
+    "usage": "oui"
+   }
+  ]
+ }
+}

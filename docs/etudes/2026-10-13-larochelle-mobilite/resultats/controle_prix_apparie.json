@@ -1,0 +1,24 @@
+{
+ "Gazole": {
+  "stations_appariees": 20,
+  "prix_anciens_ecartes": {
+   "oct2025": 0,
+   "oct2026": 1,
+   "age_max_j_oct2026": 284
+  },
+  "ecart_median": 0.747,
+  "ecart_min": 0.507,
+  "ecart_max": 0.81
+ },
+ "E10": {
+  "stations_appariees": 16,
+  "prix_anciens_ecartes": {
+   "oct2025": 0,
+   "oct2026": 2,
+   "age_max_j_oct2026": 284
+  },
+  "ecart_median": 0.52,
+  "ecart_min": 0.269,
+  "ecart_max": 0.553
+ }
+}

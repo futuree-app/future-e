@@ -1,0 +1,22 @@
+indicateur,p,bas,haut,lignes,n_eff
+La Rochelle : actifs allant travailler en voiture,0.533,0.519,0.547,9427,4957
+La Rochelle : à vélo,0.177,0.166,0.187,9427,4957
+La Rochelle : actifs d'un ménage sans voiture,0.134,0.125,0.144,9427,4957
+La Rochelle : ménage motorisé mais pas en voiture au travail,0.402,0.387,0.417,7957,4196
+Rochelais travaillant à La Rochelle : voiture,0.441,0.424,0.457,6500,3442
+Rochelais travaillant à Périgny/Aytré/Lagord/Puilboreau : voiture,0.723,0.687,0.757,1232,624
+"La Rochelle, propriétaires : voiture",0.543,0.52,0.566,3061,1769
+"La Rochelle, propriétaires : vélo",0.223,0.205,0.243,3061,1769
+"La Rochelle, propriétaires : ménage sans voiture",0.042,0.033,0.052,3061,1769
+"La Rochelle, locataires privé vide : voiture",0.505,0.48,0.531,3099,1483
+"La Rochelle, locataires privé vide : vélo",0.182,0.163,0.202,3099,1483
+"La Rochelle, locataires privé vide : ménage sans voiture",0.169,0.15,0.188,3099,1483
+"La Rochelle, locataires HLM : voiture",0.608,0.578,0.636,2043,1104
+Lagord → La Rochelle : vélo,0.2,0.146,0.268,245,163
+Lagord → La Rochelle : voiture,0.641,0.565,0.71,245,163
+Puilboreau → La Rochelle : vélo,0.075,0.042,0.131,213,142
+Puilboreau → La Rochelle : voiture,0.813,0.741,0.869,213,142
+Périgny → La Rochelle : vélo,0.202,0.151,0.264,291,194
+Périgny → La Rochelle : voiture,0.706,0.638,0.765,291,194
+Aytré → La Rochelle : vélo,0.19,0.143,0.247,327,218
+Aytré → La Rochelle : voiture,0.67,0.605,0.729,327,218
