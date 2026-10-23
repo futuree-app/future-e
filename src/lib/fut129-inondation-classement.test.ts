@@ -73,6 +73,16 @@ const PROFILS: Record<string, M[]> = {
 const sansInondation = (prefs: M[]) => prefs.filter((p) => p.key !== "faible_risque_inondation");
 const commune = (insee: string) => COMMUNES.find((c) => c.insee === insee)!;
 
+for (const nom of ["inondation-soins", "inondation-seule"]) {
+  test(`${nom} : les communes, scores, raisons et faits restent ceux de l'entrée figée`, async () => {
+    const s = JSON.parse(readFileSync(`docs/audits/2026-10-23-revue-finale/${nom}-session.json`, "utf8"));
+    const r = await V.matchProjects(s.parsed);
+    const extraire = (x: M) => ({ insee: x.insee, compatibility: x.compatibility, reasons: x.reasons, inondation: x.inondation });
+    assert.deepEqual(r.results.slice(0, 3).map(extraire), s.outcome.results.map(extraire));
+    assert.deepEqual(r.inondation, s.outcome.inondation);
+  });
+}
+
 test("l'index porte l'historique ONRN pour presque toutes les communes, labels verbatim", () => {
   const avec = COMMUNES.filter((c) => c.historiqueInondation);
   assert.ok(avec.length >= 34700, `${avec.length}`);

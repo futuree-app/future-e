@@ -15,6 +15,7 @@ import { ChipTooltip } from "@/components/ChipTooltip";
 import { departmentName } from "@/lib/regions-fr";
 import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
+import { repliInondation } from "@/lib/comparateur/synthese-repli";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -214,7 +215,9 @@ function distinctId(): string {
 
 // Fallback déterministe si la synthèse IA est indisponible (502). On reste
 // qualitatif, on s'appuie sur ce que le moteur a déjà produit.
-function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[]): string {
+function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean): string {
+  const inondation = repliInondation(parsed.preferences, results, exploration);
+  if (inondation) return inondation;
   const reasons = Array.from(
     new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
   ).slice(0, 3);
@@ -555,7 +558,7 @@ export function OuVivreClient() {
         if (seq === runSeq.current) capture("life_synthesis_shown");
       } catch {
         if (seq !== runSeq.current) return;
-        setSynthesis(fallbackSynthesis(p, top));
+        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false));
         capture("life_synthesis_fallback");
       } finally {
         if (seq === runSeq.current) setSynthesizing(false);
