@@ -9,14 +9,14 @@
 //   1. Un espace vert ne COMPENSE PAS l'exposition. L'îlot de chaleur du logement est le même avec
 //      ou sans bois à 300 mètres. Ce qui change est l'accès à un extérieur moins minéral, jamais la
 //      chaleur subie chez soi. Toute formule qui suggérerait une compensation ferait de deux faits
-//      mesurés une conclusion qu'aucune donnée ne porte.
+//      sourcés une conclusion qu'aucune donnée ne porte.
 //   2. Aucun score, aucun indice, aucun agrégat. Deux faits reliés par une phrase, et l'ADR-0001
 //      interdit la note qui semblerait s'en déduire.
 //   3. Aucune promesse thermique. La nature du polygone dit ce qu'OpenStreetMap a cartographié, pas
 //      l'ombre portée à seize heures ni le confort d'un après-midi de canicule.
 //
-// LES DEUX FAITS N'ONT PAS LE MÊME GRAIN, et la phrase doit le porter. L'îlot de chaleur est mesuré
-// au grand-IRIS, donc au secteur ; l'espace vert est une distance depuis l'adresse, donc un point.
+// LES DEUX FAITS N'ONT PAS LE MÊME GRAIN, et la phrase doit le porter. L'îlot de chaleur est estimé par
+// modélisation au grand-IRIS, donc au secteur ; l'espace vert est une distance depuis l'adresse, donc un point.
 // Les enchaîner sans nommer les deux échelles les fondrait en une seule, alors que la doctrine
 // impose que l'échelle réelle s'affiche toujours. D'où « votre secteur » d'un côté et « à N mètres »
 // de l'autre, dans toutes les branches.
@@ -50,7 +50,7 @@ export function lireChaleurEtVegetal(
   icu: IcuSnapshot,
   osm: Pick<OsmProximity, "nearestMappedGreenSpace"> | null,
 ): ChaleurVegetal | null {
-  // Sans îlot de chaleur mesuré, il n'y a rien à relier : l'espace vert se lit très bien seul, dans
+  // Sans îlot de chaleur estimé, il n'y a rien à relier : l'espace vert se lit très bien seul, dans
   // son bloc. Cette lecture n'existe que parce que la chaleur du secteur lui donne un enjeu.
   if (!icu) return null;
 
@@ -98,11 +98,11 @@ export function lireChaleurEtVegetal(
 
   // DEUX FAITS ÉCRITS CÔTE À CÔTE SE LISENT COMME UNE CAUSE (FUT-73). « Îlot marqué » puis « un parc
   // à 120 mètres » laisse entendre que le parc l'allège. La limite pose d'abord l'échelle réelle de la
-  // mesure CSTB, puis l'absence de preuve d'un effet au logement. Elle ne nie pas tout effet physique
+  // modélisation CSTB, puis l'absence de preuve d'un effet au logement. Elle ne nie pas tout effet physique
   // de la végétation : elle dit que la donnée ne l'établit pas.
   const designation = nature?.vegetal === false ? "cet espace" : "cet espace vert";
   const independance =
-    "L'îlot de chaleur est mesuré à l'échelle du secteur. " +
+    "L'îlot de chaleur est estimé par modélisation à l'échelle du secteur. " +
     (dedans
       ? `La présence de ${designation} à l'adresse ne suffit pas à établir un effet sur la température du logement.`
       : `La proximité de ${designation} ne suffit pas à établir un effet sur la température du logement.`);

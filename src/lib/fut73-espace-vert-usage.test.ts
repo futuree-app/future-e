@@ -2,7 +2,7 @@
 //
 // La sélection d'espaces verts du module Autour répond à « où puis-je aller » : `parseOverpass`
 // écarte les espaces `access=private|no`. Aucune surface du produit ne lit aujourd'hui la végétation
-// OSM comme une PRÉSENCE physique (la chaleur vient du CSTB, mesurée, et un espace vert ne la
+// OSM comme une PRÉSENCE physique (la chaleur vient du CSTB, estimée par modélisation, et un espace vert ne la
 // compense pas). Le défaut était donc dans le texte : la sélection filtrée se racontait comme un
 // recensement. Ces tests vont de l'élément Overpass jusqu'à la phrase rendue.
 import test from "node:test";
@@ -99,9 +99,11 @@ test("la note ne promet rien et ne porte ni tiret cadratin ni antithèse", () =>
 test("ÉCHELLE ET PREUVE : la limite pose l'échelle du secteur, puis l'absence de preuve d'un effet au logement", () => {
   const prox = computeOsmProximity(ADRESSE, parseOverpass([parcSansTag]), 1500);
   const proche = lireChaleurEtVegetal(ICU, prox)!;
-  assert.match(proche.limite, /^L'îlot de chaleur est mesuré à l'échelle du secteur\. La proximité de cet espace vert ne suffit pas à établir un effet sur la température du logement\./);
+  assert.match(proche.limite, /^L'îlot de chaleur est estimé par modélisation à l'échelle du secteur\. La proximité de cet espace vert ne suffit pas à établir un effet sur la température du logement\./);
   const dedans = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { ...prox.nearestMappedGreenSpace!, distanceMeters: 0 } })!;
-  assert.match(dedans.limite, /^L'îlot de chaleur est mesuré à l'échelle du secteur\. La présence de cet espace vert à l'adresse ne suffit pas/);
+  assert.match(dedans.limite, /^L'îlot de chaleur est estimé par modélisation à l'échelle du secteur\. La présence de cet espace vert à l'adresse ne suffit pas/);
+  // Le signal CSTB est une estimation modélisée (cf. IcuExposure.tsx) : la limite ne dit jamais « mesuré ».
+  assert.doesNotMatch(proche.limite, /chaleur est mesuré/);
   // Un ancien « espace de loisirs » n'est pas requalifié en espace vert.
   const loisirs = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { distanceMeters: 150, kind: "recreation_ground" } })!;
   assert.match(loisirs.limite, /La proximité de cet espace ne suffit pas/);
