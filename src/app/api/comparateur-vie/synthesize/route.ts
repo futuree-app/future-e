@@ -133,8 +133,8 @@ Hiérarchie à respecter absolument :
 - il reste une DIFFÉRENCE RELATIVE entre les propositions affichées.
 
 Quand au moins DEUX communes affichées portent un trait distinctif, consacrez UNE phrase à les
-différencier. N'utilisez QUE les libellés fournis, sans extrapoler ni inventer. Une commune SANS
-trait : dites simplement qu'elle ne se détache pas nettement, ne lui fabriquez aucun axe.
+différencier. N'utilisez QUE les libellés fournis, sans extrapoler ni inventer. Pour une commune SANS
+trait fourni, ne concluez rien sur ses différences réelles ; aucune comparaison n'est établie par ce champ absent.
 L'absence de trait distinctif ne démontre ni proximité des profils, ni position d'équilibre
 ou de compromis. Si moins de deux traits sont fournis, n'imposez pas de comparaison.
 Restez sobre : une phrase, jamais l'inventaire des cartes.

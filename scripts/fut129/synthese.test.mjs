@@ -63,6 +63,7 @@ for (const nom of ['inondation-soins', 'inondation-seule']) {
   assert.match(regles,/France ne devient pas relatif au département/);
   assert.match(regles,/Ne reconstituez pas après coup une explication de la sélection/);
   assert.match(regles,/Un compromis seulement s'il est explicitement fourni/);
+  assert.match(regles,/trait fourni, ne concluez rien sur ses différences réelles/);
   assert.match(regles,/Une même classe historique signifie seulement une même plage de sinistres passés, jamais une exposition équivalente/);
   assert.doesNotMatch(regles,/ET utilisé au classement|les critères demandés expliquent POURQUOI|dites honnêtement que les profils sont proches/);
   assert.equal(JSON.stringify(body),avant); // pas de réécriture des entrées
