@@ -21,7 +21,7 @@
 // impose que l'échelle réelle s'affiche toujours. D'où « votre secteur » d'un côté et « à N mètres »
 // de l'autre, dans toutes les branches.
 
-import { adresseDansLEspace, type GreenKind, type IcuSnapshot, type OsmProximity } from "./logement-autour-types.ts";
+import { HORS_ESPACES_FERMES, adresseDansLEspace, type GreenKind, type IcuSnapshot, type OsmProximity } from "./logement-autour-types.ts";
 
 export type ChaleurVegetal = {
   /** La phrase composée, ou null quand il n'y a rien à relier. */
@@ -58,9 +58,14 @@ export function lireChaleurEtVegetal(
   const intensite = icu.level === "marque" ? "marqué" : "présent";
   const secteur = `Votre secteur présente un îlot de chaleur urbain ${intensite}`;
 
+  // LA SÉLECTION ÉCARTE LES ESPACES DÉCLARÉS PRIVÉS OU FERMÉS (FUT-73), et la phrase doit le dire :
+  // sans cette précision, « le premier espace végétalisé » ou « aucun espace » se lisaient comme un
+  // recensement de la végétation, faux dès qu'un bois privé borde l'adresse.
+  const hors = HORS_ESPACES_FERMES.charAt(0).toUpperCase() + HORS_ESPACES_FERMES.slice(1);
+
   if (!vert) {
     return {
-      texte: `${secteur}. Aucun espace correspondant aux catégories recherchées n'est cartographié dans le périmètre analysé autour de l'adresse.`,
+      texte: `${secteur}. ${hors}, aucun espace correspondant aux catégories recherchées n'est cartographié dans le périmètre analysé autour de l'adresse.`,
       limite:
         "Ce résultat reflète la couverture d'OpenStreetMap et les catégories interrogées : il ne permet pas de conclure à l'absence de tout espace végétalisé.",
     };
@@ -78,8 +83,8 @@ export function lireChaleurEtVegetal(
   const texte = dedans
     ? `${secteur}. L'adresse est dans ${nom} ${cartographie}.`
     : nature?.vegetal === false
-    ? `${secteur}. L'espace cartographié le plus proche est ${nom}, à ${metres} ${unite} de l'adresse.`
-    : `${secteur}. Le premier espace végétalisé cartographié est ${nom}, à ${metres} ${unite} de l'adresse.`;
+    ? `${secteur}. ${hors}, l'espace cartographié le plus proche est ${nom}, à ${metres} ${unite} de l'adresse.`
+    : `${secteur}. ${hors}, le premier espace végétalisé cartographié est ${nom}, à ${metres} ${unite} de l'adresse.`;
 
   // L'ACCESSIBILITÉ EST INCONNUE, ET IL FAUT LE DIRE. La distance est mesurée du point au BORD du
   // polygone, à vol d'oiseau (`distancePointToPolygonM`) : un bois privé, clôturé ou séparé par une

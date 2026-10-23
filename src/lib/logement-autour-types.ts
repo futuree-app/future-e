@@ -240,6 +240,27 @@ export function libelleLigneEspaceVert(
   return rang === "grand" ? "Un grand espace vert à proximité" : "Le plus proche";
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// CE QUE LA SÉLECTION ÉCARTE, DIT LÀ OÙ ELLE S'AFFICHE (FUT-73, 23/10/2026).
+//
+// `parseOverpass` écarte les espaces `access=private|no` (décision du porteur, 03/08/2026) : la
+// sélection répond à « où puis-je aller », pas à « quelle végétation entoure l'adresse ». Le texte
+// la présentait pourtant comme un recensement : « le premier espace végétalisé cartographié » ou
+// « aucun espace vert » restaient écrits quand un bois privé bordait l'adresse. La règle est donc
+// nommée à chaque endroit où la sélection parle, dans une seule formule.
+//
+// LES ESPACES RETENUS NE SONT PAS DITS ACCESSIBLES. La plupart ne portent aucun tag `access` : leur
+// accès est non renseigné, et le texte le dit tel quel.
+export const HORS_ESPACES_FERMES = "hors espaces déclarés privés ou fermés au public";
+
+/** La ligne rendue quand aucun espace vert n'est retenu. Elle ne conclut pas à l'absence de végétation. */
+export const TEXTE_AUCUN_ESPACE_VERT =
+  `Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée, ${HORS_ESPACES_FERMES}.`;
+
+/** La note sous les lignes d'espace vert : la règle de sélection, puis ce qui n'est pas vérifié. */
+export const NOTE_ESPACES_VERTS =
+  "Les espaces déclarés privés ou fermés au public dans OpenStreetMap ne sont pas proposés. L’accès aux espaces affichés n’est pas vérifié.";
+
 export type GreenKind = "park" | "wood" | "forest" | "grass" | "recreation_ground";
 
 export type OsmProximity = {

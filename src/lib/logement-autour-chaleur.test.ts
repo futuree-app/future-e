@@ -65,7 +65,7 @@ test("un parc n'est pas présumé arboré", () => {
 
 test("aucun espace vert : l'absence porte sur le périmètre cartographié, pas sur le réel", () => {
   const r = lireChaleurEtVegetal({ iuhi: 4.5, level: "marque" }, { nearestMappedGreenSpace: null })!;
-  assert.match(r.texte, /Aucun espace correspondant aux catégories recherchées/);
+  assert.match(r.texte, /aucun espace correspondant aux catégories recherchées/);
   assert.match(r.limite, /couverture d'OpenStreetMap et les catégories interrogées/);
 });
 
