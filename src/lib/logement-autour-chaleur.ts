@@ -84,7 +84,7 @@ export function lireChaleurEtVegetal(
     ? `${secteur}. L'adresse est dans ${nom} ${cartographie}.`
     : nature?.vegetal === false
     ? `${secteur}. ${hors}, l'espace cartographié le plus proche est ${nom}, à ${metres} ${unite} de l'adresse.`
-    : `${secteur}. ${hors}, le premier espace végétalisé cartographié est ${nom}, à ${metres} ${unite} de l'adresse.`;
+    : `${secteur}. ${hors}, l'espace vert cartographié le plus proche est ${nom}, à ${metres} ${unite} de l'adresse.`;
 
   // L'ACCESSIBILITÉ EST INCONNUE, ET IL FAUT LE DIRE. La distance est mesurée du point au BORD du
   // polygone, à vol d'oiseau (`distancePointToPolygonM`) : un bois privé, clôturé ou séparé par une
@@ -96,11 +96,15 @@ export function lireChaleurEtVegetal(
       ? "Sa part de végétation, son accessibilité et son confort lors des fortes chaleurs ne sont pas documentés."
       : "Son accessibilité, son ombrage et son confort lors des fortes chaleurs ne sont pas documentés.";
 
+  // DEUX FAITS ÉCRITS CÔTE À CÔTE SE LISENT COMME UNE CAUSE (FUT-73). « Îlot marqué » puis « un parc
+  // à 120 mètres » laisse entendre que le parc l'allège : la limite le dit en premier.
+  const independance = "La présence de cet espace ne modifie pas l'îlot de chaleur mesuré pour le secteur.";
+
   return {
     texte,
     // Sans distance affichée, la phrase sur la manière de la mesurer n'a plus d'objet.
     limite: dedans
-      ? inconnues
-      : `${inconnues} La distance est mesurée à vol d'oiseau jusqu'à la limite de l'espace, pas jusqu'à une entrée.`,
+      ? `${independance} ${inconnues}`
+      : `${independance} ${inconnues} La distance est mesurée à vol d'oiseau jusqu'à la limite de l'espace, pas jusqu'à une entrée.`,
   };
 }

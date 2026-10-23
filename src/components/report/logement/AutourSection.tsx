@@ -211,7 +211,7 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
               if (lecture) {
                 return (
                   <>
-                    <div style={FACE3_SUBHEAD}>Chaleur du secteur et végétation à proximité</div>
+                    <div style={FACE3_SUBHEAD}>Chaleur du secteur et espace vert le plus proche</div>
                     <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{lecture.texte}</p>
                     <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{lecture.limite}</p>
                   </>

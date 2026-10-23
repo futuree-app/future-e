@@ -255,7 +255,7 @@ export const HORS_ESPACES_FERMES = "hors espaces déclarés privés ou fermés a
 
 /** La ligne rendue quand aucun espace vert n'est retenu. Elle ne conclut pas à l'absence de végétation. */
 export const TEXTE_AUCUN_ESPACE_VERT =
-  `Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée, ${HORS_ESPACES_FERMES}.`;
+  `H${HORS_ESPACES_FERMES.slice(1)}, aucun espace vert des catégories recherchées n’est cartographié autour de l’adresse.`;
 
 /** La note sous les lignes d'espace vert : la règle de sélection, puis ce qui n'est pas vérifié. */
 export const NOTE_ESPACES_VERTS =

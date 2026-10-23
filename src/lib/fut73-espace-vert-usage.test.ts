@@ -48,7 +48,7 @@ test("LA PHRASE NE RACONTE PLUS UN RECENSEMENT : la règle de sélection est dit
   // 400 m » serait faux sur la végétation présente. La phrase dit ce qu'elle a écarté.
   const prox = computeOsmProximity(ADRESSE, parseOverpass([boisPrive, parcSansTag]), 1500);
   const r = lireChaleurEtVegetal(ICU, prox)!;
-  assert.match(r.texte, /Hors espaces déclarés privés ou fermés au public, le premier espace végétalisé cartographié est un parc/);
+  assert.match(r.texte, /Hors espaces déclarés privés ou fermés au public, l'espace vert cartographié le plus proche est un parc/);
   assert.doesNotMatch(r.texte, /accès|accessible|ouvert à tous/i);
 });
 
@@ -58,7 +58,7 @@ test("tout est privé : « aucun espace » est borné à la sélection, jamais �
   const r = lireChaleurEtVegetal(ICU, prox)!;
   assert.match(r.texte, /Hors espaces déclarés privés ou fermés au public, aucun espace correspondant/);
   assert.match(r.limite, /ne permet pas de conclure à l'absence de tout espace végétalisé/);
-  assert.match(TEXTE_AUCUN_ESPACE_VERT, /hors espaces déclarés privés ou fermés au public/);
+  assert.match(TEXTE_AUCUN_ESPACE_VERT, /^Hors espaces déclarés privés ou fermés au public, aucun espace vert/);
 });
 
 test("SANS TAG D'ACCÈS : l'espace est proposé, son accès n'est jamais dit certain", () => {
@@ -94,4 +94,18 @@ test("la note ne promet rien et ne porte ni tiret cadratin ni antithèse", () =>
     assert.doesNotMatch(t, /—/);
     assert.doesNotMatch(t, /c'est .*, pas /i);
   }
+});
+
+test("UN PARC PROCHE NE RÉDUIT PAS L'ÎLOT MESURÉ : la limite le dit dans toutes les branches avec un espace", () => {
+  for (const d of [0, 120]) {
+    const prox = computeOsmProximity(ADRESSE, parseOverpass([parcSansTag]), 1500);
+    const r = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { ...prox.nearestMappedGreenSpace!, distanceMeters: d } })!;
+    assert.match(r.limite, /^La présence de cet espace ne modifie pas l'îlot de chaleur mesuré pour le secteur\./);
+  }
+});
+
+test("la lecture ne se présente plus comme un relevé de la végétation", () => {
+  const prox = computeOsmProximity(ADRESSE, parseOverpass([parcSansTag]), 1500);
+  const r = lireChaleurEtVegetal(ICU, prox)!;
+  assert.doesNotMatch(r.texte, /premier espace végétalisé|végétation (autour|à proximité)/);
 });
