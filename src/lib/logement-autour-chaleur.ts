@@ -97,8 +97,15 @@ export function lireChaleurEtVegetal(
       : "Son accessibilité, son ombrage et son confort lors des fortes chaleurs ne sont pas documentés.";
 
   // DEUX FAITS ÉCRITS CÔTE À CÔTE SE LISENT COMME UNE CAUSE (FUT-73). « Îlot marqué » puis « un parc
-  // à 120 mètres » laisse entendre que le parc l'allège : la limite le dit en premier.
-  const independance = "La présence de cet espace ne modifie pas l'îlot de chaleur mesuré pour le secteur.";
+  // à 120 mètres » laisse entendre que le parc l'allège. La limite pose d'abord l'échelle réelle de la
+  // mesure CSTB, puis l'absence de preuve d'un effet au logement. Elle ne nie pas tout effet physique
+  // de la végétation : elle dit que la donnée ne l'établit pas.
+  const designation = nature?.vegetal === false ? "cet espace" : "cet espace vert";
+  const independance =
+    "L'îlot de chaleur est mesuré à l'échelle du secteur. " +
+    (dedans
+      ? `La présence de ${designation} à l'adresse ne suffit pas à établir un effet sur la température du logement.`
+      : `La proximité de ${designation} ne suffit pas à établir un effet sur la température du logement.`);
 
   return {
     texte,

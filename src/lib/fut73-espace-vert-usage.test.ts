@@ -96,11 +96,21 @@ test("la note ne promet rien et ne porte ni tiret cadratin ni antithèse", () =>
   }
 });
 
-test("UN PARC PROCHE NE RÉDUIT PAS L'ÎLOT MESURÉ : la limite le dit dans toutes les branches avec un espace", () => {
+test("ÉCHELLE ET PREUVE : la limite pose l'échelle du secteur, puis l'absence de preuve d'un effet au logement", () => {
+  const prox = computeOsmProximity(ADRESSE, parseOverpass([parcSansTag]), 1500);
+  const proche = lireChaleurEtVegetal(ICU, prox)!;
+  assert.match(proche.limite, /^L'îlot de chaleur est mesuré à l'échelle du secteur\. La proximité de cet espace vert ne suffit pas à établir un effet sur la température du logement\./);
+  const dedans = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { ...prox.nearestMappedGreenSpace!, distanceMeters: 0 } })!;
+  assert.match(dedans.limite, /^L'îlot de chaleur est mesuré à l'échelle du secteur\. La présence de cet espace vert à l'adresse ne suffit pas/);
+  // Un ancien « espace de loisirs » n'est pas requalifié en espace vert.
+  const loisirs = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { distanceMeters: 150, kind: "recreation_ground" } })!;
+  assert.match(loisirs.limite, /La proximité de cet espace ne suffit pas/);
+});
+
+test("la limite ne nie pas l'effet physique de la végétation : elle dit seulement qu'il n'est pas établi", () => {
   for (const d of [0, 120]) {
-    const prox = computeOsmProximity(ADRESSE, parseOverpass([parcSansTag]), 1500);
-    const r = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { ...prox.nearestMappedGreenSpace!, distanceMeters: d } })!;
-    assert.match(r.limite, /^La présence de cet espace ne modifie pas l'îlot de chaleur mesuré pour le secteur\./);
+    const r = lireChaleurEtVegetal(ICU, { nearestMappedGreenSpace: { distanceMeters: d, kind: "park" } })!;
+    assert.doesNotMatch(r.limite, /ne modifie pas|aucun effet|n'a pas d'effet|sans effet/);
   }
 });
 
