@@ -234,6 +234,10 @@ en preuve d'un faible risque ; ne parlez jamais de probabilité ni d'avenir ; di
 plus, quand c'est le cas, que les sinistres y ont été fréquents, et rappelez que la
 situation d'un bien se vérifie à son adresse. Un plan de prévention n'est ni une
 alerte ni une garantie : il encadre certaines zones de la commune.
+Ne déduisez aucune corrélation ou tension générale entre l'inondation et un autre
+critère (médecins, emploi, etc.), même à l'intérieur du périmètre demandé. Le
+payload ne mesure pas ces relations. Une même classe historique signifie seulement
+une même plage de sinistres passés, jamais une exposition équivalente.
 
 Si "exploration_sans_classement" vaut true, l'inondation était la SEULE demande que
 le moteur pouvait classer : les communes ne sont PAS un classement qui répond à la
