@@ -266,7 +266,7 @@ test("diagnostics de l'adresse : rien à dire quand l'adresse n'en porte aucun",
 test("diagnostics de l'adresse : un diagnostic d'IMMEUBLE est signalé comme tel", () => {
   const p = buildSynthesisPayload(fullData({
     dpeSelectionStatus: "selection_required", selectedDpe: null,
-    dpeCandidates: [...voisins, { ...voisins[0], id_dpe: "V4", methode_dpe: "dpe immeuble collectif" }],
+    dpeCandidates: [...voisins, { ...voisins[0], id_dpe: "V4", type_batiment: "immeuble", methode_dpe: "dpe immeuble collectif" }],
   })) as { diagnostics_adresse: { immeuble_entier: boolean; total: number } };
   assert.equal(p.diagnostics_adresse.immeuble_entier, true);
   assert.equal(p.diagnostics_adresse.total, 4);

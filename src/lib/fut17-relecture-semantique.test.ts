@@ -346,8 +346,8 @@ test("Chaleur ambiante (non demandée) : sans adresse, aucune composition ; avec
   assert.match(commune.vu, /futur•e signale cette exposition à partir de 10 jours par an au-dessus de 35 °C, ou de 39 nuits tropicales par an, hors priorité déclarée\./);
   const b1 = await dossier({ commune: "nimes", logement: "immeuble", prefs: { acces_soins: 2 } });
   const t = texte(rendreComposition(composition(b1.d, "ambient_heat_housing")));
-  assert.match(t, /^De fortes chaleurs projetées, et un confort d'été encore à vérifier À l'échelle de la commune .* À cette adresse Le diagnostic retrouvé, daté du 7 novembre 2023, a été généré à partir des données de l'immeuble : il décrit le bâtiment .*, pas ce logement/);
-  assert.match(t, /Preuve · diagnostic établi à l'immeuble/);
+  assert.match(t, /^De fortes chaleurs projetées, et un confort d'été encore à vérifier À l'échelle de la commune .* À cette adresse Le diagnostic retrouvé, daté du 7 novembre 2023, a été établi à partir des données de l'immeuble : les caractéristiques qu'il décrit sont celles du bâtiment .*, et il ne qualifie pas le confort d'été de ce logement/);
+  assert.match(t, /Preuve · diagnostic établi à partir des données de l'immeuble/);
   assert.doesNotMatch(t, /Le logement (n'est pas|est) traversant|classe son confort d'été/);
 });
 

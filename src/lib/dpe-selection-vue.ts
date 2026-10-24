@@ -17,6 +17,7 @@
 
 import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
 import { isCollective } from "./dpe-address-context.ts";
+import { issuDesDonneesDeLImmeuble } from "./dpe-grain.ts";
 import { candidateIdentifier, isUnidentifiable, matchesQuery, meaningfulFloor } from "./dpe-candidate-match.ts";
 
 /**
@@ -65,7 +66,11 @@ export type LigneCandidat = {
   titre: string;
   /** `false` quand le titre dit l'absence d'identifiant : il s'affiche en retrait. */
   identifie: boolean;
-  /** Un diagnostic de l'immeuble entier, qui ne décrit pas un logement en particulier. */
+  /**
+   * Un diagnostic de l'immeuble entier, qui ne décrit pas un logement en particulier. Depuis FUT-74,
+   * une telle ligne n'entre plus dans la liste à reconnaître (`AddressDiagnosticsBlock`) : le champ
+   * reste vrai pour qu'aucun appelant ne puisse la présenter comme celle d'un logement.
+   */
   immeuble: boolean;
   /** Les repères secondaires, du plus utile pour reconnaître au résultat énergétique. */
   details: string[];
@@ -83,11 +88,18 @@ export type LigneCandidat = {
  */
 export function ligneCandidat(c: DpeRecord, champs: ChampsVariables): LigneCandidat {
   const ident = candidateIdentifier(c);
-  const immeuble = isCollective(c.methode_dpe);
+  const immeuble = isCollective(c);
   const titre = ident ?? (immeuble ? "Immeuble entier" : "Sans identifiant de logement");
 
   const details: string[] = [];
   if (immeuble) details.push("diagnostic de l'immeuble");
+  // FUT-74 (D6) : un DPE de logement établi à partir des données de l'immeuble le dit, et la visite
+  // manquante se dit seulement quand l'ADEME la renseigne. Ni l'un ni l'autre ne le disqualifie.
+  if (!immeuble && issuDesDonneesDeLImmeuble(c)) {
+    details.push(c.appartement_non_visite === true
+      ? "appartement non visité, établi à partir des données de l'immeuble"
+      : "établi à partir des données de l'immeuble");
+  }
   // Le type d'une ligne d'immeuble est « immeuble » : le marqueur ci-dessus le dit déjà.
   if (champs.type && c.type_batiment && !immeuble) details.push(c.type_batiment);
   if (c.surface_m2 != null) details.push(`${m2(c.surface_m2)} m²`);
@@ -152,9 +164,11 @@ export function phraseIdentifiables(identifiables: number, total: number): strin
  * dont le geste est de RECONNAÎTRE un logement. La liste ouverte montre elle-même ce que chaque
  * diagnostic porte ; les bornes restent dans le bloc secondaire, sous les gestes.
  */
-export function phrasesOuvertureRepliee(total: number): { titre: string; aide: string } {
+export function phrasesOuvertureRepliee(total: number, deLogement = false): { titre: string; aide: string } {
   return {
-    titre: `${total} diagnostics sont enregistrés à cette adresse.`,
+    // FUT-74 : `total` compte les diagnostics DE LOGEMENT ; « de logement » se dit quand l'immeuble
+    // a aussi le sien, pour que le compte ne se lise pas comme celui de toute l'adresse.
+    titre: `${total} diagnostics${deLogement ? " de logement" : ""} sont enregistrés à cette adresse.`,
     aide: "futur•e ne peut pas savoir lequel correspond à ce logement sans votre aide.",
   };
 }
@@ -210,11 +224,78 @@ export function vueSectionDpe(args: {
 }
 
 /**
- * LE DIAGNOSTIC D'IMMEUBLE, DIT POUR CE QU'IL APPORTE (FUT-68). L'ancienne phrase (« Il décrit le
- * bâtiment commun, et pas la performance d'un logement en particulier ») était exacte, mais ne disait
- * pas quoi en faire. Celle-ci dit les deux choses à retenir : c'est une information sur le BÂTIMENT,
- * et elle ne REMPLACE PAS le diagnostic du logement, y compris quand celui-ci est introuvable.
- * Son rôle dans le dossier relève de FUT-74, pas de cet écran.
+ * CE QUE L'ÉCRAN DIT D'UN DPE D'IMMEUBLE, POUR LUI-MÊME (FUT-74, D7). Il ne se présente plus comme
+ * une ligne à reconnaître : il a sa fiche, qui nomme son objet avant sa classe.
+ *
+ * La taille de l'immeuble ne se dit que si l'ADEME la rend vraisemblable. Mesuré le 24/10/2026 sur
+ * les 413 041 DPE d'immeuble : la surface est renseignée à 99,99 %, le nombre d'appartements partout,
+ * mais il vaut 0 ou 1 dans 4,9 % des cas, ce qui ne décrit pas un immeuble collectif. Sous deux, il
+ * est tu plutôt qu'affiché faux.
  */
-export const PHRASE_DPE_IMMEUBLE =
-  "Un diagnostic concerne l'immeuble entier. Il donne une indication sur la performance du bâtiment, mais ne remplace pas le DPE de ce logement.";
+export type FicheImmeuble = {
+  id: string;
+  /** « Diagnostic de l'immeuble entier » : l'objet, avant toute valeur. */
+  titre: string;
+  classe: DpeLabel | null;
+  /** « classé C », ou l'absence d'étiquette dite comme telle. */
+  classement: string;
+  /** Repères vérifiables : date, taille de l'immeuble quand elle est fiable, source. */
+  details: string[];
+};
+
+function jourFr(iso: string): string | null {
+  const [a, m, j] = iso.slice(0, 10).split("-");
+  return a && m && j ? `${j}/${m}/${a}` : null;
+}
+
+export function ficheImmeuble(c: DpeRecord): FicheImmeuble {
+  const details: string[] = [];
+  const date = c.date_dpe ? jourFr(c.date_dpe) : null;
+  if (date) details.push(`établi le ${date}`);
+  const taille: string[] = [];
+  if (c.nombre_appartements != null && c.nombre_appartements >= 2) taille.push(`${c.nombre_appartements} logements`);
+  if (c.surface_immeuble_m2 != null && c.surface_immeuble_m2 > 0) taille.push(`${m2(c.surface_immeuble_m2)} m² habitables`);
+  if (taille.length > 0) details.push(`immeuble de ${taille.join(", ")}`);
+  details.push("base DPE de l'ADEME");
+  const classe = c.etiquette_dpe && /^[A-G]$/.test(c.etiquette_dpe) ? c.etiquette_dpe : null;
+  return {
+    id: c.id_dpe,
+    titre: "Diagnostic de l'immeuble entier",
+    classe,
+    classement: classe ? `classé ${classe}` : "sans étiquette énergétique",
+    details,
+  };
+}
+
+/**
+ * LA PORTÉE D'UN DPE D'IMMEUBLE, dite une fois sous ses fiches. Elle remplace `PHRASE_DPE_IMMEUBLE`
+ * dans le bloc des diagnostics : celle-ci annonçait un diagnostic sans le montrer.
+ */
+export const PORTEE_DPE_IMMEUBLE =
+  "Il décrit le bâtiment dans son ensemble, et ne donne la classe d'aucun logement en particulier : futur•e ne l'attribue pas à ce logement.";
+
+/** FUT-74 (D3) : des diagnostics que la base ne permet de ranger ni dans un logement, ni dans l'immeuble. */
+export function phraseIndetermines(n: number): string {
+  return n === 1
+    ? "Un autre diagnostic enregistré à cette adresse ne précise pas s'il porte sur un logement ou sur l'immeuble : il n'est pas attribué à ce logement."
+    : `${n} autres diagnostics enregistrés à cette adresse ne précisent pas s'ils portent sur un logement ou sur l'immeuble : ils ne sont pas attribués à ce logement.`;
+}
+
+/**
+ * UN ANCIEN CHOIX QUI NE PEUT PLUS SERVIR (FUT-74, D4). Un dossier a pu retenir, avant ce correctif,
+ * le DPE de l'immeuble comme celui du logement. Le choix reste inscrit, rien n'est effacé, et l'écran
+ * dit pourquoi il n'est plus lu comme la performance du logement.
+ */
+export function phraseChoixEcarte(grain: "immeuble" | "indetermine"): string {
+  return grain === "immeuble"
+    ? "Le diagnostic retenu pour ce logement porte sur l'immeuble entier. Il décrit le bâtiment, et futur•e ne l'utilise plus comme diagnostic de ce logement : son étiquette n'entre pas dans ce dossier."
+    : "Le diagnostic retenu pour ce logement ne précise pas s'il porte sur un logement ou sur l'immeuble. futur•e ne l'utilise plus comme diagnostic de ce logement : son étiquette n'entre pas dans ce dossier.";
+}
+
+/** D6 : la phrase de la section Énergie pour un DPE de logement établi à partir de l'immeuble. */
+export function phraseEtabliDepuisImmeuble(c: DpeRecord): string | null {
+  if (!issuDesDonneesDeLImmeuble(c)) return null;
+  return c.appartement_non_visite === true
+    ? "Ce diagnostic a été établi à partir des données de l'immeuble, sans visite de l'appartement : la méthode applique alors les équipements individuels les moins performants de l'immeuble."
+    : "Ce diagnostic a été établi à partir des données de l'immeuble.";
+}

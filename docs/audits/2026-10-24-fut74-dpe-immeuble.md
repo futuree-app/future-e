@@ -322,7 +322,7 @@ Les 5 `todo` de `dpe-grain.test.ts`, plus, à écrire avec le câblage :
 | D2 | Un numéro de document qui désigne l'immeuble | (a) le montrer comme celui de l'immeuble, sans rattacher ; (b) refuser comme « introuvable » | **(a)** : le numéro existe, le dire faux enverrait chercher une faute de frappe |
 | D3 | Grain indéterminé (0 cas dans les jeux actuels) | (a) jamais attribuable ; (b) sélectionnable avec mention | **(a)** : aucun cas réel n'est perdu, et la règle protège les snapshots anciens |
 | D4 | Dossiers historiques | (a) neutraliser à la lecture, message, reprise ; (b) migration | **(a)**, après la requête du § 5.4 |
-| D5 | Synthèses dont l'empreinte change | (a) accepter la régénération ; (b) figer l'ancien payload | **(a)** si la requête montre peu de dossiers (14 dossiers payés mesurés le 16/09) |
+| D5 | Synthèses dont l'empreinte change | (a) accepter la régénération ; (b) figer l'ancien payload | **(a)** si la requête montre peu de dossiers |
 | D6 | Dire qu'un appartement généré n'a pas été visité | (a) oui, en détail (« logement non visité : les équipements les moins performants de l'immeuble ont été appliqués ») ; (b) non | **(a)**, en secondaire (E2) : c'est une propriété documentée qui change la lecture d'une étiquette |
 | D7 | Contenu de l'information « immeuble » | classe + année seulement, ou + surface et nombre de logements | classe + année en urgent ; le reste avec E2 |
 
@@ -335,3 +335,62 @@ Les 5 `todo` de `dpe-grain.test.ts`, plus, à écrire avec le câblage :
 - Présentation des deux méthodes de DPE en appartement (DPE de l'appartement ou adaptation des données de l'immeuble) : [Préfecture du Var, fiche DPE](https://www.var.gouv.fr/contenu/telechargement/27839/188954/file/f03_dpe_web.pdf) ; principe de la note fondée sur l'immeuble et un échantillon de lots : [Selectra, DPE collectif](https://entreprises.selectra.info/energie/profils/copropriete/dpe-collectif) (source commerciale, citée pour le principe seulement).
 - Code lu : `src/lib/dpe.ts`, `dpe-attribution.ts`, `dpe-address-context.ts`, `dpe-selection-vue.ts`, `dpe-candidate-match.ts`, `dpe-rapprochement.ts`, `thermal-evidence.ts`, `logement-synthesis-cache.ts`, `decision/logement-facts.ts`, `decision/logement-rules.ts`, `decision/chaleur-logement.ts`, `api/logement-dpe/*`, `api/synthesize-logement/route.ts`, `components/report/LogementModule.tsx`, `DpeSelector.tsx`, `logement/AddressDiagnosticsBlock.tsx`, `EnergieSection.tsx`, `PropertyPassport.tsx`.
 - Tickets : FUT-68 (sélection compacte, livrée), FUT-65 (absence et panne), FUT-62 (audit énergétique), FUT-20 (chaleur × logement).
+
+---
+
+## 7. Livraison (24/10/2026, après arbitrages du porteur)
+
+### 7.1 Arbitrages retenus
+
+| # | Décision du porteur | Mise en œuvre |
+|---|---|---|
+| D1 | jamais sélectionnable | la liste ne propose que `repartirParGrain(c).logements` ; la route refuse `422 DPE_NON_ATTRIBUABLE` (`refusDAttribution`) |
+| D2 | numéro d'immeuble : montré, jamais rattaché | `/api/logement-dpe/numero` rend `grain` et `attachable: false` ; `SaisieNumeroDpe` dit « Ce numéro est celui du diagnostic de l'immeuble entier » |
+| D3 | grain indéterminé : non attribué | `grainDpe` rend `indetermine` pour un type absent sans méthode lisible, un type hors énumération, ou un type et une méthode contradictoires ; la liste les nomme à part (`phraseIndetermines`), sans les compter comme absence de diagnostic |
+| D4 | historiques immuables, réserve explicite, nouvelle sélection | `dpeDuLogement` neutralise à la lecture (moteur, écran, synthèse) ; la base n'est pas réécrite ; la section dit `phraseChoixEcarte` et offre « Retirer ce choix et désigner le diagnostic du logement » |
+| D5 | pas de régénération à la consultation ; mesurer d'abord | comptage ci-dessous ; aucune empreinte de synthèse existante ne change (§ 7.3) ; procédure § 7.4 |
+| D6 | « appartement non visité » si renseigné | collecte de `appartement_non_visite` pour les seuls générés ; détail de ligne et phrase de la section Énergie, sans jugement sur le diagnostic |
+| D7 | fiche immeuble distincte | `ficheImmeuble` : classe, date, source ; « immeuble de N logements » seulement si N ≥ 2 (4,9 % des DPE d'immeuble déclarent 0 ou 1), surface si > 0 ; statistiques d'adresse sur les seuls logements (classes, surfaces, années, types) |
+
+### 7.2 Comptage des dossiers (lecture seule)
+
+Requêtes `HEAD` avec `Prefer: count=exact` sur l'API Supabase du projet de `.env.local` : aucune ligne transférée, aucune écriture possible, seuls des nombres affichés. Versionné dans `scripts/admin/fut74-compter-dpe-hors-logement.mjs`. Contrôles positifs passés (les filtres retrouvent bien les appartements individuels et la maison retenus).
+
+| Mesure | Résultat |
+|---|---|
+| Dossiers à DPE retenu dont le DPE est celui d'un immeuble | **0** |
+| … dont le grain est indéterminé ou le type hors énumération | **0** |
+| … dont le DPE est un appartement généré | 0 (tous les DPE retenus sont des appartements individuels ou des maisons) |
+| Versions de rapport dont un candidat est un DPE d'immeuble | quelques-unes : montré dans la liste, jamais retenu |
+| Versions de rapport dont un candidat est un appartement généré | 0 |
+| Artefacts de décision issus d'un DPE d'immeuble retenu | **0** |
+
+Les volumes exacts (dossiers, versions, artefacts par version du moteur) sont consignés dans FUT-74 sur Linear : le dépôt est public, et ils décrivent l'activité.
+
+Aucun dossier ne demande de nouvelle sélection ni d'actualisation. Aucune version du moteur n'est impliquée.
+
+### 7.3 Compatibilité historique
+
+- **Base** : rien n'est réécrit, aucune migration.
+- **Artefacts figés** : inchangés ; aucun n'est concerné.
+- **`ENGINE_VERSION`** : reste `engine-7`. Le moteur ne change de conclusion que pour un dossier ayant retenu un DPE d'immeuble ; il n'en existe aucun, et la route empêche d'en créer. La raison est écrite au-dessus de la constante, dans la forme des précédents FUT-20 et FUT-96.
+- **Synthèses** : les champs que lit le modèle (`dpe`, `diagnostics_adresse.total`, `ecart_classes`, `immeuble_entier`) gardent leur valeur pour toutes les données en base. Les versions à DPE d'immeuble candidat ont un vrai DPE d'immeuble : `immeuble_entier` y reste vrai. Aucune empreinte ne bouge, aucune régénération n'est déclenchée.
+- **Rapports versionnés** : les DPE d'immeuble et les appartements générés portent désormais `surface_immeuble_m2`, `nombre_appartements` ou `appartement_non_visite`. Ces champs ne sont posés que pour ces grains : un appartement individuel ou une maison garde sa forme exacte. Pour les adresses à DPE d'immeuble, la prochaine actualisation **demandée par le lecteur** produira une nouvelle version (l'empreinte du rapport change) ; c'est le comportement voulu d'une actualisation (FUT-13), jamais déclenché à la consultation.
+- **Statistiques communales** (`getDpeSummaryForCommune`) : filtrées sur `type_batiment:(appartement OR maison)`, syntaxe vérifiée sur l'API (La Rochelle : 33 051 logements + 1 197 immeubles = 34 248). La route n'a pas d'appelant.
+
+### 7.4 Procédure d'actualisation, si un comptage futur trouvait un cas
+
+1. Relancer `node scripts/admin/fut74-compter-dpe-hors-logement.mjs` avant et après le déploiement.
+2. Un dossier compté lit, dès le déploiement, la réserve et l'offre de nouvelle sélection ; son étiquette n'entre plus dans les faits, son artefact figé reste tel qu'il a été vendu.
+3. Aucun geste automatique : la nouvelle sélection et l'actualisation restent des gestes du lecteur. Une actualisation pour son compte, s'il fallait la faire, passerait par la route d'actualisation existante, version par version, et serait décidée dossier par dossier par le porteur.
+
+### 7.5 Tests
+
+`npm test` sur `main` à jour (après #83 et #84) : **3 043 tests, 0 échec, 0 todo** ; fusion simulée avec #82 : 3 055, 0 échec. Les 5 `todo` de l'audit sont devenus des tests effectifs, vérifiés en échec sur le code d'avant puis en succès. `src/lib/dpe-grain.test.ts` compte 27 tests : grain des 13 méthodes, type prioritaire, type hors énumération, ambigus, jeu d'avant 2021, neuf, répartition, champ parasite ; non-régressions (attribution automatique, confort d'été FUT-20, statistiques) ; défauts 1 à 3 ; chaîne serveur, liste, compte replié, phrases inchangées sans immeuble, D6, D7, persistance, moteur (`runRules` : plus de « classe ce logement F » pour un immeuble, toujours pour un généré F), synthèse.
+
+Tests existants ajustés, et pourquoi :
+- `dpe-selection-vue.test.ts`, `logement-synthesis-cache.test.ts` : leurs fixtures combinaient le type « appartement » et la méthode « dpe immeuble collectif », que l'ADEME ne publie jamais ; elles portent désormais le type « immeuble » ;
+- `logement-facts.test.ts` : la fixture n'avait pas de type ; elle en reçoit un, et un test ajouté vérifie qu'un snapshot sans grain ne donne plus son étiquette ;
+- `fut20-chaleur-logement.test.ts`, `fut17-relecture-semantique.test.ts` : le nouveau libellé de la composition chaleur pour un appartement établi à partir de l'immeuble.
+
+Banc de développement `/dev/dpe-selection` : six cas `fut74-*` ajoutés, rendus et relus sur le serveur de développement (`fut74-generes`, `fut74-generes-lots`, `fut74-individuels`, `fut74-immeuble-seul`, `fut74-ancien-choix`, `fut74-genere-retenu`). Aucun bouton « Retenir » ne porte un DPE d'immeuble. La saisie d'un numéro d'immeuble n'a pas été rendue en navigateur (elle exige un dossier authentifié) ; sa logique est couverte par `grainDpe` et la route.

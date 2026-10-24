@@ -15,6 +15,7 @@
 
 import { deriveThermalEvidence, thermalEvidenceSummary } from "./thermal-evidence.ts";
 import { buildAddressDpeContext } from "./dpe-address-context.ts";
+import { dpeDuLogement } from "./dpe-grain.ts";
 import { stableStringify } from "./stable-stringify.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
 
@@ -114,6 +115,11 @@ export type SynthesisData = {
 const DPE_CONFIRMED = (s: string | null | undefined) =>
   s === "auto_confirmed" || s === "user_confirmed";
 
+// FUT-74 : le diagnostic retenu, s'il porte sur un logement. Le DPE d'un immeuble ne devient jamais le
+// sujet « énergie » de la synthèse, même si un appelant le transmettait comme choix confirmé.
+const dpeRetenu = (data: SynthesisData): DpeRecord | null =>
+  DPE_CONFIRMED(data.dpeSelectionStatus) ? dpeDuLogement(data.selectedDpe ?? null) : null;
+
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LA COUVERTURE EST UN FAIT DU PAYLOAD, PAS UNE DÉDUCTION LAISSÉE AU MODÈLE.
 //
@@ -160,7 +166,7 @@ const LIBELLES: Record<Exclude<keyof SynthesisCoverage, "non_lues">, string> = {
 };
 
 export function buildCoverage(data: SynthesisData): SynthesisCoverage {
-  const dpe = Boolean(DPE_CONFIRMED(data.dpeSelectionStatus) && data.selectedDpe);
+  const dpe = dpeRetenu(data) != null;
   const parcel = data.georisques?.parcel;
   // Une exposition EXAMINÉE veut dire que Géorisques a répondu pour cette adresse, même si sa
   // réponse est « rien ici ». C'est précisément la distinction qui manquait : un zonage vide est
@@ -230,7 +236,7 @@ export function sinistralitePourRecit(
 }
 
 export function buildSynthesisPayload(data: SynthesisData): Record<string, unknown> {
-  const dpe = DPE_CONFIRMED(data.dpeSelectionStatus) && data.selectedDpe;
+  const dpe = dpeRetenu(data);
   const parcel = data.georisques?.parcel;
   return {
     address: data.address?.label ?? null,
@@ -251,16 +257,16 @@ export function buildSynthesisPayload(data: SynthesisData): Record<string, unkno
     // quand la valeur est présente : aucun artefact existant n'est invalidé.
     dpe: dpe
       ? {
-          etiquette: data.selectedDpe!.etiquette_dpe ?? null,
-          ges: data.selectedDpe!.etiquette_ges ?? null,
-          conso: data.selectedDpe!.conso_ep_m2 ?? null,
-          emissions: data.selectedDpe!.emission_ges_m2 ?? null,
-          surface: data.selectedDpe!.surface_m2 ?? null,
-          construction: data.selectedDpe!.annee_construction ?? null,
-          type: data.selectedDpe!.type_batiment ?? null,
+          etiquette: dpe!.etiquette_dpe ?? null,
+          ges: dpe!.etiquette_ges ?? null,
+          conso: dpe!.conso_ep_m2 ?? null,
+          emissions: dpe!.emission_ges_m2 ?? null,
+          surface: dpe!.surface_m2 ?? null,
+          construction: dpe!.annee_construction ?? null,
+          type: dpe!.type_batiment ?? null,
         }
       : null,
-    confortEte: dpe ? thermalEvidenceSummary(deriveThermalEvidence(data.selectedDpe!)) : null,
+    confortEte: dpe ? thermalEvidenceSummary(deriveThermalEvidence(dpe!)) : null,
     risks: [...(parcel?.risks?.labels ?? []), ...(parcel?.pprn?.labels ?? [])],
     seismic: parcel?.seismic?.label ?? null,
     rga: parcel?.rga?.label ?? null,

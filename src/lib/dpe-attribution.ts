@@ -34,6 +34,15 @@ export type DpeRecord = {
   isolation_murs: string | null;
   isolation_menuiseries: string | null;
   methode_dpe: string | null;
+  // FUT-74 : OPTIONNELS, ET ABSENTS DES SNAPSHOTS ANTÉRIEURS. `toRecord` ne les pose que pour les
+  // grains qui s'en servent (cf. `champsDeGrain` dans dpe.ts) : un DPE d'appartement individuel ou de
+  // maison garde exactement sa forme d'avant, donc l'empreinte des rapports versionnés qui le portent.
+  /** Appartement généré à partir de l'immeuble : `true` s'il n'a pas été visité (ADEME, 0/1). */
+  appartement_non_visite?: boolean | null;
+  /** DPE d'immeuble : surface habitable totale de l'immeuble, en m². */
+  surface_immeuble_m2?: number | null;
+  /** DPE d'immeuble : nombre d'appartements déclaré. */
+  nombre_appartements?: number | null;
 };
 
 export const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];

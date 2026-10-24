@@ -65,7 +65,11 @@ function grainDeLaMethode(m: string): GrainDpe | null {
 }
 
 export function grainDpe(d: ChampsDeGrain): GrainDpe {
-  const parType = grainDuType(norm(d.type_batiment));
+  const type = norm(d.type_batiment);
+  const parType = grainDuType(type);
+  // UN TYPE RENSEIGNÉ HORS DE L'ÉNUMÉRATION (« tertiaire », « local ») est un diagnostic mal typé : la
+  // méthode ne le rattrape pas. Elle ne supplée qu'un type ABSENT, celui d'un snapshot ancien.
+  if (type && !parType) return "indetermine";
   const parMethode = grainDeLaMethode(norm(d.methode_dpe));
   if (parType && parMethode && parType !== parMethode) return "indetermine";
   return parType ?? parMethode ?? "indetermine";
@@ -97,4 +101,26 @@ export function repartirParGrain<T extends ChampsDeGrain>(candidats: T[]): Repar
     (g === "logement" ? r.logements : g === "immeuble" ? r.immeubles : r.indetermines).push(c);
   }
   return r;
+}
+
+/**
+ * LE DIAGNOSTIC RETENU, TEL QU'IL PEUT SERVIR À CE LOGEMENT. Le snapshot d'un dossier peut porter
+ * un DPE d'immeuble retenu avant FUT-74 (aucun en base au 24/10/2026, mais la route l'acceptait) :
+ * il n'est ni effacé ni réécrit, et il cesse d'être lu comme la performance du logement. C'est le
+ * point de passage unique du moteur (`buildLogementFacts`) et de l'écran (`LogementModule`).
+ */
+export function dpeDuLogement<T extends ChampsDeGrain>(retenu: T | null | undefined): T | null {
+  return retenu && attribuableAuLogement(retenu) ? retenu : null;
+}
+
+/**
+ * LE REFUS QUE LA ROUTE DE SÉLECTION OPPOSE, décidé ici pour être testé sans réseau. `null` : le
+ * diagnostic peut devenir celui du logement. Sinon, le code d'erreur et le grain qui le motive.
+ */
+export function refusDAttribution(
+  d: ChampsDeGrain | null,
+): { error: "DPE_NON_ATTRIBUABLE"; grain: Exclude<GrainDpe, "logement"> } | null {
+  if (!d) return null;
+  const grain = grainDpe(d);
+  return grain === "logement" ? null : { error: "DPE_NON_ATTRIBUABLE", grain };
 }

@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { etiquetteExploitable, type NiveauRapprochement } from "@/lib/dpe-rapprochement";
 import { DpeBadge } from "./kit";
+import type { GrainDpe } from "@/lib/dpe-grain";
+import { ficheImmeuble } from "@/lib/dpe-selection-vue";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « J'AI LE DOCUMENT » — la seule question dont la réponse ne dépend pas de ce que le lecteur devine.
@@ -31,6 +33,8 @@ type Reponse =
   | {
       status: "trouve";
       niveau: NiveauRapprochement;
+      /** FUT-74 : absent d'une réponse antérieure, lu alors comme `logement` (le serveur refuse de toute façon). */
+      grain?: GrainDpe;
       attachable: boolean;
       confirmationRequise: boolean;
       adresse: string | null;
@@ -167,6 +171,12 @@ export function SaisieNumeroDpe({
           <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
             <DpeBadge label={reponse.dpe.etiquette_dpe} size="sm" />
             <div style={{ minWidth: 0 }}>
+              {/* FUT-74 : l'objet du diagnostic avant son adresse, quand il ne porte pas sur un logement. */}
+              {reponse.grain === "immeuble" && (
+                <div style={{ fontSize: 12.5, color: "var(--fg-3)", marginBottom: 2 }}>
+                  {ficheImmeuble(reponse.dpe).titre}
+                </div>
+              )}
               <div style={{ fontSize: 14.5, color: "var(--fg-hi)" }}>
                 {reponse.adresse ?? "Adresse non renseignée dans la base"}
               </div>
@@ -184,7 +194,7 @@ export function SaisieNumeroDpe({
               consommation nulle quand le diagnostiqueur n'a pas pu reconstituer les consommations,
               cas fréquent avant 2021. Le rattacher reste utile (surface, année, type de bâtiment),
               et promettre une classe le serait beaucoup moins. */}
-          {!etiquetteExploitable(reponse.dpe.etiquette_dpe) && (
+          {(reponse.grain ?? "logement") === "logement" && !etiquetteExploitable(reponse.dpe.etiquette_dpe) && (
             <Message>
               Ce diagnostic ne porte aucune étiquette énergétique : le diagnostiqueur n&apos;a pas pu
               établir la consommation du logement. Le rattacher renseignera sa surface et sa date,
@@ -192,7 +202,25 @@ export function SaisieNumeroDpe({
             </Message>
           )}
 
-          {reponse.niveau === "batiment" && (
+          {/* FUT-74 (D2, D3) : montré, jamais rattaché. Le message vient avant ceux de l'adresse : quelle
+              que soit l'entrée où il est enregistré, ce diagnostic ne peut pas être celui du logement. */}
+          {reponse.grain === "immeuble" && (
+            <Message ton="refus">
+              Ce numéro est celui du diagnostic de l&apos;immeuble entier. Il décrit le bâtiment dans son
+              ensemble et ne donne la classe d&apos;aucun logement en particulier : il n&apos;est donc pas
+              rattaché comme diagnostic de ce logement. Le diagnostic propre à l&apos;appartement porte un
+              autre numéro.
+            </Message>
+          )}
+
+          {reponse.grain === "indetermine" && (
+            <Message ton="refus">
+              La base ne précise pas si ce diagnostic porte sur un logement ou sur l&apos;immeuble entier :
+              rien ne permet de le rattacher comme diagnostic de ce logement.
+            </Message>
+          )}
+
+          {(reponse.grain ?? "logement") === "logement" && reponse.niveau === "batiment" && (
             <Message>
               L&apos;ADEME enregistre ce diagnostic à une entrée voisine de la vôtre, ce qui arrive
               souvent : c&apos;est le diagnostiqueur qui saisit l&apos;adresse. Vérifiez qu&apos;il

@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  APERCU_CANDIDATS, PHRASE_DPE_IMMEUBLE, champsVariables, compterIdentifiables, decouperListe, ligneCandidat, listeRepliee,
+  APERCU_CANDIDATS, PORTEE_DPE_IMMEUBLE, champsVariables, compterIdentifiables, decouperListe, ligneCandidat, listeRepliee,
   phraseAttribution, phraseIdentifiables, phrasesOuvertureRepliee, SAISIE_NUMERO, vueSectionDpe,
 } from "./dpe-selection-vue.ts";
 import { dpeAttributionStatus, type DpeRecord } from "./dpe-attribution.ts";
@@ -128,7 +128,9 @@ test("type et année de construction n'apparaissent que s'ils distinguent", () =
 });
 
 test("le diagnostic d'immeuble ne se présente jamais comme celui d'un logement", () => {
-  const immeuble = dpe({ complement: null, etage: null, methode_dpe: "dpe immeuble collectif" });
+  // FUT-74 : le grain se lit sur le type. L'ADEME ne publie jamais « dpe immeuble collectif » sous un
+  // autre type que « immeuble » (17,3 M de lignes) ; la fixture le porte donc.
+  const immeuble = dpe({ complement: null, etage: null, type_batiment: "immeuble", methode_dpe: "dpe immeuble collectif" });
   const l = ligneCandidat(immeuble, champsVariables([immeuble, dpe()]));
   assert.equal(l.titre, "Immeuble entier");
   assert.equal(l.details[0], "diagnostic de l'immeuble");
@@ -232,9 +234,9 @@ test("moteur inchangé : 34 candidats demandent une sélection, la liste reçue 
 });
 
 test("DPE d'immeuble : une information sur le bâtiment, qui ne remplace pas celui du logement", () => {
-  assert.equal(
-    PHRASE_DPE_IMMEUBLE,
-    "Un diagnostic concerne l'immeuble entier. Il donne une indication sur la performance du bâtiment, mais ne remplace pas le DPE de ce logement.",
-  );
-  assert.doesNotMatch(PHRASE_DPE_IMMEUBLE, /à défaut|faute de|en l'absence|à la place|utilis/i);
+  // FUT-74 : la phrase suit désormais la fiche de l'immeuble, qui le MONTRE ; elle dit sa portée.
+  assert.match(PORTEE_DPE_IMMEUBLE, /bâtiment dans son ensemble/);
+  assert.match(PORTEE_DPE_IMMEUBLE, /ne l'attribue pas à ce logement/);
+  // Il ne se présente jamais comme un substitut, même quand le DPE du logement manque.
+  assert.doesNotMatch(PORTEE_DPE_IMMEUBLE, /à défaut|faute de|en l'absence|à la place|utilis/i);
 });

@@ -95,7 +95,11 @@ function statementDe(c: ConfortEteFait): string {
   if (c.niveau === "batiment") {
     const decrit = c.caracteristiques.map((x) => minuscule(x.libelle));
     const tete = c.methode === "immeuble"
-      ? `Le diagnostic retrouvé${etabliLe(c)} a été généré à partir des données de l'immeuble : il décrit le bâtiment${decrit.length ? ` (${decrit.join(", ")})` : ""}, pas ce logement, et ne qualifie pas son confort d'été.`
+      // FUT-74 : ce diagnostic est celui d'un LOGEMENT, établi à partir des données de l'immeuble ; son
+      // étiquette est la sienne. Ce sont ses caractéristiques de bâti qui viennent de l'immeuble, et c'est
+      // pourquoi elles ne qualifient pas le confort d'été de ce logement. Il disait « il décrit le
+      // bâtiment, pas ce logement », que contredisait la section Énergie.
+      ? `Le diagnostic retrouvé${etabliLe(c)} a été établi à partir des données de l'immeuble : les caractéristiques qu'il décrit sont celles du bâtiment${decrit.length ? ` (${decrit.join(", ")})` : ""}, et il ne qualifie pas le confort d'été de ce logement.`
       : `Le diagnostic retrouvé${etabliLe(c)} ne qualifie pas le confort d'été de ce logement.${decrit.length ? ` Il renseigne : ${decrit.join(", ")}.` : ""}`;
     return [tete, nonRenseigne(c, "Il"), "Face aux fortes chaleurs projetées ici, ce sont les points à faire vérifier."].filter(Boolean).join(" ");
   }
@@ -183,7 +187,7 @@ function resumeDe(c: ConfortEteFait): (nom: string) => string {
 function preuvesDe(c: ConfortEteFait): EvidenceRef[] {
   if (c.niveau === "aucun") return [];
   const observedValue = c.niveau === "logement" ? `confort d'été ${c.indicateur}`
-    : c.methode === "immeuble" ? "diagnostic établi à l'immeuble" : "confort d'été non renseigné";
+    : c.methode === "immeuble" ? "diagnostic établi à partir des données de l'immeuble" : "confort d'été non renseigné";
   return [{
     factId: RULE_CONFORT_ETE, module: "logement", label: "Base DPE (ADEME)", grain: "adresse",
     href: "/rapport/logement", sourceMode: "persisted_snapshot", observedValue,

@@ -72,6 +72,13 @@ import type { ContexteDuBien } from "../relation-au-lieu.ts";
 // `satisfied`. Le registre des critères, l'orientation et le verdict changent : c'est ce que le moteur
 // CONCLUT. Un dossier engine-6 garde sa carte et son verdict tels qu'ils ont été vendus ; l'écran le
 // contextualise (`lectureInondationAnterieure`), sans rien réécrire.
+// PAS D'INCRÉMENT POUR FUT-74 (24/10/2026), et la raison est un comptage. Le moteur ne lit plus l'étiquette
+// d'un DPE qui ne porte pas sur un logement (`dpeDuLogement`, dans `buildLogementFacts`) : un dossier qui
+// aurait retenu le DPE de l'immeuble perdrait sa réserve « le diagnostic choisi classe ce logement F ». Ce
+// serait un changement de conclusion, s'il existait un tel dossier. Mesuré en lecture seule le 24/10/2026
+// (`scripts/admin/fut74-compter-dpe-hors-logement.mjs`) : parmi les dossiers à DPE retenu, aucun DPE d'immeuble
+// ni de grain indéterminé ; aucun artefact n'est concerné. Et la route refuse désormais ce choix, donc aucun dossier
+// futur ne peut y entrer. Le seul texte changé ailleurs est la limite de « Diagnostic non attribué ».
 export const ENGINE_VERSION = "engine-7";
 
 export type DecisionArtifactV1 = {

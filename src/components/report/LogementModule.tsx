@@ -10,6 +10,7 @@ import type { AddressDossierRow, DpeSelectionStatus } from "@/lib/address-dossie
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
 import { LogementSynthesis } from "@/components/report/LogementSynthesis";
+import { dpeDuLogement } from "@/lib/dpe-grain";
 import { deriveThermalEvidence } from "@/lib/thermal-evidence";
 import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
@@ -328,7 +329,12 @@ export default function LogementModule({
   }
 
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
-  const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  const dpeRetenu = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  // FUT-74 (D4) : et seulement s'il porte sur un logement. Un DPE d'immeuble retenu avant que la route ne
+  // le refuse reste inscrit au dossier, rien n'est effacé ; il n'est plus lu comme la performance du
+  // logement, et l'écran le dit (`dpeEcarte`), avec de quoi choisir à nouveau.
+  const dpe = dpeDuLogement(dpeRetenu);
+  const dpeEcarte = dpeRetenu && !dpe ? dpeRetenu : null;
   // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
   const thermalEvidence = deriveThermalEvidence(dpe);
   const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
@@ -567,6 +573,7 @@ export default function LogementModule({
             <EnergieSection
               dpeStatus={dpeStatus}
               dpe={dpe}
+              dpeEcarte={dpeEcarte}
               audit={result.audit}
               auditStatus={result.auditStatus}
               autresAudits={result.autresAudits ?? []}

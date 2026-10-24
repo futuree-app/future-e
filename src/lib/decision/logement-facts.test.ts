@@ -13,9 +13,16 @@ function data(over: Partial<LogementDecisionData> = {}): LogementDecisionData {
 }
 
 test("DPE depuis l'artefact sauvegardé + label", () => {
-  const f = buildLogementFacts(data(), { etiquette_dpe: "G" } as DpeRecord);
+  const f = buildLogementFacts(data(), { etiquette_dpe: "G", type_batiment: "appartement" } as DpeRecord);
   assert.equal(f.dpe, "passoire");
   assert.equal(f.dpeLabel, "G");
+});
+
+test("FUT-74 · un diagnostic sans grain établi ne donne pas son étiquette au logement", () => {
+  // Ni type ni méthode : rien ne dit qu'il porte sur un logement (D3). Aucun dossier n'en porte au 24/10/2026.
+  const f = buildLogementFacts(data(), { etiquette_dpe: "G" } as DpeRecord);
+  assert.equal(f.dpe, "absent");
+  assert.equal(f.dpeLabel, null);
 });
 
 test("RGA present + label notable -> expositionBati vrai ; coverage transmis", () => {

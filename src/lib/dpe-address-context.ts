@@ -26,34 +26,37 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import { LABEL_ORDER, type DpeLabel, type DpeRecord } from "./dpe-attribution.ts";
+import { grainDpe } from "./dpe-grain.ts";
 
-/** Un logement d'habitation. Écarte les diagnostics tertiaires, qui ne comparent rien d'utile. */
-function isResidential(t: string | null): boolean {
-  const s = (t ?? "").toLowerCase();
-  return s.includes("maison") || s.includes("appartement") || s.includes("appart");
-}
-
-/** Un diagnostic à l'échelle de l'IMMEUBLE, qui concerne le bâtiment et non un logement. */
-export function isCollective(m: string | null): boolean {
-  return (m ?? "").toLowerCase().includes("immeuble");
+/**
+ * Un diagnostic à l'échelle de l'IMMEUBLE, qui concerne le bâtiment et non un logement.
+ *
+ * FUT-74 : il cherchait le mot « immeuble » dans la méthode, et rangeait donc ici les appartements
+ * « générés à partir des données DPE immeuble », qui sont des DPE de logement (26,6 % du jeu). Le
+ * grain se lit désormais sur `type_batiment` (cf. `dpe-grain.ts`).
+ */
+export function isCollective(d: Pick<DpeRecord, "type_batiment" | "methode_dpe">): boolean {
+  return grainDpe(d) === "immeuble";
 }
 
 export type LabelCount = { label: DpeLabel; count: number };
 
 export type AddressDpeContext = {
-  /** Tous les diagnostics rattachés à l'adresse, tertiaire compris. */
+  /** Tous les diagnostics rattachés à l'adresse, quel que soit leur grain. */
   total: number;
+  /** FUT-74 : ceux qui portent sur UN logement, seuls candidats à être reconnus. */
+  logements: number;
   /** Ceux qui portent une classe ET concernent un logement : la matière comparable. */
   labelled: number;
   /** Répartition des classes, ordonnée de A à G. Vide si moins de deux classes connues. */
   distribution: LabelCount[];
   /** Les deux bornes observées. `null` sous trois diagnostics classés : trop peu pour un repère. */
   spread: { min: DpeLabel; max: DpeLabel } | null;
-  /** Années des diagnostics. `null` si aucune date exploitable. */
+  /** Années des diagnostics de logement. `null` si aucune date exploitable. */
   years: { min: number; max: number } | null;
   /** Surfaces observées, en m². `null` si aucune. Bornes, jamais une moyenne. */
   surfaces: { min: number; max: number } | null;
-  /** Types de bâtiment distincts, tels que l'ADEME les nomme. */
+  /** Types des diagnostics de logement (« appartement », « maison »), tels que l'ADEME les nomme. */
   buildingTypes: string[];
   /** Au moins un diagnostic porte sur l'immeuble entier. */
   hasCollective: boolean;
@@ -71,7 +74,10 @@ function bounds(values: number[]): { min: number; max: number } | null {
 export function buildAddressDpeContext(candidates: DpeRecord[]): AddressDpeContext | null {
   if (candidates.length === 0) return null;
 
-  const residential = candidates.filter((c) => isResidential(c.type_batiment));
+  // FUT-74 : LES STATISTIQUES NE MÉLANGENT PAS LES GRAINS. Elles portaient déjà sur les seuls types
+  // « maison » et « appartement » pour les classes et les surfaces ; les années et les types aussi,
+  // désormais : un DPE d'immeuble se décrit à part, pour lui-même (`ficheImmeuble`).
+  const residential = candidates.filter((c) => grainDpe(c) === "logement");
   const labels = residential
     .map((c) => c.etiquette_dpe)
     .filter((l): l is DpeLabel => l != null);
@@ -92,7 +98,7 @@ export function buildAddressDpeContext(candidates: DpeRecord[]): AddressDpeConte
       : null;
 
   const years = bounds(
-    candidates
+    residential
       .map((c) => (c.date_dpe ? Number.parseInt(c.date_dpe.slice(0, 4), 10) : Number.NaN))
       .filter((y) => Number.isFinite(y)),
   );
@@ -102,18 +108,19 @@ export function buildAddressDpeContext(candidates: DpeRecord[]): AddressDpeConte
   );
 
   const buildingTypes = [
-    ...new Set(candidates.map((c) => c.type_batiment).filter((t): t is string => Boolean(t))),
+    ...new Set(residential.map((c) => c.type_batiment).filter((t): t is string => Boolean(t))),
   ];
 
   return {
     total: candidates.length,
+    logements: residential.length,
     labelled: labels.length,
     distribution,
     spread,
     years,
     surfaces,
     buildingTypes,
-    hasCollective: candidates.some((c) => isCollective(c.methode_dpe)),
+    hasCollective: candidates.some(isCollective),
   };
 }
 
@@ -136,8 +143,16 @@ export function buildAddressDpeContext(candidates: DpeRecord[]): AddressDpeConte
  * offert sous la liste existe pour cette réponse-là.
  */
 export function addressContextLead(ctx: AddressDpeContext): string {
-  if (ctx.total === 1) {
-    return "Un diagnostic est enregistré à cette adresse. Est-ce celui de ce logement ?";
+  // FUT-74 : LA QUESTION NE PORTE QUE SUR LES DIAGNOSTICS DE LOGEMENT. Compter le DPE de l'immeuble
+  // parmi eux invitait à reconnaître une ligne qui ne peut pas être la bonne ; s'il est seul, il n'y a
+  // rien à reconnaître. Le mot « de logement » n'apparaît que lorsqu'un DPE d'immeuble est là pour le
+  // rendre nécessaire : ailleurs, la phrase reste celle d'avant.
+  if (ctx.logements === 0) {
+    return "Aucun diagnostic de logement n'est enregistré à cette adresse dans la base ouverte.";
   }
-  return `${ctx.total} diagnostics sont enregistrés à cette adresse. Reconnaissez-vous celui de ce logement ?`;
+  const de = ctx.hasCollective ? " de logement" : "";
+  if (ctx.logements === 1) {
+    return `Un diagnostic${de} est enregistré à cette adresse. Est-ce celui de ce logement ?`;
+  }
+  return `${ctx.logements} diagnostics${de} sont enregistrés à cette adresse. Reconnaissez-vous celui de ce logement ?`;
 }
