@@ -1,0 +1,162 @@
+[
+ {
+  "scenario": "complete-17-soins-nature",
+  "largeur": 1440,
+  "couverture": "complete",
+  "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+  "phrase": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Bourcefranc-le-Chapus",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   },
+   {
+    "nom": "Dolus-d'Oléron",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   },
+   {
+    "nom": "Saint-Martin-de-Ré",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "complete-17-soins-nature",
+  "largeur": 390,
+  "couverture": "complete",
+  "message": "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.",
+  "phrase": "Les trois pourraient convenir. Mais ils ne racontent pas la même histoire.",
+  "cartes": [
+   {
+    "nom": "Bourcefranc-le-Chapus",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   },
+   {
+    "nom": "Dolus-d'Oléron",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   },
+   {
+    "nom": "Saint-Martin-de-Ré",
+    "palier": "Bonne correspondance",
+    "nonMesure": null
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "partielle-75-calme-culture",
+  "largeur": 1440,
+  "couverture": "partielle",
+  "message": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "phrase": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "Priorités en partie mesurées",
+    "nonMesure": "Non mesuré ici : un cadre calme."
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "partielle-75-calme-culture",
+  "largeur": 390,
+  "couverture": "partielle",
+  "message": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "phrase": "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "Priorités en partie mesurées",
+    "nonMesure": "Non mesuré ici : un cadre calme."
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "aucune-75-calme",
+  "largeur": 1440,
+  "couverture": "aucune",
+  "message": "Aucune de vos priorités n'est mesurée pour ces territoires : ils sont à explorer, sans classement sur votre demande.",
+  "phrase": "Aucune de vos priorités n'est mesurée pour ces territoires : ils sont à explorer, sans classement sur votre demande.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "À explorer",
+    "nonMesure": "Non mesuré ici : un cadre calme."
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "aucune-75-calme",
+  "largeur": 390,
+  "couverture": "aucune",
+  "message": "Aucune de vos priorités n'est mesurée pour ces territoires : ils sont à explorer, sans classement sur votre demande.",
+  "phrase": "Aucune de vos priorités n'est mesurée pour ces territoires : ils sont à explorer, sans classement sur votre demande.",
+  "cartes": [
+   {
+    "nom": "Paris",
+    "palier": "À explorer",
+    "nonMesure": "Non mesuré ici : un cadre calme."
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "sans-priorite-17",
+  "largeur": 1440,
+  "couverture": "sans_priorite",
+  "message": "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+  "phrase": "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+  "cartes": [
+   {
+    "nom": "Angoulins",
+    "palier": "À explorer",
+    "nonMesure": null
+   },
+   {
+    "nom": "Aytré",
+    "palier": "À explorer",
+    "nonMesure": null
+   },
+   {
+    "nom": "Châtelaillon-Plage",
+    "palier": "À explorer",
+    "nonMesure": null
+   }
+  ],
+  "debordement": 0
+ },
+ {
+  "scenario": "sans-priorite-17",
+  "largeur": 390,
+  "couverture": "sans_priorite",
+  "message": "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+  "phrase": "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+  "cartes": [
+   {
+    "nom": "Angoulins",
+    "palier": "À explorer",
+    "nonMesure": null
+   },
+   {
+    "nom": "Aytré",
+    "palier": "À explorer",
+    "nonMesure": null
+   },
+   {
+    "nom": "Châtelaillon-Plage",
+    "palier": "À explorer",
+    "nonMesure": null
+   }
+  ],
+  "debordement": 0
+ }
+]

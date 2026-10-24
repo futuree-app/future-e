@@ -17,7 +17,13 @@ Décision du porteur du 24/10/2026, mise en œuvre sur la branche `bonjourfuture
   - Une priorité non mesurée ne produit ni raison, ni compromis, ni conclusion. La synthèse reçoit `priorites_non_mesurees` avec la consigne de les dire « non mesurées ici », jamais satisfaites ni manquantes, jamais une correspondance.
 - **Inondation** : doctrine inchangée. Le recul dépend des poids déclarés ; il ne peut que faire reculer ; l'inondation seule reste une exploration.
 
-**Choix assumé.** Une commune entièrement mesurée mais « à la limite » d'une condition non négociable passe devant une commune confirmée dont une priorité n'est pas mesurée : la couverture organise les groupes, et à l'intérieur de chacun l'ordre historique (confirmées d'abord) est conservé. Le badge « à la limite » reste affiché.
+**Ordre du classement** (révision du 24/10 après revue de #87, `ordreClassement` et `etalerParGroupes`), le même à chaque étape de `matchProjects` :
+1. une commune dont les conditions non négociables sont confirmées passe avant une commune dont une condition reste à la limite ;
+2. à statut égal, toutes les priorités mesurées avant une couverture partielle, puis aucune ;
+3. ensuite le score, puis la diversité géographique, qui n'agit qu'à l'intérieur d'un même groupe ;
+4. une couverture partielle retenue ne reçoit toujours aucun palier.
+
+Étapes vérifiées : tri initial ; affinage des trajets (statut encore inconnu : couverture puis score, pour que le plafond d'affinage n'aille pas d'abord aux couvertures incomplètes) ; tri après affinage ; dédoublonnage des villes PLM (la première rencontrée dans cet ordre est gardée) ; étalement, groupe par groupe. Les règles de filtrage des conditions ne changent pas.
 
 ## 3. Un critère implicite absent : l'emploi des arrondissements
 
@@ -67,8 +73,26 @@ Les 12 cartes sont des recherches à Paris sur le calme, que la densité des arr
 
 L'invariant « une recherche sans priorité inondation garde exactement son score d'avant » imposait l'ancienne formule. Il est remplacé, avec l'accord du porteur, par la méthode vérifiée sur l'index entier : moyenne pondérée des seuls critères mesurés, **identique à l'ancienne formule pour toute commune entièrement mesurée**. Les 19 autres tests de FUT-129 sont inchangés et passent, sessions figées comprises.
 
-## 7. Limites
+## 7. Révision du 24/10 après revue de #87
+
+**Deux correctifs.**
+- **Ordre** : la première version regroupait l'étalement par couverture seule ; une commune complète mais à la limite pouvait passer devant une commune confirmée à couverture partielle. Elle passe désormais après (§2). Effet de bord voulu : à couverture égale, l'étalement régional ne peut plus faire remonter une commune à la limite devant une commune confirmée d'une région déjà vue.
+- **Phrases générales** : « Les trois pourraient convenir », « Un seul territoire répond à ce que vous avez demandé » et « Voici ceux qui impliquent le moins de compromis » ne sont plus atteintes que si toutes les communes affichées ont une couverture complète. Sinon, le moteur rend `couverture` (`partielle`, `aucune`, `sans_priorite`) et une phrase d'exploration (`MESSAGE_COUVERTURE`), que la page affiche et que le repli de synthèse reprend ; la synthèse reçoit `couverture_des_priorites` avec la consigne de ne dire ni « correspondent », ni « répondent », ni « conviennent », ni « moins de compromis ».
+
+**Écarts avec la première version de #87** (mêmes 984 recherches, même index) : aucune composition, aucun ordre, aucun palier, aucune raison ne change ; seules les 12 phrases générales des recherches à couverture incomplète changent (8 « partielle », 4 « aucune »). Aucune phrase générale ne promet plus une correspondance sur une couverture incomplète (0 sur 984). Contrôle de promotion sur l'index entier inchangé : 0 commune incomplète dans le top 100 (1 594 sans la garde).
+
+**Navigateur** (`scripts/fut109/capturer-couverture.mjs`, captures et relevés dans `docs/audits/2026-10-24-fut109-captures/`) : vraie page « Où vivre », serveur local sans clé Anthropic, résultats de la route `/match` (déterministe) restaurés comme session, synthèse remplacée par un texte explicite. 1 440 et 390 px, aucun débordement.
+
+| Situation | Phrase générale | Palier des cartes |
+|---|---|---|
+| Complète (17 : soins, nature) | « Les trois pourraient convenir. » | Bonne correspondance |
+| Partielle (75 : calme, culture) | « Certaines de vos priorités ne sont pas mesurées… » | Priorités en partie mesurées + « Non mesuré ici : un cadre calme. » |
+| Aucune (75 : calme) | « Aucune de vos priorités n'est mesurée… » | À explorer + « Non mesuré ici : un cadre calme. » |
+| Sans priorité (17) | « Votre recherche ne porte sur aucune priorité que le comparateur mesure… » | À explorer |
+
+## 8. Limites
 
 - Le score affiché n'est jamais chiffré à l'écran : seul le palier l'est, et il est réservé aux couvertures complètes.
-- La carte n'a pas été vérifiée dans un navigateur : le parcours « Où vivre » appelle le modèle pour analyser le projet, et aucun appel Anthropic n'était autorisé. Le texte de la carte est couvert par un test de source.
+- **Communes à la limite, de bout en bout** : elles naissent de l'isochrone IGN, que le moteur ne laisse pas injecter et que le serveur local n'a pas jointe (la contrainte de trajet reste « non appliquée » hors ligne). L'ordre est prouvé par des tests sur `ordreClassement` et `etalerParGroupes`, que `matchProjects` utilise à chaque étape, dont le cas demandé : commune confirmée à couverture partielle contre commune à la limite à couverture complète.
+- Observé, préexistant sur `main`, non corrigé : le bloc de questions propose « Pourquoi Paris ressort en premier ? » même en exploration, et Paris (1ᵉʳ arrondissement, moins de 25 000 habitants dans une très grande agglomération) reçoit l'identité « aux portes d'une grande ville ».
 - `vie_locale` garde son `?? 0` hors rétablissement : `null` y code des communes sans aucun lieu ni association recensés, un zéro mesuré. Hœnheim (11 469 habitants) en fait partie, ce qui ressemble à un trou de source (Alsace-Moselle) : à vérifier hors FUT-109.
