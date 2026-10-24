@@ -65,6 +65,7 @@ export type { DpeLabel, DpeRecord, DpeAttribution } from "./dpe-attribution.ts";
 export { dedupeAndCollapseDpe, dpeAttributionStatus } from "./dpe-attribution.ts";
 
 import { LABEL_ORDER, dedupeAndCollapseDpe } from "./dpe-attribution.ts";
+import { grainDpe, issuDesDonneesDeLImmeuble } from "./dpe-grain.ts";
 import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
 
 export type DpeCommuneSummary = {
@@ -113,6 +114,9 @@ const SELECT_LOGEMENT = [
   "qualite_isolation_murs",
   "qualite_isolation_menuiseries",
   "methode_application_dpe",
+  "appartement_non_visite",
+  "surface_habitable_immeuble",
+  "nombre_appartement",
   "_geopoint",
 ].join(",");
 
@@ -140,6 +144,9 @@ type ApiRecord = {
   qualite_isolation_murs?: string | null;
   qualite_isolation_menuiseries?: string | null;
   methode_application_dpe?: string | null;
+  appartement_non_visite?: string | number | null;
+  surface_habitable_immeuble?: number | null;
+  nombre_appartement?: number | null;
   _geopoint?: string | null;
 };
 
@@ -178,7 +185,27 @@ function toRecord(r: ApiRecord): DpeRecord {
     isolation_murs:       r.qualite_isolation_murs ?? null,
     isolation_menuiseries: r.qualite_isolation_menuiseries ?? null,
     methode_dpe:          r.methode_application_dpe ?? null,
+    ...champsDeGrain(r),
   };
+}
+
+// FUT-74 : CE QUE L'ADEME DIT DE L'IMMEUBLE, posé seulement là où il sert. Le dictionnaire de données
+// définit `appartement_non_visite` pour les appartements générés à partir de l'immeuble, et la surface
+// et le nombre d'appartements de l'immeuble pour un DPE d'immeuble. Les poser sur tout record changerait
+// la forme de chaque diagnostic d'appartement individuel ou de maison, donc l'empreinte de chaque
+// rapport versionné, sans rien apporter au lecteur.
+function champsDeGrain(r: ApiRecord): Partial<DpeRecord> {
+  const enregistre = { type_batiment: r.type_batiment ?? null, methode_dpe: r.methode_application_dpe ?? null };
+  if (grainDpe(enregistre) === "immeuble") {
+    return {
+      surface_immeuble_m2: r.surface_habitable_immeuble ?? null,
+      nombre_appartements: r.nombre_appartement ?? null,
+    };
+  }
+  if (issuDesDonneesDeLImmeuble(enregistre)) {
+    return { appartement_non_visite: toBool01(r.appartement_non_visite) };
+  }
+  return {};
 }
 
 async function fetchLines(dataset: string, params: Record<string, string>): Promise<ApiRecord[]> {
@@ -445,7 +472,9 @@ export async function getDpeByCoordinates(
 }
 
 async function getDpeCommuneSummary(inseeCode: string): Promise<DpeCommuneSummary | null> {
-  const qs = `code_insee_ban:"${inseeCode}"`;
+  // FUT-74 : des LOGEMENTS seulement. Un DPE d'immeuble compté ici pèserait comme un logement de plus,
+  // alors qu'il décrit le bâtiment de plusieurs d'entre eux.
+  const qs = `code_insee_ban:"${inseeCode}" AND type_batiment:(appartement OR maison)`;
 
   const [aggs, recent] = await Promise.all([
     fetchAgg(DS.existant, "etiquette_dpe", qs),

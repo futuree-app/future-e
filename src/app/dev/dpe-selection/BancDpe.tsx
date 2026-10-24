@@ -4,6 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { EnergieSection, type DpeUiStatus } from "@/components/report/logement/EnergieSection";
+import { dpeDuLogement } from "@/lib/dpe-grain";
+import {
+  GENERES_SEULS, IMMEUBLE_ET_GENERES_SANS_COMPLEMENT, IMMEUBLE_ET_INDIVIDUELS, IMMEUBLE_SEUL, dpe as dpeFut74,
+} from "@/lib/dpe-grain.fixtures";
 
 function dpe(over: Partial<DpeRecord>): DpeRecord {
   return {
@@ -39,6 +43,13 @@ const AVEC_IMMEUBLE = [
   dpe({ id_dpe: "2417IM", complement: null, etage: null, surface_m2: 2140, type_batiment: "immeuble", methode_dpe: "dpe immeuble collectif", etiquette_dpe: "D" }),
 ];
 
+// FUT-74 : les formes relevées sur la base réelle le 24/10/2026 (identifiants inventés).
+const IMMEUBLE_DATE = { ...IMMEUBLE_SEUL[0], date_dpe: "2026-10-19", nombre_appartements: 10, surface_immeuble_m2: 374.3 };
+const GENERE_NON_VISITE = dpeFut74({
+  id_dpe: "FUT74GEN00099", methode_dpe: "dpe appartement généré à partir des données DPE immeuble",
+  appartement_non_visite: true, etiquette_dpe: "D", complement: "Lot : 900009 - Porte : 21",
+});
+
 type Cas = { titre: string; statut: DpeUiStatus; candidats: DpeRecord[]; retenu?: DpeRecord; baseMuette?: boolean; partielle?: boolean };
 const CAS: Record<string, Cas> = {
   "1": { titre: "Un diagnostic, à confirmer", statut: "selection_required", candidats: UN },
@@ -51,16 +62,25 @@ const CAS: Record<string, Cas> = {
   panne: { titre: "Base ADEME muette", statut: "not_found", candidats: [], baseMuette: true },
   auto: { titre: "Retenu automatiquement (maison)", statut: "auto_confirmed", candidats: [MAISON], retenu: MAISON },
   choisi: { titre: "Choisi par le lecteur", statut: "confirmed", candidats: TRENTE_QUATRE, retenu: TRENTE_QUATRE[5] },
+  "fut74-generes": { titre: "FUT-74 · L'immeuble et six appartements générés", statut: "selection_required", candidats: IMMEUBLE_ET_GENERES_SANS_COMPLEMENT },
+  "fut74-generes-lots": { titre: "FUT-74 · Trois appartements générés, sans immeuble", statut: "selection_required", candidats: GENERES_SEULS },
+  "fut74-individuels": { titre: "FUT-74 · L'immeuble et trois appartements individuels", statut: "selection_required", candidats: IMMEUBLE_ET_INDIVIDUELS },
+  "fut74-immeuble-seul": { titre: "FUT-74 · Le DPE de l'immeuble, seul", statut: "selection_required", candidats: [IMMEUBLE_DATE] },
+  "fut74-ancien-choix": { titre: "FUT-74 · Un DPE d'immeuble retenu avant le correctif", statut: "confirmed", candidats: [IMMEUBLE_DATE, ...GENERES_SEULS], retenu: IMMEUBLE_DATE },
+  "fut74-genere-retenu": { titre: "FUT-74 · Un appartement généré, non visité, retenu", statut: "confirmed", candidats: [GENERE_NON_VISITE], retenu: GENERE_NON_VISITE },
 };
 
 function Section({ cas }: { cas: Cas }) {
   const [statut, setStatut] = useState<DpeUiStatus>(cas.statut);
   const [retenu, setRetenu] = useState<DpeRecord | null>(cas.retenu ?? null);
-  const dpeAffiche = statut === "auto_confirmed" || statut === "confirmed" ? retenu : null;
+  // La même lecture que `LogementModule` : un DPE retenu qui ne porte pas sur un logement est écarté.
+  const dpeConfirme = statut === "auto_confirmed" || statut === "confirmed" ? retenu : null;
+  const dpeAffiche = dpeDuLogement(dpeConfirme);
   return (
     <EnergieSection
       dpeStatus={statut}
       dpe={dpeAffiche}
+      dpeEcarte={dpeConfirme && !dpeAffiche ? dpeConfirme : null}
       audit={null}
       candidates={cas.candidats}
       dpeNonVerifiable={cas.baseMuette ?? false}

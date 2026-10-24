@@ -8,7 +8,8 @@ import { formatGesM2, formatKwhEpM2 } from "@/lib/audit-record";
 import type { VoixAudit } from "@/lib/audit-lecture";
 import { AuditEnergetiqueBlock } from "./AuditEnergetiqueBlock";
 import { dateFr } from "@/lib/decision/autour-permis";
-import { phraseAttribution, vueSectionDpe } from "@/lib/dpe-selection-vue";
+import { phraseAttribution, phraseChoixEcarte, phraseEtabliDepuisImmeuble, vueSectionDpe } from "@/lib/dpe-selection-vue";
+import { grainDpe } from "@/lib/dpe-grain";
 
 // Face 1 — Énergie & rénovation : attribution du DPE au logement (sélecteur / absence / rejet /
 // diagnostic confirmé) et audit énergétique s'il existe. La lecture thermique riche (confort d'été)
@@ -35,12 +36,18 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 }
 
 export function EnergieSection({
-  dpeStatus, dpe, audit, auditStatus, autresAudits = [], autresAuditsIncomplets = false, voixAudit = "neutre", auditDetailsOuverts = false,
+  dpeStatus, dpe, dpeEcarte = null, audit, auditStatus, autresAudits = [], autresAuditsIncomplets = false, voixAudit = "neutre", auditDetailsOuverts = false,
   candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
   onPick, onNotInList, onReselect, onPickParNumero,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
+  /**
+   * FUT-74 (D4) : le diagnostic retenu au dossier qui ne porte pas sur un logement (un DPE d'immeuble
+   * choisi avant que la route ne le refuse). Il reste inscrit ; la section dit pourquoi elle ne le lit
+   * plus, et offre d'en retirer le choix. `dpe` vaut alors `null`.
+   */
+  dpeEcarte?: DpeRecord | null;
   audit: LogementReport["audit"];
   /** FUT-65 : `unavailable` dit que l'audit n'a pas pu être vérifié ; `undefined` (rapport ancien) ne dit rien. */
   auditStatus?: LogementReport["auditStatus"];
@@ -107,6 +114,17 @@ export function EnergieSection({
       <ReportSection eyebrow="Diagnostics à cette adresse" tone="orange">
         <GlassCard>
           {erreur ? <p style={{ fontSize: 13.5, color: "var(--danger, #c0563a)", lineHeight: 1.6, margin: "0 0 14px" }}>{erreur}</p> : null}
+
+          {/* UN ANCIEN CHOIX QUI NE SERT PLUS SE DIT, IL NE DISPARAÎT PAS (FUT-74, D4). Rien n'est effacé :
+              le lecteur voit ce qui avait été retenu, pourquoi le dossier ne le lit plus, et choisit. */}
+          {dpeEcarte && (
+            <div style={{ display: "grid", gap: 10, padding: "12px 14px", marginBottom: 16, borderRadius: 10, border: "1px solid var(--border-2)" }}>
+              <p style={{ fontSize: 14, color: "var(--fg-1)", lineHeight: 1.6, margin: 0 }}>
+                {phraseChoixEcarte(grainDpe(dpeEcarte) === "immeuble" ? "immeuble" : "indetermine")}
+              </p>
+              <LienReprise busy={busy} onClick={onReselect} label="Retirer ce choix et désigner le diagnostic du logement" />
+            </div>
+          )}
 
           {/* LE REFUS EST UNE RÉPONSE, ET ELLE SE VOIT (20/08/2026). « Aucun de ces diagnostics
               n'est celui de ce logement » écrivait bien `not_in_list` en base, mais l'écran rendait
@@ -215,6 +233,11 @@ export function EnergieSection({
           />.
         </p>
         {erreur ? <p style={{ fontSize: 13, color: "var(--danger, #c0563a)", lineHeight: 1.55, margin: 0 }}>{erreur}</p> : null}
+
+        {/* FUT-74 (D6) : un DPE de logement établi à partir de l'immeuble le dit, sans en douter. */}
+        {phraseEtabliDepuisImmeuble(dpe) && (
+          <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{phraseEtabliDepuisImmeuble(dpe)}</p>
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px,1fr))", gap: 14 }}>
           {dpe.conso_ep_m2 != null && <Block label="Consommation" value={formatKwhEpM2(dpe.conso_ep_m2)} />}

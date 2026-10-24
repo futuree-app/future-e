@@ -282,13 +282,13 @@ test("Nîmes, B1 : les caractéristiques de l'immeuble, jamais attribuées au lo
   const c = carteChaleur(d)!;
   const t = texte(rendreComposition(c, []));
   assert.match(t, /De fortes chaleurs projetées, et un confort d'été encore à vérifier/);
-  assert.match(t, /Le diagnostic retrouvé, daté du 7 novembre 2023, a été généré à partir des données de l'immeuble : il décrit le bâtiment \(inertie lourde, VMC simple flux, isolation des murs : insuffisante, menuiseries : moyenne\), pas ce logement, et ne qualifie pas son confort d'été\./);
+  assert.match(t, /Le diagnostic retrouvé, daté du 7 novembre 2023, a été établi à partir des données de l'immeuble : les caractéristiques qu'il décrit sont celles du bâtiment \(inertie lourde, VMC simple flux, isolation des murs : insuffisante, menuiseries : moyenne\), et il ne qualifie pas le confort d'été de ce logement\./);
   assert.match(t, /Il ne dit ni si le logement est traversant, ni s'il dispose de protections solaires\./);
   // Rien du bâtiment n'est dit DU logement, et aucun indicateur n'est cité.
   assert.doesNotMatch(t, /Le logement (n'est pas|est) traversant|son inertie est|classe son confort d'été|confort d'été (bon|moyen|insuffisant)/);
   assert.match(t, /Demandez si le logement est traversant/);
   assert.match(t, /Demandez si le logement est traversant Données et limites À vérifier Un logement traversant permet de créer un courant d'air d'une façade à l'autre\. Demandez aussi si les fenêtres ont des volets ou des stores, si l'on peut aérer les chambres la nuit et si le logement est sous les toits\. L'aération de nuit ne rafraîchit que lorsque l'air extérieur est plus frais qu'à l'intérieur\./);
-  assert.equal(c.logement.evidence[0].observedValue, "diagnostic établi à l'immeuble");
+  assert.equal(c.logement.evidence[0].observedValue, "diagnostic établi à partir des données de l'immeuble");
   assert.equal(c.logement.evidence[0].observedAt, "2023-11-07");
   // Aucun constat « Confort d'été insuffisant » n'a été émis (B1) : rien à absorber.
   assert.deepEqual(c.absorbedFactIds, ["30189:climat-chaleur"]);
@@ -324,7 +324,7 @@ test("C : aucune preuve ADEME n'est présentée comme retrouvée (provenance et 
     assert.ok(!d.conclusionBasis.evidence.some((e: M) => e.factId === "logement.confort-ete"), nom);
   }
   // A et B1 gardent leur preuve datée, rattachée à un diagnostic précis.
-  for (const [cas2, valeur, date] of [["temoin", "confort d'été insuffisant", "2024-03-18"], ["immeuble", "diagnostic établi à l'immeuble", "2023-11-07"]] as const) {
+  for (const [cas2, valeur, date] of [["temoin", "confort d'été insuffisant", "2024-03-18"], ["immeuble", "diagnostic établi à partir des données de l'immeuble", "2023-11-07"]] as const) {
     const e = carteChaleur((await dossier("nimes", { chaleur: 3, logement: cas2 })).d)!.logement.evidence;
     assert.equal(e.length, 1);
     assert.deepEqual([e[0].label, e[0].observedValue, e[0].observedAt, e[0].sourceMode, e[0].grain], ["Base DPE (ADEME)", valeur, date, "persisted_snapshot", "adresse"]);

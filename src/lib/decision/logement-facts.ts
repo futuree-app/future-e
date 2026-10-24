@@ -3,6 +3,7 @@
 // energyState (decision/logement-coverage.ts, pur) ; type-only le reste -> node-testable.
 import { energyState } from "./logement-coverage.ts";
 import { deriveThermalEvidence } from "../thermal-evidence.ts";
+import { dpeDuLogement } from "../dpe-grain.ts";
 import type { LogementDecisionData } from "../server/logement-decision-data.ts";
 import type { DpeRecord } from "../dpe.ts";
 import type { LogementFacts, ConfortEteFait, ConfortEteCle } from "./decision-fact.ts";
@@ -15,7 +16,9 @@ import type { LogementFacts, ConfortEteFait, ConfortEteCle } from "./decision-fa
  * `protection_solaire: false` vaut « non renseignées » (c'est le libellé de `deriveThermalEvidence`) :
  * la base publie 0 quand le diagnostiqueur n'a rien saisi, et l'on n'affirme pas une absence.
  */
-export function confortEteDepuisDpe(savedDpe: DpeRecord | null): ConfortEteFait {
+export function confortEteDepuisDpe(retenu: DpeRecord | null): ConfortEteFait {
+  // FUT-74 : un diagnostic qui ne porte pas sur un logement ne documente le confort d'aucun logement.
+  const savedDpe = dpeDuLogement(retenu);
   const ev = deriveThermalEvidence(savedDpe);
   const tous = [...ev.factors, ...ev.drawerFields];
   const caracteristiques = tous.map((f) => ({ cle: f.key as ConfortEteCle, libelle: f.label, sens: f.polarity }));
@@ -40,7 +43,11 @@ export function confortEteDepuisDpe(savedDpe: DpeRecord | null): ConfortEteFait 
   return { niveau: "aucun", indicateur: null, methode: null, caracteristiques: [], nonRenseignees: ["traversant", "protection"], dateDiagnostic: null };
 }
 
-export function buildLogementFacts(data: LogementDecisionData, savedDpe: DpeRecord | null, addressLabel = "cette adresse"): LogementFacts {
+export function buildLogementFacts(data: LogementDecisionData, retenu: DpeRecord | null, addressLabel = "cette adresse"): LogementFacts {
+  // FUT-74 : LE DIAGNOSTIC D'UN LOGEMENT, OU AUCUN. Un snapshot peut porter un DPE d'immeuble retenu
+  // avant que la route ne le refuse : il reste inscrit au dossier, et son étiquette n'entre pas dans les
+  // faits. Sans cette ligne, `ruleDpe` écrivait « le diagnostic choisi classe ce logement F ».
+  const savedDpe = dpeDuLogement(retenu);
   const rgaNotable = data.rga.coverage === "present" && !!data.rga.label && /moyen|fort|élev/i.test(data.rga.label);
   // LA MÉTHODE PRIME, et c'est le garde-fou : `deriveThermalEvidence` rend `indicator: null` dès que
   // le DPE a été généré à l'immeuble. On ne conclut donc au confort d'été que sur un diagnostic qui
