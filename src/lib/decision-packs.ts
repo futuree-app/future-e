@@ -27,6 +27,8 @@ export type DecisionPack = {
   communes: (string | null)[];
   projetLabel: string | null;
   parsedSnapshot: ParsedProject | null; // null en mode choix
+  /** Date d'achat (FUT-129 : contextualiser un comparatif vendu avant un changement de lecture). */
+  createdAt: string | null;
 };
 
 // L'utilisateur possède-t-il le pack pour ces communes ? Lecture RLS (ses propres packs).
@@ -39,7 +41,7 @@ export async function resolvePackOwnership(
   const { data } = await supabase
     .from("decision_packs")
     .select(
-      "trio_key, mode, insee_1, insee_2, insee_3, commune_1, commune_2, commune_3, projet_label, parsed_snapshot",
+      "trio_key, mode, insee_1, insee_2, insee_3, commune_1, commune_2, commune_3, projet_label, parsed_snapshot, created_at",
     )
     .eq("user_id", userId)
     .eq("trio_key", key)
@@ -64,6 +66,7 @@ export async function resolvePackOwnership(
     communes: communesOut,
     projetLabel: data.projet_label,
     parsedSnapshot: (data.parsed_snapshot as ParsedProject | null) ?? null,
+    createdAt: typeof data.created_at === "string" ? data.created_at : null,
   };
 }
 

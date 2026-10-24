@@ -409,6 +409,8 @@ export default function LogementModule({
         cavites: coverage.cavites.coverage, caviteProche: coverage.cavites.count > 0,
         patrimoine: coverage.patrimoine.coverage, perimetrePatrimonial: coverage.patrimoine.count > 0,
         sinistralite: coverage.sinistralite.coverage, sinistraliteActive: coverage.sinistralite.active,
+        // FUT-127 : un rapport antérieur n'a pas ce champ ; il est absent, jamais inventé.
+        ...(coverage.zonageInondation ? { zonageInondation: coverage.zonageInondation } : {}),
         addressLabel: result?.address?.label ?? "cette adresse",
       }
     : null;

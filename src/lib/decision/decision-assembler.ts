@@ -118,6 +118,24 @@ function factEvidence(f: DecisionFact): EvidenceRef[] {
   return f.role === "compromise" ? f.sides.flatMap((s) => s.evidence) : f.evidence;
 }
 
+// UNE RÉSERVE MAJEURE PASSE AVANT CE QUI CORRESPOND (FUT-127, arbitrage du porteur du 23/10/2026).
+// Les correspondances ouvrent d'ordinaire les cartes, juste sous le verdict qui les annonce. Mais à
+// Charron, avec une autre priorité favorable, « Ce qui correspond à votre projet » s'affichait AU-DESSUS
+// d'une adresse en zone d'interdiction submersible : la réserve se lisait comme une nuance après coup.
+// Quand une carte de contrôle `decision_critical` est assemblée (aujourd'hui, la seule zone inondation
+// établie à l'adresse), la section des contrôles remonte juste après les conditions sans compromis.
+// Les correspondances suivent immédiatement : rien n'est retiré, la balance reste visible. Sans réserve
+// décisive, l'ordre ne change pas.
+function avantLesCorrespondancesSiCritique(sections: DossierSection[]): DossierSection[] {
+  const controles = sections.find((s) => s.key === "verifications");
+  const critique = controles?.cards.some((c) => c.kind === "fact" && c.fact.role === "verification" && c.fact.materialityTier === "decision_critical");
+  if (!controles || !critique) return sections;
+  const sans = sections.filter((s) => s !== controles);
+  const apres = sans.findIndex((s) => s.key !== "incompatibilities");
+  const i = apres === -1 ? sans.length : apres;
+  return [...sans.slice(0, i), controles, ...sans.slice(i)];
+}
+
 export function assembleDossier(
   run: RunResult,
   project: UserProject,
@@ -179,7 +197,7 @@ export function assembleDossier(
     // ce que le DOSSIER contient, pas ce que la minute montre.
     { key: "verifications", title: l.verifTitle, cards: sectionCards(facts, compositions, ["verification"], "verifications", Number.POSITIVE_INFINITY) },
   ];
-  const sections = candidates.filter((s) => s.cards.length > 0);
+  const sections = avantLesCorrespondancesSiCritique(candidates.filter((s) => s.cards.length > 0));
   const allCards = sections.flatMap((s) => s.cards);
   const shown = allCards.filter((c): c is DossierCard & { kind: "fact" } => c.kind === "fact").map((c) => c.fact);
   const shownComps = allCards.filter((c): c is DossierCard & { kind: "composition" } => c.kind === "composition").map((c) => c.composition);

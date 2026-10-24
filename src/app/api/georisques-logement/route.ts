@@ -69,7 +69,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     );
 
     const georisquesAddressP = process.env.GEORISQUES_API_TOKEN
-      ? getGeorisquesAddressSummary(address.latitude, address.longitude).catch(() => null)
+      ? getGeorisquesAddressSummary(address.latitude, address.longitude, address.citycode).catch(() => null)
       : Promise.resolve(null);
     const georisquesParcelP = parcelP.then((parcel) =>
       process.env.GEORISQUES_API_TOKEN && parcel?.parcelCode
@@ -160,6 +160,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         cavites,
         heritage,
         sinistralite,
+        parcelleParRepli: parcel?.rattachement === "repli",
       }),
       granularity: {
         geocoding: "address",

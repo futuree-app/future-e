@@ -573,6 +573,18 @@ const POSTURE = (text: string): VerdictHeadline =>
 
 // LA DOUBLE GATE. Un headline qui nomme doit tenir les DEUX conditions, sinon la branche entière
 // retombe en posture : jamais un héros à moitié nommé, jamais une phrase qui déborde sa mesure.
+// « RÉSERVE MAJEURE » (FUT-127, arbitrage du porteur du 23/10/2026). « Correspondance à nuancer » se lisait
+// comme une nuance secondaire au-dessus d'une adresse en zone d'interdiction submersible, alors que le
+// lecteur avait demandé un faible risque d'inondation. L'étiquette change quand une réserve
+// `decision_critical` est AFFICHÉE : aujourd'hui, seule une zone inondation ÉTABLIE à l'adresse en produit
+// une (liée explicitement à l'inondation, rattachement fiable, régime d'interdiction ou particulier ;
+// `materiality-rules.ts`). Une incertitude, une donnée manquante ou une divergence point / parcelle restent
+// `structuring` et gardent l'étiquette ordinaire. Le ton ne change pas : une réserve n'est pas une
+// incompatibilité, celle-ci a sa propre étiquette (« Condition non respectée »).
+function reserveMajeureEtablie(input: Pick<ConclusionPlanInput, "shownFacts">): boolean {
+  return input.shownFacts.some((f) => f.role === "verification" && f.materialityTier === "decision_critical");
+}
+
 function nameIssues(
   text: string,
   candidates: LeadCandidate[],
@@ -1377,7 +1389,7 @@ function verdictBrut(input: ConclusionPlanInput, controles: PerimetreControles):
     // alors son compte plutôt que d'annoncer zéro, et la clause « plus bas » porte tout le dossier.
     const montres = controles.visibles;
     return {
-      label: "Correspondance à nuancer", tone: "caution",
+      label: reserveMajeureEtablie(input) ? "Réserve majeure" : "Correspondance à nuancer", tone: "caution",
       // « conclure à Toulouse » se lit comme « tirer une conclusion sur place » : la conclusion porte
       // SUR la commune, elle ne s'y tient pas.
       headline: namedReserve ?? POSTURE(
@@ -1429,7 +1441,7 @@ function verdictBrut(input: ConclusionPlanInput, controles: PerimetreControles):
     };
   }
   return {
-    label: "Lecture encore partielle", tone: "caution",
+    label: reserveMajeureEtablie(input) ? "Réserve majeure" : "Lecture encore partielle", tone: "caution",
     headline: namedReserve ?? POSTURE(`Il est encore trop tôt pour dire que ${voc.repond(nom)}.`),
     // « 2 points structurants demandent attention » : sans déterminant, la phrase n'est pas française,
     // et « structurants » est le nom d'un materialityTier, soit la tuyauterie que le lot A retire

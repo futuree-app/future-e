@@ -23,6 +23,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 import type { RegulatoryPlan } from "../pprn-zonage.ts";
+import { zonageInondationDeLAdresse, type ZonageInondationFait } from "./zonage-inondation.ts";
 import type { OnrnSinistralite } from "../onrn-sinistralite.ts";
 
 export type SourceCoverage = "present" | "none" | "unavailable"; // none = la source a répondu, rien trouvé
@@ -40,6 +41,8 @@ export type LogementCoverageInputs = {
   heritage: { items: unknown[]; sourceStatus: "ok" | "unavailable" };
   /** `null` = pas de code commune, ou panne. */
   sinistralite: OnrnSinistralite | null;
+  /** FUT-127 : la parcelle vient du repli cadastral (le point ne tombait dans aucune parcelle). */
+  parcelleParRepli?: boolean;
 };
 
 export type LogementCoverage = {
@@ -48,6 +51,8 @@ export type LogementCoverage = {
   cavites: { coverage: SourceCoverage; count: number };
   patrimoine: { coverage: SourceCoverage; count: number };
   sinistralite: { coverage: SourceCoverage; active: boolean };
+  /** FUT-127 : le zonage inondation de l'adresse, point et parcelle confrontés. */
+  zonageInondation: ZonageInondationFait;
 };
 
 /**
@@ -120,5 +125,10 @@ export function deriveLogementCoverage(i: LogementCoverageInputs): LogementCover
       count: i.heritage.items.length,
     },
     sinistralite: { coverage: siniMuet ? "unavailable" : siniActive ? "present" : "none", active: siniActive },
+    zonageInondation: zonageInondationDeLAdresse({
+      point: i.georisquesAddress ? i.georisquesAddress.regulatoryPlans : null,
+      parcelle: i.georisquesParcel ? i.georisquesParcel.regulatoryPlans : null,
+      parcelleParRepli: i.parcelleParRepli,
+    }),
   };
 }

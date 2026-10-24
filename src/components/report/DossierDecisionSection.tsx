@@ -17,6 +17,7 @@ import { DossierDecisionReleve } from "@/components/releve/DossierDecisionReleve
 import type { PresentationDossier } from "@/components/releve/activation";
 import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 import { AnnonceVersion } from "@/components/report/AnnonceVersion";
+import { AvertissementInondationAnterieure } from "@/components/report/AvertissementInondationAnterieure";
 
 // LES SIX REGISTRES DE DÉCISION DE LA CHARTE v1.7 (branchés le 04/08/2026). Chaque section du
 // dossier est l'un des six registres nommés par la charte, et porte sa teinte.
@@ -275,6 +276,9 @@ export function DossierDecisionSection({
             />
           ) : null}
 
+          {/* FUT-127 : une analyse figée avant la correction de la lecture des inondations le dit, sans être
+              réécrite (`lectureInondationAnterieure`, reconnue au contenu de l'artefact). */}
+          <AvertissementInondationAnterieure dossier={dossier} className="rounded-xl p-4 mb-3.5 text-[13px] text-muted" style={{ borderLeft: "2px solid var(--info)", background: "var(--bg-elev-2)" }} />
           {logementStatus === "pending" ? (
             <div className="glass rounded-xl p-4 mb-3.5 flex items-center gap-3" style={{ borderLeft: "2px solid var(--info)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-info shrink-0 animate-pulse" />

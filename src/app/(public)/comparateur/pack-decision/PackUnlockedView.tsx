@@ -10,6 +10,8 @@ type Props = {
   trio: MatchResult[];
   pistes: MatchResult[];
   projetLabel: string | null;
+  /** FUT-129 : contexte d'un comparatif acheté avant un changement de lecture, ou dont le trio a dû être recomposé. */
+  avertissements?: string[];
 };
 
 function cap(s: string): string {
@@ -25,7 +27,7 @@ function forces(r: MatchResult): string[] {
   return out.slice(0, 2);
 }
 
-export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
+export function PackUnlockedView({ data, trio, pistes, projetLabel, avertissements = [] }: Props) {
   const router = useRouter();
   const [opening, setOpening] = useState<string | null>(null);
 
@@ -43,6 +45,13 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel }: Props) {
           Pack Décision · {projetLabel}
         </p>
       )}
+
+      {/* FUT-129 : dire ce qui a changé depuis l'achat, sans rien réécrire. */}
+      {avertissements.map((a) => (
+        <p key={a} data-fut129="avertissement-pack" className="mb-4 rounded-xl px-4 py-3 text-[13px] leading-[1.55] text-muted" style={{ borderLeft: "2px solid var(--info)", background: "var(--bg-elev-2)" }}>
+          {a}
+        </p>
+      ))}
 
       {/* Ouvrir les rapports complets (débloqués par les report_grants du pack) ;
           2 ou 3 selon le mode (choix peut n'en avoir que 2). */}

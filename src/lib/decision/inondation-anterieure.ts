@@ -1,0 +1,62 @@
+// ════════════════════════════════════════════════════════════════════════════════════════════
+// UNE ANALYSE FIGÉE AVANT FUT-127 PEUT RESTER TROMPEUSE SUR L'INONDATION. ON LE DIT, ON NE RÉÉCRIT RIEN.
+//
+// Un artefact `engine-6` ou antérieur porte, tel qu'il a été vendu, l'une de deux lectures que le moteur
+// courant a retirées (FUT-127, engine-7) :
+//
+//   exposition_elevee  « L'exposition de la commune à l'inondation ressort élevée », tirée du seul rang
+//                      du compte de reconnaissances CatNat (4 reconnaissances suffisaient) ;
+//   frequence_faible   la priorité « faible risque d'inondation » comptée FAVORABLE parce que la commune
+//                      avait peu de reconnaissances, alors qu'un faible compte ne démontre rien.
+//
+// L'arbitrage du porteur (22/10/2026) : ne réécrire aucun artefact, et contextualiser de façon visible et
+// testée. La reconnaissance se fait AU CONTENU, pas à la version : ces deux lectures n'existent que dans
+// des artefacts antérieurs, et la page n'a pas à faire descendre la version jusqu'ici pour les voir.
+// Un artefact `engine-7` ne les porte jamais (la règle ne rend plus `satisfied`, et ne dit plus « élevée ») :
+// la fonction rend alors `null`. Pur, testé sous `node --test`.
+// ════════════════════════════════════════════════════════════════════════════════════════════
+import type { DecisionFact, Dossier } from "./decision-fact.ts";
+
+const RULE_INOND = "territoire.inondation-exposition";
+const RULE_INOND_LECTURE = "territoire.inondation-lecture";
+
+export type LectureInondationAnterieure = {
+  motif: "exposition_elevee" | "frequence_faible";
+  texte: string;
+};
+
+function tousLesFaits(d: Dossier): DecisionFact[] {
+  return [
+    ...d.sections.flatMap((s) => s.cards.flatMap((c) => (c.kind === "fact" ? [c.fact] : []))),
+    ...d.absorbedFacts,
+  ];
+}
+
+const EXPOSITION_ELEVEE = /exposition de la commune à l'inondation ressort élevée/;
+
+// Passe éditoriale du 23/10 : ce que le lecteur doit retenir d'abord (cette analyse n'applique plus
+// la lecture actuelle), puis pourquoi, puis ce qu'il peut faire. Sans le sigle CatNat.
+const SUITE = "Une nouvelle analyse lirait les plans de prévention de la commune et la zone de l'adresse. L'analyse ci-dessous reste celle qui vous a été remise.";
+const TEXTE: Record<LectureInondationAnterieure["motif"], string> = {
+  exposition_elevee:
+    "Cette analyse date d'une version antérieure de futur•e : sa lecture des inondations n'est plus celle que nous appliquons. "
+    + "Elle jugeait l'exposition de la commune d'après le nombre de catastrophes naturelles reconnues, qui retrace des indemnisations et ne mesure pas le risque. "
+    + SUITE,
+  frequence_faible:
+    "Cette analyse date d'une version antérieure de futur•e : sa lecture des inondations n'est plus celle que nous appliquons. "
+    + "Elle jugeait votre priorité, un faible risque d'inondation, satisfaite parce que la commune comptait peu de catastrophes naturelles reconnues, ce qui ne démontre pas un faible risque. "
+    + SUITE,
+};
+
+export function lectureInondationAnterieure(d: Dossier | null | undefined): LectureInondationAnterieure | null {
+  if (!d) return null;
+  if (tousLesFaits(d).some((f) => "statement" in f && typeof f.statement === "string" && EXPOSITION_ELEVEE.test(f.statement))) {
+    return { motif: "exposition_elevee", texte: TEXTE.exposition_elevee };
+  }
+  const critere = d.criteria?.registry?.find((c) => c.criterionKey === "faible_risque_inondation");
+  if (critere && critere.outcome === "favorable"
+    && critere.ruleIds.includes(RULE_INOND) && !critere.ruleIds.includes(RULE_INOND_LECTURE)) {
+    return { motif: "frequence_faible", texte: TEXTE.frequence_faible };
+  }
+  return null;
+}

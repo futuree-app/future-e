@@ -9,6 +9,12 @@ export type CadastreParcel = {
   prefixe: string;
   contenance: number | null;
   nomCommune: string | null;
+  /**
+   * FUT-127 : COMMENT CETTE PARCELLE A ÉTÉ RATTACHÉE AU POINT. `point` : le point géocodé tombe
+   * dedans. `repli` : il ne tombait dans aucune (voirie, cour), et c'est la plus petite parcelle d'un
+   * carré de quelques mètres autour, qui peut être celle d'un voisin. Absent sur un rapport antérieur.
+   */
+  rattachement?: "point" | "repli";
 };
 
 type CadastreFeature = {
@@ -136,7 +142,7 @@ export async function findCadastreParcelByPoint(
 
   const directParcel = toCadastreParcel(pointFeatures[0]);
   if (directParcel) {
-    return directParcel;
+    return { ...directParcel, rattachement: "point" };
   }
 
   for (const radiusMeters of [3, 8, 15]) {
@@ -147,7 +153,7 @@ export async function findCadastreParcelByPoint(
     const fallbackParcel = chooseBestParcel(polygonFeatures);
 
     if (fallbackParcel) {
-      return fallbackParcel;
+      return { ...fallbackParcel, rattachement: "repli" };
     }
   }
 

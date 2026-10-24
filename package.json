@@ -11,7 +11,7 @@
     "index:unpack": "node scripts/index-unpack.mjs",
     "index:pack": "node scripts/index-pack.mjs",
     "index:verify": "node scripts/index-verify.mjs",
-    "prebuild": "node scripts/index-verify.mjs && node scripts/accueil/donnees-accueil.mjs",
+    "prebuild": "node scripts/fut129/bascule.mjs --check-production && node scripts/index-verify.mjs && node scripts/accueil/donnees-accueil.mjs",
     "accueil:verifier": "node scripts/accueil/donnees-accueil.mjs",
     "accueil:generer": "node scripts/accueil/donnees-accueil.mjs --ecrire",
     "hooks:install": "node scripts/install-git-hooks.mjs"

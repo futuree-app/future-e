@@ -286,7 +286,7 @@ FACE3_CELL = 0.18
 FACE3_DIR = os.path.join(ROOT, "data", "bpe-points")
 FACE3_CATS = {
     "sante":        {"D265", "D307"},                          # médecin généraliste, pharmacie
-    "alimentation": {"B105", "B201", "B202", "B204", "B207", "B208"},  # supermarché/supérette/épicerie, boucherie, boulangerie, primeur
+    "alimentation": {"B104", "B105", "B201", "B202", "B204", "B207", "B208"},  # B104 filtré par APET ci-dessous ; supermarché, commerces de proximité
     "education":    {"C107", "C108", "C109"},                  # maternelle, primaire, élémentaire
     "transports":   {"E107", "E108", "E109"},                  # gares & haltes voyageurs
     "services":     {"A203", "A206"},                          # banque, bureau de poste
@@ -398,20 +398,31 @@ def grouper_lieux(records):
     return [sorted(m, key=lambda r: (r["siret"], r["nom"])) for _, m in sorted(lieux.items())]
 
 
-def write_face3_shards(parquet_path=None, millesime=None):
+def build_face3_shards(parquet_path=None, millesime=None, b104_only=False):
+    """Prépare les lieux sans écriture ; mêmes règles pour source complète et extrait FUT-99."""
     import math
     parquet_path = parquet_path or PARQUET_FACE3
     code_to_cat = {code: cat for cat, codes in FACE3_CATS.items() for code in codes}
     all_types = list(code_to_cat)
     cols = [COL_TYPE, COL_LAT, COL_LON, "NOMRS", "SIRET", "STATUT_DIFFUSION",
-            "NUMVOIE", "INDREP", "TYPVOIE", "LIBVOIE", "CODPOS", "LIBCOM", "AN"]
+            "NUMVOIE", "INDREP", "TYPVOIE", "LIBVOIE", "CODPOS", "LIBCOM", "AN", "APET"]
     t = pq.read_table(parquet_path, columns=cols)
     col = {c: t.column(c).to_pylist() for c in cols}
     millesime = millesime_du_parquet(parquet_path, millesime)
 
+    if b104_only and (not col[COL_TYPE] or set(col[COL_TYPE]) != {"B104"}):
+        raise ValueError("L'ajout ciblé exige un extrait non vide exclusivement B104")
     cells = {}
     gardes = 0
     for i, ty in enumerate(col[COL_TYPE]):
+        # B104 inclut aussi les grands magasins non alimentaires (4719A).
+        # APET=4711F établit l'activité hypermarché, pas une entrée physique : des drives
+        # sont inclus par l'Insee. Aucun tri par nom d'enseigne, aucune activité devinée.
+        if ty == "B104":
+            if (col["STATUT_DIFFUSION"][i] or "").strip().upper() not in {"O", "P"}:
+                raise ValueError("B104 : STATUT_DIFFUSION inconnu")
+            if (col["APET"][i] or "").strip().upper() != "4711F":
+                continue
         la, lo = col[COL_LAT][i], col[COL_LON][i]
         if ty not in all_types or la is None or lo is None:
             continue
@@ -434,7 +445,7 @@ def write_face3_shards(parquet_path=None, millesime=None):
             ),
         })
 
-    os.makedirs(FACE3_DIR, exist_ok=True)
+    shards = {}
     total_lieux, total_ambigus = 0, 0
     for key, records in cells.items():
         points = []
@@ -463,16 +474,57 @@ def write_face3_shards(parquet_path=None, millesime=None):
         total_lieux += len(points)
         # Ordre stable dans le fichier : catégorie, type, position.
         points.sort(key=lambda p: (p["c"], p["t"], p["lat"], p["lon"]))
-        with open(os.path.join(FACE3_DIR, f"{key}.json"), "w") as f:
-            json.dump(
-                {"cell": key, "millesime": millesime, "points": points},
-                f, ensure_ascii=False, separators=(",", ":"),
-            )
+        shards[key] = {"cell": key, "millesime": millesime, "points": points}
     print(
         f"✓ Face 3 (BPE {millesime}) : {len(cells)} cellules, {gardes} enregistrements "
-        f"-> {total_lieux} lieux, dont {total_ambigus} à plusieurs exploitants -> {FACE3_DIR}",
+        f"-> {total_lieux} lieux, dont {total_ambigus} à plusieurs exploitants (préparés en mémoire)",
         file=sys.stderr,
     )
+
+    return shards
+
+
+def write_face3_shards(parquet_path=None, millesime=None):
+    shards = build_face3_shards(parquet_path, millesime)
+    os.makedirs(FACE3_DIR, exist_ok=True)
+    for key, shard in shards.items():
+        with open(os.path.join(FACE3_DIR, f"{key}.json"), "w") as f:
+            json.dump(shard, f, ensure_ascii=False, separators=(",", ":"))
+
+
+def append_b104(parquet_path, output_dir, base_dir=FACE3_DIR):
+    """Ajout borné, idempotent ; ne lit/écrit ni index ni cache du comparateur.
+
+    output_dir reçoit seulement les cellules modifiées. Toutes les cellules sont validées
+    avant la première écriture. Une mise à jour de B104 déjà intégré exige une autre opération.
+    """
+    shards = build_face3_shards(parquet_path, b104_only=True)
+    pending = {}
+    for key, shard in shards.items():
+        source = os.path.join(base_dir, f"{key}.json")
+        if os.path.exists(source):
+            with open(source) as f:
+                old = json.load(f)
+            if old.get("cell") != key or old.get("millesime") != shard["millesime"]:
+                raise ValueError(f"Cellule ou millésime incompatible : {key}")
+        else:
+            old = {"cell": key, "millesime": shard["millesime"], "points": []}
+        present = [p for p in old["points"] if p["t"] == "B104"]
+        if present:
+            if present != shard["points"]:
+                raise ValueError(f"B104 déjà présent mais différent : {key}")
+            continue
+        merged = old["points"] + shard["points"]
+        merged.sort(key=lambda p: (p["c"], p["t"], p["lat"], p["lon"]))
+        # Cette opération ne doit modifier ni réordonner les anciens points.
+        if [p for p in merged if p["t"] != "B104"] != old["points"]:
+            raise ValueError(f"Ordre des anciens points incompatible : {key}")
+        pending[key] = {**old, "points": merged}
+    os.makedirs(output_dir, exist_ok=True)
+    for key, shard in pending.items():
+        with open(os.path.join(output_dir, f"{key}.json"), "w") as f:
+            json.dump(shard, f, ensure_ascii=False, separators=(",", ":"))
+    return len(pending)
 
 
 def main():
@@ -480,12 +532,21 @@ def main():
     ap.add_argument("--write-index", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--face3-shards", action="store_true")
+    ap.add_argument("--append-b104", metavar="PARQUET", help="ajouter seulement B104 depuis un extrait")
+    ap.add_argument("--output-dir", help="destination explicite des cellules de l'ajout B104")
     # Le millésime BPE n'est PAS figé dans le script : le fichier source change chaque année, et
     # le millésime lu dans la colonne AN est écrit dans chaque shard, puis affiché au lecteur.
     ap.add_argument("--parquet", default=None, help="parquet BPE source des shards (défaut : data/bpe25.parquet)")
     ap.add_argument("--millesime", default=None, help="forcer le millésime (défaut : colonne AN)")
     args = ap.parse_args()
 
+    if args.append_b104:
+        if not args.output_dir or args.face3_shards or args.write_index or args.selftest or args.parquet or args.millesime:
+            ap.error("--append-b104 exige --output-dir et ne se combine pas avec les autres modes")
+        print(f"Cellules modifiées : {append_b104(args.append_b104, args.output_dir)}")
+        return
+    if args.output_dir:
+        ap.error("--output-dir ne s'utilise qu'avec --append-b104")
     if args.face3_shards:
         write_face3_shards(args.parquet, args.millesime)
         return
