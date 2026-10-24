@@ -287,8 +287,13 @@ test("P1 : un candidat unique sur une liste incomplète n'est jamais attribué a
   const maison = { id_dpe: "2475E0000000X", type_batiment: "maison", etiquette_dpe: "D" } as never;
   assert.equal(dpeAttributionStatus([maison], "housenumber").status, "auto_confirmed", "liste complète : inchangé");
   assert.equal(dpeAttributionStatus([maison], "housenumber", false).status, "selection_required");
+  // FUT-74 : l'appel passe par `departDpe`, qui transmet la complétude de la liste à `dpeAttributionStatus`.
   const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /dpeAttributionStatus\(candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
+  assert.match(module, /departDpe\(row, candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
+  const { departDpe } = await import("./dpe-attribution-auto.ts");
+  const neuf = { dpe_selection_status: "pending", dpe_selection_at: null };
+  assert.equal(departDpe(neuf, [maison], "housenumber", false).kind, "a_choisir");
+  assert.equal(departDpe(neuf, [maison], "housenumber", true).kind, "proposer_auto");
 });
 
 test("P2 : l'écran ne présente pas une liste incomplète comme le total de l'adresse", () => {

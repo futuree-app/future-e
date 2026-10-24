@@ -394,3 +394,26 @@ Tests existants ajustés, et pourquoi :
 - `fut20-chaleur-logement.test.ts`, `fut17-relecture-semantique.test.ts` : le nouveau libellé de la composition chaleur pour un appartement établi à partir de l'immeuble.
 
 Banc de développement `/dev/dpe-selection` : six cas `fut74-*` ajoutés, rendus et relus sur le serveur de développement (`fut74-generes`, `fut74-generes-lots`, `fut74-individuels`, `fut74-immeuble-seul`, `fut74-ancien-choix`, `fut74-genere-retenu`). Aucun bouton « Retenir » ne porte un DPE d'immeuble. La saisie d'un numéro d'immeuble n'a pas été rendue en navigateur (elle exige un dossier authentifié) ; sa logique est couverte par `grainDpe` et la route.
+
+### 7.6 Revue indépendante : l'attribution automatique (24/10/2026)
+
+La revue indépendante de la PR #86 a arrêté la fusion sur un défaut réel, démontré sur fixtures et jamais observé en base.
+
+**Cause.** `dpeAttributionStatus` retenait seul un candidat dont le type contient « maison », sans consulter son grain. Deux cas recevaient donc `auto_confirmed` alors que `grainDpe` les déclare indéterminés : une fiche typée « maison » à méthode « dpe immeuble collectif », et un type hors énumération contenant « maison ». Par ailleurs, `LogementModule` posait `auto_confirmed` avant d'appeler le serveur et ignorait sa réponse : un refus (`422 DPE_NON_ATTRIBUABLE`) ou une panne réseau laissait à l'écran un choix que la base n'avait jamais reçu. La route et `dpeDuLogement` empêchaient déjà toute écriture et toute fuite de classe dans le moteur ; c'est la cohérence de l'écran qui manquait.
+
+**Correctif.**
+- `dpeAttributionStatus` exige en plus `attribuableAuLogement(candidat)`. Les conditions historiques restent toutes : candidat unique, liste complète, maison, adresse BAN `housenumber`, étiquette présente.
+- `src/lib/dpe-attribution-auto.ts` (pur) : `departDpe` décide du point de départ (restaurer, aucun, à choisir, proposer) ; `confirmerAutomatiquement` enregistre la proposition et rend `confirme`, `refuse` ou `perime`.
+- `LogementModule` : la proposition laisse la liste ouverte et les gestes en attente pendant l'appel. Elle n'est montrée retenue qu'après la réponse positive du serveur. Un refus ou une panne affiche « Le diagnostic de cette adresse n'a pas pu être retenu automatiquement. S'il est celui de ce logement, vous pouvez le désigner ci-dessous. » Une réponse arrivée après un geste du lecteur est ignorée.
+
+**Aucun autre chemin** n'attribue automatiquement : `auto_confirmed` n'est produit que par `dpeAttributionStatus`, appelé depuis `LogementModule` seulement ; la route ne fait que recevoir ce statut.
+
+**Preuves.**
+- Script de contrôle de la revue (`controle-attribution.mjs`), rejoué sans modification : code de sortie 1 sur `970ea1a1`, 0 après correctif (deux refus, témoin conservé).
+- `src/lib/dpe-attribution-auto.test.ts`, 14 tests : les deux contre-exemples (vérifiés en échec avant correctif) et le témoin ; les conditions historiques (liste partielle, adresse imprécise, sans classe, plusieurs candidats) ; DPE d'immeuble et grain indéterminé ; appartement généré qui garde son grain sans devenir une maison ; retrait volontaire jamais suivi d'une réattribution ; persistance simulée en succès, en refus, en panne réseau, et en réponse périmée.
+- `logement-source-indisponible.test.ts` (FUT-65) suit l'appel jusqu'à `departDpe`, avec la même garantie sur une liste incomplète.
+- `npm test` sur `main` à `0a5aceb9` (#85 comprise) : 3 081 réussis, 0 échec. `tsc`, `eslint` et `next build` propres.
+
+**Ce qui ne change pas.** `grainDpe`, les protections serveur, la collecte, le moteur, les seuils, les snapshots et artefacts, le prompt et les empreintes de synthèse. `engine-7` reste juste : la proposition automatique ne s'applique qu'à l'ouverture d'un dossier neuf, et aucun dossier ne porte un DPE retenu de grain non attribuable.
+
+**Non vérifié en navigateur.** Le chemin automatique exige un dossier neuf à maison unique, et l'ouvrir écrirait une attribution sur un vrai dossier. Il est couvert par les tests ci-dessus.

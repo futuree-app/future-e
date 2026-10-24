@@ -2,6 +2,8 @@
 // ces fonctions sont appelées AUSSI côté client (LogementModule décide l'état du DPE en direct).
 // La partie IO (fetch ADEME) vit dans `dpe.ts`, qui ré-exporte ces symboles pour le serveur.
 
+import { attribuableAuLogement } from "./dpe-grain.ts";
+
 export type DpeLabel = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
 export type DpeRecord = {
@@ -86,6 +88,12 @@ const isMaison = (t: string | null): boolean => (t ?? "").toLowerCase().includes
 // « UN SEUL CANDIDAT » SUPPOSE UNE LISTE COMPLÈTE (FUT-65). Quand l'un des deux jeux ADEME n'a pas
 // répondu, le candidat unique est seulement le seul qu'on a VU : un autre diagnostic peut exister dans
 // le jeu tombé. Sur une liste incomplète, on demande donc toujours confirmation.
+//
+// « MAISON » NE SUFFIT PAS À DIRE « LOGEMENT » (FUT-74, revue du 24/10/2026). `isMaison` cherche un mot
+// dans le type : une fiche typée « maison » à méthode « dpe immeuble collectif », ou un type hors de
+// l'énumération ADEME qui contient « maison », passaient. La convergence exige désormais AUSSI que le
+// diagnostic porte sur un logement selon la règle canonique (`attribuableAuLogement`) ; les autres
+// conditions restent celles d'avant.
 export function dpeAttributionStatus(
   candidates: DpeRecord[],
   banFeatureType: string | null,
@@ -97,6 +105,7 @@ export function dpeAttributionStatus(
     listeComplete &&
     candidates.length === 1 &&
     isMaison(one.type_batiment) &&
+    attribuableAuLogement(one) &&
     banFeatureType === "housenumber" &&
     one.etiquette_dpe != null;
   return strongConvergence
