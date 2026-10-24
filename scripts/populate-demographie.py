@@ -7,6 +7,11 @@ Source INSEE « Évolution et structure de la population 2021 » (recensement) :
 Score = percentile national signé du taux. recit = code narratif (croissance × arrivées).
 cf. spec 2026-06-04-croissance-demographique.
 
+FUT-109 : la base est publiée dans la géographie au 01/01/2024. Une commune dont le TERRITOIRE a changé depuis
+(fusion du 01/01/2025, rétablissement) y décrit un autre territoire que le sien : taux, arrivées et récit de
+l'ancien périmètre. Elle n'est pas notée (abstention, `null`), jamais notée sur le territoire d'avant. La liste
+est celle de data/population-referentiel-cog2025.json (motif territoire_modifie).
+
 Venv .venv-bpe. Modes : --selftest --summary --probe --matrix --write-index.
 """
 import json, os, sys, csv, io, math, argparse, bisect, zipfile, urllib.request
@@ -19,6 +24,7 @@ INSEE_ZIP = os.path.join(CACHE, "insee-evol-pop.zip")
 INSEE_URL = "https://www.insee.fr/fr/statistiques/fichier/8201904/base-cc-evol-struct-pop-2021_csv.zip"
 INSEE_CSV = "base-cc-evol-struct-pop-2021.CSV"
 OUT_CACHE = os.path.join(CACHE, "communes-demographie.json")
+REFERENTIEL = os.path.join(ROOT, "data", "population-referentiel-cog2025.json")
 
 YEARS = 6  # 2015 -> 2021
 # Zone morte autour de 0 pour « stable » (taux annualisé) ; seuil d'arrivée = tercile haut.
@@ -87,8 +93,15 @@ def _num(s):
         return None
 
 
+def territoires_modifies(path=REFERENTIEL):
+    """FUT-109 : communes au territoire modifié depuis la géographie de la base (abstention)."""
+    ref = json.load(open(path))
+    return {k for k, c in ref["communes"].items() if c["motif"] == "territoire_modifie"}
+
+
 def load_insee(valid_insee):
     """Retourne dict insee -> (taux_total, part_nouveaux) pour les communes de l'index."""
+    exclues = territoires_modifies()
     download(INSEE_URL, INSEE_ZIP)
     out = {}
     z = zipfile.ZipFile(INSEE_ZIP)
@@ -96,14 +109,14 @@ def load_insee(valid_insee):
         rd = csv.DictReader(io.TextIOWrapper(f, encoding="latin-1"), delimiter=";")
         for row in rd:
             ins = (row.get("CODGEO") or "").strip()
-            if ins not in valid_insee:
+            if ins not in valid_insee or ins in exclues:
                 continue
             p15 = _num(row.get("P15_POP")); p21 = _num(row.get("P21_POP"))
             taux = growth_rate(p15, p21)
             p01p = _num(row.get("P21_POP01P"))
             iran = sum(_num(row.get(f"P21_POP01P_IRAN{k}")) or 0.0 for k in (3, 4, 5, 6, 7))
             out[ins] = (taux, part_nouveaux(iran, p01p))
-    print(f"INSEE : {len(out)} communes appariées", file=sys.stderr)
+    print(f"INSEE : {len(out)} communes appariées ; {len(exclues)} au territoire modifié depuis la base, non notées", file=sys.stderr)
     return out
 
 
@@ -168,6 +181,9 @@ def selftest():
     assert recit_code(0.0, 0.10, 0.06) == "stable_renouv"
     assert recit_code(-0.02, 0.10, 0.06) == "perd"
     assert recit_code(None, 0.10, 0.06) is None
+    t = territoires_modifies()
+    assert {"85084", "85165", "93066", "14408"} <= t        # rétablissement 2024, fusions 2025
+    assert "08053" not in t and "49126" not in t           # fusion déjà regroupée par la base ; simple changement de code
     print("✓ selftest OK", file=sys.stderr)
 
 

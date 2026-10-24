@@ -12,6 +12,12 @@ const parCode = new Map(index.communes.map((c) => [c.insee, c]));
 const accueil = JSON.parse(readFileSync("src/data/accueil-communes.json", "utf8"));
 const col = Object.fromEntries(accueil.champs.map((c, i) => [c, i]));
 
+test("index : une commune nouvelle du 01/01/2024, déjà regroupée par la source, garde sa population 2021", () => {
+  // Bazeilles 2 502 = 2 365 + 137 (La Moncelle) : au grain, aucune raison de changer de millésime.
+  assert.equal(referentiel.communes["08053"], undefined);
+  assert.equal(parCode.get("08053").population, 2502);
+});
+
 test("index : les trois communes rétablies le 01/01/2024 ont leur population Insee, plus 0", () => {
   assert.deepEqual(
     ["85165", "85212", "60694"].map((k) => [k, parCode.get(k).population]),
@@ -39,6 +45,27 @@ test("index : la taille hors unité urbaine suit la population corrigée", () =>
     const c = parCode.get(k);
     if (c.hors_uu) assert.equal(c.uu_pop, c.population, k);
   }
+});
+
+test("index : aucun score de vie locale ni de démographie calculé sur un autre territoire", () => {
+  const ecarts = [];
+  for (const [k, r] of Object.entries(referentiel.communes)) {
+    const c = parCode.get(k);
+    // Un rétablissement partage un territoire que le code RNA ne répartit pas : pas de vie locale notée.
+    if (r.retablissement && c.vieLocale != null) ecarts.push(`${k} ${r.nom} : vieLocale ${JSON.stringify(c.vieLocale)}`);
+    // La base RP 2021 décrit le territoire d'avant : pas de démographie notée.
+    if (r.motif === "territoire_modifie" && c.demographie != null) ecarts.push(`${k} ${r.nom} : demographie ${JSON.stringify(c.demographie)}`);
+  }
+  assert.deepEqual(ecarts, []);
+});
+
+test("index : pas de rang sans score (une bande d'avant affirmerait une position)", () => {
+  const orphelines = [];
+  for (const c of index.communes) {
+    if (c.rankBands?.vie_locale && c.vieLocale == null) orphelines.push(`${c.insee} vie_locale`);
+    if (c.rankBands?.croissance_demographique && c.demographie?.croissance == null) orphelines.push(`${c.insee} croissance`);
+  }
+  assert.deepEqual(orphelines, []);
 });
 
 test("accueil : les données légères recopient la population corrigée", () => {

@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "regle": "population ADEME 2021 (Insee PMUN, géographie 2023-01-01) gardée si le territoire et le code inchangés jusqu'au 2025-01-01 ; sinon population de référence Insee 2023 (PMUN, limites au 2025-01-01). Mouvements du COG retenus : territoire 21, 31, 32, 33, code 41, 50. Une commune absente de la source sans mouvement reste null.",
+ "regle": "population ADEME 2021 (Insee PMUN, géographie 2024-01-01) gardée si le territoire et le code inchangés depuis le 2024-01-01 (rétablissements de cette date compris) jusqu'au 2025-01-01 ; sinon population de référence Insee 2023 (PMUN, limites au 2025-01-01). Mouvements du COG retenus : territoire 21, 31, 32, 33, code 41, 50. Chaque valeur gardée est vérifiée égale à la population légale 2021 de son territoire. Une commune absente de la source sans mouvement reste null.",
  "sources": {
   "mouvements": {
    "url": "https://www.insee.fr/fr/statistiques/fichier/8377162/v_mvt_commune_2025.csv",
@@ -10,6 +10,11 @@
    "url": "https://www.insee.fr/fr/statistiques/fichier/8680726/ensemble.zip",
    "fichier": "donnees_communes.csv",
    "sha256": "ccfe782e04ebde04a1706214157b288a0d055eb3ab913ff9f7bab5a3571f67ab"
+  },
+  "populationsLegales2021": {
+   "url": "https://www.insee.fr/fr/statistiques/fichier/7739582/ensemble.zip",
+   "fichier": "donnees_communes.csv",
+   "sha256": "eab65b0a64d1439ed28451e55a4a282181d5d5f7290b8e07224aef43a0f78485"
   },
   "ademe2021": {
    "fichier": "communes-population.json",
@@ -23,923 +28,1078 @@
    "population": 1540,
    "millesime": 2023,
    "motif": "code_modifie",
+   "retablissement": false,
    "valeur2021": null,
+   "codesRepris": [
+    "12076"
+   ],
    "mouvements": [
     {
      "mod": "50",
      "date": "2024-03-04"
     }
-   ]
+   ],
+   "uu": null
   },
   "14408": {
    "nom": "Saint-Martin-de-May",
    "population": 4529,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2017,
+   "codesRepris": [
+    "14623"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "14206"
   },
   "14581": {
    "nom": "Aurseulles",
    "population": 1896,
    "millesime": 2023,
    "motif": "code_modifie",
+   "retablissement": false,
    "valeur2021": null,
+   "codesRepris": [
+    "14011"
+   ],
    "mouvements": [
     {
      "mod": "50",
      "date": "2024-04-24"
     }
-   ]
+   ],
+   "uu": null
   },
   "14743": {
    "nom": "Victot-en-Auge",
    "population": 145,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 82,
+   "codesRepris": [
+    "14300"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "15031": {
    "nom": "Celles",
    "population": 217,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": null,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "15035": {
    "nom": "Chalinargues",
    "population": 304,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": null,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "15047": {
    "nom": "Chavagnac",
    "population": 88,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": null,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "15141": {
    "nom": "Neussargues-Moissac",
    "population": 824,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 1653,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "15171": {
    "nom": "Sainte-Anastasie",
    "population": 122,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": null,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "16023": {
    "nom": "Aunac-sur-Charente",
    "population": 647,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 565,
+   "codesRepris": [
+    "16238"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "16097": {
-   "nom": "Val-de-Cognac",
-   "population": 3471,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 3468,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "16198": {
    "nom": "Magnac-lès-Gardes",
    "population": 741,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 473,
+   "codesRepris": [
+    "16147"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "16393": {
    "nom": "La Boixe",
    "population": 2841,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2165,
+   "codesRepris": [
+    "16226"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "17268": {
    "nom": "Rives-de-Boutonne",
    "population": 419,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 189,
+   "codesRepris": [
+    "17334"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "18173": {
-   "nom": "Osmery",
-   "population": 264,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 272,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "19248": {
    "nom": "Les Trois-Saints",
    "population": 1388,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 698,
+   "codesRepris": [
+    "19223",
+    "19230"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "22147": {
    "nom": "Merdrignac",
    "population": 3139,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2964,
+   "codesRepris": [
+    "22309"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "22103"
   },
   "22237": {
    "nom": "Val-d'Arguenon",
    "population": 2844,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2208,
+   "codesRepris": [
+    "22200"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "22201"
   },
   "22241": {
    "nom": "Plumieux",
    "population": 1678,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 1025,
+   "codesRepris": [
+    "22027",
+    "22043"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "23149": {
    "nom": "Parsac",
    "population": 825,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 713,
+   "codesRepris": [
+    "23023"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "25060": {
-   "nom": "Val-d'Usiers",
-   "population": 2132,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 2114,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "25223": {
    "nom": "Éternoz-Vallée-du-Lison",
    "population": 343,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 324,
+   "codesRepris": [
+    "25533"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "25364": {
    "nom": "Mamirolle",
    "population": 1988,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 1798,
+   "codesRepris": [
+    "25297"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "25390": {
    "nom": "Pays-de-Montbenoît",
    "population": 1923,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 401,
+   "codesRepris": [
+    "25303",
+    "25347",
+    "25398",
+    "25620"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "26289": {
    "nom": "Saillans",
    "population": 1460,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 1405,
+   "codesRepris": [
+    "26371"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "28319": {
    "nom": "Neuville Saint Denis",
    "population": 647,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 341,
+   "codesRepris": [
+    "28025",
+    "28276"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "30329": {
    "nom": "Thoiras-Corbès",
    "population": 607,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 442,
+   "codesRepris": [
+    "30094"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "32365": {
    "nom": "Cap d'Astarac",
    "population": 460,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 307,
+   "codesRepris": [
+    "32067",
+    "32260",
+    "32413"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "33008": {
    "nom": "Porte-de-Benauge",
    "population": 602,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 500,
+   "codesRepris": [
+    "33409"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "34144": {
    "nom": "Lunas-les-Châteaux",
    "population": 832,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 670,
+   "codesRepris": [
+    "34093"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "35062": {
-   "nom": "La Chapelle-Fleurigné",
-   "population": 2451,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 2409,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "39434": {
    "nom": "Poligny",
    "population": 3976,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 4011,
+   "codesRepris": [
+    "39548"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "39108"
   },
   "39576": {
    "nom": "Val-Sonnette",
    "population": 1318,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 942,
+   "codesRepris": [
+    "39474"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "42084": {
    "nom": "Solore-en-Forez",
    "population": 507,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 159,
+   "codesRepris": [
+    "42109",
+    "42252"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "42217": {
    "nom": "La Côte-Saint-Didier",
    "population": 520,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 458,
+   "codesRepris": [
+    "42072"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "46172": {
    "nom": "Pern-Lhospitalet",
    "population": 925,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 501,
+   "codesRepris": [
+    "46217"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "49126": {
    "nom": "Orée d'Anjou",
    "population": 17162,
    "millesime": 2023,
    "motif": "code_modifie",
+   "retablissement": false,
    "valeur2021": null,
+   "codesRepris": [
+    "49069"
+   ],
    "mouvements": [
     {
      "mod": "50",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "49160": {
-   "nom": "Ingrandes-le-Fresne-sur-Loire",
-   "population": 3071,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 3070,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "51485": {
    "nom": "La Neuville-au-Temple",
    "population": 579,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 318,
+   "codesRepris": [
+    "51205"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "59006": {
    "nom": "L'Orée de Mormal",
    "population": 619,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 223,
+   "codesRepris": [
+    "59070"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "60054": {
    "nom": "Beaumont-les-Nonains",
    "population": 339,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 878,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2024-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "60694": {
    "nom": "Les Hauts-Talican",
    "population": 542,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 0,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2024-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "61275": {
    "nom": "Merlerault-le-Pin",
    "population": 1429,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 753,
+   "codesRepris": [
+    "61017",
+    "61188",
+    "61192",
+    "61310"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "62447": {
    "nom": "Hesdin-la-Forêt",
    "population": 4480,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2222,
+   "codesRepris": [
+    "62461",
+    "62549",
+    "62743"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "62204"
   },
   "63109": {
    "nom": "Les Deux-Rives",
    "population": 825,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 512,
+   "codesRepris": [
+    "63330"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "64300": {
-   "nom": "Lacq",
-   "population": 1036,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 1035,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "69114": {
    "nom": "Porte des Pierres Dorées",
    "population": 4185,
    "millesime": 2023,
    "motif": "code_modifie",
+   "retablissement": false,
    "valeur2021": null,
+   "codesRepris": [
+    "69159"
+   ],
    "mouvements": [
     {
      "mod": "50",
      "date": "2024-03-15"
     }
-   ]
-  },
-  "69149": {
-   "nom": "Oullins-Pierre-Bénite",
-   "population": 38168,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 37628,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "70152": {
    "nom": "Colombine",
    "population": 605,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 475,
+   "codesRepris": [
+    "70557"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "70180": {
    "nom": "Belles-Fontaines",
    "population": 600,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 444,
+   "codesRepris": [
+    "70264",
+    "70530"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "71566": {
    "nom": "Verdun-Ciel",
    "population": 1811,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 960,
+   "codesRepris": [
+    "71131"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "71105"
   },
   "72155": {
    "nom": "Laigné-Saint-Gervais",
    "population": 4252,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2283,
+   "codesRepris": [
+    "72287"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "72701"
   },
   "72382": {
    "nom": "Val-de-la-Hune",
    "population": 1521,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 964,
+   "codesRepris": [
+    "72298"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "76455": {
    "nom": "Morville-le-Héron",
    "population": 538,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 297,
+   "codesRepris": [
+    "76358"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "79307": {
    "nom": "Sauzé-entre-Bois",
    "population": 2271,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 1495,
+   "codesRepris": [
+    "79060",
+    "79180",
+    "79205",
+    "79212"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "80155": {
    "nom": "Bussus-lès-Yaucourt",
    "population": 556,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 302,
+   "codesRepris": [
+    "80830"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "85076": {
    "nom": "Cugand-la-Bernardière",
    "population": 5711,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 3685,
+   "codesRepris": [
+    "85021"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "00362"
   },
   "85084": {
    "nom": "Essarts-en-Bocage",
    "population": 6851,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 9399,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2024-01-01"
     }
-   ]
+   ],
+   "uu": "85213"
   },
   "85165": {
    "nom": "L'Oie",
    "population": 1250,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 0,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2024-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "85212": {
    "nom": "Sainte-Florence",
    "population": 1359,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": true,
    "valeur2021": 0,
+   "codesRepris": [],
    "mouvements": [
     {
      "mod": "21",
      "date": "2024-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "85223": {
    "nom": "Saint-Jean-d'Hermine",
    "population": 3611,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 2951,
+   "codesRepris": [
+    "85233"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "85292": {
-   "nom": "Rives-du-Fougerais",
-   "population": 1500,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 1507,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
-  },
-  "86247": {
-   "nom": "Val-de-Comporté",
-   "population": 999,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 1014,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": "85113"
   },
   "88321": {
    "nom": "Neufchâteau",
    "population": 6732,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 6580,
+   "codesRepris": [
+    "88393"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": "88204"
   },
   "93066": {
    "nom": "Saint-Denis",
    "population": 149077,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 113942,
+   "codesRepris": [
+    "93059"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "95169": {
-   "nom": "Commeny",
-   "population": 646,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 653,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": "00851"
   },
   "01187": {
    "nom": "Haut Valromey",
    "population": 801,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 609,
+   "codesRepris": [
+    "01330"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "02589": {
    "nom": "Pargny-et-Filain",
    "population": 367,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 255,
+   "codesRepris": [
+    "02311"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
-  },
-  "08053": {
-   "nom": "Bazeilles",
-   "population": 2470,
-   "millesime": 2023,
-   "motif": "territoire_modifie",
-   "valeur2021": 2502,
-   "mouvements": [
-    {
-     "mod": "32",
-     "date": "2024-01-01"
-    }
-   ]
+   ],
+   "uu": null
   },
   "08439": {
    "nom": "Tannay-le-Mont-Dieu",
    "population": 163,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 148,
+   "codesRepris": [
+    "08300"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   },
   "09088": {
    "nom": "Caychax-et-Senconac",
    "population": 20,
    "millesime": 2023,
    "motif": "territoire_modifie",
+   "retablissement": false,
    "valeur2021": 14,
+   "codesRepris": [
+    "09287"
+   ],
    "mouvements": [
     {
      "mod": "32",
      "date": "2025-01-01"
     }
-   ]
+   ],
+   "uu": null
   }
  },
  "absentesSansMouvement": [

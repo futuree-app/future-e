@@ -368,9 +368,9 @@ async function main() {
   }
   console.log(`Pression climatique éco : ${peMarquee} marquée, ${peModeree} modérée (seuils brut p70=${PE_MODEREE.toFixed(3)} p90=${PE_MARQUEE.toFixed(3)}).`);
 
-  // FUT-109 : la population ADEME 2021 n'est pas au grain du référentiel (COG 2025) pour les communes au
-  // territoire modifié depuis 2023 ou absentes de la source. Référentiel versionné, règle dans
-  // scripts/lib/population-grain.mjs.
+  // FUT-109 : la population ADEME 2021 (géographie au 01/01/2024) n'est pas au grain du référentiel (COG 2025)
+  // pour les communes au territoire ou au code modifié depuis (rétablissements du 01/01/2024 compris).
+  // Référentiel versionné, règle dans scripts/lib/population-grain.mjs.
   const referentielPop = JSON.parse(await fs.readFile(path.join(root, 'data', 'population-referentiel-cog2025.json'), 'utf8'));
   const grain = appliquerCorrections(communes, referentielPop.communes);
   console.log(`Population au grain : ${grain.corrigees} communes reprises (Insee 2023), ${grain.absentes} sans valeur officielle.`);
@@ -387,7 +387,7 @@ async function main() {
     vivSource: 'ADEME data_communes (air de fond, APL médecins, éloignement services)',
     percentile: 'ascendant 0–100 sur la France métropolitaine (0 = plus faible valeur)',
     approximations: [
-      'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022) ; communes hors grain du COG 2025 : populations de référence Insee 2023 (data/population-referentiel-cog2025.json)',
+      'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022, géographie au 01/01/2024) ; population 2021 partout, sauf les communes hors grain du COG 2025 : populations de référence Insee 2023 (data/population-referentiel-cog2025.json). Densité et autres indicateurs ADEME : périmètre d\'avant pour les communes modifiées après le 01/01/2024 (FUT-109)',
       'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
       'emploi : viabilité du bassin (taille + diversité A38) à la maille ZE2020 INSEE, héritée par commune. Flores fin 2024, salarié uniquement (sous-estime agriculture/indépendants).',
       'pression_eco : pression climatique sur l\'économie locale (NARRATIF, hors score). Σ part_secteur(ZE) × sensibilité × aléa(pct). AZ = agri+forêt (sécheresse/feu) ; IZ = proxy tourisme (estival=chaleur en plaine, montagne=neige en altitude, proxy faible). Ne mesure PAS la capacité d\'adaptation. Paliers par percentiles nationaux (modérée p70, marquée p90).',

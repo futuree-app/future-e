@@ -6,6 +6,13 @@ Pour chaque commune : densité = compte/(pop+K) pour les lieux (OSM) et les asso
 = 0.7·P_lieux + 0.3·P_assos. cf. spec 2026-06-04-vie-locale.
 
 Venv .venv-bpe (numpy). Modes : --selftest --summary --probe --matrix --write-index.
+
+FUT-109 : numérateur et dénominateur sur le MÊME territoire. La population de l'index est au grain du COG 2025
+(data/population-referentiel-cog2025.json). Le RNA range une association sous le code de la commune de son
+adresse, souvent un code disparu depuis : une association rangée sous une commune absorbée ou sous l'ancien
+code d'un transfert de chef-lieu est comptée dans la commune qui l'a repris (`codesRepris`). Un rétablissement,
+lui, partage un territoire que le code ne répartit pas (les associations de L'Oie restent rangées sous
+Essarts-en-Bocage) : la commune rétablie et sa commune d'origine ne sont pas notées (abstention, `null`).
 """
 import json, os, sys, csv, io, math, argparse, bisect, zipfile, urllib.request, urllib.parse
 import numpy as np
@@ -23,6 +30,7 @@ AMALIA = {  # dept -> URL data.gouv (CSV ; ETAT_ASSOCIATION, COMMUNE, CODE_POSTA
     "57": "https://static.data.gouv.fr/resources/associations-de-droit-local-alsace-moselle-pour-le-departement-de-la-moselle-57/20260602-152910/57-opendatas.csv",
 }
 AMALIA_CACHE = os.path.join(CACHE, "amalia")
+REFERENTIEL = os.path.join(ROOT, "data", "population-referentiel-cog2025.json")
 
 OVERPASS_MIRRORS = [
     "https://overpass.openstreetmap.fr/api/interpreter",
@@ -192,8 +200,10 @@ TEMOINS = {
 }
 
 
-def compute_scores(communes, lieux, assos, k):
-    """Retourne dict insee -> (score, p_lieux, p_assos, n_lieux, n_assos)."""
+def compute_scores(communes, lieux, assos, k, abstentions=frozenset()):
+    """Retourne dict insee -> (score, p_lieux, p_assos, n_lieux, n_assos). Les communes en `abstentions`
+    sont absentes du résultat et de la distribution des percentiles."""
+    communes = [c for c in communes if c["insee"] not in abstentions]
     dl = [density(lieux.get(c["insee"], 0), c.get("population"), k) for c in communes]
     da = [density(assos.get(c["insee"], 0), c.get("population"), k) for c in communes]
     pl = component_pct(dl)
@@ -214,10 +224,19 @@ def download(url, dest):
     return dest
 
 
+def load_referentiel(path=REFERENTIEL):
+    """FUT-109 : (code disparu -> code repris, communes non notées pour rétablissement)."""
+    ref = json.load(open(path))["communes"]
+    repris = {ancien: k for k, c in ref.items() for ancien in c["codesRepris"]}
+    return repris, {k for k, c in ref.items() if c["retablissement"]}
+
+
 def load_rna(valid_insee):
-    """RNA waldec : associations ACTIVES (position == 'A') par INSEE (adrs_codeinsee)."""
+    """RNA waldec : associations ACTIVES (position == 'A') par INSEE (adrs_codeinsee), codes disparus repris."""
     download(RNA_WALDEC_URL, RNA_WALDEC_ZIP)
+    repris, _ = load_referentiel()
     counts = {}
+    nrepris = 0
     z = zipfile.ZipFile(RNA_WALDEC_ZIP)
     for name in [n for n in z.namelist() if n.lower().endswith(".csv")]:
         with z.open(name) as f:
@@ -226,9 +245,11 @@ def load_rna(valid_insee):
                 if (row.get("position") or "").strip().upper() != "A":
                     continue
                 ins = (row.get("adrs_codeinsee") or "").strip()
+                if ins in repris:
+                    ins = repris[ins]; nrepris += 1
                 if ins in valid_insee:
                     counts[ins] = counts.get(ins, 0) + 1
-    print(f"RNA actives géocodées : {sum(counts.values())} sur {len(counts)} communes", file=sys.stderr)
+    print(f"RNA actives géocodées : {sum(counts.values())} sur {len(counts)} communes ({nrepris} sous un code repris)", file=sys.stderr)
     return counts
 
 
@@ -294,6 +315,13 @@ def selftest():
     assert combine(0, 100) == 30
     assert combine(90, 50) == 78
     assert cell_key(0.00051, 0.0, 0.0005) == (1, 0)
+    # abstention : la commune sort du résultat ET de la distribution (les autres percentiles l'ignorent)
+    cs = [{"insee": "a", "population": 100}, {"insee": "b", "population": 100}, {"insee": "c", "population": 0}]
+    sc = compute_scores(cs, {"a": 1, "b": 2, "c": 50}, {}, 1000, abstentions={"c"})
+    assert set(sc) == {"a", "b"} and sc["b"][1] == 100 and sc["a"][1] == 50
+    repris, retablies = load_referentiel()
+    assert repris["93059"] == "93066" and repris["49069"] == "49126"   # Pierrefitte -> Saint-Denis, Orée d'Anjou
+    assert {"85084", "85165", "85212", "60054", "60694"} <= retablies and "93066" not in retablies
     print("✓ selftest OK", file=sys.stderr)
 
 
@@ -336,9 +364,13 @@ def main():
     plat, plon = load_social_pois()
     lieux = assign_to_communes(communes, plat, plon)
     assos = load_assos(communes)
-    scores = compute_scores(communes, lieux, assos, K)
+    _, retablies = load_referentiel()
+    scores = compute_scores(communes, lieux, assos, K, abstentions=retablies)
     rec = {}
     for c in communes:
+        if c["insee"] in retablies:
+            rec[c["insee"]] = None  # FUT-109 : territoire partagé, associations non réparties -> non notée
+            continue
         sc, pl, pa, nl, na = scores[c["insee"]]
         rec[c["insee"]] = None if (pl == 0 and pa == 0) else {"score": sc, "lieux_pct": pl, "assos_pct": pa}
     served = sum(1 for v in rec.values() if v)

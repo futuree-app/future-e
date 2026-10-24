@@ -12,6 +12,10 @@
 // REFUSE (exit 1) sur anomalie : distribution dégénérée, bande hors [0,1], low > high, enrichissement perdu.
 //
 // Lancer : npx tsx scripts/populate-mismatch-rank.mts
+//
+// RECALCUL DÉCLARÉ : `--recalculer vie_locale,croissance_demographique` ne recalcule QUE ces clés, parce que
+// leur score source a été recalculé (FUT-109 : population au grain du COG 2025), et rapporte le nombre de
+// bandes modifiées par clé. Les autres clés ne sont pas touchées : leurs bandes restent celles de l'index.
 import fs from "node:fs/promises";
 import path from "node:path";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "../src/lib/comparateur-scores.ts";
@@ -25,6 +29,15 @@ const idx = JSON.parse(await fs.readFile(idxPath, "utf8")) as {
   communes: (IndexCommune & { rankBands?: Record<string, [number, number]> })[];
 };
 const communes = idx.communes;
+
+const iRecalc = process.argv.indexOf("--recalculer");
+const RECALCULER = new Set(iRecalc > 0 ? (process.argv[iRecalc + 1] ?? "").split(",").filter(Boolean) : []);
+for (const k of RECALCULER) {
+  if (!(MISMATCH_RANK_KEYS as string[]).includes(k)) {
+    console.error(`REFUS: --recalculer ${k} n'est pas une clé de mismatch`);
+    process.exit(1);
+  }
+}
 
 const report: string[] = [];
 const die = (msg: string): never => {
@@ -42,7 +55,7 @@ for (const k of OLD_KEYS) {
   oldBands.set(k, m);
 }
 
-for (const key of MISMATCH_RANK_KEYS) {
+for (const key of MISMATCH_RANK_KEYS.filter((k) => RECALCULER.size === 0 || RECALCULER.has(k))) {
   const vals = communes
     .map((c) => mismatchRawScore(key, c))
     .filter((v): v is number => v != null)
@@ -70,7 +83,11 @@ for (const key of MISMATCH_RANK_KEYS) {
   const errs: number[] = [];
   for (const c of communes) {
     const v = mismatchRawScore(key, c);
-    if (v == null) continue;
+    if (v == null) {
+      // Sans la donnée, pas de bande : une bande d'avant (score depuis retiré, FUT-109) affirmerait un rang.
+      if (c.rankBands) delete c.rankBands[key];
+      continue;
+    }
     const low = lowIdx(v) / N, high = highIdx(v) / N;
     if (low < 0 || high > 1 || low > high) die(`${key} produit une bande invalide sur ${c.insee}`);
     tieMax = Math.max(tieMax, high - low);
@@ -93,10 +110,13 @@ for (const key of MISMATCH_RANK_KEYS) {
 let changed = 0;
 for (const k of OLD_KEYS) {
   const m = oldBands.get(k)!;
-  for (const c of communes) if (JSON.stringify(c.rankBands?.[k]) !== m.get(c.insee)) changed++;
+  let n = 0;
+  for (const c of communes) if (JSON.stringify(c.rankBands?.[k]) !== m.get(c.insee)) n++;
+  if (RECALCULER.has(k)) report.push(`recalcul déclaré : ${k} · ${n} bandes modifiées`);
+  else changed += n;
 }
 if (changed > 0) die(`régression: ${changed} bandes de clés EXISTANTES ont changé (attendu 0)`);
-report.push(`diff sémantique OK : 0 bande existante modifiée (${OLD_KEYS.length} clés) · seule douceur_climat ajoutée`);
+report.push(`diff sémantique OK : 0 bande modifiée hors recalcul déclaré (${OLD_KEYS.length - RECALCULER.size} clés)`);
 
 console.log(report.join("\n"));
 

@@ -115,7 +115,11 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
     if (v !== null) out.push(`- ${label} : ${v}`);
   };
 
-  push("Population (2021)", num(commune.population));
+  // FUT-109 : le millésime suit la commune (2023 quand ADEME n'est pas au grain de la commune actuelle).
+  push(`Population (${commune.population_millesime ?? 2021})`, num(commune.population));
+  if (commune.perimetre_anterieur) {
+    out.push(`- Périmètre : la commune a changé de territoire ou de code le ${commune.perimetre_anterieur.split("-").reverse().join("/")}. Hors population, les indicateurs ADEME de ce bloc décrivent le territoire d'avant : ne les présentez pas comme ceux de la commune actuelle.`);
+  }
   push("Densité (hab/km²)", num(commune.territoire.densite));
   push("Vieillissement annuel 65+ (%)", pct(commune.vieillissement_pct, 2));
 

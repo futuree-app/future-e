@@ -1,9 +1,11 @@
 // FUT-109 · La population au grain du référentiel : règle pure. Les valeurs sont celles des fichiers Insee
-// (populations légales 2021, populations de référence 2023, COG 2025) et d'ADEME `population_totale_2021`.
+// (populations légales 2021, populations de référence 2023, COG 2025) et d'ADEME `population_totale_2021`,
+// portée dans la géographie au 01/01/2024.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  communesHorsGrain, construireCorrections, appliquerCorrections, effectifOfficiel, lireCsv, SOURCE_GRAIN,
+  communesHorsGrain, codesRepris, construireCorrections, ecartsAuGrain, appliquerCorrections, effectifOfficiel, lireCsv,
+  SOURCE_PRINCIPALE, SOURCE_GRAIN,
 } from "./population-grain.mjs";
 
 // Extraits réels de v_mvt_commune_2025.csv (Insee, COG au 01/01/2025).
@@ -16,8 +18,13 @@ const MVT = [
   { MOD: "21", DATE_EFF: "2024-01-01", TYPECOM_AV: "COM", COM_AV: "60054", TYPECOM_AP: "COM", COM_AP: "60054" },
   // Fusion du 01/01/2025 : Pierrefitte-sur-Seine rejoint Saint-Denis.
   { MOD: "32", DATE_EFF: "2025-01-01", TYPECOM_AV: "COM", COM_AV: "93059", TYPECOM_AP: "COM", COM_AP: "93066" },
+  { MOD: "32", DATE_EFF: "2025-01-01", TYPECOM_AV: "COM", COM_AV: "93059", TYPECOM_AP: "COMD", COM_AP: "93059" },
+  { MOD: "32", DATE_EFF: "2025-01-01", TYPECOM_AV: "COM", COM_AV: "93066", TYPECOM_AP: "COM", COM_AP: "93066" },
   // Transfert de chef-lieu du 01/01/2025 : Orée d'Anjou change de code (49069 → 49126), pas de territoire.
   { MOD: "50", DATE_EFF: "2025-01-01", TYPECOM_AV: "COM", COM_AV: "49069", TYPECOM_AP: "COM", COM_AP: "49126" },
+  // Fusion du 01/01/2024 : la source l'a déjà regroupée (Bazeilles 2 502 = 2 365 + 137 La Moncelle).
+  { MOD: "32", DATE_EFF: "2024-01-01", TYPECOM_AV: "COM", COM_AV: "08294", TYPECOM_AP: "COM", COM_AP: "08053" },
+  { MOD: "32", DATE_EFF: "2024-01-01", TYPECOM_AV: "COM", COM_AV: "08053", TYPECOM_AP: "COM", COM_AP: "08053" },
   // Création de 2016 : avant la géographie de la source, déjà prise en compte par la valeur 2021.
   { MOD: "32", DATE_EFF: "2016-01-01", TYPECOM_AV: "COM", COM_AV: "85165", TYPECOM_AP: "COM", COM_AP: "85084" },
   // Mouvements sans effet sur le territoire.
@@ -25,7 +32,7 @@ const MVT = [
   { MOD: "34", DATE_EFF: "2023-12-31", TYPECOM_AV: "COM", COM_AV: "14735", TYPECOM_AP: "COM", COM_AP: "14735" },
   { MOD: "35", DATE_EFF: "2024-01-01", TYPECOM_AV: "COMD", COM_AV: "01002", TYPECOM_AP: "COM", COM_AP: "01002" },
 ];
-const INTERVALLE = { apres: "2023-01-01", jusqua: "2025-01-01" };
+const INTERVALLE = { apres: SOURCE_PRINCIPALE.geographie, jusqua: SOURCE_GRAIN.geographie };
 
 const COMMUNES = [
   { insee: "85165", nom: "L'Oie" },
@@ -38,30 +45,40 @@ const COMMUNES = [
   { insee: "14735", nom: "Vendeuvre" },
   { insee: "55189", nom: "Fleury-devant-Douaumont" },
   { insee: "49126", nom: "Orée d'Anjou" },
+  { insee: "08053", nom: "Bazeilles" },
   { insee: "99999", nom: "Commune fictive sans aucune valeur" },
 ];
 // ADEME `population_totale_2021` tel que publié (0 pour les communes rétablies, valeur d'avant séparation pour
 // la commune d'origine, valeur d'avant fusion pour Saint-Denis ; Fleury et Orée d'Anjou absentes).
 const ADEME = new Map([
   ["85165", 0], ["85212", 0], ["60694", 0], ["85084", 9399], ["60054", 878], ["93066", 113942],
-  ["01001", 832], ["14735", 805],
+  ["01001", 832], ["14735", 805], ["08053", 2502],
 ]);
 // Populations de référence Insee 2023 (PMUN, limites au 01/01/2025).
 const PL2023 = new Map([
   ["85165", 1250], ["85212", 1359], ["60694", 542], ["85084", 6851], ["60054", 339], ["93066", 149077],
-  ["01001", 846], ["14735", 800], ["55189", 0], ["49126", 17162],
+  ["01001", 846], ["14735", 800], ["55189", 0], ["49126", 17162], ["08053", 2470],
+]);
+// Populations légales 2021 (PMUN, limites au 01/01/2023) : les communes telles qu'avant les mouvements.
+const PMUN2021 = new Map([
+  ["85084", 9399], ["60054", 878], ["93066", 113942], ["93059", 32379], ["49069", 16709],
+  ["01001", 832], ["14735", 805], ["08053", 2365], ["08294", 137],
 ]);
 
+const EN_VIGUEUR = new Set(COMMUNES.map((c) => c.insee));
 const corrections = () =>
   construireCorrections({
     communes: COMMUNES, source2021: ADEME, horsGrain: communesHorsGrain(MVT, INTERVALLE), populationsGrain: PL2023,
+    repris: codesRepris(MVT, INTERVALLE, EN_VIGUEUR),
   });
 
-test("seuls les mouvements de territoire ou de code de l'intervalle comptent", () => {
+test("seuls les mouvements de territoire ou de code postérieurs à la géographie de la source comptent", () => {
   const m = communesHorsGrain(MVT, INTERVALLE);
   assert.deepEqual([...m.keys()].sort(), ["49126", "60054", "60694", "85084", "85165", "85212", "93059", "93066"]);
+  assert.equal(m.has("08053"), false); // fusion du jour de la géographie de la source : déjà regroupée
   assert.equal(m.has("49069"), false); // l'ancien code d'un transfert de chef-lieu n'est plus dans le référentiel
-  assert.deepEqual(m.get("85165"), [{ mod: "21", date: "2024-01-01" }]); // le mouvement de 2016 est hors intervalle
+  // Rétablissement du jour même : la source ne l'a pas réparti. Le mouvement de 2016 est hors intervalle.
+  assert.deepEqual(m.get("85165"), [{ mod: "21", date: "2024-01-01" }]);
   assert.equal(m.has("01001"), false); // changement de nom
   assert.equal(m.has("14735"), false); // fusion-association devenue fusion simple : territoire inchangé
 });
@@ -148,4 +165,36 @@ test("l'application est limitée aux communes corrigées, et idempotente", () =>
 test("lecture des CSV Insee : guillemets, BOM, fins de ligne CRLF", () => {
   assert.deepEqual(lireCsv('﻿"MOD","COM_AP"\r\n"21","85165"\r\n', ","), [{ MOD: "21", COM_AP: "85165" }]);
   assert.deepEqual(lireCsv("COM;PMUN\n85165;1250\n", ";"), [{ COM: "85165", PMUN: "1250" }]);
+});
+
+test("une commune nouvelle du jour de la géographie de la source garde sa valeur 2021, déjà au grain", () => {
+  assert.equal(corrections()["08053"], undefined);
+});
+
+test("rétablissement : drapeau posé sur la commune rétablie et sur sa commune d'origine, jamais sur une fusion", () => {
+  const c = corrections();
+  assert.deepEqual(["85165", "85212", "85084", "60694", "60054", "93066", "49126"].map((k) => c[k].retablissement),
+    [true, true, true, true, true, false, false]);
+});
+
+test("codes repris : communes absorbées et anciens codes, jamais un code encore en vigueur", () => {
+  const r = codesRepris(MVT, INTERVALLE, EN_VIGUEUR);
+  assert.deepEqual(Object.fromEntries(r), { "93066": ["93059"], "49126": ["49069"] });
+  // La commune d'origine d'un rétablissement reste en vigueur : rien ne se répartit par son code.
+  assert.equal(r.has("85165"), false);
+  assert.equal(r.has("08053"), false); // fusion du jour de la géographie de la source : hors intervalle
+  assert.deepEqual(corrections()["93066"].codesRepris, ["93059"]);
+});
+
+test("preuve du grain : une valeur gardée égale la population légale 2021 de son territoire, sinon écart", () => {
+  const c = corrections();
+  // Bazeilles 2 502 = 2 365 + 137 (La Moncelle, absorbée le jour de la géographie de la source).
+  assert.deepEqual(ecartsAuGrain({ communes: COMMUNES, source2021: ADEME, corrections: c, pmun2021: PMUN2021, mouvements: MVT }), []);
+  // Une source qui n'aurait pas regroupé la fusion (Bazeilles seule) est détectée.
+  const fausse = new Map([...ADEME, ["08053", 2365]]);
+  const e = ecartsAuGrain({ communes: COMMUNES, source2021: fausse, corrections: c, pmun2021: PMUN2021, mouvements: MVT });
+  assert.deepEqual(e.map((x) => [x.insee, x.source, x.attendue]), [["08053", 2365, 2502]]);
+  // Un territoire dont une commune fondatrice manque au fichier légal n'est pas « prouvé » : écart, pas silence.
+  const sansMoncelle = new Map([...PMUN2021].filter(([k]) => k !== "08294"));
+  assert.equal(ecartsAuGrain({ communes: COMMUNES, source2021: ADEME, corrections: c, pmun2021: sansMoncelle, mouvements: MVT })[0].attendue, null);
 });

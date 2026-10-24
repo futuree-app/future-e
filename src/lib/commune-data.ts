@@ -1,6 +1,7 @@
 import "server-only";
 
 import { irisQueryPrefix, keepIrisOfCommune, scopeFromPoint, type IrisScope } from "./iris-scope";
+import { perimetreAnterieur, populationHorsGrain, SOURCE_POPULATION } from "./population-millesime";
 
 const COMMUNES_DS = "https://data.ademe.fr/data-fair/api/v1/datasets/8ggfo546-mtjxy4lbqxcl462";
 const IRIS_DS     = "https://data.ademe.fr/data-fair/api/v1/datasets/jixoufr9qp0gko9xcqyzbr4a";
@@ -11,6 +12,11 @@ export type CommuneData = {
   inseeCode: string;
   nom: string;
   population: number | null;
+  // FUT-109 : millésime de `population` (2021, ou 2023 quand la source n'est pas au grain de la commune).
+  population_millesime?: number | null;
+  // FUT-109 : date d'une fusion, d'un rétablissement ou d'un changement de code postérieur à la géographie
+  // d'ADEME (01/01/2024) : les autres indicateurs de ce bloc décrivent alors le territoire d'avant. `null` sinon.
+  perimetre_anterieur?: string | null;
   vieillissement_pct: number | null;   // évolution annuelle des 65+ (2016-2022)
   logements: {
     vacants_2022: number | null;
@@ -244,10 +250,17 @@ async function fetchIrisAtPoint(lat: number, lon: number): Promise<IrisApiRecord
 // ── Mappers ───────────────────────────────────────────────────────────────────
 
 function toCommuneData(r: CommuneApiRecord): CommuneData {
+  // FUT-109 : ADEME porte la population 2021 dans sa géographie (01/01/2024). Une commune rétablie y vaut 0,
+  // une commune fusionnée depuis y garde l'ancien périmètre : la population servie est alors celle de l'index,
+  // au grain de la commune actuelle, jamais la valeur brute.
+  const horsGrain = populationHorsGrain(r.code_commune_insee);
+  const population = horsGrain ? horsGrain.population : num(r.population_totale_2021);
   return {
     inseeCode: r.code_commune_insee,
     nom:       r.commune,
-    population: num(r.population_totale_2021),
+    population,
+    population_millesime: population == null ? null : horsGrain?.millesime ?? SOURCE_POPULATION.millesime,
+    perimetre_anterieur: perimetreAnterieur(r.code_commune_insee),
     vieillissement_pct: num(r.taux_devolution_annuel_des_65_ans_et_plus_20162022),
     logements: {
       vacants_2022:  num(r.nombre_de_logements_vacants_2022),

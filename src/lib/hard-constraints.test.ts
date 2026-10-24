@@ -545,6 +545,23 @@ test("sizeRelativeTo : plus grand que la référence alors qu'on voulait plus pe
   assert.match(a.statement, /Auch/);
 });
 
+test("sizeRelativeTo (FUT-109) : la phrase date la population de référence avec SES millésimes", () => {
+  const paris: ResolvedSizeReference = {
+    status: "resolved", originalLabel: "Paris", canonicalLabel: "Paris", urbanUnitCode: "00851",
+    comparisonPopulation: 10_893_507, populationYear: 2023, populationYears: [2021, 2023], populationKind: "urban_unit",
+    source: "plm_table", meta: META,
+  };
+  const grande = commune({ nom: "Lille", uu: "59702", tailleVille: 11_000_000 });
+  const a = evaluateSizeRelativeTo(ctx({ sizeRelativeTo: { label: "Paris", direction: "smaller", reference: paris } }, grande), grande);
+  assert.ok(a.status === "incompatible");
+  assert.match(a.statement, /habitants selon les chiffres Insee 2021 et 2023\)/);
+  // Une référence d'avant FUT-109 (sans millésimes détaillés) garde sa phrase.
+  const ancienne: ResolvedSizeReference = { ...paris, populationYear: 2021, populationYears: undefined };
+  const b = evaluateSizeRelativeTo(ctx({ sizeRelativeTo: { label: "Paris", direction: "smaller", reference: ancienne } }, grande), grande);
+  assert.ok(b.status === "incompatible");
+  assert.match(b.statement, /habitants en 2021\)/);
+});
+
 // ── le registre ──────────────────────────────────────────────────────────────
 
 test("le registre est EXHAUSTIF : les 12 clés ont un évaluateur", () => {

@@ -1,30 +1,29 @@
 // FUT-109 · LA POPULATION AU GRAIN DU RÉFÉRENTIEL. Logique PURE (aucune I/O), testable sans l'index.
 //
-// LE DÉFAUT. L'index lit la population dans ADEME `data_communes`, champ `population_totale_2021`. Ce champ
-// est la population MUNICIPALE Insee 2021 (vérifié : égale au PMUN des populations légales 2021 pour les
-// 34 704 communes au territoire inchangé), publiée dans la géographie au 01/01/2023. ADEME l'a rattachée aux
-// codes d'un COG plus récent SANS la recalculer :
-//   - commune rétablie (défusion) : `0`, alors que la commune compte des habitants (L'Oie, Sainte-Florence,
-//     Les Hauts-Talican, rétablies le 01/01/2024) ;
-//   - commune d'origine d'une défusion : la population de l'ancienne commune nouvelle, avant séparation
-//     (Essarts-en-Bocage 9 399 pour 6 851) ;
-//   - commune nouvelle : la seule population de la commune qui a gardé son code (Saint-Denis 113 942 pour
-//     149 077 après fusion avec Pierrefitte-sur-Seine) ;
-//   - code créé depuis 2023 (transfert de chef-lieu) : absent de la source.
-// Le référentiel de l'index est le COG au 01/01/2025 (liste DRIAS) : ces valeurs ne sont pas à son grain.
+// LA SOURCE. L'index lit la population dans ADEME `data_communes`, champ `population_totale_2021` : la
+// population MUNICIPALE Insee 2021, portée dans la géographie au 01/01/2024. Vérifié sur les sources Insee :
+//   - commune au territoire inchangé : égale au PMUN des populations légales 2021 ;
+//   - commune nouvelle du 01/01/2024 : égale à la SOMME exacte des PMUN 2021 de ses communes fondatrices
+//     (Bazeilles 2 502 = 2 365 + 137 ; Oullins-Pierre-Bénite 37 628 = 27 113 + 10 515) : au bon grain ;
+//   - commune RÉTABLIE le 01/01/2024 : `0`, le recensement 2021 ne la sépare pas de sa commune d'origine,
+//     qui garde son ancien périmètre (L'Oie et Sainte-Florence 0, Essarts-en-Bocage 9 399 pour 6 851) ;
+//   - mouvement postérieur au 01/01/2024 : valeur d'avant le mouvement (Saint-Denis 113 942 pour 149 077
+//     après sa fusion du 01/01/2025 avec Pierrefitte-sur-Seine), ou code absent (transfert de chef-lieu).
+// La base Insee « évolution et structure de la population 2021 » (scripts/populate-demographie.py) suit la
+// même géographie, avec les mêmes trous. Le référentiel de l'index est le COG au 01/01/2025 (liste DRIAS).
 //
-// LA RÈGLE. Une valeur 2021 n'est gardée que si le territoire de la commune n'a pas changé entre la
-// géographie de ce millésime (01/01/2023) et celle du référentiel (01/01/2025), et si son code existait déjà.
-// Sinon, on prend la population de référence Insee publiée DANS la géographie du référentiel (millésime 2023,
-// limites au 01/01/2025). Jamais de somme ni de report d'une commune nouvelle sur une commune déléguée : une
-// valeur officielle au bon grain, ou une absence explicite (`null`), jamais un `0` par défaut.
+// LA RÈGLE. Une valeur 2021 n'est gardée que si le territoire et le code de la commune n'ont pas changé
+// depuis la géographie de la source, rétablissements de cette date compris. Sinon, on prend la population de
+// référence Insee publiée DANS la géographie du référentiel (millésime 2023, limites au 01/01/2025). Jamais
+// de somme ni de report d'une commune nouvelle sur une commune déléguée : une valeur officielle au bon
+// grain, ou une absence explicite (`null`), jamais un `0` par défaut.
 //
 // HORS PÉRIMÈTRE, ASSUMÉ. Une commune que la source ne porte pas sans qu'aucun mouvement ne l'explique reste
 // `null` : les six villages détruits de la Meuse (Insee : 0 habitant). Les présenter comme « 0 habitant »
 // demande une décision éditoriale, pas une correction de grain.
 
 // Millésime et géographie de la source principale (ADEME `population_totale_2021`).
-export const SOURCE_PRINCIPALE = { millesime: 2021, geographie: "2023-01-01" };
+export const SOURCE_PRINCIPALE = { millesime: 2021, geographie: "2024-01-01" };
 // Millésime de repli : populations de référence Insee 2023, limites communales au 01/01/2025.
 export const SOURCE_GRAIN = { millesime: 2023, geographie: "2025-01-01" };
 
@@ -37,14 +36,22 @@ export const MOUVEMENTS_TERRITORIAUX = new Set(["21", "31", "32", "33"]);
 export const MOUVEMENTS_DE_CODE = new Set(["41", "50"]);
 // Les autres ne touchent ni au territoire ni au code : changement de nom (10), suppression de commune déléguée
 // (35), passage d'une fusion-association en fusion simple (34).
+const RETABLISSEMENT = "21";
+
+// Un mouvement compte s'il est postérieur à la géographie de la source, ou si c'est un rétablissement à cette
+// date même : la source a regroupé les fusions du jour, elle n'a pas pu séparer les communes rétablies.
+function horsGeographieSource(m, { apres, jusqua }) {
+  if (m.DATE_EFF > jusqua) return false;
+  return m.DATE_EFF > apres || (m.DATE_EFF === apres && m.MOD === RETABLISSEMENT);
+}
 
 /**
  * Les communes (type COM) dont la valeur de la source n'est plus au grain du référentiel, d'après les
- * mouvements de l'intervalle ]apres, jusqua].
+ * mouvements postérieurs à la géographie de la source (`apres`), jusqu'à celle du référentiel (`jusqua`).
  * @param {Array<Record<string, string>>} mouvements lignes de `v_mvt_commune_AAAA.csv` (MOD, DATE_EFF, TYPECOM_AV, COM_AV, TYPECOM_AP, COM_AP)
  * @returns {Map<string, Array<{ mod: string, date: string }>>}
  */
-export function communesHorsGrain(mouvements, { apres, jusqua }) {
+export function communesHorsGrain(mouvements, intervalle) {
   const out = new Map();
   const noter = (code, m) => {
     const liste = out.get(code) ?? [];
@@ -52,13 +59,35 @@ export function communesHorsGrain(mouvements, { apres, jusqua }) {
     out.set(code, liste);
   };
   for (const m of mouvements) {
-    if (!(m.DATE_EFF > apres && m.DATE_EFF <= jusqua)) continue;
+    if (!horsGeographieSource(m, intervalle)) continue;
     if (MOUVEMENTS_TERRITORIAUX.has(m.MOD)) {
       if (m.TYPECOM_AV === "COM") noter(m.COM_AV, m);
       if (m.TYPECOM_AP === "COM") noter(m.COM_AP, m);
     } else if (MOUVEMENTS_DE_CODE.has(m.MOD) && m.TYPECOM_AP === "COM" && m.COM_AP !== m.COM_AV) {
       noter(m.COM_AP, m);
     }
+  }
+  return out;
+}
+
+/**
+ * Les codes disparus depuis la géographie de la source, par commune qui les a repris : communes absorbées par
+ * une fusion, ancien code d'un transfert de chef-lieu. Une donnée rangée sous l'un de ces codes (une
+ * association du RNA, par exemple) est sur le territoire actuel de la commune qui l'a repris. Un code encore
+ * en vigueur (la commune d'origine d'un rétablissement) n'est jamais repris : rien ne permet de le partager.
+ * @param {Set<string>} enVigueur codes du référentiel
+ * @returns {Map<string, string[]>} code actuel -> codes disparus
+ */
+export function codesRepris(mouvements, intervalle, enVigueur) {
+  const out = new Map();
+  for (const m of mouvements) {
+    if (!horsGeographieSource(m, intervalle)) continue;
+    if (!MOUVEMENTS_TERRITORIAUX.has(m.MOD) && !MOUVEMENTS_DE_CODE.has(m.MOD)) continue;
+    if (m.MOD === RETABLISSEMENT || m.TYPECOM_AV !== "COM" || m.TYPECOM_AP !== "COM") continue;
+    if (m.COM_AV === m.COM_AP || enVigueur.has(m.COM_AV) || !enVigueur.has(m.COM_AP)) continue;
+    const liste = out.get(m.COM_AP) ?? [];
+    if (!liste.includes(m.COM_AV)) liste.push(m.COM_AV);
+    out.set(m.COM_AP, liste.sort());
   }
   return out;
 }
@@ -72,9 +101,10 @@ export function communesHorsGrain(mouvements, { apres, jusqua }) {
  * @param {Map<string, number|null>} p.source2021 population ADEME 2021 par code
  * @param {Map<string, Array<{mod: string, date: string}>>} p.horsGrain sortie de `communesHorsGrain`
  * @param {Map<string, number|null>} p.populationsGrain PMUN Insee 2023 par code (géographie du référentiel)
- * @returns {Record<string, { nom: string, population: number|null, millesime: number|null, motif: string, valeur2021: number|null, mouvements: Array<{mod: string, date: string}> }>}
+ * @param {Map<string, string[]>} [p.repris] sortie de `codesRepris`
+ * @returns {Record<string, { nom: string, population: number|null, millesime: number|null, motif: string, retablissement: boolean, valeur2021: number|null, codesRepris: string[], mouvements: Array<{mod: string, date: string}> }>}
  */
-export function construireCorrections({ communes, source2021, horsGrain, populationsGrain }) {
+export function construireCorrections({ communes, source2021, horsGrain, populationsGrain, repris = new Map() }) {
   const out = {};
   for (const { insee, nom } of communes) {
     const mouvements = horsGrain.get(insee);
@@ -86,11 +116,42 @@ export function construireCorrections({ communes, source2021, horsGrain, populat
       population: connue ? officielle : null,
       millesime: connue ? SOURCE_GRAIN.millesime : null,
       motif: mouvements.some((m) => MOUVEMENTS_TERRITORIAUX.has(m.mod)) ? "territoire_modifie" : "code_modifie",
+      // Un rétablissement partage un territoire : aucune donnée rangée par code ne se répartit d'elle-même
+      // entre la commune rétablie et sa commune d'origine.
+      retablissement: mouvements.some((m) => m.mod === RETABLISSEMENT),
       valeur2021: source2021.get(insee) ?? null,
+      codesRepris: repris.get(insee) ?? [],
       mouvements,
     };
   }
   return out;
+}
+
+/**
+ * Preuve que les valeurs GARDÉES sont au grain : pour chaque commune de l'index hors corrections, la valeur
+ * de la source doit égaler la somme des PMUN 2021 officiels (populations légales 2021) de ses communes
+ * fondatrices, c'est-à-dire elle-même, plus les communes qu'elle a absorbées à la date de la géographie de la
+ * source. Rend les écarts ; une liste vide veut dire que la règle est vérifiée sur toute la France.
+ * @param {Map<string, number|null>} p.pmun2021 PMUN 2021 par code, géographie de son année de publication
+ * @param {Array<Record<string, string>>} p.mouvements
+ */
+export function ecartsAuGrain({ communes, source2021, corrections, pmun2021, mouvements }) {
+  const fondatrices = new Map();
+  for (const m of mouvements) {
+    if (m.DATE_EFF !== SOURCE_PRINCIPALE.geographie || !MOUVEMENTS_TERRITORIAUX.has(m.MOD) || m.MOD === RETABLISSEMENT) continue;
+    if (m.TYPECOM_AV !== "COM" || m.TYPECOM_AP !== "COM" || m.COM_AV === m.COM_AP) continue;
+    fondatrices.set(m.COM_AP, [...(fondatrices.get(m.COM_AP) ?? []), m.COM_AV]);
+  }
+  const ecarts = [];
+  for (const { insee, nom } of communes) {
+    if (corrections[insee]) continue;
+    const v = source2021.get(insee) ?? null;
+    if (v == null) continue; // absente de la source : non comblée, rien à prouver
+    const codes = [insee, ...(fondatrices.get(insee) ?? [])];
+    const attendue = codes.every((k) => pmun2021.has(k)) ? codes.reduce((s, k) => s + pmun2021.get(k), 0) : null;
+    if (attendue !== v) ecarts.push({ insee, nom, source: v, attendue, fondatrices: codes });
+  }
+  return ecarts;
 }
 
 /**
