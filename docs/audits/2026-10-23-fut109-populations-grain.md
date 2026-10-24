@@ -1,8 +1,10 @@
 # FUT-109 · Trois populations à 0 : un défaut de grain, pas trois communes vides
 
-Audit et correctif préparés les 23 et 24/10/2026. Branche `bonjourfuturee/fut-109-populations-communes-deleguees` (worktree `.claude/worktrees/fut109`), partie de `main` @ `3af53c3c`. Rien n'est poussé : voir §9.
+Audit et correctif préparés les 23 et 24/10/2026. Branche `bonjourfuturee/fut-109-populations-communes-deleguees` (worktree `.claude/worktrees/fut109`), rebasée sur `main` @ `de001b2b` (après #84 et #82). Rien n'est poussé : voir §9.
 
 **Révision du 24/10.** La première version (commit `11f60680`) corrigeait 71 communes en supposant la source dans la géographie du 01/01/2023. Vérification faite sur les fichiers Insee, la source est dans la **géographie du 01/01/2024**. Les 11 communes nouvelles du 01/01/2024 y sont déjà au bon grain (somme exacte de leurs communes fondatrices). Le correctif porte donc sur **60 communes**. La révision traite aussi les scores dont le dénominateur restait calculé sur l'ancien territoire (§5), et les libellés de millésime (§6).
+
+**Seconde révision du 24/10, après #84.** Le « blocage ADEME » de la première révision était trop large : ADEME mêle **deux géographies** sous un même code, et la densité (donc le calme), l'éloignement, la centralité, les logements vacants, le nombre de logements sociaux et le revenu médian sont **déjà au périmètre fusionné**. Seuls l'APL, l'air, la pression agricole, le taux de logements sociaux et le boisement décrivent l'ancien territoire : ils ne sont plus lus pour les 51 communes concernées, et sont rattachés exactement pour les 4 changements de code (§5.5). La mobilité est recalculée exactement (§5.6). Un **point bloquant** subsiste, hors du correctif : le score de compatibilité du comparateur compte un critère non noté comme 0 (§5.8).
 
 ## 1. En une phrase
 
@@ -95,12 +97,16 @@ Le taux annuel 2015-2021, la part d'arrivants et le récit sont calculés par l'
 - Le récit en dépend.
 - Les rétablissements ne sont pas reconstituables avec cette base.
 
-**Correctif** : **abstention**, la démographie est `null` pour les 56 communes au territoire modifié.
-- Le comparateur traite déjà `null` comme « non noté », sans pénalité.
+**Correctif** : **abstention**, la démographie est `null` pour les 56 communes au territoire modifié (49 en avaient une).
+- Le comparateur ne la cite plus (ni raison, ni arbitrage). **Correction du 24/10** : la version précédente affirmait « sans pénalité » ; c'est faux, le score de compatibilité la compte pour 0 (§5.8).
 - Le dossier n'affiche ni carte ni phrase.
 - Le rang passe à « incertain ».
 
-Effet : 49 communes perdent un récit qui décrivait un autre territoire. Hors des 60, 191 percentiles bougent d'un point, et 4 verdicts changent en limite de seuil. Les 4 changements de code restent `null`, comme aujourd'hui. Les ré-étiqueter avec l'ancien code serait exact (même territoire), mais c'est une option à décider.
+Effet : 49 communes perdent un récit qui décrivait un autre territoire. Hors des 60, 156 percentiles bougent d'un point, et 2 récits changent par l'effet du tercile d'arrivées recalculé (78143, 91045).
+
+**Changements de code seuls** (arbitrage du 24/10) : Conques-en-Rouergue, Aurseulles, Porte des Pierres Dorées et Orée d'Anjou gardent leur territoire (MOD 50, transfert de chef-lieu). La base les publie sous l'ancien code ; cette ligne est la leur, **rattachée exactement** (`codes_rattaches()`, selftest). Elles passent de « non notée » à une démographie : Orée d'Anjou 91, Porte des Pierres Dorées 97, Aurseulles 19, Conques-en-Rouergue 4.
+
+**Attention** : « non notée » n'est pas neutre dans le score de compatibilité du comparateur (§5.8).
 
 ### 5.3 Part étudiante (`etudes_dyn`) : pas d'incompatibilité, non relancée
 
@@ -113,31 +119,62 @@ Le score est l'effectif du MESR divisé par la population de l'unité urbaine, o
 
 Le rayon de recherche dépend de la taille de ville (seuils de 30 000, 100 000 et 500 000 habitants). Recalculé avant et après sur les 34 788 communes, **aucun rayon ne change**, et les rayons publiés sont retrouvés exactement. Les comptages se font autour du centroïde et ne dépendent pas du territoire.
 
-### 5.5 Indicateurs ADEME de la géographie 2024 : incompatibilité de territoire, **blocage documenté**
+### 5.5 Indicateurs ADEME : deux géographies sous un même code, champ par champ
 
-Les indicateurs concernés sont :
-- dans l'index : densité 2022 (critère « calme » et indicateur « dense »), APL (accès aux soins), éloignement des services, part de logements sociaux, air ;
-- dans le dossier, à l'exécution : densité, logements vacants, revenu médian, vieillissement.
+**Le constat** (`scripts/lib/perimetre-ademe.mjs`, `data/perimetre-ademe-cog2025.json`). Les **lignes** d'ADEME `data_communes` sont celles du 01/01/2024 : les 64 communes absorbées le 01/01/2025 y ont encore leur ligne. Mais une partie des **champs** vient de sources déjà passées au COG 2025. Le test, refait à chaque construction : un champ renseigné pour les communes absorbées est dans la géographie 2024 ; un champ dense, vide pour toutes, et renseigné pour les communes nouvelles, est au COG 2025.
 
-Ces indicateurs sont dans la géographie du 01/01/2024.
-- **Rétablies de 2024** : leurs valeurs 2022 sont au bon grain. La densité de L'Oie (89,65 hab./km²) et d'Essarts-en-Bocage (99,78) correspond aux nouveaux territoires (14,1 et 68,5 km² implicites).
-- **Fusions et rétablissements de 2025 (47 communes)** : ADEME décrit la commune d'avant, sous son ancien nom (« May-sur-Orne » pour 14408, « Vars » pour La Boixe, « Hesdin » pour Hesdin-la-Forêt). La densité y vaut population 2022 / surface de l'ancienne commune.
+**Preuve que les champs « 2025 » décrivent bien la commune fusionnée**, et pas seulement l'absence des absorbées (le script refuse sinon) :
+- population 2022 : **46/46** communes nouvelles égalent la somme exacte des populations légales 2022 de leurs communes (Saint-Denis 148 907) ;
+- densité 2022 : pour **46/46**, la surface implicite (population ÷ densité) est la surface fusionnée. Rapport à la surface fusionnée : 0,966 à 1,010 (bande nationale p01–p99 : 0,926–1,033) ; rapport à l'ancienne surface : 1,015 à 22,6.
 
-**Pourquoi c'est un blocage** : il n'y a pas, en local, de source pour les recalculer exactement.
-- ADEME ne publie pas encore la géographie 2025.
-- Les lignes ADEME des codes absorbés sont incomplètes : Pierrefitte n'a pas de densité.
-- La surface officielle n'était pas joignable (geo.api.gouv.fr refuse la connexion).
+| Indicateur | Champ ADEME | Géographie | Communes fusionnées ou rétablies en 2025 (51) | Changements de code (4) |
+|---|---|---|---|---|
+| Densité → **calme**, typologie | `densite_de_population_2022` | **2025** | **gardée** (au bon périmètre) | non publiée (null) |
+| Éloignement des services | `part_de_la_population_eloignee…` | 2025 | gardé | null |
+| Centralité → accès aux services | `niveau_de_centres_d_equipements…` | 2025 | gardée | non publiée : **non noté** (clé retirée) |
+| **Soins** (APL) | `apl_aux_medecins_generalistes` | **2024** | **abstention** | **rattachée** de l'ancien code |
+| Air (PM2,5, NO₂ ; PM10, O₃ à l'exécution) | `moyenne_annuelle_de_concentration_…` | 2024 | abstention | rattaché |
+| Pression agricole (IFT, part SAU, bio) | `ift_t`, `ift_h`, `p_sau`, `p_bio` | 2024 | abstention | rattachée |
+| **Logement** : taux de logements sociaux | `taux_de_logements_sociaux_percent` | 2024 | abstention | rattaché |
+| **Logement** : nombre de logements sociaux, logements vacants | `nombre_de_logements_sociaux_rpls_2023`, `…vacants_2022` | 2025 | gardés | null |
+| **Revenus** : revenu médian | `mediane_du_revenu_disponible_par_uc_2021` | 2025 | gardé | null |
+| **Revenus** : écart à la médiane nationale | `taux_dinferiorite_…` | 2024 | abstention | rattaché (à l'exécution) |
+| Vieillissement, boisement | `taux_devolution_…65_ans…`, `tauxboisement` | 2025, 2024 | gardé, abstention | null, rattaché |
+| Incendies | `nombre_dincendies` | **indécidable** (champ clairsemé) | abstention, par prudence | rattaché |
 
-Ce défaut existe sur `main` avant FUT-109, et FUT-109 ne l'aggrave pas. **Atténuation livrée** : AskFuture reçoit pour ces communes la mention « Hors population, les indicateurs ADEME de ce bloc décrivent le territoire d'avant ».
+**Pourquoi l'abstention, et pas un recalcul**, pour les champs 2024 des communes fusionnées : un APL, une concentration de polluants ou un indice de traitement ne s'additionnent pas, et la méthode des producteurs n'est pas publiée au niveau qui permettrait de la refaire exactement. Pour un changement de code seul, le territoire est identique : la valeur de l'ancien code est la sienne. Son percentile se lit dans la distribution des autres communes, inchangée.
 
-**Décision demandée** (une des trois) :
-- (a) abstention de ces indicateurs pour les 47 communes, dans l'index et dans le dossier ;
-- (b) densité recalculée à partir de la population 2023 et de la surface IGN du COG 2025, quand la surface est disponible ;
-- (c) attendre la mise à jour ADEME (FUT-78).
+**Où c'est appliqué** : `populate-population-grain.mjs` (et, pour une reconstruction complète, `build-comparateur-index.mjs` et `populate-hlm.mjs`) ; à l'exécution, `commune-data.ts` interroge l'ancien code d'un changement de code et écarte les champs 2024 d'un territoire modifié. AskFuture dit que ces indicateurs ne sont publiés que pour l'ancien territoire, sans les estimer. Les rétablissements du 01/01/2024 sont au bon grain dans les deux géographies : rien ne change pour eux.
 
-La part de déplacements en voiture (MOBPRO 2022, géographie 2024) relève du même cas.
+**Densité inconnue** : 15 communes de l'index n'ont pas de densité hors arrondissements PLM (8 du référentiel, sans ligne ADEME). La typologie de l'accueil les rangeait en « cœur urbain dense » (`densite == null` valait arrondissement). Elle ne choisit plus d'angle pour elles.
 
-### 5.6 Hors index
+**Effets mesurés** (index de `main` → index régénéré) :
+- 51 communes perdent APL, air, pression agricole et taux de logements sociaux ; 4 les retrouvent (Orée d'Anjou : APL 2,784, 47ᵉ percentile).
+- Hors des 60 : **aucune valeur** de ces champs ne change (percentiles de rattachement lus sans modifier la distribution).
+- Rangs `acces_soins` : 54 communes du référentiel ; ailleurs, décalage de 2 points de base au plus (43 valeurs retirées de la distribution).
+
+### 5.6 Mobilité (`mobilite`, MOBPRO 2022) : recalcul exact
+
+Le RP 2022 est dans la géographie du 01/01/2024. Rejeu exact de `main` : **0 écart sur 34 788**. Les navetteurs d'une commune fusionnée sont ceux de ses communes d'origine : leurs pondérations individuelles s'**additionnent exactement**. Changements de code : rattachés. Rétablissements du 01/01/2025 (Neussargues et les 4 rétablies du Cantal) : la base ne répartit pas l'ancien territoire, **abstention**.
+- Saint-Denis : part de la voiture 21,9 % → **24,9 %** (Pierrefitte comprise) ; Orée d'Anjou, Aurseulles, Conques-en-Rouergue, Porte des Pierres Dorées : notées ; Neussargues-Moissac : non notée.
+- Hors des 60 : 266 percentiles bougent d'un point ; rangs `faible_dependance_auto` décalés de 127 points de base au plus.
+
+### 5.7 Logement, prix d'achat (DVF) : constat, ticket séparé
+
+DVF range une vente sous le code de la commune **l'année de la vente** : La Moncelle (08294) garde ses ventes 2021-2023 sous son code, Bazeilles ne les compte pas ; L'Oie n'a aucune vente à son code, même en 2024. Le défaut touche **toutes les communes nouvelles depuis 2021**, pas seulement les 60, dans un module **non scoré** (niveau de prix narratif). De plus, `populate-logement.mjs` ne reproduit pas `main` (33 099 communes diffèrent) : l'index a été produit avant le correctif « une seule vente de logement » (`ef77afdd`). Un recalcul exact des 60 imposerait de régénérer les prix de toute la France : **hors FUT-109, ticket recommandé**. Loyers (ANIL) : au COG 2025, corrects.
+
+### 5.8 Point bloquant : un critère non noté compte comme 0 dans le classement
+
+`scorePreferences` divise la somme pondérée des critères **mesurés** par le poids **de tous les critères déclarés**. Un critère non noté sort du texte (raisons, arbitrage), mais pèse **0** dans le score de compatibilité. C'est la convention depuis le moteur V1.6 ; FUT-129 l'a réaffirmée par un test de non-régression sur l'index entier.
+
+**Conséquence pour FUT-109** : les abstentions ne sont pas neutres dans le classement. Mesure, profil « critère × 3 + chaleur × 2 + critères de base » :
+- Haut Valromey, non notée en soins : **25 908ᵉ** sur 34 788 ; avec un score rapporté aux seuls critères mesurés : 4 366ᵉ. Même effet en démographie (26 760ᵉ → 3 729ᵉ), air, pression agricole.
+- Avec la renormalisation, **aucune des 100 premières communes nationales ne change** sur 8 profils (soins, voiture, démographie, vie locale, air, pression agricole, calme, nature).
+- Essai dans la copie isolée : un seul test échoue, celui de FUT-129 qui impose la convention.
+
+Ce comportement concerne aussi `main` (4 740 communes sans mobilité, 422 sans pression agricole…). **Il n'est pas corrigé dans FUT-109** : c'est un invariant du moteur fusionné hier. **Décision demandée** : renormaliser sur les critères mesurés (et, au besoin, dire sur la carte qu'un critère n'est pas mesuré), ou garder la convention en l'assumant. Tant qu'elle n'est pas prise, **la PR n'est pas déclarée prête à livrer**.
+
+### 5.9 Hors index
 
 `populate-dependance-auto.js` écrit une table Supabase (200 premières communes, densité ADEME). C'est la production : non touchée.
 
@@ -150,93 +187,74 @@ La part de déplacements en voiture (MOBPRO 2022, géographie 2024) relève du m
 
 **Ce qui est livré** :
 - `src/lib/population-millesimes.generated.ts`, généré par `construire-referentiel.mjs` et contrôlé par un test contre le JSON : les 60 communes, leur millésime, leur dernier mouvement et leur unité urbaine, plus les **12 unités urbaines qui comptent une commune reprise**. 7 mêlent 2021 et 2023, et 5 sont entièrement en 2023.
-- `src/lib/population-millesime.ts` : `millesimePopulation`, `millesimesAgglomeration`, `perimetreAnterieur`, `enMillesimes`.
+- `src/lib/population-millesime.ts` : `millesimePopulation`, `millesimesAgglomeration`, `perimetreAnterieur` (date d'une fusion ou d'un rétablissement postérieur, plus jamais un simple changement de code), `enMillesimes`.
+- `src/lib/perimetre-ademe.generated.ts`, généré par `construire-perimetre-ademe.mjs` et contrôlé par un test : les champs ADEME de 2024 et la conduite par commune (§5.5).
 - Dossier Territoire : le millésime de la population suit la commune (« 2023 » pour L'Oie).
 - Contraintes de taille : « (149 077 habitants en 2023) » pour la commune de Saint-Denis, « (10 893 507 habitants selon les chiffres Insee 2021 et 2023) » pour l'agglomération de Paris. La phrase est inchangée ailleurs, et une référence enregistrée avant le correctif garde sa phrase.
-- `commune-data.ts` : la population ADEME brute est remplacée par celle du référentiel, avec son millésime. AskFuture affiche le bon millésime et la mention de périmètre (§5.5).
+- `commune-data.ts` : la population ADEME brute est remplacée par celle du référentiel, avec son millésime. Les champs ADEME de 2024 ne sont pas lus pour un territoire modifié ; l'ancien code est lu pour un changement de code. AskFuture affiche le bon millésime et dit quels indicateurs ne sont publiés que pour l'ancien territoire (§5.5).
 - Métadonnées de l'index : `meta.population` (source, grain, règle, **conventions**), `meta.uuPop.millesimes` et l'approximation « population/densité ».
 - L'accueil n'écrit pas d'année (« INSEE · population communale ») : rien à changer.
 
 **Conventions** (inscrites dans `meta.population.conventions`) :
 - **Population communale** : 2021 pour toutes les communes, sauf les 60 du référentiel (2023). Le millésime affiché suit la commune, jamais « 2021 » pour toute la France.
 - **Unités urbaines** : `uu_pop` est la somme des populations communales de l'index. Une unité urbaine qui compte une commune du référentiel mêle 2021 et 2023, et se dit « selon les chiffres Insee 2021 et 2023 ». Cinq unités urbaines, entièrement composées de communes reprises, sont en 2023.
-- **Scores dépendants** : voir §5 (codes RNA repris, abstentions, rangs recalculés pour ces deux critères).
+- **Scores dépendants** : voir §5 (codes RNA repris, abstentions, codes rattachés, mobilité sommée, rangs recalculés pour quatre critères).
+- **Indicateurs ADEME** : `meta.population.conventions.indicateursAdeme` et `data/perimetre-ademe-cog2025.json` (géographie de chaque champ, preuves, traitement de chaque commune).
 - **Absences** : les six villages de la Meuse sont `null` (« non lue »), pas `0`.
 - La migration générale vers 2023 reste hors périmètre (FUT-78).
 
-## 7. Validation, en espace isolé
+## 7. Validation
 
-Les artefacts régénérés n'ont été produits que dans une **copie du dépôt dans le scratchpad**. Les artefacts du worktree sont ceux de `main`, intacts.
+Artefacts régénérés dans une **copie isolée** (scratchpad), depuis l'index de `main` @ `1ce292c6` (après #84), puis rapatriés. #82, fusionnée ensuite, ne touche ni les artefacts ni les fichiers de FUT-109 : branche rebasée sur `de001b2b`, contrôles rejoués.
 
-| Contrôle | Artefacts de `main` | Artefacts régénérés |
-|---|---|---|
-| `npm test` | 2 986 tests, 5 échecs : les tests de garde sur les artefacts détectent le défaut | **2 986/2 986** |
-| `tsc --noEmit` | 0 erreur | 0 erreur |
-| `eslint` (fichiers modifiés) | 0 erreur | 0 erreur |
-| selftests Python (vie locale, démographie) | OK | OK |
-| `verifier-equivalence.mjs` (34 791 codes) | — | 104 373/104 373 lectures identiques |
-| `construire-referentiel.mjs` | — | identique octet pour octet sur deux exécutions ; refuse une règle fausse |
-| Rangs (`populate-mismatch-rank.mts --recalculer …`) | — | 0 bande modifiée hors des deux clés déclarées |
+| Contrôle | Résultat |
+|---|---|
+| `npm test` (suite seule) | **3 074/3 074** |
+| `tsc --noEmit` | 0 erreur |
+| `eslint` (fichiers modifiés) | 0 erreur (1 avertissement préexistant sur `main`) |
+| selftests Python (vie locale, démographie, mobilité) | OK |
+| `verifier-equivalence.mjs` (34 791 codes) | 104 373/104 373 lectures identiques |
+| Reproductibilité | deux rejeux complets : empreintes identiques (`b4a1421e…` index, `723bbbcd…` accueil) |
+| `construire-perimetre-ademe.mjs` | preuves 46/46 ; refuse un champ de l'index à géographie indécidable |
+| Rangs | 0 bande modifiée hors des clés déclarées (`vie_locale`, `croissance_demographique`, `acces_soins`, `faible_dependance_auto`) |
+| Essai de renormalisation (non commité) | 3 060/3 061 : seul l'invariant FUT-129 échoue (§5.8) |
 
-**Diff de l'index** : 6 champs seulement, plus `meta`.
-- `population` : 60 communes, toutes dans le référentiel.
-- `uu_pop` : 512 ; `uu_count` : 8.
-- `vieLocale` : 1 074 ; `demographie` : 241.
-- `rankBands` : 29 642, surtout des décalages d'un point de base dus à l'effectif de la distribution.
+**Diff de l'index, champ par champ** (`main` → branche). Dans les 60 : `population` 60, `uu_pop` 60, `vieLocale` 50, `demographie` 53, `mobilite` 50, APL/air/agri/taux HLM 51, `agri.equip` 8 (retiré). **Hors des 60, seuls changent** : `uu_pop` (452 communes de 12 unités urbaines), et des percentiles d'un point au plus par effet de distribution (vie locale ~500, démographie 156, mobilité 266), 2 récits démographiques, et les rangs des quatre critères recalculés (décalages de quelques points de base ; 332 au plus pour `vie_locale`, groupes d'ex æquo). **Aucun autre champ** ne change ; `meta` : `population`, `uuPop`, `countWithPopulation`.
 
 ## 8. Constats hors périmètre (antérieurs à FUT-109, non corrigés)
 
-1. **Rangs désynchronisés sur `main`.** Les bandes de rang `acces_ecoles` (11 676 communes), `acces_culture` (25 792) et `acces_services` (34 726, plus 62 sans bande) ne correspondent plus aux scores actuels : BPE 2025, puis centralité ANCT. Le garde-fou du script de rang refuse toute régénération, si bien que les règles d'accord et de désaccord du dossier lisent des rangs périmés. Le correctif FUT-109 ne recalcule que ses deux clés. **Ticket recommandé.**
-2. **Associations sous des codes disparus avant 2024.** 10 031 associations actives, sur 570 communes nouvelles plus anciennes, ne sont comptées nulle part dans la vie locale. Le mécanisme `codesRepris`, alimenté par tout l'historique du COG, les corrigerait. **Ticket recommandé.**
-3. **Part étudiante d'un petit bassin à 88.** Les 30 507 communes dont le bassin compte moins de 5 000 habitants reçoivent le percentile du haut de leur ex æquo (88) au lieu d'une valeur basse ou d'une abstention. Le critère « vie étudiante » en hérite. **À examiner.**
-4. **Villages détruits de la Meuse** (population officielle 0) : affichage à décider.
-5. **`?? 0` de `comparateur-vie.ts`** (palier de taille, signature, homonymes) : une population `null` y est lue comme 0. Risque potentiel, à traiter après #84.
+Diagnostics bornés du 24/10, sans modification de l'index. Aucun ticket Linear existant ne les couvre (recherches « étudiant », « rang », « percentile », « RNA », « association », « DVF » ; FUT-78 traite la migration Insee 2023, pas ces défauts).
 
-## 9. Séquence GitHub et procédure après #84
+1. **Part étudiante : un village sans étudiant noté comme une ville étudiante.** `populate-etudiants.py` met la part à 0 sous 5 000 habitants de bassin, puis le percentile (`bisect_right`) donne à tous les ex æquo le rang du haut : **30 771 communes valent 88**, et **aucune commune n'est sous 88**. Toutes ont `vie_etudiante` ≥ 66 : palier « forte présence étudiante » dans la comparaison complète, raison favorable (≥ 55) et identité « Pour une ville étudiante à taille humaine. » (Leménil-Mitry, 2 habitants ; 95 petites communes sur 300 échantillonnées). Sans la part conventionnelle, 9 848 garderaient le palier « forte » par l'accès seul.
+2. **Rangs périmés des écoles, de la culture et des services.** Cause datée dans l'historique de l'index : les **services** ont des rangs bâtis le 16/07 (`ea1b1608`) sur l'ancien indicateur (éloignement) ; le score est passé au niveau de centralité ANCT le 04/08 (`d3094eb8`) sans recalcul. Les **écoles et la culture** ont été rescorées le 21/08 (`0e4ec0fa`) sans recalcul des rangs. Verdicts du dossier faux : services **6 479** « parmi les moins favorables » à tort (Valserhône, centre structurant noté 87, rangée dans les 20 % du bas) et 3 758 autres changements ; écoles 388 ; culture 1 263 (Marseille 7ᵉ, culture 81, rangée parmi les moins favorables).
+3. **Associations sous des codes disparus avant 2024.** La reprise étendue à tout l'historique du COG (fusions et changements de code, 4 143 codes ; 86 écartés car la commune d'arrivée a été découpée par un rétablissement) rattache **9 973** associations, **sans double comptage** (total 1 838 871 → 1 848 844, +9 973 exactement). Effets : 2 072 notes de vie locale changent, 332 de plus d'un point (17 au plus), 69 paliers, 30 raisons favorables, 32 identités « vie locale », 39 catégories « vie locale faible ».
+4. **Prix d'achat DVF** : géographie de l'année de la vente (§5.7).
+5. **Convention « non noté = 0 »** du score de compatibilité (§5.8).
+6. **Villages détruits de la Meuse** (population officielle 0) : affichage à décider.
 
-**Branche locale, rien de poussé** :
-- `11f60680` est conservé ;
-- la révision du 24/10 forme un second commit.
+## 9. Séquence GitHub
 
-`data/comparateur-index.json.gz` et `src/data/accueil-communes.json`, que #84 modifie, ne sont **ni régénérés ni commités** sur la branche. Les tests de garde y échouent donc jusqu'à l'intégration : la branche **n'est pas prête pour une PR**.
+**Branche locale, rien de poussé, aucune PR ouverte.** Commits sur `de001b2b` : population au grain (`11f60680` réécrit par le rebase, sauvegardé sur la branche locale `fut109-sauvegarde-11f60680-ecefc286`), révision du 24/10, indicateurs ADEME et mobilité, artefacts régénérés.
 
-Après la fusion de #84 :
+**Régénérer les artefacts** (rejoué deux fois, empreintes identiques) :
 
 ```bash
-git fetch origin && git rebase origin/main                 # branche FUT-109
 npm run index:unpack
-node scripts/populate-population-grain.mjs                 # 60 communes reprises
+node scripts/populate-population-grain.mjs     # population au grain + indicateurs ADEME au périmètre
 node scripts/populate-uu-pop.mjs
-.venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     # caches data/.cache requis (OSM, RNA, AMALIA)
+.venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     # caches data/.cache (OSM, RNA, AMALIA)
 .venv-bpe/bin/python scripts/populate-demographie.py --write-index    # cache insee-evol-pop.zip
-node scripts/populate-mismatch-rank.mts --recalculer vie_locale,croissance_demographique
+.venv-bpe/bin/python scripts/populate-mobilite.py --write-index       # data/rp-mobpro-2022.parquet
+npx tsx scripts/populate-mismatch-rank.mts --recalculer vie_locale,croissance_demographique,acces_soins,faible_dependance_auto --retirer-orphelines acces_services
 npm run index:pack
 node scripts/accueil/donnees-accueil.mjs --ecrire
 ```
 
-Une modification de `src/lib/comparateur-vie.ts` est nécessaire **après #84 et avant la PR**. Sans elle, le comparateur lit une vie locale `null` comme `0`. Essarts-en-Bocage, seule commune éligible parmi les abstentions, serait alors classée dernière en vie locale au lieu d'être « non notée » :
+**Reconstruire les référentiels** (inutile tant que les sources ne changent pas) :
+1. Population : `v_mvt_commune_2025.csv` (Insee 8377162), `donnees_communes.csv` de 8680726 (2023) et 7739582 (2021), puis `node scripts/population/construire-referentiel.mjs --mvt … --pl2023 … --pl2021 …`.
+2. Périmètre ADEME : `node scripts/population/construire-perimetre-ademe.mjs --telecharger <json>`, puis `--lignes <json> --pl2022 <donnees_communes.csv de 8290591>`.
 
-```ts
-case "vie_locale":
-  // FUT-109 : un rétablissement n'est pas noté (associations non réparties) ; ailleurs, null = rien de mesurable.
-  return c.vieLocale?.score ?? (populationHorsGrain(c.insee)?.retablissement ? null : 0);
-```
-
-Puis :
-
-```bash
-npm test && npx tsc --noEmit && node scripts/accueil/verifier-equivalence.mjs
-git add data/comparateur-index.json.gz src/data/accueil-communes.json src/lib/comparateur-vie.ts && git commit
-```
-
-Les caches `data/.cache` (OSM, RNA, AMALIA, insee-evol-pop) sont ceux du checkout principal. Le rejeu les a lus sans réseau ni écriture. Les comparer à des téléchargements frais changerait d'autres communes.
-
-**Reconstruire le référentiel** (inutile tant que les sources ne changent pas) :
-1. Télécharger `v_mvt_commune_2025.csv` (Insee 8377162), puis `donnees_communes.csv` des deux archives : 8680726 (populations de référence 2023) et 7739582 (populations légales 2021).
-2. Lancer `node scripts/fetch-communes-population.mjs`.
-3. Lancer `node scripts/population/construire-referentiel.mjs --mvt … --pl2023 … --pl2021 …`.
-
-Le script réécrit le JSON et le module TypeScript généré.
+**Avant de déclarer la PR prête** : décision sur la convention du §5.8.
 
 ## Sources
 
