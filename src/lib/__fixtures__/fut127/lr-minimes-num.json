@@ -1,0 +1,140 @@
+{
+ "adresse": {
+  "q": "5 Rue de la Désirée 17000 La Rochelle",
+  "label": "Rue de la Désirée 17000 La Rochelle",
+  "score": 0.8332945454545454,
+  "type": "street",
+  "citycode": "17300",
+  "lat": 46.150997,
+  "lon": -1.155893
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 67211973,
+   "numero": "0052",
+   "feuille": 1,
+   "section": "HK",
+   "code_dep": "17",
+   "nom_com": "La Rochelle",
+   "code_com": "300",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17300000HK0052",
+   "contenance": 1469,
+   "code_insee": "17300"
+  },
+  "parcelCodeApp": "17300-000-HK-0052",
+  "idu": "17300000HK0052",
+  "repli": {
+   "rayon_m": 8,
+   "candidates": 2
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 115,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "02",
+        "libelle": "Prescriptions",
+        "nom": "Zone bleue Bs1: Ensemble des zones urbanisees en alea faible a court terme",
+        "codeZone": "Bs1"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 43,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 94,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "02",
+        "libelle": "Prescriptions",
+        "nom": "Zone bleue Bs2: Ensemble des zones urbanisees comprises entre les limites des 2 aleas ainsi que les zones naturelles en alea nul court terme et faible long terme",
+        "codeZone": "Bs2"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 45,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ }
+}

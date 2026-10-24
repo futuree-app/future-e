@@ -16,7 +16,7 @@ import { villeGaspar } from "../georisques-flags.ts";
 //
 // ── POURQUOI L'INDEX, ET PAS L'APPEL DIRECT ──────────────────────────────────────────────────
 // Le moteur de décision est déterministe et sans réseau : il lit l'index (`comparateur-index.json`,
-// alimenté par `scripts/gaspar/collecter-catnat.mts`, submersion marine exclue). La carte, elle, a
+// alimenté par `scripts/gaspar/collecter-catnat.mts`). La carte, elle, a
 // l'appel direct sous la main. Faire descendre l'index jusqu'à la carte est le seul sens qui
 // marche : l'inverse demanderait au moteur un appel réseau, qu'il refuse par construction.
 //
@@ -62,7 +62,7 @@ export function catnatFigeAffichable(o: CatnatInondation | null | undefined): o 
 
 export type CatnatInondation = {
   /**
-   * Reconnaissances CatNat INONDATION (submersion marine exclue). UNITÉ (FUT-60) : la ligne GASPAR,
+   * Reconnaissances CatNat INONDATION. UNITÉ (FUT-60) : la ligne GASPAR,
    * soit un arrêté × un phénomène × un événement. Paris : 20 lignes pour 16 arrêtés distincts. Ce
    * n'est donc pas un nombre d'arrêtés, et le texte dit « reconnaissances ».
    */
@@ -144,6 +144,11 @@ function echelle(o: CatnatInondation): string {
  * Ce qui doit être IDENTIQUE, c'est ce que le lecteur compare : la pastille et la carte qu'elle
  * vise. Le constat, lui, est lu au même endroit que la pastille, jamais en regard d'elle.
  */
+/** FUT-127 : l'absence de reconnaissance, dite ici pour la même raison que le compte (une seule phrase). */
+export function phraseAucuneReconnaissanceInondation(o: CatnatInondation): string {
+  return `aucune reconnaissance de catastrophe naturelle liée aux inondations n'est comptée depuis ${o.depuis}${echelle(o)}`;
+}
+
 export function phraseConstatCatnatInondation(o: CatnatInondation): string {
   const pluriel = o.count > 1 ? "s" : "";
   return `${o.count} reconnaissance${pluriel} de catastrophe naturelle liée${pluriel} aux inondations depuis ${o.depuis}${echelle(o)}`;
@@ -153,6 +158,12 @@ export function phraseConstatCatnatInondation(o: CatnatInondation): string {
  * Le libellé de SOURCE, pour « Données et limites ». Il porte la version de la convention : un
  * dossier figé doit pouvoir dire sous quelle règle son compte a été établi.
  */
+//
+// « SUBMERSION MARINE EXCLUE » ÉTAIT FAUX, ET A ÉTÉ RETIRÉ (FUT-127, 22/10/2026). Aucune reconnaissance
+// GASPAR n'est libellée « submersion » (export du 05/10/2026, 0 ligne sur 245 000) : les épisodes de
+// submersion sont reconnus sous « Inondations et/ou Coulées de Boue », Xynthia comprise (721 communes de
+// Charente-Maritime et de Vendée). L'exclusion ne retirait rien, et la source affichée disait le
+// contraire de ce que le compte contient. Le compte, lui, ne change pas : même convention.
 export function sourceCatnatInondation(o: CatnatInondation): string {
-  return `Reconnaissances CatNat inondation (GASPAR), submersion marine exclue · ${o.version}`;
+  return `Reconnaissances de catastrophe naturelle liées aux inondations, base GASPAR · ${o.version}`;
 }

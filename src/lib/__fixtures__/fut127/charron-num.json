@@ -1,0 +1,140 @@
+{
+ "adresse": {
+  "q": "2 Rue du 19 Mars 1962 17230 Charron",
+  "label": "Rue du 19 Mars 1962 17230 Charron",
+  "score": 0.8119725668449197,
+  "type": "street",
+  "citycode": "17091",
+  "lat": 46.300204,
+  "lon": -1.104613
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 73064041,
+   "numero": "0006",
+   "feuille": 1,
+   "section": "AM",
+   "code_dep": "17",
+   "nom_com": "Charron",
+   "code_com": "091",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17091000AM0006",
+   "contenance": 1095,
+   "code_insee": "17091"
+  },
+  "parcelCodeApp": "17091-000-AM-0006",
+  "idu": "17091000AM0006",
+  "repli": {
+   "rayon_m": 3,
+   "candidates": 1
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 124,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100006",
+     "libPpr": "PPR Charron",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme",
+        "codeZone": "Rs2"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 61,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "2",
+     "exposition": "Exposition moyenne"
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 145,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100006",
+     "libPpr": "PPR Charron",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone rouge Rs2: Ensemble des zones submersibles en alea tres fort a court terme",
+        "codeZone": "Rs2"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 72,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "2",
+     "exposition": "Exposition moyenne"
+    }
+   ]
+  }
+ }
+}

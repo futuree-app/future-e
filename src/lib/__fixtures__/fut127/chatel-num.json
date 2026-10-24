@@ -1,0 +1,127 @@
+{
+ "adresse": {
+  "q": "10 Boulevard de la Mer 17340 Châtelaillon-Plage",
+  "label": "10 Boulevard de la Mer 17340 Châtelaillon-Plage",
+  "score": 0.9629445454545454,
+  "type": "housenumber",
+  "citycode": "17094",
+  "lat": 46.081957,
+  "lon": -1.096044
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 89406376,
+   "numero": "0879",
+   "feuille": 1,
+   "section": "AB",
+   "code_dep": "17",
+   "nom_com": "Châtelaillon-Plage",
+   "code_com": "094",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17094000AB0879",
+   "contenance": 189,
+   "code_insee": "17094"
+  },
+  "parcelCodeApp": "17094-000-AB-0879",
+  "idu": "17094000AB0879",
+  "repli": null
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 130,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100008",
+     "libPpr": "PPR Chatelaillon",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone rouge Rs3: zones naturelles en alea faible, modere, fort pour alea court terme et hors alea a court terme et en aleas modere, fort et tres fort pour alea long terme et zones urbanisees en alea modere, fort pour alea court terme",
+        "codeZone": "Rs3"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 47,
+  "body": {
+   "totalElements": 0,
+   "totalPages": 0,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": []
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 150,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100008",
+     "libPpr": "PPR Chatelaillon",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": true,
+      "listTypeReg": [
+       {
+        "code": "03",
+        "libelle": "Interdiction",
+        "nom": "Zone orange Os: Ensemble des zones fortement urbanisees en alea modere a court terme",
+        "codeZone": "Os"
+       }
+      ]
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 56,
+  "body": {
+   "totalElements": 0,
+   "totalPages": 0,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": []
+  }
+ }
+}

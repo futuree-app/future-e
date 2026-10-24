@@ -65,7 +65,8 @@ test("Ciré-d'Aunis : le compte affiché est celui de la preuve du dossier, mot 
   const l = construireLectureInondation(CIRE)!;
   const catnat = l.constats.find((c) => c.cle === "catnat_commune")!;
   assert.match(catnat.enonce, /^La commune compte 5 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982\./);
-  assert.match(catnat.source, /submersion marine exclue/);
+  assert.match(catnat.source, /base GASPAR/);
+  assert.doesNotMatch(catnat.source, /submersion marine exclue/); // FUT-127 : la mention était fausse
   assert.equal(catnat.periode, "depuis 1982");
 });
 
@@ -162,7 +163,7 @@ test("un zonage inondation au point est énoncé comme un fait, avec le nom du p
     onrn: { kind: "aucun" },
   })!;
   const z = l.constats.find((c) => c.cle === "zonage_point")!;
-  assert.match(z.enonce, /Un plan de prévention du risque inondation réglemente ce point : PPRI de la Charente\./);
+  assert.match(z.enonce, /^Cette adresse est dans une zone réglementée pour l'inondation \(PPRI de la Charente\)\./);
   assert.equal(z.signal, true);
 });
 

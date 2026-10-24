@@ -151,7 +151,8 @@ export function appliquerCollecte(index: Index, collecte: Collecte, convention: 
     collecte_debut: collecte.debut,
     collecte_fin: collecte.dernierLot,
     statut: "complete",
-    unite: "lignes GASPAR du groupe Inondations (un arrêté × un phénomène × un événement), submersion marine exclue",
+    // « submersion marine exclue » figurait ici et ne retirait rien : aucune ligne GASPAR n'a ce libellé (FUT-127).
+    unite: "lignes GASPAR du groupe Inondations (un arrêté × un phénomène × un événement)",
     codes_interroges: codes.length,
     communes_index: index.communes.length,
     lignes_inondation: Object.values(collecte.comptes).reduce((s, n) => s + n, 0),
