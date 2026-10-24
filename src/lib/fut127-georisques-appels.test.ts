@@ -1,4 +1,5 @@
-import { test, before } from "node:test";
+import { test, before, beforeEach, type TestContext } from "node:test";
+import { setImmediate as prochainTour } from "node:timers/promises";
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -11,7 +12,8 @@ import { readFileSync } from "node:fs";
 // qu'une fois la liste des plans reçue : c'est un appel EN SÉRIE, qui s'ajoute à la lecture de l'adresse.
 // Ces tests font tourner `georisques.ts` tel quel, avec un `fetch` simulé qui sert les réponses
 // Géorisques RÉELLES relevées le 22/10/2026 (`__fixtures__/fut127/`) après une latence choisie. Ils
-// comptent les appels et chronomètrent la lecture. Ce qu'ils ne mesurent pas : la latence réelle du
+// comptent les appels et pilotent une horloge simulée : aucune borne de temps murale ne dépend de la
+// charge de la machine. Les délais de 3 s et 8 s viennent toujours du vrai code Géorisques. Ce qu'ils ne mesurent pas : la latence réelle du
 // service (Géorisques ne répond qu'aux adresses IP françaises et refusait la connexion depuis le poste
 // de mesure). Aucun réseau, aucun appel Anthropic.
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -28,7 +30,7 @@ const fixture = (nom: string): M => JSON.parse(readFileSync(`src/lib/__fixtures_
 const CHARRON = fixture("charron-num");
 const DETAIL_CHARRON = fixture("pprn-detail-17DDTM20100006");
 
-type Appel = { chemin: string; debut: number; fin: number };
+type Appel = { chemin: string; debut: number; fin: number; annulation?: number };
 let appels: Appel[] = [];
 let latence: (chemin: string) => number = () => 0;
 let enPanne: (chemin: string) => boolean = () => false;
@@ -56,7 +58,7 @@ before(() => {
     appels.push(appel);
     await new Promise<void>((ok, ko) => {
       const minuteur = setTimeout(ok, latence(chemin));
-      init?.signal?.addEventListener("abort", () => { clearTimeout(minuteur); ko(Object.assign(new Error("aborted"), { name: "AbortError" })); });
+      init?.signal?.addEventListener("abort", () => { appel.annulation = Date.now() - t0; clearTimeout(minuteur); ko(Object.assign(new Error("aborted"), { name: "AbortError" })); });
     });
     appel.fin = Date.now() - t0;
     if (enPanne(chemin)) return new Response("", { status: 503 });
@@ -84,66 +86,118 @@ async function lireAdresse(g: M, lat: number, lon: number, parcelle: string) {
 
 const compter = (as: Appel[], chemin: string) => as.filter((a) => a.chemin === chemin).length;
 
-test("premier dossier : un seul appel de détail pour le plan, partagé entre le point et la parcelle", async () => {
+// Les callbacks et Date avancent ensemble. Un tour réel vide les continuations de fetch/Response,
+// sans dormir et sans imposer de budget CPU. Les mocks sont restaurés automatiquement par node:test.
+beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 0 });
   latence = () => 200;
   enPanne = () => false;
-  const g = await moduleNeuf();
-  const r = await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
-  // 4 appels au point + 4 à la parcelle (inchangés), + 1 détail : le même plan est lu aux deux grains.
-  assert.equal(r.appels.length, 9, r.appels.map((a) => a.chemin).join(", "));
-  assert.equal(compter(r.appels, "détail du plan"), 1);
-  // Le détail part APRÈS la liste des plans : la lecture dure deux allers-retours au lieu d'un.
-  const detail = r.appels.find((a) => a.chemin === "détail du plan")!;
-  const liste = r.appels.find((a) => a.chemin === "/api/v2/gaspar/pprn (point)")!;
-  assert.ok(detail.debut >= liste.fin - 5, "le détail attend la liste");
-  assert.ok(r.duree >= 400 && r.duree < 600, `durée ${r.duree} ms pour une latence de 200 ms par appel`);
-  assert.equal(r.parc.regulatoryPlans[0].approvedAt, "2021-08-10");
-  console.log(`MESURE premier dossier : ${r.appels.length} appels, dont ${compter(r.appels, "détail du plan")} détail ; ${r.duree} ms (latence simulée 200 ms par appel)`);
 });
+async function avancer(t: TestContext, ms: number) {
+  t.mock.timers.tick(ms);
+  await prochainTour();
+}
+async function deuxTours(t: TestContext, g: M, lat = 46.2994, lon = -1.1007, parcelle = "17091000AB0123", ms = 200) {
+  const lecture = lireAdresse(g, lat, lon, parcelle);
+  await avancer(t, ms);
+  await avancer(t, ms);
+  return lecture;
+}
+function paralleles(as: Appel[]) {
+  assert.equal(as.length, 8, "quatre appels au point et quatre à la parcelle");
+  assert.ok(as.every(a => a.debut === 0 && a.fin === -1), "tous démarrent avant la première réponse");
+}
 
-test("dossier suivant dans la même commune (même process) : le détail vient du cache, aucun appel de plus", async () => {
-  latence = () => 200;
-  enPanne = () => false;
+test("premier dossier : un seul appel de détail pour le plan, partagé entre le point et la parcelle", async (t) => {
   const g = await moduleNeuf();
-  await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
-  const r = await lireAdresse(g, 46.3001, -1.1012, "17091000AB0456");
-  assert.equal(compter(r.appels, "détail du plan"), 0);
-  assert.equal(r.appels.length, 8, "le même nombre d'appels qu'avant FUT-127");
-  assert.ok(r.duree < 400, `durée ${r.duree} ms : un seul aller-retour`);
+  let terminee = false;
+  const lecture = lireAdresse(g, 46.2994, -1.1007, "17091000AB0123").then(r => { terminee = true; return r; });
+  paralleles(appels);
+  await avancer(t, 199);
+  assert.ok(appels.every(a => a.fin === -1));
+  await avancer(t, 1);
+  assert.equal(appels.length, 9);
+  assert.equal(compter(appels, "détail du plan"), 1);
+  const detail = appels.find(a => a.chemin === "détail du plan")!;
+  const listes = appels.filter(a => a.chemin.startsWith("/api/v2/gaspar/pprn"));
+  assert.equal(listes.length, 2);
+  assert.ok(listes.every(a => a.fin === 200 && a.fin <= detail.debut), "le détail attend les listes point/parcelle");
+  assert.equal(detail.debut, 200);
+  assert.equal(detail.fin, -1);
+  assert.equal(terminee, false, "les deux grains attendent le détail partagé");
+  await avancer(t, 199);
+  assert.equal(terminee, false);
+  await avancer(t, 1);
+  const r = await lecture;
+  assert.equal(r.duree, 400, "deux tours de réseau virtuels, pas une mesure de performance réelle");
   assert.equal(r.point.regulatoryPlans[0].approvedAt, "2021-08-10");
-  console.log(`MESURE dossier suivant (cache chaud) : ${r.appels.length} appels, 0 détail ; ${r.duree} ms`);
+  assert.equal(r.parc.regulatoryPlans[0].approvedAt, "2021-08-10");
+  assert.deepEqual(r.point.regulatoryPlans[0].aleas, r.parc.regulatoryPlans[0].aleas);
+  assert.ok(r.point.regulatoryPlans[0].aleas.length);
 });
 
-test("même adresse relue (actualisation, second rendu) : aucun appel, tout vient du cache du process", async () => {
-  latence = () => 200;
+test("dossier suivant dans la même commune (même process) : le détail vient du cache, aucun appel de plus", async (t) => {
   const g = await moduleNeuf();
-  await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
+  await deuxTours(t, g);
+  const lecture = lireAdresse(g, 46.3001, -1.1012, "17091000AB0456");
+  paralleles(appels);
+  await avancer(t, 200);
+  const r = await lecture;
+  assert.equal(compter(r.appels, "détail du plan"), 0);
+  assert.equal(r.appels.length, 8);
+  assert.equal(r.duree, 200, "un seul tour virtuel avec le détail en cache");
+  assert.equal(r.point.regulatoryPlans[0].approvedAt, "2021-08-10");
+});
+
+test("même adresse relue (actualisation, second rendu) : aucun appel, tout vient du cache du process", async (t) => {
+  const g = await moduleNeuf();
+  await deuxTours(t, g);
   const r = await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
   assert.equal(r.appels.length, 0);
 });
 
-test("détail très lent : coupé à 3 s, la lecture tient dans le budget d'affichage de 10 s, aléas inconnus", async () => {
-  latence = (c) => (c === "détail du plan" ? 9000 : 1500);
-  enPanne = () => false;
+test("détail très lent : coupé exactement à 3 s, aléas inconnus, sans épuiser le budget de 10 s", async (t) => {
+  latence = c => c === "détail du plan" ? 9000 : 1500;
   const g = await moduleNeuf();
-  const r = await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
-  // 1,5 s de liste + 3 s de délai du détail, au lieu de 1,5 + 8 s avec le délai commun : au-delà de 10 s,
-  // `fetchLogementDecisionDataWithTimeout` déclarait toute l'analyse du logement indisponible.
-  assert.ok(r.duree >= 4400 && r.duree < 5200, `durée ${r.duree} ms`);
-  // Le plan est lu sans aléas : la nature reste « inconnue » au pire, jamais « autre ».
+  let terminee = false;
+  const lecture = lireAdresse(g, 46.2994, -1.1007, "17091000AB0123").then(r => { terminee = true; return r; });
+  await avancer(t, 1500);
+  const detail = appels.find(a => a.chemin === "détail du plan")!;
+  assert.equal(detail.debut, 1500);
+  await avancer(t, 2999);
+  assert.equal(terminee, false, "pas de coupure anticipée");
+  assert.equal(detail.annulation, undefined);
+  await avancer(t, 1);
+  const r = await lecture;
+  assert.equal(detail.annulation, 4500, "le vrai délai du détail est 3 000 ms");
+  assert.equal(r.duree, 4500);
   assert.equal(r.parc.regulatoryPlans[0].aleas, null);
   assert.equal(r.parc.regulatoryPlans[0].approvedAt, null);
-  console.log(`MESURE détail lent (9 s simulées) : lecture rendue en ${r.duree} ms, aléas inconnus`);
 });
 
-test("détail en panne : aléas inconnus, et l'échec n'est pas mis en cache (le dossier suivant réessaie)", async () => {
-  latence = () => 50;
-  enPanne = (c) => c === "détail du plan";
+test("les autres requêtes Géorisques gardent leur délai technique de 8 s", async (t) => {
+  latence = () => 9000;
   const g = await moduleNeuf();
-  const r1 = await lireAdresse(g, 46.2994, -1.1007, "17091000AB0123");
+  let terminee = false;
+  const lecture = lireAdresse(g, 46.2994, -1.1007, "17091000AB0123").then(r => { terminee = true; return r; });
+  paralleles(appels);
+  await avancer(t, 7999);
+  assert.equal(terminee, false);
+  assert.ok(appels.every(a => a.annulation === undefined));
+  await avancer(t, 1);
+  await lecture;
+  assert.equal(appels.length, 8, "pas de détail sans liste exploitable");
+  assert.ok(appels.every(a => a.annulation === 8000), "tous les vrais contrôleurs annulent à 8 000 ms");
+});
+
+test("détail en panne : aléas inconnus, et l'échec n'est pas mis en cache (le dossier suivant réessaie)", async (t) => {
+  latence = () => 50;
+  enPanne = c => c === "détail du plan";
+  const g = await moduleNeuf();
+  const r1 = await deuxTours(t, g, 46.2994, -1.1007, "17091000AB0123", 50);
   assert.equal(r1.point.regulatoryPlans[0].aleas, null);
   enPanne = () => false;
-  const r2 = await lireAdresse(g, 46.3001, -1.1012, "17091000AB0456");
+  const r2 = await deuxTours(t, g, 46.3001, -1.1012, "17091000AB0456", 50);
   assert.equal(compter(r2.appels, "détail du plan"), 1, "l'échec n'est pas retenu");
   assert.ok(r2.point.regulatoryPlans[0].aleas?.length);
 });
