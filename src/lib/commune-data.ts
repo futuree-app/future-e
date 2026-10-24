@@ -2,6 +2,7 @@ import "server-only";
 
 import { irisQueryPrefix, keepIrisOfCommune, scopeFromPoint, type IrisScope } from "./iris-scope";
 import { perimetreAnterieur, populationHorsGrain, SOURCE_POPULATION } from "./population-millesime";
+import { CHAMPS_ADEME_ANCIENNE_GEOGRAPHIE, PERIMETRE_ADEME } from "./perimetre-ademe.generated.ts";
 
 const COMMUNES_DS = "https://data.ademe.fr/data-fair/api/v1/datasets/8ggfo546-mtjxy4lbqxcl462";
 const IRIS_DS     = "https://data.ademe.fr/data-fair/api/v1/datasets/jixoufr9qp0gko9xcqyzbr4a";
@@ -14,8 +15,9 @@ export type CommuneData = {
   population: number | null;
   // FUT-109 : millésime de `population` (2021, ou 2023 quand la source n'est pas au grain de la commune).
   population_millesime?: number | null;
-  // FUT-109 : date d'une fusion, d'un rétablissement ou d'un changement de code postérieur à la géographie
-  // d'ADEME (01/01/2024) : les autres indicateurs de ce bloc décrivent alors le territoire d'avant. `null` sinon.
+  // FUT-109 : date d'une fusion ou d'un rétablissement postérieur au 01/01/2024. Les indicateurs qu'ADEME publie
+  // encore dans cette géographie (air, accès aux médecins, taux de logements sociaux, boisement, incendies, écart
+  // au revenu national) décriraient le territoire d'avant : ils valent alors `null`. `null` : périmètre à jour.
   perimetre_anterieur?: string | null;
   vieillissement_pct: number | null;   // évolution annuelle des 65+ (2016-2022)
   logements: {
@@ -249,18 +251,23 @@ async function fetchIrisAtPoint(lat: number, lon: number): Promise<IrisApiRecord
 
 // ── Mappers ───────────────────────────────────────────────────────────────────
 
-function toCommuneData(r: CommuneApiRecord): CommuneData {
+function toCommuneData(brut: CommuneApiRecord, inseeCode: string): CommuneData {
   // FUT-109 : ADEME porte la population 2021 dans sa géographie (01/01/2024). Une commune rétablie y vaut 0,
   // une commune fusionnée depuis y garde l'ancien périmètre : la population servie est alors celle de l'index,
   // au grain de la commune actuelle, jamais la valeur brute.
-  const horsGrain = populationHorsGrain(r.code_commune_insee);
-  const population = horsGrain ? horsGrain.population : num(r.population_totale_2021);
+  const horsGrain = populationHorsGrain(inseeCode);
+  const population = horsGrain ? horsGrain.population : num(brut.population_totale_2021);
+  // Territoire modifié depuis le 01/01/2024 : les champs publiés dans cette géographie ne sont pas lus.
+  const nonLus = PERIMETRE_ADEME[inseeCode]?.traitement === "abstention" ? new Set(CHAMPS_ADEME_ANCIENNE_GEOGRAPHIE) : null;
+  const r = nonLus
+    ? (Object.fromEntries(Object.entries(brut).filter(([k]) => !nonLus.has(k))) as CommuneApiRecord)
+    : brut;
   return {
-    inseeCode: r.code_commune_insee,
+    inseeCode,
     nom:       r.commune,
     population,
     population_millesime: population == null ? null : horsGrain?.millesime ?? SOURCE_POPULATION.millesime,
-    perimetre_anterieur: perimetreAnterieur(r.code_commune_insee),
+    perimetre_anterieur: perimetreAnterieur(inseeCode),
     vieillissement_pct: num(r.taux_devolution_annuel_des_65_ans_et_plus_20162022),
     logements: {
       vacants_2022:  num(r.nombre_de_logements_vacants_2022),
@@ -311,9 +318,11 @@ async function fetchCommuneFullData(
   inseeCode: string,
   point?: { lat: number; lon: number } | null,
 ): Promise<CommuneFullData | null> {
-  const communeRecord = await fetchCommuneRecord(inseeCode);
+  // FUT-109 : un changement de code seul garde son territoire ; ADEME ne le connaît que sous l'ancien code.
+  const perimetre = PERIMETRE_ADEME[inseeCode];
+  const communeRecord = await fetchCommuneRecord(perimetre?.traitement === "rattachement" ? perimetre.depuis : inseeCode);
   if (!communeRecord) return null;
-  const commune = toCommuneData(communeRecord);
+  const commune = toCommuneData(communeRecord, inseeCode);
 
   // UN POINT EST FOURNI : on tente l'IRIS qui le contient. C'est la seule lecture réellement
   // sectorielle ; la moyenne communale écrase des écarts de 0,3 % à 85,1 % (HLM, La Rochelle).

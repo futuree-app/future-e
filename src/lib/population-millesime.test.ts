@@ -41,10 +41,12 @@ test("agglomération : les millésimes réunis, jamais un seul millésime présu
   assert.deepEqual(millesimesAgglomeration(null, "85165"), [2023]); // hors UU : le millésime de la commune
 });
 
-test("le périmètre ADEME n'est ancien qu'après la géographie de la source", () => {
+test("le périmètre ADEME n'est ancien qu'après la géographie de la source, et jamais pour un simple changement de code", () => {
   assert.equal(perimetreAnterieur("93066"), "2025-01-01");
-  assert.equal(perimetreAnterieur("49126"), "2025-01-01");
-  assert.equal(perimetreAnterieur("12218"), "2024-03-04");
+  assert.equal(perimetreAnterieur("15141"), "2025-01-01"); // Neussargues, commune d'origine d'un rétablissement
+  // Transferts de chef-lieu : même territoire, l'ancien code est rattaché.
+  assert.equal(perimetreAnterieur("49126"), null);
+  assert.equal(perimetreAnterieur("12218"), null);
   // Rétablie le 01/01/2024 : densité et logements 2022 sont calculés pour elle ; seule la population 2021 manquait.
   assert.equal(perimetreAnterieur("85165"), null);
   assert.equal(perimetreAnterieur("17300"), null);

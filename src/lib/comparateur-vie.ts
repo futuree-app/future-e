@@ -18,6 +18,7 @@ import { gabaritTailleAncre } from "@/lib/ancre-gabarit";
 import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
 import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale, communeLittoraleMer, categorieDeFacade, presDuRivage } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
+import { populationHorsGrain } from "@/lib/population-millesime";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -34,7 +35,7 @@ import {
 import { hardFilter, unappliedLabels } from "@/lib/hard-constraints-filter";
 import { etalerResultats } from "@/lib/comparateur-etalement";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "@/lib/comparateur-scores";
-import { travelThresholdLabel, ROUTABLE_MODES, kmLisible } from "@/lib/hard-constraints";
+import { travelThresholdLabel, ROUTABLE_MODES, kmLisible, estArrondissementPLM } from "@/lib/hard-constraints";
 import { estimateTravelMinutes } from "@/lib/route-time";
 import { reachabilityStore } from "@/lib/reachability-store";
 import { deptRegionalCategories } from "@/lib/commune-categories";
@@ -776,11 +777,13 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
   }
 
   // ── Densité : urbain dense (sud/nord) vs rural/périurbain ───────────────────
-  // densite null = arrondissement (Paris/Lyon) présent dans l'index → cœur urbain.
-  const dense = c.densite == null || c.densite >= 1500;
+  // densite null = arrondissement (Paris/Lyon/Marseille) présent dans l'index → cœur urbain. Ailleurs, une
+  // densité inconnue (commune sans ligne ADEME, FUT-109) ne choisit aucun des deux angles.
+  const dense = c.densite == null ? estArrondissementPLM(c.insee) : c.densite >= 1500;
+  const peuDense = c.densite != null && !dense;
   if (dense) {
     cats.add(sud ? 'urbain_dense_sud' : 'urbain_dense_nord');
-  } else {
+  } else if (peuDense) {
     cats.add('rural_peri_urbain');
     // Dépendance à la voiture : percentile haut = peu d'alternatives.
     if (c.mobilite && c.mobilite.dependance >= 60) cats.add('periurbain_dependance_auto');
@@ -788,7 +791,7 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
 
   // ── Caractère rural : agricole / forestier (couvert OSO, pas pression_agricole,
   //    qui ne traque pas la ruralité). Réservé aux communes peu denses.
-  if (!dense && c.nature?.composition) {
+  if (peuDense && c.nature?.composition) {
     const comp = c.nature.composition;
     if ((comp.agricole ?? 0) >= 30) cats.add('rural_agricole');
     if ((comp.foret ?? 0) >= 35) cats.add('rural_forestier');
@@ -815,7 +818,7 @@ export function deriveCategoriesFromEntry(c: IndexCommune): string[] {
   // Commune qui change : forte croissance démographique récente.
   if (c.demographie && c.demographie.croissance >= 80) cats.add('croissance_forte');
   // Vie locale en jeu : tissu social faible, hors cœur urbain (où la question ne se pose pas).
-  if (!dense && c.vieLocale && c.vieLocale.score <= 30) cats.add('faible_vie_locale');
+  if (peuDense && c.vieLocale && c.vieLocale.score <= 30) cats.add('faible_vie_locale');
 
   return Array.from(cats);
 }
@@ -1384,8 +1387,9 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return Math.round(0.4 * a + 0.6 * d);
     }
     case "vie_locale":
-      // intensité de vie sociale (lieux + assos par habitant) ; pas de vie locale mesurable = 0.
-      return c.vieLocale?.score ?? 0;
+      // intensité de vie sociale (lieux + assos par habitant) ; pas de vie locale mesurable = 0. FUT-109 : une
+      // commune rétablie n'est pas notée (ses associations restent rangées sous le code de sa commune d'origine).
+      return c.vieLocale?.score ?? (populationHorsGrain(c.insee)?.retablissement ? null : 0);
     case "croissance_demographique":
       // trajectoire démographique ; null (donnée absente) -> non noté (opt-in, pas de pénalité).
       return c.demographie?.croissance ?? null;

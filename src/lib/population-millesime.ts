@@ -6,6 +6,7 @@
 //
 // Table générée par scripts/population/construire-referentiel.mjs (règle : scripts/lib/population-grain.mjs).
 import { MILLESIMES_UNITES_URBAINES, POPULATIONS_HORS_GRAIN, SOURCE_POPULATION } from "./population-millesimes.generated.ts";
+import { PERIMETRE_ADEME } from "./perimetre-ademe.generated.ts";
 
 export { SOURCE_POPULATION };
 
@@ -31,15 +32,15 @@ export function millesimesAgglomeration(uu: string | null | undefined, insee?: s
 }
 
 /**
- * La date du mouvement (fusion, rétablissement, changement de code) qui rend ANCIEN le périmètre des
- * indicateurs communaux publiés dans la géographie de la source (ADEME data_communes, au 01/01/2024) : densité,
- * logements, revenus, accès aux soins y décrivent la commune d'avant. `null` : périmètre à jour.
- * Un rétablissement du jour même de cette géographie n'en fait pas partie : ces indicateurs-là ont été
- * calculés pour la commune rétablie, seule la population 2021 ne l'a pas été.
+ * La date de la fusion ou du rétablissement qui rend ANCIEN le périmètre des indicateurs qu'ADEME publie encore
+ * dans la géographie du 01/01/2024 (air, accès aux médecins, taux de logements sociaux… : liste et preuves dans
+ * data/perimetre-ademe-cog2025.json). Ces indicateurs ne sont alors pas lus. `null` : périmètre à jour, ou
+ * simple changement de code (même territoire, l'ancien code est rattaché). Un rétablissement du 01/01/2024
+ * n'en fait pas partie : la géographie de ces indicateurs le connaît déjà.
  */
 export function perimetreAnterieur(insee: string | null | undefined): string | null {
-  const h = populationHorsGrain(insee);
-  return h && h.mouvement > SOURCE_POPULATION.geographie ? h.mouvement : null;
+  if (!insee || PERIMETRE_ADEME[insee]?.traitement !== "abstention") return null;
+  return populationHorsGrain(insee)?.mouvement ?? null;
 }
 
 /** « en 2021 », ou « selon les chiffres Insee 2021 et 2023 » quand une agglomération mêle deux millésimes. */

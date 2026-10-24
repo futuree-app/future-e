@@ -11,6 +11,8 @@ FUT-109 : la base est publiée dans la géographie au 01/01/2024. Une commune do
 (fusion du 01/01/2025, rétablissement) y décrit un autre territoire que le sien : taux, arrivées et récit de
 l'ancien périmètre. Elle n'est pas notée (abstention, `null`), jamais notée sur le territoire d'avant. La liste
 est celle de data/population-referentiel-cog2025.json (motif territoire_modifie).
+Une commune qui n'a changé QUE de code (motif code_modifie, MOD 50 : transfert de chef-lieu) garde son territoire :
+la base la publie sous l'ancien code, et cette ligne est la sienne. Elle lui est rattachée, exactement.
 
 Venv .venv-bpe. Modes : --selftest --summary --probe --matrix --write-index.
 """
@@ -99,9 +101,16 @@ def territoires_modifies(path=REFERENTIEL):
     return {k for k, c in ref["communes"].items() if c["motif"] == "territoire_modifie"}
 
 
+def codes_rattaches(path=REFERENTIEL):
+    """FUT-109 : ancien code -> code actuel, pour les seuls changements de code (territoire identique)."""
+    ref = json.load(open(path))
+    return {ancien: k for k, c in ref["communes"].items() if c["motif"] == "code_modifie" for ancien in c["codesRepris"]}
+
+
 def load_insee(valid_insee):
     """Retourne dict insee -> (taux_total, part_nouveaux) pour les communes de l'index."""
     exclues = territoires_modifies()
+    rattaches = codes_rattaches()
     download(INSEE_URL, INSEE_ZIP)
     out = {}
     z = zipfile.ZipFile(INSEE_ZIP)
@@ -109,6 +118,7 @@ def load_insee(valid_insee):
         rd = csv.DictReader(io.TextIOWrapper(f, encoding="latin-1"), delimiter=";")
         for row in rd:
             ins = (row.get("CODGEO") or "").strip()
+            ins = rattaches.get(ins, ins)
             if ins not in valid_insee or ins in exclues:
                 continue
             p15 = _num(row.get("P15_POP")); p21 = _num(row.get("P21_POP"))
@@ -116,7 +126,8 @@ def load_insee(valid_insee):
             p01p = _num(row.get("P21_POP01P"))
             iran = sum(_num(row.get(f"P21_POP01P_IRAN{k}")) or 0.0 for k in (3, 4, 5, 6, 7))
             out[ins] = (taux, part_nouveaux(iran, p01p))
-    print(f"INSEE : {len(out)} communes appariées ; {len(exclues)} au territoire modifié depuis la base, non notées", file=sys.stderr)
+    print(f"INSEE : {len(out)} communes appariées ; {len(exclues)} au territoire modifié depuis la base, non notées ; "
+          f"{sum(1 for k in rattaches.values() if k in out)} rattachées depuis leur ancien code", file=sys.stderr)
     return out
 
 
@@ -184,6 +195,7 @@ def selftest():
     t = territoires_modifies()
     assert {"85084", "85165", "93066", "14408"} <= t        # rétablissement 2024, fusions 2025
     assert "08053" not in t and "49126" not in t           # fusion déjà regroupée par la base ; simple changement de code
+    assert codes_rattaches() == {"12076": "12218", "14011": "14581", "69159": "69114", "49069": "49126"}
     print("✓ selftest OK", file=sys.stderr)
 
 

@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import zlib from "node:zlib";
 
 const referentiel = JSON.parse(readFileSync("data/population-referentiel-cog2025.json", "utf8"));
+const perimetre = JSON.parse(readFileSync("data/perimetre-ademe-cog2025.json", "utf8"));
 const index = JSON.parse(zlib.gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString("utf8"));
 const parCode = new Map(index.communes.map((c) => [c.insee, c]));
 const accueil = JSON.parse(readFileSync("src/data/accueil-communes.json", "utf8"));
@@ -64,6 +65,48 @@ test("index : pas de rang sans score (une bande d'avant affirmerait une position
   for (const c of index.communes) {
     if (c.rankBands?.vie_locale && c.vieLocale == null) orphelines.push(`${c.insee} vie_locale`);
     if (c.rankBands?.croissance_demographique && c.demographie?.croissance == null) orphelines.push(`${c.insee} croissance`);
+  }
+  assert.deepEqual(orphelines, []);
+});
+
+test("index : changement de code seul, la démographie de l'ancien code est rattachée (même territoire)", () => {
+  const codes = Object.entries(referentiel.communes).filter(([, r]) => r.motif === "code_modifie").map(([k]) => k);
+  assert.deepEqual(codes.sort(), ["12218", "14581", "49126", "69114"]);
+  for (const k of codes) assert.equal(typeof parCode.get(k).demographie?.croissance, "number", k);
+});
+
+test("index : indicateurs ADEME de 2024, non lus sur un territoire modifié depuis, rattachés pour un code modifié", () => {
+  const ecarts = [];
+  for (const [k, t] of Object.entries(perimetre.communes)) {
+    const c = parCode.get(k);
+    const lus = [c.viv.apl, c.vivpct.apl, c.viv.pm25, c.vivpct.pm25, c.viv.no2, c.vivpct.no2, c.agri.ift_t, c.agri.ift_h, c.agri.p_sau, c.agri.p_bio, c.pression_agricole, c.hlm_pct];
+    if (t.traitement === "abstention" && lus.some((v) => v != null)) ecarts.push(`${k} : ${JSON.stringify(lus)}`);
+    if (t.traitement === "rattachement") {
+      const v = t.valeurs;
+      const attendu = [v.apl_aux_medecins_generalistes, v.moyenne_annuelle_de_concentration_de_pm25_ugm3, v.moyenne_annuelle_de_concentration_de_no2_ugm3, v.ift_t, v.p_sau, v.taux_de_logements_sociaux_percent];
+      const lu = [c.viv.apl, c.viv.pm25, c.viv.no2, c.agri.ift_t, c.agri.p_sau, c.hlm_pct];
+      if (JSON.stringify(lu) !== JSON.stringify(attendu)) ecarts.push(`${k} : ${JSON.stringify(lu)} au lieu de ${JSON.stringify(attendu)}`);
+      if (c.vivpct.apl == null) ecarts.push(`${k} : APL sans percentile`);
+    }
+    // Sans ligne ADEME, aucun niveau de centralité présumé (null vaudrait « aucun centre »).
+    if (!t.ligne && "equip" in c.agri) ecarts.push(`${k} : agri.equip ${c.agri.equip}`);
+  }
+  assert.deepEqual(ecarts, []);
+  // La densité 2022 des communes nouvelles est au périmètre fusionné : gardée.
+  assert.equal(parCode.get("93066").densite, 9424.49);
+});
+
+test("index : mobilité, rétablissements du 01/01/2025 non notés, changements de code rattachés", () => {
+  for (const k of ["15141", "15031", "15035", "15047", "15171"]) assert.equal(parCode.get(k).mobilite, null, k);
+  for (const k of ["12218", "14581", "49126", "69114"]) assert.equal(typeof parCode.get(k).mobilite?.part_voiture, "number", k);
+});
+
+test("index : pas de rang sans score, pour les critères touchés par FUT-109", () => {
+  const orphelines = [];
+  for (const c of index.communes) {
+    if (c.rankBands?.acces_soins && c.vivpct?.apl == null) orphelines.push(`${c.insee} acces_soins`);
+    if (c.rankBands?.faible_dependance_auto && c.mobilite == null) orphelines.push(`${c.insee} faible_dependance_auto`);
+    if (c.rankBands?.acces_services && c.agri?.equip === undefined && !/^(751\d\d|6938\d|132\d\d)$/.test(c.insee)) orphelines.push(`${c.insee} acces_services`);
   }
   assert.deepEqual(orphelines, []);
 });

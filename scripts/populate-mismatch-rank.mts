@@ -16,6 +16,10 @@
 // RECALCUL DÉCLARÉ : `--recalculer vie_locale,croissance_demographique` ne recalcule QUE ces clés, parce que
 // leur score source a été recalculé (FUT-109 : population au grain du COG 2025), et rapporte le nombre de
 // bandes modifiées par clé. Les autres clés ne sont pas touchées : leurs bandes restent celles de l'index.
+//
+// RETRAIT DÉCLARÉ : `--retirer-orphelines acces_services` retire, pour ces clés, la seule bande des communes
+// dont le score est devenu null (FUT-109 : commune sans ligne ADEME, plus de niveau de centralité), sans
+// recalculer les autres : une bande sans score affirmerait un rang. Toute autre modification reste refusée.
 import fs from "node:fs/promises";
 import path from "node:path";
 import { mismatchRawScore, MISMATCH_RANK_KEYS } from "../src/lib/comparateur-scores.ts";
@@ -32,9 +36,11 @@ const communes = idx.communes;
 
 const iRecalc = process.argv.indexOf("--recalculer");
 const RECALCULER = new Set(iRecalc > 0 ? (process.argv[iRecalc + 1] ?? "").split(",").filter(Boolean) : []);
-for (const k of RECALCULER) {
+const iOrph = process.argv.indexOf("--retirer-orphelines");
+const ORPHELINES = new Set(iOrph > 0 ? (process.argv[iOrph + 1] ?? "").split(",").filter(Boolean) : []);
+for (const k of [...RECALCULER, ...ORPHELINES]) {
   if (!(MISMATCH_RANK_KEYS as string[]).includes(k)) {
-    console.error(`REFUS: --recalculer ${k} n'est pas une clé de mismatch`);
+    console.error(`REFUS: ${k} n'est pas une clé de mismatch`);
     process.exit(1);
   }
 }
@@ -106,12 +112,24 @@ for (const key of MISMATCH_RANK_KEYS.filter((k) => RECALCULER.size === 0 || RECA
   report.push(`${key.padEnd(26)} ${String(N).padStart(6)} valeurs · ex æquo max ${(tieMax * 100).toFixed(1)} %${pctProof}`);
 }
 
+for (const key of MISMATCH_RANK_KEYS.filter((k) => ORPHELINES.has(k) && !RECALCULER.has(k))) {
+  let n = 0;
+  for (const c of communes) if (c.rankBands?.[key] && mismatchRawScore(key, c) == null) { delete c.rankBands[key]; n++; }
+  report.push(`retrait déclaré : ${key} · ${n} bandes sans score retirées`);
+}
+
 // DIFF SÉMANTIQUE : aucune bande d'une clé existante ne doit avoir changé (seule ensoleillement s'ajoute).
 let changed = 0;
 for (const k of OLD_KEYS) {
   const m = oldBands.get(k)!;
   let n = 0;
-  for (const c of communes) if (JSON.stringify(c.rankBands?.[k]) !== m.get(c.insee)) n++;
+  for (const c of communes) {
+    const avant = m.get(c.insee), apres = JSON.stringify(c.rankBands?.[k]);
+    if (apres === avant) continue;
+    // Un retrait déclaré n'est admis que s'il retire une bande, sans en modifier aucune.
+    if (ORPHELINES.has(k) && !RECALCULER.has(k) && apres === undefined) continue;
+    n++;
+  }
   if (RECALCULER.has(k)) report.push(`recalcul déclaré : ${k} · ${n} bandes modifiées`);
   else changed += n;
 }
