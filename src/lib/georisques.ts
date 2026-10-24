@@ -1,6 +1,6 @@
 import "server-only";
 import { agregerLignesCatnat, codeGaspar, riskFlagsFromLabels, type GasparCatnatSummary } from "./georisques-flags.ts";
-import { buildRegulatoryPlans, type RegulatoryPlan } from "./pprn-zonage.ts";
+import { avecDetail, buildRegulatoryPlans, detailDuPlan, type PlanDetail, type RawPprnDetail, type RegulatoryPlan } from "./pprn-zonage.ts";
 
 type GasparRiskDetail = {
   libelle_risque_long?: string | null;
@@ -171,7 +171,7 @@ async function fetchJson<T>(pathname: string, searchParams: URLSearchParams) {
   }
 }
 
-async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
+async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams, timeoutMs = REQUEST_TIMEOUT_MS) {
   const token = process.env.GEORISQUES_API_TOKEN;
 
   if (!token) {
@@ -179,7 +179,7 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(
@@ -202,6 +202,42 @@ async function fetchJsonV2<T>(pathname: string, searchParams: URLSearchParams) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+// ── LE DÉTAIL D'UN PLAN (FUT-127) ──────────────────────────────────────────────────────────────
+// La réponse au point ne porte ni les aléas ni la date d'approbation d'un plan. Le détail les donne,
+// commune par commune. Un appel par plan DISTINCT, mis en cache par process : un plan ne change pas
+// d'aléas d'un dossier à l'autre. Une panne rend `null` (aléas inconnus), jamais une liste vide.
+//
+// UN DÉLAI COURT, PARCE QUE L'APPEL EST EN SÉRIE (passe du 23/10/2026). Le détail ne part qu'une fois la
+// liste des plans reçue : sa durée s'AJOUTE à celle de la lecture, que l'affichage coupe à 10 s
+// (`fetchLogementDecisionDataWithTimeout`), et au-delà toute l'analyse du logement passe « indisponible ».
+// Avec le délai commun de 8 s, un détail lent pouvait faire perdre la lecture entière. À 3 s, le pire cas
+// reste dans le budget, et un détail trop lent rend `null` : aléas inconnus, donc la lecture prudente
+// (« risque concerné à confirmer »), jamais une conclusion. Mesure : `fut127-georisques-appels.test.ts`.
+const PLAN_DETAIL_TIMEOUT_MS = 3000;
+const planDetailCache = new Map<string, Promise<RawPprnDetail | null>>();
+
+function rawPlanDetail(idGaspar: string): Promise<RawPprnDetail | null> {
+  if (!planDetailCache.has(idGaspar)) {
+    planDetailCache.set(
+      idGaspar,
+      fetchJsonV2<RawPprnDetail>(`/api/v2/gaspar/pprn/${encodeURIComponent(idGaspar)}`, new URLSearchParams(), PLAN_DETAIL_TIMEOUT_MS)
+        .catch(() => {
+          planDetailCache.delete(idGaspar);
+          return null;
+        }),
+    );
+  }
+  return planDetailCache.get(idGaspar)!;
+}
+
+async function completerPlans(plans: RegulatoryPlan[], codeInsee: string | null): Promise<RegulatoryPlan[]> {
+  return Promise.all(plans.map(async (plan) => {
+    const raw = plan.gasparId ? await rawPlanDetail(plan.gasparId) : null;
+    const detail: PlanDetail | null = raw ? detailDuPlan(raw, codeInsee) : null;
+    return avecDetail(plan, detail);
+  }));
 }
 
 async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSummary> {
@@ -248,6 +284,7 @@ async function loadGeorisquesSummary(inseeCode: string): Promise<GeorisquesSumma
 async function loadGeorisquesAddressSummary(
   latitude: number,
   longitude: number,
+  codeInsee: string | null,
 ): Promise<GeorisquesAddressSummary> {
   const params = new URLSearchParams({
     latitude: String(latitude),
@@ -312,7 +349,7 @@ async function loadGeorisquesAddressSummary(
       labels: pprnLabels,
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
     },
-    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
+    regulatoryPlans: await completerPlans(buildRegulatoryPlans(pprnJson.content), codeInsee),
     rga: rga
       ? {
           code: rga.codeExposition || null,
@@ -404,7 +441,8 @@ async function loadGeorisquesParcelSummary(
       total: Number(pprnJson.totalElements ?? pprnLabels.length),
       zones: pprnZones,
     },
-    regulatoryPlans: buildRegulatoryPlans(pprnJson.content),
+    // Le code parcelle commence par le code INSEE de sa commune (`17091-000-AM-0006`).
+    regulatoryPlans: await completerPlans(buildRegulatoryPlans(pprnJson.content), parcelCode.slice(0, 5)),
     rga: rga
       ? {
           code: rga.codeExposition || null,
@@ -439,13 +477,15 @@ export async function getGeorisquesSummary(inseeCode: string) {
 export async function getGeorisquesAddressSummary(
   latitude: number,
   longitude: number,
+  /** La commune du point (code BAN) : elle choisit les aléas du plan qui la concernent (FUT-127). */
+  codeInsee: string | null = null,
 ) {
-  const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+  const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)},${codeInsee ?? ""}`;
 
   if (!addressSummaryCache.has(cacheKey)) {
     addressSummaryCache.set(
       cacheKey,
-      loadGeorisquesAddressSummary(latitude, longitude),
+      loadGeorisquesAddressSummary(latitude, longitude, codeInsee),
     );
   }
 

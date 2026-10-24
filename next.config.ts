@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
       "./data/comparateur-index.json.gz",
       "./data/residences-secondaires.json",
       "./data/communes-baignade.json",
+      "./data/gaspar-pprn-inondation.json",
     ],
     "/api/synthesize-quartier": [
       "./data/comparateur-index.json.gz",
@@ -55,9 +56,10 @@ const nextConfig: NextConfig = {
     ],
     // FUT-33 : le dossier mesure la distance d'une ADRESSE au rivage marin (lib/server/rivage-mer.ts). Les
     // trois points d'entrée qui génèrent ou affichent un dossier d'adresse lisent ce fichier.
-    "/rapport": ["./data/mer/rivage-5m.f32.gz"],
-    "/api/dossier/actualiser": ["./data/mer/rivage-5m.f32.gz"],
-    "/api/stripe/webhook": ["./data/mer/rivage-5m.f32.gz"],
+    // FUT-127 : la règle inondation lit les plans de prévention de la commune (lib/gaspar-pprn-commune.ts).
+    "/rapport": ["./data/mer/rivage-5m.f32.gz", "./data/gaspar-pprn-inondation.json"],
+    "/api/dossier/actualiser": ["./data/mer/rivage-5m.f32.gz", "./data/gaspar-pprn-inondation.json"],
+    "/api/stripe/webhook": ["./data/mer/rivage-5m.f32.gz", "./data/gaspar-pprn-inondation.json"],
     // (Il exista ici deux entrées pour les métriques de police de pdfkit. Elles n'ont RIEN changé :
     // la production répondait toujours `ENOENT ... pdfkit/js/data/Helvetica.afm`. Le rendu passe
     // désormais par `pdfkit.standalone.js`, qui embarque ces métriques et ne lit aucun fichier ;

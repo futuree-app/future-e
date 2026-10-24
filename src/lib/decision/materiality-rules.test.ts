@@ -76,120 +76,113 @@ test("D7 retirée : sans mesure DRIAS, la chaleur reste non conclue, jamais favo
   assert.equal(chaleur.some((e) => e.outcome === "satisfied"), false);
 });
 
-test("règle inondation : vérification si exposition notable, texte acheteur", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] }, { intent: "achat" });
-  const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+// ── L'INONDATION À L'ÉCHELLE DE LA COMMUNE (FUT-127, engine-7) ──────────────────────────────────
+// Le rang du compte CatNat ne décide plus rien : la carte communale part des plans de prévention de la
+// commune (base GASPAR). Les cas d'adresse (zone, hors zone, point et parcelle) sont dans
+// `src/lib/fut127-inondation-adresse.test.ts`.
+const PPR_LR = {
+  export: "2026-10-05",
+  plans: [{ id: "17DDTM20100014", nom: "PPR La Rochelle", modele: "PPRN-L", statut: "approuve" as const, date: "2019-02-26", aleas: ["Par submersion marine"] }],
+};
+const PRESCRIT = {
+  export: "2026-10-05",
+  plans: [{ id: "X", nom: "PPRI du Val témoin", modele: "PPRN-I", statut: "prescrit" as const, date: "2024-05-02", aleas: ["Par une crue à débordement lent de cours d'eau"] }],
+};
+const INOND = [{ key: "faible_risque_inondation", weight: 3 }];
+const lecture = (r: ReturnType<typeof run>) => r.facts.find((x) => x.ruleId === "territoire.inondation-lecture");
+
+test("inondation, commune couverte par un plan : des faits réglementaires, jamais « exposition élevée »", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND }, { intent: "achat" });
+  const r = run(facts({ nom: "La Rochelle", inondationRisque: 89, catnatInondation: 7, plansInondation: PPR_LR }), p);
+  const f = lecture(r);
   assert.ok(f && f.role === "verification");
-  assert.ok(f.action.label.length > 0);
-  assert.match(f.statement, /avant de vous engager/);
-  assert.match(f.statement, /1982/);
-});
-
-test("règle inondation : relation et intention inconnues -> ni acheteur ni habitant (FUT-26)", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
-  assert.ok(f && f.role === "verification");
-  assert.doesNotMatch(f.statement, /avant de vous engager|surveiller/);
-  assert.match(f.statement, /1982/);
-});
-
-test("règle inondation : une seule preuve chiffrée, opposable, et qui VISE la carte des arrêtés", () => {
-  // NOM REVU (revue du 11/08/2026) : il promettait que « le lien démontre ce qu'il affiche ». Ce
-  // test ne vérifie que la valeur produite et la clé visée. Que la carte cible affiche ce même
-  // chiffre reste FAUX à ce jour (elle donne le total tous risques, en direct de GASPAR, quand la
-  // preuve compte les arrêtés inondation de l'index local), et aucun test ici ne pourrait le dire :
-  // il faudrait rendre le module. Un nom qui promet une garantie que les assertions ne tiennent pas
-  // est plus dangereux que l'absence de test, parce qu'il ferme la question.
-  // Deux défauts d'une même chaîne, corrigés ensemble le 11/08/2026.
-  //
-  // 1. « 100/100 » pouvait se lire comme une probabilité. La preuve affiche la matière que le
-  //    lecteur peut vérifier, les arrêtés CatNat ; le score reste interne au moteur. (Acquis.)
-  //
-  // 2. UNE SEULE PASTILLE PORTAIT DEUX AFFIRMATIONS, et son lien n'en démontrait aucune : vu à
-  //    l'écran sur un dossier payé, « exposition élevée · 7 arrêtés CatNat depuis 1982 » menait à
-  //    la carte « Inondation fluviale », qui dit « Une partie du territoire est concernée » et ne
-  //    mentionne aucun arrêté. Le compte d'arrêtés a sa propre carte dans le module Territoire
-  //    (« Mémoire des catastrophes ») : c'est elle que le lien vise désormais.
-  //
-  // L'exposition, elle, ne porte plus de valeur : « élevée » vient du seuil interne, et aucune
-  // carte ne le démontre. La phrase du constat la dit déjà, en toutes lettres.
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const avec = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p)
-    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
-  assert.ok(avec && avec.role === "verification");
-
-  const chiffree = avec.evidence.filter((e) => e.observedValue);
-  assert.equal(chiffree.length, 1, "une seule preuve chiffrée : celle qui est opposable");
-  assert.equal(chiffree[0]!.observedValue, "6 reconnaissances liées aux inondations depuis 1982");
-  // « CatNat » est du jargon, et surtout le mot masquait un écart : la carte cible affiche le total
-  // TOUS RISQUES depuis la première reconnaissance réelle, quand cette preuve compte les seuls
-  // arrêtés inondation depuis 1982. Le libellé dit donc ce qu'il compte, pour que le lecteur sache
-  // quelle ligne chercher dans la ventilation par risque.
-  assert.equal(chiffree[0]!.observedValue?.includes("CatNat"), false);
-  assert.equal(chiffree[0]!.targetKey, "risk.catnat", "le lien doit viser la carte qui montre les arrêtés");
-  // Aucune pastille ne peut plus mélanger le seuil interne et la matière vérifiable.
-  assert.equal(
-    avec.evidence.some((e) => e.observedValue?.includes("exposition élevée")),
-    false,
-  );
-
-  // Sans arrêté connu, il n'y a rien d'opposable à montrer : aucune preuve chiffrée, et la carte
-  // vit de son constat. Une pastille « exposition élevée » renverrait le lecteur vers une carte
-  // qui ne dit pas « élevée ».
-  const sans = run(facts({ inondationRisque: 80, catnatInondation: null }), p)
-    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
-  assert.ok(sans && sans.role === "verification");
-  assert.equal(sans.evidence.filter((e) => e.observedValue).length, 0);
-  // ET AUCUNE SOURCE INVENTÉE. La référence de l'exposition rendait « Source : Territoire · La
-  // Rochelle », un libellé de contexte affiché sous le mot « Source ». Elle nomme désormais la
-  // donnée d'entrée ET la transformation, seule forme honnête pour un fait calculé.
-  assert.equal(sans.evidence.length, 1, "assertFactValid refuse un fait sans preuve : elle reste");
-  // Le périmètre de l'index est la France métropolitaine, DROM exclus : « rang national » annonçait
-  // un territoire que le calcul ne parcourt pas.
-  assert.equal(sans.evidence[0]!.label, "Reconnaissances CatNat inondation (GASPAR), position en France métropolitaine");
-  assert.equal(sans.evidence[0]!.observedValue, undefined, "le rang est interne, il ne s'affiche pas");
-});
-
-test("règle inondation : qui HABITE la commune -> comprendre/surveiller, pas s'engager (FUT-26)", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const vit = { echelle: "commune", relation: "current_residence", origine: "confirmed_by_user" } as const;
-  const r = run(facts({ inondationRisque: 80, catnatInondation: 6, relationAuLieu: vit }), p);
-  const f = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
-  assert.ok(f && f.role === "verification");
-  assert.doesNotMatch(f.statement, /avant de vous engager/);
-  assert.match(f.statement, /surveiller/i);
-  // L'objectif « j'y habite déjà », sans relation à CE lieu, ne parle plus à un habitant.
-  const objectifSeul = run(facts({ inondationRisque: 80, catnatInondation: 6 }), { ...p, posture: "habitant" });
-  const g = objectifSeul.facts.find((x) => x.ruleId === "territoire.inondation-exposition");
-  assert.ok(g && g.role === "verification");
-  assert.doesNotMatch(g.statement, /surveiller/i);
-});
-
-test("règle inondation : exposition inconnue -> aucun fait", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = run(facts({ inondationRisque: null }), p);
-  assert.equal(r.facts.some((x) => x.ruleId === "territoire.inondation-exposition"), false);
-});
-
-// ── Le contrat des outcomes (slice 2.1) ────────────────────────────────────────
-// not_applicable = HORS SUJET. satisfied = déclaré, examiné, RIEN À REDIRE.
-// Les confondre faisait compter une bonne nouvelle comme un trou de couverture.
-
-test("règle inondation : exposition FAIBLE + priorité déclarée -> satisfied (examiné, rien à redire)", () => {
-  const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = run(facts({ inondationRisque: 20 }), p);
+  // Niveau 1 : le constat en clair ; niveau 2 : ce que cela change ; niveau 3 : le plan, la date, le compte.
+  assert.equal(f.statement, "À La Rochelle, un plan de prévention réglemente certaines zones pour la submersion marine. Selon l'adresse, un bien peut se trouver dans l'une de ces zones, ou en dehors.");
+  assert.equal(f.limitation, "Ces faits portent sur la commune : ils ne disent rien d'une adresse en particulier.");
+  assert.match(f.signalConvention ?? "", /^À La Rochelle, un plan de prévention des risques littoraux, « PPR La Rochelle », approuvé le 26 février 2019, réglemente la submersion marine\./);
+  assert.match(f.signalConvention ?? "", /7 reconnaissances de catastrophe naturelle liées aux inondations depuis 1982/);
+  assert.match(f.signalConvention ?? "", /n'indique ni la probabilité d'une inondation, ni la part du territoire exposée/);
+  assert.doesNotMatch(`${f.statement} ${f.limitation ?? ""} ${f.signalConvention ?? ""}`, /élevée|exposition de la commune/);
+  assert.match(f.signalConvention ?? "", /approuvé, appliqué par anticipation ou prescrit \(base GASPAR, export du 5 octobre 2026\)/);
+  // L'acheteur sans adresse reçoit la seule manœuvre qui lève l'inconnue, et le document qui fait foi.
+  assert.equal(f.action.type, "renseigner_adresse");
+  assert.match(f.action.detail ?? "", /état des risques remis par le vendeur/);
+  assert.doesNotMatch(`${f.action.label} ${f.action.detail}`, /Géorisques|ERRIAL/);
+  // La carte ne penche pas : la règle orientante (exposition établie à l'adresse) se tait sans adresse.
   const ev = r.evaluations.find((e) => e.ruleId === "territoire.inondation-exposition");
-  assert.equal(ev?.outcome, "satisfied");
-  assert.deepEqual(ev?.facts, []); // silencieux : aucune carte, mais un point FAVORABLE
+  assert.equal(ev?.outcome, "not_applicable");
+});
+
+test("inondation, la preuve chiffrée : le plan de la commune et le compte, chacun à sa carte", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND });
+  const f = lecture(run(facts({ nom: "La Rochelle", catnatInondation: 6, plansInondation: PPR_LR }), p));
+  assert.ok(f && f.role === "verification");
+  const plan = f.evidence.find((e) => e.factId === "inondation.ppr-commune")!;
+  assert.equal(plan.observedValue, "PPR La Rochelle, approuvé le 26 février 2019");
+  assert.equal(plan.label, "Plans de prévention des risques naturels, base GASPAR (export du 5 octobre 2026)");
+  const catnat = f.evidence.find((e) => e.factId === "inondation.catnat")!;
+  assert.equal(catnat.observedValue, "6 reconnaissances liées aux inondations depuis 1982");
+  assert.equal(catnat.targetKey, "risk.catnat", "le lien vise la carte qui montre les arrêtés");
+  // Le rang interne ne s'affiche nulle part, et ne fonde plus aucune preuve.
+  assert.equal(f.evidence.some((e) => e.factId === "inondation.risque"), false);
+});
+
+test("inondation, plan seulement prescrit : son état administratif est dit, sans zonage prêté", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND }, { intent: "achat" });
+  const f = lecture(run(facts({ nom: "Ville témoin", catnatInondation: 2, plansInondation: PRESCRIT }), p));
+  assert.ok(f && f.role === "verification");
+  assert.equal(f.statement, "À Ville témoin, un plan de prévention est en préparation pour les crues lentes de cours d'eau : ses zones ne sont pas encore fixées. Un bien de la commune pourra être concerné une fois le plan approuvé.");
+  assert.match(f.signalConvention ?? "", /est prescrit depuis le 2 mai 2024 pour les crues lentes de cours d'eau : il n'a pas encore de zonage opposable/);
+  assert.equal(f.status, "Plan inondation en préparation");
+  assert.doesNotMatch(f.statement, /réglemente/);
+  assert.equal(f.action.type, "obtenir_document");
+});
+
+test("inondation, peu de reconnaissances et aucun plan : ni alerte, ni bonne nouvelle", () => {
+  // Une faible fréquence CatNat ne démontre JAMAIS une faible exposition (arbitrage du 22/10/2026).
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND });
+  for (const catnatInondation of [0, 1, 3]) {
+    const r = run(facts({ inondationRisque: 10, catnatInondation, plansInondation: { export: "2026-10-05", plans: [] } }), p);
+    const outcomes = r.evaluations.filter((e) => e.projectKeys.includes("faible_risque_inondation")).map((e) => e.outcome);
+    assert.equal(outcomes.includes("satisfied"), false, `compte ${catnatInondation} : jamais « satisfied »`);
+    assert.ok(outcomes.includes("neutral"), "examiné, sans conclusion");
+    assert.equal(lecture(r), undefined, "aucune carte");
+  }
+});
+
+test("inondation, rang élevé SANS plan : plus d'« exposition élevée » fabriquée par le compte", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND }, { intent: "achat" });
+  const r = run(facts({ inondationRisque: 99, catnatInondation: 14, plansInondation: { export: "2026-10-05", plans: [] } }), p);
+  assert.equal(r.facts.some((x) => x.ruleId.startsWith("territoire.inondation")), false);
+});
+
+test("inondation, table des plans non chargée : la lecture ne conclut pas", () => {
+  const p = project({ reformulation: "x", hardConstraints: {}, preferences: INOND });
+  const r = run(facts({ inondationRisque: 89, catnatInondation: 7 }), p);
+  const ev = r.evaluations.find((e) => e.ruleId === "territoire.inondation-lecture");
+  assert.equal(ev?.outcome, "uncertain");
+  assert.equal(r.facts.some((x) => x.ruleId.startsWith("territoire.inondation")), false);
+});
+
+test("inondation, les voix : acheteur, futur locataire, habitant, sans intention (FUT-26)", () => {
+  const avec = (over: Partial<UserProject>, relationAuLieu?: ModuleFacts["relationAuLieu"]) =>
+    lecture(run(facts({ nom: "La Rochelle", catnatInondation: 7, plansInondation: PPR_LR, ...(relationAuLieu ? { relationAuLieu } : {}) }),
+      project({ reformulation: "x", hardConstraints: {}, preferences: INOND }, over)))!;
+  const loc = avec({ intent: "location" });
+  assert.match(loc.action.label, /Demandez au bailleur l'état des risques/);
+  assert.doesNotMatch(`${loc.action.label} ${loc.action.detail}`, /ERRIAL|préparer/, "le locataire ne prépare pas le document : il le reçoit");
+  const vit = avec({}, { echelle: "commune", relation: "current_residence", origine: "confirmed_by_user" });
+  assert.match(vit.action.label, /Retrouvez l'état des risques remis à l'achat ou au bail/);
+  const neutre = avec({});
+  assert.match(neutre.action.label, /Ajoutez l'adresse d'un bien/);
 });
 
 test("règle inondation : priorité NON déclarée -> not_applicable (hors sujet)", () => {
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [] });
-  const r = run(facts({ inondationRisque: 20 }), p);
-  const ev = r.evaluations.find((e) => e.ruleId === "territoire.inondation-exposition");
-  assert.equal(ev?.outcome, "not_applicable");
+  const r = run(facts({ inondationRisque: 20, plansInondation: PPR_LR }), p);
+  for (const id of ["territoire.inondation-exposition", "territoire.inondation-lecture"]) {
+    assert.equal(r.evaluations.find((e) => e.ruleId === id)?.outcome, "not_applicable", id);
+  }
 });
 
 // ── Le registre fait tourner les 12 contraintes dures, au-dessus de l'évaluateur partagé ──
@@ -347,13 +340,15 @@ test("chaleur AMBIANTE : déclarée -> la règle ambiante rend not_applicable (u
 });
 
 test("chaleur AMBIANTE : la verification non déclarée ne touche NI couverture NI orientation (criteria-registry n'agrège que le déclaré)", () => {
-  // faible_chaleur non déclarée (ambiante) ; une autre priorité satisfaite donne l'orientation.
+  // faible_chaleur non déclarée (ambiante) ; une autre priorité, examinée sans réserve, donne l'orientation.
+  // FUT-127 : l'inondation n'est plus « satisfaite » par un faible compte CatNat ; sans plan connu dans
+  // la commune, elle est examinée NEUTRE. L'invariant reste le même : pas de réserve fabriquée.
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const r = run(facts({ climat: EXPOSEE, inondationRisque: 10 }), p);
+  const r = run(facts({ climat: EXPOSEE, inondationRisque: 10, plansInondation: { export: "2026-10-05", plans: [] } }), p);
   assert.ok(r.facts.some((x) => x.ruleId === "territoire.verification-chaleur-future" && x.role === "verification"));
   const summary = buildCriteriaRegistry(p, r);
   assert.equal(summary.registry.some((c) => c.criterionKey === "faible_chaleur"), false); // pas un critère
-  assert.equal(summary.orientation, "favorable"); // la chaleur ambiante n'a pas dégradé le dossier en réserves
+  assert.ok(!["minor_reserves", "major_reserves"].includes(summary.orientation), "la chaleur ambiante n'a pas dégradé le dossier en réserves");
 });
 
 test("FEU, priorité déclarée + danger notable : un MISMATCH, plus une verification (lot feu)", () => {
@@ -598,15 +593,15 @@ test("PLUIES et INONDATION peuvent COEXISTER sans dire deux fois la même chose"
     reformulation: "x", hardConstraints: {},
     preferences: [{ key: "faible_precip_extremes", weight: 3 }, { key: "faible_risque_inondation", weight: 3 }],
   });
-  const r = run(facts({ climat: EXPOSEE, inondationRisque: 80 }), p);
+  const r = run(facts({ climat: EXPOSEE, inondationRisque: 80, plansInondation: PPR_LR }), p);
   const pluies = r.facts.find((x) => x.ruleId === "territoire.climat-pluies")!;
-  const inond = r.facts.find((x) => x.ruleId === "territoire.inondation-exposition")!;
+  const inond = r.facts.find((x) => x.ruleId === "territoire.inondation-lecture")!;
   assert.ok(pluies && inond);
   // Deux sujets DISTINCTS : ce que le ciel déverse, et ce que le territoire en fait.
   assert.notEqual(pluies.topic, inond.topic);
   assert.match(pluies.action!.label, /^Regardez où va l'eau autour de l'adresse$/);
   assert.match(pluies.action!.detail!, /réseaux d'évacuation/);
-  assert.match(inond.action!.label, /état des risques/);
+  assert.match(`${inond.action!.label} ${inond.action!.detail}`, /état des risques/);
 });
 
 test("LA MATÉRIALITÉ SUIT LE POIDS DÉCLARÉ, jamais l'intensité seule", () => {
@@ -1055,10 +1050,10 @@ test("la phrase de la pastille est INCLUSE mot pour mot dans la ligne de la cart
   // Le chemin de la carte est reproduit ici tel quel : `catnatInondationDepuisIndex` sur l'entrée
   // d'index, exactement ce que fait /rapport/quartier.
   const p = project({ reformulation: "x", hardConstraints: {}, preferences: [{ key: "faible_risque_inondation", weight: 3 }] });
-  const fait = run(facts({ inondationRisque: 80, catnatInondation: 6 }), p)
-    .facts.find((x) => x.ruleId === "territoire.inondation-exposition");
+  const fait = run(facts({ inondationRisque: 80, catnatInondation: 6, plansInondation: PPR_LR }), p)
+    .facts.find((x) => x.ruleId === "territoire.inondation-lecture");
   assert.ok(fait && fait.role === "verification");
-  const pastille = fait.evidence.find((e) => e.observedValue)?.observedValue;
+  const pastille = fait.evidence.find((e) => e.factId === "inondation.catnat")?.observedValue;
 
   // INCLUSION, ET PLUS IDENTITÉ (revue du 11/08/2026). Imposer que toute la ligne de la carte soit
   // la pastille interdisait d'expliquer la relation entre le total tous risques et son

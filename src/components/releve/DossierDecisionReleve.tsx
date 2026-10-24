@@ -20,6 +20,7 @@ import { ConclusionBlock, planToBlocks, type NiveauTitre } from "@/components/re
 import { ConclusionRedigee } from "@/components/report/ConclusionRedigee";
 import { AnalyseAncienProjet } from "@/components/report/AnalyseAncienProjet";
 import { AnnonceVersion } from "@/components/report/AnnonceVersion";
+import { AvertissementInondationAnterieure } from "@/components/report/AvertissementInondationAnterieure";
 import { jetonDeRendu } from "@/lib/rendu/jeton-de-rendu";
 import { conditionPorteeParLeBloc, ancresRendues, controlesParEchelle } from "@/lib/decision/dossier-view";
 import { dateFr } from "@/lib/decision/autour-permis";
@@ -193,6 +194,9 @@ export function DossierDecisionReleve({
           {(projetAChange || contexteAChange || voisinageAChange) && insee ? (
             <AnalyseAncienProjet insee={insee} scopeKey={scopeKey} versionServie={versionServie} raison={projetAChange ? "projet" : contexteAChange ? "lien" : "voisinage"} />
           ) : null}
+          {/* FUT-127 : une analyse figée avant la correction de la lecture des inondations le dit, sans être
+              réécrite (`lectureInondationAnterieure`, reconnue au contenu de l'artefact). */}
+          <AvertissementInondationAnterieure dossier={dossier} className={`${s.etatDossier} ${s.dense}`} style={{ "--r-teinte": "var(--reg-controle)" } as CSSProperties} />
           {/* Les deux états de l'analyse d'adresse, avec les phrases de production. `unavailable` n'est
               jamais présenté comme une adresse lue : l'emblème garde alors le périmètre communal. */}
           {logementStatus === "pending" ? (

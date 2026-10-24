@@ -39,7 +39,7 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
   const token = process.env.GEORISQUES_API_TOKEN;
   const parcel = await findCadastreParcelByPoint(address.longitude, address.latitude).catch(() => null);
   const [gAddr, gParcel, cavites, heritage, sini] = await Promise.all([
-    token ? getGeorisquesAddressSummary(address.latitude, address.longitude).catch(() => null) : Promise.resolve(null),
+    token ? getGeorisquesAddressSummary(address.latitude, address.longitude, address.citycode).catch(() => null) : Promise.resolve(null),
     token && parcel?.parcelCode ? getGeorisquesParcelSummary(parcel.parcelCode).catch(() => null) : Promise.resolve(null),
     fetchCavitesNearPoint(address.latitude, address.longitude), // [] vide | [...] | null (panne)
     fetchHeritageProtections(address.latitude, address.longitude).catch(() => ({ items: [], sourceStatus: "unavailable" as const })),
@@ -53,6 +53,7 @@ export async function fetchLogementDecisionData(address: ResolvedAddress): Promi
       cavites,
       heritage,
       sinistralite: sini,
+      parcelleParRepli: parcel?.rattachement === "repli",
     }),
     fetchedAt: new Date().toISOString(),
   };

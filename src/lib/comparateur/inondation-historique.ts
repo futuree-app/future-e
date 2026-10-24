@@ -173,7 +173,7 @@ export const PHRASE_EXPLORATION =
 // CatNat. On ne réécrit rien en base ; on dit, au-dessus du comparatif, que la ligne a changé.
 // À AJUSTER LE JOUR DE LA MISE EN PRODUCTION : la date à partir de laquelle la nouvelle lecture est servie.
 // null pendant la préparation : renseigner le jour effectif de production avant livraison.
-export const LECTURE_INONDATION_DEPUIS: string | null = null;
+export const LECTURE_INONDATION_DEPUIS: string | null = "2026-10-24";
 
 export function avertissementPackAnterieur(
   createdAt: string | null | undefined,

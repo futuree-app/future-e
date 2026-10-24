@@ -1,0 +1,107 @@
+{
+ "adresse": {
+  "q": "12 Rue du Palais 17000 La Rochelle",
+  "label": "12 Rue du Palais 17000 La Rochelle",
+  "score": 0.9721736363636363,
+  "type": "housenumber",
+  "citycode": "17300",
+  "lat": 46.159522,
+  "lon": -1.153731
+ },
+ "cadastre": {
+  "status": 200,
+  "properties": {
+   "gid": 501435,
+   "numero": "0010",
+   "feuille": 1,
+   "section": "EN",
+   "code_dep": "17",
+   "nom_com": "La Rochelle",
+   "code_com": "300",
+   "com_abs": "000",
+   "code_arr": "000",
+   "idu": "17300000EN0010",
+   "contenance": 674,
+   "code_insee": "17300"
+  },
+  "parcelCodeApp": "17300-000-EN-0010",
+  "idu": "17300000EN0010",
+  "repli": {
+   "rayon_m": 3,
+   "candidates": 1
+  }
+ },
+ "v2_pprn_point": {
+  "status": 200,
+  "ms": 55,
+  "body": {
+   "totalElements": 0,
+   "totalPages": 0,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": []
+  }
+ },
+ "v2_rga_point": {
+  "status": 200,
+  "ms": 48,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ },
+ "v2_pprn_parcelle_formatApp": {
+  "status": 200,
+  "ms": 122,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "idGaspar": "17DDTM20100014",
+     "libPpr": "PPR La Rochelle",
+     "modeleProcedure": "PPRN-L",
+     "libBassinRisques": "Bassin Nord du département",
+     "etatRevision": false,
+     "supExists": true,
+     "zonageReglementaire": {
+      "zoneRegExists": false,
+      "listTypeReg": []
+     },
+     "departementPilote": {
+      "codeDepartementPilote": "17",
+      "libelleDepartementPilote": "CHARENTE-MARITIME"
+     },
+     "dateModification": "19/02/2025",
+     "listePprRevises": []
+    }
+   ]
+  }
+ },
+ "v2_rga_parcelle_formatApp": {
+  "status": 200,
+  "ms": 51,
+  "body": {
+   "totalElements": 1,
+   "totalPages": 1,
+   "pageNumber": 0,
+   "pageSize": 10,
+   "content": [
+    {
+     "codeExposition": "3",
+     "exposition": "Exposition forte"
+    }
+   ]
+  }
+ }
+}
