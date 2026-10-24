@@ -19,6 +19,7 @@ import { derivesDAncrePourRecherche } from "@/lib/ancre-recherche";
 import { scoreProximiteMer, scoreEloignementMer, bonusMer, ancreLittorale, communeLittoraleMer, categorieDeFacade, presDuRivage } from "@/lib/mer-recherche";
 import { populationCommunalePLM } from "@/lib/plm-population";
 import { populationHorsGrain } from "@/lib/population-millesime";
+import { PREFERENCE_LABELS } from "@/lib/comparateur-labels";
 import type { PlaceDirectory } from "@/lib/hard-constraints-resolve";
 import { hydrateHardConstraints, explorationHints } from "@/lib/hard-constraints-hydrate";
 import { resolveExternalReferences } from "@/lib/hard-constraints-external";
@@ -193,6 +194,9 @@ export type MatchResult = {
   dept: string;
   region: string | null;
   compatibility: number; // 0–100
+  // FUT-109 : la couverture des priorités déclarées. Un palier de correspondance ne se dit que si elle est
+  // complète ; sinon la carte nomme ce qui n'est pas mesuré ici (libellés du projet), sans en conclure.
+  couverture?: { etat: CouverturePriorites["etat"]; nonMesurees: string[] };
   reasons: string[];
   // FUT-129 : les faits d'inondation de la commune, quand le lecteur a déclaré cette priorité. Une ligne
   // pour la carte, et les phrases complètes pour la synthèse. Jamais un niveau de risque.
@@ -1394,12 +1398,13 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       // trajectoire démographique ; null (donnée absente) -> non noté (opt-in, pas de pénalité).
       return c.demographie?.croissance ?? null;
     case "calme_sonore":
-      // exposition cumulée aux infra bruyantes ; loin de tout = 100 (jamais « non noté »).
-      // Champ absent (commune sans calcul) -> traité comme calme (100), pas comme pénalité.
-      return c.calmeSonore?.score ?? 100;
+      // exposition cumulée aux infra bruyantes ; loin de tout = 100 (score mesuré). FUT-109 : un champ absent
+      // (commune sans calcul, aucune aujourd'hui) n'est pas noté, ni 100 ni 0.
+      return c.calmeSonore?.score ?? null;
     case "faible_exposition_industrielle":
-      // éloignement aux sites industriels à risque ; loin de tout = 100 (jamais « non noté »).
-      return c.expoIndustrielle?.score ?? 100;
+      // éloignement aux sites industriels à risque ; loin de tout = 100 (score mesuré). FUT-109 : un champ
+      // absent (aucune commune aujourd'hui) n'est pas noté.
+      return c.expoIndustrielle?.score ?? null;
     default:
       return null;
   }
@@ -2266,13 +2271,31 @@ const REASON_NEG: Record<PreferenceKey, string> = {
 // dimension laissée au dénominateur sans valeur compterait comme un 0), puis elle agit par son seul
 // RECUL, quand les sinistres indemnisés de 1995 à 2021 ont été fréquents. Par construction, le score
 // avec cette priorité n'est jamais supérieur au score sans elle (`fut129-inondation-classement.test.ts`).
+//
+// FUT-109 · UN CRITÈRE NON MESURÉ N'EST PAS UN CRITÈRE NOTÉ 0 (arbitrage du porteur, 24/10/2026). Le score
+// divisait par le poids de TOUS les critères déclarés : un critère sans donnée (`null`) y pesait 0, et une
+// commune dont on n'avait pas la mesure reculait comme si elle était la pire. Désormais :
+//   - le score est la moyenne pondérée des seuls critères MESURÉS (un vrai 0 reste un 0) ;
+//   - la COUVERTURE des priorités déclarées (critères implicites et inondation exclus) se dit à part :
+//     complète, partielle, aucune, ou sans objet quand aucune priorité classable n'est déclarée ;
+//   - une couverture incomplète ne peut pas être promue : `matchProjects` classe d'abord les communes
+//     dont toutes les priorités sont mesurées, et l'interface ne donne de palier de correspondance qu'à
+//     elles (cf. `rangCouverture`). Aucun seuil : une priorité déclarée est mesurée ou ne l'est pas.
+// Le recul d'inondation est inchangé (il dépend des poids DÉCLARÉS, pas des mesures) : il ne peut toujours
+// que faire reculer une commune.
 export type PreferencePonderee = { key: PreferenceKey; weight: number; baseline?: boolean };
+export type CouverturePriorites = {
+  etat: "complete" | "partielle" | "aucune" | "sans_priorite";
+  /** Les priorités déclarées sans mesure pour cette commune, dans l'ordre du projet. */
+  nonMesurees: PreferenceKey[];
+};
 export function scorePreferences(c: IndexCommune, prefs: PreferencePonderee[]): {
   subs: (PreferencePonderee & { s: number })[];
-  /** Le score sans la priorité inondation. */
+  /** Le score sans la priorité inondation, sur les seuls critères mesurés. */
   reference: number;
   recul: number;
   base: number;
+  couverture: CouverturePriorites;
 } {
   const classees = prefs.filter((p) => p.key !== "faible_risque_inondation");
   const poidsInondation = prefs.filter((p) => p.key === "faible_risque_inondation").reduce((s, p) => s + p.weight, 0);
@@ -2282,9 +2305,20 @@ export function scorePreferences(c: IndexCommune, prefs: PreferencePonderee[]): 
     const s = subScore(p.key, c);
     if (s != null) subs.push({ key: p.key, weight: p.weight, baseline: p.baseline, s });
   }
-  const reference = poidsAutres > 0 ? subs.reduce((s, x) => s + x.weight * x.s, 0) / poidsAutres : 0;
+  const poidsMesures = subs.reduce((s, x) => s + x.weight, 0);
+  const reference = poidsMesures > 0 ? subs.reduce((s, x) => s + x.weight * x.s, 0) / poidsMesures : 0;
   const recul = reculInondation({ historique: historiqueInondation(c.historiqueInondation), poidsInondation, poidsAutres });
-  return { subs, reference, recul, base: scoreAvecRecul(reference, recul) };
+  const declarees = classees.filter((p) => !p.baseline);
+  const nonMesurees = declarees.filter((p) => !subs.some((x) => x.key === p.key && !x.baseline)).map((p) => p.key);
+  const etat: CouverturePriorites["etat"] = declarees.length === 0 ? "sans_priorite"
+    : nonMesurees.length === 0 ? "complete"
+    : nonMesurees.length < declarees.length ? "partielle" : "aucune";
+  return { subs, reference, recul, base: scoreAvecRecul(reference, recul), couverture: { etat, nonMesurees } };
+}
+
+/** L'ordre des couvertures : une priorité non mesurée ne fait jamais passer une commune devant une autre. */
+export function rangCouverture(etat: CouverturePriorites["etat"]): 0 | 1 | 2 {
+  return etat === "complete" || etat === "sans_priorite" ? 0 : etat === "partielle" ? 1 : 2;
 }
 
 function reasonText(key: PreferenceKey, c: IndexCommune): string {
@@ -3028,7 +3062,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     // souple (preferred / inspiration). On garde le score brut (non plafonné) pour le tri : sinon, quand
     // les grandes villes saturent déjà à 100, le clamp écrase le bonus et l'ancre préférée ne départage
     // plus. Le score affiché reste borné à 100.
-    const { subs, base, recul } = scorePreferences(c, prefs);
+    const { subs, base, recul, couverture } = scorePreferences(c, prefs);
     // Bonus d'ancre souple. Au sein d'un axe : max (sémantique OU, ex. « Atlantique
     // ou Sud-Ouest »). Entre axes orthogonaux (zone vs altitude) : somme bornée, pour
     // que l'intersection (« le Sud-Ouest ET en altitude ») prime sans filtrer.
@@ -3082,6 +3116,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? REASON_NEG[tradeoffKey] : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
+    built.couverture = { etat: couverture.etat, nonMesurees: couverture.nonMesurees.map((k) => PREFERENCE_LABELS[k] ?? k) };
     if (inondationDeclaree) {
       const h = historiqueInondation(c.historiqueInondation);
       built.inondation = {
@@ -3096,6 +3131,8 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
       // En exploration, l'ordre est celui que la page annonce : les communes sans sinistres fréquents
       // d'abord, puis le nombre d'habitants. Ce n'est plus un score de correspondance.
       sortScore: exploration ? (recul > 0 ? 0 : 1e9) + (c.population ?? 0) : rawScore,
+      // FUT-109 : en exploration, l'ordre annoncé prime ; sinon une couverture incomplète passe après.
+      couvertureRang: exploration ? 0 : rangCouverture(couverture.etat),
       boundary,
       pref,
       // Clé du compromis absolu (pref demandée scorant < 50), conservée pour l'unicité
@@ -3169,9 +3206,20 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
 
   // `unique` ne contient que des communes ÉLIGIBLES (candidates -> scored -> unique). L'étalement ordonne
   // et plafonne ce vivier, il n'y ajoute rien : 3 est un maximum, jamais un quota (FUT-5).
-  const deduped = etalerResultats(unique, { anyPreferred, target: TARGET, display: DISPLAY });
+  // FUT-109 : l'étalement (une région, puis un département de plus) ne doit pas promouvoir une commune dont une
+  // priorité n'est pas mesurée devant une commune entièrement mesurée. Il s'applique d'abord aux communes à
+  // couverture complète, exactement comme avant ; les autres ne complètent la liste que s'il en manque.
+  const deduped: MatchResult[] = [];
+  for (const rang of [0, 1, 2]) {
+    if (deduped.length >= TARGET) break;
+    const groupe = unique.filter((s) => s.couvertureRang === rang);
+    if (!groupe.length) continue;
+    deduped.push(...etalerResultats(groupe, { anyPreferred, target: TARGET - deduped.length, display: Math.max(1, DISPLAY - deduped.length) }));
+  }
 
-  const best = deduped[0]?.compatibility ?? 0;
+  // Un palier « parfait » ne se dit que d'une commune dont toutes les priorités DÉCLARÉES sont mesurées : ni sur
+  // une couverture partielle, ni sur les seuls critères implicites.
+  const best = deduped.find((r) => r.couverture?.etat === "complete")?.compatibility ?? 0;
   const perfect = candidates.length > 0 && best >= PERFECT_THRESHOLD;
 
   // Sur-contrainte : quand les ancres en filtre vident le vivier, on le DIT en

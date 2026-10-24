@@ -156,18 +156,39 @@ test("PROPRIÉTÉ, index entier : avec l'historique ONRN, aucune commune ne mont
   assert.ok(reculees > 0, "le recul s'applique bien quelque part");
 });
 
-test("NON-RÉGRESSION, index entier : une recherche sans priorité inondation garde exactement son score d'avant", () => {
+// FUT-109 (arbitrage du porteur, 24/10/2026) : cet invariant imposait de reproduire EXACTEMENT l'ancienne
+// formule, qui divisait par le poids de tous les critères déclarés et comptait ainsi un critère non mesuré
+// comme un 0. Il est remplacé par la méthode elle-même, vérifiée sur l'index entier : moyenne pondérée des
+// seuls critères mesurés, identique à l'ancienne formule pour toute commune entièrement mesurée. Les
+// garanties d'inondation (jamais favorable, recul documenté, exploration) restent testées ci-dessus et
+// ci-dessous, inchangées.
+test("MÉTHODE, index entier : sans priorité inondation, le score est la moyenne des seuls critères mesurés", () => {
   const ancien = (c: M, prefs: M[]) => {
     const totalW = prefs.reduce((s, p) => s + p.weight, 0) || 1;
     return prefs.reduce((s, p) => { const v = V.subScore(p.key, c); return v == null ? s : s + p.weight * v; }, 0) / totalW;
   };
+  let completes = 0, partielles = 0;
   for (const prefs of [
     [{ key: "acces_soins", weight: 2 }, { key: "nature", weight: 3 }],
     [{ key: "vie_locale", weight: 3 }, { key: "acces_transports", weight: 2 }, { key: "faible_chaleur", weight: 1 }],
   ]) {
     const p = [...prefs, ...BASE];
-    for (const c of COMMUNES) assert.ok(Math.abs(V.scorePreferences(c, p).base - ancien(c, p)) < 1e-9, c.insee);
+    for (const c of COMMUNES) {
+      const r = V.scorePreferences(c, p);
+      const mesures = p.map((x) => ({ ...x, v: V.subScore(x.key, c) })).filter((x) => x.v != null);
+      const w = mesures.reduce((s, x) => s + x.weight, 0);
+      const attendu = w > 0 ? mesures.reduce((s, x) => s + x.weight * x.v, 0) / w : 0;
+      assert.ok(Math.abs(r.base - attendu) < 1e-9, c.insee);
+      assert.equal(r.recul, 0, c.insee);
+      if (mesures.length === p.length) {
+        // Toute commune entièrement mesurée garde exactement son score d'avant.
+        assert.ok(Math.abs(r.base - ancien(c, p)) < 1e-9, c.insee);
+        assert.equal(r.couverture.etat, "complete", c.insee);
+        completes++;
+      } else if (r.couverture.etat !== "complete") partielles++;
+    }
   }
+  assert.ok(completes > 60000 && partielles > 0, `${completes} / ${partielles}`);
 });
 
 test("le recul reste modéré : jamais une exclusion de fait", () => {

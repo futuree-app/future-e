@@ -98,6 +98,10 @@ Les critères ordinaires peuvent expliquer la sélection quand les "raisons" du 
 l'établissent. L'inondation ne contribue JAMAIS favorablement au classement : elle peut
 seulement entraîner un recul documenté. Si "exploration_sans_classement" vaut true,
 les communes sont à explorer, sans classement favorable sur la demande.
+Si un territoire porte "priorites_non_mesurees", ces priorités n'ont PAS été mesurées pour
+cette commune : nommez-les une fois comme « non mesurées ici », sans dire qu'elles sont
+satisfaites ou manquantes, sans en faire un compromis, et ne dites pas que la commune
+« correspond » au projet sur ces points.
 Avant d'écrire, faites la liste mentale de ces critères et vérifiez
 que CHACUN apparaît, NOMMÉ, au moins une fois dans votre récit. L'utilisateur doit pouvoir
 relire la synthèse et reconnaître immédiatement ce qu'il a demandé.
@@ -290,7 +294,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[] }[];
   heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
   outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
@@ -367,6 +371,8 @@ export async function POST(request: NextRequest) {
       logement: r.logement ?? null,
       littoral: r.littoral ?? null,
       trait_distinctif: r.distinctive ?? null,
+      priorites_non_mesurees: Array.isArray(r.prioritesNonMesurees) && r.prioritesNonMesurees.length
+        ? r.prioritesNonMesurees.filter((x) => typeof x === "string") : null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };
