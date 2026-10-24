@@ -286,3 +286,10 @@ test("un type renseigné hors de l'énumération reste indéterminé, même avec
   assert.equal(grainDpe({ type_batiment: "tertiaire", methode_dpe: "dpe appartement individuel" }), "indetermine");
   assert.equal(grainDpe({ type_batiment: "", methode_dpe: "dpe appartement individuel" }), "logement");
 });
+
+test("IMMEUBLE · la portée s'accorde au nombre de DPE d'immeuble montrés", async () => {
+  const { porteeDpeImmeuble } = await import("./dpe-selection-vue.ts");
+  assert.equal(porteeDpeImmeuble(1), PORTEE_DPE_IMMEUBLE);
+  assert.match(porteeDpeImmeuble(2), /^Ils décrivent chacun un bâtiment dans son ensemble, et ne donnent la classe d'aucun logement/);
+  assert.match(porteeDpeImmeuble(2), /ne les attribue pas à ce logement\.$/);
+});

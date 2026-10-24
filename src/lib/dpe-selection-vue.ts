@@ -274,6 +274,13 @@ export function ficheImmeuble(c: DpeRecord): FicheImmeuble {
 export const PORTEE_DPE_IMMEUBLE =
   "Il décrit le bâtiment dans son ensemble, et ne donne la classe d'aucun logement en particulier : futur•e ne l'attribue pas à ce logement.";
 
+/** La même portée, accordée au nombre de fiches (deux DPE d'immeuble à Six-Fours-les-Plages, revue du 24/10). */
+export function porteeDpeImmeuble(n: number): string {
+  return n > 1
+    ? "Ils décrivent chacun un bâtiment dans son ensemble, et ne donnent la classe d'aucun logement en particulier : futur•e ne les attribue pas à ce logement."
+    : PORTEE_DPE_IMMEUBLE;
+}
+
 /** FUT-74 (D3) : des diagnostics que la base ne permet de ranger ni dans un logement, ni dans l'immeuble. */
 export function phraseIndetermines(n: number): string {
   return n === 1

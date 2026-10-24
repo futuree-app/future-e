@@ -8,7 +8,7 @@ import {
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
 import {
-  PORTEE_DPE_IMMEUBLE, SAISIE_NUMERO, ficheImmeuble, listeRepliee, phraseIndetermines, phrasesOuvertureRepliee,
+  SAISIE_NUMERO, ficheImmeuble, porteeDpeImmeuble, listeRepliee, phraseIndetermines, phrasesOuvertureRepliee,
 } from "@/lib/dpe-selection-vue";
 import { repartirParGrain } from "@/lib/dpe-grain";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
@@ -108,7 +108,7 @@ function FichesImmeuble({ immeubles }: { immeubles: DpeRecord[] }) {
           </div>
         );
       })}
-      <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{PORTEE_DPE_IMMEUBLE}</p>
+      <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{porteeDpeImmeuble(immeubles.length)}</p>
     </div>
   );
 }
