@@ -375,7 +375,15 @@ export default function LogementModule({
   // Le gate « attendre que l'autour soit terminal » (board critique 2a) A DISPARU avec l'autour :
   // il existait parce qu'une synthèse générée trop tôt se figeait sans la section entourage. Ce
   // fait n'entrant plus dans le payload, la synthèse ne dépend plus que de l'analyse et du DPE.
-  const synthesisReady = Boolean(result) && dpeTerminal;
+  //
+  // UNE SYNTHÈSE NE PART JAMAIS PENDANT QU'UNE SÉLECTION S'ENREGISTRE (FUT-74, seconde revue du
+  // 24/10/2026). `selection_required` décrit deux situations : l'absence stable de choix, qui est un
+  // résultat et mérite sa lecture, et l'attente d'une attribution automatique que le serveur n'a pas
+  // encore acceptée, qui n'en est pas un. Seul `dpeBusy` les distingue : il est vrai du début à la fin
+  // de toute écriture de sélection, automatique (`confirmerAutomatiquement`) comme manuelle
+  // (`appliquerSelection`, dont l'état optimiste n'est pas un choix enregistré). Sans lui, une maison
+  // retenue automatiquement déclenchait une synthèse sans DPE, puis une seconde après confirmation.
+  const synthesisReady = Boolean(result) && dpeTerminal && !dpeBusy;
   const synthesisData: SynthesisData = {
     address: result?.address,
     altitude: result?.altitude,

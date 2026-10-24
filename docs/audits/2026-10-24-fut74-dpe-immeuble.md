@@ -417,3 +417,23 @@ La revue indépendante de la PR #86 a arrêté la fusion sur un défaut réel, d
 **Ce qui ne change pas.** `grainDpe`, les protections serveur, la collecte, le moteur, les seuils, les snapshots et artefacts, le prompt et les empreintes de synthèse. `engine-7` reste juste : la proposition automatique ne s'applique qu'à l'ouverture d'un dossier neuf, et aucun dossier ne porte un DPE retenu de grain non attribuable.
 
 **Non vérifié en navigateur.** Le chemin automatique exige un dossier neuf à maison unique, et l'ouvrir écrirait une attribution sur un vrai dossier. Il est couvert par les tests ci-dessus.
+
+### 7.7 Seconde revue indépendante : aucune synthèse pendant qu'une sélection s'enregistre (24/10/2026)
+
+**Défaut.** Sur un dossier neuf à maison unique, l'attribution automatique attend la réponse du serveur avec `selection_required` et `dpeBusy = true`. Or `synthesisReady` ne considérait comme non terminaux que `loading` et `error`. `LogementSynthesis` demandait donc une lecture sans DPE pendant l'attente, puis une seconde après confirmation, sous deux empreintes différentes. Le même défaut touchait le choix **manuel** : son état optimiste (le choix affiché avant la réponse du serveur) déclenchait une synthèse sur un choix que le serveur pouvait encore refuser. Le banc d'intégration l'a montré en retirant le correctif.
+
+**Correctif (une ligne).** `synthesisReady = Boolean(result) && dpeTerminal && !dpeBusy`. `selection_required` reste terminal pour une adresse sans choix ; c'est `dpeBusy` qui distingue l'attente d'un enregistrement d'une absence stable de choix. Il est vrai du début à la fin de toute écriture de sélection, automatique (`confirmerAutomatiquement`) comme manuelle (`appliquerSelection`). Une réponse automatique périmée ne remet pas `dpeBusy` à faux : c'est le geste du lecteur qui le gouverne. Aucune temporisation, aucune seconde machine à états, aucun changement de prompt, d'empreinte ou de moteur.
+
+**Preuve avant/après, banc indépendant `controle-synthese.cjs`** (rejoué sans modification, SHA-256 `31031804b28f…`, vrais `LogementModule` et `LogementSynthesis`, requêtes interceptées) :
+
+| Scénario | Avant correctif (`d2c77b7a`), pendant l'attente | Avant, après réponse | Après correctif, pendant l'attente | Après correctif, après réponse |
+|---|---|---|---|---|
+| Succès 200 | ready vrai, **1 synthèse** `syn:v10:b3ed11f2` (sans DPE) | **2 synthèses** (`d0ef9906`) | ready faux, **0 synthèse** | `auto_confirmed`, **1 synthèse** `syn:v10:d0ef9906`, DPE `FUT74MAI00099` |
+| Refus 422 | ready vrai, **1 synthèse** | 1 | ready faux, **0** | `selection_required`, 1 synthèse `b3ed11f2`, sans DPE |
+| Panne réseau | ready vrai, **1 synthèse** | 1 | ready faux, **0** | `selection_required`, 1 synthèse `b3ed11f2`, sans DPE |
+
+Code de sortie du banc : **1 avant, 0 après**.
+
+**Non-régression versionnée** : `src/components/report/logement-module-synthese.test.ts`, 11 tests sur les vrais composants (React 19.2.4, `react-test-renderer` 19.2.4 ajouté en dépendance de développement à la version exacte de React ; seuls la présentation, `next/link` et PostHog sont doublés). Scénarios : succès, refus 422, panne réseau, réponse périmée (le lecteur refuse pendant l'attente, puis l'attribution automatique répond : aucune synthèse sur la décision périmée) ; témoins : plusieurs diagnostics, DPE d'immeuble seul, retrait volontaire, dossier historique, choix manuel accepté puis refusé, synthèse enregistrée resservie sans aucune requête. **6 échouent sans le correctif**, les 11 passent avec.
+
+**Contrôles.** `controle-attribution.mjs` : 0. Les 14 tests d'attribution : verts. `npm test` : 3 092 réussis, 0 échec. `tsc`, `next build` propres ; `eslint --no-ignore` sur les fichiers de la PR : 0 erreur (les variables `module` de `logement-source-indisponible.test.ts` renommées `source`, sans effet ; un avertissement antérieur subsiste).

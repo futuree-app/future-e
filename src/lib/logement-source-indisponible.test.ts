@@ -162,9 +162,9 @@ test("A9 / A10 / A11 : seule une panne établie entre dans `sources_absentes`", 
   assert.ok(!sourcesAbsentes(rapport({ auditStatus: "absent" })).includes("audit_energetique"));
   assert.ok(!sourcesAbsentes(rapport({ auditStatus: "present" })).includes("audit_energetique"));
   assert.deepEqual(sourcesAbsentes(rapport()), [], "un rapport complet n'a aucune source muette");
-  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /audit_energetique: "audit énergétique ADEME"/);
-  assert.match(module, /diagnostics_dpe: "diagnostics de performance énergétique ADEME"/);
+  const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(source, /audit_energetique: "audit énergétique ADEME"/);
+  assert.match(source, /diagnostics_dpe: "diagnostics de performance énergétique ADEME"/);
 });
 
 test("A12 : N vérifiable, puis l'audit tombe à l'actualisation → refusée, N reste", async () => {
@@ -251,10 +251,10 @@ test("D5 : le rendu distingue l'absence de la panne, à chaque endroit qui la ci
   assert.match(route, /lookupDpeCandidatesByBanId\(address\.id\)\.catch\(\(\) => \(\{ status: "unavailable" as const, candidates: \[\] \}\)\)/);
   assert.match(route, /dpeCandidatesStatus: dpeLookup\.status,/);
   assert.doesNotMatch(route, /getDpeCandidatesByBanId\(address\.id\)\.catch\(\(\) => \[\]\)/);
-  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /const dpeNonVerifiable = result\?\.dpeCandidatesStatus === "unavailable" && dpeCandidates\.length === 0;/);
-  assert.match(module, /diagnosticNonAttribue: dpeNonVerifiable \? undefined : /);
-  assert.equal((module.match(/dpeNonVerifiable=\{dpeNonVerifiable\}/g) ?? []).length, 2, "Énergie et confort d'été");
+  const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(source, /const dpeNonVerifiable = result\?\.dpeCandidatesStatus === "unavailable" && dpeCandidates\.length === 0;/);
+  assert.match(source, /diagnosticNonAttribue: dpeNonVerifiable \? undefined : /);
+  assert.equal((source.match(/dpeNonVerifiable=\{dpeNonVerifiable\}/g) ?? []).length, 2, "Énergie et confort d'été");
   const energie = readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8");
   assert.match(energie, /\{dpeNonVerifiable \? \(\s*<p[^>]*>\s*La base des diagnostics de performance énergétique \(ADEME\) n&apos;a pas répondu/);
   const confort = readFileSync("src/components/report/ThermalComfortSection.tsx", "utf8");
@@ -288,8 +288,8 @@ test("P1 : un candidat unique sur une liste incomplète n'est jamais attribué a
   assert.equal(dpeAttributionStatus([maison], "housenumber").status, "auto_confirmed", "liste complète : inchangé");
   assert.equal(dpeAttributionStatus([maison], "housenumber", false).status, "selection_required");
   // FUT-74 : l'appel passe par `departDpe`, qui transmet la complétude de la liste à `dpeAttributionStatus`.
-  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /departDpe\(row, candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
+  const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(source, /departDpe\(row, candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
   const { departDpe } = await import("./dpe-attribution-auto.ts");
   const neuf = { dpe_selection_status: "pending", dpe_selection_at: null };
   assert.equal(departDpe(neuf, [maison], "housenumber", false).kind, "a_choisir");
@@ -297,8 +297,8 @@ test("P1 : un candidat unique sur une liste incomplète n'est jamais attribué a
 });
 
 test("P2 : l'écran ne présente pas une liste incomplète comme le total de l'adresse", () => {
-  const module = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(module, /listeDpeIncomplete=\{result\.dpeCandidatesStatus === "unavailable" && dpeCandidates\.length > 0\}/);
+  const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
+  assert.match(source, /listeDpeIncomplete=\{result\.dpeCandidatesStatus === "unavailable" && dpeCandidates\.length > 0\}/);
   assert.match(readFileSync("src/components/report/logement/EnergieSection.tsx", "utf8"), /listeIncomplete=\{listeDpeIncomplete\}/);
   const bloc = readFileSync("src/components/report/logement/AddressDiagnosticsBlock.tsx", "utf8");
   assert.match(bloc, /\{listeIncomplete && \(\s*<p[^>]*>\s*La base ADEME n&apos;a répondu qu&apos;en partie/);
