@@ -7,7 +7,7 @@ const vert = (kind: GreenKind | undefined, d: number) => ({
   nearestMappedGreenSpace: { distanceMeters: d, kind },
 });
 
-test("sans îlot de chaleur mesuré, il n'y a rien à relier", () => {
+test("sans îlot de chaleur estimé, il n'y a rien à relier", () => {
   assert.equal(lireChaleurEtVegetal(null, vert("wood", 340)), null);
 });
 
@@ -65,7 +65,7 @@ test("un parc n'est pas présumé arboré", () => {
 
 test("aucun espace vert : l'absence porte sur le périmètre cartographié, pas sur le réel", () => {
   const r = lireChaleurEtVegetal({ iuhi: 4.5, level: "marque" }, { nearestMappedGreenSpace: null })!;
-  assert.match(r.texte, /Aucun espace correspondant aux catégories recherchées/);
+  assert.match(r.texte, /aucun espace correspondant aux catégories recherchées/);
   assert.match(r.limite, /couverture d'OpenStreetMap et les catégories interrogées/);
 });
 
@@ -75,7 +75,7 @@ test("un espace sans tag de nature reste générique", () => {
 });
 
 test("LES DEUX ÉCHELLES SONT NOMMÉES dans toutes les branches", () => {
-  // L'îlot de chaleur est mesuré au grand-IRIS, l'espace vert depuis l'adresse. Fondre les deux
+  // L'îlot de chaleur est estimé au grand-IRIS, l'espace vert depuis l'adresse. Fondre les deux
   // dans une même échelle est exactement ce que la doctrine interdit.
   const cas = [
     lireChaleurEtVegetal({ iuhi: 4, level: "marque" }, vert("wood", 300)),

@@ -1,5 +1,5 @@
 import React from "react";
-import { BPE_WALK_RADIUS_M, adresseDansLEspace, libelleCourant, libelleLigneEspaceVert, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
+import { BPE_WALK_RADIUS_M, NOTE_ESPACES_VERTS, TEXTE_AUCUN_ESPACE_VERT, adresseDansLEspace, libelleCourant, libelleLigneEspaceVert, type EspaceVert, type Face3Snapshot, type GreenKind } from "@/lib/logement-autour-types";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { lireChaleurEtVegetal } from "@/lib/logement-autour-chaleur";
 import { preuveEquipement, sourceBpe, LIMITE_BPE } from "@/lib/logement-bpe-lisible";
@@ -211,7 +211,7 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
               if (lecture) {
                 return (
                   <>
-                    <div style={FACE3_SUBHEAD}>Chaleur du secteur et végétation à proximité</div>
+                    <div style={FACE3_SUBHEAD}>Chaleur du secteur et espace vert le plus proche</div>
                     <p style={{ fontSize: 15, color: "var(--fg-1)", lineHeight: 1.65, margin: 0 }}>{lecture.texte}</p>
                     <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{lecture.limite}</p>
                   </>
@@ -233,10 +233,13 @@ export function Face3Block({ s, car }: { s: Face3Snapshot; car?: CarOwnership | 
                       {s.osm.largerGreenSpaceNearby && (
                         <LigneEspaceVert espace={s.osm.largerGreenSpaceNearby} rang="grand" />
                       )}
+                      {/* FUT-73 : la sélection écarte les espaces déclarés privés ou fermés, et ne
+                          vérifie pas l'accès aux autres. « Le plus proche » le dit ici. */}
+                      <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{NOTE_ESPACES_VERTS}</p>
                     </div>
                   ) : (
                     <span style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6 }}>
-                      Aucun espace vert correspondant aux catégories recherchées dans l’emprise cartographiée.
+                      {TEXTE_AUCUN_ESPACE_VERT}
                     </span>
                   )}
                 </>
