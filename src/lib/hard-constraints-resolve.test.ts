@@ -56,6 +56,22 @@ test("sizeRelativeTo : la population de référence est celle de l'AGGLOMÉRATIO
   assert.equal(r.populationYear, 2021);
 });
 
+test("sizeRelativeTo (FUT-109) : le millésime suit la référence, jamais 2021 présumé pour toute la France", () => {
+  const saintDenis: DirectoryEntry = { insee: "93066", nom: "Saint-Denis", lat: 48.94, lon: 2.36, uu: "00851", tailleVille: 10_893_507, population: 149_077 };
+  const lOie: DirectoryEntry = { insee: "85165", nom: "L'Oie", lat: 46.78, lon: -1.12, uu: null, tailleVille: 1_250, population: 1_250 };
+  const d: PlaceDirectory = { byName: (l) => ({ "saint denis": saintDenis, "l oie": lOie })[l] ?? null, plmByName: () => null };
+  const sd = resolveSizeReference("Saint-Denis", d, { context: "" });
+  assert.ok(sd.status === "resolved");
+  // Saint-Denis, fusionnée le 01/01/2025 : population de référence 2023 ; son agglomération (Paris) mêle 2021 et 2023.
+  assert.deepEqual([sd.communePopulationYear, sd.populationYears, sd.populationYear], [2023, [2021, 2023], 2023]);
+  const o = resolveSizeReference("L'Oie", d, { context: "" });
+  assert.ok(o.status === "resolved");
+  assert.deepEqual([o.communePopulationYear, o.populationYears], [2023, [2023]]);
+  const b = resolveSizeReference("Brest", dir, { context: "" });
+  assert.ok(b.status === "resolved");
+  assert.deepEqual([b.communePopulationYear, b.populationYears], [2021, [2021]]);
+});
+
 test("inputHash : change quand le LABEL change (« Matabiau » ne peut pas garder les coords de « Saint-Jean »)", () => {
   const a = resolutionInputHash("Gare Matabiau", "31", "place");
   const b = resolutionInputHash("Gare Saint-Jean", "31", "place");

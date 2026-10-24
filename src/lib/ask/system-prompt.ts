@@ -115,7 +115,11 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
     if (v !== null) out.push(`- ${label} : ${v}`);
   };
 
-  push("Population (2021)", num(commune.population));
+  // FUT-109 : le millésime suit la commune (2023 quand ADEME n'est pas au grain de la commune actuelle).
+  push(`Population (${commune.population_millesime ?? 2021})`, num(commune.population));
+  if (commune.perimetre_anterieur) {
+    out.push(`- Périmètre : la commune a changé de territoire le ${commune.perimetre_anterieur.split("-").reverse().join("/")}. L'air, l'accès aux médecins, le taux de logements sociaux, le boisement et l'écart au revenu médian national ne sont publiés que pour son ancien territoire : ils ne sont pas fournis, ne les estimez pas.`);
+  }
   push("Densité (hab/km²)", num(commune.territoire.densite));
   push("Vieillissement annuel 65+ (%)", pct(commune.vieillissement_pct, 2));
 

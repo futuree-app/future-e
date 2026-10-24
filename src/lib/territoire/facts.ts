@@ -21,6 +21,7 @@ import type { LittoralSummary } from "../littoral.ts";
 import type { Era5Trend } from "../era5-trend.ts";
 import type { CatnatInondation } from "../decision/catnat-evidence.ts";
 import type { TerritoryType } from "../territory-mood.ts";
+import { millesimePopulation } from "../population-millesime.ts";
 
 /** Version du registre et de ses règles. La monter invalide les snapshots, donc les synthèses. */
 export const TERRITOIRE_REGISTRY_VERSION = "territoire-facts@1";
@@ -220,8 +221,10 @@ export function buildTerritoireSnapshot(i: TerritoireInputs, builtAt: string): F
       card: card("identity"), synthesis: INCLUDE,
     }),
     fact({
+      // FUT-109 : 2021, sauf pour une commune dont le territoire ou le code a changé depuis la géographie de la
+      // source (population de référence Insee 2023). L'index et ADEME servent la même valeur, au même millésime.
       key: "place.population", value: num(e?.population) ?? num(i.ademe?.population), unit: "habitants",
-      scale: "commune", vintage: "2021",
+      scale: "commune", vintage: String(millesimePopulation(i.insee)),
       source: { producer: "INSEE", dataset: "Recensement de la population", field: "population" },
       card: card("identity"), synthesis: INCLUDE,
     }),

@@ -33,7 +33,8 @@ const SELECT = [
 ].join(',');
 const PAGE_SIZE = 10000;
 
-const num = (v) => (v == null || Number.isNaN(Number(v)) ? null : Number(v));
+// Une cellule vide est une absence : `Number("")` vaudrait 0 (FUT-109).
+const num = (v) => (v == null || String(v).trim() === '' || Number.isNaN(Number(v)) ? null : Number(v));
 
 async function fetchAll() {
   const out = {};

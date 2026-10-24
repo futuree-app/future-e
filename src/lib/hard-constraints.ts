@@ -14,6 +14,7 @@
 // qu'il remplace : le schéma des contraintes vit dans un module neutre (hard-constraint-schema.ts).
 import { pointInPolygon, type PolygonGeometry } from "./geo-polygon.ts";
 import { deCommune } from "./typography.ts";
+import { enMillesimes } from "./population-millesime.ts";
 import type {
   ResolvedPlaceReference, ResolvedUrbanAreaReference, ResolvedSizeReference,
 } from "./hard-constraints-resolve.ts";
@@ -1117,7 +1118,7 @@ export function evaluateSizeRelativeTo(
     return {
       key: "sizeRelativeTo", status: "incompatible", observedValue: obs, expectedValue: exp, observedLabel: obsLabel, expectedLabel: expLabel, evidenceKeys: keys,
       topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
-      statement: `Cette commune compte ${fmt(tc)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+      statement: `Cette commune compte ${fmt(tc)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que la commune ${deCommune(ref.canonicalLabel)} (${fmt(refPop)} habitants ${enMillesimes([ref.communePopulationYear ?? ref.populationYear])}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
     };
   }
   if (c.tailleVille == null) return { key: "sizeRelativeTo", status: "unexamined", reason: "missing_data" };
@@ -1144,14 +1145,14 @@ export function evaluateSizeRelativeTo(
     return {
       key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
       topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
-      statement: `${c.nom} fait partie de l'agglomération ${deCommune(ref.canonicalLabel)} elle-même (${fmt(t)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+      statement: `${c.nom} fait partie de l'agglomération ${deCommune(ref.canonicalLabel)} elle-même (${fmt(t)} habitants ${enMillesimes(ref.populationYears ?? [ref.populationYear])}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
     };
   }
   const sujet = c.uu ? `${c.nom} appartient à une agglomération de` : "Cette commune compte";
   return {
     key: "sizeRelativeTo", status: "incompatible", observedValue, expectedValue, observedLabel, expectedLabel, evidenceKeys,
     topic: topicFit(`la taille ${deCommune(c.nom)} face à ${ref.canonicalLabel}`, `la taille face à ${ref.canonicalLabel}`),
-    statement: `${sujet} ${fmt(t)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que ${ref.canonicalLabel} (${fmt(ref.comparisonPopulation)} habitants en ${ref.populationYear}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
+    statement: `${sujet} ${fmt(t)} habitants, ${s.direction === "smaller" ? "plus" : "moins"} que ${ref.canonicalLabel} (${fmt(ref.comparisonPopulation)} habitants ${enMillesimes(ref.populationYears ?? [ref.populationYear])}), alors que vous cherchez ${s.direction === "smaller" ? "plus petit" : "plus grand"}.`,
   };
 }
 

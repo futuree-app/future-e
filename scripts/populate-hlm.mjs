@@ -23,6 +23,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { assertIndexWorktree } from "./lib/require-index-worktree.mjs";
+import { appliquerPerimetre } from "./lib/perimetre-ademe.mjs";
+import { pressionAgricole } from "./lib/pression-agricole.mjs";
 
 assertIndexWorktree();
 
@@ -78,8 +80,11 @@ async function main() {
     const h = hlm[c.insee];
     c.hlm_pct = h?.hlm_pct ?? null;
     c.hlm_nb = h?.hlm_nb ?? null;
-    if (c.hlm_pct != null) withHlm++;
   }
+  // FUT-109 : le taux est publié dans la géographie du 01/01/2024, le nombre au COG 2025
+  // (data/perimetre-ademe-cog2025.json) : le taux n'est pas lu pour une commune au territoire modifié depuis.
+  appliquerPerimetre(communes, JSON.parse(await fs.readFile(path.join(root, "data", "perimetre-ademe-cog2025.json"), "utf8")), pressionAgricole);
+  for (const c of communes) if (c.hlm_pct != null) withHlm++;
 
   meta.hlm = {
     source: "ADEME data_communes (taux RPLS 2023)",
