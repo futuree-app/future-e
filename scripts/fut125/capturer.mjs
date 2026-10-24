@@ -13,8 +13,10 @@ const [url, prefixe, de, a, largeursBrutes = "1440,390,360", ...opts] = process.
 if (!url?.startsWith("http://localhost")) throw new Error("Captures locales seulement.");
 const clair = opts.includes("--clair");
 const ouvrir = opts.find((o) => o.startsWith("--ouvrir="))?.slice(9);
+// --deplier=<texte> : déplie d'abord les dépliants (`<summary>`) qui contiennent ce texte (répétable).
+const deplier = opts.filter((o) => o.startsWith("--deplier=")).map((o) => o.slice(10));
 const moteurWebkit = process.env.MOTEUR === "webkit";
-const dossier = "docs/audits/2026-10-22-fut125/captures";
+const dossier = process.env.SORTIE ?? "docs/audits/2026-10-22-fut125/captures";
 mkdirSync(dossier, { recursive: true });
 const navigateur = moteurWebkit
   ? await webkit.launch({ headless: true })
@@ -30,6 +32,10 @@ for (const largeur of largeursBrutes.split(",").map(Number)) {
   await page.goto(url, { waitUntil: "networkidle", timeout: 180000 }).catch(() => {});
   await page.waitForTimeout(Number(process.env.ATTENTE ?? 1200));
   await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" }).catch(() => {});
+  for (const texte of deplier) {
+    for (const s of await page.locator("summary", { hasText: texte }).all()) await s.click();
+    await page.waitForTimeout(400);
+  }
   if (ouvrir) { await page.getByRole("button", { name: ouvrir, exact: true }).click(); await page.waitForTimeout(400); }
   const debord = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   const haut = await page.locator(de).first().boundingBox();

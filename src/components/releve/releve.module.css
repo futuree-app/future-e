@@ -320,6 +320,9 @@ button.bouton { font-family: inherit; cursor: pointer; }
 .details[open] summary::before { content: "− "; }
 .details summary:hover { color: var(--r-encre); }
 .details summary:focus-visible { outline: 2px solid var(--r-encre); outline-offset: 2px; }
+/* FUT-126 · un dépliant en ligne (« Données et limites », une définition) se touche au doigt : 44 px de
+   haut sur écran tactile, sans changer sa place ni sa taille de texte. */
+@media (pointer: coarse) { .details summary { display: flex; align-items: center; min-height: 44px; } }
 
 /* FUT-75 · « DONNÉES ET LIMITES » S'OUVRE EN CONTINUITÉ. Toujours un `<details>` natif (clavier, lecteur
    d'écran, recherche dans la page) ; la zone passe de zéro à sa hauteur, le contenu arrive de 4 px, le
@@ -522,6 +525,19 @@ button.bouton { font-family: inherit; cursor: pointer; }
 .groupeSigne { font-family: var(--font-mono); color: var(--r-discret); }
 @media (prefers-reduced-motion: no-preference) { .groupeSigne { transition: transform 160ms ease; } }
 .groupeCorps { padding: 4px 0 24px; }
+/* FUT-126 · la liste complète ouvre un nouveau mouvement : filet fort et air au-dessus, comme une section
+   de page, et non comme une rubrique de plus de la synthèse. */
+.controles { border-top: 1px solid var(--r-filet-fort); padding-top: 48px; }
+/* Le geste d'une rubrique, en mots à côté du signe : « Déplier » fermée, « Replier » ouverte. */
+.groupeGeste { display: inline-flex; align-items: baseline; gap: 8px; font-size: var(--r-t-nuance); font-weight: 500; color: var(--r-discret); }
+.groupe > summary:hover .groupeGeste { color: var(--r-encre); }
+.groupe:not([open]) .siOuvert, .groupe[open] .siFerme { display: none; }
+/* Sous 640 px, le compte et le geste passent sous le nom de la rubrique : en colonne de droite, ils
+   écrasaient la liste des sujets, coupée tous les deux mots. */
+@media (max-width: 639px) {
+  .groupe > summary { grid-template-columns: auto minmax(0, 1fr); }
+  .groupe > summary > :last-child { grid-column: 2; }
+}
 
 /* Une carte du dossier : l'ancre des gestes prioritaires y arrive (focus programmatique, sans contour). */
 .entree { scroll-margin-top: 96px; }
