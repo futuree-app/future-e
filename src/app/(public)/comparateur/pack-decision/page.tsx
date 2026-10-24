@@ -8,7 +8,8 @@ import { resolvePackOwnership } from "@/lib/decision-packs";
 import { getStripe } from "@/lib/stripe";
 import { traiterRetourPaiementPack, type EtatRetourPack } from "@/lib/server/retour-paiement-pack";
 import { PackPaiementEnAttente } from "./PackPaiementEnAttente";
-import { matchProjects, seedComparaison, truncateComparaison } from "@/lib/comparateur-vie";
+import { rejouerPack, seedComparaison, truncateComparaison } from "@/lib/comparateur-vie";
+import { avertissementPackAnterieur, AVERTISSEMENT_TRIO_RECOMPOSE } from "@/lib/comparateur/inondation-historique";
 import { PackConvictionView } from "./PackConvictionView";
 import { ChoixConvictionView } from "./ChoixConvictionView";
 import { PackUnlockedView } from "./PackUnlockedView";
@@ -128,21 +129,29 @@ export default async function PackDecisionPage({
               trio={seeded.trio}
               pistes={[]}
               projetLabel={pack.projetLabel}
+              avertissements={[avertissementPackAnterieur(pack.createdAt)].filter((x): x is string => x != null)}
             />
           </main>
         </div>
       );
     }
-    const outcome = await matchProjects(pack.parsedSnapshot);
+    // FUT-129 : les communes ACHETÉES priment sur le classement recalculé (cf. `rejouerPack`).
+    const rejoue = await rejouerPack(pack.parsedSnapshot, pack.insees);
+    if (!rejoue) redirect("/comparateur");
+    const avertissements = [
+      avertissementPackAnterieur(pack.createdAt),
+      rejoue.trioRecompose ? AVERTISSEMENT_TRIO_RECOMPOSE : null,
+    ].filter((x): x is string => x != null);
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
         <Navbar />
         <main style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px 120px" }}>
           <PackUnlockedView
-            data={outcome.comparaisonComplete}
-            trio={outcome.results.slice(0, 3)}
-            pistes={outcome.pistes}
+            data={rejoue.data}
+            trio={rejoue.trio}
+            pistes={rejoue.pistes}
             projetLabel={pack.projetLabel}
+            avertissements={avertissements}
           />
         </main>
       </div>

@@ -126,7 +126,10 @@ test("D8. le prompt de synthèse interdit la causalité et ne la donne plus en e
 
 test("D9. les sessions locales d'Où vivre antérieures à FUT-36 ne sont plus restaurées", () => {
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
-  assert.match(client, /const SESSION_VERSION = 4;/);
+  // 4 depuis FUT-36 ; 5 depuis FUT-129 (l'ancienne lecture de l'inondation). Toute version au moins égale à 4
+  // laisse tomber les sessions antérieures à FUT-36.
+  const version = Number(/const SESSION_VERSION = (\d+);/.exec(client)?.[1]);
+  assert.ok(version >= 4, `SESSION_VERSION = ${version}`);
   // Le mécanisme est inchangé : une version différente n'est pas restaurée.
   assert.match(client, /if \(s\.v !== SESSION_VERSION\) return null;/);
   assert.match(client, /const SESSION_KEY = "futuree:ouvivre:session";/);

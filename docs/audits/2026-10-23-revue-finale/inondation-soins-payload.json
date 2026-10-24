@@ -1,0 +1,172 @@
+{
+  "project": "Un faible risque d'inondation et un bon accès aux soins, en Charente-Maritime",
+  "reformulation": "Un faible risque d'inondation et un bon accès aux soins, en Charente-Maritime",
+  "preferences": [
+    {
+      "key": "faible_risque_inondation",
+      "weight": 3
+    },
+    {
+      "key": "acces_soins",
+      "weight": 2
+    }
+  ],
+  "results": [
+    {
+      "insee": "17028",
+      "nom": "Aytré",
+      "dept": "17",
+      "region": "Nouvelle-Aquitaine",
+      "compatibility": 97,
+      "reasons": [
+        "bon accès aux médecins"
+      ],
+      "signature": [
+        "Côte atlantique",
+        "Bassin de la Rochelle",
+        "Hivers doux"
+      ],
+      "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+      "tradeoff": null,
+      "compromis": "En échange, la sécheresse est plus présente qu'à Dompierre-sur-Mer.",
+      "decouverte": "rivage marin à 1,1 km",
+      "pressionEco": null,
+      "climatInondation": null,
+      "logement": "marché parmi les plus chers",
+      "littoral": null,
+      "distinctive": null,
+      "demographie": "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
+      "calmeSonore": "la proximité d'un grand axe routier",
+      "expoIndustrielle": "la proximité d'un site industriel",
+      "heritageIndustriel": "Plusieurs anciens sites industriels sont recensés à proximité.",
+      "signaux": {
+        "vie_locale": "vie locale animée",
+        "secheresse": "sols plus exposés à la sécheresse",
+        "feu": "risque de feu intermédiaire",
+        "chaleur": "étés intermédiaires",
+        "expo_industrielle": "présence industrielle intermédiaire",
+        "inondation": "de 1995 à 2021, 2 à 5 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+      },
+      "metrics": {
+        "mer_centre_km": 1.13,
+        "population": 9578,
+        "jours_chauds_30": 18.5,
+        "temp_hiver": 8.31,
+        "precip_annuelle": 759.71,
+        "ifm": 5
+      },
+      "inondation": {
+        "ligne": "Inondation : 2 à 5 sinistres pour 1 000 biens par an (1995-2021) · plan de prévention approuvé",
+        "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à 2 à 5 sinistres pour 1 000 biens assurés dans la commune.",
+        "plans": "Plan de prévention des inondations approuvé (submersion marine).",
+        "sinistresFrequents": false
+      }
+    },
+    {
+      "insee": "17142",
+      "nom": "Dompierre-sur-Mer",
+      "dept": "17",
+      "region": "Nouvelle-Aquitaine",
+      "compatibility": 97,
+      "reasons": [
+        "bon accès aux médecins"
+      ],
+      "signature": [
+        "Bassin de la Rochelle"
+      ],
+      "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+      "tradeoff": null,
+      "compromis": "En échange, la vie locale est plus discrète qu'à Lagord.",
+      "decouverte": "population en croissance",
+      "pressionEco": null,
+      "climatInondation": null,
+      "logement": "marché parmi les plus chers",
+      "littoral": null,
+      "distinctive": null,
+      "demographie": "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
+      "calmeSonore": "la proximité d'un grand axe routier",
+      "expoIndustrielle": "la proximité d'un site industriel",
+      "heritageIndustriel": null,
+      "signaux": {
+        "vie_locale": "vie locale intermédiaire",
+        "expo_industrielle": "à l'écart des sites industriels à risque",
+        "secheresse": "exposition intermédiaire à la sécheresse",
+        "feu": "risque de feu plus marqué",
+        "chaleur": "étés généralement plus chauds",
+        "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+      },
+      "metrics": {
+        "mer_centre_km": 7.38,
+        "population": 5961,
+        "jours_chauds_30": 25.9,
+        "temp_hiver": 7.77,
+        "precip_annuelle": 826.44,
+        "ifm": 6.5
+      },
+      "inondation": {
+        "ligne": "Inondation : moins de 1 sinistre pour 1 000 biens par an (1995-2021) · aucun plan de prévention des inondations recensé",
+        "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à moins de 1 sinistre pour 1 000 biens assurés dans la commune.",
+        "plans": "Aucun plan de prévention des inondations recensé dans la commune.",
+        "sinistresFrequents": false
+      }
+    },
+    {
+      "insee": "17200",
+      "nom": "Lagord",
+      "dept": "17",
+      "region": "Nouvelle-Aquitaine",
+      "compatibility": 97,
+      "reasons": [
+        "bon accès aux médecins"
+      ],
+      "signature": [
+        "Bassin de la Rochelle",
+        "Hivers doux"
+      ],
+      "identite": "Pour des hivers parmi les plus doux du pays.",
+      "tradeoff": null,
+      "compromis": "En échange, les sites industriels sont plus présents qu'à Dompierre-sur-Mer.",
+      "decouverte": "forte présence étudiante",
+      "pressionEco": null,
+      "climatInondation": null,
+      "logement": "marché parmi les plus chers",
+      "littoral": null,
+      "distinctive": null,
+      "demographie": "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
+      "calmeSonore": "la proximité d'un grand axe routier",
+      "expoIndustrielle": "la proximité d'un site industriel à risque majeur",
+      "heritageIndustriel": "Une ancienne usine à gaz, parmi d'autres anciens sites industriels, est recensée à proximité.",
+      "signaux": {
+        "vie_locale": "vie locale animée",
+        "expo_industrielle": "présence industrielle intermédiaire",
+        "secheresse": "sols plus exposés à la sécheresse",
+        "chaleur": "étés intermédiaires",
+        "feu": "risque de feu plus marqué",
+        "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+      },
+      "metrics": {
+        "mer_centre_km": 3,
+        "population": 7387,
+        "jours_chauds_30": 18,
+        "temp_hiver": 8.22,
+        "precip_annuelle": 763.84,
+        "ifm": 5.5
+      },
+      "inondation": {
+        "ligne": "Inondation : moins de 1 sinistre pour 1 000 biens par an (1995-2021) · aucun plan de prévention des inondations recensé",
+        "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à moins de 1 sinistre pour 1 000 biens assurés dans la commune.",
+        "plans": "Aucun plan de prévention des inondations recensé dans la commune.",
+        "sinistresFrequents": false
+      }
+    }
+  ],
+  "outcome": {
+    "perfectMatch": true,
+    "message": null,
+    "exploration": false
+  },
+  "perimetre": [
+    "Charente-Maritime"
+  ],
+  "orientation": []
+}
