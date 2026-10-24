@@ -13,11 +13,12 @@
  * pour un changement de code seul. Règle : scripts/lib/perimetre-ademe.mjs. À relancer après populate-hlm.mjs.
  *
  * À enchaîner, car ils dérivent de la population (l'ordre compte, chaque étape lit la précédente) :
+ *   node scripts/populate-emploi-arrondissements.mjs    emploi des 45 arrondissements PLM (zone de leur ville)
  *   node scripts/populate-uu-pop.mjs                    uu_pop / uu_count / hors_uu
  *   .venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     vieLocale (dénominateur, codes repris)
  *   .venv-bpe/bin/python scripts/populate-demographie.py --write-index    demographie (abstentions, codes rattachés)
  *   .venv-bpe/bin/python scripts/populate-mobilite.py --write-index       mobilite (fusions sommées, codes rattachés)
- *   node scripts/populate-mismatch-rank.mts --recalculer vie_locale,croissance_demographique,acces_soins,faible_dependance_auto
+ *   npx tsx scripts/populate-mismatch-rank.mts --recalculer vie_locale,croissance_demographique,acces_soins,faible_dependance_auto,viabilite_emploi --retirer-orphelines acces_services
  *   npm run index:pack
  *   node scripts/accueil/donnees-accueil.mjs --ecrire   src/data/accueil-communes.json
  * etudes_dyn n'est PAS relancé : la source MESR a changé de rentrée depuis, et les communes corrigées y

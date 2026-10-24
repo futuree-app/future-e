@@ -111,6 +111,15 @@ test("index : pas de rang sans score, pour les critères touchés par FUT-109", 
   assert.deepEqual(orphelines, []);
 });
 
+test("index : un arrondissement a l'emploi de la zone d'emploi de sa ville (Insee ZE2020)", () => {
+  const emploi = JSON.parse(readFileSync("data/communes-emploi.json", "utf8")).data;
+  const parZe = (ze) => Object.values(emploi).find((e) => e.ze === ze);
+  for (const c of index.communes.filter((x) => /^(751\d\d|6938\d|132\d\d)$/.test(x.insee))) {
+    const ze = c.insee.startsWith("751") ? "1109" : c.insee.startsWith("6938") ? "8421" : "9312";
+    assert.deepEqual(c.emploi, { ze, taille: parZe(ze).taille, diversite: parZe(ze).diversite }, c.insee);
+  }
+});
+
 test("accueil : les données légères recopient la population corrigée", () => {
   for (const k of ["85165", "85212", "60694", "85084", "60054"]) {
     const l = accueil.communes[k];

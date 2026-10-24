@@ -31,6 +31,7 @@ import { lireMer, ajouterMer } from './lib/mer-index.mjs';
 import { appliquerCorrections } from './lib/population-grain.mjs';
 import { pressionAgricole } from './lib/pression-agricole.mjs';
 import { appliquerPerimetre } from './lib/perimetre-ademe.mjs';
+import { emploiArrondissement } from './lib/emploi-arrondissements.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -209,9 +210,10 @@ async function main() {
       densite: pop.densite ?? null,
       altitude: altMap[insee] ?? null, // m NGF, centroïde IGN RGE ALTI (cf. populate-communes-altitude.js)
       // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
+      // FUT-109 : un arrondissement PLM a la zone d'emploi de sa ville (scripts/lib/emploi-arrondissements.mjs).
       emploi: emploiMap[insee]
         ? { ze: emploiMap[insee].ze, taille: emploiMap[insee].taille, diversite: emploiMap[insee].diversite }
-        : null,
+        : emploiArrondissement(insee, emploiMap),
       clim,
       // Santé environnementale + vivabilité (scorables nationalement)
       viv: {
