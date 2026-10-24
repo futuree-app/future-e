@@ -98,6 +98,11 @@ Les critères ordinaires peuvent expliquer la sélection quand les "raisons" du 
 l'établissent. L'inondation ne contribue JAMAIS favorablement au classement : elle peut
 seulement entraîner un recul documenté. Si "exploration_sans_classement" vaut true,
 les communes sont à explorer, sans classement favorable sur la demande.
+Si "couverture_des_priorites" vaut "aucune" ou "sans_priorite", aucune priorité déclarée n'est
+mesurée pour ces communes : ne dites jamais qu'elles « correspondent », « répondent »,
+« conviennent » ni qu'elles impliquent « le moins de compromis » ; présentez-les comme des
+communes à explorer, sans leur prêter ni qualité ni défaut sur la demande. Si elle vaut
+"partielle", ne dites pas que l'ensemble correspond au projet : dites ce qui est mesuré.
 Si un territoire porte "priorites_non_mesurees", ces priorités n'ont PAS été mesurées pour
 cette commune : nommez-les une fois comme « non mesurées ici », sans dire qu'elles sont
 satisfaites ou manquantes, sans en faire un compromis, et ne dites pas que la commune
@@ -296,7 +301,7 @@ type Body = {
   preferences?: { key: string; weight: number }[];
   results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[] }[];
   heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
-  outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean };
+  outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean; couverture?: string };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
   orientation?: string[]; // ancres souples = penchant (résultats inclinés, sans s'y limiter)
   enrichment?: Record<string, unknown>; // extensible : eau / cadmium / sols suivis (à venir)
@@ -354,6 +359,8 @@ export async function POST(request: NextRequest) {
     aucun_territoire_parfait: body.outcome?.perfectMatch === false,
     message_moteur: body.outcome?.message ?? null,
     exploration_sans_classement: inondationDemandee && body.outcome?.exploration === true,
+    // FUT-109 : « complete » seulement si toutes les priorités déclarées sont mesurées pour chaque commune affichée.
+    couverture_des_priorites: ["complete", "partielle", "aucune", "sans_priorite"].includes(body.outcome?.couverture ?? "") ? body.outcome!.couverture : "complete",
     role_inondation: inondationDemandee ? "recul documenté uniquement, jamais favorable" : null,
     reference_prix_logement: results.some((r) => r.logement) ? "France" : null,
     territoires: results.map((r) => ({

@@ -232,9 +232,11 @@ function distinctId(): string {
 
 // Fallback déterministe si la synthèse IA est indisponible (502). On reste
 // qualitatif, on s'appuie sur ce que le moteur a déjà produit.
-function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean): string {
+function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean, couverture?: { etat: string; message: string | null }): string {
   const inondation = repliInondation(parsed.preferences, results, exploration);
   if (inondation) return inondation;
+  // FUT-109 : sans priorité mesurée partout, le repli ne raconte ni arbitrage ni correspondance : il dit l'exploration.
+  if (couverture && couverture.etat !== "complete" && couverture.message) return `${parsed.reformulation} ${couverture.message}`;
   const reasons = Array.from(
     new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
   ).slice(0, 3);
@@ -525,6 +527,7 @@ export function OuVivreClient() {
         perimetre?: string[];
         orientation?: string[];
         exploration?: boolean;
+        couverture?: string;
       },
     ) => {
       setSynthesis("");
@@ -555,7 +558,7 @@ export function OuVivreClient() {
               inondation: r.inondation ?? null, // FUT-129 : faits (sinistres 1995-2021, plans), gatés côté route
               prioritesNonMesurees: r.couverture?.nonMesurees ?? [], // FUT-109 : jamais présentées comme satisfaites
             })),
-            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false },
+            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false, couverture: outcomeMeta.couverture ?? "complete" },
             perimetre: outcomeMeta.perimetre ?? [],
             orientation: outcomeMeta.orientation ?? [],
           }),
@@ -576,7 +579,7 @@ export function OuVivreClient() {
         if (seq === runSeq.current) capture("life_synthesis_shown");
       } catch {
         if (seq !== runSeq.current) return;
-        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false));
+        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false, { etat: outcomeMeta.couverture ?? "complete", message: outcomeMeta.message }));
         capture("life_synthesis_fallback");
       } finally {
         if (seq === runSeq.current) setSynthesizing(false);
@@ -639,6 +642,7 @@ export function OuVivreClient() {
       perimetre: matchOutcome.perimetreDur ?? matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
       orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
       exploration: matchOutcome.inondation?.exploration ?? false,
+      couverture: matchOutcome.couverture ?? "complete",
     });
   }, [parsed, submittedText, streamSynthesis]);
 
@@ -1202,6 +1206,9 @@ export function OuVivreClient() {
               {/* FUT-129 : la seule demande classable était l'inondation. Pas de palmarès : on dit l'ordre. */}
               {outcome?.inondation?.exploration ? (
                 <>{outcome.inondation.ordre}</>
+              ) : /* FUT-109 : une couverture incomplète ne promet ni correspondance ni compromis établi. */
+              outcome?.couverture && outcome.couverture !== "complete" && outcome.message ? (
+                <>{outcome.message}</>
               ) : /* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */
               motCardinal(top.length) ? (
                 <>

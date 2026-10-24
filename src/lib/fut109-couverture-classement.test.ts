@@ -163,3 +163,68 @@ test("synthèse : les priorités non mesurées lui parviennent et ne peuvent pas
   assert.match(client, /prioritesNonMesurees: r\.couverture\?\.nonMesurees/);
   assert.match(client, /Priorités en partie mesurées/);
 });
+
+// ── L'ORDRE : CONDITIONS D'ABORD, COUVERTURE ENSUITE, SCORE ET DIVERSITÉ ENFIN (arbitrage du 24/10/2026) ──────
+const cand = (insee: string, region: string, boundary: boolean, couvertureRang: number, sortScore: number) =>
+  ({ boundary, couvertureRang, sortScore, pref: false, result: { insee, dept: insee.slice(0, 2), region } });
+
+test("une commune confirmée à couverture partielle passe devant une commune à la limite à couverture complète", () => {
+  const confirmeePartielle = cand("17300", "Nouvelle-Aquitaine", false, 1, 40);
+  const limiteComplete = cand("33063", "Occitanie", true, 0, 95);
+  // Tri : la condition prime sur la couverture et sur le score.
+  assert.deepEqual([limiteComplete, confirmeePartielle].sort(V.ordreClassement).map((x) => x.result.insee), ["17300", "33063"]);
+  // Étalement : la diversité régionale ne remonte pas la commune à la limite (autre région, meilleur score).
+  const r = V.etalerParGroupes([confirmeePartielle, limiteComplete].sort(V.ordreClassement), { anyPreferred: false, target: 5, display: 3 });
+  assert.deepEqual(r.map((x: M) => x.insee), ["17300", "33063"]);
+});
+
+test("à statut égal : couverture complète, puis partielle, puis aucune ; le score et la diversité ensuite", () => {
+  const xs = [
+    cand("13001", "PACA", false, 2, 99),          // aucune priorité mesurée, meilleur score
+    cand("69123", "Auvergne-Rhône-Alpes", false, 1, 90),  // partielle, autre région
+    cand("17300", "Nouvelle-Aquitaine", false, 0, 50),
+    cand("17306", "Nouvelle-Aquitaine", false, 0, 49),    // complète, même région que la première
+    cand("33063", "Nouvelle-Aquitaine", true, 0, 100),    // complète mais à la limite
+  ].sort(V.ordreClassement);
+  assert.deepEqual(xs.map((x) => x.result.insee), ["17300", "17306", "69123", "13001", "33063"]);
+  // La diversité n'agit qu'À L'INTÉRIEUR d'un groupe : 69123 (autre région) ne passe pas devant 17306.
+  const r = V.etalerParGroupes(xs, { anyPreferred: false, target: 5, display: 3 });
+  assert.deepEqual(r.map((x: M) => x.insee), ["17300", "17306", "69123", "13001", "33063"]);
+});
+
+test("à statut et couverture égaux, l'étalement régional reste celui d'avant", () => {
+  const xs = [cand("17300", "Nouvelle-Aquitaine", false, 0, 90), cand("17306", "Nouvelle-Aquitaine", false, 0, 80), cand("69123", "Auvergne-Rhône-Alpes", false, 0, 70)];
+  assert.deepEqual(V.etalerParGroupes(xs, { anyPreferred: false, target: 5, display: 3 }).map((x: M) => x.insee), ["17300", "69123", "17306"]);
+});
+
+// ── LES PHRASES GÉNÉRALES NE PROMETTENT PAS PLUS QUE LES CARTES ──────────────────────────────────────────────
+test("aucune priorité mesurée : la phrase générale dit l'exploration, jamais une correspondance ni un compromis", async () => {
+  const o = await match(["75"], [{ key: "cadre_calme", weight: 3 }]);
+  assert.equal(o.couverture, "aucune");
+  assert.equal(o.message, V.MESSAGE_COUVERTURE.aucune);
+  assert.doesNotMatch(o.message, /convien|correspond|répond|moins de compromis/i);
+});
+
+test("couverture partielle, sans priorité, complète : chaque cas a sa phrase", async () => {
+  const p = await match(["75"], [{ key: "cadre_calme", weight: 3 }, { key: "acces_culture", weight: 2 }]);
+  assert.equal(p.couverture, "partielle");
+  assert.equal(p.message, V.MESSAGE_COUVERTURE.partielle);
+  const s = await match(["17"], []);
+  assert.equal(s.couverture, "sans_priorite");
+  assert.equal(s.message, V.MESSAGE_COUVERTURE.sans_priorite);
+  const c = await match(["17"], [{ key: "acces_soins", weight: 2 }, { key: "nature", weight: 3 }]);
+  assert.equal(c.couverture, "complete");
+  assert.ok(c.message === null || /moins de compromis/.test(c.message));
+  for (const m of Object.values(V.MESSAGE_COUVERTURE) as string[]) assert.doesNotMatch(m, /convien|correspond|répond|moins de compromis/i);
+});
+
+test("la page et la synthèse suivent la couverture du résultat (sans appel Anthropic)", () => {
+  const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
+  // L'en-tête « Les trois pourraient convenir » n'est atteint que pour une couverture complète.
+  assert.match(client, /outcome\?\.couverture && outcome\.couverture !== "complete" && outcome\.message \?/);
+  assert.match(client, /couverture: outcomeMeta\.couverture \?\? "complete"/);
+  assert.match(client, /couverture\.etat !== "complete" && couverture\.message\) return/);
+  const route = readFileSync("src/app/api/comparateur-vie/synthesize/route.ts", "utf8");
+  assert.match(route, /couverture_des_priorites:/);
+  assert.match(route, /ne dites jamais qu'elles « correspondent », « répondent »/);
+});

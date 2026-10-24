@@ -358,6 +358,9 @@ export type MatchOutcome = {
   bestCompatibility: number;
   candidates: number;
   message: string | null;
+  // FUT-109 : la couverture des priorités sur les communes AFFICHÉES. Les phrases générales (page, synthèse)
+  // ne disent « correspondre » que si elle est complète.
+  couverture?: CouvertureResultats;
   results: MatchResult[];
   // Comparaison complète du trio affiché (Pack Décision). Calculée sur les 3 premiers
   // results, narratif, hors score/tri. cf. buildComparaisonComplete.
@@ -2316,6 +2319,52 @@ export function scorePreferences(c: IndexCommune, prefs: PreferencePonderee[]): 
   return { subs, reference, recul, base: scoreAvecRecul(reference, recul), couverture: { etat, nonMesurees } };
 }
 
+/** La couverture des communes affichées : complète seulement si chacune l'est. */
+export type CouvertureResultats = "complete" | "partielle" | "aucune" | "sans_priorite";
+export function couvertureDesResultats(affichees: { couverture?: { etat: CouverturePriorites["etat"] } }[]): CouvertureResultats {
+  const etats = affichees.map((r) => r.couverture?.etat ?? "complete");
+  if (etats.every((e) => e === "complete")) return "complete";
+  if (etats.every((e) => e === "sans_priorite")) return "sans_priorite";
+  if (etats.every((e) => e === "aucune" || e === "sans_priorite")) return "aucune";
+  return "partielle";
+}
+export const MESSAGE_COUVERTURE: Record<Exclude<CouvertureResultats, "complete">, string> = {
+  partielle: "Certaines de vos priorités ne sont pas mesurées pour une partie de ces territoires : ils sont à explorer, et chaque carte dit ce qui n'y est pas mesuré.",
+  aucune: "Aucune de vos priorités n'est mesurée pour ces territoires : ils sont à explorer, sans classement sur votre demande.",
+  sans_priorite: "Votre recherche ne porte sur aucune priorité que le comparateur mesure : ces territoires sont à explorer, sans classement sur une demande.",
+};
+
+// FUT-109 · L'ORDRE DU CLASSEMENT (arbitrage du porteur, 24/10/2026), le même à chaque étape de `matchProjects` :
+// tri, affinage des trajets (à statut de condition encore inconnu : couverture puis score), dédoublonnage des
+// villes (la première rencontrée est gardée), étalement.
+//   1. une commune dont les conditions non négociables sont confirmées passe avant une commune à la limite ;
+//   2. à statut égal, toutes les priorités mesurées avant une couverture partielle, puis aucune ;
+//   3. ensuite seulement le score, puis la diversité géographique.
+// Une couverture partielle retenue ne reçoit toujours aucun palier (`MatchResult.couverture`).
+type Classable = { boundary: boolean; couvertureRang: number; sortScore: number };
+export function ordreClassement(a: Classable, b: Classable): number {
+  return Number(a.boundary) - Number(b.boundary) || a.couvertureRang - b.couvertureRang || b.sortScore - a.sortScore;
+}
+
+/**
+ * L'étalement (une région, puis un département de plus) appliqué GROUPE PAR GROUPE, dans l'ordre ci-dessus :
+ * la diversité géographique ne fait passer aucune commune devant une commune d'un groupe prioritaire. Un groupe
+ * ne complète la liste que s'il en manque après les précédents. `unique` est déjà trié par `ordreClassement`.
+ */
+export function etalerParGroupes<T extends { dept: string; region?: string | null }>(
+  unique: (Classable & { result: T; pref: boolean })[],
+  opts: { anyPreferred: boolean; target: number; display: number },
+): T[] {
+  const out: T[] = [];
+  for (const groupe of [0, 1, 2, 3, 4, 5]) {
+    if (out.length >= opts.target) break;
+    const membres = unique.filter((s) => Number(s.boundary) * 3 + s.couvertureRang === groupe);
+    if (!membres.length) continue;
+    out.push(...etalerResultats(membres, { anyPreferred: opts.anyPreferred, target: opts.target - out.length, display: Math.max(1, opts.display - out.length) }));
+  }
+  return out;
+}
+
 /** L'ordre des couvertures : une priorité non mesurée ne fait jamais passer une commune devant une autre. */
 export function rangCouverture(etat: CouverturePriorites["etat"]): 0 | 1 | 2 {
   return etat === "complete" || etat === "sans_priorite" ? 0 : etat === "partielle" ? 1 : 2;
@@ -3145,7 +3194,8 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   // LES CONFIRMÉES D'ABORD, ET LE SCORE ENSUITE. Sur une condition NON NÉGOCIABLE, le score de préférences
   // n'a pas le droit de faire disparaître l'incertitude : une commune que le moteur n'a pas su trancher ne
   // passe pas devant une commune dont la condition est établie, si séduisante soit-elle par ailleurs.
-  scored.sort((a, b) => Number(a.boundary) - Number(b.boundary) || b.sortScore - a.sortScore);
+  // FUT-109 : à statut égal sur les conditions, la couverture, puis le score (`ordreClassement`).
+  scored.sort(ordreClassement);
 
   // ── PASSE A : L'ITINÉRAIRE TRANCHE ──
   //
@@ -3158,7 +3208,9 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
   // communes-limite, poussées en fin de liste, ne seraient jamais affinées, et la bande ne se viderait
   // jamais.
   const byInseeIdx = new Map(communes.map((c) => [c.insee, c]));
-  const aAffiner = [...scored].sort((a, b) => b.sortScore - a.sortScore).slice(0, REFINE_BAND_CAP);
+  // FUT-109 : la couverture précède le score ici aussi, pour que le plafond d'affinage n'aille pas d'abord aux
+  // communes dont une priorité n'est pas mesurée.
+  const aAffiner = [...scored].sort((a, b) => a.couvertureRang - b.couvertureRang || b.sortScore - a.sortScore).slice(0, REFINE_BAND_CAP);
   const affine = await refineTravelTimes(
     aAffiner.map((s) => byInseeIdx.get(s.result.insee)).filter((c): c is IndexCommune => c != null),
     constraints,
@@ -3189,7 +3241,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     return true;
   });
   // Les nouvellement confirmées remontent : le tri le reflète.
-  retenues.sort((a, b) => Number(a.boundary) - Number(b.boundary) || b.sortScore - a.sortScore);
+  retenues.sort(ordreClassement);
   scored.length = 0;
   scored.push(...retenues);
 
@@ -3206,16 +3258,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
 
   // `unique` ne contient que des communes ÉLIGIBLES (candidates -> scored -> unique). L'étalement ordonne
   // et plafonne ce vivier, il n'y ajoute rien : 3 est un maximum, jamais un quota (FUT-5).
-  // FUT-109 : l'étalement (une région, puis un département de plus) ne doit pas promouvoir une commune dont une
-  // priorité n'est pas mesurée devant une commune entièrement mesurée. Il s'applique d'abord aux communes à
-  // couverture complète, exactement comme avant ; les autres ne complètent la liste que s'il en manque.
-  const deduped: MatchResult[] = [];
-  for (const rang of [0, 1, 2]) {
-    if (deduped.length >= TARGET) break;
-    const groupe = unique.filter((s) => s.couvertureRang === rang);
-    if (!groupe.length) continue;
-    deduped.push(...etalerResultats(groupe, { anyPreferred, target: TARGET - deduped.length, display: Math.max(1, DISPLAY - deduped.length) }));
-  }
+  const deduped = etalerParGroupes(unique, { anyPreferred, target: TARGET, display: DISPLAY });
 
   // Un palier « parfait » ne se dit que d'une commune dont toutes les priorités DÉCLARÉES sont mesurées : ni sur
   // une couverture partielle, ni sur les seuls critères implicites.
@@ -3265,12 +3308,19 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     : anchorLabels.length > 0
       ? `Aucun territoire ne réunit l'ensemble de vos critères dans ${listFr(anchorLabels)}. Essayez d'élargir le périmètre ou un autre critère.`
       : "Aucun territoire ne respecte l'ensemble de vos contraintes. Essayez d'élargir un critère.";
+  // FUT-109 : une phrase générale ne promet pas plus que les cartes. Sans priorité mesurée, ou avec une
+  // couverture partielle, elle ne parle ni de correspondance ni de « moins de compromis » : elle dit l'exploration.
+  const couvertureResultats = couvertureDesResultats(deduped.slice(0, DISPLAY));
   const message =
     candidates.length === 0
       ? emptyMessage
-      : perfect || exploration
+      : exploration
         ? null
-        : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
+        : couvertureResultats !== "complete"
+          ? MESSAGE_COUVERTURE[couvertureResultats]
+          : perfect
+            ? null
+            : "Aucun territoire ne réunit l'ensemble de vos critères. Voici ceux qui impliquent le moins de compromis.";
 
   // Trait distinctif (narratif, hors score) sur les seules communes AFFICHÉES, relatif
   // au groupe. Le moteur a accès à tous les sous-scores ; on charge l'index littoral ici
@@ -3351,6 +3401,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     // doivent pas continuer d'être comptées comme des candidates.
     candidates: scored.length,
     message,
+    couverture: couvertureResultats,
     results: deduped,
     comparaisonComplete,
     pistes: pistesPicks,
