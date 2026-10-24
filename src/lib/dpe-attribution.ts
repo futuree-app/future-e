@@ -2,6 +2,8 @@
 // ces fonctions sont appelées AUSSI côté client (LogementModule décide l'état du DPE en direct).
 // La partie IO (fetch ADEME) vit dans `dpe.ts`, qui ré-exporte ces symboles pour le serveur.
 
+import { attribuableAuLogement } from "./dpe-grain.ts";
+
 export type DpeLabel = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
 export type DpeRecord = {
@@ -34,6 +36,15 @@ export type DpeRecord = {
   isolation_murs: string | null;
   isolation_menuiseries: string | null;
   methode_dpe: string | null;
+  // FUT-74 : OPTIONNELS, ET ABSENTS DES SNAPSHOTS ANTÉRIEURS. `toRecord` ne les pose que pour les
+  // grains qui s'en servent (cf. `champsDeGrain` dans dpe.ts) : un DPE d'appartement individuel ou de
+  // maison garde exactement sa forme d'avant, donc l'empreinte des rapports versionnés qui le portent.
+  /** Appartement généré à partir de l'immeuble : `true` s'il n'a pas été visité (ADEME, 0/1). */
+  appartement_non_visite?: boolean | null;
+  /** DPE d'immeuble : surface habitable totale de l'immeuble, en m². */
+  surface_immeuble_m2?: number | null;
+  /** DPE d'immeuble : nombre d'appartements déclaré. */
+  nombre_appartements?: number | null;
 };
 
 export const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];
@@ -77,6 +88,12 @@ const isMaison = (t: string | null): boolean => (t ?? "").toLowerCase().includes
 // « UN SEUL CANDIDAT » SUPPOSE UNE LISTE COMPLÈTE (FUT-65). Quand l'un des deux jeux ADEME n'a pas
 // répondu, le candidat unique est seulement le seul qu'on a VU : un autre diagnostic peut exister dans
 // le jeu tombé. Sur une liste incomplète, on demande donc toujours confirmation.
+//
+// « MAISON » NE SUFFIT PAS À DIRE « LOGEMENT » (FUT-74, revue du 24/10/2026). `isMaison` cherche un mot
+// dans le type : une fiche typée « maison » à méthode « dpe immeuble collectif », ou un type hors de
+// l'énumération ADEME qui contient « maison », passaient. La convergence exige désormais AUSSI que le
+// diagnostic porte sur un logement selon la règle canonique (`attribuableAuLogement`) ; les autres
+// conditions restent celles d'avant.
 export function dpeAttributionStatus(
   candidates: DpeRecord[],
   banFeatureType: string | null,
@@ -88,6 +105,7 @@ export function dpeAttributionStatus(
     listeComplete &&
     candidates.length === 1 &&
     isMaison(one.type_batiment) &&
+    attribuableAuLogement(one) &&
     banFeatureType === "housenumber" &&
     one.etiquette_dpe != null;
   return strongConvergence

@@ -7,8 +7,12 @@ import {
 } from "@/lib/dpe-address-context";
 import { DpeSelector } from "@/components/report/DpeSelector";
 import { listeLongue } from "@/lib/dpe-candidate-match";
-import { PHRASE_DPE_IMMEUBLE, SAISIE_NUMERO, listeRepliee, phrasesOuvertureRepliee } from "@/lib/dpe-selection-vue";
+import {
+  SAISIE_NUMERO, ficheImmeuble, porteeDpeImmeuble, listeRepliee, phraseIndetermines, phrasesOuvertureRepliee,
+} from "@/lib/dpe-selection-vue";
+import { repartirParGrain } from "@/lib/dpe-grain";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
+import { DpeBadge } from "./kit";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « DIAGNOSTICS TROUVÉS À CETTE ADRESSE » — la matière NON ATTRIBUÉE.
@@ -40,6 +44,12 @@ import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 // reconnaître un logement, et la classe y redevenait un critère de choix. À 34 diagnostics, la page ne s'ouvre plus sur 34 lignes, et le refus
 // n'arrive plus au bout d'une liste. Jusqu'à six, rien ne change : la liste reste la question.
 // Seuil d'écran, documenté dans `dpe-selection-vue.ts`.
+//
+// LE DPE DE L'IMMEUBLE N'EST PAS UNE LIGNE À RECONNAÎTRE (FUT-74, 24/10/2026). Il était proposé dans la
+// liste comme les autres ; retenu, il donnait sa classe au logement jusque dans le moteur (« le
+// diagnostic choisi classe ce logement F »). Il a désormais sa fiche, à part, qui le décrit pour ce
+// qu'il est. Seuls les diagnostics DE LOGEMENT sont comptés, listés et offerts au choix ; s'il n'y en a
+// aucun, il n'y a ni liste ni refus à offrir, seulement la fiche de l'immeuble et le numéro du document.
 //
 // AUCUNE VALEUR N'EST PRÊTÉE AU LOGEMENT. Chaque chiffre décrit l'adresse. C'est aussi pour ça
 // qu'aucune moyenne n'est affichée (cf. `dpe-address-context.ts`) : une moyenne se lit comme LA
@@ -74,6 +84,34 @@ const LIEN: React.CSSProperties = {
   justifySelf: "start", fontSize: 13, color: "var(--accent-dim, #7a6e60)", textDecoration: "underline",
   background: "none", border: "none", cursor: "pointer", padding: "6px 0", textAlign: "left",
 };
+
+/** FUT-74 (D7) : le DPE de l'immeuble, décrit pour lui-même. Pas un bouton : il ne se retient pas. */
+function FichesImmeuble({ immeubles }: { immeubles: DpeRecord[] }) {
+  if (immeubles.length === 0) return null;
+  return (
+    <div style={{ display: "grid", gap: 10 }}>
+      {immeubles.map((c) => {
+        const f = ficheImmeuble(c);
+        return (
+          <div
+            key={f.id}
+            style={{
+              display: "flex", gap: 14, alignItems: "center", padding: "11px 13px", borderRadius: 10,
+              border: "1px dashed var(--border-2)", background: "transparent",
+            }}
+          >
+            {f.classe && <DpeBadge label={f.classe} size="sm" />}
+            <div style={{ display: "grid", gap: 2, minWidth: 0 }}>
+              <span style={{ fontSize: 14.5, color: "var(--fg-1)" }}>{f.titre}, {f.classement}</span>
+              <span style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.45 }}>{f.details.join(" · ")}</span>
+            </div>
+          </div>
+        );
+      })}
+      <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{porteeDpeImmeuble(immeubles.length)}</p>
+    </div>
+  );
+}
 
 function Repartition({ ctx }: { ctx: AddressDpeContext }) {
   if (ctx.distribution.length === 0) return null;
@@ -112,9 +150,11 @@ export function AddressDiagnosticsBlock({
   const [ouvert, setOuvert] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
   if (!ctx) return null;
-  const dense = listeLongue(ctx.total);
-  const repliee = listeRepliee(ctx.total);
-  const ouverture = phrasesOuvertureRepliee(ctx.total);
+  // FUT-74 : la liste, ses seuils et ses phrases ne portent que sur les diagnostics DE LOGEMENT.
+  const { logements, immeubles, indetermines } = repartirParGrain(candidates);
+  const dense = listeLongue(logements.length);
+  const repliee = listeRepliee(logements.length);
+  const ouverture = phrasesOuvertureRepliee(logements.length, immeubles.length > 0);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
@@ -143,15 +183,10 @@ export function AddressDiagnosticsBlock({
         </p>
       )}
 
-      {/* LE DIAGNOSTIC D'IMMEUBLE EST NOMMÉ AVANT LA LISTE (FUT-68). Il venait après elle : on pouvait
-          choisir sa ligne avant d'apprendre qu'elle décrit le bâtiment commun. Sa ligne le dit aussi. */}
-      {ctx.hasCollective && (
-        <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
-          {PHRASE_DPE_IMMEUBLE}
-        </p>
-      )}
+      {/* LE DIAGNOSTIC D'IMMEUBLE EST NOMMÉ AVANT LA LISTE (FUT-68), et il n'y figure plus (FUT-74). */}
+      <FichesImmeuble immeubles={immeubles} />
 
-      {repliee ? (
+      {logements.length === 0 ? null : repliee ? (
         <div style={{ display: "grid", gap: 10 }}>
           {!ouvert && (
             <button type="button" onClick={() => setOuvert(true)} disabled={busy} style={BOUTON_PRINCIPAL}>
@@ -167,7 +202,7 @@ export function AddressDiagnosticsBlock({
           {ouvert && (
             <div style={{ paddingTop: 6 }}>
               <DpeSelector
-                candidates={candidates}
+                candidates={logements}
                 onPick={onPick}
                 onNotInList={onNotInList}
                 busy={busy}
@@ -177,7 +212,13 @@ export function AddressDiagnosticsBlock({
           )}
         </div>
       ) : (
-        <DpeSelector candidates={candidates} onPick={onPick} onNotInList={onNotInList} busy={busy} />
+        <DpeSelector candidates={logements} onPick={onPick} onNotInList={onNotInList} busy={busy} />
+      )}
+
+      {indetermines.length > 0 && (
+        <p style={{ fontSize: 13, color: "var(--fg-4)", lineHeight: 1.6, margin: 0 }}>
+          {phraseIndetermines(indetermines.length)}
+        </p>
       )}
 
       {/* LE NUMÉRO DU DOCUMENT, le seul geste qui ne demande pas de deviner. Il était introduit par

@@ -10,8 +10,10 @@ import type { AddressDossierRow, DpeSelectionStatus } from "@/lib/address-dossie
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { ThermalComfortSection } from "@/components/report/ThermalComfortSection";
 import { LogementSynthesis } from "@/components/report/LogementSynthesis";
+import { dpeDuLogement } from "@/lib/dpe-grain";
 import { deriveThermalEvidence } from "@/lib/thermal-evidence";
-import { dpeAttributionStatus, type DpeRecord } from "@/lib/dpe-attribution";
+import type { DpeRecord } from "@/lib/dpe-attribution";
+import { confirmerAutomatiquement, departDpe, MESSAGE_AUTO_NON_ENREGISTRE } from "@/lib/dpe-attribution-auto";
 // Faces extraites (board étape 4 : une face = un fichier ; gabarit ThermalComfortSection).
 import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
@@ -134,6 +136,10 @@ export default function LogementModule({
   // qualification, qui est la seule surface capable de la produire avant tout paiement.
   // Rehydratation au montage : ne s'exécute qu'une fois (sinon boucle sur re-render).
   const rehydratedRef = useRef(false);
+  // FUT-74 : LE NUMÉRO DU DERNIER GESTE SUR LE DIAGNOSTIC. Une attribution automatique en cours
+  // d'enregistrement ne s'applique que s'il n'a pas changé à sa réponse : un choix, un refus ou un
+  // retrait du lecteur fait entre-temps l'emporte toujours.
+  const gesteDpeRef = useRef(0);
   // L'ACTUALISATION EST UN GESTE DU LECTEUR, et le rapport affiché le reste pendant tout le calcul.
   const [actualisation, setActualisation] = useState<"idle" | "en_cours" | "nouvelle_version" | "identique" | "refusee" | "erreur">("idle");
   const posthog = usePostHog();
@@ -192,23 +198,39 @@ export default function LogementModule({
       // cette condition, quelqu'un qui vient de dire « ce n'est pas le bon diagnostic » se voyait
       // réattribuer le même au rechargement suivant, sans un mot. Le geste du lecteur n'est pas
       // une absence de donnée à combler, et la date du geste est ce qui les distingue.
-      if (row.dpe_selection_status !== "pending" || row.dpe_selection_at != null) {
+      // La décision vit dans `departDpe` (pur, testé) ; FUT-65 : une liste incomplète n'attribue jamais.
+      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
+      if (depart.kind === "restaurer") {
         setSelectedDpe(row.selected_dpe_snapshot);
         setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
         // `pending` restauré (donc un retrait volontaire) rouvre la sélection sans rien attribuer :
         // `RUNTIME_DPE_STATUS` le rend déjà en `selection_required`.
+      } else if (depart.kind === "aucun") {
+        setDpeStatus("not_found");
+      } else if (depart.kind === "a_choisir") {
+        setDpeStatus("selection_required");
       } else {
-        // FUT-65 : une liste incomplète (base ADEME en panne partielle) n'attribue jamais seule.
-        const attribution = dpeAttributionStatus(candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
-        if (attribution.status === "not_found") {
-          setDpeStatus("not_found");
-        } else if (attribution.status === "auto_confirmed") {
-          setSelectedDpe(attribution.dpe);
-          setDpeStatus("auto_confirmed");
-          void persistDpe("auto_confirmed", attribution.dpe);
-        } else {
-          setDpeStatus("selection_required");
-        }
+        // FUT-74 : UNE PROPOSITION N'EST PAS UN CHOIX TANT QUE LE SERVEUR NE L'A PAS ENREGISTRÉE. Elle
+        // posait `auto_confirmed` avant l'appel et ignorait un refus : un « retenu automatiquement »
+        // s'affichait sans exister en base. La liste reste ouverte pendant l'appel ; les gestes attendent
+        // sa réponse (`dpeBusy`), qui ne s'applique que si aucun geste n'est survenu entre-temps.
+        setDpeStatus("selection_required");
+        setDpeBusy(true);
+        const jeton = ++gesteDpeRef.current;
+        void confirmerAutomatiquement(
+          depart.dpe,
+          (d) => persistDpe("auto_confirmed", d),
+          () => gesteDpeRef.current === jeton,
+        ).then((issue) => {
+          if (issue === "perime") return;
+          setDpeBusy(false);
+          if (issue === "confirme") {
+            setSelectedDpe(depart.dpe);
+            setDpeStatus("auto_confirmed");
+          } else {
+            setDpeError(MESSAGE_AUTO_NON_ENREGISTRE);
+          }
+        });
       }
 
       // Signal implicite acheteur/résident : l'adresse du dossier est-elle la commune déclarée ?
@@ -312,6 +334,8 @@ export default function LogementModule({
     dpe: DpeRecord | null,
     source: "liste" | "numero" = "liste",
   ) {
+    // Ce geste rend périmée toute attribution automatique encore en attente de sa réponse.
+    gesteDpeRef.current += 1;
     const statutAvant = dpeStatus;
     const dpeAvant = selectedDpe;
     setDpeBusy(true);
@@ -328,7 +352,12 @@ export default function LogementModule({
   }
 
   // Le DPE « du logement » = uniquement le choix attribué (jamais un candidat non confirmé).
-  const dpe = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  const dpeRetenu = (dpeStatus === "auto_confirmed" || dpeStatus === "confirmed") ? selectedDpe : null;
+  // FUT-74 (D4) : et seulement s'il porte sur un logement. Un DPE d'immeuble retenu avant que la route ne
+  // le refuse reste inscrit au dossier, rien n'est effacé ; il n'est plus lu comme la performance du
+  // logement, et l'écran le dit (`dpeEcarte`), avec de quoi choisir à nouveau.
+  const dpe = dpeDuLogement(dpeRetenu);
+  const dpeEcarte = dpeRetenu && !dpe ? dpeRetenu : null;
   // Lecture thermique (Face 1) : dérivée du DPE attribué uniquement (sinon C_NO_DATA).
   const thermalEvidence = deriveThermalEvidence(dpe);
   const dpeYear = dpe?.date_dpe ? dpe.date_dpe.slice(0, 4) : null;
@@ -346,7 +375,15 @@ export default function LogementModule({
   // Le gate « attendre que l'autour soit terminal » (board critique 2a) A DISPARU avec l'autour :
   // il existait parce qu'une synthèse générée trop tôt se figeait sans la section entourage. Ce
   // fait n'entrant plus dans le payload, la synthèse ne dépend plus que de l'analyse et du DPE.
-  const synthesisReady = Boolean(result) && dpeTerminal;
+  //
+  // UNE SYNTHÈSE NE PART JAMAIS PENDANT QU'UNE SÉLECTION S'ENREGISTRE (FUT-74, seconde revue du
+  // 24/10/2026). `selection_required` décrit deux situations : l'absence stable de choix, qui est un
+  // résultat et mérite sa lecture, et l'attente d'une attribution automatique que le serveur n'a pas
+  // encore acceptée, qui n'en est pas un. Seul `dpeBusy` les distingue : il est vrai du début à la fin
+  // de toute écriture de sélection, automatique (`confirmerAutomatiquement`) comme manuelle
+  // (`appliquerSelection`, dont l'état optimiste n'est pas un choix enregistré). Sans lui, une maison
+  // retenue automatiquement déclenchait une synthèse sans DPE, puis une seconde après confirmation.
+  const synthesisReady = Boolean(result) && dpeTerminal && !dpeBusy;
   const synthesisData: SynthesisData = {
     address: result?.address,
     altitude: result?.altitude,
@@ -567,6 +604,7 @@ export default function LogementModule({
             <EnergieSection
               dpeStatus={dpeStatus}
               dpe={dpe}
+              dpeEcarte={dpeEcarte}
               audit={result.audit}
               auditStatus={result.auditStatus}
               autresAudits={result.autresAudits ?? []}
