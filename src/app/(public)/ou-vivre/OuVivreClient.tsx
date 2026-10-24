@@ -15,6 +15,7 @@ import { ChipTooltip } from "@/components/ChipTooltip";
 import { departmentName } from "@/lib/regions-fr";
 import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
+import { repliInondation } from "@/lib/comparateur/synthese-repli";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -51,7 +52,9 @@ const FREE_ASK = 2;
 const SESSION_KEY = "futuree:ouvivre:session";
 // v4 (FUT-36) : les sessions v3 peuvent porter « qui attire » (identité, synthèse) ; on les laisse
 // tomber plutôt que de réafficher une causalité retirée.
-const SESSION_VERSION = 4;
+// v5 (FUT-129) : une session v4 peut porter l'ancienne lecture de l'inondation (« peu de reconnaissances
+// CatNat inondation », palier « Risque d'inondation faible ») : on ne la réaffiche pas.
+const SESSION_VERSION = 5;
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 h
 
 type SessionSnapshot = {
@@ -212,7 +215,9 @@ function distinctId(): string {
 
 // Fallback déterministe si la synthèse IA est indisponible (502). On reste
 // qualitatif, on s'appuie sur ce que le moteur a déjà produit.
-function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[]): string {
+function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean): string {
+  const inondation = repliInondation(parsed.preferences, results, exploration);
+  if (inondation) return inondation;
   const reasons = Array.from(
     new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
   ).slice(0, 3);
@@ -502,6 +507,7 @@ export function OuVivreClient() {
         message: string | null;
         perimetre?: string[];
         orientation?: string[];
+        exploration?: boolean;
       },
     ) => {
       setSynthesis("");
@@ -529,8 +535,9 @@ export function OuVivreClient() {
               calmeSonore: r.calmeSonore, // récit calme sonore (source bruyante proche), gaté côté route par calme_sonore demandé
               expoIndustrielle: r.expoIndustrielle, // récit sites industriels, gaté côté route par critère demandé
               heritageIndustriel: r.heritageIndustriel, // récit héritage industriel, gaté côté route par heritageIntent
+              inondation: r.inondation ?? null, // FUT-129 : faits (sinistres 1995-2021, plans), gatés côté route
             })),
-            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message },
+            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false },
             perimetre: outcomeMeta.perimetre ?? [],
             orientation: outcomeMeta.orientation ?? [],
           }),
@@ -551,7 +558,7 @@ export function OuVivreClient() {
         if (seq === runSeq.current) capture("life_synthesis_shown");
       } catch {
         if (seq !== runSeq.current) return;
-        setSynthesis(fallbackSynthesis(p, top));
+        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false));
         capture("life_synthesis_fallback");
       } finally {
         if (seq === runSeq.current) setSynthesizing(false);
@@ -613,6 +620,7 @@ export function OuVivreClient() {
       message: matchOutcome.message,
       perimetre: matchOutcome.perimetreDur ?? matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
       orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
+      exploration: matchOutcome.inondation?.exploration ?? false,
     });
   }, [parsed, submittedText, streamSynthesis]);
 
@@ -1173,8 +1181,11 @@ export function OuVivreClient() {
               Les territoires à regarder.
             </h2>
             <p className="text-[14px] leading-[1.6] text-muted mb-6">
-              {/* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */}
-              {motCardinal(top.length) ? (
+              {/* FUT-129 : la seule demande classable était l'inondation. Pas de palmarès : on dit l'ordre. */}
+              {outcome?.inondation?.exploration ? (
+                <>{outcome.inondation.ordre}</>
+              ) : /* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */
+              motCardinal(top.length) ? (
                 <>
                   {motCardinal(top.length) === "trois" ? "Les trois" : "Les deux"} pourraient convenir.{" "}
                   <span className="italic text-accent">Mais ils ne racontent pas la même histoire.</span>
@@ -1194,7 +1205,7 @@ export function OuVivreClient() {
                   className="card-answer rounded-2xl p-7 flex flex-col"
                 >
                   {/* Identité : l'essence du lieu, en tête (remplace « Territoire N »). */}
-                  <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>
+                  {!outcome?.inondation?.exploration && <p className="text-[13px] leading-[1.5] text-accent italic">{r.identite}</p>}
                   <h3
                     className="mt-2 font-normal text-[22px] text-label leading-[1.15]"
                     style={{ fontFamily: "var(--font-serif)" }}
@@ -1208,9 +1219,12 @@ export function OuVivreClient() {
                   {/* Correspondance : palier qualitatif + ce qui rapproche du projet
                       (1 confirmation demandée + 1 découverte non demandée, distinct d'une
                       carte à l'autre). Remplace la longue liste de raisons qui se répétait. */}
-                  <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
-                    {matchTier(r.compatibility)}
-                  </p>
+                  {/* FUT-129 : en exploration, aucun palier de correspondance : rien n'a été classé sur la demande. */}
+                  {!outcome?.inondation?.exploration && (
+                    <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
+                      {matchTier(r.compatibility)}{outcome?.inondation ? " sur vos autres critères" : ""}
+                    </p>
+                  )}
                   {/* LA DURÉE ESTIMÉE. Ce n'est pas un temps réel : le moteur de routage calcule sur son
                       graphe, sans trafic, sans stationnement, sans attente. La phrase le dit (« environ »),
                       et le grain aussi (le point de référence de la commune, pas toute la commune). */}
@@ -1231,7 +1245,7 @@ export function OuVivreClient() {
                       {r.boundaryReason === "routing" ? " · calcul indisponible" : ""}
                     </p>
                   )}
-                  {forces(r).length > 0 && (
+                  {!outcome?.inondation?.exploration && forces(r).length > 0 && (
                     <ul className="mt-2 flex flex-col gap-1.5">
                       {forces(r).map((f) => (
                         <li key={f} className="flex items-start gap-2 text-[13px] text-label/90 leading-snug">
@@ -1242,14 +1256,31 @@ export function OuVivreClient() {
                     </ul>
                   )}
 
+                  {/* FUT-129 : le fait d'inondation de la commune (sinistres indemnisés 1995-2021, plan de
+                      prévention), quand le lecteur a déclaré cette priorité. Un fait, jamais un niveau. */}
+                  {r.inondation && (
+                    <p className={`mt-3 text-[12px] leading-[1.5] ${r.inondation.sinistresFrequents ? "text-amber-300/90" : "text-label/75"}`}>
+                      {r.inondation.ligne}
+                    </p>
+                  )}
+
                   {/* Compromis : la tension assumée, ce qui distingue le territoire et donne
                       envie de comparer en profondeur. Récit moteur, toujours présent, hors score.
                       Pression éco / logement / littoral restent hors carte (doctrine 2026-06-02)
                       et vivent dans la synthèse, AskFuture et le rapport. */}
-                  {r.compromis && (
+                  {!outcome?.inondation?.exploration && r.compromis && (
                     <p className="mt-4 pt-3 border-t border-[var(--border-1)] text-[length:var(--text-caption)] leading-[1.55] text-muted">
                       Compromis : {r.compromis}
                     </p>
+                  )}
+
+                  {outcome?.inondation?.exploration && (
+                    <details className="mt-4 text-[length:var(--text-caption)] leading-[1.55] text-muted">
+                      <summary className="cursor-pointer py-3">Autres caractéristiques de la commune</summary>
+                      <p>{r.identite}</p>
+                      {forces(r).length > 0 && <ul className="mt-2 list-disc pl-4">{forces(r).map((f) => <li key={f}>{cap(f)}</li>)}</ul>}
+                      {r.compromis && <p className="mt-2">À savoir aussi : {r.compromis}</p>}
+                    </details>
                   )}
 
                   <a
@@ -1265,7 +1296,16 @@ export function OuVivreClient() {
                 </article>
               ))}
             </div>
-
+            {/* FUT-129 : ce qui est comparé pour l'inondation, une fois par recherche. */}
+            {outcome?.inondation && !outcome.inondation.exploration && (
+              <p className="mt-5 text-[12px] leading-[1.6] text-label/70">{outcome.inondation.transparence}</p>
+            )}
+            {outcome?.inondation?.exploration && (
+              <p className="mt-5 text-[12px] leading-[1.6] text-label/70">
+                Nous comparons des sinistres passés, pas la probabilité d&apos;une inondation à venir : aucune donnée communale ne
+                permet de désigner une commune sans risque. Cela se vérifie à l&apos;adresse.
+              </p>
+            )}
           </div>
 
           {/* Preuve / profondeur SOUS la réponse : la synthèse narrative puis le

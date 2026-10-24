@@ -1,0 +1,181 @@
+{
+  "v": 5,
+  "savedAt": 1792765792800,
+  "submittedText": "Un faible risque d'inondation, en Charente-Maritime",
+  "parsed": {
+    "reformulation": "Un faible risque d'inondation, en Charente-Maritime",
+    "hardConstraints": {
+      "departements": [
+        "17"
+      ]
+    },
+    "preferences": [
+      {
+        "key": "faible_risque_inondation",
+        "weight": 3
+      }
+    ]
+  },
+  "outcome": {
+    "perfectMatch": true,
+    "bestCompatibility": 92,
+    "candidates": 96,
+    "message": null,
+    "results": [
+      {
+        "insee": "17300",
+        "nom": "La Rochelle",
+        "dept": "17",
+        "region": "Nouvelle-Aquitaine",
+        "compatibility": 92,
+        "reasons": [],
+        "signature": [
+          "Côte atlantique",
+          "Hivers doux"
+        ],
+        "identite": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+        "tradeoff": null,
+        "compromis": "En échange, les sites industriels sont plus présents qu'à Saintes.",
+        "decouverte": "rivage marin à 1 km",
+        "pressionEco": null,
+        "climatInondation": null,
+        "logement": "marché parmi les plus chers",
+        "littoral": null,
+        "distinctive": "le bassin d'emploi le plus dynamique des trois",
+        "demographie": "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
+        "calmeSonore": "la proximité d'un aéroport",
+        "expoIndustrielle": "la proximité d'un site industriel à risque majeur",
+        "heritageIndustriel": "Une ancienne usine à gaz, parmi d'autres anciens sites industriels, est recensée à proximité.",
+        "signaux": {
+          "croissance_demographique": "gagne des habitants",
+          "expo_industrielle": "environnement industriel marqué",
+          "transports": "bien reliée par le train",
+          "emploi": "bassin d'emploi plus dynamique",
+          "ecoles": "accès aux écoles plus facile",
+          "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+        },
+        "metrics": {
+          "mer_centre_km": 0.95,
+          "population": 78535,
+          "jours_chauds_30": 18,
+          "temp_hiver": 8.22,
+          "precip_annuelle": 763.84,
+          "ifm": 5.5
+        },
+        "inondation": {
+          "ligne": "Inondation : 1 à 2 sinistres pour 1 000 biens par an (1995-2021) · plan de prévention approuvé",
+          "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à 1 à 2 sinistres pour 1 000 biens assurés dans la commune.",
+          "plans": "Plan de prévention des inondations approuvé (submersion marine).",
+          "sinistresFrequents": false
+        }
+      },
+      {
+        "insee": "17415",
+        "nom": "Saintes",
+        "dept": "17",
+        "region": "Nouvelle-Aquitaine",
+        "compatibility": 73,
+        "reasons": [],
+        "signature": [
+          "Petite ville"
+        ],
+        "identite": "Pour des hivers parmi les plus doux du pays.",
+        "tradeoff": null,
+        "compromis": "En échange, chaleur en hausse.",
+        "decouverte": "arrêts de bus près du centre de la commune",
+        "pressionEco": null,
+        "climatInondation": null,
+        "logement": "marché plus cher que la moyenne",
+        "littoral": null,
+        "distinctive": "les étés les plus chauds des trois",
+        "demographie": "gagne des habitants, avec une part d'arrivants récents parmi les plus élevées",
+        "calmeSonore": "la proximité d'un grand axe routier",
+        "expoIndustrielle": "la proximité d'un site industriel",
+        "heritageIndustriel": "Un ancien site industriel est recensé à proximité.",
+        "signaux": {
+          "expo_industrielle": "à l'écart des sites industriels à risque",
+          "croissance_demographique": "gagne des habitants",
+          "transports": "peu reliée par le train",
+          "feu": "risque de feu plus marqué",
+          "culture": "offre culturelle plus présente",
+          "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+        },
+        "metrics": {
+          "mer_centre_km": 23.79,
+          "population": 25518,
+          "jours_chauds_30": 26.5,
+          "temp_hiver": 7.6,
+          "precip_annuelle": 830.35,
+          "ifm": 7.5
+        },
+        "inondation": {
+          "ligne": "Inondation : 1 à 2 sinistres pour 1 000 biens par an (1995-2021) · plan de prévention approuvé",
+          "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à 1 à 2 sinistres pour 1 000 biens assurés dans la commune.",
+          "plans": "Plan de prévention des inondations approuvé (crues lentes de cours d'eau).",
+          "sinistresFrequents": false
+        }
+      },
+      {
+        "insee": "17299",
+        "nom": "Rochefort",
+        "dept": "17",
+        "region": "Nouvelle-Aquitaine",
+        "compatibility": 71,
+        "reasons": [],
+        "signature": [
+          "Petite ville",
+          "Hivers doux"
+        ],
+        "identite": "Pour une ville étudiante à taille humaine.",
+        "tradeoff": null,
+        "compromis": "En échange, la sécheresse est plus présente qu'à La Rochelle.",
+        "decouverte": "vie locale animée (commerces, marchés, associations)",
+        "pressionEco": null,
+        "climatInondation": null,
+        "logement": "marché plus cher que la moyenne",
+        "littoral": null,
+        "distinctive": null,
+        "demographie": "perd des habitants",
+        "calmeSonore": "la proximité d'une voie ferrée",
+        "expoIndustrielle": "la proximité d'un site industriel",
+        "heritageIndustriel": "Une ancienne usine à gaz, parmi d'autres anciens sites industriels, est recensée à proximité.",
+        "signaux": {
+          "croissance_demographique": "perd des habitants",
+          "ecoles": "accès aux écoles intermédiaire",
+          "emploi": "bassin d'emploi intermédiaire",
+          "culture": "offre culturelle intermédiaire",
+          "feu": "risque de feu intermédiaire",
+          "inondation": "de 1995 à 2021, 1 à 2 sinistres pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+        },
+        "metrics": {
+          "mer_centre_km": 7.97,
+          "population": 23092,
+          "jours_chauds_30": 18.5,
+          "temp_hiver": 8.32,
+          "precip_annuelle": 759.2,
+          "ifm": 5
+        },
+        "inondation": {
+          "ligne": "Inondation : 1 à 2 sinistres pour 1 000 biens par an (1995-2021) · plan de prévention approuvé",
+          "historique": "De 1995 à 2021, les inondations ont donné lieu en moyenne chaque année à 1 à 2 sinistres pour 1 000 biens assurés dans la commune.",
+          "plans": "Plan de prévention des inondations approuvé (submersion marine).",
+          "sinistresFrequents": false
+        }
+      }
+    ],
+    "appliedZones": [],
+    "perimetreDur": [
+      "le département 17"
+    ],
+    "appliedExclusions": [],
+    "inondation": {
+      "transparence": "Pour l'inondation, nous faisons reculer les communes où les sinistres indemnisés ont été fréquents de 1995 à 2021. Nous comparons des sinistres passés, pas la probabilité d'une inondation à venir : aucune donnée communale ne permet de désigner une commune sans risque. Cela se vérifie à l'adresse.",
+      "exploration": true,
+      "ordre": "Votre recherche ne porte que sur l'inondation : nous ne classons pas les communes sur cette seule demande. Voici des communes à explorer, rangées par nombre d'habitants, celles où les sinistres indemnisés ont été fréquents de 1995 à 2021 en dernier. Ajoutez ce qui compte pour vous (un cadre, des services, une région) pour obtenir des communes qui vous correspondent."
+    }
+  },
+  "synthesis": "",
+  "askMessages": [],
+  "askRemaining": 2,
+  "askLimit": false
+}

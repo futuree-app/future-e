@@ -22,6 +22,8 @@ import {
   TRAIT_REPOS,
 } from "./echelle-geometry";
 import styles from "./EchelleNavigator.module.css";
+import { releve as r } from "@/components/releve/primitives";
+import type { PresentationDossier } from "@/components/releve/activation";
 
 type Echelle = EchelleDuDossier["key"];
 
@@ -61,6 +63,7 @@ export function EchelleNavigator({
   commune,
   inseeCode,
   className = "",
+  presentation = "classique",
 }: {
   territoireHref: string;
   autourHref: string;
@@ -69,7 +72,14 @@ export function EchelleNavigator({
   commune?: string | null;
   inseeCode?: string | null;
   className?: string;
+  /**
+   * FUT-126 : sous le Relevé, l'étiquette passe en casse normale (DESIGN.md § 9.1 : « à passer en casse
+   * normale ») et l'indication garde de l'air sous elle, là où le filet de la colonne s'arrêtait net.
+   * Mêmes destinations, même mesure, mêmes interactions. Par défaut, rien ne change.
+   */
+  presentation?: PresentationDossier;
 }) {
+  const releve = presentation === "releve";
   const [active, setActive] = useState<Echelle | null>(null);
   const hintId = useId();
   // Les identifiants de `clipPath` et de `mask` sont globaux au document : deux navigateurs rendus
@@ -121,9 +131,9 @@ export function EchelleNavigator({
 
   return (
     <aside
-      className={`mt-5 border-y border-[var(--border-1)] py-5 lg:mt-0 lg:border-y-0 lg:border-l lg:py-0 lg:pl-6 ${className}`}
+      className={`mt-5 border-y border-[var(--border-1)] py-5 lg:mt-0 lg:border-y-0 lg:border-l lg:py-0 lg:pl-6 ${releve ? "lg:pb-8 " : ""}${className}`}
     >
-      <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-ghost">
+      <p className={releve ? r.etiquette : "font-mono text-[10px] tracking-[0.12em] uppercase text-ghost"}>
         {addressAvailable ? "3 échelles ouvertes" : "1 échelle ouverte"}
       </p>
       <p

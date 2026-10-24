@@ -56,6 +56,8 @@ export function buildLogementFacts(data: LogementDecisionData, savedDpe: DpeReco
     cavites: data.cavites.coverage, caviteProche: data.cavites.coverage === "present" && data.cavites.count > 0,
     patrimoine: data.patrimoine.coverage, perimetrePatrimonial: data.patrimoine.coverage === "present" && data.patrimoine.count > 0,
     sinistralite: data.sinistralite.coverage, sinistraliteActive: data.sinistralite.coverage === "present" && data.sinistralite.active,
+    // FUT-127 : absent d'une donnée antérieure (le champ n'existait pas), présent dès qu'elle est dérivée.
+    ...(data.zonageInondation ? { zonageInondation: data.zonageInondation } : {}),
     addressLabel,
   };
 }

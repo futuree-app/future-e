@@ -11,9 +11,12 @@ import { bindOrphans } from "@/lib/typography";
 import { sujetsDuGroupe } from "@/lib/decision/controles-sujets";
 import { lireCarteDuDossier } from "./lecture-dossier";
 import { EntreeReleve } from "./EntreeReleve";
-import { releve as s, Grain, type GrainCle } from "./primitives";
+import { releve as s, Grain, Registre, type GrainCle } from "./primitives";
 
-const GLYPHE: Record<string, GrainCle> = { territoire: "commune", quartier: "secteur", logement: "batiment" };
+// L'ÉCHELLE D'UNE RUBRIQUE A LA FORME DE L'EMBLÈME (FUT-126) : cercle, carré, losange, en trait. Le losange
+// PLEIN est le grain d'un fait établi sur le bâtiment ; en tête de la rubrique « Logement », il contredisait
+// le losange vide de « D'où viennent ces constats » et du navigateur, pour la même échelle, sur la même page.
+const GLYPHE: Record<string, GrainCle> = { territoire: "commune", quartier: "secteur", logement: "adresse" };
 const COULEUR = "var(--reg-controle)";
 
 export function ControlesReleve({ dossier, provenance }: { dossier: Dossier; provenance?: string }) {
@@ -21,15 +24,21 @@ export function ControlesReleve({ dossier, provenance }: { dossier: Dossier; pro
   const nonRealisees = phraseVerificationsNonRealisees(dossier);
   if (groupes.length === 0 && nonRealisees == null) return null;
   return (
-    <section id="controles" className={`mt-14 scroll-mt-24 ${s.releveSection}`}>
+    // FUT-126 · LE PASSAGE DE LA SYNTHÈSE AU DÉTAIL SE VOIT. La recette lisait la liste complète comme une
+    // section de plus, au rang de « À contrôler » : même surtitre, même filet. Elle ouvre désormais un
+    // nouveau mouvement (filet fort, titre au rang de ceux de la balance), et sa phrase dit ce qu'elle
+    // contient : TOUS les contrôles de chaque échelle, y compris ceux que la synthèse cite déjà
+    // (`controlesParEchelle` reprend toute la section des vérifications). Sans rubrique, la phrase se tait.
+    <section id="controles" aria-labelledby="controles-titre" className={`mt-14 scroll-mt-24 ${s.releveSection} ${s.controles}`}>
       <div className={s.enTeteMouvement}>
-        <h2 className={s.surtitre}>
-          <span aria-hidden className={s.sommaireTrait} style={{ background: COULEUR }} />
-          <span>{dossier.controlesTitle}</span>
-        </h2>
-        <p className={s.nuance}>
-          {bindOrphans("La synthèse ci-dessus retient l'essentiel. Dépliez une rubrique pour consulter les contrôles supplémentaires établis par nos sources.")}
-        </p>
+        <Registre as="h2" teinte={COULEUR} className={`${s.titre} ${s.titreBalance}`}>
+          <span id="controles-titre">{dossier.controlesTitle}</span>
+        </Registre>
+        {groupes.length > 0 ? (
+          <p className={s.dense}>
+            {bindOrphans("La synthèse ci-dessus retient l'essentiel pour décider. Voici le détail : chaque rubrique liste tous les contrôles établis à son échelle, y compris ceux déjà cités.")}
+          </p>
+        ) : null}
         {nonRealisees ? <p className={s.dense} style={{ color: "var(--reg-non-su)" }}>{bindOrphans(nonRealisees)}</p> : null}
       </div>
       <div>
@@ -46,7 +55,12 @@ export function ControlesReleve({ dossier, provenance }: { dossier: Dossier; pro
               </span>
               <span className={s.rangee} style={{ gap: 12 }}>
                 <span className={s.mono} style={{ fontSize: 12, color: "var(--r-meta)" }}>{g.cards.length === 1 ? "1 contrôle" : `${g.cards.length} contrôles`}</span>
-                <span aria-hidden className={s.groupeSigne}>+</span>
+                {/* Le geste dit en mots, à côté du signe : la rubrique se déplie. L'état ouvert ou fermé, lui,
+                    est annoncé par le `<details>` natif ; ce mot est un repère visuel, caché aux lecteurs d'écran. */}
+                <span aria-hidden className={s.groupeGeste}>
+                  <span className={s.siFerme}>Déplier</span><span className={s.siOuvert}>Replier</span>
+                  <span className={s.groupeSigne}>+</span>
+                </span>
               </span>
             </summary>
             <div className={s.groupeCorps}>

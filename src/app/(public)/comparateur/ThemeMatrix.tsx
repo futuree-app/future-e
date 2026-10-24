@@ -129,7 +129,7 @@ function LigneRow({ ligne, trio }: { ligne: ComparaisonLigne; trio: MatchResult[
             {dispo[0].qualifier ? `, ${dispo[0].qualifier}` : ""}
           </span>
           {/* FUT-32 : le cardinal réel ; une matrice n'existe qu'à deux ou trois communes. */}
-          {motCardinal(n) && <span className="text-[length:var(--text-dense)] text-muted">· les {motCardinal(n)} territoires se valent</span>}
+          {motCardinal(n) && <span className="text-[length:var(--text-dense)] text-muted">· même information pour les {motCardinal(n)} communes</span>}
         </div>
       ) : (
         trio.map((r) => {

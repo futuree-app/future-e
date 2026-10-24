@@ -62,7 +62,8 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   acces_ecoles: "Collèges et lycées accessibles alentour.",
   eviter_grandes_villes: "Taille de l'agglomération (unité urbaine).",
   prefere_grande_ville: "Taille de l'agglomération (unité urbaine).",
-  faible_risque_inondation: "Historique d'inondations observé sur le territoire.",
+  // FUT-129 : ce qui est lu, sans promettre un niveau de risque.
+  faible_risque_inondation: "Sinistres d'inondation indemnisés de 1995 à 2021 et plans de prévention de la commune. Des faits passés, pas une probabilité : la situation d'un bien se vérifie à son adresse.",
   faible_precip_extremes: "Pluies intenses projetées par le climat.",
   calme_sonore: "Densité de grandes infrastructures bruyantes autour (axes rapides, voie ferrée, aéroport). Mesure l'environnement sonore structurel, pas le bruit ressenti.",
   faible_exposition_industrielle: "Densité d'installations industrielles classées en activité à proximité (sites Seveso, IED). Mesure leur présence, pas un niveau de pollution ni un risque sanitaire avéré. Ne couvre pas les anciens sites pollués ni les friches.",

@@ -21,6 +21,8 @@ import { buildClimatFacts, type ClimatFacts } from "./climat-facts.ts";
 import { getClimatDataCommune } from "../drias-json.ts";
 import { getGeorisquesSummary } from "../georisques.ts";
 import { getRadonPotentiel } from "../radon.ts";
+import { getPlansInondationCommune } from "../gaspar-pprn-commune.ts";
+import type { PlansInondationCommune } from "../data/gaspar-pprn-inondation.ts";
 import { runRules } from "./materiality-rules.ts";
 import { assembleDossier } from "./decision-assembler.ts";
 import { composeFacts } from "./fact-compositions.ts";
@@ -33,7 +35,7 @@ import { effectiveProject } from "./effective-value.ts";
 
 export function buildModuleFacts(
   entry: IndexCommune,
-  opts: { hasAddress: boolean; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null },
+  opts: { hasAddress: boolean; climat?: ClimatFacts | null; risquesDeclares?: { wildfire: boolean } | null; radon?: RadonFacts | null; plansInondation?: PlansInondationCommune | null },
 ): ModuleFacts {
   const scores: ModuleFacts["scores"] = {};
   for (const key of PREFERENCE_KEYS) scores[key] = subScore(key, entry);
@@ -48,6 +50,7 @@ export function buildModuleFacts(
     climat: opts.climat ?? null,
     risquesDeclares: opts.risquesDeclares ?? null,
     radon: opts.radon ?? null,
+    plansInondation: opts.plansInondation ?? null,
   });
 }
 
@@ -89,7 +92,7 @@ export async function loadModuleFacts(
   //
   // La source est déjà mise en cache par commune (getGeorisquesSummary) : aucun appel supplémentaire pour
   // un lecteur qui ouvre aussi le module Territoire. Une panne rend `null` — jamais `false`.
-  const [entryCommune, climat, georisques, radon] = await Promise.all([
+  const [entryCommune, climat, georisques, radon, plansInondation] = await Promise.all([
     getCommuneEntry(insee),
     loadClimatFacts(insee),
     getGeorisquesSummary(insee).catch(() => null),
@@ -97,6 +100,8 @@ export async function loadModuleFacts(
     // n'ont pas de valeur radon — et c'est la vérité, puisqu'elle y varie d'un arrondissement à
     // l'autre. Cache 30 j : une classification géologique ne bouge pas.
     loadRadonFacts(insee, opts.citycode),
+    // FUT-127 : les plans de prévention des inondations de la commune (fichier embarqué, lu une fois).
+    getPlansInondationCommune(insee),
   ]);
   // PARIS, LYON, MARSEILLE : L'INDEX N'A PAS DE LIGNE POUR LE CODE AGRÉGÉ (13/08/2026).
   // ══════════════════════════════════════════════════════════════════════════════════════════
@@ -111,7 +116,7 @@ export async function loadModuleFacts(
   const entry = entryCommune
     ?? (opts.citycode && opts.citycode !== insee ? await getCommuneEntry(opts.citycode) : null);
   const risquesDeclares = georisques ? { wildfire: georisques.flags.wildfire } : null;
-  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares, radon }) : null;
+  return entry ? buildModuleFacts(entry, { hasAddress: opts.hasAddress, climat, risquesDeclares, radon, plansInondation }) : null;
 }
 
 // LE CONTEXTE DES CONTRAINTES DURES, hydraté AU-DESSUS des deux moteurs : le MÊME annuaire et la MÊME
