@@ -157,3 +157,35 @@ test("une ville de référence sans mesure ne transmet pas de trait « vie étud
   const d = V.communeToPreferences(commune("54310"));
   assert.equal(d.preferences.some((p: M) => p.key === "vie_etudiante"), false);
 });
+
+test("comparaison complète : un petit bassin lit « Non mesurée » en vie étudiante, et la couverture le signale", async () => {
+  // Leménil-Mitry et Rochefourchat (petits bassins) face à Nancy (mesurée).
+  const r = await V.seedComparaison(["54395", "54310", "26274"]);
+  const lignes = r.comparaison.themes.flatMap((t: M) => t.lignes);
+  const etudiante = lignes.find((l: M) => l.id === "vie_etudiante");
+  const par = Object.fromEntries(etudiante.cellules.map((x: M) => [x.insee, x]));
+  for (const insee of ["54310", "26274"]) {
+    assert.equal(par[insee].palier, "Non mesurée", insee);
+    assert.equal(par[insee].disponible, false, insee);
+  }
+  assert.equal(par["54395"].disponible, true);
+  assert.notEqual(par["54395"].palier, "Non mesurée");
+  // Le libellé ne change que pour la vie étudiante : une autre case sans donnée garde le sien.
+  for (const l of lignes.filter((x: M) => x.id !== "vie_etudiante")) {
+    for (const cell of l.cellules) assert.notEqual(cell.palier, "Non mesurée", `${l.id} ${cell.insee}`);
+  }
+
+  // FUT-109 : la priorité déclarée reste signalée comme non mesurée sur la carte de ces communes.
+  // Creuse : Guéret est mesurée, Aubusson et Felletin (petits bassins) suivent dans le même trio.
+  const o = await V.matchProjects({ reformulation: "FUT-135", hardConstraints: { departements: ["23"] }, preferences: [{ key: "vie_etudiante", weight: 3 }, { key: "nature", weight: 2 }] });
+  const trio = o.results.slice(0, 3);
+  const nonMesurees = trio.filter((x: M) => vie(commune(x.insee)) == null);
+  assert.ok(nonMesurees.length >= 1, "le trio de la Creuse compte une commune non mesurée");
+  const cellules = o.comparaisonComplete.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "vie_etudiante").cellules;
+  for (const x of nonMesurees) {
+    assert.deepEqual(x.couverture, { etat: "partielle", nonMesurees: ["une ville étudiante"] }, x.nom);
+    assert.equal(cellules.find((cell: M) => cell.insee === x.insee).palier, "Non mesurée", x.nom);
+  }
+  const p = V.scorePreferences(commune("54310"), [{ key: "vie_etudiante", weight: 3 }, { key: "nature", weight: 2 }]);
+  assert.deepEqual(p.couverture, { etat: "partielle", nonMesurees: ["vie_etudiante"] });
+});

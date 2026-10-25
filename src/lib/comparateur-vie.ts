@@ -1697,7 +1697,10 @@ export function buildComparaisonComplete(
       const c = cols[i];
       const s = raw[i];
       if (c == null || s == null) {
-        return { insee: r.insee, palier: "Non concernée", qualifier: null, disponible: false, alerte: false };
+        // FUT-135 : la vie étudiante d'un petit bassin n'est pas mesurée ; le lecteur qui l'a demandée reste
+        // concerné. Les autres dimensions gardent leur libellé.
+        const palier = dim.id === "vie_etudiante" ? "Non mesurée" : "Non concernée";
+        return { insee: r.insee, palier, qualifier: null, disponible: false, alerte: false };
       }
       const band = bands[i];
       const palier = dim.key === "taille_ville" ? tailleVillePalier(c) : palierAffiche(dim, band!, c);
