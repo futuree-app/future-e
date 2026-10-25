@@ -1386,11 +1386,13 @@ export function subScore(key: PreferenceKey, c: IndexCommune): number | null {
       return lerp(GRANDE_VILLE_MAX, tailleVille(c));
     case "vie_etudiante": {
       // 40 % accès (présence établissements sup, BPE) + 60 % dynamisme (part étudiante UU, MESR).
+      // FUT-135 : LES DEUX MESURES OU AUCUNE. Le dynamisme est null pour un bassin de moins de 5 000 habitants
+      // (part non représentative) ; se replier sur l'accès seul notait « ville étudiante » un village proche
+      // d'un campus, et se replier sur le dynamisme seul lui donnerait tout le poids. La priorité est alors
+      // non mesurée : signalée, jamais promue (FUT-109). L'accès reste un fait distinct (`etudesSup`).
       const a = c.etudes_acces ?? null;
       const d = c.etudes_dyn ?? null;
-      if (a == null && d == null) return null;
-      if (a == null) return d;
-      if (d == null) return a;
+      if (a == null || d == null) return null;
       return Math.round(0.4 * a + 0.6 * d);
     }
     case "vie_locale":

@@ -61,7 +61,12 @@ test("D1. forte arrivée récente : le fait, la position relative, aucune cause"
 test("D2. croissance démographique : la carte de Belley dit la croissance, sans « qui attire »", async () => {
   const r = await groupe([AMBERIEU, BELLEY, CESSY]);
   const belley = r.trio.find((c) => c.insee === BELLEY)!;
-  assert.equal(belley.identite, "Pour s'installer dans une commune qui gagne des habitants.");
+  // FUT-135 : Ambérieu n'est plus notée « ville étudiante » (part étudiante corrigée) ; elle prend la première
+  // l'identité de croissance, unique dans le groupe, et Belley reçoit son candidat suivant. La croissance de
+  // Belley reste dite sur sa carte, dans le récit démographique (D1).
+  const croissance = r.trio.filter((c) => c.identite === "Pour s'installer dans une commune qui gagne des habitants.");
+  assert.deepEqual(croissance.map((c) => c.insee), [AMBERIEU]);
+  assert.match(belley.demographie!, /^gagne des habitants/);
   for (const c of r.trio) assert.doesNotMatch(c.identite, CAUSAL, c.nom);
 });
 

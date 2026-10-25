@@ -1,0 +1,2870 @@
+{
+  "index": {
+    "avant": "d92b56fff7f07f715bca3ab9b86bee688cac1db66d70eab136feed33bb8d54df",
+    "apres": "eff0bea645fd478f36c01561f3126371a35534a77dca64d10d0c326c48103efa"
+  },
+  "etudesDyn": {
+    "source": "MESR, fr-esr-atlas_regional-effectifs-d-etudiants-inscrits_agregeables, effectif_atlas",
+    "rentree": "2024",
+    "sourceSha256": "18f6c72390ec07ff99229347b14620a428c25e0dea5778cd4637aea3a9b57e65",
+    "bassin": "unité urbaine de l'index (uu, populations communales sommées), sinon la commune hors unité urbaine",
+    "regle": "part = effectifs du bassin / population du bassin, plafonnée à 100 % ; non mesurée (null) sous 5000 habitants de bassin ou sans population ; 0 = aucun étudiant recensé par l'atlas dans un bassin mesuré",
+    "rang": "rang national des communes mesurées, ex æquo par le milieu (midrank) : 100 × (nb < x + nb ≤ x) / 2 / n, arrondi au demi supérieur",
+    "communesMesurees": 5555,
+    "nonMesurees": {
+      "bassinTropPetit": 29227,
+      "sansPopulation": 6
+    },
+    "vraiZero": {
+      "communes": 1280,
+      "rang": 12
+    }
+  },
+  "distributionDyn": {
+    "avant": {
+      "100": 175,
+      "non mesuré": 17,
+      "80-89": 31117,
+      "90-99": 3479
+    },
+    "apres": {
+      "100": 25,
+      "non mesuré": 29233,
+      "10-19": 1280,
+      "20-29": 363,
+      "30-39": 551,
+      "40-49": 554,
+      "50-59": 558,
+      "60-69": 567,
+      "70-79": 471,
+      "80-89": 663,
+      "90-99": 523
+    }
+  },
+  "distributionVie": {
+    "avant": {
+      "100": 77,
+      "non mesuré": 0,
+      "40-49": 7,
+      "50-59": 5,
+      "60-69": 13288,
+      "70-79": 9500,
+      "80-89": 8546,
+      "90-99": 3365
+    },
+    "apres": {
+      "100": 12,
+      "non mesuré": 29233,
+      "20-29": 443,
+      "30-39": 753,
+      "40-49": 1210,
+      "50-59": 709,
+      "60-69": 733,
+      "70-79": 737,
+      "80-89": 582,
+      "90-99": 376
+    }
+  },
+  "dynModifies": 34747,
+  "vieModifies": 34733,
+  "devenuesNonMesurees": 29233,
+  "paliers": {
+    "avant": {
+      "forte": 34772
+    },
+    "apres": {
+      "forte": 1985
+    },
+    "transitions": {
+      "forte -> non mesuré": 29218,
+      "forte -> forte": 1985,
+      "forte -> intermédiaire": 2861,
+      "forte -> limitée": 708,
+      "intermédiaire -> non mesuré": 15,
+      "intermédiaire -> limitée": 1
+    }
+  },
+  "raison": {
+    "perdus": 32012,
+    "gagnes": 0
+  },
+  "identite": {
+    "perdus": 32012,
+    "gagnes": 0
+  },
+  "decouverte": {
+    "perdus": 32787,
+    "gagnes": 0
+  },
+  "signature": {
+    "perdus": 18163,
+    "gagnes": 0
+  },
+  "petitsBassinsPresentesCommeEtudiants": {
+    "avant": 29226,
+    "apres": 0
+  },
+  "exemples": {
+    "26274": {
+      "avant": {
+        "nom": "Rochefourchat",
+        "population": 1,
+        "uu": null,
+        "uuPop": 1,
+        "acces": 40,
+        "dyn": 88,
+        "vie": 69,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": false
+      },
+      "apres": {
+        "nom": "Rochefourchat",
+        "population": 1,
+        "uu": null,
+        "uuPop": 1,
+        "acces": 40,
+        "dyn": null,
+        "vie": null,
+        "palier": "non mesuré",
+        "raison": false,
+        "identite": false,
+        "decouverte": false,
+        "signature": false
+      }
+    },
+    "29019": {
+      "avant": {
+        "nom": "Brest",
+        "population": 139619,
+        "uu": "29701",
+        "uuPop": 203750,
+        "acces": 98,
+        "dyn": 100,
+        "vie": 99,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      },
+      "apres": {
+        "nom": "Brest",
+        "population": 139619,
+        "uu": "29701",
+        "uuPop": 203750,
+        "acces": 98,
+        "dyn": 97,
+        "vie": 97,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      }
+    },
+    "35238": {
+      "avant": {
+        "nom": "Rennes",
+        "population": 225081,
+        "uu": "35701",
+        "uuPop": 371464,
+        "acces": 100,
+        "dyn": 100,
+        "vie": 100,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      },
+      "apres": {
+        "nom": "Rennes",
+        "population": 225081,
+        "uu": "35701",
+        "uuPop": 371464,
+        "acces": 100,
+        "dyn": 100,
+        "vie": 100,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      }
+    },
+    "54310": {
+      "avant": {
+        "nom": "Leménil-Mitry",
+        "population": 2,
+        "uu": null,
+        "uuPop": 2,
+        "acces": 65,
+        "dyn": 88,
+        "vie": 79,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      },
+      "apres": {
+        "nom": "Leménil-Mitry",
+        "population": 2,
+        "uu": null,
+        "uuPop": 2,
+        "acces": 65,
+        "dyn": null,
+        "vie": null,
+        "palier": "non mesuré",
+        "raison": false,
+        "identite": false,
+        "decouverte": false,
+        "signature": false
+      }
+    },
+    "81004": {
+      "avant": {
+        "nom": "Albi",
+        "population": 49714,
+        "uu": "81502",
+        "uuPop": 73911,
+        "acces": 92,
+        "dyn": 98,
+        "vie": 96,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      },
+      "apres": {
+        "nom": "Albi",
+        "population": 49714,
+        "uu": "81502",
+        "uuPop": 73911,
+        "acces": 92,
+        "dyn": 86,
+        "vie": 88,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      }
+    },
+    "86194": {
+      "avant": {
+        "nom": "Poitiers",
+        "population": 90240,
+        "uu": "86601",
+        "uuPop": 134397,
+        "acces": 98,
+        "dyn": 100,
+        "vie": 99,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      },
+      "apres": {
+        "nom": "Poitiers",
+        "population": 90240,
+        "uu": "86601",
+        "uuPop": 134397,
+        "acces": 98,
+        "dyn": 100,
+        "vie": 99,
+        "palier": "forte",
+        "raison": true,
+        "identite": true,
+        "decouverte": true,
+        "signature": true
+      }
+    }
+  },
+  "recherches": {
+    "etudiante-seule": {
+      "trioAvant": [
+        "Aubière",
+        "Betton",
+        "Angers"
+      ],
+      "trioApres": [
+        "Betton",
+        "Angers",
+        "Corenc"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Betton",
+        "Angers",
+        "Corenc"
+      ],
+      "pistesAvant": [
+        "Achenheim",
+        "Chenôve"
+      ],
+      "pistesApres": [
+        "Achenheim",
+        "Castelnau-le-Lez"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "63014",
+            "Forte présence étudiante"
+          ],
+          [
+            "35024",
+            "Forte présence étudiante"
+          ],
+          [
+            "49007",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "35024",
+            "Forte présence étudiante"
+          ],
+          [
+            "49007",
+            "Forte présence étudiante"
+          ],
+          [
+            "38126",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Betton",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Angers",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "arrêts de tram près du centre de la commune"
+        },
+        {
+          "nom": "Corenc",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "bien reliée par le train"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Aubière",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Betton",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Angers",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "arrêts de tram près du centre de la commune"
+        }
+      ]
+    },
+    "etudiante-taille-humaine": {
+      "trioAvant": [
+        "Jonage",
+        "Erstein",
+        "Arradon"
+      ],
+      "trioApres": [
+        "Arradon",
+        "La Roche-sur-Yon",
+        "Corte"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Arradon",
+        "La Roche-sur-Yon",
+        "Corte"
+      ],
+      "pistesAvant": [
+        "Baillargues",
+        "Treillières"
+      ],
+      "pistesApres": [
+        "Cluny",
+        "Mauguio"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "69279",
+            "Forte présence étudiante"
+          ],
+          [
+            "67130",
+            "Forte présence étudiante"
+          ],
+          [
+            "56003",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "56003",
+            "Forte présence étudiante"
+          ],
+          [
+            "85191",
+            "Forte présence étudiante"
+          ],
+          [
+            "2B096",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Arradon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "rivage marin à 1,4 km"
+        },
+        {
+          "nom": "La Roche-sur-Yon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "arrêts de bus près du centre de la commune"
+        },
+        {
+          "nom": "Corte",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "forêts et espaces naturels à proximité"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Jonage",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Erstein",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour une petite ville qui reste vraiment vivante.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        },
+        {
+          "nom": "Arradon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "rivage marin à 1,4 km"
+        }
+      ]
+    },
+    "etudiante-transports-vie-locale": {
+      "trioAvant": [
+        "Lyon",
+        "Paris",
+        "Talence"
+      ],
+      "trioApres": [
+        "Lyon",
+        "Strasbourg",
+        "Noyal-Châtillon-sur-Seiche"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Lyon",
+        "Strasbourg",
+        "Noyal-Châtillon-sur-Seiche"
+      ],
+      "pistesAvant": [
+        "Strasbourg",
+        "Ramonville-Saint-Agne"
+      ],
+      "pistesApres": [
+        "La Madeleine",
+        "Ramonville-Saint-Agne"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "69381",
+            "Forte présence étudiante"
+          ],
+          [
+            "75101",
+            "Forte présence étudiante"
+          ],
+          [
+            "33522",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "69381",
+            "Forte présence étudiante"
+          ],
+          [
+            "67482",
+            "Forte présence étudiante"
+          ],
+          [
+            "35206",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Lyon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "arrêts de métro près du centre de la commune"
+        },
+        {
+          "nom": "Strasbourg",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour s'installer dans une commune qui gagne des habitants.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Noyal-Châtillon-sur-Seiche",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Lyon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "arrêts de métro près du centre de la commune"
+        },
+        {
+          "nom": "Paris",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Talence",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "bien reliée par le train",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "population en croissance"
+        }
+      ]
+    },
+    "etudiante-bretagne": {
+      "trioAvant": [
+        "Betton",
+        "Bohars",
+        "Plescop"
+      ],
+      "trioApres": [
+        "Betton",
+        "Bohars",
+        "Séné"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Betton",
+        "Bohars",
+        "Séné"
+      ],
+      "pistesAvant": [
+        "Langueux",
+        "Cesson-Sévigné"
+      ],
+      "pistesApres": [
+        "Langueux",
+        "Cesson-Sévigné"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "35024",
+            "Forte présence étudiante"
+          ],
+          [
+            "29011",
+            "Forte présence étudiante"
+          ],
+          [
+            "56158",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "35024",
+            "Forte présence étudiante"
+          ],
+          [
+            "29011",
+            "Forte présence étudiante"
+          ],
+          [
+            "56243",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Betton",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Bohars",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "rivage marin à 3,8 km"
+        },
+        {
+          "nom": "Séné",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Betton",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Bohars",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "rivage marin à 3,8 km"
+        },
+        {
+          "nom": "Plescop",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        }
+      ]
+    },
+    "etudiante-nature-auvergne": {
+      "trioAvant": [
+        "Royat",
+        "Aurillac",
+        "Saint-Didier-en-Velay"
+      ],
+      "trioApres": [
+        "Royat",
+        "Aurillac",
+        "Pont-Salomon"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Royat",
+        "Aurillac",
+        "Pont-Salomon"
+      ],
+      "pistesAvant": [
+        "Montluçon",
+        "Arpajon-sur-Cère"
+      ],
+      "pistesApres": [
+        "Montluçon",
+        "Durtol"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "63308",
+            "Forte présence étudiante"
+          ],
+          [
+            "15014",
+            "Forte présence étudiante"
+          ],
+          [
+            "43177",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "63308",
+            "Forte présence étudiante"
+          ],
+          [
+            "15014",
+            "Forte présence étudiante"
+          ],
+          [
+            "43153",
+            "Présence étudiante intermédiaire"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Royat",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Aurillac",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "arrêts de bus près du centre de la commune"
+        },
+        {
+          "nom": "Pont-Salomon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, au grand air.",
+          "decouverte": "bien reliée par le train"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Royat",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Aurillac",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "arrêts de bus près du centre de la commune"
+        },
+        {
+          "nom": "Saint-Didier-en-Velay",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, au grand air.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        }
+      ]
+    },
+    "etudiante-retraite-calme": {
+      "trioAvant": [
+        "Niederhausbergen",
+        "Isneauville",
+        "Saint-Grégoire"
+      ],
+      "trioApres": [
+        "Niederhausbergen",
+        "Saint-Grégoire",
+        "Verson"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Niederhausbergen",
+        "Saint-Grégoire",
+        "Verson"
+      ],
+      "pistesAvant": [
+        "Saint-Genest-Lerpt",
+        "Sennecey-lès-Dijon"
+      ],
+      "pistesApres": [
+        "Camon",
+        "Lavérune"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "67326",
+            "Forte présence étudiante"
+          ],
+          [
+            "76377",
+            "Forte présence étudiante"
+          ],
+          [
+            "35278",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "67326",
+            "Forte présence étudiante"
+          ],
+          [
+            "35278",
+            "Forte présence étudiante"
+          ],
+          [
+            "14738",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Niederhausbergen",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Saint-Grégoire",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Verson",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "étés plus frais"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Niederhausbergen",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Isneauville",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Saint-Grégoire",
+          "couverture": "complete",
+          "reasons": [
+            "cadre calme et habitable",
+            "bon accès aux médecins",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        }
+      ]
+    },
+    "nature-calme": {
+      "trioAvant": [
+        "Doussard",
+        "Bagnères-de-Bigorre",
+        "Brando"
+      ],
+      "trioApres": [
+        "Doussard",
+        "Bagnères-de-Bigorre",
+        "Brando"
+      ],
+      "trioIdentique": true,
+      "cartesChangees": [],
+      "pistesAvant": [
+        "La Broque",
+        "Roquebillière"
+      ],
+      "pistesApres": [
+        "La Broque",
+        "Roquebillière"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "74104",
+            "Forte présence étudiante"
+          ],
+          [
+            "65059",
+            "Forte présence étudiante"
+          ],
+          [
+            "2B043",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "74104",
+            "Présence étudiante intermédiaire"
+          ],
+          [
+            "65059",
+            "Présence étudiante limitée"
+          ],
+          [
+            "2B043",
+            "Présence étudiante intermédiaire"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Doussard",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Bagnères-de-Bigorre",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "air de fond plus pur"
+        },
+        {
+          "nom": "Brando",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à 1,7 km"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Doussard",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Bagnères-de-Bigorre",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "air de fond plus pur"
+        },
+        {
+          "nom": "Brando",
+          "couverture": "complete",
+          "reasons": [
+            "forêts et espaces naturels à proximité",
+            "à l'écart des grandes infrastructures bruyantes"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à 1,7 km"
+        }
+      ]
+    },
+    "mer-soins": {
+      "trioAvant": [
+        "Le Relecq-Kerhuon",
+        "Bidart",
+        "Marseille"
+      ],
+      "trioApres": [
+        "Le Relecq-Kerhuon",
+        "Bidart",
+        "Marseille"
+      ],
+      "trioIdentique": true,
+      "cartesChangees": [],
+      "pistesAvant": [
+        "Lattes",
+        "Trignac"
+      ],
+      "pistesApres": [
+        "Lattes",
+        "Trignac"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "29235",
+            "Forte présence étudiante"
+          ],
+          [
+            "64125",
+            "Forte présence étudiante"
+          ],
+          [
+            "13201",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "29235",
+            "Forte présence étudiante"
+          ],
+          [
+            "64125",
+            "Forte présence étudiante"
+          ],
+          [
+            "13201",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Le Relecq-Kerhuon",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 900 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "forte présence étudiante"
+        },
+        {
+          "nom": "Bidart",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 600 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Marseille",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 900 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "arrêts de métro près du centre de la commune"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Le Relecq-Kerhuon",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 900 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "forte présence étudiante"
+        },
+        {
+          "nom": "Bidart",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 600 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Marseille",
+          "couverture": "complete",
+          "reasons": [
+            "rivage marin à 900 m",
+            "bon accès aux médecins"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "arrêts de métro près du centre de la commune"
+        }
+      ]
+    },
+    "vie-locale-petite-17": {
+      "trioAvant": [
+        "La Flotte",
+        "Saint-Martin-de-Ré",
+        "Jonzac"
+      ],
+      "trioApres": [
+        "La Flotte",
+        "Saint-Martin-de-Ré",
+        "Jonzac"
+      ],
+      "trioIdentique": true,
+      "cartesChangees": [
+        "Jonzac"
+      ],
+      "pistesAvant": [
+        "Rivedoux-Plage",
+        "Bourcefranc-le-Chapus"
+      ],
+      "pistesApres": [
+        "Rivedoux-Plage",
+        "Bourcefranc-le-Chapus"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "17161",
+            "Forte présence étudiante"
+          ],
+          [
+            "17369",
+            "Forte présence étudiante"
+          ],
+          [
+            "17197",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "17161",
+            "Présence étudiante intermédiaire"
+          ],
+          [
+            "17369",
+            "Présence étudiante intermédiaire"
+          ],
+          [
+            "17197",
+            "Présence étudiante intermédiaire"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "La Flotte",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        },
+        {
+          "nom": "Saint-Martin-de-Ré",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "rivage marin à 700 m"
+        },
+        {
+          "nom": "Jonzac",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour s'installer dans une commune qui gagne des habitants.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "La Flotte",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "à l'écart des grandes infrastructures bruyantes"
+        },
+        {
+          "nom": "Saint-Martin-de-Ré",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "rivage marin à 700 m"
+        },
+        {
+          "nom": "Jonzac",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "ville à taille humaine"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ]
+    },
+    "fraicheur-train": {
+      "trioAvant": [
+        "Isneauville",
+        "La Chapelle-d'Armentières",
+        "Drumettaz-Clarafond"
+      ],
+      "trioApres": [
+        "Isneauville",
+        "La Chapelle-d'Armentières",
+        "Drumettaz-Clarafond"
+      ],
+      "trioIdentique": true,
+      "cartesChangees": [],
+      "pistesAvant": [
+        "Melesse",
+        "Barr"
+      ],
+      "pistesApres": [
+        "Melesse",
+        "Barr"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "76377",
+            "Forte présence étudiante"
+          ],
+          [
+            "59143",
+            "Forte présence étudiante"
+          ],
+          [
+            "73103",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "76377",
+            "Forte présence étudiante"
+          ],
+          [
+            "59143",
+            "Forte présence étudiante"
+          ],
+          [
+            "73103",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "cartesApres": [
+        {
+          "nom": "Isneauville",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "La Chapelle-d'Armentières",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "forte présence étudiante"
+        },
+        {
+          "nom": "Drumettaz-Clarafond",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "forêts et espaces naturels à proximité"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Isneauville",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "La Chapelle-d'Armentières",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "forte présence étudiante"
+        },
+        {
+          "nom": "Drumettaz-Clarafond",
+          "couverture": "complete",
+          "reasons": [
+            "étés plus frais",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "forêts et espaces naturels à proximité"
+        }
+      ]
+    },
+    "comme-Brest": {
+      "trioAvant": [
+        "Sainte-Adresse",
+        "Brest",
+        "Saint-Mandrier-sur-Mer"
+      ],
+      "trioApres": [
+        "Brest",
+        "Sainte-Adresse",
+        "Jacou"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Brest",
+        "Sainte-Adresse",
+        "Jacou"
+      ],
+      "pistesAvant": [
+        "Valras-Plage",
+        "Le Pouliguen"
+      ],
+      "pistesApres": [
+        "Saint-Mandrier-sur-Mer",
+        "La Rochelle"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "76552",
+            "Forte présence étudiante"
+          ],
+          [
+            "29019",
+            "Forte présence étudiante"
+          ],
+          [
+            "83153",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "29019",
+            "Forte présence étudiante"
+          ],
+          [
+            "76552",
+            "Forte présence étudiante"
+          ],
+          [
+            "34120",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "arrêts de tram près du centre de la commune",
+        "forte présence étudiante",
+        "vie locale animée (commerces, marchés, associations)",
+        "à l'écart des grandes infrastructures bruyantes",
+        "proximité du littoral"
+      ],
+      "traitsApres": [
+        "arrêts de tram près du centre de la commune",
+        "forte présence étudiante",
+        "vie locale animée (commerces, marchés, associations)",
+        "à l'écart des grandes infrastructures bruyantes",
+        "proximité du littoral"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        },
+        {
+          "key": "calme_sonore",
+          "weight": 2
+        },
+        {
+          "key": "proximite_mer",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        },
+        {
+          "key": "calme_sonore",
+          "weight": 2
+        },
+        {
+          "key": "proximite_mer",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Brest",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Sainte-Adresse",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Jacou",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Sainte-Adresse",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Brest",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Saint-Mandrier-sur-Mer",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "population en croissance"
+        }
+      ]
+    },
+    "comme-Poitiers": {
+      "trioAvant": [
+        "Paris",
+        "Talence",
+        "Ramonville-Saint-Agne"
+      ],
+      "trioApres": [
+        "Ramonville-Saint-Agne",
+        "Rennes",
+        "Beaucouzé"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Ramonville-Saint-Agne",
+        "Rennes",
+        "Beaucouzé"
+      ],
+      "pistesAvant": [
+        "Lyon",
+        "Strasbourg"
+      ],
+      "pistesApres": [
+        "Strasbourg",
+        "Lyon"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "75104",
+            "Forte présence étudiante"
+          ],
+          [
+            "33522",
+            "Forte présence étudiante"
+          ],
+          [
+            "31446",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "31446",
+            "Forte présence étudiante"
+          ],
+          [
+            "35238",
+            "Forte présence étudiante"
+          ],
+          [
+            "49020",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "forte présence étudiante",
+        "arrêts de bus près du centre de la commune",
+        "population en croissance",
+        "vie locale animée (commerces, marchés, associations)"
+      ],
+      "traitsApres": [
+        "forte présence étudiante",
+        "arrêts de bus près du centre de la commune",
+        "population en croissance",
+        "vie locale animée (commerces, marchés, associations)"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "vie_etudiante",
+          "weight": 3
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "vie_etudiante",
+          "weight": 3
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Ramonville-Saint-Agne",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de bus près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Rennes",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Beaucouzé",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de bus près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": null
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Paris",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Talence",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de tram près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Ramonville-Saint-Agne",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de bus près du centre de la commune",
+            "population en croissance"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": null
+        }
+      ]
+    },
+    "comme-Rennes": {
+      "trioAvant": [
+        "Gentilly",
+        "Lyon",
+        "Lingolsheim"
+      ],
+      "trioApres": [
+        "Lingolsheim",
+        "Rennes",
+        "Lyon"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Lingolsheim",
+        "Rennes",
+        "Lyon"
+      ],
+      "pistesAvant": [
+        "Talence",
+        "Toulouse"
+      ],
+      "pistesApres": [
+        "Toulouse",
+        "Bègles"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "94037",
+            "Forte présence étudiante"
+          ],
+          [
+            "69389",
+            "Forte présence étudiante"
+          ],
+          [
+            "67267",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "67267",
+            "Forte présence étudiante"
+          ],
+          [
+            "35238",
+            "Forte présence étudiante"
+          ],
+          [
+            "69389",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "forte présence étudiante",
+        "arrêts de métro près du centre de la commune",
+        "bien reliée par le train",
+        "population en croissance"
+      ],
+      "traitsApres": [
+        "forte présence étudiante",
+        "arrêts de métro près du centre de la commune",
+        "bien reliée par le train",
+        "population en croissance"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "vie_etudiante",
+          "weight": 3
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "acces_transports",
+          "weight": 2
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "vie_etudiante",
+          "weight": 3
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "acces_transports",
+          "weight": 2
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Lingolsheim",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de tram près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": null
+        },
+        {
+          "nom": "Rennes",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Lyon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": null
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Gentilly",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Lyon",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de métro près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": null
+        },
+        {
+          "nom": "Lingolsheim",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "arrêts de tram près du centre de la commune",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour s'installer dans une commune qui gagne des habitants.",
+          "decouverte": null
+        }
+      ]
+    },
+    "comme-Albi": {
+      "trioAvant": [
+        "Chamalières",
+        "Mareil-Marly",
+        "Montpellier"
+      ],
+      "trioApres": [
+        "Chamalières",
+        "Pérols",
+        "Longueau"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Chamalières",
+        "Pérols",
+        "Longueau"
+      ],
+      "pistesAvant": [
+        "Villefranche-sur-Mer",
+        "Talence"
+      ],
+      "pistesApres": [
+        "Mareil-Marly",
+        "Nancy"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "63075",
+            "Forte présence étudiante"
+          ],
+          [
+            "78367",
+            "Forte présence étudiante"
+          ],
+          [
+            "34172",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "63075",
+            "Forte présence étudiante"
+          ],
+          [
+            "34198",
+            "Forte présence étudiante"
+          ],
+          [
+            "80489",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "forte présence étudiante",
+        "vie locale animée (commerces, marchés, associations)",
+        "arrêts de bus près du centre de la commune",
+        "à l'écart des sites industriels à risque"
+      ],
+      "traitsApres": [
+        "vie locale animée (commerces, marchés, associations)",
+        "arrêts de bus près du centre de la commune",
+        "forte présence étudiante",
+        "à l'écart des sites industriels à risque"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "vie_etudiante",
+          "weight": 3
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "vie_locale",
+          "weight": 3
+        },
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 2
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Chamalières",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Pérols",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de tram près du centre de la commune",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à 1 km"
+        },
+        {
+          "nom": "Longueau",
+          "couverture": "complete",
+          "reasons": [
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+          "decouverte": "population en croissance"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Chamalières",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de bus près du centre de la commune"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Mareil-Marly",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de tram près du centre de la commune"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Montpellier",
+          "couverture": "complete",
+          "reasons": [
+            "forte présence étudiante",
+            "vie locale animée (commerces, marchés, associations)",
+            "arrêts de tram près du centre de la commune"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ]
+    },
+    "comme-Annecy": {
+      "trioAvant": [
+        "Échirolles",
+        "Aubagne",
+        "Besançon"
+      ],
+      "trioApres": [
+        "Échirolles",
+        "Besançon",
+        "Montpellier"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Échirolles",
+        "Besançon",
+        "Montpellier"
+      ],
+      "pistesAvant": [
+        "Boucau",
+        "Montpellier"
+      ],
+      "pistesApres": [
+        "Avrillé",
+        "Aubagne"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "38151",
+            "Forte présence étudiante"
+          ],
+          [
+            "13005",
+            "Forte présence étudiante"
+          ],
+          [
+            "25056",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "38151",
+            "Forte présence étudiante"
+          ],
+          [
+            "25056",
+            "Forte présence étudiante"
+          ],
+          [
+            "34172",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "arrêts de bus près du centre de la commune",
+        "population en croissance",
+        "forte présence étudiante",
+        "forêts et espaces naturels à proximité"
+      ],
+      "traitsApres": [
+        "arrêts de bus près du centre de la commune",
+        "population en croissance",
+        "forte présence étudiante",
+        "forêts et espaces naturels à proximité"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "nature",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "nature",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Échirolles",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Besançon",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour s'installer dans une commune qui gagne des habitants.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Montpellier",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Échirolles",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Aubagne",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Besançon",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "population en croissance",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour s'installer dans une commune qui gagne des habitants.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        }
+      ]
+    },
+    "comme-Leménil-Mitry": {
+      "trioAvant": [
+        "Châtel-Saint-Germain",
+        "Saint-Clément-de-Rivière",
+        "Marseille"
+      ],
+      "trioApres": [
+        "Sadirac",
+        "Thurins",
+        "Marseille"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "Sadirac",
+        "Thurins",
+        "Marseille"
+      ],
+      "pistesAvant": [
+        "Saint-Pierre-la-Palud",
+        "Sucé-sur-Erdre"
+      ],
+      "pistesApres": [
+        "Montberon",
+        "Nesles-la-Vallée"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "57134",
+            "Forte présence étudiante"
+          ],
+          [
+            "34247",
+            "Forte présence étudiante"
+          ],
+          [
+            "13208",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "33363",
+            "Forte présence étudiante"
+          ],
+          [
+            "69249",
+            "Forte présence étudiante"
+          ],
+          [
+            "13208",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "à l'écart des sites industriels à risque",
+        "à l'écart des grandes infrastructures bruyantes",
+        "forte présence étudiante",
+        "bien reliée par le train"
+      ],
+      "traitsApres": [
+        "à l'écart des sites industriels à risque",
+        "à l'écart des grandes infrastructures bruyantes",
+        "bien reliée par le train"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 3
+        },
+        {
+          "key": "calme_sonore",
+          "weight": 2
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "acces_transports",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 3
+        },
+        {
+          "key": "calme_sonore",
+          "weight": 2
+        },
+        {
+          "key": "acces_transports",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Sadirac",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Thurins",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour une ville étudiante à taille humaine.",
+          "decouverte": "forte présence étudiante"
+        },
+        {
+          "nom": "Marseille",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "bien reliée par le train"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "hivers parmi les plus doux"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Châtel-Saint-Germain",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour vivre aux portes d'une grande ville, sans en habiter le centre.",
+          "decouverte": "population en croissance"
+        },
+        {
+          "nom": "Saint-Clément-de-Rivière",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Marseille",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des sites industriels à risque",
+            "à l'écart des grandes infrastructures bruyantes",
+            "forte présence étudiante"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à moins de 100 m"
+        }
+      ]
+    },
+    "comme-Rochefourchat": {
+      "trioAvant": [
+        "Bagnères-de-Bigorre",
+        "Doussard",
+        "Santa-Maria-di-Lota"
+      ],
+      "trioApres": [
+        "Bagnères-de-Bigorre",
+        "Doussard",
+        "Santa-Maria-di-Lota"
+      ],
+      "trioIdentique": true,
+      "cartesChangees": [],
+      "pistesAvant": [
+        "Seillans",
+        "Plainfaing"
+      ],
+      "pistesApres": [
+        "Seillans",
+        "Plainfaing"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "65059",
+            "Forte présence étudiante"
+          ],
+          [
+            "74104",
+            "Forte présence étudiante"
+          ],
+          [
+            "2B309",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "65059",
+            "Présence étudiante limitée"
+          ],
+          [
+            "74104",
+            "Présence étudiante intermédiaire"
+          ],
+          [
+            "2B309",
+            "Présence étudiante intermédiaire"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "à l'écart des grandes infrastructures bruyantes",
+        "à l'écart des sites industriels à risque",
+        "forêts et espaces naturels à proximité"
+      ],
+      "traitsApres": [
+        "à l'écart des grandes infrastructures bruyantes",
+        "à l'écart des sites industriels à risque",
+        "forêts et espaces naturels à proximité"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "calme_sonore",
+          "weight": 3
+        },
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 2
+        },
+        {
+          "key": "nature",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "calme_sonore",
+          "weight": 3
+        },
+        {
+          "key": "faible_exposition_industrielle",
+          "weight": 2
+        },
+        {
+          "key": "nature",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "Bagnères-de-Bigorre",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Doussard",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Santa-Maria-di-Lota",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à 3 km"
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "Bagnères-de-Bigorre",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne dans une commune qui reste animée.",
+          "decouverte": "étés plus frais"
+        },
+        {
+          "nom": "Doussard",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+          "decouverte": "vie locale animée (commerces, marchés, associations)"
+        },
+        {
+          "nom": "Santa-Maria-di-Lota",
+          "couverture": "complete",
+          "reasons": [
+            "à l'écart des grandes infrastructures bruyantes",
+            "à l'écart des sites industriels à risque",
+            "forêts et espaces naturels à proximité"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "rivage marin à 3 km"
+        }
+      ]
+    },
+    "comme-La Rochelle": {
+      "trioAvant": [
+        "La Rochelle",
+        "Marseille",
+        "Montpellier"
+      ],
+      "trioApres": [
+        "La Rochelle",
+        "Montpellier",
+        "Vannes"
+      ],
+      "trioIdentique": false,
+      "cartesChangees": [
+        "La Rochelle",
+        "Montpellier",
+        "Vannes"
+      ],
+      "pistesAvant": [
+        "Vannes",
+        "Caen"
+      ],
+      "pistesApres": [
+        "Marseille",
+        "Caen"
+      ],
+      "paliersComparaison": {
+        "avant": [
+          [
+            "17300",
+            "Forte présence étudiante"
+          ],
+          [
+            "13203",
+            "Forte présence étudiante"
+          ],
+          [
+            "34172",
+            "Forte présence étudiante"
+          ]
+        ],
+        "apres": [
+          [
+            "17300",
+            "Forte présence étudiante"
+          ],
+          [
+            "34172",
+            "Forte présence étudiante"
+          ],
+          [
+            "56260",
+            "Forte présence étudiante"
+          ]
+        ]
+      },
+      "traitsAvant": [
+        "arrêts de bus près du centre de la commune",
+        "forte présence étudiante",
+        "population en croissance",
+        "vie locale animée (commerces, marchés, associations)",
+        "proximité du littoral"
+      ],
+      "traitsApres": [
+        "arrêts de bus près du centre de la commune",
+        "population en croissance",
+        "vie locale animée (commerces, marchés, associations)",
+        "forte présence étudiante",
+        "proximité du littoral"
+      ],
+      "preferencesAvant": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        },
+        {
+          "key": "proximite_mer",
+          "weight": 2
+        }
+      ],
+      "preferencesApres": [
+        {
+          "key": "mobilite_quotidienne",
+          "weight": 3
+        },
+        {
+          "key": "croissance_demographique",
+          "weight": 2
+        },
+        {
+          "key": "vie_locale",
+          "weight": 2
+        },
+        {
+          "key": "vie_etudiante",
+          "weight": 2
+        },
+        {
+          "key": "proximite_mer",
+          "weight": 2
+        }
+      ],
+      "cartesApres": [
+        {
+          "nom": "La Rochelle",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "population en croissance",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Montpellier",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "population en croissance",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Vannes",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "population en croissance",
+            "vie locale animée (commerces, marchés, associations)"
+          ],
+          "identite": "Pour un quotidien tourné vers la mer, à un rythme plus posé.",
+          "decouverte": null
+        }
+      ],
+      "cartesAvant": [
+        {
+          "nom": "La Rochelle",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de bus près du centre de la commune",
+            "forte présence étudiante",
+            "population en croissance"
+          ],
+          "identite": "Pour la vie au bord de l'eau avec les services d'une vraie ville.",
+          "decouverte": "hivers parmi les plus doux"
+        },
+        {
+          "nom": "Marseille",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de métro près du centre de la commune",
+            "forte présence étudiante",
+            "population en croissance"
+          ],
+          "identite": "Pour un quotidien méditerranéen, les pieds près de l'eau.",
+          "decouverte": "bien reliée par le train"
+        },
+        {
+          "nom": "Montpellier",
+          "couverture": "complete",
+          "reasons": [
+            "arrêts de tram près du centre de la commune",
+            "forte présence étudiante",
+            "population en croissance"
+          ],
+          "identite": "Pour des hivers parmi les plus doux du pays.",
+          "decouverte": null
+        }
+      ]
+    }
+  }
+}
