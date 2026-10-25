@@ -1,0 +1,453 @@
+{
+ "schema": "FUT-109 · géographie des champs ADEME data_communes et traitement des communes du référentiel modifiées après le 01/01/2024",
+ "regle": "scripts/lib/perimetre-ademe.mjs",
+ "sources": {
+  "ademe": {
+   "dataset": "https://data.ademe.fr/data-fair/api/v1/datasets/8ggfo546-mtjxy4lbqxcl462",
+   "recupere": "2026-10-24T13:59:02.099Z",
+   "sha256": "35ab132d0ce791870d1735c01f54bd9b36d5409470ee58614fb272f52fe436f8"
+  },
+  "pl2022": {
+   "url": "https://www.insee.fr/fr/statistiques/8290591",
+   "sha256": "bd3a4b802d58cdbca989383e244cda5f66d80200169dd3feb6e5b5fbc648e4e0"
+  },
+  "referentiel": {
+   "fichier": "data/population-referentiel-cog2025.json",
+   "sha256": "df50cc7f1038130f78dbd4aa08c56aea4817e534a7eaafb80c88e9b51a9d8913"
+  }
+ },
+ "geographies": {
+  "lignes": "2024-01-01",
+  "recente": "2025-01-01"
+ },
+ "champs": {
+  "apl_aux_medecins_generalistes": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 1
+  },
+  "moyenne_annuelle_de_concentration_de_pm25_ugm3": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.995
+  },
+  "moyenne_annuelle_de_concentration_de_no2_ugm3": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.995
+  },
+  "part_de_la_population_eloignee_de_plus_de_20_minutes_dau_moins_un_des_services": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "ift_t": {
+   "geographie": "2024-01-01",
+   "absorbees": "63/64",
+   "nouvelles": "45/46",
+   "remplissage": 0.989
+  },
+  "ift_h": {
+   "geographie": "2024-01-01",
+   "absorbees": "63/64",
+   "nouvelles": "45/46",
+   "remplissage": 0.989
+  },
+  "p_sau": {
+   "geographie": "2024-01-01",
+   "absorbees": "63/64",
+   "nouvelles": "45/46",
+   "remplissage": 0.989
+  },
+  "p_bio": {
+   "geographie": "2024-01-01",
+   "absorbees": "49/64",
+   "nouvelles": "37/46",
+   "remplissage": 0.733
+  },
+  "niveau_de_centres_dequipements_et_de_services_des_communes_2021": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "densite_de_population_2022": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "taux_de_logements_sociaux_percent": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.995
+  },
+  "nombre_de_logements_sociaux_rpls_2023": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "taux_devolution_annuel_des_65_ans_et_plus_20162022": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.996
+  },
+  "nombre_de_logements_vacants_2022": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "part_des_logements_vacants_2022": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "moyenne_annuelle_de_concentration_de_pm10_ugm3": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.995
+  },
+  "moyenne_annuelle_de_concentration_de_o3_ugm3": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.995
+  },
+  "mediane_du_revenu_disponible_par_uc_2021": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "taux_dinferiorite_de_la_mediane_de_la_commune_par_rapport_a_la_mediane_nationale_percent": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "44/46",
+   "remplissage": 0.896
+  },
+  "nombre_dincendies": {
+   "geographie": null,
+   "absorbees": "4/64",
+   "nouvelles": "7/46",
+   "remplissage": 0.138
+  },
+  "tauxboisement": {
+   "geographie": "2024-01-01",
+   "absorbees": "63/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.991
+  },
+  "population_totale_2021": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 1
+  },
+  "population_au_dernier_recensement_2022": {
+   "geographie": "2025-01-01",
+   "absorbees": "0/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.997
+  },
+  "surfcom2024": {
+   "geographie": "2024-01-01",
+   "absorbees": "64/64",
+   "nouvelles": "46/46",
+   "remplissage": 0.998
+  }
+ },
+ "preuves": {
+  "population2022": "46/46 communes nouvelles du 2025-01-01 : population_au_dernier_recensement_2022 = somme des populations légales 2022 de leurs communes",
+  "densite2022": {
+   "constat": "46/46 : la surface implicite (population 2022 ÷ densité 2022) est la surface fusionnée (somme des surfcom2024), pas celle de l'ancienne commune",
+   "rapportSurfaceFusionnee": [
+    0.966,
+    1.01
+   ],
+   "rapportAncienneSurface": [
+    1.015,
+    22.591
+   ],
+   "bandeNationaleP01P99": [
+    0.926,
+    1.033
+   ]
+  }
+ },
+ "communes": {
+  "12218": {
+   "traitement": "rattachement",
+   "depuis": "12076",
+   "ligne": false,
+   "valeurs": {
+    "apl_aux_medecins_generalistes": 5.231,
+    "moyenne_annuelle_de_concentration_de_pm25_ugm3": 6.883722611,
+    "moyenne_annuelle_de_concentration_de_no2_ugm3": 2.715903707,
+    "ift_t": 0.32,
+    "ift_h": 0.11,
+    "p_sau": 38.84,
+    "p_bio": 15.5,
+    "taux_de_logements_sociaux_percent": 1
+   }
+  },
+  "14408": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "14581": {
+   "traitement": "rattachement",
+   "depuis": "14011",
+   "ligne": false,
+   "valeurs": {
+    "apl_aux_medecins_generalistes": 2.699,
+    "moyenne_annuelle_de_concentration_de_pm25_ugm3": 7.95853518,
+    "moyenne_annuelle_de_concentration_de_no2_ugm3": 5.314204372,
+    "ift_t": 2.92,
+    "ift_h": 1.11,
+    "p_sau": 74.39,
+    "p_bio": 3.82,
+    "taux_de_logements_sociaux_percent": 0
+   }
+  },
+  "14743": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "15031": {
+   "traitement": "abstention",
+   "ligne": false
+  },
+  "15035": {
+   "traitement": "abstention",
+   "ligne": false
+  },
+  "15047": {
+   "traitement": "abstention",
+   "ligne": false
+  },
+  "15141": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "15171": {
+   "traitement": "abstention",
+   "ligne": false
+  },
+  "16023": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "16198": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "16393": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "17268": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "19248": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "22147": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "22237": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "22241": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "23149": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "25223": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "25364": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "25390": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "26289": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "28319": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "30329": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "32365": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "33008": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "34144": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "39434": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "39576": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "42084": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "42217": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "46172": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "49126": {
+   "traitement": "rattachement",
+   "depuis": "49069",
+   "ligne": false,
+   "valeurs": {
+    "apl_aux_medecins_generalistes": 2.784,
+    "moyenne_annuelle_de_concentration_de_pm25_ugm3": 8.5593956,
+    "moyenne_annuelle_de_concentration_de_no2_ugm3": 5.239053289,
+    "ift_t": 2.17,
+    "ift_h": 0.59,
+    "p_sau": 67.89,
+    "p_bio": 10.38,
+    "taux_de_logements_sociaux_percent": 7
+   }
+  },
+  "51485": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "59006": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "61275": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "62447": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "63109": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "69114": {
+   "traitement": "rattachement",
+   "depuis": "69159",
+   "ligne": false,
+   "valeurs": {
+    "apl_aux_medecins_generalistes": 3.351,
+    "moyenne_annuelle_de_concentration_de_pm25_ugm3": 8.732293129,
+    "moyenne_annuelle_de_concentration_de_no2_ugm3": 8.854518366,
+    "ift_t": 6.14,
+    "ift_h": 0.34,
+    "p_sau": 47.58,
+    "p_bio": 8.03,
+    "taux_de_logements_sociaux_percent": 2
+   }
+  },
+  "70152": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "70180": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "71566": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "72155": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "72382": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "76455": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "79307": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "80155": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "85076": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "85223": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "88321": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "93066": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "01187": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "02589": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "08439": {
+   "traitement": "abstention",
+   "ligne": true
+  },
+  "09088": {
+   "traitement": "abstention",
+   "ligne": true
+  }
+ }
+}

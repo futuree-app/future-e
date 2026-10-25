@@ -64,10 +64,10 @@ async function main() {
   for (const row of rows) {
     const insee = String(row.code_commune_insee ?? '').padStart(5, '0');
     if (insee.length !== 5) continue;
-    const population =
-      row.population_totale_2021 != null ? Number(row.population_totale_2021) : null;
-    const densite =
-      row.densite_de_population_2022 != null ? Number(row.densite_de_population_2022) : null;
+    // Une cellule vide est une absence : `Number("")` vaudrait 0 (FUT-109).
+    const lire = (v) => (v == null || String(v).trim() === '' ? null : Number(v));
+    const population = lire(row.population_totale_2021);
+    const densite = lire(row.densite_de_population_2022);
     out[insee] = {
       population: Number.isNaN(population) ? null : population,
       densite: Number.isNaN(densite) ? null : densite,

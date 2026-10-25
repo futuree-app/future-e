@@ -187,6 +187,23 @@ function matchTier(compatibility: number): string {
   return "Correspondance partielle";
 }
 
+// FUT-109 : un palier ne se dit que d'une commune dont toutes les priorités déclarées sont mesurées. Sinon
+// la carte ne promet rien : elle dit ce qui n'est pas mesuré ici, sans chiffre ni seuil.
+function palierCarte(r: MatchResult): { libelle: string; classe: string } {
+  const etat = r.couverture?.etat ?? "complete";
+  if (etat === "partielle") return { libelle: "Priorités en partie mesurées", classe: "text-muted" };
+  if (etat === "aucune" || etat === "sans_priorite") return { libelle: "À explorer", classe: "text-muted" };
+  return { libelle: matchTier(r.compatibility), classe: matchTierClass(r.compatibility) };
+}
+
+/** « Non mesuré ici : un bon accès aux soins et l'accès au train et aux gares. » */
+function ligneNonMesure(r: MatchResult): string | null {
+  const n = r.couverture?.nonMesurees ?? [];
+  if (!n.length) return null;
+  const liste = n.length === 1 ? n[0] : `${n.slice(0, -1).join(", ")} et ${n.at(-1)}`;
+  return `Non mesuré ici : ${liste}.`;
+}
+
 // Couleur du label de palier : la force se LIT à la couleur. « Forte » porte
 // l'accent chaud (le plus fort de la page) ; « Bonne » un vert calme et positif
 // mais distinct ; « partielle » s'atténue. Une bonne correspondance ne doit pas
@@ -215,9 +232,11 @@ function distinctId(): string {
 
 // Fallback déterministe si la synthèse IA est indisponible (502). On reste
 // qualitatif, on s'appuie sur ce que le moteur a déjà produit.
-function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean): string {
+function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], exploration: boolean, couverture?: { etat: string; message: string | null }): string {
   const inondation = repliInondation(parsed.preferences, results, exploration);
   if (inondation) return inondation;
+  // FUT-109 : sans priorité mesurée partout, le repli ne raconte ni arbitrage ni correspondance : il dit l'exploration.
+  if (couverture && couverture.etat !== "complete" && couverture.message) return `${parsed.reformulation} ${couverture.message}`;
   const reasons = Array.from(
     new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
   ).slice(0, 3);
@@ -508,6 +527,7 @@ export function OuVivreClient() {
         perimetre?: string[];
         orientation?: string[];
         exploration?: boolean;
+        couverture?: string;
       },
     ) => {
       setSynthesis("");
@@ -536,8 +556,9 @@ export function OuVivreClient() {
               expoIndustrielle: r.expoIndustrielle, // récit sites industriels, gaté côté route par critère demandé
               heritageIndustriel: r.heritageIndustriel, // récit héritage industriel, gaté côté route par heritageIntent
               inondation: r.inondation ?? null, // FUT-129 : faits (sinistres 1995-2021, plans), gatés côté route
+              prioritesNonMesurees: r.couverture?.nonMesurees ?? [], // FUT-109 : jamais présentées comme satisfaites
             })),
-            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false },
+            outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false, couverture: outcomeMeta.couverture ?? "complete" },
             perimetre: outcomeMeta.perimetre ?? [],
             orientation: outcomeMeta.orientation ?? [],
           }),
@@ -558,7 +579,7 @@ export function OuVivreClient() {
         if (seq === runSeq.current) capture("life_synthesis_shown");
       } catch {
         if (seq !== runSeq.current) return;
-        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false));
+        setSynthesis(fallbackSynthesis(p, top, outcomeMeta.exploration ?? false, { etat: outcomeMeta.couverture ?? "complete", message: outcomeMeta.message }));
         capture("life_synthesis_fallback");
       } finally {
         if (seq === runSeq.current) setSynthesizing(false);
@@ -621,6 +642,7 @@ export function OuVivreClient() {
       perimetre: matchOutcome.perimetreDur ?? matchOutcome.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label),
       orientation: matchOutcome.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label),
       exploration: matchOutcome.inondation?.exploration ?? false,
+      couverture: matchOutcome.couverture ?? "complete",
     });
   }, [parsed, submittedText, streamSynthesis]);
 
@@ -1184,6 +1206,9 @@ export function OuVivreClient() {
               {/* FUT-129 : la seule demande classable était l'inondation. Pas de palmarès : on dit l'ordre. */}
               {outcome?.inondation?.exploration ? (
                 <>{outcome.inondation.ordre}</>
+              ) : /* FUT-109 : une couverture incomplète ne promet ni correspondance ni compromis établi. */
+              outcome?.couverture && outcome.couverture !== "complete" && outcome.message ? (
+                <>{outcome.message}</>
               ) : /* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */
               motCardinal(top.length) ? (
                 <>
@@ -1221,9 +1246,12 @@ export function OuVivreClient() {
                       carte à l'autre). Remplace la longue liste de raisons qui se répétait. */}
                   {/* FUT-129 : en exploration, aucun palier de correspondance : rien n'a été classé sur la demande. */}
                   {!outcome?.inondation?.exploration && (
-                    <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${matchTierClass(r.compatibility)}`}>
-                      {matchTier(r.compatibility)}{outcome?.inondation ? " sur vos autres critères" : ""}
+                    <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${palierCarte(r).classe}`}>
+                      {palierCarte(r).libelle}{outcome?.inondation && r.couverture?.etat !== "aucune" ? " sur vos autres critères" : ""}
                     </p>
+                  )}
+                  {ligneNonMesure(r) && (
+                    <p className="mt-1.5 text-[12px] leading-[1.5] text-muted">{bindOrphans(ligneNonMesure(r)!)}</p>
                   )}
                   {/* LA DURÉE ESTIMÉE. Ce n'est pas un temps réel : le moteur de routage calcule sur son
                       graphe, sans trafic, sans stationnement, sans attente. La phrase le dit (« environ »),

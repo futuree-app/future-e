@@ -7,6 +7,7 @@
 // nature). Leur donner le même type obligerait leur évaluateur à rouvrir un index au runtime, et les
 // deux moteurs cesseraient de lire la même chose.
 import { createHash } from "node:crypto";
+import { millesimePopulation, millesimesAgglomeration, SOURCE_POPULATION } from "./population-millesime.ts";
 
 export type ResolutionMetadata = {
   // L'empreinte de l'ENTRÉE : label brut + contexte territorial + type attendu + version du résolveur.
@@ -74,7 +75,11 @@ export type ResolvedSizeReference =
       // FUT-8 : la population de la COMMUNE de référence, pour « plus petite que la commune de Lyon ».
       // `null` = inconnue : la comparaison entre communes ne se fait pas (jamais de faux verdict).
       communePopulation: number | null;
+      // Le millésime le plus récent de `comparisonPopulation`. FUT-109 : une agglomération peut en réunir deux
+      // (`populationYears`, du plus ancien au plus récent) ; la commune de référence a le sien.
       populationYear: number;
+      populationYears?: number[];
+      communePopulationYear?: number;
       populationKind: "urban_unit" | "isolated_commune";
       source: "commune_index" | "plm_table";
       meta: ResolutionMetadata;
@@ -103,8 +108,9 @@ export type PlaceDirectory = {
 // puis BAN) et il CONTRÔLE. Un inputHash d'hier ne dit donc plus la même chose : la version le déclare.
 export const RESOLVER_VERSION = "resolve-2";
 // L'année de la population de l'index (INSEE, millésime 2021 : cf. scripts/populate-*, croissance
-// 2015-2021). Vérifiée contre l'index, jamais supposée.
-export const INDEX_POPULATION_YEAR = 2021;
+// 2015-2021). Vérifiée contre l'index, jamais supposée. FUT-109 : vaut pour toutes les communes, sauf celles
+// dont le territoire ou le code a changé depuis la géographie de la source (cf. population-millesime.ts).
+export const INDEX_POPULATION_YEAR = SOURCE_POPULATION.millesime;
 
 export function normalizeName(s: string): string {
   return s
@@ -205,15 +211,18 @@ export function resolveSizeReference(
     // donne la population communale (somme des arrondissements) et l'unité urbaine parente.
     const plm = dir.plmByName(normalizeName(label));
     if (plm && plm.uuPop != null) {
+      const populationYears = millesimesAgglomeration(plm.uu);
       return {
         status: "resolved", originalLabel: label,
         canonicalLabel: label.trim().charAt(0).toUpperCase() + label.trim().slice(1),
         urbanUnitCode: plm.uu, comparisonPopulation: plm.uuPop, communePopulation: plm.communePop ?? null,
-        populationYear: INDEX_POPULATION_YEAR, populationKind: "urban_unit", source: "plm_table", meta: m,
+        populationYear: populationYears.at(-1)!, populationYears, communePopulationYear: INDEX_POPULATION_YEAR,
+        populationKind: "urban_unit", source: "plm_table", meta: m,
       };
     }
     return { status: "unresolved", originalLabel: label, reason: "no_result", meta: m };
   }
+  const populationYears = millesimesAgglomeration(hit.uu, hit.insee);
   return {
     status: "resolved",
     originalLabel: label,
@@ -221,7 +230,9 @@ export function resolveSizeReference(
     urbanUnitCode: hit.uu,
     comparisonPopulation: hit.tailleVille,
     communePopulation: hit.population ?? null,
-    populationYear: INDEX_POPULATION_YEAR,
+    populationYear: populationYears.at(-1)!,
+    populationYears,
+    communePopulationYear: millesimePopulation(hit.insee),
     populationKind: hit.uu ? "urban_unit" : "isolated_commune",
     source: "commune_index",
     meta: m,

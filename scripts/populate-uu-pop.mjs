@@ -71,6 +71,9 @@ async function main() {
       "récit « taille vécue / est-ce une grande ville ? » à l'échelle de l'agglomération, pas de la commune",
     limite:
       "UNITÉ URBAINE (continuité du bâti), PAS aire d'attraction des villes (AAV) — ne pas dire « aire urbaine » ; uu_pop partielle si des communes du groupe ont une population nulle",
+    // FUT-109 : la somme suit le millésime de chaque commune. Ne jamais la dater « 2021 » sans vérifier.
+    millesimes:
+      "somme de populations communales 2021, sauf les communes reprises des populations de référence Insee 2023 (data/population-referentiel-cog2025.json) : une UU qui en compte une mêle 2021 et 2023 (liste : src/lib/population-millesimes.generated.ts, MILLESIMES_UNITES_URBAINES)",
   };
   meta.approximations = meta.approximations ?? [];
   if (!meta.approximations.some((a) => a.startsWith("uu_pop"))) {

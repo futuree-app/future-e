@@ -12,6 +12,9 @@
  *                                      lat/lon embarqués (col01/col02).
  *   - data/communes-population.json  : cache population/densité (optionnel ;
  *                                      voir scripts/fetch-communes-population.mjs).
+ *   - data/population-referentiel-cog2025.json : populations au grain du COG 2025 pour les
+ *                                      communes que la source 2021 ne couvre pas à ce grain
+ *                                      (FUT-109, scripts/population/construire-referentiel.mjs).
  *
  * Sortie :
  *   - data/comparateur-index.json    : { meta, communes: [...] }
@@ -25,6 +28,10 @@
  */
 
 import { lireMer, ajouterMer } from './lib/mer-index.mjs';
+import { appliquerCorrections } from './lib/population-grain.mjs';
+import { pressionAgricole } from './lib/pression-agricole.mjs';
+import { appliquerPerimetre } from './lib/perimetre-ademe.mjs';
+import { emploiArrondissement } from './lib/emploi-arrondissements.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -83,34 +90,6 @@ const DEPT_TO_REGION = {
 // (FUT-33, 02/10/2026 : l'ancienne distance à une liste de villes côtières est retirée ; la vérité littorale
 // vient de data/mer, ajoutée en fin de construction par scripts/lib/mer-index.mjs.)
 
-
-// ── Pression agricole / phytosanitaire (V1.6) ───────────────────────────────
-// pression = intensité de traitement (IFT) × prévalence agricole (part SAU).
-// Une commune très traitée mais peu agricole (ville avec une vigne) a une
-// pression modérée ; une commune très agricole et très traitée (Champagne) max.
-// C'est une PRESSION territoriale, pas une exposition des habitants.
-function lerpAnchors(anchors, x) {
-  if (x == null) return null;
-  if (x <= anchors[0][0]) return anchors[0][1];
-  const last = anchors[anchors.length - 1];
-  if (x >= last[0]) return last[1];
-  for (let i = 1; i < anchors.length; i++) {
-    if (x <= anchors[i][0]) {
-      const [x0, y0] = anchors[i - 1];
-      const [x1, y1] = anchors[i];
-      return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0);
-    }
-  }
-  return last[1];
-}
-const IFT_INTENSITY = [[0, 0], [1, 15], [2, 35], [3.5, 55], [6, 80], [10, 95], [16, 100]];
-const SAU_PREVALENCE = [[0, 0.25], [5, 0.45], [15, 0.7], [30, 0.9], [50, 1]];
-function pressionAgricole(ift_t, p_sau) {
-  if (ift_t == null) return null;
-  const intensity = lerpAnchors(IFT_INTENSITY, ift_t);
-  const prev = lerpAnchors(SAU_PREVALENCE, p_sau ?? 0);
-  return Math.round(intensity * prev);
-}
 
 function deptFromInsee(insee) {
   if (insee.startsWith('2A') || insee.startsWith('2B')) return insee.slice(0, 2);
@@ -231,9 +210,10 @@ async function main() {
       densite: pop.densite ?? null,
       altitude: altMap[insee] ?? null, // m NGF, centroïde IGN RGE ALTI (cf. populate-communes-altitude.js)
       // Viabilité du bassin d'emploi (ZE2020 héritée). taille/diversite = 0–100.
+      // FUT-109 : un arrondissement PLM a la zone d'emploi de sa ville (scripts/lib/emploi-arrondissements.mjs).
       emploi: emploiMap[insee]
         ? { ze: emploiMap[insee].ze, taille: emploiMap[insee].taille, diversite: emploiMap[insee].diversite }
-        : null,
+        : emploiArrondissement(insee, emploiMap),
       clim,
       // Santé environnementale + vivabilité (scorables nationalement)
       viv: {
@@ -364,6 +344,17 @@ async function main() {
   }
   console.log(`Pression climatique éco : ${peMarquee} marquée, ${peModeree} modérée (seuils brut p70=${PE_MODEREE.toFixed(3)} p90=${PE_MARQUEE.toFixed(3)}).`);
 
+  // FUT-109 : la population ADEME 2021 (géographie au 01/01/2024) n'est pas au grain du référentiel (COG 2025)
+  // pour les communes au territoire ou au code modifié depuis (rétablissements du 01/01/2024 compris).
+  // Référentiel versionné, règle dans scripts/lib/population-grain.mjs.
+  const referentielPop = JSON.parse(await fs.readFile(path.join(root, 'data', 'population-referentiel-cog2025.json'), 'utf8'));
+  const grain = appliquerCorrections(communes, referentielPop.communes);
+  console.log(`Population au grain : ${grain.corrigees} communes reprises (Insee 2023), ${grain.absentes} sans valeur officielle.`);
+  // FUT-109 : les indicateurs ADEME publiés dans la géographie du 01/01/2024 ne décrivent pas une commune au
+  // territoire modifié depuis (data/perimetre-ademe-cog2025.json, scripts/lib/perimetre-ademe.mjs).
+  const perimetreAdeme = JSON.parse(await fs.readFile(path.join(root, 'data', 'perimetre-ademe-cog2025.json'), 'utf8'));
+  appliquerPerimetre(communes, perimetreAdeme, pressionAgricole);
+
   const withPop = communes.filter((c) => c.population != null).length;
   const meta = {
     generatedScenario: SCENARIO,
@@ -376,7 +367,7 @@ async function main() {
     vivSource: 'ADEME data_communes (air de fond, APL médecins, éloignement services)',
     percentile: 'ascendant 0–100 sur la France métropolitaine (0 = plus faible valeur)',
     approximations: [
-      'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022)',
+      'population/densité : ADEME data_communes (population_totale_2021, densite_de_population_2022, géographie au 01/01/2024) ; population 2021 partout, sauf les communes hors grain du COG 2025 : populations de référence Insee 2023 (data/population-referentiel-cog2025.json). Indicateurs ADEME : densité, éloignement et centralité au COG 2025 ; APL, air et pression agricole au 01/01/2024, non lus pour une commune au territoire modifié depuis, rattachés pour un changement de code (data/perimetre-ademe-cog2025.json, FUT-109)',
       'altitude : centroïde de la commune via IGN RGE ALTI (Géoplateforme). Sous-estime une commune de vallée étendue (centroïde en fond de vallée).',
       'emploi : viabilité du bassin (taille + diversité A38) à la maille ZE2020 INSEE, héritée par commune. Flores fin 2024, salarié uniquement (sous-estime agriculture/indépendants).',
       'pression_eco : pression climatique sur l\'économie locale (NARRATIF, hors score). Σ part_secteur(ZE) × sensibilité × aléa(pct). AZ = agri+forêt (sécheresse/feu) ; IZ = proxy tourisme (estival=chaleur en plaine, montagne=neige en altitude, proxy faible). Ne mesure PAS la capacité d\'adaptation. Paliers par percentiles nationaux (modérée p70, marquée p90).',
