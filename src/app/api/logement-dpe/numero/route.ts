@@ -2,6 +2,7 @@ import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { findDpeByNumero } from "@/lib/dpe";
 import { normaliserNumeroDpe, rapprocher } from "@/lib/dpe-rapprochement";
+import { grainDpe } from "@/lib/dpe-grain";
 
 export const dynamic = "force-dynamic";
 
@@ -60,10 +61,15 @@ export async function POST(req: Request) {
     { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
   );
 
+  // LE GRAIN VOYAGE AVEC LA FICHE (FUT-74, D2). Le numéro d'un DPE d'immeuble existe : répondre
+  // « introuvable » enverrait chercher une faute de frappe. La fiche est donc montrée, comme celle du
+  // bâtiment, et elle n'est jamais rattachable, quelle que soit l'adresse.
+  const grain = grainDpe(trouve.dpe);
   return Response.json({
     status: "trouve",
     niveau: rapprochement.niveau,
-    attachable: rapprochement.attachable,
+    grain,
+    attachable: rapprochement.attachable && grain === "logement",
     confirmationRequise: rapprochement.confirmationRequise,
     // L'ADRESSE ENREGISTRÉE À L'ADEME VOYAGE AVEC LE DIAGNOSTIC, toujours, y compris quand elle
     // coïncide avec celle du dossier. C'est elle qui permet au lecteur de voir qu'il s'est trompé

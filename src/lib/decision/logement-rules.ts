@@ -237,7 +237,9 @@ const ruleDiagnosticNonAttribue: DecisionRule = {
       "obtenir_document",
       GESTES.diagnostic_adresse[bucket(p, f)],
       "Diagnostic non attribué",
-      "Un diagnostic généré à l'immeuble ne décrit pas un logement en particulier.",
+      // FUT-74 : « généré à l'immeuble » désignait le DPE de l'immeuble, alors que l'ADEME appelle ainsi
+      // le DPE d'un appartement établi à partir des données de l'immeuble, qui décrit bien ce logement-là.
+      "Le diagnostic de l'immeuble entier ne décrit pas un logement en particulier.",
     ));
   },
 };

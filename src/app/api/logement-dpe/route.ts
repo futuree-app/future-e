@@ -7,6 +7,7 @@ import {
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { findDpeByNumero, getDpeCandidatesByBanId } from "@/lib/dpe";
 import { normaliserNumeroDpe, rapprocher } from "@/lib/dpe-rapprochement";
+import { refusDAttribution } from "@/lib/dpe-grain";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +112,14 @@ export async function POST(req: Request) {
       return Response.json({ error: "DPE_NOT_AT_ADDRESS" }, { status: 422 });
     }
   }
+
+  // SEUL UN DIAGNOSTIC DE LOGEMENT DEVIENT CELUI DU LOGEMENT (FUT-74). Le contrôle porte sur la fiche
+  // relue à la source, quelle que soit sa provenance : la liste de l'adresse ne propose plus le DPE de
+  // l'immeuble, et la saisie par numéro ne le rattache pas, mais le serveur ne présume ni de l'un ni de
+  // l'autre. Un DPE d'immeuble retenu donnait sa classe au logement jusque dans le moteur ; un grain
+  // indéterminé n'est la preuve de rien.
+  const refus = refusDAttribution(dpe);
+  if (refus) return Response.json(refus, { status: 422 });
 
   const fields = buildDpeSelectionFields(body.status, dpe, new Date().toISOString());
   const updated = await updateOwnedAddressDossier(user.id, body.dossierId, fields);
