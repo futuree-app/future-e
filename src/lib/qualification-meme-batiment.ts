@@ -27,7 +27,8 @@ import { grainDpe } from "./dpe-grain.ts";
 
 /**
  * - `candidats` : au moins un diagnostic de logement est enregistré à une autre adresse du bâtiment ;
- * - `aucun` : le bâtiment est identifié, les deux jeux ADEME ont répondu, aucun diagnostic de logement ;
+ * - `aucun` : le bâtiment est identifié, les deux jeux ADEME ont répondu en entier (non tronqués), aucun
+ *   diagnostic de logement ;
  * - `sans_objet` : le référentiel ne désigne pas un bâtiment unique, le dossier ne cherchera pas ;
  * - `non_verifie` : une source n'a pas répondu, ou trop tard. On ne sait pas.
  */
@@ -52,7 +53,9 @@ export function etatMemeBatiment(
   if (!recherche) return "non_verifie";
   // Un candidat LU est établi, même si l'autre jeu est tombé ou si la page est tronquée.
   if (recherche.candidates.some((c) => grainDpe(c) === "logement")) return "candidats";
-  return recherche.status === "unavailable" ? "non_verifie" : "aucun";
+  // L'absence ne s'établit que sur une liste COMPLÈTE : une panne ou une page tronquée ne disent pas ce que
+  // contient la partie non lue (revue du 27/10/2026 : immeuble seul lu, liste tronquée → « aucun »).
+  return recherche.status === "unavailable" || recherche.tronque ? "non_verifie" : "aucun";
 }
 
 /**

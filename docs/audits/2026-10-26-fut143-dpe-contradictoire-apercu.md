@@ -38,9 +38,9 @@ Zéro échec. Sur 47 adresses sans DPE exact : 2 ont des candidats de logement a
 | état | condition | texte |
 |---|---|---|
 | `candidats` | ≥ 1 DPE **de logement** lu à une autre adresse (même si un jeu ADEME est tombé ou la page tronquée) | ligne « Autres adresses du même bâtiment · diagnostics à vérifier » ; « Des diagnostics de logements le sont néanmoins à d'autres adresses du même bâtiment : le dossier vous les présentera, à vérifier avant d'en retenir un pour ce logement. » |
-| `aucun` | bâtiment unique, deux jeux ADEME répondus, aucun DPE de logement (immeuble seul compris) | « Sans diagnostic, ce dossier ne pourra qualifier… » + « la plupart des adresses » |
+| `aucun` | bâtiment unique, deux jeux ADEME répondus **en entier (non tronqués)**, aucun DPE de logement (immeuble seul compris) | « Sans diagnostic, ce dossier ne pourra qualifier… » + « la plupart des adresses » |
 | `sans_objet` | plusieurs bâtiments, aucun bâtiment | idem `aucun` (le dossier ne cherchera pas au bâtiment) |
-| `non_verifie` | RNB indisponible, délai dépassé, ADEME muette sans candidat lu | « Les autres adresses du même bâtiment n'ont pas pu être consultées à l'instant : le dossier les consultera à son ouverture, sans garantie d'y trouver un diagnostic. » |
+| `non_verifie` | RNB indisponible, délai dépassé, ADEME muette ou liste tronquée sans DPE de logement lu (correctif de revue du 27/10) | « Les autres adresses du même bâtiment n'ont pas pu être consultées à l'instant : le dossier les consultera à son ouverture, sans garantie d'y trouver un diagnostic. » |
 | absent | DPE à l'adresse, ADEME muette à l'adresse, ou réponse d'un déploiement antérieur | textes d'avant ; la conséquence d'absence est désormais conditionnelle (« Sans diagnostic, … ») |
 
 Tests : `qualification-meme-batiment.test.ts` (états, sonde, textes), `fut143-qualification-route.test.ts` (vraie route, vrais lecteurs ADEME/RNB, `fetch` servi par les fixtures : Villeurbanne, DPE exact sans sonde, immeuble seul, Puyravault, Bordeaux, RNB en panne ou muet, ADEME en panne ou partielle, ADEME muette à l'adresse).

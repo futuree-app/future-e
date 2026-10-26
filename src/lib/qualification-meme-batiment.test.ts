@@ -59,6 +59,17 @@ test("ADEME partiellement indisponible : des candidats lus restent établis ; z�
   assert.equal(etatMemeBatiment(identiteVilleurbanne, { status: "unavailable", candidates: [], tronque: false }), "non_verifie");
 });
 
+test("réponse tronquée sans DPE de logement lu (immeuble seul) : non vérifié, jamais « aucun »", () => {
+  // La page non lue peut porter des diagnostics de logement : une liste partielle ne prouve pas leur absence.
+  const immeubles = recherche(villeurbanne, { status: "present", tronque: true });
+  immeubles.candidates = immeubles.candidates.filter((c) => /immeuble/i.test(String(c.type_batiment)));
+  assert.ok(immeubles.candidates.length >= 1);
+  assert.equal(etatMemeBatiment(identiteVilleurbanne, immeubles), "non_verifie");
+  assert.equal(etatMemeBatiment(identiteVilleurbanne, { status: "absent", candidates: [], tronque: true }), "non_verifie");
+  // Complète, la même liste établit l'absence.
+  assert.equal(etatMemeBatiment(identiteVilleurbanne, { ...immeubles, tronque: false }), "aucun");
+});
+
 test("réponse tronquée : un candidat lu suffit à l'établir, sans en promettre le nombre", () => {
   assert.equal(etatMemeBatiment(identiteVilleurbanne, recherche(villeurbanne, { tronque: true })), "candidats");
 });

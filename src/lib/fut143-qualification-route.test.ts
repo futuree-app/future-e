@@ -50,6 +50,8 @@ type Scenario = {
   batiment: unknown[] | "panne";
   /** Un des deux jeux ADEME tombe sur la recherche par bâtiment. */
   batimentPartiel?: boolean;
+  /** La base annonce plus de lignes que la page lue (`total` > `results`). */
+  batimentTronque?: boolean;
 };
 let scenario: Scenario;
 let appels: string[];
@@ -74,7 +76,7 @@ function servir(url: string): Promise<Response> {
       appels.push(`ademe:batiment:${neuf ? "neuf" : "existant"}`);
       if (scenario.batiment === "panne" || (scenario.batimentPartiel && neuf)) return Promise.resolve(new Response("", { status: 500 }));
       const lignes = neuf ? [] : scenario.batiment;
-      return Promise.resolve(Response.json({ total: lignes.length, results: lignes }));
+      return Promise.resolve(Response.json({ total: lignes.length + (scenario.batimentTronque && !neuf ? 50 : 0), results: lignes }));
     }
   }
   throw new Error(`appel inattendu : ${url}`);
@@ -123,6 +125,14 @@ test("aucun DPE, aucun candidat de logement (immeuble seul) → `aucun`", async 
   scenario = { adresse: [], rnb: villeurbanne.rnb, batiment: immeuble };
   const corps = await (await POST(requete(villeurbanne))).json();
   assert.equal(corps.matter.memeBatiment, "aucun");
+});
+
+test("liste du bâtiment tronquée : immeuble seul lu → `non_verifie` ; un logement lu → `candidats`", async () => {
+  const immeuble = (villeurbanne.ademe_batiment as Array<{ type_batiment: string }>).filter((l) => l.type_batiment === "immeuble");
+  scenario = { adresse: [], rnb: villeurbanne.rnb, batiment: immeuble, batimentTronque: true };
+  assert.equal((await (await POST(requete(villeurbanne))).json()).matter.memeBatiment, "non_verifie");
+  scenario = { adresse: [], rnb: villeurbanne.rnb, batiment: villeurbanne.ademe_batiment, batimentTronque: true };
+  assert.equal((await (await POST(requete(villeurbanne))).json()).matter.memeBatiment, "candidats");
 });
 
 test("plusieurs bâtiments RNB (Puyravault) → `sans_objet`, et aucune recherche au bâtiment", async () => {
