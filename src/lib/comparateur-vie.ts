@@ -2224,18 +2224,29 @@ const PRESENCE_ETUDIANTE = ["forte présence étudiante", "présence étudiante 
 //     (scripts/populate-bpe.py). Chaque terme est ≥ 0 et n'est > 0 que pour un établissement dans le rayon :
 //     un accès > 0 prouve donc au moins un établissement. L'inverse ne tient pas (poids nul à d = DMAX,
 //     arrondi à 2 décimales), mais il ne joue que sur l'absence, que le dossier lit déjà ainsi ;
-//   - compte et accès en désaccord (compte > 0 sans accès, compte 0 avec accès) : incertain.
+//   - le rayon est l'un de ceux de la convention BPE (RADIUS_TABLE, RADIUS_RURAL), sinon incertain ;
+//   - avec un compte n, chaque terme vaut entre 1 − r/DMAX (d = r) et 1 (d = 0) : l'accès tient dans
+//     [n·(1 − r/DMAX), n]. Ces deux bornes ont au plus deux décimales et l'arrondi stocké (2 décimales) est
+//     monotone : l'accès arrondi y tient aussi, sans tolérance. Hors bornes (1 établissement pour un accès de 2) :
+//     incertain ;
+//   - compte et accès en désaccord de signe (compte > 0 sans accès, compte 0 avec accès) : incertain. À 25 km, un
+//     compte > 0 avec un accès nul est possible (établissements à la frontière) ; il reste incertain, par prudence.
 // Présence ⇒ `classifyHigherEdAbsence` = neutral ; absence ⇒ mismatch. L'état raffine le verdict du dossier sans
 // jamais le contredire. L'index de l'accès (BPE 2025) ne porte pas de compte : l'accès pondéré y suffit.
+const BPE_DMAX_KM = 25; // DMAX, scripts/populate-bpe.py
+const BPE_RAYONS_KM: readonly number[] = [5, 10, 15, 25]; // RADIUS_TABLE + RADIUS_RURAL, scripts/populate-bpe.py
+const EPSILON_FLOTTANT = 1e-9; // représentation binaire des décimales, pas une tolérance de mesure
 export type EtatEtablissementSup = "presence" | "absence" | "incertain";
 export function etatEtablissementSup(sup: IndexCommune["etudesSup"]): EtatEtablissementSup {
   if (!sup || sup.measured !== true) return "incertain";
-  if (!Number.isFinite(sup.radiusKm) || sup.radiusKm <= 0) return "incertain";
+  if (!BPE_RAYONS_KM.includes(sup.radiusKm)) return "incertain";
   const acces = sup.weightedAccess;
   if (typeof acces !== "number" || !Number.isFinite(acces) || acces < 0) return "incertain";
   const compte = sup.establishmentCount;
   if (compte != null) {
     if (!Number.isInteger(compte) || compte < 0) return "incertain";
+    const plancher = compte * (1 - sup.radiusKm / BPE_DMAX_KM);
+    if (acces < plancher - EPSILON_FLOTTANT || acces > compte + EPSILON_FLOTTANT) return "incertain";
     if ((compte > 0) !== (acces > 0)) return "incertain";
     return compte > 0 ? "presence" : "absence";
   }

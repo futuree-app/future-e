@@ -388,3 +388,55 @@ test("revue 2. index réel : les 259 identités candidates reposent toutes sur u
   assert.equal(INDEX.communes.filter((c) => V.etatEtablissementSup(c.etudesSup) === "incertain").length, 0);
   assert.equal(INDEX.communes.filter((c) => c.etudesSup?.establishmentCount != null).length, 0);
 });
+
+// ── Revue 3 (26/10/2026) : bornes du couple compte / accès pondéré (scripts/populate-bpe.py) ──
+// Chaque établissement dans le rayon r apporte 1 − d/25, entre 1 − r/25 et 1 : l'accès tient dans [n·(1 − r/25), n].
+test("revue 3. bornes compte / accès : une contradiction mathématique est incertaine, jamais présence ni absence", () => {
+  const e = (radiusKm: unknown, establishmentCount: unknown, weightedAccess: unknown) =>
+    V.etatEtablissementSup({ measured: true, radiusKm, establishmentCount, weightedAccess });
+  const cas: [unknown, unknown, unknown, string][] = [
+    [5, 1, 2, "incertain"], // reproduction de Work
+    [5, 1, 1, "presence"],
+    [5, 1, 0.8, "presence"], // plancher exact à 5 km : d = 5
+    [5, 1, 0.79, "incertain"], // sous le plancher de 5 km
+    [10, 1, 0.6, "presence"],
+    [10, 1, 0.59, "incertain"],
+    [15, 1, 0.4, "presence"],
+    [15, 1, 0.39, "incertain"],
+    [25, 1, 0.01, "presence"],
+    [5, 3, 2.4, "presence"], // 3 × 0,8 : plancher exact, flottant compris
+    [5, 3, 2.39, "incertain"],
+    [5, 3, 3, "presence"],
+    [5, 3, 3.01, "incertain"], // au-dessus du compte
+    [25, 2, 5, "incertain"],
+    [5, 0, 0, "absence"],
+    [25, 0, 0, "absence"],
+    [5, 0, 0.3, "incertain"],
+    [25, 0, 0.01, "incertain"],
+    [10, 2, 0, "incertain"], // sous le plancher de 10 km
+    [25, 2, 0, "incertain"], // frontière à 25 km : possible, gardée incertaine par prudence
+    [5, undefined, 2, "presence"], // sans compte : le repli sur l'accès pondéré > 0 reste nécessaire (index réel)
+    [25, null, 0.01, "presence"],
+    [10, undefined, 0, "absence"],
+    // Rayon hors convention BPE (5, 10, 15, 25 km).
+    [7, 1, 0.9, "incertain"],
+    [30, undefined, 1, "incertain"],
+    [25.5, undefined, 1, "incertain"],
+    [0, undefined, 1, "incertain"],
+    ["5", 1, 0.9, "incertain"],
+  ];
+  for (const [r, n, a, attendu] of cas) assert.equal(e(r, n, a), attendu, `rayon ${String(r)}, compte ${String(n)}, accès ${String(a)}`);
+});
+
+test("revue 3. reproduction de Work : 1 établissement pour un accès de 2 ne donne pas l'identité, score inchangé", () => {
+  for (const insee of VILLES_ETUDIANTES) {
+    const reel = commune(insee);
+    const c = { ...reel, etudesSup: { measured: true, radiusKm: 5, establishmentCount: 1, weightedAccess: 2 } };
+    assert.equal(V.etatEtablissementSup(c.etudesSup), "incertain", insee);
+    assert.equal(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), false, insee);
+    assert.equal(V.presenceEtudiante(c, 0), "forte présence étudiante", insee);
+    assert.equal(vie(c), vie(reel), insee);
+    // Les données réelles gardent l'identité.
+    assert.ok(V.buildIdentiteCandidates(reel).includes(IDENTITE_ETUDIANTE), insee);
+  }
+});

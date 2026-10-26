@@ -226,6 +226,36 @@ Présence implique le verdict `neutral` de `classifyHigherEdAbsence`, absence im
 
 Preuves : `docs/audits/2026-10-26-fut135-revue2/`.
 
+### Troisième revue du 26/10 : bornes du couple compte / accès
+
+**Défaut.** `{measured: true, radiusKm: 5, establishmentCount: 1, weightedAccess: 2}` rendait `presence`, alors que la formule BPE l'exclut : seul le signe du compte et de l'accès était comparé.
+
+**Règle ajoutée.** Avec un compte n, chaque établissement retenu à d ≤ r apporte 1 − d/25, entre 1 − r/25 et 1. L'accès tient donc dans **[n·(1 − r/25), n]**. Pour les rayons de la convention, ces bornes valent 0,8n, 0,6n, 0,4n ou 0, puis n : elles ont au plus deux décimales. L'arrondi stocké à deux décimales est monotone, donc l'accès arrondi reste dans ces bornes exactes. **Aucune tolérance n'est ajoutée**, seulement un epsilon de représentation flottante (1e-9). Hors bornes : `incertain`.
+
+Le rayon doit appartenir à la convention BPE existante : **5, 10, 15 ou 25 km** (`RADIUS_TABLE`, `RADIUS_RURAL`). L'index réel n'en contient pas d'autre : 1 001, 1 084, 1 008 et 31 695 communes.
+
+Deux règles restent inchangées :
+- le désaccord de signe reste incertain ;
+- sans compte, l'accès pondéré strictement positif reste la preuve. C'est le cas de tout l'index.
+
+**Cas frontière.** À 25 km, un compte positif avec un accès nul est mathématiquement possible : établissements à 25 km pile, ou contribution arrondie à 0 au-delà de 24,875 km. Il reste `incertain` par prudence. `classifyHigherEdAbsence` le lit `neutral` en préférant le compte. Les deux règles ne se contredisent pas, puisque l'incertain n'affirme rien. Le dossier payant n'est pas modifié.
+
+**Incohérence documentée, non corrigée.** `classifyHigherEdAbsence` ne vérifie pas les bornes : il lit `neutral` pour un compte de 1 avec un accès de 2. Aucune attestation réelle ne porte de compte, donc aucun dossier n'est concerné aujourd'hui. Une éventuelle vérification relève de la règle du dossier, hors du périmètre de FUT-135.
+
+**Résultats.**
+- Reproduction de Work : présence et identité accordées dans les 4 villes avant correction (code 1). Après correction : `incertain` et identité refusée, avec le même score et l'identité réelle conservée (code 0).
+- Contrôleur de la deuxième revue, non modifié : 0 violation. Les 32 fixtures négatives restent refusées et les 4 témoins conservent leur identité.
+- Données réelles :
+  - 259 candidats à l'identité, inchangés ;
+  - photographies avant/après identiques octet pour octet (34 788 communes, 18 recherches) ;
+  - 0 écart numérique et 0 récit modifié ;
+  - 487 communes : 0 faute ;
+  - reproductions historiques identiques ;
+  - accueil 104 373/104 373.
+- Tests : matrice de 28 cas sur les bornes et les rayons, plus la reproduction de Work sur les 4 villes.
+
+Preuves : `docs/audits/2026-10-26-fut135-revue3/`.
+
 ## 10. Régénérer
 
 ```bash
