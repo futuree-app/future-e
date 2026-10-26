@@ -18,11 +18,12 @@
  *   .venv-bpe/bin/python scripts/populate-vie-locale.py --write-index     vieLocale (dénominateur, codes repris)
  *   .venv-bpe/bin/python scripts/populate-demographie.py --write-index    demographie (abstentions, codes rattachés)
  *   .venv-bpe/bin/python scripts/populate-mobilite.py --write-index       mobilite (fusions sommées, codes rattachés)
+ *   .venv-bpe/bin/python scripts/populate-etudiants.py --write-index      etudes_dyn (bassins sommés, rentrée figée)
  *   npx tsx scripts/populate-mismatch-rank.mts --recalculer vie_locale,croissance_demographique,acces_soins,faible_dependance_auto,viabilite_emploi --retirer-orphelines acces_services
  *   npm run index:pack
  *   node scripts/accueil/donnees-accueil.mjs --ecrire   src/data/accueil-communes.json
- * etudes_dyn n'est PAS relancé : la source MESR a changé de rentrée depuis, et les communes corrigées y
- * resteraient non notées (cf. docs/audits/2026-10-23-fut109-populations-grain.md).
+ * FUT-135 : etudes_dyn se relance sans changer de source, la rentrée MESR étant figée dans le script (FUT-109
+ * ne le relançait pas, le script prenant alors d'office la rentrée la plus récente).
  *
  * Idempotent : relit l'index, applique, réécrit { meta, communes }.
  *   node scripts/populate-population-grain.mjs

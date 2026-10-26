@@ -1,0 +1,898 @@
+{
+  "ecartsNumeriques": [],
+  "candidatsIdentiteEtudianteRetires": 2510,
+  "recits": {
+    "etudiante-seule": [
+      {
+        "carte": "trio Betton",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Rennes"
+        ]
+      },
+      {
+        "carte": "trio Corenc",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Grenoble"
+        ]
+      },
+      {
+        "carte": "pistes Achenheim",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Strasbourg"
+        ]
+      },
+      {
+        "carte": "pistes Castelnau-le-Lez",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Montpellier"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Rennes",
+            "Forte présence étudiante",
+            "Forte présence étudiante dans l'agglomération de Grenoble"
+          ]
+        }
+      }
+    ],
+    "etudiante-taille-humaine": [
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ],
+    "etudiante-transports-vie-locale": [
+      {
+        "carte": "trio Noyal-Châtillon-sur-Seiche",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Rennes",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "carte": "pistes La Madeleine",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Lille",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "carte": "pistes Ramonville-Saint-Agne",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Toulouse",
+          "bien reliée par le train",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante dans l'agglomération de Rennes"
+          ]
+        }
+      }
+    ],
+    "etudiante-bretagne": [
+      {
+        "carte": "trio Betton",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Rennes"
+        ]
+      },
+      {
+        "carte": "trio Bohars",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Brest"
+        ]
+      },
+      {
+        "carte": "trio Séné",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Vannes"
+        ]
+      },
+      {
+        "carte": "pistes Langueux",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Saint-Brieuc"
+        ]
+      },
+      {
+        "carte": "pistes Cesson-Sévigné",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Rennes"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Rennes",
+            "Forte présence étudiante dans l'agglomération de Brest",
+            "Forte présence étudiante dans l'agglomération de Vannes"
+          ]
+        }
+      }
+    ],
+    "etudiante-nature-auvergne": [
+      {
+        "carte": "trio Royat",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "forêts et espaces naturels à proximité"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Clermont-Ferrand",
+          "forêts et espaces naturels à proximité"
+        ]
+      },
+      {
+        "carte": "trio Pont-Salomon",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "forêts et espaces naturels à proximité"
+        ],
+        "apres": [
+          "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km",
+          "forêts et espaces naturels à proximité"
+        ]
+      },
+      {
+        "carte": "pistes Durtol",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "forêts et espaces naturels à proximité"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Clermont-Ferrand",
+          "forêts et espaces naturels à proximité"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Présence étudiante intermédiaire"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Clermont-Ferrand",
+            "Forte présence étudiante",
+            "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne / aucun établissement supérieur recensé à moins de 10 km"
+          ]
+        }
+      }
+    ],
+    "etudiante-retraite-calme": [
+      {
+        "carte": "trio Niederhausbergen",
+        "champ": "reasons",
+        "avant": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante dans l'agglomération de Strasbourg"
+        ]
+      },
+      {
+        "carte": "trio Saint-Grégoire",
+        "champ": "reasons",
+        "avant": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante dans l'agglomération de Rennes"
+        ]
+      },
+      {
+        "carte": "trio Verson",
+        "champ": "reasons",
+        "avant": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante dans l'agglomération de Caen"
+        ]
+      },
+      {
+        "carte": "trio Verson",
+        "champ": "identite",
+        "avant": "Pour une ville étudiante à taille humaine.",
+        "apres": "Pour s'installer dans une commune qui gagne des habitants."
+      },
+      {
+        "carte": "pistes Camon",
+        "champ": "reasons",
+        "avant": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante dans l'agglomération d'Amiens"
+        ]
+      },
+      {
+        "carte": "pistes Lavérune",
+        "champ": "reasons",
+        "avant": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "cadre calme et habitable",
+          "bon accès aux médecins",
+          "forte présence étudiante dans l'agglomération de Montpellier"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Strasbourg",
+            "Forte présence étudiante dans l'agglomération de Rennes",
+            "Forte présence étudiante dans l'agglomération de Caen"
+          ]
+        }
+      }
+    ],
+    "nature-calme": [
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Présence étudiante intermédiaire",
+            "Présence étudiante limitée",
+            "Présence étudiante intermédiaire"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Présence étudiante intermédiaire dans l'agglomération d'Annecy / aucun établissement supérieur recensé à moins de 10 km",
+            "Présence étudiante limitée / aucun établissement supérieur recensé à moins de 25 km",
+            "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+          ]
+        }
+      }
+    ],
+    "mer-soins": [
+      {
+        "carte": "trio Le Relecq-Kerhuon",
+        "champ": "decouverte",
+        "avant": "forte présence étudiante",
+        "apres": "forte présence étudiante dans l'agglomération de Brest"
+      },
+      {
+        "carte": "pistes Lattes",
+        "champ": "decouverte",
+        "avant": "forte présence étudiante",
+        "apres": "forte présence étudiante dans l'agglomération de Montpellier"
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Brest",
+            "Forte présence étudiante dans l'agglomération de Bayonne",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ],
+    "vie-locale-petite-17": [
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Présence étudiante intermédiaire",
+            "Présence étudiante intermédiaire",
+            "Présence étudiante intermédiaire"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Présence étudiante intermédiaire",
+            "Présence étudiante intermédiaire dans l'agglomération de La Flotte",
+            "Présence étudiante intermédiaire / aucun établissement supérieur recensé à moins de 25 km"
+          ]
+        }
+      }
+    ],
+    "fraicheur-train": [
+      {
+        "carte": "trio La Chapelle-d'Armentières",
+        "champ": "decouverte",
+        "avant": "forte présence étudiante",
+        "apres": "forte présence étudiante dans l'agglomération d'Armentières"
+      },
+      {
+        "carte": "pistes Melesse",
+        "champ": "signaux",
+        "avant": {
+          "secheresse": "sols plus exposés à la sécheresse",
+          "croissance_demographique": "gagne des habitants",
+          "air": "air généralement moins sain",
+          "vie_etudiante": "forte présence étudiante",
+          "culture": "offre culturelle intermédiaire",
+          "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+        },
+        "apres": {
+          "secheresse": "sols plus exposés à la sécheresse",
+          "croissance_demographique": "gagne des habitants",
+          "air": "air généralement moins sain",
+          "vie_etudiante": "forte présence étudiante dans l'agglomération de Rennes, aucun établissement supérieur recensé à moins de 10 km",
+          "culture": "offre culturelle intermédiaire",
+          "inondation": "de 1995 à 2021, moins de 1 sinistre pour 1 000 biens assurés chaque année après une inondation, ce qui ne garantit pas un faible risque"
+        }
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Rouen",
+            "Forte présence étudiante dans l'agglomération d'Armentières",
+            "Forte présence étudiante dans l'agglomération de Chambéry"
+          ]
+        }
+      }
+    ],
+    "comme-Brest": [
+      {
+        "carte": "trio Sainte-Adresse",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante dans l'agglomération du Havre",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "carte": "trio Jacou",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante dans l'agglomération de Montpellier",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "carte": "pistes Saint-Mandrier-sur-Mer",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante",
+          "vie locale animée (commerces, marchés, associations)"
+        ],
+        "apres": [
+          "arrêts de bus près du centre de la commune",
+          "présence étudiante intermédiaire dans l'agglomération de Toulon",
+          "vie locale animée (commerces, marchés, associations)"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante dans l'agglomération du Havre",
+            "Forte présence étudiante dans l'agglomération de Montpellier"
+          ]
+        }
+      }
+    ],
+    "comme-Poitiers": [
+      {
+        "carte": "trio Ramonville-Saint-Agne",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "arrêts de bus près du centre de la commune",
+          "population en croissance"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Toulouse",
+          "arrêts de bus près du centre de la commune",
+          "population en croissance"
+        ]
+      },
+      {
+        "carte": "trio Beaucouzé",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "arrêts de bus près du centre de la commune",
+          "population en croissance"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération d'Angers",
+          "arrêts de bus près du centre de la commune",
+          "population en croissance"
+        ]
+      },
+      {
+        "carte": "trio Beaucouzé",
+        "champ": "identite",
+        "avant": "Pour une ville étudiante à taille humaine.",
+        "apres": "Pour s'installer dans une commune qui gagne des habitants."
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Toulouse",
+            "Forte présence étudiante",
+            "Forte présence étudiante dans l'agglomération d'Angers"
+          ]
+        }
+      }
+    ],
+    "comme-Rennes": [
+      {
+        "carte": "trio Lingolsheim",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "arrêts de tram près du centre de la commune",
+          "bien reliée par le train"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Strasbourg",
+          "arrêts de tram près du centre de la commune",
+          "bien reliée par le train"
+        ]
+      },
+      {
+        "carte": "pistes Bègles",
+        "champ": "reasons",
+        "avant": [
+          "forte présence étudiante",
+          "arrêts de tram près du centre de la commune",
+          "bien reliée par le train"
+        ],
+        "apres": [
+          "forte présence étudiante dans l'agglomération de Bordeaux",
+          "arrêts de tram près du centre de la commune",
+          "bien reliée par le train"
+        ]
+      },
+      {
+        "carte": "pistes Bègles",
+        "champ": "identite",
+        "avant": "Pour une ville étudiante à taille humaine.",
+        "apres": "Pour s'installer dans une commune qui gagne des habitants."
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Strasbourg",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ],
+    "comme-Albi": [
+      {
+        "carte": "trio Chamalières",
+        "champ": "reasons",
+        "avant": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante dans l'agglomération de Clermont-Ferrand"
+        ]
+      },
+      {
+        "carte": "trio Pérols",
+        "champ": "reasons",
+        "avant": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de tram près du centre de la commune",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de tram près du centre de la commune",
+          "forte présence étudiante dans l'agglomération de Montpellier"
+        ]
+      },
+      {
+        "carte": "trio Longueau",
+        "champ": "reasons",
+        "avant": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de bus près du centre de la commune",
+          "forte présence étudiante dans l'agglomération d'Amiens"
+        ]
+      },
+      {
+        "carte": "pistes Mareil-Marly",
+        "champ": "reasons",
+        "avant": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de tram près du centre de la commune",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "vie locale animée (commerces, marchés, associations)",
+          "arrêts de tram près du centre de la commune",
+          "forte présence étudiante dans l'agglomération de Paris"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Clermont-Ferrand",
+            "Forte présence étudiante dans l'agglomération de Montpellier",
+            "Forte présence étudiante dans l'agglomération d'Amiens"
+          ]
+        }
+      }
+    ],
+    "comme-Annecy": [
+      {
+        "carte": "trio Échirolles",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante dans l'agglomération de Grenoble"
+        ]
+      },
+      {
+        "carte": "trio Échirolles",
+        "champ": "identite",
+        "avant": "Pour une ville étudiante à taille humaine.",
+        "apres": "Pour s'installer dans une commune qui gagne des habitants."
+      },
+      {
+        "carte": "trio Besançon",
+        "champ": "identite",
+        "avant": "Pour s'installer dans une commune qui gagne des habitants.",
+        "apres": "Pour une ville étudiante à taille humaine."
+      },
+      {
+        "carte": "pistes Avrillé",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante dans l'agglomération d'Angers"
+        ]
+      },
+      {
+        "carte": "pistes Aubagne",
+        "champ": "reasons",
+        "avant": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante"
+        ],
+        "apres": [
+          "arrêts de tram près du centre de la commune",
+          "population en croissance",
+          "forte présence étudiante dans l'agglomération de Marseille"
+        ]
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Grenoble",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ],
+    "comme-Leménil-Mitry": [
+      {
+        "carte": "trio Thurins",
+        "champ": "identite",
+        "avant": "Pour une ville étudiante à taille humaine.",
+        "apres": "Pour s'installer dans une commune qui gagne des habitants."
+      },
+      {
+        "carte": "trio Thurins",
+        "champ": "decouverte",
+        "avant": "forte présence étudiante",
+        "apres": "forte présence étudiante dans l'agglomération de Lyon, aucun établissement supérieur recensé à moins de 5 km"
+      },
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante dans l'agglomération de Bordeaux / aucun établissement supérieur recensé à moins de 5 km",
+            "Forte présence étudiante dans l'agglomération de Lyon / aucun établissement supérieur recensé à moins de 5 km",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ],
+    "comme-Rochefourchat": [
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Présence étudiante limitée",
+            "Présence étudiante intermédiaire",
+            "Présence étudiante intermédiaire"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Présence étudiante limitée / aucun établissement supérieur recensé à moins de 25 km",
+            "Présence étudiante intermédiaire dans l'agglomération d'Annecy / aucun établissement supérieur recensé à moins de 10 km",
+            "Présence étudiante intermédiaire dans l'agglomération de Bastia"
+          ]
+        }
+      }
+    ],
+    "comme-La Rochelle": [
+      {
+        "champ": "comparaison vie étudiante",
+        "avant": {
+          "aide": "La présence d'étudiants et d'établissements supérieurs.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        },
+        "apres": {
+          "aide": "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.",
+          "cellules": [
+            "Forte présence étudiante",
+            "Forte présence étudiante",
+            "Forte présence étudiante"
+          ]
+        }
+      }
+    ]
+  }
+}
