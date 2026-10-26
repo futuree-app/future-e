@@ -96,5 +96,33 @@
   "debord": 0,
   "erreurs": 0,
   "ecritures": 0
+ },
+ {
+  "cas": "la-rochelle",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "la-rochelle",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "tronque",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "tronque",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
  }
 ]

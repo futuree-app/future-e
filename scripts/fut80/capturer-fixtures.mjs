@@ -2,7 +2,8 @@
 // FUT-80 · Capture les réponses RÉELLES du RNB et de l'ADEME pour les tests (`src/lib/__fixtures__/fut80/`).
 // Les empreintes (`shape`) sont retirées : le code de production ne les lit pas, et elles pèsent.
 // Lecture seule, sources publiques, sans jeton.
-// Usage : node scripts/fut80/capturer-fixtures.mjs
+// Usage : node scripts/fut80/capturer-fixtures.mjs [cas…]   (sans argument : tous ; avec : seulement ceux-là,
+// pour ajouter un cas sans recapturer, donc sans faire bouger, les fixtures déjà relues)
 
 import { mkdirSync, writeFileSync } from "node:fs";
 
@@ -41,9 +42,12 @@ const cas = {
   puyravault_ambigu: { ban: "17293_0061_00003", label: "3 Rue du Stade 17700 Puyravault", insee: "17293" },
   // Aucun bâtiment au référentiel.
   bordeaux_aucun: { ban: "33063_8927_00009", label: "9 Sente des Thoniers 33100 Bordeaux", insee: "33063" },
+  // Revue indépendante du 26/10/2026 : trois bâtiments à l'adresse, un seul DPE de maison, sans id_rnb.
+  la_rochelle_trois_batiments: { ban: "17300_1150_00027", label: "27 Rue des Brandes 17000 La Rochelle", insee: "17300" },
 };
 
-for (const [nom, c] of Object.entries(cas)) {
+const demandes = process.argv.slice(2);
+for (const [nom, c] of Object.entries(cas).filter(([n]) => demandes.length === 0 || demandes.includes(n))) {
   const r = await rnb(c.ban);
   const ids = r.results.map((b) => b.rnb_id);
   const parAdresse = await lignes(`identifiant_ban:"${c.ban}"`);

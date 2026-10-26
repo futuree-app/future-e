@@ -37,6 +37,8 @@ type Reponse =
       grain?: GrainDpe;
       attachable: boolean;
       confirmationRequise: boolean;
+      /** Le référentiel rattache ce diagnostic à un autre bâtiment que celui de l'adresse. */
+      contredit?: boolean;
       adresse: string | null;
       dpe: DpeRecord;
     };
@@ -233,6 +235,16 @@ export function SaisieNumeroDpe({
               L&apos;ADEME enregistre ce diagnostic à une autre adresse, que le Référentiel national des
               bâtiments rattache au même bâtiment que la vôtre. Le même bâtiment n&apos;est pas le même
               logement : vérifiez qu&apos;il s&apos;agit bien de celui-ci avant de le rattacher.
+            </Message>
+          )}
+
+          {/* Revue du 26/10/2026 : à la bonne adresse, le contrôle du bâtiment était court-circuité. La
+              sélection reste possible (le document du lecteur est une preuve), mais rien n'est tu. */}
+          {(reponse.grain ?? "logement") === "logement" && reponse.attachable && reponse.contredit && (
+            <Message>
+              Le Référentiel national des bâtiments rattache ce diagnostic à un autre bâtiment que celui de
+              cette adresse. L&apos;une des deux bases se trompe, et rien ne dit laquelle : ne le rattachez que
+              si le numéro est bien celui de votre document.
             </Message>
           )}
 

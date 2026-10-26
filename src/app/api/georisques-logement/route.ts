@@ -50,10 +50,10 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
     // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
     const dpeLookupP = address.id
-      ? lookupDpeCandidatesByBanId(address.id).catch(() => ({ status: "unavailable" as const, candidates: [] }))
+      ? lookupDpeCandidatesByBanId(address.id).catch(() => ({ status: "unavailable" as const, candidates: [], tronque: false }))
       : getDpeByCoordinates(address.latitude, address.longitude)
-          .then((d) => ({ status: d ? "present" as const : "absent" as const, candidates: d ? [d] : [] }))
-          .catch(() => ({ status: "unavailable" as const, candidates: [] }));
+          .then((d) => ({ status: d ? "present" as const : "absent" as const, candidates: d ? [d] : [], tronque: false }))
+          .catch(() => ({ status: "unavailable" as const, candidates: [], tronque: false }));
     // FUT-80 : LE BÂTIMENT, EN PARALLÈLE DE TOUT LE RESTE. Une seule requête au référentiel (~85 ms),
     // bornée à 5 s, qui ne lève jamais : son absence ne retient pas le dossier. Les diagnostics du même
     // bâtiment ne se cherchent que derrière un bâtiment UNIQUE ; sur plusieurs, lequel serait le bon ?
@@ -140,6 +140,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       altitude,
       dpeCandidates: dpeLookup.candidates,
       dpeCandidatesStatus: dpeLookup.status,
+      // La troncature voyage jusqu'à la décision et à l'écran ; absente d'un rapport complet.
+      ...(dpeLookup.tronque ? { dpeCandidatesTronque: true as const } : {}),
       banFeatureType,
       // FUT-80 : posés seulement quand ils disent quelque chose. Sans identifiant BAN, rien n'est cherché.
       ...(batiment ? { batiment } : {}),

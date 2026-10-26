@@ -1,5 +1,5 @@
 import "server-only";
-import { identiteDepuisRnb, idsDesBatiments, type IdentiteBatiment } from "./batiment-rnb.ts";
+import { identiteDepuisRnb, type IdentiteBatiment } from "./batiment-rnb.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // LE RÉFÉRENTIEL NATIONAL DES BÂTIMENTS, INTERROGÉ PAR L'ADRESSE (FUT-80).
@@ -14,24 +14,45 @@ import { identiteDepuisRnb, idsDesBatiments, type IdentiteBatiment } from "./bat
 
 const RNB = "https://rnb-api.beta.gouv.fr/api/alpha/buildings/";
 const DELAI_MS = 5_000;
+/** Taille de page maximale de l'API (100, la valeur par défaut est 20). Une adresse en porte au plus 7
+ *  dans l'échantillon du 26/10/2026 : une page suffit, la suite n'est lue que si `next` l'annonce. */
+const TAILLE = 100;
+const PAGES_MAX = 3;
+
+/**
+ * LES PAGES, TOUTES OU RIEN (revue indépendante du 26/10/2026). La réponse est paginée (`next`) ; une
+ * première page à un bâtiment ne prouve pas qu'il est seul. Les pages suivantes sont lues tant que `next`
+ * en annonce, sur le même hôte seulement (une URL venue d'une réponse ne choisit pas où l'on va). Au-delà
+ * de `PAGES_MAX`, ou sur un `next` étranger, la réponse reste incomplète et `identiteDepuisRnb` la rend
+ * non vérifiable.
+ */
+async function lirePages(premiere: string): Promise<unknown> {
+  const results: unknown[] = [];
+  let url: string | null = premiere;
+  for (let page = 0; url && page < PAGES_MAX; page++) {
+    const res = await fetch(url, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(DELAI_MS) });
+    if (!res.ok) return null;
+    const corps = (await res.json()) as { results?: unknown; next?: unknown } | null;
+    if (!Array.isArray(corps?.results)) return null;
+    results.push(...corps.results);
+    const suivante = typeof corps.next === "string" ? corps.next : null;
+    if (corps.next != null && !suivante) return { results, next: corps.next };
+    url = suivante && new URL(suivante).origin === new URL(RNB).origin ? suivante : null;
+    if (suivante && !url) return { results, next: suivante };
+  }
+  return { results, next: url };
+}
 
 export async function lookupBatimentByBanId(banId: string): Promise<IdentiteBatiment> {
   const url = new URL(RNB);
   url.searchParams.set("cle_interop_ban", banId);
+  url.searchParams.set("limit", String(TAILLE));
   try {
     // Le référentiel évolue chaque semaine : une journée de cache suffit, comme pour l'ADEME.
-    const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(DELAI_MS) });
-    if (!res.ok) return { statut: "indisponible" };
-    return identiteDepuisRnb(await res.json(), new Date().toISOString());
+    const corps = await lirePages(url.toString());
+    if (corps == null) return { statut: "indisponible" };
+    return identiteDepuisRnb(corps, new Date().toISOString());
   } catch {
     return { statut: "indisponible" };
   }
-}
-
-/**
- * Les bâtiments d'une adresse, pour vérifier un diagnostic désigné. Vide si le référentiel ne
- * répond pas : la vérification retombe alors sur l'adresse seule, comme avant FUT-80.
- */
-export async function batimentsDeLAdresse(banId: string): Promise<string[]> {
-  return idsDesBatiments(await lookupBatimentByBanId(banId));
 }

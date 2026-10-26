@@ -4,11 +4,15 @@ import {
   getDossier,
   type DpeSelectionStatus,
 } from "@/lib/address-dossier-store";
-import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
-import { findDpeByNumero, getDpeCandidatesByBanId } from "@/lib/dpe";
+import { updateOwnedAddressDossier, updateOwnedAddressDossierSi } from "@/lib/server/address-dossier-write";
+import { findDpeByNumero, getDpeCandidatesByBanId, lookupDpeCandidatesByBanId } from "@/lib/dpe";
 import { normaliserNumeroDpe, rapprocherAvecBatiment } from "@/lib/dpe-rapprochement";
-import { batimentsDeLAdresse } from "@/lib/rnb";
+import { lookupBatimentByBanId } from "@/lib/rnb";
 import { refusDAttribution } from "@/lib/dpe-grain";
+import { CONDITION_ECRITURE_AUTO, controlerAttributionAuto, estVierge } from "@/lib/dpe-attribution-auto";
+import { lireDerniereVersion } from "@/lib/server/logement-report-versions";
+import type { AddressDossierRow } from "@/lib/address-dossier-store";
+import type { DpeRecord } from "@/lib/dpe-attribution";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +83,16 @@ export async function POST(req: Request) {
     return Response.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
   }
 
+  // UNE ATTRIBUTION AUTOMATIQUE NE VIENT QUE DE LA LISTE DE L'ADRESSE (revue indépendante du 26/10/2026).
+  // Un diagnostic apporté par son numéro, ou trouvé à une autre entrée du même bâtiment, est toujours à
+  // confirmer : l'écrire `auto_confirmed` donnait à un candidat lointain le statut d'une convergence forte.
+  if (body.status === "auto_confirmed" && body.source === "numero") {
+    return Response.json({ error: "AUTO_HORS_LISTE" }, { status: 422 });
+  }
+  if (body.status === "auto_confirmed") {
+    return attribuerAutomatiquement(user.id, supabase, dossier, dpeId);
+  }
+
   // Le diagnostic n'est JAMAIS accepté sur parole. Sans ce contrôle, n'importe quel identifiant de
   // DPE, y compris celui d'un autre bâtiment, pourrait être figé dans un dossier payant : la
   // classe, la surface, les coûts et les échéances du rapport en découlent.
@@ -98,11 +112,13 @@ export async function POST(req: Request) {
       return Response.json({ error: "DPE_INTROUVABLE" }, { status: 422 });
     }
     // FUT-80 : même vérification que `/numero`, par la même fonction. Le bâtiment est RELU ICI, au
-    // référentiel : ce que le navigateur a montré ne prouve rien de ce qu'il envoie.
+    // référentiel : ce que le navigateur a montré ne prouve rien de ce qu'il envoie. Un diagnostic que le
+    // bâtiment contredit reste rattachable à la main (`contredit`, confirmé à l'écran avec la mention),
+    // jamais automatiquement (ci-dessus).
     const rapprochement = await rapprocherAvecBatiment(
       { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse, id_rnb: trouve.dpe.id_rnb },
       { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
-      batimentsDeLAdresse,
+      lookupBatimentByBanId,
     );
     if (!rapprochement.attachable) {
       return Response.json(
@@ -127,6 +143,8 @@ export async function POST(req: Request) {
   const refus = refusDAttribution(dpe);
   if (refus) return Response.json(refus, { status: 422 });
 
+  // UN GESTE EXPLICITE S'ÉCRIT SANS CONDITION : c'est le plus récent qui vaut, et une attribution
+  // automatique encore en vol ne pourra plus l'écraser (sa propre écriture exige une ligne vierge).
   const fields = buildDpeSelectionFields(body.status, dpe, new Date().toISOString());
   const updated = await updateOwnedAddressDossier(user.id, body.dossierId, fields);
 
@@ -137,4 +155,67 @@ export async function POST(req: Request) {
   // La fiche canonique revient au client : c'est elle qui est en base, et l'écran doit afficher ce
   // qui a été enregistré, pas ce qu'il avait sous la main avant l'appel.
   return Response.json({ ok: true, dpe: updated.selected_dpe_snapshot });
+}
+
+/**
+ * L'ATTRIBUTION AUTOMATIQUE, DÉCIDÉE ET ÉCRITE PAR LE SERVEUR (revue indépendante du 26/10/2026).
+ *
+ * Le navigateur PROPOSE ; le serveur relit tout et refait la décision avec la règle de l'écran
+ * (`controlerAttributionAuto`) :
+ *   - la liste ADEME de l'adresse, complète (les deux jeux ont répondu) et non tronquée ;
+ *   - l'identité du bâtiment, relue au référentiel : une panne n'est pas une absence de contradiction,
+ *     et elle refuse ; plusieurs bâtiments, aucun bâtiment existant, un bâtiment en ruine ou un
+ *     diagnostic qui en désigne un autre refusent aussi ;
+ *   - le type d'adresse que la version du rapport a enregistré (le navigateur ne le décrit pas).
+ * Puis il écrit SOUS CONDITION : la ligne doit être encore vierge de tout geste au moment même de
+ * l'UPDATE. Un refus, un retrait ou un choix arrivés pendant les lectures gagnent toujours.
+ */
+async function attribuerAutomatiquement(
+  userId: string,
+  supabase: Parameters<typeof getDossier>[0],
+  dossier: AddressDossierRow,
+  dpeId: string,
+): Promise<Response> {
+  const dejaFait = (row: AddressDossierRow) =>
+    row.dpe_selection_status === "auto_confirmed" && row.selected_dpe_id === dpeId;
+  // Une proposition envoyée deux fois (double effet, onglet rechargé) n'est pas une erreur : la ligne
+  // porte déjà exactement ce choix, rien n'est réécrit.
+  if (!estVierge(dossier)) {
+    return dejaFait(dossier)
+      ? Response.json({ ok: true, dpe: dossier.selected_dpe_snapshot })
+      : Response.json({ error: "DECISION_DEJA_PRISE" }, { status: 409 });
+  }
+
+  const [liste, identite, version] = await Promise.all([
+    lookupDpeCandidatesByBanId(dossier.ban_id).catch(() => ({ status: "unavailable" as const, candidates: [] as DpeRecord[], tronque: false })),
+    lookupBatimentByBanId(dossier.ban_id),
+    lireDerniereVersion(supabase, dossier.id),
+  ]);
+  const controle = controlerAttributionAuto({
+    dpeId,
+    row: dossier,
+    candidates: liste.candidates,
+    listeComplete: liste.status !== "unavailable" && !liste.tronque,
+    banFeatureType: version?.report.banFeatureType ?? null,
+    identite,
+  });
+  if (!controle.ok) {
+    return Response.json(
+      { error: "AUTO_NON_ADMISSIBLE", refus: controle.refus, ...(controle.veto ? { veto: controle.veto } : {}) },
+      { status: 422 },
+    );
+  }
+  // Défense en profondeur : la règle l'exige déjà (`attribuableAuLogement`).
+  const refus = refusDAttribution(controle.dpe);
+  if (refus) return Response.json(refus, { status: 422 });
+
+  const fields = buildDpeSelectionFields("auto_confirmed", controle.dpe, new Date().toISOString());
+  const ecrit = await updateOwnedAddressDossierSi(userId, dossier.id, fields, CONDITION_ECRITURE_AUTO);
+  if (ecrit === null) return Response.json({ error: "DOSSIER_NOT_ACCESSIBLE" }, { status: 403 });
+  if (ecrit === "etat_change") {
+    const actuel = await getDossier(supabase, userId, dossier.id);
+    if (actuel && dejaFait(actuel)) return Response.json({ ok: true, dpe: actuel.selected_dpe_snapshot });
+    return Response.json({ error: "DECISION_PLUS_RECENTE" }, { status: 409 });
+  }
+  return Response.json({ ok: true, dpe: ecrit.selected_dpe_snapshot });
 }

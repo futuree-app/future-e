@@ -136,11 +136,13 @@ function Repartition({ ctx }: { ctx: AddressDpeContext }) {
 }
 
 export function AddressDiagnosticsBlock({
-  candidates, listeIncomplete = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero, batiments = [],
+  candidates, listeIncomplete = false, listeTronquee = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero, batiments = [],
 }: {
   candidates: DpeRecord[];
   /** FUT-65 : un des deux jeux ADEME n'a pas répondu. Le compte ci-dessous est un minimum. */
   listeIncomplete?: boolean;
+  /** La base en compte plus que la page lue (revue du 26/10/2026). Le compte ci-dessous est un minimum. */
+  listeTronquee?: boolean;
   dossierId: string;
   busy?: boolean;
   onPick: (d: DpeRecord) => void;
@@ -182,6 +184,13 @@ export function AddressDiagnosticsBlock({
         <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
           La base ADEME n&apos;a répondu qu&apos;en partie lors de cette collecte : d&apos;autres diagnostics
           peuvent être enregistrés à cette adresse.
+        </p>
+      )}
+      {/* Dit AVANT la liste et avant tout geste : le compte annoncé n'est pas le total. */}
+      {listeTronquee && !listeIncomplete && (
+        <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+          La base ADEME compte à&nbsp;cette adresse plus de diagnostics que ceux lus lors de&nbsp;cette
+          collecte&nbsp;: seuls les plus récents sont montrés.
         </p>
       )}
 

@@ -19,7 +19,6 @@ import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
-import { idsDesBatiments } from "@/lib/batiment-rnb";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { InondationLectureBlock } from "@/components/report/logement/InondationSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
@@ -200,9 +199,13 @@ export default function LogementModule({
       // réattribuer le même au rechargement suivant, sans un mot. Le geste du lecteur n'est pas
       // une absence de donnée à combler, et la date du geste est ce qui les distingue.
       // La décision vit dans `departDpe` (pur, testé) ; FUT-65 : une liste incomplète n'attribue jamais.
-      // FUT-80 : les bâtiments de l'adresse, pour qu'un diagnostic rattaché à un autre bâtiment ne soit
-      // pas retenu d'office. Rapport antérieur : aucun bâtiment, règle d'avant.
-      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable", idsDesBatiments(payload.batiment));
+      // FUT-80 : L'IDENTITÉ du bâtiment, pas une liste d'identifiants (revue du 26/10/2026) : plusieurs
+      // bâtiments, un référentiel muet ou un diagnostic rattaché à un autre bâtiment ne retiennent rien
+      // d'office. Rapport antérieur : identité absente, règle d'avant ; le serveur relit de toute façon
+      // le référentiel avant d'écrire, et refuse ce que la règle refuse.
+      // Une liste tronquée (la base en compte plus que la page lue) n'est pas complète non plus.
+      const listeComplete = payload.dpeCandidatesStatus !== "unavailable" && payload.dpeCandidatesTronque !== true;
+      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, listeComplete, payload.batiment);
       if (depart.kind === "restaurer") {
         setSelectedDpe(row.selected_dpe_snapshot);
         setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
@@ -617,6 +620,7 @@ export default function LogementModule({
               candidates={dpeCandidates}
               dpeNonVerifiable={dpeNonVerifiable}
               listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}
+              listeDpeTronquee={result.dpeCandidatesTronque === true}
               dossierId={dossier?.id ?? ""}
               busy={dpeBusy}
               erreur={dpeError}

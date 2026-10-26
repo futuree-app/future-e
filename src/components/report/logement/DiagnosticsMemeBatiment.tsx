@@ -74,6 +74,12 @@ export function DiagnosticsMemeBatiment({
         </p>
       )}
 
+      {/* La troncature se dit AVANT le geste d'ouvrir (revue du 26/10/2026) : le nombre annoncé au-dessus
+          n'est pas le total. */}
+      {memeBatiment.tronque && (
+        <p style={{ fontSize: 13, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>{PHRASES_MEME_BATIMENT.tronque}</p>
+      )}
+
       {!ouvert ? (
         <button type="button" onClick={() => setOuvert(true)} disabled={busy} style={LIEN}>
           {PHRASES_MEME_BATIMENT.bouton(logements.length + immeubles.length)}
@@ -104,9 +110,6 @@ export function DiagnosticsMemeBatiment({
               contexte={parLigne ? { banId } : {}}
               autresAdresses
             />
-          )}
-          {memeBatiment.tronque && (
-            <p style={{ fontSize: 12.5, color: "var(--fg-4)", lineHeight: 1.55, margin: 0 }}>{PHRASES_MEME_BATIMENT.tronque}</p>
           )}
         </div>
       )}

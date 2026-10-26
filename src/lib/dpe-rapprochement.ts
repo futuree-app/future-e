@@ -1,4 +1,5 @@
 import { communeParent } from "./plm.ts";
+import { contreditParLeBatiment, idsDesBatiments, type IdentiteBatiment } from "./batiment-rnb.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // UN DIAGNOSTIC APPORTÉ PAR SON NUMÉRO PORTE-T-IL SUR CE LOGEMENT ?
@@ -46,6 +47,14 @@ export type Rapprochement = {
   attachable: boolean;
   /** Le lecteur doit-il confirmer explicitement avant rattachement ? */
   confirmationRequise: boolean;
+  /**
+   * Revue indépendante du 26/10/2026 : l'`id_rnb` du diagnostic désigne un autre bâtiment que celui (ou
+   * ceux) que le référentiel donne à l'adresse du dossier. Posé seulement quand c'est établi (référentiel
+   * lu, bâtiment connu). Une sélection MANUELLE reste possible, après confirmation et avec la mention :
+   * le lecteur qui recopie le numéro de son document apporte une preuve que le bâtiment n'infirme pas
+   * (l'un des deux se trompe, rien ne dit lequel). Une attribution AUTOMATIQUE, jamais.
+   */
+  contredit?: true;
 };
 
 /**
@@ -149,11 +158,13 @@ export function etiquetteExploitable(label: string | null | undefined): boolean 
 
 
 /**
- * LE RAPPROCHEMENT, AVEC LE BÂTIMENT SEULEMENT QUAND IL PEUT CHANGER LA RÉPONSE (FUT-80).
+ * LE RAPPROCHEMENT, AVEC LE BÂTIMENT (FUT-80, revu après la revue indépendante du 26/10/2026).
  *
- * Le référentiel n'est interrogé que si le diagnostic porte un `id_rnb` et que l'adresse seule ne
- * suffit pas : un diagnostic à la bonne adresse n'a pas besoin de lui. Une panne du référentiel rend
- * des bâtiments vides, donc le rapprochement d'avant FUT-80 : elle ne refuse rien de plus.
+ * Le référentiel est lu dès que le diagnostic porte un `id_rnb`, MÊME À LA BONNE ADRESSE : un même
+ * identifiant BAN, ou une même voie, court-circuitaient le contrôle, et un diagnostic rattaché à un autre
+ * bâtiment se confirmait sans que personne ne le dise (Monchaux-sur-Écaillon). Il ne devient pas refusé
+ * pour autant : il demande confirmation, avec `contredit`. Une panne du référentiel ne refuse rien de plus
+ * et ne prouve rien : ni `contredit`, ni `meme_batiment`.
  *
  * Partagé par les deux routes qui vérifient un numéro (`/numero` montre, `/logement-dpe` rattache) :
  * elles ne peuvent pas se contredire sur le même diagnostic.
@@ -161,10 +172,14 @@ export function etiquetteExploitable(label: string | null | undefined): boolean 
 export async function rapprocherAvecBatiment(
   dpe: { id_ban: string | null; adresse: string | null; id_rnb?: string | null },
   dossier: { ban_id: string; address_label: string; insee: string },
-  chargerBatiments: (banId: string) => Promise<string[]>,
+  chargerIdentite: (banId: string) => Promise<IdentiteBatiment>,
 ): Promise<Rapprochement> {
-  const parAdresse = rapprocher(dpe, dossier);
-  if (parAdresse.attachable || !dpe.id_rnb) return parAdresse;
-  const batiments = await chargerBatiments(dossier.ban_id).catch(() => []);
-  return rapprocher(dpe, dossier, batiments);
+  if (!dpe.id_rnb) return rapprocher(dpe, dossier);
+  const identite = await chargerIdentite(dossier.ban_id).catch((): IdentiteBatiment => ({ statut: "indisponible" }));
+  const batiments = idsDesBatiments(identite);
+  const r = rapprocher(dpe, dossier, batiments);
+  if ((r.niveau === "adresse" || r.niveau === "batiment") && contreditParLeBatiment(dpe, batiments)) {
+    return { ...r, confirmationRequise: true, contredit: true };
+  }
+  return r;
 }

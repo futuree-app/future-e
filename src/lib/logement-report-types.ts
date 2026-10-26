@@ -33,6 +33,12 @@ export type LogementReport = {
    * `undefined` : rapport écrit avant FUT-65, on ne sait pas, et ce n'est JAMAIS lu comme `absent`.
    */
   dpeCandidatesStatus?: AuditStatus;
+  /**
+   * La base compte à cette adresse plus de diagnostics que la page lue (revue indépendante du 26/10/2026).
+   * Posé SEULEMENT quand c'est le cas : un rapport complet garde sa forme et son empreinte d'avant. La
+   * liste montrée n'est alors pas exhaustive, et rien ne s'attribue sur son unicité.
+   */
+  dpeCandidatesTronque?: true;
   banFeatureType?: string | null;
   /**
    * FUT-80 : LE BÂTIMENT DE L'ADRESSE selon le Référentiel national des bâtiments (cf. `batiment-rnb.ts`).

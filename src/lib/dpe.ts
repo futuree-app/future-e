@@ -274,22 +274,31 @@ export async function getDpeCandidatesByBanId(banId: string): Promise<DpeRecord[
 //
 // Bornée à 8 s, comme les autres sources du module (FUT-13) : `fetchLines` n'a pas de délai.
 // `getDpeCandidatesByBanId` reste tel quel pour ses autres appelants.
+//
+// UNE PAGE N'EST PAS LA LISTE (revue indépendante du 26/10/2026). Trente lignes sont lues par jeu ; la
+// base dit combien elle en compte (`total`). Trente diagnostics d'une même maison, réduits à un seul par
+// la déduplication, faisaient un « candidat unique » sur une adresse qui en comptait quatre-vingts, et
+// l'attribution automatique partait. `tronque` : un jeu en compte plus que la page lue, ou ne dit pas
+// combien ; la liste n'est alors pas complète, et rien ne s'attribue sur son unicité supposée.
 export async function lookupDpeCandidatesByBanId(
   banId: string,
-): Promise<{ status: "present" | "absent" | "unavailable"; candidates: DpeRecord[] }> {
+): Promise<{ status: "present" | "absent" | "unavailable"; candidates: DpeRecord[]; tronque: boolean }> {
+  const TAILLE = 30;
   const collected: DpeRecord[] = [];
   let sawFailure = false;
+  let tronque = false;
   for (const dataset of [DS.existant, DS.neuf]) {
     const url = new URL(`${dataset}/lines`);
     url.searchParams.set("qs", `identifiant_ban:"${banId}"`);
-    url.searchParams.set("size", "30");
+    url.searchParams.set("size", String(TAILLE));
     url.searchParams.set("sort", "-date_etablissement_dpe");
     url.searchParams.set("select", SELECT_LOGEMENT);
     try {
       const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
       if (!res.ok) { sawFailure = true; continue; }
-      const json = (await res.json()) as { results?: unknown };
+      const json = (await res.json()) as { results?: unknown; total?: unknown };
       if (!Array.isArray(json?.results)) { sawFailure = true; continue; }
+      if (typeof json.total !== "number" || json.total > json.results.length) tronque = true;
       collected.push(...(json.results as ApiRecord[]).map(toRecord));
     } catch {
       sawFailure = true; // délai dépassé, réseau, réponse illisible
@@ -297,7 +306,7 @@ export async function lookupDpeCandidatesByBanId(
   }
   const candidates = dedupeAndCollapseDpe(collected)
     .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
-  return { status: sawFailure ? "unavailable" : candidates.length > 0 ? "present" : "absent", candidates };
+  return { status: sawFailure ? "unavailable" : candidates.length > 0 ? "present" : "absent", candidates, tronque };
 }
 
 /**
@@ -337,7 +346,7 @@ export async function lookupDpeMemeBatiment(
       if (!res.ok) { sawFailure = true; continue; }
       const json = (await res.json()) as { results?: unknown; total?: unknown };
       if (!Array.isArray(json?.results)) { sawFailure = true; continue; }
-      if (typeof json.total === "number" && json.total > TAILLE) tronque = true;
+      if (typeof json.total !== "number" || json.total > json.results.length) tronque = true;
       collected.push(...(json.results as ApiRecord[]).map(toRecord));
     } catch {
       sawFailure = true;

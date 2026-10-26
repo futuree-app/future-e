@@ -230,13 +230,13 @@ const dossierVilleurbanne = { ban_id: "69266_0110_00002", address_label: "2 Rue 
 test("même bâtiment, autre adresse : refusé avant FUT-80 (« commune »), rattachable après confirmation par l'ID-RNB", async () => {
   const appart = fiches(fx("villeurbanne_angle").ademe_batiment).find((c: M) => c.type_batiment === "appartement");
   assert.equal(rappr.rapprocher(appart, dossierVilleurbanne).niveau, "commune");
-  const r = await rappr.rapprocherAvecBatiment(appart, dossierVilleurbanne, async () => ["ETRZP8JQ3DNK"]);
+  const r = await rappr.rapprocherAvecBatiment(appart, dossierVilleurbanne, async () => identite(fx("villeurbanne_angle")));
   assert.deepEqual(r, { niveau: "meme_batiment", attachable: true, confirmationRequise: true });
 });
 
 test("DPE proche mais d'un autre bâtiment : jamais rattaché par le bâtiment", async () => {
   const appart = { ...fiches(fx("villeurbanne_angle").ademe_batiment).find((c: M) => c.type_batiment === "appartement"), id_rnb: "ZZZZZZZZZZZZ" };
-  const r = await rappr.rapprocherAvecBatiment(appart, dossierVilleurbanne, async () => ["ETRZP8JQ3DNK"]);
+  const r = await rappr.rapprocherAvecBatiment(appart, dossierVilleurbanne, async () => identite(fx("villeurbanne_angle")));
   assert.equal(r.niveau, "commune");
   assert.equal(r.attachable, false);
 });
@@ -247,23 +247,31 @@ test("absence d'identifiant RNB : le référentiel n'est pas interrogé, et la r
   assert.equal("id_rnb" in sans, false);
   assert.equal("provenance_id_rnb" in sans, false);
   let appels = 0;
-  const r = await rappr.rapprocherAvecBatiment(sans, dossierVilleurbanne, async () => { appels++; return ["ETRZP8JQ3DNK"]; });
+  const r = await rappr.rapprocherAvecBatiment(sans, dossierVilleurbanne, async () => { appels++; return identite(fx("villeurbanne_angle")); });
   assert.equal(appels, 0);
   assert.equal(r.niveau, "commune");
 });
 
-test("un diagnostic à la bonne adresse n'a pas besoin du référentiel, même s'il désigne un autre bâtiment", async () => {
+// Revue indépendante du 26/10/2026 : cette règle disait l'inverse (« pas besoin du référentiel »), et le
+// même identifiant BAN court-circuitait le contrôle. Le diagnostic reste rattachable À LA MAIN, mais plus
+// sans confirmation ni sans le dire.
+test("un diagnostic à la bonne adresse que le bâtiment contredit : rattachable à la main, après confirmation et avec la mention", async () => {
   const f = fx("thenac_contradiction");
   const contredit = fiches(f.ademe_adresse).find((c: M) => c.provenance_id_rnb === "Logiciel");
   let appels = 0;
-  const r = await rappr.rapprocherAvecBatiment(contredit, { ban_id: f.ban, address_label: f.label, insee: f.insee }, async () => { appels++; return ["ASTCYQ4TDP38"]; });
-  assert.equal(r.niveau, "adresse");
-  assert.equal(appels, 0);
+  const r = await rappr.rapprocherAvecBatiment(contredit, { ban_id: f.ban, address_label: f.label, insee: f.insee }, async () => { appels++; return identite(f); });
+  assert.equal(appels, 1);
+  assert.deepEqual(r, { niveau: "adresse", attachable: true, confirmationRequise: true, contredit: true });
+  // Concordant : rien ne change.
+  const concordant = fiches(f.ademe_adresse).find((c: M) => c.id_rnb === "ASTCYQ4TDP38");
+  assert.deepEqual(await rappr.rapprocherAvecBatiment(concordant, { ban_id: f.ban, address_label: f.label, insee: f.insee }, async () => identite(f)),
+    { niveau: "adresse", attachable: true, confirmationRequise: false });
 });
 
 test("référentiel indisponible pendant la vérification : rien n'est refusé de plus ni accepté de plus qu'avant", async () => {
   const appart = fiches(fx("villeurbanne_angle").ademe_batiment).find((c: M) => c.type_batiment === "appartement");
   const r = await rappr.rapprocherAvecBatiment(appart, dossierVilleurbanne, async () => { throw new Error("RNB muet"); });
+  assert.equal(r.contredit, undefined, "une panne ne prouve aucune contradiction");
   assert.equal(r.niveau, "commune");
   assert.equal(r.attachable, false);
 });
@@ -273,15 +281,17 @@ test("référentiel indisponible pendant la vérification : rien n'est refusé d
 test("une maison seule à l'adresse, rattachée par la base à un bâtiment à 78 m : plus retenue d'office", () => {
   const f = fx("monchaux_auto");
   const candidates = fiches(f.ademe_adresse);
-  const batiments = rnb.idsDesBatiments(identite(f));
+  const id = identite(f);
+  const batiments = rnb.idsDesBatiments(id);
   assert.deepEqual(batiments, ["JHR966BZVKDA"]);
   assert.equal(candidates[0].id_rnb, "Z4ZCPFA4P9P2");
   // Avant FUT-80, et sur un rapport antérieur (aucun bâtiment connu) : retenue automatiquement.
   assert.equal(attrib.dpeAttributionStatus(candidates, "housenumber", true).status, "auto_confirmed");
   assert.equal(auto.departDpe({ dpe_selection_status: "pending", dpe_selection_at: null }, candidates, "housenumber", true).kind, "proposer_auto");
   // Avec le bâtiment : le lecteur choisit, et la ligne dit pourquoi.
-  assert.equal(attrib.dpeAttributionStatus(candidates, "housenumber", true, batiments).status, "selection_required");
-  assert.equal(auto.departDpe({ dpe_selection_status: "pending", dpe_selection_at: null }, candidates, "housenumber", true, batiments).kind, "a_choisir");
+  assert.equal(attrib.dpeAttributionStatus(candidates, "housenumber", true, id).status, "selection_required");
+  assert.equal(auto.departDpe({ dpe_selection_status: "pending", dpe_selection_at: null }, candidates, "housenumber", true, id).kind, "a_choisir");
+  assert.equal(rnb.vetoBatiment(candidates[0], id), "contredit");
   const ligne = vue.ligneCandidat(candidates[0], vue.champsVariables(candidates), { batiments });
   assert.ok(ligne.details.includes("rattaché par la base ADEME à un autre bâtiment"));
 });
@@ -291,7 +301,7 @@ test("le bâtiment n'ajoute jamais de certitude : un candidat concordant ne devi
   const concordant = fiches(f.ademe_adresse).filter((c: M) => c.id_rnb === "ASTCYQ4TDP38");
   assert.ok(concordant.length > 1);
   // Un appartement concordant reste à choisir : la règle d'avant ne retient que les maisons.
-  assert.equal(attrib.dpeAttributionStatus([concordant[0]], "housenumber", true, ["ASTCYQ4TDP38"]).status, "selection_required");
+  assert.equal(attrib.dpeAttributionStatus([concordant[0]], "housenumber", true, identite(f)).status, "selection_required");
 });
 
 test("les DPE saisis sur un autre bâtiment le disent, avec la bonne voix (diagnostiqueur ou base)", () => {
@@ -309,13 +319,13 @@ test("les DPE saisis sur un autre bâtiment le disent, avec la bonne voix (diagn
 test("une sélection explicite du lecteur est conservée, même si le bâtiment la contredit", () => {
   const f = fx("monchaux_auto");
   const candidates = fiches(f.ademe_adresse);
-  const batiments = rnb.idsDesBatiments(identite(f));
+  const id = identite(f);
   for (const row of [
     { dpe_selection_status: "user_confirmed", dpe_selection_at: "2026-10-01T00:00:00Z" },
     { dpe_selection_status: "auto_confirmed", dpe_selection_at: "2026-10-01T00:00:00Z" },
     { dpe_selection_status: "not_in_list", dpe_selection_at: "2026-10-01T00:00:00Z" },
   ]) {
-    assert.equal(auto.departDpe(row, candidates, "housenumber", true, batiments).kind, "restaurer");
+    assert.equal(auto.departDpe(row, candidates, "housenumber", true, id).kind, "restaurer");
   }
 });
 
@@ -373,4 +383,51 @@ test("les phrases de prudence lient leurs petits mots (espaces insécables)", ()
   assert.equal(rnb.listeAdresses([{ cle: "a", libelle: "1 Rue A, X" }, { cle: "b", libelle: "2 Rue B, X" }, { cle: "c", libelle: "3 Rue C, X" }, { cle: "d", libelle: "4 Rue D, X" }, { cle: "e", libelle: "5 Rue E, X" }]).replace(/ /g, " "),
     "1 Rue A, 2 Rue B, 3 Rue C et 2 autres adresses");
   assert.equal(rnb.voieDuLibelle("122 Avenue Roger Salengro 69100 Villeurbanne"), "122 Avenue Roger Salengro");
+});
+
+// ── 7. Revue indépendante du 26/10/2026 : ce que l'écran dit avant le geste ─────────────────────────
+
+test("liste de l'adresse tronquée : dit AVANT la liste que le compte n'est pas le total", () => {
+  const candidates = fiches(fx("thenac_contradiction").ademe_adresse);
+  const t = texte(energie({ dpeStatus: "selection_required", candidates, listeDpeTronquee: true }));
+  assert.match(t, /La base ADEME compte à cette adresse plus de diagnostics que ceux lus lors de cette collecte : seuls les plus récents sont montrés\./);
+  assert.ok(t.indexOf("plus de diagnostics que ceux lus") < t.indexOf("Identifier mon logement"), "avant le geste");
+  assert.doesNotMatch(texte(energie({ dpeStatus: "selection_required", candidates })), /plus de diagnostics que ceux lus/);
+});
+
+test("diagnostics du même bâtiment tronqués : la réserve se lit avant d'ouvrir la liste", () => {
+  // Sur be86f4c7 : la réserve n'apparaissait qu'une fois la liste ouverte.
+  const f = fx("villeurbanne_angle");
+  const t = texte(React.createElement(MemeBat, {
+    batiment: identite(f), memeBatiment: { status: "present", candidates: fiches(f.ademe_batiment), tronque: true }, banId: f.ban, onPick: () => {},
+  }));
+  assert.match(t, /La base en compte davantage : seuls les plus récents sont montrés\./);
+  assert.match(t, /Voir ces diagnostics/, "la liste est encore repliée");
+});
+
+test("passeport : un bâtiment en ruine le dit ; un bâtiment seulement démoli n'est pas présenté comme celui de l'adresse", () => {
+  const b = (fx("villeurbanne_angle").rnb as M).results[0];
+  const ruine = rnb.identiteDepuisRnb({ next: null, results: [{ ...b, status: "notUsable" }] }, LE);
+  assert.equal(ruine.statut, "confirme");
+  assert.equal(ruine.batiment.etat, "notUsable");
+  assert.match(rnb.ligneBatimentPasseport(ruine, "x").complement.replace(/\u00a0/g, " "), /^Le référentiel le signale en mauvais état ou en ruine\./);
+  const demoli = rnb.identiteDepuisRnb({ next: null, results: [{ ...b, status: "demolished" }] }, LE);
+  assert.deepEqual(demoli, { statut: "exclu", exclus: ["ETRZP8JQ3DNK"], consulteLe: LE });
+  const l = rnb.ligneBatimentPasseport(demoli, "x");
+  assert.equal(l.lien, null);
+  assert.match(l.valeur.replace(/\u00a0/g, " "), /^Aucun bâtiment existant rattaché à cette adresse$/);
+  // Un bâtiment ordinaire garde exactement sa forme d'avant (empreinte des versions inchangée).
+  assert.equal("etat" in identite(fx("villeurbanne_angle")).batiment, false);
+  // Démoli : pas une absence ; il n'entre pas non plus dans les sources absentes.
+  assert.deepEqual(version.sourcesAbsentes({ ...rapportBase, batiment: demoli }).filter((s: string) => /batiment/.test(s)), []);
+});
+
+test("déduplication : la même unité à deux adresses reste deux candidats ; à la même adresse, un seul", () => {
+  const base0 = fiches(fx("villeurbanne_angle").ademe_batiment)[1];
+  const u = { etage: 0, complement: "Maison 1", surface_m2: 105.8 };
+  const a = { ...base0, ...u, id_dpe: "A", id_ban: "69266_3620_00122", date_dpe: "2025-03-01" };
+  const b = { ...base0, ...u, id_dpe: "B", id_ban: "69266_3620_00124", date_dpe: "2025-04-01" };
+  assert.deepEqual(attrib.dedupeAndCollapseDpe([a, b]).map((d: M) => d.id_dpe).sort(), ["A", "B"]);
+  assert.deepEqual(attrib.dedupeAndCollapseDpe([a, { ...b, id_ban: a.id_ban }]).map((d: M) => d.id_dpe), ["B"], "même adresse : le plus récent");
+  assert.deepEqual(attrib.dedupeAndCollapseDpe([a, a]).map((d: M) => d.id_dpe), ["A"], "même numéro : une fois");
 });

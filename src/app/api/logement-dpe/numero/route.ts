@@ -2,7 +2,7 @@ import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { findDpeByNumero } from "@/lib/dpe";
 import { normaliserNumeroDpe, rapprocherAvecBatiment } from "@/lib/dpe-rapprochement";
-import { batimentsDeLAdresse } from "@/lib/rnb";
+import { lookupBatimentByBanId } from "@/lib/rnb";
 import { grainDpe } from "@/lib/dpe-grain";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
   const rapprochement = await rapprocherAvecBatiment(
     { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse, id_rnb: trouve.dpe.id_rnb },
     { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
-    batimentsDeLAdresse,
+    lookupBatimentByBanId,
   );
 
   // LE GRAIN VOYAGE AVEC LA FICHE (FUT-74, D2). Le numéro d'un DPE d'immeuble existe : répondre
@@ -75,6 +75,9 @@ export async function POST(req: Request) {
     grain,
     attachable: rapprochement.attachable && grain === "logement",
     confirmationRequise: rapprochement.confirmationRequise,
+    // Le référentiel rattache ce diagnostic à un autre bâtiment que celui de l'adresse : l'écran le dit
+    // avant la confirmation. Absent sinon.
+    ...(rapprochement.contredit ? { contredit: true } : {}),
     // L'ADRESSE ENREGISTRÉE À L'ADEME VOYAGE AVEC LE DIAGNOSTIC, toujours, y compris quand elle
     // coïncide avec celle du dossier. C'est elle qui permet au lecteur de voir qu'il s'est trompé
     // de numéro, et c'est la seule chose qu'on puisse lui montrer pour qu'il tranche lui-même.

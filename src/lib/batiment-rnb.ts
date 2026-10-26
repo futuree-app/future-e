@@ -41,19 +41,45 @@ export type AdresseRnb = {
 export type BatimentRnb = {
   rnb_id: string;
   adresses: AdresseRnb[];
+  /**
+   * Revue indépendante du 26/10/2026 : posé SEULEMENT pour un bâtiment que le référentiel dit « en ruine »
+   * (`notUsable`, lexique RNB). Il existe, il est bien celui de l'adresse, mais le passeport ne peut pas
+   * le présenter comme un bâtiment ordinaire, ni l'attribution automatique s'y fier. Absent sinon : un
+   * bâtiment `constructed` garde exactement la forme d'avant.
+   */
+  etat?: "notUsable";
 };
 
 export type IdentiteBatiment =
   | { statut: "confirme"; batiment: BatimentRnb; consulteLe: string }
   | { statut: "ambigu"; batiments: BatimentRnb[]; consulteLe: string }
   | { statut: "non_trouve"; consulteLe: string }
+  /**
+   * Le référentiel rattache l'adresse à des bâtiments, mais AUCUN d'eux n'est un bâtiment existant :
+   * démoli, identifiant désactivé, projet. Ce n'est pas une absence : un diagnostic peut désigner l'un
+   * d'eux, et l'adresse a bien un passé bâti. Distinct de `non_trouve` pour que ce veto ne se perde pas.
+   */
+  | { statut: "exclu"; exclus: string[]; consulteLe: string }
+  /**
+   * Il n'a pas répondu, ou sa réponse n'est pas vérifiable : illisible, élément mal formé, statut
+   * inconnu, page incomplète (`next`). Rien n'en est conclu, ni absence, ni unicité.
+   */
   | { statut: "indisponible" };
 
 /**
- * LES ÉTATS D'UN BÂTIMENT QUI EXISTE. Le RNB garde aussi les bâtiments démolis et les projets de
- * construction : ni l'un ni l'autre n'est le bâtiment où l'on envisage d'habiter.
+ * LES STATUTS DU RÉFÉRENTIEL, ET CE QU'ON EN FAIT (lexique RNB, relu le 26/10/2026 : `constructed`,
+ * `notUsable`, `demolished` ; les anciens états de projet restent possibles dans les données).
+ *   - existant ordinaire : `constructed`, `ongoingChange` (en travaux, toujours debout) ;
+ *   - existant « en ruine » : `notUsable`, gardé, signalé, jamais attribué automatiquement ;
+ *   - exclu : `demolished`, `constructionProject`, `canceledConstructionProject`, et tout identifiant
+ *     désactivé (`is_active: false`, créé par erreur ou fusionné).
+ * Un statut hors de ces listes rend la réponse NON VÉRIFIABLE : le référentiel aurait changé de
+ * vocabulaire, et deviner serait affirmer.
  */
-const EXISTANTS = new Set(["constructed", "ongoingChange", "notUsable"]);
+const EXISTANTS = new Set(["constructed", "ongoingChange"]);
+const EN_RUINE = "notUsable";
+const EXCLUS = new Set(["demolished", "constructionProject", "canceledConstructionProject"]);
+const ID_RNB = /^[0-9A-Z]{12}$/;
 
 type RnbAdresseBrute = {
   id?: unknown; street_number?: unknown; street_rep?: unknown; street?: unknown; city_name?: unknown;
@@ -76,29 +102,85 @@ function adresse(a: RnbAdresseBrute): AdresseRnb | null {
 /**
  * La réponse de `GET /api/alpha/buildings/?cle_interop_ban=…`, lue. Une réponse illisible n'est pas
  * une absence : elle rend `indisponible`, jamais `non_trouve`.
+ *
+ * TOUT ÉLÉMENT DOIT ÊTRE LISIBLE, ET LA PAGE COMPLÈTE (revue indépendante du 26/10/2026). Un élément sans
+ * identifiant RNB bien formé, sans `is_active` booléen ou d'un statut inconnu rend toute la réponse non
+ * vérifiable : l'écarter en silence pouvait faire d'une adresse à deux bâtiments une adresse à un seul.
+ * Un `next` non nul dit qu'une autre page existe : une première page à un bâtiment ne prouve pas
+ * l'unicité. `rnb.ts` suit les pages et ne passe ici qu'une réponse complète.
  */
 export function identiteDepuisRnb(corps: unknown, consulteLe: string): IdentiteBatiment {
-  const resultats = (corps as { results?: unknown } | null)?.results;
+  const c = corps as { results?: unknown; next?: unknown } | null;
+  const resultats = c?.results;
   if (!Array.isArray(resultats)) return { statut: "indisponible" };
+  if (c?.next != null) return { statut: "indisponible" };
   const batiments: BatimentRnb[] = [];
+  const exclus: string[] = [];
   for (const brut of resultats as RnbBatimentBrut[]) {
-    const id = texte(brut?.rnb_id);
-    if (!id || brut.is_active === false || !EXISTANTS.has(String(brut.status))) continue;
+    if (!brut || typeof brut !== "object") return { statut: "indisponible" };
+    const id = texte(brut.rnb_id);
+    const statut = texte(brut.status);
+    if (!id || !ID_RNB.test(id) || typeof brut.is_active !== "boolean" || !statut) return { statut: "indisponible" };
+    const connu = EXISTANTS.has(statut) || statut === EN_RUINE || EXCLUS.has(statut);
+    if (!connu) return { statut: "indisponible" };
+    if (!brut.is_active || EXCLUS.has(statut)) {
+      if (!exclus.includes(id)) exclus.push(id);
+      continue;
+    }
     const adresses = Array.isArray(brut.addresses)
       ? (brut.addresses as RnbAdresseBrute[]).map(adresse).filter((a): a is AdresseRnb => a != null)
       : [];
-    if (!batiments.some((b) => b.rnb_id === id)) batiments.push({ rnb_id: id, adresses });
+    if (!batiments.some((b) => b.rnb_id === id)) {
+      batiments.push({ rnb_id: id, adresses, ...(statut === EN_RUINE ? { etat: EN_RUINE } : {}) });
+    }
   }
-  if (batiments.length === 0) return { statut: "non_trouve", consulteLe };
+  if (batiments.length === 0) {
+    return exclus.length > 0 ? { statut: "exclu", exclus, consulteLe } : { statut: "non_trouve", consulteLe };
+  }
   if (batiments.length === 1) return { statut: "confirme", batiment: batiments[0], consulteLe };
   return { statut: "ambigu", batiments, consulteLe };
 }
 
-/** Les identifiants des bâtiments de l'adresse, quel que soit leur nombre. Vide sinon. */
+/** Les identifiants des bâtiments EXISTANTS de l'adresse, quel que soit leur nombre. Vide sinon. */
 export function idsDesBatiments(identite: IdentiteBatiment | null | undefined): string[] {
   if (identite?.statut === "confirme") return [identite.batiment.rnb_id];
   if (identite?.statut === "ambigu") return identite.batiments.map((b) => b.rnb_id);
   return [];
+}
+
+/**
+ * LE BÂTIMENT INTERDIT-IL L'ATTRIBUTION AUTOMATIQUE ? `null` : il ne s'y oppose pas.
+ *
+ * Revue indépendante du 26/10/2026. La règle ne recevait qu'une LISTE d'identifiants : trois bâtiments à
+ * l'adresse (La Rochelle, 27 rue des Brandes) et un diagnostic sans `id_rnb` passaient, alors que le
+ * passeport disait au même moment « 3 bâtiments rattachés à cette adresse ». Une adresse BAN précise ne
+ * désigne pas un bâtiment quand le référentiel en compte plusieurs : laquelle des maisons est celle du
+ * diagnostic, rien ne le dit.
+ *
+ *   - `undefined` : rapport antérieur à FUT-80, côté écran seulement. Le serveur, lui, relit toujours le
+ *     référentiel avant d'enregistrer : il ne reçoit jamais `undefined`.
+ *   - `non_trouve` : le référentiel a répondu sans bâtiment (11 % des adresses). Rien ne contredit,
+ *     règle d'avant FUT-80.
+ *   - tout le reste demande le lecteur : référentiel muet ou réponse non vérifiable (une panne ne prouve
+ *     pas l'absence de contradiction), plusieurs bâtiments, aucun bâtiment existant, bâtiment en ruine,
+ *     diagnostic qui désigne un autre bâtiment.
+ */
+export type VetoBatiment = "indisponible" | "ambigu" | "exclu" | "en_ruine" | "contredit";
+
+export function vetoBatiment(
+  dpe: { id_rnb?: string | null },
+  identite: IdentiteBatiment | null | undefined,
+): VetoBatiment | null {
+  if (identite === undefined || identite === null) return null;
+  switch (identite.statut) {
+    case "indisponible": return "indisponible";
+    case "ambigu": return "ambigu";
+    case "exclu": return "exclu";
+    case "non_trouve": return null;
+    case "confirme":
+      if (identite.batiment.etat === EN_RUINE) return "en_ruine";
+      return contreditParLeBatiment(dpe, [identite.batiment.rnb_id]) ? "contredit" : null;
+  }
 }
 
 /** Les AUTRES adresses du bâtiment, celle du dossier exclue. Seulement pour un bâtiment unique. */
@@ -215,10 +297,23 @@ export function ligneBatimentPasseport(
 ): { valeur: string; lien: string | null; complement: string | null } | null {
   if (identite?.statut === "confirme") {
     const autres = autresAdresses(identite, banId);
+    const aussi = autres.length > 0 ? `Il porte aussi ${listeAdresses(autres, 2)}.` : null;
+    // « En ruine » (`notUsable`) : le dire, et avant le reste. Une ligne ordinaire laissait croire à un
+    // bâtiment en état d'être habité.
+    const ruine = identite.batiment.etat === EN_RUINE
+      ? `Le référentiel le signale en${NB}mauvais état ou en${NB}ruine.`
+      : null;
     return {
       valeur: formatRnbId(identite.batiment.rnb_id),
       lien: lienCarteRnb(identite.batiment.rnb_id),
-      complement: autres.length > 0 ? `Il porte aussi ${listeAdresses(autres, 2)}.` : null,
+      complement: [ruine, aussi].filter(Boolean).join(" ") || null,
+    };
+  }
+  if (identite?.statut === "exclu") {
+    return {
+      valeur: `Aucun bâtiment existant rattaché à${NB}cette adresse`,
+      lien: null,
+      complement: "Le référentiel n'y rattache qu'un bâtiment démoli ou un identifiant retiré.",
     };
   }
   if (identite?.statut === "ambigu") {

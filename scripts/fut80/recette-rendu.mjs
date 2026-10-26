@@ -30,6 +30,11 @@ const ATTENDU = {
   puyravault: { present: [/7 bâtiments rattachés à cette adresse/, /ne dit pas lequel abrite le logement/], absent: [/même bâtiment/] },
   bordeaux: { present: [], absent: [/Bâtiment \(RNB\)/i, /même bâtiment/] },
   ancien: { present: [], absent: [/Bâtiment \(RNB\)/i, /même bâtiment/] },
+  // Revue indépendante du 26/10/2026. Trois bâtiments : la maison seule n'est PAS retenue, et aucune écriture
+  // ne part (la garde ci-dessous l'exige pour tous les cas).
+  "la-rochelle": { present: [/3 bâtiments rattachés à cette adresse/, /ne dit pas lequel abrite le logement/], absent: [/retenu automatiquement/] },
+  // Listes tronquées : les deux réserves se lisent AVANT tout geste.
+  tronque: { present: [/plus de diagnostics que ceux lus lors de cette collecte/, /La base en compte davantage : seuls les plus récents sont montrés\./], absent: [] },
 };
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME, headless: true });

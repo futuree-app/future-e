@@ -3,7 +3,7 @@
 // La partie IO (fetch ADEME) vit dans `dpe.ts`, qui ré-exporte ces symboles pour le serveur.
 
 import { attribuableAuLogement } from "./dpe-grain.ts";
-import { contreditParLeBatiment } from "./batiment-rnb.ts";
+import { vetoBatiment, type IdentiteBatiment } from "./batiment-rnb.ts";
 
 export type DpeLabel = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
@@ -57,17 +57,23 @@ export type DpeRecord = {
 export const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];
 
 // Dédup par numéro de DPE, puis collapse CONSERVATEUR : deux diagnostics qui décrivent
-// manifestement la même unité (même étage + même complément + même surface, tous renseignés)
-// sont fusionnés en gardant le plus récent. Au moindre doute (un champ d'identification
+// manifestement la même unité (même adresse BAN + même étage + même complément + même surface, tous
+// renseignés) sont fusionnés en gardant le plus récent. Au moindre doute (un champ d'identification
 // manquant), on garde les deux : mieux vaut un sélecteur qu'une fusion fausse.
+//
+// L'ADRESSE ENTRE DANS LA CLÉ (revue indépendante du 26/10/2026). La recherche par bâtiment (FUT-80)
+// réunit des diagnostics de PLUSIEURS adresses : deux maisons que le référentiel compte ensemble, au 122 et
+// au 124, toutes deux « Maison 1 », rez-de-chaussée, 105,8 m², devenaient un seul candidat, et l'une
+// disparaissait sans preuve qu'elles soient le même logement. À une même adresse, rien ne change : la
+// liste de l'adresse est cherchée par son identifiant BAN, toutes ses lignes le portent.
 export function dedupeAndCollapseDpe(records: DpeRecord[]): DpeRecord[] {
   const byId = new Map<string, DpeRecord>();
   for (const r of records) if (!byId.has(r.id_dpe)) byId.set(r.id_dpe, r);
   const unique = [...byId.values()];
 
   const sameUnitKey = (r: DpeRecord): string | null =>
-    r.etage != null && r.complement != null && r.surface_m2 != null
-      ? `${r.etage}|${r.complement}|${r.surface_m2}`
+    r.id_ban != null && r.etage != null && r.complement != null && r.surface_m2 != null
+      ? `${r.id_ban}|${r.etage}|${r.complement}|${r.surface_m2}`
       : null; // identification incomplète -> jamais fusionné
 
   const kept = new Map<string, DpeRecord>();
@@ -102,18 +108,17 @@ const isMaison = (t: string | null): boolean => (t ?? "").toLowerCase().includes
 // diagnostic porte sur un logement selon la règle canonique (`attribuableAuLogement`) ; les autres
 // conditions restent celles d'avant.
 //
-// UN DIAGNOSTIC RATTACHÉ À UN AUTRE BÂTIMENT NE CONVERGE PLUS (FUT-80). Quand son ID-RNB n'est aucun
-// des bâtiments que le référentiel donne à l'adresse, l'adresse et l'identifiant se contredisent :
-// l'un des deux se trompe, et rien ne dit lequel. Le lecteur choisit (cf. `contreditParLeBatiment`).
-// Mesuré le 26/10/2026 : 1 cas sur 126 adresses à candidat unique de logement (Monchaux-sur-Écaillon,
-// bâtiment désigné à 78 m). `batimentsAdresse` vide (rapport antérieur, référentiel muet) : règle
-// d'avant, inchangée.
-// Le bâtiment ne fait JAMAIS l'inverse : le trouver n'attribue rien de plus.
+// LE BÂTIMENT PEUT S'OPPOSER, JAMAIS AJOUTER (FUT-80, revu après la revue indépendante du 26/10/2026).
+// La règle recevait une liste d'identifiants : elle voyait un diagnostic désignant un autre bâtiment
+// (Monchaux-sur-Écaillon), mais pas une adresse à trois bâtiments (La Rochelle), ni un référentiel muet,
+// ni un bâtiment démoli. Elle reçoit désormais l'IDENTITÉ, et `vetoBatiment` dit pourquoi elle s'oppose.
+// `identite` absente (rapport antérieur, écran seulement) : règle d'avant ; le serveur relit toujours le
+// référentiel avant d'enregistrer une attribution automatique.
 export function dpeAttributionStatus(
   candidates: DpeRecord[],
   banFeatureType: string | null,
   listeComplete = true,
-  batimentsAdresse: readonly string[] = [],
+  identite?: IdentiteBatiment | null,
 ): DpeAttribution {
   if (candidates.length === 0) return { status: "not_found" };
   const one = candidates[0];
@@ -124,7 +129,7 @@ export function dpeAttributionStatus(
     attribuableAuLogement(one) &&
     banFeatureType === "housenumber" &&
     one.etiquette_dpe != null &&
-    !contreditParLeBatiment(one, batimentsAdresse);
+    vetoBatiment(one, identite) === null;
   return strongConvergence
     ? { status: "auto_confirmed", dpe: one }
     : { status: "selection_required", candidates };
