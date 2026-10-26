@@ -75,7 +75,17 @@ const MESURE =
 
 const finiOuNull = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
-/** Le sens que le taux STOCKÉ démontre à lui seul, ou `null` s'il ne tranche pas (absent, invalide, borne). */
+// Domaine du taux (revue de Work, 3e passe) : `taux_total` vaut ((P21/P15)^(1/6) − 1) × 100, et
+// populate-demographie.py écarte P21 ≤ 0. Le taux brut est donc strictement supérieur à −100 %/an ; arrondi,
+// le taux stocké est ≥ −100. En dessous, la valeur est impossible : elle est invalide, avec ou sans code.
+// Aucune borne haute : la formule n'en a pas, et un plafond serait un seuil arbitraire.
+const TAUX_MINIMUM_PCT = -100;
+const tauxOuNull = (v: unknown): number | null => {
+  const t = finiOuNull(v);
+  return t != null && t >= TAUX_MINIMUM_PCT ? t : null;
+};
+
+/** Le sens que le taux STOCKÉ démontre à lui seul, ou `null` s'il ne tranche pas (absent, invalide ou impossible, borne). */
 function sensDuTaux(t: number | null): keyof typeof EVOLUTION | null {
   if (t == null) return null;
   if (t > BANDE_STABLE_PCT) return "hausse";
@@ -94,7 +104,7 @@ function codeCompatible(code: DemographyCode, t: number): boolean {
 
 /** Les constats démontrés : chacun est `null` quand les valeurs ne le fondent pas. */
 function constats(d: NonNullable<DemographieIndex>): { sens: keyof typeof EVOLUTION | null; arrivants: string | null } {
-  const t = finiOuNull(d.taux_total);
+  const t = tauxOuNull(d.taux_total);
   const p = finiOuNull(d.part_nouveaux);
   const partValide = p != null && p >= 0 && p <= 100;
   // `Object.hasOwn`, pas `in` (celui de `isDemographyCode`) : « toString » ou « constructor » ne sont pas des codes.

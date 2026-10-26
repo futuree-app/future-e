@@ -16,6 +16,12 @@
 //      et « part élevée ». Les codes sont désormais vérifiés contre le taux et la part (arrondi compris) ;
 //   B. le contrôle de causalité se contournait (« attire … sans difficulté », « attirera », « la croissance
 //      prouve que les familles choisissent… ») et refusait une mise en garde légitime.
+// Revue de Work (26/10, SHA 86135c12), trois contre-exemples corrigés et rejoués ici :
+//   1. taux −101 %/an + `perd` donnait « la population diminue ». Un taux sous −100 %/an est impossible
+//      (P21 > 0) : il est désormais invalide, avec ou sans code. Aucune borne haute ;
+//   2. et 3. « Le dossier attire votre attention sur les risques pour les familles » et « Les eaux stagnantes
+//      attirent les moustiques près des habitants » partaient au repli : un mot de personne n'importe où dans
+//      la proposition suffisait. Seuls comptent maintenant le groupe sujet et le groupe objet d'« attirer ».
 // L'index réel ne contient aucune donnée contradictoire : pour éprouver la route sur ces cas, le hook
 // enveloppe `@/lib/comparateur-vie` (le fichier n'est pas modifié). Les INSEE fictifs 99xxx renvoient une
 // vraie commune de l'index dont seule la démographie est altérée ; tout autre INSEE passe au vrai moteur.
@@ -237,6 +243,16 @@ const COHERENCE: [string, DemographieIndex, string | null, RegExp | null][] = [
   ["code inconnu, −0,2", { taux_total: -0.2, part_nouveaux: 9, recit: "code_inconnu" }, EVOL.baisse, null],
   ["« toString » n'est pas un code", { taux_total: 0.5, part_nouveaux: 9, recit: "toString" }, EVOL.hausse, null],
   ["tout absent", { taux_total: null, part_nouveaux: null, recit: null }, null, null],
+  // Domaine du taux : (P21/P15)^(1/6) − 1 > −100 %/an. En dessous, la valeur est impossible.
+  ["Work 3 : taux −101, part 5, perd", { taux_total: -101, part_nouveaux: 5, recit: "perd" }, null, null],
+  ["perd, taux −100,01", { taux_total: -100.01, part_nouveaux: 5, recit: "perd" }, null, null],
+  ["sans code, taux −101", { taux_total: -101, part_nouveaux: 5, recit: null }, null, null],
+  ["sans code, taux −Infinity", { taux_total: -Infinity, part_nouveaux: 5, recit: null }, null, null],
+  ["perd, taux −100 (borne atteignable après arrondi)", { taux_total: -100, part_nouveaux: 5, recit: "perd" }, EVOL.baisse, null],
+  ["sans code, taux −100", { taux_total: -100, part_nouveaux: 5, recit: null }, EVOL.baisse, null],
+  // Aucun plafond sur les croissances : la formule n'en a pas.
+  ["gagne_attire, taux +250", { taux_total: 250, part_nouveaux: 9, recit: "gagne_attire" }, EVOL.hausse, ELEVEE],
+  ["sans code, taux +1e6", { taux_total: 1e6, part_nouveaux: 9, recit: null }, EVOL.hausse, null],
 ];
 
 for (const [nom, demo, evolution, arrivants] of COHERENCE) {
@@ -257,12 +273,15 @@ const FAUX: Record<string, { base: string; demographie: DemographieIndex }> = {
   "99003": { base: "01034", demographie: { taux_total: 0.84, part_nouveaux: null, recit: "gagne_attire" } },
   "99004": { base: "01262", demographie: { taux_total: 0.15, part_nouveaux: 9, recit: null } },
   "99005": { base: "01262", demographie: { taux_total: 0.15, part_nouveaux: 5, recit: "gagne_sans_renouv" } },
+  // Reproduction exacte de Work (3e revue) : Belley, taux impossible.
+  "99006": { base: "01034", demographie: { taux_total: -101, part_nouveaux: 5, recit: "perd" } },
+  "99007": { base: "01034", demographie: { taux_total: -101, part_nouveaux: 5, recit: null } },
 };
 
 test("/qna, données contradictoires ou invalides : le payload n'affirme que ce que les valeurs démontrent", async () => {
   (globalThis as { __fut72Faux?: typeof FAUX }).__fut72Faux = FAUX;
   try {
-    for (const insee of ["99001", "99002", "99004"]) {
+    for (const insee of ["99001", "99002", "99004", "99006", "99007"]) {
       const { prompt, brut } = await payloadPour(insee, "Commune test");
       assert.ok(prompt.territory_signals, `${insee} : les autres signaux restent`);
       assert.equal("demographie" in prompt.territory_signals, false, `${insee} : ${JSON.stringify(prompt.territory_signals.demographie)}`);
@@ -338,6 +357,15 @@ const REFUSEES: [string, string][] = [
   ["Les chiffres ne disent pas tout, mais la commune attire des familles.", "interdit:attractivite"],
   ["La commune attire des familles, rien ne le prouve pourtant.", "interdit:attractivite"],
   ["Il est difficile de se loger car la commune attire des familles.", "interdit:attractivite"],
+  // Sujet ou objet d'« attirer », quels que soient les mots intercalés.
+  ["La commune attire chaque année de nombreuses familles.", "interdit:attractivite"],
+  ["La commune de Belley attire des familles.", "interdit:attractivite"],
+  ["Elle pourrait déjà les attirer.", "interdit:attractivite"],
+  ["La commune continue d'attirer des familles.", "interdit:attractivite"],
+  ["Ce territoire attire en masse des retraités.", "interdit:attractivite"],
+  ["Ces emplois attirent des habitants.", "interdit:attractivite"],
+  ["Les familles sont attirées par le calme.", "interdit:attractivite"],
+  ["Un cadre de vie attirant pour les familles.", "interdit:attractivite"],
 ];
 
 const ACCEPTEES = [
@@ -353,7 +381,13 @@ const ACCEPTEES = [
   "Il serait hâtif d'en déduire que la commune est attractive.",
   "Gardez-vous de conclure que la commune attire des familles.",
   "On ignore pourquoi des habitants s'installent.",
-  // « attirer » dans un autre sens.
+  // « attirer » dans un autre sens. Les deux premières sont les reproductions de Work (3e revue) : des
+  // familles ou des habitants ailleurs dans la phrase ne font pas d'« attirer » une attraction résidentielle.
+  "Le dossier attire votre attention sur les risques pour les familles.",
+  "Les eaux stagnantes attirent les moustiques près des habitants.",
+  "La lumière attire les insectes chez les habitants.",
+  "Il faut attirer l'attention sur les risques.",
+  "Les familles attirent l'attention des élus.",
   "Les eaux stagnantes attirent le moustique tigre.",
   "Ce point mérite d'attirer l'attention lors d'une visite.",
   // Les constats eux-mêmes.
@@ -380,6 +414,15 @@ test("checkCausaliteDemographique : sans nom de commune, « Belley attire. » n'
   assert.equal(checkCausaliteDemographique("Belley attire.", "Belley").length, 1);
 });
 
+test("checkCausaliteDemographique : limites documentées du repérage par position", () => {
+  // Le territoire est le groupe qui précède le verbe : refus à tort, le repli s'affiche.
+  assert.equal(checkCausaliteDemographique("Les eaux stagnantes de la commune attirent les moustiques.").length, 1);
+  // Le complément du nom reste dans le groupe objet : refus à tort.
+  assert.equal(checkCausaliteDemographique("Le bruit attire les plaintes des habitants.").length, 1);
+  // Le pronom objet n'est pas résolu : passe.
+  assert.equal(checkCausaliteDemographique("Ces emplois les attirent.").length, 0);
+});
+
 // Les mêmes phrases, par la VRAIE route et le modèle simulé.
 test("/qna, réponses simulées de Work : les trois contournements partent au repli, la mise en garde passe", async () => {
   for (const [phrase, regle] of REFUSEES.slice(0, 3)) {
@@ -391,5 +434,13 @@ test("/qna, réponses simulées de Work : les trois contournements partent au re
   for (const phrase of ACCEPTEES.slice(0, 2)) {
     const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: phrase, cta: "Ouvrez le dossier" }));
     assert.equal(corps.source, "modele", `${phrase} ${JSON.stringify(corps.violations)}`);
+  }
+});
+
+test("/qna, réponses simulées de Work (3e revue) : « attirer » hors attraction résidentielle passe", async () => {
+  for (const phrase of ["Le dossier attire votre attention sur les risques pour les familles.", "Les eaux stagnantes attirent les moustiques près des habitants."]) {
+    const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: phrase, cta: "Ouvrez le dossier" }));
+    assert.equal(corps.source, "modele", `${phrase} ${JSON.stringify(corps.violations)}`);
+    assert.deepEqual(corps.violations, []);
   }
 });
