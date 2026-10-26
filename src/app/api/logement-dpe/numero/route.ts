@@ -1,7 +1,8 @@
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
 import { findDpeByNumero } from "@/lib/dpe";
-import { normaliserNumeroDpe, rapprocher } from "@/lib/dpe-rapprochement";
+import { normaliserNumeroDpe, rapprocherAvecBatiment } from "@/lib/dpe-rapprochement";
+import { batimentsDeLAdresse } from "@/lib/rnb";
 import { grainDpe } from "@/lib/dpe-grain";
 
 export const dynamic = "force-dynamic";
@@ -56,9 +57,12 @@ export async function POST(req: Request) {
     return Response.json({ status: "expire", date: trouve.date, adresse: trouve.adresse });
   }
 
-  const rapprochement = rapprocher(
-    { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse },
+  // FUT-80 : un diagnostic du même bâtiment, enregistré à une autre entrée, est rapproché par son
+  // identifiant RNB, et seulement s'il en porte un et que l'adresse seule ne suffit pas.
+  const rapprochement = await rapprocherAvecBatiment(
+    { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse, id_rnb: trouve.dpe.id_rnb },
     { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
+    batimentsDeLAdresse,
   );
 
   // LE GRAIN VOYAGE AVEC LA FICHE (FUT-74, D2). Le numéro d'un DPE d'immeuble existe : répondre

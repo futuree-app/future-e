@@ -3,6 +3,7 @@ import type { DpeRecord } from "@/lib/dpe-attribution";
 import { PassportTiltScene } from "@/components/report/PassportTiltScene";
 import { DpeBadge } from "./kit";
 import { formatSurfaceM2 } from "@/lib/audit-record";
+import { ligneBatimentPasseport } from "@/lib/batiment-rnb";
 
 // Passeport du bien : pendant du passeport territorial, au grain adresse. Surface
 // teintée à l'accent du module, adresse en grand (Instrument Serif), DPE en sceau.
@@ -10,19 +11,27 @@ export function PropertyPassport({
   address,
   parcel,
   dpe,
+  batiment,
 }: {
   address: LogementReport["address"];
   parcel: LogementReport["parcel"];
   dpe: DpeRecord | null;
+  /** FUT-80 : le bâtiment selon le RNB. Absent (rapport antérieur, référentiel muet) : rien n'est dit. */
+  batiment?: LogementReport["batiment"];
 }) {
   const tint = "#c8b89a";
   const dpeLetter = dpe?.etiquette_dpe ?? null;
-  const fields: { label: string; value: string }[] = [];
+  const fields: { label: string; value: string; lien?: string | null; complement?: string | null }[] = [];
   if (dpe?.surface_m2) fields.push({ label: "Surface", value: formatSurfaceM2(dpe.surface_m2) });
   if (dpe?.annee_construction) fields.push({ label: "Construction", value: String(dpe.annee_construction) });
   if (dpe?.type_batiment) fields.push({ label: "Type de bâti", value: dpe.type_batiment });
   if (parcel?.parcelCode)
     fields.push({ label: "Parcelle", value: parcel.contenance ? `${parcel.parcelCode} · ${formatSurfaceM2(parcel.contenance)}` : parcel.parcelCode });
+  // FUT-80 : DE QUEL BÂTIMENT ON PARLE. Son identifiant national, vérifiable sur la carte du référentiel,
+  // et ses autres adresses. Rien sur le logement : les champs au-dessus viennent du DPE retenu, celui-ci
+  // décrit le bâtiment entier.
+  const ligneBat = ligneBatimentPasseport(batiment, address?.id);
+  if (ligneBat) fields.push({ label: "Bâtiment (RNB)", value: ligneBat.valeur, lien: ligneBat.lien, complement: ligneBat.complement });
 
   return (
     // Scène 3D : pendant du passeport territorial. Se déplie au chargement, puis
@@ -69,7 +78,14 @@ export function PropertyPassport({
           <div key={f.label} className="flex items-start gap-3 py-3 border-b" style={{ borderColor: "var(--border-1)" }}>
             <div className="min-w-0">
               <dt className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">{f.label}</dt>
-              <dd className="text-[15px] text-label leading-snug">{f.value}</dd>
+              <dd className="text-[15px] text-label leading-snug">
+                {f.lien ? (
+                  <a href={f.lien} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2" title="Voir le bâtiment sur la carte du Référentiel national des bâtiments">
+                    {f.value}
+                  </a>
+                ) : f.value}
+              </dd>
+              {f.complement && <dd className="text-[13px] text-muted leading-snug mt-1">{f.complement}</dd>}
             </div>
           </div>
         ))}

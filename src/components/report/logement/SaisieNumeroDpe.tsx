@@ -228,6 +228,14 @@ export function SaisieNumeroDpe({
             </Message>
           )}
 
+          {(reponse.grain ?? "logement") === "logement" && reponse.niveau === "meme_batiment" && (
+            <Message>
+              L&apos;ADEME enregistre ce diagnostic à une autre adresse, que le Référentiel national des
+              bâtiments rattache au même bâtiment que la vôtre. Le même bâtiment n&apos;est pas le même
+              logement : vérifiez qu&apos;il s&apos;agit bien de celui-ci avant de le rattacher.
+            </Message>
+          )}
+
           {reponse.niveau === "commune" && (
             <Message ton="refus">
               Cette adresse n&apos;est pas celle de ce dossier. Être dans la même commune ne suffit

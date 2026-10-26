@@ -12,7 +12,10 @@ import {
 import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/lib/point-hazards";
 import { getAltitude } from "@/lib/ign";
 import { fetchHeritageProtections } from "@/lib/gpu";
-import { lookupDpeCandidatesByBanId, getDpeByCoordinates } from "@/lib/dpe";
+import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
+import { lookupBatimentByBanId } from "@/lib/rnb";
+import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
+import type { IdentiteBatiment } from "@/lib/batiment-rnb";
 import { validateSelectedBanAddress } from "@/lib/selected-ban-address";
 import { getZfeForPoint } from "@/lib/zfe";
 import { getAuditByBanId, getNearbyAuditCandidate } from "@/lib/audit";
@@ -51,6 +54,18 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       : getDpeByCoordinates(address.latitude, address.longitude)
           .then((d) => ({ status: d ? "present" as const : "absent" as const, candidates: d ? [d] : [] }))
           .catch(() => ({ status: "unavailable" as const, candidates: [] }));
+    // FUT-80 : LE BÂTIMENT, EN PARALLÈLE DE TOUT LE RESTE. Une seule requête au référentiel (~85 ms),
+    // bornée à 5 s, qui ne lève jamais : son absence ne retient pas le dossier. Les diagnostics du même
+    // bâtiment ne se cherchent que derrière un bâtiment UNIQUE ; sur plusieurs, lequel serait le bon ?
+    // Troisième dépendance réelle de la route : ils attendent l'identifiant du bâtiment, et rien d'autre.
+    const batimentP: Promise<IdentiteBatiment | undefined> = address.id
+      ? lookupBatimentByBanId(address.id)
+      : Promise.resolve(undefined);
+    const memeBatimentP = batimentP.then((b) =>
+      b?.statut === "confirme" && address.id
+        ? lookupDpeMemeBatiment(b.batiment.rnb_id, address.id).catch(() => ({ status: "unavailable" as const, candidates: [], tronque: false }))
+        : undefined,
+    );
     // L'AUDIT ÉNERGÉTIQUE NE S'ATTRIBUE QUE PAR L'ADRESSE (FUT-59) : seul un identifiant BAN identique
     // donne un audit exploitable.
     // FUT-65 : la recherche rend ce qu'elle a ÉTABLI (présent / absent / non vérifiable), jamais `null`
@@ -77,7 +92,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -102,7 +117,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -126,6 +141,11 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       dpeCandidates: dpeLookup.candidates,
       dpeCandidatesStatus: dpeLookup.status,
       banFeatureType,
+      // FUT-80 : posés seulement quand ils disent quelque chose. Sans identifiant BAN, rien n'est cherché.
+      ...(batiment ? { batiment } : {}),
+      ...(memeBatiment
+        ? { dpeMemeBatiment: memeBatimentHorsAdresse(memeBatiment, dpeLookup.candidates) }
+        : {}),
       audit,
       auditStatus,
       auditProche: candidat,

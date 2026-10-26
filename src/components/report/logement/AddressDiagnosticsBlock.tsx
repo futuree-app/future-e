@@ -136,7 +136,7 @@ function Repartition({ ctx }: { ctx: AddressDpeContext }) {
 }
 
 export function AddressDiagnosticsBlock({
-  candidates, listeIncomplete = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero,
+  candidates, listeIncomplete = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero, batiments = [],
 }: {
   candidates: DpeRecord[];
   /** FUT-65 : un des deux jeux ADEME n'a pas répondu. Le compte ci-dessous est un minimum. */
@@ -146,6 +146,8 @@ export function AddressDiagnosticsBlock({
   onPick: (d: DpeRecord) => void;
   onNotInList: () => void;
   onPickParNumero: (d: DpeRecord) => void;
+  /** FUT-80 : les ID-RNB de l'adresse ; une ligne rattachée à un autre bâtiment le dit. */
+  batiments?: readonly string[];
 }) {
   const [ouvert, setOuvert] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
@@ -207,12 +209,13 @@ export function AddressDiagnosticsBlock({
                 onNotInList={onNotInList}
                 busy={busy}
                 afficherRefus={false}
+                contexte={{ batiments }}
               />
             </div>
           )}
         </div>
       ) : (
-        <DpeSelector candidates={logements} onPick={onPick} onNotInList={onNotInList} busy={busy} />
+        <DpeSelector candidates={logements} onPick={onPick} onNotInList={onNotInList} busy={busy} contexte={{ batiments }} />
       )}
 
       {indetermines.length > 0 && (

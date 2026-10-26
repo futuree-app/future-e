@@ -19,6 +19,7 @@ import { Block, FamilyHeading } from "@/components/report/logement/kit";
 import { IconSeismic, IconStrata, IconCavity, IconLandslide } from "@/components/report/logement/icons";
 import { PropertyPassport } from "@/components/report/logement/PropertyPassport";
 import { EnergieSection } from "@/components/report/logement/EnergieSection";
+import { idsDesBatiments } from "@/lib/batiment-rnb";
 import { SinistraliteBlock } from "@/components/report/logement/SinistraliteSection";
 import { InondationLectureBlock } from "@/components/report/logement/InondationSection";
 import { RegulatoryStatusBlock } from "@/components/report/logement/RegulatorySection";
@@ -199,7 +200,9 @@ export default function LogementModule({
       // réattribuer le même au rechargement suivant, sans un mot. Le geste du lecteur n'est pas
       // une absence de donnée à combler, et la date du geste est ce qui les distingue.
       // La décision vit dans `departDpe` (pur, testé) ; FUT-65 : une liste incomplète n'attribue jamais.
-      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
+      // FUT-80 : les bâtiments de l'adresse, pour qu'un diagnostic rattaché à un autre bâtiment ne soit
+      // pas retenu d'office. Rapport antérieur : aucun bâtiment, règle d'avant.
+      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable", idsDesBatiments(payload.batiment));
       if (depart.kind === "restaurer") {
         setSelectedDpe(row.selected_dpe_snapshot);
         setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
@@ -559,6 +562,7 @@ export default function LogementModule({
             address={result.address}
             parcel={result.parcel}
             dpe={dpe}
+            batiment={result.batiment}
           />
 
           {/* Note informative si l'adresse est dans une commune ≠ résidence (commune débloquée, cf. 4.5). */}
@@ -623,6 +627,9 @@ export default function LogementModule({
               // la ligne gardait son ancien statut, et le diagnostic corrigé revenait au
               // rechargement. `pending` est le seul statut qui rouvre vraiment la sélection.
               onReselect={() => { void appliquerSelection("pending", null); }}
+              batiment={result.batiment}
+              memeBatiment={result.dpeMemeBatiment}
+              banId={result.address?.id ?? null}
             />
             </div>
 

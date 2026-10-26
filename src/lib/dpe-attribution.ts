@@ -3,6 +3,7 @@
 // La partie IO (fetch ADEME) vit dans `dpe.ts`, qui ré-exporte ces symboles pour le serveur.
 
 import { attribuableAuLogement } from "./dpe-grain.ts";
+import { contreditParLeBatiment } from "./batiment-rnb.ts";
 
 export type DpeLabel = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 
@@ -45,6 +46,12 @@ export type DpeRecord = {
   surface_immeuble_m2?: number | null;
   /** DPE d'immeuble : nombre d'appartements déclaré. */
   nombre_appartements?: number | null;
+  // FUT-80 : OPTIONNELS, posés seulement quand l'ADEME les renseigne (51 % des DPE existants au
+  // 26/10/2026, aucun « Reprise RNB » après mi-2025). Un DPE sans identifiant garde sa forme d'avant.
+  /** Identifiant du bâtiment au Référentiel national des bâtiments (ID-RNB). */
+  id_rnb?: string | null;
+  /** « Reprise RNB » : dérivé de l'adresse du DPE ; « Logiciel » : saisi par le diagnostiqueur. */
+  provenance_id_rnb?: string | null;
 };
 
 export const LABEL_ORDER: DpeLabel[] = ["A", "B", "C", "D", "E", "F", "G"];
@@ -94,10 +101,19 @@ const isMaison = (t: string | null): boolean => (t ?? "").toLowerCase().includes
 // l'énumération ADEME qui contient « maison », passaient. La convergence exige désormais AUSSI que le
 // diagnostic porte sur un logement selon la règle canonique (`attribuableAuLogement`) ; les autres
 // conditions restent celles d'avant.
+//
+// UN DIAGNOSTIC RATTACHÉ À UN AUTRE BÂTIMENT NE CONVERGE PLUS (FUT-80). Quand son ID-RNB n'est aucun
+// des bâtiments que le référentiel donne à l'adresse, l'adresse et l'identifiant se contredisent :
+// l'un des deux se trompe, et rien ne dit lequel. Le lecteur choisit (cf. `contreditParLeBatiment`).
+// Mesuré le 26/10/2026 : 1 cas sur 126 adresses à candidat unique de logement (Monchaux-sur-Écaillon,
+// bâtiment désigné à 78 m). `batimentsAdresse` vide (rapport antérieur, référentiel muet) : règle
+// d'avant, inchangée.
+// Le bâtiment ne fait JAMAIS l'inverse : le trouver n'attribue rien de plus.
 export function dpeAttributionStatus(
   candidates: DpeRecord[],
   banFeatureType: string | null,
   listeComplete = true,
+  batimentsAdresse: readonly string[] = [],
 ): DpeAttribution {
   if (candidates.length === 0) return { status: "not_found" };
   const one = candidates[0];
@@ -107,7 +123,8 @@ export function dpeAttributionStatus(
     isMaison(one.type_batiment) &&
     attribuableAuLogement(one) &&
     banFeatureType === "housenumber" &&
-    one.etiquette_dpe != null;
+    one.etiquette_dpe != null &&
+    !contreditParLeBatiment(one, batimentsAdresse);
   return strongConvergence
     ? { status: "auto_confirmed", dpe: one }
     : { status: "selection_required", candidates };

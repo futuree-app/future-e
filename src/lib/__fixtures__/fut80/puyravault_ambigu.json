@@ -1,0 +1,381 @@
+{
+ "capture": "2026-10-26T18:34:38.115Z",
+ "ban": "17293_0061_00003",
+ "label": "3 Rue du Stade 17700 Puyravault",
+ "insee": "17293",
+ "rnb": {
+  "next": null,
+  "previous": null,
+  "results": [
+   {
+    "rnb_id": "GF746FV3DNGT",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813680526919745,
+      46.136496971281446
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-WP1A-YQEV-H9L3",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:33.065587+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000294780117",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:12:06.781533+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "RW3XEHY3XEAQ",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813800392897255,
+      46.13616432238549
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-HX42-YGPC-6NCT",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:14.049526+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000294780170",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:10:06.526238+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "FX7ZFKX3ZWQW",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813980848031887,
+      46.13707376625074
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00001",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "1",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00002",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "2",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00003",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "3",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00004",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "4",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00005",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "5",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00006",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "6",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-CVTC-AMSD-KYW7",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:06.602744+00:00",
+      "source_version": "2023_01"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "8PDZKK7427P6",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813852608193146,
+      46.13612424856623
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-Q5NJ-TP9B-Y7UT",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:23.274581+00:00",
+      "source_version": "2023_01"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "HFBKQN2H3GQY",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813546096364762,
+      46.136416122406004
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_0061_00005",
+      "ban_id": "fe1371dc-d17d-4f53-aa73-4af47b65b382",
+      "source": "BAN",
+      "street_number": "5",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-NQME-EEB7-ZMQY",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:21.156615+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000294780181",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:10:06.531651+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "W45QCJE9C2W6",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813448969821761,
+      46.1361033766415
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_0061_00004",
+      "ban_id": "5f62a1ed-3151-46bc-9d06-0587a39ea215",
+      "source": "BAN",
+      "street_number": "4",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-KTQ1-7F2F-ZBKC",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:16.844784+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000294780173",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:10:06.529832+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "8HRMHJFS3HEA",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -0.813958304568149,
+      46.13618966432853
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17293_0061_00003",
+      "ban_id": "6ee5887b-60bf-4f5b-b487-a8220d8722a2",
+      "source": "BAN",
+      "street_number": "3",
+      "street_rep": null,
+      "street": "Rue du Stade",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     },
+     {
+      "id": "17293_1es8q7_00007",
+      "ban_id": null,
+      "source": "bdnb",
+      "street_number": "7",
+      "street_rep": "",
+      "street": "lotissement bel epi",
+      "city_name": "Puyravault",
+      "city_zipcode": "17700",
+      "city_insee_code": "17293"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-TXZW-QBER-N8UC",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:28.880934+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000294780168",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:10:06.524513+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   }
+  ]
+ },
+ "ademe_adresse": [],
+ "ademe_batiment": []
+}

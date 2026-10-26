@@ -66,6 +66,7 @@ export { dedupeAndCollapseDpe, dpeAttributionStatus } from "./dpe-attribution.ts
 
 import { LABEL_ORDER, dedupeAndCollapseDpe } from "./dpe-attribution.ts";
 import { grainDpe, issuDesDonneesDeLImmeuble } from "./dpe-grain.ts";
+import { memeBatimentSeulement } from "./dpe-meme-batiment.ts";
 import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
 
 export type DpeCommuneSummary = {
@@ -117,6 +118,8 @@ const SELECT_LOGEMENT = [
   "appartement_non_visite",
   "surface_habitable_immeuble",
   "nombre_appartement",
+  "id_rnb",
+  "provenance_id_rnb",
   "_geopoint",
 ].join(",");
 
@@ -147,6 +150,8 @@ type ApiRecord = {
   appartement_non_visite?: string | number | null;
   surface_habitable_immeuble?: number | null;
   nombre_appartement?: number | null;
+  id_rnb?: string | null;
+  provenance_id_rnb?: string | null;
   _geopoint?: string | null;
 };
 
@@ -160,7 +165,8 @@ function toConfort(v: string | null | undefined): DpeRecord["confort_ete"] {
   return v === "bon" || v === "moyen" || v === "insuffisant" ? v : null;
 }
 
-function toRecord(r: ApiRecord): DpeRecord {
+// Exportée pour les tests (FUT-80) : les fixtures réelles de l'ADEME passent par la même lecture que la production.
+export function toRecord(r: ApiRecord): DpeRecord {
   return {
     id_dpe:            r.numero_dpe,
     date_dpe:          r.date_etablissement_dpe ?? null,
@@ -186,7 +192,14 @@ function toRecord(r: ApiRecord): DpeRecord {
     isolation_menuiseries: r.qualite_isolation_menuiseries ?? null,
     methode_dpe:          r.methode_application_dpe ?? null,
     ...champsDeGrain(r),
+    ...champsDeBatiment(r),
   };
+}
+
+// FUT-80 : l'identifiant RNB, seulement s'il existe. Le poser à `null` sur les 49 % de DPE qui n'en ont
+// pas changerait leur forme, donc l'empreinte de chaque rapport versionné, sans rien leur apprendre.
+function champsDeBatiment(r: ApiRecord): Partial<DpeRecord> {
+  return r.id_rnb ? { id_rnb: r.id_rnb, provenance_id_rnb: r.provenance_id_rnb ?? null } : {};
 }
 
 // FUT-74 : CE QUE L'ADEME DIT DE L'IMMEUBLE, posé seulement là où il sert. Le dictionnaire de données
@@ -285,6 +298,53 @@ export async function lookupDpeCandidatesByBanId(
   const candidates = dedupeAndCollapseDpe(collected)
     .sort((a, b) => (b.date_dpe ?? "").localeCompare(a.date_dpe ?? ""));
   return { status: sawFailure ? "unavailable" : candidates.length > 0 ? "present" : "absent", candidates };
+}
+
+/**
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ * LES DIAGNOSTICS DU MÊME BÂTIMENT, ENREGISTRÉS À UNE AUTRE ADRESSE (FUT-80).
+ *
+ * L'ADEME porte désormais `id_rnb` sur 51 % des DPE existants. Un diagnostic de ce bâtiment peut
+ * avoir été saisi à son autre entrée (angle de rue, autre cage, « bis ») : la jointure par adresse
+ * ne le voit pas. Mesuré le 26/10/2026 : 3,9 % des adresses passent de zéro diagnostic à au moins un
+ * candidat, et 28 % des adresses collectives en gagnent de nouveaux.
+ *
+ * CE SONT DES CANDIDATS, JAMAIS DES ATTRIBUTIONS. Le même bâtiment n'est pas le même logement : un
+ * immeuble de 88 adresses (Royan) ou deux maisons mitoyennes comptées ensemble portent les diagnostics
+ * de voisins. Ils se montrent à part, avec leur adresse, et ne se retiennent que par un geste.
+ *
+ * Mêmes garanties que `lookupDpeCandidatesByBanId` : 8 s, et une panne d'un des deux jeux rend
+ * `unavailable` (la liste montrée n'est alors pas complète). `tronque` : un jeu en compte plus que la
+ * page lue ; les plus récents sont gardés.
+ * ════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export async function lookupDpeMemeBatiment(
+  rnbId: string,
+  banIdDuDossier: string,
+): Promise<{ status: "present" | "absent" | "unavailable"; candidates: DpeRecord[]; tronque: boolean }> {
+  const TAILLE = 50;
+  const collected: DpeRecord[] = [];
+  let sawFailure = false;
+  let tronque = false;
+  for (const dataset of [DS.existant, DS.neuf]) {
+    const url = new URL(`${dataset}/lines`);
+    url.searchParams.set("qs", `id_rnb:"${rnbId}"`);
+    url.searchParams.set("size", String(TAILLE));
+    url.searchParams.set("sort", "-date_etablissement_dpe");
+    url.searchParams.set("select", SELECT_LOGEMENT);
+    try {
+      const res = await fetch(url.toString(), { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8_000) });
+      if (!res.ok) { sawFailure = true; continue; }
+      const json = (await res.json()) as { results?: unknown; total?: unknown };
+      if (!Array.isArray(json?.results)) { sawFailure = true; continue; }
+      if (typeof json.total === "number" && json.total > TAILLE) tronque = true;
+      collected.push(...(json.results as ApiRecord[]).map(toRecord));
+    } catch {
+      sawFailure = true;
+    }
+  }
+  const candidates = memeBatimentSeulement(collected, banIdDuDossier);
+  return { status: sawFailure ? "unavailable" : candidates.length > 0 ? "present" : "absent", candidates, tronque };
 }
 
 // Sonde de QUALIFICATION : dit si un diagnostic EXACT existe à cet identifiant BAN, et distingue

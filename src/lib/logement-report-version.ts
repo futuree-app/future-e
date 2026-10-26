@@ -102,6 +102,10 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // rapport antérieur (statut `undefined`) ne s'invente pas une panne.
   if (r.auditStatus === "unavailable") absentes.push("audit_energetique");
   if (r.dpeCandidatesStatus === "unavailable") absentes.push("diagnostics_dpe");
+  // FUT-80 : mêmes règles. Un rapport antérieur (champ absent) ne s'invente pas de panne, et un
+  // référentiel qui a répondu « aucun bâtiment » n'est pas une source muette.
+  if (r.batiment?.statut === "indisponible") absentes.push("batiment");
+  if (r.dpeMemeBatiment?.status === "unavailable") absentes.push("diagnostics_meme_batiment");
   return absentes;
 }
 

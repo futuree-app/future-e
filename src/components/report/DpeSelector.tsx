@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { listeLongue, sortCandidates } from "@/lib/dpe-candidate-match";
 import {
-  champsVariables, compterIdentifiables, decouperListe, ligneCandidat, phraseIdentifiables,
+  champsVariables, compterIdentifiables, decouperListe, ligneCandidat, phraseIdentifiables, type ContexteLigne,
 } from "@/lib/dpe-selection-vue";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
@@ -36,7 +36,7 @@ const LIEN: React.CSSProperties = {
 };
 
 export function DpeSelector({
-  candidates, onPick, onNotInList, busy = false, afficherRefus = true,
+  candidates, onPick, onNotInList, busy = false, afficherRefus = true, contexte = {}, autresAdresses = false,
 }: {
   candidates: DpeRecord[];
   onPick: (d: DpeRecord) => void;
@@ -44,7 +44,12 @@ export function DpeSelector({
   busy?: boolean;
   /** `false` quand le refus est déjà offert au-dessus de la liste (liste repliée) : il ne se répète pas. */
   afficherRefus?: boolean;
+  /** FUT-80 : l'adresse et les bâtiments du dossier, pour que chaque ligne dise ce qui la distingue. */
+  contexte?: ContexteLigne;
+  /** FUT-80 : la liste porte les diagnostics du même bâtiment À D'AUTRES ADRESSES, pas ceux de l'adresse. */
+  autresAdresses?: boolean;
 }) {
+  const ou = autresAdresses ? "de ce bâtiment" : "de cette adresse";
   const [q, setQ] = useState("");
   const [toutVoir, setToutVoir] = useState(false);
   const ordered = useMemo(() => sortCandidates(candidates), [candidates]);
@@ -62,7 +67,7 @@ export function DpeSelector({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Porte, surface ou n° du diagnostic"
-            aria-label="Chercher parmi les diagnostics de cette adresse"
+            aria-label={`Chercher parmi les diagnostics ${ou}`}
             style={{
               width: "100%", padding: "10px 13px", fontSize: 16,
               background: "var(--bg-elev)", border: "1px solid var(--border-1)",
@@ -88,7 +93,7 @@ export function DpeSelector({
 
       <div style={{ display: "grid", gap: 8 }}>
         {visibles.map((c) => {
-          const l = ligneCandidat(c, champs);
+          const l = ligneCandidat(c, champs, contexte);
           return (
             <button
               key={l.id}
@@ -117,7 +122,7 @@ export function DpeSelector({
 
         {correspondances === 0 && (
           <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: "4px 0" }}>
-            Aucun diagnostic de cette adresse ne correspond à cette recherche. Celui de ce logement
+            Aucun diagnostic {ou} ne correspond à cette recherche. Celui de ce logement
             peut ne pas avoir été versé dans la base ouverte, ou y figurer sans identifiant.
           </p>
         )}

@@ -6,7 +6,8 @@ import {
 } from "@/lib/address-dossier-store";
 import { updateOwnedAddressDossier } from "@/lib/server/address-dossier-write";
 import { findDpeByNumero, getDpeCandidatesByBanId } from "@/lib/dpe";
-import { normaliserNumeroDpe, rapprocher } from "@/lib/dpe-rapprochement";
+import { normaliserNumeroDpe, rapprocherAvecBatiment } from "@/lib/dpe-rapprochement";
+import { batimentsDeLAdresse } from "@/lib/rnb";
 import { refusDAttribution } from "@/lib/dpe-grain";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,9 @@ type Body = {
    *
    * `liste` (le défaut) : une ligne de la liste de l'adresse, vérifiée par appartenance.
    * `numero` : un numéro lu sur un document, vérifié par `rapprocher`, qui autorise l'entrée
-   * voisine du même bâtiment et refuse tout le reste. Sans cette distinction, la vérification par
+   * voisine du même bâtiment et refuse tout le reste. FUT-80 : c'est aussi la voie des diagnostics
+   * « du même bâtiment, à une autre adresse », que l'écran propose à part : ils ne sont pas dans la
+   * liste de l'adresse, et l'identifiant RNB qui les relie est vérifié ici. Sans cette distinction, la vérification par
    * appartenance rejetterait le seul cas que la saisie du numéro existe pour servir.
    */
   source?: "liste" | "numero";
@@ -94,9 +97,12 @@ export async function POST(req: Request) {
     if (trouve.status !== "trouve") {
       return Response.json({ error: "DPE_INTROUVABLE" }, { status: 422 });
     }
-    const rapprochement = rapprocher(
-      { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse },
+    // FUT-80 : même vérification que `/numero`, par la même fonction. Le bâtiment est RELU ICI, au
+    // référentiel : ce que le navigateur a montré ne prouve rien de ce qu'il envoie.
+    const rapprochement = await rapprocherAvecBatiment(
+      { id_ban: trouve.dpe.id_ban, adresse: trouve.dpe.adresse, id_rnb: trouve.dpe.id_rnb },
       { ban_id: dossier.ban_id, address_label: dossier.address_label, insee: dossier.insee },
+      batimentsDeLAdresse,
     );
     if (!rapprochement.attachable) {
       return Response.json(

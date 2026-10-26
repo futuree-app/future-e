@@ -38,10 +38,12 @@ export function departDpe(
   candidates: DpeRecord[],
   banFeatureType: string | null,
   listeComplete: boolean,
+  batimentsAdresse: readonly string[] = [],
 ): DepartDpe {
   if (row.dpe_selection_status !== "pending" || row.dpe_selection_at != null) return { kind: "restaurer" };
   // FUT-65 : une liste incomplète (base ADEME en panne partielle) n'attribue jamais seule.
-  const a = dpeAttributionStatus(candidates, banFeatureType, listeComplete);
+  // FUT-80 : un diagnostic rattaché à un autre bâtiment que ceux de l'adresse non plus.
+  const a = dpeAttributionStatus(candidates, banFeatureType, listeComplete, batimentsAdresse);
   if (a.status === "not_found") return { kind: "aucun" };
   if (a.status === "auto_confirmed") return { kind: "proposer_auto", dpe: a.dpe };
   return { kind: "a_choisir" };
