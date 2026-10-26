@@ -13,7 +13,7 @@
 //   3. à la moindre violation, la phrase fautive n'est pas affichée : la réponse devient le repli
 //      déterministe (src/lib/accueil/reponses.ts). Aucune seconde tentative du modèle, qui pourrait
 //      reproduire la même dérive.
-import { checkRecitPublic, type Violation } from "../garde-fous/assertions.ts";
+import { checkRecitPublic, checkRegles, type RegleAssertion, type Violation } from "../garde-fous/assertions.ts";
 import { reponseDeRepli, type ReponseQna } from "./reponses.ts";
 import { construireFaitsCommune, indicatorsDepuisScenarios, type FaitsCommune } from "./faits.ts";
 import type { GwlScenarios } from "../decision/climat-facts.ts";
@@ -47,6 +47,7 @@ What you may affirm (this is checked automatically; an answer that breaks a rule
 - Never predict property prices, a loss of value, insurance costs or insurability.
 - Never rank or compare the commune with others ("parmi les plus…", "que la plupart des villes…", "de France"): no fact compares communes.
 - Never explain WHY (sea influence, relief, altitude, urban heat islands…): say only what the facts count.
+- Demography ("territory_signals.demographie") is what two censuses observed. Never write or suggest that the commune attracts people or is attractive, nor why people arrive or leave.
 - Never use "aujourd'hui" or "actuellement" for a climate value: the reference is the period 1976-2005, not the present.
 - Train ("territory_signals.train"): name a station only if it is given in "gare_la_plus_proche", and present it only as the station nearest to the commune's reference point, with its stated distance, as the crow flies. Say it is in the commune only if "dans_la_commune" is true. Never present any other station as the commune's station, its nearest station or its usual station. "acces_au_train" says nothing about timetables, train frequency, destinations or travel times: never state them.
 - If the facts do not answer the question, say so plainly and point to the dossier.
@@ -160,6 +161,16 @@ function nombresNonSources(texte: string, autorises: number[]): Violation[] {
 
 // ── Contrôle d'une réponse ──────────────────────────────────────────────────────────────────
 
+// FUT-72 : une croissance et une part d'arrivants récents décrivent ce que le recensement observe, jamais
+// pourquoi des habitants s'installent. Propre à /qna, seul récit public qui reçoit la démographie.
+// Affirmative : « les données ne disent pas si la commune attire » reste permis.
+export const REGLE_ATTRACTIVITE: RegleAssertion = {
+  id: "interdit:attractivite",
+  polarity: "affirmative",
+  // Fin de mot en lookahead : `\b` échoue après « é » (« attiré », « attractivité »).
+  patterns: [/\battir(e|es|ent|er|ait|aient|ant|ée?s?)(?![\wà-ÿ])/, /\battracti(f|fs|ve|ves|vité|vités)(?![\wà-ÿ])/],
+};
+
 export type ResultatControle = { ok: true; reponse: ReponseQna } | { ok: false; violations: Violation[] };
 
 export function controlerReponse(brut: unknown, ctx: ContexteQna): ResultatControle {
@@ -170,6 +181,7 @@ export function controlerReponse(brut: unknown, ctx: ContexteQna): ResultatContr
   const texte = `${r.verdict}\n${r.detail}\n${r.cta}`;
   const violations = [
     ...checkRecitPublic(texte),
+    ...checkRegles(texte, [REGLE_ATTRACTIVITE]),
     // Le présent appliqué à une projection : « aujourd'hui » ou « actuellement » à côté d'un chiffre DRIAS.
     ...(/\b(aujourd'hui|actuellement)\b[^.]*\d+\s*(jours?|nuits?|°)/i.test(texte.replace(/[’ʼ]/g, "'"))
       ? [{ rule: "temps:projection-au-present", excerpt: texte.slice(0, 120) }]
