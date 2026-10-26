@@ -39,11 +39,51 @@ const CLASSEMENT: RegExp[] = [
   `mieux (${adj("placé")}|${adj("classé")}|${adj("adapté")})`,
   `(arrive|passe|se place|se classe|ressort|${adj("classé")}|est)(-t)?(-elles?|-ils?)?\\s+devant`,
   `(le|la|les) plus (${adj("adapté")}|favorables?|${adj("pertinent")}|${adj("indiqué")}|${adj("recommandé")}|${adj("intéressant")})`,
-  "l'emporte|gagnante?s?",
+  "l'emporte|gagnante?s?|devancent|devance",
 ].map(mot);
 // Avant la tournure, dans la même proposition : ce qui en fait une mise en garde.
 // « n' » se colle au verbe suivant (« n'établit ») : il n'a pas de borne à droite.
-const NEGATION = new RegExp(`(?<![\\p{L}])(?:n['’]|(?:ne|pas|aucune?|rien|jamais|ni|sans|impossible|trompeuse?|hâtive?|prématurée?|abusive?|abusif)(?![\\p{L}]))`, "u");
+const NEGATION = new RegExp(`(?<![\\p{L}])(?:n['’]|(?:ne|pas|aucune?|rien|jamais|ni|sans|impossible|trompeuse?|hâtive?|prématurée?|abusive?|abusif)(?![\\p{L}]))`, "gu");
+
+// LA PORTÉE DE LA RÉSERVE (revue du 26/10). « Rien ne prouve le contraire et La Rochelle est votre meilleur
+// choix » : la négation porte sur « le contraire », pas sur l'affirmation coordonnée après « et ». Une réserve
+// cesse de couvrir la tournure quand, entre elles, une coordination ouvre une proposition AUTONOME : un verbe
+// conjugué à l'indicatif, sans « que » ni infinitif qui la rattache à la réserve. Restent couverts :
+// « …et que X est… », « …et de conclure que… », « …comparer ces communes et conclure que… », et les
+// sujets coordonnés au subjonctif (« rien ne prouve que Saintes et La Rochelle soient… »). Un infinitif ne
+// rattache que s'il est suivi de son complément (« conclure que », « comparer ces »), pour ne pas prendre
+// « votre » ou « autre » pour un verbe.
+const COORDINATION = new RegExp(`(?<![\\p{L}])(?:et|puis|donc|alors|ainsi|car|d'ailleurs|de plus|en plus)(?![\\p{L}])`, "gu");
+// Une élision (« qu' », « d' », « l' ») se colle au mot suivant : elle n'a pas de borne à droite.
+const COMPLEMENT = `(?:qu['’]|d['’]|l['’]|(?:que|si|à|de|le|la|les|un|une|ces|cette|ce|en)(?![\\p{L}]))`;
+const RATTACHEE = new RegExp(
+  `^\\s*(?:(?:encore moins|moins encore|a fortiori|surtout|même|non plus|donc|ainsi)\\s+)?(?:(?:en|y)\\s+)?`
+  + `(?:qu['’]|d['’]|(?:que|de|à|ni)(?![\\p{L}])|\\p{L}+(?:er|ir|re|oir)\\s+${COMPLEMENT})`,
+  "u",
+);
+const INDICATIF = mot(
+  "est|sont|reste|restent|demeure|demeurent|devient|deviennent|constitue|constituent|représente|représentent|semble|semblent|paraît|apparaît|a|ont"
+  + "|arrive|arrivent|passe|passent|ressort|ressortent|correspond|correspondent|répond|répondent|convient|conviennent"
+  + "|présente|présentent|offre|offrent|affiche|affichent|bénéficie|bénéficient|se place|se classe|l'emporte|s'impose|s'imposent"
+  + "|recommande|recommandons|conseille|conseillons",
+);
+
+/** La réserve placée avant la tournure la couvre-t-elle encore ? */
+function couverteParUneReserve(p: string, debutTournure: number): boolean {
+  const avant = p.slice(0, debutTournure);
+  const negations = [...avant.matchAll(NEGATION)];
+  const derniere = negations.at(-1);
+  if (!derniere) return false;
+  const depuis = derniere.index!;
+  if (FAUSSE_NEGATION.test(p.slice(depuis, debutTournure))) return false;
+  // La dernière coordination entre la réserve et la tournure, s'il y en a une.
+  const coord = [...avant.slice(depuis).matchAll(COORDINATION)].at(-1);
+  if (!coord) return true;
+  // Jusqu'au bout de la proposition : le verbe peut suivre la tournure (« et votre meilleur choix est X »).
+  const suite = p.slice(depuis + coord.index! + coord[0].length);
+  if (RATTACHEE.test(suite)) return true;
+  return !INDICATIF.test(suite);
+}
 // …sauf ces tournures, qui renforcent au lieu de nier.
 const FAUSSE_NEGATION = mot("pas (un hasard|seulement|uniquement|surprenant|étonnant)|non seulement|sans (aucun )?doute|sans conteste|sans surprise|sans hésit\\p{L}*|ne fait (aucun|pas de) doute|n'est que");
 
@@ -61,8 +101,7 @@ export function affirmationsNonEtablies(texte: string, mode: ModeQuestions): Aff
     for (const m of motifs) {
       const r = m.exec(p);
       if (!r) continue;
-      const avant = p.slice(0, r.index);
-      if (NEGATION.test(avant) && !FAUSSE_NEGATION.test(avant)) continue;
+      if (couverteParUneReserve(p, r.index)) continue;
       out.push({ tournure: r[0], proposition: p });
       break;
     }

@@ -98,9 +98,9 @@ CE QUE LE RÉSULTAT ÉTABLIT : LISEZ "lecture" AVANT TOUT
 Le champ "lecture.mode" dit ce que l'ordre des territoires signifie. Vous n'en dites jamais plus.
 - "classe" : les territoires sont classés sur les priorités déclarées, mesurées pour chacun. Vous pouvez
   expliquer pourquoi un territoire ressort et son compromis principal, à partir des seules raisons et
-  compromis donnés. Seuls "raisons" et "compromis" expliquent l'ordre : le logement, les signaux, le
-  littoral, le trait distinctif et les autres notes sont hors classement, ils décrivent sans jamais
-  expliquer pourquoi un territoire passe devant. Si deux territoires ont les mêmes raisons, dites qu'ils
+  compromis donnés. Seuls "raisons" et "compromis" expliquent l'ordre ("lecture.ce_qui_explique_l_ordre") :
+  le logement, les signaux, le littoral, le trait distinctif et les autres notes sont hors classement, ils
+  décrivent sans jamais expliquer pourquoi un territoire passe devant. Si deux territoires ont les mêmes raisons, dites qu'ils
   sont proches sur vos priorités, sans inventer de cause. Même ici, aucun territoire n'est « le meilleur
   choix » ni « parfait » : il ressort sur les priorités déclarées, avec ses compromis.
 - "exploration_inondation" : la seule demande classable était l'inondation, et le comparateur ne classe pas
@@ -269,6 +269,14 @@ meilleur choix face aux inondations : l'ordre affiché suit une règle d'explora
 données décrivent les inondations passées, sans dire la probabilité d'une inondation à venir. Le rapport
 lit cette question à l'adresse. »`;
 
+// FUT-142 : en mode classé, les seuls champs qui expliquent l'ordre, et ceux qui le décrivent sans l'expliquer.
+const CAUSES_DE_L_ORDRE = {
+  causes: ["raisons", "compromis"],
+  descriptifs_hors_classement: [
+    "logement", "signaux", "littoral", "trait_distinctif", "pression_climatique_economie", "heritage_industriel",
+  ],
+};
+
 // FUT-142 : ce que l'ordre signifie, en une phrase déterministe par mode.
 const SENS_DE_L_ORDRE: Record<LectureAsk["mode"], string> = {
   classe: "Classement sur les priorités déclarées, mesurées pour chaque territoire affiché.",
@@ -309,6 +317,8 @@ function buildContextBlock(
       ordre_affichage: lecture.mode === "exploration_inondation" ? lecture.ordre : null,
       transparence_inondation: lecture.transparence,
       nombre_de_territoires: territoires.length,
+      // Ce qui peut être donné pour cause de l'ordre. Hors classement, rien : l'ordre n'a pas de cause à raconter.
+      ce_qui_explique_l_ordre: lecture.mode === "classe" ? CAUSES_DE_L_ORDRE : null,
     },
     ...(alertes.premisse
       ? { question_a_premisse: `La question présuppose « ${alertes.premisse} », que ce résultat n'établit pas. Rectifiez-le d'abord.` }

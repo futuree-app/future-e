@@ -12,7 +12,7 @@ import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { contexteAsk, lectureDuContexte } from "./comparateur/lecture-ask.ts";
 import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "./comparateur/garde-ask.ts";
-import { modeQuestions, questionsSuggerees } from "./comparateur/questions-ask.ts";
+import { modeQuestions, questionsSuggerees, type ModeQuestions as ModeLecture } from "./comparateur/questions-ask.ts";
 import { sessionReconstituable } from "./comparateur/session-ou-vivre.ts";
 import { preferencesToLabels } from "./comparateur-labels.ts";
 
@@ -432,6 +432,106 @@ test("repli : dans chaque mode, à 1, 2 et 3 communes, il passe le garde et resp
       }
     }
   }
+});
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// 6 bis · La portée d'une réserve (revue du 26/10) : une négation ne couvre pas une affirmation autonome
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+
+const HORS_PORTEE = [
+  "Rien ne prouve le contraire et La Rochelle est votre meilleur choix.",
+  "Rien ne prouve le contraire et Saintes arrive devant Rochefort.",
+  "Aucun doute n'est permis et votre meilleur choix est La Rochelle.",
+  "Rien n'est certain, et pourtant Saintes est la meilleure option.",
+  "Rien ne s'y oppose, donc La Rochelle correspond le mieux à votre demande.",
+  "Rien n'indique une crue récente car Rochefort est épargnée par les crues.",
+  "Rien ne prouve que Saintes soit sûre et La Rochelle est le meilleur choix.",
+  "La Rochelle est sans doute le meilleur choix.",
+];
+const DANS_LA_PORTEE = [
+  "On ne peut pas conclure que La Rochelle est le meilleur choix.",
+  "Rien ne prouve que La Rochelle soit le meilleur choix.",
+  // Une réserve qui porte sur plusieurs verbes coordonnés, ou sur des sujets coordonnés.
+  "On ne peut ni conclure ni affirmer que La Rochelle est le meilleur choix.",
+  "On ne peut pas comparer ces communes et conclure que La Rochelle est le meilleur choix.",
+  "Rien ne permet de dire et encore moins d'affirmer que La Rochelle est le meilleur choix.",
+  "Rien ne prouve que Saintes est sûre et que La Rochelle est le meilleur choix.",
+  "Rien ne prouve que Saintes et La Rochelle soient les meilleurs choix.",
+  "Cette recherche ne classe pas ces communes et n'établit pas que La Rochelle est le meilleur choix.",
+  "Ce n'est sans doute pas le meilleur choix.",
+];
+
+test("portée : une affirmation coordonnée après la réserve est refusée, sur la vraie route", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  for (const answer of HORS_PORTEE) {
+    etat.appels = [];
+    etat.reponse = { answer, routes_to_report: false };
+    const { res, json } = await poser(corps(contexteDePage(r), QUESTION_LR));
+    assert.equal(res.status, 200);
+    assert.notEqual(json.answer, answer, answer);
+    assert.match(json.answer, /^Les communes de La Rochelle, Saintes et Rochefort sont proposées pour être examinées/, answer);
+  }
+});
+
+test("portée : les réserves qui couvrent vraiment l'affirmation restent acceptées, sur la vraie route", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  for (const answer of DANS_LA_PORTEE) {
+    etat.reponse = { answer, routes_to_report: false };
+    const { json } = await poser(corps(contexteDePage(r), QUESTION_LR));
+    assert.equal(json.answer, answer, answer);
+  }
+});
+
+test("portée : les réponses des cinq appels réels du 26/10 restent acceptées dans leur mode", () => {
+  for (const [mode, t] of REPONSES_REELLES) assert.deepEqual(affirmationsNonEtablies(t, mode), [], t);
+});
+
+// Les réponses brutes de claude-sonnet-4-6 aux cinq appels autorisés (rapport FUT-142).
+const REPONSES_REELLES: [ModeLecture, string][] = [
+  ["exploration_inondation", "La Rochelle n'apparaît pas comme le meilleur choix face aux inondations : cette recherche n'établit aucun classement sur ce seul critère, et l'ordre affiché suit simplement la taille des communes. Les trois villes présentent d'ailleurs un historique de sinistres indemnisés comparable sur la période observée, sans qu'aucune puisse être désignée comme à l'abri. Pour lire l'exposition à l'adresse précise qui vous intéresse, le rapport de chaque territoire est l'étape suivante."],
+  ["exploration_inondation", "Cette recherche n'établit pas quelle commune serait la moins risquée face aux inondations : le comparateur ne classe pas sur ce seul critère, et les données décrivent des sinistres passés, jamais la probabilité d'une inondation à venir. Les trois communes affichées, La Rochelle, Saintes et Rochefort, présentent d'ailleurs un historique de sinistres comparable sur la période observée. La lecture précise du risque à votre adresse appartient au rapport de chaque territoire."],
+  ["couverture_incomplete", "Cette recherche n'établit pas que Paris soit le meilleur choix : en couverture incomplète, le comparateur ne classe pas, il propose un territoire à examiner. Paris ressort bien sur l'offre culturelle, mais le cadre calme, votre autre priorité, n'est pas mesuré pour cette commune. On ne sait donc pas si elle y répond ou non. Le rapport permet d'explorer ce que Paris offre vraiment sur ces deux dimensions."],
+  ["classe", "Bourcefranc-le-Chapus devance Dolus-d'Oléron car les deux communes répondent aux deux priorités déclarées (accès aux soins et espaces naturels), mais Bourcefranc présente le marché immobilier le plus accessible des trois options, ce qui peut faire pencher la balance. Le compromis à garder en tête est son historique d'inondations indemnisées, nettement plus fréquent que celui de Dolus sur la période observée. Le rapport de chaque commune permet d'aller plus loin sur ces dimensions."],
+  ["exploration_inondation", "Rochefort apparaît comme troisième option à explorer, mais cet ordre ne signifie pas qu'elle correspond moins bien à votre recherche sur l'inondation : les trois communes affichent un historique de sinistres similaire, sans qu'aucune puisse être désignée comme plus sûre. Ce qui la distingue des deux autres, c'est une dynamique démographique en recul et un bassin d'emploi intermédiaire. Le rapport permet d'aller plus loin, notamment à l'adresse."],
+];
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// 6 ter · Mode classé : ce qui explique l'ordre, et ce que le garde ne peut pas vérifier
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+
+test("classé : le contexte et le prompt séparent les causes de l'ordre des descriptions hors classement", async () => {
+  const r = await recherche(CLASSE[0], [...CLASSE[1]], [...CLASSE[2]]);
+  const [c0, c1] = r.top.map((t: M) => t.nom);
+  etat.reponse = { answer: "Réponse simulée.", routes_to_report: false };
+  const { modele, contexte } = await poser(corps(contexteDePage(r), `Pourquoi ${c0} plutôt que ${c1} ?`));
+  assert.equal(contexte.lecture.mode, "classe");
+  assert.deepEqual(contexte.lecture.ce_qui_explique_l_ordre.causes, ["raisons", "compromis"]);
+  assert.ok(contexte.lecture.ce_qui_explique_l_ordre.descriptifs_hors_classement.includes("logement"));
+  assert.match(modele.system, /Seuls "raisons" et "compromis" expliquent l'ordre/);
+  assert.match(modele.system, /le logement, les signaux, le littoral, le trait distinctif et les autres notes sont hors classement/);
+  // Le logement vit dans son propre champ, jamais parmi les raisons du moteur.
+  for (const t of contexte.territoires) for (const raison of t.raisons) assert.doesNotMatch(raison, /immobili|loyer|prix|logement/i, raison);
+  assert.ok(contexte.territoires.some((t: M) => t.logement));
+  // Hors classement, aucune cause d'ordre n'est proposée.
+  const e = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  etat.appels = [];
+  assert.equal((await poser(corps(contexteDePage(e), QUESTION_LR))).contexte.lecture.ce_qui_explique_l_ordre, null);
+});
+
+test("classé : l'ordre attribué au prix de l'immobilier n'est PAS détecté par le garde (limite documentée)", async () => {
+  const r = await recherche(CLASSE[0], [...CLASSE[1]], [...CLASSE[2]]);
+  const [c0, c1] = r.top.map((t: M) => t.nom);
+  const inventee = `${c0} devance ${c1} grâce à son marché immobilier plus accessible, ce qui fait pencher la balance.`;
+  etat.reponse = { answer: inventee, routes_to_report: false };
+  const { json } = await poser(corps(contexteDePage(r), `Pourquoi ${c0} plutôt que ${c1} ?`));
+  // En mode classé, « devance » est un vocabulaire permis : le garde ne lit pas les causes, seul le prompt les
+  // borne. Ce test fige la limite, il ne la valide pas.
+  assert.equal(json.answer, inventee);
+  // Hors classement, la même phrase est refusée : « devance » y proclame un gagnant.
+  const e = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  etat.reponse = { answer: "La Rochelle devance Saintes grâce à son marché immobilier plus accessible.", routes_to_report: false };
+  const hors = await poser(corps(contexteDePage(e), "Pourquoi La Rochelle plutôt que Saintes ?"));
+  assert.match(hors.json.answer, /^Les communes de La Rochelle, Saintes et Rochefort sont proposées/);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════════
