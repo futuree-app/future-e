@@ -1,0 +1,2011 @@
+{
+  "mesureLe": "2026-10-26T22:46:38.906Z",
+  "resultats": [
+    {
+      "id": "centre-plui-psmv",
+      "vise": "Centre-ville, PLUi, secteur sauvegardé",
+      "q": "12 rue du Palais 17000 La Rochelle",
+      "temps": {
+        "ban": 172,
+        "cadastre": 213,
+        "municipality": 47,
+        "document": 88,
+        "zone": 47,
+        "secteur": 37,
+        "prescSurf": 117,
+        "prescLin": 91,
+        "prescPct": 89,
+        "infoSurf": 242,
+        "details": 121,
+        "totalGpu": 363
+      },
+      "adresse": {
+        "label": "12 Rue du Palais 17000 La Rochelle",
+        "type": "housenumber",
+        "score": 0.9721736363636363,
+        "citycode": "17300",
+        "lon": -1.153731,
+        "lat": 46.159522
+      },
+      "parcellesA5m": [
+        "17300000EN0010"
+      ],
+      "parcelle": {
+        "idu": "17300000EN0010",
+        "contenance": 674,
+        "rattachement": "repli",
+        "rayon": 3
+      },
+      "commune": [
+        {
+          "insee": "17300",
+          "nom": "LA ROCHELLE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "be136e99d07395b0a93b1adc18b92449",
+          "type": "PLUi",
+          "titre": "PLUI DE LA ROCHELLE",
+          "nom": "241700434_PLUi_20260305",
+          "statut": "production",
+          "maj": "2026-05-12T10:39:07.762Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 11407,
+        "prescSurf": 170416
+      },
+      "zones": [
+        {
+          "libelle": "PSMV",
+          "libelong": "plan de sauvegarde et de mise en valeur de La Rochelle",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260305",
+          "datappro": null,
+          "nomfic": "241700434_psmv_20260305.pdf",
+          "urlfic": "",
+          "doc": "be136e99d07395b0a93b1adc18b92449",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "PSMV"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Stationnement zone PSMV",
+          "typepsc": "44",
+          "stypepsc": "00",
+          "txt": "523_Statio",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Droit de préemption urbain",
+          "typepsc": "99",
+          "stypepsc": "00",
+          "txt": "611_DPU",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Archéologie préventive - zone de saisine A : tout dossier",
+          "typeinf": "16",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "zonage d'assainissement collectif",
+          "typeinf": "19",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Fuseau de nuisances sonores",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone blanche",
+          "typeinf": "99",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "be136e99d07395b0a93b1adc18b92449",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) DE LA ROCHELLE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "12/05/2026 14:28:15",
+          "producteur": "Communauté d'Agglomération de La Rochelle",
+          "nbPieces": 17,
+          "reglements": [
+            {
+              "name": "241700434_reglement_20260305.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "paris-marais",
+      "vise": "Centre-ville, PLU communal et PSMV",
+      "q": "14 rue des Francs-Bourgeois 75003 Paris",
+      "temps": {
+        "ban": 33,
+        "cadastre": 40,
+        "municipality": 207,
+        "document": 50,
+        "zone": 46,
+        "secteur": 48,
+        "prescSurf": 165,
+        "prescLin": 58,
+        "prescPct": 54,
+        "infoSurf": 131,
+        "details": 123,
+        "totalGpu": 330
+      },
+      "adresse": {
+        "label": "14 Rue des Francs Bourgeois 75003 Paris",
+        "type": "housenumber",
+        "score": 0.9675636363636362,
+        "citycode": "75103",
+        "lon": 2.36253,
+        "lat": 48.857044
+      },
+      "parcellesA5m": [
+        "75103000AO0044"
+      ],
+      "parcelle": {
+        "idu": "75103000AO0044",
+        "contenance": 4292,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "75103",
+          "nom": "PARIS-3E-ARRONDISSEMENT",
+          "rnu": false
+        },
+        {
+          "insee": "75056",
+          "nom": "PARIS",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "6755c72bbbb06df5fdb26bccd10b45bc",
+          "type": "PSMV",
+          "titre": "PARIS",
+          "nom": "75056_PSMV_20131218_A",
+          "statut": "production",
+          "maj": "2021-04-19T13:13:26Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 5827,
+        "prescSurf": 195829
+      },
+      "zones": [
+        {
+          "libelle": "US",
+          "libelong": "Zone urbaine Sauvegardée",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": null,
+          "datappro": null,
+          "nomfic": "75056_reglement_20131218_A.pdf",
+          "urlfic": null,
+          "doc": "6755c72bbbb06df5fdb26bccd10b45bc",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "US"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Voie publique ou privée",
+          "typepsc": "24",
+          "stypepsc": "00",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeubles protégés en totalité au titre des monuments historiques",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 7.3
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zones à risque délimitées par le P.P.R.I.",
+          "typepsc": "02",
+          "stypepsc": "02",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 9.3
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 2.4
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0.7
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 1.2
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 12.4
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type B",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zones à risque délimitées par le P.P.R.I.",
+          "typepsc": "02",
+          "stypepsc": "02",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 90.6
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble pouvant être conservé, amélioré ou remplacé",
+          "typepsc": "99",
+          "stypepsc": "05",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 12.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 1.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 3.4
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 3.6
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 1.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble pouvant être conservé, amélioré ou remplacé",
+          "typepsc": "99",
+          "stypepsc": "05",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble pouvant être conservé, amélioré ou remplacé",
+          "typepsc": "99",
+          "stypepsc": "05",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 0.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeubles protégés en totalité au titre des monuments historiques",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 11.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 3.6
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre de son intérêt patrimonial de type A",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": null,
+          "urlfic": null,
+          "nomfic": null,
+          "part": 1.2
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Jardin protégé au titre des monuments historiques",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Jardin protégé au titre des monuments historiques",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Cour protégée au titre des monuments historiques",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone de développement prioritaire du réseau de chaleur",
+          "typeinf": "07",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Cour protégée au titre des monuments historiques",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone tampon des biens inscrits au patrimoine mondial",
+          "typeinf": "99",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "6755c72bbbb06df5fdb26bccd10b45bc",
+          "type": "PSMV",
+          "titre": "Plan de Sauvegarde et de Mise en Valeur (PSMV) PARIS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "21/04/2021 13:01:16",
+          "producteur": "Direction de l'Urbanisme de la Ville de Paris, 121 avenue de France, CS 51388, 75639 PARIS CEDEX 13",
+          "nbPieces": 18,
+          "reglements": [
+            {
+              "name": "75056_reglement_20131218_A.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "residentiel-blagnac",
+      "vise": "Quartier résidentiel périurbain, PLUi-H",
+      "q": "8 avenue des Pins 31700 Blagnac",
+      "temps": {
+        "ban": 31,
+        "cadastre": 41,
+        "municipality": 41,
+        "document": 45,
+        "zone": 42,
+        "secteur": 40,
+        "prescSurf": 158,
+        "prescLin": 46,
+        "prescPct": 41,
+        "infoSurf": 321,
+        "details": 102,
+        "totalGpu": 423
+      },
+      "adresse": {
+        "label": "8 Avenue des Pins 31700 Blagnac",
+        "type": "housenumber",
+        "score": 0.9637163636363635,
+        "citycode": "31069",
+        "lon": 1.38411,
+        "lat": 43.63705
+      },
+      "parcellesA5m": [
+        "31069000BM0211",
+        "31069000BM0212",
+        "31069000BM0213"
+      ],
+      "parcelle": {
+        "idu": "31069000BM0213",
+        "contenance": 1320,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "31069",
+          "nom": "BLAGNAC",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "e80befa51d0bc24c945e137f11dccfa7",
+          "type": "PLUi",
+          "titre": "PLUI TOULOUSE METROPOLE",
+          "nom": "243100518_PLUi_20251218",
+          "statut": "production",
+          "maj": "2026-06-26T09:26:27.927Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 2970,
+        "prescSurf": 178746
+      },
+      "zones": [
+        {
+          "libelle": "UM4-4",
+          "libelong": "Zonage du PLUi-H : UM4-4 (12-NR-60-RE)",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "",
+          "datappro": null,
+          "nomfic": "243100518_reglement_20251218.pdf",
+          "urlfic": "",
+          "doc": "e80befa51d0bc24c945e137f11dccfa7",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "UM4-4"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zone ruissellement : fortes accumulations (>= 0.5 m)",
+          "typepsc": "48",
+          "stypepsc": "01",
+          "txt": "RUISS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 6.5
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteurs de stationnement : Secteur 3",
+          "typepsc": "44",
+          "stypepsc": "00",
+          "txt": "STAT",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 98.5
+        },
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zone ruissellement : autres zones inondables (0.2 à 0.5 m)",
+          "typepsc": "48",
+          "stypepsc": "01",
+          "txt": "RUISS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 0.2
+        },
+        {
+          "forme": "surf",
+          "libelle": "Seuil minimal de densité (zone d'influence des transports en commun) : rayon 500 m",
+          "typepsc": "44",
+          "stypepsc": "01",
+          "txt": "ZIS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Pourcentage de logements sociaux selon seuil de déclenchement ( non-règlementé / 0)",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "SPL",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zone ruissellement : autres zones inondables (0.2 à 0.5 m)",
+          "typepsc": "48",
+          "stypepsc": "01",
+          "txt": "RUISS",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 5.2
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Périmètre de droit de préemption urbain \"simple\"",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de voisinage d'infrastructure de transport terrestre (secteur affecté par le bruit)",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur de taxe d'aménagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de voisinage d'infrastructure de transport terrestre (secteur affecté par le bruit)",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Réglement local de publicité intercommunal",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Autre périmètre, secteur, plan, document, site, projet, espace",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre d'application d'une pièce écrite territorialisée relative aux annexes (liste des annexes, liste des SUP, plan des SUP)",
+          "typeinf": "97",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "e80befa51d0bc24c945e137f11dccfa7",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) TOULOUSE METROPOLE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "26/06/2026 12:29:14",
+          "producteur": "Toulouse-Métropole",
+          "nbPieces": 83,
+          "reglements": [
+            {
+              "name": "243100518_rapport_8_20251218.pdf",
+              "title": "Justification du règlement et des OAP"
+            },
+            {
+              "name": "243100518_reglement_20251218.pdf",
+              "title": "Règlement, lexique, végétaux, voies, cours d'eau, routes, clôtures, piscines"
+            },
+            {
+              "name": "243100518_info_surf_20_00_20251218.pdf",
+              "title": "Règlement local de publicité intercommunal"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "residentiel-bourg-la-reine",
+      "vise": "Quartier résidentiel, PLU communal (Île-de-France)",
+      "q": "15 avenue du Général Leclerc 92340 Bourg-la-Reine",
+      "temps": {
+        "ban": 51,
+        "cadastre": 79,
+        "municipality": 37,
+        "document": 43,
+        "zone": 42,
+        "secteur": 161,
+        "prescSurf": 137,
+        "prescLin": 63,
+        "prescPct": 44,
+        "infoSurf": 323,
+        "details": 111,
+        "totalGpu": 434
+      },
+      "adresse": {
+        "label": "15 Avenue du Général Leclerc 92340 Bourg-la-Reine",
+        "type": "housenumber",
+        "score": 0.9727899999999998,
+        "citycode": "92014",
+        "lon": 2.318339,
+        "lat": 48.786598
+      },
+      "parcellesA5m": [
+        "920140000E0049"
+      ],
+      "parcelle": {
+        "idu": "920140000E0049",
+        "contenance": 263,
+        "rattachement": "repli",
+        "rayon": 3
+      },
+      "commune": [
+        {
+          "insee": "92014",
+          "nom": "BOURG-LA-REINE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "785f84516bed09e2a9709668ac00b487",
+          "type": "PLUi",
+          "titre": "PLUI VALLEE SUD-GRAND PARIS",
+          "nom": "200057966_PLUi_20260701",
+          "statut": "production",
+          "maj": "2026-07-15T15:53:04.219Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 5326,
+        "prescSurf": 137140
+      },
+      "zones": [
+        {
+          "libelle": "U2b",
+          "libelong": "U2bE6T1H19A3",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20251210",
+          "datappro": null,
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "urlfic": "",
+          "doc": "785f84516bed09e2a9709668ac00b487",
+          "part": 100
+        },
+        {
+          "libelle": "U2b",
+          "libelong": "U2bE6T1H14A3",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20251210",
+          "datappro": null,
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "urlfic": "",
+          "doc": "785f84516bed09e2a9709668ac00b487",
+          "part": 0
+        }
+      ],
+      "zoneAuPoint": [
+        "U2b"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur mixite sociale 30 800",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "30%",
+          "urlfic": "",
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur concerne par une OAP communale",
+          "typepsc": "18",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "200057966_orientations_amenagement_20260701.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Perimetre de 800m autour d'une gare",
+          "typepsc": "44",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "part": 100
+        },
+        {
+          "forme": "lin",
+          "libelle": "Lineaire RDC actif",
+          "typepsc": "22",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "part": null
+        },
+        {
+          "forme": "lin",
+          "libelle": "Alignement d'arbres",
+          "typepsc": "07",
+          "stypepsc": "04",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "200057966_reglement_20260701.pdf",
+          "part": null
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Droit Preemption",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Perimetre de sauvegarde du commerce et artisanat de proximite",
+          "typeinf": "33",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Droit Preemption Renforce",
+          "typeinf": "04",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Classement acoustique des infrastructures de transport terrestre",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone de Publicite Restreinte n°2",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Risque argile fort",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur dans lequel l'édification d'une clôture doit être précédée d'une déclaration préalable",
+          "typeinf": "42",
+          "stypeinf": "02"
+        },
+        {
+          "libelle": "Zone à risque d'exposition au plomb",
+          "typeinf": "17",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur dans lequel les travaux de ravalement sont soumis à déclaration préalable",
+          "typeinf": "42",
+          "stypeinf": "03"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "785f84516bed09e2a9709668ac00b487",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) VALLEE SUD-GRAND PARIS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "15/07/2026 18:14:07",
+          "producteur": "EPT VALLEE SUD - GRAND PARIS",
+          "nbPieces": 84,
+          "reglements": [
+            {
+              "name": "200057966_reglement_20260701.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "200057966_info_surf_20_00_20260701.pdf",
+              "title": "Règlement local de publicité"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "plui-rennes",
+      "vise": "Commune couverte par un PLUi métropolitain",
+      "q": "12 rue de la Chalotais 35510 Cesson-Sévigné",
+      "temps": {
+        "ban": 35,
+        "cadastre": 42,
+        "municipality": 40,
+        "document": 215,
+        "zone": 72,
+        "secteur": 42,
+        "prescSurf": 2187,
+        "prescLin": 61,
+        "prescPct": 42,
+        "infoSurf": 341,
+        "details": 106,
+        "totalGpu": 2293
+      },
+      "adresse": {
+        "label": "12 Rue de la Chalotais 35510 Cesson-Sévigné",
+        "type": "housenumber",
+        "score": 0.9678672727272727,
+        "citycode": "35051",
+        "lon": -1.601117,
+        "lat": 48.122921
+      },
+      "parcellesA5m": [
+        "35051000AD0005",
+        "35051000AD0006"
+      ],
+      "parcelle": {
+        "idu": "35051000AD0006",
+        "contenance": 1689,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "35051",
+          "nom": "CESSON-SEVIGNE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "c4ac400c874359294b31afad7f311f28",
+          "type": "PLUi",
+          "titre": "PLUI RENNES METROPOLE",
+          "nom": "243500139_PLUi_20260917",
+          "statut": "production",
+          "maj": "2026-09-18T13:22:01.500Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 6501,
+        "prescSurf": 6179698
+      },
+      "zones": [
+        {
+          "libelle": "UC2",
+          "libelong": "",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260917",
+          "datappro": null,
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "doc": "c4ac400c874359294b31afad7f311f28",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "UC2"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Implantation des constructions par rapport aux voies et aux emprises publiques",
+          "typepsc": "15",
+          "stypepsc": "01",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 22.7
+        },
+        {
+          "forme": "surf",
+          "libelle": "OAP patrimoniales, architecturales et écologiques",
+          "typepsc": "18",
+          "stypepsc": "05",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Hauteur",
+          "typepsc": "39",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Stationnement",
+          "typepsc": "44",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Mesures pour limiter l'imperméabilisation des sols",
+          "typepsc": "48",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Patrimoine bâti, paysager ou éléments de paysages à protéger pour des motifs d'ordre culturel, historique, architectural ou écologique",
+          "typepsc": "07",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Patrimoine bâti, paysager ou éléments de paysages à protéger pour des motifs d'ordre culturel, historique, architectural ou écologique",
+          "typepsc": "07",
+          "stypepsc": "00",
+          "txt": "Vélo",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Périmètre comportant des orientations d'aménagement et de programmation (OAP)",
+          "typepsc": "18",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Patrimoine bâti, paysager ou éléments de paysages à protéger pour des motifs d'ordre culturel, historique, architectural ou écologique",
+          "typepsc": "07",
+          "stypepsc": "00",
+          "txt": "Cloture",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Coefficient de biotope par surface",
+          "typepsc": "42",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Périmètre comportant des orientations d'aménagement et de programmation (OAP)",
+          "typepsc": "18",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Autre",
+          "typepsc": "99",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Périmètre comportant des orientations d'aménagement et de programmation (OAP)",
+          "typepsc": "18",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "https://public.sig.rennesmetropole.fr/ressources/donnees/urbanisme/plui/envigueur/3_reglement/d01_rl.zip",
+          "nomfic": "243500139_reglement_20260917.pdf",
+          "part": 100
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Périmètre d'application d'une pièce écrite territorialisée relative aux annexes (liste des annexes, liste des SUP, plan des SUP)",
+          "typeinf": "97",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de droit de préemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Autre  périmètre, secteur, plan, document, site, projet, espace.",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur de taxe d'aménagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur de taxe d'aménagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Autre  périmètre, secteur, plan, document, site, projet, espace.",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre d'application d'une pièce écrite territorialisée relative aux annexes (liste des annexes, liste des SUP, plan des SUP)",
+          "typeinf": "97",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "c4ac400c874359294b31afad7f311f28",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) RENNES METROPOLE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "24/09/2026 10:29:49",
+          "producteur": "Rennes Métropole - Service Information Géographique",
+          "nbPieces": 7,
+          "reglements": [
+            {
+              "name": "243500139_reglement_20260917.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "lyon-croix-rousse",
+      "vise": "Prescriptions patrimoniales et zone voisine en limite",
+      "q": "10 rue d'Austerlitz 69004 Lyon",
+      "temps": {
+        "ban": 79,
+        "cadastre": 136,
+        "municipality": 37,
+        "document": 109,
+        "zone": 91,
+        "secteur": 38,
+        "prescSurf": 587,
+        "prescLin": 80,
+        "prescPct": 89,
+        "infoSurf": 168,
+        "details": 115,
+        "totalGpu": 702
+      },
+      "adresse": {
+        "label": "10 Rue d'Austerlitz 69004 Lyon",
+        "type": "housenumber",
+        "score": 0.9662563636363637,
+        "citycode": "69384",
+        "lon": 4.833728,
+        "lat": 45.775838
+      },
+      "parcellesA5m": [
+        "69384000AV0059"
+      ],
+      "parcelle": {
+        "idu": "69384000AV0059",
+        "contenance": 576,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "69123",
+          "nom": "LYON",
+          "rnu": false
+        },
+        {
+          "insee": "69384",
+          "nom": "LYON-4E-ARRONDISSEMENT",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "type": "PLUi",
+          "titre": "PLUI GRAND LYON LA METROPOLE",
+          "nom": "200046977_PLUi_20260326",
+          "statut": "production",
+          "maj": "2026-04-23T09:35:17.636Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 21847,
+        "prescSurf": 329043
+      },
+      "zones": [
+        {
+          "libelle": "UCe3-p",
+          "libelong": "Tissus urbains marques par une forte mixite de l habitat et des activites economiques. Ils sont constitues sur un parcellaire profond et etroit par un front bati continu le long des rues a l arriere duquel se developpe generalement un ba",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260326",
+          "datappro": null,
+          "nomfic": "200046977_reglement_20260326.pdf",
+          "urlfic": "",
+          "doc": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "part": 0
+        },
+        {
+          "libelle": "UCe1a",
+          "libelong": "Tissu urbain dense a caractere patrimonial qui regroupe toutes les fonctions des centres urbains. Il est constitue d ilots profonds tres occupes par le bati avec peu d espaces vegetalises.",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260326",
+          "datappro": null,
+          "nomfic": "200046977_reglement_20260326.pdf",
+          "urlfic": "",
+          "doc": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "UCe1a"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur de taille minimale des logements-1",
+          "typepsc": "23",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Diversite commerciale a proteger ou a developper-TOUTACTI",
+          "typepsc": "22",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 34.1
+        },
+        {
+          "forme": "surf",
+          "libelle": "Risque d inondation par ruissellement-ZONE PRODUCTION",
+          "typepsc": "02",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de stationnement-B",
+          "typepsc": "44",
+          "stypepsc": "00",
+          "txt": "B",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Perimetre d interet patrimonial-A1",
+          "typepsc": "07",
+          "stypepsc": "02",
+          "txt": "A1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Polarite commerciale",
+          "typepsc": "51",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Polarite d hebergement hotelier et touristique",
+          "typepsc": "51",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de mixite sociale",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Plan de detail-CENTRE-CROIX-ROUSSE-1",
+          "typepsc": "97",
+          "stypepsc": "01",
+          "txt": "SECT01",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Hauteur Max-16",
+          "typepsc": "39",
+          "stypepsc": "02",
+          "txt": "16",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de mixite sociale",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de mixite sociale",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de taille minimale des logements-1",
+          "typepsc": "23",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de mixite sociale",
+          "typepsc": "17",
+          "stypepsc": "00",
+          "txt": "1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        },
+        {
+          "forme": "surf",
+          "libelle": "Element Bati a preserver-13",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": "13",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 0
+        },
+        {
+          "forme": "surf",
+          "libelle": "Diversite commerciale a proteger ou a developper-TOUTACTI",
+          "typepsc": "22",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 0
+        },
+        {
+          "forme": "surf",
+          "libelle": "OAP-0.1",
+          "typepsc": "18",
+          "stypepsc": "00",
+          "txt": "0.1",
+          "urlfic": "",
+          "nomfic": "",
+          "part": 100
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Zone d assainissement-COLLECTI",
+          "typeinf": "19",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Perimetre d un bien inscrit au patrimoine mondial",
+          "typeinf": "40",
+          "stypeinf": "01"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) GRAND LYON LA METROPOLE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "23/04/2026 13:44:58",
+          "producteur": "Métropole de Lyon",
+          "nbPieces": 617,
+          "reglements": [
+            {
+              "name": "200046977_reglement_20260326.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "200046977_RLP_reglement_20_00_20260326.pdf",
+              "title": "RLP reglement 20 00"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "chamonix",
+      "vise": "Montagne, PLU communal",
+      "temps": {
+        "ban": 33,
+        "cadastre": 44,
+        "municipality": 63,
+        "document": 64,
+        "zone": 81,
+        "secteur": 40,
+        "prescSurf": 135,
+        "prescLin": 44,
+        "prescPct": 43,
+        "infoSurf": 52,
+        "details": 111,
+        "totalGpu": 246
+      },
+      "adresse": {
+        "label": "48 Rue de l'Hôtel de Ville 74400 Chamonix-Mont-Blanc",
+        "type": "housenumber",
+        "score": 0.9987,
+        "citycode": "74056",
+        "lon": 6.869565,
+        "lat": 45.923727
+      },
+      "parcellesA5m": [
+        "740560000G4352",
+        "740560000G4353",
+        "740560000G0945"
+      ],
+      "parcelle": {
+        "idu": "740560000G4352",
+        "contenance": 1009,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "74056",
+          "nom": "CHAMONIX-MONT-BLANC",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "beaa82a7b5594b3913d5156928287d07",
+          "type": "PLU",
+          "titre": "CHAMONIX-MONT-BLANC",
+          "nom": "74056_PLU_20260226",
+          "statut": "production",
+          "maj": "2026-04-28T09:49:06.173Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 20952,
+        "prescSurf": 14430
+      },
+      "zones": [
+        {
+          "libelle": "Ua",
+          "libelong": "Ua : Zone urbaine de centre-ville",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260226",
+          "datappro": null,
+          "nomfic": "74056_reglement_20260226.pdf",
+          "urlfic": "",
+          "doc": "beaa82a7b5594b3913d5156928287d07",
+          "part": 100
+        },
+        {
+          "libelle": "Ua-h",
+          "libelong": "Ua-h : Zone urbaine de centre-ville en faveur de l'hôtellerie",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260226",
+          "datappro": null,
+          "nomfic": "74056_reglement_20260226.pdf",
+          "urlfic": "",
+          "doc": "beaa82a7b5594b3913d5156928287d07",
+          "part": 0
+        },
+        {
+          "libelle": "Ua-h",
+          "libelong": "Ua-h : Zone urbaine de centre-ville en faveur de l'hôtellerie",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260226",
+          "datappro": null,
+          "nomfic": "74056_reglement_20260226.pdf",
+          "urlfic": "",
+          "doc": "beaa82a7b5594b3913d5156928287d07",
+          "part": 0
+        }
+      ],
+      "zoneAuPoint": [
+        "Ua"
+      ],
+      "secteursCC": [],
+      "prescriptions": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur patrimonial",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "74056_reglement_20260226.pdf",
+          "part": 100
+        },
+        {
+          "forme": "lin",
+          "libelle": "Diversité commercial à protéger ou à développer",
+          "typepsc": "22",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "74056_reglement_20260226.pdf",
+          "part": null
+        },
+        {
+          "forme": "lin",
+          "libelle": "Diversité commercial à protéger ou à développer",
+          "typepsc": "22",
+          "stypepsc": "00",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "74056_reglement_20260226.pdf",
+          "part": null
+        },
+        {
+          "forme": "pct",
+          "libelle": "Patrimoine bâti à protéger pour des motifs d ordre culturel, historique, architectural",
+          "typepsc": "07",
+          "stypepsc": "01",
+          "txt": "",
+          "urlfic": "",
+          "nomfic": "74056_reglement_20260226.pdf",
+          "part": null
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Tampon de 500m autour des gares et des arrêts ferroviaires",
+          "typeinf": "99",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "beaa82a7b5594b3913d5156928287d07",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de CHAMONIX-MONT-BLANC",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "28/04/2026 12:08:08",
+          "producteur": "Communauté de Communes de la Vallée de Chamonix-Mont-Blanc",
+          "nbPieces": 34,
+          "reglements": [
+            {
+              "name": "74056_reglement_20260226.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "rural-bonnat",
+      "vise": "Bourg rural, PLUi",
+      "q": "3 rue de la Paix 23220 Bonnat",
+      "temps": {
+        "ban": 31,
+        "cadastre": 40,
+        "municipality": 163,
+        "document": 68,
+        "zone": 48,
+        "secteur": 43,
+        "prescSurf": 55,
+        "prescLin": 45,
+        "prescPct": 45,
+        "infoSurf": 42,
+        "details": 104,
+        "totalGpu": 267
+      },
+      "adresse": {
+        "label": "3 Rue de La Paix 23220 Bonnat",
+        "type": "housenumber",
+        "score": 0.9507327272727272,
+        "citycode": "23025",
+        "lon": 1.903093,
+        "lat": 46.327373
+      },
+      "parcellesA5m": [
+        "23025000BD0013"
+      ],
+      "parcelle": {
+        "idu": "23025000BD0013",
+        "contenance": 660,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "23025",
+          "nom": "BONNAT",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "d392ad69dda0672b053cb5f4017b4882",
+          "type": "PLUi",
+          "titre": "PLUI PORTES DE LA CREUSE EN MARCHE",
+          "nom": "200041556_PLUi_20260305",
+          "statut": "production",
+          "maj": "2026-04-09T14:51:59.664Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 10864,
+        "prescSurf": 147
+      },
+      "zones": [
+        {
+          "libelle": "Ut",
+          "libelong": "",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260305",
+          "datappro": null,
+          "nomfic": "200041556_reglement_20260305.pdf",
+          "urlfic": "",
+          "doc": "d392ad69dda0672b053cb5f4017b4882",
+          "part": 0
+        },
+        {
+          "libelle": "Ue",
+          "libelong": "",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260305",
+          "datappro": null,
+          "nomfic": "200041556_reglement_20260305.pdf",
+          "urlfic": "",
+          "doc": "d392ad69dda0672b053cb5f4017b4882",
+          "part": 0
+        },
+        {
+          "libelle": "Ua",
+          "libelong": "",
+          "typezone": "U",
+          "destdomi": null,
+          "datvalid": "20260305",
+          "datappro": null,
+          "nomfic": "200041556_reglement_20260305.pdf",
+          "urlfic": "",
+          "doc": "d392ad69dda0672b053cb5f4017b4882",
+          "part": 100
+        }
+      ],
+      "zoneAuPoint": [
+        "Ua"
+      ],
+      "secteursCC": [],
+      "prescriptions": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "d392ad69dda0672b053cb5f4017b4882",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) PORTES DE LA CREUSE EN MARCHE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "09/04/2026 17:27:55",
+          "producteur": "Communauté de communes des Portes de la Creuse en Marche",
+          "nbPieces": 20,
+          "reglements": [
+            {
+              "name": "200041556_reglement_20260305.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ]
+    },
+    {
+      "id": "cc-vauquois",
+      "vise": "Carte communale",
+      "q": "1 rue d’Orleans 55270 Vauquois",
+      "temps": {
+        "ban": 30,
+        "cadastre": 234,
+        "municipality": 40,
+        "document": 40,
+        "zone": 42,
+        "secteur": 52,
+        "prescSurf": 45,
+        "prescLin": 40,
+        "prescPct": 41,
+        "infoSurf": 70,
+        "details": 102,
+        "totalGpu": 172
+      },
+      "adresse": {
+        "label": "1 Rue d’Orleans 55270 Vauquois",
+        "type": "housenumber",
+        "score": 0.9288945454545454,
+        "citycode": "55536",
+        "lon": 5.073521,
+        "lat": 49.203929
+      },
+      "parcellesA5m": [],
+      "parcelle": {
+        "idu": "555360000B0194",
+        "contenance": 140,
+        "rattachement": "repli",
+        "rayon": 8
+      },
+      "commune": [
+        {
+          "insee": "55536",
+          "nom": "VAUQUOIS",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "a907741b483c6198fc2bdf80bf4d0cbd",
+          "type": "CC",
+          "titre": "VAUQUOIS",
+          "nom": "55536_CC_20200210",
+          "statut": "production",
+          "maj": "2020-02-20T15:55:03Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 147,
+        "prescSurf": 147
+      },
+      "zones": [],
+      "zoneAuPoint": [],
+      "secteursCC": [
+        {
+          "libelle": "C",
+          "libelong": null,
+          "typesect": "01",
+          "part": 100,
+          "i": 0
+        }
+      ],
+      "prescriptions": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "a907741b483c6198fc2bdf80bf4d0cbd",
+          "type": "CC",
+          "titre": "Carte Communale (CC) de la commune de VAUQUOIS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "09/03/2020 21:39:02",
+          "nbPieces": 6,
+          "reglements": [],
+          "reglementHttp": null
+        }
+      ]
+    },
+    {
+      "id": "rnu-chatelard",
+      "vise": "RNU",
+      "temps": {
+        "ban": 118,
+        "cadastre": 40,
+        "municipality": 41,
+        "document": 39,
+        "zone": 36,
+        "secteur": 33,
+        "prescSurf": 37,
+        "prescLin": 38,
+        "prescPct": 41,
+        "infoSurf": 46,
+        "totalGpu": 46
+      },
+      "adresse": {
+        "label": "3 impasse du bois d'ardon 23700 Châtelard",
+        "type": "housenumber",
+        "score": 0.991,
+        "citycode": "23055",
+        "lon": 2.466302,
+        "lat": 45.963917
+      },
+      "parcellesA5m": [
+        "230550000A0234",
+        "230550000A0097"
+      ],
+      "parcelle": {
+        "idu": "230550000A0234",
+        "contenance": 527,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "23055",
+          "nom": "CHATELARD",
+          "rnu": true
+        }
+      ],
+      "documents": [],
+      "documentsAuPoint": 0,
+      "octets": {
+        "zone": 147,
+        "prescSurf": 147
+      },
+      "zones": [],
+      "zoneAuPoint": [],
+      "secteursCC": [],
+      "prescriptions": [],
+      "informations": [],
+      "echecs": [],
+      "details": []
+    },
+    {
+      "id": "sans-doc-grandvals",
+      "vise": "Hors RNU mais aucun document versé au GPU (voie seule à la BAN)",
+      "q": "rue de l'École 48260 Grandvals",
+      "temps": {
+        "ban": 110,
+        "cadastre": 52,
+        "municipality": 51,
+        "document": 41,
+        "zone": 44,
+        "secteur": 48,
+        "prescSurf": 91,
+        "prescLin": 43,
+        "prescPct": 43,
+        "infoSurf": 56,
+        "totalGpu": 91
+      },
+      "adresse": {
+        "label": "Rue de l'École 48260 Grandvals",
+        "type": "street",
+        "score": 0.9329881818181817,
+        "citycode": "48071",
+        "lon": 3.051889,
+        "lat": 44.721516
+      },
+      "parcellesA5m": [
+        "480710000B0103",
+        "480710000B0104",
+        "480710000B0098",
+        "480710000B0099"
+      ],
+      "parcelle": {
+        "idu": "480710000B0099",
+        "contenance": 519,
+        "rattachement": "point",
+        "rayon": null
+      },
+      "commune": [
+        {
+          "insee": "48071",
+          "nom": "GRANDVALS",
+          "rnu": false
+        }
+      ],
+      "documents": [],
+      "documentsAuPoint": 0,
+      "octets": {
+        "zone": 147,
+        "prescSurf": 147
+      },
+      "zones": [],
+      "zoneAuPoint": [],
+      "secteursCC": [],
+      "prescriptions": [],
+      "informations": [],
+      "echecs": [],
+      "details": []
+    }
+  ]
+}
