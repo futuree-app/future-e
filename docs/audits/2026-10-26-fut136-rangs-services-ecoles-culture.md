@@ -1,6 +1,6 @@
 # FUT-136 · Les rangs des services, des écoles et de la culture suivent de nouveau leurs scores
 
-*26/10/2026 · index de `main` @ `de009441` (FUT-135 livré) · source : FUT-109 §8.2*
+*26/10/2026 · index de `main` @ `de009441` (FUT-135 livré), synchronisé avec `cf4a2dab` (#90, sans effet sur les données) · source : FUT-109 §8.2*
 
 ## 1. En une phrase
 
@@ -133,7 +133,7 @@ Chaque position du dossier porte l'estampille `distributionVersion: "mismatch-di
 |---|---|
 | Garde des rangs (`rangs-parite.test.ts`) | 7/7 ; échoue sur l'index de `main` |
 | Règles d'accord et de désaccord (`mismatch-rules`, `alignment-rules`, `fut110`, `fut96`, `fact-compositions`) | inclus dans la suite complète |
-| `npm test`, suite lancée seule | **3 205/3 205** (`main` : 3 198, plus les 7 nouveaux) |
+| `npm test`, suite lancée seule | **3 205/3 205** sur `de009441` (3 198 + les 7 nouveaux) ; **3 227/3 227** après synchronisation avec `main` @ `cf4a2dab` (#90 fusionnée : + 22) |
 | `tsc --noEmit` | 0 erreur |
 | `eslint` (fichiers modifiés, test compris avec `--no-ignore`) | 0 problème |
 | `next build` (prébuild compris : `index-verify`, données de l'accueil) | OK, avec des clés Supabase factices (aucun appel réel) |
