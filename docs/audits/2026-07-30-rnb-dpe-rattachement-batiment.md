@@ -1,5 +1,8 @@
 # Sonde — RNB comme couche de rattachement bâtimentaire pour le DPE
 
+> **Dépassé le 26/10/2026** : les DPE de l'ADEME portent `id_rnb` (51 % des existants) et le rattachement
+> géométrique ne prouve rien. Voir `docs/audits/2026-10-26-fut80-rnb-bdnb.md`.
+
 **Date** : 2026-07-30 · **Origine** : piste soulevée en brainstorming (session checkout dossier), en
 réponse au taux de ~44 % d'adresses sans DPE à moins de 50 m
 (`docs/audits/2026-07-03-dpe-confort-ete-couverture.md`, résultat 6).
