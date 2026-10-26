@@ -14,10 +14,9 @@ const racine = process.cwd() + "/";
 const mode = process.argv[2];
 
 // Les seuils que lisent les consommateurs (src/lib/comparateur-vie.ts) : palier (bandIndex), raison favorable,
-// identité « Pour une ville étudiante à taille humaine. », découverte, trait d'une ville de référence.
+// découverte. L'identité et le trait d'une ville de référence sont lus du moteur lui-même.
 const PALIER = (s) => (s == null ? "non mesuré" : s >= 66 ? "forte" : s < 34 ? "limitée" : "intermédiaire");
 const SEUIL_RAISON = 55;
-const SEUIL_IDENTITE = 55;
 const SEUIL_DECOUVERTE = 65; // strictement au-dessus
 // Le trait d'ancre (seuil 70) est lu par `communeToPreferences` lui-même.
 
@@ -54,7 +53,7 @@ async function photographier(sortie) {
       acces: c.etudes_acces ?? null, dyn: c.etudes_dyn ?? null, vie: s,
       palier: PALIER(s),
       raison: s != null && s >= SEUIL_RAISON,
-      identite: s != null && s >= SEUIL_IDENTITE,
+      identite: V.buildIdentiteCandidates(c).includes("Pour une ville étudiante à taille humaine."),
       decouverte: s != null && s > SEUIL_DECOUVERTE,
       signature: V.communeToPreferences(c).preferences.some((p) => p.key === "vie_etudiante"),
     };
@@ -74,7 +73,10 @@ async function photographier(sortie) {
       trio: o.results.slice(0, 3).map(carte),
       pistes: (o.pistes ?? []).map(carte),
       paliersComparaison: ligne ? ligne.cellules.map((x) => [x.insee, x.palier]) : null,
+      ligneVieEtudiante: ligne,
       resume: o.comparaisonComplete.resume, arbitrage: o.comparaisonComplete.arbitrage,
+      syntheses: o.comparaisonComplete.themes.map((t) => t.synthese),
+      divergence: o.comparaisonComplete.divergence ?? null,
     };
   };
   for (const r of RECHERCHES) await lancer(r.id, r.departements ? { departements: r.departements } : {}, r.prefs);
@@ -152,6 +154,54 @@ function comparer(fa, fb) {
   console.log(JSON.stringify(out, null, 2));
 }
 
+// FUT-135 (revue du 25/10) · Correctif ÉDITORIAL : tout ce qui est numérique ou de classement doit rester identique
+// (scores, paliers numériques, couverture, composition et ordre des trios et des pistes, compatibilités) ; seuls
+// les récits peuvent changer, et ils sont listés un par un.
+function comparerRecits(fa, fb) {
+  const A = JSON.parse(readFileSync(fa, "utf8"));
+  const B = JSON.parse(readFileSync(fb, "utf8"));
+  const ecarts = [];
+  if (A.indexSha !== B.indexSha) ecarts.push(`index ${A.indexSha} -> ${B.indexSha}`);
+  const CHAMPS = ["acces", "dyn", "vie", "palier", "raison", "decouverte", "signature"];
+  for (const k of Object.keys(A.parCommune)) {
+    for (const f of CHAMPS) if (A.parCommune[k][f] !== B.parCommune[k][f]) ecarts.push(`${k} ${f}`);
+  }
+  const numerique = (x) => ({ insee: x.insee, compatibility: x.compatibility, couverture: x.couverture });
+  const recits = {};
+  for (const id of Object.keys(A.recherches)) {
+    const a = A.recherches[id], b = B.recherches[id];
+    for (const part of ["trio", "pistes"]) {
+      if (JSON.stringify(a[part].map(numerique)) !== JSON.stringify(b[part].map(numerique))) ecarts.push(`${id} ${part}`);
+    }
+    if (a.couverture !== b.couverture || a.perfectMatch !== b.perfectMatch) ecarts.push(`${id} couverture`);
+    const bandes = (l) => l && l.cellules.map((x) => [x.insee, x.disponible]);
+    if (JSON.stringify(bandes(a.ligneVieEtudiante)) !== JSON.stringify(bandes(b.ligneVieEtudiante))) ecarts.push(`${id} cellules`);
+    if (JSON.stringify(a.ligneVieEtudiante?.avantage) !== JSON.stringify(b.ligneVieEtudiante?.avantage)) ecarts.push(`${id} avantage`);
+    const diffs = [];
+    for (const part of ["trio", "pistes"]) {
+      a[part].forEach((x, i) => {
+        const y = b[part][i];
+        for (const f of ["reasons", "identite", "decouverte", "tradeoff", "signaux"]) {
+          if (JSON.stringify(x[f]) !== JSON.stringify(y[f])) diffs.push({ carte: `${part} ${x.nom}`, champ: f, avant: x[f], apres: y[f] });
+        }
+      });
+    }
+    for (const f of ["resume", "arbitrage", "syntheses", "divergence"]) {
+      if (JSON.stringify(a[f]) !== JSON.stringify(b[f])) diffs.push({ champ: f, avant: a[f], apres: b[f] });
+    }
+    const cel = (l) => l && l.cellules.map((x) => `${x.palier}${x.qualifier ? ` / ${x.qualifier}` : ""}`);
+    if (JSON.stringify(cel(a.ligneVieEtudiante)) !== JSON.stringify(cel(b.ligneVieEtudiante)) || a.ligneVieEtudiante?.aide !== b.ligneVieEtudiante?.aide) {
+      diffs.push({ champ: "comparaison vie étudiante", avant: { aide: a.ligneVieEtudiante?.aide, cellules: cel(a.ligneVieEtudiante) }, apres: { aide: b.ligneVieEtudiante?.aide, cellules: cel(b.ligneVieEtudiante) } });
+    }
+    if (a.traits && JSON.stringify(a.traits) !== JSON.stringify(b.traits)) diffs.push({ champ: "traits", avant: a.traits, apres: b.traits });
+    if (a.traits && JSON.stringify(a.preferences) !== JSON.stringify(b.preferences)) ecarts.push(`${id} preferences`);
+    if (diffs.length) recits[id] = diffs;
+  }
+  const identites = Object.keys(A.parCommune).filter((k) => A.parCommune[k].identite !== B.parCommune[k].identite).length;
+  console.log(JSON.stringify({ ecartsNumeriques: ecarts, candidatsIdentiteEtudianteRetires: identites, recits }, null, 2));
+}
+
 if (mode === "--photo") await photographier(process.argv[3]);
 else if (mode === "--comparer") comparer(process.argv[3], process.argv[4]);
-else { console.error("usage : --photo <sortie.json> | --comparer <avant.json> <apres.json>"); process.exit(1); }
+else if (mode === "--recits") comparerRecits(process.argv[3], process.argv[4]);
+else { console.error("usage : --photo <sortie.json> | --comparer <avant.json> <apres.json> | --recits <avant.json> <apres.json>"); process.exit(1); }

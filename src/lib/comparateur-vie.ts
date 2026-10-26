@@ -48,7 +48,8 @@ import {
 } from "@/lib/comparateur/inondation-historique";
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
-import { libellesAgglomeration, lectureCommunalePLM, villePLM, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
+import { libellesAgglomeration, lectureCommunalePLM, villePLM, villeDeArrondissement, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
+import { classifyHigherEdAbsence } from "@/lib/decision/absence-facts";
 import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -620,7 +621,12 @@ export type IndexCommune = {
 const INDEX_GZ_PATH = path.join(process.cwd(), "data", "comparateur-index.json.gz");
 // L'index canonique est un .gz versionné (cf. spec compression-index-gzip). Le loader
 // gunzip + mémoïse + valide la racine, et appelle buildUuPop une seule fois.
-const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, buildUuPop);
+// FUT-135 : les libellés d'agglomération sont dérivés au même moment, pour les phrases qui nomment l'échelle
+// d'une mesure (« dans l'agglomération de Lyon »).
+const loadIndexOnce = createCompressedIndexLoader(INDEX_GZ_PATH, (communes) => {
+  buildUuPop(communes);
+  buildUuLabels(communes);
+});
 
 let nameCache: Map<string, IndexCommune> | null = null;
 
@@ -1070,7 +1076,7 @@ function tailleLabel(pop: number | null): "village" | "petite" | "moyenne" | "gr
 // renvoie PLUSIEURS pour que la passe de groupe (assignIdentite) puisse départager
 // deux communes au profil proche (deux côtières, deux montagnes) sans répéter la
 // même promesse dans un trio. Le dernier candidat (neutre) est toujours présent.
-function buildIdentiteCandidates(c: IndexCommune): string[] {
+export function buildIdentiteCandidates(c: IndexCommune): string[] {
   const uuPop = tailleVille(c);
   const taille = tailleLabel(uuPop);
   // FUT-33 : une promesse « au bord de l'eau » exige une commune littorale ET un point de référence près du
@@ -1117,7 +1123,9 @@ function buildIdentiteCandidates(c: IndexCommune): string[] {
   if (frais) push("Pour chercher davantage de fraîcheur et un rythme plus posé.");
   if (doux) push("Pour des hivers parmi les plus doux du pays.");
   // Traits de caractère (départagent deux communes de même géographie).
-  if (etudianteForte) push("Pour une ville étudiante à taille humaine.");
+  // FUT-135 : seulement si la commune porte elle-même la mesure (pôle de son bassin, établissement recensé dans son
+  // rayon) ; sinon la preuve est celle de l'agglomération, dite par la raison, pas par l'identité.
+  if (etudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
   // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
   // phrase dit le fait observé, sans lui prêter de cause.
   if (croissanceForte) push("Pour s'installer dans une commune qui gagne des habitants.");
@@ -1518,7 +1526,7 @@ const DIMENSIONS: ComparaisonDim[] = [
   { id: "isolement", label: "Isolement", themeId: "services", key: "eviter_isolement", paliers: ["Bassin de vie étendu", "Bassin de proximité", "Bassin de vie restreint"], gp: "le bassin de vie", forte: "son bassin de vie étendu", aide: "La taille du bassin de vie qui dessert le territoire.", risque: false, directionnel: true },
   { id: "emploi", label: "Emploi", themeId: "vitalite", key: "viabilite_emploi", paliers: ["Bassin d'emploi étendu", "Bassin d'emploi intermédiaire", "Bassin d'emploi resserré"], gp: "le bassin d'emploi", forte: "son bassin d'emploi étendu", aide: "L'étendue et la diversité du bassin d'emploi.", risque: false, directionnel: true },
   { id: "vie_locale", label: "Vie locale", themeId: "vitalite", key: "vie_locale", paliers: ["Vie locale animée", "Vie locale intermédiaire", "Vie locale discrète"], gp: "la vie locale", forte: "sa vie locale animée", aide: "L'intensité de la vie sociale (cafés, marchés, sport, associations).", risque: false, directionnel: true },
-  { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante limitée"], gp: "la vie étudiante", forte: "sa vie étudiante", aide: "La présence d'étudiants et d'établissements supérieurs.", risque: false, directionnel: true },
+  { id: "vie_etudiante", label: "Vie étudiante", themeId: "vitalite", key: "vie_etudiante", paliers: ["Forte présence étudiante", "Présence étudiante intermédiaire", "Présence étudiante limitée"], gp: "la vie étudiante", forte: "sa vie étudiante", aide: "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.", risque: false, directionnel: true },
   { id: "demographie", label: "Démographie", themeId: "vitalite", key: "croissance_demographique", paliers: ["Gagne des habitants", "Population stable", "Perd des habitants"], gp: "la démographie", forte: "sa croissance démographique", aide: "Si le territoire gagne ou perd des habitants.", risque: false, directionnel: true },
   { id: "taille_ville", label: "Taille de ville", themeId: "vitalite", key: "taille_ville", paliers: ["Grande agglomération", "Ville moyenne", "Petite ville ou rural"], gp: "la taille de ville", forte: "sa taille", aide: "La taille de l'agglomération.", risque: false, directionnel: false },
 ];
@@ -1707,8 +1715,11 @@ export function buildComparaisonComplete(
       // Qualifier (source proche) seulement pour expliquer une EXPOSITION : pas sur le tier
       // favorable, pas sur la commune qui MÈNE (sinon « Avantage » + « site à risque proche »
       // se contredisent).
-      const qualifier =
-        band != null && band >= 1 && !leaderSet.has(r.insee) ? dimQualifier(dim.id, c) : null;
+      // FUT-135 : pour la vie étudiante, le qualificatif dit l'absence d'établissement recensé dans le rayon, même
+      // pour la commune qui mène : son palier est celui de son agglomération.
+      const qualifier = dim.id === "vie_etudiante" && band != null
+        ? presenceEtudianteParties(c, band).rayon
+        : band != null && band >= 1 && !leaderSet.has(r.insee) ? dimQualifier(dim.id, c) : null;
       // Alerte rouge : pire tier d'un critère de risque, alors qu'une autre commune fait mieux.
       const alerte = dim.risque && band === 2 && someoneBetter(2);
       return { insee: r.insee, palier, qualifier, disponible: true, alerte };
@@ -1759,7 +1770,12 @@ export function buildComparaisonComplete(
       if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
         const insee = l.avantage.insees[0];
         const arr = winners.get(insee) ?? [];
-        arr.push(forteById.get(l.id) ?? l.label.toLowerCase());
+        // FUT-135 : hors du pôle, « sa vie étudiante » prêterait à la commune la mesure de son agglomération.
+        const col = cols[trio.findIndex((r) => r.insee === insee)];
+        const forte = l.id === "vie_etudiante" && col && !villeEtudianteLocale(col)
+          ? "la présence étudiante de son agglomération"
+          : forteById.get(l.id) ?? l.label.toLowerCase();
+        arr.push(forte);
         winners.set(insee, arr);
       }
     }
@@ -1962,6 +1978,11 @@ const SIGNAUX_MAX = 5;
 // classement (qui écrivait « En bord de mer » jusqu'à 51 km). Le score ne sert plus qu'à dire qui est le plus près.
 function palierAffiche(dim: (typeof DIMENSIONS)[number], band: 0 | 1 | 2, c: IndexCommune): string {
   if (dim.id === "mer" && c.mer_centre_km != null) return `Rivage marin · ${kmLisible(c.mer_centre_km)}`;
+  // FUT-135 : même palier, à l'échelle de la mesure (« Forte présence étudiante dans l'agglomération de Lyon… »).
+  if (dim.id === "vie_etudiante") {
+    const t = presenceEtudianteParties(c, band).presence;
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
   return dim.paliers[band];
 }
 
@@ -2043,7 +2064,7 @@ function buildCompromisCandidates(
     const text =
       neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
         ? `En échange, ${neg} qu'à ${leader.nom}.`
-        : `En échange, ${REASON_NEG[key]}.`;
+        : `En échange, ${raisonNeg(key, c)}.`;
     out.push({ key, severity, text });
   };
 
@@ -2168,7 +2189,10 @@ function assignSignaux(
       .sort((a, b) => b.dist - a.dist)
       .slice(0, SIGNAUX_MAX);
     const signaux: Record<string, string> = {};
-    for (const x of ranked) signaux[x.dim.id] = x.dim.bands[bandIndex(x.s)];
+    for (const x of ranked) {
+      // FUT-135 : la vie étudiante se dit à l'échelle mesurée (agglomération, rayon), pas comme un trait de la commune.
+      signaux[x.dim.id] = x.dim.id === "vie_etudiante" && cols[i] ? presenceEtudiante(cols[i]!, bandIndex(x.s)) : x.dim.bands[bandIndex(x.s)];
+    }
     // FUT-129 : l'inondation n'est plus une bande de terciles (« historique d'inondation plus faible »),
     // mais un fait daté, dit même quand il est bas, et jamais comme une réassurance. Hors cap ambiant.
     const ci = cols[i];
@@ -2177,6 +2201,77 @@ function assignSignaux(
     if (r.climatInondation) signaux["climat_inondation"] = r.climatInondation;
     r.signaux = signaux;
   });
+}
+
+// ── FUT-135 · LE GRAIN DES MOTS ÉTUDIANTS (narratif, hors score) ───────────────────────────────────
+// Trois mesures, trois échelles. La part d'étudiants (`etudes_dyn`) est celle du BASSIN, l'unité urbaine le
+// plus souvent. L'accès (`etudes_acces`, `etudesSup`) se mesure depuis la COMMUNE, dans un rayon. `vie_etudiante`
+// combine les deux et n'établit pas, à lui seul, une présence étudiante dans la commune. Un texte ne prête donc
+// à une commune que ce qui est mesuré à son échelle :
+//   - hors du pôle de son agglomération, la présence se dit « dans l'agglomération de X » ;
+//   - sans établissement du supérieur recensé dans le rayon étudié, le texte le dit, borné à ce rayon (même
+//     prédicat que la règle d'absence du dossier, `classifyHigherEdAbsence`). Ce n'est pas une absence
+//     d'étudiants résidents, ni d'établissement au-delà du rayon ;
+//   - le niveau suit le palier de la comparaison (`bandIndex`) : un score intermédiaire ne se dit jamais « forte ».
+// Rien ici ne touche un score, un seuil, un rang ou la composition des résultats.
+const PRESENCE_ETUDIANTE = ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] as const;
+
+type GrainEtudiant = { pole: boolean; agglomeration: string | null; rayonSansEtablissementKm: number | null };
+function grainEtudiant(c: IndexCommune): GrainEtudiant {
+  const uuPop = c.uu ? uuPopCache?.get(c.uu) ?? null : null;
+  // La commune EST son bassin : hors unité urbaine, ou seule commune de la sienne.
+  const seule = !c.uu || uuPop == null || uuPop <= (c.population ?? 0);
+  const agglomeration = c.uu ? uuLabelCache?.get(c.uu) ?? null : null;
+  const nomVille = villeDeArrondissement(c.insee)?.nom ?? c.nom; // un arrondissement est sa ville (FUT-43)
+  const pole = seule || (agglomeration != null && normalizeName(agglomeration) === normalizeName(nomVille));
+  // Même attestation que le dossier (module-facts-map.ts), donc même verdict d'absence.
+  const sup = c.etudesSup;
+  const aucun = sup?.measured === true && classifyHigherEdAbsence({
+    measured: true, weightedAccess: sup.weightedAccess, radiusKm: sup.radiusKm, establishmentCount: sup.establishmentCount ?? null,
+  }) === "mismatch";
+  return { pole, agglomeration: pole ? null : agglomeration, rayonSansEtablissementKm: aucun ? sup!.radiusKm : null };
+}
+
+// « de Lyon », « d'Angers », « du Havre », « des Sables-d'Olonne ».
+function deAgglomeration(nom: string): string {
+  if (/^Les\s/.test(nom)) return `des ${nom.slice(4)}`;
+  if (/^Le\s/.test(nom)) return `du ${nom.slice(3)}`;
+  return deCommune(nom);
+}
+
+// Deux faits distincts : la présence étudiante, à l'échelle de sa mesure, et l'absence d'établissement recensé
+// dans le rayon de la commune (null quand au moins un y est recensé). La comparaison complète les montre sur deux
+// lignes (palier, qualificatif) ; les phrases les joignent.
+function presenceEtudianteParties(c: IndexCommune, niveau: 0 | 1 | 2): { presence: string; rayon: string | null } {
+  const g = grainEtudiant(c);
+  let presence: string = PRESENCE_ETUDIANTE[niveau];
+  if (!g.pole) presence += g.agglomeration ? ` dans l'agglomération ${deAgglomeration(g.agglomeration)}` : " dans son agglomération";
+  const rayon = g.rayonSansEtablissementKm != null ? `aucun établissement supérieur recensé à moins de ${g.rayonSansEtablissementKm} km` : null;
+  return { presence, rayon };
+}
+
+/** La présence étudiante d'une commune, au niveau d'un palier (0 forte, 1 intermédiaire, 2 limitée), à l'échelle mesurée. */
+export function presenceEtudiante(c: IndexCommune, niveau: 0 | 1 | 2): string {
+  const { presence, rayon } = presenceEtudianteParties(c, niveau);
+  return rayon ? `${presence}, ${rayon}` : presence;
+}
+
+// Le niveau de la phrase : celui du palier du score, jamais au-dessus.
+function presenceEtudianteDuScore(c: IndexCommune): string {
+  const s = subScore("vie_etudiante", c);
+  return presenceEtudiante(c, s == null ? 2 : bandIndex(s));
+}
+
+// Une identité « ville étudiante » suppose que la commune porte elle-même la mesure : pôle de son bassin, avec
+// au moins un établissement du supérieur recensé dans son rayon. Sinon la preuve est celle de l'agglomération.
+function villeEtudianteLocale(c: IndexCommune): boolean {
+  const g = grainEtudiant(c);
+  return g.pole && g.rayonSansEtablissementKm == null;
+}
+
+// Les compromis absolus : REASON_NEG, sauf la vie étudiante, dite au niveau et à l'échelle mesurés.
+function raisonNeg(key: PreferenceKey, c: IndexCommune | null | undefined): string {
+  return key === "vie_etudiante" && c ? presenceEtudianteDuScore(c) : REASON_NEG[key];
 }
 
 const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> = {
@@ -2227,7 +2322,9 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   },
   eviter_grandes_villes: "ville à taille humaine",
   prefere_grande_ville: "grande ville animée",
-  vie_etudiante: "forte présence étudiante",
+  // FUT-135 : niveau du palier (une raison à 63 ne dit pas « forte »), échelle de la mesure (agglomération), et
+  // absence d'établissement recensé dans le rayon quand c'est le cas.
+  vie_etudiante: (c) => presenceEtudianteDuScore(c),
   vie_locale: "vie locale animée (commerces, marchés, associations)",
   croissance_demographique: "population en croissance",
   // Positif = score haut = environnement peu maillé d'infra bruyantes. Le coupable proche
@@ -3167,7 +3264,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     // FUT-129 : une commune qui recule pour ses inondations indemnisées fréquentes le dit, en premier :
     // c'est une priorité déclarée que les faits contredisent, et la seule raison de son recul.
     const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < 50 ? worst.key : null;
-    const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? REASON_NEG[tradeoffKey] : null;
+    const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? raisonNeg(tradeoffKey, c) : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);
     built.couverture = { etat: couverture.etat, nonMesurees: couverture.nonMesurees.map((k) => PREFERENCE_LABELS[k] ?? k) };

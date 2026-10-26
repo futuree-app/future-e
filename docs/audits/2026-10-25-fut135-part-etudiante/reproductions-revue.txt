@@ -1,0 +1,15 @@
+AVANT (db788843)
+A: Royat · Aurillac · Pont-Salomon | ["forte présence étudiante","forêts et espaces naturels à proximité"] complete vie 63
+B: [["69249","Forte présence étudiante"],["43153","Présence étudiante intermédiaire"],["86194","Forte présence étudiante"]] {"type":"avantage","insees":["69249","86194"]} | aide: La présence d'étudiants et d'établissements supérieurs.
+   resume: ["Pont-Salomon prend l'avantage sur la santé environnementale (air, bruit, industrie) et la nature et le cadre de vie (espaces naturels, mer).","Poitiers se distingue sur la mobilité (voiture, train, transports) et les services (soins, écoles, commerces)."] | arbitrage: "Si la santé environnementale compte d'abord pour vous, Pont-Salomon prend l'avantage ; si vous regardez surtout les services, Poitiers reprend la main."
+C: Thurins: Pour vivre aux portes d'une grande ville, sans en habiter le centre. | [] | déc à l'écart des grandes infrastructures bruyantes
+   Saint-Jean-des-Vignes: Pour une ville étudiante à taille humaine. | [] | déc bien reliée par le train
+   Mondouzil: Pour des hivers parmi les plus doux du pays. | [] | déc hivers parmi les plus doux
+
+APRÈS
+A: Royat · Aurillac · Pont-Salomon | ["présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km","forêts et espaces naturels à proximité"] complete vie 63
+B: [["69249","Forte présence étudiante dans l'agglomération de Lyon","aucun établissement supérieur recensé à moins de 5 km"],["43153","Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne","aucun établissement supérieur recensé à moins de 10 km"],["86194","Forte présence étudiante",null]] {"type":"avantage","insees":["69249","86194"]} | aide: La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.
+   resume: ["Pont-Salomon prend l'avantage sur la santé environnementale (air, bruit, industrie) et la nature et le cadre de vie (espaces naturels, mer).","Poitiers se distingue sur la mobilité (voiture, train, transports) et les services (soins, écoles, commerces)."] | arbitrage: "Si la santé environnementale compte d'abord pour vous, Pont-Salomon prend l'avantage ; si vous regardez surtout les services, Poitiers reprend la main."
+C: Thurins: Pour vivre aux portes d'une grande ville, sans en habiter le centre. | [] | déc à l'écart des grandes infrastructures bruyantes
+   Saint-Jean-des-Vignes: Pour s'installer dans une commune qui gagne des habitants. | [] | déc bien reliée par le train
+   Mondouzil: Pour des hivers parmi les plus doux du pays. | [] | déc hivers parmi les plus doux

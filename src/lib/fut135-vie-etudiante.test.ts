@@ -189,3 +189,113 @@ test("comparaison complète : un petit bassin lit « Non mesurée » en vie étu
   const p = V.scorePreferences(commune("54310"), [{ key: "vie_etudiante", weight: 3 }, { key: "nature", weight: 2 }]);
   assert.deepEqual(p.couverture, { etat: "partielle", nonMesurees: ["vie_etudiante"] });
 });
+
+// ── Revue indépendante du 25/10 : les mots suivent le grain des données ─────────────────────────────────
+// La part étudiante (`etudes_dyn`) est celle de l'agglomération, l'accès (`etudes_acces`) se mesure depuis la
+// commune dans un rayon, et leur combinaison n'établit pas une présence étudiante DANS la commune. Effet narratif
+// seulement : les scores, paliers numériques, avantages et classements sont ceux de la photographie d'audit.
+const ligneEtudiante = (cc: M) => cc.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "vie_etudiante");
+const PONT_SALOMON = "43153", THURINS = "69249", SAINT_JEAN_DES_VIGNES = "69212", MONDOUZIL = "31352";
+const IDENTITE_ETUDIANTE = "Pour une ville étudiante à taille humaine.";
+
+test("revue 1. Pont-Salomon : raison au palier intermédiaire, à l'échelle de l'agglomération, rayon dit", async () => {
+  const o = await V.matchProjects({ reformulation: "Recherche de recette auvergne", hardConstraints: { departements: ["03", "15", "43", "63"] }, preferences: [{ key: "vie_etudiante", weight: 2 }, { key: "nature", weight: 2 }] });
+  assert.deepEqual(o.results.slice(0, 3).map((r: M) => r.insee), ["63308", "15014", PONT_SALOMON], "trio inchangé");
+  const ps = o.results[2];
+  assert.equal(vie(commune(PONT_SALOMON)), 63);
+  assert.deepEqual(ps.reasons, [
+    "présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km",
+    "forêts et espaces naturels à proximité",
+  ]);
+  assert.deepEqual(ps.couverture, { etat: "complete", nonMesurees: [] });
+  for (const r of [...o.results, ...o.pistes]) {
+    for (const t of r.reasons) if (/^forte présence étudiante/.test(t)) assert.ok(vie(commune(r.insee)) >= PALIER_FORTE, `${r.nom} : ${t}`);
+  }
+});
+
+test("revue 2. Thurins : palier, qualificatif, aide, avantage et synthèse à l'échelle mesurée", async () => {
+  const r = await V.seedComparaison([THURINS, PONT_SALOMON, "86194"]);
+  const l = ligneEtudiante(r.comparaison);
+  assert.equal(l.aide, "La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune.");
+  const par = Object.fromEntries(l.cellules.map((x: M) => [x.insee, x]));
+  assert.equal(par[THURINS].palier, "Forte présence étudiante dans l'agglomération de Lyon");
+  assert.equal(par[THURINS].qualifier, "aucun établissement supérieur recensé à moins de 5 km");
+  assert.equal(par[PONT_SALOMON].palier, "Présence étudiante intermédiaire dans l'agglomération de Saint-Étienne");
+  assert.equal(par[PONT_SALOMON].qualifier, "aucun établissement supérieur recensé à moins de 10 km");
+  assert.equal(par["86194"].palier, "Forte présence étudiante");
+  assert.equal(par["86194"].qualifier, null);
+  // L'avantage reste celui des paliers numériques ; il se lit désormais sur des paliers qui disent leur échelle.
+  assert.deepEqual(l.avantage, { type: "avantage", insees: [THURINS, "86194"] });
+  for (const t of [...r.comparaison.resume, r.comparaison.arbitrage ?? ""]) assert.doesNotMatch(t, /tudiant/);
+  // Seule à mener : la synthèse du thème nomme l'agglomération, pas « sa vie étudiante ».
+  const duo = await V.seedComparaison([THURINS, PONT_SALOMON]);
+  const vitalite = duo.comparaison.themes.find((t: M) => t.id === "vitalite").synthese;
+  assert.match(vitalite, /^Thurins se distingue par la présence étudiante de son agglomération/);
+  assert.doesNotMatch(vitalite, /sa vie étudiante/);
+});
+
+test("revue 3. Saint-Jean-des-Vignes : identité finale non étudiante", async () => {
+  const r = await V.seedComparaison([THURINS, SAINT_JEAN_DES_VIGNES, MONDOUZIL]);
+  for (const x of r.trio) assert.notEqual(x.identite, IDENTITE_ETUDIANTE, x.nom);
+  for (const insee of [THURINS, SAINT_JEAN_DES_VIGNES, MONDOUZIL]) {
+    assert.equal(V.buildIdentiteCandidates(commune(insee)).includes(IDENTITE_ETUDIANTE), false, insee);
+  }
+});
+
+test("revue 4. vraies villes étudiantes : formulations favorables intactes", async () => {
+  for (const insee of ["49007", "35238", "86194", "2B096"]) { // Angers, Rennes, Poitiers, Corte
+    const c = commune(insee);
+    assert.ok(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), c.nom);
+    assert.equal(V.presenceEtudiante(c, 0), "forte présence étudiante", c.nom);
+  }
+  const r = await V.seedComparaison(["49007", "35238", "2B096"]);
+  for (const x of ligneEtudiante(r.comparaison).cellules) {
+    assert.equal(x.palier, "Forte présence étudiante", x.insee);
+    assert.equal(x.qualifier, null, x.insee);
+  }
+  const duo = await V.seedComparaison(["49007", PONT_SALOMON]);
+  assert.match(duo.comparaison.themes.find((t: M) => t.id === "vitalite").synthese, /^Angers se distingue par sa vie étudiante/);
+  const o = await V.matchProjects({ reformulation: "FUT-135", hardConstraints: {}, preferences: [{ key: "vie_etudiante", weight: 3 }, { key: "eviter_grandes_villes", weight: 2 }] });
+  const corte = o.results.find((x: M) => x.insee === "2B096");
+  assert.ok(corte, "Corte reste dans le trio");
+  assert.equal(corte.reasons[0], "forte présence étudiante");
+});
+
+test("revue 5. priorité non mesurée : « Non mesurée » et couverture FUT-109 inchangés", async () => {
+  const r = await V.seedComparaison([THURINS, "54310"]);
+  const cell = ligneEtudiante(r.comparaison).cellules.find((x: M) => x.insee === "54310");
+  assert.deepEqual([cell.palier, cell.qualifier, cell.disponible], ["Non mesurée", null, false]);
+  assert.equal(ligneEtudiante(r.comparaison).avantage.type, "egalite", "pas d'avantage face à une commune non mesurée");
+  const p = V.scorePreferences(commune("54310"), [{ key: "vie_etudiante", weight: 3 }]);
+  assert.deepEqual(p.couverture, { etat: "aucune", nonMesurees: ["vie_etudiante"] });
+});
+
+test("revue 6. sans établissement recensé, présence mesurée dans le bassin : deux faits distincts", async () => {
+  // Thurins : la présence est celle de l'agglomération de Lyon, l'absence est celle du rayon de 5 km.
+  assert.equal(V.presenceEtudiante(commune(THURINS), 0), "forte présence étudiante dans l'agglomération de Lyon, aucun établissement supérieur recensé à moins de 5 km");
+  // La Flèche, seule dans son unité urbaine : des étudiants recensés par le MESR, aucun établissement par la BPE
+  // dans 25 km. La phrase garde les deux faits, sans en conclure l'un par l'autre.
+  const laFleche = commune("72154");
+  assert.equal(V.presenceEtudiante(laFleche, 1), "présence étudiante intermédiaire, aucun établissement supérieur recensé à moins de 25 km");
+  const r = await V.seedComparaison(["72154", "86194"]);
+  const cell = ligneEtudiante(r.comparaison).cellules.find((x: M) => x.insee === "72154");
+  assert.deepEqual([cell.palier, cell.qualifier], ["Présence étudiante intermédiaire", "aucun établissement supérieur recensé à moins de 25 km"]);
+  // Une commune avec établissement recensé ne reçoit pas la mention du rayon.
+  assert.doesNotMatch(V.presenceEtudiante(commune("86194"), 0), /aucun établissement/);
+});
+
+test("revue : les 487 communes sans établissement recensé et notées ≥ 55 ne sont jamais dites étudiantes localement", async () => {
+  const parUU = new Map<string, number>();
+  for (const c of INDEX.communes) if (c.uu) parUU.set(c.uu, (parUU.get(c.uu) ?? 0) + 1);
+  const set = INDEX.communes.filter((c) => (vie(c) ?? 0) >= SEUIL_RAISON && c.etudesSup?.weightedAccess === 0);
+  assert.equal(set.length, 487);
+  assert.equal(set.filter((c) => vie(c) >= PALIER_FORTE).length, 255);
+  for (const c of set) {
+    assert.equal(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), false, c.insee);
+    const phrase = V.presenceEtudiante(c, vie(c) >= PALIER_FORTE ? 0 : 1);
+    assert.match(phrase, / aucun établissement supérieur recensé à moins de \d+ km$/, c.insee);
+    if (c.uu && parUU.get(c.uu)! > 1) assert.match(phrase, /dans l'agglomération (de |d'|du |des )/, c.insee);
+    for (const t of V.communeToPreferences(c).traits) if (/tudiant/.test(t.text)) assert.equal(t.text, phrase, c.insee);
+  }
+  // Cartes, pistes, comparaisons et recherches forcées : scripts/fut135/controle-487.mjs (0 faute, 25/10/2026).
+});

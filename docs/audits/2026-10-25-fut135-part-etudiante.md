@@ -130,14 +130,76 @@ Corte (51,7 % d'étudiants, la plus forte part de France) garde son score (97) ;
 
 ## 7. Limites
 
-1. **L'accès a le même défaut d'ex æquo.** Le score mêle deux faits distincts : la **présence étudiante dans l'agglomération** (`etudes_dyn`, part des étudiants dans la population de l'unité urbaine) et les **établissements accessibles depuis la commune** (`etudes_acces`, établissements du supérieur dans le rayon autour de la commune). Ce second fait (`populate-bpe.py`, `percentile_scores`) range aussi par `bisect_right` : les 14 123 communes sans établissement accessible valent 40. Parmi les communes mesurées, 487 sans établissement accessible atteignent encore ≥ 55, par la seule présence étudiante de leur agglomération (Thurins, 3 131 habitants dans l'unité urbaine de Lyon : aucun établissement dans son rayon, accès 40, présence étudiante de l'agglomération 92, vie 71). Avec un rang moyen sur l'accès (≈ 20), 360 resteraient ≥ 55, mais seulement 11 sur 255 au palier « forte ». Non corrigé ici : `etudes_acces` ne se rejoue pas depuis l'index (accès brut arrondi, 15 714 écarts), et relancer `populate-bpe.py` réécrit écoles et culture, qui relèvent de FUT-136. Décision du porteur (25/10) : **aucun calcul modifié dans cette PR** ; la question sera traitée séparément, avec une méthode vérifiable (la convention d'ex æquo de `percentile_scores` concerne aussi écoles et culture).
-2. **Le bassin est l'agglomération** (choix de la spec) : une petite commune d'une grande unité urbaine étudiante est notée sur la part de son agglomération. C'est voulu, mais l'identité « Pour une ville étudiante à taille humaine. » se lit mal pour Lyon ou pour un village périurbain ; c'est un sujet de rédaction, hors périmètre.
+1. **L'accès a le même défaut d'ex æquo.** Le score mêle deux faits distincts : la **présence étudiante dans l'agglomération** (`etudes_dyn`, part des étudiants dans la population de l'unité urbaine) et les **établissements accessibles depuis la commune** (`etudes_acces`, établissements du supérieur dans le rayon autour de la commune). Ce second fait (`populate-bpe.py`, `percentile_scores`) range aussi par `bisect_right` : les 14 123 communes sans établissement accessible valent 40. Parmi les communes mesurées, 487 sans établissement accessible atteignent encore ≥ 55, par la seule présence étudiante de leur agglomération (Thurins, 3 131 habitants dans l'unité urbaine de Lyon : aucun établissement dans son rayon, accès 40, présence étudiante de l'agglomération 92, vie 71). Avec un rang moyen sur l'accès (≈ 20), 360 resteraient ≥ 55, mais seulement 11 sur 255 au palier « forte ». Non corrigé ici : `etudes_acces` ne se rejoue pas depuis l'index (accès brut arrondi, 15 714 écarts), et relancer `populate-bpe.py` réécrit écoles et culture, qui relèvent de FUT-136. Décision du porteur (25/10) : **aucun calcul modifié dans cette PR** ; la question sera traitée séparément, avec une méthode vérifiable, dans **FUT-141** (coordonné avec FUT-136 : la convention d'ex æquo de `percentile_scores` concerne aussi écoles et culture). Leurs **textes**, eux, sont corrigés dans cette PR (§8).
+2. **Le bassin est l'agglomération** (choix de la spec) : une petite commune d'une grande unité urbaine étudiante est notée sur la part de son agglomération. C'est voulu ; depuis la revue (§8), les textes le disent, et l'identité « ville étudiante » est réservée au pôle de son bassin. Elle reste « à taille humaine » pour un pôle de grande taille (Lyon) : formulation antérieure, non traitée ici.
 3. **Zéro = aucun étudiant recensé par l'atlas**, compté à la commune de l'établissement, pas au domicile : un bassin sans établissement mais avec des étudiants résidents vaut 0.
 4. **Échelle des rangs** : elle compte des communes, pas des bassins (convention conservée) ; une grande unité urbaine pèse autant de fois qu'elle a de communes.
 5. ~~« Non concernée »~~ : corrigé le 25/10 pour la seule vie étudiante, qui dit désormais « Non mesurée » quand le score est absent (une priorité non mesurée concerne toujours le lecteur qui l'a demandée). Les autres dimensions gardent « Non concernée ». Aucun score, classement ni artefact ne change (photographie d'audit identique, même empreinte d'index).
 6. **Rentrée 2025** : disponible, non appliquée (§3).
 
-## 8. Régénérer
+## 8. Revue indépendante du 25/10 : les mots suivent le grain des données
+
+La revue de Work (FUT-135, SHA `db788843`) a validé le calcul et bloqué la livraison sur les **formulations** : elles prêtaient à une commune une présence étudiante mesurée à l'échelle de son agglomération. Correctif **exclusivement narratif** : aucun score, seuil, palier numérique, avantage, couverture, classement ni donnée ne change.
+
+### Trois mesures, trois échelles
+
+| Mesure | Échelle | Ce que le texte peut dire |
+|---|---|---|
+| `etudes_dyn` | bassin, l'unité urbaine le plus souvent | une présence étudiante **dans l'agglomération de X** (dit tel quel pour le pôle, ou une commune seule dans son bassin) |
+| `etudes_acces` / `etudesSup` | la commune, dans un rayon (5 à 25 km) | « aucun établissement supérieur recensé à moins de N km », borné au rayon ; jamais une absence d'étudiants résidents |
+| `vie_etudiante` | combinaison 40/60 | un niveau (forte, intermédiaire, limitée) **égal au palier** de la comparaison, jamais au-dessus |
+
+Une seule fonction rédige ces phrases (`presenceEtudiante`, `src/lib/comparateur-vie.ts`). Le pôle est la commune qui donne son nom à l'agglomération (`libellesAgglomeration`, Paris, Lyon et Marseille en ville entière) ou une commune seule dans son bassin. L'absence d'établissement reprend **le prédicat du dossier** (`classifyHigherEdAbsence`, même attestation que `module-facts-map.ts`).
+
+### Consommateurs corrigés
+
+- **Raisons des cartes** (`REASON_POS`) : niveau du palier (une raison à 63 dit « intermédiaire ») et échelle.
+- **Découverte** et **traits d'une ville de référence** : même fonction.
+- **Compromis** (`REASON_NEG` via `raisonNeg`) : « présence étudiante limitée » seulement au palier limité, à l'échelle mesurée.
+- **Signaux ambiants** (AskFuture, synthèse) : même fonction.
+- **Comparaison complète** : palier à l'échelle (« Forte présence étudiante dans l'agglomération de Lyon ») ; qualificatif « aucun établissement supérieur recensé à moins de 5 km », affiché même pour la commune qui mène ; aide : « La part d'étudiants dans l'agglomération, et les établissements supérieurs accessibles depuis la commune. » ; synthèse de thème : « Thurins se distingue par la présence étudiante de son agglomération », « sa vie étudiante » restant réservé au pôle avec établissement.
+- **Identité** « Pour une ville étudiante à taille humaine. » : réservée à une commune pôle de son bassin avec au moins un établissement recensé dans son rayon. Les communes concernées prennent leur candidat suivant ; le seuil (55) est inchangé.
+- Inchangés : résumés et arbitrages (niveau thème, ils ne citent pas la vie étudiante), prompts de synthèse, moteur, dossiers.
+
+### Reproductions avant / après
+
+Script : `scripts/fut135/reproductions-revue.mjs` ; sorties : `docs/audits/2026-10-25-fut135-part-etudiante/reproductions-revue.txt`.
+
+| Cas | Avant (`db788843`) | Après |
+|---|---|---|
+| A. Pont-Salomon, 3ᵉ de « vie étudiante + nature en Auvergne » (score 63) | raison « forte présence étudiante » | « présence étudiante intermédiaire dans l'agglomération de Saint-Étienne, aucun établissement supérieur recensé à moins de 10 km » ; trio identique |
+| B. Thurins dans la comparaison complète | « Forte présence étudiante » ; aide « La présence d'étudiants et d'établissements supérieurs. » | « Forte présence étudiante dans l'agglomération de Lyon », qualificatif « aucun établissement supérieur recensé à moins de 5 km », nouvelle aide ; avantage inchangé (Thurins et Poitiers), lu sur des paliers qui disent leur échelle |
+| C. Saint-Jean-des-Vignes (479 hab.) | identité « Pour une ville étudiante à taille humaine. » | « Pour s'installer dans une commune qui gagne des habitants. » |
+
+### Aucun changement fonctionnel
+
+`node scripts/fut135/audit-vie-etudiante.mjs --recits avant après` (sortie : `recits-revue.json`) compare `db788843` et ce correctif sur les **34 788 communes** et les **18 recherches** : **0 écart** sur l'accès, le dynamisme, le score, le palier, les raisons, découvertes et traits possibles, la composition et l'ordre des trios et des pistes, les compatibilités, la couverture, la disponibilité et l'avantage des cellules. Empreinte d'index inchangée (`eff0bea6…`), données de l'accueil inchangées, `verifier-equivalence` 104 373/104 373.
+
+Récits modifiés : dans les 18 recherches (raisons et découvertes nommant l'agglomération ; aide et cellules de la comparaison ; Saint-Mandrier, à 63, passe de « forte » à « intermédiaire »). **Identités finales** changées dans les trios et pistes : Verson, Beaucouzé, Bègles, Échirolles et Thurins quittent « ville étudiante » ; Besançon (pôle avec établissements) la reprend dans son groupe, libérée par Échirolles. Sur l'index, l'identité étudiante candidate passe de 2 769 à **259** communes : 2 023 communes hors pôle (avec établissement dans leur rayon) et les 487 sans établissement recensé la perdent.
+
+### Les 487 communes de la revue
+
+`node scripts/fut135/controle-487.mjs` : les 487 communes (dont 255 au palier fort), vérifiées une par une sur les vraies sorties, **0 faute** :
+- candidats d'identité et traits d'ancre : jamais « ville étudiante » ;
+- comparaison complète avec Poitiers : palier à l'échelle de l'agglomération et qualificatif du rayon pour les 487, identité, découverte, signaux et synthèses de thème ;
+- carte de recherche réelle (département et population exacte, hors réseau) pour les **405** communes au-dessus du plancher de réalisme du moteur (1 500 habitants) : raison étudiante qualifiée sur les 405 ; les **82** sous le plancher n'apparaissent dans aucune recherche ;
+- 42 cartes et pistes de recherches « vie étudiante » de leurs départements.
+
+Une première version de ce contrôle forçait les communes par `nearPlace` : pour les noms ambigus, le moteur a interrogé le géocodeur public de la BAN (environ 85 requêtes de lecture, aucune écriture). La version versionnée n'utilise plus aucun réseau.
+
+### Tests ajoutés (`src/lib/fut135-vie-etudiante.test.ts`)
+
+Pont-Salomon (raison et palier cohérents, trio inchangé, aucune raison « forte » sous 66 dans la recherche) ; Thurins (palier, qualificatif, aide, avantage, résumé, synthèse de thème) ; Saint-Jean-des-Vignes (identité finale et candidats) ; Angers, Rennes, Poitiers, Corte (formulations favorables intactes) ; « Non mesurée » et couverture FUT-109 ; Thurins et La Flèche (présence mesurée et absence d'établissement, deux faits distincts) ; les 487 sur l'index entier.
+
+### Limites de ce correctif
+
+- L'**avantage** de la comparaison suit toujours les paliers numériques : Thurins mène avec Poitiers, sur un palier qui dit désormais « dans l'agglomération de Lyon ». Le retirer aurait changé un résultat de comparaison.
+- La **ligne de fracture** (`divergence`) reprend le palier à l'échelle, sans le qualificatif du rayon.
+- Les raisons qualifiées sont **longues** (jusqu'à ~110 caractères) ; aucune capture navigateur n'a été faite.
+- La Flèche (seule dans son unité urbaine) a des étudiants recensés par le MESR mais aucun établissement recensé par la BPE dans 25 km : les deux faits sont dits côte à côte, sans réconciliation des sources.
+- **FUT-141** : la méthode de l'accès (`etudes_acces`, ex æquo à zéro) reste un chantier distinct, coordonné avec FUT-136.
+
+## 9. Régénérer
 
 ```bash
 npm run index:unpack
