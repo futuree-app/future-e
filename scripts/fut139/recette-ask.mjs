@@ -1,11 +1,16 @@
 // FUT-139 · Recette de la vraie page : les chips et placeholders d'AskFuture rendus pour quatre résultats du
 // vrai moteur (fixtures.json, cf. generer-fixtures.mts). Parse, match et synthèse sont simulés ; toute autre
 // requête POST (dont /ask) est bloquée : aucun modèle appelé, aucune écriture.
+// Seconde partie : sessions V5 déposées dans le localStorage, l'une intacte (restaurée), les autres privées
+// de leur couverture ou de leur mode d'exploration (rejetées : formulaire vierge, aucun appel).
 // Usage : CHROME=<chemin> node scripts/fut139/recette-ask.mjs http://localhost:3139
 import { chromium } from 'playwright-core';
 import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { modeQuestions, questionsSuggerees, placeholdersAsk, enteteAsk } from '../../src/lib/comparateur/questions-ask.ts';
+// Clé et version de session de `OuVivreClient.tsx` (loadSession).
+const SESSION_KEY = 'futuree:ouvivre:session';
+const SESSION_VERSION = 5;
 
 const base = process.argv[2];
 assert.match(base ?? '', /^http:\/\/(localhost|127\.0\.0\.1):\d+$/);
@@ -76,6 +81,69 @@ for (const [id, f] of Object.entries(fixtures)) {
     } finally {
       await browser.close();
     }
+  }
+}
+// ── Sessions restaurées ──────────────────────────────────────────────────────
+const MESSAGES = [{ role: 'user', content: 'Question posée avant le paywall ?' }, { role: 'assistant', content: 'Réponse reçue avant le paywall.' }];
+const sessions = [
+  { id: 'session-classe-intacte', f: fixtures['classe-complet'], alterer: null },
+  { id: 'session-exploration-intacte', f: fixtures['exploration-inondation'], alterer: null },
+  { id: 'session-sans-couverture-agregee', f: fixtures['classe-complet'], alterer: (s) => { delete s.outcome.couverture; } },
+  { id: 'session-carte-sans-couverture', f: fixtures['classe-complet'], alterer: (s) => { delete s.outcome.results[1].couverture; } },
+  { id: 'session-sans-exploration', f: fixtures['exploration-inondation'], alterer: (s) => { delete s.outcome.inondation; } },
+];
+for (const { id, f, alterer } of sessions) {
+  const s = JSON.parse(JSON.stringify({ submittedText: f.texte, parsed: f.parsed, outcome: f.outcome, synthesis: 'Synthèse restaurée.', askMessages: MESSAGES, askRemaining: 1, askLimit: false }));
+  if (alterer) alterer(s);
+  const browser = await chromium.launch({ executablePath: process.env.CHROME, headless: true });
+  const page = await browser.newPage({ viewport: { width: 390, height: 900 }, isMobile: true, hasTouch: true });
+  page.setDefaultTimeout(30000);
+  const posts = [];
+  const erreurs = [];
+  page.on('pageerror', (e) => erreurs.push(e.message));
+  await page.route('**/*', async (route) => {
+    const req = route.request();
+    const url = new URL(req.url());
+    if (url.origin !== base || /ingest|posthog|_vercel/.test(url.pathname)) return route.abort();
+    if (req.method() !== 'GET') { posts.push(url.pathname); return route.abort(); }
+    return route.continue();
+  });
+  await page.addInitScript(([cle, version, snap]) => {
+    localStorage.setItem('futuree-consent', 'denied');
+    localStorage.setItem(cle, JSON.stringify({ v: version, savedAt: Date.now(), ...snap }));
+  }, [SESSION_KEY, SESSION_VERSION, s]);
+  try {
+    await page.goto(`${base}/ou-vivre`, { waitUntil: 'load', timeout: 180000 }); // une page restaurée ne devient pas toujours « networkidle »
+    // Hydratée : soit la session restaurée remplit le champ, soit le placeholder animé démarre.
+    await page.waitForFunction(() => { const c = document.querySelector('textarea'); return c && (c.value.length > 0 || c.placeholder.length > 3); }, null, { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    const demander = page.getByRole('button', { name: 'Demander' });
+    let mesure;
+    if (alterer) {
+      assert.equal(await demander.count(), 0, `${id} : session rejetée, aucun résultat restauré`);
+      assert.equal(await page.locator('article.card-answer').count(), 0, `${id} : aucune carte`);
+      assert.equal(await page.locator('textarea').first().inputValue(), '', `${id} : formulaire vierge`);
+      assert.equal(await page.getByText(MESSAGES[1].content).count(), 0, `${id} : aucun ancien message réaffiché`);
+      mesure = { id, restauree: false };
+    } else {
+      await demander.waitFor({ timeout: 30000 });
+      const section = page.locator('section').filter({ has: demander });
+      const top = f.outcome.results.slice(0, 3);
+      const mode = modeQuestions(f.outcome, top);
+      const chips = (await section.locator('button').allInnerTexts()).map((x) => x.trim()).filter((x) => x !== 'Demander');
+      assert.deepEqual(chips, questionsSuggerees(top, mode, null), `${id} : chips restaurées`);
+      assert.equal((await section.locator('h2').innerText()).trim(), enteteAsk(mode, top.length).titre);
+      for (const m of MESSAGES) assert.equal(await section.getByText(m.content, { exact: true }).count(), 1, `${id} : message restauré tel quel`);
+      await page.addStyleTag({ content: 'nextjs-portal {display:none!important}' });
+      await section.screenshot({ path: `${dir}/${id}-390.jpg`, type: 'jpeg', quality: 80 });
+      mesure = { id, restauree: true, mode, chips };
+    }
+    assert.deepEqual(posts, [], `${id} : aucun appel API`);
+    assert.deepEqual(erreurs, []);
+    mesures.push(mesure);
+    console.log(`${id} OK`, JSON.stringify(mesure));
+  } finally {
+    await browser.close();
   }
 }
 writeFileSync(`${dir}/mesures.json`, JSON.stringify({ base, recette: 'fixtures du vrai moteur, API simulées, aucun modèle appelé', mesures }, null, 2) + '\n');

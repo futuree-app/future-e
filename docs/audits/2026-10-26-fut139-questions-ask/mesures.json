@@ -283,6 +283,38 @@
         "/api/comparateur-vie/match",
         "/api/comparateur-vie/synthesize"
       ]
+    },
+    {
+      "id": "session-classe-intacte",
+      "restauree": true,
+      "mode": "classe",
+      "chips": [
+        "Pourquoi Bourcefranc-le-Chapus plutôt que Dolus-d'Oléron ?",
+        "Quels risques climatiques les séparent ?",
+        "Qu'est-ce qui a vraiment pesé ?"
+      ]
+    },
+    {
+      "id": "session-exploration-intacte",
+      "restauree": true,
+      "mode": "exploration_inondation",
+      "chips": [
+        "Que disent les inondations passées de ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ]
+    },
+    {
+      "id": "session-sans-couverture-agregee",
+      "restauree": false
+    },
+    {
+      "id": "session-carte-sans-couverture",
+      "restauree": false
+    },
+    {
+      "id": "session-sans-exploration",
+      "restauree": false
     }
   ]
 }

@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { modeQuestions, questionsSuggerees, placeholdersAsk, enteteAsk } from "./comparateur/questions-ask.ts";
+import { sessionReconstituable } from "./comparateur/session-ou-vivre.ts";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
 const hook = `
@@ -181,4 +182,116 @@ test("classé avec inondation déclarée (hors exploration) : le classement port
 test("aucun résultat : ni chip ni placeholder", () => {
   assert.deepEqual(questionsSuggerees([], "classe"), []);
   assert.deepEqual(placeholdersAsk([], "exploration_inondation"), []);
+});
+
+// ── Revue indépendante du 26/10 : une couverture absente n'est jamais une couverture complète. ──────────────
+
+const NOMS = ["Paris", "Lyon", "Nantes"];
+const communes = (n: number, couverture?: (i: number) => unknown) =>
+  NOMS.slice(0, n).map((nom, i) => ({ nom, littoral: null, ...(couverture ? { couverture: couverture(i) } : {}) })) as M[];
+const COMPLETE = () => ({ etat: "complete", nonMesurees: [] });
+
+const textes = (top: M[], mode: ReturnType<typeof modeQuestions>) => {
+  const e = enteteAsk(mode, top.length);
+  return [...questionsSuggerees(top, mode), ...placeholdersAsk(top, mode, ["nature", "viabilite_emploi"]), e.surtitre, e.titre, e.invite];
+};
+
+for (const n of [1, 2, 3]) {
+  test(`couverture inconnue, ${n} commune${n > 1 ? "s" : ""} : questions factuelles, jamais comparatives`, () => {
+    const cas: [string, M | null | undefined, M[]][] = [
+      ["outcome absent", undefined, communes(n)],
+      ["outcome null", null, communes(n)],
+      ["outcome vide", {}, communes(n)],
+      ["agrégat absent, cartes complètes", { inondation: null }, communes(n, COMPLETE)],
+      ["agrégat null, cartes complètes", { couverture: null }, communes(n, COMPLETE)],
+      ["agrégat complet, cartes sans couverture", { couverture: "complete" }, communes(n)],
+      ["agrégat complet, une carte null", { couverture: "complete" }, communes(n, (i) => (i === n - 1 ? null : COMPLETE()))],
+      ["agrégat complet, une carte sans état", { couverture: "complete" }, communes(n, (i) => (i === n - 1 ? {} : COMPLETE()))],
+      ["agrégat inconnu", { couverture: "inconnue" }, communes(n, COMPLETE)],
+      ["agrégat partiel", { couverture: "partielle" }, communes(n, COMPLETE)],
+      ["agrégat nul", { couverture: "aucune" }, communes(n, () => ({ etat: "aucune", nonMesurees: ["un cadre calme"] }))],
+    ];
+    for (const [nom, outcome, top] of cas) {
+      const mode = modeQuestions(outcome as never, top as never);
+      assert.equal(mode, "couverture_incomplete", nom);
+      assert.equal(questionsSuggerees(top as never, mode)[0], `Que montrent les données disponibles sur ${n > 1 ? "ces communes" : "Paris"} ?`, nom);
+      for (const q of textes(top, mode)) {
+        assert.doesNotMatch(q, VICTOIRE, `${nom} : ${q}`);
+        if (n === 1) assert.doesNotMatch(q, PLURIEL, `${nom} : ${q}`);
+      }
+    }
+  });
+
+  test(`couverture établie, ${n} commune${n > 1 ? "s" : ""} : la comparaison reste proposée`, () => {
+    const top = communes(n, COMPLETE);
+    const mode = modeQuestions({ couverture: "complete", inondation: { exploration: false } } as never, top as never);
+    assert.equal(mode, "classe");
+    assert.equal(questionsSuggerees(top as never, mode)[0], n > 1 ? "Pourquoi Paris plutôt que Lyon ?" : "Pourquoi Paris ressort pour mon projet ?");
+    // L'exploration prime, même sur une couverture agrégée annoncée complète.
+    assert.equal(modeQuestions({ couverture: "complete", inondation: { exploration: true } } as never, top as never), "exploration_inondation");
+  });
+}
+
+test("aucune commune affichée : jamais classé", () => {
+  assert.equal(modeQuestions({ couverture: "complete" } as never, []), "couverture_incomplete");
+});
+
+// Sessions : un instantané V5 bâti comme saveSession, sur de vrais résultats du moteur. `loadSession` garde ses
+// contrôles de version et de fraîcheur, puis appelle `sessionReconstituable` (rendu réel : scripts/fut139/recette-ask.mjs).
+async function session(departements: string[], preferences: M[]) {
+  const o = await V.matchProjects({ reformulation: "FUT-139", hardConstraints: { departements }, preferences });
+  const askMessages = [{ role: "user", content: "Pourquoi Paris plutôt que Lyon ?" }, { role: "assistant", content: "Réponse d'origine." }];
+  return {
+    v: 5, savedAt: 1_000_000, submittedText: "FUT-139",
+    parsed: { reformulation: "FUT-139", hardConstraints: { departements }, preferences },
+    outcome: JSON.parse(JSON.stringify(o)), synthesis: "Synthèse.", askMessages, askRemaining: 1, askLimit: false,
+  } as M;
+}
+// Aller-retour JSON, comme le localStorage, puis la validation que `loadSession` applique.
+const lire = (s: M): M | null => { const lu = JSON.parse(JSON.stringify(s)); return sessionReconstituable(lu) ? lu : null; };
+const restituer = (s: M | null) => {
+  if (!s) return null;
+  const top = s.outcome.results.slice(0, 3);
+  return { mode: modeQuestions(s.outcome, top), chips: questionsSuggerees(top, modeQuestions(s.outcome, top)) };
+};
+
+test("session V5 complète : restaurée telle quelle, messages AskFuture inchangés, mode recalculé", async () => {
+  const classe = await session(["17"], [{ key: "acces_soins", weight: 2 }, { key: "nature", weight: 3 }]);
+  const lu = lire(classe);
+  assert.ok(lu, "session valide restaurée");
+  assert.deepEqual(lu.askMessages, classe.askMessages, "aucune réécriture des anciens messages");
+  assert.equal(restituer(lu)!.mode, "classe");
+  assert.match(restituer(lu)!.chips[0], /plutôt que/);
+
+  const explo = await session(["17"], [{ key: "faible_risque_inondation", weight: 3 }]);
+  assert.equal(restituer(lire(explo))!.mode, "exploration_inondation");
+  const paris = await session(["75"], [{ key: "cadre_calme", weight: 3 }, { key: "acces_culture", weight: 2 }]);
+  assert.equal(restituer(lire(paris))!.mode, "couverture_incomplete");
+});
+
+test("session V5 aux champs manquants : rejetée, jamais complétée par « complete »", async () => {
+  const classe = await session(["17"], [{ key: "acces_soins", weight: 2 }, { key: "nature", weight: 3 }]);
+  const explo = await session(["17"], [{ key: "faible_risque_inondation", weight: 3 }]);
+  const alterations: [string, M, (s: M) => void][] = [
+    ["couverture agrégée absente", classe, (s) => { delete s.outcome.couverture; }],
+    ["couverture agrégée null", classe, (s) => { s.outcome.couverture = null; }],
+    ["couverture agrégée inconnue", classe, (s) => { s.outcome.couverture = "totale"; }],
+    ["couverture de la 2e carte absente", classe, (s) => { delete s.outcome.results[1].couverture; }],
+    ["couverture de la 1re carte null", classe, (s) => { s.outcome.results[0].couverture = null; }],
+    ["état de carte absent", classe, (s) => { delete s.outcome.results[2].couverture.etat; }],
+    ["priorités non mesurées absentes", classe, (s) => { delete s.outcome.results[0].couverture.nonMesurees; }],
+    ["toutes les couvertures absentes", classe, (s) => { delete s.outcome.couverture; for (const r of s.outcome.results) delete r.couverture; }],
+    ["exploration absente avec inondation déclarée", explo, (s) => { delete s.outcome.inondation; }],
+    ["exploration non booléenne", explo, (s) => { s.outcome.inondation.exploration = "oui"; }],
+    ["outcome absent", classe, (s) => { delete s.outcome; }],
+    ["résultats absents", classe, (s) => { s.outcome.results = []; }],
+    ["projet absent", classe, (s) => { delete s.parsed; }],
+  ];
+  for (const [nom, base, alterer] of alterations) {
+    const s = JSON.parse(JSON.stringify(base));
+    alterer(s);
+    assert.equal(lire(s), null, nom);
+  }
+  assert.equal(sessionReconstituable(null), false);
+  assert.equal(sessionReconstituable({}), false);
 });

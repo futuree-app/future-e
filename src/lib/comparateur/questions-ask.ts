@@ -6,18 +6,22 @@
 // Elles ne s'appuient que sur ce que la route /ask reçoit (synthèse, raisons, signaux, littoral).
 import type { CouverturePriorites, CouvertureResultats } from "../comparateur-vie.ts";
 
+// `couverture_incomplete` couvre aussi la couverture INCONNUE : une absence de preuve n'est pas un classement.
 export type ModeQuestions = "classe" | "exploration_inondation" | "couverture_incomplete";
 
-type Commune = { nom: string; littoral?: string | null; couverture?: { etat: CouverturePriorites["etat"] } };
+type Commune = { nom: string; littoral?: string | null; couverture?: { etat: CouverturePriorites["etat"] } | null };
 
-/** Classé seulement si rien ne dit le contraire : ni exploration, ni priorité non mesurée sur une commune affichée. */
+/**
+ * Classé seulement si la couverture complète est ÉTABLIE : l'agrégat le dit explicitement ET chaque commune
+ * affichée aussi. Un champ absent, null ou inconnu ne vaut jamais « complete ».
+ */
 export function modeQuestions(
-  outcome: { couverture?: CouvertureResultats; inondation?: { exploration: boolean } } | null | undefined,
+  outcome: { couverture?: CouvertureResultats | null; inondation?: { exploration: boolean } | null } | null | undefined,
   communes: readonly Commune[],
 ): ModeQuestions {
   if (outcome?.inondation?.exploration) return "exploration_inondation";
-  const toutesMesurees = communes.every((c) => (c.couverture?.etat ?? "complete") === "complete");
-  if ((outcome?.couverture ?? "complete") !== "complete" || !toutesMesurees) return "couverture_incomplete";
+  const toutesMesurees = communes.length > 0 && communes.every((c) => c.couverture?.etat === "complete");
+  if (outcome?.couverture !== "complete" || !toutesMesurees) return "couverture_incomplete";
   return "classe";
 }
 

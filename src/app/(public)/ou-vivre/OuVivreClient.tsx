@@ -17,6 +17,7 @@ import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
 import { repliInondation } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
+import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -89,6 +90,8 @@ function loadSession(): SessionSnapshot | null {
     if (s.v !== SESSION_VERSION) return null;
     if (!s.savedAt || Date.now() - s.savedAt > SESSION_TTL_MS) return null;
     if (!s.parsed || !s.outcome?.results?.length) return null;
+    // FUT-139 : sans couverture ni mode d'exploration lisibles, la session est rejetée, jamais complétée.
+    if (!sessionReconstituable(s)) return null;
     return s;
   } catch {
     return null;
