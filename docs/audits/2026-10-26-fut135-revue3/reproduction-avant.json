@@ -1,0 +1,47 @@
+{
+  "sup": {
+    "measured": true,
+    "radiusKm": 5,
+    "establishmentCount": 1,
+    "weightedAccess": 2
+  },
+  "sortie": [
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "etat": "presence",
+      "identiteEtudiante": true,
+      "identiteReelle": true,
+      "score": 99,
+      "scoreReel": 99
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "etat": "presence",
+      "identiteEtudiante": true,
+      "identiteReelle": true,
+      "score": 100,
+      "scoreReel": 100
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "etat": "presence",
+      "identiteEtudiante": true,
+      "identiteReelle": true,
+      "score": 99,
+      "scoreReel": 99
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "etat": "presence",
+      "identiteEtudiante": true,
+      "identiteReelle": true,
+      "score": 97,
+      "scoreReel": 97
+    }
+  ],
+  "violations": 4
+}

@@ -53,6 +53,13 @@ Comptage des équipements `C5xx` dans le rayon, percentile → `c.etudes_acces` 
 4. Percentile national de la part → `c.etudes_dyn` (0-100). Une commune sans étudiant a une part
    de 0 (percentile bas), ce n'est pas `null`.
 
+> **Amendement FUT-135 (25/10/2026).** L'implémentation contredisait ce point : les bassins de moins de
+> 5 000 habitants recevaient une part de 0, et le percentile (`bisect_right`) donnait à ce plateau d'ex æquo le
+> rang du haut, 88 pour 30 771 communes. Désormais : un bassin de moins de 5 000 habitants n'est **pas mesuré**
+> (`null`), un vrai zéro reste mesuré, le rang porte sur les seules communes mesurées, ex æquo par le milieu
+> (midrank, comme `src/lib/rang-national.ts`), et la rentrée MESR est figée (2024). `vie_etudiante` exige ses
+> deux mesures : sans l'une d'elles, la priorité est non mesurée. Rapport : `docs/audits/2026-10-25-fut135-part-etudiante.md`.
+
 ## Champs index (deux, deux scripts indépendants, comme mobilité)
 
 ```ts
