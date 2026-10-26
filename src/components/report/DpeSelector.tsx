@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { listeLongue, sortCandidates } from "@/lib/dpe-candidate-match";
 import { explicationContradiction } from "@/lib/batiment-rnb";
@@ -61,6 +61,13 @@ export function DpeSelector({
   const [toutVoir, setToutVoir] = useState(false);
   // FUT-143 : l'identifiant de la ligne contredite dont l'explication est dépliée, en attente du second geste.
   const [aConfirmer, setAConfirmer] = useState<string | null>(null);
+  // Les lignes, pour rendre le focus à celle dont on referme l'explication : sans lui, le bouton
+  // « Annuler » disparaît sous le focus et le clavier repart du haut de la page (recette du 27/10/2026).
+  const lignes = useRef(new Map<string, HTMLButtonElement>());
+  const refermer = (id: string) => {
+    setAConfirmer(null);
+    lignes.current.get(id)?.focus();
+  };
   const ordered = useMemo(() => sortCandidates(candidates), [candidates]);
   const champs = useMemo(() => champsVariables(candidates), [candidates]);
   const { visibles, masques, correspondances } = decouperListe(ordered, q, toutVoir);
@@ -106,7 +113,7 @@ export function DpeSelector({
           const deplie = l.contredit && aConfirmer === l.id;
           const ligne = (
             <button
-              key={l.id}
+              ref={(b) => { if (b) lignes.current.set(l.id, b); else lignes.current.delete(l.id); }}
               type="button"
               onClick={() => {
                 if (l.contredit) { setAConfirmer(deplie ? null : l.id); return; }
@@ -133,42 +140,46 @@ export function DpeSelector({
               </span>
             </button>
           );
-          if (!deplie) return ligne;
+          // LE MÊME CONTENEUR, OUVERT OU NON : envelopper la ligne seulement à l'ouverture la démontait et la
+          // remontait, et le focus clavier tombait sur la page (recette du 27/10/2026).
           return (
             <div key={l.id} style={{ display: "grid", gap: 0 }}>
               {ligne}
-              <div
-                id={`confirmer-${l.id}`}
-                role="group"
-                aria-label="Confirmer un diagnostic rattaché à un autre bâtiment"
-                style={{
-                  display: "grid", gap: 12, margin: "6px 0 4px", padding: "13px 15px", borderRadius: 10,
-                  background: "var(--bg-elev)", border: "1px solid var(--border-1)",
-                }}
-              >
-                <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-                  {explicationContradiction(
-                    "ne le retenez que si vous savez qu'il s'agit bien de ce logement, par exemple parce que son numéro figure sur le document qu'on vous a remis.",
-                  )}
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px" }}>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => { setAConfirmer(null); onPick(c); }}
-                    style={{
-                      padding: "9px 15px", minHeight: 44, fontSize: 14, fontWeight: 500, borderRadius: 10,
-                      background: "var(--bg-elev-2)", border: "1px solid var(--accent-dim, #7a6e60)", color: "var(--fg-hi)",
-                      cursor: busy ? "default" : "pointer", opacity: busy ? 0.5 : 1,
-                    }}
-                  >
-                    Retenir quand même ce diagnostic
-                  </button>
-                  <button type="button" onClick={() => setAConfirmer(null)} style={{ ...LIEN, color: "var(--fg-2)" }}>
-                    Annuler
-                  </button>
+              {deplie && (
+                <div
+                  id={`confirmer-${l.id}`}
+                  role="group"
+                  aria-label="Confirmer un diagnostic rattaché à un autre bâtiment"
+                  onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); refermer(l.id); } }}
+                  style={{
+                    display: "grid", gap: 12, margin: "6px 0 4px", padding: "13px 15px", borderRadius: 10,
+                    background: "var(--bg-elev)", border: "1px solid var(--border-1)",
+                  }}
+                >
+                  <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                    {explicationContradiction(
+                      "ne le retenez que si vous savez qu'il s'agit bien de ce logement, par exemple parce que son numéro figure sur le document qu'on vous a remis.",
+                    )}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px" }}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => { setAConfirmer(null); onPick(c); }}
+                      style={{
+                        padding: "9px 15px", minHeight: 44, fontSize: 14, fontWeight: 500, borderRadius: 10,
+                        background: "var(--bg-elev-2)", border: "1px solid var(--accent-dim, #7a6e60)", color: "var(--fg-hi)",
+                        cursor: busy ? "default" : "pointer", opacity: busy ? 0.5 : 1,
+                      }}
+                    >
+                      Retenir quand même ce diagnostic
+                    </button>
+                    <button type="button" onClick={() => refermer(l.id)} style={{ ...LIEN, color: "var(--fg-2)", minHeight: 44 }}>
+                      Annuler
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })}

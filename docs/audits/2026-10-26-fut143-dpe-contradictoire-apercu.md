@@ -62,3 +62,35 @@ Tests : `qualification-meme-batiment.test.ts` (états, sonde, textes), `fut143-q
 ## Coexistence avec FUT-81
 
 Aucun fichier commun avec la branche FUT-81 (992af92f). FUT-81 modifie `cadastre.ts` et `georisques-logement/route.ts`, sans toucher `probeCadastreAtPoint` ni la règle de recherche au bâtiment que la sonde reproduit.
+
+## Recette clavier et lisibilité dans Chrome (27/10/2026)
+
+Demandée par la revue indépendante (« lisibilité ordinateur/mobile et navigation clavier restent à vérifier »). L'extension Claude pour Chrome n'était pas connectée : Google Chrome installé, piloté par Playwright (`scripts/fut143/recette-clavier.mjs`), à 1440 px, sur Pixel 7 et à 360 px. Serveur de dev lancé sans clé Anthropic ; écritures interceptées et comptées. Bilan et captures : `2026-10-26-fut143/clavier/`.
+
+**Clavier, au SHA `1451e1fd` : deux défauts trouvés et corrigés.**
+1. Entrée sur la ligne contredite ouvrait l'explication, mais **le focus tombait sur la page** : la ligne n'était enveloppée qu'à l'ouverture, donc React la démontait. Elle garde désormais le même conteneur, ouverte ou fermée.
+2. « Annuler » disparaissait sous le focus. Annuler et **Échap** (nouveau) rendent désormais le focus à la ligne.
+
+**Parcours vérifié à chaque largeur, au clavier seul :**
+- Tab jusqu'à la ligne, focus visible ;
+- Entrée l'ouvre (`aria-expanded="true"`), aucune écriture ;
+- Tab vers « Retenir quand même », puis Tab vers « Annuler », focus visible ;
+- Entrée sur Annuler : explication fermée, focus sur la ligne, aucune écriture ;
+- Espace l'ouvre, Échap la ferme, focus sur la ligne, aucune écriture ;
+- Entrée, Tab, Entrée : une seule écriture `user_confirmed`.
+
+Avant achat : Tab jusqu'au champ d'adresse, saisie, flèche bas et Entrée sur la suggestion (vraie route), puis Tab jusqu'à « Créer mon dossier », focus visible.
+
+**Lisibilité : deux défauts corrigés.**
+
+| | avant | après |
+|---|---|---|
+| état « diagnostics à vérifier » (11 px) | 4,0:1 | 7,31:1 |
+| état « aucun à cette adresse » (11 px, existant) | 3,0:1 | 5,06:1 |
+| hauteur de « Annuler » | 33 px | 44 px |
+
+Les libellés d'état de la qualification passent en opacité pleine ; seule la pastille garde l'atténuation. Les autres contrastes étaient déjà AA : explication 12,7:1, mention de la ligne 4,69:1, paragraphe avant achat 16,88:1. Aucun débordement de page.
+
+**Défaut existant, hors FUT-143, non corrigé.** Sous 412 px de large, la colonne du module Logement est plus large que l'écran et se fait rogner à droite. Le dépassement est de 38 px à 360 px, 23 px à 375 px et 8 px à 390 px. Cela touche le passeport, la section Énergie (« Chercher », la ligne de diagnostic, le panneau ajouté par FUT-143) et les titres en `nowrap`. **Les mesures sont identiques sur `main` 2af75b87 et sur la PR.**
+
+Cause : la grille de la colonne garde la largeur minimale de ses enfants (`min-width: auto`), et certains contenus ne rétrécissent pas. Ce défaut touche la mise en page commune du module Logement, que FUT-81 modifie en ce moment : il mérite un ticket séparé.

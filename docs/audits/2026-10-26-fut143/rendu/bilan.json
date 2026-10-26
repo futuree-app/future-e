@@ -16,7 +16,7 @@
   {
     "cas": "B-villeurbanne-reel",
     "appareil": "ordinateur",
-    "route_reelle_ms": 325,
+    "route_reelle_ms": 179,
     "reponse": {
       "status": "qualified",
       "anchorSource": "ban_housenumber",
@@ -35,7 +35,7 @@
   {
     "cas": "B-villeurbanne-reel",
     "appareil": "android",
-    "route_reelle_ms": 69,
+    "route_reelle_ms": 61,
     "reponse": {
       "status": "qualified",
       "anchorSource": "ban_housenumber",

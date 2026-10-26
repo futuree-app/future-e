@@ -271,3 +271,41 @@ test("FUT-143 · la recherche par numéro et la liste disent la contradiction av
     globalThis.fetch = fetchAvant;
   }
 });
+
+// ── Au clavier (recette Chrome du 27/10/2026) ──
+// L'explication s'ouvrait en ENVELOPPANT la ligne dans un nouveau conteneur : React démontait et remontait le
+// bouton, et le focus clavier tombait sur la page. « Annuler » disparaissait de même sous le focus. Ici : la
+// ligne garde le même parent ouverte ou fermée, et `focus()` est rendu à la ligne (les montages réels sont
+// vérifiés dans Chrome par `scripts/fut143/recette-clavier.mjs`, `document.activeElement`).
+test("FUT-143 · clavier : la ligne garde son conteneur à l'ouverture, et Annuler ou Échap lui rendent le focus", async () => {
+  const focus: string[] = [];
+  let r!: Rendu;
+  await act(async () => {
+    r = create(React.createElement(AddressDiagnosticsBlock, {
+      candidates: candidatsMonchaux, dossierId: "banc-fut143", batiments: batimentsMonchaux,
+      onPick: () => assert.fail("aucune écriture attendue"), onNotInList: () => {}, onPickParNumero: () => {},
+    }), {
+      createNodeMock: (e: { type: string; props: Record<string, unknown> }) =>
+        e.type === "button" && /après confirmation/.test(String(e.props["aria-label"] ?? ""))
+          ? { focus: () => focus.push("ligne") } : null,
+    }) as Rendu;
+  });
+  const parent = () => (bouton(r, /après confirmation/) as unknown as { parent: Noeud }).parent;
+  const avant = parent();
+  assert.equal(avant.type, "div");
+  await cliquer(bouton(r, /après confirmation/));
+  const apres = parent();
+  assert.equal(apres.type, avant.type);
+  assert.deepEqual(apres.props.style, avant.props.style, "même conteneur : la ligne n'est pas remontée");
+  await cliquer(bouton(r, /^\s*Annuler\s*$/));
+  assert.deepEqual(focus, ["ligne"], "Annuler rend le focus à la ligne");
+
+  await cliquer(bouton(r, /après confirmation/));
+  const groupe = r.root.findAll((n) => n.props.role === "group")[0];
+  let empeche = false;
+  await act(async () => { (groupe.props.onKeyDown as (e: unknown) => void)({ key: "Escape", preventDefault: () => { empeche = true; } }); });
+  assert.ok(empeche);
+  assert.doesNotMatch(texte(r), /L'une des deux bases se trompe/, "Échap referme");
+  assert.deepEqual(focus, ["ligne", "ligne"], "Échap rend le focus à la ligne");
+  r.unmount();
+});

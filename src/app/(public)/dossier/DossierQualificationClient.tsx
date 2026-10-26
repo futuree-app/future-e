@@ -85,7 +85,10 @@ function MatterRow({ label, text, tone }: { label: string; text: string; tone: "
       <span className="text-[length:var(--text-dense)] text-muted">{label}</span>
       <span
         className="font-mono text-[11px] tracking-[0.08em] uppercase"
-        style={{ color: TONE_COLOR[tone], opacity: tone === "found" ? 0.85 : 0.7 }}
+        // OPACITÉ PLEINE (FUT-143, recette du 27/10/2026) : à 0,7, ces libellés de 11 px tombaient à 3:1
+        // (« aucun à cette adresse ») et 4:1 (« diagnostics à vérifier »), sous le seuil AA de 4,5:1. La
+        // pastille porte seule l'atténuation.
+        style={{ color: TONE_COLOR[tone] }}
       >
         {text}
       </span>
