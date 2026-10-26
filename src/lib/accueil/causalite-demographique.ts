@@ -26,7 +26,8 @@
 //     du nom reste dans le groupe objet) ; « ces emplois les attirent » passe (le pronom n'est pas résolu) ;
 //   - un cadre de réserve placé APRÈS l'affirmation ne la rattrape pas (« Elle attire des familles, rien ne
 //     le prouve » est refusé) ; une réserve dans une autre proposition (« … ne disent pas tout, mais elle
-//     attire ») non plus ;
+//     attire », « rien ne prouve le contraire et la commune attire ») non plus. Un « et » suivi d'un sujet
+//     ouvre une nouvelle proposition, même quand c'est un sujet coordonné sous la réserve (refus à tort) ;
 //   - les motifs sont reconnus par des tournures (« choisissent … pour sa qualité de vie », « grâce à son
 //     cadre de vie », « prisée », « séduit ») : une paraphrase hors de ces familles passe. Le prompt reste
 //     la première barrière ; ce contrôle est le filet.
@@ -177,11 +178,33 @@ function attractionResidentielle(proposition: string, index: number, forme: stri
   return PERSONNES.test(objet.join(" "));
 }
 
+// Un « et » suivi d'un nouveau sujet ouvre une proposition indépendante : la réserve qui précède ne la couvre
+// pas (« Rien ne prouve le contraire et la commune attire des familles »). Un « et » suivi d'un verbe
+// (« rien ne prouve que la commune attire et séduise… ») ou de « que », « si » (« … et que la commune
+// attire… ») reste sous la réserve. Limite : un sujet coordonné sous la réserve (« rien ne prouve que les
+// jeunes et les familles sont attirés ») est lu comme une nouvelle proposition et refusé à tort.
+const SUJETS_APRES_ET = new Set([...DETERMINANTS, "il", "elle", "ils", "elles", "on", "cela", "ça", "c'"]);
+const ET = new RegExp(`${D}et\\s+`, "g");
+
+/** Le début de la proposition indépendante qui porte l'affirmation, après un « et » suivi d'un sujet. */
+function debutApresEt(phrase: string, debut: number, index: number, commune: string | null): number {
+  const avant = phrase.slice(0, index);
+  ET.lastIndex = debut;
+  let m: RegExpExecArray | null;
+  let coupure = debut;
+  while ((m = ET.exec(avant))) {
+    const suite = avant.slice(m.index + m[0].length);
+    const premier = mots(suite)[0] ?? "";
+    if (SUJETS_APRES_ET.has(premier) || (!!commune && suite.startsWith(commune))) coupure = m.index + m[0].length;
+  }
+  return coupure;
+}
+
 // Une réserve avant l'affirmation, ou DANS elle quand elle s'étend sur plusieurs mots (« la croissance ne
 // prouve pas que les familles choisissent… »).
-function estReservee(phrase: string, debut: number, index: number, longueur: number): boolean {
+function estReservee(phrase: string, debut: number, index: number, longueur: number, commune: string | null): boolean {
   if (NE_AVANT.test(phrase.slice(debut, index)) && PAS_APRES.test(phrase.slice(index, index + longueur + 40))) return true;
-  const portee = phrase.slice(debut, index + longueur);
+  const portee = phrase.slice(debutApresEt(phrase, debut, index, commune), index + longueur);
   return CADRES.some((re) => re.test(portee));
 }
 
@@ -198,7 +221,7 @@ export function checkCausaliteDemographique(texte: string, commune: string | nul
         const debut = debutDeProposition(phrase, m.index);
         const proposition = phrase.slice(debut);
         if (f.porteSurPersonnes && !attractionResidentielle(proposition, m.index - debut, m[0], nom)) continue;
-        if (estReservee(phrase, debut, m.index, m[0].length)) continue;
+        if (estReservee(phrase, debut, m.index, m[0].length, nom)) continue;
         out.push({ rule: f.rule, excerpt: phrase });
         refusee = true;
       }

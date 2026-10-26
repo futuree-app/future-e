@@ -22,6 +22,9 @@
 //   2. et 3. « Le dossier attire votre attention sur les risques pour les familles » et « Les eaux stagnantes
 //      attirent les moustiques près des habitants » partaient au repli : un mot de personne n'importe où dans
 //      la proposition suffisait. Seuls comptent maintenant le groupe sujet et le groupe objet d'« attirer ».
+// Revue de Work (26/10, 4e passe) : une réserve couvrait une affirmation indépendante introduite par « et »
+// (« Rien ne prouve le contraire et la commune attire des familles »). Un « et » suivi d'un nouveau sujet
+// ouvre désormais une autre proposition ; « et » suivi d'un verbe ou de « que » reste sous la réserve.
 // L'index réel ne contient aucune donnée contradictoire : pour éprouver la route sur ces cas, le hook
 // enveloppe `@/lib/comparateur-vie` (le fichier n'est pas modifié). Les INSEE fictifs 99xxx renvoient une
 // vraie commune de l'index dont seule la démographie est altérée ; tout autre INSEE passe au vrai moteur.
@@ -366,6 +369,11 @@ const REFUSEES: [string, string][] = [
   ["Ces emplois attirent des habitants.", "interdit:attractivite"],
   ["Les familles sont attirées par le calme.", "interdit:attractivite"],
   ["Un cadre de vie attirant pour les familles.", "interdit:attractivite"],
+  // Une réserve ne couvre pas une proposition indépendante introduite par « et » + sujet (4e revue de Work).
+  ["Rien ne prouve le contraire et la commune attire des familles.", "interdit:attractivite"],
+  ["Les recensements ne disent pas pourquoi des habitants s'installent et la commune attire de nouvelles familles.", "interdit:attractivite"],
+  ["Rien ne prouve le contraire et Belley attire des familles.", "interdit:attractivite"],
+  ["Rien ne prouve le contraire et elle attire des familles.", "interdit:attractivite"],
 ];
 
 const ACCEPTEES = [
@@ -381,6 +389,11 @@ const ACCEPTEES = [
   "Il serait hâtif d'en déduire que la commune est attractive.",
   "Gardez-vous de conclure que la commune attire des familles.",
   "On ignore pourquoi des habitants s'installent.",
+  // Une réserve couvre les verbes coordonnés et les subordonnées coordonnées par « et que ».
+  "Rien ne prouve que la commune attire et séduise de nouveaux habitants.",
+  "On ne peut pas conclure que la commune attire et retient des familles.",
+  "Rien ne prouve que la population augmente et que la commune attire des familles.",
+  "Rien ne permet de dire que la commune attire des familles et des retraités.",
   // « attirer » dans un autre sens. Les deux premières sont les reproductions de Work (3e revue) : des
   // familles ou des habitants ailleurs dans la phrase ne font pas d'« attirer » une attraction résidentielle.
   "Le dossier attire votre attention sur les risques pour les familles.",
@@ -421,6 +434,8 @@ test("checkCausaliteDemographique : limites documentées du repérage par positi
   assert.equal(checkCausaliteDemographique("Le bruit attire les plaintes des habitants.").length, 1);
   // Le pronom objet n'est pas résolu : passe.
   assert.equal(checkCausaliteDemographique("Ces emplois les attirent.").length, 0);
+  // Un sujet coordonné sous la réserve est lu comme une nouvelle proposition : refus à tort.
+  assert.equal(checkCausaliteDemographique("Rien ne prouve que les jeunes et les familles sont attirés par la commune.").length, 1);
 });
 
 // Les mêmes phrases, par la VRAIE route et le modèle simulé.
@@ -443,4 +458,19 @@ test("/qna, réponses simulées de Work (3e revue) : « attirer » hors attracti
     assert.equal(corps.source, "modele", `${phrase} ${JSON.stringify(corps.violations)}`);
     assert.deepEqual(corps.violations, []);
   }
+});
+
+test("/qna, réponses simulées de Work (4e revue) : la réserve ne couvre pas une proposition introduite par « et »", async () => {
+  for (const phrase of [
+    "Rien ne prouve le contraire et la commune attire des familles.",
+    "Les recensements ne disent pas pourquoi des habitants s'installent et la commune attire de nouvelles familles.",
+  ]) {
+    const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: phrase, cta: "Ouvrez le dossier" }));
+    assert.equal(corps.source, "repli", phrase);
+    assert.ok(corps.violations.includes("interdit:attractivite"), `${phrase} ${JSON.stringify(corps.violations)}`);
+    assert.doesNotMatch(`${corps.verdict} ${corps.detail}`, CAUSAL);
+  }
+  const legitime = "Rien ne prouve que la commune attire et séduise de nouveaux habitants.";
+  const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: legitime, cta: "Ouvrez le dossier" }));
+  assert.equal(corps.source, "modele", `${legitime} ${JSON.stringify(corps.violations)}`);
 });
