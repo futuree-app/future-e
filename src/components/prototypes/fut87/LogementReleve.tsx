@@ -248,8 +248,8 @@ export function LogementReleve({ cas }: { cas: CasDeLogement }) {
               {/* Les trois états de `RegulatoryStatusBlock`, avec ses phrases. */}
               {!g ? (
                 <>
-                  <Registre teinte="var(--reg-non-su)">Statut réglementaire non déterminé</Registre>
-                  <p className={s.dense}>Les données interrogées n&apos;ont pas permis de qualifier cette adresse.</p>
+                  <Registre teinte="var(--reg-non-su)">Risques réglementés non déterminés</Registre>
+                  <p className={s.dense}>Les données Géorisques interrogées n&apos;ont pas permis de dire si un plan de prévention des risques s&apos;applique à cette adresse.</p>
                 </>
               ) : plan ? (
                 <>
@@ -260,7 +260,7 @@ export function LogementReleve({ cas }: { cas: CasDeLogement }) {
                 </>
               ) : (
                 <>
-                  <Registre teinte="var(--r-encre)">Aucune règle de construction particulière à cette adresse</Registre>
+                  <Registre teinte="var(--r-encre)">Ni plan de prévention des risques ni périmètre patrimonial à cette adresse</Registre>
                   <p className={s.dense}>La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l&apos;une de ses zones à règles.</p>
                 </>
               )}

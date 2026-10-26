@@ -4,6 +4,8 @@ import { dateLongue } from "@/lib/data/gaspar-pprn-inondation";
 import { PORTEE_ETAT_DES_RISQUES } from "@/lib/decision/inondation-lecture";
 import type { LogementReport } from "@/lib/logement-report-types";
 import type { HeritageProtection, HeritageStatus } from "@/lib/gpu-servitudes";
+import type { UrbanismeParcelle } from "@/lib/urbanisme-parcelle";
+import { UrbanismeBlock } from "./UrbanismeBlock";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { Disclosure } from "./kit";
 
@@ -146,9 +148,15 @@ function HeritageBlock({
 export function RegulatoryStatusBlock({
   georisques,
   heritage,
+  urbanisme,
 }: {
   georisques: LogementReport["georisques"];
   heritage: HeritageStatus | null;
+  /**
+   * FUT-81 : le plan d'urbanisme de la parcelle. Absent : l'appelant ne le connaît pas (bancs antérieurs),
+   * rien ne s'affiche. Présent avec `lecture` indéfinie : un rapport collecté avant FUT-81, qui le dit.
+   */
+  urbanisme?: { lecture: UrbanismeParcelle | undefined; parcelCode: string | null; parcelleParRepli: boolean };
 }) {
   const g = georisques?.parcel ?? georisques?.address;
   const grainLu: "parcelle" | "point" = georisques?.parcel ? "parcelle" : "point";
@@ -164,15 +172,20 @@ export function RegulatoryStatusBlock({
           {!g ? (
             // État B : la source n'a pas permis de qualifier le point.
             <>
-              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Statut réglementaire non déterminé</p>
-              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>Les données interrogées n’ont pas permis de qualifier cette adresse.</p>
+              {/* FUT-81 : le titre nomme ce qui n'est pas déterminé. Le plan d'urbanisme, lu plus bas, l'est
+                  peut-être : « statut réglementaire non déterminé » aurait contredit le bloc suivant. */}
+              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Risques réglementés non déterminés</p>
+              <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>Les données Géorisques interrogées n’ont pas permis de dire si un plan de prévention des risques s’applique à cette adresse.</p>
             </>
           ) : plans.length === 0 && protections.length === 0 ? (
             // État A : la source a répondu, aucun zonage ni protection patrimoniale au point.
             <>
-              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Aucune règle de construction particulière à cette adresse</p>
+              {/* FUT-81 : « aucune règle de construction particulière » était faux dès qu'un plan d'urbanisme
+                  s'applique, c'est-à-dire presque partout. L'état dit désormais ce qu'il a vérifié : ni plan
+                  de prévention des risques, ni périmètre patrimonial. */}
+              <p style={{ fontSize: 15, fontWeight: 500, color: "var(--fg-hi)", margin: 0 }}>Ni plan de prévention des risques ni périmètre patrimonial à cette adresse</p>
               <p style={{ fontSize: 14, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
-                La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune contrainte de construction ne s’applique précisément à cette adresse.
+                La commune peut avoir un plan de prévention des risques sans que ce logement tombe dans l’une de ses zones à règles. Cela ne veut pas dire qu’il n’y a aucun risque ici, seulement qu’aucune de ces deux contraintes ne s’applique précisément à cette adresse.
               </p>
             </>
           ) : (
@@ -233,6 +246,14 @@ export function RegulatoryStatusBlock({
               )}
               {protections.length > 0 && <HeritageBlock protections={protections} withDivider={plans.length > 0} />}
             </>
+          )}
+          {urbanisme && (
+            <UrbanismeBlock
+              urbanisme={urbanisme.lecture}
+              parcelCode={urbanisme.parcelCode}
+              parcelleParRepli={urbanisme.parcelleParRepli}
+              withDivider
+            />
           )}
         </div>
       </GlassCard>

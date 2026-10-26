@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireCurrentUser } from "@/lib/user-account";
 import { getDossier } from "@/lib/address-dossier-store";
-import { findCadastreParcelByPoint } from "@/lib/cadastre";
+import { findCadastreParcelWithGeometry } from "@/lib/cadastre";
 import {
   getGeorisquesAddressSummary,
   getGeorisquesParcelSummary,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/georisques";
 import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/lib/point-hazards";
 import { getAltitude } from "@/lib/ign";
-import { fetchHeritageProtections } from "@/lib/gpu";
+import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
 import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
@@ -42,10 +42,21 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     // SOMME des sources les plus lentes de chaque étape. Seules deux dépendances réelles restent
     // chaînées, chacune derrière la sienne : la lecture Géorisques par parcelle attend la parcelle, et
     // la recherche d'un audit voisin attend de savoir qu'aucun audit exact n'existe.
-    const parcelP = findCadastreParcelByPoint(
+    const parcelLueP = findCadastreParcelWithGeometry(
       address.longitude,
       address.latitude,
     ).catch(() => null);
+    const parcelP = parcelLueP.then((lu) => lu?.parcel ?? null);
+    // FUT-81 : LE PLAN D'URBANISME, À LA PARCELLE. Quatrième dépendance réelle : il attend la géométrie
+    // de la parcelle (~50 ms), puis part en parallèle de tout le reste. Sans parcelle, il lit au point.
+    // Ne lève jamais : une panne du Géoportail rend « indisponible » et ne retient pas le dossier.
+    const urbanismeP = parcelLueP.then((lu) =>
+      fetchUrbanismeParcelle(
+        address.latitude,
+        address.longitude,
+        lu ? { geometry: lu.geometry, contenance: lu.parcel.contenance } : null,
+      ),
+    );
 
     // FUT-65 : la recherche dit ce qu'elle a établi. Une panne ADEME n'est plus « aucun diagnostic ».
     // Sans identifiant BAN, branche morte sur le chemin payant (cf. `getDpeByCoordinates`) : inchangée.
@@ -92,7 +103,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         : null,
     );
 
-    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment] = await Promise.all([Promise.all([
+    const [[georisquesCommune, altitude, zfe, cartofriches, communeData, sinistralite, cavites, mvt, heritage], parcel, dpeLookup, auditExact, auditProche, georisquesAddress, georisquesParcel, batiment, memeBatiment, urbanisme] = await Promise.all([Promise.all([
       address.citycode ? getGeorisquesSummary(address.citycode).catch(() => null) : null,
       getAltitude(address.latitude, address.longitude).catch(() => null),
       getZfeForPoint(address.latitude, address.longitude).catch(() => null),
@@ -117,7 +128,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchHeritageProtections(address.latitude, address.longitude).catch(
         () => ({ items: [], sourceStatus: "unavailable" as const }),
       ),
-    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP]);
+    ]), parcelP, dpeLookupP, auditExactP, auditProcheP, georisquesAddressP, georisquesParcelP, batimentP, memeBatimentP, urbanismeP]);
     const { audit, auditProche: candidat, auditStatus, autresAudits, autresAuditsIncomplets } = resultatAudit(auditExact, auditProche);
 
     // Risques du bâti au grain point : cavités + mouvements de terrain géolocalisés, plus le résidu
@@ -172,6 +183,7 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
         commune: georisquesCommune,
       },
       heritage,
+      urbanisme,
       pointHazards,
       // LA COUVERTURE PAR FAMILLE, dérivée par la MÊME fonction que le moteur de décision. Le
       // module en tire les gestes « à vérifier » en évaluant les règles du dossier, au lieu d'en

@@ -682,7 +682,15 @@ export default function LogementModule({
 
             {result.georisques && (
               <div id={evidenceAnchorId("housing.regulated_zone")} className="scroll-mt-24">
-                <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+                <RegulatoryStatusBlock
+                  georisques={result.georisques}
+                  heritage={result.heritage ?? null}
+                  urbanisme={{
+                    lecture: result.urbanisme,
+                    parcelCode: result.parcel?.parcelCode ?? null,
+                    parcelleParRepli: result.parcel?.rattachement === "repli",
+                  }}
+                />
               </div>
             )}
 

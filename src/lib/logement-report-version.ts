@@ -106,6 +106,9 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // référentiel qui a répondu « aucun bâtiment » n'est pas une source muette.
   if (r.batiment?.statut === "indisponible") absentes.push("batiment");
   if (r.dpeMemeBatiment?.status === "unavailable") absentes.push("diagnostics_meme_batiment");
+  // FUT-81 : mêmes règles. Un rapport antérieur (champ absent) ne s'invente pas de panne ; une commune
+  // sans document publié n'est pas une source muette, elle est `non_trouve`.
+  if (r.urbanisme?.statut === "indisponible") absentes.push("urbanisme");
   return absentes;
 }
 

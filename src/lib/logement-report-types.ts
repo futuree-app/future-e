@@ -10,6 +10,7 @@ import type { DpeRecord } from "./dpe-attribution.ts";
 import type { IdentiteBatiment } from "./batiment-rnb.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
+import type { UrbanismeParcelle } from "./urbanisme-parcelle.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
 import type { PointHazards } from "./point-hazards.ts";
 import type { SolPollutionLu } from "./cartofriches-pollution.ts";
@@ -25,7 +26,9 @@ export type LogementReport = {
   sourcesNonActualisees?: string[];
   address?: { id: string | null; label: string; city: string | null; citycode: string | null; postcode: string | null; latitude: number; longitude: number; };
   altitude?: number | null;
-  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; } | null;
+  // `rattachement` (FUT-127) voyage déjà sur le fil, depuis `CadastreParcel` ; FUT-81 le lit pour dire
+  // qu'une parcelle retenue par proximité peut être celle d'un voisin. Absent sur un rapport antérieur.
+  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; rattachement?: "point" | "repli"; } | null;
   dpeCandidates?: DpeRecord[];
   /**
    * CE QU'A ÉTABLI LA RECHERCHE DES DIAGNOSTICS DE L'ADRESSE (FUT-65). `unavailable` : la base ADEME
@@ -104,6 +107,12 @@ export type LogementReport = {
   // Protections patrimoniales au point (AC1/AC2/AC4). Statut réglementaire, comme le PPRN :
   // re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.
   heritage?: HeritageStatus | null;
+  /**
+   * FUT-81 : LE PLAN D'URBANISME DE LA PARCELLE (Géoportail de l'urbanisme, cf. `urbanisme-parcelle.ts`).
+   * Document applicable, zones, prescriptions, règlement à lire. `undefined` : rapport écrit avant
+   * FUT-81, jamais lu comme « aucune règle » ni comme une panne.
+   */
+  urbanisme?: UrbanismeParcelle;
   sinistralite?: OnrnSinistralite | null;
   // Risques du bâti au grain point (cavités, mouvements de terrain) + résidu communal. Comme le
   // reste de Géorisques : re-fetché à chaque rendu, jamais snapshoté. `null` = non interrogé.

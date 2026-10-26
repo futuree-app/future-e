@@ -1,6 +1,10 @@
 import "server-only";
 import { buildHeritageProtections, type HeritageStatus, type RawSupFeature } from "./gpu-servitudes.ts";
 
+import {
+  GPU_SITE, lireUrbanisme, urbanismeIndisponible, type GpuFeature, type UrbanismeParcelle,
+} from "./urbanisme-parcelle.ts";
+
 export type { HeritageStatus } from "./gpu-servitudes.ts";
 
 // Géoportail de l'urbanisme (API Carto IGN). Même hôte que `cadastre.ts`, aucune clé requise.
@@ -25,5 +29,84 @@ export async function fetchHeritageProtections(
     return { items: buildHeritageProtections(json.features), sourceStatus: "ok" };
   } catch {
     return { items: [], sourceStatus: "unavailable" };
+  }
+}
+
+// ── FUT-81 : LE PLAN D'URBANISME DE LA PARCELLE ──────────────────────────────────────────────
+// Même hôte, même absence de clé. Mesuré le 26/10/2026 sur 29 adresses : 0,2 à 3,2 s (médiane
+// ~0,5 s) pour les sept couches en parallèle, puis ~0,1 s pour le détail des documents. Les réponses
+// portent la géométrie entière des zones et prescriptions (5 Mo une fois, à Cesson-Sévigné) : POST,
+// pour qu'une parcelle aux nombreux sommets ne dépasse jamais la longueur d'une URL.
+const GPU_URL = "https://apicarto.ign.fr/api/gpu";
+const GPU_DOC_TIMEOUT_MS = 4000;
+
+async function gpuCouche(couche: string, geom: unknown): Promise<GpuFeature[] | null> {
+  try {
+    const res = await fetch(`${GPU_URL}/${couche}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ geom }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { features?: GpuFeature[] };
+    return Array.isArray(json.features) ? json.features : null;
+  } catch {
+    return null;
+  }
+}
+
+async function gpuDocument<T>(id: string, chemin: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${GPU_SITE}/api/document/${id}/${chemin}`, {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+      signal: AbortSignal.timeout(GPU_DOC_TIMEOUT_MS),
+    });
+    return res.ok ? ((await res.json()) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Le plan d'urbanisme qui s'applique à la parcelle (ou, sans parcelle, au point). Ne lève JAMAIS :
+ * une panne rend `indisponible`, que le module affiche comme tel, sans retenir le dossier.
+ */
+export async function fetchUrbanismeParcelle(
+  latitude: number,
+  longitude: number,
+  parcelle: { geometry: { type: string; coordinates: unknown } | null; contenance: number | null } | null,
+): Promise<UrbanismeParcelle> {
+  try {
+    const point = { type: "Point", coordinates: [longitude, latitude] };
+    const geom = parcelle?.geometry ?? point;
+    const [municipality, documents, zones, secteurs, surface, ligne, pct] = await Promise.all([
+      gpuCouche("municipality", point),
+      gpuCouche("document", geom),
+      gpuCouche("zone-urba", geom),
+      gpuCouche("secteur-cc", geom),
+      gpuCouche("prescription-surf", geom),
+      gpuCouche("prescription-lin", geom),
+      gpuCouche("prescription-pct", geom),
+    ]);
+    const ids = [...new Set((documents ?? []).map((d) => d.properties?.gpu_doc_id).filter((v): v is string => typeof v === "string" && /^[0-9a-f]{32}$/.test(v)))];
+    const lus = await Promise.all(ids.map(async (id) => {
+      const [details, fichiers] = await Promise.all([
+        gpuDocument<Record<string, unknown>>(id, "details"),
+        gpuDocument<{ name?: unknown; title?: unknown }[]>(id, "files"),
+      ]);
+      return [id, details, fichiers] as const;
+    }));
+    return lireUrbanisme({
+      parcelle: parcelle?.geometry ? parcelle : null,
+      municipality, documents, zones, secteurs,
+      prescriptions: { surface, ligne, point: pct },
+      details: Object.fromEntries(lus.map(([id, d]) => [id, d])),
+      fichiers: Object.fromEntries(lus.map(([id, , f]) => [id, Array.isArray(f) ? f : null])),
+    });
+  } catch {
+    return urbanismeIndisponible();
   }
 }

@@ -18,6 +18,7 @@ export type CadastreParcel = {
 };
 
 type CadastreFeature = {
+  geometry?: { type: string; coordinates: unknown } | null;
   properties?: {
     idu?: string;
     code_insee?: string;
@@ -110,28 +111,37 @@ function buildSquareAroundPoint(
   };
 }
 
-function chooseBestParcel(features: CadastreFeature[]): CadastreParcel | null {
+function chooseBestParcel(features: CadastreFeature[]): CadastreFeature | null {
   const parcels = features
-    .map((feature) => toCadastreParcel(feature))
-    .filter((parcel): parcel is CadastreParcel => Boolean(parcel));
+    .map((feature) => ({ feature, parcel: toCadastreParcel(feature) }))
+    .filter((x): x is { feature: CadastreFeature; parcel: CadastreParcel } => Boolean(x.parcel));
 
   if (parcels.length === 0) {
     return null;
   }
 
   parcels.sort((a, b) => {
-    const areaA = a.contenance ?? Number.POSITIVE_INFINITY;
-    const areaB = b.contenance ?? Number.POSITIVE_INFINITY;
+    const areaA = a.parcel.contenance ?? Number.POSITIVE_INFINITY;
+    const areaB = b.parcel.contenance ?? Number.POSITIVE_INFINITY;
     return areaA - areaB;
   });
 
-  return parcels[0];
+  return parcels[0].feature;
 }
 
-export async function findCadastreParcelByPoint(
+/**
+ * FUT-81 : la parcelle ET SA GÉOMÉTRIE. La géométrie sert à lire le plan d'urbanisme à la parcelle ;
+ * elle ne voyage pas dans le rapport (seul `parcel` y entre), elle s'y relirait sans rien apporter.
+ */
+export type CadastreParcelLue = {
+  parcel: CadastreParcel;
+  geometry: { type: string; coordinates: unknown } | null;
+};
+
+export async function findCadastreParcelWithGeometry(
   longitude: number,
   latitude: number,
-): Promise<CadastreParcel | null> {
+): Promise<CadastreParcelLue | null> {
   const pointFeatures = await fetchCadastreFeatures(
     {
       type: "Point",
@@ -142,7 +152,7 @@ export async function findCadastreParcelByPoint(
 
   const directParcel = toCadastreParcel(pointFeatures[0]);
   if (directParcel) {
-    return { ...directParcel, rattachement: "point" };
+    return { parcel: { ...directParcel, rattachement: "point" }, geometry: pointFeatures[0]?.geometry ?? null };
   }
 
   for (const radiusMeters of [3, 8, 15]) {
@@ -150,14 +160,22 @@ export async function findCadastreParcelByPoint(
       buildSquareAroundPoint(longitude, latitude, radiusMeters),
       8,
     );
-    const fallbackParcel = chooseBestParcel(polygonFeatures);
+    const fallback = chooseBestParcel(polygonFeatures);
+    const fallbackParcel = toCadastreParcel(fallback ?? undefined);
 
-    if (fallbackParcel) {
-      return { ...fallbackParcel, rattachement: "repli" };
+    if (fallback && fallbackParcel) {
+      return { parcel: { ...fallbackParcel, rattachement: "repli" }, geometry: fallback.geometry ?? null };
     }
   }
 
   return null;
+}
+
+export async function findCadastreParcelByPoint(
+  longitude: number,
+  latitude: number,
+): Promise<CadastreParcel | null> {
+  return (await findCadastreParcelWithGeometry(longitude, latitude))?.parcel ?? null;
 }
 
 // Sonde de QUALIFICATION : la lecture parcellaire sera-t-elle disponible pour ce point ? L'absence
