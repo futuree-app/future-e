@@ -1,0 +1,320 @@
+{
+  "base": "http://localhost:3139",
+  "recette": "fixtures du vrai moteur, API simulées, aucun modèle appelé",
+  "mesures": [
+    {
+      "id": "exploration-inondation",
+      "width": 1440,
+      "mode": "exploration_inondation",
+      "communes": [
+        "La Rochelle",
+        "Saintes",
+        "Rochefort"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ces territoires ?",
+        "invite": "Posez une question sur les territoires proposés, les faits qui les décrivent ou leur évolution future."
+      },
+      "chips": [
+        "Que disent les inondations passées de ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "placeholdersComplets": [
+        "Que disent les inondations passées de ces communes ?",
+        "Que va changer le climat ici d'ici 2050 ?"
+      ],
+      "pool": [
+        "Que disent les inondations passées de ces communes ?",
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "exploration-inondation",
+      "width": 390,
+      "mode": "exploration_inondation",
+      "communes": [
+        "La Rochelle",
+        "Saintes",
+        "Rochefort"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ces territoires ?",
+        "invite": "Posez une question sur les territoires proposés, les faits qui les décrivent ou leur évolution future."
+      },
+      "chips": [
+        "Que disent les inondations passées de ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "placeholdersComplets": [
+        "Que disent les inondations passées de ces communes ?",
+        "Que va changer le climat ici d'ici 2050 ?"
+      ],
+      "pool": [
+        "Que disent les inondations passées de ces communes ?",
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "classe-complet",
+      "width": 1440,
+      "mode": "classe",
+      "communes": [
+        "Bourcefranc-le-Chapus",
+        "Dolus-d'Oléron",
+        "Saint-Martin-de-Ré"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES ARBITRAGES",
+        "titre": "Pourquoi ces territoires ressortent ?",
+        "invite": "Posez une question sur les territoires proposés, les compromis identifiés ou leur évolution future."
+      },
+      "chips": [
+        "Pourquoi Bourcefranc-le-Chapus plutôt que Dolus-d'Oléron ?",
+        "Quels risques climatiques les séparent ?",
+        "Qu'est-ce qui a vraiment pesé ?"
+      ],
+      "placeholdersComplets": [
+        "Pourquoi Bourcefranc-le-Chapus ressort devant Dolus-d'Oléron ?",
+        "Que va changer le climat ici d'ici 2050 ?"
+      ],
+      "pool": [
+        "Pourquoi Bourcefranc-le-Chapus ressort devant Dolus-d'Oléron ?",
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Laquelle est la plus adaptée pour une retraite dans 20 ans ?",
+        "Quelle commune restera la plus vivable pendant les canicules ?",
+        "Pourquoi futur•e écarte des communes que j'avais en tête ?",
+        "Que montrent les données que je ne vois pas encore ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "classe-complet",
+      "width": 390,
+      "mode": "classe",
+      "communes": [
+        "Bourcefranc-le-Chapus",
+        "Dolus-d'Oléron",
+        "Saint-Martin-de-Ré"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES ARBITRAGES",
+        "titre": "Pourquoi ces territoires ressortent ?",
+        "invite": "Posez une question sur les territoires proposés, les compromis identifiés ou leur évolution future."
+      },
+      "chips": [
+        "Pourquoi Bourcefranc-le-Chapus plutôt que Dolus-d'Oléron ?",
+        "Quels risques climatiques les séparent ?",
+        "Qu'est-ce qui a vraiment pesé ?"
+      ],
+      "placeholdersComplets": [
+        "Pourquoi Bourcefranc-le-Chapus ressort devant Dolus-d'Oléron ?",
+        "Que va changer le climat ici d'ici 2050 ?"
+      ],
+      "pool": [
+        "Pourquoi Bourcefranc-le-Chapus ressort devant Dolus-d'Oléron ?",
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Laquelle est la plus adaptée pour une retraite dans 20 ans ?",
+        "Quelle commune restera la plus vivable pendant les canicules ?",
+        "Pourquoi futur•e écarte des communes que j'avais en tête ?",
+        "Que montrent les données que je ne vois pas encore ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "paris-partielle",
+      "width": 1440,
+      "mode": "couverture_incomplete",
+      "communes": [
+        "Paris"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ce territoire ?",
+        "invite": "Posez une question sur le territoire proposé, les faits qui le décrivent ou son évolution future."
+      },
+      "chips": [
+        "Que montrent les données disponibles sur Paris ?",
+        "Quels risques climatiques pèsent sur Paris ?",
+        "Quelles priorités préciser pour affiner la recherche ?"
+      ],
+      "placeholdersComplets": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment Paris vivra-t-elle les canicules ?"
+      ],
+      "pool": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment Paris vivra-t-elle les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour affiner la recherche ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "paris-partielle",
+      "width": 390,
+      "mode": "couverture_incomplete",
+      "communes": [
+        "Paris"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ce territoire ?",
+        "invite": "Posez une question sur le territoire proposé, les faits qui le décrivent ou son évolution future."
+      },
+      "chips": [
+        "Que montrent les données disponibles sur Paris ?",
+        "Quels risques climatiques pèsent sur Paris ?",
+        "Quelles priorités préciser pour affiner la recherche ?"
+      ],
+      "placeholdersComplets": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment Paris vivra-t-elle les canicules ?"
+      ],
+      "pool": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment Paris vivra-t-elle les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour affiner la recherche ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "sans-priorite",
+      "width": 1440,
+      "mode": "couverture_incomplete",
+      "communes": [
+        "Angoulins",
+        "Aytré",
+        "Châtelaillon-Plage"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ces territoires ?",
+        "invite": "Posez une question sur les territoires proposés, les faits qui les décrivent ou leur évolution future."
+      },
+      "chips": [
+        "Que montrent les données disponibles sur ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "placeholdersComplets": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?"
+      ],
+      "pool": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "sans-priorite",
+      "width": 390,
+      "mode": "couverture_incomplete",
+      "communes": [
+        "Angoulins",
+        "Aytré",
+        "Châtelaillon-Plage"
+      ],
+      "entete": {
+        "surtitre": "LIRE LES FAITS",
+        "titre": "Que disent les données de ces territoires ?",
+        "invite": "Posez une question sur les territoires proposés, les faits qui les décrivent ou leur évolution future."
+      },
+      "chips": [
+        "Que montrent les données disponibles sur ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "placeholdersComplets": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?"
+      ],
+      "pool": [
+        "Que va changer le climat ici d'ici 2050 ?",
+        "Comment ces communes vivront-elles les canicules ?",
+        "Que montrent les données que je ne vois pas encore ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ],
+      "appels": [
+        "/api/comparateur-vie/parse",
+        "/api/comparateur-vie/match",
+        "/api/comparateur-vie/synthesize"
+      ]
+    },
+    {
+      "id": "session-classe-intacte",
+      "restauree": true,
+      "mode": "classe",
+      "chips": [
+        "Pourquoi Bourcefranc-le-Chapus plutôt que Dolus-d'Oléron ?",
+        "Quels risques climatiques les séparent ?",
+        "Qu'est-ce qui a vraiment pesé ?"
+      ]
+    },
+    {
+      "id": "session-exploration-intacte",
+      "restauree": true,
+      "mode": "exploration_inondation",
+      "chips": [
+        "Que disent les inondations passées de ces communes ?",
+        "Quels risques climatiques pèsent sur ces communes ?",
+        "Quelles priorités préciser pour comparer ces communes ?"
+      ]
+    },
+    {
+      "id": "session-sans-couverture-agregee",
+      "restauree": false
+    },
+    {
+      "id": "session-carte-sans-couverture",
+      "restauree": false
+    },
+    {
+      "id": "session-sans-exploration",
+      "restauree": false
+    }
+  ]
+}

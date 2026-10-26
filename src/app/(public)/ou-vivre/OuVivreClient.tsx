@@ -16,6 +16,8 @@ import { departmentName } from "@/lib/regions-fr";
 import { bindOrphans } from "@/lib/typography";
 import { AnchorAmorce } from "./AnchorAmorce";
 import { repliInondation } from "@/lib/comparateur/synthese-repli";
+import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
+import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -88,6 +90,8 @@ function loadSession(): SessionSnapshot | null {
     if (s.v !== SESSION_VERSION) return null;
     if (!s.savedAt || Date.now() - s.savedAt > SESSION_TTL_MS) return null;
     if (!s.parsed || !s.outcome?.results?.length) return null;
+    // FUT-139 : sans couverture ni mode d'exploration lisibles, la session est rejetée, jamais complétée.
+    if (!sessionReconstituable(s)) return null;
     return s;
   } catch {
     return null;
@@ -759,44 +763,12 @@ export function OuVivreClient() {
   // ── AskFuture comparateur ─────────────────────────────────────────────────
   const top = topCards(outcome?.results);
 
-  // Chips suggérées (MAX 3, une seule ligne) : ancrées sur les vraies communes et
-  // signaux du classement, pas des questions génériques. Reflètent les arbitrages.
-  const askChips = (() => {
-    if (!top.length) return [];
-    const c0 = top[0].nom;
-    const c1 = top[1]?.nom;
-    const out: string[] = [
-      c1 ? `Pourquoi ${c0} plutôt que ${c1} ?` : `Pourquoi ${c0} ressort en premier ?`,
-    ];
-    const littoral = top.find((r) => r.littoral)?.nom;
-    if (littoral) out.push(`Le littoral est-il un sujet à ${littoral} ?`);
-    else if (exclLabels[0]) out.push(`Que vais-je gagner en quittant ${exclLabels[0]} ?`);
-    else out.push("Quels risques climatiques les séparent ?");
-    out.push("Qu'est-ce qui a vraiment pesé ?");
-    return out.slice(0, 3);
-  })();
-
-  // Pool du placeholder « machine à écrire » : donne envie de cliquer avant même
-  // d'avoir une question en tête, en montrant l'étendue du moteur (climat, littoral,
-  // nature/emploi, retraite, canicule…), templaté sur les communes réelles.
-  const askPlaceholders = (() => {
-    if (!top.length) return [];
-    const c0 = top[0].nom;
-    const c1 = top[1]?.nom;
-    const litt = top.find((r) => r.littoral)?.nom;
-    const keys = new Set((parsed?.preferences ?? []).map((p) => p.key));
-    const pool: string[] = [];
-    if (c1) pool.push(`Pourquoi ${c0} ressort devant ${c1} ?`);
-    pool.push("Que va changer le climat ici d'ici 2050 ?");
-    if (litt) pool.push(`L'érosion du littoral est-elle un sujet à ${litt} ?`);
-    if (keys.has("nature") && keys.has("viabilite_emploi"))
-      pool.push("Où trouver plus de nature sans perdre l'accès à l'emploi ?");
-    pool.push("Laquelle est la plus adaptée pour une retraite dans 20 ans ?");
-    pool.push("Quelle commune restera la plus vivable pendant les canicules ?");
-    pool.push("Pourquoi futur•e écarte des communes que j'avais en tête ?");
-    pool.push("Que montrent les données que je ne vois pas encore ?");
-    return pool;
-  })();
+  // FUT-139 : questions et placeholders suivent le mode du résultat. Hors classement complet (exploration,
+  // priorité non mesurée), aucune question ne présente l'ordre des cartes comme une victoire.
+  const askMode = modeQuestions(outcome, top);
+  const askChips = questionsSuggerees(top, askMode, exclLabels[0]);
+  const askEntete = enteteAsk(askMode, top.length);
+  const askPlaceholders = placeholdersAsk(top, askMode, (parsed?.preferences ?? []).map((p) => p.key));
   const askPlaceholdersRef = useRef<string[]>(askPlaceholders);
   askPlaceholdersRef.current = askPlaceholders;
   const askTopKey = top.map((t) => t.insee).join(",");
@@ -1455,20 +1427,20 @@ export function OuVivreClient() {
             </div>
           )}
 
-          {/* Bloc 1 — comprendre les arbitrages derrière le classement (pas « une IA ») */}
+          {/* Bloc 1 — comprendre les arbitrages derrière le classement (pas « une IA ») ; hors classement, les faits (FUT-139) */}
           <section className="mt-12 glass rounded-2xl p-7">
             <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-ghost mb-1">
-              Lire les arbitrages
+              {askEntete.surtitre}
             </p>
             <h2
               className="font-normal text-[22px] text-label mb-1.5"
               style={{ fontFamily: "var(--font-serif)" }}
             >
-              Pourquoi ces territoires ressortent ?
+              {askEntete.titre}
             </h2>
             <p className={`text-[14px] text-muted leading-[1.65] text-pretty ${askRemaining > 0 ? "mb-1.5" : "mb-5"}`}>
               {askRemaining > 0
-                ? bindOrphans("Posez une question sur les territoires proposés, les compromis identifiés ou leur évolution future.")
+                ? bindOrphans(askEntete.invite)
                 : bindOrphans("Pour aller plus loin, ouvrez le rapport d'un de ces territoires.")}
             </p>
             {askRemaining > 0 && (
