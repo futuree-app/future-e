@@ -199,7 +199,13 @@ export default function LogementModule({
       // réattribuer le même au rechargement suivant, sans un mot. Le geste du lecteur n'est pas
       // une absence de donnée à combler, et la date du geste est ce qui les distingue.
       // La décision vit dans `departDpe` (pur, testé) ; FUT-65 : une liste incomplète n'attribue jamais.
-      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, payload.dpeCandidatesStatus !== "unavailable");
+      // FUT-80 : L'IDENTITÉ du bâtiment, pas une liste d'identifiants (revue du 26/10/2026) : plusieurs
+      // bâtiments, un référentiel muet ou un diagnostic rattaché à un autre bâtiment ne retiennent rien
+      // d'office. Rapport antérieur : identité absente, règle d'avant ; le serveur relit de toute façon
+      // le référentiel avant d'écrire, et refuse ce que la règle refuse.
+      // Une liste tronquée (la base en compte plus que la page lue) n'est pas complète non plus.
+      const listeComplete = payload.dpeCandidatesStatus !== "unavailable" && payload.dpeCandidatesTronque !== true;
+      const depart = departDpe(row, candidates, payload.banFeatureType ?? null, listeComplete, payload.batiment);
       if (depart.kind === "restaurer") {
         setSelectedDpe(row.selected_dpe_snapshot);
         setDpeStatus(RUNTIME_DPE_STATUS[row.dpe_selection_status] ?? "not_found");
@@ -559,6 +565,7 @@ export default function LogementModule({
             address={result.address}
             parcel={result.parcel}
             dpe={dpe}
+            batiment={result.batiment}
           />
 
           {/* Note informative si l'adresse est dans une commune ≠ résidence (commune débloquée, cf. 4.5). */}
@@ -613,6 +620,7 @@ export default function LogementModule({
               candidates={dpeCandidates}
               dpeNonVerifiable={dpeNonVerifiable}
               listeDpeIncomplete={result.dpeCandidatesStatus === "unavailable" && dpeCandidates.length > 0}
+              listeDpeTronquee={result.dpeCandidatesTronque === true}
               dossierId={dossier?.id ?? ""}
               busy={dpeBusy}
               erreur={dpeError}
@@ -623,6 +631,9 @@ export default function LogementModule({
               // la ligne gardait son ancien statut, et le diagnostic corrigé revenait au
               // rechargement. `pending` est le seul statut qui rouvre vraiment la sélection.
               onReselect={() => { void appliquerSelection("pending", null); }}
+              batiment={result.batiment}
+              memeBatiment={result.dpeMemeBatiment}
+              banId={result.address?.id ?? null}
             />
             </div>
 

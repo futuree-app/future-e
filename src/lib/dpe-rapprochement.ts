@@ -1,4 +1,5 @@
 import { communeParent } from "./plm.ts";
+import { contreditParLeBatiment, idsDesBatiments, type IdentiteBatiment } from "./batiment-rnb.ts";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // UN DIAGNOSTIC APPORTÉ PAR SON NUMÉRO PORTE-T-IL SUR CE LOGEMENT ?
@@ -29,6 +30,10 @@ export type NiveauRapprochement =
   /** Identifiant BAN différent, même numéro et même voie : le géocodage du diagnostiqueur a
    *  désigné une entrée voisine du même bâtiment, cas ordinaire et non l'exception. */
   | "batiment"
+  /** FUT-80 : autre adresse, mais le Référentiel national des bâtiments rattache le diagnostic
+   *  (son `id_rnb`) à un bâtiment de l'adresse du dossier : angle de rue, autre cage, « bis ». Le même
+   *  bâtiment n'est pas le même logement : rattachable, toujours après confirmation. */
+  | "meme_batiment"
   /** Même commune, autre adresse. Refusé. */
   | "commune"
   /** Autre commune. Refusé. */
@@ -38,10 +43,18 @@ export type NiveauRapprochement =
 
 export type Rapprochement = {
   niveau: NiveauRapprochement;
-  /** Le rattachement est-il possible ? Vrai pour `adresse` et `batiment` seulement. */
+  /** Le rattachement est-il possible ? Vrai pour `adresse`, `batiment` et `meme_batiment`. */
   attachable: boolean;
   /** Le lecteur doit-il confirmer explicitement avant rattachement ? */
   confirmationRequise: boolean;
+  /**
+   * Revue indépendante du 26/10/2026 : l'`id_rnb` du diagnostic désigne un autre bâtiment que celui (ou
+   * ceux) que le référentiel donne à l'adresse du dossier. Posé seulement quand c'est établi (référentiel
+   * lu, bâtiment connu). Une sélection MANUELLE reste possible, après confirmation et avec la mention :
+   * le lecteur qui recopie le numéro de son document apporte une preuve que le bâtiment n'infirme pas
+   * (l'un des deux se trompe, rien ne dit lequel). Une attribution AUTOMATIQUE, jamais.
+   */
+  contredit?: true;
 };
 
 /**
@@ -92,14 +105,19 @@ export function voieComparable(label: string | null | undefined): string | null 
   return nettoye.length > 0 ? nettoye : null;
 }
 
+/**
+ * `batiments` : les ID-RNB des bâtiments de l'adresse du dossier (FUT-80). Absents ou vides (rapport
+ * antérieur, référentiel muet), le rapprochement est exactement celui d'avant.
+ */
 export function rapprocher(
-  dpe: { id_ban: string | null; adresse: string | null },
+  dpe: { id_ban: string | null; adresse: string | null; id_rnb?: string | null },
   dossier: { ban_id: string; address_label: string; insee: string },
+  batiments: readonly string[] = [],
 ): Rapprochement {
   const rendre = (niveau: NiveauRapprochement): Rapprochement => ({
     niveau,
-    attachable: niveau === "adresse" || niveau === "batiment",
-    confirmationRequise: niveau === "batiment",
+    attachable: niveau === "adresse" || niveau === "batiment" || niveau === "meme_batiment",
+    confirmationRequise: niveau === "batiment" || niveau === "meme_batiment",
   });
 
   if (dpe.id_ban && dpe.id_ban === dossier.ban_id) return rendre("adresse");
@@ -107,6 +125,12 @@ export function rapprocher(
   const voieDpe = voieComparable(dpe.adresse);
   const voieDossier = voieComparable(dossier.address_label);
   if (voieDpe && voieDossier && voieDpe === voieDossier) return rendre("batiment");
+
+  // L'IDENTIFIANT DU BÂTIMENT PASSE AVANT LA COMMUNE. Mesuré le 26/10/2026 : 96 % (adresses uniformes) et
+  // 88 % (adresses collectives) des diagnostics du même bâtiment enregistrés à une autre adresse portent
+  // un autre numéro ou une autre voie, et
+  // tombaient donc en « commune », refusés, alors que c'est le cas même que la saisie du numéro sert.
+  if (dpe.id_rnb && batiments.includes(dpe.id_rnb)) return rendre("meme_batiment");
 
   // La commune du diagnostic se lit dans son identifiant BAN. Les arrondissements de Paris, Lyon
   // et Marseille passent par leur commune parente : un diagnostic du 7e n'est pas « ailleurs »
@@ -132,3 +156,30 @@ export function etiquetteExploitable(label: string | null | undefined): boolean 
   return typeof label === "string" && /^[A-G]$/.test(label.trim().toUpperCase());
 }
 
+
+/**
+ * LE RAPPROCHEMENT, AVEC LE BÂTIMENT (FUT-80, revu après la revue indépendante du 26/10/2026).
+ *
+ * Le référentiel est lu dès que le diagnostic porte un `id_rnb`, MÊME À LA BONNE ADRESSE : un même
+ * identifiant BAN, ou une même voie, court-circuitaient le contrôle, et un diagnostic rattaché à un autre
+ * bâtiment se confirmait sans que personne ne le dise (Monchaux-sur-Écaillon). Il ne devient pas refusé
+ * pour autant : il demande confirmation, avec `contredit`. Une panne du référentiel ne refuse rien de plus
+ * et ne prouve rien : ni `contredit`, ni `meme_batiment`.
+ *
+ * Partagé par les deux routes qui vérifient un numéro (`/numero` montre, `/logement-dpe` rattache) :
+ * elles ne peuvent pas se contredire sur le même diagnostic.
+ */
+export async function rapprocherAvecBatiment(
+  dpe: { id_ban: string | null; adresse: string | null; id_rnb?: string | null },
+  dossier: { ban_id: string; address_label: string; insee: string },
+  chargerIdentite: (banId: string) => Promise<IdentiteBatiment>,
+): Promise<Rapprochement> {
+  if (!dpe.id_rnb) return rapprocher(dpe, dossier);
+  const identite = await chargerIdentite(dossier.ban_id).catch((): IdentiteBatiment => ({ statut: "indisponible" }));
+  const batiments = idsDesBatiments(identite);
+  const r = rapprocher(dpe, dossier, batiments);
+  if ((r.niveau === "adresse" || r.niveau === "batiment") && contreditParLeBatiment(dpe, batiments)) {
+    return { ...r, confirmationRequise: true, contredit: true };
+  }
+  return r;
+}

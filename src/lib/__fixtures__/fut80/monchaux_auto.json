@@ -1,0 +1,71 @@
+{
+ "capture": "2026-10-26T18:34:37.948Z",
+ "ban": "59407_0051_00055",
+ "label": "55 Rue du Chaufour 59224 Monchaux-sur-Écaillon",
+ "insee": "59407",
+ "rnb": {
+  "next": null,
+  "previous": null,
+  "results": [
+   {
+    "rnb_id": "JHR966BZVKDA",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      3.458373393100507,
+      50.28836854295665
+     ]
+    },
+    "addresses": [
+     {
+      "id": "59407_0051_00055",
+      "ban_id": "9420d1bf-72b5-4e08-9da6-b0daad5e3914",
+      "source": "BAN",
+      "street_number": "55",
+      "street_rep": null,
+      "street": "Rue du Chaufour",
+      "city_name": "Monchaux-sur-Écaillon",
+      "city_zipcode": "59224",
+      "city_insee_code": "59407"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "BATIMENT0000002496229365",
+      "source": "bdtopo",
+      "created_at": "2026-01-24T14:35:07.136934+00:00",
+      "source_version": "2025-12-15"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   }
+  ]
+ },
+ "ademe_adresse": [
+  {
+   "appartement_non_visite": 0,
+   "annee_construction": 2021,
+   "_geopoint": "50.289077998802505,3.4589559658206643",
+   "qualite_isolation_murs": "très bonne",
+   "emission_ges_5_usages_par_m2": 9.1,
+   "type_batiment": "maison",
+   "numero_dpe": "2159N0072016M",
+   "surface_habitable_immeuble": 105.8,
+   "qualite_isolation_menuiseries": "très bonne",
+   "methode_application_dpe": "dpe issu d'une étude thermique réglementaire RT2012 bâtiment : maison individuelle",
+   "adresse_ban": "55 Rue du Chaufour 59224 Monchaux-sur-Écaillon",
+   "nombre_appartement": 1,
+   "etiquette_ges": "B",
+   "identifiant_ban": "59407_0051_00055",
+   "id_rnb": "Z4ZCPFA4P9P2",
+   "provenance_id_rnb": "Reprise RNB",
+   "conso_5_usages_par_m2_ep": 54.3,
+   "date_etablissement_dpe": "2021-07-21",
+   "surface_habitable_logement": 105.8,
+   "etiquette_dpe": "B"
+  }
+ ],
+ "ademe_batiment": []
+}

@@ -66,8 +66,12 @@ function ademe(mode: Mode, lignes: unknown[] = [], parJeu?: Record<string, Mode>
     if (m === "500") return Promise.resolve(new Response(JSON.stringify({ error: "boom" }), { status: 500 }));
     if (m === "illisible") return Promise.resolve(new Response("<html>maintenance</html>", { status: 200 }));
     if (m === "sans_liste") return Promise.resolve(new Response(JSON.stringify({ erreur: "x" }), { status: 200 }));
-    if (m === "vide" || u.includes("bbox=")) return Promise.resolve(new Response(JSON.stringify({ results: u.includes("bbox=") ? [{ n_audit: "A-VOISIN", identifiant_ban: "99999_test_00009", _geopoint: "48.0001,2" }] : [] }), { status: 200 }));
-    return Promise.resolve(new Response(JSON.stringify({ results: lignes }), { status: 200 }));
+    // `total` comme la vraie API : sans lui, une liste se lit tronquée (revue FUT-80 du 26/10/2026).
+    if (m === "vide" || u.includes("bbox=")) {
+      const results = u.includes("bbox=") ? [{ n_audit: "A-VOISIN", identifiant_ban: "99999_test_00009", _geopoint: "48.0001,2" }] : [];
+      return Promise.resolve(new Response(JSON.stringify({ total: results.length, results }), { status: 200 }));
+    }
+    return Promise.resolve(new Response(JSON.stringify({ total: lignes.length, results: lignes }), { status: 200 }));
   }) as typeof fetch;
 }
 
@@ -222,7 +226,7 @@ test("A14 : un rapport antérieur sans statut n'est jamais lu comme une absence 
 test("D1 : les deux jeux répondent vide → absent ; une ligne → present", async () => {
   const { lookupDpeCandidatesByBanId } = await import("./dpe.ts");
   ademe("vide");
-  assert.deepEqual(await lookupDpeCandidatesByBanId(BAN), { status: "absent", candidates: [] });
+  assert.deepEqual(await lookupDpeCandidatesByBanId(BAN), { status: "absent", candidates: [], tronque: false });
   ademe("lignes", [LIGNE_DPE]);
   const r = await lookupDpeCandidatesByBanId(BAN);
   assert.equal(r.status, "present");
@@ -233,7 +237,7 @@ test("D2 / D3 / D4 : HTTP 500, délai dépassé, réponse illisible ou sans list
   const { lookupDpeCandidatesByBanId } = await import("./dpe.ts");
   for (const mode of ["500", "delai", "illisible", "sans_liste"] as const) {
     ademe(mode);
-    assert.deepEqual(await lookupDpeCandidatesByBanId(BAN), { status: "unavailable", candidates: [] }, mode);
+    assert.deepEqual(await lookupDpeCandidatesByBanId(BAN), { status: "unavailable", candidates: [], tronque: false }, mode);
   }
   // Un seul jeu en panne : ce que l'autre a rendu reste montré, mais la liste n'est pas complète.
   ademe("lignes", [LIGNE_DPE], { dpe02neuf: "500" });
@@ -248,7 +252,7 @@ test("D2 / D3 / D4 : HTTP 500, délai dépassé, réponse illisible ou sans list
 
 test("D5 : le rendu distingue l'absence de la panne, à chaque endroit qui la citait", () => {
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
-  assert.match(route, /lookupDpeCandidatesByBanId\(address\.id\)\.catch\(\(\) => \(\{ status: "unavailable" as const, candidates: \[\] \}\)\)/);
+  assert.match(route, /lookupDpeCandidatesByBanId\(address\.id\)\.catch\(\(\) => \(\{ status: "unavailable" as const, candidates: \[\], tronque: false \}\)\)/);
   assert.match(route, /dpeCandidatesStatus: dpeLookup\.status,/);
   assert.doesNotMatch(route, /getDpeCandidatesByBanId\(address\.id\)\.catch\(\(\) => \[\]\)/);
   const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
@@ -289,7 +293,9 @@ test("P1 : un candidat unique sur une liste incomplète n'est jamais attribué a
   assert.equal(dpeAttributionStatus([maison], "housenumber", false).status, "selection_required");
   // FUT-74 : l'appel passe par `departDpe`, qui transmet la complétude de la liste à `dpeAttributionStatus`.
   const source = readFileSync("src/components/report/LogementModule.tsx", "utf8");
-  assert.match(source, /departDpe\(row, candidates, payload\.banFeatureType \?\? null, payload\.dpeCandidatesStatus !== "unavailable"\)/);
+  // FUT-80 : l'identité du bâtiment suit la complétude, qui inclut désormais la troncature (revue du 26/10).
+  assert.match(source, /const listeComplete = payload\.dpeCandidatesStatus !== "unavailable" && payload\.dpeCandidatesTronque !== true;/);
+  assert.match(source, /departDpe\(row, candidates, payload\.banFeatureType \?\? null, listeComplete, payload\.batiment\)/);
   const { departDpe } = await import("./dpe-attribution-auto.ts");
   const neuf = { dpe_selection_status: "pending", dpe_selection_at: null };
   assert.equal(departDpe(neuf, [maison], "housenumber", false).kind, "a_choisir");

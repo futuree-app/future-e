@@ -2,6 +2,8 @@ import type { LogementReport } from "@/lib/logement-report-types";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { ReportSection, GlassCard } from "@/components/report/kit";
 import { AddressDiagnosticsBlock } from "./AddressDiagnosticsBlock";
+import { DiagnosticsMemeBatiment } from "./DiagnosticsMemeBatiment";
+import { idsDesBatiments } from "@/lib/batiment-rnb";
 import { SaisieNumeroDpe } from "./SaisieNumeroDpe";
 import { DpeBadge, Block, DPE_LABELS } from "./kit";
 import { formatGesM2, formatKwhEpM2 } from "@/lib/audit-record";
@@ -37,8 +39,8 @@ function LienReprise({ label, busy, onClick }: { label: string; busy: boolean; o
 
 export function EnergieSection({
   dpeStatus, dpe, dpeEcarte = null, audit, auditStatus, autresAudits = [], autresAuditsIncomplets = false, voixAudit = "neutre", auditDetailsOuverts = false,
-  candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, dossierId, busy = false, erreur = null,
-  onPick, onNotInList, onReselect, onPickParNumero,
+  candidates, dpeNonVerifiable = false, listeDpeIncomplete = false, listeDpeTronquee = false, dossierId, busy = false, erreur = null,
+  onPick, onNotInList, onReselect, onPickParNumero, batiment, memeBatiment, banId = null,
 }: {
   dpeStatus: DpeUiStatus;
   dpe: DpeRecord | null;
@@ -64,6 +66,8 @@ export function EnergieSection({
   dpeNonVerifiable?: boolean;
   /** FUT-65 : un des deux jeux ADEME n'a pas répondu. La liste montrée n'est pas exhaustive. */
   listeDpeIncomplete?: boolean;
+  /** La base compte à l'adresse plus de diagnostics que la page lue : la liste n'est pas exhaustive. */
+  listeDpeTronquee?: boolean;
   /** Le dossier lu, dont la saisie par numéro a besoin pour rapprocher l'adresse trouvée. */
   dossierId: string;
   /** Une écriture de sélection est en cours : les gestes attendent sa réponse. */
@@ -75,6 +79,12 @@ export function EnergieSection({
   onReselect: () => void;
   /** Rattache un diagnostic trouvé par son numéro, y compris hors de la liste de l'adresse. */
   onPickParNumero: (d: DpeRecord) => void;
+  /** FUT-80 : le bâtiment de l'adresse (absent sur un rapport antérieur : rien n'est montré). */
+  batiment?: LogementReport["batiment"];
+  /** FUT-80 : les diagnostics du même bâtiment, enregistrés à d'autres adresses. */
+  memeBatiment?: LogementReport["dpeMemeBatiment"];
+  /** L'identifiant BAN du dossier, pour dire d'une ligne qu'elle est enregistrée ailleurs. */
+  banId?: string | null;
 }) {
   // LA SÉLECTION NE BLOQUE PLUS LE RAPPORT (31/07/2026). Elle se faisait avant lui, dans un écran
   // `PreciseLogementStep` qui masquait tout le module tant que le lecteur n'avait pas désigné son
@@ -107,6 +117,17 @@ export function EnergieSection({
     || (audit != null && audit.correspondance === "exact_address" && audit.scenarios.length > 0);
 
   if (vue !== "attribue" || !dpe) {
+    // FUT-80 : les diagnostics du même bâtiment à d'autres adresses. Ils ne sont pas ceux de l'adresse :
+    // ils se lisent APRÈS elle, et avant le numéro, qui reste le recours le plus sûr.
+    const memeBat = (
+      <DiagnosticsMemeBatiment
+        batiment={batiment}
+        memeBatiment={memeBatiment}
+        banId={banId}
+        busy={busy}
+        onPick={onPickParNumero}
+      />
+    );
     const saisie = (
       <SaisieNumeroDpe dossierId={dossierId} busy={busy} onConfirm={onPickParNumero} />
     );
@@ -144,6 +165,7 @@ export function EnergieSection({
                 Le dossier n&apos;attribue donc aucune étiquette énergétique à ce logement, et ne
                 prête à ce bien aucune des valeurs mesurées à cette adresse.
               </p>
+              {memeBat}
               <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
                 <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
                   Si vous avez le document du diagnostic, son numéro le retrouve, même
@@ -161,15 +183,20 @@ export function EnergieSection({
               </button>
             </div>
           ) : vue === "a_choisir" ? (
-            <AddressDiagnosticsBlock
-              candidates={candidates}
-              listeIncomplete={listeDpeIncomplete}
-              dossierId={dossierId}
-              busy={busy}
-              onPick={onPick}
-              onNotInList={onNotInList}
-              onPickParNumero={onPickParNumero}
-            />
+            <div style={{ display: "grid", gap: 18 }}>
+              <AddressDiagnosticsBlock
+                candidates={candidates}
+                listeIncomplete={listeDpeIncomplete}
+                listeTronquee={listeDpeTronquee}
+                dossierId={dossierId}
+                busy={busy}
+                onPick={onPick}
+                onNotInList={onNotInList}
+                onPickParNumero={onPickParNumero}
+                batiments={idsDesBatiments(batiment)}
+              />
+              {memeBat}
+            </div>
           ) : (
             /* AUCUN CANDIDAT : LE NUMÉRO EST LE SEUL RECOURS, et il n'y a ici aucun bouton
                « aucun de ces diagnostics » à cliquer pour l'atteindre. C'est l'état où la saisie
@@ -188,6 +215,7 @@ export function EnergieSection({
                   avoir été versé, ou y être enregistré à une entrée voisine.
                 </p>
               )}
+              {memeBat}
               <div style={{ paddingTop: 14, borderTop: "1px solid var(--border-1)", display: "grid", gap: 12 }}>
                 <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
                   Si vous avez le document du diagnostic, son numéro le retrouve où qu&apos;il soit

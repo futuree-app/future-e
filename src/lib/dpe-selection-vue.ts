@@ -19,6 +19,16 @@ import type { DpeLabel, DpeRecord } from "./dpe-attribution.ts";
 import { isCollective } from "./dpe-address-context.ts";
 import { issuDesDonneesDeLImmeuble } from "./dpe-grain.ts";
 import { candidateIdentifier, isUnidentifiable, matchesQuery, meaningfulFloor } from "./dpe-candidate-match.ts";
+import { contreditParLeBatiment, mentionContradiction, voieDuLibelle } from "./batiment-rnb.ts";
+
+/**
+ * FUT-80 : CE QUE LA LIGNE DOIT SAVOIR DU DOSSIER pour dire ce qui la distingue. Absent, la ligne est
+ * exactement celle d'avant.
+ *   - `banId` : l'adresse du dossier. Une ligne enregistrée ailleurs le dit, avec son adresse.
+ *   - `batiments` : les ID-RNB de l'adresse. Une ligne rattachée à un autre bâtiment (par son
+ *     diagnostiqueur ou par la base) le dit aussi : ce n'est pas un refus, c'est un fait à voir.
+ */
+export type ContexteLigne = { banId?: string | null; batiments?: readonly string[] };
 
 /**
  * AU-DELÀ DE CE NOMBRE, LA LISTE NE S'AFFICHE PLUS D'EMBLÉE. C'EST UN SEUIL D'ÉCRAN, PAS UNE RÈGLE
@@ -86,12 +96,20 @@ export type LigneCandidat = {
  * La date du diagnostic s'écrit « DPE 2025 » et non « 2025 » seul : à côté d'une année de
  * construction, une année nue ne dit pas de quoi elle est l'année.
  */
-export function ligneCandidat(c: DpeRecord, champs: ChampsVariables): LigneCandidat {
+export function ligneCandidat(c: DpeRecord, champs: ChampsVariables, contexte: ContexteLigne = {}): LigneCandidat {
   const ident = candidateIdentifier(c);
   const immeuble = isCollective(c);
   const titre = ident ?? (immeuble ? "Immeuble entier" : "Sans identifiant de logement");
 
   const details: string[] = [];
+  // FUT-80 : où il est enregistré, EN PREMIER, quand ce n'est pas l'adresse du dossier : c'est ce qui
+  // sépare cette ligne de toutes celles de l'adresse, et ce qui permet de la reconnaître ou de l'écarter.
+  if (contexte.banId && c.id_ban !== contexte.banId) {
+    details.push(`enregistré au ${voieDuLibelle(c.adresse) ?? "une autre adresse"}`);
+  }
+  if (contreditParLeBatiment(c, contexte.batiments)) {
+    details.push(mentionContradiction(c));
+  }
   if (immeuble) details.push("diagnostic de l'immeuble");
   // FUT-74 (D6) : un DPE de logement établi à partir des données de l'immeuble le dit, et la visite
   // manquante se dit seulement quand l'ADEME la renseigne. Ni l'un ni l'autre ne le disqualifie.
@@ -177,7 +195,8 @@ export function phrasesOuvertureRepliee(total: number, deLogement = false): { ti
  * LA SAISIE PAR NUMÉRO, dite comme une question et non comme une explication. L'ancienne phrase
  * (« Il retrouve aussi les diagnostics enregistrés à une entrée voisine… ») avait un « il » ambigu
  * et expliquait un cas technique avant l'action. Ce cas vit désormais dans l'aide du champ, et il
- * est exact : `dpe-rapprochement.ts` accepte le niveau « bâtiment » (même numéro, même voie).
+ * est exact : `dpe-rapprochement.ts` accepte le niveau « bâtiment » (même numéro, même voie) et,
+ * depuis FUT-80, « même bâtiment » (autre adresse que le référentiel rattache au même bâtiment).
  */
 export const SAISIE_NUMERO = {
   question: "Vous avez le numéro du DPE ?",

@@ -136,16 +136,20 @@ function Repartition({ ctx }: { ctx: AddressDpeContext }) {
 }
 
 export function AddressDiagnosticsBlock({
-  candidates, listeIncomplete = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero,
+  candidates, listeIncomplete = false, listeTronquee = false, dossierId, busy = false, onPick, onNotInList, onPickParNumero, batiments = [],
 }: {
   candidates: DpeRecord[];
   /** FUT-65 : un des deux jeux ADEME n'a pas répondu. Le compte ci-dessous est un minimum. */
   listeIncomplete?: boolean;
+  /** La base en compte plus que la page lue (revue du 26/10/2026). Le compte ci-dessous est un minimum. */
+  listeTronquee?: boolean;
   dossierId: string;
   busy?: boolean;
   onPick: (d: DpeRecord) => void;
   onNotInList: () => void;
   onPickParNumero: (d: DpeRecord) => void;
+  /** FUT-80 : les ID-RNB de l'adresse ; une ligne rattachée à un autre bâtiment le dit. */
+  batiments?: readonly string[];
 }) {
   const [ouvert, setOuvert] = useState(false);
   const ctx = buildAddressDpeContext(candidates);
@@ -182,6 +186,13 @@ export function AddressDiagnosticsBlock({
           peuvent être enregistrés à cette adresse.
         </p>
       )}
+      {/* Dit AVANT la liste et avant tout geste : le compte annoncé n'est pas le total. */}
+      {listeTronquee && !listeIncomplete && (
+        <p style={{ fontSize: 13.5, color: "var(--fg-3)", lineHeight: 1.6, margin: 0 }}>
+          La base ADEME compte à&nbsp;cette adresse plus de diagnostics que ceux lus lors de&nbsp;cette
+          collecte&nbsp;: seuls les plus récents sont montrés.
+        </p>
+      )}
 
       {/* LE DIAGNOSTIC D'IMMEUBLE EST NOMMÉ AVANT LA LISTE (FUT-68), et il n'y figure plus (FUT-74). */}
       <FichesImmeuble immeubles={immeubles} />
@@ -207,12 +218,13 @@ export function AddressDiagnosticsBlock({
                 onNotInList={onNotInList}
                 busy={busy}
                 afficherRefus={false}
+                contexte={{ batiments }}
               />
             </div>
           )}
         </div>
       ) : (
-        <DpeSelector candidates={logements} onPick={onPick} onNotInList={onNotInList} busy={busy} />
+        <DpeSelector candidates={logements} onPick={onPick} onNotInList={onNotInList} busy={busy} contexte={{ batiments }} />
       )}
 
       {indetermines.length > 0 && (

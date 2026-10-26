@@ -1,0 +1,473 @@
+(node:39966) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout be86f4c7>/src/components/report/fut80-revue-module.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout be86f4c7>/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✖ La Rochelle, trois bâtiments : le vrai module n'émet AUCUNE attribution automatique (108.259203ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✖ Puyravault, sept bâtiments, DPE rattaché à l'un d'eux : aucune attribution automatique (10.856588ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✖ référentiel muet, bâtiment en ruine ou démoli : aucune attribution automatique (9.505189ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✖ liste ADEME tronquée : aucune attribution automatique sur un candidat unique supposé (9.785209ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ TÉMOIN · maison seule, un bâtiment : la proposition part, par la liste, pour ce diagnostic (10.315209ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ TÉMOIN · rapport antérieur à FUT-80 (sans bâtiment) : proposée comme avant ; le serveur relit le référentiel (8.103373ms)
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+✔ restauration : un choix, un refus ou un retrait datés ne déclenchent rien, quel que soit le bâtiment (23.450375ms)
+(node:39967) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout be86f4c7>/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ Monchaux : `auto_confirmed` contredit par le bâtiment → refus explicite, aucune écriture, référentiel relu (39.195809ms)
+✔ Monchaux : la même maison, choisie À LA MAIN dans la liste, reste enregistrable (sélection explicite préservée) (3.006568ms)
+✖ Monchaux par son numéro : le même BAN ne court-circuite plus le bâtiment ; rattachable à la main, avec la contradiction dite (2.775383ms)
+✖ autre entrée du même bâtiment (Villeurbanne, 122) : `auto_confirmed` par numéro refusé ; confirmation manuelle acceptée (2.895264ms)
+✔ un DPE d'immeuble ne devient jamais celui d'un appartement, par aucune voie (3.047435ms)
+✖ La Rochelle, 27 rue des Brandes : trois bâtiments, une maison sans id_rnb → `auto_confirmed` refusé (1.606777ms)
+✖ Puyravault : un DPE dont l'id_rnb est l'un des sept bâtiments de l'adresse → refusé aussi (1.592685ms)
+✖ le cas légitime reste automatique : maison seule, adresse précise, UN bâtiment, liste complète (2.459057ms)
+✖ la décision vient du serveur, pas du navigateur : type d'adresse lu dans la version, diagnostic exact exigé (1.637772ms)
+✖ une panne du référentiel n'est pas une absence de contradiction : l'automatique est refusé, le manuel reste possible (1.565474ms)
+✖ bâtiments inadmissibles ou réponse non vérifiable : le veto ne se perd jamais en « aucun bâtiment » (1.607359ms)
+✖ pagination : une première page à un bâtiment ne prouve pas l'unicité ; les pages suivantes sont lues (1.47012ms)
+✔ aucun bâtiment au référentiel (réponse complète et vide) : la règle d'avant FUT-80, sans blocage arbitraire (1.172452ms)
+✖ liste tronquée : un candidat lu sur quatre-vingts n'est pas un candidat unique (1.322777ms)
+✖ deux maisons du même bâtiment RNB à deux adresses, même étage, complément et surface : deux candidats (1.919057ms)
+✖ refus PUIS automatique retardée : la base garde le refus, et l'automatique répond 409 (15.175253ms)
+(node:39967) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout be86f4c7>/src/app/api/logement-dpe/route.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout be86f4c7>/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ sélection explicite PUIS automatique retardée : le choix du lecteur reste (11.769782ms)
+✖ retrait PUIS automatique retardée : le retrait daté reste, rien n'est réattribué (12.635219ms)
+✔ automatique PUIS refus : le refus, plus récent, l'emporte (1.590771ms)
+✖ réponses inversées : deux propositions concurrentes, une seule écriture ; puis un refus tardif en réseau gagne quand même (12.19033ms)
+✔ après la course, le dossier rechargé restaure le refus et ne repropose rien (13.257955ms)
+✖ propriété, révocation et dossiers historiques : refus sans écriture ni source, aucun choix réécrit (2.031794ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 8
+ℹ fail 21
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1307.133526
+
+✖ failing tests:
+
+test at src/components/report/fut80-revue-module.test.ts:115:1
+✖ La Rochelle, trois bâtiments : le vrai module n'émet AUCUNE attribution automatique (108.259203ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     dossierId: 'DOSSIER-FIXTURE',
+  +     dpeId: '2417E2613440S',
+  +     source: 'liste',
+  +     status: 'auto_confirmed'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/components/report/fut80-revue-module.test.ts:116:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { dossierId: 'DOSSIER-FIXTURE', status: 'auto_confirmed', dpeId: '2417E2613440S', source: 'liste' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at src/components/report/fut80-revue-module.test.ts:119:1
+✖ Puyravault, sept bâtiments, DPE rattaché à l'un d'eux : aucune attribution automatique (10.856588ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     dossierId: 'DOSSIER-FIXTURE',
+  +     dpeId: '2417E9999999P',
+  +     source: 'liste',
+  +     status: 'auto_confirmed'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/components/report/fut80-revue-module.test.ts:122:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { dossierId: 'DOSSIER-FIXTURE', status: 'auto_confirmed', dpeId: '2417E9999999P', source: 'liste' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at src/components/report/fut80-revue-module.test.ts:125:1
+✖ référentiel muet, bâtiment en ruine ou démoli : aucune attribution automatique (9.505189ms)
+  AssertionError [ERR_ASSERTION]: {"statut":"indisponible"}
+  + actual - expected
+  
+  + [
+  +   {
+  +     dossierId: 'DOSSIER-FIXTURE',
+  +     dpeId: '2417E2613440S',
+  +     source: 'liste',
+  +     status: 'auto_confirmed'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/components/report/fut80-revue-module.test.ts:132:12)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ { dossierId: 'DOSSIER-FIXTURE', status: 'auto_confirmed', dpeId: '2417E2613440S', source: 'liste' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at src/components/report/fut80-revue-module.test.ts:136:1
+✖ liste ADEME tronquée : aucune attribution automatique sur un candidat unique supposé (9.785209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     dossierId: 'DOSSIER-FIXTURE',
+  +     dpeId: '2417E2613440S',
+  +     source: 'liste',
+  +     status: 'auto_confirmed'
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/components/report/fut80-revue-module.test.ts:137:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { dossierId: 'DOSSIER-FIXTURE', status: 'auto_confirmed', dpeId: '2417E2613440S', source: 'liste' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:199:1
+✖ Monchaux : `auto_confirmed` contredit par le bâtiment → refus explicite, aucune écriture, référentiel relu (39.195809ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:203:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:217:1
+✖ Monchaux par son numéro : le même BAN ne court-circuite plus le bâtiment ; rattachable à la main, avec la contradiction dite (2.775383ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:223:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:234:1
+✖ autre entrée du même bâtiment (Villeurbanne, 122) : `auto_confirmed` par numéro refusé ; confirmation manuelle acceptée (2.895264ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:238:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:261:1
+✖ La Rochelle, 27 rue des Brandes : trois bâtiments, une maison sans id_rnb → `auto_confirmed` refusé (1.606777ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:265:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:270:1
+✖ Puyravault : un DPE dont l'id_rnb est l'un des sept bâtiments de l'adresse → refusé aussi (1.592685ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:275:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:280:1
+✖ le cas légitime reste automatique : maison seule, adresse précise, UN bâtiment, liste complète (2.459057ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:289:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:292:1
+✖ la décision vient du serveur, pas du navigateur : type d'adresse lu dans la version, diagnostic exact exigé (1.637772ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'ADRESSE_IMPRECISE'
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:296:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'ADRESSE_IMPRECISE',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:309:1
+✖ une panne du référentiel n'est pas une absence de contradiction : l'automatique est refusé, le manuel reste possible (1.565474ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:314:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:321:1
+✖ bâtiments inadmissibles ou réponse non vérifiable : le veto ne se perd jamais en « aucun bâtiment » (1.607359ms)
+  AssertionError [ERR_ASSERTION]: démoli seul
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:340:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:346:1
+✖ pagination : une première page à un bâtiment ne prouve pas l'unicité ; les pages suivantes sont lues (1.47012ms)
+  AssertionError [ERR_ASSERTION]: la seconde page est lue : deux bâtiments
+  + actual - expected
+  
+  + undefined
+  - 'ambigu'
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:354:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'ambigu',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:373:1
+✖ liste tronquée : un candidat lu sur quatre-vingts n'est pas un candidat unique (1.322777ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 422
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:379:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 422,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:393:1
+✖ deux maisons du même bâtiment RNB à deux adresses, même étage, complément et surface : deux candidats (1.919057ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  -   '2569E0000122A',
+      '2569E0000124B'
+    ]
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:401:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '2569E0000124B' ],
+    expected: [ '2569E0000122A', '2569E0000124B' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:418:1
+✖ refus PUIS automatique retardée : la base garde le refus, et l'automatique répond 409 (15.175253ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:427:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:433:1
+✖ sélection explicite PUIS automatique retardée : le choix du lecteur reste (11.769782ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:443:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:447:1
+✖ retrait PUIS automatique retardée : le retrait daté reste, rien n'est réattribué (12.635219ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:453:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:467:1
+✖ réponses inversées : deux propositions concurrentes, une seule écriture ; puis un refus tardif en réseau gagne quand même (12.19033ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:475:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at src/lib/fut80-revue-routes.test.ts:494:1
+✖ propriété, révocation et dossiers historiques : refus sans écriture ni source, aucun choix réécrit (2.031794ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  200 !== 409
+  
+      at TestContext.<anonymous> (file://<checkout be86f4c7>/src/lib/fut80-revue-routes.test.ts:507:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 409,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,128 @@
+[
+ {
+  "cas": "villeurbanne",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "villeurbanne",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "la-couarde",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "la-couarde",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "thenac",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "thenac",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "monchaux",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "monchaux",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "puyravault",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "puyravault",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "bordeaux",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "bordeaux",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "ancien",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "ancien",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "la-rochelle",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "la-rochelle",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "tronque",
+  "appareil": "ordinateur",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ },
+ {
+  "cas": "tronque",
+  "appareil": "android",
+  "debord": 0,
+  "erreurs": 0,
+  "ecritures": 0
+ }
+]

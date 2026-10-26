@@ -1,0 +1,93 @@
+{
+ "capture": "2026-10-26T18:34:37.458Z",
+ "ban": "17121_0249_00055",
+ "label": "55 Grande Rue 17670 La Couarde-sur-Mer",
+ "insee": "17121",
+ "rnb": {
+  "next": null,
+  "previous": null,
+  "results": [
+   {
+    "rnb_id": "FY2J2BSAD5CN",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -1.426033377483909,
+      46.1942666327932
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17121_0249_00055",
+      "ban_id": "4c085810-5231-4896-a942-0c043c34740f",
+      "source": "BAN",
+      "street_number": "55",
+      "street_rep": null,
+      "street": "Grande Rue",
+      "city_name": "La Couarde-sur-Mer",
+      "city_zipcode": "17670",
+      "city_insee_code": "17121"
+     },
+     {
+      "id": "17121_0249_00058",
+      "ban_id": "c7e37b5e-eafd-4f8f-8d23-422b91166c9a",
+      "source": "BAN",
+      "street_number": "58",
+      "street_rep": null,
+      "street": "Grande Rue",
+      "city_name": "La Couarde-sur-Mer",
+      "city_zipcode": "17670",
+      "city_insee_code": "17121"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-6RZ5-LQXX-J1LF",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:20:57.530391+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000292924723",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:02:59.113453+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   }
+  ]
+ },
+ "ademe_adresse": [],
+ "ademe_batiment": [
+  {
+   "emission_ges_5_usages_par_m2": 5,
+   "methode_application_dpe": "dpe appartement individuel",
+   "logement_traversant": 1,
+   "type_ventilation": "VMC SF Auto réglable de 2001 à 2012",
+   "id_rnb": "FY2J2BSAD5CN",
+   "provenance_id_rnb": "Reprise RNB",
+   "classe_inertie_batiment": "Légère",
+   "conso_5_usages_par_m2_ep": 141.5,
+   "date_etablissement_dpe": "2025-01-02",
+   "_geopoint": "46.19416395672042,-1.4260140329134325",
+   "qualite_isolation_murs": "bonne",
+   "type_batiment": "appartement",
+   "numero_dpe": "2517E0005755E",
+   "presence_brasseur_air": 0,
+   "qualite_isolation_menuiseries": "moyenne",
+   "indicateur_confort_ete": "insuffisant",
+   "protection_solaire_exterieure": 0,
+   "adresse_ban": "58 Grande Rue 17670 La Couarde-sur-Mer",
+   "isolation_toiture": 1,
+   "nombre_appartement": 1,
+   "etiquette_ges": "A",
+   "identifiant_ban": "17121_0249_00058",
+   "numero_etage_appartement": 0,
+   "surface_habitable_logement": 159.1,
+   "etiquette_dpe": "C"
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+ "capture": "2026-10-26T20:45:10.278Z",
+ "ban": "17300_1150_00027",
+ "label": "27 Rue des Brandes 17000 La Rochelle",
+ "insee": "17300",
+ "rnb": {
+  "next": null,
+  "previous": null,
+  "results": [
+   {
+    "rnb_id": "WS2SANZ7K6NR",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -1.162115696941358,
+      46.16836892310711
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17300_1150_00027",
+      "ban_id": "1da9cb38-a9df-4b37-871c-d686fbddbd58",
+      "source": "BAN",
+      "street_number": "27",
+      "street_rep": null,
+      "street": "Rue des Brandes",
+      "city_name": "La Rochelle",
+      "city_zipcode": "17000",
+      "city_insee_code": "17300"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-QZF1-KJA2-GGJJ",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:24.520481+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000000293024177",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T18:55:00.863745+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "8WKNN87HEZ6R",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -1.161961361138084,
+      46.16840528074725
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17300_1150_00027",
+      "ban_id": "1da9cb38-a9df-4b37-871c-d686fbddbd58",
+      "source": "BAN",
+      "street_number": "27",
+      "street_rep": null,
+      "street": "Rue des Brandes",
+      "city_name": "La Rochelle",
+      "city_zipcode": "17000",
+      "city_insee_code": "17300"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-U7SM-SLPM-WZZ1",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:29.274174+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000002205861023",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:07:23.108035+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   },
+   {
+    "rnb_id": "AVQNAE7SH2NT",
+    "status": "constructed",
+    "point": {
+     "type": "Point",
+     "coordinates": [
+      -1.16227917824888,
+      46.16835466458075
+     ]
+    },
+    "addresses": [
+     {
+      "id": "17300_1150_00027",
+      "ban_id": "1da9cb38-a9df-4b37-871c-d686fbddbd58",
+      "source": "BAN",
+      "street_number": "27",
+      "street_rep": null,
+      "street": "Rue des Brandes",
+      "city_name": "La Rochelle",
+      "city_zipcode": "17000",
+      "city_insee_code": "17300"
+     }
+    ],
+    "ext_ids": [
+     {
+      "id": "bdnb-bc-NGKB-GUWP-DHMD",
+      "source": "bdnb",
+      "created_at": "2023-12-07T15:21:20.801833+00:00",
+      "source_version": "2023_01"
+     },
+     {
+      "id": "BATIMENT0000002205861088",
+      "source": "bdtopo",
+      "created_at": "2023-12-21T19:07:23.160354+00:00",
+      "source_version": "bdtopo_2023_09"
+     }
+    ],
+    "is_active": true,
+    "validated_by": []
+   }
+  ]
+ },
+ "ademe_adresse": [
+  {
+   "annee_construction": 1930,
+   "_geopoint": "46.16849899224238,-1.1620509628702955",
+   "qualite_isolation_murs": "bonne",
+   "emission_ges_5_usages_par_m2": 19,
+   "type_batiment": "maison",
+   "numero_dpe": "2417E2613440S",
+   "presence_brasseur_air": 0,
+   "qualite_isolation_menuiseries": "bonne",
+   "indicateur_confort_ete": "insuffisant",
+   "protection_solaire_exterieure": 0,
+   "methode_application_dpe": "dpe maison individuelle",
+   "logement_traversant": 1,
+   "adresse_ban": "27 Rue des Brandes 17000 La Rochelle",
+   "isolation_toiture": 1,
+   "etiquette_ges": "C",
+   "identifiant_ban": "17300_1150_00027",
+   "type_ventilation": "VMC SF Hygro B après 2012",
+   "classe_inertie_batiment": "Légère",
+   "numero_etage_appartement": 0,
+   "conso_5_usages_par_m2_ep": 143.2,
+   "date_etablissement_dpe": "2024-07-19",
+   "surface_habitable_logement": 207,
+   "etiquette_dpe": "C"
+  }
+ ],
+ "ademe_batiment": []
+}

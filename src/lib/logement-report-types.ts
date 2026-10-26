@@ -7,6 +7,7 @@
 import type { AuditCandidatProche, AuditRecord, AuditStatus } from "./audit-record.ts";
 import type { IssueActualisation, VersionMeta } from "./logement-report-version.ts";
 import type { DpeRecord } from "./dpe-attribution.ts";
+import type { IdentiteBatiment } from "./batiment-rnb.ts";
 import type { RegulatoryPlan } from "./pprn-zonage.ts";
 import type { HeritageStatus } from "./gpu-servitudes.ts";
 import type { OnrnSinistralite } from "./onrn-sinistralite.ts";
@@ -32,7 +33,24 @@ export type LogementReport = {
    * `undefined` : rapport écrit avant FUT-65, on ne sait pas, et ce n'est JAMAIS lu comme `absent`.
    */
   dpeCandidatesStatus?: AuditStatus;
+  /**
+   * La base compte à cette adresse plus de diagnostics que la page lue (revue indépendante du 26/10/2026).
+   * Posé SEULEMENT quand c'est le cas : un rapport complet garde sa forme et son empreinte d'avant. La
+   * liste montrée n'est alors pas exhaustive, et rien ne s'attribue sur son unicité.
+   */
+  dpeCandidatesTronque?: true;
   banFeatureType?: string | null;
+  /**
+   * FUT-80 : LE BÂTIMENT DE L'ADRESSE selon le Référentiel national des bâtiments (cf. `batiment-rnb.ts`).
+   * `undefined` : rapport écrit avant FUT-80, on ne sait pas, et ce n'est JAMAIS lu comme `non_trouve`.
+   */
+  batiment?: IdentiteBatiment;
+  /**
+   * FUT-80 : les diagnostics du MÊME bâtiment enregistrés à une AUTRE adresse, hors de la liste de
+   * l'adresse. Candidats seulement, jamais attribués. Posé seulement quand le bâtiment est unique
+   * (`batiment.statut === "confirme"`) : sur plusieurs bâtiments, on ne sait pas lequel est le bon.
+   */
+  dpeMemeBatiment?: { status: AuditStatus; candidates: DpeRecord[]; tronque: boolean };
   // FUT-59 : la forme de `audit-record.ts`, valeurs PAR M² (kWh EP/m²/an) et objet audité (logement ou immeuble).
   audit?: AuditRecord | null;
   /**
