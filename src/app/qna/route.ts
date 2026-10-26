@@ -4,6 +4,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { getCommuneEntry, buildTerritorySignals } from "@/lib/comparateur-vie";
 import { chargerGaresBpe } from "@/lib/gares-bpe";
 import { garesDeLaCommune } from "@/lib/gares-commune";
+import { signauxPourLeModele } from "@/lib/accueil/signal-demographie";
 import { getClimatDataCommune } from "@/lib/drias-json";
 import { getGeorisquesSummary } from "@/lib/georisques";
 import {
@@ -110,7 +111,8 @@ export async function POST(request: Request) {
       // FUT-97 : les gares dites au lecteur viennent de la BPE (data/gares-bpe.json, lu une fois par
       // instance). Illisible : `null`, et le signal ne nomme aucune gare, pas même leur absence.
       const garesBpe = entry ? (await chargerGaresBpe())?.gares ?? null : null;
-      if (entry) territorySignals = buildTerritorySignals(entry, garesDeLaCommune(entry, garesBpe));
+      // FUT-72 : le modèle ne reçoit pas le code démographique interne (`gagne_attire`), mais des constats.
+      if (entry) territorySignals = signauxPourLeModele(buildTerritorySignals(entry, garesDeLaCommune(entry, garesBpe)), entry.demographie);
     } catch {
       territorySignals = null;
     }
