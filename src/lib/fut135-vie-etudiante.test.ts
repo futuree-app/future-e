@@ -299,3 +299,92 @@ test("revue : les 487 communes sans établissement recensé et notées ≥ 55 ne
   }
   // Cartes, pistes, comparaisons et recherches forcées : scripts/fut135/controle-487.mjs (0 faute, 25/10/2026).
 });
+
+// ── Revue 2 (26/10/2026) : l'identité « ville étudiante » exige une PREUVE POSITIVE d'établissement ──
+// Fixtures sur des copies de communes réelles : seule l'attestation `etudesSup` varie, le score reste le même.
+const VILLES_ETUDIANTES = ["49007", "35238", "86194", "2B096"]; // Angers, Rennes, Poitiers, Corte
+const AVEC = (c: M, sup: M) => ({ ...commune(c.insee ?? c), etudesSup: { ...commune(c.insee ?? c).etudesSup, ...sup } });
+const ATTESTATIONS: [string, (insee: string) => M, "presence" | "absence" | "incertain"][] = [
+  ["données réelles (accès pondéré > 0, sans compte)", (i) => commune(i), "presence"],
+  ["etudesSup absent", (i) => { const { etudesSup, ...c } = commune(i); void etudesSup; return c; }, "incertain"],
+  ["etudesSup null", (i) => ({ ...commune(i), etudesSup: null }), "incertain"],
+  ["measured: false", (i) => ({ ...commune(i), etudesSup: { measured: false } }), "incertain"],
+  ["measured: false avec des champs", (i) => AVEC(i, { measured: false }), "incertain"],
+  ["rayon absent", (i) => AVEC(i, { radiusKm: undefined }), "incertain"],
+  ["rayon nul", (i) => AVEC(i, { radiusKm: 0 }), "incertain"],
+  ["rayon négatif", (i) => AVEC(i, { radiusKm: -5 }), "incertain"],
+  ["rayon NaN", (i) => AVEC(i, { radiusKm: NaN }), "incertain"],
+  ["rayon en texte", (i) => AVEC(i, { radiusKm: "5" }), "incertain"],
+  ["accès absent", (i) => AVEC(i, { weightedAccess: undefined }), "incertain"],
+  ["accès absent, compte positif", (i) => AVEC(i, { weightedAccess: undefined, establishmentCount: 3 }), "incertain"],
+  ["accès négatif", (i) => AVEC(i, { weightedAccess: -1 }), "incertain"],
+  ["accès NaN", (i) => AVEC(i, { weightedAccess: NaN }), "incertain"],
+  ["accès infini", (i) => AVEC(i, { weightedAccess: Infinity }), "incertain"],
+  ["accès en texte", (i) => AVEC(i, { weightedAccess: "2" }), "incertain"],
+  ["compte négatif", (i) => AVEC(i, { establishmentCount: -1 }), "incertain"],
+  ["compte non entier", (i) => AVEC(i, { establishmentCount: 1.5 }), "incertain"],
+  ["compte NaN", (i) => AVEC(i, { establishmentCount: NaN }), "incertain"],
+  ["présence attestée : compte et accès positifs", (i) => AVEC(i, { establishmentCount: 4, weightedAccess: 2.7 }), "presence"],
+  ["absence attestée : compte nul, accès nul", (i) => AVEC(i, { establishmentCount: 0, weightedAccess: 0 }), "absence"],
+  ["absence attestée : accès nul, sans compte", (i) => AVEC(i, { weightedAccess: 0 }), "absence"],
+  ["contradiction : compte positif, accès nul", (i) => AVEC(i, { establishmentCount: 3, weightedAccess: 0 }), "incertain"],
+  ["contradiction : compte nul, accès positif", (i) => AVEC(i, { establishmentCount: 0, weightedAccess: 0.8 }), "incertain"],
+];
+
+test("revue 2. preuve positive : trois états, présence et absence n'en contredisent jamais le verdict du dossier", async () => {
+  const { classifyHigherEdAbsence } = await import("./decision/absence-facts.ts");
+  const verdict = (sup: M) => classifyHigherEdAbsence(sup?.measured === true
+    ? { measured: true, weightedAccess: sup.weightedAccess, radiusKm: sup.radiusKm, establishmentCount: sup.establishmentCount ?? null }
+    : { measured: false });
+  for (const insee of VILLES_ETUDIANTES) {
+    for (const [cas, fixture, attendu] of ATTESTATIONS) {
+      const c = fixture(insee);
+      const etat = V.etatEtablissementSup(c.etudesSup);
+      assert.equal(etat, attendu, `${insee} ${cas}`);
+      if (etat === "presence") assert.equal(verdict(c.etudesSup), "neutral", `${insee} ${cas}`);
+      if (etat === "absence") assert.equal(verdict(c.etudesSup), "mismatch", `${insee} ${cas}`);
+    }
+  }
+});
+
+test("revue 2. identité « ville étudiante » : seulement avec un établissement positivement attesté, score inchangé", () => {
+  for (const insee of VILLES_ETUDIANTES) {
+    const score = vie(commune(insee));
+    for (const [cas, fixture, attendu] of ATTESTATIONS) {
+      const c = fixture(insee);
+      assert.equal(vie(c), score, `${insee} ${cas} : le score ne dépend pas de l'attestation`);
+      assert.equal(V.villeEtudianteLocale(c), attendu === "presence", `${insee} ${cas}`);
+      assert.equal(V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE), attendu === "presence", `${insee} ${cas}`);
+      // L'absence n'est dite que démontrée ; l'incertain ne dit rien des établissements.
+      const phrase = V.presenceEtudiante(c, 0);
+      if (attendu === "absence") assert.match(phrase, /^forte présence étudiante, aucun établissement supérieur recensé à moins de \d+ km$/, `${insee} ${cas}`);
+      else assert.equal(phrase, "forte présence étudiante", `${insee} ${cas}`);
+    }
+  }
+});
+
+test("revue 2. synthèse déterministe : sans preuve locale, Angers n'est pas dite pour « sa vie étudiante »", async () => {
+  const duo = await V.seedComparaison(["49007", PONT_SALOMON]);
+  const vitalite = (byInsee: Map<string, M>) =>
+    V.buildComparaisonComplete(duo.trio, byInsee).themes.find((t: M) => t.id === "vitalite").synthese;
+  const reel = new Map([["49007", commune("49007")], [PONT_SALOMON, commune(PONT_SALOMON)]]);
+  assert.equal(vitalite(reel), "Angers se distingue par sa vie étudiante et sa croissance démographique.");
+  for (const [cas, fixture, attendu] of ATTESTATIONS) {
+    const map = new Map([["49007", fixture("49007")], [PONT_SALOMON, commune(PONT_SALOMON)]]);
+    const cc = V.buildComparaisonComplete(duo.trio, map);
+    // Scores, paliers numériques et avantages : identiques à la lecture réelle.
+    assert.deepEqual(ligneEtudiante(cc).avantage, ligneEtudiante(V.buildComparaisonComplete(duo.trio, reel)).avantage, cas);
+    const s = vitalite(map);
+    if (attendu === "presence") assert.equal(s, "Angers se distingue par sa vie étudiante et sa croissance démographique.", cas);
+    else assert.equal(s, "Angers se distingue par la présence étudiante de son agglomération et sa croissance démographique.", cas);
+  }
+});
+
+test("revue 2. index réel : les 259 identités candidates reposent toutes sur une présence attestée", () => {
+  const candidats = INDEX.communes.filter((c) => V.buildIdentiteCandidates(c).includes(IDENTITE_ETUDIANTE));
+  assert.equal(candidats.length, 259);
+  for (const c of candidats) assert.equal(V.etatEtablissementSup(c.etudesSup), "presence", c.insee);
+  // Couverture de l'attestation réelle : mesurée partout, sans compte d'établissements ; l'accès pondéré la porte.
+  assert.equal(INDEX.communes.filter((c) => V.etatEtablissementSup(c.etudesSup) === "incertain").length, 0);
+  assert.equal(INDEX.communes.filter((c) => c.etudesSup?.establishmentCount != null).length, 0);
+});

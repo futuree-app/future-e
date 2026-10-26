@@ -49,7 +49,6 @@ import {
 import { centraliteRang } from "@/lib/centralite-services";
 import { motCardinal } from "@/lib/comparaison-cardinal";
 import { libellesAgglomeration, lectureCommunalePLM, villePLM, villeDeArrondissement, type LectureCommunalePLM } from "@/lib/territoire/plm-communal";
-import { classifyHigherEdAbsence } from "@/lib/decision/absence-facts";
 import { garesDeLaCommune, signalTrain, type GaresCommune } from "@/lib/gares-commune";
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1123,8 +1122,8 @@ export function buildIdentiteCandidates(c: IndexCommune): string[] {
   if (frais) push("Pour chercher davantage de fraîcheur et un rythme plus posé.");
   if (doux) push("Pour des hivers parmi les plus doux du pays.");
   // Traits de caractère (départagent deux communes de même géographie).
-  // FUT-135 : seulement si la commune porte elle-même la mesure (pôle de son bassin, établissement recensé dans son
-  // rayon) ; sinon la preuve est celle de l'agglomération, dite par la raison, pas par l'identité.
+  // FUT-135 : seulement si la commune porte elle-même la mesure (pôle de son bassin, établissement positivement
+  // attesté dans son rayon) ; sinon la preuve est celle de l'agglomération, dite par la raison, pas par l'identité.
   if (etudianteForte && villeEtudianteLocale(c)) push("Pour une ville étudiante à taille humaine.");
   // FUT-36 : la croissance mesure une population qui augmente, pas une commune qui « attire ». La
   // phrase dit le fait observé, sans lui prêter de cause.
@@ -1770,7 +1769,8 @@ export function buildComparaisonComplete(
       if (l.avantage.type === "avantage" && l.avantage.insees.length === 1) {
         const insee = l.avantage.insees[0];
         const arr = winners.get(insee) ?? [];
-        // FUT-135 : hors du pôle, « sa vie étudiante » prêterait à la commune la mesure de son agglomération.
+        // FUT-135 : hors du pôle, ou sans établissement positivement attesté, « sa vie étudiante » prêterait à la
+        // commune la mesure de son agglomération.
         const col = cols[trio.findIndex((r) => r.insee === insee)];
         const forte = l.id === "vie_etudiante" && col && !villeEtudianteLocale(col)
           ? "la présence étudiante de son agglomération"
@@ -2209,14 +2209,40 @@ function assignSignaux(
 // combine les deux et n'établit pas, à lui seul, une présence étudiante dans la commune. Un texte ne prête donc
 // à une commune que ce qui est mesuré à son échelle :
 //   - hors du pôle de son agglomération, la présence se dit « dans l'agglomération de X » ;
-//   - sans établissement du supérieur recensé dans le rayon étudié, le texte le dit, borné à ce rayon (même
-//     prédicat que la règle d'absence du dossier, `classifyHigherEdAbsence`). Ce n'est pas une absence
-//     d'étudiants résidents, ni d'établissement au-delà du rayon ;
+//   - sans établissement du supérieur recensé dans le rayon étudié, le texte le dit, borné à ce rayon (absence
+//     démontrée, cf. `etatEtablissementSup`). Ce n'est pas une absence d'étudiants résidents, ni d'établissement
+//     au-delà du rayon ;
 //   - le niveau suit le palier de la comparaison (`bandIndex`) : un score intermédiaire ne se dit jamais « forte ».
 // Rien ici ne touche un score, un seuil, un rang ou la composition des résultats.
 const PRESENCE_ETUDIANTE = ["forte présence étudiante", "présence étudiante intermédiaire", "présence étudiante limitée"] as const;
 
-type GrainEtudiant = { pole: boolean; agglomeration: string | null; rayonSansEtablissementKm: number | null };
+// L'attestation locale du supérieur (`etudesSup`), en trois états. « Pas d'absence démontrée » n'est pas une
+// présence démontrée : une attestation absente, non mesurée, invalide ou contradictoire est INCERTAINE, et
+// n'autorise ni l'absence dite ni l'identité « ville étudiante ».
+//   - le compte d'établissements, quand il est là, prime (même ordre que `classifyHigherEdAbsence`) ;
+//   - sinon l'accès pondéré : Σ (1 − d/DMAX) sur les établissements à d ≤ rayon, avec rayon ≤ DMAX = 25 km
+//     (scripts/populate-bpe.py). Chaque terme est ≥ 0 et n'est > 0 que pour un établissement dans le rayon :
+//     un accès > 0 prouve donc au moins un établissement. L'inverse ne tient pas (poids nul à d = DMAX,
+//     arrondi à 2 décimales), mais il ne joue que sur l'absence, que le dossier lit déjà ainsi ;
+//   - compte et accès en désaccord (compte > 0 sans accès, compte 0 avec accès) : incertain.
+// Présence ⇒ `classifyHigherEdAbsence` = neutral ; absence ⇒ mismatch. L'état raffine le verdict du dossier sans
+// jamais le contredire. L'index de l'accès (BPE 2025) ne porte pas de compte : l'accès pondéré y suffit.
+export type EtatEtablissementSup = "presence" | "absence" | "incertain";
+export function etatEtablissementSup(sup: IndexCommune["etudesSup"]): EtatEtablissementSup {
+  if (!sup || sup.measured !== true) return "incertain";
+  if (!Number.isFinite(sup.radiusKm) || sup.radiusKm <= 0) return "incertain";
+  const acces = sup.weightedAccess;
+  if (typeof acces !== "number" || !Number.isFinite(acces) || acces < 0) return "incertain";
+  const compte = sup.establishmentCount;
+  if (compte != null) {
+    if (!Number.isInteger(compte) || compte < 0) return "incertain";
+    if ((compte > 0) !== (acces > 0)) return "incertain";
+    return compte > 0 ? "presence" : "absence";
+  }
+  return acces > 0 ? "presence" : "absence";
+}
+
+type GrainEtudiant = { pole: boolean; agglomeration: string | null; etablissement: EtatEtablissementSup; rayonSansEtablissementKm: number | null };
 function grainEtudiant(c: IndexCommune): GrainEtudiant {
   const uuPop = c.uu ? uuPopCache?.get(c.uu) ?? null : null;
   // La commune EST son bassin : hors unité urbaine, ou seule commune de la sienne.
@@ -2224,12 +2250,11 @@ function grainEtudiant(c: IndexCommune): GrainEtudiant {
   const agglomeration = c.uu ? uuLabelCache?.get(c.uu) ?? null : null;
   const nomVille = villeDeArrondissement(c.insee)?.nom ?? c.nom; // un arrondissement est sa ville (FUT-43)
   const pole = seule || (agglomeration != null && normalizeName(agglomeration) === normalizeName(nomVille));
-  // Même attestation que le dossier (module-facts-map.ts), donc même verdict d'absence.
-  const sup = c.etudesSup;
-  const aucun = sup?.measured === true && classifyHigherEdAbsence({
-    measured: true, weightedAccess: sup.weightedAccess, radiusKm: sup.radiusKm, establishmentCount: sup.establishmentCount ?? null,
-  }) === "mismatch";
-  return { pole, agglomeration: pole ? null : agglomeration, rayonSansEtablissementKm: aucun ? sup!.radiusKm : null };
+  const etablissement = etatEtablissementSup(c.etudesSup);
+  return {
+    pole, agglomeration: pole ? null : agglomeration, etablissement,
+    rayonSansEtablissementKm: etablissement === "absence" ? c.etudesSup!.radiusKm : null,
+  };
 }
 
 // « de Lyon », « d'Angers », « du Havre », « des Sables-d'Olonne ».
@@ -2263,10 +2288,11 @@ function presenceEtudianteDuScore(c: IndexCommune): string {
 }
 
 // Une identité « ville étudiante » suppose que la commune porte elle-même la mesure : pôle de son bassin, avec
-// au moins un établissement du supérieur recensé dans son rayon. Sinon la preuve est celle de l'agglomération.
-function villeEtudianteLocale(c: IndexCommune): boolean {
+// au moins un établissement du supérieur POSITIVEMENT attesté dans son rayon. Sinon la preuve est celle de
+// l'agglomération, ou n'est pas faite.
+export function villeEtudianteLocale(c: IndexCommune): boolean {
   const g = grainEtudiant(c);
-  return g.pole && g.rayonSansEtablissementKm == null;
+  return g.pole && g.etablissement === "presence";
 }
 
 // Les compromis absolus : REASON_NEG, sauf la vie étudiante, dite au niveau et à l'échelle mesurés.

@@ -1,0 +1,1544 @@
+{
+  "sha": "41376a1192c5d75bd4c4b8775f2c6bf036b2fbf2",
+  "donneesReelles": {
+    "total": 34788,
+    "sansObjet": 0,
+    "nonMesures": 0,
+    "incertains": 0,
+    "identitesAutoriseesSansPreuve": []
+  },
+  "fixtures": [
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "temoin",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "neutral",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72,
+        "radiusKm": 0
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "absence_attestee",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 0,
+        "radiusKm": 5,
+        "establishmentCount": 0
+      },
+      "score": 99,
+      "verdictPreuve": "mismatch",
+      "identiteEtudiante": false,
+      "premiereIdentite": "Pour s'installer dans une commune qui gagne des habitants.",
+      "candidats": [
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "temoin",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03,
+        "radiusKm": 10
+      },
+      "score": 100,
+      "verdictPreuve": "neutral",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03,
+        "radiusKm": 0
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "absence_attestee",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 0,
+        "radiusKm": 5,
+        "establishmentCount": 0
+      },
+      "score": 100,
+      "verdictPreuve": "mismatch",
+      "identiteEtudiante": false,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "temoin",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "neutral",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36,
+        "radiusKm": 0
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "absence_attestee",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 0,
+        "radiusKm": 5,
+        "establishmentCount": 0
+      },
+      "score": 99,
+      "verdictPreuve": "mismatch",
+      "identiteEtudiante": false,
+      "premiereIdentite": "Pour s'installer dans une commune qui gagne des habitants.",
+      "candidats": [
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "temoin",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89,
+        "radiusKm": 25
+      },
+      "score": 97,
+      "verdictPreuve": "neutral",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89,
+        "radiusKm": 0
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 25
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 25
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89,
+        "radiusKm": 25,
+        "establishmentCount": -1
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "absence_attestee",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 0,
+        "radiusKm": 5,
+        "establishmentCount": 0
+      },
+      "score": 97,
+      "verdictPreuve": "mismatch",
+      "identiteEtudiante": false,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    }
+  ],
+  "violations": [
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72,
+        "radiusKm": 0
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "49007",
+      "nom": "Angers",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 21.72,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03,
+        "radiusKm": 0
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "35238",
+      "nom": "Rennes",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 42.03,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 100,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+      "candidats": [
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour des hivers parmi les plus doux du pays.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36,
+        "radiusKm": 0
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 10
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "86194",
+      "nom": "Poitiers",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 19.36,
+        "radiusKm": 10,
+        "establishmentCount": -1
+      },
+      "score": 99,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour une ville étudiante à taille humaine.",
+      "candidats": [
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour la vie d'une grande ville et tous ses services.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "objet_absent",
+      "etudesSup": null,
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "objet_null",
+      "etudesSup": null,
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "non_mesure",
+      "etudesSup": {
+        "measured": false,
+        "weightedAccess": 0,
+        "radiusKm": 5
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "rayon_absent",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "rayon_zero",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89,
+        "radiusKm": 0
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "poids_absent",
+      "etudesSup": {
+        "measured": true,
+        "radiusKm": 25
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "poids_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": -1,
+        "radiusKm": 25
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    },
+    {
+      "insee": "2B096",
+      "nom": "Corte",
+      "cas": "compte_negatif",
+      "etudesSup": {
+        "measured": true,
+        "weightedAccess": 6.89,
+        "radiusKm": 25,
+        "establishmentCount": -1
+      },
+      "score": 97,
+      "verdictPreuve": "uncertain",
+      "identiteEtudiante": true,
+      "premiereIdentite": "Pour vivre en montagne, dans un climat plus supportable l'été.",
+      "candidats": [
+        "Pour vivre en montagne, dans un climat plus supportable l'été.",
+        "Pour vivre en montagne, au grand air.",
+        "Pour chercher davantage de fraîcheur et un rythme plus posé.",
+        "Pour une ville étudiante à taille humaine.",
+        "Pour s'installer dans une commune qui gagne des habitants.",
+        "Pour un cadre rural préservé, loin de l'agitation.",
+        "Pour un quotidien au calme, loin de l'agitation.",
+        "Pour vivre au plus près de la nature.",
+        "Pour la tranquillité d'une commune à taille humaine.",
+        "Pour un cadre de vie équilibré, sans excès."
+      ]
+    }
+  ]
+}

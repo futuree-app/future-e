@@ -199,7 +199,34 @@ Pont-Salomon (raison et palier cohérents, trio inchangé, aucune raison « fort
 - La Flèche (seule dans son unité urbaine) a des étudiants recensés par le MESR mais aucun établissement recensé par la BPE dans 25 km : les deux faits sont dits côte à côte, sans réconciliation des sources.
 - **FUT-141** : la méthode de l'accès (`etudes_acces`, ex æquo à zéro) reste un chantier distinct, coordonné avec FUT-136.
 
-## 9. Régénérer
+## 9. Deuxième revue du 26/10 : l'identité exige une preuve positive
+
+**Défaut.** `villeEtudianteLocale` autorisait l'identité « Pour une ville étudiante à taille humaine. » dès qu'aucune absence d'établissement n'était démontrée (`rayonSansEtablissementKm == null`). Ce `null` recouvrait aussi une attestation absente, non mesurée, invalide ou contradictoire. Le contrôleur de Work, rejoué sans modification sur `41376a11`, échoue avec **32 violations sur 32 fixtures négatives** (Angers, Rennes, Poitiers, Corte ; code 1).
+
+**Règle.** `etatEtablissementSup(etudesSup)` rend trois états :
+
+| État | Condition | Effet |
+|---|---|---|
+| Présence démontrée | mesurée, rayon > 0, accès pondéré fini ≥ 0, et compte entier > 0 ou, sans compte, accès > 0 ; compte et accès d'accord | autorise l'identité au pôle de son bassin |
+| Absence démontrée | mêmes validités, compte 0 ou, sans compte, accès 0 | texte « aucun établissement supérieur recensé à moins de N km » |
+| Information incertaine | attestation absente, `null`, non mesurée, rayon ou accès absent, nul, négatif, non fini ; compte négatif, non entier ou non fini ; compte et accès en désaccord | ni identité, ni absence dite |
+
+Présence implique le verdict `neutral` de `classifyHigherEdAbsence`, absence implique `mismatch` : l'état raffine la règle du dossier sans jamais la contredire.
+
+**Pourquoi l'accès pondéré suffit.** Le compte d'établissements (`establishmentCount`) est **absent des 34 788 communes** de l'index, y compris des 259 candidates à l'identité. Exiger ce champ aurait retiré toutes les identités légitimes. Or l'accès pondéré vaut Σ (1 − d/25) sur les établissements à une distance d ≤ rayon, avec un rayon de 5, 10, 15 ou 25 km (`count_within_radius`, `scripts/populate-bpe.py`). Chaque terme est ≥ 0 et n'est > 0 que pour un établissement dans le rayon : un accès strictement positif prouve au moins un établissement recensé. L'inverse ne tient pas (poids nul à 25 km pile, arrondi à deux décimales), mais cela ne joue que sur l'absence, déjà lue ainsi par le dossier.
+
+**Consommateurs.** L'identité (`buildIdentiteCandidates`) et la synthèse de thème de la comparaison complète. Sans preuve locale, Angers devient « Angers se distingue par la présence étudiante de son agglomération et sa croissance démographique. » au lieu de « sa vie étudiante ». Le texte de présence ne mentionne les établissements que si l'absence est démontrée ; l'état incertain n'ajoute aucune formule d'incertitude.
+
+**Résultats.**
+
+- Contrôleur de Work : 32 violations avant, **0 après** (code 0) ; les 4 témoins réels gardent leur identité, les 4 absences attestées la refusent.
+- Index réel : 259 candidats à l'identité étudiante avant, **259 après**, tous en présence démontrée ; 0 attestation incertaine.
+- Photographies d'audit avant/après **identiques octet pour octet** (34 788 communes, 18 recherches) : 0 écart numérique, 0 récit modifié, 0 candidat retiré. Contrôle des 487 : 0 faute. Reproductions Pont-Salomon, Thurins, Saint-Jean-des-Vignes inchangées. Accueil 104 373/104 373. Index, données et `rankBands` non touchés.
+- Tests ajoutés : 24 attestations × 4 villes, sur les vraies fonctions (`etatEtablissementSup`, `villeEtudianteLocale`, `buildIdentiteCandidates`, `presenceEtudiante`, `buildComparaisonComplete`), et la vérification des 259 candidats réels.
+
+Preuves : `docs/audits/2026-10-26-fut135-revue2/`.
+
+## 10. Régénérer
 
 ```bash
 npm run index:unpack
