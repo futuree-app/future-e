@@ -10,21 +10,44 @@
 // l'appel à Anthropic est capturé (c'est le payload testé) et reçoit une réponse écrite ici. Aucun appel
 // réseau, aucun appel au modèle. Le hook de résolution (même patron que
 // `comparateur-demographie-causalite.test.ts`) fournit `server-only`, les alias `@/` et un PostHog muet.
+//
+// Revue de Work (26/10, SHA 12b4c328), deux blocages corrigés et rejoués ici :
+//   A. le code passait avant les valeurs : taux −2 %/an + `gagne_attire` donnait « la population augmente »
+//      et « part élevée ». Les codes sont désormais vérifiés contre le taux et la part (arrondi compris) ;
+//   B. le contrôle de causalité se contournait (« attire … sans difficulté », « attirera », « la croissance
+//      prouve que les familles choisissent… ») et refusait une mise en garde légitime.
+// L'index réel ne contient aucune donnée contradictoire : pour éprouver la route sur ces cas, le hook
+// enveloppe `@/lib/comparateur-vie` (le fichier n'est pas modifié). Les INSEE fictifs 99xxx renvoient une
+// vraie commune de l'index dont seule la démographie est altérée ; tout autre INSEE passe au vrai moteur.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
-import { signalDemographie, signauxPourLeModele } from "./signal-demographie.ts";
+import { gunzipSync } from "node:zlib";
+import { readFileSync } from "node:fs";
+import { signalDemographie, signauxPourLeModele, type DemographieIndex } from "./signal-demographie.ts";
+import { checkCausaliteDemographique } from "./causalite-demographique.ts";
 import { controlerReponse, type ContexteQna } from "./qna.ts";
 import { construireFaitsCommune } from "./faits.ts";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
+const moteurReel = `${racine}src/lib/comparateur-vie.ts`;
+const enveloppeMoteur = `
+import * as vrai from ${JSON.stringify(moteurReel)};
+export * from ${JSON.stringify(moteurReel)};
+export async function getCommuneEntry(insee) {
+  const f = globalThis.__fut72Faux?.[insee];
+  if (!f) return vrai.getCommuneEntry(insee);
+  const base = await vrai.getCommuneEntry(f.base);
+  return base && { ...base, demographie: f.demographie };
+}`;
 const posthogMuet = "export function getPostHogClient(){return{capture(){},async shutdown(){}}}";
 const hook = `
 export async function resolve(spec, ctx, next) {
   if (spec === "server-only") return { url: "data:text/javascript,export{}", shortCircuit: true };
   if (spec === "@/lib/posthog-server") return { url: "data:text/javascript," + encodeURIComponent(${JSON.stringify(posthogMuet)}), shortCircuit: true };
   if (spec === "next/server") return next("next/server.js", ctx);
+  if (spec === "@/lib/comparateur-vie") return { url: "data:text/javascript," + encodeURIComponent(${JSON.stringify(enveloppeMoteur)}), shortCircuit: true };
   if (spec.startsWith("@/")) return next(${JSON.stringify(racine)} + "src/" + spec.slice(2) + ".ts", ctx);
   if ((spec.startsWith("./") || spec.startsWith("../")) && !/\\.[cm]?[jt]s$|\\.json$/.test(spec)) {
     try { return await next(spec + ".ts", ctx); } catch { return next(spec, ctx); }
@@ -41,7 +64,6 @@ const appels: Appel[] = [];
 let reponseSimulee = "";
 const fetchOrigine = globalThis.fetch;
 const cleOrigine = process.env.ANTHROPIC_API_KEY;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let POST: (r: Request) => Promise<Response>;
 
 before(async () => {
@@ -176,13 +198,198 @@ test("signauxPourLeModele : retire le signal brut quand rien ne le fonde, garde 
   assert.deepEqual(remplace.calme, { niveau: "plutôt calme" });
 });
 
-test("REGLE_ATTRACTIVITE : affirmative, la négation reste permise", () => {
-  const ctx: ContexteQna = { commune: "Belley", tensionId: "croissance_transformation", questionLabel: "La commune se transforme-t-elle ?", faits: construireFaitsCommune("Belley", null, null) };
-  const r = (detail: string) => controlerReponse({ verdict: "La population de Belley augmente.", detail, cta: "Ouvrez le dossier" }, ctx);
-  assert.equal(r("Les recensements ne disent pas si la commune attire de nouveaux habitants.").ok, true);
-  for (const d of ["La commune attire des familles.", "Un territoire attractif.", "Son attractivité progresse.", "Des actifs attirés par la ville."]) {
-    const res = r(d);
-    assert.equal(res.ok, false, d);
-    if (!res.ok) assert.ok(res.violations.some((v) => v.rule === "interdit:attractivite"), d);
+// ── A. Valeurs absentes, invalides, contradictoires, et arrondi de stockage ─────────────────────
+
+const EVOL = { hausse: "la population augmente", stable: "la population est globalement stable", baisse: "la population diminue" };
+const ELEVEE = /^part élevée/;
+const NON_ELEVEE = /pas particulièrement élevée$/;
+
+// [cas, démographie, évolution attendue (null = omise), arrivants attendus (null = omis)]
+const COHERENCE: [string, DemographieIndex, string | null, RegExp | null][] = [
+  // Les deux reproductions de Work.
+  ["Work 1 : taux −2, part absente, gagne_attire", { taux_total: -2, part_nouveaux: null, recit: "gagne_attire" }, null, null],
+  ["Work 2 : taux NaN, part −4, gagne_attire", { taux_total: NaN, part_nouveaux: -4, recit: "gagne_attire" }, null, null],
+  // Contradictions : le code ou la valeur est faux, on ne sait pas lequel. Rien n'est dit.
+  ["gagne_attire, taux 0,14 (stable)", { taux_total: 0.14, part_nouveaux: 9, recit: "gagne_attire" }, null, null],
+  ["perd, taux +0,4", { taux_total: 0.4, part_nouveaux: 9, recit: "perd" }, null, null],
+  ["stable, taux −0,16", { taux_total: -0.16, part_nouveaux: 5, recit: "stable" }, null, null],
+  // Code sans taux valide : le code n'est pas un constat.
+  ["gagne_attire, taux absent", { taux_total: null, part_nouveaux: 9, recit: "gagne_attire" }, null, null],
+  ["stable_renouv, taux Infinity", { taux_total: Infinity, part_nouveaux: 9, recit: "stable_renouv" }, null, null],
+  // Code compatible, part invalide : l'évolution reste démontrée, la part n'est pas qualifiée.
+  ["gagne_attire, part absente", { taux_total: 0.84, part_nouveaux: null, recit: "gagne_attire" }, EVOL.hausse, null],
+  ["stable, part absente (le code la dit « non élevée » par défaut)", { taux_total: 0.02, part_nouveaux: null, recit: "stable" }, EVOL.stable, null],
+  ["gagne_attire, part 150", { taux_total: 0.84, part_nouveaux: 150, recit: "gagne_attire" }, EVOL.hausse, null],
+  ["stable_renouv, part NaN", { taux_total: 0, part_nouveaux: NaN, recit: "stable_renouv" }, EVOL.stable, null],
+  // Bornes de part valides.
+  ["gagne_sans_renouv, part 0", { taux_total: 0.5, part_nouveaux: 0, recit: "gagne_sans_renouv" }, EVOL.hausse, NON_ELEVEE],
+  ["stable_renouv, part 100", { taux_total: 0, part_nouveaux: 100, recit: "stable_renouv" }, EVOL.stable, ELEVEE],
+  // Arrondi à deux décimales : à ±0,15 exactement, les deux codes voisins sont possibles (vu sur l'index).
+  ["gagne_attire à +0,15", { taux_total: 0.15, part_nouveaux: 9, recit: "gagne_attire" }, EVOL.hausse, ELEVEE],
+  ["stable à +0,15", { taux_total: 0.15, part_nouveaux: 5, recit: "stable" }, EVOL.stable, NON_ELEVEE],
+  ["perd à −0,15", { taux_total: -0.15, part_nouveaux: 9, recit: "perd" }, EVOL.baisse, null],
+  ["stable_renouv à −0,15", { taux_total: -0.15, part_nouveaux: 9, recit: "stable_renouv" }, EVOL.stable, ELEVEE],
+  // Sans code reconnu : le taux seul, sauf à la borne où il ne tranche pas ; jamais la part.
+  ["sans code, +0,15 (borne)", { taux_total: 0.15, part_nouveaux: 9, recit: null }, null, null],
+  ["sans code, −0,15 (borne)", { taux_total: -0.15, part_nouveaux: 9, recit: null }, null, null],
+  ["sans code, +0,16", { taux_total: 0.16, part_nouveaux: 9, recit: null }, EVOL.hausse, null],
+  ["sans code, −0,14", { taux_total: -0.14, part_nouveaux: 9, recit: null }, EVOL.stable, null],
+  ["code inconnu, −0,2", { taux_total: -0.2, part_nouveaux: 9, recit: "code_inconnu" }, EVOL.baisse, null],
+  ["« toString » n'est pas un code", { taux_total: 0.5, part_nouveaux: 9, recit: "toString" }, EVOL.hausse, null],
+  ["tout absent", { taux_total: null, part_nouveaux: null, recit: null }, null, null],
+];
+
+for (const [nom, demo, evolution, arrivants] of COHERENCE) {
+  test(`signalDemographie, ${nom}`, () => {
+    const s = signalDemographie(demo);
+    if (evolution == null && arrivants == null) return assert.equal(s, null, JSON.stringify(s));
+    assert.equal(s?.evolution_population, evolution ?? undefined);
+    if (arrivants) assert.match(s?.arrivants_recents ?? "", arrivants);
+    else assert.equal(s && "arrivants_recents" in s, false);
+  });
+}
+
+// Les mêmes cas, par la VRAIE route : des communes réelles (Belley, Montluel) dont seule la démographie
+// est altérée. Le payload envoyé au modèle n'affirme que ce que les valeurs démontrent.
+const FAUX: Record<string, { base: string; demographie: DemographieIndex }> = {
+  "99001": { base: "01034", demographie: { taux_total: -2, part_nouveaux: null, recit: "gagne_attire" } },
+  "99002": { base: "01034", demographie: { taux_total: NaN, part_nouveaux: -4, recit: "gagne_attire" } },
+  "99003": { base: "01034", demographie: { taux_total: 0.84, part_nouveaux: null, recit: "gagne_attire" } },
+  "99004": { base: "01262", demographie: { taux_total: 0.15, part_nouveaux: 9, recit: null } },
+  "99005": { base: "01262", demographie: { taux_total: 0.15, part_nouveaux: 5, recit: "gagne_sans_renouv" } },
+};
+
+test("/qna, données contradictoires ou invalides : le payload n'affirme que ce que les valeurs démontrent", async () => {
+  (globalThis as { __fut72Faux?: typeof FAUX }).__fut72Faux = FAUX;
+  try {
+    for (const insee of ["99001", "99002", "99004"]) {
+      const { prompt, brut } = await payloadPour(insee, "Commune test");
+      assert.ok(prompt.territory_signals, `${insee} : les autres signaux restent`);
+      assert.equal("demographie" in prompt.territory_signals, false, `${insee} : ${JSON.stringify(prompt.territory_signals.demographie)}`);
+      assert.doesNotMatch(brut, CODES_INTERNES);
+    }
+    const partAbsente = (await payloadPour("99003", "Commune test")).prompt.territory_signals.demographie;
+    assert.deepEqual([partAbsente.evolution_population, "arrivants_recents" in partAbsente], [EVOL.hausse, false]);
+    const borne = (await payloadPour("99005", "Commune test")).prompt.territory_signals.demographie;
+    assert.equal(borne.evolution_population, EVOL.hausse);
+    assert.match(borne.arrivants_recents, NON_ELEVEE);
+  } finally {
+    delete (globalThis as { __fut72Faux?: unknown }).__fut72Faux;
+  }
+});
+
+// Mesure sur l'index réel : les garde-fous de cohérence n'y retirent rien. Chaque commune garde le constat
+// que son code dit, et les codes y sont séparés par un seul seuil de part d'arrivants (arrondi compris).
+test("index réel : aucun constat retiré, codes cohérents avec les valeurs stockées", () => {
+  const index = JSON.parse(gunzipSync(readFileSync("data/comparateur-index.json.gz")).toString()) as {
+    communes: { insee: string; demographie?: { taux_total: number; part_nouveaux: number | null; recit: string | null } | null }[];
+  };
+  const SENS: Record<string, string> = { gagne_attire: EVOL.hausse, gagne_sans_renouv: EVOL.hausse, stable_renouv: EVOL.stable, stable: EVOL.stable, perd: EVOL.baisse };
+  let mesurees = 0, minElevee = Infinity, maxNonElevee = -Infinity;
+  for (const c of index.communes) {
+    const d = c.demographie;
+    if (!d) continue;
+    mesurees++;
+    const s = signalDemographie(d);
+    assert.equal(s?.evolution_population, SENS[d.recit ?? ""], `${c.insee} ${JSON.stringify(d)}`);
+    const attendu = d.recit === "gagne_attire" || d.recit === "stable_renouv" ? ELEVEE : d.recit === "perd" ? null : NON_ELEVEE;
+    if (attendu) assert.match(s?.arrivants_recents ?? "", attendu, c.insee);
+    else assert.equal(s && "arrivants_recents" in s, false, c.insee);
+    if (d.part_nouveaux != null && d.recit !== "perd") {
+      if (attendu === ELEVEE) minElevee = Math.min(minElevee, d.part_nouveaux);
+      else maxNonElevee = Math.max(maxNonElevee, d.part_nouveaux);
+    }
+  }
+  assert.ok(mesurees > 34_000, String(mesurees));
+  // Arrondi à 0,1 point : les deux classes peuvent se toucher (7,7 aujourd'hui), jamais se chevaucher.
+  assert.ok(maxNonElevee <= minElevee, `${maxNonElevee} > ${minElevee}`);
+});
+
+// ── B. Le contrôle de causalité ────────────────────────────────────────────────────────────────
+
+const ctxBelley: ContexteQna = { commune: "Belley", tensionId: "croissance_transformation", questionLabel: "La commune se transforme-t-elle ?", faits: construireFaitsCommune("Belley", null, null) };
+/** Le contrôle complet de /qna, avec la reproduction exacte de Work : verdict et CTA neutres. */
+const controle = (detail: string) => controlerReponse({ verdict: "La population évolue.", detail, cta: "Ouvrez le dossier" }, ctxBelley);
+
+const REFUSEES: [string, string][] = [
+  // Les trois contournements trouvés par Work.
+  ["La commune attire des familles sans difficulté.", "interdit:attractivite"],
+  ["La commune attirera des familles.", "interdit:attractivite"],
+  ["La croissance prouve que les familles choisissent cette commune pour sa qualité de vie.", "interdit:cause-demographique"],
+  // Temps et modes.
+  ["La commune attirait déjà des familles.", "interdit:attractivite"],
+  ["Elle pourrait attirer de jeunes actifs.", "interdit:attractivite"],
+  ["Belley a attiré de nouveaux habitants.", "interdit:attractivite"],
+  ["Des familles attirées par le calme s'y installent.", "interdit:attractivite"],
+  ["Belley attire.", "interdit:attractivite"],
+  // « ne … que » restreint, il ne nie pas.
+  ["La commune n'attire que des familles.", "interdit:attractivite"],
+  // Formulations équivalentes.
+  ["Un territoire attractif pour les familles.", "interdit:attractivite"],
+  ["Son attractivité résidentielle progresse.", "interdit:attractivite"],
+  ["Une commune prisée des familles.", "interdit:attractivite"],
+  ["Belley séduit de nouveaux habitants.", "interdit:attractivite"],
+  ["Les familles viennent pour son cadre de vie.", "interdit:cause-demographique"],
+  ["Des habitants s'installent ici pour la qualité de vie.", "interdit:cause-demographique"],
+  ["La croissance s'explique par la proximité de Lyon.", "interdit:cause-demographique"],
+  ["La population augmente grâce à son cadre de vie.", "interdit:cause-demographique"],
+  ["La hausse de la population reflète la qualité de vie.", "interdit:cause-demographique"],
+  // Une réserve dans une AUTRE proposition, ou après l'affirmation, ne la rattrape pas.
+  ["Les chiffres ne disent pas tout, mais la commune attire des familles.", "interdit:attractivite"],
+  ["La commune attire des familles, rien ne le prouve pourtant.", "interdit:attractivite"],
+  ["Il est difficile de se loger car la commune attire des familles.", "interdit:attractivite"],
+];
+
+const ACCEPTEES = [
+  // Les mises en garde de Work.
+  "Il faut éviter de parler de commune attractive.",
+  "On ne peut pas conclure à son attractivité.",
+  // Négations et réserves légitimes.
+  "Les recensements ne disent pas si la commune attire de nouveaux habitants.",
+  "Rien ne permet de dire, à ce stade, que la commune attire des familles.",
+  "La commune n'attire pas forcément des familles : les données ne le disent pas.",
+  "Aucune donnée ne montre que les familles choisissent la commune pour sa qualité de vie.",
+  "La croissance ne prouve pas que les familles choisissent cette commune pour sa qualité de vie.",
+  "Il serait hâtif d'en déduire que la commune est attractive.",
+  "Gardez-vous de conclure que la commune attire des familles.",
+  "On ignore pourquoi des habitants s'installent.",
+  // « attirer » dans un autre sens.
+  "Les eaux stagnantes attirent le moustique tigre.",
+  "Ce point mérite d'attirer l'attention lors d'une visite.",
+  // Les constats eux-mêmes.
+  "La population de Belley augmente, avec une part élevée d'habitants arrivés d'une autre commune.",
+  "Les recensements ne disent pas pourquoi des habitants s'installent.",
+];
+
+for (const [phrase, regle] of REFUSEES) {
+  test(`contrôle /qna refuse : « ${phrase} »`, () => {
+    const r = controle(phrase);
+    assert.equal(r.ok, false, phrase);
+    if (!r.ok) assert.ok(r.violations.some((v) => v.rule === regle), JSON.stringify(r.violations));
+  });
+}
+for (const phrase of ACCEPTEES) {
+  test(`contrôle /qna accepte : « ${phrase} »`, () => {
+    const r = controle(phrase);
+    assert.equal(r.ok, true, r.ok ? "" : JSON.stringify(r.violations));
+  });
+}
+
+test("checkCausaliteDemographique : sans nom de commune, « Belley attire. » n'est pas reconnu (limite documentée)", () => {
+  assert.equal(checkCausaliteDemographique("Belley attire.").length, 0);
+  assert.equal(checkCausaliteDemographique("Belley attire.", "Belley").length, 1);
+});
+
+// Les mêmes phrases, par la VRAIE route et le modèle simulé.
+test("/qna, réponses simulées de Work : les trois contournements partent au repli, la mise en garde passe", async () => {
+  for (const [phrase, regle] of REFUSEES.slice(0, 3)) {
+    const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: phrase, cta: "Ouvrez le dossier" }));
+    assert.equal(corps.source, "repli", phrase);
+    assert.ok(corps.violations.includes(regle), `${phrase} ${JSON.stringify(corps.violations)}`);
+    assert.doesNotMatch(`${corps.verdict} ${corps.detail}`, CAUSAL);
+  }
+  for (const phrase of ACCEPTEES.slice(0, 2)) {
+    const { corps } = await payloadPour("01034", "Belley", JSON.stringify({ verdict: "La population évolue.", detail: phrase, cta: "Ouvrez le dossier" }));
+    assert.equal(corps.source, "modele", `${phrase} ${JSON.stringify(corps.violations)}`);
   }
 });

@@ -13,7 +13,8 @@
 //   3. à la moindre violation, la phrase fautive n'est pas affichée : la réponse devient le repli
 //      déterministe (src/lib/accueil/reponses.ts). Aucune seconde tentative du modèle, qui pourrait
 //      reproduire la même dérive.
-import { checkRecitPublic, checkRegles, type RegleAssertion, type Violation } from "../garde-fous/assertions.ts";
+import { checkRecitPublic, type Violation } from "../garde-fous/assertions.ts";
+import { checkCausaliteDemographique } from "./causalite-demographique.ts";
 import { reponseDeRepli, type ReponseQna } from "./reponses.ts";
 import { construireFaitsCommune, indicatorsDepuisScenarios, type FaitsCommune } from "./faits.ts";
 import type { GwlScenarios } from "../decision/climat-facts.ts";
@@ -161,16 +162,6 @@ function nombresNonSources(texte: string, autorises: number[]): Violation[] {
 
 // ── Contrôle d'une réponse ──────────────────────────────────────────────────────────────────
 
-// FUT-72 : une croissance et une part d'arrivants récents décrivent ce que le recensement observe, jamais
-// pourquoi des habitants s'installent. Propre à /qna, seul récit public qui reçoit la démographie.
-// Affirmative : « les données ne disent pas si la commune attire » reste permis.
-export const REGLE_ATTRACTIVITE: RegleAssertion = {
-  id: "interdit:attractivite",
-  polarity: "affirmative",
-  // Fin de mot en lookahead : `\b` échoue après « é » (« attiré », « attractivité »).
-  patterns: [/\battir(e|es|ent|er|ait|aient|ant|ée?s?)(?![\wà-ÿ])/, /\battracti(f|fs|ve|ves|vité|vités)(?![\wà-ÿ])/],
-};
-
 export type ResultatControle = { ok: true; reponse: ReponseQna } | { ok: false; violations: Violation[] };
 
 export function controlerReponse(brut: unknown, ctx: ContexteQna): ResultatControle {
@@ -181,7 +172,8 @@ export function controlerReponse(brut: unknown, ctx: ContexteQna): ResultatContr
   const texte = `${r.verdict}\n${r.detail}\n${r.cta}`;
   const violations = [
     ...checkRecitPublic(texte),
-    ...checkRegles(texte, [REGLE_ATTRACTIVITE]),
+    // FUT-72 : aucune attraction ni motif prêté aux arrivants (src/lib/accueil/causalite-demographique.ts).
+    ...checkCausaliteDemographique(texte, ctx.commune),
     // Le présent appliqué à une projection : « aujourd'hui » ou « actuellement » à côté d'un chiffre DRIAS.
     ...(/\b(aujourd'hui|actuellement)\b[^.]*\d+\s*(jours?|nuits?|°)/i.test(texte.replace(/[’ʼ]/g, "'"))
       ? [{ rule: "temps:projection-au-present", excerpt: texte.slice(0, 120) }]

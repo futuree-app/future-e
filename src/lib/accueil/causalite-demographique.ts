@@ -1,0 +1,131 @@
+// FUT-72 : LE CONTRÔLE DE CAUSALITÉ DÉMOGRAPHIQUE DE /qna. Module PUR : aucune I/O, aucun appel IA.
+//
+// Une croissance et une part d'arrivants récents décrivent ce que le recensement observe, jamais POURQUOI
+// des habitants s'installent. Ce contrôle refuse une réponse qui prête à la commune une attraction ou aux
+// arrivants un motif.
+//
+// Pourquoi pas le moteur générique (`checkRegles`) : sa négation « au sens large » est réglée pour une
+// autre question. Un « sans » n'importe où dans la proposition l'annule (« La commune attire des familles
+// sans difficulté » passait), et une MISE EN GARDE (« Il faut éviter de parler de commune attractive »)
+// était refusée. Ici, une affirmation n'est écartée que par :
+//   - une négation PORTÉE PAR SON VERBE : « n'attire pas », « ne les attirera plus » (pas « n'attire que »,
+//     qui affirme) ;
+//   - un CADRE de réserve qui la précède dans la même proposition : « rien ne prouve que », « les données ne
+//     disent pas si », « on ne peut pas conclure à », « il faut éviter de parler de »…
+//
+// Limites assumées d'un contrôle déterministe (documentées par les tests) :
+//   - « attirer » n'est refusé que s'il porte sur des personnes ou sur le territoire (« attire des
+//     familles », « la commune attire ») : « les eaux stagnantes attirent le moustique tigre » reste permis.
+//     Une phrase qui fait attirer des moustiques à « la commune » serait refusée à tort ; le repli s'affiche ;
+//   - un cadre de réserve placé APRÈS l'affirmation ne la rattrape pas (« Elle attire des familles, rien ne
+//     le prouve » est refusé) ; une réserve dans une autre proposition (« … ne disent pas tout, mais elle
+//     attire ») non plus ;
+//   - les motifs sont reconnus par des tournures (« choisissent … pour sa qualité de vie », « grâce à son
+//     cadre de vie », « prisée », « séduit ») : une paraphrase hors de ces familles passe. Le prompt reste
+//     la première barrière ; ce contrôle est le filet.
+import { normalizeText, sentencesOf, type Violation } from "../garde-fous/assertions.ts";
+
+// `\b` ne voit pas les lettres accentuées (« éviter », « attractivité ») : bornes en lookaround.
+const L = "[a-zàâäçéèêëîïôöûùüÿœ]";
+const D = `(?<!${L})`;
+const finDeMot = `(?!${L})`;
+
+// Les personnes et le territoire dont une attraction parlerait.
+const PERSONNES = new RegExp(
+  `${D}(habitants?|familles?|ménages?|personnes?|gens|monde|actifs?|jeunes|retraités?|seniors?|étudiants?|résidents?|arrivants?|nouveaux venus|population|citadins?|parisiens?|néo-\\w+|investisseurs?|entreprises?|touristes?|vous)${finDeMot}`,
+);
+const TERRITOIRE = new RegExp(`${D}(commune|ville|village|territoire|bourg|agglomération|région|elle|il)${finDeMot}`);
+
+/** Une affirmation candidate : sa famille, et la règle qu'elle viole. */
+type Famille = { rule: string; re: RegExp; porteSurPersonnes?: boolean };
+
+const FAMILLES: Famille[] = [
+  // attirer, à tous les temps et modes (attire, attirera, attirerait, attira, attiré·e·s, attirant…).
+  { rule: "interdit:attractivite", re: new RegExp(`${D}attir${L}*`, "g"), porteSurPersonnes: true },
+  { rule: "interdit:attractivite", re: new RegExp(`${D}(attractif|attractifs|attractive|attractives|attractivités?|attraits?)${finDeMot}`, "g") },
+  { rule: "interdit:attractivite", re: new RegExp(`${D}(séduis${L}*|séduit|séduire|séduira${L}*|plébiscit${L}*|prisée?s?|convoitée?s?|courue?s?|recherchée?s? par)${finDeMot}`, "g") },
+  // Un motif prêté aux arrivants : « choisissent cette commune pour sa qualité de vie ».
+  {
+    rule: "interdit:cause-demographique",
+    re: new RegExp(`${D}(choisi${L}*|choisir|préf[éè]r${L}*|vien${L}*|venir|s'install${L}*|arriv${L}*|emménag${L}*)${finDeMot}[^.;:]*?\\bpour (sa|son|ses|la|le|les|l'|leur)\\s*${L}+`, "g"),
+  },
+  // Une croissance ou des arrivées expliquées : « grâce à », « en raison de », « s'explique par »…
+  {
+    rule: "interdit:cause-demographique",
+    re: new RegExp(`${D}(croissance|population|habitants|arrivées|arrivants|installations?)${finDeMot}[^.;:]*?${D}(grâce à|en raison de|du fait de|s'expliqu${L}* par|tient à|tiennent à|due? à|dues à|portée? par)`, "g"),
+  },
+  // Une mesure démographique présentée comme la preuve d'un choix : « la croissance prouve que les familles
+  // choisissent », « la hausse reflète la qualité de vie ».
+  {
+    rule: "interdit:cause-demographique",
+    re: new RegExp(`${D}(croissance|population|hausse|augmentation|habitants|arrivées|arrivants|installations?)${finDeMot}[^.;:]*?${D}(prouv|démontr|montr|témoign|trahi|reflèt|reflét|tradui|confirm|signe|illustr)${L}*[^.;:]*?${D}(choisi${L}*|choix|préf[éè]r${L}*|envie|désir${L}*|succès|attraits?|qualité de vie|cadre de vie)${finDeMot}`, "g"),
+  },
+];
+
+// La proposition qui contient l'affirmation : on coupe aux points-virgules, deux-points et aux
+// conjonctions d'opposition, pas aux virgules (« Rien ne permet de dire, à ce stade, que… »).
+const COUPURE = /;|:|\b(mais|pourtant|cependant|toutefois|néanmoins|or)\b/g;
+
+function debutDeProposition(phrase: string, index: number): number {
+  let debut = 0;
+  COUPURE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = COUPURE.exec(phrase)) && m.index < index) debut = m.index + m[0].length;
+  return debut;
+}
+
+// Négation portée par le verbe : « ne / n' » juste avant (pronoms compris), « pas, plus, jamais… » juste
+// après. « n'attire que » n'est pas une négation : c'est une restriction qui affirme.
+const NE_AVANT = /\bn(e\s+|')((les?|la|l'|leur|lui|en|y|se|s'|vous|nous)\s*){0,2}$/;
+const PAS_APRES = new RegExp(`^${L}*(-\\w+)?\\s+((les?|la|l'|leur|en|y|vous)\\s+)?(pas|plus|jamais|guère|nullement|aucunement|point)${finDeMot}`);
+
+// Les cadres de réserve : ce qui suit n'est pas affirmé, mais déclaré non établi ou à éviter.
+const VERBES_DE_PREUVE = `(permet${L}*|prouv${L}*|montr${L}*|di[st]${L}*|disent|indiqu${L}*|établi${L}*|expliqu${L}*|garanti${L}*|peu[tx]${L}*|pouv${L}*|sai[st]|sav${L}*|mesur${L}*|renseign${L}*|suffi${L}*|autoris${L}*|signifi${L}*|veu[tl]${L}*|démontr${L}*|attest${L}*|apprend${L}*|apprenn${L}*)`;
+const DIRE = "(parler|dire|conclure|affirmer|écrire|présenter|qualifier|déduire|en déduire|supposer|prêter|attribuer|prétendre|voir|lire|interpréter)";
+const CADRES = [
+  new RegExp(`${D}n(e\\s+|')((l'|le|les|nous|vous|se|s'|en|y)\\s*)?${VERBES_DE_PREUVE}\\s+(pas|rien|aucunement|nullement|jamais|guère)${finDeMot}`),
+  new RegExp(`${D}(rien|personne|aucun${L}*(\\s+${L}+){0,2})\\s+n(e\\s+|')((l'|le|les|nous|vous|en)\\s*)?${VERBES_DE_PREUVE}`),
+  // « Il serait hâtif d'en déduire », « il faut éviter de parler de », « gardez-vous de conclure » : la
+  // réserve exige un verbe de discours, sinon « difficile de se loger, la commune attire » passerait.
+  new RegExp(`${D}(impossible|difficile|abusif|hâtif|faux|trompeur|imprudent|exagéré|prématuré|excessif) d(e\\s+|')(en\\s+)?${DIRE}`),
+  new RegExp(`${D}(évit${L}*|gardez-vous|garder|s'abstenir|abstenez-vous|attention à ne pas|méfiez-vous|se méfier)\\s+(de\\s+|d')?(en\\s+)?${DIRE}`),
+  new RegExp(`${D}ne pas (en\\s+)?${DIRE}`),
+  /\bsans (pouvoir|qu'on puisse|que (les|ces) (données|chiffres|recensements|mesures))\b/,
+  /\b(on ignore|on ne sait|nul ne sait|reste à (établir|démontrer|prouver)|n'est pas (établi|démontré|prouvé|mesuré))\b/,
+];
+
+// « attirer » ne compte que s'il porte sur des personnes (objet ou sujet) ou si le territoire le précède.
+function porteSurPersonnesOuTerritoire(proposition: string, index: number, commune: string | null): boolean {
+  const avant = proposition.slice(0, index);
+  return PERSONNES.test(proposition.slice(index)) || PERSONNES.test(avant) || TERRITOIRE.test(avant) || (!!commune && avant.includes(commune));
+}
+
+// Une réserve avant l'affirmation, ou DANS elle quand elle s'étend sur plusieurs mots (« la croissance ne
+// prouve pas que les familles choisissent… »).
+function estReservee(phrase: string, debut: number, index: number, longueur: number): boolean {
+  if (NE_AVANT.test(phrase.slice(debut, index)) && PAS_APRES.test(phrase.slice(index, index + longueur + 40))) return true;
+  const portee = phrase.slice(debut, index + longueur);
+  return CADRES.some((re) => re.test(portee));
+}
+
+/** Les affirmations d'attraction ou de motif démographique d'un texte. */
+export function checkCausaliteDemographique(texte: string, commune: string | null = null): Violation[] {
+  const out: Violation[] = [];
+  const nom = commune ? normalizeText(commune).trim() : null;
+  for (const phrase of sentencesOf(normalizeText(texte))) {
+    for (const f of FAMILLES) {
+      f.re.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      let refusee = false;
+      while (!refusee && (m = f.re.exec(phrase))) {
+        const debut = debutDeProposition(phrase, m.index);
+        const proposition = phrase.slice(debut);
+        if (f.porteSurPersonnes && !porteSurPersonnesOuTerritoire(proposition, m.index - debut, nom)) continue;
+        if (estReservee(phrase, debut, m.index, m[0].length)) continue;
+        out.push({ rule: f.rule, excerpt: phrase });
+        refusee = true;
+      }
+    }
+  }
+  return out;
+}

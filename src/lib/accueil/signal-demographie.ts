@@ -14,7 +14,7 @@
 // (bande stable ±0,15 %/an, part d'arrivants dans le tiers haut national). Aucun nouveau seuil : la
 // « forte » croissance disparaît, faute d'une convention qui la définisse.
 import { BANDE_STABLE_PCT } from "../territoire/plm-communal.ts";
-import { isDemographyCode, type DemographyCode } from "../territoire/facts.ts";
+import type { DemographyCode } from "../territoire/facts.ts";
 
 /** Le champ `demographie` de l'index, tel que la route le lit. */
 export type DemographieIndex = {
@@ -24,7 +24,7 @@ export type DemographieIndex = {
 } | null | undefined;
 
 export type SignalDemographie = {
-  evolution_population: string;
+  evolution_population?: string;
   arrivants_recents?: string;
   ce_que_cela_mesure: string;
 };
@@ -57,22 +57,63 @@ const MESURE =
   "une part d'arrivants est dite élevée quand elle se situe dans le tiers des communes où elle est la plus forte. " +
   "Ce sont des constats observés : ils ne disent pas pourquoi la population change ni pourquoi des habitants s'installent.";
 
-/** Le sens de l'évolution : le code d'abord, sinon le taux avec la même bande stable. */
-function sens(d: NonNullable<DemographieIndex>): keyof typeof EVOLUTION | null {
-  if (isDemographyCode(d.recit)) return SENS_DU_CODE[d.recit];
-  const t = d.taux_total;
-  if (t == null || !Number.isFinite(t)) return null;
-  return t > BANDE_STABLE_PCT ? "hausse" : t < -BANDE_STABLE_PCT ? "baisse" : "stable";
+// ── Cohérence des valeurs et du code (revue de Work, 26/10) ─────────────────────────────────
+//
+// Le code n'a plus la priorité : il est DÉRIVÉ du taux et de la part (`recit_code` de
+// populate-demographie.py) et ne vaut que s'il s'accorde avec eux. Un constat qui n'est pas démontré
+// est omis ; un constat indépendant qui reste démontré est gardé.
+//
+// Arrondi de stockage : `taux_total` est le taux brut ×100 arrondi à deux décimales. Le code « hausse »
+// exige un taux brut > 0,15 %/an, donc un taux stocké ≥ 0,15 ; « baisse » un stocké ≤ −0,15 ; « stable »
+// un stocké dans [−0,15 ; 0,15]. À ±0,15 exactement, les deux codes voisins sont possibles (l'index en
+// compte 248 communes) : sans code, ce taux ne tranche pas.
+//
+// Limite : le seuil de la part d'arrivants (tiers haut national) n'est pas stocké, et la part est arrondie
+// à 0,1 point. La qualification « élevée » ne peut donc pas être recalculée ici ; elle exige le code ET
+// une part valide (nombre fini entre 0 et 100). Le test sur l'index réel vérifie que les codes y sont
+// séparés par un seul seuil.
+
+const finiOuNull = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/** Le sens que le taux STOCKÉ démontre à lui seul, ou `null` s'il ne tranche pas (absent, invalide, borne). */
+function sensDuTaux(t: number | null): keyof typeof EVOLUTION | null {
+  if (t == null) return null;
+  if (t > BANDE_STABLE_PCT) return "hausse";
+  if (t < -BANDE_STABLE_PCT) return "baisse";
+  if (t > -BANDE_STABLE_PCT && t < BANDE_STABLE_PCT) return "stable";
+  return null;
+}
+
+/** Le code s'accorde-t-il avec le taux stocké, arrondi compris ? */
+function codeCompatible(code: DemographyCode, t: number): boolean {
+  const s = SENS_DU_CODE[code];
+  if (s === "hausse") return t >= BANDE_STABLE_PCT;
+  if (s === "baisse") return t <= -BANDE_STABLE_PCT;
+  return t >= -BANDE_STABLE_PCT && t <= BANDE_STABLE_PCT;
+}
+
+/** Les constats démontrés : chacun est `null` quand les valeurs ne le fondent pas. */
+function constats(d: NonNullable<DemographieIndex>): { sens: keyof typeof EVOLUTION | null; arrivants: string | null } {
+  const t = finiOuNull(d.taux_total);
+  const p = finiOuNull(d.part_nouveaux);
+  const partValide = p != null && p >= 0 && p <= 100;
+  // `Object.hasOwn`, pas `in` (celui de `isDemographyCode`) : « toString » ou « constructor » ne sont pas des codes.
+  const code = typeof d.recit === "string" && Object.hasOwn(SENS_DU_CODE, d.recit) ? (d.recit as DemographyCode) : null;
+  // Sans code reconnu (absent ou inconnu) : le taux seul, rien sur les arrivants.
+  if (!code) return { sens: sensDuTaux(t), arrivants: null };
+  // Un code sans taux valide, ou contredit par le taux : le code n'est pas fiable, aucun constat n'en sort.
+  // Le taux seul ne suffit pas non plus : la valeur ou le code est faux, on ne sait pas lequel.
+  if (t == null || !codeCompatible(code, t)) return { sens: null, arrivants: null };
+  return { sens: SENS_DU_CODE[code], arrivants: partValide ? ARRIVANTS_DU_CODE[code] ?? null : null };
 }
 
 /** Le signal démographique dit au modèle, ou `null` quand aucune mesure ne le fonde. */
 export function signalDemographie(d: DemographieIndex): SignalDemographie | null {
   if (!d) return null;
-  const s = sens(d);
-  if (!s) return null;
-  const arrivants = isDemographyCode(d.recit) ? ARRIVANTS_DU_CODE[d.recit] : undefined;
+  const { sens, arrivants } = constats(d);
+  if (!sens && !arrivants) return null;
   return {
-    evolution_population: EVOLUTION[s],
+    ...(sens ? { evolution_population: EVOLUTION[sens] } : {}),
     ...(arrivants ? { arrivants_recents: arrivants } : {}),
     ce_que_cela_mesure: MESURE,
   };
