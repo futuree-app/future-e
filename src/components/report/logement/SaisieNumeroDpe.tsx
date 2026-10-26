@@ -6,6 +6,7 @@ import { etiquetteExploitable, type NiveauRapprochement } from "@/lib/dpe-rappro
 import { DpeBadge } from "./kit";
 import type { GrainDpe } from "@/lib/dpe-grain";
 import { ficheImmeuble } from "@/lib/dpe-selection-vue";
+import { explicationContradiction } from "@/lib/batiment-rnb";
 
 // ════════════════════════════════════════════════════════════════════════════════════════════
 // « J'AI LE DOCUMENT » — la seule question dont la réponse ne dépend pas de ce que le lecteur devine.
@@ -242,9 +243,7 @@ export function SaisieNumeroDpe({
               sélection reste possible (le document du lecteur est une preuve), mais rien n'est tu. */}
           {(reponse.grain ?? "logement") === "logement" && reponse.attachable && reponse.contredit && (
             <Message>
-              Le Référentiel national des bâtiments rattache ce diagnostic à un autre bâtiment que celui de
-              cette adresse. L&apos;une des deux bases se trompe, et rien ne dit laquelle : ne le rattachez que
-              si le numéro est bien celui de votre document.
+              {explicationContradiction("ne le rattachez que si le numéro est bien celui de votre document.")}
             </Message>
           )}
 
