@@ -1,0 +1,199 @@
+{
+ "_note": "Artefact engine-7 généré le 26/10/2026 par le code de main avant le correctif de provenance de FUT-136 (fbd523c7, mêmes règles que cf4a2dab) sur l'index de main cf4a2dab (bandes de services périmées). Valserhône (01033), projet services + soins, sans adresse, hors réseau. NE PAS RÉGÉNÉRER : il fige ce qui a pu être vendu avant FUT-136.",
+ "artefact": {
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-26T12:00:00.000Z",
+  "engineVersion": "engine-7",
+  "conventionsVersion": "hc-conv-3",
+  "projectSnapshot": {
+   "posture": "recherche",
+   "intent": null,
+   "rawText": "Une ville bien équipée, avec des médecins.",
+   "parsed": {
+    "reformulation": "Une ville bien équipée, avec des médecins.",
+    "hardConstraints": {},
+    "preferences": [
+     {
+      "key": "acces_services",
+      "weight": 3
+     },
+     {
+      "key": "acces_soins",
+      "weight": 3
+     }
+    ]
+   },
+   "schemaVersion": 3,
+   "updatedAt": "2026-10-26T00:00:00.000Z"
+  },
+  "dossier": {
+   "scope": "commune",
+   "conclusionState": "no_hard_constraint_declared",
+   "conclusion": "Cet écart est à peser avant de vous décider.",
+   "narrativePlan": {
+    "scope": "commune",
+    "communeNom": "Valserhône",
+    "conclusionState": "no_hard_constraint_declared",
+    "posture": "recherche",
+    "blocks": [
+     {
+      "key": "verdict",
+      "fallbackText": "Cet écart est à peser avant de vous décider.",
+      "sourceIds": [],
+      "requiredPhrases": [],
+      "allowedNumbers": [],
+      "maxChars": 320,
+      "generable": false
+     }
+    ],
+    "reservesCount": 0,
+    "controles": {
+     "visibles": 0,
+     "enPlus": 0
+    },
+    "lead": {
+     "kind": "none"
+    },
+    "priorityControl": null,
+    "minute": [
+     "01033:mismatch-acces_services"
+    ],
+    "verdict": {
+     "label": "Arbitrage",
+     "tone": "neutral",
+     "headline": {
+      "kind": "named_issues",
+      "text": "Valserhône répond moins bien à une de vos priorités : le niveau de services.",
+      "consumedFactIds": [
+       "01033:mismatch-acces_services"
+      ],
+      "consumedCompositionIds": [],
+      "consumedFrom": "mismatches"
+     },
+     "detail": "Cet écart est à peser avant de vous décider."
+    },
+    "verdictLabel": "Arbitrage",
+    "verdictTone": "neutral"
+   },
+   "criteria": {
+    "registry": [
+     {
+      "criterionKey": "acces_services",
+      "kind": "preference",
+      "label": "une commune qui concentre commerces et services",
+      "coverage": "examined",
+      "unexaminedReason": null,
+      "outcome": "mismatch",
+      "maxReserveTier": null,
+      "ruleIds": [
+       "territoire.mismatch-acces_services",
+       "territoire.alignment-acces_services"
+      ],
+      "confirmed": false,
+      "capability": "apprecier",
+      "capabilityReason": "position_relative"
+     },
+     {
+      "criterionKey": "acces_soins",
+      "kind": "preference",
+      "label": "un bon accès aux soins",
+      "coverage": "examined",
+      "unexaminedReason": null,
+      "outcome": "indeterminate",
+      "maxReserveTier": null,
+      "ruleIds": [
+       "territoire.mismatch-acces_soins",
+       "territoire.alignment-acces_soins",
+       "autour.acces-soins"
+      ],
+      "confirmed": false,
+      "capability": "apprecier",
+      "capabilityReason": "position_relative"
+     }
+    ],
+    "coverage": "complete",
+    "orientation": "arbitration",
+    "hasFavorable": false,
+    "favorableCount": 0,
+    "mismatchStructuring": 1,
+    "mismatchSecondary": 0,
+    "openConditions": [],
+    "metConditions": [],
+    "nonMesurees": [],
+    "examinedCount": 2,
+    "unexaminedCount": 0,
+    "lectureImpossible": null
+   },
+   "conclusionBasis": {
+    "ruleIds": [
+     "territoire.mismatch-acces_services"
+    ],
+    "factIds": [
+     "01033:mismatch-acces_services"
+    ],
+    "evidence": [
+     {
+      "factId": "relativePosition.acces_services",
+      "module": "territoire",
+      "label": "Territoire · Valserhône",
+      "observedValue": "parmi les 20 % de communes les moins favorables",
+      "grain": "commune",
+      "href": "/rapport/quartier"
+     }
+    ]
+   },
+   "sections": [
+    {
+     "key": "mismatches",
+     "title": "Ce qui correspond moins bien",
+     "cards": [
+      {
+       "kind": "fact",
+       "fact": {
+        "id": "01033:mismatch-acces_services",
+        "ruleId": "territoire.mismatch-acces_services",
+        "sourceFactIds": [
+         "relativePosition.acces_services"
+        ],
+        "module": "territoire",
+        "role": "mismatch",
+        "projectKey": "acces_services",
+        "materialityTier": "structuring",
+        "topic": "le niveau de services de la commune",
+        "headlineSubject": "le niveau de services",
+        "status": "20 % les moins favorables",
+        "statement": "Vous avez placé une commune qui concentre commerces et services parmi vos priorités. Sur le niveau de services de la commune, Valserhône se situe parmi les 20 % de communes les moins favorables de France.",
+        "basis": {
+         "kind": "relative_position",
+         "rankLow": 0.1745,
+         "rankHigh": 0.1844,
+         "universe": "communes_france",
+         "distributionVersion": "mismatch-dist-2026-07-15"
+        },
+        "evidence": [
+         {
+          "factId": "relativePosition.acces_services",
+          "module": "territoire",
+          "label": "Territoire · Valserhône",
+          "observedValue": "parmi les 20 % de communes les moins favorables",
+          "grain": "commune",
+          "href": "/rapport/quartier"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ],
+   "controlesTitle": "Tous les contrôles établis pour ce dossier",
+   "compositions": [],
+   "absorbedFacts": [],
+   "presentation": {
+    "elementaryFactShown": 1,
+    "compositionShown": 0,
+    "absorbedFactTotal": 0
+   },
+   "uncovered": []
+  }
+ }
+}

@@ -11,7 +11,10 @@
 // (Il exista un `MISMATCH_CONVENTIONS_VERSION` pour la doctrine — extrême, ex æquo — que rien ne posait
 // sur un fait : les bases relatives portent `distributionVersion`, le millésime des données, pas une
 // version de doctrine. Retiré. Ce qui n'estampille rien ne verrouille rien.)
-export const MISMATCH_DISTRIBUTION_VERSION = "mismatch-dist-2026-07-15"; // le MILLÉSIME des données classées
+// L'identité HISTORIQUE des distributions classées : celle des critères dont le classement n'a pas reçu d'identité
+// propre. Une preuve ne la lit jamais directement : elle passe par `distributionVersionDe(key)` (distributions-rang.ts),
+// qui donne aux critères recalculés depuis (FUT-136) leur identité, reliée à l'empreinte des bandes publiées.
+export const MISMATCH_DISTRIBUTION_VERSION = "mismatch-dist-2026-07-15";
 export const EXTREME_SHARE = 0.2;
 
 export type RankBand = { low: number; high: number };

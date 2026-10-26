@@ -11,9 +11,10 @@ import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import { MISMATCH_KEYS } from "./mismatch-rules.ts"; // la MÊME liste de critères classables
 import {
-  classifyPosition, rankFractionFavorable, MISMATCH_LABELS, ALIGNMENT_LABELS, MISMATCH_DISTRIBUTION_VERSION,
+  classifyPosition, rankFractionFavorable, MISMATCH_LABELS, ALIGNMENT_LABELS,
   type RelativeCriterionFact,
 } from "./mismatch-facts.ts";
+import { distributionVersionDe } from "./distributions-rang.ts"; // la MÊME identité que mismatch-rules
 
 const territoireHref = "/rapport/quartier";
 
@@ -27,7 +28,7 @@ const bdc = (s: string): string => (s ? s.charAt(0).toLowerCase() + s.slice(1) :
 
 function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact {
   const band = f.rankBands?.[key] ?? null;
-  return { key, rawValue: band ? band.low : null, band, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION };
+  return { key, rawValue: band ? band.low : null, band, universe: "communes_france", distributionVersion: distributionVersionDe(key) };
 }
 
 function makeAlignmentRule(key: PreferenceKey): DecisionRule {
@@ -79,7 +80,7 @@ function makeAlignmentRule(key: PreferenceKey): DecisionRule {
         // (headlineSubject capitalisé) + `faceStatement` (le fragment scannable), sans rien recalculer.
         statement: `Pour ${copy.headlineSubject}, ${f.nom} se situe ${bdc(rang)}.`,
         faceStatement: rang,
-        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
+        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: distributionVersionDe(key) },
         evidence: [ev],
         // Nuance MÉTHODOLOGIQUE card-only héritée du critère (ERA5-Land, 1976-2005) : elle vaut pour la
         // position favorable comme pour la défavorable. Jamais une limite de portée.
