@@ -123,12 +123,18 @@ const etat = (x: unknown): EtatLu => (typeof x === "string" && ETATS.has(x) ? (x
 export function lectureDuContexte(ctx: ContexteAsk): LectureAsk {
   const l = ctx.lecture && typeof ctx.lecture === "object" ? ctx.lecture : null;
   const exploration = l?.exploration === true || l?.exploration === false ? l.exploration : "inconnue";
-  const couverture = etat(l?.couverture);
   const communes = (ctx.territoires ?? []).map((t) => {
     const c = t?.couverture && typeof t.couverture === "object" ? t.couverture : null;
-    const nonMesurees = Array.isArray(c?.non_mesurees) ? c.non_mesurees.map(texte).filter((x): x is string => !!x) : [];
-    return { nom: texte(t?.nom) ?? "", couverture: etat(c?.etat), nonMesurees };
+    const brutes: unknown = c?.non_mesurees;
+    const nonMesurees = Array.isArray(brutes) ? brutes.map(texte).filter((x): x is string => !!x) : [];
+    // Une commune « complète » qui déclare des priorités non mesurées se contredit : ni complète, ni
+    // partielle (ce serait inventer un état), elle est lue « inconnue ». Les données transmises restent intactes.
+    const contradictoire = c?.etat === "complete" && (Array.isArray(brutes) ? brutes.length > 0 : brutes !== undefined);
+    return { nom: texte(t?.nom) ?? "", couverture: contradictoire ? "inconnue" as const : etat(c?.etat), nonMesurees };
   });
+  // Même règle pour l'agrégat : il ne peut se dire complet si une commune affichée ne l'est pas.
+  const couverture: EtatLu =
+    etat(l?.couverture) === "complete" && communes.some((c) => c.couverture !== "complete") ? "inconnue" : etat(l?.couverture);
   const mode: ModeQuestions =
     exploration === true ? "exploration_inondation"
     : exploration === "inconnue" ? "couverture_incomplete"

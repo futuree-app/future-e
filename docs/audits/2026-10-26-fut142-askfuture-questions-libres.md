@@ -148,6 +148,14 @@ Le « et » n'est pas coupé aveuglément. Il n'y a ni analyse syntaxique ni nou
 
 **Faux positif connu, sans danger.** « On ne peut pas dire que Saintes et La Rochelle sont le meilleur choix » (sujets coordonnés à l'indicatif) est refusé et remplacé par le repli.
 
+## Apostrophes et couverture contradictoire (2ᵉ revue de Work, 26/10)
+
+**Apostrophes.** Sur la vraie route, en exploration, « Saintes est à l'abri des crues. » déclenchait le repli, mais « Saintes est à l’abri des crues. » était rendu tel quel (`reponse_remplacee: false`). Les motifs étaient écrits avec l'apostrophe droite, et seuls quelques-uns prévoyaient la typographique. Le garde passe désormais tout texte (réponse comme question) par une seule fonction, `normaliser` : forme NFC, minuscules, espaces simples, et les apostrophes ’ ‘ ʼ ′ ´ ` ramenées à `'`. Les classes `['’]` devenues inutiles sont retirées des motifs. Les deux graphies reçoivent le même traitement : un test le vérifie sur chaque phrase de portée et sur les cinq réponses réelles, dans les trois modes.
+
+**Couverture contradictoire.** Une carte `{"etat":"complete","non_mesurees":["un bon accès aux soins"]}` était lue complète, et le mode `classe` accordé. `lectureDuContexte` lit désormais une telle carte `inconnue`, pas `partielle`, ce qui reviendrait à inventer un état. C'est aussi le cas si `non_mesurees` n'est pas un tableau. Les priorités non mesurées restent transmises au modèle et citées par le repli. L'agrégat suit la même règle : il ne peut pas se dire `complete` si une carte affichée ne l'est pas, et il est alors lu `inconnue`. Le contexte reçu n'est jamais réécrit. L'exploration inondation garde la priorité.
+
+**Hors du périmètre de cette correction :** la cause inventée en mode classé, limite acceptée par Work (voir plus bas).
+
 ## Mode classé : ce qui explique l'ordre
 
 **Le contexte.** En mode `classe`, il porte `lecture.ce_qui_explique_l_ordre`, qui sépare deux familles de champs :
@@ -207,9 +215,21 @@ Les appels passent par la vraie route et le vrai `claude-sonnet-4-6`. PostHog et
 
 **Contre-épreuve de la correction.** Avec le garde de 938c3c4f remis en place, les 3 tests de portée et de « devance » échouent.
 
+**Contre-épreuve de la 2ᵉ revue.** 8 tests ont été ajoutés, ce qui porte le total à 42 :
+- apostrophes sur la vraie route, télémétrie comprise ;
+- mises en garde typographiques et prémisse typographique ;
+- même verdict dans les deux graphies ;
+- couverture contradictoire avec 1, 2 et 3 communes, pour trois cas : carte complète avec une priorité non mesurée, `non_mesurees` illisible, agrégat complet avec une carte partielle. À chaque fois, un témoin réellement complet reste classé ;
+- lecture directe sans réécriture des données ;
+- exploration conservée.
+
+Avec `garde-ask.ts` et `lecture-ask.ts` de `8e846eb4` remis en place, **6 échouent** : les deux tests de route sur les apostrophes, les trois tests de couverture contradictoire (1, 2 et 3 communes) et la lecture directe.
+
 **Contre-épreuve initiale.** Avec la route de `main` remise en place, **12 tests échouent**, ceux du contrat, du prompt et du garde. Les 17 autres, protections comprises, passent : le comportement existant est conservé.
 
-**Résultats.**
+**Résultats (2ᵉ revue, base `main` 8636524f).** Tests FUT-142 : 42/42. FUT-142, 139 et 109 réunis : 85/85. Suite complète lancée seule : **3 386/3 386**. TypeScript OK, ESLint ciblé 0 erreur, `index:verify` OK, build OK (279 pages).
+
+**Résultats (correction de portée).**
 
 - Tests ciblés FUT-142, FUT-139 et FUT-109 : 73/73. Les scénarios de FUT-139 sont rejoués sans régression.
 - Suite complète, lancée seule : **3 270/3 270**. Le compte inclut les 11 tests de `logement-module-synthese`. Ce fichier exige `react-test-renderer` : le `node_modules` du checkout principal ne l'a pas, et la suite a donc été lancée avec celui de fut139, dont le lockfile est identique à `main`.

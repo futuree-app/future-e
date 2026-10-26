@@ -43,7 +43,7 @@ const CLASSEMENT: RegExp[] = [
 ].map(mot);
 // Avant la tournure, dans la même proposition : ce qui en fait une mise en garde.
 // « n' » se colle au verbe suivant (« n'établit ») : il n'a pas de borne à droite.
-const NEGATION = new RegExp(`(?<![\\p{L}])(?:n['’]|(?:ne|pas|aucune?|rien|jamais|ni|sans|impossible|trompeuse?|hâtive?|prématurée?|abusive?|abusif)(?![\\p{L}]))`, "gu");
+const NEGATION = new RegExp(`(?<![\\p{L}])(?:n'|(?:ne|pas|aucune?|rien|jamais|ni|sans|impossible|trompeuse?|hâtive?|prématurée?|abusive?|abusif)(?![\\p{L}]))`, "gu");
 
 // LA PORTÉE DE LA RÉSERVE (revue du 26/10). « Rien ne prouve le contraire et La Rochelle est votre meilleur
 // choix » : la négation porte sur « le contraire », pas sur l'affirmation coordonnée après « et ». Une réserve
@@ -55,10 +55,10 @@ const NEGATION = new RegExp(`(?<![\\p{L}])(?:n['’]|(?:ne|pas|aucune?|rien|jama
 // « votre » ou « autre » pour un verbe.
 const COORDINATION = new RegExp(`(?<![\\p{L}])(?:et|puis|donc|alors|ainsi|car|d'ailleurs|de plus|en plus)(?![\\p{L}])`, "gu");
 // Une élision (« qu' », « d' », « l' ») se colle au mot suivant : elle n'a pas de borne à droite.
-const COMPLEMENT = `(?:qu['’]|d['’]|l['’]|(?:que|si|à|de|le|la|les|un|une|ces|cette|ce|en)(?![\\p{L}]))`;
+const COMPLEMENT = `(?:qu'|d'|l'|(?:que|si|à|de|le|la|les|un|une|ces|cette|ce|en)(?![\\p{L}]))`;
 const RATTACHEE = new RegExp(
   `^\\s*(?:(?:encore moins|moins encore|a fortiori|surtout|même|non plus|donc|ainsi)\\s+)?(?:(?:en|y)\\s+)?`
-  + `(?:qu['’]|d['’]|(?:que|de|à|ni)(?![\\p{L}])|\\p{L}+(?:er|ir|re|oir)\\s+${COMPLEMENT})`,
+  + `(?:qu'|d'|(?:que|de|à|ni)(?![\\p{L}])|\\p{L}+(?:er|ir|re|oir)\\s+${COMPLEMENT})`,
   "u",
 );
 const INDICATIF = mot(
@@ -89,12 +89,19 @@ const FAUSSE_NEGATION = mot("pas (un hasard|seulement|uniquement|surprenant|éto
 
 export type Affirmation = { tournure: string; proposition: string };
 
+// Une seule forme du texte pour tous les motifs : minuscules, accents composés (NFC), espaces simples, et
+// l'apostrophe typographique ramenée à l'apostrophe droite. Sans cela, « à l’abri des crues » échappait au
+// motif écrit « à l'abri » (revue du 26/10) : chaque motif n'a pas à prévoir chaque variante.
+const APOSTROPHES = /[\u2018\u2019\u02BC\u2032\u00B4`]/g;
+export const normaliser = (texte: string) =>
+  texte.normalize("NFC").toLowerCase().replace(APOSTROPHES, "'").replace(/\s+/g, " ");
+
 /** Les propositions qui affirment un classement ou une sécurité que le mode courant n'établit pas. */
 export function affirmationsNonEtablies(texte: string, mode: ModeQuestions): Affirmation[] {
   const motifs = mode === "classe" ? JAMAIS : [...JAMAIS, ...CLASSEMENT];
   const out: Affirmation[] = [];
   // Propositions : coupées aux ponctuations fortes, aux virgules et aux « mais ». Le « ? » est gardé.
-  const props = texte.toLowerCase().replace(/\s+/g, " ").split(/(?<=[.;:!?])|,|\bmais\b|\bor\b|\bcependant\b|\btoutefois\b/);
+  const props = normaliser(texte).split(/(?<=[.;:!?])|,|\bmais\b|\bor\b|\bcependant\b|\btoutefois\b/);
   for (const brute of props) {
     const p = brute.trim();
     if (!p || p.endsWith("?")) continue; // une question n'affirme rien
@@ -114,7 +121,7 @@ export function affirmationsNonEtablies(texte: string, mode: ModeQuestions): Aff
  * « pourquoi X est-elle le meilleur choix ? » porte la prémisse, même terminée par « ? ».
  */
 export function premisseNonEtablie(question: string, mode: ModeQuestions): string | null {
-  const q = question.toLowerCase().replace(/\s+/g, " ").replace(/\?/g, ".");
+  const q = normaliser(question).replace(/\?/g, ".");
   // « Laquelle est la plus exposée à la chaleur ? » reste une question légitime sur les signaux : seules les
   // tournures de victoire ou de sécurité portent une prémisse.
   return affirmationsNonEtablies(q, mode)[0]?.tournure ?? null;

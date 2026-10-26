@@ -635,3 +635,119 @@ test("câblage : sendAsk construit son contexte avec contexteAsk, et le prompt n
   for (const interdit of ["commune-enrichment", "georisques", "comparateur-vie", "comparateur-index", "supabase"]) assert.ok(!imports.includes(interdit), interdit);
   assert.doesNotMatch(route, /matchProjects\(/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// 9 · Revue du 26/10 : l'apostrophe typographique, et une couverture qui se contredit
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+
+const typo = (t: string) => t.replace(/'/g, "’");
+
+test("apostrophes : « à l'abri » et « à l’abri » déclenchent le même repli, sur la vraie route, télémétrie comprise", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  for (const answer of ["Saintes est à l'abri des crues.", "Saintes est à l’abri des crues."]) {
+    etat.appels = [];
+    etat.reponse = { answer, routes_to_report: false };
+    const { res, json } = await poser(corps(contexteDePage(r), "Que disent les inondations passées ?"));
+    assert.equal(res.status, 200, answer);
+    assert.match(json.answer, /^Les communes de La Rochelle, Saintes et Rochefort sont proposées pour être examinées/, answer);
+    const repondu = etat.appels.find((a) => a.quoi === "capture" && a.detail!.event === "life_ask_answered")!.detail!;
+    assert.equal(repondu.properties.reponse_remplacee, true, answer);
+    assert.equal(repondu.properties.mode_lecture, "exploration_inondation", answer);
+  }
+});
+
+test("apostrophes : les mises en garde typographiques restent acceptées, et la prémisse typographique est repérée", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  for (const answer of [
+    "Rien n’indique que Saintes soit à l’abri des crues.",
+    "Cette recherche n’établit pas que La Rochelle est le meilleur choix.",
+    "On ne peut pas dire qu’une de ces communes est à l’abri des crues.",
+  ]) {
+    etat.reponse = { answer, routes_to_report: false };
+    const { json } = await poser(corps(contexteDePage(r), "Que disent les inondations passées ?"));
+    assert.equal(json.answer, answer, answer);
+  }
+  etat.appels = [];
+  etat.reponse = { answer: PRUDENTE_LR, routes_to_report: false };
+  const { contexte } = await poser(corps(contexteDePage(r), "Saintes est-elle à l’abri des crues ?"));
+  assert.match(contexte.question_a_premisse, /à l'abri/);
+});
+
+test("apostrophes : chaque phrase de portée reçoit le même verdict dans ses deux graphies, dans chaque mode", () => {
+  for (const t of [...HORS_PORTEE, ...DANS_LA_PORTEE, ...REPONSES_REELLES.map(([, x]) => x)]) {
+    for (const mode of ["classe", "couverture_incomplete", "exploration_inondation"] as ModeLecture[]) {
+      assert.deepEqual(affirmationsNonEtablies(typo(t), mode).map((a) => a.tournure), affirmationsNonEtablies(t, mode).map((a) => a.tournure), t);
+    }
+  }
+});
+
+const SOINS = "un bon accès aux soins";
+for (const n of [1, 2, 3]) {
+  test(`couverture contradictoire, ${n} commune${n > 1 ? "s" : ""} : une carte « complète » avec une priorité non mesurée n'est jamais classée`, async () => {
+    const r = await recherche(CLASSE[0], [...CLASSE[1]], [...CLASSE[2]], n);
+    const base = contexteDePage(r);
+    const noms = r.top.map((t: M) => t.nom);
+    const victoire = `${noms[0]} correspond le mieux à vos priorités.`;
+    // Témoin : réellement complet partout, classé, la comparaison est rendue.
+    etat.reponse = { answer: victoire, routes_to_report: false };
+    const temoin = await poser(corps(base, "Qu'est-ce qui a vraiment pesé ?"));
+    assert.equal(temoin.contexte.lecture.mode, "classe");
+    assert.equal(temoin.contexte.lecture.couverture_globale, "complete");
+    assert.equal(temoin.json.answer, victoire);
+
+    const cas: [string, (c: M) => void][] = [
+      ["carte complète + priorité non mesurée", (c) => { c.territoires[n - 1].couverture = { etat: "complete", non_mesurees: [SOINS] }; }],
+      ["carte complète + non_mesurees illisible", (c) => { c.territoires[n - 1].couverture = { etat: "complete", non_mesurees: SOINS }; }],
+      ["agrégat complet + carte partielle", (c) => { c.territoires[n - 1].couverture = { etat: "partielle", non_mesurees: [SOINS] }; }],
+    ];
+    for (const [nom, alterer] of cas) {
+      const c = JSON.parse(JSON.stringify(base));
+      alterer(c);
+      const envoye = JSON.parse(JSON.stringify(c));
+      assert.equal(c.lecture.couverture, "complete", nom);
+      etat.appels = [];
+      etat.reponse = { answer: victoire, routes_to_report: false };
+      const { res, json, contexte } = await poser(corps(c, "Qu'est-ce qui a vraiment pesé ?"));
+      assert.equal(res.status, 200, nom);
+      assert.equal(contexte.lecture.mode, "couverture_incomplete", nom);
+      assert.equal(contexte.lecture.couverture_globale, "inconnue", `${nom} : l'agrégat ne se dit plus complet`);
+      assert.notEqual(contexte.territoires[n - 1].couverture_priorites, "complete", nom);
+      if (Array.isArray(c.territoires[n - 1].couverture.non_mesurees)) {
+        assert.deepEqual(contexte.territoires[n - 1].priorites_non_mesurees, [SOINS], nom);
+        assert.match(json.answer, new RegExp(`certaines priorités ne sont pas mesurées ici \\(${SOINS}\\)`), nom);
+      }
+      assert.notEqual(json.answer, victoire, nom);
+      assert.deepEqual(affirmationsNonEtablies(json.answer, "couverture_incomplete"), [], nom);
+      const repondu = etat.appels.find((a) => a.quoi === "capture" && a.detail!.event === "life_ask_answered")!.detail!;
+      assert.equal(repondu.properties.reponse_remplacee, true, nom);
+      assert.equal(repondu.properties.mode_lecture, "couverture_incomplete", nom);
+      assert.deepEqual(c, envoye, `${nom} : le contexte reçu n'est pas modifié`);
+    }
+  });
+}
+
+test("couverture contradictoire : l'état contradictoire est lu « inconnue », les priorités transmises restent intactes", () => {
+  const ctx = {
+    territoires: [
+      { rang: 1, nom: "A", region: null, raisons: [], compromis: null, couverture: { etat: "complete", non_mesurees: [SOINS] } },
+      { rang: 2, nom: "B", region: null, raisons: [], compromis: null, couverture: { etat: "complete", non_mesurees: [] } },
+    ],
+    lecture: { exploration: false, couverture: "complete", ordre: null, transparence_inondation: null },
+  } as M;
+  const l = lectureDuContexte(ctx);
+  assert.deepEqual(l.communes.map((c) => [c.couverture, c.nonMesurees]), [["inconnue", [SOINS]], ["complete", []]]);
+  assert.equal(l.couverture, "inconnue");
+  assert.equal(l.mode, "couverture_incomplete");
+  assert.equal(ctx.territoires[0].couverture.etat, "complete", "aucune réécriture des données reçues");
+});
+
+test("couverture contradictoire en exploration inondation : le mode exploration est conservé", async () => {
+  const r = await recherche(CM[0], [...CM[1]], [...CM[2]]);
+  const c = contexteDePage(r) as M;
+  c.lecture.couverture = "complete";
+  c.territoires[0].couverture = { etat: "complete", non_mesurees: [SOINS] };
+  etat.reponse = { answer: VICTOIRE_LR, routes_to_report: false };
+  const { json, contexte } = await poser(corps(c, QUESTION_LR));
+  assert.equal(contexte.lecture.mode, "exploration_inondation");
+  assert.match(json.answer, /^Les communes de La Rochelle, Saintes et Rochefort sont proposées pour être examinées, pas classées/);
+});
