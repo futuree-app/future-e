@@ -1,0 +1,124 @@
+[
+  {
+    "cas": "A-monchaux",
+    "appareil": "ordinateur",
+    "ecritures": [
+      "/api/logement-dpe {\"dossierId\":\"banc-fut80-monchaux\",\"status\":\"user_confirmed\",\"dpeId\":\"2159N0072016M\",\"source\":\"liste\"}"
+    ]
+  },
+  {
+    "cas": "A-monchaux",
+    "appareil": "android",
+    "ecritures": [
+      "/api/logement-dpe {\"dossierId\":\"banc-fut80-monchaux\",\"status\":\"user_confirmed\",\"dpeId\":\"2159N0072016M\",\"source\":\"liste\"}"
+    ]
+  },
+  {
+    "cas": "B-villeurbanne-reel",
+    "appareil": "ordinateur",
+    "route_reelle_ms": 325,
+    "reponse": {
+      "status": "qualified",
+      "anchorSource": "ban_housenumber",
+      "matter": {
+        "dpe": "none",
+        "parcel": "found",
+        "memeBatiment": "candidats"
+      },
+      "quote": {
+        "status": "provisional",
+        "basePriceCents": 3900,
+        "amountDueCents": 3900
+      }
+    }
+  },
+  {
+    "cas": "B-villeurbanne-reel",
+    "appareil": "android",
+    "route_reelle_ms": 69,
+    "reponse": {
+      "status": "qualified",
+      "anchorSource": "ban_housenumber",
+      "matter": {
+        "dpe": "none",
+        "parcel": "found",
+        "memeBatiment": "candidats"
+      },
+      "quote": {
+        "status": "provisional",
+        "basePriceCents": 3900,
+        "amountDueCents": 3900
+      }
+    }
+  },
+  {
+    "cas": "B-candidats",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-candidats",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-dpe-exact",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-dpe-exact",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-aucun-candidat",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-aucun-candidat",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-plusieurs-batiments",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-plusieurs-batiments",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-rnb-indisponible",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-rnb-indisponible",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-ademe-indisponible",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-ademe-indisponible",
+    "appareil": "android",
+    "ok": true
+  },
+  {
+    "cas": "B-ancienne-reponse",
+    "appareil": "ordinateur",
+    "ok": true
+  },
+  {
+    "cas": "B-ancienne-reponse",
+    "appareil": "android",
+    "ok": true
+  }
+]
