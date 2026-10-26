@@ -80,7 +80,9 @@ Les **54 bandes ajoutées** concernent des communes notées qui n'avaient pas de
 
 Détail des transitions : services 6 479 défavorable → neutre, 374 défavorable → favorable, 3 384 neutre → favorable, 54 « non calculable » → favorable (47) ou neutre (7). Écoles et culture : des échanges dans les deux sens autour des seuils des 20 %, ce qu'on attend d'un classement qui s'était simplement décalé.
 
-Toutes priorités confondues : **11 411 communes** ont au moins un verdict qui change, et **375** passent de défavorable à favorable. **Aucune** ne passe de favorable à défavorable.
+Toutes priorités confondues : **11 411 communes** ont au moins un verdict qui change, et **375** passent de défavorable à favorable. **Aucune**, critère par critère, ne passe de favorable à défavorable.
+
+Cela ne veut pas dire qu'aucune **conclusion d'ensemble** ne devient moins favorable : quand plusieurs priorités sont posées, une position défavorable nouvellement révélée pèse dans l'arbitrage (constat de la revue indépendante). Exemple, Saint-Saturnin-lès-Avignon (84119), projet services + écoles + culture : les services deviennent favorables (score 70, [19,73 % ; 100 %] → [89,06 % ; 97,34 %]), mais la culture (score 18, [20,5 % ; 21,5 %] → [17,5 % ; 18,5 %]) passe sous le seuil des 20 % et devient un désaccord. La phrase de verdict passe de « Une partie de vos priorités va dans ce sens. » à « L'accès aux collèges et lycées et le niveau de services de la commune répondent en revanche à votre projet. La décision se joue entre ces correspondances et l'écart relevé. » C'est le classement corrigé qui le dit : la culture de cette commune est bien parmi les 20 % les moins dotées.
 
 ### Textes du dossier
 
@@ -100,7 +102,7 @@ Pour les écoles et la culture, 316 et 1 269 dossiers gardent leur verdict mais 
 
 - **Les scores** : aucun score, aucune source, aucun seuil, aucune pondération. Champ par champ, les 34 788 communes sont identiques en dehors des trois clés de rang ; les métadonnées de l'index aussi.
 - **L'accueil** : il ne lit que la douceur de l'hiver. Les 34 788 lignes des données légères sont identiques ; seule l'empreinte de l'index source change.
-- **Les dossiers déjà vendus** : un dossier acheté est figé dans son artefact (texte compris) et se relit tel qu'il a été vendu. Seules les **nouvelles** évaluations lisent l'index corrigé. La version du moteur reste `engine-7` : les règles ne changent pas, seule la donnée qu'elles lisent est corrigée (même doctrine que FUT-109 et FUT-135).
+- **Les dossiers déjà vendus** : un dossier acheté est figé dans son artefact (texte compris) et se relit tel qu'il a été vendu. Seules les **nouvelles** évaluations lisent l'index corrigé. La version du moteur reste `engine-7` : les règles ne changent pas, seule la donnée qu'elles lisent est corrigée (même doctrine que FUT-109 et FUT-135). Ce qui distingue une position produite avant FUT-136 d'une position produite après, c'est l'identité de sa distribution (§8).
 - **FUT-135** (vie étudiante) : `vie_etudiante`, `etudes_acces`, `etudes_dyn`, le millésime MESR 2024 et les identités étudiantes sont intacts, car identiques champ par champ.
 
 ## 6. Le garde permanent
@@ -121,11 +123,30 @@ Pour les écoles et la culture, 316 et 1 269 dossiers gardent leur verdict mais 
 npx tsx scripts/populate-mismatch-rank.mts --recalculer acces_ecoles,acces_culture
 ```
 
+Si les bandes changent effectivement, le test de provenance (§8) exigera en plus une identité nouvelle pour chaque critère concerné, et une ligne de registre portant la nouvelle empreinte, dans `distributions-rang.ts`. Si les scores ressortent identiques, les bandes et l'empreinte aussi, et rien n'est à faire.
+
 `etudes_acces`, `etudes_dyn` et `vie_etudiante` ne sont pas des clés de rang : FUT-141 n'a aucun rang à recalculer pour elles.
 
-## 8. Remarque, hors périmètre
+## 8. Provenance : une identité par distribution publiée
 
-Chaque position du dossier porte l'estampille `distributionVersion: "mismatch-dist-2026-07-15"`, présentée dans le code comme « le millésime des données classées ». Elle n'a jamais été relevée, ni le 04/08, ni le 21/08, ni pour FUT-109, ni ici. Aucune règle ne la lit ; la relever changerait l'estampille de toutes les positions. C'est à décider à part.
+**Le défaut** (revue indépendante, au SHA `fbd523c7`) : chaque position du dossier porte, dans sa preuve structurée figée par l'artefact, l'identité de la distribution qui l'a produite (`basis.distributionVersion`). Elle valait `mismatch-dist-2026-07-15` pour tous les critères, avant comme après le recalcul. À Valserhône, la preuve services défavorable d'avant ([17,45 % ; 18,44 %]) et la preuve favorable d'après ([97,34 % ; 99,47 %]) portaient la même identité et le même moteur (`engine-7`) : rien ne disait de quelles données venait chacune. Cette identité n'est pas affichée au lecteur ; elle est la traçabilité de l'artefact payant.
+
+**La correction** (`src/lib/decision/distributions-rang.ts`) :
+
+| Critère | Identité avant FUT-136 | Identité après | Empreinte des bandes publiées |
+|---|---|---|---|
+| Services | `mismatch-dist-2026-07-15` (empreinte `61490bd1…`, 34 726 communes) | `mismatch-dist-2026-10-26-acces_services` | `c8e94c94…`, 34 780 communes |
+| Écoles | `mismatch-dist-2026-07-15` (`ad399efb…`) | `mismatch-dist-2026-10-26-acces_ecoles` | `9cf57165…`, 34 788 |
+| Culture | `mismatch-dist-2026-07-15` (`e299bb2b…`) | `mismatch-dist-2026-10-26-acces_culture` | `4556218a…`, 34 788 |
+| Les dix autres | `mismatch-dist-2026-07-15` | inchangée | empreinte relevée, inchangée par FUT-136 |
+
+- Une seule fonction pure, `distributionVersionDe(clé)`, donne l'identité aux deux familles de règles (favorables et défavorables) : elles ne peuvent pas diverger.
+- **Le lien avec les données est vérifié, pas déclaré.** Un registre en ajout seul associe chaque identité à l'empreinte des bandes qu'elle désigne : le sha256 des lignes `insee, bas, haut`, triées, de l'index versionné. Le test `distributions-rang.test.ts` recalcule l'empreinte sur l'index publié. Il échoue si une distribution change sans identité nouvelle, si l'identité en vigueur ne désigne pas les bandes publiées, si une règle favorable et une défavorable posent des identités différentes, ou si une clé non concernée reçoit une nouvelle identité. Les quatre cas ont été provoqués volontairement : chacun fait échouer le test.
+- L'ancienne identité reste au registre pour les trois critères, avec l'empreinte des bandes périmées : un dossier vendu avant FUT-136 désigne toujours, sans ambiguïté, la distribution qui l'a produit.
+
+**Ce qui ne change pas** : `engine-7`, les dix autres identités, les artefacts historiques (un artefact Valserhône produit avant le correctif est figé en fixture et se relit à l'identique, `mismatch-dist-2026-07-15` compris), et toute conclusion. Sur l'index corrigé, l'ancien code (`fbd523c7`) et le nouveau produisent des dossiers **identiques** pour 34 788 communes × 2 projets (les trois critères à poids 3 ; les treize à poids 2) : 69 576 dossiers, 0 écart une fois l'identité neutralisée. Seule la provenance change, sur 38 794 d'entre eux.
+
+**Dette connue, hors périmètre** : FUT-109 (25/10) avait recalculé les rangs de `vie_locale`, `croissance_demographique`, `acces_soins`, `faible_dependance_auto` et `viabilite_emploi` sans changer d'identité. Pour ces critères, `mismatch-dist-2026-07-15` a donc désigné deux distributions successives. Ce n'est pas corrigé ici (consigne : ne pas toucher aux dix autres identités). Mais le registre les fige désormais : tout recalcul futur exigera une identité nouvelle.
 
 ## 9. Vérifications
 
@@ -133,7 +154,7 @@ Chaque position du dossier porte l'estampille `distributionVersion: "mismatch-di
 |---|---|
 | Garde des rangs (`rangs-parite.test.ts`) | 7/7 ; échoue sur l'index de `main` |
 | Règles d'accord et de désaccord (`mismatch-rules`, `alignment-rules`, `fut110`, `fut96`, `fact-compositions`) | inclus dans la suite complète |
-| `npm test`, suite lancée seule | **3 205/3 205** sur `de009441` (3 198 + les 7 nouveaux) ; **3 227/3 227** après synchronisation avec `main` @ `cf4a2dab` (#90 fusionnée : + 22) |
+| `npm test`, suite lancée seule | **3 205/3 205** sur `de009441` (3 198 + les 7 nouveaux) ; **3 227/3 227** après synchronisation avec `main` @ `cf4a2dab` (#90 fusionnée : + 22) ; **3 236/3 236** avec le correctif de provenance (+ 9) |
 | `tsc --noEmit` | 0 erreur |
 | `eslint` (fichiers modifiés, test compris avec `--no-ignore`) | 0 problème |
 | `next build` (prébuild compris : `index-verify`, données de l'accueil) | OK, avec des clés Supabase factices (aucun appel réel) |
@@ -142,6 +163,8 @@ Chaque position du dossier porte l'estampille `distributionVersion: "mismatch-di
 | Reproductibilité depuis l'index de `main` | worktree neuf, même commande : empreinte identique `4f33d782…` |
 | Avant / après champ par champ | 0 commune modifiée hors des trois clés ; métadonnées identiques |
 | Accueil | 34 788 / 34 788 lignes identiques |
+| Provenance (`distributions-rang.test.ts`) | 9/9 ; quatre mutations (ancien index, recalcul sans identité, règles divergentes, clé non concernée) font chacune échouer le test |
+| Équivalence de l'ancien et du nouveau code | 69 576 dossiers identiques hors identité de distribution |
 
 ## 10. Rejouer
 

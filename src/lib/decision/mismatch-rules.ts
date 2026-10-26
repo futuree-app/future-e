@@ -13,9 +13,10 @@ import { preferenceSurfaced } from "./conditions.ts";
 import type { PreferenceKey } from "../comparateur-vie.ts";
 import type { EvidenceTargetKey } from "./evidence-targets.ts";
 import {
-  classifyPosition, rankPhrase, rankStatus, MISMATCH_LABELS, MISMATCH_DISTRIBUTION_VERSION,
+  classifyPosition, rankPhrase, rankStatus, MISMATCH_LABELS,
   type RelativeCriterionFact,
 } from "./mismatch-facts.ts";
+import { distributionVersionDe } from "./distributions-rang.ts";
 
 const territoireHref = "/rapport/quartier";
 
@@ -48,7 +49,7 @@ function relativeFact(f: ModuleFacts, key: PreferenceKey): RelativeCriterionFact
     rawValue: band ? band.low : null,
     band,
     universe: "communes_france",
-    distributionVersion: MISMATCH_DISTRIBUTION_VERSION,
+    distributionVersion: distributionVersionDe(key),
   };
 }
 
@@ -107,7 +108,7 @@ function makeMismatchRule(key: PreferenceKey): DecisionRule {
         // un mismatch n'est pas une incompatibilité. Fini « répond moins bien à cette dimension de votre
         // projet » (qui répétait le titre de section et parlait d'abstraction administrative).
         statement: `Vous avez placé ${lab.projectPhrase} parmi vos priorités. ${surIndicateur}, ${f.nom} se situe parmi ${rankPhrase(band.high)} les moins favorables de France.`,
-        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: MISMATCH_DISTRIBUTION_VERSION },
+        basis: { kind: "relative_position", rankLow: band.low, rankHigh: band.high, universe: "communes_france", distributionVersion: distributionVersionDe(key) },
         evidence: [ev],
         // Certains critères (ensoleillement) portent une nuance méthodologique card-only.
         ...(lab.limitation ? { limitation: lab.limitation } : {}),
