@@ -18,6 +18,7 @@ import { AnchorAmorce } from "./AnchorAmorce";
 import { repliInondation } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
 import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
+import { contexteAsk } from "@/lib/comparateur/lecture-ask";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -29,7 +30,8 @@ import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
 //   - aucun chiffre climatique affiché (les metrics restent inertes côté client,
 //     réservées au rapport) ;
 //   - AskFuture ne reçoit QUE du qualitatif scellé : reformulation, libellés
-//     humains, synthèse, et territoires (rang/nom/region/raisons/compromis).
+//     humains, synthèse, territoires (rang/nom/region/raisons/compromis) et
+//     ce que leur ordre signifie (exploration, couverture : FUT-142).
 //     Jamais d'INSEE, jamais de metrics, jamais de clé technique.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -793,27 +795,15 @@ export function OuVivreClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
-          context: {
+          // FUT-142 : le contexte dit aussi ce que l'ordre des cartes signifie (exploration, couverture).
+          context: contexteAsk({
             reformulation: parsed.reformulation,
             criteres: preferencesToLabels(parsed.preferences),
-            perimetre: outcome?.perimetreDur ?? outcome?.appliedZones?.filter((z) => z.strength === "hard").map((z) => z.label) ?? [],
-            orientation: outcome?.appliedZones?.filter((z) => z.strength !== "hard").map((z) => z.label) ?? [],
+            inondationDeclaree: (parsed.preferences ?? []).some((p) => p.key === "faible_risque_inondation"),
+            outcome,
             synthese: synthesis,
-            aucun_territoire_parfait: outcome?.perfectMatch === false,
-            territoires: top.map((r, i) => ({
-              rang: i + 1,
-              nom: r.nom,
-              region: r.region,
-              raisons: r.reasons,
-              compromis: r.tradeoff,
-              pression_eco: r.pressionEco?.note ?? null, // narratif qualitatif, firewall préservé
-              logement: r.logement, // niveau de prix relatif qualitatif, firewall préservé
-              littoral: r.littoral, // narratif littoral (recul du trait de côte), firewall préservé
-              distinctive: r.distinctive, // trait distinctif relatif au groupe (narratif, hors-score), firewall préservé
-              signaux: r.signaux, // signaux ambiants qualitatifs (hors-score), firewall préservé
-              heritage_industriel: r.heritageIndustriel ?? null, // récit héritage (narratif, hors-score), firewall préservé
-            })),
-          },
+            top,
+          }),
           focus: null,
           history,
           distinctId: distinctId(),

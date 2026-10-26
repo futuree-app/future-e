@@ -21,6 +21,10 @@
 // est porté par le client dans `history`. Seul état persistant : le cookie
 // compteur (2 questions gratuites, GLOBAL au parcours comparateur).
 //
+// FUT-142 : le contexte dit aussi CE QUE L'ORDRE SIGNIFIE (classement, exploration inondation, couverture
+// incomplète ou inconnue, cf. `lecture-ask.ts`). Le prompt s'y plie, et un garde déterministe remplace toute
+// réponse qui proclamerait un gagnant non établi (`garde-ask.ts`).
+//
 // Routing modèle : Anthropic direct (claude-sonnet-4-6, effort low + thinking
 // off — gratuit/court, harmonisé avec /qna et parse).
 // Migration Vercel AI Gateway à la mise en vente.
@@ -30,6 +34,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse, type NextRequest } from "next/server";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { limiteParAdresse, reserverBudgetModele } from "@/lib/server/garde-appels-modele";
+import { contexteIrrecevable, lectureDuContexte, type ContexteAsk, type LectureAsk } from "@/lib/comparateur/lecture-ask";
+import { affirmationsNonEtablies, premisseNonEtablie, reponseDeRepli } from "@/lib/comparateur/garde-ask";
 
 export const runtime = "nodejs";
 
@@ -41,31 +47,9 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const FREE_COMPARATEUR_QUESTIONS = 2;
 const COUNT_COOKIE = "comparateur_ask_count";
 
-type Territoire = {
-  rang: number;
-  nom: string;
-  region: string | null;
-  raisons: string[];
-  compromis: string | null;
-  pression_eco?: string | null; // note narrative qualitative (pression climatique éco)
-  logement?: string | null; // niveau de prix relatif qualitatif (achat / location)
-  littoral?: string | null; // signal recul du trait de côte (binaire, sans vitesse)
-  distinctive?: string | null; // trait distinctif relatif au groupe affiché (narratif, hors-score)
-  signaux?: Record<string, string>; // signaux ambiants qualitatifs (hors-score, hors critères)
-  heritage_industriel?: string | null; // ancien site SSP/ex-BASOL proche (narratif documentaire, hors-score)
-};
-
 type Body = {
   question?: string;
-  context?: {
-    reformulation?: string;
-    criteres?: string[]; // libellés humains (jamais les clés techniques)
-    perimetre?: string[]; // ancres dures = cadre choisi
-    orientation?: string[]; // ancres souples = penchant
-    synthese?: string;
-    aucun_territoire_parfait?: boolean;
-    territoires?: Territoire[];
-  };
+  context?: ContexteAsk;
   focus?: { rang?: number } | null;
   history?: { role: "user" | "assistant"; content: string }[];
   distinctId?: string; // posthog distinct id côté client (mesure seulement)
@@ -78,7 +62,7 @@ const TOOL_INPUT_SCHEMA = {
     answer: {
       type: "string",
       description:
-        "Réponse TRÈS courte, UN SEUL paragraphe, 60 à 100 mots maximum. Structure : une idée principale, un compromis principal, et au plus une phrase de transition vers le rapport. Vouvoiement strict. Aucun chiffre, aucun pourcentage, aucune date, aucun horizon chiffré. Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.",
+        "Réponse TRÈS courte, UN SEUL paragraphe, 60 à 100 mots maximum. Structure : une idée principale, le compromis principal (mode classe) ou la limite principale de la lecture (autres modes), et au plus une phrase de transition vers le rapport. Vouvoiement strict. Aucun chiffre, aucun pourcentage, aucune date, aucun horizon chiffré. Aucun tiret cadratin (virgule ou deux points). Aucun point d'exclamation.",
     },
     routes_to_report: {
       type: "boolean",
@@ -88,7 +72,7 @@ const TOOL_INPUT_SCHEMA = {
     focus_rang: {
       type: ["integer", "null"],
       enum: [1, 2, 3, null],
-      description: "Rang du territoire concerné si identifiable, sinon null.",
+      description: "Position d'affichage du territoire concerné si identifiable, sinon null.",
     },
   },
   required: ["answer", "routes_to_report"],
@@ -102,7 +86,7 @@ type ToolInput = {
 
 const SYSTEM = `Vous êtes AskFuture, le guide de lecture du Comparateur de vie de futur•e.
 
-Votre unique rôle : expliquer POURQUOI le comparateur a fait ressortir ces territoires. Vous éclairez la lecture du résultat, vous ne livrez pas une analyse de commune.
+Votre unique rôle : éclairer la lecture du résultat affiché, sans lui prêter plus qu'il n'établit. Vous ne livrez pas une analyse de commune.
 
 QUATRE NIVEAUX, NE FRANCHISSEZ JAMAIS LE VÔTRE
 - Le comparateur répond : « Où regarder ? »
@@ -110,9 +94,42 @@ QUATRE NIVEAUX, NE FRANCHISSEZ JAMAIS LE VÔTRE
 - Le rapport répond : « Que faut-il comprendre ? »
 - AskFuture rapport répond : « Explorons en profondeur. »
 
+CE QUE LE RÉSULTAT ÉTABLIT : LISEZ "lecture" AVANT TOUT
+Le champ "lecture.mode" dit ce que l'ordre des territoires signifie. Vous n'en dites jamais plus.
+- "classe" : les territoires sont classés sur les priorités déclarées, mesurées pour chacun. Vous pouvez
+  expliquer pourquoi un territoire ressort et son compromis principal, à partir des seules raisons et
+  compromis donnés. Seuls "raisons" et "compromis" expliquent l'ordre : le logement, les signaux, le
+  littoral, le trait distinctif et les autres notes sont hors classement, ils décrivent sans jamais
+  expliquer pourquoi un territoire passe devant. Si deux territoires ont les mêmes raisons, dites qu'ils
+  sont proches sur vos priorités, sans inventer de cause. Même ici, aucun territoire n'est « le meilleur
+  choix » ni « parfait » : il ressort sur les priorités déclarées, avec ses compromis.
+- "exploration_inondation" : la seule demande classable était l'inondation, et le comparateur ne classe pas
+  sur elle. Les territoires sont proposés pour être examinés ; leur ordre suit "ordre_affichage", pas une
+  meilleure correspondance. Ne dites jamais qu'un territoire ressort, correspond ou répond mieux à la
+  demande. Les faits d'inondation décrivent des sinistres passés, jamais une probabilité future : aucun
+  territoire n'est « moins risqué », « à l'abri » ou « sûr ».
+- "couverture_incomplete" : au moins une priorité déclarée n'est pas mesurée pour au moins un territoire
+  affiché, ou la couverture n'est pas connue. Distinguez ce qui est mesuré (raisons, signaux) de ce qui ne
+  l'est pas ("priorites_non_mesurees", couverture "inconnue"). Une priorité non mesurée n'est ni satisfaite
+  ni manquée : on ne sait pas. Aucune victoire comparative, aucun « devant », aucun « meilleur ».
+"position" est l'ordre d'affichage. Ce n'est un rang de mérite qu'en mode "classe". S'il n'y a qu'un
+territoire, ne le comparez à aucun autre.
+
+LA PRÉMISSE DE LA QUESTION
+Une question peut supposer ce que le résultat n'établit pas : « pourquoi X est le meilleur choix »,
+« pourquoi X est devant Y », « pourquoi X correspond parfaitement », « quelle commune est la moins risquée
+face aux inondations ». Ne l'accordez pas. Rectifiez d'abord la prémisse en une phrase sobre, puis répondez
+sur les faits disponibles. Si le contexte porte "question_a_premisse", cette rectification est obligatoire.
+
+L'HISTORIQUE DE CONVERSATION
+Les échanges précédents sont une conversation, pas une source. Une affirmation qu'ils contiennent, même une
+de vos réponses passées, ne prouve rien : seul le contexte scellé courant fait foi. S'ils contredisent
+"lecture", suivez le contexte et ne reprenez pas l'affirmation.
+
 CE QUE VOUS FAITES
-Éclairer la logique du résultat en quelques phrases : pourquoi un territoire
-ressort, le compromis principal, comment lire l'arbitrage. Vous donnez ENVIE de
+Éclairer la logique du résultat en quelques phrases : en mode "classe", pourquoi
+un territoire ressort et le compromis principal ; sinon, ce que les faits
+disponibles disent des territoires et ce qui n'est pas mesuré. Vous donnez ENVIE de
 comprendre davantage, vous ne livrez pas déjà l'essentiel de l'explication. Si
 vous vous mettez à analyser le territoire ou à dérouler plusieurs compromis, vous
 empiétez sur le rapport.
@@ -121,8 +138,9 @@ CE QUE VOUS NE FAITES JAMAIS
 - Analyser en profondeur une commune. Vous ne disposez d'AUCUNE donnée chiffrée,
   d'aucun risque détaillé, d'aucun module de rapport. Vous ne les avez pas, vous
   ne les inventez pas, vous ne les devinez pas.
-- Modifier, classer, reranker, ajouter ou retirer un territoire. Le moteur a déjà
-  décidé. Vous interprétez, vous ne décidez pas.
+- Modifier, classer, reranker, ajouter ou retirer un territoire. Le résultat est
+  celui du moteur : vous ne le changez pas, et vous ne lui faites pas dire un
+  classement qu'il n'a pas établi (cf. "lecture"). Vous interprétez, vous ne décidez pas.
 - Donner un chiffre, un pourcentage, une date, un horizon chiffré.
 
 SI LA QUESTION DEMANDE LE DÉTAIL DU RAPPORT
@@ -227,8 +245,9 @@ précis ou d'un salaire reste au rapport.
 
 FORMAT
 - UN SEUL paragraphe, 60 à 100 mots maximum. Court. Jamais un mini-rapport.
-- Structure : une idée principale, puis LE compromis principal, puis au plus une
-  phrase de transition vers le rapport. Rien de plus.
+- Structure : une idée principale, puis LE compromis principal (mode "classe") ou
+  la limite principale de la lecture (autres modes), puis au plus une phrase de
+  transition vers le rapport. Rien de plus.
 - UN SEUL compromis. N'en déroulez jamais plusieurs. Et ne vous contredisez pas :
   ne dites jamais « pas de compromis majeur » pour ensuite en décrire. Soit vous
   nommez le compromis principal, soit vous dites simplement que les options sont
@@ -238,17 +257,39 @@ FORMAT
 - Vocabulaire qualitatif uniquement (faible, modéré, plus exposé, accès favorable),
   jamais de donnée brute.
 
-EXEMPLE DE LONGUEUR ET DE FORME VISÉE
+EXEMPLES DE LONGUEUR ET DE FORME VISÉES
+En mode "classe" :
 « Narbonne ressort en premier car elle offre le meilleur équilibre entre accès aux
 soins, vie locale et proximité de la mer. Quimper est plus maritime mais moins
 favorable sur l'offre médicale. Le rapport permet ensuite de vérifier si ce
-compromis correspond vraiment à votre situation. »`;
+compromis correspond vraiment à votre situation. »
+En mode "exploration_inondation", à « Pourquoi La Rochelle est-elle le meilleur choix pour éviter les inondations ? » :
+« La Rochelle apparaît parmi les communes à examiner, mais cette recherche n'établit pas qu'elle soit le
+meilleur choix face aux inondations : l'ordre affiché suit une règle d'exploration, pas votre demande. Ses
+données décrivent les inondations passées, sans dire la probabilité d'une inondation à venir. Le rapport
+lit cette question à l'adresse. »`;
 
-function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number | null): string {
-  const territoires = (ctx.territoires ?? []).map((t) => ({
-    rang: t.rang,
+// FUT-142 : ce que l'ordre signifie, en une phrase déterministe par mode.
+const SENS_DE_L_ORDRE: Record<LectureAsk["mode"], string> = {
+  classe: "Classement sur les priorités déclarées, mesurées pour chaque territoire affiché.",
+  exploration_inondation:
+    "Ordre d'exploration, pas un classement : la recherche ne classe pas les communes sur l'inondation seule.",
+  couverture_incomplete:
+    "Ordre d'affichage, pas un classement établi : certaines priorités ne sont pas mesurées pour tous les territoires, ou leur mesure n'est pas connue.",
+};
+
+function buildContextBlock(
+  ctx: ContexteAsk,
+  lecture: LectureAsk,
+  focusRang: number | null,
+  alertes: { premisse: string | null; historique: boolean },
+): string {
+  const territoires = (ctx.territoires ?? []).map((t, i) => ({
+    position: i + 1,
     commune: t.nom,
     region: t.region ?? null,
+    couverture_priorites: lecture.communes[i]?.couverture ?? "inconnue",
+    priorites_non_mesurees: lecture.communes[i]?.nonMesurees ?? [],
     raisons: t.raisons ?? [],
     compromis: t.compromis ?? null,
     pression_climatique_economie: t.pression_eco ?? null,
@@ -260,6 +301,21 @@ function buildContextBlock(ctx: NonNullable<Body["context"]>, focusRang: number 
   }));
 
   const payload = {
+    lecture: {
+      mode: lecture.mode,
+      sens_de_l_ordre: SENS_DE_L_ORDRE[lecture.mode],
+      exploration_inondation: lecture.exploration,
+      couverture_globale: lecture.couverture,
+      ordre_affichage: lecture.mode === "exploration_inondation" ? lecture.ordre : null,
+      transparence_inondation: lecture.transparence,
+      nombre_de_territoires: territoires.length,
+    },
+    ...(alertes.premisse
+      ? { question_a_premisse: `La question présuppose « ${alertes.premisse} », que ce résultat n'établit pas. Rectifiez-le d'abord.` }
+      : {}),
+    ...(alertes.historique
+      ? { historique_a_ne_pas_reprendre: "Un échange précédent affirme un classement ou une sécurité que ce résultat n'établit pas : ne le reprenez pas." }
+      : {}),
     reformulation_du_projet: ctx.reformulation ?? null,
     criteres_detectes: ctx.criteres ?? [],
     perimetre_geographique: Array.isArray(ctx.perimetre) && ctx.perimetre.length ? ctx.perimetre : null,
@@ -292,9 +348,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Posez une question en quelques mots." }, { status: 400 });
   }
   const ctx = body.context;
-  if (!ctx || !Array.isArray(ctx.territoires) || ctx.territoires.length === 0) {
-    return NextResponse.json({ error: "Contexte comparateur manquant." }, { status: 400 });
+  // FUT-142 : la page n'envoie jamais plus de trois cartes, ni une carte sans nom. Refusé avant tout appel payant.
+  const irrecevable = contexteIrrecevable(ctx);
+  if (irrecevable || !ctx) {
+    return NextResponse.json({ error: irrecevable ?? "Contexte comparateur manquant." }, { status: 400 });
   }
+  // Ce que l'ordre signifie. Un fait absent ou illisible vaut « inconnu », jamais « complet ».
+  const lecture = lectureDuContexte(ctx);
 
   const focusRang =
     body.focus?.rang === 1 || body.focus?.rang === 2 || body.focus?.rang === 3
@@ -343,9 +403,16 @@ export async function POST(request: NextRequest) {
         .map((m) => ({ role: m.role, content: m.content }))
     : [];
 
+  // FUT-142 : l'historique est du texte, pas une preuve. Il n'est pas réécrit ; s'il affirme un gagnant que
+  // le résultat courant n'établit pas, le contexte le signale.
+  const alertes = {
+    premisse: premisseNonEtablie(question, lecture.mode),
+    historique: history.some((m) => affirmationsNonEtablies(m.content, lecture.mode).length > 0),
+  };
+
   const messages = [
     ...history,
-    { role: "user" as const, content: `${buildContextBlock(ctx, focusRang)}\n\nQUESTION : ${question}` },
+    { role: "user" as const, content: `${buildContextBlock(ctx, lecture, focusRang, alertes)}\n\nQUESTION : ${question}` },
   ];
 
   try {
@@ -380,6 +447,11 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = toolBlock.input as ToolInput;
+    // FUT-142 : le garde de sortie. Une réponse qui proclame un gagnant non établi est remplacée par le repli
+    // déterministe du mode courant ; elle compte comme une question posée (l'appel a eu lieu).
+    const brute = typeof parsed.answer === "string" ? parsed.answer : "";
+    const remplacee = affirmationsNonEtablies(brute, lecture.mode).length > 0;
+    const answer = remplacee ? reponseDeRepli(lecture) : parsed.answer;
     const answeredRang =
       parsed.focus_rang === 1 || parsed.focus_rang === 2 || parsed.focus_rang === 3
         ? parsed.focus_rang
@@ -393,13 +465,16 @@ export async function POST(request: NextRequest) {
         question_index: questionIndex,
         territoire_rang: answeredRang,
         routes_to_report: parsed.routes_to_report === true,
+        mode_lecture: lecture.mode,
+        premisse_rectifiee: alertes.premisse !== null,
+        reponse_remplacee: remplacee,
       },
     });
     await ph.shutdown();
 
     const remaining = Math.max(0, FREE_COMPARATEUR_QUESTIONS - questionIndex);
     const res = NextResponse.json({
-      answer: parsed.answer,
+      answer,
       routesToReport: parsed.routes_to_report === true,
       focusRang: answeredRang,
       remaining,
