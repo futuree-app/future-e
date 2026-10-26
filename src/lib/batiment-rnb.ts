@@ -221,6 +221,23 @@ export function contreditParLeBatiment(
   return !batiments.includes(dpe.id_rnb);
 }
 
+/**
+ * FUT-143 : CE QUE LE LECTEUR LIT AVANT DE RETENIR UN DIAGNOSTIC CONTREDIT, quel que soit le chemin (liste
+ * de l'adresse ou numéro du document). Une seule explication, pour qu'un même fait ne reçoive pas deux
+ * doctrines selon l'écran. Chaque chemin la conclut par le geste qui lui est propre.
+ */
+export const EXPLICATION_CONTRADICTION =
+  "Le Référentiel national des bâtiments rattache ce diagnostic à un autre bâtiment que celui de cette adresse. L'une des deux bases se trompe, et rien ne dit laquelle";
+
+/**
+ * L'explication suivie du geste propre au chemin. Composée ici plutôt qu'en JSX : un texte JSX sur
+ * plusieurs lignes, placé après une expression, perd son espace initial à la compilation (« laquelle: »,
+ * constaté en recette le 26/10/2026). L'espace avant les deux-points est insécable.
+ */
+export function explicationContradiction(geste: string): string {
+  return `${EXPLICATION_CONTRADICTION}\u00a0: ${geste}`;
+}
+
 /** Ce que la ligne d'un diagnostic contredit en dit, selon QUI a posé l'identifiant. */
 export function mentionContradiction(dpe: { provenance_id_rnb?: string | null }): string {
   return dpe.provenance_id_rnb === "Logiciel"

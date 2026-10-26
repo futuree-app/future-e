@@ -1,0 +1,1090 @@
+{
+  "date": "2026-10-26T22:41:31.906Z",
+  "echantillon": {
+    "tirees": 60,
+    "temoins": 7,
+    "par_strate": 15,
+    "graine": 143
+  },
+  "latence_ms": {
+    "exacte": {
+      "mediane": 76,
+      "p95": 148
+    },
+    "rnb": {
+      "mediane": 84,
+      "p95": 100
+    },
+    "batiment": {
+      "mediane": 80,
+      "p95": 111
+    },
+    "chaine_ajoutee": {
+      "mediane": 159,
+      "p95": 195,
+      "max": 251
+    }
+  },
+  "echecs": {
+    "exacte": 0,
+    "rnb": 0,
+    "batiment": 0
+  },
+  "rnb_statuts": {
+    "confirme": 48,
+    "ambigu": 9,
+    "non_trouve": 3
+  },
+  "sans_dpe_exact": {
+    "adresses": 47,
+    "avec_candidats_logement_meme_batiment": 2,
+    "immeuble_seul": 1
+  },
+  "lignes": [
+    {
+      "banId": "33063_2938_00014",
+      "label": "14 Cité du Perier 33100 Bordeaux",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 310,
+      "rnb": "confirme",
+      "ms_rnb": 98,
+      "ms_batiment": 82,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 180
+    },
+    {
+      "banId": "59599_4709_00102",
+      "label": "102 Rue Raspail 59200 Tourcoing",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 193,
+      "rnb": "confirme",
+      "ms_rnb": 150,
+      "ms_batiment": 101,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 251
+    },
+    {
+      "banId": "33318_3300_00032_bis",
+      "label": "32 bis Rue de Verthamon 33600 Pessac",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 74,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 94,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 178
+    },
+    {
+      "banId": "33318_1850_00030",
+      "label": "30 Rue Jules Siegfried 33600 Pessac",
+      "strate": "urbain_dense",
+      "exacte": "found",
+      "ms_exacte": 77,
+      "rnb": "confirme",
+      "ms_rnb": 87,
+      "ms_batiment": 95,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 182
+    },
+    {
+      "banId": "33281_2123_00015",
+      "label": "15 Rue des Millepertuis 33700 Mérignac",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 81,
+      "rnb": "confirme",
+      "ms_rnb": 93,
+      "ms_batiment": 102,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 195
+    },
+    {
+      "banId": "69266_0660_00012",
+      "label": "12 Place des Buers 69100 Villeurbanne",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 91,
+      "rnb": "confirme",
+      "ms_rnb": 89,
+      "ms_batiment": 112,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 201
+    },
+    {
+      "banId": "59350_6999_00115",
+      "label": "115 Rue de Pologne 59800 Lille",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 76,
+      "rnb": "confirme",
+      "ms_rnb": 85,
+      "ms_batiment": 73,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 158
+    },
+    {
+      "banId": "44162_0310_00006",
+      "label": "6 Impasse Blandine 44800 Saint-Herblain",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 102,
+      "rnb": "confirme",
+      "ms_rnb": 82,
+      "ms_batiment": 106,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 5,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 188
+    },
+    {
+      "banId": "59183_s8v2kf_00353",
+      "label": "353 Rue de la République 59430 Dunkerque",
+      "strate": "urbain_dense",
+      "exacte": "found",
+      "ms_exacte": 82,
+      "rnb": "confirme",
+      "ms_rnb": 96,
+      "ms_batiment": 74,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 170
+    },
+    {
+      "banId": "59350_5513_00174",
+      "label": "174 Rue Léon Gambetta 59800 Lille",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 69,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 80,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 1
+      },
+      "ms_ajout_chaine": 164
+    },
+    {
+      "banId": "44162_2230_00029",
+      "label": "29 Route du Plessis Bouchet 44800 Saint-Herblain",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 65,
+      "rnb": "confirme",
+      "ms_rnb": 89,
+      "ms_batiment": 81,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 170
+    },
+    {
+      "banId": "33063_7105_00174",
+      "label": "174 Rue Pelleport 33800 Bordeaux",
+      "strate": "urbain_dense",
+      "exacte": "found",
+      "ms_exacte": 77,
+      "rnb": "confirme",
+      "ms_rnb": 100,
+      "ms_batiment": 74,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 174
+    },
+    {
+      "banId": "44109_0772_00028",
+      "label": "28 Rue Bernard 44100 Nantes",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 78,
+      "rnb": "ambigu",
+      "ms_rnb": 87,
+      "batiments": 2,
+      "ms_ajout_chaine": 87
+    },
+    {
+      "banId": "59350_4128_00014",
+      "label": "14 Rue Gounod 59800 Lille",
+      "strate": "urbain_dense",
+      "exacte": "none",
+      "ms_exacte": 73,
+      "rnb": "confirme",
+      "ms_rnb": 93,
+      "ms_batiment": 66,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 159
+    },
+    {
+      "banId": "59512_3130_00005",
+      "label": "5 Rue Lavoisier 59100 Roubaix",
+      "strate": "urbain_dense",
+      "exacte": "found",
+      "ms_exacte": 73,
+      "rnb": "confirme",
+      "ms_rnb": 87,
+      "ms_batiment": 70,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 157
+    },
+    {
+      "banId": "33003_0670_00019",
+      "label": "19 Rue Nelson Mandela 33440 Ambarès-et-Lagrave",
+      "strate": "peri_urbain",
+      "exacte": "found",
+      "ms_exacte": 76,
+      "rnb": "confirme",
+      "ms_rnb": 86,
+      "ms_batiment": 90,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 176
+    },
+    {
+      "banId": "33529_fkze50_00033",
+      "label": "33 Boulevard du Maréchal Lyautey 33115 La Teste-de-Buch",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 68,
+      "rnb": "confirme",
+      "ms_rnb": 94,
+      "ms_batiment": 93,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 187
+    },
+    {
+      "banId": "59508_0709_00017",
+      "label": "17 Rue Maxence Van Der Meersch 59223 Roncq",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 73,
+      "rnb": "confirme",
+      "ms_rnb": 89,
+      "ms_batiment": 91,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 180
+    },
+    {
+      "banId": "33522_0250_00026",
+      "label": "26 Rue Bayard 33400 Talence",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 66,
+      "rnb": "confirme",
+      "ms_rnb": 67,
+      "ms_batiment": 81,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 148
+    },
+    {
+      "banId": "33449_0326_00038",
+      "label": "38 Rue Claude Debussy 33160 Saint-Médard-en-Jalles",
+      "strate": "peri_urbain",
+      "exacte": "found",
+      "ms_exacte": 80,
+      "rnb": "confirme",
+      "ms_rnb": 95,
+      "ms_batiment": 77,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 1,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 172
+    },
+    {
+      "banId": "69275_0620_00064",
+      "label": "64 Avenue Jean Macé 69150 Décines-Charpieu",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 71,
+      "rnb": "confirme",
+      "ms_rnb": 73,
+      "ms_batiment": 70,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 143
+    },
+    {
+      "banId": "59527_0510_00003",
+      "label": "3 Rue Jean de La Fontaine 59350 Saint-André-lez-Lille",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 67,
+      "rnb": "confirme",
+      "ms_rnb": 85,
+      "ms_batiment": 80,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 165
+    },
+    {
+      "banId": "44209_0132_00009_bis",
+      "label": "9 Bis Rue des frênes 44119 Treillières",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 67,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 81,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 165
+    },
+    {
+      "banId": "44132_c1hfb9_00004",
+      "label": "4 Impasse des Sports 44380 Pornichet",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 80,
+      "rnb": "confirme",
+      "ms_rnb": 83,
+      "ms_batiment": 111,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 194
+    },
+    {
+      "banId": "33312_0572_00010",
+      "label": "10 Rue de Vassivey 33290 Parempuyre",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 96,
+      "rnb": "confirme",
+      "ms_rnb": 89,
+      "ms_batiment": 76,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 165
+    },
+    {
+      "banId": "33056_0604_00008",
+      "label": "8 Rue de Magnol 33290 Blanquefort",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 103,
+      "rnb": "confirme",
+      "ms_rnb": 64,
+      "ms_batiment": 70,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 134
+    },
+    {
+      "banId": "44132_1555_00007_bis",
+      "label": "7 BIS Avenue Villes-Davaud 44380 Pornichet",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 70,
+      "rnb": "confirme",
+      "ms_rnb": 86,
+      "ms_batiment": 70,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 156
+    },
+    {
+      "banId": "33550_8z6v7d_00037",
+      "label": "37 Rue Sadi Carnot 33140 Villenave-d'Ornon",
+      "strate": "peri_urbain",
+      "exacte": "found",
+      "ms_exacte": 78,
+      "rnb": "ambigu",
+      "ms_rnb": 79,
+      "batiments": 2,
+      "ms_ajout_chaine": 79
+    },
+    {
+      "banId": "17299_0170_00013_bis",
+      "label": "13 bis Rue Gaston Baril 17300 Rochefort",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 71,
+      "rnb": "confirme",
+      "ms_rnb": 70,
+      "ms_batiment": 72,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 142
+    },
+    {
+      "banId": "44190_0689_00002_a",
+      "label": "2 a Rue des Hêtres 44230 Saint-Sébastien-sur-Loire",
+      "strate": "peri_urbain",
+      "exacte": "none",
+      "ms_exacte": 74,
+      "rnb": "confirme",
+      "ms_rnb": 62,
+      "ms_batiment": 78,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 1,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 140
+    },
+    {
+      "banId": "59489_0500_00409",
+      "label": "409 Rue Paul Lafargue 59283 Raimbeaucourt",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 77,
+      "rnb": "confirme",
+      "ms_rnb": 65,
+      "ms_batiment": 71,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 136
+    },
+    {
+      "banId": "59268_0140_00094",
+      "label": "94 Rue de la Gendarmerie 59253 La Gorgue",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 63,
+      "rnb": "confirme",
+      "ms_rnb": 89,
+      "ms_batiment": 70,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 159
+    },
+    {
+      "banId": "59581_0070_00211",
+      "label": "211 Rue de l'Epinette 59181 Steenwerck",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 69,
+      "rnb": "non_trouve",
+      "ms_rnb": 56,
+      "ms_ajout_chaine": 56
+    },
+    {
+      "banId": "33234_0056_00029",
+      "label": "29 Route de Carignan 33360 Latresne",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 70,
+      "rnb": "confirme",
+      "ms_rnb": 75,
+      "ms_batiment": 72,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 147
+    },
+    {
+      "banId": "44137_0124_00022",
+      "label": "22 Rue du Côteau -le Chatelier 44260 Prinquiau",
+      "strate": "petite_ville",
+      "exacte": "found",
+      "ms_exacte": 78,
+      "rnb": "ambigu",
+      "ms_rnb": 77,
+      "batiments": 2,
+      "ms_ajout_chaine": 77
+    },
+    {
+      "banId": "33535_a105_00039",
+      "label": "39 Lotissement la Séguinie 33370 Tresses",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 69,
+      "rnb": "ambigu",
+      "ms_rnb": 113,
+      "batiments": 2,
+      "ms_ajout_chaine": 113
+    },
+    {
+      "banId": "59509_0113_00028",
+      "label": "28 Rue Jean Jacques Rousseau 59286 Roost-Warendin",
+      "strate": "petite_ville",
+      "exacte": "found",
+      "ms_exacte": 116,
+      "rnb": "confirme",
+      "ms_rnb": 88,
+      "ms_batiment": 94,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 182
+    },
+    {
+      "banId": "33207_4650_00045",
+      "label": "45 Impasse Nougueyreau 33450 Izon",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 83,
+      "rnb": "non_trouve",
+      "ms_rnb": 54,
+      "ms_ajout_chaine": 54
+    },
+    {
+      "banId": "44032_0200_00005",
+      "label": "5 Rue du temple 44330 La Chapelle-Heulin",
+      "strate": "petite_ville",
+      "exacte": "found",
+      "ms_exacte": 81,
+      "rnb": "confirme",
+      "ms_rnb": 82,
+      "ms_batiment": 103,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 185
+    },
+    {
+      "banId": "44166_0965_00007",
+      "label": "7 Rue du Postillon 44640 Saint-Jean-de-Boiseau",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 73,
+      "rnb": "ambigu",
+      "ms_rnb": 85,
+      "batiments": 2,
+      "ms_ajout_chaine": 85
+    },
+    {
+      "banId": "59663_0110_00055",
+      "label": "55 Rue Maxence Van Der Meersch 59470 Wormhout",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 75,
+      "rnb": "confirme",
+      "ms_rnb": 86,
+      "ms_batiment": 76,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 162
+    },
+    {
+      "banId": "17161_1345_00004",
+      "label": "4 Impasse du Platin 17630 La Flotte",
+      "strate": "petite_ville",
+      "exacte": "found",
+      "ms_exacte": 75,
+      "rnb": "confirme",
+      "ms_rnb": 64,
+      "ms_batiment": 113,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 177
+    },
+    {
+      "banId": "17190_0169_00042",
+      "label": "42 Rue Henri Gregoire 17137 L'Houmeau",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 76,
+      "rnb": "ambigu",
+      "ms_rnb": 70,
+      "batiments": 2,
+      "ms_ajout_chaine": 70
+    },
+    {
+      "banId": "69040_0179_00002",
+      "label": "2 Square La Fontaine 69410 Champagne-au-Mont-d'Or",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 68,
+      "rnb": "confirme",
+      "ms_rnb": 87,
+      "ms_batiment": 84,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 171
+    },
+    {
+      "banId": "44151_5241_00001",
+      "label": "1 Venelle de Ranlieu 44117 Saint-André-des-Eaux",
+      "strate": "petite_ville",
+      "exacte": "none",
+      "ms_exacte": 73,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 82,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 166
+    },
+    {
+      "banId": "17079_0030_00051",
+      "label": "51 Rue de Chatressac 17890 Chaillevette",
+      "strate": "rural",
+      "exacte": "found",
+      "ms_exacte": 95,
+      "rnb": "ambigu",
+      "ms_rnb": 71,
+      "batiments": 2,
+      "ms_ajout_chaine": 71
+    },
+    {
+      "banId": "59023_0110_00015",
+      "label": "15 Rue Louis Bleriot 59265 Aubencheul-au-Bac",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 88,
+      "rnb": "confirme",
+      "ms_rnb": 80,
+      "ms_batiment": 107,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 187
+    },
+    {
+      "banId": "15248_0260_00001",
+      "label": "1 Chemin du Pont 15300 Valuéjols",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 148,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 67,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 151
+    },
+    {
+      "banId": "17186_0526_00011_d",
+      "label": "11 d Chemin du Treuil 17540 Le Gué-d'Alleré",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 65,
+      "rnb": "confirme",
+      "ms_rnb": 83,
+      "ms_batiment": 83,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 166
+    },
+    {
+      "banId": "69125_0180_00041",
+      "label": "41 Chemin de la Ferrandière 69380 Marcilly-d'Azergues",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 72,
+      "rnb": "ambigu",
+      "ms_rnb": 82,
+      "batiments": 2,
+      "ms_ajout_chaine": 82
+    },
+    {
+      "banId": "33033_0093_00231",
+      "label": "231 Route du Cypres 33880 Baurech",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 113,
+      "rnb": "non_trouve",
+      "ms_rnb": 43,
+      "ms_ajout_chaine": 43
+    },
+    {
+      "banId": "59545_0040_00004",
+      "label": "4 Rue Bertine 59360 Saint-Souplet",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 70,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 68,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 152
+    },
+    {
+      "banId": "59403_0090_00023",
+      "label": "23 Rue du 8 Mai 1945 59178 Millonfosse",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 128,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 67,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 151
+    },
+    {
+      "banId": "59602_0180_00015",
+      "label": "15 Rue du Marais 59152 Tressin",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 86,
+      "rnb": "confirme",
+      "ms_rnb": 85,
+      "ms_batiment": 66,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 151
+    },
+    {
+      "banId": "33060_b6f5x3_00362",
+      "label": "362 Route des Bords du Ciron 33210 Bommes",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 69,
+      "rnb": "confirme",
+      "ms_rnb": 81,
+      "ms_batiment": 72,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 153
+    },
+    {
+      "banId": "17471_0070_00016",
+      "label": "16 Rue de la Sacristie 17470 La Villedieu",
+      "strate": "rural",
+      "exacte": "found",
+      "ms_exacte": 86,
+      "rnb": "confirme",
+      "ms_rnb": 84,
+      "ms_batiment": 74,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 158
+    },
+    {
+      "banId": "59634_0050_00716",
+      "label": "716 Route d'Hazebrouck 59190 Wallon-Cappel",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 102,
+      "rnb": "confirme",
+      "ms_rnb": 80,
+      "ms_batiment": 81,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 161
+    },
+    {
+      "banId": "33174_0144_00003_a",
+      "label": "3 a Rue du Port de Fronsac 33126 Fronsac",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 97,
+      "rnb": "confirme",
+      "ms_rnb": 80,
+      "ms_batiment": 72,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 152
+    },
+    {
+      "banId": "59300_ll84z8_00055",
+      "label": "55 Rue le Marais 59247 Hem-Lenglet",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 92,
+      "rnb": "confirme",
+      "ms_rnb": 88,
+      "ms_batiment": 76,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 164
+    },
+    {
+      "banId": "59528_0300_00035",
+      "label": "35 Rue Louis Pasteur 59188 Saint-Aubert",
+      "strate": "rural",
+      "exacte": "none",
+      "ms_exacte": 67,
+      "rnb": "ambigu",
+      "ms_rnb": 89,
+      "batiments": 2,
+      "ms_ajout_chaine": 89
+    },
+    {
+      "banId": "69266_0110_00002",
+      "label": "2 Rue des Alliés 69100 Villeurbanne",
+      "strate": "temoin:villeurbanne_angle",
+      "exacte": "none",
+      "ms_exacte": 58,
+      "rnb": "confirme",
+      "ms_rnb": 100,
+      "ms_batiment": 96,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 18,
+        "immeubles": 1
+      },
+      "ms_ajout_chaine": 196
+    },
+    {
+      "banId": "59407_0051_00055",
+      "label": "55 Rue du Chaufour 59224 Monchaux-sur-Écaillon",
+      "strate": "temoin:monchaux_auto",
+      "exacte": "found",
+      "ms_exacte": 75,
+      "rnb": "confirme",
+      "ms_rnb": 113,
+      "ms_batiment": 73,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 186
+    },
+    {
+      "banId": "17444_0140_00043",
+      "label": "43 Rue de la République 17460 Thénac",
+      "strate": "temoin:thenac_contradiction",
+      "exacte": "found",
+      "ms_exacte": 97,
+      "rnb": "confirme",
+      "ms_rnb": 83,
+      "ms_batiment": 84,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 0,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 167
+    },
+    {
+      "banId": "17293_0061_00003",
+      "label": "3 Rue du Stade 17700 Puyravault",
+      "strate": "temoin:puyravault_ambigu",
+      "exacte": "none",
+      "ms_exacte": 460,
+      "rnb": "ambigu",
+      "ms_rnb": 95,
+      "batiments": 7,
+      "ms_ajout_chaine": 95
+    },
+    {
+      "banId": "17121_0249_00055",
+      "label": "55 Grande Rue 17670 La Couarde-sur-Mer",
+      "strate": "temoin:la_couarde_maison",
+      "exacte": "none",
+      "ms_exacte": 67,
+      "rnb": "confirme",
+      "ms_rnb": 82,
+      "ms_batiment": 76,
+      "batiment": {
+        "echec": false,
+        "tronque": false,
+        "logements": 1,
+        "immeubles": 0
+      },
+      "ms_ajout_chaine": 158
+    },
+    {
+      "banId": "33063_8927_00009",
+      "label": "9 Sente des Thoniers 33100 Bordeaux",
+      "strate": "temoin:bordeaux_aucun",
+      "exacte": "none",
+      "ms_exacte": 68,
+      "rnb": "non_trouve",
+      "ms_rnb": 57,
+      "ms_ajout_chaine": 57
+    },
+    {
+      "banId": "17300_1150_00027",
+      "label": "27 Rue des Brandes 17000 La Rochelle",
+      "strate": "temoin:la_rochelle_trois_batiments",
+      "exacte": "found",
+      "ms_exacte": 75,
+      "rnb": "ambigu",
+      "ms_rnb": 82,
+      "batiments": 3,
+      "ms_ajout_chaine": 82
+    }
+  ]
+}
