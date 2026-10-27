@@ -249,13 +249,13 @@ Versions et dossiers payants :
 | --- | --- |
 | Tests ciblés `src/lib/fut81-urbanisme-parcelle.test.ts` | 28/28 (dont 10 tests des cinq blocages de la revue) |
 | Tests liés (15 fichiers : versions, sources bornées, FUT-80, FUT-127, Sitadel, qualification…) | 227/227 |
-| Suite complète, lancée seule | **3 472 / 3 472**, 0 échec, 0 ignoré (3 444 avant FUT-81 + 28) |
+| Suite complète, lancée seule, deux fois | **3 513 / 3 513** après intégration de `main` (`06e043d0`, FUT-143), 0 échec, 0 ignoré ; `main` seule : 3 485, stable sur deux exécutions ; 3 485 + 28 = 3 513. Une première exécution de `main` avait rendu 3 478 (un fichier omis sans échec) : compte écarté |
 | TypeScript `tsc --noEmit` | 0 erreur |
 | Lint des fichiers modifiés | 0 problème |
-| Lint `eslint src` | 14 diagnostics, **identiques ligne à ligne** à la base exacte `2af75b87` (checkout détaché), aucun dans FUT-81 |
+| Lint `eslint src` | 14 diagnostics, **identiques ligne à ligne** à la base exacte : `2af75b87` avant intégration, puis `06e043d0` après (checkouts détachés), aucun dans FUT-81 |
 | `npm run lint` | échoue comme sur `main` (plugin `react` non défini dans la config) |
 | `npm run index:verify` | « Index vérifié. » |
-| `npm run build` | réussi avec la **configuration Supabase réelle** (URL, clé publiable, clé de service ; aucune clé Anthropic, Stripe ni Resend) : compilation, 281/281 pages statiques, aucune erreur. Sans clé de service, le build échoue sur `/api/dossier/relation` (client créé au chargement), comme sur `main` |
+| `npm run build` | réussi avant et après intégration de `main`, avec la **configuration Supabase réelle** (URL, clé publiable, clé de service ; aucune clé Anthropic, Stripe ni Resend) : compilation, 281/281 pages statiques, aucune erreur. Sans clé de service, le build échoue sur `/api/dossier/relation` (client créé au chargement), comme sur `main` |
 | Recette du vrai module (`/dev/fut81`) | bureau 1 512 px, fenêtre 500 px, cadre 360 px ; cas confirmés, ambigus, repli, vigueur non vérifiée, prescription incertaine, ancien dossier ; captures `rendu/revue-*.jpg` |
 
 Deux défauts **préexistants** relevés pendant la recette, hors FUT-81, non corrigés ici :
