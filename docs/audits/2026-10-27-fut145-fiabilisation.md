@@ -56,6 +56,32 @@ présentait l'extrait comme rebranchable tel quel est corrigé.
 | Réseau coupé | exception → route 502 avec message |
 | Page coupée (`total` > lignes servies, ou page pleine sans `total`) | `tronque: true` |
 
+### Correction de revue (PR #97) : un `total` amont impossible faisait croire à une liste complète
+
+La revue indépendante a bloqué `938e01f4` : `tronque` faisait confiance à tout `total` numérique. Le total
+n'est désormais cru que s'il est entier, fini, positif ou nul et au moins égal au nombre de lignes servies ;
+sinon, la liste est présumée incomplète. Rejoué sur la vraie route `/api/proxy/irep`, amont simulé :
+
+| Réponse amont | `938e01f4` | Après |
+|---|---|---|
+| 20 lignes sans total | 200, tronque=true | 200, tronque=true |
+| 20 lignes, `total: -1` | 200, **tronque=false** | 200, tronque=true |
+| 20 lignes, `total: 20.5` | 200, tronque=true | 200, tronque=true |
+| 20 lignes, `total: 5` (contradictoire) | 200, **tronque=false** | 200, tronque=true |
+| 20 lignes, `total: "45"` (chaîne) | 200, tronque=true | 200, tronque=true |
+| 20 lignes, `total: null` | 200, tronque=true | 200, tronque=true |
+| 20 lignes, `total: 1e400` (infini) | non testé | 200, tronque=true |
+| 20 lignes, `total: 20` ; 3 lignes, `total: 3` | 200, tronque=false | 200, tronque=false |
+| 20 lignes, `total: 45` | 200, tronque=true | 200, tronque=true |
+| vide, `total: 0` | 200, tronque=false | 200, tronque=false |
+| vide, `total: -1` | 200, **tronque=false** | 200, tronque=true |
+| HTTP 503 | 502 | 502 |
+| JSON invalide sous HTTP 200 | 502 | 502 |
+| `results` absent ou pas un tableau | 502 | 502 |
+
+Dans tous les cas 200, `source.exhaustif` vaut `false`. Le build ne contient plus aucun appel client à
+`/api/proxy/irep`, et la page servie affiche le bloc explicatif sans phrase d'absence.
+
 ## B · AskFuture recevait « Incendies récents (nombre) »
 
 ### Avant
@@ -154,9 +180,10 @@ ici. Ses raisons, compromis et signaux sont vérifiés sur le moteur réel (test
 
 | Contrôle | Résultat |
 |---|---|
-| `src/lib/fut145-fiabilite.test.ts` | 18 / 18 |
-| Même fichier sur `main` non corrigé | 13 échecs ; 5 réussites = invariants (dossier payé sans IREP, réseau coupé déjà en 502, commune sans valeur, faits légitimes transmis, rang inchangé) |
-| `npm test` complet | 3 503 / 3 503 |
+| `src/lib/fut145-fiabilite.test.ts` | 20 / 20 (18 initiaux + 2 de la correction de revue) |
+| 18 tests initiaux sur `main` non corrigé | 13 échecs ; 5 réussites = invariants (dossier payé sans IREP, réseau coupé déjà en 502, commune sans valeur, faits légitimes transmis, rang inchangé) |
+| 20 tests sur `938e01f4` | 1 échec : le test du `total` plausible (les réponses malformées étaient déjà en 502) |
+| `npm test` complet | 3 505 / 3 505 |
 | `tsc --noEmit` | 0 erreur |
 | `eslint` sur les fichiers modifiés | 0 erreur (1 avertissement préexistant : `tailleVilleFrom` inutilisé) |
 | `npm run lint` sans argument | plante sur `main` à l'identique (règle `react/no-unescaped-entities` sans plugin) |
@@ -164,6 +191,8 @@ ici. Ses raisons, compromis et signaux sont vérifiés sur le moteur réel (test
 | Appel Anthropic réel | aucun (SDK simulé dans les tests, clé invalide et adresse inatteignable partout) |
 
 ## Anomalies distinctes, non corrigées ici
+
+Selon la revue de la PR #97, ces anomalies sont couvertes par les tickets FUT-151, FUT-152 et FUT-153.
 
 1. **Points forts contradictoires (à traiter avant lancement).** Dans `matchProjects`, quand aucun critère
    d'une commune n'atteint 55, la carte affiche quand même son meilleur critère relatif comme raison positive,

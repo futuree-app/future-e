@@ -152,6 +152,49 @@ test("A · page de 20 sur 45 lignes : la réponse se dit tronquée", async () =>
   assert.equal((await IREP.getIrepNearPoint(METZ.lat, METZ.lon, 10000)).tronque, true);
 });
 
+test("A · un `total` amont n'est cru que s'il est plausible (vraie route /api/proxy/irep)", async () => {
+  // Revue de la PR #97 : `total: -1` sur 20 lignes rendait `tronque: false`, une exhaustivité que rien ne prouve.
+  const vingt = Array.from({ length: 20 }, (_, i) => ligne(i, i * 1e-3));
+  const cas: [string, M | string, number, boolean][] = [
+    ["20 lignes sans total", { results: vingt }, 20, true],
+    ["20 lignes, total -1", { total: -1, results: vingt }, 20, true],
+    ["20 lignes, total fractionnaire", { total: 20.5, results: vingt }, 20, true],
+    ["20 lignes, total contradictoire (5)", { total: 5, results: vingt }, 20, true],
+    ["20 lignes, total en chaîne", { total: "45", results: vingt }, 20, true],
+    ["20 lignes, total null", { total: null, results: vingt }, 20, true],
+    ["20 lignes, total infini (1e400 dans le JSON brut)", `{"total":1e400,"results":${JSON.stringify(vingt)}}`, 20, true],
+    ["20 lignes, total 20 (égal)", { total: 20, results: vingt }, 20, false],
+    ["3 lignes, total 3 (égal)", { total: 3, results: vingt.slice(0, 3) }, 3, false],
+    ["20 lignes, total 45 (supérieur)", { total: 45, results: vingt }, 20, true],
+    ["vide, total 0", { total: 0, results: [] }, 0, false],
+    ["vide, total -1", { total: -1, results: [] }, 0, true],
+  ];
+  for (const [nom, corps, count, tronque] of cas) {
+    servir(() => (typeof corps === "string" ? new Response(corps, { headers: { "content-type": "application/json" } }) : Response.json(corps)));
+    const r = await proxy();
+    assert.equal(r.status, 200, nom);
+    assert.equal(r.json.count, count, nom);
+    assert.equal(r.json.tronque, tronque, nom);
+    assert.equal(r.json.source.exhaustif, false, nom);
+  }
+});
+
+test("A · erreur HTTP et réponses malformées : 502, jamais une liste", async () => {
+  const cas: [string, () => Response][] = [
+    ["HTTP 503", () => new Response("indisponible", { status: 503 })],
+    ["JSON invalide sous HTTP 200", () => new Response("<html>", { status: 200, headers: { "content-type": "application/json" } })],
+    ["results qui n'est pas un tableau", () => Response.json({ total: 3, results: { a: 1 } })],
+    ["results absent, total présent", () => Response.json({ total: 12 })],
+  ];
+  for (const [nom, fabrique] of cas) {
+    servir(fabrique);
+    const r = await proxy();
+    assert.equal(r.status, 502, nom);
+    assert.equal(r.json.installations, undefined, nom);
+    assert.equal(typeof r.json.error, "string", nom);
+  }
+});
+
 test("A · la page publique n'interroge plus l'extrait et ne peut plus conclure à une absence", () => {
   const src = readFileSync(new URL("../components/PollutionLookup.tsx", import.meta.url), "utf8");
   const code = src.replace(/^\s*\/\/.*$/gm, ""); // commentaires de ligne seulement : les URL gardent leur « // »

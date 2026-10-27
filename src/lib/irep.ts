@@ -53,6 +53,16 @@ function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Le `total` de l'amont n'est cru que s'il est plausible : entier, positif ou nul, et au moins égal au
+// nombre de lignes servies. Un total impossible (-1, 20,5, « 45 », 5 pour 20 lignes) ne prouve rien :
+// la liste est alors présumée incomplète, jamais exhaustive (contre-épreuve de revue, PR #97).
+// Sans total, une page pleine est présumée coupée.
+function estTronque(total: unknown, servis: number): boolean {
+  if (total === undefined) return servis >= PAGE;
+  const plausible = typeof total === "number" && Number.isInteger(total) && total >= 0 && total >= servis;
+  return plausible ? total > servis : true;
+}
+
 // ── Public API ───────────────────────────────────────────────────────────────
 
 export async function getIrepNearPoint(
@@ -76,7 +86,7 @@ export async function getIrepNearPoint(
   if (!res.ok) throw new Error(`irep:${res.status}`);
 
   const json = (await res.json()) as {
-    total?: number;
+    total?: unknown;
     results?: Array<{
       identifiant: number;
       nom_etablissement: string;
@@ -89,7 +99,7 @@ export async function getIrepNearPoint(
 
   // Un HTTP 200 sans tableau de résultats est une réponse d'erreur déguisée, pas un vide.
   if (!Array.isArray(json.results)) throw new Error("irep:reponse-sans-resultats");
-  const tronque = typeof json.total === "number" ? json.total > json.results.length : json.results.length >= PAGE;
+  const tronque = estTronque(json.total, json.results.length);
 
   const installations = json.results
     .map((r) => ({
