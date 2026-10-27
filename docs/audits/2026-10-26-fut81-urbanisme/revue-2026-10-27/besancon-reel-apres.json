@@ -1,0 +1,450 @@
+[
+  {
+    "q": "10 rue des Granges 25000 Besançon",
+    "ban": {
+      "label": "10 Rue des Granges 25000 Besançon",
+      "score": 0.9784827272727271,
+      "housenumber": "10",
+      "id": "25056_2510_00010",
+      "banId": "1ebcff4f-6a73-499e-a0d2-dfb8fe170fe4",
+      "name": "10 Rue des Granges",
+      "postcode": "25000",
+      "citycode": "25056",
+      "x": 928716.68,
+      "y": 6686484.5,
+      "city": "Besançon",
+      "context": "25, Doubs, Bourgogne-Franche-Comté",
+      "type": "housenumber",
+      "importance": 0.76331,
+      "depcode": "25",
+      "street": "Rue des Granges",
+      "_type": "address"
+    },
+    "parcel": {
+      "idu": "25056000AD0068",
+      "parcelCode": "25056-000-AD-0068",
+      "codeInsee": "25056",
+      "section": "AD",
+      "numero": "0068",
+      "prefixe": "000",
+      "contenance": 349,
+      "nomCommune": "Besançon",
+      "rattachement": "repli",
+      "distanceRepliM": 0.7
+    },
+    "urbanisme": {
+      "convention": "fut81-2",
+      "statut": "ambigu",
+      "regime": "document",
+      "communeRnu": false,
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "repli",
+        "distanceM": 0.7
+      },
+      "documents": [
+        {
+          "id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "type": "PSMV",
+          "titre": "Plan de Sauvegarde et de Mise en Valeur (PSMV) BESANCON",
+          "producteur": "CU du Grand Besançon Métropole",
+          "vigueur": "etablie",
+          "statutJuridique": "APPROVED",
+          "detailLu": true,
+          "piecesLues": true,
+          "approbation": "2026-06-15",
+          "publication": "2026-07-15",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/d0b079a7ea9c1b698e4ea5baa6137b6f"
+        }
+      ],
+      "zones": [
+        {
+          "libelle": "PSMV-CA-SSR1",
+          "libelong": "PSMV Centre Ancien-Sous-Secteur-SSR1",
+          "typezone": "U",
+          "part": 1,
+          "surfaceM2": 345.7,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/files/25056_reglement_20260615.pdf",
+            "source": "gpu"
+          }
+        },
+        {
+          "libelle": "SPR CA",
+          "libelong": "Site Patrimoniale Remarquable Centre Ancien",
+          "typezone": "U",
+          "part": 1,
+          "surfaceM2": 345.7,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/files/25056_reglement_20260615.pdf",
+            "source": "gpu"
+          }
+        }
+      ],
+      "zonesEnLimite": [],
+      "zonesNonMesurables": [],
+      "secteurs": [],
+      "prescriptions": [
+        {
+          "categorie": "07-67",
+          "code": "07",
+          "sousCode": "67",
+          "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+          "forme": "surface",
+          "etendue": "couvre",
+          "part": 0.111,
+          "surfaceM2": 38.5,
+          "longueurM": null,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "documentType": "PSMV"
+        },
+        {
+          "categorie": "07-50",
+          "code": "07",
+          "sousCode": "50",
+          "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+          "forme": "surface",
+          "etendue": "couvre",
+          "part": 0.35,
+          "surfaceM2": 121.1,
+          "longueurM": null,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "documentType": "PSMV"
+        },
+        {
+          "categorie": "03-00",
+          "code": "03",
+          "sousCode": "00",
+          "libelle": "Immeuble ou partie d'Immeuble dont la démolition ou la modification peut être imposée à l'occasion d'opérations publiques ou privées",
+          "forme": "surface",
+          "etendue": "couvre",
+          "part": 0.118,
+          "surfaceM2": 40.8,
+          "longueurM": null,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "documentType": "PSMV"
+        },
+        {
+          "categorie": "02-02",
+          "code": "02",
+          "sousCode": "02",
+          "libelle": "Zone de sismicité 3 - PS92 modifié ou EUROCODE 8",
+          "forme": "surface",
+          "etendue": "couvre",
+          "part": 1,
+          "surfaceM2": 345.7,
+          "longueurM": null,
+          "documentId": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+          "documentType": "PSMV"
+        }
+      ],
+      "prescriptionsContact": 3,
+      "autresPrescriptions": [
+        "stationnement"
+      ],
+      "prescriptionsStatut": "ok",
+      "ambiguites": [
+        "parcelle_incertaine"
+      ]
+    },
+    "links": [
+      {
+        "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/files/25056_reglement_20260615.pdf",
+        "finalUrl": "https://data.geopf.fr/annexes/gpu/documents/PSMV_25056/d0b079a7ea9c1b698e4ea5baa6137b6f/25056_reglement_20260615.pdf",
+        "status": 200,
+        "contentType": "application/pdf"
+      }
+    ],
+    "trace": [
+      {
+        "url": "https://data.geopf.fr/geocodage/search?q=10+rue+des+Granges+25000+Besan%C3%A7on&limit=1",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/cadastre/parcelle?geom=%7B%22type%22%3A%22Point%22%2C%22coordinates%22%3A%5B6.024094%2C47.239241%5D%7D&_limit=2",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/cadastre/parcelle?geom=%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B6.024054306669451%2C47.23921405066475%5D%2C%5B6.0241336933305485%2C47.23921405066475%5D%2C%5B6.0241336933305485%2C47.23926794933525%5D%2C%5B6.024054306669451%2C47.23926794933525%5D%2C%5B6.024054306669451%2C47.23921405066475%5D%5D%5D%7D&_limit=8",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/municipality",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/document",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/zone-urba",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/secteur-cc",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/prescription-surf",
+        "status": 200,
+        "properties": [
+          {
+            "gid": 20342713,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+            "txt": "INP",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "67",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20347067,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+            "txt": "IP-PSMV",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "50",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20345864,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+            "txt": "IP-PSMV",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "50",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20344018,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+            "txt": "IP-PSMV",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "50",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20343393,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+            "txt": "INP",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "67",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20343893,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'Immeuble dont la démolition ou la modification peut être imposée à l'occasion d'opérations publiques ou privées",
+            "txt": "DEMOL",
+            "typepsc": "03",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "00",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20343179,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+            "txt": "INP",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "67",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20346863,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "PSMV_CA-Périmètre (gare, station de transport public guidé ou de transport collectif en site propre) où la construction de logement est non soumise aux règles générales du PLU en terme de stationnement (article L.151-36)",
+            "txt": "SITEPROPRE",
+            "typepsc": "04",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "00",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20345553,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+            "txt": "IP-PSMV",
+            "typepsc": "07",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "50",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20347256,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Zone de sismicité 3 - PS92 modifié ou EUROCODE 8",
+            "txt": "LCRERIG",
+            "typepsc": "02",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "02",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          },
+          {
+            "gid": 20344081,
+            "gpu_doc_id": "d0b079a7ea9c1b698e4ea5baa6137b6f",
+            "gpu_status": "production",
+            "gpu_timestamp": "2026-07-15T15:19:31.567Z",
+            "partition": "PSMV_25056",
+            "libelle": "Immeuble ou partie d'Immeuble dont la démolition ou la modification peut être imposée à l'occasion d'opérations publiques ou privées",
+            "txt": "DEMOL",
+            "typepsc": "03",
+            "nomfic": "25056_reglement_20260615.pdf",
+            "urlfic": "",
+            "insee": null,
+            "datappro": null,
+            "datvalid": "20260615",
+            "idurba": "25056_PSMV_20260615",
+            "stypepsc": "00",
+            "idpsc": null,
+            "lib_idpsc": null,
+            "nature": "",
+            "symbole": ""
+          }
+        ]
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/prescription-lin",
+        "status": 200
+      },
+      {
+        "url": "https://apicarto.ign.fr/api/gpu/prescription-pct",
+        "status": 200
+      },
+      {
+        "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/details",
+        "status": 200
+      },
+      {
+        "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/files",
+        "status": 200
+      },
+      {
+        "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d0b079a7ea9c1b698e4ea5baa6137b6f/files/25056_reglement_20260615.pdf",
+        "status": 200
+      }
+    ]
+  }
+]

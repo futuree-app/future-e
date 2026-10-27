@@ -1,0 +1,493 @@
+{
+  "sha": "992af92fd4c23eece89b5c39ec465fcd2b3099c0",
+  "geometry": [
+    {
+      "name": "limite seule",
+      "exact": 0,
+      "measured": 0,
+      "exactSurfaceM2": 0,
+      "prescriptions": [],
+      "contact": 1
+    },
+    {
+      "name": "microchevauchement",
+      "exact": 0.0001,
+      "measured": 0,
+      "exactSurfaceM2": 1,
+      "prescriptions": [
+        {
+          "categorie": "05-00",
+          "etendue": "marginale",
+          "part": 0,
+          "surfaceM2": 1
+        }
+      ],
+      "contact": 0
+    },
+    {
+      "name": "bande réservée 50 m²",
+      "exact": 0.005,
+      "measured": 0.005,
+      "exactSurfaceM2": 50,
+      "prescriptions": [
+        {
+          "categorie": "05-00",
+          "etendue": "couvre",
+          "part": 0.005,
+          "surfaceM2": 49.7
+        }
+      ],
+      "contact": 0
+    },
+    {
+      "name": "bande réservée 30 m²",
+      "exact": 0.003,
+      "measured": 0.003,
+      "exactSurfaceM2": 30,
+      "prescriptions": [
+        {
+          "categorie": "05-00",
+          "etendue": "couvre",
+          "part": 0.003,
+          "surfaceM2": 29.8
+        }
+      ],
+      "contact": 0
+    },
+    {
+      "name": "deux zones réelles",
+      "exact": 0.6,
+      "measured": 0.6,
+      "exactSurfaceM2": 6000,
+      "prescriptions": [
+        {
+          "categorie": "05-00",
+          "etendue": "couvre",
+          "part": 0.6,
+          "surfaceM2": 5959.8
+        }
+      ],
+      "contact": 0
+    },
+    {
+      "name": "petite parcelle : intersection réelle 1 m²",
+      "exact": 0.01,
+      "measured": 0.01
+    },
+    {
+      "name": "trou : prescription dans le trou",
+      "measured": 0
+    },
+    {
+      "name": "multipolygone, une composante sur deux",
+      "measured": 0.5
+    },
+    {
+      "name": "parcelle concave : encoche exclue",
+      "measured": 0
+    },
+    {
+      "name": "parcelle concave : deux tiers reels",
+      "expected": 0.667,
+      "measured": 0.667
+    },
+    {
+      "name": "deux zones",
+      "zones": [
+        [
+          "UB",
+          0.6
+        ],
+        [
+          "UA",
+          0.4
+        ]
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "name": "point ouest",
+      "prescriptions": [],
+      "contact": 1
+    },
+    {
+      "name": "point est",
+      "prescriptions": [],
+      "contact": 1
+    },
+    {
+      "name": "ligne ouest",
+      "prescriptions": [],
+      "contact": 1
+    },
+    {
+      "name": "ligne est",
+      "prescriptions": [],
+      "contact": 1
+    },
+    {
+      "name": "geometry absente",
+      "statut": "confirme",
+      "grain": "point",
+      "rattachement": {
+        "mode": "aucun",
+        "distanceM": null
+      },
+      "zones": [
+        "UA"
+      ]
+    },
+    {
+      "name": "Polygon vide",
+      "statut": "confirme",
+      "grain": "point",
+      "rattachement": {
+        "mode": "aucun",
+        "distanceM": null
+      },
+      "zones": [
+        "UA"
+      ]
+    },
+    {
+      "name": "Polygon invalide",
+      "statut": "confirme",
+      "grain": "point",
+      "rattachement": {
+        "mode": "aucun",
+        "distanceM": null
+      },
+      "zones": [
+        "UA"
+      ]
+    },
+    {
+      "name": "detail en panne",
+      "statut": "ambigu",
+      "vigueur": "non_verifiee",
+      "ambiguites": [
+        "vigueur_non_verifiee"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle D’après le document publié, cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). Le statut de ce document, en vigueur ou non, n’a pas pu être vérifié lors de la collecte. Faites confirmer en mairie la version qui s’applique avant de vous fonder sur cette lecture. zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "metadonnees vides",
+      "statut": "ambigu",
+      "vigueur": "non_verifiee",
+      "ambiguites": [
+        "vigueur_non_verifiee"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle D’après le document publié, cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). Le statut de ce document, en vigueur ou non, n’a pas pu être vérifié lors de la collecte. Faites confirmer en mairie la version qui s’applique avant de vous fonder sur cette lecture. zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "statut legal absent",
+      "statut": "ambigu",
+      "vigueur": "non_verifiee",
+      "ambiguites": [
+        "vigueur_non_verifiee"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle D’après le document publié, cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). Le statut de ce document, en vigueur ou non, n’a pas pu être vérifié lors de la collecte. Faites confirmer en mairie la version qui s’applique avant de vous fonder sur cette lecture. zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "hors vigueur",
+      "statut": "ambigu",
+      "vigueur": "hors_vigueur",
+      "ambiguites": [
+        "document_hors_vigueur"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle D’après le document publié, cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). Le Géoportail ne donne pas ce document comme en vigueur. Faites confirmer en mairie la version qui s’applique avant de vous fonder sur cette lecture. zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "repli selectionne la plus petite, pas la plus proche",
+      "parcel": {
+        "idu": "proche",
+        "parcelCode": "99999-000-AA-proche",
+        "codeInsee": "99999",
+        "section": "AA",
+        "numero": "proche",
+        "prefixe": "000",
+        "contenance": 5000,
+        "nomCommune": null,
+        "rattachement": "repli",
+        "distanceRepliM": 0
+      },
+      "statut": "ambigu",
+      "ambiguites": [
+        "parcelle_incertaine"
+      ],
+      "rattachement": {
+        "mode": "repli",
+        "distanceM": 0
+      },
+      "visibleText": "Plan d’urbanisme de la parcelle Le point de l’adresse ne tombe dans aucune parcelle. La plus proche (PARCELLE-TEST), à moins d’un mètre, a été retenue : elle peut être celle d’un voisin. Les règles ci-dessous ne valent pour ce logement que si c’est bien sa parcelle ; vérifiez la référence cadastrale sur l’acte ou le compromis. La parcelle retenue est en zone ZONE-VOISIN du plan local d&#x27;urbanisme (PLU). Prescriptions cartographiées sur la parcelle retenue Emplacement réservé · sur toute la parcelle « Réserve chez le voisin » Une partie du terrain fait l&#x27;objet d&#x27;un emplacement réservé dont le Géoportail ne précise pas la destination. Demandez en mairie son objet et son bénéficiaire avant tout projet. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone ZONE-VOISIN et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone ZONE-VOISIN n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "actualisation perd la source prescriptions",
+      "oldAbsent": [
+        "parcelle",
+        "altitude",
+        "zfe",
+        "friches",
+        "donnees_communales",
+        "sinistralite",
+        "georisques_commune",
+        "georisques_point",
+        "patrimoine"
+      ],
+      "newAbsent": [
+        "parcelle",
+        "altitude",
+        "zfe",
+        "friches",
+        "donnees_communales",
+        "sinistralite",
+        "georisques_commune",
+        "georisques_point",
+        "patrimoine",
+        "urbanisme_prescriptions"
+      ],
+      "newPrescriptionsStatut": "indisponible",
+      "issue": "refusee"
+    },
+    {
+      "name": "actualisation : prescriptions officiellement retirees (evolution legitime)",
+      "issue": "nouvelle_version"
+    },
+    {
+      "name": "actualisation : detail en panne apres un detail lu",
+      "issue": "refusee"
+    },
+    {
+      "name": "actualisation : dossier historique sans urbanisme, Geoportail en panne",
+      "issue": "refusee"
+    },
+    {
+      "name": "nomenclature 05-05",
+      "prescriptions": [
+        {
+          "categorie": "05-05",
+          "code": "05",
+          "sousCode": "05"
+        }
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Prescriptions cartographiées sur la parcelle Emplacement réservé à un programme de logements (mixité sociale) · sur toute la parcelle « Emplacement réservé logement social/mixité sociale » Le plan réserve ce terrain à la réalisation d&#x27;un programme de logements qu&#x27;il définit, au titre de la mixité sociale. Demandez en mairie ce que la réserve impose avant tout projet. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "nomenclature 05-07",
+      "prescriptions": [
+        {
+          "categorie": "05-07",
+          "code": "05",
+          "sousCode": "07"
+        }
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Prescriptions cartographiées sur la parcelle Secteur en attente d&#x27;un projet d&#x27;aménagement global · sur toute la parcelle « Secteur de projet en attente d’un projet d’aménagement global » Le plan attend ici un projet d&#x27;aménagement d&#x27;ensemble ; les constructions peuvent y être limitées pour une durée déterminée. Le seuil et la durée se lisent dans le règlement, à vérifier en mairie. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    }
+  ],
+  "witnesses": [
+    {
+      "name": "lyon-croix-rousse",
+      "statut": "confirme",
+      "ambiguites": [],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "point",
+        "distanceM": null
+      },
+      "zones": [
+        [
+          "UCe1a",
+          1,
+          571.5
+        ]
+      ],
+      "enLimite": [
+        {
+          "libelle": "UCe3-p",
+          "surfaceM2": 0.1
+        }
+      ],
+      "prescriptions": [
+        [
+          "02-00",
+          "couvre",
+          1,
+          571.6,
+          "Risque d inondation par ruissellement-ZONE PRODUCTION"
+        ],
+        [
+          "07-02",
+          "couvre",
+          1,
+          571.6,
+          "Perimetre d interet patrimonial-A1"
+        ]
+      ],
+      "contact": 2,
+      "vigueur": [
+        "etablie"
+      ]
+    },
+    {
+      "name": "six-fours-emplacement-reserve",
+      "statut": "confirme",
+      "ambiguites": [],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "point",
+        "distanceM": null
+      },
+      "zones": [
+        [
+          "UE",
+          1,
+          3725.1
+        ]
+      ],
+      "enLimite": [
+        {
+          "libelle": "UF",
+          "surfaceM2": 0.2
+        }
+      ],
+      "prescriptions": [
+        [
+          "05-00",
+          "couvre",
+          0.138,
+          515.8,
+          "Emplacement réservé"
+        ],
+        [
+          "07-00",
+          "couvre",
+          null,
+          null,
+          "Espaces verts à protéger - alignements"
+        ]
+      ],
+      "contact": 0,
+      "vigueur": [
+        "etablie"
+      ]
+    },
+    {
+      "name": "merignac-deux-zones",
+      "statut": "confirme",
+      "ambiguites": [],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "point",
+        "distanceM": null
+      },
+      "zones": [
+        [
+          "US7",
+          0.617,
+          3501.9
+        ],
+        [
+          "US9",
+          0.383,
+          2176.5
+        ]
+      ],
+      "enLimite": [],
+      "prescriptions": [
+        [
+          "05-01",
+          "couvre",
+          0.012,
+          70.5,
+          "Emplacement réservé - Voirie tertiaire"
+        ],
+        [
+          "07-02",
+          "couvre",
+          0.006,
+          35,
+          "Patrimoine paysager - Bois et bosquets intérieurs"
+        ]
+      ],
+      "contact": 0,
+      "vigueur": [
+        "etablie"
+      ]
+    },
+    {
+      "name": "la-rochelle-psmv",
+      "statut": "ambigu",
+      "ambiguites": [
+        "parcelle_incertaine"
+      ],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "repli",
+        "distanceM": null
+      },
+      "zones": [
+        [
+          "PSMV",
+          1,
+          664.6
+        ]
+      ],
+      "enLimite": [],
+      "prescriptions": [],
+      "contact": 0,
+      "vigueur": [
+        "etablie"
+      ]
+    },
+    {
+      "name": "vauquois-carte-communale",
+      "statut": "ambigu",
+      "ambiguites": [
+        "parcelle_incertaine"
+      ],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "repli",
+        "distanceM": null
+      },
+      "zones": [],
+      "enLimite": [],
+      "prescriptions": [],
+      "contact": 0,
+      "vigueur": [
+        "etablie"
+      ]
+    },
+    {
+      "name": "chatelard-rnu",
+      "statut": "confirme",
+      "ambiguites": [],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "point",
+        "distanceM": null
+      },
+      "zones": [],
+      "enLimite": [],
+      "prescriptions": [],
+      "contact": 0,
+      "vigueur": []
+    },
+    {
+      "name": "grandvals-sans-document",
+      "statut": "non_trouve",
+      "ambiguites": [],
+      "grain": "parcelle",
+      "rattachement": {
+        "mode": "point",
+        "distanceM": null
+      },
+      "zones": [],
+      "enLimite": [],
+      "prescriptions": [],
+      "contact": 0,
+      "vigueur": []
+    }
+  ]
+}

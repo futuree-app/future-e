@@ -106,7 +106,51 @@ export function sourcesAbsentes(r: LogementReport): string[] {
   // référentiel qui a répondu « aucun bâtiment » n'est pas une source muette.
   if (r.batiment?.statut === "indisponible") absentes.push("batiment");
   if (r.dpeMemeBatiment?.status === "unavailable") absentes.push("diagnostics_meme_batiment");
+  // FUT-81 : mêmes règles. Un rapport antérieur (champ absent) ne s'invente pas de panne ; une commune
+  // sans document publié n'est pas une source muette, elle est `non_trouve`.
+  absentes.push(...urbanismeAbsent(r));
   return absentes;
+}
+
+/**
+ * LES SOUS-SOURCES DU PLAN D'URBANISME QUI N'ONT PAS RÉPONDU (revue indépendante du 27/10/2026). Une
+ * lecture peut rester « confirmée » avec ses prescriptions, la vigueur de son document ou ses pièces
+ * muettes : la panne était dite à l'écran, mais l'actualisation qui la portait remplaçait une version
+ * complète. Chaque sous-source est donc nommée, et une panne totale reste la seule `urbanisme`.
+ */
+export const SOUS_SOURCES_URBANISME = ["urbanisme", "urbanisme_prescriptions", "urbanisme_vigueur", "urbanisme_pieces", "urbanisme_parcelle"] as const;
+
+function urbanismeAbsent(r: LogementReport): string[] {
+  const u = r.urbanisme;
+  if (!u) return [];
+  if (u.statut === "indisponible") return ["urbanisme"];
+  const out: string[] = [];
+  if (u.prescriptionsStatut === "indisponible") out.push("urbanisme_prescriptions");
+  if ((u.documents ?? []).some((d) => d.detailLu !== true)) out.push("urbanisme_vigueur");
+  if ((u.documents ?? []).some((d) => d.piecesLues !== true)) out.push("urbanisme_pieces");
+  return out;
+}
+
+/**
+ * CE QUE LE PLAN D'URBANISME DE N SAVAIT LIRE ET QUE N+1 NE SAIT PLUS. Comparé sur les DEUX rapports, pas
+ * sur la liste enregistrée : une version écrite avant FUT-81 n'avait aucune lecture, elle ne perd donc
+ * rien quand le Géoportail tombe pendant son actualisation. Une évolution légitime n'est jamais une
+ * perte : un document remplacé, une prescription retirée, un statut devenu « hors vigueur » ont été LUS.
+ */
+export function pertesUrbanisme(ancien: LogementReport, nouveau: LogementReport): string[] {
+  const a = ancien.urbanisme;
+  const n = nouveau.urbanisme;
+  if (!a || a.statut === "indisponible") return [];
+  if (!n || n.statut === "indisponible") return ["urbanisme"];
+  const pertes: string[] = [];
+  if (a.prescriptionsStatut === "ok" && n.prescriptionsStatut === "indisponible") pertes.push("urbanisme_prescriptions");
+  const tous = (u: typeof a, champ: "detailLu" | "piecesLues") => (u.documents ?? []).length > 0 && u.documents.every((d) => d[champ] === true);
+  if (tous(a, "detailLu") && (n.documents ?? []).some((d) => d.detailLu !== true)) pertes.push("urbanisme_vigueur");
+  if (tous(a, "piecesLues") && (n.documents ?? []).some((d) => d.piecesLues !== true)) pertes.push("urbanisme_pieces");
+  // Troisième revue : une lecture mesurée à la parcelle ne cède pas la place à une lecture au point (parcelle
+  // devenue non mesurable, ou disparue). Ce n'est pas une panne, mais une lecture moins sûre : N reste.
+  if (a.grain === "parcelle" && n.grain !== "parcelle") pertes.push("urbanisme_parcelle");
+  return pertes;
 }
 
 /** Un rapport complet dans sa FORME : l'adresse est là et la route n'a pas rendu d'erreur. */
@@ -130,7 +174,10 @@ export function issueActualisation(
   if (!ancienne) return "nouvelle_version";
   if (nouveauHash === ancienne.reportHash) return "identique";
   const avant = new Set(ancienne.sourcesAbsentes);
-  if (sourcesAbsentes(nouveau).some((s) => !avant.has(s))) return "refusee";
+  const urba = new Set<string>(SOUS_SOURCES_URBANISME);
+  if (sourcesAbsentes(nouveau).some((s) => !urba.has(s) && !avant.has(s))) return "refusee";
+  // Le plan d'urbanisme se compare sur les rapports eux-mêmes (cf. `pertesUrbanisme`).
+  if (pertesUrbanisme(ancienne.report, nouveau).length > 0) return "refusee";
   return "nouvelle_version";
 }
 

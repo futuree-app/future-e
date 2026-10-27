@@ -1,0 +1,2954 @@
+{
+  "mesureLe": "2026-10-27T00:05:55.385Z",
+  "resultats": [
+    {
+      "id": "alea-1-34003",
+      "vise": "Tirage pondéré : Agde",
+      "temps": {
+        "ban": 82,
+        "cadastre": 92,
+        "municipality": 59,
+        "document": 190,
+        "zone": 180,
+        "secteur": 62,
+        "prescSurf": 182,
+        "prescLin": 139,
+        "prescPct": 86,
+        "infoSurf": 134,
+        "details": 103,
+        "totalGpu": 293,
+        "lecture": 16
+      },
+      "adresse": {
+        "label": "22 Rue du Gingembre 34300 Agde",
+        "type": "housenumber",
+        "score": 0.9967,
+        "citycode": "34003",
+        "lon": 3.485684,
+        "lat": 43.306528
+      },
+      "parcellesA5m": [
+        "34003000KX0126",
+        "34003000KX0127",
+        "34003000KX0128",
+        "34003000KX0140"
+      ],
+      "parcelle": {
+        "idu": "34003000KX0127",
+        "contenance": 464,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "34003",
+          "nom": "AGDE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "abcb3be63af537d7f1726e9aff11225d",
+          "type": "PLU",
+          "titre": "AGDE",
+          "nom": "34003_PLU_20240521",
+          "statut": "production",
+          "maj": "2024-06-24T09:55:23.459Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 11276,
+        "prescSurf": 24946
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UD1a",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "34003_reglement_20240521.pdf",
+          "doc": "abcb3be63af537d7f1726e9aff11225d"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur de mixité sociale",
+          "typepsc": "17",
+          "stypepsc": "00"
+        }
+      ],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "abcb3be63af537d7f1726e9aff11225d",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de AGDE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "24/06/2024 12:36:47",
+          "producteur": "Bureau d'études GAXIEU",
+          "nbPieces": 23,
+          "reglements": [
+            {
+              "name": "34003_reglement_20240521.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD1a",
+            "part": 1,
+            "surfaceM2": 447.1,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-2-74005",
+      "vise": "Tirage pondéré : Allinges",
+      "temps": {
+        "ban": 34,
+        "cadastre": 40,
+        "municipality": 85,
+        "document": 156,
+        "zone": 189,
+        "secteur": 48,
+        "prescSurf": 699,
+        "prescLin": 41,
+        "prescPct": 67,
+        "infoSurf": 135,
+        "details": 160,
+        "totalGpu": 859,
+        "lecture": 14
+      },
+      "adresse": {
+        "label": "330a Route de commelinges 74200 Allinges",
+        "type": "housenumber",
+        "score": 0.9993,
+        "citycode": "74005",
+        "lon": 6.459694,
+        "lat": 46.333752
+      },
+      "parcellesA5m": [
+        "74005000AK0080"
+      ],
+      "parcelle": {
+        "idu": "74005000AK0080",
+        "contenance": 1135,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "74005",
+          "nom": "ALLINGES",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "c36093052df6f8c3c1f17bb4ca26f926",
+          "type": "PLUi",
+          "titre": "PLUI THONON AGGLOMERATION",
+          "nom": "200067551_PLUi_20251216",
+          "statut": "production",
+          "maj": "2026-03-05T17:05:24.938Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 18612,
+        "prescSurf": 64716
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UD",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200067551_reglement_20251216.pdf",
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
+        },
+        {
+          "libelle": "UE",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200067551_reglement_20251216.pdf",
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
+        },
+        {
+          "libelle": "UC2",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200067551_reglement_20251216.pdf",
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur à programme de logements mixité sociale en zone U et AU au titre de l'article L151-15 du CU",
+          "typepsc": "17",
+          "stypepsc": "00"
+        }
+      ],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "c36093052df6f8c3c1f17bb4ca26f926",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) THONON AGGLOMERATION",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "06/03/2026 12:34:19",
+          "producteur": "Service urbanisme - Thonon Agglomération",
+          "nbPieces": 118,
+          "reglements": [
+            {
+              "name": "200067551_reglement_20251216.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD",
+            "part": 1,
+            "surfaceM2": 1117.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UE",
+            "surfaceM2": 0
+          },
+          {
+            "libelle": "UC2",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-3-33281",
+      "vise": "Tirage pondéré : Mérignac",
+      "temps": {
+        "ban": 31,
+        "cadastre": 46,
+        "municipality": 54,
+        "document": 126,
+        "zone": 158,
+        "secteur": 51,
+        "prescSurf": 1565,
+        "prescLin": 67,
+        "prescPct": 80,
+        "infoSurf": 1521,
+        "details": 104,
+        "totalGpu": 1669,
+        "lecture": 48
+      },
+      "adresse": {
+        "label": "14 Avenue Ariane 33700 Mérignac",
+        "type": "housenumber",
+        "score": 0.9861,
+        "citycode": "33281",
+        "lon": -0.679001,
+        "lat": 44.833939
+      },
+      "parcellesA5m": [
+        "33281000AE0183",
+        "33281000AE0187"
+      ],
+      "parcelle": {
+        "idu": "33281000AE0187",
+        "contenance": 4979,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "33281",
+          "nom": "MERIGNAC",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "0b6c6621184959caf3fa5b684f929657",
+          "type": "PLUi",
+          "titre": "PLUI BORDEAUX METROPOLE",
+          "nom": "243300316_PLUi_20260505",
+          "statut": "production",
+          "maj": "2026-05-11T19:19:11.239Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 11110,
+        "prescSurf": 38371
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "US7",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "243300316_reglement_20260505.pdf",
+          "doc": "0b6c6621184959caf3fa5b684f929657"
+        },
+        {
+          "libelle": "US9",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "243300316_reglement_20260505.pdf",
+          "doc": "0b6c6621184959caf3fa5b684f929657"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Secteur de diversité sociale : Non concerné",
+          "typepsc": "99",
+          "stypepsc": "03"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Constructibilité par nouvelle bande d'accès interdite",
+          "typepsc": "28",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Emplacement réservé - Voirie tertiaire",
+          "typepsc": "05",
+          "stypepsc": "01"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Indice de stationnement",
+          "typepsc": "44",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur de diversité sociale : Non concerné",
+          "typepsc": "99",
+          "stypepsc": "03"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Indice de stationnement",
+          "typepsc": "44",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Constructibilité par nouvelle bande d'accès interdite",
+          "typepsc": "28",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Patrimoine paysager - Bois et bosquets intérieurs",
+          "typepsc": "07",
+          "stypepsc": "02"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Périmètre de sursis à statuer",
+          "typeinf": "12",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Taxe d'aménagement majorée",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone d'effet des canalisations de gaz",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de voisinage d'infrastructure de transport terrestre (secteur affecté par le bruit) - voie routière",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de droit de préemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de sursis à statuer",
+          "typeinf": "12",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone d'assainissement collectif",
+          "typeinf": "19",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Zone d'aménagement différé",
+          "typeinf": "05",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Plan d'exposition au bruit des aérodromes - Zone D",
+          "typeinf": "27",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "0b6c6621184959caf3fa5b684f929657",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) BORDEAUX METROPOLE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "12/05/2026 00:09:09",
+          "producteur": "Bordeaux Métropole",
+          "nbPieces": 69,
+          "reglements": [
+            {
+              "name": "243300316_reglement_20260505.pdf",
+              "title": "réglement pièces écrites"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "US7",
+            "part": 0.617,
+            "surfaceM2": 3501.5,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "US9",
+            "part": 0.383,
+            "surfaceM2": 2176.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "05-01",
+            "etendue": "couvre",
+            "part": 0.012,
+            "surfaceM2": 70.4,
+            "longueurM": null,
+            "libelle": "Emplacement réservé - Voirie tertiaire"
+          },
+          {
+            "categorie": "07-02",
+            "etendue": "couvre",
+            "part": 0.007,
+            "surfaceM2": 37.3,
+            "longueurM": null,
+            "libelle": "Patrimoine paysager - Bois et bosquets intérieurs"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "autre prescription",
+          "conditions de desserte",
+          "stationnement"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-4-31555",
+      "vise": "Tirage pondéré : Toulouse",
+      "temps": {
+        "ban": 39,
+        "cadastre": 100,
+        "municipality": 62,
+        "document": 44,
+        "zone": 136,
+        "secteur": 38,
+        "prescSurf": 507,
+        "prescLin": 117,
+        "prescPct": 110,
+        "infoSurf": 832,
+        "details": 100,
+        "totalGpu": 932,
+        "lecture": 4
+      },
+      "adresse": {
+        "label": "37 Rue de la République 31300 Toulouse",
+        "type": "housenumber",
+        "score": 0.9996,
+        "citycode": "31555",
+        "lon": 1.433428,
+        "lat": 43.598373
+      },
+      "parcellesA5m": [
+        "31555828AD0231",
+        "31555828AD0232",
+        "31555828AD0233"
+      ],
+      "parcelle": {
+        "idu": "31555828AD0232",
+        "contenance": 178,
+        "rattachement": "repli",
+        "rayon": 3,
+        "distanceM": 0.2,
+        "candidatsAuPoint": null
+      },
+      "commune": [
+        {
+          "insee": "31555",
+          "nom": "TOULOUSE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "741fb112ea7a4538c3a0a48afd454c0c",
+          "type": "PSMV",
+          "titre": "TOULOUSE",
+          "nom": "31555_PSMV_20250217",
+          "statut": "production",
+          "maj": "2025-06-12T06:53:55.924Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 15816,
+        "prescSurf": 6759
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "PSMV",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "31555_reglement_20250217.pdf",
+          "doc": "741fb112ea7a4538c3a0a48afd454c0c"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "52"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble non bâti ou autre espace libre soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère",
+          "typepsc": "07",
+          "stypepsc": "68"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties intérieures et extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "50"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "52"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "52"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "52"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti pouvant être conservé, amélioré, démoli ou remplacé, soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère",
+          "typepsc": "07",
+          "stypepsc": "67"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
+          "typepsc": "07",
+          "stypepsc": "52"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Linéaire renforcé (Service)",
+          "typepsc": "22",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "pct",
+          "libelle": "Élément intérieur particulier : E = escalier",
+          "typepsc": "07",
+          "stypepsc": "51"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Emprise du Plan de Sauvegarde et de Mise en Valeur",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre d'application d'une pièce écrite territorialisée relative aux annexes (liste des annexes, liste des SUP, plan des SUP)",
+          "typeinf": "97",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de voisinage d'infrastructure de transport terrestre (secteur affecté par le bruit)",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Secteur de taxe d'aménagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de droit de préemption urbain renforcé",
+          "typeinf": "04",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Ilot n°645",
+          "typeinf": "97",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Réglement local de publicité intercommunal",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de voisinage d'infrastructure de transport terrestre (secteur affecté par le bruit)",
+          "typeinf": "14",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Droit de préemption commercial",
+          "typeinf": "33",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "741fb112ea7a4538c3a0a48afd454c0c",
+          "type": "PSMV",
+          "titre": "Plan de Sauvegarde et de Mise en Valeur (PSMV) TOULOUSE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "13/06/2025 09:29:28",
+          "producteur": "Commune de TOULOUSE",
+          "nbPieces": 13,
+          "reglements": [
+            {
+              "name": "31555_reglement_20250217.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "ambigu",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "repli",
+          "distanceM": 0.2
+        },
+        "ambiguites": [
+          "parcelle_incertaine"
+        ],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "PSMV",
+            "part": 1,
+            "surfaceM2": 177.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-52",
+            "etendue": "couvre",
+            "part": 0.523,
+            "surfaceM2": 92.8,
+            "longueurM": null,
+            "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité"
+          },
+          {
+            "categorie": "07-68",
+            "etendue": "couvre",
+            "part": 0.094,
+            "surfaceM2": 16.6,
+            "longueurM": null,
+            "libelle": "Immeuble non bâti ou autre espace libre soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère"
+          },
+          {
+            "categorie": "07-51",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": null,
+            "libelle": "Élément intérieur particulier : E = escalier"
+          }
+        ],
+        "prescriptionsContact": 5,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-5-77296",
+      "vise": "Tirage pondéré : Moissy-Cramayel",
+      "temps": {
+        "ban": 31,
+        "cadastre": 46,
+        "municipality": 72,
+        "document": 75,
+        "zone": 97,
+        "secteur": 85,
+        "prescSurf": 81,
+        "prescLin": 81,
+        "prescPct": 57,
+        "infoSurf": 59,
+        "details": 104,
+        "totalGpu": 201,
+        "lecture": 6
+      },
+      "adresse": {
+        "label": "80 Rue de la Mauve 77550 Moissy-Cramayel",
+        "type": "housenumber",
+        "score": 0.9992,
+        "citycode": "77296",
+        "lon": 2.601628,
+        "lat": 48.624644
+      },
+      "parcellesA5m": [
+        "77296000AC0404",
+        "77296000AC0407",
+        "77296000AC0707"
+      ],
+      "parcelle": {
+        "idu": "77296000AC0707",
+        "contenance": 674,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "77296",
+          "nom": "MOISSY-CRAMAYEL",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "29fa09e00b9d5bcb7fba5d79c0f01d8d",
+          "type": "PLU",
+          "titre": "MOISSY-CRAMAYEL",
+          "nom": "77296_PLU_20251215",
+          "statut": "production",
+          "maj": "2026-02-25T16:55:50.555Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 17895,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UC",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "77296_reglement_20251215.pdf",
+          "doc": "29fa09e00b9d5bcb7fba5d79c0f01d8d"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "29fa09e00b9d5bcb7fba5d79c0f01d8d",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de MOISSY-CRAMAYEL",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "25/02/2026 18:14:39",
+          "producteur": "Mairie de Moissy-Cramayel",
+          "nbPieces": 43,
+          "reglements": [
+            {
+              "name": "77296_reglement_20251215.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UC",
+            "part": 1,
+            "surfaceM2": 668,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-6-34032",
+      "vise": "Tirage pondéré : Béziers",
+      "temps": {
+        "ban": 36,
+        "cadastre": 47,
+        "municipality": 103,
+        "document": 69,
+        "zone": 131,
+        "secteur": 52,
+        "prescSurf": 139,
+        "prescLin": 87,
+        "prescPct": 104,
+        "infoSurf": 439,
+        "details": 98,
+        "totalGpu": 537,
+        "lecture": 4
+      },
+      "adresse": {
+        "label": "7 Rue Eugène Scribe 34500 Béziers",
+        "type": "housenumber",
+        "score": 0.9993,
+        "citycode": "34032",
+        "lon": 3.229505,
+        "lat": 43.348395
+      },
+      "parcellesA5m": [
+        "34032000OS0149",
+        "34032000OS0150"
+      ],
+      "parcelle": {
+        "idu": "34032000OS0149",
+        "contenance": 2665,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "34032",
+          "nom": "BEZIERS",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "00ad6978a9b56bd44b3362bbaafdc07e",
+          "type": "PLU",
+          "titre": "BEZIERS",
+          "nom": "34032_PLU_20260707",
+          "statut": "production",
+          "maj": "2026-08-19T07:18:59.217Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 34913,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UC",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "34032_reglement_20260707.pdf#page=46",
+          "doc": "00ad6978a9b56bd44b3362bbaafdc07e"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [
+        {
+          "libelle": "Droit de Préemption Urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Fiscalité d'aménagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Plan de Prévention des Risques de Mouvements de Terrain (PPRMT)",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Plan de Prévention des Risques de Mouvements de Terrain (PPRMT)",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Plan de Prévention des Risques d'Inondations : PPRi",
+          "typeinf": "99",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "00ad6978a9b56bd44b3362bbaafdc07e",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de BEZIERS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "19/08/2026 09:39:48",
+          "producteur": "Communauté d'Agglomération Béziers Méditerranée",
+          "nbPieces": 86,
+          "reglements": [
+            {
+              "name": "34032_reglement_20260707.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "34032_Reglement_Local_Publicite_20260707.pdf",
+              "title": "Reglement Local Publicite"
+            },
+            {
+              "name": "34032_reglement_PPRi_PPRMT_20260707.pdf",
+              "title": "Reglement PPRi PPRMT"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UC",
+            "part": 1,
+            "surfaceM2": 2633.9,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-7-64348",
+      "vise": "Tirage pondéré : Lons",
+      "temps": {
+        "ban": 51,
+        "cadastre": 41,
+        "municipality": 47,
+        "document": 99,
+        "zone": 142,
+        "secteur": 38,
+        "prescSurf": 311,
+        "prescLin": 62,
+        "prescPct": 55,
+        "infoSurf": 255,
+        "details": 106,
+        "totalGpu": 417,
+        "lecture": 4
+      },
+      "adresse": {
+        "label": "8 Impasse des Saules 64140 Lons",
+        "type": "housenumber",
+        "score": 0.9942,
+        "citycode": "64348",
+        "lon": -0.406979,
+        "lat": 43.324798
+      },
+      "parcellesA5m": [
+        "64348000BL0303"
+      ],
+      "parcelle": {
+        "idu": "64348000BL0303",
+        "contenance": 1069,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "64348",
+          "nom": "LONS",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "702a5ac1aa1d3cc718bf7ed2512196c8",
+          "type": "PLUi",
+          "titre": "PLUI PAU BEARN PYRENEES",
+          "nom": "200067254_PLUi_20241219",
+          "statut": "production",
+          "maj": "2025-04-29T16:45:32.393Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 65682,
+        "prescSurf": 32859
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UBc",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200067254_reglement_20241219.pdf",
+          "doc": "702a5ac1aa1d3cc718bf7ed2512196c8"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "secteur de renforcement de mixité sociale",
+          "typepsc": "17",
+          "stypepsc": "00"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "DPU simple : zonage U-AU",
+          "typeinf": "04",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "702a5ac1aa1d3cc718bf7ed2512196c8",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) PAU BEARN PYRENEES",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "30/04/2025 08:11:08",
+          "producteur": "Communauté d'agglomération Pau Béarn Pyrénées - DUAC - service PLUi",
+          "nbPieces": 121,
+          "reglements": [
+            {
+              "name": "200067254_reglement_20241219.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "200067254_Reglement_local_publicite_20241219.pdf",
+              "title": "Reglement local publicite"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UBc",
+            "part": 1,
+            "surfaceM2": 1061.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-8-19031",
+      "vise": "Tirage pondéré : Brive-la-Gaillarde",
+      "temps": {
+        "ban": 36,
+        "cadastre": 42,
+        "municipality": 79,
+        "document": 83,
+        "zone": 298,
+        "secteur": 61,
+        "prescSurf": 154,
+        "prescLin": 83,
+        "prescPct": 119,
+        "infoSurf": 422,
+        "details": 103,
+        "totalGpu": 525,
+        "lecture": 36
+      },
+      "adresse": {
+        "label": "33 Chemin De Bassaler 19100 Brive-la-Gaillarde",
+        "type": "housenumber",
+        "score": 0.9837,
+        "citycode": "19031",
+        "lon": 1.51546,
+        "lat": 45.142634
+      },
+      "parcellesA5m": [
+        "19031000DS0304"
+      ],
+      "parcelle": {
+        "idu": "19031000DS0304",
+        "contenance": 2378,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "19031",
+          "nom": "BRIVE-LA-GAILLARDE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "92d9ee55ef8de4a93f5f3730ae7da2f4",
+          "type": "PLU",
+          "titre": "BRIVE-LA-GAILLARDE",
+          "nom": "19031_PLU_20251009",
+          "statut": "production",
+          "maj": "2025-10-13T09:46:19.677Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 518221,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UEa",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "19031_reglement_20250402.pdf",
+          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4"
+        },
+        {
+          "libelle": "N",
+          "typezone": "N",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "19031_reglement_20250402.pdf",
+          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [
+        {
+          "libelle": "Règlement local de publicité - zone 3",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone d'assainissement non collectif",
+          "typeinf": "19",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Site archéologique - Planchetorte / Courolle",
+          "typeinf": "16",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone de droit de préemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "92d9ee55ef8de4a93f5f3730ae7da2f4",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de BRIVE-LA-GAILLARDE",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "13/10/2025 12:17:43",
+          "producteur": "Mairie de Brive-la-Gaillarde",
+          "nbPieces": 70,
+          "reglements": [
+            {
+              "name": "19031_reglement_20250402.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "19031_info_surf_20_reglement_RLP_20160317.pdf",
+              "title": "Info surf 20 reglement RLP"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UEa",
+            "part": 0.999,
+            "surfaceM2": 2305,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "N",
+            "surfaceM2": 1.6
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-9-60214",
+      "vise": "Tirage pondéré : Ernemont-Boutavent",
+      "temps": {
+        "ban": 54
+      },
+      "echec": "adresse non géocodée"
+    },
+    {
+      "id": "alea-10-77442",
+      "vise": "Tirage pondéré : Samoreau",
+      "temps": {
+        "ban": 54
+      },
+      "echec": "adresse non géocodée"
+    },
+    {
+      "id": "alea-11-94080",
+      "vise": "Tirage pondéré : Vincennes",
+      "temps": {
+        "ban": 30,
+        "cadastre": 42,
+        "municipality": 42,
+        "document": 41,
+        "zone": 244,
+        "secteur": 941,
+        "prescSurf": 743,
+        "prescLin": 303,
+        "prescPct": 179,
+        "infoSurf": 119,
+        "details": 95,
+        "totalGpu": 1036,
+        "lecture": 7
+      },
+      "adresse": {
+        "label": "47 Cours Marigny 94300 Vincennes",
+        "type": "housenumber",
+        "score": 0.9977,
+        "citycode": "94080",
+        "lon": 2.439032,
+        "lat": 48.846295
+      },
+      "parcellesA5m": [
+        "940800000O0168",
+        "940800000O0169",
+        "940800000O0192"
+      ],
+      "parcelle": {
+        "idu": "940800000O0192",
+        "contenance": 17625,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "94080",
+          "nom": "VINCENNES",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "f7abbb79443a3d74d559ec786e2640bb",
+          "type": "PLUi",
+          "titre": "PLUI PARIS-EST-MARNE ET BOIS",
+          "nom": "200057941_PLUi_20261015",
+          "statut": "production",
+          "maj": "2026-10-19T14:38:44.350Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 15318,
+        "prescSurf": 31630
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UF",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200057941_reglement_20261015.pdf",
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
+        },
+        {
+          "libelle": "N",
+          "typezone": "N",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200057941_reglement_20261015.pdf",
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
+        },
+        {
+          "libelle": "UFb",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200057941_reglement_20261015.pdf",
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
+        },
+        {
+          "libelle": "UE2",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "200057941_reglement_20261015.pdf",
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Périmètre de 500m autour des gares",
+          "typepsc": "44",
+          "stypepsc": "02"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteurs de mixité sociale au titre de l'article L151-15 du Code de l'Urbanisme",
+          "typepsc": "17",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteurs de mixité sociale au titre de l'article L151-15 du Code de l'Urbanisme",
+          "typepsc": "17",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Linéaire de préservation et de développement de la diversité commerciale restreint au titre de l'article L. 151-16 du Code de l'urbanisme",
+          "typepsc": "22",
+          "stypepsc": "04"
+        }
+      ],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "f7abbb79443a3d74d559ec786e2640bb",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) PARIS-EST-MARNE ET BOIS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "19/10/2026 17:07:22",
+          "producteur": "PARIS-EST-MARNE ET BOIS",
+          "nbPieces": 105,
+          "reglements": [
+            {
+              "name": "200057941_reglement_20261015.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "200057941_info_surf_20_00_20231212.pdf",
+              "title": "Règlement local de publicité"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "N",
+            "part": 1,
+            "surfaceM2": 17499.2,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UF",
+            "surfaceM2": 2.8
+          },
+          {
+            "libelle": "UFb",
+            "surfaceM2": 4.2
+          },
+          {
+            "libelle": "UE2",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-04",
+            "etendue": "marginale",
+            "part": 0,
+            "surfaceM2": 0.3,
+            "longueurM": null,
+            "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "diversité commerciale",
+          "stationnement"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-12-59322",
+      "vise": "Tirage pondéré : Iwuy",
+      "temps": {
+        "ban": 29,
+        "cadastre": 332,
+        "municipality": 94,
+        "document": 92,
+        "zone": 75,
+        "secteur": 37,
+        "prescSurf": 75,
+        "prescLin": 74,
+        "prescPct": 91,
+        "infoSurf": 197,
+        "details": 110,
+        "totalGpu": 307,
+        "lecture": 1
+      },
+      "adresse": {
+        "label": "19 Rue Marie Lariviere 59141 Iwuy",
+        "type": "housenumber",
+        "score": 0.9825,
+        "citycode": "59322",
+        "lon": 3.33223,
+        "lat": 50.230774
+      },
+      "parcellesA5m": [
+        "593220000A2888"
+      ],
+      "parcelle": {
+        "idu": "593220000A2888",
+        "contenance": 751,
+        "rattachement": "repli",
+        "rayon": 3,
+        "distanceM": 1.3,
+        "candidatsAuPoint": null
+      },
+      "commune": [
+        {
+          "insee": "59322",
+          "nom": "IWUY",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "e79d1cdf314d07ffad93ec38922b9832",
+          "type": "PLU",
+          "titre": "IWUY",
+          "nom": "59322_PLU_20230918",
+          "statut": "production",
+          "maj": "2023-10-30T09:28:48Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 11223,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UB",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "59322_reglement_graphique_1_20230918.pdf",
+          "doc": "e79d1cdf314d07ffad93ec38922b9832"
+        },
+        {
+          "libelle": "1Aua",
+          "typezone": "AUc",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "59322_reglement_graphique_1_20230918.pdf",
+          "doc": "e79d1cdf314d07ffad93ec38922b9832"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "e79d1cdf314d07ffad93ec38922b9832",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de IWUY",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "30/10/2023 09:48:06",
+          "producteur": "Commune de IWUY",
+          "nbPieces": 22,
+          "reglements": [
+            {
+              "name": "59322_reglement_20170411.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "ambigu",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "repli",
+          "distanceM": 1.3
+        },
+        "ambiguites": [
+          "parcelle_incertaine"
+        ],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UB",
+            "part": 1,
+            "surfaceM2": 752.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "1Aua",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-13-98613",
+      "vise": "Tirage pondéré : Uvea",
+      "temps": {
+        "ban": 66
+      },
+      "echec": "adresse non géocodée"
+    },
+    {
+      "id": "alea-14-53091",
+      "vise": "Tirage pondéré : Désertines",
+      "temps": {
+        "ban": 32,
+        "cadastre": 41,
+        "municipality": 76,
+        "document": 163,
+        "zone": 70,
+        "secteur": 39,
+        "prescSurf": 57,
+        "prescLin": 56,
+        "prescPct": 51,
+        "infoSurf": 63,
+        "details": 105,
+        "totalGpu": 268,
+        "lecture": 3
+      },
+      "adresse": {
+        "label": "3 La Petite Serrerie 53190 Désertines",
+        "type": "housenumber",
+        "score": 0.9898,
+        "citycode": "53091",
+        "lon": -0.870081,
+        "lat": 48.467644
+      },
+      "parcellesA5m": [
+        "530910000Z0043"
+      ],
+      "parcelle": {
+        "idu": "530910000Z0043",
+        "contenance": 1303,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "53091",
+          "nom": "DESERTINES",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "6b3ac6aa5de6a1c97e6f52d00dda46df",
+          "type": "PLUi",
+          "titre": "PLUI DU BOCAGE MAYENNAIS",
+          "nom": "245300389_PLUi_20260603",
+          "statut": "production",
+          "maj": "2026-07-08T16:22:42.122Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 35622,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "N",
+          "typezone": "N",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "245300389_reglement_20250917.pdf",
+          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df"
+        },
+        {
+          "libelle": "UA",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "245300389_reglement_20250917.pdf",
+          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [
+        {
+          "libelle": "Périmètre de droit de préemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "6b3ac6aa5de6a1c97e6f52d00dda46df",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) DU BOCAGE MAYENNAIS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "08/07/2026 19:33:45",
+          "producteur": "CC du Bocage Mayennais",
+          "nbPieces": 33,
+          "reglements": [
+            {
+              "name": "245300389_reglement_20250917.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UA",
+            "part": 1,
+            "surfaceM2": 1317.6,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "N",
+            "surfaceM2": 0.1
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-15-94011",
+      "vise": "Tirage pondéré : Bonneuil-sur-Marne",
+      "temps": {
+        "ban": 43,
+        "cadastre": 41,
+        "municipality": 136,
+        "document": 90,
+        "zone": 76,
+        "secteur": 47,
+        "prescSurf": 73,
+        "prescLin": 64,
+        "prescPct": 57,
+        "infoSurf": 290,
+        "details": 137,
+        "totalGpu": 427,
+        "lecture": 6
+      },
+      "adresse": {
+        "label": "13 Avenue des Myosotis 94370 Sucy-en-Brie",
+        "type": "housenumber",
+        "score": 0.9905,
+        "citycode": "94071",
+        "lon": 2.496556,
+        "lat": 48.768398
+      },
+      "parcellesA5m": [
+        "94071000AZ0205"
+      ],
+      "parcelle": {
+        "idu": "94071000AZ0205",
+        "contenance": 55540,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "94071",
+          "nom": "SUCY-EN-BRIE",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "827efeb42cc1bc40ec2b4279943403ef",
+          "type": "PLUi",
+          "titre": "PLUI GRAND PARIS SUD EST AVENIR",
+          "nom": "200058006_PLUi_20260226",
+          "statut": "production",
+          "maj": "2026-04-03T07:39:43.898Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 17131,
+        "prescSurf": 14831
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UILC2C2C3C4C",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "33-41-42-51-52-55",
+          "destnon": "10-22-31-32-34-35-36-37-43-44-45-46-47-54",
+          "nomfic": "200058006_reglement_20260226.pdf",
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
+        },
+        {
+          "libelle": "UIO1O1O1O1OO",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "11-31-32-33-34-36-41-42-43-44-45-46-51-53-54-55",
+          "destnon": "12-22-35-37-47",
+          "nomfic": "200058006_reglement_20260226.pdf",
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
+        },
+        {
+          "libelle": "UILO1O1O1O1O",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "33-41-42-51-52-55",
+          "destnon": "10-22-31-32-34-35-36-37-43-44-45-46-47-54",
+          "nomfic": "200058006_reglement_20260226.pdf",
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
+        },
+        {
+          "libelle": "UIO2O1O1O2OO",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "11-31-32-33-34-36-41-42-43-44-45-46-51-53-54-55",
+          "destnon": "12-22-35-37-47",
+          "nomfic": "200058006_reglement_20260226.pdf",
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Zone humide",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Recul spécifique",
+          "typepsc": "15",
+          "stypepsc": "01"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Emplacement réservé",
+          "typepsc": "05",
+          "stypepsc": "01"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zone humide",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Cours d'eau",
+          "typepsc": "07",
+          "stypepsc": "04"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Cours d'eau",
+          "typepsc": "07",
+          "stypepsc": "04"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Taxe d'amenagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zonage enseigne 2",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zonage publicite 4",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Perimetre de droit de preemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Perimetre de droit de preemption urbain renforce",
+          "typeinf": "04",
+          "stypeinf": "01"
+        },
+        {
+          "libelle": "Retrait gonflement des argiles",
+          "typeinf": "99",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Taxe d'amenagement",
+          "typeinf": "32",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zonage publicite 4",
+          "typeinf": "20",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zone d'amenagement concerte",
+          "typeinf": "02",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Perimetre de droit de preemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Zonage enseigne 2",
+          "typeinf": "20",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "827efeb42cc1bc40ec2b4279943403ef",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) GRAND PARIS SUD EST AVENIR",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "03/04/2026 10:04:14",
+          "producteur": "EPT Grand Paris Sud Est Avenir",
+          "nbPieces": 79,
+          "reglements": [
+            {
+              "name": "200058006_reglement_20260226.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_SAGE_Marne_Confluence_20260226.pdf",
+              "title": "Info surf 19 01 reglement SAGE Marne Confluence"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_assainissement_collectif_20260226.pdf",
+              "title": "Info surf 19 01 reglement assainissement collectif"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_assainissement_non_collectif_20260226.pdf",
+              "title": "Info surf 19 01 reglement assainissement non collectif"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_dechet_HVM_20260226.pdf",
+              "title": "Info surf 19 01 reglement dechet HVM"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_dechet_SIVOM_20260226.pdf",
+              "title": "Info surf 19 01 reglement dechet SIVOM"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_ep_20260226.pdf",
+              "title": "Info surf 19 01 reglement ep"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_eu_GPSEA_20260226.pdf",
+              "title": "Info surf 19 01 reglement eu GPSEA"
+            },
+            {
+              "name": "200058006_info_surf_19_01_reglement_eu_RSDA_20260226.pdf",
+              "title": "Info surf 19 01 reglement eu RSDA"
+            },
+            {
+              "name": "200058006_info_surf_20_00_20260226.pdf",
+              "title": "Règlement local de publicité"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UILO1O1O1O1O",
+            "part": 0.531,
+            "surfaceM2": 29122.1,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "UIO1O1O1O1OO",
+            "part": 0.446,
+            "surfaceM2": 24498.5,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "UIO2O1O1O2OO",
+            "part": 0.023,
+            "surfaceM2": 1264.9,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UILC2C2C3C4C",
+            "surfaceM2": 38.3
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-04",
+            "etendue": "couvre",
+            "part": 0.002,
+            "surfaceM2": 108.2,
+            "longueurM": null,
+            "libelle": "Zone humide"
+          },
+          {
+            "categorie": "05-01",
+            "etendue": "couvre",
+            "part": 0.186,
+            "surfaceM2": 10212.9,
+            "longueurM": null,
+            "libelle": "Emplacement réservé"
+          },
+          {
+            "categorie": "07-04",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": 13.9,
+            "libelle": "Cours d'eau"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "implantation des constructions"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-16-13063",
+      "vise": "Tirage pondéré : Miramas",
+      "temps": {
+        "ban": 32,
+        "cadastre": 44,
+        "municipality": 91,
+        "document": 153,
+        "zone": 72,
+        "secteur": 40,
+        "prescSurf": 69,
+        "prescLin": 72,
+        "prescPct": 76,
+        "infoSurf": 70,
+        "details": 127,
+        "totalGpu": 280,
+        "lecture": 1
+      },
+      "adresse": {
+        "label": "3 Rue Louis Blériot 13140 Miramas",
+        "type": "housenumber",
+        "score": 0.9972,
+        "citycode": "13063",
+        "lon": 5.012041,
+        "lat": 43.584534
+      },
+      "parcellesA5m": [
+        "13063000AR0026"
+      ],
+      "parcelle": {
+        "idu": "13063000AR0026",
+        "contenance": 3046,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "13063",
+          "nom": "MIRAMAS",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "adde538aa74af70825bfd35a2e6e3099",
+          "type": "PLU",
+          "titre": "MIRAMAS",
+          "nom": "13063_PLU_20261015",
+          "statut": "production",
+          "maj": "2026-10-19T10:47:39.177Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 3524,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UBa1",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "13063_reglement_20261015.pdf",
+          "doc": "adde538aa74af70825bfd35a2e6e3099"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "adde538aa74af70825bfd35a2e6e3099",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de MIRAMAS",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "21/10/2026 00:06:22",
+          "producteur": "Métropole Aix-Marseille-Provence",
+          "nbPieces": 31,
+          "reglements": [
+            {
+              "name": "13063_reglement_20261015.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UBa1",
+            "part": 1,
+            "surfaceM2": 3030,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-17-51065",
+      "vise": "Tirage pondéré : Blacy",
+      "temps": {
+        "ban": 63
+      },
+      "echec": "adresse non géocodée"
+    },
+    {
+      "id": "alea-18-83129",
+      "vise": "Tirage pondéré : Six-Fours-les-Plages",
+      "temps": {
+        "ban": 45,
+        "cadastre": 37,
+        "municipality": 84,
+        "document": 54,
+        "zone": 173,
+        "secteur": 48,
+        "prescSurf": 132,
+        "prescLin": 85,
+        "prescPct": 72,
+        "infoSurf": 270,
+        "details": 124,
+        "totalGpu": 394,
+        "lecture": 22
+      },
+      "adresse": {
+        "label": "1682 Avenue du Brusc 83140 Six-Fours-les-Plages",
+        "type": "housenumber",
+        "score": 0.9977,
+        "citycode": "83129",
+        "lon": 5.813987,
+        "lat": 43.086302
+      },
+      "parcellesA5m": [
+        "83129000AX2636"
+      ],
+      "parcelle": {
+        "idu": "83129000AX2636",
+        "contenance": 3764,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "83129",
+          "nom": "SIX-FOURS-LES-PLAGES",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "d36f93f74ce721ef818770637976e383",
+          "type": "PLU",
+          "titre": "SIX-FOURS-LES-PLAGES",
+          "nom": "83129_PLU_20260908",
+          "statut": "production",
+          "maj": "2026-09-10T08:24:46.256Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 88523,
+        "prescSurf": 10704
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "UF",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "83129_reglement_20251218.pdf",
+          "doc": "d36f93f74ce721ef818770637976e383"
+        },
+        {
+          "libelle": "UE",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "83129_reglement_20251218.pdf",
+          "doc": "d36f93f74ce721ef818770637976e383"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Emplacement réservé",
+          "typepsc": "05",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Espaces verts à protéger - alignements",
+          "typepsc": "07",
+          "stypepsc": "00"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Zone d'expansion de crue",
+          "typeinf": "21",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "DPU",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Synthèse du plan de prévention du risque inondation",
+          "typeinf": "21",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Règlement Local de Publicité intercommunal",
+          "typeinf": "20",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "d36f93f74ce721ef818770637976e383",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de SIX-FOURS-LES-PLAGES",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "10/09/2026 10:35:18",
+          "producteur": "Citadia Conseil",
+          "nbPieces": 71,
+          "reglements": [
+            {
+              "name": "83129_reglement_20251218.pdf",
+              "title": "Règlement écrit"
+            },
+            {
+              "name": "83129_info_surf_20_00_1_20260203.pdf",
+              "title": "Règlement local de publicité (1)"
+            },
+            {
+              "name": "83129_info_surf_20_00_2_20260203.pdf",
+              "title": "Règlement local de publicité (2)"
+            },
+            {
+              "name": "83129_info_surf_20_00_3_20260203.pdf",
+              "title": "Règlement local de publicité (3)"
+            },
+            {
+              "name": "83129_info_surf_20_00_4_20260203.pdf",
+              "title": "Règlement local de publicité (4)"
+            },
+            {
+              "name": "83129_info_surf_20_00_5_20260203.pdf",
+              "title": "Règlement local de publicité (5)"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UE",
+            "part": 1,
+            "surfaceM2": 3725.1,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UF",
+            "surfaceM2": 0.3
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "05-00",
+            "etendue": "couvre",
+            "part": 0.138,
+            "surfaceM2": 515.7,
+            "longueurM": null,
+            "libelle": "Emplacement réservé"
+          },
+          {
+            "categorie": "07-00",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": 26.5,
+            "libelle": "Espaces verts à protéger - alignements"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-19-33099",
+      "vise": "Tirage pondéré : Carignan-de-Bordeaux",
+      "temps": {
+        "ban": 30,
+        "cadastre": 41,
+        "municipality": 75,
+        "document": 98,
+        "zone": 90,
+        "secteur": 40,
+        "prescSurf": 90,
+        "prescLin": 85,
+        "prescPct": 53,
+        "infoSurf": 88,
+        "details": 110,
+        "totalGpu": 208,
+        "lecture": 0
+      },
+      "adresse": {
+        "label": "14 Chemin de la Font 33360 Carignan-de-Bordeaux",
+        "type": "housenumber",
+        "score": 0.9889,
+        "citycode": "33099",
+        "lon": -0.470151,
+        "lat": 44.810525
+      },
+      "parcellesA5m": [
+        "33099000AD0025",
+        "33099000AD0026"
+      ],
+      "parcelle": {
+        "idu": "33099000AD0025",
+        "contenance": 1264,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "33099",
+          "nom": "CARIGNAN-DE-BORDEAUX",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "f915b89d5caf5283d84870543e3b5390",
+          "type": "PLU",
+          "titre": "CARIGNAN-DE-BORDEAUX",
+          "nom": "33099_PLU_20251022",
+          "statut": "production",
+          "maj": "2025-11-28T10:20:28.875Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 9838,
+        "prescSurf": 147
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "2AU",
+          "typezone": "AUs",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "33099_reglement_20251022.pdf",
+          "doc": "f915b89d5caf5283d84870543e3b5390"
+        },
+        {
+          "libelle": "UA",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": "",
+          "destnon": "",
+          "nomfic": "33099_reglement_20251022.pdf",
+          "doc": "f915b89d5caf5283d84870543e3b5390"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
+      "informations": [],
+      "echecs": [],
+      "details": [
+        {
+          "id": "f915b89d5caf5283d84870543e3b5390",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de CARIGNAN-DE-BORDEAUX",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "02/12/2025 08:55:59",
+          "producteur": "mairie de Carignan de bordeaux",
+          "nbPieces": 17,
+          "reglements": [
+            {
+              "name": "33099_reglement_20251022.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UA",
+            "part": 1,
+            "surfaceM2": 1255.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "2AU",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
+    },
+    {
+      "id": "alea-20-30047",
+      "vise": "Tirage pondéré : Bouillargues",
+      "temps": {
+        "ban": 33,
+        "cadastre": 45,
+        "municipality": 40,
+        "document": 77,
+        "zone": 151,
+        "secteur": 41,
+        "prescSurf": 232,
+        "prescLin": 101,
+        "prescPct": 121,
+        "infoSurf": 193,
+        "details": 99,
+        "totalGpu": 331,
+        "lecture": 3
+      },
+      "adresse": {
+        "label": "11 Rue des Pinsons 30230 Bouillargues",
+        "type": "housenumber",
+        "score": 0.9971,
+        "citycode": "30047",
+        "lon": 4.437923,
+        "lat": 43.800582
+      },
+      "parcellesA5m": [
+        "30047000AO0145",
+        "30047000AO0143",
+        "30047000AO0144",
+        "30047000AO0320"
+      ],
+      "parcelle": {
+        "idu": "30047000AO0144",
+        "contenance": 512,
+        "rattachement": "point",
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
+      },
+      "commune": [
+        {
+          "insee": "30047",
+          "nom": "BOUILLARGUES",
+          "rnu": false
+        }
+      ],
+      "documents": [
+        {
+          "id": "d6aee5c77a9ce41bb7d316d549a6cd18",
+          "type": "PLU",
+          "titre": "BOUILLARGUES",
+          "nom": "30047_PLU_20151126",
+          "statut": "production",
+          "maj": "2021-01-11T18:13:15Z"
+        }
+      ],
+      "documentsAuPoint": 1,
+      "octets": {
+        "zone": 26770,
+        "prescSurf": 66947
+      },
+      "zonesBrutes": [
+        {
+          "libelle": "2AUH",
+          "typezone": "AUc",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "30047_reglement_20151126.pdf#page=41",
+          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18"
+        },
+        {
+          "libelle": "UD",
+          "typezone": "U",
+          "destdomi": null,
+          "destoui": null,
+          "destnon": null,
+          "nomfic": "30047_reglement_20151126.pdf#page=23",
+          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18"
+        }
+      ],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
+        {
+          "forme": "surf",
+          "libelle": "Orientations d'Aménagement et de Programmation (OAP) : secteur de Bonice",
+          "typepsc": "18",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "PPRI : Aléa résiduel",
+          "typepsc": "02",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Mouvements différentiels de terrain liés au phénomène de retrait-gonflement des argiles : Zone très exposée (B1)",
+          "typepsc": "02",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Secteur où au moins 30% des programmes de logements doivent être affectés à des logements locatifs sociaux",
+          "typepsc": "17",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "Zone inondable par débordement de cours d'eau",
+          "typepsc": "02",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "PPRI : R - U",
+          "typepsc": "02",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "surf",
+          "libelle": "PPRI : R - NU",
+          "typepsc": "02",
+          "stypepsc": "00"
+        },
+        {
+          "forme": "lin",
+          "libelle": "Marges de recul des constructions le long des cours d'eau et vallats",
+          "typepsc": "15",
+          "stypepsc": "00"
+        }
+      ],
+      "informations": [
+        {
+          "libelle": "Périmètre de droit de préemption urbain",
+          "typeinf": "04",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "ZONE D'AMENAGEMENT DIFFERE DE«BONICE»",
+          "typeinf": "05",
+          "stypeinf": "00"
+        },
+        {
+          "libelle": "Périmètre de protection éloignée des captages",
+          "typeinf": "99",
+          "stypeinf": "00"
+        }
+      ],
+      "echecs": [],
+      "details": [
+        {
+          "id": "d6aee5c77a9ce41bb7d316d549a6cd18",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de BOUILLARGUES",
+          "legalStatus": "APPROVED",
+          "effectiveStatus": "EN_VIGUEUR",
+          "publication": "12/01/2021 08:35:37",
+          "producteur": "Mairie de Bouillargues",
+          "nbPieces": 33,
+          "reglements": [
+            {
+              "name": "30047_reglement_20151126.pdf",
+              "title": "Règlement écrit"
+            }
+          ],
+          "reglementHttp": 302
+        }
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "2AUH",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "PPRI : Aléa résiduel"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "Mouvements différentiels de terrain liés au phénomène de retrait-gonflement des argiles : Zone très exposée (B1)"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "Zone inondable par débordement de cours d'eau"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "PPRI : R - U"
+          }
+        ],
+        "prescriptionsContact": 3,
+        "autresPrescriptions": [
+          "implantation des constructions"
+        ],
+        "prescriptionsStatut": "ok"
+      }
+    }
+  ]
+}

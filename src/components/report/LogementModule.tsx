@@ -682,7 +682,14 @@ export default function LogementModule({
 
             {result.georisques && (
               <div id={evidenceAnchorId("housing.regulated_zone")} className="scroll-mt-24">
-                <RegulatoryStatusBlock georisques={result.georisques} heritage={result.heritage ?? null} />
+                <RegulatoryStatusBlock
+                  georisques={result.georisques}
+                  heritage={result.heritage ?? null}
+                  urbanisme={{
+                    lecture: result.urbanisme,
+                    parcelCode: result.parcel?.parcelCode ?? null,
+                  }}
+                />
               </div>
             )}
 
@@ -763,6 +770,9 @@ const NOM_SOURCE: Record<string, string> = {
   donnees_communales: "données communales", sinistralite: "sinistralité", georisques_commune: "Géorisques (commune)",
   georisques_point: "Géorisques (adresse)", patrimoine: "servitudes patrimoniales",
   audit_energetique: "audit énergétique ADEME", diagnostics_dpe: "diagnostics de performance énergétique ADEME",
+  urbanisme: "Géoportail de l'urbanisme", urbanisme_prescriptions: "prescriptions du plan d'urbanisme",
+  urbanisme_vigueur: "statut des documents d'urbanisme", urbanisme_pieces: "pièces des documents d'urbanisme",
+  urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

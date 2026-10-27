@@ -1,0 +1,17 @@
+(node:65217) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/quentinbrache/Desktop/Futur%C2%B7e/.claude/worktrees/fut81/src/lib/geocodeur-ban.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/fut81/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+centre-plui-psmv       12 Rue du Palais 17000 La Rochelle | repli | ambigu parcelle_incertaine | docs PLUi | zones PSMV 100% | CC - | presc - (contact 0) | 517 ms
+paris-marais           14 Rue des Francs Bourgeois 75003 Paris | point | confirme  | docs PSMV | zones US 100% | CC - | presc 07-01:couvre 07-01:couvre 07-01:marginale (contact 0) | 1127 ms
+residentiel-blagnac    8 Avenue des Pins 31700 Blagnac | point | confirme  | docs PLUi | zones UM4-4 100% | CC - | presc - (contact 0) | 719 ms
+residentiel-bourg-la-reine 15 Avenue du Général Leclerc 92340 Bourg-la-Reine | repli | ambigu parcelle_incertaine | docs PLUi | zones U2b 100% | CC - | presc - (contact 2) | 2201 ms
+plui-rennes            12 Rue de la Chalotais 35510 Cesson-Sévigné | point | confirme  | docs PLUi | zones UC2 100% | CC - | presc 07-00:couvre (contact 0) | 4984 ms
+lyon-croix-rousse      10 Rue d'Austerlitz 69004 Lyon | point | confirme  | docs PLUi | zones UCe1a 100% | bordure UCe3-p 0 m² | CC - | presc 02-00:couvre 07-02:couvre (contact 2) | 1132 ms
+chamonix               48 Rue de l'Hôtel de Ville 74400 Chamonix-Mont-Blanc | point | confirme  | docs PLU | zones Ua 100% | bordure Ua-h 0 m² | CC - | presc 07-01:couvre 07-01:couvre (contact 1) | 1101 ms
+rural-bonnat           3 Rue de La Paix 23220 Bonnat | point | confirme  | docs PLUi | zones Ua 100% | bordure Ut 0 m², Ue 0 m² | CC - | presc - (contact 0) | 511 ms
+cc-vauquois            1 Rue d’Orleans 55270 Vauquois | repli | ambigu parcelle_incertaine | docs CC | zones - | CC C | presc - (contact 0) | 641 ms
+rnu-chatelard          3 impasse du bois d'ardon 23700 Châtelard | point | confirme  | docs aucun | zones - | CC - | presc - (contact 0) | 77 ms
+sans-doc-grandvals     Rue de l'École 48260 Grandvals | point | non_trouve  | docs aucun | zones - | CC - | presc - (contact 0) | 196 ms
+
+-> docs/audits/2026-10-26-fut81-urbanisme/revue-2026-10-27b/mesure-cas-apres.json

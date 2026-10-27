@@ -1,0 +1,26 @@
+(node:65816) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/quentinbrache/Desktop/Futur%C2%B7e/.claude/worktrees/fut81/src/lib/geocodeur-ban.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/quentinbrache/Desktop/Futur·e/.claude/worktrees/fut81/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+alea-1-34003           22 Rue du Gingembre 34300 Agde | point | confirme  | docs PLU | zones UD1a 100% | CC - | presc - (contact 0) | 308 ms
+alea-2-74005           330a Route de commelinges 74200 Allinges | point | confirme  | docs PLUi | zones UD 100% | bordure UE 0 m², UC2 0 m² | CC - | presc - (contact 0) | 1829 ms
+alea-3-33281           14 Avenue Ariane 33700 Mérignac | point | confirme  | docs PLUi | zones US7 61.7%, US9 38.3% | CC - | presc 05-01:couvre 07-02:couvre (contact 0) | 3990 ms
+alea-4-31555           37 Rue de la République 31300 Toulouse | repli | ambigu parcelle_incertaine | docs PSMV | zones PSMV 100% | CC - | presc 07-52:couvre 07-68:couvre 07-51:couvre (contact 5) | 1135 ms
+alea-5-77296           80 Rue de la Mauve 77550 Moissy-Cramayel | point | confirme  | docs PLU | zones UC 100% | CC - | presc - (contact 0) | 242 ms
+alea-6-34032           7 Rue Eugène Scribe 34500 Béziers | point | confirme  | docs PLU | zones UC 100% | CC - | presc - (contact 0) | 694 ms
+alea-7-64348           8 Impasse des Saules 64140 Lons | point | confirme  | docs PLUi | zones UBc 100% | CC - | presc - (contact 0) | 495 ms
+alea-8-19031           33 Chemin De Bassaler 19100 Brive-la-Gaillarde | point | confirme  | docs PLU | zones UEa 99.9% | bordure N 1.5 m² | CC - | presc - (contact 0) | 536 ms
+alea-9-60214           ? | - | -  | docs aucun | zones - | CC - | presc - (contact 0) | undefined ms
+alea-10-77442          ? | - | -  | docs aucun | zones - | CC - | presc - (contact 0) | undefined ms
+alea-11-94080          47 Cours Marigny 94300 Vincennes | point | confirme  | docs PLUi | zones N 100% | bordure UF 2.3 m², UFb 4.5 m², UE2 0.3 m² | CC - | presc 07-04:marginale (contact 0) | 4164 ms
+alea-12-59322          19 Rue Marie Lariviere 59141 Iwuy | repli | ambigu parcelle_incertaine | docs PLU | zones UB 100% | bordure 1Aua 0.1 m² | CC - | presc - (contact 0) | 2276 ms
+alea-13-98613          ? | - | -  | docs aucun | zones - | CC - | presc - (contact 0) | undefined ms
+alea-14-53091          3 La Petite Serrerie 53190 Désertines | point | confirme  | docs PLUi | zones UA 100% | bordure N 0.1 m² | CC - | presc - (contact 0) | 301 ms
+alea-15-94011          13 Avenue des Myosotis 94370 Sucy-en-Brie | point | confirme  | docs PLUi | zones UILO1O1O1O1O 53.1%, UIO1O1O1O1OO 44.6%, UIO2O1O1O2OO 2.3% | bordure UILC2C2C3C4C 43 m² | CC - | presc 07-04:couvre 05-01:couvre 07-04:couvre (contact 0) | 834 ms
+alea-16-13063          3 Rue Louis Blériot 13140 Miramas | point | confirme  | docs PLU | zones UBa1 100% | CC - | presc - (contact 0) | 2776 ms
+alea-17-51065          ? | - | -  | docs aucun | zones - | CC - | presc - (contact 0) | undefined ms
+alea-18-83129          1682 Avenue du Brusc 83140 Six-Fours-les-Plages | point | confirme  | docs PLU | zones UE 100% | bordure UF 0.5 m² | CC - | presc 05-00:couvre 07-00:couvre (contact 0) | 366 ms
+alea-19-33099          14 Chemin de la Font 33360 Carignan-de-Bordeaux | point | confirme  | docs PLU | zones UA 100% | bordure 2AU 0 m² | CC - | presc - (contact 0) | 314 ms
+alea-20-30047          11 Rue des Pinsons 30230 Bouillargues | point | confirme  | docs PLU | zones UD 100% | bordure 2AUH 0 m² | CC - | presc 02-00:couvre 02-00:couvre 02-00:couvre 02-00:couvre (contact 3) | 637 ms
+
+-> docs/audits/2026-10-26-fut81-urbanisme/revue-2026-10-27b/mesure-aleatoire-apres.json

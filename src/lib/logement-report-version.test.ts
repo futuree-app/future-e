@@ -345,5 +345,7 @@ test("T19 : à la première génération, une source indisponible est « non vé
   assert.equal((v.decision as unknown as typeof couverture).pprn.coverage, "unavailable");
   // À l'écran : sans résumé Géorisques, le bloc dit « non déterminé », jamais la phrase de l'état « rien ici ».
   const bloc = readFileSync("src/components/report/logement/RegulatorySection.tsx", "utf8");
-  assert.match(bloc, /\{!g \? \([\s\S]*?Statut réglementaire non déterminé[\s\S]*?\) : plans\.length === 0/);
+  // FUT-81 : le titre nomme ce qui n'est pas déterminé (les risques réglementés), le plan d'urbanisme
+  // lu plus bas pouvant l'être.
+  assert.match(bloc, /\{!g \? \([\s\S]*?Risques réglementés non déterminés[\s\S]*?\) : plans\.length === 0/);
 });

@@ -117,7 +117,7 @@ test("T5 : une source qui répond 500 n'est jamais lue comme une absence", async
 
 // ── La route ne fait plus la somme de ses sources ───────────────────────────────────────────────────
 // FUT-80 : une troisième dépendance réelle, les diagnostics du même bâtiment, qui attendent l'ID-RNB.
-test("Route : toutes les sources partent ensemble ; seules trois dépendances réelles restent chaînées", () => {
+test("Route : toutes les sources partent ensemble ; seules quatre dépendances réelles restent chaînées", () => {
   const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
   const corps = route.slice(route.indexOf("async function buildReport"), route.indexOf("// Typé par le contrat partagé"));
   const code = corps.replace(/^\s*\/\/.*$/gm, "");
@@ -128,7 +128,10 @@ test("Route : toutes les sources partent ensemble ; seules trois dépendances r�
   assert.match(code, /const georisquesParcelP = parcelP\.then\(/);
   assert.match(code, /const auditProcheP = auditExactP\.then\(/);
   assert.match(code, /const memeBatimentP = batimentP\.then\(/);
-  assert.equal((code.match(/\.then\(/g) ?? []).length, 4, "parcelle, audit voisin, même bâtiment, et le repli sans identifiant BAN");
+  // FUT-81 : la parcelle se lit avec sa géométrie ; le plan d'urbanisme l'attend, et rien d'autre.
+  assert.match(code, /const parcelP = parcelLueP\.then\(/);
+  assert.match(code, /const urbanismeP = parcelLueP\.then\(/);
+  assert.equal((code.match(/\.then\(/g) ?? []).length, 6, "parcelle (et sa géométrie), urbanisme, audit voisin, même bâtiment, et le repli sans identifiant BAN");
 });
 
 // ── ZFE : la source filtre au point ─────────────────────────────────────────────────────────────────

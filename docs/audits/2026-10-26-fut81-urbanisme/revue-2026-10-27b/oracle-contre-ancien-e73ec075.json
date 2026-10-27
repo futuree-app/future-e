@@ -1,0 +1,100 @@
+{
+ "total": 445,
+ "rejetes": 132,
+ "parFamille": {
+  "revue": [
+   2,
+   2
+  ],
+  "contact": [
+   3,
+   1
+  ],
+  "micro": [
+   7,
+   7
+  ],
+  "bande": [
+   2,
+   0
+  ],
+  "partage": [
+   4,
+   0
+  ],
+  "concave": [
+   3,
+   1
+  ],
+  "trou": [
+   5,
+   2
+  ],
+  "multi": [
+   3,
+   1
+  ],
+  "oblique": [
+   12,
+   12
+  ],
+  "grande": [
+   4,
+   0
+  ],
+  "aleatoire": [
+   400,
+   106
+  ]
+ },
+ "pires": [
+  {
+   "cas": "rotation 45° : séparée de 1 mm",
+   "ecart": 5000.45,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 45° : frontière commune, bande de 4 mm",
+   "ecart": 5000.4,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 7° : frontière commune, bande de 4 mm",
+   "ecart": 5000.4,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 30° : frontière commune, bande de 4 mm",
+   "ecart": 5000.4,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "bande extérieure séparée de 1 mm",
+   "ecart": 5000.25,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 61° : séparée de 1 mm",
+   "ecart": 5000.25,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 7° : séparée de 1 mm",
+   "ecart": 5000.25,
+   "ancien": 5000,
+   "geos": 0
+  },
+  {
+   "cas": "rotation 30° : séparée de 1 mm",
+   "ecart": 5000.25,
+   "ancien": 5000,
+   "geos": 0
+  }
+ ]
+}
