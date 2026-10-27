@@ -4,7 +4,7 @@ import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { readFileSync, readdirSync } from "node:fs";
 import {
-  lireBruitAerien, jeuValide, BRUIT_AERIEN_CONVENTION, LIMITE_PROCHE_M, RAYON_VOISINAGE_M,
+  lireBruitAerien, jeuValide, precisionDepuisBanId, BRUIT_AERIEN_CONVENTION, LIMITE_PROCHE_M, RAYON_VOISINAGE_M,
   type EntreeBruitAerien, type JeuBruitAerien, type LectureBruitAerien, type ZonePubliee,
 } from "./bruit-aerien.ts";
 import { texteAutour, texteLogement } from "./bruit-aerien-texte.ts";
@@ -151,6 +151,17 @@ describe("1. La copie officielle", () => {
     }
   });
 
+  test("revue I1 : les zones publiées en double ne sont gardées qu'une fois (Les Mureaux, Saint-Cyr, Semur, Villacoublay)", () => {
+    const vus = new Set<string>();
+    for (const z of jeu.peb) {
+      const k = `${z.oaci}|${z.zone}|${z.bbox.join(",")}`;
+      assert.ok(!vus.has(k), `doublon ${k}`);
+      vus.add(k);
+    }
+    const ecartes = (jeu.meta as unknown as { comptes: { doublonsEcartes: string[] } }).comptes.doublonsEcartes;
+    for (const o of ["LFXU", "LFPZ", "LFGQ", "LFPV"]) assert.ok(ecartes.some((e) => e.startsWith(o)), o);
+  });
+
   test("une date discordante dans la donnée publiée n'est jamais affichée (Gap : attribut de 1985, document de 2017)", () => {
     const gap = jeu.peb.filter((z) => z.oaci === "LFNA" && z.zone !== "D");
     assert.ok(gap.length > 0);
@@ -189,6 +200,25 @@ describe("2. Les adresses réelles, contre l'oracle tiré du fichier officiel", 
         assert.equal(couvrantes[0], [...couvrantes].sort((a, b) => (ORDRE[plan] as readonly string[]).indexOf(a) - (ORDRE[plan] as readonly string[]).indexOf(b))[0]);
       }
     }
+  });
+
+  test("revue B1 : la précision se lit dans l'identifiant BAN, et la production lit donc bien la parcelle", () => {
+    assert.equal(precisionDepuisBanId("13054_0483_00020"), "housenumber");
+    assert.equal(precisionDepuisBanId("13054_0483_00020_bis"), "housenumber");
+    assert.equal(precisionDepuisBanId("2A004_0170_00012"), "housenumber");
+    assert.equal(precisionDepuisBanId("13054_0483"), "street");
+    assert.equal(precisionDepuisBanId("13054"), null);
+    assert.equal(precisionDepuisBanId(null), null);
+    // Le chemin de la route : `type: null` envoyé par le client, précision tirée de l'identifiant du dossier.
+    for (const c of CAS) {
+      const x = fixture(c) as Fixture & { ban: { id: string } };
+      assert.equal(precisionDepuisBanId(x.ban.id), x.ban.type, c);
+    }
+    const route = readFileSync("src/app/api/georisques-logement/route.ts", "utf8");
+    assert.match(route, /geocodage: banFeatureType \?\? precisionDepuisBanId\(address\.id\)/);
+    const l = lireBruitAerien(jeu, { ...entree("albi-zone-d"), geocodage: precisionDepuisBanId((fixture("albi-zone-d") as Fixture & { ban: { id: string } }).ban.id) });
+    assert.equal(l.grain, "parcelle");
+    assert.doesNotMatch(rendreLogement(l), /précision de la localisation n'est pas connue/);
   });
 
   test("Marignane : deux logements de la même commune, l'un en zone, l'autre hors zone, et le texte le dit", () => {
@@ -251,7 +281,7 @@ describe("2. Les adresses réelles, contre l'oracle tiré du fichier officiel", 
     assert.equal(l.grain, "parcelle");
     assert.equal(l.peb.retenue?.zone, "A");
     assert.ok(l.peb.autres.some((z) => z.zone === "B"));
-    assert.match(rendreLogement(l), /La parcelle touche aussi la zone B ; la zone A, plus exposée, est retenue/);
+    assert.match(rendreLogement(l), /La parcelle touche aussi la zone B de ce plan ; la zone A, plus exposée, est retenue/);
   });
 });
 
@@ -348,8 +378,9 @@ describe("3. Les limites, les tracés et les rattachements", () => {
     const a80 = lireBruitAerien(jeu, { point: versLonLat([m[0] - n[0] * 80, m[1] - n[1] * 80]) as [number, number], geocodage: "housenumber", parcelle: null });
     assert.equal(a30.peb.etat, "en_limite");
     assert.equal(a30.peb.retenue?.zone, "C");
-    // À 80 m de cette arête, une AUTRE limite peut passer près : seul compte qu'aucune ne soit à moins de 50 m.
-    if (a80.peb.enLimite.length === 0) assert.equal(a80.peb.etat, "en_zone");
+    // À 80 m de cette arête, une AUTRE limite peut passer près : l'état suit exactement la présence d'une limite.
+    assert.equal(a80.peb.retenue?.zone, "C");
+    assert.equal(a80.peb.etat, a80.peb.enLimite.length === 0 ? "en_zone" : "en_limite");
   });
 
   test("parcelle invalide (anneau croisé) : lecture au point, et le texte le dit", () => {
@@ -385,15 +416,73 @@ describe("3. Les limites, les tracés et les rattachements", () => {
     assert.doesNotMatch(t, /parcelle rattachée/);
   });
 
-  test("une géométrie officielle non mesurable près de l'adresse rend la lecture incertaine (Villacoublay)", () => {
-    const z = jeu.peb.find((x) => x.oaci === "LFPV" && !x.valide)!;
-    assert.ok(z, "Villacoublay a une zone non mesurable dans la copie");
+  test("une géométrie officielle non mesurable rend la lecture incertaine à moins de 50 m de son tracé (Dijon, zone A)", () => {
+    const z = jeu.peb.find((x) => !x.valide)!;
+    assert.equal(z.oaci, "LFSD", "seule la zone A de Dijon reste non mesurable après dédoublonnage");
     const sommet = (z.geometry as { coordinates: number[][][][] }).coordinates[0][0][3] as [number, number];
     const l = lireBruitAerien(jeu, { point: sommet, geocodage: "housenumber", parcelle: null });
     assert.equal(l.peb.etat, "incertain");
     const t = rendreAutour(lireBruitAerien(jeu, { point: sommet, geocodage: null, parcelle: null }));
     assert.match(t, /n'a pas pu être établie/);
     assert.doesNotMatch(t, /hors des zones/);
+  });
+
+  test("revue B3 : loin du tracé non mesurable, Dijon et Versailles se lisent normalement (plus de halo de 5 km)", () => {
+    // Points de reproduction de la revue indépendante du 27/10/2026.
+    const gare = lireBruitAerien(jeu, { point: [5.027, 47.3233], geocodage: "housenumber", parcelle: null });
+    const liberation = lireBruitAerien(jeu, { point: [5.0415, 47.322], geocodage: "housenumber", parcelle: null });
+    const versailles = lireBruitAerien(jeu, { point: [2.1204, 48.8049], geocodage: "housenumber", parcelle: null });
+    for (const l of [gare, liberation, versailles]) assert.notEqual(l.peb.etat, "incertain");
+    assert.equal(liberation.peb.etat, "hors_zone");
+    assert.equal(liberation.peb.plusProche?.zone, "D");
+  });
+
+  test("revue B2 : deux aérodromes superposés (Paris-Charles de Gaulle et Paris-Le Bourget) sont nommés tous les deux, sans parcelle inventée", () => {
+    for (const p of [[2.433304, 48.974554], [2.454010, 48.976925], [2.440031, 48.968951]] as [number, number][]) {
+      const l = lireBruitAerien(jeu, { point: p, geocodage: "housenumber", parcelle: null });
+      const oaci = [l.peb.retenue?.aerodrome.oaci, ...(l.peb.autresAerodromes ?? []).map((z) => z.aerodrome.oaci)];
+      assert.ok(oaci.includes("LFPG") && oaci.includes("LFPB"), `${p} : ${oaci}`);
+      const g = rendreLogement(l);
+      const a = rendreAutour(lireBruitAerien(jeu, { point: p, geocodage: null, parcelle: null }));
+      assert.doesNotMatch(g, /La parcelle/);
+      for (const t of [g, a]) {
+        assert.match(t, /Paris-Charles de Gaulle/);
+        assert.match(t, /Paris-Le Bourget/);
+        assert.match(t, /les plans de chaque aérodrome s'appliquent/);
+        sansInterdit(t);
+      }
+      assert.match(g, /indiquant ces zones/);
+    }
+  });
+
+  test("revue B2 : au point, deux zones d'un même plan qui se recouvrent sont une limite, jamais « la parcelle touche aussi » (Bastia)", () => {
+    const l = lireBruitAerien(jeu, { point: [9.48818, 42.563732], geocodage: "housenumber", parcelle: null });
+    assert.equal(l.peb.autres.length, 0);
+    assert.doesNotMatch(rendreLogement(l), /La parcelle touche/);
+    assert.match(rendreLogement(l), /La zone D passe à moins de 50 m du point/);
+  });
+
+  test("revue I2 : le plan de gêne sonore qui déborde du PEB (Orly) n'est jamais dit « aussi », et parle seul s'il le faut", () => {
+    const hors = lireBruitAerien(jeu, { point: [2.36207, 48.72437], geocodage: null, parcelle: null });
+    assert.equal(hors.peb.etat === "en_zone" || hors.peb.etat === "en_limite" ? "dans le PEB" : "hors PEB", "hors PEB");
+    assert.ok(hors.pgs.retenue);
+    const a = rendreAutour(hors);
+    assert.match(a, /Le secteur est en revanche en zone/);
+    assert.doesNotMatch(a, /aussi en zone/);
+    const g = rendreLogement(lireBruitAerien(jeu, { point: [2.36207, 48.72437], geocodage: "housenumber", parcelle: null }));
+    assert.doesNotMatch(g, /aussi en zone/);
+    const seul = lireBruitAerien(jeu, { point: [2.58864, 48.75975], geocodage: null, parcelle: null });
+    assert.equal(seul.peb.etat, "absent");
+    assert.ok(seul.pgs.retenue);
+    assert.match(rendreAutour(seul), /est en zone [I]+ du plan de gêne sonore de l'aérodrome de Paris-Orly/);
+    assert.match(rendreLogement({ ...seul, portee: "adresse" }), /Zone [I]+ du plan de gêne sonore de l'aérodrome de Paris-Orly/);
+  });
+
+  test("revue I3 : plusieurs zones citées s'accordent (« des zones A et C », « passent »)", () => {
+    const l = lireBruitAerien(jeu, { point: [6.328593, 45.62837], geocodage: "housenumber", parcelle: null });
+    const t = rendreLogement(l) + " " + rendreAutour(lireBruitAerien(jeu, { point: [6.328593, 45.62837], geocodage: null, parcelle: null }));
+    assert.doesNotMatch(t, /la zones|de les zones|La zones/);
+    for (const c of CAS) assert.doesNotMatch(rendreLogement(lire(c)) + rendreAutour(lire(c, { sansParcelle: true })), /la zones|de les zones/);
   });
 
   test("loin de tout aérodrome : rien n'est affiché", () => {
@@ -434,6 +523,15 @@ describe("4. Panne, données absentes, dossiers antérieurs", () => {
     const ancienne: VersionLogement = { numero: 1, collecteeLe: "2026-10-01", sourcesAbsentes: sourcesAbsentes(base), synthese: null, syntheseHash: null, report: base, reportHash: "h1", syntheseDpe: null };
     assert.equal(issueActualisation({ ...base, bruitAerien: lireBruitAerien(null, entree("albi-zone-d")) }, "h2", ancienne), "refusee");
     assert.equal(issueActualisation({ ...base, bruitAerien: lire("albi-zone-d") }, "h2", ancienne), "nouvelle_version");
+  });
+
+  test("revue M3 : une lecture faite à la parcelle ne cède pas la place à une lecture au point", () => {
+    const base = { address: { id: "x", label: "x", city: null, citycode: null, postcode: null, latitude: 43, longitude: 5 } } as LogementReport;
+    const aParcelle = { ...base, bruitAerien: lire("albi-zone-d") };
+    assert.equal(aParcelle.bruitAerien.grain, "parcelle");
+    const ancienne: VersionLogement = { numero: 1, collecteeLe: "2026-10-27", sourcesAbsentes: sourcesAbsentes(aParcelle), synthese: null, syntheseHash: null, report: aParcelle, reportHash: "h1", syntheseDpe: null };
+    assert.equal(issueActualisation({ ...base, bruitAerien: lire("albi-zone-d", { sansParcelle: true }) }, "h2", ancienne), "refusee");
+    assert.equal(issueActualisation({ ...base, bruitAerien: lire("albi-zone-d") }, "h1", ancienne), "identique");
   });
 
   test("un rapport collecté avant FUT-146 n'affiche rien du bruit aérien, ni zone, ni « hors zone », ni panne", () => {
@@ -487,7 +585,7 @@ describe("5. Ce que les textes disent, et ne disent jamais", () => {
     const z = jeu.peb.find((x) => x.oaci === "LFML" && x.zone === l.peb.retenue!.zone)!;
     assert.ok(z.dateArrete);
     const [a, m, j] = z.dateArrete!.split("-").map(Number);
-    assert.match(t, new RegExp(`Plan approuvé le ${j === 1 ? "1er" : j} [^ ]+ ${a}`));
+    assert.match(t, new RegExp(`Plan de l'aérodrome de Marseille-Provence approuvé le ${j === 1 ? "1er" : j} [^ ]+ ${a}`));
     void m;
     assert.equal(texteLogement(l)?.document?.url, z.document);
   });

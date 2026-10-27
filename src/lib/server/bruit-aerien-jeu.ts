@@ -14,7 +14,11 @@ let jeu: Promise<JeuBruitAerien | null> | null = null;
 
 function charger(): Promise<JeuBruitAerien | null> {
   jeu ??= fs.readFile(path.join(process.cwd(), "data", "bruit-aerien.json"), "utf8")
-    .then((t) => { const j: unknown = JSON.parse(t); return jeuValide(j) ? j : null; })
+    .then((t) => {
+      const j: unknown = JSON.parse(t);
+      if (!jeuValide(j)) throw new Error("forme inattendue");
+      return j;
+    })
     .catch((e) => {
       console.error("[bruit-aerien] jeu illisible", String(e).slice(0, 160));
       jeu = null; // un échec n'est pas mémorisé : la prochaine lecture retente

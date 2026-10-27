@@ -10,9 +10,9 @@
 | Mesure-t-il le bruit entendu ? | Non | Non |
 | Producteur | DGAC (arrêté préfectoral ou interpréfectoral) | DGAC (arrêté) |
 | Diffusion | Géoplateforme IGN, couche `dgac_peb_plan_wmsv` (WMS vecteur) ; arrêtés `dgac_peb_arrete_wfs` (224 aérodromes) | Géoplateforme IGN, couche `dgac_pgs_plan_wmsv` ; arrêtés `dgac_pgs_arrete_wmsv` |
-| Aérodromes concernés | 224 aérodromes dotés d'un PEB publié (WFS des arrêtés, `numberMatched` = 224 le 27/10/2026) | 11 aérodromes (liste du ministère, ci-dessous) |
+| Aérodromes concernés | 224 aérodromes dotés d'un PEB publié (WFS des arrêtés, `numberMatched` = 224 le 27/10/2026), plus 2 aérodromes avec des zones mais sans arrêté listé (LFDX Fumel 1981, LFIV Vendays-Montalivet, sans document) | 11 aérodromes (liste du ministère, ci-dessous) |
 | Zones | A, B, C, D (D facultative selon l'aérodrome) | I, II, III |
-| Licence | Licence Ouverte Etalab par défaut (CGU Géoplateforme), aucune licence propre déclarée | Idem |
+| Licence | Aucune licence déclarée par la DGAC ; la Licence Ouverte Etalab s'applique **par défaut** (CGU Géoplateforme) | Idem |
 
 **Conclusion.** Les deux sources sont utilisables : producteur officiel, géométries vectorielles complètes,
 réutilisation commerciale permise sous condition de citer la source et la date. Une réserve demeure sur la
@@ -85,7 +85,7 @@ C : bruit modéré ; D : facultative. **Le PEB décrit une prévision, pas une m
 | Élément | Constat (27/10/2026) |
 |---|---|
 | Service | `https://data.geopf.fr/wms-v/ows`, WMS 1.3.0 vecteur, `GetFeatureInfo` en `application/json` |
-| Géométrie | **Polygones complets** (`MultiPolygon`, coordonnées à 5 décimales, ≈ 1 m) dans la réponse : la décision géométrique peut se faire chez futur•e, sans dépendre de la tolérance de clic du serveur |
+| Géométrie | Le `GetFeatureInfo` rend des polygones à 5 décimales, **simplifiés** (242 sommets au lieu de 593 pour la zone C d'Orly). Le KML de `GetMap` (mode vecteur intégral) rend le tracé complet à 6 décimales, identique quelle que soit l'emprise : c'est lui qui est extrait |
 | Attributs PEB | zone, aérodrome, code OACI, date de l'arrêté (cf. POC FUT-82) |
 | Arrêtés | WFS `dgac_peb_arrete_wfs` : point de l'aérodrome, nom, OACI, lien vers l'arrêté PDF (`piece-jointe-carto.developpement-durable.gouv.fr`) |
 | Anciennes couches | `DGAC-PGS_BDD_FXX_WM:fxx_pgs_wm` (encore citée par data.gouv.fr) : **retirée** du WFS (exception `InvalidParameterValue`) |

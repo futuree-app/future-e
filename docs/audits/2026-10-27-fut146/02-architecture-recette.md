@@ -1,6 +1,8 @@
 # FUT-146 · 2. Architecture retenue et recette
 
 > Branche `bonjourfuturee/fut-146-plans-bruit-aerien`, partie de `main` 4556ca11 (FUT-81 / PR #95 incluse).
+> Mis à jour après la revue indépendante du 27/10/2026 (`docs/rapports-agents/revue/2026-10-27-fut146-bruit-aerien.md`,
+> NO GO sur 4a9e90a7) : les corrections sont au § 3.
 
 ## 1. L'architecture
 
@@ -139,7 +141,25 @@ Banc `/dev/fut146?vue=section|logement|autour&cas=…` (404 en production), capt
 interface à 1 280 px et 390 px : aucun défilement horizontal ; bloc Autour à 300 px sur mobile ; section
 Logement à 814 px sur bureau dans le conteneur de page.
 
-## 3. Réserves
+## 3. Corrections après la revue indépendante
+
+| Constat | Correction | Test |
+|---|---|---|
+| B1. En production, le client envoie `type: null` : la parcelle n'était jamais lue | La précision se lit dans l'identifiant BAN du dossier (`commune_voie_numéro` = numéro), que le paiement n'accepte qu'au numéro | « revue B1 » : chemin de la route, grain parcelle |
+| B2. Deux zones superposées : « la parcelle touche aussi » au point, aérodrome non nommé | La règle « la plus exposée » vaut dans un seul plan. Les autres aérodromes sont dits (`autresAerodromes`) : « les plans de chaque aérodrome s'appliquent » ; au point, deux zones d'un même plan sont une limite | « revue B2 » : trois points CDG/Le Bourget, Bastia |
+| B3. Halo « incertain » de 5 km autour des géométries non mesurables | Doublons écartés à l'extraction (Villacoublay lisible) ; une géométrie non mesurable ne rend incertain qu'à moins de 50 m de son tracé ou dans son emprise | « revue B3 » : Dijon gare et place de la Libération, Versailles |
+| I1. Parts doublées (zones publiées en double) | 11 doublons écartés (même aérodrome, zone, emprise, sommets) ; l'extraction refuse deux zones d'une même lettre qui se recouvrent | « revue I1 » |
+| I2. PGS hors du PEB dit « aussi » ; PGS seul passé sous silence | « en revanche » hors PEB ; bloc propre au PGS quand aucun PEB n'est à 5 km | « revue I2 » : Orly |
+| I3. « la zones A et C » | Accord « la zone / les zones », « passe / passent » | « revue I3 » : Albertville et toute la recette |
+| I4. Copie tronquée possible | Liste des 11 aérodromes du PGS vérifiée, placemarks comptés, aucun aérodrome retiré sans `--accepter-retraits`, écriture atomique | (script) |
+| M1 | Préfiltre à 110 000 m par degré | |
+| M2 | Au grain parcelle, la zone la plus proche se mesure depuis la parcelle ; « touche la limite de la parcelle » | |
+| M3 | Une actualisation qui ferait passer la lecture de la parcelle au point est refusée (même règle que FUT-81) | « revue M3 » |
+| M4 | Une copie mal formée n'est pas mémorisée : la lecture suivante retente | |
+| M5 | Assertion du cas « à 80 m » rendue complète | |
+| M6, M7 | Documentation corrigée ; « le certificat d'urbanisme signale la zone de bruit » (L112-13), sans « et ses règles » | |
+
+## 4. Réserves
 
 1. **Licence** : aucune déclarée par la DGAC ; la Licence Ouverte s'applique par défaut selon les CGU de
    la Géoplateforme. Une confirmation écrite de la DGAC reste souhaitable (D6 de FUT-82).
@@ -148,8 +168,11 @@ Logement à 814 px sur bureau dans le conteneur de page.
    s'appliquer par anticipation : l'écran renvoie à la mairie.
 3. **14 dates d'arrêté** sont discordantes dans la donnée publiée (attribut contre nom du document, ex.
    Gap) : elles ne sont pas affichées, l'écran renvoie à l'arrêté.
-4. **3 géométries officielles non mesurables** (Dijon zone A, Villacoublay zones B et C) : lecture
-   « incertaine » à leurs abords.
+4. **Une géométrie officielle non mesurable** (Dijon zone A ; celles de Villacoublay étaient des doublons
+   écartés) : lecture « incertaine » à moins de 50 m de son tracé ou dans son emprise.
+9. **Deux aérodromes sans arrêté listé** (LFDX Fumel, 1981 ; LFIV Vendays-Montalivet, sans document) ont des
+   zones dans la couche : peut-être des plans abrogés. Ils sont lus comme les autres ; à confirmer auprès de
+   la DGAC.
 5. **Noms d’aérodromes** : 30 noms abrégés par la DGAC sont développés à la main (table `NOMS`) ; les
    autres sont repris tels que publiés, sans accents restitués (« Nimes Garons »).
 6. **Base légale du PGS** (Code de l'environnement) non relue sur Légifrance : l'écran ne cite aucun

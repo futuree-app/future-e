@@ -27,12 +27,19 @@
  * Licence : aucune déclarée par la DGAC ; les CGU de la Géoplateforme (15/10/2024) appliquent alors la
  * Licence Ouverte Etalab. Cf. docs/audits/2026-10-27-fut146/01-sources.md.
  *
- * Usage : node scripts/build-bruit-aerien.mjs [--brut <dossier>]   (--brut : garde les réponses brutes)
+ *  - Le nombre de placemarks lus est celui du KML ; une zone publiée en double (même aérodrome, même zone,
+ *    même emprise, même nombre de sommets à deux près) n'est gardée qu'une fois, la mesurable de préférence ;
+ *    deux zones restantes d'un même aérodrome et d'une même lettre ne doivent pas se recouvrir (sinon une
+ *    part de parcelle serait comptée deux fois).
+ *  - Aucun aérodrome de la copie précédente ne disparaît sans `--accepter-retraits`.
+ *  - L'écriture est atomique (fichier temporaire, puis renommage).
+ *
+ * Usage : node scripts/build-bruit-aerien.mjs [--brut <dossier>] [--accepter-retraits]
  */
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { aireRegion, projectionPour, regionDe, regionMesurable } from "../src/lib/geometrie-parcelle.ts";
+import { aireIntersection, aireRegion, projectionPour, regionDe, regionMesurable } from "../src/lib/geometrie-parcelle.ts";
 
 const WMS = "https://data.geopf.fr/wms-v/ows";
 const WFS = "https://data.geopf.fr/wfs/ows";
@@ -49,6 +56,9 @@ const SORTIE = path.resolve("data/bruit-aerien.json");
 
 const args = process.argv.slice(2);
 const brut = args.includes("--brut") ? args[args.indexOf("--brut") + 1] : null;
+const accepterRetraits = args.includes("--accepter-retraits");
+/** Les onze aérodromes que le ministère cite pour l'aide à l'insonorisation (ecologie.gouv.fr, 07/10/2026). */
+const PGS_ATTENDUS = ["LFBD", "LFBO", "LFLL", "LFML", "LFMN", "LFOB", "LFPB", "LFPG", "LFPO", "LFRS", "LFSB"];
 
 async function lire(url, essais = 3) {
   for (let i = 1; ; i++) {
@@ -158,8 +168,33 @@ if (brut) {
 }
 
 const arretes = JSON.parse(arretesTxt);
-const peb = placemarks(pebKml).map((f) => zone(f, "peb"));
-const pgs = placemarks(pgsKml).map((f) => zone(f, "pgs"));
+const lus = (kml, plan) => {
+  const l = placemarks(kml);
+  const n = (kml.match(/<Placemark\b/g) ?? []).length;
+  if (l.length !== n) throw new Error(`${plan} : ${l.length} placemarks lus sur ${n}`);
+  return l.map((f) => zone(f, plan));
+};
+
+/**
+ * LES ZONES PUBLIÉES EN DOUBLE (27/10/2026 : Les Mureaux, Saint-Cyr-l'École, Semur-en-Auxois, Villacoublay).
+ * Gardées, elles additionnaient deux fois la même part de parcelle ; à Villacoublay, le double non mesurable
+ * rendait la lecture incertaine alors que son jumeau se lit. Une seule est gardée, la mesurable de préférence.
+ */
+const sommets = (z) => z.geometry.coordinates.flat(2).length;
+function sansDoublons(l) {
+  const garde = [];
+  const ecartees = [];
+  for (const z of [...l].sort((a, b) => Number(b.valide) - Number(a.valide))) {
+    const jumeau = garde.find((g) => g.oaci === z.oaci && g.zone === z.zone && g.bbox.every((v, i) => v === z.bbox[i]) && Math.abs(sommets(g) - sommets(z)) <= 2);
+    if (jumeau) ecartees.push(`${z.oaci} ${z.zone} (${z.id}, jumeau de ${jumeau.id})`);
+    else garde.push(z);
+  }
+  return { zones: garde.sort((a, b) => Number(a.id) - Number(b.id)), ecartees };
+}
+const pebLu = sansDoublons(lus(pebKml, "peb"));
+const pgsLu = sansDoublons(lus(pgsKml, "pgs"));
+const peb = pebLu.zones;
+const pgs = pgsLu.zones;
 
 // ── Contrôles d'exhaustivité ────────────────────────────────────────────────────────────────────────
 const oaciArretes = new Set(arretes.features.map((f) => f.properties.oaci));
@@ -167,12 +202,33 @@ if (arretes.numberMatched !== arretes.features.length) throw new Error(`liste de
 const oaciPeb = new Set(peb.map((z) => z.oaci));
 const manquants = [...oaciArretes].filter((o) => !oaciPeb.has(o));
 if (manquants.length) throw new Error(`aérodromes à arrêté sans aucune zone : ${manquants.join(", ")}`);
-const oaciPgs = [...new Set(pgs.map((z) => z.oaci))];
+const oaciPgs = [...new Set(pgs.map((z) => z.oaci))].sort();
+if (oaciPgs.join(",") !== PGS_ATTENDUS.join(",")) throw new Error(`PGS : ${oaciPgs.join(",")} au lieu de ${PGS_ATTENDUS.join(",")}`);
 for (const o of oaciPgs) {
   const zs = pgs.filter((z) => z.oaci === o).map((z) => z.zone).sort().join(",");
   if (zs !== "I,II,III") throw new Error(`PGS ${o} : zones ${zs}`);
 }
 if (new Set(peb.map((z) => z.id)).size !== peb.length) throw new Error("identifiants PEB en double");
+// Deux zones d'une même lettre et d'un même aérodrome ne se recouvrent pas (parts additionnées par la lecture).
+for (const l of [peb, pgs]) {
+  for (let i = 0; i < l.length; i++) {
+    for (let j = i + 1; j < l.length; j++) {
+      const [a, b] = [l[i], l[j]];
+      if (a.oaci !== b.oaci || a.zone !== b.zone || !a.valide || !b.valide) continue;
+      const proj = projectionPour(a.geometry, [0, 0]);
+      const aire = aireIntersection(regionDe(a.geometry, proj), regionDe(b.geometry, proj));
+      if (aire == null || aire > 1) throw new Error(`${a.oaci} ${a.zone} : ${a.id} et ${b.id} se recouvrent (${aire} m²)`);
+    }
+  }
+}
+// Aucun aérodrome de la copie précédente ne disparaît en silence.
+try {
+  const avant = JSON.parse(await fs.readFile(SORTIE, "utf8"));
+  const retires = [...new Set([...avant.peb, ...avant.pgs].map((z) => z.oaci))].filter((o) => !oaciPeb.has(o) && !oaciPgs.includes(o));
+  if (retires.length && !accepterRetraits) throw new Error(`aérodromes retirés depuis la copie précédente : ${retires.join(", ")} (--accepter-retraits pour confirmer)`);
+} catch (e) {
+  if (e.code !== "ENOENT") throw e;
+}
 
 const compte = (l, f) => l.reduce((a, x) => ((a[f(x)] = (a[f(x)] ?? 0) + 1), a), {});
 const meta = {
@@ -194,19 +250,22 @@ const meta = {
     aerodromesPeb: oaciPeb.size,
     aerodromesPebSansArreteListe: [...oaciPeb].filter((o) => !oaciArretes.has(o)).sort(),
     zonesPeb: compte(peb, (z) => z.zone),
-    aerodromesPgs: oaciPgs.sort(),
+    aerodromesPgs: oaciPgs,
     zonesPgs: pgs.length,
     datesNonConfirmees: [...peb, ...pgs].filter((z) => !z.dateArrete).length,
     geometriesNonMesurables: [...peb, ...pgs].filter((z) => !z.valide).map((z) => `${z.oaci} ${z.zone} (${z.id})`),
+    doublonsEcartes: [...pebLu.ecartees, ...pgsLu.ecartees],
   },
 };
 
 // Une ligne par zone : le diff d'une réextraction se lit zone par zone.
 const lignes = (l) => l.map((z) => `    ${JSON.stringify(z)}`).join(",\n");
+const provisoire = `${SORTIE}.tmp`;
 await fs.writeFile(
-  SORTIE,
+  provisoire,
   `{\n  "meta": ${JSON.stringify(meta, null, 2).replace(/\n/g, "\n  ")},\n  "peb": [\n${lignes(peb)}\n  ],\n  "pgs": [\n${lignes(pgs)}\n  ]\n}\n`,
 );
+await fs.rename(provisoire, SORTIE);
 const taille = (await fs.stat(SORTIE)).size;
 console.log(`${path.relative(process.cwd(), SORTIE)} : ${peb.length} zones PEB (${oaciPeb.size} aérodromes), ${pgs.length} zones PGS (${oaciPgs.length} aérodromes), ${(taille / 1e6).toFixed(1)} Mo`);
 console.log(JSON.stringify(meta.comptes, null, 2));

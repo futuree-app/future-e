@@ -181,6 +181,9 @@ export function issueActualisation(
   if (sourcesAbsentes(nouveau).some((s) => !urba.has(s) && !avant.has(s))) return "refusee";
   // Le plan d'urbanisme se compare sur les rapports eux-mêmes (cf. `pertesUrbanisme`).
   if (pertesUrbanisme(ancienne.report, nouveau).length > 0) return "refusee";
+  // FUT-146 : même règle que le plan d'urbanisme. Une lecture des plans de bruit faite à la parcelle ne cède
+  // pas la place à une lecture au point : ce n'est pas une panne, mais une lecture moins sûre.
+  if (ancienne.report.bruitAerien?.grain === "parcelle" && nouveau.bruitAerien?.grain !== "parcelle") return "refusee";
   return "nouvelle_version";
 }
 

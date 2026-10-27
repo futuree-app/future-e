@@ -13,6 +13,7 @@ import { buildPointHazards, communalResidualFromLabels, isMvtFlagged } from "@/l
 import { getAltitude } from "@/lib/ign";
 import { fetchHeritageProtections, fetchUrbanismeParcelle } from "@/lib/gpu";
 import { lireBruitAerienAdresse } from "@/lib/server/bruit-aerien-jeu";
+import { precisionDepuisBanId } from "@/lib/bruit-aerien";
 import { lookupDpeCandidatesByBanId, lookupDpeMemeBatiment, getDpeByCoordinates } from "@/lib/dpe";
 import { lookupBatimentByBanId } from "@/lib/rnb";
 import { memeBatimentHorsAdresse } from "@/lib/dpe-meme-batiment";
@@ -71,7 +72,8 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
     const bruitAerienP = parcelLueP.then((lu) =>
       lireBruitAerienAdresse({
         point: [address.longitude, address.latitude],
-        geocodage: banFeatureType,
+        // Le client ne transmet pas le type BAN (`type: null`) : l'identifiant de l'adresse le porte.
+        geocodage: banFeatureType ?? precisionDepuisBanId(address.id),
         parcelle: lu
           ? { geometry: lu.geometry, rattachement: lu.parcel.rattachement ?? "point", candidatsAuPoint: lu.parcel.candidatsAuPoint }
           : null,

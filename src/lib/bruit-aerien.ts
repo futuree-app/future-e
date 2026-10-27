@@ -30,10 +30,12 @@
 //    projet et le secteur, et un plan en révision peut s'appliquer par anticipation (L112-14, L112-15).
 //  - Aucun droit à l'aide déduit du PGS.
 //  - « Hors zone » ne veut jamais dire « pas de bruit d'avion » : un survol hors zone reste possible.
-//  - Une géométrie qu'on ne sait pas mesurer ne produit jamais un « hors zone » : elle rend la lecture incertaine.
+//  - Une géométrie qu'on ne sait pas mesurer ne produit jamais un « hors zone » : quand son tracé passe à moins
+//    de 50 m (ou que le point est dans son emprise), elle rend la lecture incertaine ; plus loin, elle ne
+//    contient pas le point, et seule sa distance compte.
 
 import {
-  aireIntersection, aireRegion, classer, distanceLignes, pointsDe, projectionAutour, regionDe, regionMesurable,
+  aireIntersection, aireRegion, classer, distanceLignes, lignesDe, pointsDe, projectionAutour, regionDe, regionMesurable,
   type Geometrie, type Region,
 } from "./geometrie-parcelle.ts";
 import { PART_MIN, SURFACE_CONTACT_M2, SURFACE_MIN_M2 } from "./urbanisme-nomenclature.ts";
@@ -100,14 +102,27 @@ export type ZoneLue = {
 
 export type LecturePlan = {
   etat: EtatPlan;
-  /** La zone retenue (la plus exposée qui couvre le bien, ou qui contient le point). */
+  /**
+   * La zone retenue : la plus exposée du plan qui couvre le bien (ou contient le point). La règle de la
+   * notice DGAC vaut à l'intérieur d'UN plan ; quand deux aérodromes se superposent, c'est l'aérodrome dont
+   * la zone retenue est la plus exposée qui est cité en premier.
+   */
   retenue: ZoneLue | null;
-  /** Les autres zones qui couvrent le bien (parcelle) ou contiennent le point. */
+  /** Les autres zones DU MÊME PLAN qui couvrent la parcelle (grain parcelle seulement). */
   autres: ZoneLue[];
+  /**
+   * Les plans d'AUTRES aérodromes qui couvrent aussi le bien ou contiennent le point (revue du 27/10/2026 :
+   * Paris-Charles de Gaulle et Paris-Le Bourget se superposent sur plus de 10 km²). Une zone par aérodrome,
+   * la plus exposée. Tous s'appliquent : aucun n'efface l'autre. Absent des lectures antérieures.
+   */
+  autresAerodromes?: ZoneLue[];
   /** Les zones qui ne font que border le bien, ou dont la limite passe tout près du point. */
   enLimite: ZoneLue[];
-  /** La zone la plus proche quand le point n'est dans aucune (`hors_zone`), et sa distance (m, arrondie). */
-  plusProche: (ZoneLue & { distanceM: number }) | null;
+  /**
+   * La zone la plus proche quand le bien n'est dans aucune (`hors_zone`), et sa distance (m, arrondie),
+   * mesurée depuis la parcelle au grain parcelle, depuis le point sinon. `contigue` : elle touche la parcelle.
+   */
+  plusProche: (ZoneLue & { distanceM: number; contigue?: boolean }) | null;
 };
 
 /**
@@ -174,6 +189,19 @@ const rang = (plan: PlanBruit, z: string) => {
 };
 const arrondi = (v: number, pas: number) => { const k = Math.round(1 / pas); return Math.round(v * k) / k; };
 
+/**
+ * LA PRÉCISION D'UNE ADRESSE, LUE DANS SON IDENTIFIANT BAN (revue du 27/10/2026). Le module Logement ne
+ * transmet pas le type de la feature BAN (`type: null`) : sans cette lecture, la parcelle n'était jamais
+ * utilisée en production. L'identifiant d'un numéro est `commune_voie_numéro` (`13054_0483_00020`, suffixe
+ * possible : `_bis`), celui d'une voie `commune_voie`. Une autre forme reste inconnue (`null`), jamais devinée.
+ */
+export function precisionDepuisBanId(id: string | null | undefined): "housenumber" | "street" | null {
+  if (!id) return null;
+  if (/^[0-9][0-9AB][0-9]{3}_[0-9a-z]+_[0-9]{5}(?:_[0-9a-z]+)?$/i.test(id)) return "housenumber";
+  if (/^[0-9][0-9AB][0-9]{3}_[0-9a-z]+$/i.test(id)) return "street";
+  return null;
+}
+
 /** L'entrée : le point de l'adresse, sa précision, et la parcelle telle que la collecte l'a rattachée. */
 export type EntreeBruitAerien = {
   point: [number, number];
@@ -189,7 +217,11 @@ function zoneLue(z: ZonePubliee, part: number | null = null, surfaceM2: number |
   };
 }
 
-/** Une même zone d'un même aérodrome (plusieurs polygones) ne se lit qu'une fois. */
+/**
+ * Une même zone d'un même aérodrome (plusieurs polygones) ne se lit qu'une fois, ses parts additionnées. Les
+ * polygones d'une même zone ne se recouvrent pas : l'extraction écarte les doublons publiés et refuse une
+ * copie où deux d'entre eux se recouvrent (`scripts/build-bruit-aerien.mjs`).
+ */
 const cle = (z: { zone: string; aerodrome: Aerodrome }) => `${z.aerodrome.oaci}|${z.zone}`;
 function dedoublonner(l: ZoneLue[]): ZoneLue[] {
   const vus = new Map<string, ZoneLue>();
@@ -204,44 +236,89 @@ function dedoublonner(l: ZoneLue[]): ZoneLue[] {
   return [...vus.values()];
 }
 
-/** Les zones dont l'emprise passe à moins de `marge` mètres du point (préfiltre, sans géométrie). */
+/**
+ * Les zones dont l'emprise passe à moins de `marge` mètres du point (préfiltre, sans géométrie). 110 000 m
+ * par degré : un peu moins que le degré réel partout, donc une marge toujours un peu plus large que demandé.
+ */
 function candidates(zones: ZonePubliee[], [lon, lat]: [number, number], marge: number): ZonePubliee[] {
-  const dLat = marge / 111_000;
-  const dLon = marge / (111_000 * Math.max(0.1, Math.cos((lat * Math.PI) / 180)));
+  const dLat = marge / 110_000;
+  const dLon = marge / (110_000 * Math.max(0.1, Math.cos((lat * Math.PI) / 180)));
   return zones.filter(({ bbox: [x0, y0, x1, y1] }) => lon >= x0 - dLon && lon <= x1 + dLon && lat >= y0 - dLat && lat <= y1 + dLat);
 }
 
 const vide = (etat: EtatPlan): LecturePlan => ({ etat, retenue: null, autres: [], enLimite: [], plusProche: null });
 
+type Proj = ReturnType<typeof projectionAutour>;
+type Pt = [number, number];
+
+/**
+ * LE TRACÉ D'UNE ZONE, MÊME QUAND SA SURFACE NE SE MESURE PAS. Une géométrie non mesurable ne dit pas
+ * « dedans » ou « dehors », mais la distance à ses anneaux reste exacte : c'est elle qui borne l'incertitude.
+ * Revue du 27/10/2026 : sans elle, toute adresse dans un rayon de 5 km de l'emprise de la zone A de Dijon
+ * devenait « zone non établie », la gare comprise, à 6,6 km du tracé.
+ */
+function traceDe(z: ZonePubliee, proj: Proj): { region: Region | null; anneaux: Pt[][] | null } {
+  const region = z.valide ? regionDe(z.geometry, proj) : null;
+  if (region) return { region, anneaux: region };
+  const polys = (z.geometry as { coordinates?: unknown } | null)?.coordinates;
+  const anneaux = Array.isArray(polys) ? lignesDe({ type: "MultiLineString", coordinates: polys.flat(1) }, proj) : null;
+  return { region: null, anneaux };
+}
+/** Le point est-il dans l'emprise de la zone ? (Pour une zone non mesurable : on ne sait pas s'il est dedans.) */
+const dansEmprise = (z: ZonePubliee, [lon, lat]: [number, number]) => lon >= z.bbox[0] && lon <= z.bbox[2] && lat >= z.bbox[1] && lat <= z.bbox[3];
+
+/**
+ * Les zones retenues, rangées par aérodrome. La première est la plus exposée de l'aérodrome le plus exposé ;
+ * `memePlan` garde les autres zones de cet aérodrome, `autresAerodromes` la plus exposée de chacun des autres.
+ */
+function parAerodrome(plan: PlanBruit, l: ZoneLue[]) {
+  const tri = (a: ZoneLue, b: ZoneLue) => rang(plan, a.zone) - rang(plan, b.zone);
+  const tous = dedoublonner(l).sort(tri);
+  if (tous.length === 0) return { retenue: null, memePlan: [] as ZoneLue[], autresAerodromes: [] as ZoneLue[] };
+  const retenue = tous[0];
+  const memePlan = tous.slice(1).filter((z) => z.aerodrome.oaci === retenue.aerodrome.oaci);
+  const autresAerodromes: ZoneLue[] = [];
+  for (const z of tous) {
+    if (z.aerodrome.oaci !== retenue.aerodrome.oaci && !autresAerodromes.some((x) => x.aerodrome.oaci === z.aerodrome.oaci)) autresAerodromes.push(z);
+  }
+  return { retenue, memePlan, autresAerodromes };
+}
+
 /**
  * Un plan, lu au point. Les distances sont calculées sur le tracé publié : la tolérance de clic d'un
- * service n'intervient jamais.
+ * service n'intervient jamais. Au point, deux zones d'un même plan qui contiennent le point ne disent
+ * qu'une chose : le point est sur leur limite commune (`en_limite`).
  */
-function lireAuPoint(plan: PlanBruit, zones: ZonePubliee[], point: [number, number]): LecturePlan {
+function lireAuPoint(plan: PlanBruit, zones: ZonePubliee[], point: Pt): LecturePlan {
   const proj = projectionAutour(point[0], point[1]);
   const ici = pointsDe({ type: "Point", coordinates: point }, proj)![0];
   const contient: ZoneLue[] = [];
   const limites: ZoneLue[] = [];
   for (const z of candidates(zones, point, LIMITE_PROCHE_M + 10)) {
-    const r = regionDe(z.geometry, proj);
-    if (!r) return vide("incertain");
+    const { region, anneaux } = traceDe(z, proj);
+    if (!anneaux) return vide("incertain");
     // Distance au TRACÉ de la zone (ses anneaux), que le point soit dedans ou dehors.
-    const dLimite = distanceLignes(ici, r);
-    const dedans = classer(ici, r).lieu !== "dehors";
-    // Une géométrie invalide ne décide de rien près du point : ni dedans, ni dehors.
-    if (!z.valide && (dedans || dLimite <= LIMITE_PROCHE_M)) return vide("incertain");
-    if (dedans) {
+    const dLimite = distanceLignes(ici, anneaux);
+    if (!region) {
+      // Non mesurable : elle ne décide de rien près du point, ni dedans ni dehors. Loin de son tracé et hors
+      // de son emprise, elle ne contient pas le point et ne change rien.
+      if (dLimite <= LIMITE_PROCHE_M || dansEmprise(z, point)) return vide("incertain");
+      continue;
+    }
+    if (classer(ici, region).lieu !== "dehors") {
       contient.push(zoneLue(z));
       if (dLimite <= LIMITE_PROCHE_M) limites.push(zoneLue(z));
     } else if (dLimite <= LIMITE_PROCHE_M) limites.push(zoneLue(z));
   }
-  const tous = dedoublonner(contient).sort((a, b) => rang(plan, a.zone) - rang(plan, b.zone));
-  const enLimite = dedoublonner(limites).sort((a, b) => rang(plan, a.zone) - rang(plan, b.zone));
-  if (tous.length > 0) {
-    return { etat: enLimite.length > 0 ? "en_limite" : "en_zone", retenue: tous[0], autres: tous.slice(1), enLimite, plusProche: null };
+  const { retenue, memePlan, autresAerodromes } = parAerodrome(plan, contient);
+  const enLimite = dedoublonner([...limites, ...memePlan])
+    .filter((z) => !autresAerodromes.some((a) => cle(a) === cle(z)))
+    .sort((a, b) => rang(plan, a.zone) - rang(plan, b.zone));
+  if (retenue) {
+    return { etat: enLimite.length > 0 ? "en_limite" : "en_zone", retenue, autres: [], autresAerodromes, enLimite, plusProche: null };
   }
   if (enLimite.length > 0) return { etat: "en_limite", retenue: null, autres: [], enLimite, plusProche: null };
-  return horsZone(zones, point);
+  return horsZone(zones, point, null);
 }
 
 /**
@@ -249,47 +326,63 @@ function lireAuPoint(plan: PlanBruit, zones: ZonePubliee[], point: [number, numb
  * seule la part de la parcelle dans chaque zone. Au-delà de `PART_MIN`, la zone couvre le bien ; en deçà,
  * mais au-delà d'un simple contact de tracés, elle le borde.
  */
-function lireALaParcelle(plan: PlanBruit, zones: ZonePubliee[], point: [number, number], parcelle: Region, aireParcelle: number, proj: ReturnType<typeof projectionAutour>): LecturePlan {
+function lireALaParcelle(plan: PlanBruit, zones: ZonePubliee[], point: Pt, parcelle: Region, aireParcelle: number, proj: Proj): LecturePlan {
   const couvre: ZoneLue[] = [];
   const borde: ZoneLue[] = [];
   // Le préfiltre couvre toute la parcelle : son sommet le plus éloigné du point, plus une marge.
   const etendue = Math.max(...parcelle.flatMap((a) => a.map(([x, y]) => Math.hypot(x, y))));
+  const ici = pointsDe({ type: "Point", coordinates: point }, proj)![0];
   for (const z of candidates(zones, point, etendue + 10)) {
-    const r = regionDe(z.geometry, proj);
+    const { region, anneaux } = traceDe(z, proj);
+    if (!region) {
+      // Non mesurable : incertaine seulement si son tracé passe sur la parcelle ou tout près, ou si
+      // la parcelle est dans son emprise.
+      if (!anneaux || distanceLignes(ici, anneaux) <= etendue + LIMITE_PROCHE_M || dansEmprise(z, point)) return vide("incertain");
+      continue;
+    }
     // Une aire que le calcul ne peut pas garantir n'alimente jamais une attribution (cf. FUT-81).
-    const aire = r ? aireIntersection(parcelle, r) : null;
+    const aire = aireIntersection(parcelle, region);
     if (aire == null) return vide("incertain");
     if (aire < SURFACE_CONTACT_M2) continue;
-    if (!z.valide) return vide("incertain");
     const part = Math.min(1, arrondi(aire / aireParcelle, 0.001));
     if (part >= PART_MIN) couvre.push(zoneLue(z, part, arrondi(aire, 0.1)));
     // Un liseré de moins de 25 m² est l'écart de tracé entre le plan et le cadastre (cf. FUT-81).
     else if (aire >= SURFACE_MIN_M2) borde.push(zoneLue(z, part, arrondi(aire, 0.1)));
   }
-  const tous = dedoublonner(couvre).sort((a, b) => rang(plan, a.zone) - rang(plan, b.zone));
+  const { retenue, memePlan, autresAerodromes } = parAerodrome(plan, couvre);
+  const dits = [retenue, ...memePlan, ...autresAerodromes].filter((z): z is ZoneLue => !!z);
   const enLimite = dedoublonner(borde)
-    .filter((b) => !tous.some((t) => cle(t) === cle(b)))
+    .filter((b) => !dits.some((t) => cle(t) === cle(b)))
     .sort((a, b) => rang(plan, a.zone) - rang(plan, b.zone));
-  if (tous.length > 0) {
-    return { etat: enLimite.length > 0 ? "en_limite" : "en_zone", retenue: tous[0], autres: tous.slice(1), enLimite, plusProche: null };
+  if (retenue) {
+    return { etat: enLimite.length > 0 ? "en_limite" : "en_zone", retenue, autres: memePlan, autresAerodromes, enLimite, plusProche: null };
   }
   if (enLimite.length > 0) return { etat: "en_limite", retenue: null, autres: [], enLimite, plusProche: null };
-  // La parcelle ne touche aucune zone : la zone la plus proche se mesure depuis le point de l'adresse.
-  return horsZone(zones, point);
+  // La parcelle ne touche aucune zone au-delà d'un liseré : la zone la plus proche se mesure depuis elle.
+  return horsZone(zones, point, parcelle);
 }
 
-/** Hors de toute zone : la plus proche à moins de `RAYON_VOISINAGE_M`, ou rien. */
-function horsZone(zones: ZonePubliee[], point: [number, number]): LecturePlan {
+/**
+ * Hors de toute zone : la plus proche à moins de `RAYON_VOISINAGE_M`, ou rien. Au grain parcelle, la distance
+ * se mesure depuis les sommets de la parcelle (revue du 27/10/2026 : mesurée depuis le point, elle pouvait
+ * annoncer « à 10 m » une zone qui touche la parcelle).
+ */
+function horsZone(zones: ZonePubliee[], point: Pt, parcelle: Region | null): LecturePlan {
   const proj = projectionAutour(point[0], point[1]);
-  const ici = pointsDe({ type: "Point", coordinates: point }, proj)![0];
+  const depart: Pt[] = parcelle ? parcelle.flat() : [pointsDe({ type: "Point", coordinates: point }, proj)![0]];
   let plusProche: (ZoneLue & { distanceM: number }) | null = null;
   for (const z of candidates(zones, point, RAYON_VOISINAGE_M)) {
-    const r = regionDe(z.geometry, proj);
-    if (!r) return vide("incertain");
-    const d = distanceLignes(ici, r);
+    const { anneaux } = traceDe(z, proj);
+    if (!anneaux) return vide("incertain");
+    const d = Math.min(...depart.map((p) => distanceLignes(p, anneaux)));
     if (d <= RAYON_VOISINAGE_M && (!plusProche || d < plusProche.distanceM)) plusProche = { ...zoneLue(z), distanceM: d };
   }
-  return plusProche ? { ...vide("hors_zone"), plusProche: { ...plusProche, distanceM: Math.round(plusProche.distanceM / 10) * 10 } } : vide("absent");
+  if (!plusProche) return vide("absent");
+  const contigue = parcelle != null && plusProche.distanceM < 1;
+  return {
+    ...vide("hors_zone"),
+    plusProche: { ...plusProche, distanceM: Math.round(plusProche.distanceM / 10) * 10, ...(contigue ? { contigue: true } : {}) },
+  };
 }
 
 /** Une lecture qui n'a pas pu se faire. Une panne n'est JAMAIS une absence de zone. */
