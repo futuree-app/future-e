@@ -1,22 +1,23 @@
 {
-  "mesureLe": "2026-10-26T22:47:05.265Z",
+  "mesureLe": "2026-10-27T00:05:55.385Z",
   "resultats": [
     {
       "id": "alea-1-34003",
       "vise": "Tirage pondéré : Agde",
       "temps": {
-        "ban": 81,
-        "cadastre": 104,
-        "municipality": 551,
-        "document": 108,
-        "zone": 54,
-        "secteur": 43,
-        "prescSurf": 69,
-        "prescLin": 89,
-        "prescPct": 87,
-        "infoSurf": 89,
-        "details": 105,
-        "totalGpu": 656
+        "ban": 82,
+        "cadastre": 92,
+        "municipality": 59,
+        "document": 190,
+        "zone": 180,
+        "secteur": 62,
+        "prescSurf": 182,
+        "prescLin": 139,
+        "prescPct": 86,
+        "infoSurf": 134,
+        "details": 103,
+        "totalGpu": 293,
+        "lecture": 16
       },
       "adresse": {
         "label": "22 Rue du Gingembre 34300 Agde",
@@ -36,7 +37,9 @@
         "idu": "34003000KX0127",
         "contenance": 464,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -60,34 +63,24 @@
         "zone": 11276,
         "prescSurf": 24946
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UD1a",
-          "libelong": "Secteur pavillonnaire contemporain",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20240521",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "34003_reglement_20240521.pdf",
-          "urlfic": "",
-          "doc": "abcb3be63af537d7f1726e9aff11225d",
-          "part": 100
+          "doc": "abcb3be63af537d7f1726e9aff11225d"
         }
       ],
-      "zoneAuPoint": [
-        "UD1a"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Secteur de mixité sociale",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": "Mixité",
-          "urlfic": "",
-          "nomfic": "",
-          "part": 100
+          "stypepsc": "00"
         }
       ],
       "informations": [],
@@ -110,24 +103,55 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD1a",
+            "part": 1,
+            "surfaceM2": 447.1,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-2-74005",
       "vise": "Tirage pondéré : Allinges",
       "temps": {
         "ban": 34,
-        "cadastre": 41,
-        "municipality": 50,
-        "document": 66,
-        "zone": 47,
-        "secteur": 42,
-        "prescSurf": 90,
-        "prescLin": 52,
-        "prescPct": 40,
-        "infoSurf": 39,
-        "details": 111,
-        "totalGpu": 201
+        "cadastre": 40,
+        "municipality": 85,
+        "document": 156,
+        "zone": 189,
+        "secteur": 48,
+        "prescSurf": 699,
+        "prescLin": 41,
+        "prescPct": 67,
+        "infoSurf": 135,
+        "details": 160,
+        "totalGpu": 859,
+        "lecture": 14
       },
       "adresse": {
         "label": "330a Route de commelinges 74200 Allinges",
@@ -144,7 +168,9 @@
         "idu": "74005000AK0080",
         "contenance": 1135,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -168,58 +194,42 @@
         "zone": 18612,
         "prescSurf": 64716
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UD",
-          "libelong": "Pavillonnaire au développement maîtrisé",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20251216",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200067551_reglement_20251216.pdf",
-          "urlfic": "",
-          "doc": "c36093052df6f8c3c1f17bb4ca26f926",
-          "part": 100
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
         },
         {
           "libelle": "UE",
-          "libelong": "Equipement public et/ou d intérêt collectif",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20251216",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200067551_reglement_20251216.pdf",
-          "urlfic": "",
-          "doc": "c36093052df6f8c3c1f17bb4ca26f926",
-          "part": 0
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
         },
         {
           "libelle": "UC2",
-          "libelong": "Centralité des communes villages et centralités périphériques des communes pôles",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20251216",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200067551_reglement_20251216.pdf",
-          "urlfic": "",
-          "doc": "c36093052df6f8c3c1f17bb4ca26f926",
-          "part": 0
+          "doc": "c36093052df6f8c3c1f17bb4ca26f926"
         }
       ],
-      "zoneAuPoint": [
-        "UD"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Secteur à programme de logements mixité sociale en zone U et AU au titre de l'article L151-15 du CU",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200067551_reglement_20251216.pdf",
-          "part": 100
+          "stypepsc": "00"
         }
       ],
       "informations": [],
@@ -242,24 +252,64 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD",
+            "part": 1,
+            "surfaceM2": 1117.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UE",
+            "surfaceM2": 0
+          },
+          {
+            "libelle": "UC2",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-3-33281",
       "vise": "Tirage pondéré : Mérignac",
       "temps": {
-        "ban": 39,
-        "cadastre": 50,
+        "ban": 31,
+        "cadastre": 46,
         "municipality": 54,
-        "document": 61,
-        "zone": 151,
-        "secteur": 95,
-        "prescSurf": 756,
-        "prescLin": 650,
-        "prescPct": 61,
-        "infoSurf": 979,
-        "details": 103,
-        "totalGpu": 1082
+        "document": 126,
+        "zone": 158,
+        "secteur": 51,
+        "prescSurf": 1565,
+        "prescLin": 67,
+        "prescPct": 80,
+        "infoSurf": 1521,
+        "details": 104,
+        "totalGpu": 1669,
+        "lecture": 48
       },
       "adresse": {
         "label": "14 Avenue Ariane 33700 Mérignac",
@@ -277,7 +327,9 @@
         "idu": "33281000AE0187",
         "contenance": 4979,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -301,116 +353,75 @@
         "zone": 11110,
         "prescSurf": 38371
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "US7",
-          "libelong": "Zones urbaines spécifiques liées à l'économie",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20200124",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "243300316_reglement_20260505.pdf",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "doc": "0b6c6621184959caf3fa5b684f929657",
-          "part": 58.3
+          "doc": "0b6c6621184959caf3fa5b684f929657"
         },
         {
           "libelle": "US9",
-          "libelong": "Zones urbaines spécifiques liées à l'économie",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20200124",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "243300316_reglement_20260505.pdf",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "doc": "0b6c6621184959caf3fa5b684f929657",
-          "part": 41.7
+          "doc": "0b6c6621184959caf3fa5b684f929657"
         }
       ],
-      "zoneAuPoint": [
-        "US9"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Secteur de diversité sociale : Non concerné",
           "typepsc": "99",
-          "stypepsc": "03",
-          "txt": "NC",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 41.7
+          "stypepsc": "03"
         },
         {
           "forme": "surf",
           "libelle": "Constructibilité par nouvelle bande d'accès interdite",
           "typepsc": "28",
-          "stypepsc": "00",
-          "txt": "NON",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 41.7
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Emplacement réservé - Voirie tertiaire",
           "typepsc": "05",
-          "stypepsc": "01",
-          "txt": "T2400",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 0.9
+          "stypepsc": "01"
         },
         {
           "forme": "surf",
           "libelle": "Indice de stationnement",
           "typepsc": "44",
-          "stypepsc": "00",
-          "txt": "5",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 58.3
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Secteur de diversité sociale : Non concerné",
           "typepsc": "99",
-          "stypepsc": "03",
-          "txt": "NC",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 58.3
+          "stypepsc": "03"
         },
         {
           "forme": "surf",
           "libelle": "Indice de stationnement",
           "typepsc": "44",
-          "stypepsc": "00",
-          "txt": "5",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 41.7
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Constructibilité par nouvelle bande d'accès interdite",
           "typepsc": "28",
-          "stypepsc": "00",
-          "txt": "NON",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 58.3
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Patrimoine paysager - Bois et bosquets intérieurs",
           "typepsc": "07",
-          "stypepsc": "02",
-          "txt": "P3205",
-          "urlfic": "https://fichiers.bordeaux-metropole.fr/plu/Telechargement/5_Reglement.zip",
-          "nomfic": "243300316_reglement_20260505.pdf",
-          "part": 0.9
+          "stypepsc": "02"
         }
       ],
       "informations": [
@@ -479,24 +490,80 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "US7",
+            "part": 0.617,
+            "surfaceM2": 3501.5,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "US9",
+            "part": 0.383,
+            "surfaceM2": 2176.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "05-01",
+            "etendue": "couvre",
+            "part": 0.012,
+            "surfaceM2": 70.4,
+            "longueurM": null,
+            "libelle": "Emplacement réservé - Voirie tertiaire"
+          },
+          {
+            "categorie": "07-02",
+            "etendue": "couvre",
+            "part": 0.007,
+            "surfaceM2": 37.3,
+            "longueurM": null,
+            "libelle": "Patrimoine paysager - Bois et bosquets intérieurs"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "autre prescription",
+          "conditions de desserte",
+          "stationnement"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-4-31555",
       "vise": "Tirage pondéré : Toulouse",
       "temps": {
-        "ban": 32,
-        "cadastre": 117,
+        "ban": 39,
+        "cadastre": 100,
         "municipality": 62,
-        "document": 41,
-        "zone": 71,
-        "secteur": 37,
-        "prescSurf": 98,
-        "prescLin": 54,
-        "prescPct": 51,
-        "infoSurf": 1154,
-        "details": 98,
-        "totalGpu": 1252
+        "document": 44,
+        "zone": 136,
+        "secteur": 38,
+        "prescSurf": 507,
+        "prescLin": 117,
+        "prescPct": 110,
+        "infoSurf": 832,
+        "details": 100,
+        "totalGpu": 932,
+        "lecture": 4
       },
       "adresse": {
         "label": "37 Rue de la République 31300 Toulouse",
@@ -515,7 +582,9 @@
         "idu": "31555828AD0232",
         "contenance": 178,
         "rattachement": "repli",
-        "rayon": 3
+        "rayon": 3,
+        "distanceM": 0.2,
+        "candidatsAuPoint": null
       },
       "commune": [
         {
@@ -539,124 +608,78 @@
         "zone": 15816,
         "prescSurf": 6759
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "PSMV",
-          "libelong": "Emprise du Plan de Sauvegarde et de Mise en Valeur",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20250217",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "31555_reglement_20250217.pdf",
-          "urlfic": "",
-          "doc": "741fb112ea7a4538c3a0a48afd454c0c",
-          "part": 100
+          "doc": "741fb112ea7a4538c3a0a48afd454c0c"
         }
       ],
-      "zoneAuPoint": [
-        "PSMV"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "52",
-          "txt": "IBP",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 5.4
+          "stypepsc": "52"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble non bâti ou autre espace libre soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère",
           "typepsc": "07",
-          "stypepsc": "68",
-          "txt": "IM NB",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 9.1
+          "stypepsc": "68"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties intérieures et extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "50",
-          "txt": "IBPT",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 0
+          "stypepsc": "50"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "52",
-          "txt": "IBP",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 0
+          "stypepsc": "52"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "52",
-          "txt": "IBP",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 0
+          "stypepsc": "52"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "52",
-          "txt": "IBP",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 33.1
+          "stypepsc": "52"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti pouvant être conservé, amélioré, démoli ou remplacé, soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère",
           "typepsc": "07",
-          "stypepsc": "67",
-          "txt": "IBC",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 0
+          "stypepsc": "67"
         },
         {
           "forme": "surf",
           "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité",
           "typepsc": "07",
-          "stypepsc": "52",
-          "txt": "IBP",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": 52.3
+          "stypepsc": "52"
         },
         {
           "forme": "lin",
           "libelle": "Linéaire renforcé (Service)",
           "typepsc": "22",
-          "stypepsc": "04",
-          "txt": "LIN RENF",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": null
+          "stypepsc": "04"
         },
         {
           "forme": "pct",
           "libelle": "Élément intérieur particulier : E = escalier",
           "typepsc": "07",
-          "stypepsc": "51",
-          "txt": "E",
-          "urlfic": "",
-          "nomfic": "31555_reglement_20250217.pdf",
-          "part": null
+          "stypepsc": "51"
         }
       ],
       "informations": [
@@ -725,24 +748,80 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "ambigu",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "repli",
+          "distanceM": 0.2
+        },
+        "ambiguites": [
+          "parcelle_incertaine"
+        ],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "PSMV",
+            "part": 1,
+            "surfaceM2": 177.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-52",
+            "etendue": "couvre",
+            "part": 0.523,
+            "surfaceM2": 92.8,
+            "longueurM": null,
+            "libelle": "Immeuble bâti dont les parties extérieures sont protégées en totalité"
+          },
+          {
+            "categorie": "07-68",
+            "etendue": "couvre",
+            "part": 0.094,
+            "surfaceM2": 16.6,
+            "longueurM": null,
+            "libelle": "Immeuble non bâti ou autre espace libre soumis aux règles générales en matière de qualité architecturale, urbaine et paysagère"
+          },
+          {
+            "categorie": "07-51",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": null,
+            "libelle": "Élément intérieur particulier : E = escalier"
+          }
+        ],
+        "prescriptionsContact": 5,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-5-77296",
       "vise": "Tirage pondéré : Moissy-Cramayel",
       "temps": {
-        "ban": 35,
-        "cadastre": 44,
-        "municipality": 476,
-        "document": 482,
-        "zone": 70,
-        "secteur": 43,
-        "prescSurf": 41,
-        "prescLin": 48,
-        "prescPct": 42,
-        "infoSurf": 47,
-        "details": 103,
-        "totalGpu": 585
+        "ban": 31,
+        "cadastre": 46,
+        "municipality": 72,
+        "document": 75,
+        "zone": 97,
+        "secteur": 85,
+        "prescSurf": 81,
+        "prescLin": 81,
+        "prescPct": 57,
+        "infoSurf": 59,
+        "details": 104,
+        "totalGpu": 201,
+        "lecture": 6
       },
       "adresse": {
         "label": "80 Rue de la Mauve 77550 Moissy-Cramayel",
@@ -761,7 +840,9 @@
         "idu": "77296000AC0707",
         "contenance": 674,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -785,25 +866,19 @@
         "zone": 17895,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UC",
-          "libelong": "Zone urbaine d'habitat pavillonnaire",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20251215",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "77296_reglement_20251215.pdf",
-          "urlfic": "",
-          "doc": "29fa09e00b9d5bcb7fba5d79c0f01d8d",
-          "part": 100
+          "doc": "29fa09e00b9d5bcb7fba5d79c0f01d8d"
         }
       ],
-      "zoneAuPoint": [
-        "UC"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [],
       "echecs": [],
       "details": [
@@ -824,24 +899,53 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UC",
+            "part": 1,
+            "surfaceM2": 668,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-6-34032",
       "vise": "Tirage pondéré : Béziers",
       "temps": {
-        "ban": 30,
-        "cadastre": 41,
-        "municipality": 61,
-        "document": 44,
-        "zone": 66,
-        "secteur": 39,
-        "prescSurf": 152,
-        "prescLin": 41,
-        "prescPct": 45,
-        "infoSurf": 209,
-        "details": 108,
-        "totalGpu": 317
+        "ban": 36,
+        "cadastre": 47,
+        "municipality": 103,
+        "document": 69,
+        "zone": 131,
+        "secteur": 52,
+        "prescSurf": 139,
+        "prescLin": 87,
+        "prescPct": 104,
+        "infoSurf": 439,
+        "details": 98,
+        "totalGpu": 537,
+        "lecture": 4
       },
       "adresse": {
         "label": "7 Rue Eugène Scribe 34500 Béziers",
@@ -859,7 +963,9 @@
         "idu": "34032000OS0149",
         "contenance": 2665,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -883,25 +989,19 @@
         "zone": 34913,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UC",
-          "libelong": "UC : zone de quartiers péricentraux",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20210406",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "34032_reglement_20260707.pdf#page=46",
-          "urlfic": "https://sig.beziers-mediterranee.fr/ARCOPOLE_PDF/PLU/34032_reglement_20260707.pdf#page=46",
-          "doc": "00ad6978a9b56bd44b3362bbaafdc07e",
-          "part": 100
+          "doc": "00ad6978a9b56bd44b3362bbaafdc07e"
         }
       ],
-      "zoneAuPoint": [
-        "UC"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [
         {
           "libelle": "Droit de Préemption Urbain",
@@ -956,24 +1056,53 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UC",
+            "part": 1,
+            "surfaceM2": 2633.9,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-7-64348",
       "vise": "Tirage pondéré : Lons",
       "temps": {
-        "ban": 28,
+        "ban": 51,
         "cadastre": 41,
-        "municipality": 42,
-        "document": 88,
-        "zone": 123,
-        "secteur": 41,
-        "prescSurf": 102,
-        "prescLin": 46,
-        "prescPct": 45,
-        "infoSurf": 165,
-        "details": 100,
-        "totalGpu": 265
+        "municipality": 47,
+        "document": 99,
+        "zone": 142,
+        "secteur": 38,
+        "prescSurf": 311,
+        "prescLin": 62,
+        "prescPct": 55,
+        "infoSurf": 255,
+        "details": 106,
+        "totalGpu": 417,
+        "lecture": 4
       },
       "adresse": {
         "label": "8 Impasse des Saules 64140 Lons",
@@ -990,7 +1119,9 @@
         "idu": "64348000BL0303",
         "contenance": 1069,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -1014,34 +1145,24 @@
         "zone": 65682,
         "prescSurf": 32859
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UBc",
-          "libelong": "UBc : Zone d'extension pavillonnaire / faubourg (Coeur de Pays)",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20230330",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200067254_reglement_20241219.pdf",
-          "urlfic": "",
-          "doc": "702a5ac1aa1d3cc718bf7ed2512196c8",
-          "part": 100
+          "doc": "702a5ac1aa1d3cc718bf7ed2512196c8"
         }
       ],
-      "zoneAuPoint": [
-        "UBc"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "secteur de renforcement de mixité sociale",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "",
-          "part": 100
+          "stypepsc": "00"
         }
       ],
       "informations": [
@@ -1074,24 +1195,55 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UBc",
+            "part": 1,
+            "surfaceM2": 1061.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "mixité sociale"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-8-19031",
       "vise": "Tirage pondéré : Brive-la-Gaillarde",
       "temps": {
-        "ban": 27,
-        "cadastre": 47,
-        "municipality": 392,
-        "document": 44,
-        "zone": 257,
-        "secteur": 40,
-        "prescSurf": 59,
-        "prescLin": 44,
-        "prescPct": 44,
-        "infoSurf": 252,
-        "details": 116,
-        "totalGpu": 508
+        "ban": 36,
+        "cadastre": 42,
+        "municipality": 79,
+        "document": 83,
+        "zone": 298,
+        "secteur": 61,
+        "prescSurf": 154,
+        "prescLin": 83,
+        "prescPct": 119,
+        "infoSurf": 422,
+        "details": 103,
+        "totalGpu": 525,
+        "lecture": 36
       },
       "adresse": {
         "label": "33 Chemin De Bassaler 19100 Brive-la-Gaillarde",
@@ -1108,7 +1260,9 @@
         "idu": "19031000DS0304",
         "contenance": 2378,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -1132,37 +1286,28 @@
         "zone": 518221,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UEa",
-          "libelong": "UEa : Habitat residentiel de coteaux secteurs d habitat diffus",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20240522",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "19031_reglement_20250402.pdf",
-          "urlfic": "",
-          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4",
-          "part": 100
+          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4"
         },
         {
           "libelle": "N",
-          "libelong": "N : Secteurs naturels stricts",
           "typezone": "N",
           "destdomi": null,
-          "datvalid": "20240522",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "19031_reglement_20250402.pdf",
-          "urlfic": "",
-          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4",
-          "part": 0
+          "doc": "92d9ee55ef8de4a93f5f3730ae7da2f4"
         }
       ],
-      "zoneAuPoint": [
-        "UEa"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [
         {
           "libelle": "Règlement local de publicité - zone 3",
@@ -1208,13 +1353,46 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UEa",
+            "part": 0.999,
+            "surfaceM2": 2305,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "N",
+            "surfaceM2": 1.6
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-9-60214",
       "vise": "Tirage pondéré : Ernemont-Boutavent",
       "temps": {
-        "ban": 53
+        "ban": 54
       },
       "echec": "adresse non géocodée"
     },
@@ -1222,7 +1400,7 @@
       "id": "alea-10-77442",
       "vise": "Tirage pondéré : Samoreau",
       "temps": {
-        "ban": 60
+        "ban": 54
       },
       "echec": "adresse non géocodée"
     },
@@ -1230,18 +1408,19 @@
       "id": "alea-11-94080",
       "vise": "Tirage pondéré : Vincennes",
       "temps": {
-        "ban": 32,
-        "cadastre": 206,
-        "municipality": 39,
-        "document": 50,
-        "zone": 93,
-        "secteur": 44,
-        "prescSurf": 113,
-        "prescLin": 60,
-        "prescPct": 60,
-        "infoSurf": 45,
-        "details": 102,
-        "totalGpu": 215
+        "ban": 30,
+        "cadastre": 42,
+        "municipality": 42,
+        "document": 41,
+        "zone": 244,
+        "secteur": 941,
+        "prescSurf": 743,
+        "prescLin": 303,
+        "prescPct": 179,
+        "infoSurf": 119,
+        "details": 95,
+        "totalGpu": 1036,
+        "lecture": 7
       },
       "adresse": {
         "label": "47 Cours Marigny 94300 Vincennes",
@@ -1260,7 +1439,9 @@
         "idu": "940800000O0192",
         "contenance": 17625,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -1284,130 +1465,87 @@
         "zone": 15318,
         "prescSurf": 31630
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UF",
-          "libelong": "UF - Zone des franges du Bois de Vincennes",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20231212",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200057941_reglement_20261015.pdf",
-          "urlfic": "",
-          "doc": "f7abbb79443a3d74d559ec786e2640bb",
-          "part": 0
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
         },
         {
           "libelle": "N",
-          "libelong": "N - Zone naturelle",
           "typezone": "N",
           "destdomi": null,
-          "datvalid": "20231212",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200057941_reglement_20261015.pdf",
-          "urlfic": "",
-          "doc": "f7abbb79443a3d74d559ec786e2640bb",
-          "part": 99.9
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
         },
         {
           "libelle": "UFb",
-          "libelong": "UF - Zone des franges du Bois de Vincennes",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20231212",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200057941_reglement_20261015.pdf",
-          "urlfic": "",
-          "doc": "f7abbb79443a3d74d559ec786e2640bb",
-          "part": 0.1
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
         },
         {
           "libelle": "UE2",
-          "libelong": "UE - Zone d'équipements publics",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20231212",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "200057941_reglement_20261015.pdf",
-          "urlfic": "",
-          "doc": "f7abbb79443a3d74d559ec786e2640bb",
-          "part": 0
+          "doc": "f7abbb79443a3d74d559ec786e2640bb"
         }
       ],
-      "zoneAuPoint": [
-        "N"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Périmètre de 500m autour des gares",
           "typepsc": "44",
-          "stypepsc": "02",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 100
+          "stypepsc": "02"
         },
         {
           "forme": "surf",
           "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 0
+          "stypepsc": "04"
         },
         {
           "forme": "surf",
           "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 0
+          "stypepsc": "04"
         },
         {
           "forme": "surf",
           "libelle": "Secteurs de mixité sociale au titre de l'article L151-15 du Code de l'Urbanisme",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": "09",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 0
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 0
+          "stypepsc": "04"
         },
         {
           "forme": "surf",
           "libelle": "Secteurs de mixité sociale au titre de l'article L151-15 du Code de l'Urbanisme",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": "10",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": 0.1
+          "stypepsc": "00"
         },
         {
           "forme": "lin",
           "libelle": "Linéaire de préservation et de développement de la diversité commerciale restreint au titre de l'article L. 151-16 du Code de l'urbanisme",
           "typepsc": "22",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200057941_reglement_20261015.pdf",
-          "part": null
+          "stypepsc": "04"
         }
       ],
       "informations": [],
@@ -1434,24 +1572,78 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "N",
+            "part": 1,
+            "surfaceM2": 17499.2,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UF",
+            "surfaceM2": 2.8
+          },
+          {
+            "libelle": "UFb",
+            "surfaceM2": 4.2
+          },
+          {
+            "libelle": "UE2",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-04",
+            "etendue": "marginale",
+            "part": 0,
+            "surfaceM2": 0.3,
+            "longueurM": null,
+            "libelle": "Jardins et coeurs d'îlot protégés au titre de l'article L. 151-23 du code de l'urbanisme"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "diversité commerciale",
+          "stationnement"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-12-59322",
       "vise": "Tirage pondéré : Iwuy",
       "temps": {
         "ban": 29,
-        "cadastre": 84,
-        "municipality": 44,
-        "document": 40,
-        "zone": 61,
-        "secteur": 39,
-        "prescSurf": 44,
-        "prescLin": 57,
-        "prescPct": 38,
-        "infoSurf": 45,
-        "details": 97,
-        "totalGpu": 158
+        "cadastre": 332,
+        "municipality": 94,
+        "document": 92,
+        "zone": 75,
+        "secteur": 37,
+        "prescSurf": 75,
+        "prescLin": 74,
+        "prescPct": 91,
+        "infoSurf": 197,
+        "details": 110,
+        "totalGpu": 307,
+        "lecture": 1
       },
       "adresse": {
         "label": "19 Rue Marie Lariviere 59141 Iwuy",
@@ -1468,7 +1660,9 @@
         "idu": "593220000A2888",
         "contenance": 751,
         "rattachement": "repli",
-        "rayon": 3
+        "rayon": 3,
+        "distanceM": 1.3,
+        "candidatsAuPoint": null
       },
       "commune": [
         {
@@ -1492,37 +1686,28 @@
         "zone": 11223,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UB",
-          "libelong": "Zone urbain de densite moyenne situee a la peripherie du centre. Elle est affectee  aux habitations individuelles et collectives, commerces, services et aux equipements publics",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20230918",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "59322_reglement_graphique_1_20230918.pdf",
-          "urlfic": null,
-          "doc": "e79d1cdf314d07ffad93ec38922b9832",
-          "part": 100
+          "doc": "e79d1cdf314d07ffad93ec38922b9832"
         },
         {
           "libelle": "1Aua",
-          "libelong": "Secteur a vocation d'habitat de la zone a caractere naturel destinee a une urbanisation future",
           "typezone": "AUc",
           "destdomi": null,
-          "datvalid": "20230918",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "59322_reglement_graphique_1_20230918.pdf",
-          "urlfic": null,
-          "doc": "e79d1cdf314d07ffad93ec38922b9832",
-          "part": 0
+          "doc": "e79d1cdf314d07ffad93ec38922b9832"
         }
       ],
-      "zoneAuPoint": [
-        "UB"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [],
       "echecs": [],
       "details": [
@@ -1543,13 +1728,48 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "ambigu",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "repli",
+          "distanceM": 1.3
+        },
+        "ambiguites": [
+          "parcelle_incertaine"
+        ],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UB",
+            "part": 1,
+            "surfaceM2": 752.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "1Aua",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-13-98613",
       "vise": "Tirage pondéré : Uvea",
       "temps": {
-        "ban": 110
+        "ban": 66
       },
       "echec": "adresse non géocodée"
     },
@@ -1557,18 +1777,19 @@
       "id": "alea-14-53091",
       "vise": "Tirage pondéré : Désertines",
       "temps": {
-        "ban": 29,
-        "cadastre": 50,
-        "municipality": 102,
-        "document": 106,
-        "zone": 67,
-        "secteur": 55,
-        "prescSurf": 88,
-        "prescLin": 78,
-        "prescPct": 45,
-        "infoSurf": 55,
-        "details": 100,
-        "totalGpu": 206
+        "ban": 32,
+        "cadastre": 41,
+        "municipality": 76,
+        "document": 163,
+        "zone": 70,
+        "secteur": 39,
+        "prescSurf": 57,
+        "prescLin": 56,
+        "prescPct": 51,
+        "infoSurf": 63,
+        "details": 105,
+        "totalGpu": 268,
+        "lecture": 3
       },
       "adresse": {
         "label": "3 La Petite Serrerie 53190 Désertines",
@@ -1585,7 +1806,9 @@
         "idu": "530910000Z0043",
         "contenance": 1303,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -1609,37 +1832,28 @@
         "zone": 35622,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "N",
-          "libelong": "Zone naturelle",
           "typezone": "N",
           "destdomi": null,
-          "datvalid": "20221221",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "245300389_reglement_20250917.pdf",
-          "urlfic": "",
-          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df",
-          "part": 0
+          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df"
         },
         {
           "libelle": "UA",
-          "libelong": "Zone urbaine centrale",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20221221",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "245300389_reglement_20250917.pdf",
-          "urlfic": "",
-          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df",
-          "part": 100
+          "doc": "6b3ac6aa5de6a1c97e6f52d00dda46df"
         }
       ],
-      "zoneAuPoint": [
-        "UA"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [
         {
           "libelle": "Périmètre de droit de préemption urbain",
@@ -1666,24 +1880,58 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UA",
+            "part": 1,
+            "surfaceM2": 1317.6,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "N",
+            "surfaceM2": 0.1
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-15-94011",
       "vise": "Tirage pondéré : Bonneuil-sur-Marne",
       "temps": {
-        "ban": 98,
-        "cadastre": 82,
-        "municipality": 36,
-        "document": 86,
-        "zone": 64,
-        "secteur": 46,
-        "prescSurf": 58,
-        "prescLin": 123,
-        "prescPct": 93,
-        "infoSurf": 243,
-        "details": 92,
-        "totalGpu": 335
+        "ban": 43,
+        "cadastre": 41,
+        "municipality": 136,
+        "document": 90,
+        "zone": 76,
+        "secteur": 47,
+        "prescSurf": 73,
+        "prescLin": 64,
+        "prescPct": 57,
+        "infoSurf": 290,
+        "details": 137,
+        "totalGpu": 427,
+        "lecture": 6
       },
       "adresse": {
         "label": "13 Avenue des Myosotis 94370 Sucy-en-Brie",
@@ -1700,7 +1948,9 @@
         "idu": "94071000AZ0205",
         "contenance": 55540,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -1724,120 +1974,81 @@
         "zone": 17131,
         "prescSurf": 14831
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UILC2C2C3C4C",
-          "libelong": "UILC2C2C3C4C1C3 : Secteur d'activites",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20260226",
-          "datappro": null,
+          "destoui": "33-41-42-51-52-55",
+          "destnon": "10-22-31-32-34-35-36-37-43-44-45-46-47-54",
           "nomfic": "200058006_reglement_20260226.pdf",
-          "urlfic": "",
-          "doc": "827efeb42cc1bc40ec2b4279943403ef",
-          "part": 0
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
         },
         {
           "libelle": "UIO1O1O1O1OO",
-          "libelong": "UIO1O1O1O1OO : Secteur d'activites",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20260226",
-          "datappro": null,
+          "destoui": "11-31-32-33-34-36-41-42-43-44-45-46-51-53-54-55",
+          "destnon": "12-22-35-37-47",
           "nomfic": "200058006_reglement_20260226.pdf",
-          "urlfic": "",
-          "doc": "827efeb42cc1bc40ec2b4279943403ef",
-          "part": 46
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
         },
         {
           "libelle": "UILO1O1O1O1O",
-          "libelong": "UILO1O1O1O1OO : Secteur d'activites",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20260226",
-          "datappro": null,
+          "destoui": "33-41-42-51-52-55",
+          "destnon": "10-22-31-32-34-35-36-37-43-44-45-46-47-54",
           "nomfic": "200058006_reglement_20260226.pdf",
-          "urlfic": "",
-          "doc": "827efeb42cc1bc40ec2b4279943403ef",
-          "part": 51.7
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
         },
         {
           "libelle": "UIO2O1O1O2OO",
-          "libelong": "UIO2O1O1O2OO : Secteur d'activites",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20260226",
-          "datappro": null,
+          "destoui": "11-31-32-33-34-36-41-42-43-44-45-46-51-53-54-55",
+          "destnon": "12-22-35-37-47",
           "nomfic": "200058006_reglement_20260226.pdf",
-          "urlfic": "",
-          "doc": "827efeb42cc1bc40ec2b4279943403ef",
-          "part": 2.4
+          "doc": "827efeb42cc1bc40ec2b4279943403ef"
         }
       ],
-      "zoneAuPoint": [
-        "UILO1O1O1O1O"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Zone humide",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": 0
+          "stypepsc": "04"
         },
         {
           "forme": "surf",
           "libelle": "Recul spécifique",
           "typepsc": "15",
-          "stypepsc": "01",
-          "txt": "Seb2",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": 14.1
+          "stypepsc": "01"
         },
         {
           "forme": "surf",
           "libelle": "Emplacement réservé",
           "typepsc": "05",
-          "stypepsc": "01",
-          "txt": "10",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": 18.4
+          "stypepsc": "01"
         },
         {
           "forme": "surf",
           "libelle": "Zone humide",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": 0
+          "stypepsc": "04"
         },
         {
           "forme": "lin",
           "libelle": "Cours d'eau",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": null
+          "stypepsc": "04"
         },
         {
           "forme": "lin",
           "libelle": "Cours d'eau",
           "typepsc": "07",
-          "stypepsc": "04",
-          "txt": "",
-          "urlfic": "",
-          "nomfic": "200058006_reglement_20260226.pdf",
-          "part": null
+          "stypepsc": "04"
         }
       ],
       "informations": [
@@ -1952,24 +2163,97 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UILO1O1O1O1O",
+            "part": 0.531,
+            "surfaceM2": 29122.1,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "UIO1O1O1O1OO",
+            "part": 0.446,
+            "surfaceM2": 24498.5,
+            "reglement": "publie"
+          },
+          {
+            "libelle": "UIO2O1O1O2OO",
+            "part": 0.023,
+            "surfaceM2": 1264.9,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UILC2C2C3C4C",
+            "surfaceM2": 38.3
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "07-04",
+            "etendue": "couvre",
+            "part": 0.002,
+            "surfaceM2": 108.2,
+            "longueurM": null,
+            "libelle": "Zone humide"
+          },
+          {
+            "categorie": "05-01",
+            "etendue": "couvre",
+            "part": 0.186,
+            "surfaceM2": 10212.9,
+            "longueurM": null,
+            "libelle": "Emplacement réservé"
+          },
+          {
+            "categorie": "07-04",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": 13.9,
+            "libelle": "Cours d'eau"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [
+          "implantation des constructions"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-16-13063",
       "vise": "Tirage pondéré : Miramas",
       "temps": {
-        "ban": 36,
-        "cadastre": 42,
-        "municipality": 40,
-        "document": 41,
-        "zone": 56,
-        "secteur": 52,
-        "prescSurf": 60,
-        "prescLin": 47,
-        "prescPct": 44,
-        "infoSurf": 41,
-        "details": 108,
-        "totalGpu": 168
+        "ban": 32,
+        "cadastre": 44,
+        "municipality": 91,
+        "document": 153,
+        "zone": 72,
+        "secteur": 40,
+        "prescSurf": 69,
+        "prescLin": 72,
+        "prescPct": 76,
+        "infoSurf": 70,
+        "details": 127,
+        "totalGpu": 280,
+        "lecture": 1
       },
       "adresse": {
         "label": "3 Rue Louis Blériot 13140 Miramas",
@@ -1986,7 +2270,9 @@
         "idu": "13063000AR0026",
         "contenance": 3046,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -2010,25 +2296,19 @@
         "zone": 3524,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UBa1",
-          "libelong": "zone à caractère central, d'habitat, de services, d'équipements, d'activités commerciales.",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20251215",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "13063_reglement_20261015.pdf",
-          "urlfic": "",
-          "doc": "adde538aa74af70825bfd35a2e6e3099",
-          "part": 100
+          "doc": "adde538aa74af70825bfd35a2e6e3099"
         }
       ],
-      "zoneAuPoint": [
-        "UBa1"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [],
       "echecs": [],
       "details": [
@@ -2049,13 +2329,41 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UBa1",
+            "part": 1,
+            "surfaceM2": 3030,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-17-51065",
       "vise": "Tirage pondéré : Blacy",
       "temps": {
-        "ban": 83
+        "ban": 63
       },
       "echec": "adresse non géocodée"
     },
@@ -2063,18 +2371,19 @@
       "id": "alea-18-83129",
       "vise": "Tirage pondéré : Six-Fours-les-Plages",
       "temps": {
-        "ban": 37,
-        "cadastre": 40,
-        "municipality": 62,
-        "document": 320,
-        "zone": 119,
-        "secteur": 43,
-        "prescSurf": 58,
-        "prescLin": 51,
-        "prescPct": 50,
-        "infoSurf": 182,
-        "details": 115,
-        "totalGpu": 435
+        "ban": 45,
+        "cadastre": 37,
+        "municipality": 84,
+        "document": 54,
+        "zone": 173,
+        "secteur": 48,
+        "prescSurf": 132,
+        "prescLin": 85,
+        "prescPct": 72,
+        "infoSurf": 270,
+        "details": 124,
+        "totalGpu": 394,
+        "lecture": 22
       },
       "adresse": {
         "label": "1682 Avenue du Brusc 83140 Six-Fours-les-Plages",
@@ -2091,7 +2400,9 @@
         "idu": "83129000AX2636",
         "contenance": 3764,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -2115,56 +2426,39 @@
         "zone": 88523,
         "prescSurf": 10704
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "UF",
-          "libelong": "UF - coreespondant aux secteurs à vocation principale d'habitat et caractérisés par un habitat de type individuel",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20180327",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "83129_reglement_20251218.pdf",
-          "urlfic": "",
-          "doc": "d36f93f74ce721ef818770637976e383",
-          "part": 0
+          "doc": "d36f93f74ce721ef818770637976e383"
         },
         {
           "libelle": "UE",
-          "libelong": "UE - correspondant aux secteurs à vocation principale d'habitat et caractérisés par un habitat de type individuel ou sous forme de petits collectifs",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20180327",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "83129_reglement_20251218.pdf",
-          "urlfic": "",
-          "doc": "d36f93f74ce721ef818770637976e383",
-          "part": 100
+          "doc": "d36f93f74ce721ef818770637976e383"
         }
       ],
-      "zoneAuPoint": [
-        "UE"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Emplacement réservé",
           "typepsc": "05",
-          "stypepsc": "00",
-          "txt": "195",
-          "urlfic": "",
-          "nomfic": "83129_prescription_surf_05_00_20251218.pdf",
-          "part": 13.8
+          "stypepsc": "00"
         },
         {
           "forme": "lin",
           "libelle": "Espaces verts à protéger - alignements",
           "typepsc": "07",
-          "stypepsc": "00",
-          "txt": "C27",
-          "urlfic": "",
-          "nomfic": "83129_prescription_surf_07_00_20150410.pdf",
-          "part": null
+          "stypepsc": "00"
         }
       ],
       "informations": [
@@ -2228,24 +2522,75 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UE",
+            "part": 1,
+            "surfaceM2": 3725.1,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "UF",
+            "surfaceM2": 0.3
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "05-00",
+            "etendue": "couvre",
+            "part": 0.138,
+            "surfaceM2": 515.7,
+            "longueurM": null,
+            "libelle": "Emplacement réservé"
+          },
+          {
+            "categorie": "07-00",
+            "etendue": "couvre",
+            "part": null,
+            "surfaceM2": null,
+            "longueurM": 26.5,
+            "libelle": "Espaces verts à protéger - alignements"
+          }
+        ],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-19-33099",
       "vise": "Tirage pondéré : Carignan-de-Bordeaux",
       "temps": {
-        "ban": 32,
-        "cadastre": 40,
-        "municipality": 37,
-        "document": 37,
-        "zone": 50,
-        "secteur": 39,
-        "prescSurf": 48,
-        "prescLin": 41,
-        "prescPct": 39,
-        "infoSurf": 44,
-        "details": 102,
-        "totalGpu": 152
+        "ban": 30,
+        "cadastre": 41,
+        "municipality": 75,
+        "document": 98,
+        "zone": 90,
+        "secteur": 40,
+        "prescSurf": 90,
+        "prescLin": 85,
+        "prescPct": 53,
+        "infoSurf": 88,
+        "details": 110,
+        "totalGpu": 208,
+        "lecture": 0
       },
       "adresse": {
         "label": "14 Chemin de la Font 33360 Carignan-de-Bordeaux",
@@ -2263,7 +2608,9 @@
         "idu": "33099000AD0025",
         "contenance": 1264,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -2287,37 +2634,28 @@
         "zone": 9838,
         "prescSurf": 147
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "2AU",
-          "libelong": "2AU",
           "typezone": "AUs",
           "destdomi": null,
-          "datvalid": "20221020",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "33099_reglement_20251022.pdf",
-          "urlfic": "",
-          "doc": "f915b89d5caf5283d84870543e3b5390",
-          "part": 0
+          "doc": "f915b89d5caf5283d84870543e3b5390"
         },
         {
           "libelle": "UA",
-          "libelong": "UA",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20221020",
-          "datappro": null,
+          "destoui": "",
+          "destnon": "",
           "nomfic": "33099_reglement_20251022.pdf",
-          "urlfic": "",
-          "doc": "f915b89d5caf5283d84870543e3b5390",
-          "part": 100
+          "doc": "f915b89d5caf5283d84870543e3b5390"
         }
       ],
-      "zoneAuPoint": [
-        "UA"
-      ],
-      "secteursCC": [],
-      "prescriptions": [],
+      "secteursBruts": [],
+      "prescriptionsBrutes": [],
       "informations": [],
       "echecs": [],
       "details": [
@@ -2338,24 +2676,58 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UA",
+            "part": 1,
+            "surfaceM2": 1255.5,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "2AU",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [],
+        "prescriptionsContact": 0,
+        "autresPrescriptions": [],
+        "prescriptionsStatut": "ok"
+      }
     },
     {
       "id": "alea-20-30047",
       "vise": "Tirage pondéré : Bouillargues",
       "temps": {
-        "ban": 35,
-        "cadastre": 50,
-        "municipality": 42,
-        "document": 76,
-        "zone": 90,
-        "secteur": 54,
-        "prescSurf": 126,
-        "prescLin": 61,
-        "prescPct": 60,
-        "infoSurf": 99,
-        "details": 117,
-        "totalGpu": 243
+        "ban": 33,
+        "cadastre": 45,
+        "municipality": 40,
+        "document": 77,
+        "zone": 151,
+        "secteur": 41,
+        "prescSurf": 232,
+        "prescLin": 101,
+        "prescPct": 121,
+        "infoSurf": 193,
+        "details": 99,
+        "totalGpu": 331,
+        "lecture": 3
       },
       "adresse": {
         "label": "11 Rue des Pinsons 30230 Bouillargues",
@@ -2375,7 +2747,9 @@
         "idu": "30047000AO0144",
         "contenance": 512,
         "rattachement": "point",
-        "rayon": null
+        "rayon": null,
+        "distanceM": null,
+        "candidatsAuPoint": 1
       },
       "commune": [
         {
@@ -2399,116 +2773,75 @@
         "zone": 26770,
         "prescSurf": 66947
       },
-      "zones": [
+      "zonesBrutes": [
         {
           "libelle": "2AUH",
-          "libelong": "Zone actuellement non équipée, destinée à l'urbanisation à court terme, à vocation principale d'habitation",
           "typezone": "AUc",
           "destdomi": null,
-          "datvalid": "20151126",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "30047_reglement_20151126.pdf#page=41",
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18",
-          "part": 0.1
+          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18"
         },
         {
           "libelle": "UD",
-          "libelong": "Zone urbaine à vocation principale d'habitat",
           "typezone": "U",
           "destdomi": null,
-          "datvalid": "20151126",
-          "datappro": null,
+          "destoui": null,
+          "destnon": null,
           "nomfic": "30047_reglement_20151126.pdf#page=23",
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18",
-          "part": 99.9
+          "doc": "d6aee5c77a9ce41bb7d316d549a6cd18"
         }
       ],
-      "zoneAuPoint": [
-        "UD"
-      ],
-      "secteursCC": [],
-      "prescriptions": [
+      "secteursBruts": [],
+      "prescriptionsBrutes": [
         {
           "forme": "surf",
           "libelle": "Orientations d'Aménagement et de Programmation (OAP) : secteur de Bonice",
           "typepsc": "18",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_orientations_amenagement_18_00_20151126.pdf",
-          "part": 0.1
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "PPRI : Aléa résiduel",
           "typepsc": "02",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_prescription_surf_02_00_1_20151126.pdf",
-          "part": 100
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Mouvements différentiels de terrain liés au phénomène de retrait-gonflement des argiles : Zone très exposée (B1)",
           "typepsc": "02",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_prescription_surf_02_00_4_20151126.pdf",
-          "part": 100
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Secteur où au moins 30% des programmes de logements doivent être affectés à des logements locatifs sociaux",
           "typepsc": "17",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_reglement_20151126.pdf",
-          "part": 0.1
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "Zone inondable par débordement de cours d'eau",
           "typepsc": "02",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_prescription_surf_02_00_1_20151126.pdf",
-          "part": 100
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "PPRI : R - U",
           "typepsc": "02",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_prescription_surf_02_00_1_20151126.pdf",
-          "part": 99.9
+          "stypepsc": "00"
         },
         {
           "forme": "surf",
           "libelle": "PPRI : R - NU",
           "typepsc": "02",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_prescription_surf_02_00_1_20151126.pdf",
-          "part": 0.1
+          "stypepsc": "00"
         },
         {
           "forme": "lin",
           "libelle": "Marges de recul des constructions le long des cours d'eau et vallats",
           "typepsc": "15",
-          "stypepsc": "00",
-          "txt": null,
-          "urlfic": "http://www.bouillargues.fr/regles-urbanisme_fr.html",
-          "nomfic": "30047_reglement_20151126.pdf",
-          "part": null
+          "stypepsc": "00"
         }
       ],
       "informations": [
@@ -2547,7 +2880,75 @@
           ],
           "reglementHttp": 302
         }
-      ]
+      ],
+      "lecture": {
+        "statut": "confirme",
+        "regime": "document",
+        "grain": "parcelle",
+        "rattachement": {
+          "mode": "point",
+          "distanceM": null
+        },
+        "ambiguites": [],
+        "vigueur": [
+          "etablie"
+        ],
+        "zones": [
+          {
+            "libelle": "UD",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "reglement": "publie"
+          }
+        ],
+        "zonesEnLimite": [
+          {
+            "libelle": "2AUH",
+            "surfaceM2": 0
+          }
+        ],
+        "zonesNonMesurables": [],
+        "secteurs": [],
+        "prescriptions": [
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "PPRI : Aléa résiduel"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "Mouvements différentiels de terrain liés au phénomène de retrait-gonflement des argiles : Zone très exposée (B1)"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "Zone inondable par débordement de cours d'eau"
+          },
+          {
+            "categorie": "02-00",
+            "etendue": "couvre",
+            "part": 1,
+            "surfaceM2": 520.7,
+            "longueurM": null,
+            "libelle": "PPRI : R - U"
+          }
+        ],
+        "prescriptionsContact": 3,
+        "autresPrescriptions": [
+          "implantation des constructions"
+        ],
+        "prescriptionsStatut": "ok"
+      }
     }
   ]
 }

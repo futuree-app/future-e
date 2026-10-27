@@ -1,4 +1,5 @@
 import "server-only";
+import { distanceRegion, projectionAutour, regionDe } from "./geometrie-parcelle.ts";
 
 export type CadastreParcel = {
   idu: string;
@@ -11,13 +12,20 @@ export type CadastreParcel = {
   nomCommune: string | null;
   /**
    * FUT-127 : COMMENT CETTE PARCELLE A ÉTÉ RATTACHÉE AU POINT. `point` : le point géocodé tombe
-   * dedans. `repli` : il ne tombait dans aucune (voirie, cour), et c'est la plus petite parcelle d'un
+   * dedans. `repli` : il ne tombait dans aucune (voirie, cour), et c'est la parcelle la plus proche d'un
    * carré de quelques mètres autour, qui peut être celle d'un voisin. Absent sur un rapport antérieur.
    */
   rattachement?: "point" | "repli";
+  /**
+   * FUT-81 (revue du 27/10/2026). `candidatsAuPoint` : posé seulement quand le point tombe sur la LIMITE
+   * de plusieurs parcelles ; celle-ci n'est que la première rendue. `distanceRepliM` : la distance
+   * mesurée du point à la parcelle retenue par repli (absente si la géométrie ne se lit pas).
+   */
+  candidatsAuPoint?: number;
+  distanceRepliM?: number;
 };
 
-type CadastreFeature = {
+export type CadastreFeature = {
   geometry?: { type: string; coordinates: unknown } | null;
   properties?: {
     idu?: string;
@@ -111,22 +119,38 @@ function buildSquareAroundPoint(
   };
 }
 
-function chooseBestParcel(features: CadastreFeature[]): CadastreFeature | null {
+/**
+ * LA PARCELLE LA PLUS PROCHE DU POINT, MESURÉE. Jusqu'au 27/10/2026, le repli retenait la plus petite
+ * contenance du carré, sans mesurer la distance, et le rapport disait « la plus proche ». Une petite
+ * parcelle voisine l'emportait sur la grande parcelle collée au point (revue indépendante). À distance
+ * égale, ou faute de géométrie lisible, la plus petite contenance départage, comme avant.
+ */
+export function choisirParcelleProche(
+  features: CadastreFeature[],
+  longitude: number,
+  latitude: number,
+): { feature: CadastreFeature; parcel: CadastreParcel; distanceM: number | null } | null {
+  const proj = projectionAutour(longitude, latitude);
   const parcels = features
-    .map((feature) => ({ feature, parcel: toCadastreParcel(feature) }))
-    .filter((x): x is { feature: CadastreFeature; parcel: CadastreParcel } => Boolean(x.parcel));
+    .map((feature) => {
+      const parcel = toCadastreParcel(feature);
+      const region = regionDe(feature.geometry, proj);
+      return parcel ? { feature, parcel, distanceM: region ? distanceRegion([0, 0], region) : null } : null;
+    })
+    .filter((x): x is { feature: CadastreFeature; parcel: CadastreParcel; distanceM: number | null } => Boolean(x));
 
   if (parcels.length === 0) {
     return null;
   }
 
   parcels.sort((a, b) => {
-    const areaA = a.parcel.contenance ?? Number.POSITIVE_INFINITY;
-    const areaB = b.parcel.contenance ?? Number.POSITIVE_INFINITY;
-    return areaA - areaB;
+    const da = a.distanceM ?? Number.POSITIVE_INFINITY;
+    const db = b.distanceM ?? Number.POSITIVE_INFINITY;
+    if (Math.abs(da - db) > 0.01) return da - db;
+    return (a.parcel.contenance ?? Number.POSITIVE_INFINITY) - (b.parcel.contenance ?? Number.POSITIVE_INFINITY);
   });
 
-  return parcels[0].feature;
+  return parcels[0];
 }
 
 /**
@@ -142,17 +166,23 @@ export async function findCadastreParcelWithGeometry(
   longitude: number,
   latitude: number,
 ): Promise<CadastreParcelLue | null> {
+  // DEUX résultats au point : un point posé sur la limite de deux parcelles les touche toutes les deux.
+  // La première reste retenue, comme avant, mais la limite est dite (FUT-81, revue du 27/10/2026).
   const pointFeatures = await fetchCadastreFeatures(
     {
       type: "Point",
       coordinates: [longitude, latitude],
     },
-    1,
+    2,
   );
 
   const directParcel = toCadastreParcel(pointFeatures[0]);
   if (directParcel) {
-    return { parcel: { ...directParcel, rattachement: "point" }, geometry: pointFeatures[0]?.geometry ?? null };
+    const autres = new Set(pointFeatures.map((f) => toCadastreParcel(f)?.idu).filter(Boolean));
+    return {
+      parcel: { ...directParcel, rattachement: "point", ...(autres.size > 1 ? { candidatsAuPoint: autres.size } : {}) },
+      geometry: pointFeatures[0]?.geometry ?? null,
+    };
   }
 
   for (const radiusMeters of [3, 8, 15]) {
@@ -160,11 +190,16 @@ export async function findCadastreParcelWithGeometry(
       buildSquareAroundPoint(longitude, latitude, radiusMeters),
       8,
     );
-    const fallback = chooseBestParcel(polygonFeatures);
-    const fallbackParcel = toCadastreParcel(fallback ?? undefined);
+    const proche = choisirParcelleProche(polygonFeatures, longitude, latitude);
 
-    if (fallback && fallbackParcel) {
-      return { parcel: { ...fallbackParcel, rattachement: "repli" }, geometry: fallback.geometry ?? null };
+    if (proche) {
+      return {
+        parcel: {
+          ...proche.parcel, rattachement: "repli",
+          ...(proche.distanceM != null ? { distanceRepliM: Math.round(proche.distanceM * 10) / 10 } : {}),
+        },
+        geometry: proche.feature.geometry ?? null,
+      };
     }
   }
 

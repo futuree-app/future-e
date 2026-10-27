@@ -7,6 +7,12 @@ Résultats bruts dans `2026-10-26-fut81-urbanisme/mesure-cas.json` et `mesure-al
 par les tests et le banc : `src/lib/__fixtures__/fut81/` (capture : `scripts/research/fut81-capture-fixtures.mjs`).
 Rendu réel : `2026-10-26-fut81-urbanisme/rendu/`.
 
+> **Revue indépendante du 27/10/2026 (`992af92f`) : NO GO, cinq blocages, tous corrigés.** Le détail, les
+> reproductions avant et après et les tests qui les rejouent sont à la section 10. Les chiffres des sections 3, 4,
+> 6, 7 et 8 sont ceux du code corrigé : le calcul de surface est désormais exact, au lieu d'une grille de points.
+> Le texte du bloc reste jugé trop long et trop technique par le porteur : sa vulgarisation est l'objet de
+> [FUT-144](https://linear.app/future-e/issue/FUT-144).
+
 ---
 
 ## Décision : GO pour une V1 limitée aux faits publiés et aux liens officiels
@@ -15,15 +21,17 @@ Rendu réel : `2026-10-26-fut81-urbanisme/rendu/`.
    patrimoine protégé : le document d'urbanisme applicable, la ou les zones **qui couvrent** la parcelle, les
    prescriptions cartographiées **sur elle** quand elles changent une vérification d'acheteur, le lien vers le
    règlement de la zone, et ce qu'il faut vérifier avant d'acheter ou de faire des travaux.
-2. **États tenus** : confirmé, ambigu (plusieurs documents, document non donné en vigueur, aucune zone lue),
-   non trouvé (aucun document publié, commune hors RNU), RNU (régime national, affirmé comme tel), indisponible
-   (panne), et rapport antérieur (champ absent, dit à l'écran).
+2. **États tenus** : confirmé, ambigu (parcelle rattachée par proximité ou sur une limite, vigueur du document
+   non vérifiée, document hors vigueur, plusieurs documents, aucune zone lue, géométrie illisible), non trouvé
+   (aucun document publié, commune hors RNU), RNU (régime national, affirmé comme tel), indisponible (panne), et
+   rapport antérieur (champ absent, dit à l'écran).
 3. **Non intégré, délibérément** : toute lecture du règlement écrit, toute capacité constructible, les
    destinations autorisées (`destoui`/`destcdt`/`destnon` vides ou absents sur les cinq PLU relevés en brut), les informations surfaciques
    (droit de préemption, archéologie, taxe d'aménagement), les servitudes non patrimoniales.
 4. **Pourquoi GO** : 25 adresses sur 27 ont un document publié et en vigueur ; la zone de la parcelle est établie
-   dans 24 cas sur 25 sans ambiguïté après filtrage ; l'API est publique, sans clé, rapide (médiane 0,3 s) ; et
-   l'information change une vérification réelle dans au moins trois cas (section 6).
+   dans 24 cas sur 25 (dont 5 conditionnelles, la parcelle ayant été rattachée par proximité) ; l'API est publique,
+   sans clé, rapide (médiane 0,4 s) ; et l'information change une vérification réelle dans au moins trois cas
+   (section 6).
 5. **Pourquoi limité** : la nomenclature nationale ne dit pas ce qu'un règlement autorise ; les prescriptions
    locales foisonnent (jusqu'à 21 sur une parcelle) ; un tiers des parcelles « touchent » une zone voisine qui ne
    les concerne pas. Toute conclusion au-delà des faits publiés serait une interprétation juridique.
@@ -107,16 +115,17 @@ Synthèse sur les 27 adresses :
 
 | Mesure | Résultat |
 | --- | --- |
-| Parcelle résolue | 27/27 (22 au point, 5 par repli) |
+| Parcelle résolue | 27/27 (22 au point, 5 par repli, à 0,2 à 9,9 m : lecture **conditionnelle**, dite avant les zones) |
 | Ambiguïté adresse → parcelle | 2 à 4 parcelles à moins de 5 m du point dans 13 cas sur 27 : la lecture porte sur **une** parcelle et le dit |
-| Document publié | 25/27 (PLU, PLUi, PSMV, CC), tous `APPROVED` + `EN_VIGUEUR` ; 1 RNU ; 1 non trouvé |
+| Document publié | 25/27 (PLU, PLUi, PSMV, CC), vigueur **établie** pour les 25 (`APPROVED` + `EN_VIGUEUR`) ; 1 RNU ; 1 non trouvé |
+| Statut de la lecture | 21 confirmées, 5 ambiguës (toutes par rattachement de proximité), 1 non trouvée |
 | Zone établie | 24/25 zone(s) retenue(s) ; 1 carte communale (secteur) |
-| Plusieurs zones réelles | 2/25 (Mérignac 61/39 %, Sucy-en-Brie 46/52/2,4 %) |
-| Zone voisine « touchée » sans couvrir | **12/25** (0 à 0,1 % de la parcelle) |
-| Prescription qui change une vérification | 10/25 (emplacement réservé 3, patrimoine ou paysage 9, constructibilité limitée 3), d'après la mesure : même seuil surfacique, lignes non filtrées |
+| Plusieurs zones réelles | 2/25 (Mérignac 62/38 %, Sucy-en-Brie 53/45/2,3 %) |
+| Zone voisine « touchée » sans couvrir | **12/25** ; aire exacte de 0 à 4,2 m², sauf un liseré de 38 m² sur 5,5 ha à Sucy-en-Brie (dit comme bordure) |
+| Prescription nommée sur la parcelle | 10/25 (emplacement réservé 3, patrimoine ou paysage 8, constructibilité limitée 2) ; 13 prescriptions qui ne font que toucher la limite, sur 5 parcelles, écartées et comptées |
 | Règlement écrit | présent parmi les pièces et servi (redirection 302) pour les 24 PLU, PLUi et PSMV ; la carte communale n'en a pas, par nature ; à La Rochelle, le fichier que désigne la zone n'est pas parmi les pièces (dit à l'écran) |
-| Temps GPU (sept couches en parallèle + détail) | médiane 0,32 s, p90 0,70 s, max 2,3 s ; cadastre médiane 47 ms |
-| Calcul de la lecture | 58 ms sur 3,9 Mo de prescriptions (Rennes) |
+| Temps GPU (sept couches en parallèle + détail) | médiane 0,42 s, p90 1,4 s ; un pic à 9,3 s à Lyon le 27/10 (délais de 8 s par appel en production, dépassement dit `non_verifiee` ou `indisponible`) ; cadastre médiane 47 ms |
+| Calcul de la lecture (aire exacte) | 323 ms au pire, sur la plus lourde réponse de l'échantillon |
 
 **La méthode est vérifiée hors des exemples positifs** : le tirage aléatoire reproduit les mêmes phénomènes que
 les cas choisis (zones voisines en bordure dans 9 tirages sur 16, emplacements réservés à Mérignac, Sucy-en-Brie,
@@ -131,21 +140,31 @@ et d'autre d'une limite de zone, URL de producteur piégée, document annulé, p
 | --- | --- | --- |
 | **A. Fait réglementaire publié** | affiché, sourcé, daté | « Cette parcelle est en zone UCe1a du plan local d'urbanisme intercommunal (PLUi). » |
 | **B. Observation** | grain et rattachement dits | « Le point de l'adresse ne tombait dans aucune parcelle : la plus proche a été retenue. Elle peut être celle d'un voisin. » |
-| **C. Calcul dérivé** | part de parcelle, arrondie, présentée comme ordre de grandeur ; sert surtout à écarter les zones voisines | « Emplacement réservé · sur environ 13 % de la parcelle » ; « ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti » |
+| **C. Calcul dérivé** | aire exacte de l'intersection, arrondie, présentée comme ordre de grandeur ; sert surtout à écarter les zones voisines | « Emplacement réservé · sur environ 14 % de la parcelle (≈ 516 m²) » ; « ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti » |
 | **D. Hypothèse ou interprétation** | **jamais produite** ; renvoyée au règlement, à la mairie, au certificat d'urbanisme | « Ce zonage ne dit pas, à lui seul, ce qui est autorisé. […] faites confirmer le projet par le service urbanisme de la mairie. » |
 
-Seuils (calcul dérivé, nommés et versionnés `fut81-1` dans `urbanisme-parcelle.ts`) : une zone ou une prescription
-surfacique **couvre** la parcelle si elle en occupe au moins **2 %** ou **25 m²** estimés. Les bordures mesurées
-vont de 0 à 0,1 % ; la plus petite part réelle relevée est 2,4 % (1 300 m²) ; le second seuil garde un emplacement
-réservé de voirie de 45 m² sur 5 000 m² (0,9 %). Une prescription linéaire ou ponctuelle n'est retenue que si elle
-passe **à l'intérieur** de la parcelle : un linéaire posé sur la limite peut être celui du voisin.
+Seuils (conventions de lecture, jamais des exemptions réglementaires, nommés et versionnés `fut81-2` dans
+`urbanisme-parcelle.ts`) :
+- une **prescription** couvre la parcelle au-delà de **2 %** ou de **25 m²** d'aire exacte (bandes de 30 et 50 m² de la
+  revue, emplacement réservé de voirie de 70 m² à Mérignac). En deçà, elle est **affichée comme marginale**, à vérifier
+  sur le plan ; seul un contact sans recouvrement (aire < 0,05 m²) est écarté, et compté ;
+- une **zone** couvre la parcelle au-delà de **2 %** seulement. Les zones pavent le territoire : toute parcelle touche
+  ses voisines, et l'écart de tracé laisse des liserés (de 0 à 4,2 m² sur l'échantillon, 38 m² sur une parcelle de
+  5,5 ha). Un liseré de 25 m² ou plus est **dit à l'écran** comme une bordure à vérifier, pas comme une zone de la
+  parcelle. La plus petite part réelle relevée est de 2,3 % (1 265 m², Sucy-en-Brie) ;
+- une prescription linéaire ou ponctuelle n'est retenue que si elle passe **à l'intérieur** de la parcelle ; posée
+  sur sa limite, quel que soit le côté, c'est un contact (elle peut être celle du voisin).
 
-Prescriptions **nommées** (familles CNIG qui changent une vérification) : espace boisé classé (01), constructibilité
-limitée pour risque ou environnement (02), démolition ou reconstruction encadrée (03), emplacement réservé (05),
-patrimoine ou paysage protégé (07), terrain non bâti protégé (08), changement de destination, extension d'une
-habitation ou STECAL en zone A ou N (16-01, 16-02, 16-03), voie à créer ou modifier (24-01 à 03), espace remarquable
-du littoral (31). Chaque note dit l'effet que le code de l'urbanisme donne à la famille, puis la vérification ; aucune
-ne conclut sur le projet du lecteur. Les autres familles (stationnement, hauteur, mixité sociale, OAP…) sont
+Prescriptions **nommées par sous-code et type de document** (tables CNIG PLU v2024 rév. 2025-06 et PSMV v2022 rév.
+2025-12) : espaces boisés classés (01-00 à 03), constructibilité interdite ou conditionnée (02-00 à 02), démolition ou
+reconstruction (03-00 à 03, et 03-50/51 en PSMV seulement), emplacements réservés par destination (05-00 à 08 : voie,
+ouvrage, installation, espace vert, **logement social**, servitude de localisation, **secteur en attente de projet**,
+relocalisation littorale), patrimoine protégé du PLU (07-00 à 05) et du PSMV (07-50 à 64), éléments **non protégés**
+du PSMV (07-65 à 69), terrain non bâti protégé (08-00), changement de destination, extension ou STECAL en zone A ou N
+(16-01 à 03), voies à créer ou modifier (24-01 à 03), espaces remarquables du littoral (31-xx). Un sous-code propre au
+PSMV ou à la carte communale ne vaut rien dans un autre document. Un sous-code inconnu d'un code qui compte (01, 02,
+03, 05, 07, 08, 31) est nommé **sans effet énoncé** (« son effet se lit dans le règlement »). Le contrat conserve le
+code, le sous-code, le document et son type. Les autres familles (stationnement, hauteur, mixité sociale, OAP…) sont
 **citées** et renvoyées au règlement ; le code 99 (« autre ») est compté, pas nommé.
 
 Garde-fous testés sur le texte rendu de tous les cas réels : jamais « constructible » (hors « inconstructible »),
@@ -174,18 +193,22 @@ certificat d'urbanisme.
 ## 6. Où l'urbanisme change une vérification ou un arbitrage
 
 1. **Six-Fours-les-Plages, 1682 avenue du Brusc.** Parcelle de 3 764 m² en zone UE (habitat individuel). Un
-   **emplacement réservé couvre environ 13 % du terrain** (≈ 490 m²). Rien d'autre dans futur•e ne le montrait. Pour
+   **emplacement réservé couvre environ 14 % du terrain** (≈ 516 m²). Rien d'autre dans futur•e ne le montrait. Pour
    un acheteur qui projette une piscine, une annexe ou une division, la vérification change : demander en mairie
    l'objet et le bénéficiaire de la réserve avant de s'engager, cette partie ne pouvant accueillir une construction
    contraire à sa destination.
-2. **Mérignac, 14 avenue Ariane.** La parcelle est **partagée entre deux zones** (US7 ≈ 61 %, US9 ≈ 39 %), avec un
-   emplacement réservé de voirie de ≈ 45 m² et un bois protégé de ≈ 30 m² en bordure intérieure. Un projet ne se lit
+2. **Mérignac, 14 avenue Ariane.** La parcelle est **partagée entre deux zones** (US7 ≈ 62 %, US9 ≈ 38 %), avec un
+   emplacement réservé de voirie de ≈ 70 m² et un bois protégé de ≈ 35 m² en bordure intérieure. Un projet ne se lit
    pas dans un seul chapitre du règlement.
 3. **Lyon 4e, 10 rue d'Austerlitz.** Ce que la V1 **n'affiche pas** compte autant : le GPU rend pour cette parcelle
    une zone UCe3-p et un « élément bâti à préserver » qui appartiennent au voisin (0 % de la parcelle). Une lecture
    naïve aurait attribué au logement une protection patrimoniale qui n'est pas la sienne.
 4. **La Rochelle, rue du Palais.** Zone de secteur sauvegardé dont le règlement n'est pas publié au GPU : la V1 le
    dit et renvoie au service urbanisme, au lieu de lier le règlement du PLUi, qui ne s'y applique pas.
+5. **Besançon, 10 rue des Granges (revue du 27/10).** Le plan de sauvegarde distingue sur la même parcelle un
+   immeuble **protégé en totalité** (≈ 35 %) et un immeuble **non protégé** soumis à des dispositions particulières
+   (≈ 11 %). La première version lisait les deux comme « protégés ». La parcelle est rattachée par proximité (0,7 m) :
+   la lecture est conditionnelle et le dit d'abord.
 
 ---
 
@@ -193,24 +216,28 @@ certificat d'urbanisme.
 
 | Fichier | Rôle |
 | --- | --- |
-| `src/lib/urbanisme-parcelle.ts` | lib **pure** : contrat `UrbanismeParcelle`, nomenclatures CNIG, part de parcelle (grille de points), choix du règlement, statuts |
-| `src/lib/gpu.ts` | `fetchUrbanismeParcelle` : sept couches en `POST` parallèles (8 s), détail et pièces (4 s), **ne lève jamais** |
-| `src/lib/cadastre.ts` | `findCadastreParcelWithGeometry` ; `findCadastreParcelByPoint` inchangé pour ses autres appelants |
+| `src/lib/geometrie-parcelle.ts` | lib **pure** : aire exacte d'intersection (Green, trous, multipolygones, bords communs), contacts symétriques, distance point–parcelle, validation des géométries |
+| `src/lib/urbanisme-parcelle.ts` | lib **pure** : contrat `UrbanismeParcelle`, nomenclatures CNIG par sous-code et type de document, rattachement, vigueur en trois états, choix du règlement, statuts |
+| `src/lib/gpu.ts` | `fetchUrbanismeParcelle` : géométrie validée avant envoi, sept couches en `POST` parallèles, détail et pièces (8 s chacun), **ne lève jamais** |
+| `src/lib/cadastre.ts` | `findCadastreParcelWithGeometry` : repli sur la parcelle la plus proche **mesurée**, point sur une limite détecté ; `findCadastreParcelByPoint` délègue |
 | `src/app/api/georisques-logement/route.ts` | l'urbanisme attend la parcelle (~50 ms) puis part en parallèle du reste |
 | `src/lib/logement-report-types.ts` | champ `urbanisme?` (absent = rapport antérieur) ; `parcel.rattachement` typé |
-| `src/lib/logement-report-version.ts` | `urbanisme` compte comme source absente **seulement** sur `indisponible` |
+| `src/lib/logement-report-version.ts` | sous-sources `urbanisme`, `urbanisme_prescriptions`, `urbanisme_vigueur`, `urbanisme_pieces` ; `pertesUrbanisme` compare les deux rapports |
 | `src/components/report/logement/UrbanismeBlock.tsx` | rendu, dans `RegulatorySection.tsx` (même carte, sous le patrimoine) |
-| `src/app/dev/fut81/page.tsx` | banc du vrai module sur les réponses réelles (`?cas=…`, dont `panne` et `ancien`) |
+| `src/app/dev/fut81/page.tsx` | banc du vrai module sur les réponses réelles (`?cas=…`, dont `besancon`, `sucy`, `vigueur`, `incertaine`, `panne`, `ancien`) |
 
 Versions et dossiers payants :
 - La lecture **appartient à la version** (elle entre dans le rapport, donc dans son empreinte) et ne change plus.
   Aucun horodatage dans la lecture : deux collectes identiques donnent la même empreinte, pas de version fantôme.
 - Un dossier antérieur s'ouvre tel quel, sans appel : l'écran dit « collecté avant la lecture du plan d'urbanisme.
   Une actualisation des données l'ajoutera. » Son empreinte ne bouge pas.
-- Actualisation : une version N+1 qui lit l'urbanisme est écrite ; N reste intacte. Si N avait l'urbanisme et que
-  le GPU est en panne, l'actualisation est **refusée** et N reste affichée.
-- Limite assumée, identique à FUT-80 pour le bâtiment : actualiser un dossier **antérieur** pendant une panne GPU
-  est refusé (la nouvelle collecte a une source absente que N n'avait pas déclarée). Le lecteur garde N.
+- Actualisation : une version N+1 qui lit l'urbanisme est écrite ; N reste intacte. Si N+1 **perd** une capacité de
+  lecture que N avait (lecture entière, prescriptions, vigueur des documents, pièces), l'actualisation est
+  **refusée** et N reste affichée. Une évolution légitime n'est pas une perte : prescription retirée, document
+  remplacé ou devenu hors vigueur ont été **lus**.
+- La comparaison porte sur les deux rapports, pas sur la liste enregistrée : un dossier **antérieur** à FUT-81
+  n'avait aucune lecture, il ne perd rien quand le Géoportail tombe pendant son actualisation (le reste de sa
+  collecte s'actualise). Le bâtiment (FUT-80) garde sa règle, non modifiée ici.
 - Aucune migration, aucune écriture sur les dossiers existants, aucun appel Anthropic : la synthèse et le moteur de
   décision ne lisent pas encore l'urbanisme (aucune empreinte de faits ne change).
 
@@ -220,16 +247,16 @@ Versions et dossiers payants :
 
 | Contrôle | Résultat |
 | --- | --- |
-| Tests ciblés `src/lib/fut81-urbanisme-parcelle.test.ts` | 21/21 |
-| Tests liés (`logement-report-version`, `fut127-inondation-adresse`, `gpu-servitudes`, `logement-sources-bornees`, `geocodeur-ban`) | verts |
-| Suite complète, lancée seule | **3 465 / 3 465**, 0 échec (3 444 avant + 21) |
+| Tests ciblés `src/lib/fut81-urbanisme-parcelle.test.ts` | 28/28 (dont 10 tests des cinq blocages de la revue) |
+| Tests liés (15 fichiers : versions, sources bornées, FUT-80, FUT-127, Sitadel, qualification…) | 227/227 |
+| Suite complète, lancée seule | **3 472 / 3 472**, 0 échec, 0 ignoré (3 444 avant FUT-81 + 28) |
 | TypeScript `tsc --noEmit` | 0 erreur |
 | Lint des fichiers modifiés | 0 problème |
-| Lint `eslint src` | 6 erreurs, 8 avertissements : **identiques à `main`**, aucune dans FUT-81 |
+| Lint `eslint src` | 14 diagnostics, **identiques ligne à ligne** à la base exacte `2af75b87` (checkout détaché), aucun dans FUT-81 |
 | `npm run lint` | échoue comme sur `main` (plugin `react` non défini dans la config) |
 | `npm run index:verify` | « Index vérifié. » |
-| `npm run build` | réussi |
-| Recette du vrai module (`/dev/fut81`) | bureau 1 512 px, fenêtre 500 px, cadre 360 px ; tous les états ; captures dans `rendu/` |
+| `npm run build` | réussi avec la **configuration Supabase réelle** (URL, clé publiable, clé de service ; aucune clé Anthropic, Stripe ni Resend) : compilation, 281/281 pages statiques, aucune erreur. Sans clé de service, le build échoue sur `/api/dossier/relation` (client créé au chargement), comme sur `main` |
+| Recette du vrai module (`/dev/fut81`) | bureau 1 512 px, fenêtre 500 px, cadre 360 px ; cas confirmés, ambigus, repli, vigueur non vérifiée, prescription incertaine, ancien dossier ; captures `rendu/revue-*.jpg` |
 
 Deux défauts **préexistants** relevés pendant la recette, hors FUT-81, non corrigés ici :
 - Sur les bancs `/dev/fut80` et `/dev/fut81`, la synthèse reçoit une page d'erreur HTML (pas de backend) et
@@ -251,3 +278,44 @@ Deux défauts **préexistants** relevés pendant la recette, hors FUT-81, non co
   urbain, zone de saisine archéologique) ; prescriptions dans la synthèse et les « à vérifier » du moteur de
   décision ; lien vers la carte du GPU centrée sur la parcelle ; lecture multi-parcelles avec FUT-83.
 - **À ne pas faire** : moteur de lecture du règlement écrit, capacité constructible, ingestion nationale.
+
+---
+
+## 10. Revue indépendante du 27/10/2026 : les cinq blocages et leurs corrections
+
+Revue de Work sur `992af92f`, décision NO GO. Ses contre-épreuves (`audit-fut81-repro.mjs`) ont été rejouées sur ce
+SHA **avant** toute correction : les cinq échouaient comme décrit. Elles ont été rejouées après, sur les mêmes
+entrées, par la sortie métier et par le texte rendu. Le script adapté (seules les deux fonctions supprimées sont
+remplacées par la sortie de `lireUrbanisme`) et les deux jeux de résultats sont dans `2026-10-26-fut81-urbanisme/revue-2026-10-27/`.
+
+| # | Blocage | Reproduction sur `992af92f` | Correction | Après |
+| --- | --- | --- | --- | --- |
+| 1 | Bandes étroites perdues, limites asymétriques | bandes de 50 et 30 m² mesurées **0**, prescription supprimée ; point/ligne sur le bord ouest retenus, sur le bord est rejetés ; `Polygon` vide lu « à la parcelle » ; coordonnées nulles : exception | `geometrie-parcelle.ts` : aire exacte d'intersection (bords des deux polygones, trous, multipolygones, bords communs comptés une fois), tolérance de contact identique dans toutes les directions, géométrie validée avant tout calcul. Prescription illisible gardée `incertaine` ; zone illisible dite | 50 et 30 m² retenus (49,7 et 29,8 m²) ; contacts nuls sur les quatre bords, comptés ; 1 m² dit « très faible surface » ; géométrie invalide → lecture au point |
+| 2 | Repli : la plus petite, présentée comme confirmée | parcelle voisine de 100 m² retenue, `confirme`, réserve cachée dans « Comprendre » | repli sur la plus proche **mesurée** (`distanceRepliM`), point sur une limite détecté (`candidatsAuPoint`) ; `rattachement` dans le contrat ; ambiguïté `parcelle_incertaine` ; réserve **visible avant** zones et prescriptions ; « La parcelle retenue est… » | la grande parcelle collée au point retenue, `ambigu`, réserve en tête ; « à moins d'un mètre » quand la distance est nulle |
+| 3 | Vigueur inconnue présentée comme confirmée | `details = null` → `confirme`, `enVigueur: null` ; statut légal absent → `true` ; objet vide → `false` | vigueur en trois états (`etablie`, `hors_vigueur`, `non_verifiee`), `legalStatus` documenté (APPROVED, PARTIALLY_ANNULLED, ANNULLED, HISTORICAL) ; délai du détail porté de 4 à 8 s ; titre « D'après le document publié, … » et réserve visible | panne, objet vide, statut absent, annulation partielle → `non_verifiee`, `ambigu` ; hors vigueur et annulé → `hors_vigueur` ; Besançon et Sucy-en-Brie rejoués sans détail ni pièces |
+| 4 | Effet juridique déduit du code principal | Besançon 07-67 « non protégé » lu « protégé » ; 05-05 et 05-07 expliqués comme voie ou équipement public | catégories par **sous-code et type de document**, sur les tables CNIG ; 07-65 à 69 non protégés ; 05-05, 05-06, 05-07, 05-08 avec leur propre libellé ; sous-code inconnu sans effet énoncé ; code, sous-code et document conservés dans le contrat | Besançon réel : 07-67 « Immeuble bâti non protégé, soumis à des dispositions particulières », 07-50 protégé ≈ 35 % ; Toulouse : 07-68 non protégé |
+| 5 | Perte partielle de source acceptée | `prescriptions.surface = null` → `nouvelle_version` | sous-sources nommées (`urbanisme_prescriptions`, `urbanisme_vigueur`, `urbanisme_pieces`) et `pertesUrbanisme` comparant N et N+1 | refusée, N intacte et affichée ; prescription retirée, document remplacé ou annulé : acceptés ; dossier antérieur sans lecture : rien perdu |
+
+Défauts trouvés en corrigeant, corrigés aussi :
+- deux zones **superposées** (zone du PSMV et périmètre du site patrimonial, chacune à 100 % à Besançon) étaient
+  annoncées comme une parcelle « partagée » ; elles sont dites superposées ;
+- le calcul exact a fait apparaître des liserés de zone de plus de 25 m² sur les très grandes parcelles (38 m² sur
+  5,5 ha) : d'où la règle propre aux zones (section 4) ;
+- quand aucune zone n'était lisible, les prescriptions n'étaient pas rendues ; elles le sont dans tous les états ;
+- bruit binaire dans les surfaces (`3725.1000000000004`), qui aurait rendu l'empreinte instable.
+
+Cas positifs préservés et rejoués : Moissy (zone unique), Mérignac (deux zones, emplacement réservé), Sucy-en-Brie
+(trois zones dont une de 2,3 %), Lyon (zone et élément patrimonial du voisin écartés), Six-Fours (emplacement réservé),
+La Rochelle (règlement de la zone PSMV non publié, jamais remplacé), Vauquois (carte communale), Châtelard (RNU),
+Grandvals (sans document). Liens de règlement vérifiés en réel : Besançon `25056_reglement_20260615.pdf`, HTTP 200,
+`application/pdf`, après redirection officielle vers `data.geopf.fr`.
+
+Limites résiduelles :
+- `effectiveStatus` n'est pas documenté dans le schéma du GPU ; s'il disparaissait, toutes les vigueurs deviendraient
+  `non_verifiee` (lecture prudente, jamais fausse).
+- Un liseré réel de moins de 2 % d'une zone voisine n'est pas présenté comme une zone de la parcelle ; au-delà de
+  25 m², il est dit comme bordure à vérifier.
+- La tolérance de contact (1 cm) traite un linéaire tracé à quelques centimètres à l'intérieur de la limite comme
+  traversant la parcelle.
+- Le rattachement multi-parcelles (jardin, copropriété sur plusieurs parcelles) reste hors V1 (FUT-83).
+- Le texte du bloc est jugé trop long et trop technique par le porteur : [FUT-144](https://linear.app/future-e/issue/FUT-144).

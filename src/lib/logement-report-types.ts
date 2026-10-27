@@ -28,7 +28,8 @@ export type LogementReport = {
   altitude?: number | null;
   // `rattachement` (FUT-127) voyage déjà sur le fil, depuis `CadastreParcel` ; FUT-81 le lit pour dire
   // qu'une parcelle retenue par proximité peut être celle d'un voisin. Absent sur un rapport antérieur.
-  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; rattachement?: "point" | "repli"; } | null;
+  // FUT-81 (revue du 27/10) : `candidatsAuPoint` et `distanceRepliM`, posés seulement quand ils disent quelque chose.
+  parcel?: { parcelCode: string; nomCommune: string | null; contenance: number | null; rattachement?: "point" | "repli"; candidatsAuPoint?: number; distanceRepliM?: number; } | null;
   dpeCandidates?: DpeRecord[];
   /**
    * CE QU'A ÉTABLI LA RECHERCHE DES DIAGNOSTICS DE L'ADRESSE (FUT-65). `unavailable` : la base ADEME

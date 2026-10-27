@@ -1,0 +1,485 @@
+{
+  "sha": "992af92fd4c23eece89b5c39ec465fcd2b3099c0",
+  "geometry": [
+    {
+      "name": "limite seule",
+      "exact": 0,
+      "measured": 0,
+      "exactSurfaceM2": 0,
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "prescriptions": []
+    },
+    {
+      "name": "microchevauchement",
+      "exact": 0.0001,
+      "measured": 0,
+      "exactSurfaceM2": 1,
+      "expectedAccepted": false,
+      "actualAccepted": false,
+      "prescriptions": []
+    },
+    {
+      "name": "bande réservée 50 m²",
+      "exact": 0.005,
+      "measured": 0,
+      "exactSurfaceM2": 50,
+      "expectedAccepted": true,
+      "actualAccepted": false,
+      "prescriptions": []
+    },
+    {
+      "name": "bande réservée 30 m²",
+      "exact": 0.003,
+      "measured": 0,
+      "exactSurfaceM2": 30,
+      "expectedAccepted": true,
+      "actualAccepted": false,
+      "prescriptions": []
+    },
+    {
+      "name": "deux zones réelles",
+      "exact": 0.6,
+      "measured": 0.6,
+      "exactSurfaceM2": 6000,
+      "expectedAccepted": true,
+      "actualAccepted": true,
+      "prescriptions": [
+        {
+          "famille": "05",
+          "libelle": "deux zones réelles",
+          "forme": "surface",
+          "part": 0.6
+        }
+      ]
+    },
+    {
+      "name": "petite parcelle : intersection réelle 1 m²",
+      "exact": 0.01,
+      "measured": 0,
+      "accepted": false
+    },
+    {
+      "name": "trou : prescription dans le trou",
+      "measured": 0
+    },
+    {
+      "name": "multipolygone, une composante sur deux",
+      "measured": 0.5
+    },
+    {
+      "name": "parcelle concave : encoche exclue",
+      "measured": 0
+    },
+    {
+      "name": "parcelle concave : deux tiers reels",
+      "expected": 0.667,
+      "measured": 0.667
+    },
+    {
+      "name": "deux zones",
+      "zones": [
+        [
+          "UB",
+          0.6
+        ],
+        [
+          "UA",
+          0.4
+        ]
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "name": "point ouest",
+      "traverse": true,
+      "prescriptions": [
+        {
+          "famille": "07",
+          "libelle": "point ouest",
+          "forme": "point",
+          "part": null
+        }
+      ]
+    },
+    {
+      "name": "point est",
+      "traverse": false,
+      "prescriptions": []
+    },
+    {
+      "name": "ligne ouest",
+      "traverse": true,
+      "prescriptions": [
+        {
+          "famille": "07",
+          "libelle": "ligne ouest",
+          "forme": "ligne",
+          "part": null
+        }
+      ]
+    },
+    {
+      "name": "ligne est",
+      "traverse": false,
+      "prescriptions": []
+    },
+    {
+      "name": "geometry absente",
+      "statut": "confirme",
+      "grain": "point",
+      "zones": [
+        {
+          "libelle": "UA",
+          "libelong": null,
+          "typezone": "U",
+          "part": null,
+          "documentId": "0123456789abcdef0123456789abcdef",
+          "reglement": {
+            "statut": "non_publie"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Polygon vide",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [
+        {
+          "libelle": "UA",
+          "libelong": null,
+          "typezone": "U",
+          "part": null,
+          "documentId": "0123456789abcdef0123456789abcdef",
+          "reglement": {
+            "statut": "non_publie"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Polygon invalide",
+      "throws": "Cannot read properties of null (reading '0')"
+    },
+    {
+      "name": "detail en panne",
+      "statut": "confirme",
+      "enVigueur": null,
+      "ambiguites": [],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document",
+      "fullText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document ▸ Comprendre cette lecture Grain : parcelle cadastrale PARCELLE-TEST rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement. Les parts de parcelle sont estimées en superposant le plan publié et la parcelle cadastrale : ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti. Les prescriptions nommées ici sont celles dont l’effet change une vérification avant achat ou travaux. Les autres sont citées par famille et se lisent dans le règlement. Une prescription qui ne fait que border la parcelle n’est pas retenue : elle peut concerner le voisin. Règle applicable n’est pas autorisation obtenue : les permis effectivement déposés autour de l’adresse se lisent dans le module Autour de l’adresse. Géoportail de l’urbanisme (API Carto IGN, nomenclature nationale du CNIG). futur•e n’est pas un certificat d’urbanisme : seuls le certificat et l’instruction d’une demande engagent l’administration."
+    },
+    {
+      "name": "metadonnees vides",
+      "statut": "ambigu",
+      "enVigueur": false,
+      "ambiguites": [
+        "document_hors_vigueur"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Le Géoportail ne le donne pas comme en vigueur : vérifiez en mairie la version applicable. Voir le document",
+      "fullText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Le Géoportail ne le donne pas comme en vigueur : vérifiez en mairie la version applicable. Voir le document ▸ Comprendre cette lecture Grain : parcelle cadastrale PARCELLE-TEST rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement. Les parts de parcelle sont estimées en superposant le plan publié et la parcelle cadastrale : ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti. Les prescriptions nommées ici sont celles dont l’effet change une vérification avant achat ou travaux. Les autres sont citées par famille et se lisent dans le règlement. Une prescription qui ne fait que border la parcelle n’est pas retenue : elle peut concerner le voisin. Règle applicable n’est pas autorisation obtenue : les permis effectivement déposés autour de l’adresse se lisent dans le module Autour de l’adresse. Géoportail de l’urbanisme (API Carto IGN, nomenclature nationale du CNIG). futur•e n’est pas un certificat d’urbanisme : seuls le certificat et l’instruction d’une demande engagent l’administration."
+    },
+    {
+      "name": "statut legal absent",
+      "statut": "confirme",
+      "enVigueur": true,
+      "ambiguites": [],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document",
+      "fullText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document ▸ Comprendre cette lecture Grain : parcelle cadastrale PARCELLE-TEST rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement. Les parts de parcelle sont estimées en superposant le plan publié et la parcelle cadastrale : ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti. Les prescriptions nommées ici sont celles dont l’effet change une vérification avant achat ou travaux. Les autres sont citées par famille et se lisent dans le règlement. Une prescription qui ne fait que border la parcelle n’est pas retenue : elle peut concerner le voisin. Règle applicable n’est pas autorisation obtenue : les permis effectivement déposés autour de l’adresse se lisent dans le module Autour de l’adresse. Géoportail de l’urbanisme (API Carto IGN, nomenclature nationale du CNIG). futur•e n’est pas un certificat d’urbanisme : seuls le certificat et l’instruction d’une demande engagent l’administration."
+    },
+    {
+      "name": "hors vigueur",
+      "statut": "ambigu",
+      "enVigueur": false,
+      "ambiguites": [
+        "document_hors_vigueur"
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Le Géoportail ne le donne pas comme en vigueur : vérifiez en mairie la version applicable. Voir le document",
+      "fullText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Le Géoportail ne le donne pas comme en vigueur : vérifiez en mairie la version applicable. Voir le document ▸ Comprendre cette lecture Grain : parcelle cadastrale PARCELLE-TEST rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement. Les parts de parcelle sont estimées en superposant le plan publié et la parcelle cadastrale : ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti. Les prescriptions nommées ici sont celles dont l’effet change une vérification avant achat ou travaux. Les autres sont citées par famille et se lisent dans le règlement. Une prescription qui ne fait que border la parcelle n’est pas retenue : elle peut concerner le voisin. Règle applicable n’est pas autorisation obtenue : les permis effectivement déposés autour de l’adresse se lisent dans le module Autour de l’adresse. Géoportail de l’urbanisme (API Carto IGN, nomenclature nationale du CNIG). futur•e n’est pas un certificat d’urbanisme : seuls le certificat et l’instruction d’une demande engagent l’administration."
+    },
+    {
+      "name": "repli selectionne la plus petite, pas la plus proche",
+      "parcel": {
+        "idu": "petite-voisine",
+        "parcelCode": "99999-000-AA-petite-voisine",
+        "codeInsee": "99999",
+        "section": "AA",
+        "numero": "petite-voisine",
+        "prefixe": "000",
+        "contenance": 100,
+        "nomCommune": null,
+        "rattachement": "repli"
+      },
+      "statut": "confirme",
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone ZONE-VOISIN du plan local d&#x27;urbanisme (PLU). Prescriptions cartographiées sur la parcelle Emplacement réservé · sur toute la parcelle « Réserve chez le voisin » Une partie du terrain est réservée à un futur aménagement public (voie, équipement, espace vert). Demandez en mairie son objet et son bénéficiaire : cette partie ne peut pas accueillir une construction contraire à cette destination. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone ZONE-VOISIN et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone ZONE-VOISIN n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document",
+      "disclosure": "▸ Comprendre cette lecture Grain : parcelle cadastrale PARCELLE-TEST rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement. Le point de l’adresse ne tombait dans aucune parcelle : la plus proche a été retenue. Elle peut être celle d’un voisin, vérifiez la référence cadastrale du bien. Les parts de parcelle sont estimées en superposant le plan publié et la parcelle cadastrale : ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti. Les prescriptions nommées ici sont celles dont l’effet change une vérification avant achat ou travaux. Les autres sont citées par famille et se lisent dans le règlement. Une prescription qui ne fait que border la parcelle n’est pas retenue : elle peut concerner le voisin. Règle applicable n’est pas autorisation obtenue : les permis effectivement déposés autour de l’adresse se lisent dans le module Autour de l’adresse. Géoportail de l’urbanisme (API Carto IGN, nomenclature nationale du CNIG). futur•e n’est pas un certificat d’urbanisme : seuls le certificat et l’instruction d’une demande engagent l’administration."
+    },
+    {
+      "name": "actualisation perd la source prescriptions",
+      "oldAbsent": [
+        "parcelle",
+        "altitude",
+        "zfe",
+        "friches",
+        "donnees_communales",
+        "sinistralite",
+        "georisques_commune",
+        "georisques_point",
+        "patrimoine"
+      ],
+      "newAbsent": [
+        "parcelle",
+        "altitude",
+        "zfe",
+        "friches",
+        "donnees_communales",
+        "sinistralite",
+        "georisques_commune",
+        "georisques_point",
+        "patrimoine"
+      ],
+      "newPrescriptionsStatut": "indisponible",
+      "issue": "nouvelle_version"
+    },
+    {
+      "name": "nomenclature 05-05",
+      "prescriptions": [
+        {
+          "famille": "05",
+          "libelle": "Emplacement réservé logement social/mixité sociale",
+          "forme": "surface",
+          "part": 1
+        }
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Prescriptions cartographiées sur la parcelle Emplacement réservé · sur toute la parcelle « Emplacement réservé logement social/mixité sociale » Une partie du terrain est réservée à un futur aménagement public (voie, équipement, espace vert). Demandez en mairie son objet et son bénéficiaire : cette partie ne peut pas accueillir une construction contraire à cette destination. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    },
+    {
+      "name": "nomenclature 05-07",
+      "prescriptions": [
+        {
+          "famille": "05",
+          "libelle": "Secteur de projet en attente d’un projet d’aménagement global",
+          "forme": "surface",
+          "part": 1
+        }
+      ],
+      "visibleText": "Plan d’urbanisme de la parcelle Cette parcelle est en zone UA du plan local d&#x27;urbanisme (PLU). zone urbaine dans la nomenclature nationale Prescriptions cartographiées sur la parcelle Emplacement réservé · sur toute la parcelle « Secteur de projet en attente d’un projet d’aménagement global » Une partie du terrain est réservée à un futur aménagement public (voie, équipement, espace vert). Demandez en mairie son objet et son bénéficiaire : cette partie ne peut pas accueillir une construction contraire à cette destination. Ce zonage ne dit pas, à lui seul, ce qui est autorisé. Avant d’acheter en vue d’une extension, d’une annexe, d’une surélévation ou d’un changement d’usage, lisez dans le règlement le chapitre de la zone UA et ses dispositions générales, puis faites confirmer le projet par le service urbanisme de la mairie. Un certificat d’urbanisme opérationnel peut aussi être demandé. Le règlement de la zone UA n’est pas publié avec le document au Géoportail : demandez-le au service urbanisme de la mairie. D’après le Géoportail de l’urbanisme : plan local d&#x27;urbanisme (PLU). Voir le document"
+    }
+  ],
+  "witnesses": [
+    {
+      "name": "lyon-croix-rousse",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [
+        {
+          "libelle": "UCe1a",
+          "libelong": "Tissu urbain dense a caractere patrimonial qui regroupe toutes les fonctions des centres urbains. Il est constitue d ilots profonds tres occupes par le bati avec peu d espaces vegetalises.",
+          "typezone": "U",
+          "part": 0.999,
+          "documentId": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/4f3ddc27a9611b4bc94fa161443b8e86/files/200046977_reglement_20260326.pdf",
+            "source": "gpu"
+          }
+        }
+      ],
+      "prescriptions": [
+        {
+          "famille": "02",
+          "libelle": "Risque d inondation par ruissellement-ZONE PRODUCTION",
+          "forme": "surface",
+          "part": 1
+        },
+        {
+          "famille": "07",
+          "libelle": "Perimetre d interet patrimonial-A1",
+          "forme": "surface",
+          "part": 1
+        }
+      ],
+      "documents": [
+        {
+          "id": "4f3ddc27a9611b4bc94fa161443b8e86",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) GRAND LYON LA METROPOLE",
+          "producteur": "Métropole de Lyon",
+          "enVigueur": true,
+          "approbation": "2026-03-26",
+          "publication": "2026-04-23",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/4f3ddc27a9611b4bc94fa161443b8e86"
+        }
+      ]
+    },
+    {
+      "name": "six-fours-emplacement-reserve",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [
+        {
+          "libelle": "UE",
+          "libelong": "UE - correspondant aux secteurs à vocation principale d'habitat et caractérisés par un habitat de type individuel ou sous forme de petits collectifs",
+          "typezone": "U",
+          "part": 1,
+          "documentId": "d36f93f74ce721ef818770637976e383",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/d36f93f74ce721ef818770637976e383/files/83129_reglement_20251218.pdf",
+            "source": "gpu"
+          }
+        }
+      ],
+      "prescriptions": [
+        {
+          "famille": "05",
+          "libelle": "Emplacement réservé",
+          "forme": "surface",
+          "part": 0.131
+        },
+        {
+          "famille": "07",
+          "libelle": "Espaces verts à protéger - alignements",
+          "forme": "ligne",
+          "part": null
+        }
+      ],
+      "documents": [
+        {
+          "id": "d36f93f74ce721ef818770637976e383",
+          "type": "PLU",
+          "titre": "Plan Local d'Urbanisme (PLU) de la commune de SIX-FOURS-LES-PLAGES",
+          "producteur": "Citadia Conseil",
+          "enVigueur": true,
+          "approbation": "2026-09-08",
+          "publication": "2026-09-10",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/d36f93f74ce721ef818770637976e383"
+        }
+      ]
+    },
+    {
+      "name": "merignac-deux-zones",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [
+        {
+          "libelle": "US7",
+          "libelong": "Zones urbaines spécifiques liées à l'économie",
+          "typezone": "U",
+          "part": 0.614,
+          "documentId": "0b6c6621184959caf3fa5b684f929657",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/0b6c6621184959caf3fa5b684f929657/files/243300316_reglement_20260505.pdf",
+            "source": "gpu"
+          }
+        },
+        {
+          "libelle": "US9",
+          "libelong": "Zones urbaines spécifiques liées à l'économie",
+          "typezone": "U",
+          "part": 0.386,
+          "documentId": "0b6c6621184959caf3fa5b684f929657",
+          "reglement": {
+            "statut": "publie",
+            "url": "https://www.geoportail-urbanisme.gouv.fr/api/document/0b6c6621184959caf3fa5b684f929657/files/243300316_reglement_20260505.pdf",
+            "source": "gpu"
+          }
+        }
+      ],
+      "prescriptions": [
+        {
+          "famille": "05",
+          "libelle": "Emplacement réservé - Voirie tertiaire",
+          "forme": "surface",
+          "part": 0.012
+        },
+        {
+          "famille": "07",
+          "libelle": "Patrimoine paysager - Bois et bosquets intérieurs",
+          "forme": "surface",
+          "part": 0.006
+        }
+      ],
+      "documents": [
+        {
+          "id": "0b6c6621184959caf3fa5b684f929657",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) BORDEAUX METROPOLE",
+          "producteur": "Bordeaux Métropole",
+          "enVigueur": true,
+          "approbation": "2026-05-05",
+          "publication": "2026-05-12",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/0b6c6621184959caf3fa5b684f929657"
+        }
+      ]
+    },
+    {
+      "name": "la-rochelle-psmv",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [
+        {
+          "libelle": "PSMV",
+          "libelong": "plan de sauvegarde et de mise en valeur de La Rochelle",
+          "typezone": "U",
+          "part": 1,
+          "documentId": "be136e99d07395b0a93b1adc18b92449",
+          "reglement": {
+            "statut": "non_publie"
+          }
+        }
+      ],
+      "prescriptions": [],
+      "documents": [
+        {
+          "id": "be136e99d07395b0a93b1adc18b92449",
+          "type": "PLUi",
+          "titre": "Plan Local d'Urbanisme intercommunal (PLUi) DE LA ROCHELLE",
+          "producteur": "Communauté d'Agglomération de La Rochelle",
+          "enVigueur": true,
+          "approbation": "2026-03-05",
+          "publication": "2026-05-12",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/be136e99d07395b0a93b1adc18b92449"
+        }
+      ]
+    },
+    {
+      "name": "vauquois-carte-communale",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [],
+      "prescriptions": [],
+      "documents": [
+        {
+          "id": "a907741b483c6198fc2bdf80bf4d0cbd",
+          "type": "CC",
+          "titre": "Carte Communale (CC) de la commune de VAUQUOIS",
+          "producteur": null,
+          "enVigueur": true,
+          "approbation": "2020-02-10",
+          "publication": "2020-03-09",
+          "url": "https://www.geoportail-urbanisme.gouv.fr/document/by-id/a907741b483c6198fc2bdf80bf4d0cbd"
+        }
+      ]
+    },
+    {
+      "name": "chatelard-rnu",
+      "statut": "confirme",
+      "grain": "parcelle",
+      "zones": [],
+      "prescriptions": [],
+      "documents": []
+    },
+    {
+      "name": "grandvals-sans-document",
+      "statut": "non_trouve",
+      "grain": "parcelle",
+      "zones": [],
+      "prescriptions": [],
+      "documents": []
+    }
+  ]
+}

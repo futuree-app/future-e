@@ -4,8 +4,11 @@
 // `urbanisme` est lu par `lireUrbanisme` à partir des réponses RÉELLES du cadastre et du Géoportail de
 // l'urbanisme relevées le 26/10/2026 (`src/lib/__fixtures__/fut81/`). Aucune source n'est appelée.
 //
-// `?cas=lyon|six-fours|merignac|moissy|la-rochelle|vauquois|chatelard|grandvals|panne|ancien`
+// `?cas=lyon|six-fours|merignac|moissy|la-rochelle|vauquois|chatelard|grandvals|besancon|sucy|vigueur|incertaine|panne|ancien`
 // `panne` : le Géoportail n'a pas répondu. `ancien` : un rapport écrit avant FUT-81, sans le champ.
+// Revue du 27/10/2026 : `besancon` (PSMV, immeuble non protégé, repli à 0,7 m), `sucy` (trois zones et un
+// liseré de bordure), `vigueur` (Moissy, détail et pièces du document en délai dépassé), `incertaine`
+// (Six-Fours, géométrie de l'emplacement réservé illisible : prescription gardée, position non vérifiable).
 import { notFound } from "next/navigation";
 import LogementModule from "@/components/report/LogementModule";
 import type { AddressDossierRow } from "@/lib/address-dossier-store";
@@ -21,18 +24,20 @@ import laRochelle from "@/lib/__fixtures__/fut81/la-rochelle-psmv.json";
 import vauquois from "@/lib/__fixtures__/fut81/vauquois-carte-communale.json";
 import chatelard from "@/lib/__fixtures__/fut81/chatelard-rnu.json";
 import grandvals from "@/lib/__fixtures__/fut81/grandvals-sans-document.json";
+import besancon from "@/lib/__fixtures__/fut81/besancon-psmv-non-protege.json";
+import sucy from "@/lib/__fixtures__/fut81/sucy-trois-zones.json";
 
 type Feature = { properties?: Record<string, unknown> | null; geometry?: { type: string; coordinates: unknown } | null };
 type Fixture = {
   capture: string; ban: { id: string; label: string; citycode: string; lon: number; lat: number };
-  parcelle: { properties: { idu: string; contenance?: number; code_insee: string; section: string; numero: string; com_abs?: string; nom_com?: string }; geometry: Feature["geometry"]; rattachement: "point" | "repli" } | null;
+  parcelle: { properties: { idu: string; contenance?: number; code_insee: string; section: string; numero: string; com_abs?: string; nom_com?: string }; geometry: Feature["geometry"]; rattachement: "point" | "repli"; distanceM?: number } | null;
   municipality: { features: Feature[] }; document: { features: Feature[] }; zone: { features: Feature[] }; secteur: { features: Feature[] };
   prescriptionSurf: { features: Feature[] }; prescriptionLin: { features: Feature[] }; prescriptionPct: { features: Feature[] };
   details: Record<string, Record<string, unknown>>; files: Record<string, { name?: unknown; title?: unknown }[]>;
 };
 const CAS: Record<string, Fixture> = {
   lyon, "six-fours": sixFours, merignac, moissy, "la-rochelle": laRochelle, vauquois, chatelard, grandvals,
-  panne: moissy, ancien: moissy,
+  besancon, sucy, vigueur: moissy, incertaine: sixFours, panne: moissy, ancien: moissy,
 } as unknown as Record<string, Fixture>;
 
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -47,20 +52,34 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
     : cle === "panne"
       ? urbanismeIndisponible()
       : lireUrbanisme({
-          parcelle: f.parcelle ? { geometry: f.parcelle.geometry, contenance: p?.contenance ?? null } : null,
+          point: [f.ban.lon, f.ban.lat],
+          parcelle: f.parcelle ? { geometry: f.parcelle.geometry, contenance: p?.contenance ?? null, rattachement: f.parcelle.rattachement, distanceM: f.parcelle.distanceM ?? null } : null,
           municipality: f.municipality.features, documents: f.document.features, zones: f.zone.features, secteurs: f.secteur.features,
-          prescriptions: { surface: f.prescriptionSurf.features, ligne: f.prescriptionLin.features, point: f.prescriptionPct.features },
-          details: f.details, fichiers: f.files,
+          prescriptions: {
+            surface: cle === "incertaine"
+              ? f.prescriptionSurf.features.map((x) => (x.properties?.typepsc === "05" ? { ...x, geometry: { type: "Polygon", coordinates: [] } } : x))
+              : f.prescriptionSurf.features,
+            ligne: f.prescriptionLin.features, point: f.prescriptionPct.features,
+          },
+          // `vigueur` : le détail et les pièces n'ont pas répondu (délai dépassé), les couches si.
+          details: cle === "vigueur" ? Object.fromEntries(Object.keys(f.details).map((id) => [id, null])) : f.details,
+          fichiers: cle === "vigueur" ? Object.fromEntries(Object.keys(f.files).map((id) => [id, null])) : f.files,
         });
   const rapport: LogementReport = {
     ...base,
     address: { ...base.address!, id: f.ban.id, label: f.ban.label, citycode: f.ban.citycode, latitude: f.ban.lat, longitude: f.ban.lon },
     parcel: p
-      ? { parcelCode: `${p.code_insee}-${p.com_abs || "000"}-${p.section}-${p.numero}`, nomCommune: p.nom_com ?? null, contenance: p.contenance ?? null, rattachement: f.parcelle!.rattachement }
+      ? {
+          parcelCode: `${p.code_insee}-${p.com_abs || "000"}-${p.section}-${p.numero}`, nomCommune: p.nom_com ?? null, contenance: p.contenance ?? null,
+          rattachement: f.parcelle!.rattachement, ...(f.parcelle!.distanceM != null ? { distanceRepliM: f.parcelle!.distanceM } : {}),
+        }
       : null,
     banFeatureType: "housenumber",
     ...(urbanisme ? { urbanisme } : {}),
-    version: { numero: 1, collecteeLe: f.capture, sourcesAbsentes: cle === "panne" ? ["urbanisme"] : [], synthese: null, syntheseHash: null },
+    version: {
+      numero: 1, collecteeLe: f.capture, synthese: null, syntheseHash: null,
+      sourcesAbsentes: cle === "panne" ? ["urbanisme"] : cle === "vigueur" ? ["urbanisme_vigueur", "urbanisme_pieces"] : [],
+    },
   };
   const maintenant = "2026-10-26T12:00:00.000Z";
   const dossier = {

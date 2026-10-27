@@ -2,8 +2,9 @@ import "server-only";
 import { buildHeritageProtections, type HeritageStatus, type RawSupFeature } from "./gpu-servitudes.ts";
 
 import {
-  GPU_SITE, lireUrbanisme, urbanismeIndisponible, type GpuFeature, type UrbanismeParcelle,
+  GPU_SITE, lireUrbanisme, urbanismeIndisponible, type EntreeUrbanisme, type GpuFeature, type UrbanismeParcelle,
 } from "./urbanisme-parcelle.ts";
+import { projectionAutour, regionDe } from "./geometrie-parcelle.ts";
 
 export type { HeritageStatus } from "./gpu-servitudes.ts";
 
@@ -33,12 +34,16 @@ export async function fetchHeritageProtections(
 }
 
 // ── FUT-81 : LE PLAN D'URBANISME DE LA PARCELLE ──────────────────────────────────────────────
-// Même hôte, même absence de clé. Mesuré le 26/10/2026 sur 29 adresses : 0,2 à 3,2 s (médiane
+// Même hôte, même absence de clé. Mesuré le 26/10/2026 sur 27 adresses : 0,2 à 3,2 s (médiane
 // ~0,5 s) pour les sept couches en parallèle, puis ~0,1 s pour le détail des documents. Les réponses
 // portent la géométrie entière des zones et prescriptions (5 Mo une fois, à Cesson-Sévigné) : POST,
 // pour qu'une parcelle aux nombreux sommets ne dépasse jamais la longueur d'une URL.
 const GPU_URL = "https://apicarto.ign.fr/api/gpu";
-const GPU_DOC_TIMEOUT_MS = 4000;
+// Le détail et les pièces d'un document disent sa VIGUEUR et son règlement. À 4 s, ils ont dépassé leur
+// délai à Besançon et à Sucy-en-Brie pendant la revue du 27/10/2026, alors que les couches avaient
+// répondu : le document passait « en vigueur » sans l'être vérifié. Même délai que les couches, désormais,
+// et un échec reste dit (`vigueur: non_verifiee`), jamais confirmé.
+const GPU_DOC_TIMEOUT_MS = 8000;
 
 async function gpuCouche(couche: string, geom: unknown): Promise<GpuFeature[] | null> {
   try {
@@ -77,11 +82,13 @@ async function gpuDocument<T>(id: string, chemin: string): Promise<T | null> {
 export async function fetchUrbanismeParcelle(
   latitude: number,
   longitude: number,
-  parcelle: { geometry: { type: string; coordinates: unknown } | null; contenance: number | null } | null,
+  parcelle: EntreeUrbanisme["parcelle"],
 ): Promise<UrbanismeParcelle> {
   try {
     const point = { type: "Point", coordinates: [longitude, latitude] };
-    const geom = parcelle?.geometry ?? point;
+    // Une géométrie de parcelle qui ne se lit pas entièrement n'est pas envoyée : lecture au point.
+    const lisible = parcelle?.geometry && regionDe(parcelle.geometry, projectionAutour(longitude, latitude)) ? parcelle : null;
+    const geom = lisible?.geometry ?? point;
     const [municipality, documents, zones, secteurs, surface, ligne, pct] = await Promise.all([
       gpuCouche("municipality", point),
       gpuCouche("document", geom),
@@ -100,7 +107,8 @@ export async function fetchUrbanismeParcelle(
       return [id, details, fichiers] as const;
     }));
     return lireUrbanisme({
-      parcelle: parcelle?.geometry ? parcelle : null,
+      point: [longitude, latitude],
+      parcelle: lisible,
       municipality, documents, zones, secteurs,
       prescriptions: { surface, ligne, point: pct },
       details: Object.fromEntries(lus.map(([id, d]) => [id, d])),

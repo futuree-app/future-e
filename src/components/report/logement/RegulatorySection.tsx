@@ -155,8 +155,9 @@ export function RegulatoryStatusBlock({
   /**
    * FUT-81 : le plan d'urbanisme de la parcelle. Absent : l'appelant ne le connaît pas (bancs antérieurs),
    * rien ne s'affiche. Présent avec `lecture` indéfinie : un rapport collecté avant FUT-81, qui le dit.
+   * Le rattachement de la parcelle voyage DANS la lecture (`rattachement`), pas à côté.
    */
-  urbanisme?: { lecture: UrbanismeParcelle | undefined; parcelCode: string | null; parcelleParRepli: boolean };
+  urbanisme?: { lecture: UrbanismeParcelle | undefined; parcelCode: string | null };
 }) {
   const g = georisques?.parcel ?? georisques?.address;
   const grainLu: "parcelle" | "point" = georisques?.parcel ? "parcelle" : "point";
@@ -251,7 +252,6 @@ export function RegulatoryStatusBlock({
             <UrbanismeBlock
               urbanisme={urbanisme.lecture}
               parcelCode={urbanisme.parcelCode}
-              parcelleParRepli={urbanisme.parcelleParRepli}
               withDivider
             />
           )}

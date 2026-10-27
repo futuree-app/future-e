@@ -10,6 +10,9 @@
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { urlRechercheBan } from "../../src/lib/geocodeur-ban.ts";
+import { distanceRegion, projectionAutour, regionDe } from "../../src/lib/geometrie-parcelle.ts";
+
+const distance = (lon, lat, g) => { const r = regionDe(g, projectionAutour(lon, lat)); return r ? distanceRegion([0, 0], r) : Infinity; };
 
 const OUT = "src/lib/__fixtures__/fut81";
 const CARTO = "https://apicarto.ign.fr/api";
@@ -24,7 +27,13 @@ const CAS = {
   "vauquois-carte-communale": "1 rue d’Orleans 55270 Vauquois",
   "chatelard-rnu": "3 impasse du bois d'ardon 23700 Châtelard",
   "grandvals-sans-document": "rue de l'École 48260 Grandvals",
+  // Revue indépendante du 27/10/2026 : prescription PSMV 07-67 (immeuble NON protégé) et repli à 0,7 m.
+  "besancon-psmv-non-protege": "10 rue des Granges 25000 Besançon",
+  // Trois zones réelles, dont une secondaire d'environ 2 % ; détail des documents parfois lent.
+  "sucy-trois-zones": "13 avenue des Myosotis 94370 Sucy-en-Brie",
 };
+// `--seul a,b` : ne capture que ces cas (les autres fixtures restent celles du 26/10/2026).
+const seul = process.argv.includes("--seul") ? process.argv[process.argv.indexOf("--seul") + 1].split(",") : null;
 
 async function getJson(url, init) {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(30_000), headers: { accept: "application/json", "content-type": "application/json" } });
@@ -79,16 +88,19 @@ function square(lon, lat, m) {
 
 mkdirSync(OUT, { recursive: true });
 for (const [cle, q] of Object.entries(CAS)) {
+  if (seul && !seul.includes(cle)) continue;
   const ban = (await getJson(urlRechercheBan({ q, limit: 1 }))).features[0];
   const [lon, lat] = ban.geometry.coordinates;
   const point = { type: "Point", coordinates: [lon, lat] };
-  // Même rattachement que `cadastre.ts` : au point, puis repli 3/8/15 m sur la plus petite parcelle.
+  // Même rattachement que `cadastre.ts` : au point, puis repli 3/8/15 m sur la parcelle la plus proche.
   let parcelle = (await post("cadastre/parcelle", point)).features?.[0];
   let rattachement = "point";
   for (const m of [3, 8, 15]) {
     if (parcelle) break;
     const fs = (await post("cadastre/parcelle", square(lon, lat, m))).features ?? [];
-    parcelle = fs.sort((a, b) => (a.properties.contenance ?? Infinity) - (b.properties.contenance ?? Infinity))[0];
+    // Comme `cadastre.ts` depuis le 27/10/2026 : la plus proche MESURÉE, la plus petite à égalité.
+    parcelle = fs.map((f) => ({ f, d: distance(lon, lat, f.geometry) }))
+      .sort((a, b) => (Math.abs(a.d - b.d) > 0.01 ? a.d - b.d : (a.f.properties.contenance ?? Infinity) - (b.f.properties.contenance ?? Infinity)))[0]?.f;
     rattachement = "repli";
   }
   const geom = parcelle?.geometry ?? point;
@@ -109,7 +121,10 @@ for (const [cle, q] of Object.entries(CAS)) {
   }
   const fixture = {
     capture: new Date().toISOString(), q, ban: { id: ban.properties.id, label: ban.properties.label, citycode: ban.properties.citycode, lon, lat },
-    parcelle: parcelle ? { properties: parcelle.properties, geometry: { type: parcelle.geometry.type, coordinates: arrondi(parcelle.geometry.coordinates) }, rattachement } : null,
+    parcelle: parcelle ? {
+      properties: parcelle.properties, geometry: { type: parcelle.geometry.type, coordinates: arrondi(parcelle.geometry.coordinates) }, rattachement,
+      ...(rattachement === "repli" ? { distanceM: Math.round(distance(lon, lat, parcelle.geometry) * 10) / 10 } : {}),
+    } : null,
     municipality: sansGeomLourde({ features: (municipality.features ?? []).map((f) => ({ properties: f.properties })) }),
     document: { features: (document.features ?? []).map((f) => ({ properties: f.properties })) },
     zone: sansGeomLourde(zone), secteur: sansGeomLourde(secteur),

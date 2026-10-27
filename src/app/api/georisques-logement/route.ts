@@ -54,7 +54,13 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       fetchUrbanismeParcelle(
         address.latitude,
         address.longitude,
-        lu ? { geometry: lu.geometry, contenance: lu.parcel.contenance } : null,
+        lu
+          ? {
+              geometry: lu.geometry, contenance: lu.parcel.contenance,
+              rattachement: lu.parcel.rattachement ?? "point",
+              candidatsAuPoint: lu.parcel.candidatsAuPoint, distanceM: lu.parcel.distanceRepliM ?? null,
+            }
+          : null,
       ),
     );
 

@@ -15,6 +15,8 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { urlRechercheBan, urlReverseBan } from "../../src/lib/geocodeur-ban.ts";
+import { distanceRegion, projectionAutour, regionDe } from "../../src/lib/geometrie-parcelle.ts";
+import { lireUrbanisme } from "../../src/lib/urbanisme-parcelle.ts";
 
 const args = Object.fromEntries(
   process.argv.slice(2).flatMap((a, i, all) => (a.startsWith("--") ? [[a.slice(2), all[i + 1]]] : [])),
@@ -92,43 +94,8 @@ async function carto(endpoint, geom) {
   return { features: json.features ?? [], bytes };
 }
 
-// ── Géométrie (calcul dérivé, approximatif) ───────────────────────────────────────────────────
-// Projection locale équirectangulaire : suffisante à l'échelle d'une parcelle.
-function rings(geom) {
-  if (!geom) return [];
-  if (geom.type === "Polygon") return [geom.coordinates];
-  if (geom.type === "MultiPolygon") return geom.coordinates;
-  return [];
-}
-function inRing(x, y, ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i];
-    const [xj, yj] = ring[j];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-function inGeom(lon, lat, geom) {
-  return rings(geom).some((poly) => inRing(lon, lat, poly[0]) && !poly.slice(1).some((h) => inRing(lon, lat, h)));
-}
-/** Part de la parcelle couverte par chaque géométrie, par échantillonnage d'une grille de points. */
-function parts(parcelGeom, zones, n = 40) {
-  const pts = rings(parcelGeom).flatMap((p) => p[0]);
-  const lons = pts.map((p) => p[0]);
-  const lats = pts.map((p) => p[1]);
-  const [x0, x1, y0, y1] = [Math.min(...lons), Math.max(...lons), Math.min(...lats), Math.max(...lats)];
-  const inside = [];
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      const lon = x0 + ((i + 0.5) / n) * (x1 - x0);
-      const lat = y0 + ((j + 0.5) / n) * (y1 - y0);
-      if (inGeom(lon, lat, parcelGeom)) inside.push([lon, lat]);
-    }
-  }
-  return zones.map((z) => (inside.length ? inside.filter(([lo, la]) => inGeom(lo, la, z)).length / inside.length : null));
-}
-
+// ── Géométrie : celle de production (aire exacte), depuis la revue du 27/10/2026 ─────────────────
+// La première mesure estimait les parts par une grille de points ; elle manquait les bandes étroites.
 function square(lon, lat, m) {
   const dLat = m / 111_320;
   const dLon = m / (111_320 * Math.cos((lat * Math.PI) / 180));
@@ -145,14 +112,18 @@ async function mesurer(cas) {
   r.adresse = { label: f.properties.label, type: f.properties.type, score: f.properties.score, citycode: f.properties.citycode, lon, lat };
   const pt = { type: "Point", coordinates: [lon, lat] };
 
-  // 1. Parcelle au point, puis repli 3/8/15 m sur la plus petite parcelle (comme `cadastre.ts`), et
-  // parcelles à moins de 5 m (ambiguïté adresse -> parcelle).
+  // 1. Parcelle au point (deux résultats : un point sur une limite), puis repli 3/8/15 m sur la parcelle
+  // la plus proche MESURÉE (comme `cadastre.ts`), et parcelles à moins de 5 m (ambiguïté adresse -> parcelle).
+  const dist = (g) => { const reg = regionDe(g, projectionAutour(lon, lat)); return reg ? distanceRegion([0, 0], reg) : Infinity; };
   const parc = await timed(async () => {
-    const auPoint = (await carto("cadastre/parcelle", pt)).features[0];
-    if (auPoint) return { f: auPoint, rattachement: "point" };
+    const auPoint = (await carto("cadastre/parcelle", pt)).features;
+    if (auPoint[0]) return { f: auPoint[0], rattachement: "point", candidatsAuPoint: auPoint.length };
     for (const m of [3, 8, 15]) {
       const fs = (await carto("cadastre/parcelle", square(lon, lat, m))).features;
-      if (fs.length) return { f: fs.sort((a, b) => (a.properties.contenance ?? Infinity) - (b.properties.contenance ?? Infinity))[0], rattachement: "repli", rayon: m };
+      if (fs.length) {
+        const [best] = fs.map((f) => ({ f, d: dist(f.geometry) })).sort((a, b) => (Math.abs(a.d - b.d) > 0.01 ? a.d - b.d : (a.f.properties.contenance ?? Infinity) - (b.f.properties.contenance ?? Infinity)));
+        return { f: best.f, rattachement: "repli", rayon: m, distanceM: Number.isFinite(best.d) ? Math.round(best.d * 10) / 10 : null };
+      }
     }
     return null;
   });
@@ -160,7 +131,7 @@ async function mesurer(cas) {
   const p = parc.value?.f;
   const proches = await timed(() => carto("cadastre/parcelle", square(lon, lat, 5)));
   r.parcellesA5m = proches.value?.features?.map((x) => x.properties.idu) ?? null;
-  r.parcelle = p ? { idu: p.properties.idu, contenance: p.properties.contenance, rattachement: parc.value.rattachement, rayon: parc.value.rayon ?? null } : null;
+  r.parcelle = p ? { idu: p.properties.idu, contenance: p.properties.contenance, rattachement: parc.value.rattachement, rayon: parc.value.rayon ?? null, distanceM: parc.value.distanceM ?? null, candidatsAuPoint: parc.value.candidatsAuPoint ?? null } : null;
   const parcelGeom = p?.geometry ?? null;
   const g = parcelGeom ?? pt; // sans parcelle : on retombe sur le point (grain plus faible).
 
@@ -189,35 +160,31 @@ async function mesurer(cas) {
   Object.assign(r.temps, { zone: zones.ms, secteur: secteurs.ms, prescSurf: psurf.ms, prescLin: plin.ms, prescPct: ppct.ms, infoSurf: isurf.ms });
   r.octets = { zone: zones.value?.bytes, prescSurf: psurf.value?.bytes };
   const zf = zones.value?.features ?? [];
-  const zParts = parcelGeom ? parts(parcelGeom, zf.map((z) => z.geometry)) : zf.map(() => null);
-  r.zones = zf.map((z, i) => ({
-    libelle: z.properties.libelle, libelong: z.properties.libelong, typezone: z.properties.typezone,
-    destdomi: z.properties.destdomi, datvalid: z.properties.datvalid, datappro: z.properties.datappro,
-    nomfic: z.properties.nomfic, urlfic: z.properties.urlfic, doc: z.properties.gpu_doc_id,
-    part: zParts[i] == null ? null : Math.round(zParts[i] * 1000) / 10,
+  r.zonesBrutes = zf.map((z) => ({
+    libelle: z.properties.libelle, typezone: z.properties.typezone, destdomi: z.properties.destdomi,
+    destoui: z.properties.destoui, destnon: z.properties.destnon, nomfic: z.properties.nomfic, doc: z.properties.gpu_doc_id,
   }));
-  r.zoneAuPoint = parcelGeom
-    ? zf.filter((z) => inGeom(lon, lat, z.geometry)).map((z) => z.properties.libelle)
-    : null;
   const sf = secteurs.value?.features ?? [];
-  r.secteursCC = sf.map((s, i) => ({ libelle: s.properties.libelle, libelong: s.properties.libelong, typesect: s.properties.typesect, part: parcelGeom ? Math.round((parts(parcelGeom, [s.geometry])[0] ?? 0) * 1000) / 10 : null, i }));
+  r.secteursBruts = sf.map((s) => ({ libelle: s.properties.libelle, typesect: s.properties.typesect }));
   const presc = (res, forme) => (res.value?.features ?? []).map((x) => ({
     forme, libelle: x.properties.libelle, typepsc: x.properties.typepsc, stypepsc: x.properties.stypepsc,
-    txt: x.properties.txt, urlfic: x.properties.urlfic, nomfic: x.properties.nomfic,
-    part: forme === "surf" && parcelGeom ? Math.round((parts(parcelGeom, [x.geometry])[0] ?? 0) * 1000) / 10 : null,
   }));
-  r.prescriptions = [...presc(psurf, "surf"), ...presc(plin, "lin"), ...presc(ppct, "pct")];
+  r.prescriptionsBrutes = [...presc(psurf, "surf"), ...presc(plin, "lin"), ...presc(ppct, "pct")];
   r.informations = (isurf.value?.features ?? []).map((x) => ({ libelle: x.properties.libelle, typeinf: x.properties.typeinf, stypeinf: x.properties.stypeinf }));
   r.echecs = Object.entries({ zones, secteurs, psurf, plin, ppct, isurf, muni, docsParc }).filter(([, v]) => !v.ok).map(([k, v]) => `${k}: ${v.error}`);
 
   // 4. Détail officiel de chaque document : statut juridique, date, pièces, règlement écrit.
   r.details = [];
+  const detailsBruts = {};
+  const fichiersBruts = {};
   for (const d of r.documents) {
     const det = await timed(() => getJson(`${GPU_SITE}/api/document/${d.id}/details`));
     r.temps.details = (r.temps.details ?? 0) + det.ms;
     const j = det.value?.json;
-    if (!j) { r.details.push({ id: d.id, echec: det.error }); continue; }
+    detailsBruts[d.id] = j ?? null;
     const files = await timed(() => getJson(`${GPU_SITE}/api/document/${d.id}/files`));
+    fichiersBruts[d.id] = Array.isArray(files.value?.json) ? files.value.json : null;
+    if (!j) { r.details.push({ id: d.id, echec: det.error }); continue; }
     const pieces = files.value?.json ?? [];
     const reglements = pieces.filter((x) => /r[eè]glement/i.test(`${x.title} ${x.name}`) && !/graphique/i.test(`${x.title} ${x.name}`));
     let reglementHttp = null;
@@ -232,6 +199,27 @@ async function mesurer(cas) {
     });
   }
   r.temps.totalGpu = ["municipality", "document", "zone", "secteur", "prescSurf", "prescLin", "prescPct", "infoSurf"].reduce((a, k) => Math.max(a, r.temps[k] ?? 0), 0) + (r.temps.details ?? 0);
+
+  // 5. LA LECTURE DE PRODUCTION sur ces réponses brutes : ce que le dossier affichera.
+  const t0 = performance.now();
+  const u = lireUrbanisme({
+    point: [lon, lat],
+    parcelle: p ? { geometry: p.geometry, contenance: p.properties.contenance ?? null, rattachement: parc.value.rattachement, candidatsAuPoint: parc.value.candidatsAuPoint, distanceM: parc.value.distanceM ?? null } : null,
+    municipality: muni.value?.features ?? null, documents: docsParc.value?.features ?? null,
+    zones: zones.value?.features ?? null, secteurs: secteurs.value?.features ?? null,
+    prescriptions: { surface: psurf.value?.features ?? null, ligne: plin.value?.features ?? null, point: ppct.value?.features ?? null },
+    details: detailsBruts, fichiers: fichiersBruts,
+  });
+  r.temps.lecture = Math.round(performance.now() - t0);
+  r.lecture = {
+    statut: u.statut, regime: u.regime, grain: u.grain, rattachement: u.rattachement, ambiguites: u.ambiguites,
+    vigueur: u.documents.map((d) => d.vigueur),
+    zones: u.zones.map((z) => ({ libelle: z.libelle, part: z.part, surfaceM2: z.surfaceM2, reglement: z.reglement.statut })),
+    zonesEnLimite: u.zonesEnLimite, zonesNonMesurables: u.zonesNonMesurables,
+    secteurs: u.secteurs.map((x) => ({ libelle: x.libelle, typesect: x.typesect, part: x.part })),
+    prescriptions: u.prescriptions.map((x) => ({ categorie: x.categorie, etendue: x.etendue, part: x.part, surfaceM2: x.surfaceM2, longueurM: x.longueurM, libelle: x.libelle })),
+    prescriptionsContact: u.prescriptionsContact, autresPrescriptions: u.autresPrescriptions, prescriptionsStatut: u.prescriptionsStatut,
+  };
   return r;
 }
 
@@ -240,8 +228,10 @@ const LISTE = args.aleatoire ? await tirage(Number(args.aleatoire), Number(args.
 for (const cas of LISTE) {
   const r = await mesurer(cas);
   resultats.push(r);
-  const z = (r.zones ?? []).map((x) => `${x.libelle}${x.part != null ? ` ${x.part}%` : ""}`).join(", ");
-  console.log(`${cas.id.padEnd(22)} ${r.adresse?.label ?? "?"} | parcelle ${r.parcelle?.idu ?? "-"} ${r.parcelle?.rattachement ?? ""} (${r.parcellesA5m?.length ?? "?"} à 5 m) | rnu ${r.commune?.[0]?.rnu} | docs ${r.documents?.map((d) => d.type).join("+") || "aucun"} | zones ${z || "-"} | CC ${r.secteursCC?.map((s) => s.libelle).join(",") || "-"} | presc ${r.prescriptions?.length ?? 0} | ${r.temps.totalGpu} ms`);
+  const l = r.lecture;
+  const z = (l?.zones ?? []).map((x) => `${x.libelle}${x.part != null ? ` ${Math.round(x.part * 1000) / 10}%` : ""}`).join(", ");
+  const bord = (l?.zonesEnLimite ?? []).map((x) => `${x.libelle} ${x.surfaceM2} m²`).join(", ");
+  console.log(`${cas.id.padEnd(22)} ${r.adresse?.label ?? "?"} | ${r.parcelle?.rattachement ?? "-"} | ${l?.statut ?? "-"} ${(l?.ambiguites ?? []).join("+")} | docs ${r.documents?.map((d) => d.type).join("+") || "aucun"} | zones ${z || "-"}${bord ? ` | bordure ${bord}` : ""} | CC ${(l?.secteurs ?? []).map((s) => s.libelle).join(",") || "-"} | presc ${(l?.prescriptions ?? []).map((x) => `${x.categorie}:${x.etendue}`).join(" ") || "-"} (contact ${l?.prescriptionsContact ?? 0}) | ${r.temps.totalGpu} ms`);
   await sleep(400);
 }
 mkdirSync(dirname(OUT), { recursive: true });
