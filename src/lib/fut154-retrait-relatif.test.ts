@@ -178,7 +178,8 @@ test("reproduction · Aubagne (chaleur 4) ne se compare plus à Marseille (20) :
   assert.ok(V.subScore("faible_chaleur", c) < 34);
   assert.doesNotMatch(r.compromis, /qu'à Marseille/);
   // La faiblesse reste dite, dans l'absolu, comme le dit la matrice (« Étés chauds »).
-  assert.equal(r.compromis, "En échange, chaleur en hausse.");
+  // Sur la base : « chaleur en hausse », une tendance que le sous-score ne mesure pas.
+  assert.equal(r.compromis, "En échange, étés chauds.");
   const ligne = o.comparaisonComplete.themes.flatMap((t: M) => t.lignes).find((l: M) => l.id === "etes_frais");
   const i = o.results.slice(0, 3).findIndex((x: M) => x.nom === "Aubagne");
   assert.equal(ligne.cellules[i].palier, "Étés chauds");
@@ -225,7 +226,7 @@ test("frontières · 33 reste défavorable, 34 et 49 passent au palier interméd
     assert.equal(V.subScore(key, c), attendu, `${insee} ${key}`);
   }
   const t = async (insee: string, key: string) => V.raisonNeg(key, await V.getCommuneEntry(insee));
-  assert.equal(await t("13030", "faible_chaleur"), V.raisonNeg("faible_chaleur", null));
+  assert.equal(await t("13030", "faible_chaleur"), "étés chauds");
   assert.equal(await t("84047", "air_sain"), "qualité de l'air moyenne");
   assert.equal(await t("29171", "air_sain"), "qualité de l'air moyenne");
   // À 50 et au-delà, la formulation absolue n'est jamais retenue (seul un comparatif justifié reste possible).
@@ -254,6 +255,17 @@ test("synthèses · /synthesize reçoit le compromis au palier du Pack, jamais l
   const territoires = JSON.parse(etat.synthese[0].prompt.split("DONNÉES :\n")[1]).territoires;
   assert.equal(territoires.find((t: M) => t.commune === "Plomeur").compromis, "qualité de l'air moyenne");
   assert.doesNotMatch(etat.synthese[0].prompt, /air plus chargé en particules/);
+});
+
+test("règle · sous 34, la chaleur et les soins se disent au palier défavorable du Pack, sans tendance ni zonage inventés", async () => {
+  for (const [key, id] of [["faible_chaleur", "etes_frais"], ["acces_soins", "soins"]]) {
+    const dim = V.DIMENSIONS.find((d: M) => d.id === id);
+    assert.equal(V.raisonNeg(key, null), dim.paliers[2].charAt(0).toLowerCase() + dim.paliers[2].slice(1));
+  }
+  // Une priorité « soins » déclarée, au palier défavorable, sur une vraie carte.
+  const o = await recherche(null, [{ key: "acces_soins", weight: 3 }]);
+  const textes = [...o.results.slice(0, 3), ...o.pistes].map((r: M) => `${r.tradeoff} ${r.compromis}`).join(" ");
+  assert.doesNotMatch(textes, /sous-dotée|chaleur en hausse/);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -310,7 +322,7 @@ test("contre-épreuves 6 et 7 · trois communes aux étés chauds : aucune ne se
   for (const r of trio) ch.set(r.nom, V.subScore("faible_chaleur", await V.getCommuneEntry(r.insee)));
   assert.ok([...ch.values()].every((s) => s < 34), JSON.stringify([...ch]));
   for (const r of trio) assert.doesNotMatch(r.compromis, /chaleur estivale est plus marquée/, r.nom);
-  assert.equal(trio.find((x: M) => x.nom === "Villeurbanne").compromis, "En échange, chaleur en hausse.");
+  assert.equal(trio.find((x: M) => x.nom === "Villeurbanne").compromis, "En échange, étés chauds.");
   await verifierGroupe(trio, "chaleur", {}, o);
 });
 

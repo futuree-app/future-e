@@ -2432,8 +2432,11 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
       ? "vaste bassin d'emploi diversifié"
       : "bassin d'emploi diversifié",
 };
+// FUT-154 : sous 34, la formulation défavorable ne dit que ce que la donnée établit. « chaleur en hausse » annonçait une
+// tendance que le sous-score (un rang de chaleur estivale) ne mesure pas ; « zone sous-dotée en médecins » empruntait le
+// zonage officiel des ARS quand la donnée est un rang d'accessibilité (APL). Les deux reprennent le palier du Pack.
 const REASON_NEG: Record<PreferenceKey, string> = {
-  faible_chaleur: "chaleur en hausse",
+  faible_chaleur: "étés chauds",
   douceur_climat: "hivers parmi les moins doux",
   ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
@@ -2444,7 +2447,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   cadre_calme: "plus dense que recherché",
   eviter_isolement: "bassin de vie réduit, plus isolé",
   air_sain: "air plus chargé en particules",
-  acces_soins: "zone sous-dotée en médecins",
+  acces_soins: "accès aux soins limité",
   acces_services: "commune hors pôle de services",
   faible_pression_agricole: "environnement agricole à traitements fréquents à proximité",
   viabilite_emploi: "bassin d'emploi étroit ou peu diversifié",
