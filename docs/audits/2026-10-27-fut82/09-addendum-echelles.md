@@ -159,12 +159,12 @@ présence) s'applique ici aussi.
 
 | Question de la personne | Ce que futur•e sait déjà | Manque | Source qui peut changer la décision |
 |---|---|---|---|
-| Le climat sera-t-il vivable ? | Chaleur, sécheresse, pluies extrêmes, danger de feu projeté (2050) | Rien d'important | — |
+| Le climat sera-t-il vivable ? | Chaleur, sécheresse, pluies extrêmes, danger de feu projeté (2050) | Rien d'important | Aucune |
 | Quels risques pour un bien ici ? | Inondation (CatNat, rang national), danger de feu projeté, industrie, radon | Les feux réellement survenus | **BDIFF** |
 | Puis-je y travailler à distance ? | Bassin d'emploi, transports, gares | La fibre | **ARCEP par commune**, pour ce profil |
 | Pourrai-je me l'offrir ? | Niveau de prix relatif à l'achat et à la location | Taxe foncière | Fiscalité : faible tant que la base du bien manque |
 | Y a-t-il de la nature, du calme ? | Score nature (OSO), calme sonore, densité | Identité du lieu (parc) | PNR : identité, rarement un critère de choix |
-| Écoles, soins, services, vie locale ? | Accès BPE, médecins, centralité, vie associative | Rien d'important | — |
+| Écoles, soins, services, vie locale ? | Accès BPE, médecins, centralité, vie associative | Rien d'important | Aucune |
 
 **Cas éprouvé (Finistère intérieur).** Projet : nature, petits prix, peu de risque de feu, télétravail.
 Brasparts, Pleyben et Landerneau sont toutes trois en « Risque de feu faible ». Brasparts a le meilleur
@@ -183,10 +183,10 @@ aucun feu dans l'une ni dans l'autre).
 |---|---|---|---|
 | Sera-t-il bruyant ? | Autoroutes, grandes routes, voies ferrées à distance | **Le bruit aérien** | **PEB/PGS** |
 | Y a-t-il de la nature à pied ? | Espaces verts utilisables (OSM) | Les sites naturels majeurs | Protections au voisinage, valeur hypothétique |
-| Commerces, écoles, médecins ? | BPE à pied, avec noms et distances | Rien d'important | — |
+| Commerces, écoles, médecins ? | BPE à pied, avec noms et distances | Rien d'important | Aucune |
 | Fera-t-il trop chaud l'été ? | Îlot de chaleur (596 communes) | Ailleurs | LCZ : couverture proche de l'îlot de chaleur |
 | Ce quartier est-il exposé au feu ? | Danger projeté **de la commune** | **La lisière forêt-habitat** | **OLD** |
-| Inondation ? | Lecture à l'adresse (PPRN, ONRN) | Rien d'important | — |
+| Inondation ? | Lecture à l'adresse (PPRN, ONRN) | Rien d'important | Aucune |
 
 **Cas éprouvés, sur les mesures existantes** (deux logements tirés par commune) :
 - **Bruit aérien** : à Marignane, un logement est hors PEB et l'autre en zone C de

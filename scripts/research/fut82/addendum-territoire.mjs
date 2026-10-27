@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * FUT-82, addendum par échelle — deux candidates relues au grain de la COMMUNE, celui du comparateur.
+ * FUT-82, addendum par échelle : deux candidates relues au grain de la COMMUNE, celui du comparateur.
  *
  *   1. Mémoire des feux (BDIFF) face aux paliers « feu » que le comparateur affiche déjà
  *      (`faible_risque_feu` = 100 − percentile de NORIFM40_yr, jours d'indice forêt-météo > 40,

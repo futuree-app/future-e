@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * FUT-82, addendum par échelle — les espaces protégés AU VOISINAGE, et non plus au point.
+ * FUT-82, addendum par échelle : les espaces protégés AU VOISINAGE, et non plus au point.
  *
  * L'audit initial a mesuré les protections au point exact du logement (0 % de Natura 2000 sur 200
  * logements). Cette mesure répond à la question du Logement (« ce terrain est-il protégé ? »), pas à
