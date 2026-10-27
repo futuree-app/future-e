@@ -162,7 +162,8 @@ Logement à 814 px sur bureau dans le conteneur de page.
 ## 4. Réserves
 
 1. **Licence** : aucune déclarée par la DGAC ; la Licence Ouverte s'applique par défaut selon les CGU de
-   la Géoplateforme. Une confirmation écrite de la DGAC reste souhaitable (D6 de FUT-82).
+   la Géoplateforme. Fondement jugé suffisant ; la confirmation écrite de la DGAC est un suivi de
+   traçabilité, pas un blocage (01-sources § 6).
 2. **Actualité** : la copie est datée ; une révision publiée après l'extraction n'est vue qu'à la
    réextraction. Certains plans sont anciens (Nantes 2004, en révision), et un plan en révision peut
    s'appliquer par anticipation : l'écran renvoie à la mairie.
@@ -170,9 +171,6 @@ Logement à 814 px sur bureau dans le conteneur de page.
    Gap) : elles ne sont pas affichées, l'écran renvoie à l'arrêté.
 4. **Une géométrie officielle non mesurable** (Dijon zone A ; celles de Villacoublay étaient des doublons
    écartés) : lecture « incertaine » à moins de 50 m de son tracé ou dans son emprise.
-9. **Deux aérodromes sans arrêté listé** (LFDX Fumel, 1981 ; LFIV Vendays-Montalivet, sans document) ont des
-   zones dans la couche : peut-être des plans abrogés. Ils sont lus comme les autres ; à confirmer auprès de
-   la DGAC.
 5. **Noms d’aérodromes** : 30 noms abrégés par la DGAC sont développés à la main (table `NOMS`) ; les
    autres sont repris tels que publiés, sans accents restitués (« Nimes Garons »).
 6. **Base légale du PGS** (Code de l'environnement) non relue sur Légifrance : l'écran ne cite aucun
@@ -182,3 +180,7 @@ Logement à 814 px sur bureau dans le conteneur de page.
    bloc a été vérifié dans la section seule.
 8. **Design** : le bloc Autour reprend la grammaire historique de l'écran qui l'accueille (exception
    déclarée au cliquet du Relevé) ; il migrera avec AutourModule (FUT-118).
+9. **Fumel et Vendays-Montalivet** : absents de la liste des arrêtés de la DGAC, mais leurs PEB ont bien été
+   approuvés (1981 et 1986, documents retrouvés par le porteur, cf. 01-sources § 5). Leur vigueur actuelle
+   n'est pas établie : l'écran le dit (« qu'il soit toujours en vigueur se vérifie en mairie ») et rend
+   conditionnelle l'obligation de l'état des nuisances sonores aériennes.

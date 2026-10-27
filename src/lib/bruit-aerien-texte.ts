@@ -66,6 +66,14 @@ function phraseAutresAerodromes(sujet: string, nom: string, p: LecturePlan): str
   return `${sujet} est aussi ${liste} : les plans de chaque aérodrome s'appliquent.`;
 }
 
+/**
+ * UN PLAN DONT LA VIGUEUR N'EST PAS ÉTABLIE (Fumel, Vendays-Montalivet) : présent sur la carte de la DGAC,
+ * absent de sa liste des arrêtés. Ses arrêtés de 1981 et 1986 existent, mais rien n'établit qu'ils n'ont pas
+ * été abrogés : aucune phrase ne le présente comme opposable sans le dire.
+ */
+const VIGUEUR_A_VERIFIER = "Ce plan figure sur la carte publiée par la DGAC, mais pas dans sa liste des arrêtés : qu'il soit toujours en vigueur se vérifie en mairie.";
+const vigueur = (...l: (ZoneLue | null | undefined)[]) => (l.some((z) => z?.vigueurAVerifier) ? VIGUEUR_A_VERIFIER : null);
+
 /** La date d'un arrêté, dite seulement si elle est établie. */
 export function phraseArrete(z: ZoneLue): string {
   const d = dateLongue(z.dateArrete);
@@ -159,7 +167,7 @@ export function texteAutour(l: LectureBruitAerien | null | undefined): TexteBrui
     const z = p.plusProche;
     return {
       retenir: `${secteur} est hors des zones du ${NOM_PEB} de ${aerodrome(z)} : la plus proche, la zone ${z.zone}, est à ${distance(z.distanceM)}.`,
-      limite: LIMITE_HORS,
+      limite: lignes(LIMITE_HORS, vigueur(z)),
       verifier: "Passez sur place à plusieurs heures de la journée, en semaine, pour entendre le trafic aérien.",
       complement: pgsLigne,
       savoirPlus: [...savoirPlus, phraseArrete(z)],
@@ -180,7 +188,7 @@ export function texteAutour(l: LectureBruitAerien | null | undefined): TexteBrui
   const ref = r ?? p.enLimite[0];
   return {
     retenir,
-    limite: LIMITE_PEB,
+    limite: lignes(LIMITE_PEB, vigueur(ref, ...autresAerodromes(p))),
     verifier: p.etat === "en_limite"
       ? "La zone exacte d'un logement se lit sur le plan, qui se consulte en mairie et sur le Géoportail."
       : "Passez sur place aux heures de décollage et d'atterrissage, et demandez en mairie si le plan est en cours de révision.",
@@ -278,7 +286,7 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
     return {
       titre: `Hors des zones du ${NOM_PEB}`,
       retenir: `${l.grain === "parcelle" ? "La parcelle n'est" : "Le point de l'adresse n'est"} dans aucune zone du plan de ${aerodrome(z)} ; la plus proche, la zone ${z.zone}, ${ou}.`,
-      limite: lignes(LIMITE_HORS, lu),
+      limite: lignes(LIMITE_HORS, vigueur(z), lu),
       verifier: null,
       complement: pgsEtAide,
       savoirPlus: [...commun, phraseArrete(z)],
@@ -302,9 +310,11 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
     const fait = part
       ? `La parcelle est pour ${part} en zone ${r.zone}, ${SENS_PEB[r.zone]}.`
       : `${sujet} est en zone ${r.zone}, ${SENS_PEB[r.zone]}.`;
+    // Un plan dont la vigueur n'est pas établie n'oblige à rien d'affirmé : l'obligation est conditionnelle.
+    const si = vigueur(r, ...autresA) ? "Si ce plan est toujours en vigueur, en" : "En";
     const ensa = autresA.length
-      ? "En vente comme en location, un état des nuisances sonores aériennes indiquant ces zones doit être remis à l'acquéreur ou au locataire."
-      : "En vente comme en location, un état des nuisances sonores aériennes indiquant cette zone doit être remis à l'acquéreur ou au locataire.";
+      ? `${si} vente comme en location, un état des nuisances sonores aériennes indiquant ces zones doit être remis à l'acquéreur ou au locataire.`
+      : `${si} vente comme en location, un état des nuisances sonores aériennes indiquant cette zone doit être remis à l'acquéreur ou au locataire.`;
     retenir = `${fait}${autres} ${ensa}`;
   } else {
     titre = `En limite du ${NOM_PEB} de ${aerodrome(ref)}`;
@@ -325,7 +335,7 @@ export function texteLogement(l: LectureBruitAerien | null | undefined): (TexteB
   return {
     titre,
     retenir,
-    limite: lignes(bordure, lu),
+    limite: lignes(bordure, vigueur(ref, ...autresA), lu),
     verifier: "Avant de vous engager, demandez l'état des nuisances sonores aériennes et l'isolation des fenêtres. Pour agrandir ou créer un logement, demandez un certificat d'urbanisme : il signale la zone de bruit.",
     complement: lignes(phraseAutresAerodromes(sujet, NOM_PEB, p), pgsEtAide),
     savoirPlus: [

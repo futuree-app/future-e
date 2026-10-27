@@ -60,6 +60,11 @@ export type ZonePubliee = {
   document: string | null;
   /** Polygone mesurable au sens de FUT-81, vérifié à l'extraction. */
   valide: boolean;
+  /**
+   * L'aérodrome n'a aucun arrêté dans la liste officielle des PEB (WFS DGAC) : Fumel et Vendays-Montalivet
+   * le 27/10/2026. Leur vigueur actuelle n'est pas établie. Absent pour tous les autres.
+   */
+  horsListeArretes?: true;
   /** [lonMin, latMin, lonMax, latMax]. */
   bbox: [number, number, number, number];
   geometry: Geometrie;
@@ -98,6 +103,8 @@ export type ZoneLue = {
   part: number | null;
   /** Aire (m²) de la parcelle dans la zone, à la parcelle seulement. */
   surfaceM2: number | null;
+  /** Le plan n'est pas dans la liste officielle des arrêtés : sa vigueur actuelle reste à vérifier. */
+  vigueurAVerifier?: true;
 };
 
 export type LecturePlan = {
@@ -214,6 +221,7 @@ function zoneLue(z: ZonePubliee, part: number | null = null, surfaceM2: number |
   return {
     zone: z.zone, aerodrome: { oaci: z.oaci, nom: nomAerodrome(z.oaci, z.aerodrome) },
     dateArrete: z.dateArrete, document: z.document, part, surfaceM2,
+    ...(z.horsListeArretes ? { vigueurAVerifier: true as const } : {}),
   };
 }
 

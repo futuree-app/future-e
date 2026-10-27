@@ -195,6 +195,13 @@ const pebLu = sansDoublons(lus(pebKml, "peb"));
 const pgsLu = sansDoublons(lus(pgsKml, "pgs"));
 const peb = pebLu.zones;
 const pgs = pgsLu.zones;
+// Un aérodrome qui a des zones sur la carte mais aucun arrêté dans la liste officielle (27/10/2026 : Fumel,
+// Vendays-Montalivet). Leurs arrêtés de 1981 et 1986 existent (PLUi, documents préfectoraux), mais rien
+// n'établit qu'ils sont toujours en vigueur : la lecture le dit, sans présenter le plan comme opposable.
+{
+  const listes = new Set(arretes.features.map((f) => f.properties.oaci));
+  for (const z of peb) if (!listes.has(z.oaci)) z.horsListeArretes = true;
+}
 
 // ── Contrôles d'exhaustivité ────────────────────────────────────────────────────────────────────────
 const oaciArretes = new Set(arretes.features.map((f) => f.properties.oaci));

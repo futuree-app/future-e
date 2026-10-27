@@ -221,6 +221,33 @@ describe("2. Les adresses réelles, contre l'oracle tiré du fichier officiel", 
     assert.doesNotMatch(rendreLogement(l), /précision de la localisation n'est pas connue/);
   });
 
+  test("Fumel et Vendays-Montalivet : sur la carte, absents de la liste des arrêtés ; jamais présentés comme opposables sans réserve", () => {
+    for (const oaci of ["LFDX", "LFIV"]) {
+      const zs = jeu.peb.filter((z) => z.oaci === oaci);
+      assert.ok(zs.length > 0 && zs.every((z) => z.horsListeArretes === true), oaci);
+      // Un point à l'intérieur de la zone, cherché sur une grille dans son emprise, vérifié par l'oracle.
+      const [x0, y0, x1, y1] = zs[0].bbox;
+      let p: [number, number] | null = null;
+      for (let i = 1; i < 20 && !p; i++) for (let j = 1; j < 20 && !p; j++) {
+        const q: [number, number] = [x0 + ((x1 - x0) * i) / 20, y0 + ((y1 - y0) * j) / 20];
+        if (dansZone(q, zs[0])) p = q;
+      }
+      assert.ok(p, `${oaci} : point intérieur`);
+      const l = lireBruitAerien(jeu, { point: p!, geocodage: "housenumber", parcelle: null });
+      assert.equal(l.peb.retenue?.aerodrome.oaci, oaci);
+      assert.equal(l.peb.retenue?.vigueurAVerifier, true);
+      const g = rendreLogement(l);
+      const a = rendreAutour(lireBruitAerien(jeu, { point: p!, geocodage: null, parcelle: null }));
+      for (const t of [g, a]) assert.match(t, /pas dans sa liste des arrêtés : qu'il soit toujours en vigueur se vérifie en mairie/);
+      assert.match(g, /Si ce plan est toujours en vigueur, en vente comme en location/);
+      assert.doesNotMatch(g, /(^|\. )En vente comme en location/);
+    }
+    // Les autres plans gardent la phrase affirmative, sans réserve de vigueur.
+    const t = rendreLogement(lire("marignane-zone-c-pgs"));
+    assert.match(t, /En vente comme en location/);
+    assert.doesNotMatch(t, /toujours en vigueur/);
+  });
+
   test("Marignane : deux logements de la même commune, l'un en zone, l'autre hors zone, et le texte le dit", () => {
     const dedans = lire("marignane-zone-c");
     const dehors = lire("marignane-hors-zone");

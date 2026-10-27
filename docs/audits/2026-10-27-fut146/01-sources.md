@@ -10,7 +10,7 @@
 | Mesure-t-il le bruit entendu ? | Non | Non |
 | Producteur | DGAC (arrêté préfectoral ou interpréfectoral) | DGAC (arrêté) |
 | Diffusion | Géoplateforme IGN, couche `dgac_peb_plan_wmsv` (WMS vecteur) ; arrêtés `dgac_peb_arrete_wfs` (224 aérodromes) | Géoplateforme IGN, couche `dgac_pgs_plan_wmsv` ; arrêtés `dgac_pgs_arrete_wmsv` |
-| Aérodromes concernés | 224 aérodromes dotés d'un PEB publié (WFS des arrêtés, `numberMatched` = 224 le 27/10/2026), plus 2 aérodromes avec des zones mais sans arrêté listé (LFDX Fumel 1981, LFIV Vendays-Montalivet, sans document) | 11 aérodromes (liste du ministère, ci-dessous) |
+| Aérodromes concernés | 224 aérodromes dotés d'un PEB publié (WFS des arrêtés, `numberMatched` = 224 le 27/10/2026), plus 2 aérodromes dont les zones sont sur la carte mais pas dans la liste des arrêtés (Fumel-Montayral LFDX, Vendays-Montalivet LFIV : voir § 5) | 11 aérodromes (liste du ministère, ci-dessous) |
 | Zones | A, B, C, D (D facultative selon l'aérodrome) | I, II, III |
 | Licence | Aucune licence déclarée par la DGAC ; la Licence Ouverte Etalab s'applique **par défaut** (CGU Géoplateforme) | Idem |
 
@@ -122,3 +122,29 @@ elle n'est pas un prérequis.
 - cartes.gouv.fr, conditions générales d'utilisation, version du 15/10/2024.
 - Capacités WMS-V et WFS de la Géoplateforme, lues le 27/10/2026.
 - data.gouv.fr, API des jeux `plan-dexposition-au-bruit-peb` et `plan-de-gene-sonore-pgs-1`.
+
+## 5. Fumel et Vendays-Montalivet : des PEB approuvés, à la vigueur actuelle non établie
+
+Vérification complémentaire du porteur (27/10/2026, consignée dans FUT-146 sur Linear, avec les liens) :
+
+| Aérodrome | Document retrouvé | Ce qui est établi |
+|---|---|---|
+| Fumel-Montayral (LFDX) | PLUi de Fumel Communauté : PEB approuvé le 24 mars 1981 (date concordante avec la couche DGAC et le nom du document `PEB_LFDX_24_03_1981.pdf`) | Un PEB a été approuvé |
+| Vendays-Montalivet (LFIV) | Document préfectoral girondin citant un arrêté d'approbation du 28 juillet 1986 (date portée par l'attribut de la couche ; aucun document joint, la date n'est donc pas affichée) | Un PEB a été approuvé |
+
+Leur absence de la liste WFS des 224 arrêtés ne veut donc **pas** dire qu'ils n'ont jamais été approuvés.
+Mais les documents sont anciens, et rien n'établit qu'aucun arrêté ultérieur ne les a abrogés ou remplacés.
+
+**Conséquence dans le produit.** Leurs zones sont lues comme les autres (`horsListeArretes` dans la copie,
+`vigueurAVerifier` dans la lecture), mais l'écran ne les présente jamais comme opposables sans réserve :
+« Ce plan figure sur la carte publiée par la DGAC, mais pas dans sa liste des arrêtés : qu'il soit toujours
+en vigueur se vérifie en mairie », et l'obligation de l'état des nuisances sonores aériennes devient
+conditionnelle (« Si ce plan est toujours en vigueur, … »). Test : « Fumel et Vendays-Montalivet ».
+
+## 6. Licence : position retenue
+
+Le fondement (CGU de la Géoplateforme : Licence Ouverte par défaut ; Licence Ouverte : réutilisation
+commerciale permise avec attribution) est jugé suffisant par le porteur. La confirmation écrite de la DGAC
+est un **suivi de traçabilité**, pas un blocage, sous réserve qu'aucune condition particulière contraire ne
+soit attachée à ces couches (aucune n'a été trouvée dans les métadonnées lues).
+
