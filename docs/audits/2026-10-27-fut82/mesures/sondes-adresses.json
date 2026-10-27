@@ -1,0 +1,9190 @@
+{
+ "genere": "2026-10-27T01:06:57.574Z",
+ "echantillon": "docs/audits/2026-10-27-fut82/mesures/echantillon.json",
+ "latences": {
+  "rapportGeorisques": {
+   "n": 45,
+   "mediane_ms": 3336,
+   "p90_ms": 6084,
+   "max_ms": 9178
+  },
+  "nappeBrgm": {
+   "n": 45,
+   "mediane_ms": 417,
+   "p90_ms": 785,
+   "max_ms": 27328
+  },
+  "piezoHubeau": {
+   "n": 45,
+   "mediane_ms": 104,
+   "p90_ms": 343,
+   "max_ms": 3116
+  },
+  "pebWms": {
+   "n": 45,
+   "mediane_ms": 90,
+   "p90_ms": 109,
+   "max_ms": 120
+  },
+  "lczWms": {
+   "n": 45,
+   "mediane_ms": 43,
+   "p90_ms": 143,
+   "max_ms": 2190
+  },
+  "natura2000Wfs": {
+   "n": 45,
+   "mediane_ms": 39,
+   "p90_ms": 44,
+   "max_ms": 913
+  },
+  "lignesWfs": {
+   "n": 45,
+   "mediane_ms": 40,
+   "p90_ms": 46,
+   "max_ms": 875
+  },
+  "debroussaillementWfs": {
+   "n": 45,
+   "mediane_ms": 42,
+   "p90_ms": 97,
+   "max_ms": 474
+  },
+  "solaireBatiWfs": {
+   "n": 45,
+   "mediane_ms": 63,
+   "p90_ms": 89,
+   "max_ms": 711
+  },
+  "fcu": {
+   "n": 45,
+   "mediane_ms": 65,
+   "p90_ms": 91,
+   "max_ms": 132
+  },
+  "pvgis": {
+   "n": 7,
+   "mediane_ms": 938,
+   "p90_ms": 2760,
+   "max_ms": 4019
+  }
+ },
+ "echecs": {
+  "piezo": [
+   "paris-hotel-de-ville:206",
+   "strasbourg-neudorf:206",
+   "goussainville-cdg:206",
+   "villeneuve-le-roi-orly:206"
+  ],
+  "rapportGeorisques": [
+   "la-rochelle-centre:0",
+   "strasbourg-neudorf:0",
+   "goussainville-cdg:0",
+   "villeneuve-le-roi-orly:0",
+   "feyzin-raffinerie:0",
+   "grande-synthe:0",
+   "briancon:0",
+   "saintes-maries:0",
+   "fontainebleau-lisiere:0",
+   "janville-beauce:0",
+   "saint-amand-montrond:0",
+   "ploubazlanec:0",
+   "metz-centre:0",
+   "pointe-a-pitre:0",
+   "fort-de-france:0",
+   "tiree-67499:0",
+   "tiree-74309:0",
+   "tiree-51274:0",
+   "tiree-40298:0"
+  ]
+ },
+ "resultats": [
+  {
+   "id": "paris-hotel-de-ville",
+   "part": "ciblee",
+   "cas": "métropole dense, Seine, nappe alluviale, EAIP",
+   "label": "Rue de l'Hôtel de Ville 75004 Paris",
+   "type": "street",
+   "score": 0.75,
+   "citycode": "75104",
+   "lat": 48.854287,
+   "lon": 2.356161,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 140,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 372,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 206,
+    "ms": 207,
+    "stations10km": 188,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01837A0414/CA11",
+     "dist_m": 162,
+     "derniere_mesure": "1972-10-06",
+     "profondeur_m": 34.8
+    },
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 113,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 41,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 50,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000245184590",
+      "puissance": 2019809,
+      "presume_public": true
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 39,
+    "pointsDeCharge1km": 510,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 114,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 0,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Énergies du Grand Paris",
+     "tauxENRR": 50.3
+    }
+   }
+  },
+  {
+   "id": "lyon-gerland",
+   "part": "ciblee",
+   "cas": "métropole, Rhône, ancien secteur industriel",
+   "label": "60 Avenue Tony Garnier 69007 Lyon",
+   "type": "housenumber",
+   "score": 0.97,
+   "citycode": "69387",
+   "lat": 45.726521,
+   "lon": 4.829849,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 5104,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 693,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 90,
+    "stations10km": 8,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "06986B0234/S",
+     "dist_m": 5488,
+     "derniere_mesure": "2001-08-02",
+     "profondeur_m": 10.5,
+     "nappe": "Forage de BOULEVARD DES BELGES"
+    },
+    "plusProcheActive": {
+     "dist_m": 6486,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 84,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 2
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 36,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 102,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 67,
+    "pointsDeCharge1km": 51,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 60,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 31,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Réseau de Lyon",
+     "tauxENRR": 62.6
+    }
+   }
+  },
+  {
+   "id": "la-rochelle-centre",
+   "part": "ciblee",
+   "cas": "commune de démonstration, littoral",
+   "label": "1 Rue du Palais 17000 La Rochelle",
+   "type": "housenumber",
+   "score": 0.97,
+   "citycode": "17300",
+   "lat": 46.160057,
+   "lon": -1.153384,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 67,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 306,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 87,
+    "stations10km": 10,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "06338X0054/P",
+     "dist_m": 5399,
+     "derniere_mesure": "1999-05-25",
+     "profondeur_m": 21.5
+    },
+    "plusProcheActive": {
+     "dist_m": 7237,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 47,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 155,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 51,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 56,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 57,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 76,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 52,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 51,
+    "n15m": 6,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000293006052",
+      "puissance": 11693,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000293006071",
+      "puissance": 163985,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000293006054",
+      "puissance": 124049,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000293006076",
+      "puissance": 82080,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 52,
+    "pointsDeCharge1km": 36,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 63,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": 501,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Port Neuf Mireuil Energie",
+     "tauxENRR": 96.3
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 1921,
+    "kWh_an_par_kWc": 1380,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "marseille-chateau-gombert",
+   "part": "ciblee",
+   "cas": "interface urbain / massif, feu",
+   "label": "Avenue de chateau gombert 13013 Marseille",
+   "type": "street",
+   "score": 0.71,
+   "citycode": "13213",
+   "lat": 43.35191,
+   "lon": 5.435554,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 9178,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 417,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 119,
+    "stations10km": 2,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "BSS003ETGS/X",
+     "dist_m": 9746,
+     "derniere_mesure": "2019-01-14",
+     "profondeur_m": 189,
+     "nappe": "SONDAGE DE DECOMPRESSION"
+    },
+    "plusProcheActive": {
+     "dist_m": 10381,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 81,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 151,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 36,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 68,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 89,
+    "n15m": 5,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000271233237",
+      "puissance": 74987,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000271234545",
+      "puissance": 313100,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000271234279",
+      "puissance": 73957,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000271233234",
+      "puissance": 167828,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 121,
+    "pointsDeCharge1km": 8,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 86,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "LUMINY",
+     "tauxENRR": 51.7
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 704,
+    "kWh_an_par_kWc": 1602,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "grenoble-centre",
+   "part": "ciblee",
+   "cas": "métropole, réseau de chaleur, montagne proche",
+   "label": "Place Grenette 38000 Grenoble",
+   "type": "street",
+   "score": 0.97,
+   "citycode": "38185",
+   "lat": 45.190975,
+   "lon": 5.727574,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 5364,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 427,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 85,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "07968X0186/RE11",
+     "dist_m": 13390,
+     "derniere_mesure": "2026-10-20",
+     "profondeur_m": 26.88,
+     "nappe": "PIEZOMETRE - REYMURE (VIF - BRGM 38) - BSH"
+    },
+    "plusProcheActive": {
+     "dist_m": 13390,
+     "derniere_mesure": "2026-10-20"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 85,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 183,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 70,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 2
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 46,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 65,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 78,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000302530466",
+      "puissance": 310038,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000302530467",
+      "puissance": 469038,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 59,
+    "pointsDeCharge1km": 191,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 67,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 72,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Réseau principal de Grenoble-Alpes Métropole",
+     "tauxENRR": 80.9
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 910,
+    "kWh_an_par_kWc": 1364,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "strasbourg-neudorf",
+   "part": "ciblee",
+   "cas": "Alsace-Moselle, réseau de chaleur",
+   "label": "Route du Polygone 67100 Strasbourg",
+   "type": "street",
+   "score": 0.98,
+   "citycode": "67482",
+   "lat": 48.565408,
+   "lon": 7.760006,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 68,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 388,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 206,
+    "ms": 197,
+    "stations10km": 140,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "02723X0189/SOC11",
+     "dist_m": 62,
+     "derniere_mesure": "1985-12-16",
+     "profondeur_m": 5.4
+    },
+    "plusProcheActive": {
+     "dist_m": 2242,
+     "derniere_mesure": "2026-09-15"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 87,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 51,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 102,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 43,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 40,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 56,
+    "n15m": 8,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000002223276794",
+      "puissance": 222999,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002223276791",
+      "puissance": 294452,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002223276793",
+      "puissance": 326084,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002223308361",
+      "puissance": 126307,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 58,
+    "pointsDeCharge1km": 46,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 73,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 35,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Strasbourg Centre Energies",
+     "tauxENRR": 72
+    }
+   }
+  },
+  {
+   "id": "goussainville-cdg",
+   "part": "ciblee",
+   "cas": "aéroport Paris-CDG (PEB/PGS)",
+   "label": "Rue de Paris 95190 Goussainville",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "95280",
+   "lat": 49.011444,
+   "lon": 2.47128,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 72,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 365,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 206,
+    "ms": 170,
+    "stations10km": 78,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01538X0061/F1",
+     "dist_m": 1122,
+     "derniere_mesure": "1979-09-15",
+     "profondeur_m": 30
+    },
+    "plusProcheActive": {
+     "dist_m": 7001,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 93,
+    "features": [
+     {
+      "zone": "C",
+      "indldenext": "56",
+      "indldenint": "65",
+      "code_oaci": "LFPG",
+      "nom": "P. CH. DE GAULLE",
+      "date_arret": "2007-04-03Z",
+      "producteur": "DSAC NORD",
+      "date_maj": null,
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PEB/PEB_LFPG_03_04_2007.pdf",
+      "id_map": 566
+     }
+    ],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 48,
+    "features": [
+     {
+      "zone": "3",
+      "indice_lde": 55,
+      "indice_l_1": 65,
+      "code_oaci": "LFPG",
+      "nom": "P. CH. DE GAULLE",
+      "date_arrete": "2013-12-11Z",
+      "producteur": "ADP",
+      "date_maj": "2018-10-05Z",
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PGS/PGS_LFPG_11_12_2013.pdf",
+      "id_map": 30
+     }
+    ],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 45,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 53,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 70,
+    "n15m": 3,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000002012697092",
+      "puissance": 20924,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002012697093",
+      "puissance": 70328,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002012697023",
+      "puissance": 1538622,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 51,
+    "pointsDeCharge1km": 23,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 57,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "villeneuve-le-roi-orly",
+   "part": "ciblee",
+   "cas": "aéroport Orly (PEB)",
+   "label": "Avenue de la République 94290 Villeneuve-le-Roi",
+   "type": "street",
+   "score": 0.97,
+   "citycode": "94077",
+   "lat": 48.731077,
+   "lon": 2.417112,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 71,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 360,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 206,
+    "ms": 179,
+    "stations10km": 83,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01837D0110/3341F1",
+     "dist_m": 5797,
+     "derniere_mesure": "1967-01-31",
+     "profondeur_m": 25
+    },
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 112,
+    "features": [
+     {
+      "zone": "B",
+      "indldenext": "65",
+      "indldenint": "70",
+      "code_oaci": "LFPO",
+      "nom": "P. ORLY",
+      "date_arret": "2012-12-21Z",
+      "producteur": "DSAC NORD",
+      "date_maj": null,
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PEB/PEB_LFPO_21_12_2012.pdf",
+      "id_map": 569
+     }
+    ],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 47,
+    "features": [
+     {
+      "zone": "1",
+      "indice_lde": 70,
+      "indice_l_1": 70,
+      "code_oaci": "LFPO",
+      "nom": "P.ORLY",
+      "date_arrete": "2013-12-30Z",
+      "producteur": "ADP",
+      "date_maj": "2018-10-05Z",
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PGS/PGS_LFPO_30_12_2013.pdf",
+      "id_map": 25
+     },
+     {
+      "zone": "2",
+      "indice_lde": 65,
+      "indice_l_1": 70,
+      "code_oaci": "LFPO",
+      "nom": "P.ORLY",
+      "date_arrete": "2013-12-30Z",
+      "producteur": "ADP",
+      "date_maj": "2018-10-05Z",
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PGS/PGS_LFPO_30_12_2013.pdf",
+      "id_map": 26
+     }
+    ],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 40,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 75,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 34,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 39,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 53,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 51,
+    "pointsDeCharge1km": 6,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 86,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": 929,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Réseau d'Orly",
+     "tauxENRR": 85.1
+    }
+   }
+  },
+  {
+   "id": "blagnac-aeroport",
+   "part": "ciblee",
+   "cas": "aéroport Toulouse-Blagnac",
+   "label": "Avenue du Parc 31700 Blagnac",
+   "type": "street",
+   "score": 0.97,
+   "citycode": "31069",
+   "lat": 43.633872,
+   "lon": 1.388283,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3951,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 621,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 505,
+    "stations10km": 114,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "09838X3274/F",
+     "dist_m": 615,
+     "derniere_mesure": "2008-06-04",
+     "profondeur_m": 5.15
+    },
+    "plusProcheActive": {
+     "dist_m": 4993,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 85,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 2190,
+    "features": [
+     {
+      "identifier": "46821-FR004L2",
+      "hre": 6.5,
+      "are": 31.06,
+      "bur": 1.28,
+      "ror": 59.92,
+      "bsr": 5.81,
+      "war": 0.24,
+      "ver": 32.74,
+      "vhr": 46.43,
+      "lcz": "E",
+      "lcz_int": 15
+     },
+     {
+      "identifier": "10816-FR004L2",
+      "hre": 11.83,
+      "are": 377.29,
+      "bur": 18.19,
+      "ror": 15.64,
+      "bsr": 0,
+      "war": 0,
+      "ver": 66.17,
+      "vhr": 79.55,
+      "lcz": "5",
+      "lcz_int": 5
+     },
+     {
+      "identifier": "10833-FR004L2",
+      "hre": 9.63,
+      "are": 628.31,
+      "bur": 18.34,
+      "ror": 33.87,
+      "bsr": 0,
+      "war": 0,
+      "ver": 47.78,
+      "vhr": 60.74,
+      "lcz": "5",
+      "lcz_int": 5
+     }
+    ],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 45,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 106,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000343328138",
+      "puissance": 38909,
+      "presume_public": true
+     },
+     {
+      "cleabs": "BATIMENT0000000343328136",
+      "puissance": 731121,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 65,
+    "pointsDeCharge1km": 41,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 65,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 20,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Zac du Ritouret",
+     "tauxENRR": 73.1
+    }
+   }
+  },
+  {
+   "id": "bouguenais-aeroport",
+   "part": "ciblee",
+   "cas": "aéroport Nantes-Atlantique",
+   "label": "Rue de la Commune de Paris 1871 44340 Bouguenais",
+   "type": "street",
+   "score": 0.77,
+   "citycode": "44020",
+   "lat": 47.178315,
+   "lon": -1.614406,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4541,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 342,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 98,
+    "stations10km": 17,
+    "actives5km": 5,
+    "plusProche": {
+     "code_bss": "BSS004DJRV/X",
+     "dist_m": 1961,
+     "derniere_mesure": "2026-10-23",
+     "profondeur_m": null,
+     "nappe": "NANTES - POMPIERRE"
+    },
+    "plusProcheActive": {
+     "dist_m": 1961,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 107,
+    "features": [
+     {
+      "zone": "D",
+      "indldenext": "50",
+      "indldenint": "57",
+      "code_oaci": "LFRS",
+      "nom": "NANTES",
+      "date_arret": "2004-09-17Z",
+      "producteur": "SNIA",
+      "date_maj": null,
+      "ref_doc": "http://piece-jointe-carto.developpement-durable.gouv.fr/NAT003/PEB/PEB_LFRS_17_09_2004.pdf",
+      "id_map": 531
+     }
+    ],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 131,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 44,
+    "n500m": 6,
+    "plusProche": {
+     "voltage": "225 kV",
+     "etat": "En service",
+     "gestionnaire": "Réseau de Transport d'Electricité",
+     "source": "RTE 2024",
+     "dist_m": 254
+    },
+    "tensions": [
+     "225 kV",
+     "63 kV"
+    ]
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 40,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 62,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000305510045",
+      "puissance": 99498,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000305510321",
+      "puissance": 4193,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 40,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 66,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "feyzin-raffinerie",
+   "part": "ciblee",
+   "cas": "Seveso seuil haut, IREP",
+   "label": "Rue de la Mairie 69320 Feyzin",
+   "type": "street",
+   "score": 0.6,
+   "citycode": "69276",
+   "lat": 45.671439,
+   "lon": 4.85765,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 67,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 687,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 114,
+    "stations10km": 9,
+    "actives5km": 3,
+    "plusProche": {
+     "code_bss": "07223X0133/P",
+     "dist_m": 3681,
+     "derniere_mesure": "2025-12-31",
+     "profondeur_m": null,
+     "nappe": "PIEZOMETRE DE SUIVI captage de CORBAS - LES ROMANETTES"
+    },
+    "plusProcheActive": {
+     "dist_m": 3681,
+     "derniere_mesure": "2025-12-31"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 84,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 37,
+    "n500m": 1,
+    "plusProche": {
+     "voltage": "63 kV",
+     "etat": "En service",
+     "gestionnaire": "Réseau de Transport d'Electricité",
+     "source": "RTE 2024",
+     "dist_m": 545
+    },
+    "tensions": [
+     "63 kV"
+    ]
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 37,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 75,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000241786746",
+      "puissance": 55679,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 91,
+    "pointsDeCharge1km": 11,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 132,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "gonfreville-industrie",
+   "part": "ciblee",
+   "cas": "zone industrielle du Havre",
+   "label": "Place Jean Jaurès 76700 Gonfreville-l'Orcher",
+   "type": "street",
+   "score": 0.76,
+   "citycode": "76305",
+   "lat": 49.503542,
+   "lon": 0.23289,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 6195,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 489,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 3116,
+    "stations10km": 4,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "00747X0074/S1",
+     "dist_m": 6687,
+     "derniere_mesure": "1976-03-09",
+     "profondeur_m": 13.59
+    },
+    "plusProcheActive": {
+     "dist_m": 7161,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 120,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 41,
+    "n500m": 1,
+    "plusProche": {
+     "voltage": "90 kV",
+     "etat": "En service",
+     "gestionnaire": "Réseau de Transport d'Electricité",
+     "source": "RTE 2024",
+     "dist_m": 224
+    },
+    "tensions": [
+     "90 kV"
+    ]
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 40,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 42,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 70,
+    "pointsDeCharge1km": 76,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 74,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 15,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "SECGO",
+     "tauxENRR": 94.2
+    }
+   }
+  },
+  {
+   "id": "fos-sur-mer",
+   "part": "ciblee",
+   "cas": "complexe industrialo-portuaire",
+   "label": "Avenue Jean Moulin 13270 Fos-sur-Mer",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "13039",
+   "lat": 43.433199,
+   "lon": 4.947802,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 6545,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 673,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 99,
+    "stations10km": 7,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "10197X0163/SX12",
+     "dist_m": 2743,
+     "derniere_mesure": "2020-03-23",
+     "profondeur_m": 49.5
+    },
+    "plusProcheActive": {
+     "dist_m": 2878,
+     "derniere_mesure": "2026-09-21"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 92,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 53,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 146,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 2
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 2,
+    "plusProche": {
+     "voltage": "225 kV",
+     "etat": "En service",
+     "gestionnaire": "Réseau de Transport d'Electricité",
+     "source": "RTE 2024",
+     "dist_m": 71
+    },
+    "tensions": [
+     "225 kV"
+    ]
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 164,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 80,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 49,
+    "pointsDeCharge1km": 7,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 56,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "grande-synthe",
+   "part": "ciblee",
+   "cas": "sidérurgie, Dunkerque",
+   "label": "Place François Mitterrand 59760 Grande-Synthe",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "59271",
+   "lat": 51.013303,
+   "lon": 2.303105,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 66,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 384,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 79,
+    "stations10km": 3,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "00036X0184/P1",
+     "dist_m": 157,
+     "derniere_mesure": "1972-12-31",
+     "profondeur_m": 3.1
+    },
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 88,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 39,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 711,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 47,
+    "pointsDeCharge1km": 11,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 57,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 197,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Réseau ARSYEL",
+     "tauxENRR": 85.8
+    }
+   }
+  },
+  {
+   "id": "la-teste-pyla",
+   "part": "ciblee",
+   "cas": "forêt littorale, incendie 2022",
+   "label": "Avenue du Figuier 33115 La Teste-de-Buch",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "33529",
+   "lat": 44.632349,
+   "lon": -1.203504,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 8920,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 360,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 134,
+    "stations10km": 34,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "08494X0001/F",
+     "dist_m": 2838,
+     "derniere_mesure": "1998-01-28",
+     "profondeur_m": 73
+    },
+    "plusProcheActive": {
+     "dist_m": 4002,
+     "derniere_mesure": "2026-10-09"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 86,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 47,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 40,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 875,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 131,
+    "n": 1,
+    "auPoint": [
+     {
+      "dept": "033",
+      "source": "Zonage IGN+traitements locaux",
+      "millesime": "2021",
+      "origine": "Masque Forêt + Landes",
+      "zonage": 2,
+      "dat_ap_old": "17/10/25"
+     }
+    ]
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 63,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000255056688",
+      "puissance": 62154,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 46,
+    "pointsDeCharge1km": 4,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 83,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "landiras-bourg",
+   "part": "ciblee",
+   "cas": "forêt des Landes, incendie 2022",
+   "label": "Rue André Dubourg 33720 Landiras",
+   "type": "street",
+   "score": 0.54,
+   "citycode": "33225",
+   "lat": 44.565632,
+   "lon": -0.416592,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 7867,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 454,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 118,
+    "stations10km": 20,
+    "actives5km": 2,
+    "plusProche": {
+     "code_bss": "08518X0002/F",
+     "dist_m": 4352,
+     "derniere_mesure": "2026-10-22",
+     "profondeur_m": 154,
+     "nappe": "FONTBANNE F (BUDOS-33)"
+    },
+    "plusProcheActive": {
+     "dist_m": 4352,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 86,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 48,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 41,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 80,
+    "n": 1,
+    "auPoint": [
+     {
+      "dept": "033",
+      "source": "Zonage IGN+traitements locaux",
+      "millesime": "2021",
+      "origine": "Masque Forêt + Landes",
+      "zonage": 2,
+      "dat_ap_old": "17/10/25"
+     }
+    ]
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 60,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000255845374",
+      "puissance": 138489,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 197,
+    "pointsDeCharge1km": 2,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 67,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "gonfaron-bourg",
+   "part": "ciblee",
+   "cas": "Maures, incendie 2021",
+   "label": "Place de la Victoire 83590 Gonfaron",
+   "type": "locality",
+   "score": 0.95,
+   "citycode": "83067",
+   "lat": 43.319682,
+   "lon": 6.28808,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4047,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 2654,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": true,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 118,
+    "stations10km": 2,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "10462X0117/F1",
+     "dist_m": 2323,
+     "derniere_mesure": "2026-10-22",
+     "profondeur_m": 133,
+     "nappe": "Gonfaron - les Moutauds"
+    },
+    "plusProcheActive": {
+     "dist_m": 2323,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 216,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 3
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 38,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 54,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 73,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 45,
+    "pointsDeCharge1km": 8,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 93,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "abbeville-somme",
+   "part": "ciblee",
+   "cas": "vallée de la Somme, remontées de nappe 2001",
+   "label": "Boulevard Vauban 80100 Abbeville",
+   "type": "street",
+   "score": 0.97,
+   "citycode": "80001",
+   "lat": 50.105364,
+   "lon": 1.839994,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 145,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 722,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 133,
+    "stations10km": 31,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "00335X0156/F-2005",
+     "dist_m": 927,
+     "derniere_mesure": "2005-10-20",
+     "profondeur_m": 30
+    },
+    "plusProcheActive": {
+     "dist_m": 5062,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 98,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 40,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 913,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [
+      "Baie de Somme Picardie maritime"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 40,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 229,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 42,
+    "pointsDeCharge1km": 40,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 58,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 27,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "ABBEVILLE ENERGIE",
+     "tauxENRR": 61.6
+    }
+   }
+  },
+  {
+   "id": "chamonix",
+   "part": "ciblee",
+   "cas": "haute montagne, parc ?",
+   "label": "Place du Triangle de l'Amitié 74400 Chamonix-Mont-Blanc",
+   "type": "street",
+   "score": 0.95,
+   "citycode": "74056",
+   "lat": 45.923455,
+   "lon": 6.868205,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 5075,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 468,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 91,
+    "stations10km": 1,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "07034X0008/F1",
+     "dist_m": 6561,
+     "derniere_mesure": "2026-09-13",
+     "profondeur_m": 60,
+     "nappe": "FORAGE DU CLAIR TEMPS"
+    },
+    "plusProcheActive": {
+     "dist_m": 6561,
+     "derniere_mesure": "2026-09-13"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 44,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 57,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 44,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 37,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 56,
+    "n15m": 3,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000300803247",
+      "puissance": 233707,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000300803163",
+      "puissance": 1612429,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000300803162",
+      "puissance": 4864,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 79,
+    "pointsDeCharge1km": 138,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 54,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "briancon",
+   "part": "ciblee",
+   "cas": "montagne, parc national proche",
+   "label": "Avenue de la République 05100 Briançon",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "05023",
+   "lat": 44.897742,
+   "lon": 6.637837,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 72,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 2692,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 84,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": null,
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 87,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 48,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 37,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 68,
+    "n15m": 4,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000314796452",
+      "puissance": 123914,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000314796454",
+      "puissance": 186219,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000314796453",
+      "puissance": 152963,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000314796455",
+      "puissance": 193296,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 59,
+    "pointsDeCharge1km": 62,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 56,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 40,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Réseau de Briançon",
+     "tauxENRR": 94.6
+    }
+   }
+  },
+  {
+   "id": "saintes-maries",
+   "part": "ciblee",
+   "cas": "Camargue, PNR, Natura 2000",
+   "label": "Avenue Frédéric Mistral 13460 Saintes-Maries-de-la-Mer",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "13096",
+   "lat": 43.451948,
+   "lon": 4.426934,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 71,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 658,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 94,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": null,
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 91,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 39,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [
+      "Camargue"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [
+      "Camargue"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [
+      "Camargue"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [
+      "Camargue"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "cen": {
+     "status": 200,
+     "ms": 62,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [
+      "CAMARGUE FLUVIO-LACUSTRE ET LAGUNO-MARINE"
+     ],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 40,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 35,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 88,
+    "n15m": 7,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000258194867",
+      "puissance": 35887,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000258194106",
+      "puissance": 24192,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000258194869",
+      "puissance": 39842,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000258194866",
+      "puissance": 67384,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 48,
+    "pointsDeCharge1km": 11,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 67,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "fontainebleau-lisiere",
+   "part": "ciblee",
+   "cas": "lisière de massif Natura 2000",
+   "label": "Boulevard du Maréchal Joffre 77300 Fontainebleau",
+   "type": "street",
+   "score": 0.97,
+   "citycode": "77186",
+   "lat": 48.41339,
+   "lon": 2.701743,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 70,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 438,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 132,
+    "stations10km": 19,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "02941X0064/F",
+     "dist_m": 488,
+     "derniere_mesure": "1993-03-20",
+     "profondeur_m": 74
+    },
+    "plusProcheActive": {
+     "dist_m": 5020,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 89,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 57,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 66,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 45,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 67,
+    "n15m": 7,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000002202183383",
+      "puissance": 44966,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002202183381",
+      "puissance": 50105,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002202183382",
+      "puissance": 10096,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002202183384",
+      "puissance": 62176,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 170,
+    "pointsDeCharge1km": 27,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 60,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "lacanau-ocean",
+   "part": "ciblee",
+   "cas": "littoral atlantique, forêt",
+   "label": "Boulevard de la Plage 33680 Lacanau",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "33214",
+   "lat": 45.003656,
+   "lon": -1.201261,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3503,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 375,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 98,
+    "stations10km": 14,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "08014X0038/F",
+     "dist_m": 4355,
+     "derniere_mesure": "2010-05-18",
+     "profondeur_m": 6.1
+    },
+    "plusProcheActive": {
+     "dist_m": 4582,
+     "derniere_mesure": "2026-10-20"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 39,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [
+      "Médoc"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 45,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 62,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 48,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000255800850",
+      "puissance": 91182,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 51,
+    "pointsDeCharge1km": 24,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 57,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "charleville-mezieres",
+   "part": "ciblee",
+   "cas": "Ardennes : seule CBS nationale sur la Géoplateforme",
+   "label": "Place de la Gare 08000 Charleville-Mézières",
+   "type": "street",
+   "score": 0.72,
+   "citycode": "08105",
+   "lat": 49.767883,
+   "lon": 4.724066,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3757,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 406,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 434,
+    "stations10km": 3,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "00696X0032/S1",
+     "dist_m": 7190,
+     "derniere_mesure": "1974-09-03",
+     "profondeur_m": 5.2
+    },
+    "plusProcheActive": {
+     "dist_m": 8185,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 59,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 41,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 52,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 57,
+    "pointsDeCharge1km": 69,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 82,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 64,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "La Citadelle",
+     "tauxENRR": 41.6
+    }
+   },
+   "cbsArdennes": {
+    "route_Lden": {
+     "status": 200,
+     "ms": 49,
+     "n": 0,
+     "zones": []
+    },
+    "route_Ln": {
+     "status": 200,
+     "ms": 143,
+     "n": 0,
+     "zones": []
+    },
+    "fer_Lden": {
+     "status": 200,
+     "ms": 132,
+     "n": 0,
+     "zones": []
+    }
+   }
+  },
+  {
+   "id": "gueret",
+   "part": "ciblee",
+   "cas": "ville moyenne rurale",
+   "label": "Place Bonnyaud 23000 Guéret",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "23096",
+   "lat": 46.168605,
+   "lon": 1.870612,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4436,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 27328,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 113,
+    "stations10km": 1,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "06426X0015/P1",
+     "dist_m": 3726,
+     "derniere_mesure": "2026-10-23",
+     "profondeur_m": 49,
+     "nappe": "SAINTE-FEYRE - VILLEDARD"
+    },
+    "plusProcheActive": {
+     "dist_m": 3726,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 115,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 73,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 775,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 63,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 42,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 56,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 63,
+    "pointsDeCharge1km": 16,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 64,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 19,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Réseau de Guéret",
+     "tauxENRR": 87.8
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 938,
+    "kWh_an_par_kWc": 1204,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "janville-beauce",
+   "part": "ciblee",
+   "cas": "plaine agricole",
+   "label": "Place du Martroi 28310 Janville-en-Beauce",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "28199",
+   "lat": 48.200321,
+   "lon": 1.882952,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 72,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 819,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 94,
+    "stations10km": 5,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "03272X0006/PZ",
+     "dist_m": 4327,
+     "derniere_mesure": "2026-10-21",
+     "profondeur_m": 46.4,
+     "nappe": "TRANCRAINVILLE (28) LE MUID DE LA ROUE"
+    },
+    "plusProcheActive": {
+     "dist_m": 4327,
+     "derniere_mesure": "2026-10-21"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 104,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 40,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 49,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 57,
+    "n15m": 5,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000335695008",
+      "puissance": 108183,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000335693802",
+      "puissance": 135490,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000335694238",
+      "puissance": 249428,
+      "presume_public": true
+     },
+     {
+      "cleabs": "BATIMENT0000000335693798",
+      "puissance": 37184,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 49,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 65,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "montlouis-sur-loire",
+   "part": "ciblee",
+   "cas": "périurbain, Loire",
+   "label": "Rue de Greux 37270 Montlouis-sur-Loire",
+   "type": "street",
+   "score": 0.64,
+   "citycode": "37156",
+   "lat": 47.379064,
+   "lon": 0.800333,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4837,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 339,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 2085,
+    "stations10km": 6,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "04585X0062/F",
+     "dist_m": 3639,
+     "derniere_mesure": "1981-10-30",
+     "profondeur_m": 68.73
+    },
+    "plusProcheActive": {
+     "dist_m": 8571,
+     "derniere_mesure": "2026-10-20"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 86,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 40,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 58,
+    "n500m": 2,
+    "plusProche": {
+     "voltage": "90 kV",
+     "etat": "En service",
+     "gestionnaire": "Réseau de Transport d'Electricité",
+     "source": "RTE 2024",
+     "dist_m": 163
+    },
+    "tensions": [
+     "90 kV"
+    ]
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 42,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 78,
+    "n15m": 4,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000323402240",
+      "puissance": 62355,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000323401953",
+      "puissance": 58935,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000323401955",
+      "puissance": 6946,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000323401954",
+      "puissance": 53971,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 49,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 65,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "saint-amand-montrond",
+   "part": "ciblee",
+   "cas": "petite ville du centre",
+   "label": "Rue Nationale 18200 Saint-Amand-Montrond",
+   "type": "street",
+   "score": 0.96,
+   "citycode": "18197",
+   "lat": 46.723326,
+   "lon": 2.505362,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 76,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 430,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 83,
+    "stations10km": 1,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "05723X0014/P",
+     "dist_m": 8919,
+     "derniere_mesure": "2013-04-14",
+     "profondeur_m": 7.6,
+     "nappe": "LA GAZONNERIE FARGES ALLICHAMPS - 18"
+    },
+    "plusProcheActive": {
+     "dist_m": 10708,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 93,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 60,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 44,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 38,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 89,
+    "n15m": 6,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000319861507",
+      "puissance": 121838,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000319861447",
+      "puissance": 32691,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000319861393",
+      "puissance": 269385,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000319861446",
+      "puissance": 115764,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 48,
+    "pointsDeCharge1km": 1,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 60,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": 924,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": "Réseau de chaleur Saint-Amand-Montrond",
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "ploubazlanec",
+   "part": "ciblee",
+   "cas": "bourg littoral breton",
+   "label": "Pors Even 22620 Ploubazlanec",
+   "type": "locality",
+   "score": 0.68,
+   "citycode": "22210",
+   "lat": 48.80071,
+   "lon": -3.009335,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 76,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 341,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 101,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": null,
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 96,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 52,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 43,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 65,
+    "n15m": 3,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000289475883",
+      "puissance": 33835,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000289475878",
+      "puissance": 56738,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000289475879",
+      "puissance": 59977,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 39,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 94,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 916,
+    "kWh_an_par_kWc": 1113,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "metz-centre",
+   "part": "ciblee",
+   "cas": "Alsace-Moselle, ville moyenne",
+   "label": "Place d'Armes Jacques-François Blondel 57000 Metz",
+   "type": "street",
+   "score": 0.45,
+   "citycode": "57463",
+   "lat": 49.119466,
+   "lon": 6.175716,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 74,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 349,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 95,
+    "stations10km": 9,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01641X0001/S",
+     "dist_m": 2209,
+     "derniere_mesure": "1980-02-13",
+     "profondeur_m": 620.2
+    },
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 89,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 68,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 53,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 37,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 56,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000316149738",
+      "puissance": 170372,
+      "presume_public": true
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 71,
+    "pointsDeCharge1km": 262,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 74,
+    "reponse": {
+     "isEligible": true,
+     "distance_m": 8,
+     "futurNetwork": false,
+     "inPDP": true,
+     "reseau": "Réseau de Metz",
+     "tauxENRR": 72.7
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 1778,
+    "kWh_an_par_kWc": 1113,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "saint-denis-reunion",
+   "part": "ciblee",
+   "cas": "outre-mer : La Réunion",
+   "label": "Rue de Paris 97400 Saint-Denis",
+   "type": "street",
+   "score": 0.98,
+   "citycode": "97411",
+   "lat": -20.882172,
+   "lon": 55.449705,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4360,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": null,
+     "commune": null
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 349,
+    "exception": false,
+    "polygonesEmprise": 0,
+    "auPoint": [],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 133,
+    "stations10km": 71,
+    "actives5km": 3,
+    "plusProche": {
+     "code_bss": "12264X0141/S2",
+     "dist_m": 380,
+     "derniere_mesure": "1983-04-26",
+     "profondeur_m": 11
+    },
+    "plusProcheActive": {
+     "dist_m": 395,
+     "derniere_mesure": "2026-10-21"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 95,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 39,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 35,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 41,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 38,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 46,
+    "pointsDeCharge1km": 3,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 56,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   },
+   "pvgis": {
+    "status": 200,
+    "ms": 4019,
+    "kWh_an_par_kWc": 1539,
+    "base_rayonnement": "PVGIS-SARAH3",
+    "erreur": null
+   }
+  },
+  {
+   "id": "pointe-a-pitre",
+   "part": "ciblee",
+   "cas": "outre-mer : Guadeloupe",
+   "label": "Rue du General Frebault 97110 Pointe-à-Pitre",
+   "type": "street",
+   "score": 0.67,
+   "citycode": "97120",
+   "lat": 16.238054,
+   "lon": -61.535994,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 74,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 382,
+    "exception": false,
+    "polygonesEmprise": 0,
+    "auPoint": [],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 87,
+    "stations10km": 5,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "1140ZZ0001/CH1",
+     "dist_m": 4926,
+     "derniere_mesure": null,
+     "profondeur_m": 55,
+     "nappe": "CHAZEAU"
+    },
+    "plusProcheActive": {
+     "dist_m": 5859,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 93,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 47,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 43,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 36,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 38,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 40,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 89,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "fort-de-france",
+   "part": "ciblee",
+   "cas": "outre-mer : Martinique",
+   "label": "Rue Victor Hugo 97200 Fort-de-France",
+   "type": "street",
+   "score": 0.98,
+   "citycode": "97209",
+   "lat": 14.604343,
+   "lon": -61.07106,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 69,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 401,
+    "exception": false,
+    "polygonesEmprise": 0,
+    "auPoint": [],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 142,
+    "stations10km": 18,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "1177ZZ0079/CNS2",
+     "dist_m": 3500,
+     "derniere_mesure": "2006-08-10",
+     "profondeur_m": 53.5
+    },
+    "plusProcheActive": {
+     "dist_m": 3538,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 94,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 57,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 43,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 43,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 39,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 41,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 66,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-67499",
+   "part": "tiree",
+   "cas": "commune tirée : Urbeis",
+   "label": "Urbeis",
+   "type": "municipality",
+   "score": 0.93,
+   "citycode": "67499",
+   "lat": 48.327071,
+   "lon": 7.213445,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 76,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 625,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": true,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 73,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": null,
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 90,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 66,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 74,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [
+      "Prairies du Val de Villé"
+     ],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 42,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 37,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 50,
+    "n15m": 5,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000334133852",
+      "puissance": 10170,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000334133856",
+      "puissance": 52352,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000334133854",
+      "puissance": 16793,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000334133853",
+      "puissance": 55576,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 48,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 65,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-74309",
+   "part": "tiree",
+   "cas": "commune tirée : Viry",
+   "label": "1201 Route de Bellegarde 74580 Viry",
+   "type": "housenumber",
+   "score": 0.99,
+   "citycode": "74309",
+   "lat": 46.115247,
+   "lon": 6.021982,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 73,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 468,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": true,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 81,
+    "stations10km": 3,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "06537X0103/VEIGY",
+     "dist_m": 2928,
+     "derniere_mesure": "2026-10-21",
+     "profondeur_m": 63,
+     "nappe": "FORAGE - BISONS (VIRY - BRGM 74) - BSH"
+    },
+    "plusProcheActive": {
+     "dist_m": 2928,
+     "derniere_mesure": "2026-10-21"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 89,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 52,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 47,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 44,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 48,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 43,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 65,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 45,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 69,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-51274",
+   "part": "tiree",
+   "cas": "commune tirée : Gizaucourt",
+   "label": "23 Rue Haute 51800 Gizaucourt",
+   "type": "housenumber",
+   "score": 0.99,
+   "citycode": "51274",
+   "lat": 49.052945,
+   "lon": 4.781704,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 83,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 448,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 87,
+    "stations10km": 2,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01602X0009/S1",
+     "dist_m": 3076,
+     "derniere_mesure": "1989-11-24",
+     "profondeur_m": 18.6
+    },
+    "plusProcheActive": {
+     "dist_m": 13925,
+     "derniere_mesure": "2026-09-28"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 91,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 48,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 82,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 89,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 60,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 50,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 46,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 42,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 68,
+    "n15m": 4,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000002244366887",
+      "puissance": 95682,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002244366888",
+      "puissance": 27769,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002244366885",
+      "puissance": 155920,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000002244366886",
+      "puissance": 43318,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 38,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 59,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-59632",
+   "part": "tiree",
+   "cas": "commune tirée : Wallers",
+   "label": "28 Rue Platon 59135 Wallers",
+   "type": "housenumber",
+   "score": 1,
+   "citycode": "59632",
+   "lat": 50.374688,
+   "lon": 3.394379,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3590,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 503,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 137,
+    "stations10km": 63,
+    "actives5km": 4,
+    "plusProche": {
+     "code_bss": "00282X0227/F3",
+     "dist_m": 180,
+     "derniere_mesure": "1995-12-16",
+     "profondeur_m": 106.35
+    },
+    "plusProcheActive": {
+     "dist_m": 1350,
+     "derniere_mesure": "2026-03-24"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 93,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 44,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [
+      "Scarpe-Escaut"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 85,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [
+      "Vallées de la Scarpe et de l'Escaut"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "cen": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [
+      "La Plaine alluviale de la Scarpe entre Flines-lez-Râches et la confluence avec l’Escaut"
+     ],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 40,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 42,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 46,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000002287726450",
+      "puissance": 16711,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000348694067",
+      "puissance": 56415,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 42,
+    "pointsDeCharge1km": 4,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 88,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-50016",
+   "part": "tiree",
+   "cas": "commune tirée : Appeville",
+   "label": "Route de Vindelonde 50500 Appeville",
+   "type": "street",
+   "score": 0.99,
+   "citycode": "50016",
+   "lat": 49.327022,
+   "lon": -1.333491,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3648,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 316,
+    "exception": false,
+    "polygonesEmprise": 5,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 88,
+    "stations10km": 9,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "00945X0052/S4",
+     "dist_m": 671,
+     "derniere_mesure": "2026-10-20",
+     "profondeur_m": 89,
+     "nappe": "Forage de la picotière (Appeville - 50)"
+    },
+    "plusProcheActive": {
+     "dist_m": 671,
+     "derniere_mesure": "2026-10-20"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 91,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 78,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "pn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [
+      "Marais du Cotentin et du Bessin"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "cen": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 40,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 44,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 59,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 42,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 58,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-34004",
+   "part": "tiree",
+   "cas": "commune tirée : Agel",
+   "label": "Agel",
+   "type": "municipality",
+   "score": 0.93,
+   "citycode": "34004",
+   "lat": 43.340301,
+   "lon": 2.850809,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 5917,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 734,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "MOYENNE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 110,
+    "stations10km": 11,
+    "actives5km": 2,
+    "plusProche": {
+     "code_bss": "10384X0061/F1",
+     "dist_m": 999,
+     "derniere_mesure": "2021-12-20",
+     "profondeur_m": 74
+    },
+    "plusProcheActive": {
+     "dist_m": 4375,
+     "derniere_mesure": "2026-01-01"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 108,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 39,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [
+      "Les Causses du Minervois"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 101,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 87,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [
+      "Haut Minervois"
+     ],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 39,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 128,
+    "n": 1,
+    "auPoint": [
+     {
+      "dept": "034",
+      "source": "Zonage local",
+      "millesime": "2015",
+      "origine": "BD Forêt V2",
+      "zonage": 2,
+      "dat_ap_old": "08/04/25"
+     }
+    ]
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 68,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000241408862",
+      "puissance": 109632,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 102,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 59,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-83147",
+   "part": "tiree",
+   "cas": "commune tirée : Vérignon",
+   "label": "83630 Vérignon",
+   "type": "municipality",
+   "score": 1,
+   "citycode": "83147",
+   "lat": 43.658,
+   "lon": 6.265,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 4390,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 2785,
+    "exception": false,
+    "polygonesEmprise": 3,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 91,
+    "stations10km": 1,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "BSS004JUWS/X",
+     "dist_m": 9440,
+     "derniere_mesure": "2026-10-23",
+     "profondeur_m": 60,
+     "nappe": "VILLECROZE"
+    },
+    "plusProcheActive": {
+     "dist_m": 9440,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 110,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 38,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [
+      "Verdon"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 34,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 45,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [
+      "FORÊT DE VÉRIGNON"
+     ],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 33,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 49,
+    "n": 1,
+    "auPoint": [
+     {
+      "dept": "083",
+      "source": "Zonage local",
+      "millesime": "2008",
+      "origine": "BD Forêt V2",
+      "zonage": 2,
+      "dat_ap_old": "26/09/25"
+     }
+    ]
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 75,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 40,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 59,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-35362",
+   "part": "tiree",
+   "cas": "commune tirée : Le Tronchet",
+   "label": "2 Le Coat Rehan 35540 Le Tronchet",
+   "type": "housenumber",
+   "score": 0.98,
+   "citycode": "35362",
+   "lat": 48.493583,
+   "lon": -1.841602,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3117,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 362,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 603,
+    "stations10km": 1,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "02465X0061/F",
+     "dist_m": 6497,
+     "derniere_mesure": "2026-10-23",
+     "profondeur_m": 49,
+     "nappe": "PIÉZOMÈTRE DU CALVAIRE (BONNEMAIN - 35)"
+    },
+    "plusProcheActive": {
+     "dist_m": 6497,
+     "derniere_mesure": "2026-10-23"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 96,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    },
+    "zps": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [
+      "Vallée de la Rance - Côte d'Emeraude"
+     ],
+     "voisinage1kmMercator": 1
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 79,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 37,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 101,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 46,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000297208182",
+      "puissance": 36263,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000297208183",
+      "puissance": 80080,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 45,
+    "pointsDeCharge1km": 2,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 62,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-32159",
+   "part": "tiree",
+   "cas": "commune tirée : L'Isle-de-Noé",
+   "label": "Lherete 32300 L'Isle-de-Noé",
+   "type": "locality",
+   "score": 1,
+   "citycode": "32159",
+   "lat": 43.586695,
+   "lon": 0.42836,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3649,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 300,
+    "exception": false,
+    "polygonesEmprise": 1,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FAIBLE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 82,
+    "stations10km": 0,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "10072X0026/F",
+     "dist_m": 10580,
+     "derniere_mesure": "2025-10-02",
+     "profondeur_m": 253,
+     "nappe": "près de Flourette"
+    },
+    "plusProcheActive": null
+   },
+   "peb": {
+    "status": 200,
+    "ms": 91,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 41,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 45,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 56,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 44,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 50,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 80,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 37,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 61,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-60393",
+   "part": "tiree",
+   "cas": "commune tirée : Mello",
+   "label": "Mello",
+   "type": "street",
+   "score": 0.94,
+   "citycode": "60393",
+   "lat": 49.272699,
+   "lon": 2.365874,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3774,
+    "tentatives": 1,
+    "remonteeNappe": {
+     "adresse": "Risque Existant",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": null,
+     "commune": null
+    },
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 368,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux débordements de nappe",
+      "fiab_tot": "FORTE",
+      "fiab_mnt": "FORTE",
+      "fiab_eso": "FORTE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": true,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 97,
+    "stations10km": 11,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "01273X0038/S1",
+     "dist_m": 2525,
+     "derniere_mesure": "2008-06-17",
+     "profondeur_m": 36.45,
+     "nappe": "PIEZOMETRE DE SAINT-VAAST-LES-MELLO - 60"
+    },
+    "plusProcheActive": {
+     "dist_m": 6715,
+     "derniere_mesure": "2026-10-22"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 86,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 44,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 53,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 40,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 52,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 37,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 39,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 65,
+    "n15m": 1,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000318346521",
+      "puissance": 26086,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 46,
+    "pointsDeCharge1km": 2,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 57,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-40298",
+   "part": "tiree",
+   "cas": "commune tirée : Serres-Gaston",
+   "label": "1396 Route de la Vallée du Gabas 40700 Serres-Gaston",
+   "type": "housenumber",
+   "score": 0.99,
+   "citycode": "40298",
+   "lat": 43.670642,
+   "lon": -0.518043,
+   "rapportGeorisques": {
+    "status": 0,
+    "ms": 70,
+    "tentatives": 2,
+    "remonteeNappe": null,
+    "feuForet": null,
+    "icpe": null
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 350,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Zones potentiellement sujettes aux inondations de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": false,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 104,
+    "stations10km": 11,
+    "actives5km": 1,
+    "plusProche": {
+     "code_bss": "09783X0018/F1",
+     "dist_m": 3517,
+     "derniere_mesure": "2026-10-11",
+     "profondeur_m": 110,
+     "nappe": "Taulade"
+    },
+    "plusProcheActive": {
+     "dist_m": 3517,
+     "derniere_mesure": "2026-10-11"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 85,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 40,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 46,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 51,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 51,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 40,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 92,
+    "n": 1,
+    "auPoint": [
+     {
+      "dept": "040",
+      "source": "Zonage IGN+traitements locaux",
+      "millesime": "2021",
+      "origine": "Masque Forêt + Landes",
+      "zonage": 2,
+      "dat_ap_old": "22/08/25"
+     }
+    ]
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 49,
+    "n15m": 0,
+    "batiments": []
+   },
+   "irve": {
+    "status": 200,
+    "ms": 43,
+    "pointsDeCharge1km": 0,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 61,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  },
+  {
+   "id": "tiree-85046",
+   "part": "tiree",
+   "cas": "commune tirée : La Chaize-le-Vicomte",
+   "label": "La Chaize-le-Vicomte",
+   "type": "municipality",
+   "score": 0.94,
+   "citycode": "85046",
+   "lat": 46.666329,
+   "lon": -1.287189,
+   "rapportGeorisques": {
+    "status": 200,
+    "ms": 3336,
+    "tentatives": 2,
+    "remonteeNappe": {
+     "adresse": "Risque non Connu",
+     "commune": "Risque Existant"
+    },
+    "feuForet": {
+     "adresse": "Risque Inconnu",
+     "commune": "Risque Existant"
+    },
+    "icpe": "Risque non Concerne"
+   },
+   "nappeBrgm": {
+    "status": 200,
+    "ms": 408,
+    "exception": false,
+    "polygonesEmprise": 2,
+    "auPoint": [
+     {
+      "classe": "Pas de débordement de nappe ni d'inondation de cave",
+      "fiab_tot": "FAIBLE",
+      "fiab_mnt": "FAIBLE",
+      "fiab_eso": "MOYENNE"
+     }
+    ],
+    "multiples": false,
+    "masques": {
+     "MASQ_EAIP": false,
+     "MASQ_BDLISA": true,
+     "MASQ_AFFLEUR": false
+    }
+   },
+   "piezo": {
+    "status": 200,
+    "ms": 121,
+    "stations10km": 2,
+    "actives5km": 0,
+    "plusProche": {
+     "code_bss": "05625X0006/SC",
+     "dist_m": 7582,
+     "derniere_mesure": null,
+     "profondeur_m": 223.66,
+     "nappe": " forage des Ajoncs (la Roche sur Yon,85)"
+    },
+    "plusProcheActive": {
+     "dist_m": 7965,
+     "derniere_mesure": "2026-10-18"
+    }
+   },
+   "peb": {
+    "status": 200,
+    "ms": 87,
+    "features": [],
+    "erreur": null
+   },
+   "pgs": {
+    "status": 200,
+    "ms": 43,
+    "features": [],
+    "erreur": null
+   },
+   "lcz": {
+    "status": 200,
+    "ms": 42,
+    "features": [],
+    "erreur": null
+   },
+   "protections": {
+    "sic": {
+     "status": 200,
+     "ms": 49,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "zps": {
+     "status": 200,
+     "ms": 43,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pn": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "pnr": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnn": {
+     "status": 200,
+     "ms": 475,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rnr": {
+     "status": 200,
+     "ms": 38,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "apb": {
+     "status": 200,
+     "ms": 39,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "rb": {
+     "status": 200,
+     "ms": 37,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "ramsar": {
+     "status": 200,
+     "ms": 41,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "cen": {
+     "status": 200,
+     "ms": 36,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff1": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 0
+    },
+    "znieff2": {
+     "status": 200,
+     "ms": 42,
+     "auPoint": [],
+     "voisinage1kmMercator": 1
+    }
+   },
+   "lignes": {
+    "status": 200,
+    "ms": 51,
+    "n500m": 0,
+    "plusProche": null,
+    "tensions": []
+   },
+   "debroussaillement": {
+    "status": 200,
+    "ms": 474,
+    "n": 0,
+    "auPoint": []
+   },
+   "solaireBati": {
+    "status": 200,
+    "ms": 61,
+    "n15m": 2,
+    "batiments": [
+     {
+      "cleabs": "BATIMENT0000000244714619",
+      "puissance": 88790,
+      "presume_public": false
+     },
+     {
+      "cleabs": "BATIMENT0000000244714578",
+      "puissance": 82913,
+      "presume_public": false
+     }
+    ]
+   },
+   "irve": {
+    "status": 200,
+    "ms": 52,
+    "pointsDeCharge1km": 2,
+    "erreur": null
+   },
+   "fcu": {
+    "status": 200,
+    "ms": 112,
+    "reponse": {
+     "isEligible": false,
+     "distance_m": null,
+     "futurNetwork": false,
+     "inPDP": false,
+     "reseau": null,
+     "tauxENRR": null
+    }
+   }
+  }
+ ]
+}

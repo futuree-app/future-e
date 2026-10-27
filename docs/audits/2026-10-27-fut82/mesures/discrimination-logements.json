@@ -1,0 +1,5529 @@
+{
+ "genere": "2026-10-27T01:13:40.332Z",
+ "graine": 8282,
+ "communesTirees": 100,
+ "adresses": 200,
+ "recalculeDepuis": "points bruts de la première exécution (parts recalculées après correction du code de classe 0)",
+ "biais": "Adresses de logements DIAGNOSTIQUÉS (DPE existants ADEME), communes tirées au prorata de la population. Pas une statistique nationale du parc.",
+ "parts": {
+  "nappe_debordement": {
+   "n": 56,
+   "pct": 28
+  },
+  "nappe_cave": {
+   "n": 64,
+   "pct": 32
+  },
+  "nappe_ni_lun_ni_lautre": {
+   "n": 80,
+   "pct": 40
+  },
+  "nappe_hors_carte_ou_masque": {
+   "n": 0,
+   "pct": 0
+  },
+  "nappe_erreur": {
+   "n": 0,
+   "pct": 0
+  },
+  "nappe_signal_fiabilite_forte": {
+   "n": 30,
+   "pct": 15
+  },
+  "nappe_signal_fiabilite_moyenne_ou_forte": {
+   "n": 78,
+   "pct": 39
+  },
+  "nappe_signal_fiabilite_faible": {
+   "n": 41,
+   "pct": 20.5
+  },
+  "nappe_debordement_fiabilite_moyenne_ou_forte": {
+   "n": 40,
+   "pct": 20
+  },
+  "nappe_debordement_fiabilite_forte": {
+   "n": 14,
+   "pct": 7
+  },
+  "natura2000": {
+   "n": 0,
+   "pct": 0
+  },
+  "pnr": {
+   "n": 16,
+   "pct": 8
+  },
+  "parc_national": {
+   "n": 0,
+   "pct": 0
+  },
+  "znieff": {
+   "n": 6,
+   "pct": 3
+  },
+  "ligne_ht_100m": {
+   "n": 2,
+   "pct": 1
+  },
+  "ligne_ht_300m": {
+   "n": 6,
+   "pct": 3
+  },
+  "debroussaillement_old": {
+   "n": 20,
+   "pct": 10
+  },
+  "peb_toutes_zones": {
+   "n": 6,
+   "pct": 3
+  },
+  "peb_zones_A_B_C": {
+   "n": 3,
+   "pct": 1.5
+  },
+  "fcu_eligible": {
+   "n": 43,
+   "pct": 21.5
+  },
+  "fcu_pdp": {
+   "n": 22,
+   "pct": 11
+  }
+ },
+ "latences": {
+  "nappe": {
+   "n": 200,
+   "mediane_ms": 346,
+   "p90_ms": 626,
+   "max_ms": 27673
+  },
+  "peb": {
+   "n": 200,
+   "mediane_ms": 43,
+   "p90_ms": 63,
+   "max_ms": 937
+  },
+  "fcu": {
+   "n": 200,
+   "mediane_ms": 28,
+   "p90_ms": 42,
+   "max_ms": 104
+  }
+ },
+ "points": [
+  {
+   "insee": "54160",
+   "nom": "Domèvre-en-Haye",
+   "pop": 405,
+   "nappe": {
+    "ms": 417,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 94,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "54160",
+   "nom": "Domèvre-en-Haye",
+   "pop": 405,
+   "nappe": {
+    "ms": 315,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "17444",
+   "nom": "Thénac",
+   "pop": 1705,
+   "nappe": {
+    "ms": 257,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 22,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "17444",
+   "nom": "Thénac",
+   "pop": 1705,
+   "nappe": {
+    "ms": 277,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75115",
+   "nom": "Paris 15e Arrondissement",
+   "pop": 227746,
+   "nappe": {
+    "ms": 272,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 43,
+    "eligible": false,
+    "distance": 159,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75115",
+   "nom": "Paris 15e Arrondissement",
+   "pop": 227746,
+   "nappe": {
+    "ms": 431,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 51,
+    "eligible": true,
+    "distance": 10,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "80021",
+   "nom": "Amiens",
+   "pop": 133625,
+   "nappe": {
+    "ms": 354,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": true,
+    "distance": 45,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "80021",
+   "nom": "Amiens",
+   "pop": 133625,
+   "nappe": {
+    "ms": 514,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 32,
+    "eligible": true,
+    "distance": 196,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "13215",
+   "nom": "Marseille 15e Arrondissement",
+   "pop": 79656,
+   "nappe": {
+    "ms": 362,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13215",
+   "nom": "Marseille 15e Arrondissement",
+   "pop": 79656,
+   "nappe": {
+    "ms": 2896,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 65,
+    "eligible": true,
+    "distance": 4,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "94069",
+   "nom": "Saint-Maurice",
+   "pop": 14603,
+   "nappe": {
+    "ms": 356,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 32,
+    "eligible": false,
+    "distance": 298,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "94069",
+   "nom": "Saint-Maurice",
+   "pop": 14603,
+   "nappe": {
+    "ms": 288,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": 254,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "71306",
+   "nom": "Montceau-les-Mines",
+   "pop": 16831,
+   "nappe": {
+    "ms": 772,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": true,
+    "distance": 3,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "71306",
+   "nom": "Montceau-les-Mines",
+   "pop": 16831,
+   "nappe": {
+    "ms": 674,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": 335,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13202",
+   "nom": "Marseille 2e Arrondissement",
+   "pop": 23627,
+   "nappe": {
+    "ms": 394,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": true,
+    "distance": 105,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13202",
+   "nom": "Marseille 2e Arrondissement",
+   "pop": 23627,
+   "nappe": {
+    "ms": 338,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": 303,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "45300",
+   "nom": "Sandillon",
+   "pop": 4205,
+   "nappe": {
+    "ms": 269,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "45300",
+   "nom": "Sandillon",
+   "pop": 4205,
+   "nappe": {
+    "ms": 323,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75118",
+   "nom": "Paris 18e Arrondissement",
+   "pop": 188446,
+   "nappe": {
+    "ms": 267,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 45,
+    "eligible": false,
+    "distance": 719,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75118",
+   "nom": "Paris 18e Arrondissement",
+   "pop": 188446,
+   "nappe": {
+    "ms": 366,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 42,
+    "eligible": false,
+    "distance": 249,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13001",
+   "nom": "Aix-en-Provence",
+   "pop": 147478,
+   "nappe": {
+    "ms": 2533,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 63,
+    "eligible": false,
+    "distance": 388,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13001",
+   "nom": "Aix-en-Provence",
+   "pop": 147478,
+   "nappe": {
+    "ms": 441,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 189,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75114",
+   "nom": "Paris 14e Arrondissement",
+   "pop": 136368,
+   "nappe": {
+    "ms": 290,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 46,
+    "eligible": false,
+    "distance": 167,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75114",
+   "nom": "Paris 14e Arrondissement",
+   "pop": 136368,
+   "nappe": {
+    "ms": 312,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 44,
+    "eligible": false,
+    "distance": 186,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59183",
+   "nom": "Dunkerque",
+   "pop": 86788,
+   "nappe": {
+    "ms": 310,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": 431,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59183",
+   "nom": "Dunkerque",
+   "pop": 86788,
+   "nappe": {
+    "ms": 324,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": 304,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "72181",
+   "nom": "Le Mans",
+   "pop": 145004,
+   "nappe": {
+    "ms": 253,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 50,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": true,
+    "distance": 284,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "72181",
+   "nom": "Le Mans",
+   "pop": 145004,
+   "nappe": {
+    "ms": 235,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": true,
+    "distance": 663,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "68337",
+   "nom": "Traubach-le-Haut",
+   "pop": 625,
+   "nappe": {
+    "ms": 307,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 276,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "68337",
+   "nom": "Traubach-le-Haut",
+   "pop": 625,
+   "nappe": {
+    "ms": 242,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "76146",
+   "nom": "Buchy",
+   "pop": 2805,
+   "nappe": {
+    "ms": 679,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "76146",
+   "nom": "Buchy",
+   "pop": 2805,
+   "nappe": {
+    "ms": 648,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "69387",
+   "nom": "Lyon 7e Arrondissement",
+   "pop": 85897,
+   "nappe": {
+    "ms": 576,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": true,
+    "distance": 167,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "69387",
+   "nom": "Lyon 7e Arrondissement",
+   "pop": 85897,
+   "nappe": {
+    "ms": 599,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": true,
+    "distance": 10,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "95392",
+   "nom": "Mériel",
+   "pop": 5213,
+   "nappe": {
+    "ms": 464,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "95392",
+   "nom": "Mériel",
+   "pop": 5213,
+   "nappe": {
+    "ms": 382,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 35,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "62643",
+   "nom": "Outreau",
+   "pop": 13270,
+   "nappe": {
+    "ms": 289,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": true,
+    "distance": 7,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "62643",
+   "nom": "Outreau",
+   "pop": 13270,
+   "nappe": {
+    "ms": 248,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": true,
+    "distance": 51,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "04070",
+   "nom": "Digne-les-Bains",
+   "pop": 17192,
+   "nappe": {
+    "ms": 2635,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 87,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "04070",
+   "nom": "Digne-les-Bains",
+   "pop": 17192,
+   "nappe": {
+    "ms": 2508,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "45224",
+   "nom": "Neuville-aux-Bois",
+   "pop": 4981,
+   "nappe": {
+    "ms": 277,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "45224",
+   "nom": "Neuville-aux-Bois",
+   "pop": 4981,
+   "nappe": {
+    "ms": 270,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "14092",
+   "nom": "Bourguébus",
+   "pop": 2433,
+   "nappe": {
+    "ms": 293,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "14092",
+   "nom": "Bourguébus",
+   "pop": 2433,
+   "nappe": {
+    "ms": 347,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "83137",
+   "nom": "Toulon",
+   "pop": 180452,
+   "nappe": {
+    "ms": 250,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 33,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "83137",
+   "nom": "Toulon",
+   "pop": 180452,
+   "nappe": {
+    "ms": 362,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13071",
+   "nom": "Les Pennes-Mirabeau",
+   "pop": 22161,
+   "nappe": {
+    "ms": 2669,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13071",
+   "nom": "Les Pennes-Mirabeau",
+   "pop": 22161,
+   "nappe": {
+    "ms": 2565,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 84,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "83061",
+   "nom": "Fréjus",
+   "pop": 57082,
+   "nappe": {
+    "ms": 487,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "83061",
+   "nom": "Fréjus",
+   "pop": 57082,
+   "nappe": {
+    "ms": 319,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 53,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13054",
+   "nom": "Marignane",
+   "pop": 33003,
+   "nappe": {
+    "ms": 329,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "13054",
+   "nom": "Marignane",
+   "pop": 33003,
+   "nappe": {
+    "ms": 346,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": [
+     "C"
+    ]
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "01248",
+   "nom": "Mionnay",
+   "pop": 2227,
+   "nappe": {
+    "ms": 287,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 1,
+   "ligne300m": 1,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "01248",
+   "nom": "Mionnay",
+   "pop": 2227,
+   "nappe": {
+    "ms": 349,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "37261",
+   "nom": "Tours",
+   "pop": 137658,
+   "nappe": {
+    "ms": 228,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": true,
+    "distance": 91,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "37261",
+   "nom": "Tours",
+   "pop": 137658,
+   "nappe": {
+    "ms": 298,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 53,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "39367",
+   "nom": "Morbier",
+   "pop": 2290,
+   "nappe": {
+    "ms": 925,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 51,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 49,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "39367",
+   "nom": "Morbier",
+   "pop": 2290,
+   "nappe": {
+    "ms": 831,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 62,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29019",
+   "nom": "Brest",
+   "pop": 139619,
+   "nappe": {
+    "ms": 270,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": 313,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29019",
+   "nom": "Brest",
+   "pop": 139619,
+   "nappe": {
+    "ms": 380,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": 400,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29232",
+   "nom": "Quimper",
+   "pop": 63642,
+   "nappe": {
+    "ms": 307,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29232",
+   "nom": "Quimper",
+   "pop": 63642,
+   "nappe": {
+    "ms": 273,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "34032",
+   "nom": "Béziers",
+   "pop": 80341,
+   "nappe": {
+    "ms": 626,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 57,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "34032",
+   "nom": "Béziers",
+   "pop": 80341,
+   "nappe": {
+    "ms": 607,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "87085",
+   "nom": "Limoges",
+   "pop": 129760,
+   "nappe": {
+    "ms": 525,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 32,
+    "eligible": true,
+    "distance": 7,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "87085",
+   "nom": "Limoges",
+   "pop": 129760,
+   "nappe": {
+    "ms": 538,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": 390,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "38245",
+   "nom": "Montagne",
+   "pop": 272,
+   "nappe": {
+    "ms": 336,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "38245",
+   "nom": "Montagne",
+   "pop": 272,
+   "nappe": {
+    "ms": 390,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 77,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "91671",
+   "nom": "Villeneuve-sur-Auvers",
+   "pop": 594,
+   "nappe": {
+    "ms": 523,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 150,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "91671",
+   "nom": "Villeneuve-sur-Auvers",
+   "pop": 594,
+   "nappe": {
+    "ms": 292,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 34,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "33471",
+   "nom": "Saint-Sauveur",
+   "pop": 1258,
+   "nappe": {
+    "ms": 384,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "33471",
+   "nom": "Saint-Sauveur",
+   "pop": 1258,
+   "nappe": {
+    "ms": 268,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "38566",
+   "nom": "Vourey",
+   "pop": 1687,
+   "nappe": {
+    "ms": 321,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 1,
+   "ligne300m": 1,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "38566",
+   "nom": "Vourey",
+   "pop": 1687,
+   "nappe": {
+    "ms": 400,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 52,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "31035",
+   "nom": "Auzeville-Tolosane",
+   "pop": 4234,
+   "nappe": {
+    "ms": 627,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "31035",
+   "nom": "Auzeville-Tolosane",
+   "pop": 4234,
+   "nappe": {
+    "ms": 578,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "95205",
+   "nom": "Écouen",
+   "pop": 7145,
+   "nappe": {
+    "ms": 326,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": [
+     "C",
+     "D"
+    ]
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "95205",
+   "nom": "Écouen",
+   "pop": 7145,
+   "nappe": {
+    "ms": 383,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 59,
+    "zones": [
+     "C"
+    ]
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "76322",
+   "nom": "Le Grand-Quevilly",
+   "pop": 25975,
+   "nappe": {
+    "ms": 388,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": 348,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "76322",
+   "nom": "Le Grand-Quevilly",
+   "pop": 25975,
+   "nappe": {
+    "ms": 332,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": 417,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92020",
+   "nom": "Châtillon",
+   "pop": 36777,
+   "nappe": {
+    "ms": 286,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": 464,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92020",
+   "nom": "Châtillon",
+   "pop": 36777,
+   "nappe": {
+    "ms": 297,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": 333,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "36005",
+   "nom": "Ardentes",
+   "pop": 3778,
+   "nappe": {
+    "ms": 386,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 489,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "36005",
+   "nom": "Ardentes",
+   "pop": 3778,
+   "nappe": {
+    "ms": 368,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "36241",
+   "nom": "Villedieu-sur-Indre",
+   "pop": 2647,
+   "nappe": {
+    "ms": 632,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "36241",
+   "nom": "Villedieu-sur-Indre",
+   "pop": 2647,
+   "nappe": {
+    "ms": 584,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 594,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "94041",
+   "nom": "Ivry-sur-Seine",
+   "pop": 64001,
+   "nappe": {
+    "ms": 363,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 32,
+    "eligible": true,
+    "distance": 50,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "94041",
+   "nom": "Ivry-sur-Seine",
+   "pop": 64001,
+   "nappe": {
+    "ms": 350,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 301,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 34,
+    "eligible": true,
+    "distance": 662,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "69385",
+   "nom": "Lyon 5e Arrondissement",
+   "pop": 48711,
+   "nappe": {
+    "ms": 615,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 52,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": true,
+    "distance": 86,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "69385",
+   "nom": "Lyon 5e Arrondissement",
+   "pop": 48711,
+   "nappe": {
+    "ms": 639,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": 837,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "78158",
+   "nom": "Le Chesnay-Rocquencourt",
+   "pop": 30924,
+   "nappe": {
+    "ms": 564,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": true,
+    "distance": 27,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "78158",
+   "nom": "Le Chesnay-Rocquencourt",
+   "pop": 30924,
+   "nappe": {
+    "ms": 607,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": true,
+    "distance": 134,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59599",
+   "nom": "Tourcoing",
+   "pop": 99011,
+   "nappe": {
+    "ms": 341,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59599",
+   "nom": "Tourcoing",
+   "pop": 99011,
+   "nappe": {
+    "ms": 227,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "93071",
+   "nom": "Sevran",
+   "pop": 51845,
+   "nappe": {
+    "ms": 310,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": 536,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "93071",
+   "nom": "Sevran",
+   "pop": 51845,
+   "nappe": {
+    "ms": 326,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 63,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": 938,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "80799",
+   "nom": "Villers-Bretonneux",
+   "pop": 4640,
+   "nappe": {
+    "ms": 334,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "80799",
+   "nom": "Villers-Bretonneux",
+   "pop": 4640,
+   "nappe": {
+    "ms": 374,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "04161",
+   "nom": "Méolans-Revel",
+   "pop": 323,
+   "nappe": {
+    "ms": 2579,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 104,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "04161",
+   "nom": "Méolans-Revel",
+   "pop": 323,
+   "nappe": {
+    "ms": 2862,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 531,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 93,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "75105",
+   "nom": "Paris 5e Arrondissement",
+   "pop": 56841,
+   "nappe": {
+    "ms": 281,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 100,
+    "eligible": true,
+    "distance": 22,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "75105",
+   "nom": "Paris 5e Arrondissement",
+   "pop": 56841,
+   "nappe": {
+    "ms": 335,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 57,
+    "eligible": true,
+    "distance": 6,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "60157",
+   "nom": "Clermont",
+   "pop": 10475,
+   "nappe": {
+    "ms": 371,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "60157",
+   "nom": "Clermont",
+   "pop": 10475,
+   "nappe": {
+    "ms": 401,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "81021",
+   "nom": "Aussillon",
+   "pop": 5706,
+   "nappe": {
+    "ms": 548,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": 940,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "81021",
+   "nom": "Aussillon",
+   "pop": 5706,
+   "nappe": {
+    "ms": 614,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": 405,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "17323",
+   "nom": "Saint-Denis-d'Oléron",
+   "pop": 1315,
+   "nappe": {
+    "ms": 246,
+    "gridcode": "2",
+    "fiab": "INCONNUE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "17323",
+   "nom": "Saint-Denis-d'Oléron",
+   "pop": 1315,
+   "nappe": {
+    "ms": 333,
+    "gridcode": "0",
+    "fiab": "INCONNUE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "30189",
+   "nom": "Nîmes",
+   "pop": 148104,
+   "nappe": {
+    "ms": 526,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "30189",
+   "nom": "Nîmes",
+   "pop": 148104,
+   "nappe": {
+    "ms": 650,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": 660,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92044",
+   "nom": "Levallois-Perret",
+   "pop": 68009,
+   "nappe": {
+    "ms": 329,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 56,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 34,
+    "eligible": true,
+    "distance": 7,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "92044",
+   "nom": "Levallois-Perret",
+   "pop": 68009,
+   "nappe": {
+    "ms": 269,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 33,
+    "eligible": true,
+    "distance": 10,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "87065",
+   "nom": "Feytiat",
+   "pop": 6080,
+   "nappe": {
+    "ms": 538,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "87065",
+   "nom": "Feytiat",
+   "pop": 6080,
+   "nappe": {
+    "ms": 551,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 35,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "66136",
+   "nom": "Perpignan",
+   "pop": 119656,
+   "nappe": {
+    "ms": 283,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 63,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "66136",
+   "nom": "Perpignan",
+   "pop": 119656,
+   "nappe": {
+    "ms": 255,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 49,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 66,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "93053",
+   "nom": "Noisy-le-Sec",
+   "pop": 46094,
+   "nappe": {
+    "ms": 375,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": true,
+    "distance": 332,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "93053",
+   "nom": "Noisy-le-Sec",
+   "pop": 46094,
+   "nappe": {
+    "ms": 355,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": true,
+    "distance": 671,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "26198",
+   "nom": "Montélimar",
+   "pop": 40399,
+   "nappe": {
+    "ms": 610,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 21,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "26198",
+   "nom": "Montélimar",
+   "pop": 40399,
+   "nappe": {
+    "ms": 589,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 345,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "94034",
+   "nom": "Fresnes",
+   "pop": 28780,
+   "nappe": {
+    "ms": 259,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": true,
+    "distance": 22,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "94034",
+   "nom": "Fresnes",
+   "pop": 28780,
+   "nappe": {
+    "ms": 279,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 3,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "30012",
+   "nom": "Aramon",
+   "pop": 4127,
+   "nappe": {
+    "ms": 511,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 85,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "30012",
+   "nom": "Aramon",
+   "pop": 4127,
+   "nappe": {
+    "ms": 544,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "40229",
+   "nom": "Pontenx-les-Forges",
+   "pop": 1698,
+   "nappe": {
+    "ms": 345,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "40229",
+   "nom": "Pontenx-les-Forges",
+   "pop": 1698,
+   "nappe": {
+    "ms": 293,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "10064",
+   "nom": "Brienne-le-Château",
+   "pop": 2738,
+   "nappe": {
+    "ms": 231,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 65,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "10064",
+   "nom": "Brienne-le-Château",
+   "pop": 2738,
+   "nappe": {
+    "ms": 221,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 206,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 22,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "35115",
+   "nom": "Fougères",
+   "pop": 20653,
+   "nappe": {
+    "ms": 348,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 36,
+    "eligible": false,
+    "distance": 225,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "35115",
+   "nom": "Fougères",
+   "pop": 20653,
+   "nappe": {
+    "ms": 263,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 49,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": true,
+    "distance": 122,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "57548",
+   "nom": "Pontoy",
+   "pop": 587,
+   "nappe": {
+    "ms": 220,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 49,
+    "zones": [
+     "D"
+    ]
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "57548",
+   "nom": "Pontoy",
+   "pop": 587,
+   "nappe": {
+    "ms": 306,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": [
+     "D"
+    ]
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "93073",
+   "nom": "Tremblay-en-France",
+   "pop": 37271,
+   "nappe": {
+    "ms": 226,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 22,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "93073",
+   "nom": "Tremblay-en-France",
+   "pop": 37271,
+   "nappe": {
+    "ms": 241,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 270,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 22,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "95199",
+   "nom": "Domont",
+   "pop": 16078,
+   "nappe": {
+    "ms": 270,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "95199",
+   "nom": "Domont",
+   "pop": 16078,
+   "nappe": {
+    "ms": 309,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 46,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "71380",
+   "nom": "Saillenard",
+   "pop": 790,
+   "nappe": {
+    "ms": 404,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "71380",
+   "nom": "Saillenard",
+   "pop": 790,
+   "nappe": {
+    "ms": 286,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "91345",
+   "nom": "Longjumeau",
+   "pop": 20620,
+   "nappe": {
+    "ms": 390,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "91345",
+   "nom": "Longjumeau",
+   "pop": 20620,
+   "nappe": {
+    "ms": 304,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 71,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "81004",
+   "nom": "Albi",
+   "pop": 49714,
+   "nappe": {
+    "ms": 650,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "81004",
+   "nom": "Albi",
+   "pop": 49714,
+   "nappe": {
+    "ms": 624,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 48,
+    "zones": [
+     "D"
+    ]
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "14218",
+   "nom": "Danestal",
+   "pop": 406,
+   "nappe": {
+    "ms": 280,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 1,
+   "old": 0,
+   "peb": {
+    "ms": 57,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "14218",
+   "nom": "Danestal",
+   "pop": 406,
+   "nappe": {
+    "ms": 388,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "26220",
+   "nom": "Nyons",
+   "pop": 6771,
+   "nappe": {
+    "ms": 363,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "26220",
+   "nom": "Nyons",
+   "pop": 6771,
+   "nappe": {
+    "ms": 395,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "57463",
+   "nom": "Metz",
+   "pop": 120874,
+   "nappe": {
+    "ms": 355,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 40,
+    "eligible": true,
+    "distance": 149,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "57463",
+   "nom": "Metz",
+   "pop": 120874,
+   "nappe": {
+    "ms": 253,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 38,
+    "eligible": true,
+    "distance": 81,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "54395",
+   "nom": "Nancy",
+   "pop": 104260,
+   "nappe": {
+    "ms": 254,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 37,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": 775,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "54395",
+   "nom": "Nancy",
+   "pop": 104260,
+   "nappe": {
+    "ms": 272,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": true,
+    "distance": 7,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "82194",
+   "nom": "Villebrumier",
+   "pop": 1356,
+   "nappe": {
+    "ms": 547,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 223,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": true,
+    "distance": 186,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "82194",
+   "nom": "Villebrumier",
+   "pop": 1356,
+   "nappe": {
+    "ms": 592,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": true,
+    "distance": 150,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "01443",
+   "nom": "Villars-les-Dombes",
+   "pop": 4954,
+   "nappe": {
+    "ms": 406,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 937,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "01443",
+   "nom": "Villars-les-Dombes",
+   "pop": 4954,
+   "nappe": {
+    "ms": 268,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 1,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92036",
+   "nom": "Gennevilliers",
+   "pop": 49410,
+   "nappe": {
+    "ms": 351,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 239,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 33,
+    "eligible": false,
+    "distance": 228,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92036",
+   "nom": "Gennevilliers",
+   "pop": 49410,
+   "nappe": {
+    "ms": 296,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 34,
+    "eligible": true,
+    "distance": 32,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "80020",
+   "nom": "Allonville",
+   "pop": 775,
+   "nappe": {
+    "ms": 484,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 35,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "80020",
+   "nom": "Allonville",
+   "pop": 775,
+   "nappe": {
+    "ms": 539,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 32,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92051",
+   "nom": "Neuilly-sur-Seine",
+   "pop": 59267,
+   "nappe": {
+    "ms": 322,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 34,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "92051",
+   "nom": "Neuilly-sur-Seine",
+   "pop": 59267,
+   "nappe": {
+    "ms": 338,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 33,
+    "eligible": false,
+    "distance": 422,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29147",
+   "nom": "Mellac",
+   "pop": 3329,
+   "nappe": {
+    "ms": 252,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "29147",
+   "nom": "Mellac",
+   "pop": 3329,
+   "nappe": {
+    "ms": 246,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 1,
+   "old": 0,
+   "peb": {
+    "ms": 38,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "66108",
+   "nom": "Millas",
+   "pop": 4294,
+   "nappe": {
+    "ms": 280,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 45,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "66108",
+   "nom": "Millas",
+   "pop": 4294,
+   "nappe": {
+    "ms": 275,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "68249",
+   "nom": "Orbey",
+   "pop": 3453,
+   "nappe": {
+    "ms": 265,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "68249",
+   "nom": "Orbey",
+   "pop": 3453,
+   "nappe": {
+    "ms": 303,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 1,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "43038",
+   "nom": "Bournoncle-Saint-Pierre",
+   "pop": 1027,
+   "nappe": {
+    "ms": 27673,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 89,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "43038",
+   "nom": "Bournoncle-Saint-Pierre",
+   "pop": 1027,
+   "nappe": {
+    "ms": 562,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "31555",
+   "nom": "Toulouse",
+   "pop": 504078,
+   "nappe": {
+    "ms": 514,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": 330,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "31555",
+   "nom": "Toulouse",
+   "pop": 504078,
+   "nappe": {
+    "ms": 568,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "26362",
+   "nom": "Valence",
+   "pop": 64483,
+   "nappe": {
+    "ms": 364,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": 351,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "26362",
+   "nom": "Valence",
+   "pop": 64483,
+   "nappe": {
+    "ms": 321,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 22,
+    "eligible": false,
+    "distance": 233,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "86137",
+   "nom": "Loudun",
+   "pop": 6743,
+   "nappe": {
+    "ms": 231,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "86137",
+   "nom": "Loudun",
+   "pop": 6743,
+   "nappe": {
+    "ms": 283,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "06029",
+   "nom": "Cannes",
+   "pop": 73255,
+   "nappe": {
+    "ms": 333,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": true,
+    "distance": 6,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "06029",
+   "nom": "Cannes",
+   "pop": 73255,
+   "nappe": {
+    "ms": 364,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 59,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "64108",
+   "nom": "Bellocq",
+   "pop": 912,
+   "nappe": {
+    "ms": 279,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 2,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "64108",
+   "nom": "Bellocq",
+   "pop": 912,
+   "nappe": {
+    "ms": 236,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 498,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "27681",
+   "nom": "Vernon",
+   "pop": 24543,
+   "nappe": {
+    "ms": 399,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "27681",
+   "nom": "Vernon",
+   "pop": 24543,
+   "nappe": {
+    "ms": 273,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 273,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 99,
+    "eligible": false,
+    "distance": 837,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "33550",
+   "nom": "Villenave-d'Ornon",
+   "pop": 40500,
+   "nappe": {
+    "ms": 278,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 31,
+    "eligible": true,
+    "distance": 120,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "33550",
+   "nom": "Villenave-d'Ornon",
+   "pop": 40500,
+   "nappe": {
+    "ms": 308,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "64109",
+   "nom": "Bénéjacq",
+   "pop": 1961,
+   "nappe": {
+    "ms": 370,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 1,
+   "old": 1,
+   "peb": {
+    "ms": 47,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "64109",
+   "nom": "Bénéjacq",
+   "pop": 1961,
+   "nappe": {
+    "ms": 380,
+    "gridcode": "1",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 1,
+   "old": 1,
+   "peb": {
+    "ms": 252,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59449",
+   "nom": "Orchies",
+   "pop": 8455,
+   "nappe": {
+    "ms": 247,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59449",
+   "nom": "Orchies",
+   "pop": 8455,
+   "nappe": {
+    "ms": 241,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 23,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59523",
+   "nom": "Sainghin-en-Mélantois",
+   "pop": 2848,
+   "nappe": {
+    "ms": 285,
+    "gridcode": "0",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 458,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "59523",
+   "nom": "Sainghin-en-Mélantois",
+   "pop": 2848,
+   "nappe": {
+    "ms": 253,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "56032",
+   "nom": "Campénéac",
+   "pop": 1891,
+   "nappe": {
+    "ms": 284,
+    "gridcode": "0",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "56032",
+   "nom": "Campénéac",
+   "pop": 1891,
+   "nappe": {
+    "ms": 243,
+    "gridcode": "2",
+    "fiab": "FAIBLE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "24067",
+   "nom": "Le Bugue",
+   "pop": 2613,
+   "nappe": {
+    "ms": 604,
+    "gridcode": "2",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "24067",
+   "nom": "Le Bugue",
+   "pop": 2613,
+   "nappe": {
+    "ms": 556,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 1,
+   "peb": {
+    "ms": 41,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 30,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "67218",
+   "nom": "Illkirch-Graffenstaden",
+   "pop": 27118,
+   "nappe": {
+    "ms": 357,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 39,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 29,
+    "eligible": false,
+    "distance": 894,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "67218",
+   "nom": "Illkirch-Graffenstaden",
+   "pop": 27118,
+   "nappe": {
+    "ms": 268,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 43,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "68224",
+   "nom": "Mulhouse",
+   "pop": 106341,
+   "nappe": {
+    "ms": 232,
+    "gridcode": "2",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 27,
+    "eligible": true,
+    "distance": 453,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "68224",
+   "nom": "Mulhouse",
+   "pop": 106341,
+   "nappe": {
+    "ms": 270,
+    "gridcode": "1",
+    "fiab": "MOYENNE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 42,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 1371,
+    "pdp": true
+   }
+  },
+  {
+   "insee": "62145",
+   "nom": "Boiry-Notre-Dame",
+   "pop": 437,
+   "nappe": {
+    "ms": 276,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 26,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "62145",
+   "nom": "Boiry-Notre-Dame",
+   "pop": 437,
+   "nappe": {
+    "ms": 493,
+    "gridcode": "0",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 51,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 24,
+    "eligible": false,
+    "distance": null,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "73065",
+   "nom": "Chambéry",
+   "pop": 59856,
+   "nappe": {
+    "ms": 351,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 44,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 28,
+    "eligible": true,
+    "distance": 17,
+    "pdp": false
+   }
+  },
+  {
+   "insee": "73065",
+   "nom": "Chambéry",
+   "pop": 59856,
+   "nappe": {
+    "ms": 384,
+    "gridcode": "1",
+    "fiab": "FORTE"
+   },
+   "natura": 0,
+   "pnr": 0,
+   "pn": 0,
+   "znieff": 0,
+   "ligne100m": 0,
+   "ligne300m": 0,
+   "old": 0,
+   "peb": {
+    "ms": 40,
+    "zones": []
+   },
+   "fcu": {
+    "ms": 25,
+    "eligible": true,
+    "distance": 140,
+    "pdp": false
+   }
+  }
+ ]
+}

@@ -1,0 +1,1457 @@
+{
+ "genere": "2026-10-27T01:18:35.186Z",
+ "stabilite": [
+  {
+   "id": "goussainville-cdg",
+   "lecture": "peb",
+   "centre": "C",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "C"
+    ]
+   },
+   "50m": {
+    "differe": 1,
+    "sur": 8,
+    "valeurs": [
+     "B,C",
+     "C"
+    ]
+   },
+   "100m": {
+    "differe": 3,
+    "sur": 8,
+    "valeurs": [
+     "B,C",
+     "C"
+    ]
+   }
+  },
+  {
+   "id": "villeneuve-le-roi-orly",
+   "lecture": "peb",
+   "centre": "B",
+   "typeBan": "street",
+   "25m": {
+    "differe": 1,
+    "sur": 8,
+    "valeurs": [
+     "B",
+     "A,B"
+    ]
+   },
+   "50m": {
+    "differe": 3,
+    "sur": 8,
+    "valeurs": [
+     "B",
+     "A,B"
+    ]
+   },
+   "100m": {
+    "differe": 3,
+    "sur": 8,
+    "valeurs": [
+     "B",
+     "A,B",
+     "A"
+    ]
+   }
+  },
+  {
+   "id": "bouguenais-aeroport",
+   "lecture": "peb",
+   "centre": "D",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "D"
+    ]
+   },
+   "50m": {
+    "differe": 1,
+    "sur": 8,
+    "valeurs": [
+     "D",
+     "aucune"
+    ]
+   },
+   "100m": {
+    "differe": 3,
+    "sur": 8,
+    "valeurs": [
+     "D",
+     "aucune"
+    ]
+   }
+  },
+  {
+   "id": "la-teste-pyla",
+   "lecture": "old",
+   "centre": "zone",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "100m": {
+    "differe": 3,
+    "sur": 8,
+    "valeurs": [
+     "zone",
+     "hors zone"
+    ]
+   }
+  },
+  {
+   "id": "landiras-bourg",
+   "lecture": "old",
+   "centre": "zone",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   }
+  },
+  {
+   "id": "tiree-40298",
+   "lecture": "old",
+   "centre": "zone",
+   "typeBan": "housenumber",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "zone"
+    ]
+   }
+  },
+  {
+   "id": "strasbourg-neudorf",
+   "lecture": "nappe",
+   "centre": "2/MOYENNE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "fos-sur-mer",
+   "lecture": "nappe",
+   "centre": "2/MOYENNE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "saintes-maries",
+   "lecture": "nappe",
+   "centre": "2/FAIBLE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/FAIBLE"
+    ]
+   }
+  },
+  {
+   "id": "tiree-32159",
+   "lecture": "nappe",
+   "centre": "0/FAIBLE",
+   "typeBan": "locality",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   }
+  },
+  {
+   "id": "tiree-50016",
+   "lecture": "nappe",
+   "centre": "0/FAIBLE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   }
+  },
+  {
+   "id": "montlouis-sur-loire",
+   "lecture": "nappe",
+   "centre": "2/FAIBLE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 1,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE",
+     "2/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 4,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE",
+     "2/FAIBLE",
+     "1/FAIBLE"
+    ]
+   }
+  },
+  {
+   "id": "charleville-mezieres",
+   "lecture": "nappe",
+   "centre": "1/MOYENNE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "tiree-59632",
+   "lecture": "nappe",
+   "centre": "2/MOYENNE",
+   "typeBan": "housenumber",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "2/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "grenoble-centre",
+   "lecture": "nappe",
+   "centre": "1/MOYENNE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "briancon",
+   "lecture": "nappe",
+   "centre": "0/FAIBLE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   }
+  },
+  {
+   "id": "lacanau-ocean",
+   "lecture": "nappe",
+   "centre": "1/MOYENNE",
+   "typeBan": "street",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "1/MOYENNE"
+    ]
+   }
+  },
+  {
+   "id": "ploubazlanec",
+   "lecture": "nappe",
+   "centre": "0/FAIBLE",
+   "typeBan": "locality",
+   "25m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "50m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   },
+   "100m": {
+    "differe": 0,
+    "sur": 8,
+    "valeurs": [
+     "0/FAIBLE"
+    ]
+   }
+  }
+ ],
+ "incendiesAdemeContreBdiff": [
+  {
+   "insee": "02083",
+   "nom": "Beuvardes",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "02409",
+   "nom": "Lappion",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "02469",
+   "nom": "Marly-Gomont",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "02667",
+   "nom": "Saconin-et-Breuil",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "03113",
+   "nom": "Ferrières-sur-Sichon",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "03214",
+   "nom": "Rocles",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "03232",
+   "nom": "Saint-Félix",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "04111",
+   "nom": "Mane",
+   "ademe": null,
+   "bdiff": 9,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "07109",
+   "nom": "Joannas",
+   "ademe": null,
+   "bdiff": 11,
+   "bdiff1ha": 3,
+   "statut": 200
+  },
+  {
+   "insee": "07337",
+   "nom": "Vernosc-lès-Annonay",
+   "ademe": null,
+   "bdiff": 4,
+   "bdiff1ha": 2,
+   "statut": 200
+  },
+  {
+   "insee": "07343",
+   "nom": "Vinezac",
+   "ademe": null,
+   "bdiff": 10,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "08333",
+   "nom": "Olizy-Primat",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "08428",
+   "nom": "Sorcy-Bauthémont",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "09221",
+   "nom": "Ornolac-Ussat-les-Bains",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "10226",
+   "nom": "Marolles-lès-Bailly",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "10258",
+   "nom": "Morvilliers",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "10329",
+   "nom": "Rouilly-Saint-Loup",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "11195",
+   "nom": "Laurabuc",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "11364",
+   "nom": "Saint-Polycarpe",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "12178",
+   "nom": "Paulhe",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "14053",
+   "nom": "Beaumais",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "14455",
+   "nom": "Moulines",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "19257",
+   "nom": "Sérilhac",
+   "ademe": null,
+   "bdiff": 2,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "21337",
+   "nom": "Lamarche-sur-Saône",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "21445",
+   "nom": "La Motte-Ternant",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "21483",
+   "nom": "Pichanges",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "22315",
+   "nom": "Saint-Maudez",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "24130",
+   "nom": "Condat-sur-Vézère",
+   "ademe": null,
+   "bdiff": 2,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "24195",
+   "nom": "Gaugeac",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "24456",
+   "nom": "Saint-Martin-des-Combes",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "25017",
+   "nom": "Amondans",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "25091",
+   "nom": "Les Bréseux",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "25094",
+   "nom": "Bretigney-Notre-Dame",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "25242",
+   "nom": "Flagey-Rigney",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "26112",
+   "nom": "Curnier",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "28100",
+   "nom": "Cintray",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "28365",
+   "nom": "Sandarville",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "29031",
+   "nom": "Clohars-Carnoët",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "31118",
+   "nom": "Castelnau-d'Estrétefonds",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "32094",
+   "nom": "Caupenne-d'Armagnac",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "32110",
+   "nom": "Courrensan",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "32368",
+   "nom": "Sainte-Christie",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "33119",
+   "nom": "Cenon",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "35022",
+   "nom": "Bécherel",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "35194",
+   "nom": "Montreuil-sous-Pérouse",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "35295",
+   "nom": "Saint-Maugan",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "36043",
+   "nom": "Chassignolles",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "39279",
+   "nom": "Larnaud",
+   "ademe": 2,
+   "bdiff": 2,
+   "bdiff1ha": 2,
+   "statut": 200
+  },
+  {
+   "insee": "40090",
+   "nom": "Donzacq",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "42010",
+   "nom": "Aveizieux",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "42030",
+   "nom": "Bussy-Albieux",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "42045",
+   "nom": "La Chambonie",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "42063",
+   "nom": "Chirassimont",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "42149",
+   "nom": "Montrond-les-Bains",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "43144",
+   "nom": "Moudeyres",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "43200",
+   "nom": "Saint-Julien-Chapteuil",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "45078",
+   "nom": "Chapelon",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "46340",
+   "nom": "Saint-Pierre-Lafeuille",
+   "ademe": null,
+   "bdiff": 2,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "47302",
+   "nom": "Sos",
+   "ademe": 1,
+   "bdiff": 5,
+   "bdiff1ha": 2,
+   "statut": 200
+  },
+  {
+   "insee": "50281",
+   "nom": "La Lucerne-d'Outremer",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "50425",
+   "nom": "Rauville-la-Bigot",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "50435",
+   "nom": "Rocheville",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "51415",
+   "nom": "Omey",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "51488",
+   "nom": "Saint-Imoges",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "52042",
+   "nom": "Beauchemin",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "52200",
+   "nom": "Flagey",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "53182",
+   "nom": "Port-Brillet",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "53246",
+   "nom": "Saint-Pierre-des-Nids",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "54500",
+   "nom": "Selaincourt",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "54523",
+   "nom": "Thuilley-aux-Groseilles",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "54586",
+   "nom": "Viterne",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "56001",
+   "nom": "Allaire",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "56056",
+   "nom": "Évriguet",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "56251",
+   "nom": "Theix-Noyalo",
+   "ademe": null,
+   "bdiff": 2,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "57127",
+   "nom": "Chanville",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "57197",
+   "nom": "Ernestviller",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "59013",
+   "nom": "Anstaing",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "59147",
+   "nom": "Choisies",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "60287",
+   "nom": "Grandrû",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "60668",
+   "nom": "Verderel-lès-Sauqueuse",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "61309",
+   "nom": "Perche en Nocé",
+   "ademe": 2,
+   "bdiff": 2,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "62044",
+   "nom": "Attin",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "62319",
+   "nom": "Éterpigny",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "63144",
+   "nom": "Égliseneuve-d'Entraigues",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "63429",
+   "nom": "Ternant-les-Eaux",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "64084",
+   "nom": "Aydie",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "64181",
+   "nom": "Castillon (Canton d'Arthez-de-Béarn)",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "64283",
+   "nom": "Jaxu",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "64345",
+   "nom": "Lohitzun-Oyhercq",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "68030",
+   "nom": "Bergholtzzell",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "68165",
+   "nom": "Kiffis",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "68168",
+   "nom": "Knœringue",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "69381",
+   "nom": "Lyon 1er Arrondissement",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "70233",
+   "nom": "Les Fessey",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "70244",
+   "nom": "Fouchécourt",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "71387",
+   "nom": "Saint-André-le-Désert",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "72031",
+   "nom": "Beillé",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "72241",
+   "nom": "Montfort-le-Gesnois",
+   "ademe": null,
+   "bdiff": 4,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "74192",
+   "nom": "Moye",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "76130",
+   "nom": "Bouelles",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "76173",
+   "nom": "La Chaussée",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "76195",
+   "nom": "Criquetot-le-Mauconduit",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "76261",
+   "nom": "La Ferté-Saint-Samson",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "76320",
+   "nom": "Grandcourt",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "77366",
+   "nom": "Le Plessis-l'Évêque",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "77458",
+   "nom": "Souppes-sur-Loing",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "80501",
+   "nom": "Maison-Ponthieu",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "80535",
+   "nom": "Le Mesge",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "81108",
+   "nom": "Itzac",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "82168",
+   "nom": "Saint-Nazaire-de-Valentane",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "85090",
+   "nom": "Sèvremont",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "86200",
+   "nom": "Pressac",
+   "ademe": null,
+   "bdiff": 2,
+   "bdiff1ha": 2,
+   "statut": 200
+  },
+  {
+   "insee": "86233",
+   "nom": "Valdivienne",
+   "ademe": null,
+   "bdiff": 1,
+   "bdiff1ha": 1,
+   "statut": 200
+  },
+  {
+   "insee": "87051",
+   "nom": "La Croisille-sur-Briance",
+   "ademe": 1,
+   "bdiff": 2,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "87066",
+   "nom": "Flavignac",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "88135",
+   "nom": "Docelles",
+   "ademe": 1,
+   "bdiff": 1,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "89022",
+   "nom": "Athie",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "89407",
+   "nom": "Tanlay",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  },
+  {
+   "insee": "91434",
+   "nom": "Morsang-sur-Orge",
+   "ademe": null,
+   "bdiff": 0,
+   "bdiff1ha": 0,
+   "statut": 200
+  }
+ ]
+}

@@ -1,0 +1,302 @@
+{
+ "genere": "2026-10-27T01:29:05.660Z",
+ "source": "https://bdiff.agriculture.gouv.fr",
+ "periode": "2006-2025",
+ "licence": "À ARBITRER : data.gouv.fr déclare lov2 ; les mentions légales de l'export excluent l'usage commercial.",
+ "totaux": {
+  "feux": 52811,
+  "surfacesMesurees": 3508,
+  "lignesPartielles": 1285,
+  "natureConnue": 27191,
+  "avecDecesOuBatiments": 63
+ },
+ "parAnnee": {
+  "2006": {
+   "feux": 3238,
+   "hectares": 7096
+  },
+  "2007": {
+   "feux": 2691,
+   "hectares": 7059
+  },
+  "2008": {
+   "feux": 1824,
+   "hectares": 4750
+  },
+  "2009": {
+   "feux": 3030,
+   "hectares": 14646
+  },
+  "2010": {
+   "feux": 2463,
+   "hectares": 9462
+  },
+  "2011": {
+   "feux": 2781,
+   "hectares": 9516
+  },
+  "2012": {
+   "feux": 2804,
+   "hectares": 7648
+  },
+  "2013": {
+   "feux": 1630,
+   "hectares": 2993
+  },
+  "2014": {
+   "feux": 1947,
+   "hectares": 4990
+  },
+  "2015": {
+   "feux": 2959,
+   "hectares": 8254
+  },
+  "2016": {
+   "feux": 2884,
+   "hectares": 14381
+  },
+  "2017": {
+   "feux": 3304,
+   "hectares": 23246
+  },
+  "2018": {
+   "feux": 1928,
+   "hectares": 4036
+  },
+  "2019": {
+   "feux": 2972,
+   "hectares": 15190
+  },
+  "2020": {
+   "feux": 2971,
+   "hectares": 11226
+  },
+  "2021": {
+   "feux": 2362,
+   "hectares": 12853
+  },
+  "2022": {
+   "feux": 4433,
+   "hectares": 59021
+  },
+  "2023": {
+   "feux": 2682,
+   "hectares": 5441
+  },
+  "2024": {
+   "feux": 1367,
+   "hectares": 2769
+  },
+  "2025": {
+   "feux": 2541,
+   "hectares": 21945
+  }
+ },
+ "couverture": {
+  "communesAvecAuMoinsUnFeu": 9675,
+  "communesAvecUnFeuDePlusDe1ha": 5383,
+  "communesAvecUnFeuDePlusDe10ha": 1459,
+  "communesAvecFeuxSur5AnneesOuPlus": 1849
+ },
+ "communes": {
+  "13039": {
+   "n": 88,
+   "n1ha": 11,
+   "n10ha": 4,
+   "haTotal": 899.9,
+   "maxHa": 711,
+   "anneesAvecFeu": 17,
+   "dernier": 2025
+  },
+  "13055": {
+   "n": 217,
+   "n1ha": 56,
+   "n10ha": 9,
+   "haTotal": 1730.3,
+   "maxHa": 1065,
+   "anneesAvecFeu": 19,
+   "dernier": 2025
+  },
+  "13096": {
+   "n": 1,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0.4,
+   "maxHa": 0.4,
+   "anneesAvecFeu": 1,
+   "dernier": 2021
+  },
+  "22210": {
+   "n": 1,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0.1,
+   "maxHa": 0.1,
+   "anneesAvecFeu": 1,
+   "dernier": 2011
+  },
+  "32159": {
+   "n": 1,
+   "n1ha": 1,
+   "n10ha": 0,
+   "haTotal": 3,
+   "maxHa": 3,
+   "anneesAvecFeu": 1,
+   "dernier": 2023
+  },
+  "33214": {
+   "n": 89,
+   "n1ha": 8,
+   "n10ha": 2,
+   "haTotal": 965.4,
+   "maxHa": 638,
+   "anneesAvecFeu": 19,
+   "dernier": 2025
+  },
+  "33225": {
+   "n": 20,
+   "n1ha": 3,
+   "n10ha": 2,
+   "haTotal": 19300.2,
+   "maxHa": 12552,
+   "anneesAvecFeu": 9,
+   "dernier": 2022
+  },
+  "33529": {
+   "n": 93,
+   "n1ha": 13,
+   "n10ha": 2,
+   "haTotal": 5765.2,
+   "maxHa": 5709,
+   "anneesAvecFeu": 19,
+   "dernier": 2025
+  },
+  "34004": {
+   "n": 2,
+   "n1ha": 1,
+   "n10ha": 1,
+   "haTotal": 14.6,
+   "maxHa": 14.3,
+   "anneesAvecFeu": 2,
+   "dernier": 2018
+  },
+  "37156": {
+   "n": 1,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0,
+   "maxHa": 0,
+   "anneesAvecFeu": 1,
+   "dernier": 2022
+  },
+  "38185": {
+   "n": 1,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0,
+   "maxHa": 0,
+   "anneesAvecFeu": 1,
+   "dernier": 2022
+  },
+  "57463": {
+   "n": 1,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0,
+   "maxHa": 0,
+   "anneesAvecFeu": 1,
+   "dernier": 2023
+  },
+  "67482": {
+   "n": 4,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0,
+   "maxHa": 0,
+   "anneesAvecFeu": 1,
+   "dernier": 2022
+  },
+  "74056": {
+   "n": 4,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0.1,
+   "maxHa": 0.1,
+   "anneesAvecFeu": 3,
+   "dernier": 2025
+  },
+  "74309": {
+   "n": 2,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0.1,
+   "maxHa": 0.1,
+   "anneesAvecFeu": 2,
+   "dernier": 2025
+  },
+  "77186": {
+   "n": 150,
+   "n1ha": 20,
+   "n10ha": 1,
+   "haTotal": 63.9,
+   "maxHa": 10,
+   "anneesAvecFeu": 14,
+   "dernier": 2025
+  },
+  "83067": {
+   "n": 16,
+   "n1ha": 1,
+   "n10ha": 1,
+   "haTotal": 6835,
+   "maxHa": 6832,
+   "anneesAvecFeu": 11,
+   "dernier": 2023
+  },
+  "83147": {
+   "n": 3,
+   "n1ha": 1,
+   "n10ha": 0,
+   "haTotal": 3.3,
+   "maxHa": 3,
+   "anneesAvecFeu": 2,
+   "dernier": 2025
+  },
+  "97209": {
+   "n": 5,
+   "n1ha": 0,
+   "n10ha": 0,
+   "haTotal": 0,
+   "maxHa": 0,
+   "anneesAvecFeu": 2,
+   "dernier": 2022
+  },
+  "97411": {
+   "n": 107,
+   "n1ha": 38,
+   "n10ha": 5,
+   "haTotal": 303,
+   "maxHa": 60,
+   "anneesAvecFeu": 17,
+   "dernier": 2022
+  },
+  "05023": {
+   "n": 12,
+   "n1ha": 1,
+   "n10ha": 0,
+   "haTotal": 3.1,
+   "maxHa": 1,
+   "anneesAvecFeu": 7,
+   "dernier": 2024
+  },
+  "08105": {
+   "n": 2,
+   "n1ha": 1,
+   "n10ha": 0,
+   "haTotal": 1.5,
+   "maxHa": 1.5,
+   "anneesAvecFeu": 2,
+   "dernier": 2025
+  }
+ },
+ "completHorsDepot": "hors dépôt : fichier bdiff-communes-complet.json du dossier --tmp de bdiff-export.mjs"
+}

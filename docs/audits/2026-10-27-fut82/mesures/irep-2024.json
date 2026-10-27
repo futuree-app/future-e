@@ -1,0 +1,917 @@
+{
+ "genere": "2026-10-27T01:32:01.734Z",
+ "officiel": {
+  "source": "https://files.georisques.fr/irep/2024.zip",
+  "annee": "2024",
+  "etablissements": 13507,
+  "sansCoordonnees": 0,
+  "systemesCoordonnees": {
+   "4326": 13507
+  },
+  "etablissementsAuMemePointQuUnAutre": 984,
+  "lignesEmissions": 63935,
+  "emissionsChiffrees": 7180,
+  "emissionsSousSeuil": 56755,
+  "lignesChiffreesParMilieu": {
+   "Air": 4290,
+   "Eau (direct)": 1308,
+   "Eau (indirect)": 943,
+   "Sol": 639
+  },
+  "etablissementsAvecUnRejetAirChiffre": 2186,
+  "polluantsAirLesPlusDeclares": [
+   [
+    "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse)",
+    866
+   ],
+   [
+    "Ammoniac (NH3)",
+    695
+   ],
+   [
+    "Dioxyde de carbone (CO2) d'origine non biomasse",
+    677
+   ],
+   [
+    "Composés organiques volatils non méthaniques (COVNM)",
+    454
+   ],
+   [
+    "Dioxyde de carbone (CO2) d'origine biomasse",
+    353
+   ],
+   [
+    "Hydroflurocarbures (HFC)",
+    188
+   ],
+   [
+    "Méthane (CH4)",
+    184
+   ],
+   [
+    "Oxydes d'azote (NOx/NO2)",
+    162
+   ],
+   [
+    "Oxydes de soufre (SOx/SO2)",
+    60
+   ],
+   [
+    "Zinc et composés (exprimés en tant que Zn)",
+    55
+   ],
+   [
+    "Protoxyde d'azote (N2O)",
+    50
+   ],
+   [
+    "Benzène",
+    39
+   ],
+   [
+    "Cobalt et composés (exprimés en tant que Co)",
+    37
+   ],
+   [
+    "Nickel et composés (exprimés en tant que Ni)",
+    30
+   ],
+   [
+    "Aldéhyde formique (formaldéhyde)",
+    27
+   ]
+  ],
+  "etablissementsElevage": 1989
+ },
+ "ademe": {
+  "titre": "data_risk_IREP",
+  "lignes": 1495,
+  "millesimeDeclare": "2019",
+  "champs": [
+   "identifiant",
+   "others",
+   "nom_etablissement",
+   "siret",
+   "latitude",
+   "longitude",
+   "top",
+   "nombre_polluants",
+   "milieu_emission",
+   "reverse_geolocregioninsee_reg",
+   "reverse_geolocregionnom_reg"
+  ]
+ },
+ "autourDesPoints": [
+  {
+   "id": "paris-hotel-de-ville",
+   "officiel2024_5km": 24,
+   "officiel2024_5km_avecAirChiffre": 5,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 2,
+   "plusProcheAvecAir": {
+    "nom": "LA MONNAIE DE PARIS",
+    "dist_m": 1271,
+    "activite": "Frappe de monnaie",
+    "principauxRejetsAir": [
+     "Hydroflurocarbures (HFC) : 124 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "lyon-gerland",
+   "officiel2024_5km": 61,
+   "officiel2024_5km_avecAirChiffre": 13,
+   "officiel2024_1km": 3,
+   "ademe2019_5km": 2,
+   "plusProcheAvecAir": {
+    "nom": "METROPOLE DE LYON",
+    "dist_m": 630,
+    "activite": "Administration publique générale",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 237 000 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine biomasse : 127 000 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 111 000 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "la-rochelle-centre",
+   "officiel2024_5km": 17,
+   "officiel2024_5km_avecAirChiffre": 3,
+   "officiel2024_1km": 2,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "RHODIA OPERATIONS",
+    "dist_m": 3420,
+    "activite": "Fabrication d'autres produits chimiques inorganiques de base n.c.a.",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 19 900 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 19 900 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "marseille-chateau-gombert",
+   "officiel2024_5km": 8,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 1,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "grenoble-centre",
+   "officiel2024_5km": 19,
+   "officiel2024_5km_avecAirChiffre": 6,
+   "officiel2024_1km": 2,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "COMPAGNIE DE CHAUFFAGE INTERCOMMUNALE DE L'AGGLOMERATION GRENOBLOISE CC",
+    "dist_m": 2412,
+    "activite": "Production et distribution de vapeur et d'air conditionné",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 73 500 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine biomasse : 73 200 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "strasbourg-neudorf",
+   "officiel2024_5km": 33,
+   "officiel2024_5km_avecAirChiffre": 3,
+   "officiel2024_1km": 3,
+   "ademe2019_5km": 3,
+   "plusProcheAvecAir": {
+    "nom": "BLUE PAPER",
+    "dist_m": 900,
+    "activite": "Fabrication de papier et de carton",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 160 000 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine biomasse : 116 000 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 44 100 000 kg/an",
+     "Aldéhyde formique (formaldéhyde) : 1 790 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "goussainville-cdg",
+   "officiel2024_5km": 13,
+   "officiel2024_5km_avecAirChiffre": 3,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 1,
+   "plusProcheAvecAir": {
+    "nom": "AEROPORTS DE PARIS",
+    "dist_m": 3300,
+    "activite": "Services auxiliaires des transports aériens",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 40 400 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine biomasse : 20 300 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 20 100 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "villeneuve-le-roi-orly",
+   "officiel2024_5km": 26,
+   "officiel2024_5km_avecAirChiffre": 2,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "STE PETROLIERE DU VAL DE MARNE - SPVM",
+    "dist_m": 1218,
+    "activite": "Entreposage et stockage non frigorifique",
+    "principauxRejetsAir": [
+     "Composés organiques volatils non méthaniques (COVNM) : 35 100 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "blagnac-aeroport",
+   "officiel2024_5km": 37,
+   "officiel2024_5km_avecAirChiffre": 7,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 4,
+   "plusProcheAvecAir": {
+    "nom": "ASTEO",
+    "dist_m": 2410,
+    "activite": "Collecte et traitement des eaux usées",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 10 900 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "bouguenais-aeroport",
+   "officiel2024_5km": 25,
+   "officiel2024_5km_avecAirChiffre": 3,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 1,
+   "plusProcheAvecAir": {
+    "nom": "SONOCO METAL PACKAGING FRANCE S.A.S",
+    "dist_m": 2478,
+    "activite": "Fabrication d'emballages métalliques légers",
+    "principauxRejetsAir": [
+     "Composés organiques volatils non méthaniques (COVNM) : 76 500 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "feyzin-raffinerie",
+   "officiel2024_5km": 60,
+   "officiel2024_5km_avecAirChiffre": 10,
+   "officiel2024_1km": 2,
+   "ademe2019_5km": 4,
+   "plusProcheAvecAir": {
+    "nom": "TOTALENERGIES RAFFINAGE FRANCE",
+    "dist_m": 719,
+    "activite": "Raffinage du pétrole",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 1 070 000 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 1 070 000 000 kg/an",
+     "Oxydes de soufre (SOx/SO2) : 1 980 000 kg/an",
+     "Oxydes d'azote (NOx/NO2) : 1 140 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "gonfreville-industrie",
+   "officiel2024_5km": 32,
+   "officiel2024_5km_avecAirChiffre": 12,
+   "officiel2024_1km": 4,
+   "ademe2019_5km": 5,
+   "plusProcheAvecAir": {
+    "nom": "CHEVRON ORONITE SAS",
+    "dist_m": 895,
+    "activite": "Fabrication d'autres produits chimiques n.c.a.",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 62 300 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 62 300 000 kg/an",
+     "Composés organiques volatils non méthaniques (COVNM) : 719 000 kg/an",
+     "Méthanol (alcool méthylique) : 336 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "fos-sur-mer",
+   "officiel2024_5km": 30,
+   "officiel2024_5km_avecAirChiffre": 12,
+   "officiel2024_1km": 6,
+   "ademe2019_5km": 7,
+   "plusProcheAvecAir": {
+    "nom": "ELENGY",
+    "dist_m": 440,
+    "activite": "Production de combustibles gazeux",
+    "principauxRejetsAir": [
+     "Méthane (CH4) : 227 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "grande-synthe",
+   "officiel2024_5km": 51,
+   "officiel2024_5km_avecAirChiffre": 15,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 7,
+   "plusProcheAvecAir": {
+    "nom": "DILLINGER FRANCE",
+    "dist_m": 1265,
+    "activite": "Sidérurgie",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 68 800 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 68 800 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "la-teste-pyla",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "landiras-bourg",
+   "officiel2024_5km": 1,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "gonfaron-bourg",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "abbeville-somme",
+   "officiel2024_5km": 5,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 2,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "chamonix",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "briancon",
+   "officiel2024_5km": 1,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "saintes-maries",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "fontainebleau-lisiere",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "lacanau-ocean",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "charleville-mezieres",
+   "officiel2024_5km": 8,
+   "officiel2024_5km_avecAirChiffre": 1,
+   "officiel2024_1km": 1,
+   "ademe2019_5km": 1,
+   "plusProcheAvecAir": {
+    "nom": "STELLANTIS AUTO SAS",
+    "dist_m": 3513,
+    "activite": "Fonderie de fonte",
+    "principauxRejetsAir": [
+     "Méthane (CH4) : 213 000 kg/an",
+     "Composés organiques volatils non méthaniques (COVNM) : 168 000 kg/an",
+     "Phénols (en tant que C total) : 9 750 kg/an",
+     "Zinc et composés (exprimés en tant que Zn) : 389 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "gueret",
+   "officiel2024_5km": 3,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "janville-beauce",
+   "officiel2024_5km": 1,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 1,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "montlouis-sur-loire",
+   "officiel2024_5km": 16,
+   "officiel2024_5km_avecAirChiffre": 1,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "DALKIA BIOMASSE TOURS",
+    "dist_m": 4367,
+    "activite": "Production d'électricité",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine biomasse : 86 900 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 86 900 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "saint-amand-montrond",
+   "officiel2024_5km": 5,
+   "officiel2024_5km_avecAirChiffre": 1,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "INVEHO UFO",
+    "dist_m": 2196,
+    "activite": "Construction de locomotives et d'autre matériel ferroviaire roulant",
+    "principauxRejetsAir": [
+     "Composés organiques volatils non méthaniques (COVNM) : 81 800 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "ploubazlanec",
+   "officiel2024_5km": 2,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "metz-centre",
+   "officiel2024_5km": 13,
+   "officiel2024_5km_avecAirChiffre": 2,
+   "officiel2024_1km": 3,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "HAGANIS",
+    "dist_m": 822,
+    "activite": "Collecte et traitement des eaux usées",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 110 000 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine biomasse : 58 700 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 51 200 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "saint-denis-reunion",
+   "officiel2024_5km": 2,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 1,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "pointe-a-pitre",
+   "officiel2024_5km": 13,
+   "officiel2024_5km_avecAirChiffre": 3,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 1,
+   "plusProcheAvecAir": {
+    "nom": "SYNDICAT DE VALORISATION DES DECHETS",
+    "dist_m": 1301,
+    "activite": "Collecte des déchets non dangereux",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine biomasse : 10 100 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 10 100 000 kg/an",
+     "Méthane (CH4) : 142 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "fort-de-france",
+   "officiel2024_5km": 4,
+   "officiel2024_5km_avecAirChiffre": 2,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "ELECTRICITE DE FRANCE",
+    "dist_m": 1566,
+    "activite": "Production d'électricité",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 235 000 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 235 000 000 kg/an",
+     "Oxydes d'azote (NOx/NO2) : 1 180 000 kg/an",
+     "Oxydes de soufre (SOx/SO2) : 933 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "tiree-74309",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "tiree-51274",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "tiree-59632",
+   "officiel2024_5km": 6,
+   "officiel2024_5km_avecAirChiffre": 1,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "SURSCHISTE SA",
+    "dist_m": 3783,
+    "activite": "Autres intermédiaires du commerce en combustibles, métaux, minéraux et produits chimiques",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 12 200 000 kg/an",
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 12 200 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "tiree-50016",
+   "officiel2024_5km": 2,
+   "officiel2024_5km_avecAirChiffre": 1,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": {
+    "nom": "CARGILL FRANCE",
+    "dist_m": 3159,
+    "activite": "Fabrication d'autres produits alimentaires n.c.a.",
+    "principauxRejetsAir": [
+     "Dioxyde de carbone (CO2) total (d'origine biomasse et non biomasse) : 28 400 000 kg/an",
+     "Dioxyde de carbone (CO2) d'origine non biomasse : 27 500 000 kg/an",
+     "Composés organiques volatils non méthaniques (COVNM) : 136 000 kg/an"
+    ]
+   }
+  },
+  {
+   "id": "tiree-35362",
+   "officiel2024_5km": 1,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "tiree-32159",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "tiree-60393",
+   "officiel2024_5km": 1,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 1,
+   "plusProcheAvecAir": null
+  },
+  {
+   "id": "tiree-40298",
+   "officiel2024_5km": 0,
+   "officiel2024_5km_avecAirChiffre": 0,
+   "officiel2024_1km": 0,
+   "ademe2019_5km": 0,
+   "plusProcheAvecAir": null
+  }
+ ],
+ "pagePubliqueRejouee": [
+  {
+   "insee": "75104",
+   "nom": "Paris 4e Arrondissement",
+   "extraitAdeme10kmCentre": 8,
+   "registre2024_10kmCentre": 121,
+   "dontRejetAirChiffre": 26,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "69387",
+   "nom": "Lyon 7e Arrondissement",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 139,
+   "dontRejetAirChiffre": 24,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "17300",
+   "nom": "La Rochelle",
+   "extraitAdeme10kmCentre": 1,
+   "registre2024_10kmCentre": 20,
+   "dontRejetAirChiffre": 3,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "13213",
+   "nom": "Marseille 13e Arrondissement",
+   "extraitAdeme10kmCentre": 2,
+   "registre2024_10kmCentre": 46,
+   "dontRejetAirChiffre": 8,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "38185",
+   "nom": "Grenoble",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 45,
+   "dontRejetAirChiffre": 11,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "67482",
+   "nom": "Strasbourg",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 64,
+   "dontRejetAirChiffre": 12,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "95280",
+   "nom": "Goussainville",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 52,
+   "dontRejetAirChiffre": 8,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "94077",
+   "nom": "Villeneuve-le-Roi",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 95,
+   "dontRejetAirChiffre": 15,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "31069",
+   "nom": "Blagnac",
+   "extraitAdeme10kmCentre": 7,
+   "registre2024_10kmCentre": 82,
+   "dontRejetAirChiffre": 15,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "44020",
+   "nom": "Bouguenais",
+   "extraitAdeme10kmCentre": 4,
+   "registre2024_10kmCentre": 61,
+   "dontRejetAirChiffre": 10,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "69276",
+   "nom": "Feyzin",
+   "extraitAdeme10kmCentre": 5,
+   "registre2024_10kmCentre": 121,
+   "dontRejetAirChiffre": 20,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "76305",
+   "nom": "Gonfreville-l'Orcher",
+   "extraitAdeme10kmCentre": 11,
+   "registre2024_10kmCentre": 62,
+   "dontRejetAirChiffre": 19,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "13039",
+   "nom": "Fos-sur-Mer",
+   "extraitAdeme10kmCentre": 10,
+   "registre2024_10kmCentre": 52,
+   "dontRejetAirChiffre": 17,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "59271",
+   "nom": "Grande-Synthe",
+   "extraitAdeme10kmCentre": 11,
+   "registre2024_10kmCentre": 69,
+   "dontRejetAirChiffre": 22,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "33529",
+   "nom": "La Teste-de-Buch",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 9,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "33225",
+   "nom": "Landiras",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 5,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "83067",
+   "nom": "Gonfaron",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 8,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "80001",
+   "nom": "Abbeville",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 7,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "74056",
+   "nom": "Chamonix-Mont-Blanc",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 0,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "05023",
+   "nom": "Briançon",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 1,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "13096",
+   "nom": "Saintes-Maries-de-la-Mer",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 0,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "77186",
+   "nom": "Fontainebleau",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 3,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "33214",
+   "nom": "Lacanau",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 0,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "08105",
+   "nom": "Charleville-Mézières",
+   "extraitAdeme10kmCentre": 1,
+   "registre2024_10kmCentre": 26,
+   "dontRejetAirChiffre": 2,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "23096",
+   "nom": "Guéret",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 5,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "28199",
+   "nom": "Janville-en-Beauce",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 1,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "37156",
+   "nom": "Montlouis-sur-Loire",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 23,
+   "dontRejetAirChiffre": 2,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "18197",
+   "nom": "Saint-Amand-Montrond",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 6,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "22210",
+   "nom": "Ploubazlanec",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 6,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "57463",
+   "nom": "Metz",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 25,
+   "dontRejetAirChiffre": 3,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "74309",
+   "nom": "Viry",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 4,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "51274",
+   "nom": "Gizaucourt",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 6,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "59632",
+   "nom": "Wallers",
+   "extraitAdeme10kmCentre": 1,
+   "registre2024_10kmCentre": 52,
+   "dontRejetAirChiffre": 6,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "50016",
+   "nom": "Appeville",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 8,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "35362",
+   "nom": "Le Tronchet",
+   "extraitAdeme10kmCentre": 1,
+   "registre2024_10kmCentre": 7,
+   "dontRejetAirChiffre": 1,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "32159",
+   "nom": "L'Isle-de-Noé",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 1,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  },
+  {
+   "insee": "60393",
+   "nom": "Mello",
+   "extraitAdeme10kmCentre": 5,
+   "registre2024_10kmCentre": 36,
+   "dontRejetAirChiffre": 7,
+   "phraseDeVideAffichee": false
+  },
+  {
+   "insee": "40298",
+   "nom": "Serres-Gaston",
+   "extraitAdeme10kmCentre": 0,
+   "registre2024_10kmCentre": 3,
+   "dontRejetAirChiffre": 0,
+   "phraseDeVideAffichee": true
+  }
+ ]
+}
