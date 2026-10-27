@@ -1,0 +1,249 @@
+{
+ "genere": "2026-10-27T08:26:55.817Z",
+ "feuParPalier": {
+  "modere": {
+   "communes": 11268,
+   "population": 14570716,
+   "avecFeu": 2509,
+   "avecFeuPlus1ha": 1371,
+   "avecFeuPlus10ha": 279,
+   "populationFeuPlus10ha": 445910,
+   "avecFeuPlus100ha": 33
+  },
+  "faible": {
+   "communes": 13132,
+   "population": 15940852,
+   "avecFeu": 2506,
+   "avecFeuPlus1ha": 1198,
+   "avecFeuPlus10ha": 316,
+   "populationFeuPlus10ha": 597076,
+   "avecFeuPlus100ha": 48
+  },
+  "eleve": {
+   "communes": 10388,
+   "population": 34996886,
+   "avecFeu": 4395,
+   "avecFeuPlus1ha": 2658,
+   "avecFeuPlus10ha": 817,
+   "populationFeuPlus10ha": 3516655,
+   "avecFeuPlus100ha": 165
+  }
+ },
+ "faiblesAvecFeuPlus100ha": {
+  "total": 48,
+  "parDepartement": {
+   "26": 1,
+   "29": 2,
+   "31": 3,
+   "38": 1,
+   "39": 3,
+   "40": 5,
+   "63": 1,
+   "64": 4,
+   "65": 7,
+   "66": 2,
+   "69": 1,
+   "09": 6,
+   "2B": 3,
+   "06": 6,
+   "2A": 1,
+   "04": 2
+  },
+  "cinqPlusGrands": [
+   {
+    "insee": "29016",
+    "nom": "Brasparts",
+    "dept": "29",
+    "plusGrandFeuHa": 1917
+   },
+   {
+    "insee": "39557",
+    "nom": "Vescles",
+    "dept": "39",
+    "plusGrandFeuHa": 700
+   },
+   {
+    "insee": "09139",
+    "nom": "L'Hospitalet-près-l'Andorre",
+    "dept": "09",
+    "plusGrandFeuHa": 520
+   },
+   {
+    "insee": "64545",
+    "nom": "Urrugne",
+    "dept": "64",
+    "plusGrandFeuHa": 450
+   },
+   {
+    "insee": "2B007",
+    "nom": "Albertacce",
+    "dept": "2B",
+    "plusGrandFeuHa": 428.2
+   }
+  ]
+ },
+ "fibre": {
+  "communes": {
+   ">=95": 27907,
+   "80-95": 5128,
+   "50-80": 1054,
+   "<50": 829
+  },
+  "populationPct": {
+   ">=95": 78,
+   "80-95": 19.2,
+   "50-80": 1.7,
+   "<50": 1.2
+  },
+  "departementsLesPlusConcernes": [
+   [
+    "976",
+    100
+   ],
+   [
+    "978",
+    100
+   ],
+   [
+    "972",
+    74
+   ],
+   [
+    "973",
+    68
+   ],
+   [
+    "15",
+    59
+   ],
+   [
+    "63",
+    59
+   ],
+   [
+    "43",
+    56
+   ],
+   [
+    "03",
+    56
+   ],
+   [
+    "74",
+    36
+   ],
+   [
+    "07",
+    29
+   ]
+  ],
+  "departementsSansCommuneSous80": 20,
+  "millesime": "2026T2-Commune\n"
+ },
+ "citees": [
+  {
+   "insee": "29016",
+   "nom": "Brasparts",
+   "palierFeu": "faible",
+   "natureScore": 58,
+   "prixAchat": "bas",
+   "bdiff": {
+    "feux": 2,
+    "plusGrandHa": 1917,
+    "dernier": 2022
+   },
+   "fibrePct": 97
+  },
+  {
+   "insee": "29162",
+   "nom": "Pleyben",
+   "palierFeu": "faible",
+   "natureScore": 49,
+   "prixAchat": "moyen",
+   "bdiff": {
+    "feux": 2,
+    "plusGrandHa": 0,
+    "dernier": 2022
+   },
+   "fibrePct": 95
+  },
+  {
+   "insee": "29103",
+   "nom": "Landerneau",
+   "palierFeu": "faible",
+   "natureScore": 42,
+   "prixAchat": "haut",
+   "bdiff": {
+    "feux": 1,
+    "plusGrandHa": 0,
+    "dernier": 2022
+   },
+   "fibrePct": 92
+  },
+  {
+   "insee": "15138",
+   "nom": "Murat",
+   "palierFeu": "faible",
+   "natureScore": 98,
+   "prixAchat": "bas",
+   "bdiff": {
+    "feux": 0,
+    "plusGrandHa": 0,
+    "dernier": null
+   },
+   "fibrePct": 96
+  },
+  {
+   "insee": "63072",
+   "nom": "Chabreloche",
+   "palierFeu": "faible",
+   "natureScore": 92,
+   "prixAchat": "bas",
+   "bdiff": {
+    "feux": 0,
+    "plusGrandHa": 0,
+    "dernier": null
+   },
+   "fibrePct": 0
+  },
+  {
+   "insee": "33529",
+   "nom": "La Teste-de-Buch",
+   "palierFeu": "modere",
+   "natureScore": 84,
+   "prixAchat": "tres_haut",
+   "bdiff": {
+    "feux": 93,
+    "plusGrandHa": 5709,
+    "dernier": 2025
+   },
+   "fibrePct": 96
+  },
+  {
+   "insee": "83063",
+   "nom": "La Garde-Freinet",
+   "palierFeu": "eleve",
+   "natureScore": 77,
+   "prixAchat": "tres_haut",
+   "bdiff": {
+    "feux": 48,
+    "plusGrandHa": 3,
+    "dernier": 2025
+   },
+   "fibrePct": 90
+  },
+  {
+   "insee": "83065",
+   "nom": "Gassin",
+   "palierFeu": "eleve",
+   "natureScore": 73,
+   "prixAchat": "tres_haut",
+   "bdiff": {
+    "feux": 23,
+    "plusGrandHa": 11,
+    "dernier": 2025
+   },
+   "fibrePct": 99
+  }
+ ]
+}
