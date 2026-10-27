@@ -1,0 +1,93 @@
+recherche	groupe	commune	cle	sous_score	reference	avant	apres
+FR · acces_transports+faible_dependance_auto+acces_services	trio	Paris	faible_secheresse	40	Villeurbanne (57)	En échange, la sécheresse est plus présente qu'à Villeurbanne.	En échange, sols exposés à la sécheresse.
+FR · acces_transports+faible_dependance_auto+acces_services	trio	Villeurbanne	faible_chaleur	8	Strasbourg (32)	En échange, la chaleur estivale est plus marquée qu'à Strasbourg.	En échange, chaleur en hausse.
+FR · viabilite_emploi+acces_ecoles+douceur_climat	trio	Bordeaux	faible_exposition_industrielle	43	Saint-Sébastien-sur-Loire (63)	En échange, les sites industriels sont plus présents qu'à Saint-Sébastien-sur-Loire.	En échange, à proximité de sites industriels à risque.
+FR · acces_soins	trio	Meylan	air_sain	0	Niederhausbergen (15)	En échange, l'air de fond est un peu moins pur qu'à Niederhausbergen.	En échange, air plus chargé en particules.
+FR · faible_risque_inondation	trio	Nice	faible_secheresse	1	Nantes (15)	En échange, la sécheresse est plus présente qu'à Nantes.	En échange, sols exposés à la sécheresse.
+FR · faible_risque_inondation	piste	Bordeaux	faible_chaleur	12	Strasbourg (32)	En échange, la chaleur estivale est plus marquée qu'à Strasbourg.	En échange, chaleur en hausse.
+FR · -	piste	Amboise	faible_secheresse	7	Ambarès-et-Lagrave (19)	En échange, la sécheresse est plus présente qu'à Ambarès-et-Lagrave.	En échange, sols exposés à la sécheresse.
+13 · acces_soins+calme_sonore+air_sain	trio	Plan-de-Cuques	air_sain	4	Saintes-Maries-de-la-Mer (30)	En échange, l'air de fond est un peu moins pur qu'à Saintes-Maries-de-la-Mer.	En échange, air plus chargé en particules.
+13 · acces_transports+faible_dependance_auto+acces_services	trio	Aubagne	faible_chaleur	4	Marseille (20)	En échange, la chaleur estivale est plus marquée qu'à Marseille.	En échange, chaleur en hausse.
+13 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Châteaurenard	faible_chaleur	1	Marseille (20)	En échange, la chaleur estivale est plus marquée qu'à Marseille.	En échange, chaleur en hausse.
+84 · proximite_mer	piste	Cavaillon	air_sain	4	Lauris (29)	En échange, l'air de fond est un peu moins pur qu'à Lauris.	En échange, air plus chargé en particules.
+84 · faible_risque_inondation	trio	Cavaillon	faible_secheresse	4	Carpentras (28)	En échange, la sécheresse est plus présente qu'à Carpentras.	En échange, sols exposés à la sécheresse.
+06 · acces_transports+faible_dependance_auto+acces_services	trio	Cannes	faible_chaleur	12	Cagnes-sur-Mer (28)	En échange, la chaleur estivale est plus marquée qu'à Cagnes-sur-Mer.	En échange, chaleur en hausse.
+06 · acces_transports+faible_dependance_auto+acces_services	piste	Saint-Laurent-du-Var	calme_sonore	34	Antibes (54)	En échange, l'environnement est plus bruyant qu'à Antibes.	En échange, environnement assez maillé d'infrastructures bruyantes.
+06 · acces_transports+faible_dependance_auto+acces_services	piste	Antibes	faible_chaleur	10	Saint-Laurent-du-Var (28)	En échange, la chaleur estivale est plus marquée qu'à Saint-Laurent-du-Var.	En échange, chaleur en hausse.
+06 · viabilite_emploi+acces_ecoles+douceur_climat	piste	Cannes	faible_chaleur	12	Nice (27)	En échange, la chaleur estivale est plus marquée qu'à Nice.	En échange, chaleur en hausse.
+06 · acces_soins	trio	Mandelieu-la-Napoule	faible_secheresse	6	Opio (21)	En échange, la sécheresse est plus présente qu'à Opio.	En échange, sols exposés à la sécheresse.
+06 · faible_risque_inondation	trio	Antibes	faible_chaleur	10	Cagnes-sur-Mer (28)	En échange, la chaleur estivale est plus marquée qu'à Cagnes-sur-Mer.	En échange, chaleur en hausse.
+29 · faible_chaleur+acces_soins	trio	Le Relecq-Kerhuon	faible_exposition_industrielle	45	Gouesnou (65)	En échange, les sites industriels sont plus présents qu'à Gouesnou.	En échange, à proximité de sites industriels à risque.
+29 · faible_chaleur+acces_soins	piste	Saint-Martin-des-Champs	faible_secheresse	40	Brest (56)	En échange, la sécheresse est plus présente qu'à Brest.	En échange, sols exposés à la sécheresse.
+29 · acces_transports+faible_dependance_auto+acces_services	trio	Plouzané	faible_secheresse	40	Brest (56)	En échange, la sécheresse est plus présente qu'à Brest.	En échange, sols exposés à la sécheresse.
+29 · viabilite_emploi+acces_ecoles+douceur_climat	piste	Le Relecq-Kerhuon	faible_exposition_industrielle	45	Guipavas (64)	En échange, les sites industriels sont plus présents qu'à Guipavas.	En échange, à proximité de sites industriels à risque.
+29 · faible_chaleur	trio	Plouzané	faible_secheresse	40	Bohars (56)	En échange, la sécheresse est plus présente qu'à Bohars.	En échange, sols exposés à la sécheresse.
+29 · acces_soins	piste	Gouesnou	air_sain	34	Ergué-Gabéric (46)	En échange, l'air de fond est un peu moins pur qu'à Ergué-Gabéric.	En échange, air plus chargé en particules.
+59 · faible_chaleur+acces_soins	piste	Vieux-Berquin	vie_locale	35	Bois-Grenier (57)	En échange, la vie locale est plus discrète qu'à Bois-Grenier.	En échange, peu de lieux de vie et d'animation locale.
+59 · nature+vie_locale+faible_secheresse	trio	Fourmies	air_sain	46	Trélon (59)	En échange, l'air de fond est un peu moins pur qu'à Trélon.	En échange, air plus chargé en particules.
+63 · faible_chaleur	piste	Aydat	acces_soins	38	Saint-Genès-Champanelle (65)	En échange, l'offre de soins est plus limitée qu'à Saint-Genès-Champanelle.	En échange, zone sous-dotée en médecins.
+33 · faible_chaleur+acces_soins	piste	Le Haillan	faible_exposition_industrielle	39	Eysines (57)	En échange, les sites industriels sont plus présents qu'à Eysines.	En échange, à proximité de sites industriels à risque.
+33 · acces_soins+calme_sonore+air_sain	trio	Le Porge	faible_secheresse	36	Lacanau (58)	En échange, la sécheresse est plus présente qu'à Lacanau.	En échange, sols exposés à la sécheresse.
+33 · nature+vie_locale+faible_secheresse	trio	Andernos-les-Bains	air_sain	47	Lacanau (64)	En échange, l'air de fond est un peu moins pur qu'à Lacanau.	En échange, air plus chargé en particules.
+33 · nature+vie_locale+faible_secheresse	piste	Arcachon	air_sain	47	Lège-Cap-Ferret (65)	En échange, l'air de fond est un peu moins pur qu'à Lège-Cap-Ferret.	En échange, air plus chargé en particules.
+33 · acces_transports+faible_dependance_auto+acces_services	trio	Bordeaux	faible_exposition_industrielle	43	Talence (63)	En échange, les sites industriels sont plus présents qu'à Talence.	En échange, à proximité de sites industriels à risque.
+33 · acces_transports+faible_dependance_auto+acces_services	trio	Bègles	calme_sonore	34	Bordeaux (57)	En échange, l'environnement est plus bruyant qu'à Bordeaux.	En échange, environnement assez maillé d'infrastructures bruyantes.
+33 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Bordeaux	faible_exposition_industrielle	43	Talence (63)	En échange, les sites industriels sont plus présents qu'à Talence.	En échange, à proximité de sites industriels à risque.
+33 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Talence	calme_sonore	46	Le Bouscat (62)	En échange, l'environnement est plus bruyant qu'à Le Bouscat.	En échange, environnement assez maillé d'infrastructures bruyantes.
+33 · proximite_mer	trio	Andernos-les-Bains	air_sain	47	Lège-Cap-Ferret (65)	En échange, l'air de fond est un peu moins pur qu'à Lège-Cap-Ferret.	En échange, air plus chargé en particules.
+33 · proximite_mer	trio	Arcachon	faible_secheresse	40	Andernos-les-Bains (56)	En échange, la sécheresse est plus présente qu'à Andernos-les-Bains.	En échange, sols exposés à la sécheresse.
+33 · faible_risque_inondation	trio	Bordeaux	faible_exposition_industrielle	43	Pessac (63)	En échange, les sites industriels sont plus présents qu'à Pessac.	En échange, à proximité de sites industriels à risque.
+33 · faible_risque_inondation	trio	Mérignac	calme_sonore	46	Pessac (59)	En échange, l'environnement est plus bruyant qu'à Pessac.	En échange, environnement assez maillé d'infrastructures bruyantes.
+33 · faible_risque_inondation	piste	Villenave-d'Ornon	faible_exposition_industrielle	49	Talence (63)	En échange, les sites industriels sont plus présents qu'à Talence.	En échange, à proximité de sites industriels à risque.
+33 · -	piste	Bègles	air_sain	6	Bassens (19)	En échange, l'air de fond est un peu moins pur qu'à Bassens.	En échange, air plus chargé en particules.
+67 · acces_transports+faible_dependance_auto+acces_services	trio	Illkirch-Graffenstaden	faible_secheresse	48	Schiltigheim (64)	En échange, la sécheresse est plus présente qu'à Schiltigheim.	En échange, sols exposés à la sécheresse.
+67 · acces_transports+faible_dependance_auto+acces_services	piste	Molsheim	faible_secheresse	39	Bischheim (64)	En échange, la sécheresse est plus présente qu'à Bischheim.	En échange, sols exposés à la sécheresse.
+67 · faible_chaleur	piste	Oberhaslach	acces_soins	44	Ottrott (57)	En échange, l'offre de soins est plus limitée qu'à Ottrott.	En échange, zone sous-dotée en médecins.
+2A · faible_chaleur+acces_soins	piste	Grosseto-Prugna	air_sain	35	Porto-Vecchio (52)	En échange, l'air de fond est un peu moins pur qu'à Porto-Vecchio.	En échange, air plus chargé en particules.
+2A · acces_soins+calme_sonore+air_sain	trio	Porto-Vecchio	faible_dependance_auto	35	Zonza (57)	En échange, on y va plus souvent travailler en voiture qu'à Zonza.	En échange, trajets domicile-travail plus souvent faits en voiture qu'ailleurs.
+2A · acces_soins+calme_sonore+air_sain	piste	Grosseto-Prugna	air_sain	35	Bonifacio (47)	En échange, l'air de fond est un peu moins pur qu'à Bonifacio.	En échange, air plus chargé en particules.
+2A · acces_soins+calme_sonore+air_sain	piste	Bonifacio	faible_secheresse	0	Grosseto-Prugna (19)	En échange, la sécheresse est plus présente qu'à Grosseto-Prugna.	En échange, sols exposés à la sécheresse.
+2A · nature+vie_locale+faible_secheresse	piste	Bonifacio	faible_secheresse	0	Grosseto-Prugna (19)	En échange, la sécheresse est plus présente qu'à Grosseto-Prugna.	En échange, sols exposés à la sécheresse.
+2A · acces_transports+faible_dependance_auto+acces_services	trio	Bonifacio	faible_chaleur	2	Ajaccio (25)	En échange, la chaleur estivale est plus marquée qu'à Ajaccio.	En échange, chaleur en hausse.
+2A · acces_soins	trio	Porto-Vecchio	faible_secheresse	1	Grosseto-Prugna (19)	En échange, la sécheresse est plus présente qu'à Grosseto-Prugna.	En échange, sols exposés à la sécheresse.
+2A · acces_soins	trio	Grosseto-Prugna	air_sain	35	Porto-Vecchio (52)	En échange, l'air de fond est un peu moins pur qu'à Porto-Vecchio.	En échange, air plus chargé en particules.
+2A · acces_soins	piste	Bonifacio	faible_chaleur	2	Ajaccio (25)	En échange, la chaleur estivale est plus marquée qu'à Ajaccio.	En échange, chaleur en hausse.
+2A · faible_risque_inondation	trio	Porto-Vecchio	faible_chaleur	5	Ajaccio (25)	En échange, la chaleur estivale est plus marquée qu'à Ajaccio.	En échange, chaleur en hausse.
+17 · viabilite_emploi+acces_ecoles+douceur_climat	piste	Puilboreau	calme_sonore	47	Angoulins (59)	En échange, l'environnement est plus bruyant qu'à Angoulins.	En échange, environnement assez maillé d'infrastructures bruyantes.
+17 · proximite_mer	piste	L'Houmeau	faible_exposition_industrielle	36	Aytré (62)	En échange, les sites industriels sont plus présents qu'à Aytré.	En échange, à proximité de sites industriels à risque.
+17 · faible_risque_inondation	trio	Rochefort	faible_secheresse	9	La Rochelle (31)	En échange, la sécheresse est plus présente qu'à La Rochelle.	En échange, sols exposés à la sécheresse.
+17 · -	piste	Dompierre-sur-Mer	vie_locale	44	L'Houmeau (60)	En échange, la vie locale est plus discrète qu'à L'Houmeau.	En échange, peu de lieux de vie et d'animation locale.
+65 · acces_soins+calme_sonore+air_sain	piste	Vic-en-Bigorre	air_sain	45	Maubourguet (61)	En échange, l'air de fond est un peu moins pur qu'à Maubourguet.	En échange, air plus chargé en particules.
+65 · viabilite_emploi+acces_ecoles+douceur_climat	piste	Tarbes	faible_exposition_industrielle	38	Soues (65)	En échange, les sites industriels sont plus présents qu'à Soues.	En échange, à proximité de sites industriels à risque.
+65 · faible_chaleur	piste	Barbazan-Debat	faible_chaleur	37	Lannemezan (50)	En échange, la chaleur estivale est plus marquée qu'à Lannemezan.	En échange, chaleur en hausse.
+64 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Billère	air_sain	12	Pau (27)	En échange, l'air de fond est un peu moins pur qu'à Pau.	En échange, air plus chargé en particules.
+64 · faible_chaleur	trio	Ascain	faible_chaleur	48	Arudy (66)	En échange, la chaleur estivale est plus marquée qu'à Arudy.	En échange, chaleur en hausse.
+64 · faible_risque_inondation	trio	Anglet	faible_exposition_industrielle	52	Pau (65)	En échange, les sites industriels sont plus présents qu'à Pau.	(aucun)
+64 · -	trio	Assat	air_sain	42	Bénéjacq (55)	En échange, l'air de fond est un peu moins pur qu'à Bénéjacq.	En échange, air plus chargé en particules.
+64 · -	piste	Billère	air_sain	12	Bizanos (25)	En échange, l'air de fond est un peu moins pur qu'à Bizanos.	En échange, air plus chargé en particules.
+31 · faible_risque_feu	piste	Saint-Gaudens	faible_exposition_industrielle	44	Martres-Tolosane (56)	En échange, les sites industriels sont plus présents qu'à Martres-Tolosane.	En échange, à proximité de sites industriels à risque.
+31 · faible_chaleur+acces_soins	piste	L'Union	calme_sonore	41	Montrabé (54)	En échange, l'environnement est plus bruyant qu'à Montrabé.	En échange, environnement assez maillé d'infrastructures bruyantes.
+31 · acces_soins	trio	L'Union	calme_sonore	41	Montrabé (54)	En échange, l'environnement est plus bruyant qu'à Montrabé.	En échange, environnement assez maillé d'infrastructures bruyantes.
+31 · proximite_mer	piste	Saint-Orens-de-Gameville	faible_secheresse	5	Péchabou (20)	En échange, la sécheresse est plus présente qu'à Péchabou.	En échange, sols exposés à la sécheresse.
+31 · -	trio	Aucamville	faible_exposition_industrielle	42	Aussonne (62)	En échange, les sites industriels sont plus présents qu'à Aussonne.	En échange, à proximité de sites industriels à risque.
+44 · acces_soins+calme_sonore+air_sain	piste	Saint-Molf	faible_secheresse	1	Saint-Julien-de-Concelles (31)	En échange, la sécheresse est plus présente qu'à Saint-Julien-de-Concelles.	En échange, sols exposés à la sécheresse.
+44 · nature+vie_locale+faible_secheresse	piste	Pornichet	faible_secheresse	3	Batz-sur-Mer (18)	En échange, la sécheresse est plus présente qu'à Batz-sur-Mer.	En échange, sols exposés à la sécheresse.
+44 · acces_transports+faible_dependance_auto+acces_services	trio	Nantes	faible_secheresse	15	Rezé (27)	En échange, la sécheresse est plus présente qu'à Rezé.	En échange, sols exposés à la sécheresse.
+44 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Nantes	faible_secheresse	15	Saint-Sébastien-sur-Loire (27)	En échange, la sécheresse est plus présente qu'à Saint-Sébastien-sur-Loire.	En échange, sols exposés à la sécheresse.
+44 · faible_risque_inondation	trio	Nantes	faible_chaleur	43	Saint-Nazaire (63)	En échange, la chaleur estivale est plus marquée qu'à Saint-Nazaire.	En échange, chaleur en hausse.
+44 · faible_risque_inondation	trio	Saint-Nazaire	faible_secheresse	2	Nantes (15)	En échange, la sécheresse est plus présente qu'à Nantes.	En échange, sols exposés à la sécheresse.
+44 · -	trio	Basse-Goulaine	vie_locale	53	Bouaye (65)	En échange, la vie locale est plus discrète qu'à Bouaye.	En échange, chaleur en hausse.
+44 · -	trio	Bouaye	faible_secheresse	13	Basse-Goulaine (31)	En échange, la sécheresse est plus présente qu'à Basse-Goulaine.	En échange, sols exposés à la sécheresse.
+35 · faible_risque_feu	trio	Dinard	faible_exposition_industrielle	37	Pleurtuit (52)	En échange, les sites industriels sont plus présents qu'à Pleurtuit.	En échange, à proximité de sites industriels à risque.
+35 · faible_chaleur+acces_soins	trio	Saint-Malo	air_sain	16	Pleurtuit (29)	En échange, l'air de fond est un peu moins pur qu'à Pleurtuit.	En échange, air plus chargé en particules.
+35 · faible_chaleur	trio	Dinard	faible_exposition_industrielle	37	Pleurtuit (52)	En échange, les sites industriels sont plus présents qu'à Pleurtuit.	En échange, à proximité de sites industriels à risque.
+35 · proximite_mer	trio	Saint-Malo	air_sain	16	Saint-Briac-sur-Mer (32)	En échange, l'air de fond est un peu moins pur qu'à Saint-Briac-sur-Mer.	En échange, air plus chargé en particules.
+35 · proximite_mer	trio	Dinard	faible_exposition_industrielle	37	Saint-Malo (65)	En échange, les sites industriels sont plus présents qu'à Saint-Malo.	En échange, à proximité de sites industriels à risque.
+69 · acces_soins+calme_sonore+air_sain	trio	Anse	faible_exposition_industrielle	47	Denicé (65)	En échange, les sites industriels sont plus présents qu'à Denicé.	En échange, à proximité de sites industriels à risque.
+69 · nature+vie_locale+faible_secheresse	trio	Thizy-les-Bourgs	acces_soins	35	Sainte-Colombe (63)	En échange, l'offre de soins est plus limitée qu'à Sainte-Colombe.	En échange, zone sous-dotée en médecins.
+69 · nature+vie_locale+faible_secheresse	piste	Amplepuis	faible_chaleur	38	Larajasse (52)	En échange, la chaleur estivale est plus marquée qu'à Larajasse.	En échange, chaleur en hausse.
+69 · acces_transports+faible_dependance_auto+acces_services	trio	Villeurbanne	faible_exposition_industrielle	35	Lyon (50)	En échange, les sites industriels sont plus présents qu'à Lyon.	En échange, à proximité de sites industriels à risque.
+69 · acces_transports+faible_dependance_auto+acces_services	piste	Oullins-Pierre-Bénite	calme_sonore	18	Bron (30)	En échange, l'environnement est plus bruyant qu'à Bron.	En échange, environnement assez maillé d'infrastructures bruyantes.
+69 · viabilite_emploi+acces_ecoles+douceur_climat	trio	Lyon	calme_sonore	4	Caluire-et-Cuire (17)	En échange, l'environnement est plus bruyant qu'à Caluire-et-Cuire.	En échange, environnement assez maillé d'infrastructures bruyantes.
+69 · acces_soins	trio	Saint-Fons	faible_exposition_industrielle	10	Lyon (26)	En échange, les sites industriels sont plus présents qu'à Lyon.	En échange, à proximité de sites industriels à risque.
+38 · acces_soins	piste	Seyssinet-Pariset	faible_exposition_industrielle	35	La Tronche (54)	En échange, les sites industriels sont plus présents qu'à La Tronche.	En échange, à proximité de sites industriels à risque.
