@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- outil de balayage : modules chargés dynamiquement (deux racines de code) */
 // FUT-151 · Les faux compromis : un critère favorable dans l'absolu (sous-score ≥ 55) présenté comme un compromis.
 // Balaye 20 périmètres × 11 projets sur l'index réel ; une ligne TSV par carte fautive (trio et pistes).
 // Usage : node scripts/fut151/faux-compromis.mts [racine du code, relative à ce dossier ; défaut ../.. = cette branche]
