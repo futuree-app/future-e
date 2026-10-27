@@ -5,5 +5,11 @@
     "env": {
       "VERCEL_SUPPORT_LARGE_FUNCTIONS": "1"
     }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true
+    }
   }
 }
