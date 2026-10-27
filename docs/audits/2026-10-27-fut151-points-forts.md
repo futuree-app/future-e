@@ -108,3 +108,75 @@ Mesures : `captures/avant-mesures.json` et `captures/apres-mesures.json`.
 - **Faux points faibles.** Quand un retrait relatif n'atteint pas l'écart `COMPROMIS_GAP` (12), le compromis reprend la formulation **absolue** de `REASON_NEG`. Exemples : Gréasque, « zone sous-dotée en médecins » ; Breil-sur-Roya (calme 95/100), « environnement assez maillé d'infrastructures bruyantes ». C'est le symétrique de ce ticket ; il ne fabrique aucun avantage, donc je n'y ai pas touché.
 - **Découverte sur une carte sans priorité favorable.** Elle reste affichée avec un « + » (par exemple « Population en croissance ») : c'est un atout réel (≥ 66), non demandé. Le palier « Aucune priorité favorable ici » évite de la lire comme une correspondance.
 - **Mode « classé ».** Il reste actif quand les trois cartes sont sans priorité favorable : le classement existe bel et bien. La question suggérée « Pourquoi X plutôt que Y ? » est relative ; AskFuture reçoit le marqueur et la consigne de le dire.
+
+## Revue du 27/10/2026 (verdict NO GO ciblé sur `1f75afd`) : deux blocages levés
+
+### 1. Les faux compromis
+
+**Reproductions**, sur le vrai moteur et la vraie page (`captures-revue/avant-revue-*`) :
+- **Bagnères-de-Bigorre** (recherche « air pur », France entière) : sécheresse à 91/100, compromis affiché « sols exposés à la sécheresse ».
+- **Aytré** (recherche « train + moins de voiture + services », 17) : vie locale à 86/100, compromis affiché « peu de lieux de vie et d'animation locale ».
+
+**Cause.** Un retrait *relatif* (la commune fait moins bien que ses voisines) devenait un compromis même quand le critère était favorable dans l'absolu. Sans écart suffisant avec la voisine, il recevait en plus la formulation absolue de `REASON_NEG`. En retirant les critères loués, FUT-151 a exposé de nouveaux cas (Aytré, Biarritz, Wisches).
+
+**Correction** (`buildCompromisCandidates`, `assignCompromis`) :
+- Un retrait relatif n'est candidat que si le sous-score de la commune est sous le seuil favorable (55, `SEUIL_RAISON`).
+- Il ne reçoit la formulation absolue que si la commune est réellement faible (< 50, `SEUIL_FAIBLESSE`, le seuil existant du `tradeoff`, désormais nommé). Sinon, il s'écrit en comparatif ou n'est pas retenu.
+- L'unicité des dimensions ne cache plus une vraie faiblesse : si aucune autre dimension honnête ne reste, la commune garde la sienne.
+- Sans compromis honnête, la carte n'en affiche pas (contrat existant : `compromis: ""`).
+
+**Résultats** (balayage `scripts/fut151/faux-compromis.mts`, 20 périmètres × 11 projets) :
+
+| Version | Compromis sur un critère ≥ 55 | Formulation absolue sur un critère entre 50 et 54 |
+|---|---|---|
+| base | 312 | 3 |
+| `1f75afd` | 290 | 7 |
+| correction | **0** | **0** |
+
+Restent 99 comparatifs relatifs (« … qu'à X ») sur des critères entre 50 et 54, ni favorables ni faibles. Ils relèvent de FUT-154.
+
+### 2. La portée en couverture partielle
+
+**Cause.** Le Pack disait « Aucune de vos priorités n'est favorable ici », et la consigne de synthèse affirmait « ses priorités déclarées sont mesurées », alors qu'au moins une priorité n'était pas mesurée.
+
+**Correction.** La portée est calculée dans un seul module, `src/lib/comparateur/portee-favorable.ts`, que lisent la carte, le Pack, `/synthesize` et `/ask`. Les quatre situations :
+
+| Situation | Ce qui est dit |
+|---|---|
+| Toutes les priorités mesurées, aucune favorable | `toutes_mesurees` : « Aucune priorité favorable ici » |
+| Certaines mesurées, aucune d'elles favorable | `parmi_celles_mesurees` : « Aucune priorité favorable parmi celles mesurées ici » (+ « Non mesuré ici : … ») |
+| Aucune priorité mesurée | pas de marqueur, même si un client l'affirme (« À explorer ») |
+| Certaines favorables, d'autres non mesurées | pas de marqueur (raisons + « Non mesuré ici ») |
+
+Les deux consignes (synthèse et AskFuture) imposent « parmi celles mesurées ici », jamais « aucune de vos priorités », et précisent qu'une priorité non mesurée n'est ni favorable ni défavorable. Un état inconnu prend toujours la portée prudente.
+
+### Contre-épreuves
+
+Huit tests ajoutés à `fut151-points-forts.test.ts` (22 au total) :
+- Bagnères (sécheresse 91) ; Aytré (vie locale 86) ;
+- Châtelaillon-Plage, favorable mais un peu derrière (soins 84) ;
+- vraie faiblesse conservée (Châteauneuf-le-Rouge, et ses voisines gardent un compromis) ;
+- trois communes favorables partout (Bagnères, Gérardmer, Aurillac) : aucun compromis ;
+- les quatre portées ;
+- Paris, couverture partielle de bout en bout : moteur, `/synthesize`, `/ask` (modèle simulé) et texte ;
+- aucune priorité mesurée, avec un faux marqueur rejeté par `/ask`.
+
+Le balayage vérifie aussi trois nouveaux invariants : aucun compromis sur un critère ≥ 55 ; formulation absolue réservée aux sous-scores < 50 ; toute faiblesse absolue reste dite.
+
+**Exécutés sur `1f75afd`**, 11 tests échouent, dont toutes les contre-épreuves attendues. Deux tests de la revue passent sur les deux versions, comme prévu : l'un vérifie la conservation d'une vraie faiblesse, l'autre est le test unitaire du nouveau module.
+
+Deux tests existants ont été adaptés :
+- **FUT-96 C5** : son cas de référence était lui-même un faux compromis (Andernos-les-Bains, voiture 76/100). Il passe sur un cas légitime (Gréasque), avec les mêmes assertions sur la formulation.
+- **Breil-sur-Roya** : le test supposait l'ancien compromis « bruyant » (calme 95/100). Il vérifie désormais que le calme n'est plus ni loué et retiré à la fois, ni présenté comme un compromis.
+
+### Invariants et validations
+
+- **Rejeu des 20 recherches** : classements, scores, pistes, couverture, `perfectMatch`, ainsi qu'avantages et paliers du comparateur restent identiques à la base.
+- **Cas validés conservés** : Châteauneuf-le-Rouge, Plouay, Breil-sur-Roya, Vaison-la-Romaine, Bagnères-de-Bigorre (médecins).
+- **Suite complète**, avec la concurrence par défaut : 3 581 / 3 581, deux fois (= 3 573 + 8), sans omission cette fois. Infrastructure de tests inchangée.
+- `tsc` : 0 erreur. `eslint` sur les fichiers modifiés : 0 erreur. Build : réussi.
+- **Recette navigateur** (`captures-revue/`, 1440 et 390 px, `1f75afd` puis correction, `/match` réel, aucun appel Anthropic) :
+  - Aytré : « sols exposés à la sécheresse » (sécheresse 27, une vraie faiblesse) au lieu de « peu de lieux de vie » ;
+  - Bagnères-de-Bigorre : plus de compromis ;
+  - Paris : « AUCUNE PRIORITÉ FAVORABLE PARMI CELLES MESURÉES ICI » + « Non mesuré ici : un cadre calme. » ;
+  - les sept scénarios précédents passent toujours.

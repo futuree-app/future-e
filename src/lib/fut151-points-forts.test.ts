@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { register } from "node:module";
 import { pathToFileURL } from "node:url";
 import { contexteAsk } from "./comparateur/lecture-ask.ts";
+import { libelleCarteSansFavorable, phraseSansFavorable, porteeSansFavorable } from "./comparateur/portee-favorable.ts";
 import { preferencesToLabels } from "./comparateur-labels.ts";
 
 const racine = pathToFileURL(`${process.cwd()}/`).href;
@@ -235,6 +236,14 @@ test("balayage : raisons au-dessus du seuil, marqueur exact, et jamais un critè
       // La carte : sa confirmation (reasons[0]) et sa découverte, face à son compromis.
       const louees = new Set([...raisons, ...decouverte]);
       for (const k of compromis) assert.ok(!louees.has(k), `${ctx} : « ${k} » à la fois point fort et compromis`);
+      // Revue FUT-151 : un critère favorable dans l'absolu n'est jamais un compromis ; la formulation absolue d'un
+      // simple retrait (sans « qu'à X ») suppose une vraie faiblesse ; une vraie faiblesse reste dite.
+      for (const k of compromis) {
+        const sc = V.subScore(k, c);
+        assert.ok(sc == null || sc < V.SEUIL_RAISON, `${ctx} : compromis « ${k} » sur un critère favorable (${Math.round(sc)})`);
+        if (!/ qu'à /.test(r.compromis) && !tradeoff.includes(k)) assert.ok(sc < V.SEUIL_FAIBLESSE, `${ctx} : « ${r.compromis} » pour ${Math.round(sc)}`);
+      }
+      if (r.tradeoff) assert.ok(r.compromis, `${ctx} : faiblesse absolue « ${r.tradeoff} » tue`);
       // Le trait distinctif (synthèse, AskFuture) ne loue ni le compromis de la carte ni sa faiblesse absolue.
       if (distinctive) {
         assert.ok(!compromis.includes(distinctive), `${ctx} : distinctif sur le compromis (${r.distinctive})`);
@@ -262,8 +271,11 @@ test("compromis : Bagnères-de-Bigorre n'est plus « bon accès aux médecins »
 
 test("découverte : Breil-sur-Roya ne loue plus le calme que son compromis lui retire", async () => {
   const r = await carte(["06"], [{ key: "faible_chaleur", weight: 3 }, { key: "acces_soins", weight: 2 }], "Breil-sur-Roya");
-  assert.match(r.compromis, /bruyantes/);
-  assert.notEqual(r.decouverte, "à l'écart des grandes infrastructures bruyantes");
+  // Sur 1f75afd : découverte « à l'écart des grandes infrastructures bruyantes » (calme 95/100), compromis « environnement
+  // assez maillé d'infrastructures bruyantes ». Le calme n'est plus ni l'un ni l'autre à la fois, et n'est plus un compromis.
+  const loueLeCalme = r.decouverte === "à l'écart des grandes infrastructures bruyantes";
+  assert.ok(!(loueLeCalme && /bruyant/.test(r.compromis)), "le même critère loué et retiré");
+  assert.doesNotMatch(r.compromis, /bruyant/, "calme 95/100 : pas un compromis");
 });
 
 test("trait distinctif : Vaison-la-Romaine n'a plus « les étés les plus supportables » à côté de « chaleur en hausse »", async () => {
@@ -328,11 +340,11 @@ test("synthèse : la vraie route transmet l'absence de priorité favorable, et s
   assert.equal(payload.message_moteur, V.MESSAGE_SANS_FAVORABLE);
   for (const t of payload.territoires) {
     assert.deepEqual(t.raisons, [], t.commune);
-    assert.equal(t.aucune_priorite_favorable, true, t.commune);
+    assert.equal(t.aucune_priorite_favorable, "toutes_mesurees", t.commune);
   }
   assert.doesNotMatch(appel.prompt, /moins propice aux feux/);
-  assert.match(appel.system, /"aucune_priorite_favorable" à true/);
-  assert.match(appel.system, /ne présentez jamais\s+un critère demandé comme son point fort/);
+  assert.match(appel.system, /Si un territoire porte "aucune_priorite_favorable", aucune des priorités MESURÉES/);
+  assert.match(appel.system, /ne présentez jamais un critère demandé comme son point\s+fort/);
   // Une commune qui a des raisons ne porte pas le marqueur (un `false` n'est jamais traduit en « vrai »).
   etat.synthese = [];
   const fav = await recherche(["29", "56"], [{ key: "faible_risque_feu", weight: 3 }]);
@@ -365,10 +377,10 @@ test("AskFuture : le contexte construit par la page porte le marqueur, la route 
   const contexte = JSON.parse(req.messages.at(-1).content.split("\n\nQUESTION : ")[0].replace(/^[^\n]*\n/, ""));
   for (const t of contexte.territoires) {
     assert.deepEqual(t.raisons, [], t.commune);
-    assert.equal(t.aucune_priorite_favorable, true, t.commune);
+    assert.equal(t.aucune_priorite_favorable, "toutes_mesurees", t.commune);
   }
   const systeme = typeof req.system === "string" ? req.system : JSON.stringify(req.system);
-  assert.match(systeme, /Quel que soit le mode, un territoire qui porte "aucune_priorite_favorable" à true/);
+  assert.match(systeme, /Quel que soit le mode, un territoire qui porte "aucune_priorite_favorable" n'atteint/);
   // Un contexte forgé qui n'envoie rien ne devient jamais « aucune priorité favorable » (ni l'inverse).
   etat.modele = [];
   const forge = { ...ctx, territoires: ctx.territoires!.map((t) => ({ ...t, aucune_priorite_favorable: "oui" as never })) };
@@ -378,7 +390,7 @@ test("AskFuture : le contexte construit par la page porte le marqueur, la route 
     headers: { "content-type": "application/json", "x-forwarded-for": "10.151.1.2" },
   }));
   const c2 = JSON.parse(etat.modele[0].messages.at(-1).content.split("\n\nQUESTION : ")[0].replace(/^[^\n]*\n/, ""));
-  for (const t of c2.territoires) assert.equal(t.aucune_priorite_favorable, false, t.commune);
+  for (const t of c2.territoires) assert.equal(t.aucune_priorite_favorable, null, t.commune);
 });
 
 // ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -387,12 +399,147 @@ test("AskFuture : le contexte construit par la page porte le marqueur, la route 
 
 test("page « Où vivre » : libellé de carte, en-tête et repli disent l'absence de priorité favorable ; le corps l'envoie", () => {
   const code = readFileSync(new URL("../app/(public)/ou-vivre/OuVivreClient.tsx", import.meta.url), "utf8");
-  assert.match(code, /if \(r\.sansPrioriteFavorable\) \{\s*return \{ libelle: inondation \? "Aucune autre priorité favorable ici" : "Aucune priorité favorable ici"/);
+  assert.match(code, /const portee = porteeSansFavorable\(\{ marque: r\.sansPrioriteFavorable, etat, nonMesurees: r\.couverture\?\.nonMesurees \}\);\s*if \(portee\) return \{ libelle: libelleCarteSansFavorable\(portee, inondation\)/);
   assert.match(code, /top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) && outcome\?\.message/);
   assert.match(code, /sansPrioriteFavorable: r\.sansPrioriteFavorable === true/);
   const pack = readFileSync(new URL("../app/(public)/comparateur/pack-decision/PackUnlockedView.tsx", import.meta.url), "utf8");
-  assert.match(pack, /r\.sansPrioriteFavorable && \(/);
+  assert.match(pack, /\{portee\(r\) && \(/);
+  assert.match(pack, /phraseSansFavorable\(portee\(r\)!\)/);
   // Le repli « deux meilleurs aspects relatifs » a disparu du moteur.
   const moteur = readFileSync(new URL("./comparateur-vie.ts", import.meta.url), "utf8").replace(/\/\/.*$/gm, "");
   assert.doesNotMatch(moteur, /if \(reasons\.length === 0\) reasons =/);
 });
+
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+// 7 · Revue de la PR #99 : les faux compromis, et la portée de « aucune priorité favorable »
+// ════════════════════════════════════════════════════════════════════════════════════════════════════
+
+test("revue · Bagnères-de-Bigorre (air pur, France) : plus de « sols exposés à la sécheresse » avec 91/100", async () => {
+  const r = await carte(null, [{ key: "air_sain", weight: 3 }], "Bagnères-de-Bigorre");
+  const c = await V.getCommuneEntry(r.insee);
+  assert.ok(V.subScore("faible_secheresse", c) >= 90);
+  assert.doesNotMatch(r.compromis, /sécheresse/);
+});
+
+test("revue · Aytré (train, moins de voiture, services, 17) : plus de « peu de lieux de vie » avec 86/100", async () => {
+  const r = await carte(["17"], [{ key: "acces_transports", weight: 3 }, { key: "faible_dependance_auto", weight: 2 }, { key: "acces_services", weight: 2 }], "Aytré");
+  const c = await V.getCommuneEntry(r.insee);
+  assert.ok(V.subScore("vie_locale", c) >= 85);
+  assert.doesNotMatch(r.compromis, /lieux de vie|vie locale/);
+});
+
+test("revue · favorable mais un peu derrière : Châtelaillon-Plage (soins 84) n'a plus « l'offre de soins est plus limitée qu'à Aytré »", async () => {
+  const r = await carte(["17"], [], "Châtelaillon-Plage");
+  const c = await V.getCommuneEntry(r.insee);
+  assert.ok(V.subScore("acces_soins", c) >= V.SEUIL_RAISON);
+  assert.doesNotMatch(r.compromis, /soins/);
+});
+
+test("revue · une vraie faiblesse reste visible : Châteauneuf-le-Rouge garde « météo plus souvent propice aux feux »", async () => {
+  const o = await recherche(["13"], [{ key: "faible_risque_feu", weight: 3 }]);
+  const r = o.results.find((x: M) => x.nom === "Châteauneuf-le-Rouge");
+  assert.equal(r.compromis, "En échange, météo plus souvent propice aux feux.");
+  // Ses voisines, aussi faibles sur les feux, ont toutes un compromis (le leur, ou la faiblesse partagée).
+  for (const x of o.results.slice(0, 3)) assert.ok(x.compromis, x.nom);
+});
+
+test("revue · trois communes favorables partout : aucun défaut fabriqué pour remplir la carte", async () => {
+  // Bagnères-de-Bigorre, Gérardmer, Aurillac : ≥ 55 sur chacune des neuf dimensions de compromis. Par la porte du
+  // comparateur (communes nommées, aucune faiblesse absolue possible) : aucune carte ne reçoit de compromis.
+  const seeded = await V.seedComparaison(["65059", "88196", "15014"]);
+  assert.equal(seeded.trio.length, 3);
+  for (const r of seeded.trio) {
+    const c = await V.getCommuneEntry(r.insee);
+    for (const k of ["faible_chaleur", "faible_secheresse", "air_sain", "acces_soins", "acces_services", "calme_sonore", "faible_exposition_industrielle", "vie_locale", "faible_dependance_auto"]) {
+      assert.ok(V.subScore(k, c) >= V.SEUIL_RAISON, `${r.nom} ${k}`);
+    }
+    assert.equal(r.compromis, "", r.nom);
+  }
+});
+
+test("revue · portée : les quatre situations de couverture se disent sans ambiguïté", () => {
+  // Toutes mesurées, aucune favorable.
+  assert.equal(porteeSansFavorable({ marque: true, etat: "complete", nonMesurees: [] }), "toutes_mesurees");
+  // Certaines mesurées, aucune d'elles favorable.
+  assert.equal(porteeSansFavorable({ marque: true, etat: "partielle", nonMesurees: ["un cadre calme"] }), "parmi_celles_mesurees");
+  // Aucune mesurée : rien n'a été comparé au seuil (même si un client l'affirme).
+  assert.equal(porteeSansFavorable({ marque: true, etat: "aucune", nonMesurees: ["un cadre calme"] }), null);
+  assert.equal(porteeSansFavorable({ marque: true, etat: "sans_priorite" }), null);
+  // Certaines favorables, d'autres non mesurées : pas de marqueur.
+  assert.equal(porteeSansFavorable({ marque: undefined, etat: "partielle", nonMesurees: ["un cadre calme"] }), null);
+  // Inconnu, ou « complète » qui déclare des non mesurées : jamais « toutes ».
+  assert.equal(porteeSansFavorable({ marque: true, etat: null }), "parmi_celles_mesurees");
+  assert.equal(porteeSansFavorable({ marque: true, etat: "complete", nonMesurees: ["x"] }), "parmi_celles_mesurees");
+  assert.equal(porteeSansFavorable({ marque: "oui", etat: "complete" }), null);
+  assert.equal(libelleCarteSansFavorable("parmi_celles_mesurees"), "Aucune priorité favorable parmi celles mesurées ici");
+  assert.doesNotMatch(phraseSansFavorable("parmi_celles_mesurees"), /Aucune de vos priorités/);
+  assert.equal(phraseSansFavorable("toutes_mesurees"), "Aucune de vos priorités n'est favorable ici.");
+});
+
+test("revue · couverture partielle de bout en bout (Paris, calme + étés frais) : moteur, /synthesize, /ask et texte disent « parmi celles mesurées »", async () => {
+  const prefs = [{ key: "cadre_calme", weight: 3 }, { key: "faible_chaleur", weight: 2 }];
+  const o = await recherche(["75"], prefs);
+  const top = o.results.slice(0, 1);
+  const r = top[0];
+  // Le moteur : le calme n'est pas mesuré, la chaleur l'est et n'est pas favorable.
+  assert.equal(r.couverture.etat, "partielle");
+  assert.deepEqual(r.couverture.nonMesurees, ["un cadre calme"]);
+  assert.equal(r.sansPrioriteFavorable, true);
+  assert.deepEqual(r.reasons, []);
+  const portee = porteeSansFavorable({ marque: r.sansPrioriteFavorable, etat: r.couverture.etat, nonMesurees: r.couverture.nonMesurees });
+  assert.equal(portee, "parmi_celles_mesurees");
+  // Le texte de la carte et du Pack.
+  assert.equal(libelleCarteSansFavorable(portee!), "Aucune priorité favorable parmi celles mesurées ici");
+  assert.match(phraseSansFavorable(portee!), /parmi celles mesurées ici ; les autres ne sont pas mesurées/);
+  // L'en-tête : la couverture prime, jamais le message « aucune de vos priorités ».
+  assert.notEqual(o.message, V.MESSAGE_SANS_FAVORABLE);
+  // /synthesize, avec le corps exact de la page.
+  const body = {
+    project: "Calme et fraîcheur à Paris.", reformulation: "FUT-151", preferences: prefs,
+    results: top.map((x: M) => ({ nom: x.nom, reasons: x.reasons, tradeoff: x.tradeoff, prioritesNonMesurees: x.couverture?.nonMesurees ?? [], sansPrioriteFavorable: x.sansPrioriteFavorable === true })),
+    outcome: { perfectMatch: o.perfectMatch, message: o.message, exploration: false, couverture: o.couverture },
+  };
+  await SYNTHESE(new NextRequest("http://localhost/api/comparateur-vie/synthesize", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json", "x-forwarded-for": "10.151.2.1" } }));
+  const appel = etat.synthese[0];
+  const t = JSON.parse(appel.prompt.split("DONNÉES :\n")[1]).territoires[0];
+  assert.equal(t.aucune_priorite_favorable, "parmi_celles_mesurees");
+  assert.deepEqual(t.priorites_non_mesurees, ["un cadre calme"]);
+  assert.match(appel.system, /dites « parmi celles mesurées ici », jamais « aucune\s+de vos priorités »/);
+  assert.doesNotMatch(appel.system, /ses priorités déclarées sont mesurées et\s+aucune/);
+  // /ask, avec le contexte construit par la page.
+  const ctx = contexteAsk({
+    reformulation: "FUT-151", criteres: preferencesToLabels(prefs), inondationDeclaree: false,
+    outcome: { ...o, couverture: V.couvertureDesResultats(top) } as never, synthese: "Synthèse affichée.", top: top as never,
+  });
+  await ASK(new NextRequest("http://localhost/api/comparateur-vie/ask", {
+    method: "POST",
+    body: JSON.stringify({ question: "Paris est-elle calme ?", context: ctx, focus: null, history: [], distinctId: "fut151c" }),
+    headers: { "content-type": "application/json", "x-forwarded-for": "10.151.2.2" },
+  }));
+  const req = etat.modele[0];
+  const contexte = JSON.parse(req.messages.at(-1).content.split("\n\nQUESTION : ")[0].replace(/^[^\n]*\n/, ""));
+  assert.equal(contexte.territoires[0].aucune_priorite_favorable, "parmi_celles_mesurees");
+  assert.deepEqual(contexte.territoires[0].priorites_non_mesurees, ["un cadre calme"]);
+  const systeme = typeof req.system === "string" ? req.system : JSON.stringify(req.system);
+  assert.match(systeme, /jamais « aucune de vos priorités »/);
+});
+
+test("revue · aucune priorité mesurée : pas de marqueur, et un client qui l'affirme quand même n'est pas cru par /ask", async () => {
+  const o = await recherche(["75"], [{ key: "cadre_calme", weight: 3 }]);
+  const top = o.results.slice(0, 1);
+  assert.equal(top[0].couverture.etat, "aucune");
+  assert.equal(top[0].sansPrioriteFavorable, undefined);
+  const ctx = contexteAsk({
+    reformulation: "FUT-151", criteres: preferencesToLabels([{ key: "cadre_calme", weight: 3 }]), inondationDeclaree: false,
+    outcome: { ...o, couverture: V.couvertureDesResultats(top) } as never, synthese: "Synthèse affichée.", top: top as never,
+  });
+  const forge = { ...ctx, territoires: ctx.territoires!.map((t) => ({ ...t, aucune_priorite_favorable: true })) };
+  await ASK(new NextRequest("http://localhost/api/comparateur-vie/ask", {
+    method: "POST",
+    body: JSON.stringify({ question: "Et le calme ?", context: forge, focus: null, history: [], distinctId: "fut151d" }),
+    headers: { "content-type": "application/json", "x-forwarded-for": "10.151.2.3" },
+  }));
+  const contexte = JSON.parse(etat.modele[0].messages.at(-1).content.split("\n\nQUESTION : ")[0].replace(/^[^\n]*\n/, ""));
+  assert.equal(contexte.territoires[0].aucune_priorite_favorable, null);
+});
+

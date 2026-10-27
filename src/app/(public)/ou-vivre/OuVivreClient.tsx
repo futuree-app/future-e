@@ -19,6 +19,7 @@ import { repliInondation } from "@/lib/comparateur/synthese-repli";
 import { enteteAsk, modeQuestions, placeholdersAsk, questionsSuggerees } from "@/lib/comparateur/questions-ask";
 import { sessionReconstituable } from "@/lib/comparateur/session-ou-vivre";
 import { contexteAsk } from "@/lib/comparateur/lecture-ask";
+import { libelleCarteSansFavorable, porteeSansFavorable } from "@/lib/comparateur/portee-favorable";
 
 // ════════════════════════════════════════════════════════════════════════════
 // Comparateur de vie — client.
@@ -196,14 +197,14 @@ function matchTier(compatibility: number): string {
 // FUT-109 : un palier ne se dit que d'une commune dont toutes les priorités déclarées sont mesurées. Sinon
 // la carte ne promet rien : elle dit ce qui n'est pas mesuré ici, sans chiffre ni seuil.
 // FUT-151 : des priorités sont mesurées et aucune n'est favorable. La carte ne parle pas de correspondance, même
-// partielle : elle le dit (`inondation` : l'inondation ne contribue jamais favorablement, ce sont les autres).
+// partielle : elle le dit, avec sa portée (toutes mesurées, ou seulement certaines : la ligne « Non mesuré ici »
+// nomme les autres). `inondation` : l'inondation ne contribue jamais favorablement, ce sont les autres priorités.
 function palierCarte(r: MatchResult, inondation = false): { libelle: string; classe: string } {
   const etat = r.couverture?.etat ?? "complete";
+  const portee = porteeSansFavorable({ marque: r.sansPrioriteFavorable, etat, nonMesurees: r.couverture?.nonMesurees });
+  if (portee) return { libelle: libelleCarteSansFavorable(portee, inondation), classe: "text-muted" };
   if (etat === "partielle") return { libelle: "Priorités en partie mesurées", classe: "text-muted" };
   if (etat === "aucune" || etat === "sans_priorite") return { libelle: "À explorer", classe: "text-muted" };
-  if (r.sansPrioriteFavorable) {
-    return { libelle: inondation ? "Aucune autre priorité favorable ici" : "Aucune priorité favorable ici", classe: "text-muted" };
-  }
   return { libelle: matchTier(r.compatibility), classe: matchTierClass(r.compatibility) };
 }
 

@@ -2082,19 +2082,21 @@ function buildCompromisCandidates(
 ): CompromisCand[] {
   const out: CompromisCand[] = [];
   const seen = new Set<PreferenceKey>();
-  const add = (key: PreferenceKey, severity: number) => {
+  const add = (key: PreferenceKey, severity: number, relatif = false) => {
     if (seen.has(key)) return;
-    seen.add(key);
     const self = c ? subScore(key, c) : null;
     const leader = compromisLeader(key, r, shownPicks, byInsee);
     const neg = COMPROMIS_NEG[key];
     // Comparatif seulement si la dimension a un sens relatif (COMPROMIS_NEG) ET qu'un
     // leader se détache vraiment (écart ≥ seuil) : « moins accessibles qu'à X ». Sinon
     // formulation absolue télégraphique (REASON_NEG), honnête sans inventer de divergence.
-    const text =
-      neg && leader && self != null && leader.score - self >= COMPROMIS_GAP
-        ? `En échange, ${neg} qu'à ${leader.nom}.`
-        : `En échange, ${raisonNeg(key, c)}.`;
+    const comparatif = !!(neg && leader && self != null && leader.score - self >= COMPROMIS_GAP);
+    // FUT-151 (revue) : un simple retrait relatif ne reçoit la formulation ABSOLUE (« sols exposés à la
+    // sécheresse ») que si la commune est réellement faible sur ce critère. Sinon, sans comparatif possible,
+    // il n'est pas un compromis.
+    if (relatif && !comparatif && (self == null || self >= SEUIL_FAIBLESSE)) return;
+    seen.add(key);
+    const text = comparatif ? `En échange, ${neg} qu'à ${leader!.nom}.` : `En échange, ${raisonNeg(key, c)}.`;
     out.push({ key, severity, text });
   };
 
@@ -2115,10 +2117,13 @@ function buildCompromisCandidates(
       // qui la louerait (« sans faiblesse marquée » = avantage déguisé, proscrit dans
       // un face-à-face neutre). Le tri par delta garde le plus saillant en tête ; le
       // comparatif « qu'à X » reste gardé par COMPROMIS_GAP dans add().
-      if (delta > 0) rel.push({ key: k, delta });
+      // FUT-151 (revue) : un critère favorable dans l'absolu ne devient pas un compromis parce qu'une voisine
+      // fait mieux. Bagnères-de-Bigorre (sécheresse 91/100) lisait « sols exposés à la sécheresse », Aytré (vie
+      // locale 86/100) « peu de lieux de vie et d'animation locale ». Seuil : celui des raisons, inchangé.
+      if (delta > 0 && s < SEUIL_RAISON) rel.push({ key: k, delta });
     }
     rel.sort((a, b) => b.delta - a.delta);
-    for (const x of rel) add(x.key, x.delta);
+    for (const x of rel) add(x.key, x.delta, true);
   }
   return out;
 }
@@ -2155,14 +2160,17 @@ function assignCompromis(
     // FUT-151 : un retrait relatif ne porte jamais sur une priorité que la carte présente comme favorable
     // (« bon accès aux soins », puis « l'offre de soins est plus limitée qu'à X »).
     const forces = new Set(forceKeysByInsee.get(r.insee) ?? []);
-    const chosen = cands.find((x) => !used.has(x.key) && !forces.has(x.key));
+    // L'unicité des dimensions ne cache jamais une faiblesse absolue : si aucune autre dimension honnête ne
+    // reste, la commune garde la sienne, même déjà dite par une autre carte du trio.
+    const chosen = cands.find((x) => !used.has(x.key) && !forces.has(x.key))
+      ?? (tradeoffKey ? cands.find((x) => x.key === tradeoffKey) : undefined);
     if (chosen) {
       used.add(chosen.key);
       cles.set(r.insee, chosen.key);
       r.compromis = chosen.text;
     } else {
-      // Aucun retrait relatif libre : la commune est au niveau ou au-dessus du groupe
-      // sur toutes les dimensions comparées. On n'INVENTE pas de revers, mais on ne la
+      // Aucun retrait relatif libre (ou seulement sur des critères favorables dans l'absolu), et aucune
+      // faiblesse absolue. On n'INVENTE pas de revers, mais on ne la
       // loue pas non plus (« sans faiblesse marquée » donnait un avantage). On n'affiche
       // rien : les cartes gèrent l'absence (rendu conditionnel sur r.compromis).
       r.compromis = "";
@@ -2555,6 +2563,8 @@ export function rangCouverture(etat: CouverturePriorites["etat"]): 0 | 1 | 2 {
 // Le seuil à partir duquel une priorité déclarée devient une raison de la carte (inchangé par FUT-151, qui l'a
 // seulement nommé). En dessous, la priorité n'est jamais présentée comme satisfaite.
 export const SEUIL_RAISON = 55;
+// Sous ce seuil, une priorité déclarée est une faiblesse absolue (le compromis `tradeoff`). Inchangé, nommé par FUT-151.
+export const SEUIL_FAIBLESSE = 50;
 
 export function reasonText(key: PreferenceKey, c: IndexCommune): string {
   const r = REASON_POS[key];
@@ -3356,7 +3366,7 @@ export async function matchProjects(parsedDuLecteur: ParsedProject): Promise<Mat
     const worst = [...visible].sort((a, b) => a.weight * a.s - b.weight * b.s)[0];
     // FUT-129 : une commune qui recule pour ses inondations indemnisées fréquentes le dit, en premier :
     // c'est une priorité déclarée que les faits contredisent, et la seule raison de son recul.
-    const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < 50 ? worst.key : null;
+    const tradeoffKey: PreferenceKey | null = recul > 0 ? "faible_risque_inondation" : worst && worst.s < SEUIL_FAIBLESSE ? worst.key : null;
     const tradeoff = recul > 0 ? RAISON_SINISTRES_FREQUENTS : tradeoffKey ? raisonNeg(tradeoffKey, c) : null;
     const boundary = verdicts.get(c.insee)?.boundary === true;
     const built = baseResult(c, { compatibility, reasons, tradeoff }, littoralIndex);

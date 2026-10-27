@@ -11,13 +11,17 @@ const [base, dir, libelle = 'apres'] = process.argv.slice(2);
 assert.match(base ?? '', /^http:\/\/(localhost|127\.0\.0\.1):\d+$/);
 assert.ok(dir, 'dossier de captures');
 mkdirSync(dir, { recursive: true });
-const verifier = libelle === 'apres'; // sur la base, on capture le défaut sans l'affirmer
+const verifier = libelle.startsWith('apres'); // sur la base (ou 1f75afd), on capture le défaut sans l'affirmer
 
 const SANS_FAVORABLE = "Aucun de ces territoires n'atteint un niveau favorable sur vos priorités : ce sont ceux qui s'en approchent le plus, avec leurs compromis.";
 const CAS = [
   { id: 'feu-13', texte: 'Je veux être loin des feux de forêt, dans les Bouches-du-Rhône.', parsed: { reformulation: 'Vous cherchez une commune moins exposée à la météo des feux, dans les Bouches-du-Rhône.', hardConstraints: { departements: ['13'] }, preferences: [{ key: 'faible_risque_feu', weight: 3 }] }, synthese: 'repli' },
   { id: 'chaleur-84', texte: 'Des étés plus frais dans le Vaucluse.', parsed: { reformulation: 'Vous cherchez des étés plus frais dans le Vaucluse.', hardConstraints: { departements: ['84'] }, preferences: [{ key: 'faible_chaleur', weight: 3 }] }, synthese: 'simulee' },
   { id: 'feu-29-56', texte: 'Loin des feux, dans le Finistère ou le Morbihan.', parsed: { reformulation: 'Vous cherchez une commune moins exposée à la météo des feux, dans le Finistère ou le Morbihan.', hardConstraints: { departements: ['29', '56'] }, preferences: [{ key: 'faible_risque_feu', weight: 3 }] }, synthese: 'simulee' },
+  // Revue de la PR #99 : deux faux compromis, et la couverture partielle.
+  { id: 'aytre-17', texte: 'Le train, moins de voiture et des services, en Charente-Maritime.', parsed: { reformulation: 'Vous cherchez le train, moins de voiture et des services, en Charente-Maritime.', hardConstraints: { departements: ['17'] }, preferences: [{ key: 'acces_transports', weight: 3 }, { key: 'faible_dependance_auto', weight: 2 }, { key: 'acces_services', weight: 2 }] }, synthese: 'simulee' },
+  { id: 'bagneres-fr', texte: 'Respirer un air pur.', parsed: { reformulation: 'Vous cherchez un air plus pur.', hardConstraints: {}, preferences: [{ key: 'air_sain', weight: 3 }] }, synthese: 'simulee' },
+  { id: 'paris-calme-chaleur', texte: 'Du calme et des étés frais, à Paris.', parsed: { reformulation: 'Vous cherchez du calme et des étés plus frais, à Paris.', hardConstraints: { departements: ['75'] }, preferences: [{ key: 'cadre_calme', weight: 3 }, { key: 'faible_chaleur', weight: 2 }] }, synthese: 'simulee' },
   { id: 'calme-culture-75', texte: 'Un cadre calme et de la culture, à Paris.', parsed: { reformulation: 'Vous cherchez un cadre calme et une offre culturelle, à Paris.', hardConstraints: { departements: ['75'] }, preferences: [{ key: 'cadre_calme', weight: 3 }, { key: 'acces_culture', weight: 2 }] }, synthese: 'simulee' },
 ];
 const mesures = [];
@@ -66,7 +70,7 @@ for (const f of CAS) {
 
     const cartes = page.locator('article.card-answer');
     const n = await cartes.count();
-    const textes = await cartes.allInnerTexts();
+    const textes = (await cartes.allInnerTexts()).map((t) => t.replace(/\u00a0/g, ' '));
     const entete = (await page.locator('h2', { hasText: 'Les territoires à regarder.' }).locator('xpath=following-sibling::p[1]').innerText()).trim();
     const corpsPage = await page.locator('body').innerText();
     // AskFuture : la première question suggérée, pour lire le contexte réellement envoyé.
@@ -89,7 +93,7 @@ for (const f of CAS) {
         texte: lignes.join(' · '),
       };
     });
-    const m = { id: f.id, width, n, entete, cartes: lu, chips, synthese: corps.synthese?.results?.map((r) => ({ nom: r.nom, reasons: r.reasons, sansPrioriteFavorable: r.sansPrioriteFavorable })), ask: corps.ask?.context?.territoires?.map((t) => ({ nom: t.nom, raisons: t.raisons, aucune_priorite_favorable: t.aucune_priorite_favorable })), repli: f.synthese === 'repli' ? corpsPage.includes(SANS_FAVORABLE) && corpsPage.includes(f.parsed.reformulation) : null, bloques, erreurs };
+    const m = { id: f.id, width, n, entete, cartes: lu, chips, synthese: corps.synthese?.results?.map((r) => ({ nom: r.nom, reasons: r.reasons, sansPrioriteFavorable: r.sansPrioriteFavorable, prioritesNonMesurees: r.prioritesNonMesurees })), ask: corps.ask?.context?.territoires?.map((t) => ({ nom: t.nom, raisons: t.raisons, aucune_priorite_favorable: t.aucune_priorite_favorable })), repli: f.synthese === 'repli' ? corpsPage.includes(SANS_FAVORABLE) && corpsPage.includes(f.parsed.reformulation) : null, bloques, erreurs };
     mesures.push(m);
 
     if (verifier) {
@@ -128,6 +132,24 @@ for (const f of CAS) {
           assert.ok(c.forces.some((x) => /moins propice aux feux/i.test(x)), c.nom);
         }
         for (const t of m.ask) assert.equal(t.aucune_priorite_favorable, false);
+      }
+      if (f.id === 'aytre-17') {
+        const a = lu.find((c) => c.nom === 'Aytré');
+        assert.ok(a, 'Aytré affichée');
+        assert.doesNotMatch(a.compromis ?? '', /lieux de vie|vie locale/, 'vie locale 86/100 : pas un compromis');
+      }
+      if (f.id === 'bagneres-fr') {
+        const b = lu.find((c) => c.nom === 'Bagnères-de-Bigorre');
+        assert.ok(b, 'Bagnères-de-Bigorre affichée');
+        assert.doesNotMatch(b.compromis ?? '', /sécheresse/, 'sécheresse 91/100 : pas un compromis');
+      }
+      if (f.id === 'paris-calme-chaleur') {
+        assert.equal(lu[0].palier, 'AUCUNE PRIORITÉ FAVORABLE PARMI CELLES MESURÉES ICI');
+        assert.match(lu[0].texte, /Non mesuré ici : un cadre calme\./);
+        assert.doesNotMatch(entete, /Aucun de ces territoires n'atteint/);
+        assert.deepEqual(m.synthese[0].prioritesNonMesurees, ['un cadre calme']);
+        assert.equal(m.synthese[0].sansPrioriteFavorable, true);
+        assert.deepEqual(m.ask[0].raisons, []);
       }
       if (f.id === 'calme-culture-75') {
         assert.equal(lu[0].palier, 'PRIORITÉS EN PARTIE MESURÉES');
