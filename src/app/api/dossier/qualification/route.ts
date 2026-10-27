@@ -8,7 +8,9 @@ import {
   type NearbyHouseNumber,
 } from "@/lib/dossier-qualification";
 import { reverseHouseNumbers } from "@/lib/ban";
-import { probeDpeByBanId } from "@/lib/dpe";
+import { lookupDpeMemeBatiment, probeDpeByBanId } from "@/lib/dpe";
+import { lookupBatimentByBanId } from "@/lib/rnb";
+import { sonderMemeBatiment, type MemeBatimentState } from "@/lib/qualification-meme-batiment";
 import { probeCadastreAtPoint } from "@/lib/cadastre";
 import { quoteForDossier, DOSSIER_PRICE } from "@/lib/dossier-pricing";
 import { hasPaidTerritory } from "@/lib/active-territory";
@@ -110,14 +112,27 @@ export async function POST(request: Request) {
   }
 
   // ── Adresse ancrée : la matière, puis le devis ─────────────────────────────────────────
+  // FUT-143 : le bâtiment RNB part EN MÊME TEMPS que les deux sondes (85 ms en médiane, une journée de
+  // cache, le même appel que le dossier). Il n'est attendu que si rien n'est enregistré à l'adresse.
+  // `lookupBatimentByBanId` ne rejette jamais : une panne y devient `indisponible`.
+  const batimentP = lookupBatimentByBanId(sel.banId);
   const [dpe, cadastre] = await Promise.all([
     probeDpeByBanId(sel.banId),
     probeCadastreAtPoint(sel.longitude, sel.latitude),
   ]);
 
-  const matter: { dpe: MatterState; parcel: MatterState } = {
+  // RIEN À L'ADRESSE : les autres adresses du même bâtiment, comme le dossier les cherchera. Bornée
+  // (`DELAI_SONDE_MS`) ; au-delà ou en panne, `non_verifie`, et la qualification répond quand même. Pas de
+  // recherche quand un diagnostic existe à l'adresse, ni quand l'ADEME n'y a pas répondu : l'écran ne dit
+  // alors pas « aucun », donc pas « néanmoins ».
+  const memeBatiment: MemeBatimentState | undefined = dpe.status === "none"
+    ? await sonderMemeBatiment({ identite: batimentP, banId: sel.banId, chercher: lookupDpeMemeBatiment })
+    : undefined;
+
+  const matter: { dpe: MatterState; parcel: MatterState; memeBatiment?: MemeBatimentState } = {
     dpe: dpe.status,
     parcel: cadastre.status,
+    ...(memeBatiment ? { memeBatiment } : {}),
   };
 
   const supabase = await createClient();

@@ -25,6 +25,8 @@
 // Pur, testé sous `node --test`.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
+import type { MemeBatimentState } from "./qualification-meme-batiment.ts";
+
 /** L'état d'un élément de matière, tel que la route de qualification le rend. */
 export type MatterState = "found" | "none" | "unavailable";
 
@@ -81,8 +83,10 @@ export type ExpectedCoverage = {
    * - `complete` : les trois échelles se lisent, diagnostic compris.
    * - `sans_diagnostic` : le bâti se lit, sa performance énergétique non.
    * - `a_reverifier` : une source n'a pas répondu ; le dossier la réinterrogera.
+   * - `candidats_a_verifier` (FUT-143) : rien à l'adresse, mais des diagnostics de logements aux autres
+   *   adresses du même bâtiment, que le dossier présentera pour vérification.
    */
-  profile: "complete" | "sans_diagnostic" | "a_reverifier";
+  profile: "complete" | "sans_diagnostic" | "a_reverifier" | "candidats_a_verifier";
   /** Ce qui manquera, en une phrase. Vide quand rien ne manque. */
   manque: string | null;
   /** Ce qui sera lu quoi qu'il arrive. Toujours présent : c'est ce que le lecteur achète. */
@@ -92,6 +96,8 @@ export type ExpectedCoverage = {
 export function expectedCoverage(matter: {
   dpe: MatterState;
   parcel: MatterState;
+  /** FUT-143 : absent d'une réponse antérieure, lu comme une recherche qui n'a pas eu lieu. */
+  memeBatiment?: MemeBatimentState;
 }): ExpectedCoverage {
   // UNE SOURCE MUETTE N'EST PAS UNE ABSENCE, et elle prime sur tout le reste : annoncer « aucun
   // diagnostic » alors que l'ADEME n'a pas répondu ferait renoncer quelqu'un sur une panne.
@@ -105,13 +111,34 @@ export function expectedCoverage(matter: {
     };
   }
 
+  // FUT-143 : RIEN À L'ADRESSE NE DIT RIEN DU DOSSIER ENTIER. Ce qui suit l'absence à l'adresse dépend de
+  // ce que la sonde du bâtiment a ÉTABLI (`qualification-meme-batiment.ts`). Des candidats se nomment pour
+  // ce qu'ils sont, à vérifier ; une sonde muette ne conclut rien ; et la conséquence (« ne pourra
+  // qualifier… ») ne se dit que là où le dossier n'a rien d'autre à présenter, et sous sa condition.
   if (matter.dpe === "none") {
+    if (matter.memeBatiment === "candidats") {
+      return {
+        profile: "candidats_a_verifier",
+        manque:
+          `${AUCUN_A_L_ADRESSE} Des diagnostics de logements le sont néanmoins à d'autres adresses du ` +
+          "même bâtiment : le dossier vous les présentera, à vérifier avant d'en retenir un pour ce logement.",
+        reste: RESTE_TOUJOURS,
+      };
+    }
+    if (matter.memeBatiment === "non_verifie") {
+      return {
+        profile: "a_reverifier",
+        manque:
+          `${AUCUN_A_L_ADRESSE} Les autres adresses du même bâtiment n'ont pas pu être consultées à ` +
+          "l'instant : le dossier les consultera à son ouverture, sans garantie d'y trouver un diagnostic.",
+        reste: RESTE_TOUJOURS,
+      };
+    }
     return {
       profile: "sans_diagnostic",
       manque:
-        "Aucun diagnostic de performance énergétique n'est rattaché à cette adresse dans la base " +
-        "ouverte. Ce dossier ne pourra donc qualifier ni la performance énergétique de ce " +
-        "logement, ni son comportement en été." +
+        `${AUCUN_A_L_ADRESSE} Sans diagnostic, ce dossier ne pourra qualifier ni la performance ` +
+        "énergétique de ce logement, ni son comportement en été." +
         (mentionOrdinaire(TAUX_ABSENCE_MINIMAL) ?? ""),
       reste: RESTE_TOUJOURS,
     };
@@ -130,6 +157,10 @@ export function expectedCoverage(matter: {
 const RESTE_TOUJOURS =
   "Restent lus : la trajectoire climatique de la commune, ce à quoi cette adresse est exposée " +
   "(zonages, sols, sinistres indemnisés), et ce que le secteur met à portée de pas.";
+
+/** Le fait établi par la sonde exacte, au grain de l'adresse : ni plus large, ni plus conclusif. */
+const AUCUN_A_L_ADRESSE =
+  "Aucun diagnostic de performance énergétique n'est enregistré à cette adresse dans la base ouverte.";
 
 const AVEC_DIAGNOSTIC =
   "S'y ajoute la lecture du diagnostic énergétique rattaché à cette adresse.";

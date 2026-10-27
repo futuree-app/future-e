@@ -86,6 +86,12 @@ export type LigneCandidat = {
   details: string[];
   /** Le résultat, posé à part et en retrait : il n'est pas un critère de reconnaissance. */
   classe: DpeLabel | null;
+  /**
+   * FUT-143 : le diagnostic désigne un autre bâtiment que ceux de l'adresse. Le clic n'écrit plus : il
+   * ouvre l'explication, et seul un second geste retient la ligne. Même règle que `contreditParLeBatiment`,
+   * celle du serveur : un `id_rnb` absent ou un bâtiment inconnu ne contredit rien.
+   */
+  contredit: boolean;
   /** Ce que lit un lecteur d'écran : le geste ET ce qu'il porte. */
   libelleAccessible: string;
 };
@@ -107,9 +113,8 @@ export function ligneCandidat(c: DpeRecord, champs: ChampsVariables, contexte: C
   if (contexte.banId && c.id_ban !== contexte.banId) {
     details.push(`enregistré au ${voieDuLibelle(c.adresse) ?? "une autre adresse"}`);
   }
-  if (contreditParLeBatiment(c, contexte.batiments)) {
-    details.push(mentionContradiction(c));
-  }
+  const contredit = contreditParLeBatiment(c, contexte.batiments);
+  if (contredit) details.push(mentionContradiction(c));
   if (immeuble) details.push("diagnostic de l'immeuble");
   // FUT-74 (D6) : un DPE de logement établi à partir des données de l'immeuble le dit, et la visite
   // manquante se dit seulement quand l'ADEME la renseigne. Ni l'un ni l'autre ne le disqualifie.
@@ -129,8 +134,10 @@ export function ligneCandidat(c: DpeRecord, champs: ChampsVariables, contexte: C
   const classe = c.etiquette_dpe;
   const lu = [titre, ...details, classe ? `classe ${classe}` : null].filter(Boolean).join(", ");
   return {
-    id: c.id_dpe, titre, identifie: ident !== null || immeuble, immeuble, details, classe,
-    libelleAccessible: `Retenir ce diagnostic pour ce logement : ${lu}`,
+    id: c.id_dpe, titre, identifie: ident !== null || immeuble, immeuble, details, classe, contredit,
+    libelleAccessible: contredit
+      ? `Retenir ce diagnostic pour ce logement, après confirmation : ${lu}`
+      : `Retenir ce diagnostic pour ce logement : ${lu}`,
   };
 }
 

@@ -5,6 +5,7 @@ import posthog from "posthog-js";
 import { AddressAutocomplete } from "@/components/report/AddressAutocomplete";
 import type { BanAddressResult } from "@/lib/ban";
 import { expectedCoverage } from "@/lib/dossier-couverture-attendue";
+import type { MemeBatimentState } from "@/lib/qualification-meme-batiment";
 // Les trois échelles sont partagées avec la page de paiement : cf. `dossier-echelles.ts`.
 import { ECHELLES_DU_DOSSIER, libelleEchelle } from "@/lib/dossier-echelles";
 
@@ -23,7 +24,8 @@ type MatterState = "found" | "none" | "unavailable";
 type Outcome =
   | {
       status: "qualified";
-      matter: { dpe: MatterState; parcel: MatterState };
+      /** FUT-143 : `memeBatiment` n'est présent que si rien n'est enregistré à l'adresse. */
+      matter: { dpe: MatterState; parcel: MatterState; memeBatiment?: MemeBatimentState };
       quote: {
         status: "final" | "provisional";
         basePriceCents: number;
@@ -62,7 +64,10 @@ const TONE_COLOR: Record<"found" | "absent" | "unknown", string> = {
 };
 
 function MatterLine({ label, state }: { label: string; state: MatterState }) {
-  const { text, tone } = MATTER_LABEL[state];
+  return <MatterRow label={label} {...MATTER_LABEL[state]} />;
+}
+
+function MatterRow({ label, text, tone }: { label: string; text: string; tone: "found" | "absent" | "unknown" }) {
   return (
     <li className="flex items-baseline gap-2.5 flex-wrap">
       <span
@@ -80,7 +85,10 @@ function MatterLine({ label, state }: { label: string; state: MatterState }) {
       <span className="text-[length:var(--text-dense)] text-muted">{label}</span>
       <span
         className="font-mono text-[11px] tracking-[0.08em] uppercase"
-        style={{ color: TONE_COLOR[tone], opacity: tone === "found" ? 0.85 : 0.7 }}
+        // OPACITÉ PLEINE (FUT-143, recette du 27/10/2026) : à 0,7, ces libellés de 11 px tombaient à 3:1
+        // (« aucun à cette adresse ») et 4:1 (« diagnostics à vérifier »), sous le seuil AA de 4,5:1. La
+        // pastille porte seule l'atténuation.
+        style={{ color: TONE_COLOR[tone] }}
       >
         {text}
       </span>
@@ -201,6 +209,12 @@ export function DossierQualificationClient() {
                     style={{ display: "grid", gap: 9 }}
                   >
                     <MatterLine label="Diagnostic énergétique" state={outcome.matter.dpe} />
+                    {/* FUT-143 : seulement quand des candidats sont ÉTABLIS. Une absence ou une sonde
+                        muette au bâtiment ne fait pas de ligne : le paragraphe ci-dessous suffit, et
+                        une ligne de plus répéterait « aucun ». */}
+                    {outcome.matter.memeBatiment === "candidats" && (
+                      <MatterRow label="Autres adresses du même bâtiment" text="diagnostics à vérifier" tone="unknown" />
+                    )}
                     <MatterLine label="Parcelle cadastrale" state={outcome.matter.parcel} />
                   </ul>
                 )}
@@ -213,7 +227,10 @@ export function DossierQualificationClient() {
               aucun à cette adresse » est un fait technique ; « ce dossier ne pourra pas qualifier
               la performance énergétique de ce logement » est une décision d'achat. Le manque se
               lit AVANT ce qui reste : l'ordre inverse minimiserait le manque. 75 à 86 % des
-              adresses sont dans ce cas (mesure du 31/07/2026). */}
+              adresses sont dans ce cas (mesure du 31/07/2026).
+              FUT-143 : cette conséquence ne se dit plus que là où le dossier n'aura rien d'autre à
+              présenter. Des diagnostics aux autres adresses du même bâtiment, ou un bâtiment qu'on
+              n'a pas pu consulter, changent la phrase (`expectedCoverage`, `memeBatiment`). */}
           {(() => {
             const cov = expectedCoverage(outcome.matter);
             return (

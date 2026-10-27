@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { DpeRecord } from "@/lib/dpe-attribution";
 import { listeLongue, sortCandidates } from "@/lib/dpe-candidate-match";
+import { explicationContradiction } from "@/lib/batiment-rnb";
 import {
   champsVariables, compterIdentifiables, decouperListe, ligneCandidat, phraseIdentifiables, type ContexteLigne,
 } from "@/lib/dpe-selection-vue";
@@ -22,6 +23,12 @@ import {
 //     par six lignes, puis « Voir les N autres », qui déplie dans la page.
 //   - LA CLASSE EN VEDETTE. Elle était à droite, en gras, au même rang que l'identifiant : l'œil
 //     choisissait par la lettre. Elle reste, en retrait, parce qu'elle fait partie de la fiche.
+//
+// UNE LIGNE CONTREDITE PAR LE BÂTIMENT NE SE RETIENT PAS D'UN CLIC (FUT-143, 26/10/2026). Son `id_rnb`
+// désigne un autre bâtiment que celui de l'adresse : le clic déplie, sous la ligne, l'explication que donne
+// déjà la recherche par numéro (`explicationContradiction`), et seul « Retenir quand même » appelle
+// `onPick`. Annuler replie sans rien écrire. Le choix reste possible : un document authentique peut
+// corriger une base administrative. Les autres lignes gardent leur clic unique.
 // ════════════════════════════════════════════════════════════════════════════════════════════
 
 const ROW: React.CSSProperties = {
@@ -52,6 +59,15 @@ export function DpeSelector({
   const ou = autresAdresses ? "de ce bâtiment" : "de cette adresse";
   const [q, setQ] = useState("");
   const [toutVoir, setToutVoir] = useState(false);
+  // FUT-143 : l'identifiant de la ligne contredite dont l'explication est dépliée, en attente du second geste.
+  const [aConfirmer, setAConfirmer] = useState<string | null>(null);
+  // Les lignes, pour rendre le focus à celle dont on referme l'explication : sans lui, le bouton
+  // « Annuler » disparaît sous le focus et le clavier repart du haut de la page (recette du 27/10/2026).
+  const lignes = useRef(new Map<string, HTMLButtonElement>());
+  const refermer = (id: string) => {
+    setAConfirmer(null);
+    lignes.current.get(id)?.focus();
+  };
   const ordered = useMemo(() => sortCandidates(candidates), [candidates]);
   const champs = useMemo(() => champsVariables(candidates), [candidates]);
   const { visibles, masques, correspondances } = decouperListe(ordered, q, toutVoir);
@@ -94,14 +110,20 @@ export function DpeSelector({
       <div style={{ display: "grid", gap: 8 }}>
         {visibles.map((c) => {
           const l = ligneCandidat(c, champs, contexte);
-          return (
+          const deplie = l.contredit && aConfirmer === l.id;
+          const ligne = (
             <button
-              key={l.id}
+              ref={(b) => { if (b) lignes.current.set(l.id, b); else lignes.current.delete(l.id); }}
               type="button"
-              onClick={() => onPick(c)}
+              onClick={() => {
+                if (l.contredit) { setAConfirmer(deplie ? null : l.id); return; }
+                setAConfirmer(null);
+                onPick(c);
+              }}
               disabled={busy}
               aria-label={l.libelleAccessible}
-              style={{ ...ROW, cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 }}
+              {...(l.contredit ? { "aria-expanded": deplie, "aria-controls": `confirmer-${l.id}` } : {})}
+              style={{ ...ROW, cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1, ...(deplie ? { borderColor: "var(--accent-dim, #7a6e60)" } : {}) }}
             >
               <span style={{ display: "grid", gap: 2, minWidth: 0 }}>
                 <span style={{ fontSize: 14.5, color: l.identifie ? "var(--fg-hi)" : "var(--fg-4)", fontWeight: l.identifie ? 500 : 400, overflowWrap: "anywhere" }}>
@@ -117,6 +139,48 @@ export function DpeSelector({
                 {l.classe ? `classe ${l.classe}` : "sans classe"}
               </span>
             </button>
+          );
+          // LE MÊME CONTENEUR, OUVERT OU NON : envelopper la ligne seulement à l'ouverture la démontait et la
+          // remontait, et le focus clavier tombait sur la page (recette du 27/10/2026).
+          return (
+            <div key={l.id} style={{ display: "grid", gap: 0 }}>
+              {ligne}
+              {deplie && (
+                <div
+                  id={`confirmer-${l.id}`}
+                  role="group"
+                  aria-label="Confirmer un diagnostic rattaché à un autre bâtiment"
+                  onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); refermer(l.id); } }}
+                  style={{
+                    display: "grid", gap: 12, margin: "6px 0 4px", padding: "13px 15px", borderRadius: 10,
+                    background: "var(--bg-elev)", border: "1px solid var(--border-1)",
+                  }}
+                >
+                  <p style={{ fontSize: 13.5, color: "var(--fg-2)", lineHeight: 1.6, margin: 0 }}>
+                    {explicationContradiction(
+                      "ne le retenez que si vous savez qu'il s'agit bien de ce logement, par exemple parce que son numéro figure sur le document qu'on vous a remis.",
+                    )}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 18px" }}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => { setAConfirmer(null); onPick(c); }}
+                      style={{
+                        padding: "9px 15px", minHeight: 44, fontSize: 14, fontWeight: 500, borderRadius: 10,
+                        background: "var(--bg-elev-2)", border: "1px solid var(--accent-dim, #7a6e60)", color: "var(--fg-hi)",
+                        cursor: busy ? "default" : "pointer", opacity: busy ? 0.5 : 1,
+                      }}
+                    >
+                      Retenir quand même ce diagnostic
+                    </button>
+                    <button type="button" onClick={() => refermer(l.id)} style={{ ...LIEN, color: "var(--fg-2)", minHeight: 44 }}>
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           );
         })}
 

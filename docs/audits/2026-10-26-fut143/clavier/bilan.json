@@ -1,0 +1,362 @@
+[
+  {
+    "cas": "A-monchaux",
+    "appareil": "ordinateur",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'à la ligne contredite",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)",
+        "tabs": 17
+      },
+      {
+        "geste": "Entrée sur la ligne",
+        "ariaExpanded": "true",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab après ouverture",
+        "tag": "button",
+        "nom": "Retenir quand même ce diagnostic",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)"
+      },
+      {
+        "geste": "Tab vers Annuler",
+        "tag": "button",
+        "nom": "Annuler",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)"
+      },
+      {
+        "geste": "Entrée sur Annuler",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)",
+        "ecritures": 0
+      },
+      {
+        "geste": "Espace sur la ligne",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Échap dans l'explication",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)",
+        "ariaExpanded": "false",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Entrée sur la confirmation",
+        "ecritures": 1
+      }
+    ],
+    "lisible": {
+      "texte": {
+        "ratio": 12.7,
+        "taille": "13.5px"
+      },
+      "confirmer": {
+        "hauteur": 44
+      },
+      "annuler": {
+        "hauteur": 44
+      },
+      "mention": {
+        "ratio": 4.69,
+        "taille": "12.5px"
+      },
+      "debord": 0
+    }
+  },
+  {
+    "cas": "A-monchaux",
+    "appareil": "android",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'à la ligne contredite",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 10
+      },
+      {
+        "geste": "Entrée sur la ligne",
+        "ariaExpanded": "true",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab après ouverture",
+        "tag": "button",
+        "nom": "Retenir quand même ce diagnostic",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)"
+      },
+      {
+        "geste": "Tab vers Annuler",
+        "tag": "button",
+        "nom": "Annuler",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)"
+      },
+      {
+        "geste": "Entrée sur Annuler",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "ecritures": 0
+      },
+      {
+        "geste": "Espace sur la ligne",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Échap dans l'explication",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "ariaExpanded": "false",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Entrée sur la confirmation",
+        "ecritures": 1
+      }
+    ],
+    "lisible": {
+      "texte": {
+        "ratio": 12.7,
+        "taille": "13.5px"
+      },
+      "confirmer": {
+        "hauteur": 44
+      },
+      "annuler": {
+        "hauteur": 44
+      },
+      "mention": {
+        "ratio": 4.69,
+        "taille": "12.5px"
+      },
+      "debord": 0
+    }
+  },
+  {
+    "cas": "A-monchaux",
+    "appareil": "etroit-360",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'à la ligne contredite",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 10
+      },
+      {
+        "geste": "Entrée sur la ligne",
+        "ariaExpanded": "true",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab après ouverture",
+        "tag": "button",
+        "nom": "Retenir quand même ce diagnostic",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)"
+      },
+      {
+        "geste": "Tab vers Annuler",
+        "tag": "button",
+        "nom": "Annuler",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)"
+      },
+      {
+        "geste": "Entrée sur Annuler",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "ecritures": 0
+      },
+      {
+        "geste": "Espace sur la ligne",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Échap dans l'explication",
+        "tag": "button",
+        "nom": "Retenir ce diagnostic pour ce logement, après confirmation : Sans identifiant de logement, rattaché par la base ADEME à un autre bâtiment, 105,8 m², DPE 2021, classe B",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "ariaExpanded": "false",
+        "ecritures": 0
+      },
+      {
+        "geste": "Tab puis Entrée sur la confirmation",
+        "ecritures": 1
+      }
+    ],
+    "lisible": {
+      "texte": {
+        "ratio": 12.7,
+        "taille": "13.5px"
+      },
+      "confirmer": {
+        "hauteur": 44
+      },
+      "annuler": {
+        "hauteur": 44
+      },
+      "mention": {
+        "ratio": 4.69,
+        "taille": "12.5px"
+      },
+      "debord": 0
+    }
+  },
+  {
+    "cas": "B-villeurbanne-reel",
+    "appareil": "ordinateur",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'au champ d'adresse",
+        "tag": "input",
+        "nom": "Saisissez une adresse",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)",
+        "tabs": 11
+      },
+      {
+        "geste": "Flèche bas + Entrée sur la suggestion",
+        "qualifie": true
+      },
+      {
+        "geste": "Tab jusqu'à Créer mon dossier",
+        "tag": "a",
+        "nom": "Créer mon dossier",
+        "visible": true,
+        "contour": "auto 1px rgb(153, 200, 255)",
+        "tabs": 2
+      }
+    ],
+    "lisible": {
+      "ligne": {
+        "ratio": 7.89,
+        "taille": "14px"
+      },
+      "etat": {
+        "ratio": 7.31,
+        "taille": "11px"
+      },
+      "aucunAdresse": {
+        "ratio": 5.06,
+        "taille": "11px"
+      },
+      "paragraphe": {
+        "ratio": 16.88,
+        "taille": "14px"
+      },
+      "debord": 0
+    }
+  },
+  {
+    "cas": "B-villeurbanne-reel",
+    "appareil": "android",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'au champ d'adresse",
+        "tag": "input",
+        "nom": "Saisissez une adresse",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 4
+      },
+      {
+        "geste": "Flèche bas + Entrée sur la suggestion",
+        "qualifie": true
+      },
+      {
+        "geste": "Tab jusqu'à Créer mon dossier",
+        "tag": "a",
+        "nom": "Créer mon dossier",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 2
+      }
+    ],
+    "lisible": {
+      "ligne": {
+        "ratio": 7.89,
+        "taille": "14px"
+      },
+      "etat": {
+        "ratio": 7.31,
+        "taille": "11px"
+      },
+      "aucunAdresse": {
+        "ratio": 5.06,
+        "taille": "11px"
+      },
+      "paragraphe": {
+        "ratio": 16.88,
+        "taille": "14px"
+      },
+      "debord": 0
+    }
+  },
+  {
+    "cas": "B-villeurbanne-reel",
+    "appareil": "etroit-360",
+    "etapes": [
+      {
+        "geste": "Tab jusqu'au champ d'adresse",
+        "tag": "input",
+        "nom": "Saisissez une adresse",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 4
+      },
+      {
+        "geste": "Flèche bas + Entrée sur la suggestion",
+        "qualifie": true
+      },
+      {
+        "geste": "Tab jusqu'à Créer mon dossier",
+        "tag": "a",
+        "nom": "Créer mon dossier",
+        "visible": true,
+        "contour": "auto 1px rgb(238, 238, 238)",
+        "tabs": 2
+      }
+    ],
+    "lisible": {
+      "ligne": {
+        "ratio": 7.89,
+        "taille": "14px"
+      },
+      "etat": {
+        "ratio": 7.31,
+        "taille": "11px"
+      },
+      "aucunAdresse": {
+        "ratio": 5.06,
+        "taille": "11px"
+      },
+      "paragraphe": {
+        "ratio": 16.88,
+        "taille": "14px"
+      },
+      "debord": 0
+    }
+  }
+]
