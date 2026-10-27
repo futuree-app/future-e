@@ -1,0 +1,6744 @@
+{
+ "dpe": {
+  "lignes": 382,
+  "verdicts": {
+   "adresse_donne_le_bon_seul": 250,
+   "adresse_ne_donne_rien": 109,
+   "adresse_donne_un_autre": 11,
+   "adresse_donne_plusieurs_dont_le_bon": 9,
+   "numero_inconnu_adresse_donne_autre": 1,
+   "numero_inconnu_du_registre": 2
+  },
+  "verdicts_un_par_couple_copro_adresse": {
+   "adresse_donne_le_bon_seul": 233,
+   "adresse_ne_donne_rien": 105,
+   "adresse_donne_un_autre": 11,
+   "adresse_donne_plusieurs_dont_le_bon": 9,
+   "numero_inconnu_adresse_donne_autre": 1,
+   "numero_inconnu_du_registre": 2
+  },
+  "commune_differente": 1,
+  "detail": [
+   {
+    "id": "2565E0467602J",
+    "type": "immeuble",
+    "adresse_ban": "12 Rue de la République 65200 Bagnères-de-Bigorre",
+    "numero": "AE7755283",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE7755283"
+    ],
+    "commune_registre": "65059",
+    "commune_ban": "65059",
+    "adresse_registre": "12 r de la republique 65200 Bagnères-de-Bigorre"
+   },
+   {
+    "id": "2517E0208633E",
+    "type": "immeuble",
+    "adresse_ban": "7 Rue Dunant 17000 La Rochelle",
+    "numero": "AB7279177",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "1 Rue Dunant 17000 La Rochelle"
+   },
+   {
+    "id": "2517E0297439U",
+    "type": "immeuble",
+    "adresse_ban": "82 Rue des Tamaris 17340 Châtelaillon-Plage",
+    "numero": "AD3635158",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3635158"
+    ],
+    "commune_registre": "17094",
+    "commune_ban": "17094",
+    "adresse_registre": "82 Rue des Tamaris 17340 Châtelaillon-Plage"
+   },
+   {
+    "id": "2517E0171043K",
+    "type": "immeuble",
+    "adresse_ban": "5 Chemin de Ronflac 17440 Aytré",
+    "numero": "AB8751794",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8751794"
+    ],
+    "commune_registre": "17028",
+    "commune_ban": "17028",
+    "adresse_registre": "5 che de ronflac 17440 Aytré"
+   },
+   {
+    "id": "2517E0086430B",
+    "type": "immeuble",
+    "adresse_ban": "14 Quai Marechal Foch 17230 Marans",
+    "numero": "AG8297053",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17218",
+    "commune_ban": "17218",
+    "adresse_registre": "14 qu foch 17230 Marans"
+   },
+   {
+    "id": "2517E0171463O",
+    "type": "immeuble",
+    "adresse_ban": "5 Chemin de Ronflac 17440 Aytré",
+    "numero": "AB8751794",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8751794"
+    ],
+    "commune_registre": "17028",
+    "commune_ban": "17028",
+    "adresse_registre": "5 che de ronflac 17440 Aytré"
+   },
+   {
+    "id": "2517E0135532P",
+    "type": "appartement",
+    "adresse_ban": "Rue Jean Giraudoux 17000 La Rochelle",
+    "numero": "AC4603940",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "12 Rue Jean Giraudoux 17000 La Rochelle"
+   },
+   {
+    "id": "2517E0091976J",
+    "type": "appartement",
+    "adresse_ban": "4 Rue Jean Giraudoux 17000 La Rochelle",
+    "numero": "AC4603940",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC4603940"
+    ],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "12 Rue Jean Giraudoux 17000 La Rochelle"
+   },
+   {
+    "id": "2517E0060823E",
+    "type": "appartement",
+    "adresse_ban": "15 Rue d'Anville 17440 Aytré",
+    "numero": "AB7932734",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7932734"
+    ],
+    "commune_registre": "17028",
+    "commune_ban": "17028",
+    "adresse_registre": "15 r d'anville 17440 Aytré"
+   },
+   {
+    "id": "2307E1346860R",
+    "type": "appartement",
+    "adresse_ban": "17 Rue René Grimaud 07200 Aubenas",
+    "numero": "AB4530275",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "07019",
+    "commune_ban": "07019",
+    "adresse_registre": "17 r rene grimaud 7200 Aubenas"
+   },
+   {
+    "id": "2507E0861729W",
+    "type": "immeuble",
+    "adresse_ban": "10 Rue Pasteur 07300 Tournon-sur-Rhône",
+    "numero": "AE6502009",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "07324",
+    "commune_ban": "07324",
+    "adresse_registre": "10 r pasteur 7300 Tournon-sur-Rhône"
+   },
+   {
+    "id": "2507E0838161K",
+    "type": "appartement",
+    "adresse_ban": "2bis Avenue Saint Exupery 07000 Privas",
+    "numero": "AC3979507",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "07186",
+    "commune_ban": "07186",
+    "adresse_registre": "2 av saint-exupery 7000 Privas"
+   },
+   {
+    "id": "2527E3740398R",
+    "type": "appartement",
+    "adresse_ban": "Les Portes d'Honfleur 27210 Boulleville",
+    "numero": "AA3183373",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27100",
+    "commune_ban": "27100",
+    "adresse_registre": "lieu dit Clos Fleury"
+   },
+   {
+    "id": "2527E3478142X",
+    "type": "appartement",
+    "adresse_ban": "65 Avenue Montgomery 27200 Vernon",
+    "numero": "AA4452470",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4452470"
+    ],
+    "commune_registre": "27681",
+    "commune_ban": "27681",
+    "adresse_registre": "65 av montgomery 27200 Vernon"
+   },
+   {
+    "id": "2527E3740479U",
+    "type": "appartement",
+    "adresse_ban": "3 Rue Jean Jaurès 27000 Évreux",
+    "numero": "AA8624900",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "2 r franklin delano roosevelt 27000 Évreux"
+   },
+   {
+    "id": "2527E3740445M",
+    "type": "appartement",
+    "adresse_ban": "3 Rue Jean Jaurès 27000 Évreux",
+    "numero": "AA8624900",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "2 r franklin delano roosevelt 27000 Évreux"
+   },
+   {
+    "id": "2527E3561118H",
+    "type": "appartement",
+    "adresse_ban": "24 Route de Magny 27200 Vernon",
+    "numero": "AA8978199",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27681",
+    "commune_ban": "27681",
+    "adresse_registre": "24A rte de magny-en-vexin 27200 Vernon"
+   },
+   {
+    "id": "2527E3716368L",
+    "type": "appartement",
+    "adresse_ban": "81 Rue de Pannette 27000 Évreux",
+    "numero": "AG9786922",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG9786922"
+    ],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "81 r de pannette 27000 Évreux"
+   },
+   {
+    "id": "2527E3527150V",
+    "type": "appartement",
+    "adresse_ban": "1 Rue du 8 Mai 1945 27400 Louviers",
+    "numero": "AF3412145",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF3412145"
+    ],
+    "commune_registre": "27375",
+    "commune_ban": "27375",
+    "adresse_registre": "1 r du 8 mai 1945 27400 Louviers"
+   },
+   {
+    "id": "2527E3581732D",
+    "type": "appartement",
+    "adresse_ban": "16 Rue du Quai 27400 Louviers",
+    "numero": "AE3778875",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE3778875"
+    ],
+    "commune_registre": "27375",
+    "commune_ban": "27375",
+    "adresse_registre": "16 r du quai 27400 Louviers"
+   },
+   {
+    "id": "2392E2779721Z",
+    "type": "appartement",
+    "adresse_ban": "34 Rue Auguste Bailly 92600 Asnières-sur-Seine",
+    "numero": "AB8450819",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8450819"
+    ],
+    "commune_registre": "92004",
+    "commune_ban": "92004",
+    "adresse_registre": "34 Rue Auguste Bailly 92600 Asnières-sur-Seine"
+   },
+   {
+    "id": "2392E2777376U",
+    "type": "appartement",
+    "adresse_ban": "73 Rue de Paris 92100 Boulogne-Billancourt",
+    "numero": "AA4308920",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4308920"
+    ],
+    "commune_registre": "92012",
+    "commune_ban": "92012",
+    "adresse_registre": "69-73 r de paris 92100 Boulogne-Billancourt"
+   },
+   {
+    "id": "2392E2719818A",
+    "type": "appartement",
+    "adresse_ban": "233 Avenue Victor Hugo 92140 Clamart",
+    "numero": "AF2706455",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF2706455"
+    ],
+    "commune_registre": "92023",
+    "commune_ban": "92023",
+    "adresse_registre": "233 Avenue Victor Hugo 92140 Clamart"
+   },
+   {
+    "id": "2392E2839791J",
+    "type": "appartement",
+    "adresse_ban": "78 Boulevard Bourdon 92200 Neuilly-sur-Seine",
+    "numero": "AB6319297",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6319297"
+    ],
+    "commune_registre": "92051",
+    "commune_ban": "92051",
+    "adresse_registre": "78 bd bourdon 92200 Neuilly-sur-Seine"
+   },
+   {
+    "id": "2392E2618032E",
+    "type": "appartement",
+    "adresse_ban": "34 Avenue de la Division Leclerc 92290 Châtenay-Malabry",
+    "numero": "AA2065167",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2065167"
+    ],
+    "commune_registre": "92019",
+    "commune_ban": "92019",
+    "adresse_registre": "30 av de la division leclerc 92290 Châtenay-Malabry"
+   },
+   {
+    "id": "2392E2796567X",
+    "type": "appartement",
+    "adresse_ban": "52 Rue Montesquieu 92600 Asnières-sur-Seine",
+    "numero": "AB8449779",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8449779"
+    ],
+    "commune_registre": "92004",
+    "commune_ban": "92004",
+    "adresse_registre": "52 r montesquieu 92600 ASNIERES-SUR-SEINE"
+   },
+   {
+    "id": "2392E2647964K",
+    "type": "appartement",
+    "adresse_ban": "11 Rue du Passeur de Boulogne 92130 Issy-les-Moulineaux",
+    "numero": "AC6468938",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AG6196356"
+    ],
+    "commune_registre": "92040",
+    "commune_ban": "92040",
+    "adresse_registre": "13 r du passeur de boulogne 92130 Issy-les-Moulineaux"
+   },
+   {
+    "id": "2392E2832734Y",
+    "type": "appartement",
+    "adresse_ban": "20 Rue Adam Ledoux 92400 Courbevoie",
+    "numero": "AA5382569",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "92026",
+    "commune_ban": "92026",
+    "adresse_registre": "18 r adam ledoux 92400 Courbevoie"
+   },
+   {
+    "id": "2503E1918023K",
+    "type": "appartement",
+    "adresse_ban": "31 Rue de Paris 03200 Vichy",
+    "numero": "AA6586820",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "03310",
+    "commune_ban": "03310",
+    "adresse_registre": "31 Rue de Paris 3200 Vichy"
+   },
+   {
+    "id": "2651E0589286A",
+    "type": "immeuble",
+    "adresse_ban": "22b Rue du Port de Marne 51000 Châlons-en-Champagne",
+    "numero": "AC9498833",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC9498833"
+    ],
+    "commune_registre": "51108",
+    "commune_ban": "51108",
+    "adresse_registre": "22B r du port de marne 51000 Châlons-en-Champagne"
+   },
+   {
+    "id": "2651E0662310Q",
+    "type": "immeuble",
+    "adresse_ban": "58 Rue du Docteur Thomas 51100 Reims",
+    "numero": "AC9934100",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC9934100"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "58 r docteur thomas 51100 Reims"
+   },
+   {
+    "id": "2651E0615773T",
+    "type": "immeuble",
+    "adresse_ban": "75 Rue de Brimontel 51100 Reims",
+    "numero": "AG8891889",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG8891889"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "71 r de brimontel 51100 Reims"
+   },
+   {
+    "id": "2651E0636827N",
+    "type": "appartement",
+    "adresse_ban": "52 place Drouet d'Erlon 51100 Reims",
+    "numero": "AB7346240",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7346240"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "52 pl drouet d'erlon 51100 Reims"
+   },
+   {
+    "id": "2651E0650567Z",
+    "type": "immeuble",
+    "adresse_ban": "29 Rue Cérès 51100 Reims",
+    "numero": "AC9343724",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC9343724"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "29 r ceres 51100 Reims"
+   },
+   {
+    "id": "2651E0593873L",
+    "type": "immeuble",
+    "adresse_ban": "10 Rue Eustache de Conflans 51000 Châlons-en-Champagne",
+    "numero": "AF3810462",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF3810462"
+    ],
+    "commune_registre": "51108",
+    "commune_ban": "51108",
+    "adresse_registre": "10 r eustache de conflans 51000 Châlons-en-Champagne"
+   },
+   {
+    "id": "2651E0596656M",
+    "type": "immeuble",
+    "adresse_ban": "43 Rue Buirette 51100 Reims",
+    "numero": "AB7322639",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7322639"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "43 r buirette 51100 Reims"
+   },
+   {
+    "id": "2605E0717796Y",
+    "type": "immeuble",
+    "adresse_ban": "17 Rue du Temple 51100 Reims",
+    "numero": "AC6555148",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC6555148"
+    ],
+    "commune_registre": "51454",
+    "commune_ban": "51454",
+    "adresse_registre": "17-21B r du temple 51100 reims"
+   },
+   {
+    "id": "2660E1454419S",
+    "type": "immeuble",
+    "adresse_ban": "57 Rue de Fay 60600 Clermont",
+    "numero": "AB5940028",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5940028"
+    ],
+    "commune_registre": "60157",
+    "commune_ban": "60157",
+    "adresse_registre": "57 r de fay 60600 Clermont"
+   },
+   {
+    "id": "2660E1534050L",
+    "type": "appartement",
+    "adresse_ban": "153 Boulevard des États-Unis 60200 Compiègne",
+    "numero": "AA1449560",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1449560"
+    ],
+    "commune_registre": "60159",
+    "commune_ban": "60159",
+    "adresse_registre": "8 r ferdinand bac 60200 Compiègne"
+   },
+   {
+    "id": "2660E1587896L",
+    "type": "appartement",
+    "adresse_ban": "27 Rue de l'Hôtel-dieu des Marais 60300 Senlis",
+    "numero": "AB4999546",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4999546"
+    ],
+    "commune_registre": "60612",
+    "commune_ban": "60612",
+    "adresse_registre": "27 r de l'hotel dieu des marais 60300 Senlis"
+   },
+   {
+    "id": "2660E1547940R",
+    "type": "appartement",
+    "adresse_ban": "35 Rue de Sénéfontaine 60000 Beauvais",
+    "numero": "AA0888495",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "r du docteur leblond, 60000 Beauvais"
+   },
+   {
+    "id": "2660E1661446H",
+    "type": "appartement",
+    "adresse_ban": "22 Rue Louis Denoual 60540 Bornel",
+    "numero": "AH5494935",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AH5494935"
+    ],
+    "commune_registre": "60088",
+    "commune_ban": "60088",
+    "adresse_registre": "22 r louis denoual 60540 Bornel"
+   },
+   {
+    "id": "2660E1541960R",
+    "type": "appartement",
+    "adresse_ban": "25 Rue du Docteur Leblond 60000 Beauvais",
+    "numero": "AA0888495",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "r du docteur leblond, 60000 Beauvais"
+   },
+   {
+    "id": "2660E1700318J",
+    "type": "immeuble",
+    "adresse_ban": "1 Square Marie-Louise Delaïdde 60200 Compiègne",
+    "numero": "AB6996946",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6996946"
+    ],
+    "commune_registre": "60159",
+    "commune_ban": "60159",
+    "adresse_registre": "1 sq marie-louise delaidde 60200 Compiègne"
+   },
+   {
+    "id": "2660E1730925O",
+    "type": "immeuble",
+    "adresse_ban": "1 Square Jean Mermoz 60200 Compiègne",
+    "numero": "AA8921330",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8921330"
+    ],
+    "commune_registre": "60159",
+    "commune_ban": "60159",
+    "adresse_registre": "3 sq jean mermoz 60200 COMPIEGNE"
+   },
+   {
+    "id": "2667E0597852C",
+    "type": "immeuble",
+    "adresse_ban": "5c Rue de l'Hôpital 67190 Mutzig",
+    "numero": "AB1258078",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "67313",
+    "commune_ban": "67313",
+    "adresse_registre": "3 r de l hopital 67190 Mutzig"
+   },
+   {
+    "id": "2667E0594717N",
+    "type": "immeuble",
+    "adresse_ban": "10 Rue Sellenick 67000 Strasbourg",
+    "numero": "AE5907605",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE5907605"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "10 r sellenick 67000 Strasbourg"
+   },
+   {
+    "id": "2667E0597728I",
+    "type": "immeuble",
+    "adresse_ban": "5a Rue de l'Hôpital 67190 Mutzig",
+    "numero": "AB1258078",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1258078"
+    ],
+    "commune_registre": "67313",
+    "commune_ban": "67313",
+    "adresse_registre": "3 r de l hopital 67190 Mutzig"
+   },
+   {
+    "id": "2667E0597641Z",
+    "type": "immeuble",
+    "adresse_ban": "3 Rue de l'Hôpital 67190 Mutzig",
+    "numero": "AB1258078",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1258078"
+    ],
+    "commune_registre": "67313",
+    "commune_ban": "67313",
+    "adresse_registre": "3 r de l hopital 67190 Mutzig"
+   },
+   {
+    "id": "2667E0597717X",
+    "type": "immeuble",
+    "adresse_ban": "6 Rue du Chaudron 67000 Strasbourg",
+    "numero": "AD8344160",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD8344160"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "6 r du chaudron 67000 Strasbourg"
+   },
+   {
+    "id": "2667E0596924K",
+    "type": "immeuble",
+    "adresse_ban": "64 Rue du Lazaret 67100 Strasbourg",
+    "numero": "AC8163487",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC8163487"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "64 r du lazaret 67100 Strasbourg"
+   },
+   {
+    "id": "2667E0631452K",
+    "type": "immeuble",
+    "adresse_ban": "138 Avenue du Rhin 67100 Strasbourg",
+    "numero": "AB0474809",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "138 rte du rhin 67000 Strasbourg"
+   },
+   {
+    "id": "2667E0647456Y",
+    "type": "immeuble",
+    "adresse_ban": "6a Rue des Vergers 67112 Breuschwickersheim",
+    "numero": "AE0719021",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE0719021"
+    ],
+    "commune_registre": "67065",
+    "commune_ban": "67065",
+    "adresse_registre": "6A r des vergers 67112 Breuschwickersheim"
+   },
+   {
+    "id": "2374E0283480A",
+    "type": "appartement",
+    "adresse_ban": "126 Chemin de la herse 74400 Chamonix-Mont-Blanc",
+    "numero": "AD5416078",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "74056",
+    "commune_ban": "74056",
+    "adresse_registre": "che de la herse, 74400 Chamonix-Mont-Blanc"
+   },
+   {
+    "id": "2374E0256187H",
+    "type": "appartement",
+    "adresse_ban": "11 Rue louis haase 74230 Thônes",
+    "numero": "AB8081473",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8081473"
+    ],
+    "commune_registre": "74280",
+    "commune_ban": "74280",
+    "adresse_registre": "11 r louis haase 74230 Thônes"
+   },
+   {
+    "id": "2374E0165606K",
+    "type": "appartement",
+    "adresse_ban": "94 Avenue des neigeos 74600 Annecy",
+    "numero": "AC4066296",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "74010",
+    "commune_ban": "74010",
+    "adresse_registre": "86 Avenue des Neigeos 74600 Annecy"
+   },
+   {
+    "id": "2374E0131120A",
+    "type": "appartement",
+    "adresse_ban": "283 Rue d'anterne 74480 Passy",
+    "numero": "AG3321148",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG3321148"
+    ],
+    "commune_registre": "74208",
+    "commune_ban": "74208",
+    "adresse_registre": "283 r d'anterne 74190 Passy"
+   },
+   {
+    "id": "2374E0036398W",
+    "type": "appartement",
+    "adresse_ban": "14 Avenue de verdun 74100 Annemasse",
+    "numero": "AA2900728",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2900728"
+    ],
+    "commune_registre": "74012",
+    "commune_ban": "74012",
+    "adresse_registre": "10-20 av de verdun 74100 Annemasse"
+   },
+   {
+    "id": "2374E0142149F",
+    "type": "appartement",
+    "adresse_ban": "3 Rue jean claude perillat 74100 Annemasse",
+    "numero": "AA5578760",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5578760"
+    ],
+    "commune_registre": "74012",
+    "commune_ban": "74012",
+    "adresse_registre": "1 r jean claude perillat 74100 Annemasse"
+   },
+   {
+    "id": "2374E0263894S",
+    "type": "appartement",
+    "adresse_ban": "132 Rue justin 74700 Sallanches",
+    "numero": "AC6261358",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC6261358"
+    ],
+    "commune_registre": "74256",
+    "commune_ban": "74256",
+    "adresse_registre": "132 r justin 74700 Sallanches"
+   },
+   {
+    "id": "2374E0145880S",
+    "type": "appartement",
+    "adresse_ban": "Route de Tully 74200 Thonon-les-Bains",
+    "numero": "AC1363746",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "74281",
+    "commune_ban": "74281",
+    "adresse_registre": "74a Route de Tully 74200 Thonon-les-Bains"
+   },
+   {
+    "id": "2549E1320783K",
+    "type": "appartement",
+    "adresse_ban": "40 Rue Fulton 49000 Angers",
+    "numero": "AD3333440",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3333440"
+    ],
+    "commune_registre": "49007",
+    "commune_ban": "49007",
+    "adresse_registre": "40 Rue Fulton 49000 Angers"
+   },
+   {
+    "id": "2549E1275627Q",
+    "type": "immeuble",
+    "adresse_ban": "22 Rue d'Iéna 49100 Angers",
+    "numero": "AB7324536",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7324536"
+    ],
+    "commune_registre": "49007",
+    "commune_ban": "49007",
+    "adresse_registre": "22 r d'iena 49100 Angers"
+   },
+   {
+    "id": "2549E1436504F",
+    "type": "immeuble",
+    "adresse_ban": "40 Rue Fulton 49000 Angers",
+    "numero": "AD3333440",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3333440"
+    ],
+    "commune_registre": "49007",
+    "commune_ban": "49007",
+    "adresse_registre": "40 Rue Fulton 49000 Angers"
+   },
+   {
+    "id": "2549E1168353S",
+    "type": "immeuble",
+    "adresse_ban": "88 Rue Larévellière 49100 Angers",
+    "numero": "AA3715836",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA3715836"
+    ],
+    "commune_registre": "49007",
+    "commune_ban": "49007",
+    "adresse_registre": "88 RUE LAREVELLIERE 49100 ANGERS"
+   },
+   {
+    "id": "2549E1339569Y",
+    "type": "immeuble",
+    "adresse_ban": "26 Rue Bigot 49100 Angers",
+    "numero": "AB5010152",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5010152"
+    ],
+    "commune_registre": "49007",
+    "commune_ban": "49007",
+    "adresse_registre": "26 r bigot 49100 Angers"
+   },
+   {
+    "id": "2586E3270566M",
+    "type": "immeuble",
+    "adresse_ban": "26 Rue de l'Abbe de l'Epée 86000 Poitiers",
+    "numero": "AB7394661",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "22 r de l'abbe de l'epee 86000 Poitiers"
+   },
+   {
+    "id": "2586E3134630E",
+    "type": "appartement",
+    "adresse_ban": "105 Rue du Père de la Croix 86000 Poitiers",
+    "numero": "AB3761111",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3761111"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "105 r du pere de la croix 86000 Poitiers"
+   },
+   {
+    "id": "2586E3243159J",
+    "type": "immeuble",
+    "adresse_ban": "15 Boulevard Savari 86000 Poitiers",
+    "numero": "AC5200498",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5200498"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "15-25 bd savari 86000 POITIERS"
+   },
+   {
+    "id": "2586E3286027D",
+    "type": "immeuble",
+    "adresse_ban": "121bis Rue de Montbernage 86000 Poitiers",
+    "numero": "AB8477234",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8477234"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "121B r de montbernage 86000 Poitiers"
+   },
+   {
+    "id": "2586E3205071L",
+    "type": "immeuble",
+    "adresse_ban": "11 Rue de Provence 86000 Poitiers",
+    "numero": "AA0655654",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0655654"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "1-11 RUE DE PROVENCE 86000 POITIERS"
+   },
+   {
+    "id": "2586E3333472Y",
+    "type": "immeuble",
+    "adresse_ban": "22 Rue de Magenta 86000 Poitiers",
+    "numero": "AC2423549",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AC2423549",
+     "AJ8697765"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "20-22 r de magenta 86000 POITIERS"
+   },
+   {
+    "id": "2586E3205169F",
+    "type": "immeuble",
+    "adresse_ban": "3 Rue de Provence 86000 Poitiers",
+    "numero": "AA0655654",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0655654"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "1-11 RUE DE PROVENCE 86000 POITIERS"
+   },
+   {
+    "id": "2586E3282732K",
+    "type": "immeuble",
+    "adresse_ban": "22 Rue du Clos des Cavaliers 86000 Poitiers",
+    "numero": "AB8572356",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "18 r du clos des cavaliers 86000 Poitiers"
+   },
+   {
+    "id": "2205E1865053B",
+    "type": "appartement",
+    "adresse_ban": "52b Route de Grenoble 05100 Briançon",
+    "numero": "AA8305476",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "05023",
+    "commune_ban": "05023",
+    "adresse_registre": "52B rte de grenoble 5100 Briançon"
+   },
+   {
+    "id": "2677E1814103J",
+    "type": "immeuble",
+    "adresse_ban": "14bis Rue de Beaurose 77330 Ozoir-la-Ferrière",
+    "numero": "AD0091835",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD0091835"
+    ],
+    "commune_registre": "77350",
+    "commune_ban": "77350",
+    "adresse_registre": "14B r de beaurose 77330 Ozoir-la-Ferrière"
+   },
+   {
+    "id": "2677E1812469N",
+    "type": "appartement",
+    "adresse_ban": "5 Rue Saint Liesne 77000 Melun",
+    "numero": "AA1568690",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1568690"
+    ],
+    "commune_registre": "77288",
+    "commune_ban": "77288",
+    "adresse_registre": "5 r saint-liesne 77000 Melun"
+   },
+   {
+    "id": "2677E1814402W",
+    "type": "immeuble",
+    "adresse_ban": "14bis Rue de Beaurose 77330 Ozoir-la-Ferrière",
+    "numero": "AD0091835",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD0091835"
+    ],
+    "commune_registre": "77350",
+    "commune_ban": "77350",
+    "adresse_registre": "14B r de beaurose 77330 Ozoir-la-Ferrière"
+   },
+   {
+    "id": "2677E1813552E",
+    "type": "appartement",
+    "adresse_ban": "20 Place Jean Bureau 77100 Meaux",
+    "numero": "AB0247940",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77284",
+    "commune_ban": "77284",
+    "adresse_registre": "8 Rue des Teinturiers 77100 Meaux"
+   },
+   {
+    "id": "2677E1865522A",
+    "type": "immeuble",
+    "adresse_ban": "3bis Rue de la Fileuse 77310 Saint-Fargeau-Ponthierry",
+    "numero": "AB1215094",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77407",
+    "commune_ban": "77407",
+    "adresse_registre": "r de la fileuse, 77310 Saint-Fargeau-Ponthierry"
+   },
+   {
+    "id": "2677E1854967B",
+    "type": "immeuble",
+    "adresse_ban": "24 Rue Aristide Briand 77300 Fontainebleau",
+    "numero": "AF0585299",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF0585299"
+    ],
+    "commune_registre": "77186",
+    "commune_ban": "77186",
+    "adresse_registre": "24 r aristide briand 77300 Fontainebleau"
+   },
+   {
+    "id": "2677E1867300K",
+    "type": "appartement",
+    "adresse_ban": "31 Rue Bernard Palissy 77210 Avon",
+    "numero": "AC3667730",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77014",
+    "commune_ban": "77014",
+    "adresse_registre": "17 r charles lefebvre 77210 AVON"
+   },
+   {
+    "id": "2677E1877448S",
+    "type": "appartement",
+    "adresse_ban": "4 Rue de l'Eglise 77680 Roissy-en-Brie",
+    "numero": "AA8798415",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8798415"
+    ],
+    "commune_registre": "77390",
+    "commune_ban": "77390",
+    "adresse_registre": "40 r pasteur 77680 Roissy-en-Brie"
+   },
+   {
+    "id": "2234E1442290B",
+    "type": "appartement",
+    "adresse_ban": "1890 Avenue de Maurin 34000 Montpellier",
+    "numero": "AC0993097",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AB9631086",
+     "AC0993097"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "1890 av de maurin 34070 MONTPELLIER"
+   },
+   {
+    "id": "2234E1319488X",
+    "type": "appartement",
+    "adresse_ban": "45 Rue Esculape 34090 Montpellier",
+    "numero": "AA7037690",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7037690"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "55 r esculape 34090 MONTPELLIER"
+   },
+   {
+    "id": "2234E1311612Z",
+    "type": "appartement",
+    "adresse_ban": "520 Avenue Konrad Adenauer 34170 Castelnau-le-Lez",
+    "numero": "AD1680545",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34057",
+    "commune_ban": "34057",
+    "adresse_registre": "520 r konrad adenauer 34170 Castelnau-le-Lez"
+   },
+   {
+    "id": "2234E1423255Y",
+    "type": "appartement",
+    "adresse_ban": "88 Rue Georges Privat 34090 Montpellier",
+    "numero": "AB6850572",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6850572"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "88 Rue Georges Privat 34090 Montpellier"
+   },
+   {
+    "id": "2234E1267165M",
+    "type": "appartement",
+    "adresse_ban": "206 Rue Fabri de Peiresc 34080 Montpellier",
+    "numero": "AA5178702",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AI7958648"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "36Ar fabri de peiresc 34080 Montpellier"
+   },
+   {
+    "id": "2234E1402654P",
+    "type": "appartement",
+    "adresse_ban": "53 Rue Denis Papin 34000 Montpellier",
+    "numero": "AA3724093",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "748 RUE DE LA VIEILLE POSTE 34000 MONTPELLIER"
+   },
+   {
+    "id": "2234E1223009E",
+    "type": "appartement",
+    "adresse_ban": "103 Rue Verrochio 34000 Montpellier",
+    "numero": "AA5101647",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5101647"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "103 Rue Verrochio 34000 Montpellier"
+   },
+   {
+    "id": "2234E1417010T",
+    "type": "appartement",
+    "adresse_ban": "624 Avenue du Pirée 34000 Montpellier",
+    "numero": "AA7017718",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7017718"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "624 av du piree 34000 MONTPELLIER"
+   },
+   {
+    "id": "2310E0437348O",
+    "type": "appartement",
+    "adresse_ban": "Cours Jacquin 10000 Troyes",
+    "numero": "AA5364823",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "10387",
+    "commune_ban": "10387",
+    "adresse_registre": "5A crs jacquin 10000 Troyes"
+   },
+   {
+    "id": "2310E0369210W",
+    "type": "appartement",
+    "adresse_ban": "17 Ancienne Route de Villenauxe 10400 Nogent-sur-Seine",
+    "numero": "AB9221466",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "10268",
+    "commune_ban": "10268",
+    "adresse_registre": "17 art de villenauxe 10400 Nogent-sur-Seine"
+   },
+   {
+    "id": "2580E3160479D",
+    "type": "immeuble",
+    "adresse_ban": "30 Boulevard du Port 80000 Amiens",
+    "numero": "AB2523959",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AA0541896"
+    ],
+    "commune_registre": "80021",
+    "commune_ban": "80021",
+    "adresse_registre": "28 Boulevard du Port 80000 Amiens"
+   },
+   {
+    "id": "2580E3346540I",
+    "type": "immeuble",
+    "adresse_ban": "9 Rue a Borel 80100 Abbeville",
+    "numero": "AD4026449",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AC7664931"
+    ],
+    "commune_registre": "62041",
+    "commune_ban": "80001",
+    "adresse_registre": "59 Rue Baudimont 62000 ARRAS"
+   },
+   {
+    "id": "2580E3449603H",
+    "type": "immeuble",
+    "adresse_ban": "80 Rue Saint-Roch 80000 Amiens",
+    "numero": "AC9007469",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC9007469"
+    ],
+    "commune_registre": "80021",
+    "commune_ban": "80021",
+    "adresse_registre": "80 r saint-roch 80000 Amiens"
+   },
+   {
+    "id": "2278E0613614P",
+    "type": "appartement",
+    "adresse_ban": "75 Avenue de Poissy 78260 Achères",
+    "numero": "AD4933040",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4933040"
+    ],
+    "commune_registre": "78005",
+    "commune_ban": "78005",
+    "adresse_registre": "75 av de poissy 78260 Achères"
+   },
+   {
+    "id": "2278E0652121Q",
+    "type": "appartement",
+    "adresse_ban": "2 Rue Joseph Lemarchand 78114 Magny-les-Hameaux",
+    "numero": "AC5819750",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AH5744347"
+    ],
+    "commune_registre": "78356",
+    "commune_ban": "78356",
+    "adresse_registre": "1 r joseph lemarchand 78114 MAGNY LES HAMEAUX"
+   },
+   {
+    "id": "2278E0475301W",
+    "type": "appartement",
+    "adresse_ban": "7 Rue Aristide Briand 78540 Vernouillet",
+    "numero": "AA2803880",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AA2803880",
+     "AH0826446"
+    ],
+    "commune_registre": "78643",
+    "commune_ban": "78643",
+    "adresse_registre": "7 RUE ARISTIDE BRIAND 78540 VERNOUILLET"
+   },
+   {
+    "id": "2278E0556975E",
+    "type": "appartement",
+    "adresse_ban": "28 Rue des Côtes 78600 Maisons-Laffitte",
+    "numero": "AC7528995",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7528995"
+    ],
+    "commune_registre": "78358",
+    "commune_ban": "78358",
+    "adresse_registre": "28 r des cotes 78600 Maisons-Laffitte"
+   },
+   {
+    "id": "2278E0612173E",
+    "type": "appartement",
+    "adresse_ban": "5 Rue des Champs 78260 Achères",
+    "numero": "AE6007264",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AB3857653"
+    ],
+    "commune_registre": "78005",
+    "commune_ban": "78005",
+    "adresse_registre": "22 av de poissy 78260 Achères"
+   },
+   {
+    "id": "2278E0475302X",
+    "type": "appartement",
+    "adresse_ban": "75 Rue Aristide Briand 78700 Conflans-Sainte-Honorine",
+    "numero": "AA0606400",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0606400"
+    ],
+    "commune_registre": "78172",
+    "commune_ban": "78172",
+    "adresse_registre": "75 r aristide briand 78700 CONFLANS STE HONORINE"
+   },
+   {
+    "id": "2278E0434306D",
+    "type": "appartement",
+    "adresse_ban": "4 Allée Van Gogh 78160 Marly-le-Roi",
+    "numero": "AA8441347",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "78372",
+    "commune_ban": "78372",
+    "adresse_registre": "10 Allée Van Gogh 78160 Marly-le-Roi"
+   },
+   {
+    "id": "2278E0499865Q",
+    "type": "appartement",
+    "adresse_ban": "17 Rue René Albert 78700 Conflans-Sainte-Honorine",
+    "numero": "AD8678955",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD8678955"
+    ],
+    "commune_registre": "78172",
+    "commune_ban": "78172",
+    "adresse_registre": "17 r rene albert 78700 Conflans-Sainte-Honorine"
+   },
+   {
+    "id": "2534E1494989B",
+    "type": "appartement",
+    "adresse_ban": "1 Rue Sarret de Coussergues 34300 Agde",
+    "numero": "AB1350610",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1350610"
+    ],
+    "commune_registre": "34003",
+    "commune_ban": "34003",
+    "adresse_registre": "1 r sarret de coussergues 34300 Agde"
+   },
+   {
+    "id": "2534E1496310W",
+    "type": "appartement",
+    "adresse_ban": "1 Rue Louis Blanc 34200 Sète",
+    "numero": "AC2414977",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2414977"
+    ],
+    "commune_registre": "34301",
+    "commune_ban": "34301",
+    "adresse_registre": "1 r louis blanc 34200 Sète"
+   },
+   {
+    "id": "2534E1571872C",
+    "type": "immeuble",
+    "adresse_ban": "1 Square de la Plage 34540 Balaruc-les-Bains",
+    "numero": "AA5828413",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5828413"
+    ],
+    "commune_registre": "34023",
+    "commune_ban": "34023",
+    "adresse_registre": "1 sq de la plage 34540 Balaruc-les-Bains"
+   },
+   {
+    "id": "2534E1644149Z",
+    "type": "immeuble",
+    "adresse_ban": "Rue François d'Orbay 34080 Montpellier",
+    "numero": "AB5855473",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "55 Route de Lodève 34080 Montpellier"
+   },
+   {
+    "id": "2534E1681934G",
+    "type": "appartement",
+    "adresse_ban": "2 Rue de la Révolution 34200 Sète",
+    "numero": "AC3494564",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3494564"
+    ],
+    "commune_registre": "34301",
+    "commune_ban": "34301",
+    "adresse_registre": "2 r de la revolution 34200 Sète"
+   },
+   {
+    "id": "2534E1898559Z",
+    "type": "immeuble",
+    "adresse_ban": "192 Rue Alberti 34970 Lattes",
+    "numero": "AB2573863",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB2573863"
+    ],
+    "commune_registre": "34129",
+    "commune_ban": "34129",
+    "adresse_registre": "192 Rue Alberti 34970 Lattes"
+   },
+   {
+    "id": "2534E1558863T",
+    "type": "appartement",
+    "adresse_ban": "12 Avenue de la Jetée 34300 Agde",
+    "numero": "AA4759056",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34003",
+    "commune_ban": "34003",
+    "adresse_registre": "1 r de la conque 34300 Agde"
+   },
+   {
+    "id": "2534E1586195Z",
+    "type": "appartement",
+    "adresse_ban": "85 Avenue d'Assas 34000 Montpellier",
+    "numero": "AA7536659",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AA7536659",
+     "AC6330997"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "85 av d'assas 34000 Montpellier"
+   },
+   {
+    "id": "2542E2629414C",
+    "type": "appartement",
+    "adresse_ban": "20 Rue Coraly Royet 42100 Saint-Étienne",
+    "numero": "AF2520724",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF2520724"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "20 r coraly royet 42100 Saint-Étienne"
+   },
+   {
+    "id": "2542E2669363P",
+    "type": "immeuble",
+    "adresse_ban": "25 Rue du Soleil 42000 Saint-Étienne",
+    "numero": "AE7093453",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "25 r du 11 novembre 42100 Saint-Étienne"
+   },
+   {
+    "id": "2542E2581127X",
+    "type": "appartement",
+    "adresse_ban": "48 Rue de la Mulatière 42100 Saint-Étienne",
+    "numero": "AF0996710",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF0996710"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "48 r mulatiere 42100 Saint-Étienne"
+   },
+   {
+    "id": "2542E2592140M",
+    "type": "appartement",
+    "adresse_ban": "51 Rue Conte Grandchamp 42100 Saint-Étienne",
+    "numero": "AJ1679323",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AJ1679323"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "51 Rue Conte Grandchamp 42100 Saint-Étienne"
+   },
+   {
+    "id": "2542E2591613F",
+    "type": "appartement",
+    "adresse_ban": "3 Rue Plantevin 42000 Saint-Étienne",
+    "numero": "AC1125087",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1125087"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "3 r plantevin 42000 Saint-Étienne"
+   },
+   {
+    "id": "2542E2600704W",
+    "type": "appartement",
+    "adresse_ban": "6 Rue des Mutilés du Travail 42000 Saint-Étienne",
+    "numero": "AC2560571",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2560571"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "6 r des mutiles du travail 42000 Saint-Étienne"
+   },
+   {
+    "id": "2542E2638263L",
+    "type": "appartement",
+    "adresse_ban": "33bis Rue Ferdinand 42000 Saint-Étienne",
+    "numero": "AC1461342",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1461342"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "33B r ferdinand 42000 Saint-Étienne"
+   },
+   {
+    "id": "2542E2629021Z",
+    "type": "appartement",
+    "adresse_ban": "11 Rue Léon Lamaizière 42000 Saint-Étienne",
+    "numero": "AA2775740",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2775740"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "11 Rue Léon Lamaizière 42000 Saint-Étienne"
+   },
+   {
+    "id": "2622E1501920F",
+    "type": "immeuble",
+    "adresse_ban": "36 Rue Jean Savidan 22300 Lannion",
+    "numero": "AA7153919",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "22113",
+    "commune_ban": "22113",
+    "adresse_registre": "34A r jean savidan 22300 LANNION"
+   },
+   {
+    "id": "2622E1556451O",
+    "type": "immeuble",
+    "adresse_ban": "1 Rue des Carmelites 22200 Guingamp",
+    "numero": "AA5536446",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5536446"
+    ],
+    "commune_registre": "22070",
+    "commune_ban": "22070",
+    "adresse_registre": "1 Rue des Carmelites 22200 Guingamp"
+   },
+   {
+    "id": "2622E1621714R",
+    "type": "immeuble",
+    "adresse_ban": "1 Rue Jean-Baptiste Lamarck 22300 Lannion",
+    "numero": "AA8994436",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "22113",
+    "commune_ban": "22113",
+    "adresse_registre": "3 Rue Jean-Baptiste Lamarck 22300 Lannion"
+   },
+   {
+    "id": "2622E1675109I",
+    "type": "immeuble",
+    "adresse_ban": "2 Rue Jean-Baptiste Lamarck 22300 Lannion",
+    "numero": "AA8992299",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8992299"
+    ],
+    "commune_registre": "22113",
+    "commune_ban": "22113",
+    "adresse_registre": "2 Rue Jean-Baptiste Lamarck 22300 Lannion"
+   },
+   {
+    "id": "2683E0936859L",
+    "type": "immeuble",
+    "adresse_ban": "Avenue de l'Eau Blanche 83240 Cavalaire-sur-Mer",
+    "numero": "AB9989716",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "83036",
+    "commune_ban": "83036",
+    "adresse_registre": "av de l'eau vive, 83240 Cavalaire-sur-Mer"
+   },
+   {
+    "id": "2683E0944949P",
+    "type": "immeuble",
+    "adresse_ban": "519 Avenue Victor HUGO 83600 Fréjus",
+    "numero": "AB0252544",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB0252544"
+    ],
+    "commune_registre": "83061",
+    "commune_ban": "83061",
+    "adresse_registre": "519 av victor hugo 83600 Fréjus"
+   },
+   {
+    "id": "2683E0953010Q",
+    "type": "immeuble",
+    "adresse_ban": "355 Rue Hippolyte FABRE 83600 Fréjus",
+    "numero": "AA7524283",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7524283"
+    ],
+    "commune_registre": "83061",
+    "commune_ban": "83061",
+    "adresse_registre": "355 Rue Hippolyte FABRE 83600 Fréjus"
+   },
+   {
+    "id": "2683E0956785V",
+    "type": "immeuble",
+    "adresse_ban": "149 Rue Jean Aicard 83700 Saint-Raphaël",
+    "numero": "AC6560171",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "83118",
+    "commune_ban": "83118",
+    "adresse_registre": "JEAN AICARD 149, RUE JEAN AICARD 83700 SAINT-RAPHAEL"
+   },
+   {
+    "id": "2683E0937016M",
+    "type": "immeuble",
+    "adresse_ban": "Avenue de l'Eau Blanche 83240 Cavalaire-sur-Mer",
+    "numero": "AB9989716",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "83036",
+    "commune_ban": "83036",
+    "adresse_registre": "av de l'eau vive, 83240 Cavalaire-sur-Mer"
+   },
+   {
+    "id": "2683E0918757F",
+    "type": "immeuble",
+    "adresse_ban": "16 Avenue François Duchatel 83160 La Valette-du-Var",
+    "numero": "AC7429996",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "83144",
+    "commune_ban": "83144",
+    "adresse_registre": "1 av francois duchatel 83160 LA VALETTE DU VAR"
+   },
+   {
+    "id": "2683E0936533X",
+    "type": "immeuble",
+    "adresse_ban": "Avenue de l'Eau Blanche 83240 Cavalaire-sur-Mer",
+    "numero": "AB9989716",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "83036",
+    "commune_ban": "83036",
+    "adresse_registre": "av de l'eau vive, 83240 Cavalaire-sur-Mer"
+   },
+   {
+    "id": "2683E0952863Z",
+    "type": "appartement",
+    "adresse_ban": "4 Rue Aristide Briand 83740 La Cadière-d'Azur",
+    "numero": "AG6129860",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG6129860"
+    ],
+    "commune_registre": "83027",
+    "commune_ban": "83027",
+    "adresse_registre": "4 r aristide briand 83740 La Cadière-d'Azur"
+   },
+   {
+    "id": "2672E1397906P",
+    "type": "immeuble",
+    "adresse_ban": "53 Rue Renée Auduc 72000 Le Mans",
+    "numero": "AA2793727",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "65 r renee auduc 72000 Le Mans"
+   },
+   {
+    "id": "2672E1431884L",
+    "type": "appartement",
+    "adresse_ban": "4 Rue Lusson 72000 Le Mans",
+    "numero": "AA9670753",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA9670753"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 r de foisy 72000 Le Mans"
+   },
+   {
+    "id": "2672E1397874J",
+    "type": "immeuble",
+    "adresse_ban": "49 Rue Renée Auduc 72000 Le Mans",
+    "numero": "AA2793727",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "65 r renee auduc 72000 Le Mans"
+   },
+   {
+    "id": "2672E1397976H",
+    "type": "immeuble",
+    "adresse_ban": "59 Rue Renée Auduc 72000 Le Mans",
+    "numero": "AA2793727",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "65 r renee auduc 72000 Le Mans"
+   },
+   {
+    "id": "2672E1397805S",
+    "type": "immeuble",
+    "adresse_ban": "65 Rue Renée Auduc 72000 Le Mans",
+    "numero": "AA2793727",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2793727"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "65 r renee auduc 72000 Le Mans"
+   },
+   {
+    "id": "2672E1422021C",
+    "type": "appartement",
+    "adresse_ban": "4 Rue de la Grande Maison 72000 Le Mans",
+    "numero": "AE1184308",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE1184308"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 r de la grande maison 72000 Le Mans"
+   },
+   {
+    "id": "2278E2217805G",
+    "type": "appartement",
+    "adresse_ban": "22 Rue Galande 78510 Triel-sur-Seine",
+    "numero": "AC7042476",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7042476"
+    ],
+    "commune_registre": "78624",
+    "commune_ban": "78624",
+    "adresse_registre": "22 r galande 78510 TRIEL SUR SEINE"
+   },
+   {
+    "id": "2278E2126320P",
+    "type": "appartement",
+    "adresse_ban": "8 Rue Mozart 78330 Fontenay-le-Fleury",
+    "numero": "AF4869442",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "78242",
+    "commune_ban": "78242",
+    "adresse_registre": "4 r wolfgang amadeus mozart 78330 Fontenay-le-Fleury"
+   },
+   {
+    "id": "2278E2167639U",
+    "type": "appartement",
+    "adresse_ban": "3 Allee du Bois de Nogent 78310 Maurepas",
+    "numero": "AA1850338",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1850338"
+    ],
+    "commune_registre": "78383",
+    "commune_ban": "78383",
+    "adresse_registre": "3 all du bois de nogent 78310 Maurepas"
+   },
+   {
+    "id": "2278E2139114R",
+    "type": "appartement",
+    "adresse_ban": "23 Rue Claude Monet 78380 Bougival",
+    "numero": "AA2173318",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2173318"
+    ],
+    "commune_registre": "78092",
+    "commune_ban": "78092",
+    "adresse_registre": "23 r claude monet 78380 Bougival"
+   },
+   {
+    "id": "2278E2230902Z",
+    "type": "appartement",
+    "adresse_ban": "27 Rue Rieussec 78220 Viroflay",
+    "numero": "AA0572404",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0572404"
+    ],
+    "commune_registre": "78686",
+    "commune_ban": "78686",
+    "adresse_registre": "27 Rue Rieussec 78220 VIROFLAY"
+   },
+   {
+    "id": "2278E2116789A",
+    "type": "appartement",
+    "adresse_ban": "94 Avenue de Paris 78000 Versailles",
+    "numero": "AB7130818",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7130818"
+    ],
+    "commune_registre": "78646",
+    "commune_ban": "78646",
+    "adresse_registre": "94 av de paris 78000 VERSAILLES"
+   },
+   {
+    "id": "2278E2246390R",
+    "type": "appartement",
+    "adresse_ban": "64 Rue Henri Prou 78340 Les Clayes-sous-Bois",
+    "numero": "AA8739195",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8739195"
+    ],
+    "commune_registre": "78165",
+    "commune_ban": "78165",
+    "adresse_registre": "20 Avenue Jules Ferry 78340 Les Clayes-sous-Bois"
+   },
+   {
+    "id": "2278E2016015C",
+    "type": "appartement",
+    "adresse_ban": "9 Rue Neuve Notre-Dame 78000 Versailles",
+    "numero": "AD4347613",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4347613"
+    ],
+    "commune_registre": "78646",
+    "commune_ban": "78646",
+    "adresse_registre": "9 r neuve notre-dame 78000 VERSAILLES"
+   },
+   {
+    "id": "2557E3736778P",
+    "type": "immeuble",
+    "adresse_ban": "13 Rue de Bourgogne 57070 Metz",
+    "numero": "AB9099037",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9099037"
+    ],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "13 r de bourgogne 57070 Metz"
+   },
+   {
+    "id": "2557E3561382P",
+    "type": "appartement",
+    "adresse_ban": "30 Rue Saint-André 57000 Metz",
+    "numero": "AA4443073",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4443073"
+    ],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "12 Rue du Lavoir 57000 Metz"
+   },
+   {
+    "id": "2557E3606707W",
+    "type": "immeuble",
+    "adresse_ban": "5 Rue du 13 Novembre 57970 Yutz",
+    "numero": "AC2863694",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2863694"
+    ],
+    "commune_registre": "57757",
+    "commune_ban": "57757",
+    "adresse_registre": "5 r du 13 novembre 57970 Yutz"
+   },
+   {
+    "id": "2557E3605707K",
+    "type": "immeuble",
+    "adresse_ban": "11 Rue de Pouilly 57000 Metz",
+    "numero": "AE2669406",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE2669406"
+    ],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "11 r de pouilly 57000 Metz"
+   },
+   {
+    "id": "2557E3495226D",
+    "type": "immeuble",
+    "adresse_ban": "1bis Rue du Général de Gaulle 57440 Algrange",
+    "numero": "AD4633806",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57012",
+    "commune_ban": "57012",
+    "adresse_registre": "RUE CHARLES DE GAULLE 57440 ALGRANGE"
+   },
+   {
+    "id": "2557E3473723C",
+    "type": "immeuble",
+    "adresse_ban": "17 Rue des Frères 57100 Thionville",
+    "numero": "AB1072438",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57672",
+    "commune_ban": "57672",
+    "adresse_registre": "17B r des freres 57100 THIONVILLE"
+   },
+   {
+    "id": "2557E3681527O",
+    "type": "immeuble",
+    "adresse_ban": "8 Rue Général Care 57950 Montigny-lès-Metz",
+    "numero": "AD6895395",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6895395"
+    ],
+    "commune_registre": "57480",
+    "commune_ban": "57480",
+    "adresse_registre": "8 r general care 57950 Montigny-lès-Metz"
+   },
+   {
+    "id": "2557E3593883Q",
+    "type": "immeuble",
+    "adresse_ban": "1 Rue des Moulins 57600 Forbach",
+    "numero": "AE8715666",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE8715666"
+    ],
+    "commune_registre": "57227",
+    "commune_ban": "57227",
+    "adresse_registre": "1 Rue des Moulins 57600 Forbach"
+   },
+   {
+    "id": "2260E2550756J",
+    "type": "appartement",
+    "adresse_ban": "61 Rue des Marchands 60230 Chambly",
+    "numero": "AB9474248",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9474248"
+    ],
+    "commune_registre": "60139",
+    "commune_ban": "60139",
+    "adresse_registre": "61 r des marchands 60230 CHAMBLY"
+   },
+   {
+    "id": "2260E2309231Y",
+    "type": "appartement",
+    "adresse_ban": "7 Allee de lâ€ Europe 60500 Chantilly",
+    "numero": "AA9827106",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "60141",
+    "commune_ban": "60141",
+    "adresse_registre": "7 all de l'europe 60500 Chantilly"
+   },
+   {
+    "id": "2260E2465761I",
+    "type": "appartement",
+    "adresse_ban": "15 Rue Georges Stephenson 60100 Creil",
+    "numero": "AB2422970",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB2422970"
+    ],
+    "commune_registre": "60175",
+    "commune_ban": "60175",
+    "adresse_registre": "15 Rue Georges Stephenson 60100 Creil"
+   },
+   {
+    "id": "2260E2505023K",
+    "type": "appartement",
+    "adresse_ban": "16 Rue des Pierres 60100 Creil",
+    "numero": "AB7851470",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7851470"
+    ],
+    "commune_registre": "60175",
+    "commune_ban": "60175",
+    "adresse_registre": "16 r des pierres 60100 Creil"
+   },
+   {
+    "id": "2260E2415665O",
+    "type": "appartement",
+    "adresse_ban": "6 Rue Leon Boufflet 60740 Saint-Maximin",
+    "numero": "AB7455884",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7455884"
+    ],
+    "commune_registre": "60589",
+    "commune_ban": "60589",
+    "adresse_registre": "4-6 r leon boufflet 60740 SAINT MAXIMIN"
+   },
+   {
+    "id": "2592E0963812K",
+    "type": "appartement",
+    "adresse_ban": "21 Rue de Seine 92100 Boulogne-Billancourt",
+    "numero": "AA0377473",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0377473"
+    ],
+    "commune_registre": "92012",
+    "commune_ban": "92012",
+    "adresse_registre": "21 Rue de Seine 92100 Boulogne-Billancourt"
+   },
+   {
+    "id": "2592E0812025L",
+    "type": "appartement",
+    "adresse_ban": "45 Rue Traversière 92100 Boulogne-Billancourt",
+    "numero": "AA8577975",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8577975"
+    ],
+    "commune_registre": "92012",
+    "commune_ban": "92012",
+    "adresse_registre": "43 r traversiere 92100 BOULOGNE BILLANCOURT"
+   },
+   {
+    "id": "2592E0772833B",
+    "type": "appartement",
+    "adresse_ban": "9 Rue Pasteur 92210 Saint-Cloud",
+    "numero": "AB3691573",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "92064",
+    "commune_ban": "92064",
+    "adresse_registre": "11 Rue Pasteur 92210 Saint-Cloud"
+   },
+   {
+    "id": "2592E0970210M",
+    "type": "appartement",
+    "adresse_ban": "58 Rue d'Estienne d'Orves 92500 Rueil-Malmaison",
+    "numero": "AC0106112",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "92063",
+    "commune_ban": "92063",
+    "adresse_registre": "56/58 r d'estienne d'orves - 44 rue Camille Saint Saens 92500 Rueil-Malmaison"
+   },
+   {
+    "id": "2592E0767908Q",
+    "type": "appartement",
+    "adresse_ban": "74bis Boulevard Gallieni 92130 Issy-les-Moulineaux",
+    "numero": "AH2310191",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AH2310191"
+    ],
+    "commune_registre": "92040",
+    "commune_ban": "92040",
+    "adresse_registre": "74B bd gallieni 92130 Issy-les-Moulineaux"
+   },
+   {
+    "id": "2592E0974937H",
+    "type": "appartement",
+    "adresse_ban": "13 Rue de Bretagne 92600 Asnières-sur-Seine",
+    "numero": "AA8132045",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8132045"
+    ],
+    "commune_registre": "92004",
+    "commune_ban": "92004",
+    "adresse_registre": "9 Rue de l’Orne 92600 Asnières-sur-Seine"
+   },
+   {
+    "id": "2592E0899480C",
+    "type": "appartement",
+    "adresse_ban": "55 Rue de la Vanne 92120 Montrouge",
+    "numero": "AB9074022",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AG7032642"
+    ],
+    "commune_registre": "92049",
+    "commune_ban": "92049",
+    "adresse_registre": "45 Rue de la Vanne 92120 Montrouge"
+   },
+   {
+    "id": "2592E0829209J",
+    "type": "appartement",
+    "adresse_ban": "15bis Avenue Pierre Grenier 92100 Boulogne-Billancourt",
+    "numero": "AB3403318",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3403318"
+    ],
+    "commune_registre": "92012",
+    "commune_ban": "92012",
+    "adresse_registre": "15bis Avenue Pierre Grenier 92100 Boulogne-Billancourt"
+   },
+   {
+    "id": "2380E3300596E",
+    "type": "appartement",
+    "adresse_ban": "4 Rue Dusevel 80000 Amiens",
+    "numero": "AD9567710",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD9567710"
+    ],
+    "commune_registre": "80021",
+    "commune_ban": "80021",
+    "adresse_registre": "4 r dusevel 80000 Amiens"
+   },
+   {
+    "id": "2590E2190770A",
+    "type": "immeuble",
+    "adresse_ban": "8 Rue du Salbert 90000 Belfort",
+    "numero": "AG1249333",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG1249333"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "8 r du salbert 90000 Belfort"
+   },
+   {
+    "id": "2590E2411703L",
+    "type": "immeuble",
+    "adresse_ban": "37 Rue Ambroise Croizat 90000 Belfort",
+    "numero": "AD1641299",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD1641299"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "35 Rue Ambroise Croizat 90000 Belfort"
+   },
+   {
+    "id": "2542E0724854U",
+    "type": "appartement",
+    "adresse_ban": "15 Rue Marx Dormoy 42800 Rive-de-Gier",
+    "numero": "AA5932025",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5932025"
+    ],
+    "commune_registre": "42186",
+    "commune_ban": "42186",
+    "adresse_registre": "15 r marx dormoy 42800 Rive-de-Gier"
+   },
+   {
+    "id": "2542E0997637L",
+    "type": "appartement",
+    "adresse_ban": "1 Route de la chabure 42400 Saint-Chamond",
+    "numero": "AG6577340",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42207",
+    "commune_ban": "42207",
+    "adresse_registre": "Route de la Chabure 42400 SAINT-CHAMOND"
+   },
+   {
+    "id": "2542E0717844E",
+    "type": "appartement",
+    "adresse_ban": "34 Cours Fauriel 42100 Saint-Étienne",
+    "numero": "AA6070932",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA6070932"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "34 Cours Fauriel 42100 Saint-Étienne"
+   },
+   {
+    "id": "2542E0940461J",
+    "type": "immeuble",
+    "adresse_ban": "45 Rue Balay 42000 Saint-Étienne",
+    "numero": "AC2376440",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2376440"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "45 r balay 42000 Saint-Étienne"
+   },
+   {
+    "id": "2542E0706248E",
+    "type": "appartement",
+    "adresse_ban": "5 Rue Saint Jean 42000 Saint-Étienne",
+    "numero": "AB9410160",
+    "verdict": "numero_inconnu_adresse_donne_autre",
+    "candidats": [
+     "AB9410960"
+    ],
+    "commune_registre": null,
+    "commune_ban": "42218",
+    "adresse_registre": null
+   },
+   {
+    "id": "2542E1067217P",
+    "type": "appartement",
+    "adresse_ban": "59 Rue Charles de Gaulle 42000 Saint-Étienne",
+    "numero": "AE2628329",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE2628329"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "59 r charles de gaulle 42000 SAINT-ETIENNE"
+   },
+   {
+    "id": "2542E0984156Y",
+    "type": "appartement",
+    "adresse_ban": "3 Rue Désiré Claude 42100 Saint-Étienne",
+    "numero": "AC6767917",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC6767917"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "3 r desire claude 42100 SAINT-ETIENNE"
+   },
+   {
+    "id": "2542E1012632E",
+    "type": "immeuble",
+    "adresse_ban": "12 Avenue du Général Gouraud 42380 Saint-Bonnet-le-Château",
+    "numero": "AD6422802",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6422802"
+    ],
+    "commune_registre": "42204",
+    "commune_ban": "42204",
+    "adresse_registre": "12 av du general gouraud 42380 Saint-Bonnet-le-Château"
+   },
+   {
+    "id": "2230E0030952R",
+    "type": "appartement",
+    "adresse_ban": "4 Rue Pierre Brossolette 30100 Alès",
+    "numero": "AB7769714",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7769714"
+    ],
+    "commune_registre": "30007",
+    "commune_ban": "30007",
+    "adresse_registre": "4 r pierre brossolette 30100 Alès"
+   },
+   {
+    "id": "2230E0007676L",
+    "type": "appartement",
+    "adresse_ban": "1 Rue du Plan de Brie 30140 Anduze",
+    "numero": "AD0399410",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30010",
+    "commune_ban": "30010",
+    "adresse_registre": "1 Plan de Brie 30140 Anduze"
+   },
+   {
+    "id": "2230E0066832R",
+    "type": "appartement",
+    "adresse_ban": "5 Rue des Chassaintes 30900 Nîmes",
+    "numero": "AB7989189",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7989189"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "8 r fernand pelloutier 30900 Nîmes"
+   },
+   {
+    "id": "2230E0065283C",
+    "type": "appartement",
+    "adresse_ban": "83 Rue Paul Arène 30000 Nîmes",
+    "numero": "AB8288144",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "63 r paul arene 30000 Nîmes"
+   },
+   {
+    "id": "2230E0074979A",
+    "type": "appartement",
+    "adresse_ban": "39 Avenue Georges Pompidou 30900 Nîmes",
+    "numero": "AA7408453",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7408453"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "18 Rue Jean Crespon 30900 Nîmes"
+   },
+   {
+    "id": "2230E0067144R",
+    "type": "appartement",
+    "adresse_ban": "24 Rue Dhuoda 30900 Nîmes",
+    "numero": "AB7923907",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7923907"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "24 r dhuoda 30900 Nîmes"
+   },
+   {
+    "id": "2230E0065657M",
+    "type": "appartement",
+    "adresse_ban": "6 Rue Ernest Daudet 30000 Nîmes",
+    "numero": "AG4575981",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AC7966237"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "8 r ernest daudet 30000 Nîmes"
+   },
+   {
+    "id": "2230E0327492B",
+    "type": "appartement",
+    "adresse_ban": "21 Rue Matisse 30900 Nîmes",
+    "numero": "AA0090019",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "21r matisse 30900 NIMES"
+   },
+   {
+    "id": "2684E0049587Q",
+    "type": "immeuble",
+    "adresse_ban": "39Bis Rue Buffon 84000 Avignon",
+    "numero": "AC5276308",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5276308"
+    ],
+    "commune_registre": "84007",
+    "commune_ban": "84007",
+    "adresse_registre": "39B r buffon 84000 Avignon"
+   },
+   {
+    "id": "2684E0034268L",
+    "type": "appartement",
+    "adresse_ban": "31 Rue Guillaume Puy 84000 Avignon",
+    "numero": "AB7755770",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7755770"
+    ],
+    "commune_registre": "84007",
+    "commune_ban": "84007",
+    "adresse_registre": "31 r guillaume puy 84000 Avignon"
+   },
+   {
+    "id": "2684E0023679E",
+    "type": "appartement",
+    "adresse_ban": "1 Rue de la Campane 84000 Avignon",
+    "numero": "AD5083258",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD5083258"
+    ],
+    "commune_registre": "84007",
+    "commune_ban": "84007",
+    "adresse_registre": "1 r campane 84000 Avignon"
+   },
+   {
+    "id": "2684E0030732L",
+    "type": "appartement",
+    "adresse_ban": "2 Rue Honoré de Balzac 84100 Orange",
+    "numero": "AG6620074",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "84087",
+    "commune_ban": "84087",
+    "adresse_registre": "r honore de balzac, 84100 Orange"
+   },
+   {
+    "id": "2684E0007779Q",
+    "type": "immeuble",
+    "adresse_ban": "527 Avenue Frédéric Mistral 84200 Carpentras",
+    "numero": "AB5917018",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5917018"
+    ],
+    "commune_registre": "84031",
+    "commune_ban": "84031",
+    "adresse_registre": "527 Avenue Frédéric Mistral 84200 Carpentras"
+   },
+   {
+    "id": "2684E0013921W",
+    "type": "immeuble",
+    "adresse_ban": "65 AVENUE françois LASCOUR 84130 Le Pontet",
+    "numero": "AC2345262",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2345262"
+    ],
+    "commune_registre": "84092",
+    "commune_ban": "84092",
+    "adresse_registre": "65 av francois lascour 84130 Le Pontet"
+   },
+   {
+    "id": "2684E0018661E",
+    "type": "appartement",
+    "adresse_ban": "251 Boulevard Salvador Allende 84700 Sorgues",
+    "numero": "AC6630479",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC6630479"
+    ],
+    "commune_registre": "84129",
+    "commune_ban": "84129",
+    "adresse_registre": "251 bd salvador allende 84700 Sorgues"
+   },
+   {
+    "id": "2684E0072965U",
+    "type": "appartement",
+    "adresse_ban": "7 Rue Saint-Thomas d'Aquin 84000 Avignon",
+    "numero": "AH8250755",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AH8250755"
+    ],
+    "commune_registre": "84007",
+    "commune_ban": "84007",
+    "adresse_registre": "7 r saint-thomas d'aquin 84000 Avignon"
+   },
+   {
+    "id": "2234E1871197M",
+    "type": "appartement",
+    "adresse_ban": "Avenue des Apollons 34170 Castelnau-le-Lez",
+    "numero": "AB1633379",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34057",
+    "commune_ban": "34057",
+    "adresse_registre": "14 av des apollons 34170 Castelnau-le-Lez"
+   },
+   {
+    "id": "2234E1781769Y",
+    "type": "appartement",
+    "adresse_ban": "29 Avenue Lepic 34070 Montpellier",
+    "numero": "AB0105387",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB0105387"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "29 Avenue Lepic 34070 MONTPELLIER"
+   },
+   {
+    "id": "2234E1801553W",
+    "type": "appartement",
+    "adresse_ban": "9bis Avenue Charles Flahault 34090 Montpellier",
+    "numero": "AA4311551",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4311551"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "9B av charles flahault 34090 Montpellier"
+   },
+   {
+    "id": "2234E1906870N",
+    "type": "appartement",
+    "adresse_ban": "18 Esplanade de lâ€ Europe 34000 Montpellier",
+    "numero": "AB7067135",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "24 Esplanade de l'Europe 34000 Montpellier"
+   },
+   {
+    "id": "2234E1793144L",
+    "type": "appartement",
+    "adresse_ban": "87 Avenue du Pont Juvenal 34000 Montpellier",
+    "numero": "AC3632189",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AC3632189",
+     "AC4230207"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "87 av du pont juvenal 34000 Montpellier"
+   },
+   {
+    "id": "2234E1828820P",
+    "type": "appartement",
+    "adresse_ban": "16 Rue Saint Léon 34090 Montpellier",
+    "numero": "AD6969893",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6969893"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "16 r saint-leon 34090 Montpellier"
+   },
+   {
+    "id": "2234E1903863W",
+    "type": "appartement",
+    "adresse_ban": "78 Rue des Anemones 34170 Castelnau-le-Lez",
+    "numero": "AC1475128",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1475128"
+    ],
+    "commune_registre": "34057",
+    "commune_ban": "34057",
+    "adresse_registre": "78 r des anemones 34170 CASTELNAU LE LEZ"
+   },
+   {
+    "id": "2234E1883800F",
+    "type": "appartement",
+    "adresse_ban": "13 Rue du Plan de l'Olivier 34000 Montpellier",
+    "numero": "AC3466927",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3466927"
+    ],
+    "commune_registre": "34172",
+    "commune_ban": "34172",
+    "adresse_registre": "13 r du plan de l'olivier 34000 MONTPELLIER"
+   },
+   {
+    "id": "2257E3110029T",
+    "type": "appartement",
+    "adresse_ban": "297 Rue de Pont-a-Mousson 57950 Montigny-lès-Metz",
+    "numero": "AG1931021",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG1931021"
+    ],
+    "commune_registre": "57480",
+    "commune_ban": "57480",
+    "adresse_registre": "297 r de pont-a-mousson 57950 Montigny-lès-Metz"
+   },
+   {
+    "id": "2257E3054649T",
+    "type": "appartement",
+    "adresse_ban": "Place de l'Eglise 57050 Longeville-lès-Metz",
+    "numero": "AA5762646",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57412",
+    "commune_ban": "57412",
+    "adresse_registre": "9 pl de l'eglise 57050 Longeville-lès-Metz"
+   },
+   {
+    "id": "2257E3085836G",
+    "type": "appartement",
+    "adresse_ban": "Rue de Paris 57160 Rozérieulles",
+    "numero": "AC1865286",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57601",
+    "commune_ban": "57601",
+    "adresse_registre": "19A r de paris 57160 Rozérieulles"
+   },
+   {
+    "id": "2257E3110312Q",
+    "type": "appartement",
+    "adresse_ban": "4 Rue du Grand Conseil 57070 Metz",
+    "numero": "AC7103849",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7103849"
+    ],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "18 av de plantieres 57070 Metz"
+   },
+   {
+    "id": "2257E3128558K",
+    "type": "appartement",
+    "adresse_ban": "49 Rue du 11 Novembre 1918 57300 Hagondange",
+    "numero": "AE2035053",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57283",
+    "commune_ban": "57283",
+    "adresse_registre": "3 pl mangin 57300 Hagondange"
+   },
+   {
+    "id": "2257E2914129D",
+    "type": "appartement",
+    "adresse_ban": "3 Place Saint-Martin 57000 Metz",
+    "numero": "AD4885851",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4885851"
+    ],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "3 pl saint-martin 57000 METZ"
+   },
+   {
+    "id": "2257E3041391V",
+    "type": "appartement",
+    "adresse_ban": "6 Place de la Nation 57950 Montigny-lès-Metz",
+    "numero": "AA5704085",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57480",
+    "commune_ban": "57480",
+    "adresse_registre": "4 Passage Léon Zimmermann 57950 Montigny-lès-Metz"
+   },
+   {
+    "id": "2257E3120427R",
+    "type": "immeuble",
+    "adresse_ban": "Rue du Bourbonnais 57070 Metz",
+    "numero": "AB1116821",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "57463",
+    "commune_ban": "57463",
+    "adresse_registre": "1 à 25 Boulevard d'Alsace 57070 METZ"
+   },
+   {
+    "id": "2472E3387486V",
+    "type": "immeuble",
+    "adresse_ban": "5 rue Port Royal 72000 Le Mans",
+    "numero": "AB4276663",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4276663"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 bd mutuel 72000 Le Mans"
+   },
+   {
+    "id": "2472E3387357W",
+    "type": "immeuble",
+    "adresse_ban": "5 rue Port Royal 72000 Le Mans",
+    "numero": "AB4276663",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4276663"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 bd mutuel 72000 Le Mans"
+   },
+   {
+    "id": "2472E3387028F",
+    "type": "immeuble",
+    "adresse_ban": "5 rue Port Royal 72000 Le Mans",
+    "numero": "AB4276663",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4276663"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 bd mutuel 72000 Le Mans"
+   },
+   {
+    "id": "2472E3029114H",
+    "type": "immeuble",
+    "adresse_ban": "8 rue Hubert Latham 72100 Le Mans",
+    "numero": "AC3581196",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3581196"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "6 r hubert latham 72100 Le Mans"
+   },
+   {
+    "id": "2472E3029236Z",
+    "type": "immeuble",
+    "adresse_ban": "12 rue Hubert Latham 72100 Le Mans",
+    "numero": "AC3581196",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3581196"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "6 r hubert latham 72100 Le Mans"
+   },
+   {
+    "id": "2472E3445612L",
+    "type": "appartement",
+    "adresse_ban": "1 Rue des Victimes du Nazisme 72000 Le Mans",
+    "numero": "AA5216254",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "1C r des victimes du nazisme 72000 Le Mans"
+   },
+   {
+    "id": "2472E3387067S",
+    "type": "immeuble",
+    "adresse_ban": "5 rue Port Royal 72000 Le Mans",
+    "numero": "AB4276663",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4276663"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 bd mutuel 72000 Le Mans"
+   },
+   {
+    "id": "2472E3387316H",
+    "type": "immeuble",
+    "adresse_ban": "5 rue Port Royal 72000 Le Mans",
+    "numero": "AB4276663",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4276663"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "4 bd mutuel 72000 Le Mans"
+   },
+   {
+    "id": "2538E1370758C",
+    "type": "appartement",
+    "adresse_ban": "76 Cours Saint - André 38800 Le Pont-de-Claix",
+    "numero": "AB0628693",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB0628693"
+    ],
+    "commune_registre": "38317",
+    "commune_ban": "38317",
+    "adresse_registre": "76 crs saint-andre 38800 Le Pont-de-Claix"
+   },
+   {
+    "id": "2538E1223455P",
+    "type": "immeuble",
+    "adresse_ban": "29 Boulevard Jean - Jacques Rousseau 38300 Bourgoin-Jallieu",
+    "numero": "AA9010257",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA9010257"
+    ],
+    "commune_registre": "38053",
+    "commune_ban": "38053",
+    "adresse_registre": "5-29 bd jean-jacques rousseau 38300 BOURGOIN JALLIEU"
+   },
+   {
+    "id": "2538E1274399Z",
+    "type": "immeuble",
+    "adresse_ban": "4 Rue Vauban 2- 38300 Bourgoin-Jallieu",
+    "numero": "AC1372242",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "38053",
+    "commune_ban": "38053",
+    "adresse_registre": "2-4 r vauban 38300 BOURGOIN-JALLIEU"
+   },
+   {
+    "id": "2538E1181869D",
+    "type": "appartement",
+    "adresse_ban": "Parc des Champs Elysées 38000 Grenoble",
+    "numero": "AB1847540",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "38185",
+    "commune_ban": "38185",
+    "adresse_registre": "16 r des champs elysees 38100 Grenoble"
+   },
+   {
+    "id": "2538E1278815V",
+    "type": "appartement",
+    "adresse_ban": "Impasse Fontaine du Corbeau 38750 Huez",
+    "numero": "AC1474139",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "38191",
+    "commune_ban": "38191",
+    "adresse_registre": "42 imp fontaine du corbeau 38750 Huez"
+   },
+   {
+    "id": "2538E1360148A",
+    "type": "immeuble",
+    "adresse_ban": "14 Rue Molière 38200 Vienne",
+    "numero": "AC2258051",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2258051"
+    ],
+    "commune_registre": "38544",
+    "commune_ban": "38544",
+    "adresse_registre": "14 r moliere 38200 VIENNE"
+   },
+   {
+    "id": "2538E1149624Y",
+    "type": "appartement",
+    "adresse_ban": "270 Avenue Ambroise Croizat 38400 Saint-Martin-d'Hères",
+    "numero": "AB8405615",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8405615"
+    ],
+    "commune_registre": "38421",
+    "commune_ban": "38421",
+    "adresse_registre": "270 av ambroise croizat 38400 Saint-Martin-d'Hères"
+   },
+   {
+    "id": "2538E1468520E",
+    "type": "immeuble",
+    "adresse_ban": "10 Avenue de Grenoble 38170 Seyssinet-Pariset",
+    "numero": "AA4712352",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4712352"
+    ],
+    "commune_registre": "38485",
+    "commune_ban": "38485",
+    "adresse_registre": "10 Avenue de Grenoble 38170 Seyssinet-Pariset"
+   },
+   {
+    "id": "2366E1385279P",
+    "type": "appartement",
+    "adresse_ban": "40 Rue Joseph CABRIT 66000 Perpignan",
+    "numero": "AD2297406",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "66136",
+    "commune_ban": "66136",
+    "adresse_registre": "24 av de grande bretagne 66000 Perpignan"
+   },
+   {
+    "id": "2593E2162770F",
+    "type": "immeuble",
+    "adresse_ban": "69 Avenue Victor Hugo 93270 Sevran",
+    "numero": "AE2434934",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE2434934"
+    ],
+    "commune_registre": "93071",
+    "commune_ban": "93071",
+    "adresse_registre": "69 av victor hugo 93270 Sevran"
+   },
+   {
+    "id": "2593E2462596Z",
+    "type": "appartement",
+    "adresse_ban": "113 Avenue Jean Jaurès 93110 Rosny-sous-Bois",
+    "numero": "AH8053746",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "93064",
+    "commune_ban": "93064",
+    "adresse_registre": "125 av jean jaures 93110 Rosny-sous-Bois"
+   },
+   {
+    "id": "2593E2322005Q",
+    "type": "appartement",
+    "adresse_ban": "31 Avenue de la Bourdonnais 93250 Villemomble",
+    "numero": "AB2128940",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB2128940"
+    ],
+    "commune_registre": "93077",
+    "commune_ban": "93077",
+    "adresse_registre": "31 av de la bourdonnais 93250 VILLEMOMBLE"
+   },
+   {
+    "id": "2593E2217595W",
+    "type": "appartement",
+    "adresse_ban": "1 Rue Fernand Herbaut 93600 Aulnay-sous-Bois",
+    "numero": "AG0639179",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG0639179"
+    ],
+    "commune_registre": "93005",
+    "commune_ban": "93005",
+    "adresse_registre": "1 r fernand herbaut 93600 Aulnay-sous-Bois"
+   },
+   {
+    "id": "2593E2460034L",
+    "type": "appartement",
+    "adresse_ban": "70 Rue Philippe Dartis 93800 Épinay-sur-Seine",
+    "numero": "AE3002367",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE3002367"
+    ],
+    "commune_registre": "93031",
+    "commune_ban": "93031",
+    "adresse_registre": "70 r philippe dartis 93800 Épinay-sur-Seine"
+   },
+   {
+    "id": "2593E2280937C",
+    "type": "appartement",
+    "adresse_ban": "58 Allée Henri Barbusse 93320 Les Pavillons-sous-Bois",
+    "numero": "AA6478671",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA6478671"
+    ],
+    "commune_registre": "93057",
+    "commune_ban": "93057",
+    "adresse_registre": "54-58 all henri barbusse 93320 LES PAVILLONS SOUS BOIS"
+   },
+   {
+    "id": "2593E2262123M",
+    "type": "immeuble",
+    "adresse_ban": "92 Avenue du Président Wilson 93100 Montreuil",
+    "numero": "AB4167276",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "93048",
+    "commune_ban": "93048",
+    "adresse_registre": "5 Rue Marcellin Berthelot 93100 Montreuil"
+   },
+   {
+    "id": "2593E2413570J",
+    "type": "appartement",
+    "adresse_ban": "101 Avenue Jean Lolive 93500 Pantin",
+    "numero": "AA8320145",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8320145"
+    ],
+    "commune_registre": "93055",
+    "commune_ban": "93055",
+    "adresse_registre": "101 av jean lolive 93500 PANTIN"
+   },
+   {
+    "id": "2345E2106841E",
+    "type": "appartement",
+    "adresse_ban": "3 Rue du Faubourg de la Chaussee 45200 Montargis",
+    "numero": "AA8928020",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8928020"
+    ],
+    "commune_registre": "45208",
+    "commune_ban": "45208",
+    "adresse_registre": "3 Rue du Faubourg de la Chaussee 45200 Montargis"
+   },
+   {
+    "id": "2345E1950972F",
+    "type": "appartement",
+    "adresse_ban": "8 Rue Lazare Carnot 45100 Orléans",
+    "numero": "AC5873450",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "45234",
+    "commune_ban": "45234",
+    "adresse_registre": "11 Rue Lazare Carnot 45100 ORLEANS"
+   },
+   {
+    "id": "2345E2182337W",
+    "type": "appartement",
+    "adresse_ban": "6 Rue du Grand Carré 45800 Saint-Jean-de-Braye",
+    "numero": "AC2274702",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC2274702"
+    ],
+    "commune_registre": "45284",
+    "commune_ban": "45284",
+    "adresse_registre": "6 r du grand carre 45800 SAINT JEAN DE BRAYE"
+   },
+   {
+    "id": "2589E2682497O",
+    "type": "immeuble",
+    "adresse_ban": "36 Rue Joubert 89000 Auxerre",
+    "numero": "AC7887607",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7887607"
+    ],
+    "commune_registre": "89024",
+    "commune_ban": "89024",
+    "adresse_registre": "36 r joubert 89000 Auxerre"
+   },
+   {
+    "id": "2589E2530072B",
+    "type": "immeuble",
+    "adresse_ban": "7 Rue Bobillot 89000 Auxerre",
+    "numero": "AD1994144",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD1994144"
+    ],
+    "commune_registre": "89024",
+    "commune_ban": "89024",
+    "adresse_registre": "5 r bobillot 89000 Auxerre"
+   },
+   {
+    "id": "2589E2657136D",
+    "type": "appartement",
+    "adresse_ban": "105 Rue de Paris 89000 Auxerre",
+    "numero": "AI6193205",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AJ2482032"
+    ],
+    "commune_registre": "89024",
+    "commune_ban": "89024",
+    "adresse_registre": "125 Rue de Paris 89000 Auxerre"
+   },
+   {
+    "id": "2589E2529943C",
+    "type": "immeuble",
+    "adresse_ban": "7 Rue Bobillot 89000 Auxerre",
+    "numero": "AD1994144",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD1994144"
+    ],
+    "commune_registre": "89024",
+    "commune_ban": "89024",
+    "adresse_registre": "5 r bobillot 89000 Auxerre"
+   },
+   {
+    "id": "2477E0271135J",
+    "type": "appartement",
+    "adresse_ban": "43 Boulevard Magenta 77300 Fontainebleau",
+    "numero": "AB7043797",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7043797"
+    ],
+    "commune_registre": "77186",
+    "commune_ban": "77186",
+    "adresse_registre": "43 bd magenta 77300 FONTAINEBLEAU"
+   },
+   {
+    "id": "2477E0183973Z",
+    "type": "appartement",
+    "adresse_ban": "214 Avenue de Chanteloup 77550 Moissy-Cramayel",
+    "numero": "AB7979511",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7979511"
+    ],
+    "commune_registre": "77296",
+    "commune_ban": "77296",
+    "adresse_registre": "174 av de chanteloup 77550 MOISSY CRAMAYEL"
+   },
+   {
+    "id": "2477E0037493D",
+    "type": "appartement",
+    "adresse_ban": "Rue Honore Daumier 77000 La Rochette",
+    "numero": "AB5370275",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77389",
+    "commune_ban": "77389",
+    "adresse_registre": "69B r honore daumier 77000 La Rochette"
+   },
+   {
+    "id": "2477E0081935L",
+    "type": "appartement",
+    "adresse_ban": "14 Rue Doré 77000 Melun",
+    "numero": "AD7164726",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD7164726"
+    ],
+    "commune_registre": "77288",
+    "commune_ban": "77288",
+    "adresse_registre": "14 r dore 77000 Melun"
+   },
+   {
+    "id": "2477E0263546M",
+    "type": "appartement",
+    "adresse_ban": "174 Avenue de Chanteloup 77550 Moissy-Cramayel",
+    "numero": "AB7979511",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7979511"
+    ],
+    "commune_registre": "77296",
+    "commune_ban": "77296",
+    "adresse_registre": "174 av de chanteloup 77550 MOISSY CRAMAYEL"
+   },
+   {
+    "id": "2477E0023276I",
+    "type": "appartement",
+    "adresse_ban": "27 Avenue du Général de Gaulle 77210 Avon",
+    "numero": "AA3345576",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AA3341021",
+     "AA3344090",
+     "AA3345576",
+     "AI8662363"
+    ],
+    "commune_registre": "77014",
+    "commune_ban": "77014",
+    "adresse_registre": "27 av du general de gaulle 77210 Avon"
+   },
+   {
+    "id": "2477E0067650A",
+    "type": "appartement",
+    "adresse_ban": "40 Rue Bernard Palissy 77210 Avon",
+    "numero": "AB7046923",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77014",
+    "commune_ban": "77014",
+    "adresse_registre": "38 r bernard palissy 77210 AVON"
+   },
+   {
+    "id": "2477E0032799P",
+    "type": "appartement",
+    "adresse_ban": "120 Allee Plein Ciel 77350 Le Mée-sur-Seine",
+    "numero": "AA0809459",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0809459"
+    ],
+    "commune_registre": "77285",
+    "commune_ban": "77285",
+    "adresse_registre": "120 all de plein ciel 77350 Le Mée-sur-Seine"
+   },
+   {
+    "id": "2393E2946477S",
+    "type": "appartement",
+    "adresse_ban": "19 Avenue Francis de Pressensé 93350 Le Bourget",
+    "numero": "AD4052254",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4052254"
+    ],
+    "commune_registre": "93013",
+    "commune_ban": "93013",
+    "adresse_registre": "19 av francis de pressense 93350 Le Bourget"
+   },
+   {
+    "id": "2393E3007973Y",
+    "type": "appartement",
+    "adresse_ban": "42 Avenue de la République 93800 Épinay-sur-Seine",
+    "numero": "AB9425810",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9425810"
+    ],
+    "commune_registre": "93031",
+    "commune_ban": "93031",
+    "adresse_registre": "40 av de la republique 93800 Épinay-sur-Seine"
+   },
+   {
+    "id": "2393E3173111K",
+    "type": "appartement",
+    "adresse_ban": "44 Boulevard Anatole France 93300 Aubervilliers",
+    "numero": "AD2435352",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD2435352"
+    ],
+    "commune_registre": "93001",
+    "commune_ban": "93001",
+    "adresse_registre": "44 bd anatole france 93300 Aubervilliers"
+   },
+   {
+    "id": "2393E3118147K",
+    "type": "appartement",
+    "adresse_ban": "44 Bd Paul Vaillant Couturier 93100 Montreuil",
+    "numero": "AB4908968",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4908968"
+    ],
+    "commune_registre": "93048",
+    "commune_ban": "93048",
+    "adresse_registre": "44 Bd Paul Vaillant Couturier 93100 MONTREUIL"
+   },
+   {
+    "id": "2393E3107185U",
+    "type": "appartement",
+    "adresse_ban": "5 Rue des Bois de Groslay 93700 Drancy",
+    "numero": "AG7241870",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "93029",
+    "commune_ban": "93029",
+    "adresse_registre": "2-6 r des midinettes 93700 Drancy"
+   },
+   {
+    "id": "2393E3061439I",
+    "type": "appartement",
+    "adresse_ban": "88 Rue Baudin 93130 Noisy-le-Sec",
+    "numero": "AC1649219",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1649219"
+    ],
+    "commune_registre": "93053",
+    "commune_ban": "93053",
+    "adresse_registre": "88-90 r baudin 93130 NOISY LE SEC"
+   },
+   {
+    "id": "2393E3256007S",
+    "type": "appartement",
+    "adresse_ban": "3 Rue des Ecoles 93600 Aulnay-sous-Bois",
+    "numero": "AE3498375",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE3498375"
+    ],
+    "commune_registre": "93005",
+    "commune_ban": "93005",
+    "adresse_registre": "3 r des ecoles 93600 AULNAY SOUS BOIS"
+   },
+   {
+    "id": "2393E3185325E",
+    "type": "appartement",
+    "adresse_ban": "6 Allée de Paris 93400 Saint-Ouen-sur-Seine",
+    "numero": "AA7019466",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7019466"
+    ],
+    "commune_registre": "93070",
+    "commune_ban": "93070",
+    "adresse_registre": "8 all de paris 93400 Saint-Ouen"
+   },
+   {
+    "id": "2476E3639025O",
+    "type": "appartement",
+    "adresse_ban": "102 Rue de Tourneville 76600 Le Havre",
+    "numero": "AC4317673",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC4317673"
+    ],
+    "commune_registre": "76351",
+    "commune_ban": "76351",
+    "adresse_registre": "17 r reine berthe 76600 Le Havre"
+   },
+   {
+    "id": "2476E3698957Q",
+    "type": "appartement",
+    "adresse_ban": "8 Rue de la Champmesle 76000 Rouen",
+    "numero": "AD7102361",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "76540",
+    "commune_ban": "76540",
+    "adresse_registre": "10 r la champmesle 76000 Rouen"
+   },
+   {
+    "id": "2476E3747681Q",
+    "type": "appartement",
+    "adresse_ban": "3 Rue du Framboisier 76000 Rouen",
+    "numero": "AA6791917",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "76540",
+    "commune_ban": "76540",
+    "adresse_registre": "24 Rue Mustel 76000 Rouen"
+   },
+   {
+    "id": "2476E3622323E",
+    "type": "immeuble",
+    "adresse_ban": "17 Rue Lormier 76190 Yvetot",
+    "numero": "AA8301582",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8301582"
+    ],
+    "commune_registre": "76758",
+    "commune_ban": "76758",
+    "adresse_registre": "17 Rue Lormier 76190 Yvetot"
+   },
+   {
+    "id": "2476E3564010J",
+    "type": "appartement",
+    "adresse_ban": "63 Rue Jean Lecanuet 76000 Rouen",
+    "numero": "AA4965968",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4965968"
+    ],
+    "commune_registre": "76540",
+    "commune_ban": "76540",
+    "adresse_registre": "63 r jean lecanuet 76000 Rouen"
+   },
+   {
+    "id": "2476E3622872H",
+    "type": "appartement",
+    "adresse_ban": "30 Rue de la Champmesle 76000 Rouen",
+    "numero": "AA4136255",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "76540",
+    "commune_ban": "76540",
+    "adresse_registre": "52 Rue de la Champmesle 76000 Rouen"
+   },
+   {
+    "id": "2476E3634343M",
+    "type": "immeuble",
+    "adresse_ban": "19 Rue Dubocage de Bléville 76620 Le Havre",
+    "numero": "AA3164639",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA3164639"
+    ],
+    "commune_registre": "76351",
+    "commune_ban": "76351",
+    "adresse_registre": "19 Rue Dubocage de Bléville 76620 Le Havre"
+   },
+   {
+    "id": "2476E3792000F",
+    "type": "appartement",
+    "adresse_ban": "Rue du Belvédère 76130 Mont-Saint-Aignan",
+    "numero": "AA4081790",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "76451",
+    "commune_ban": "76451",
+    "adresse_registre": "3 Chemin du Prieuré 76130 Mont-Saint-Aignan"
+   },
+   {
+    "id": "2592E2360685H",
+    "type": "immeuble",
+    "adresse_ban": "3 Rue Auguste Bailly 92400 Courbevoie",
+    "numero": "AC8549768",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC8549768"
+    ],
+    "commune_registre": "92026",
+    "commune_ban": "92026",
+    "adresse_registre": "3 Rue Auguste Bailly 92400 COURBEVOIE"
+   },
+   {
+    "id": "2592E2250571D",
+    "type": "appartement",
+    "adresse_ban": "45 Avenue Marceau 92400 Courbevoie",
+    "numero": "AA0671164",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AC0986810"
+    ],
+    "commune_registre": "92026",
+    "commune_ban": "92026",
+    "adresse_registre": "43 Avenue Marceau 92400 Courbevoie"
+   },
+   {
+    "id": "2592E2306190I",
+    "type": "appartement",
+    "adresse_ban": "126 Rue Perronet 92200 Neuilly-sur-Seine",
+    "numero": "AC4518981",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC4518981"
+    ],
+    "commune_registre": "92051",
+    "commune_ban": "92051",
+    "adresse_registre": "126 Rue Perronet 92200 Neuilly-sur-Seine"
+   },
+   {
+    "id": "2592E2329327F",
+    "type": "appartement",
+    "adresse_ban": "1958 Rue du Vieux Pont de Sèvres 92100 Boulogne-Billancourt",
+    "numero": "AB3577723",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3577723"
+    ],
+    "commune_registre": "92012",
+    "commune_ban": "92012",
+    "adresse_registre": "72 rpt du pont de sevres 92100 Boulogne-Billancourt"
+   },
+   {
+    "id": "2592E2298791T",
+    "type": "appartement",
+    "adresse_ban": "48 Rue Pasteur 92150 Suresnes",
+    "numero": "AB6123335",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6123335"
+    ],
+    "commune_registre": "92073",
+    "commune_ban": "92073",
+    "adresse_registre": "48 Rue Pasteur 92150 Suresnes"
+   },
+   {
+    "id": "2592E2215801V",
+    "type": "appartement",
+    "adresse_ban": "7 Avenue de l’Union 92600 Asnières-sur-Seine",
+    "numero": "AB3503067",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3503067"
+    ],
+    "commune_registre": "92004",
+    "commune_ban": "92004",
+    "adresse_registre": "7 Avenue de l’Union 92600 Asnières-sur-Seine"
+   },
+   {
+    "id": "2592E2418391T",
+    "type": "appartement",
+    "adresse_ban": "121 Boulevard Jean Jaurès 92110 Clichy",
+    "numero": "AB1720077",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1720077"
+    ],
+    "commune_registre": "92024",
+    "commune_ban": "92024",
+    "adresse_registre": "121 bd jean jaures 92110 Clichy"
+   },
+   {
+    "id": "2592E2327380I",
+    "type": "immeuble",
+    "adresse_ban": "9 Allee de Trevise Bâtiment E1, 92330 Sceaux",
+    "numero": "AB1636836",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "92071",
+    "commune_ban": "92071",
+    "adresse_registre": "9-31 all de trevise 92330 Sceaux"
+   },
+   {
+    "id": "2463E2929486C",
+    "type": "appartement",
+    "adresse_ban": "27 rue du Mont-Mouchet 63000 Clermont-Ferrand",
+    "numero": "AF7121585",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF7121585"
+    ],
+    "commune_registre": "63113",
+    "commune_ban": "63113",
+    "adresse_registre": "27 r du mont mouchet 63000 Clermont-Ferrand"
+   },
+   {
+    "id": "2463E2953221Z",
+    "type": "appartement",
+    "adresse_ban": "33 boulevard Jean Jaurès 63000 Clermont-Ferrand",
+    "numero": "AA7930597",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7930597"
+    ],
+    "commune_registre": "63113",
+    "commune_ban": "63113",
+    "adresse_registre": "33 bd jean jaures 63000 Clermont-Ferrand"
+   },
+   {
+    "id": "2463E2928671T",
+    "type": "appartement",
+    "adresse_ban": "56 boulevard Aristide Briand 63000 Clermont-Ferrand",
+    "numero": "AA0858035",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "63113",
+    "commune_ban": "63113",
+    "adresse_registre": "54 bd aristide briand 63000 CLERMONT FERRAND"
+   },
+   {
+    "id": "2417E3740528G",
+    "type": "immeuble",
+    "adresse_ban": "56 Avenue de Pontaillac 17420 Saint-Palais-sur-Mer",
+    "numero": "AD4335162",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4335162"
+    ],
+    "commune_registre": "17380",
+    "commune_ban": "17380",
+    "adresse_registre": "56 Avenue de Pontaillac 17420 Saint-Palais-sur-Mer"
+   },
+   {
+    "id": "2417E3609399V",
+    "type": "appartement",
+    "adresse_ban": "28 Rue Sardinerie 17000 La Rochelle",
+    "numero": "AC3450749",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3450749"
+    ],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "28 Rue Sardinerie 17000 La Rochelle"
+   },
+   {
+    "id": "2417E3432310S",
+    "type": "appartement",
+    "adresse_ban": "54 Rue du Brave Rondeau 17000 La Rochelle",
+    "numero": "AD3016714",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3016714"
+    ],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "59 r villeneuve 17000 LA ROCHELLE"
+   },
+   {
+    "id": "2417E3641024E",
+    "type": "appartement",
+    "adresse_ban": "3 Rue Mal de Lattre de Tassigny 17300 Rochefort",
+    "numero": "AA4411054",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17299",
+    "commune_ban": "17299",
+    "adresse_registre": "7 Rue Mal de Lattre de Tassigny 17300 Rochefort"
+   },
+   {
+    "id": "2417E3752720E",
+    "type": "immeuble",
+    "adresse_ban": "27ter Rue du Général de Gaulle 17139 Dompierre-sur-Mer",
+    "numero": "AB8114480",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8114480"
+    ],
+    "commune_registre": "17142",
+    "commune_ban": "17142",
+    "adresse_registre": "27T r du general de gaulle 17139 Dompierre-sur-Mer"
+   },
+   {
+    "id": "2417E3656809H",
+    "type": "appartement",
+    "adresse_ban": "14 Rue Saint Cybard 17180 Périgny",
+    "numero": "AA9159005",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17274",
+    "commune_ban": "17274",
+    "adresse_registre": "12 r saint cybard 17180 PERIGNY"
+   },
+   {
+    "id": "2417E3688476G",
+    "type": "immeuble",
+    "adresse_ban": "66b Rue Alfred Kastler 17000 La Rochelle",
+    "numero": "AA7524366",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "66 Rue Alfred Kastler 17000 LA ROCHELLE"
+   },
+   {
+    "id": "2417E3574677J",
+    "type": "appartement",
+    "adresse_ban": "25 Rue Léonce Vieljeux 17000 La Rochelle",
+    "numero": "AD3783156",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3783156"
+    ],
+    "commune_registre": "17300",
+    "commune_ban": "17300",
+    "adresse_registre": "25 r leonce vieljeux 17000 La Rochelle"
+   },
+   {
+    "id": "2430E4110550J",
+    "type": "immeuble",
+    "adresse_ban": "1105 Chemin du Golf 30900 Nîmes",
+    "numero": "AB1631399",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1631399"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "1105 che du golf 30900 Nîmes"
+   },
+   {
+    "id": "2430E4158012V",
+    "type": "immeuble",
+    "adresse_ban": "Rue Rousselier 30900 Nîmes",
+    "numero": "AC8601486",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "13 Rue Rousselier 30000 Nîmes"
+   },
+   {
+    "id": "2430E3989682P",
+    "type": "appartement",
+    "adresse_ban": "38 Rue du 19 Mars 1962 30130 Pont-Saint-Esprit",
+    "numero": "AG2488310",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30202",
+    "commune_ban": "30202",
+    "adresse_registre": "19 bd gambetta 30130 Pont-Saint-Esprit"
+   },
+   {
+    "id": "2430E4154933K",
+    "type": "appartement",
+    "adresse_ban": "10 Rue Canteduc 30000 Nîmes",
+    "numero": "AC8577637",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC8577637"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "10 Rue Canteduc 30000 NIMES"
+   },
+   {
+    "id": "2430E4121038T",
+    "type": "appartement",
+    "adresse_ban": "1385 Chemin du Golf 30900 Nîmes",
+    "numero": "AB1631399",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1631399"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "1105 che du golf 30900 Nîmes"
+   },
+   {
+    "id": "2430E4152316T",
+    "type": "appartement",
+    "adresse_ban": "1 Rue des Greffes 30000 Nîmes",
+    "numero": "AD1305424",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD1305424"
+    ],
+    "commune_registre": "30189",
+    "commune_ban": "30189",
+    "adresse_registre": "1 r des greffes 30000 NIMES"
+   },
+   {
+    "id": "2430E4188201Y",
+    "type": "appartement",
+    "adresse_ban": "310 Rue de l'Elysée 30130 Pont-Saint-Esprit",
+    "numero": "AB9837915",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9837915"
+    ],
+    "commune_registre": "30202",
+    "commune_ban": "30202",
+    "adresse_registre": "310 r de l'elysee 30130 Pont-Saint-Esprit"
+   },
+   {
+    "id": "2430E4220211C",
+    "type": "appartement",
+    "adresse_ban": "32bis Avenue de Stalingrad 30100 Alès",
+    "numero": "AB1388180",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "30007",
+    "commune_ban": "30007",
+    "adresse_registre": "Avenue Stalingrad / 30100 ALES"
+   },
+   {
+    "id": "2442E2150415A",
+    "type": "appartement",
+    "adresse_ban": "11 Rue du Vernay 42100 Saint-Étienne",
+    "numero": "AG1431071",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG1431071"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "11 r du vernay 42100 Saint-Étienne"
+   },
+   {
+    "id": "2442E2292510F",
+    "type": "appartement",
+    "adresse_ban": "18c Rue Paul Rollat 42650 Saint-Jean-Bonnefonds",
+    "numero": "AB2836229",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42237",
+    "commune_ban": "42237",
+    "adresse_registre": "18 r paul rollat 42650 Saint-Jean-Bonnefonds"
+   },
+   {
+    "id": "2442E2228442B",
+    "type": "appartement",
+    "adresse_ban": "12b Avenue Albert Raimond 42270 Saint-Priest-en-Jarez",
+    "numero": "AI3694056",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42275",
+    "commune_ban": "42275",
+    "adresse_registre": "10 av albert raimond 42270 Saint-Priest-en-Jarez"
+   },
+   {
+    "id": "2442E2000559I",
+    "type": "appartement",
+    "adresse_ban": "1b Rue Carnot 42270 Saint-Priest-en-Jarez",
+    "numero": "AC5375712",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42275",
+    "commune_ban": "42275",
+    "adresse_registre": "1 r carnot 42270 Saint-Priest-en-Jarez"
+   },
+   {
+    "id": "2442E2048232X",
+    "type": "appartement",
+    "adresse_ban": "4bis Rue de la Convention 42100 Saint-Étienne",
+    "numero": "AA8641086",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "4 r de la convention 42100 Saint-Étienne"
+   },
+   {
+    "id": "2442E2144467G",
+    "type": "appartement",
+    "adresse_ban": "1 Rue des Touristes 42000 Saint-Étienne",
+    "numero": "AB1779727",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1779727"
+    ],
+    "commune_registre": "42218",
+    "commune_ban": "42218",
+    "adresse_registre": "1 r des touristes 42000 Saint-Étienne"
+   },
+   {
+    "id": "2622E0004515S",
+    "type": "appartement",
+    "adresse_ban": "4 Avenue des Combattants 22600 Loudéac",
+    "numero": "AB4370953",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "22136",
+    "commune_ban": "22136",
+    "adresse_registre": "4B av des combattants 22600 Loudéac"
+   },
+   {
+    "id": "2622E0094178H",
+    "type": "appartement",
+    "adresse_ban": "35 Rue Mansart 22000 Saint-Brieuc",
+    "numero": "AA0629279",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "1 r saint-jouan 22000 SAINT BRIEUC"
+   },
+   {
+    "id": "2622E0194943W",
+    "type": "appartement",
+    "adresse_ban": "9 Rue du Colombier 22000 Saint-Brieuc",
+    "numero": "AC8326423",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "5 r du colombier 22000 Saint-Brieuc"
+   },
+   {
+    "id": "2622E0159340N",
+    "type": "immeuble",
+    "adresse_ban": "9 Rue Henri Barbusse 22000 Saint-Brieuc",
+    "numero": "AC1832286",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1832286"
+    ],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "9 Rue Henri Barbusse 22000 Saint-Brieuc"
+   },
+   {
+    "id": "2622E0119183A",
+    "type": "appartement",
+    "adresse_ban": "1 Rue Duguay-Trouin 22000 Saint-Brieuc",
+    "numero": "AC1825070",
+    "verdict": "numero_inconnu_du_registre",
+    "candidats": [],
+    "commune_registre": null,
+    "commune_ban": "22278",
+    "adresse_registre": null
+   },
+   {
+    "id": "2622E0187791U",
+    "type": "immeuble",
+    "adresse_ban": "9 Rue Henri Barbusse 22000 Saint-Brieuc",
+    "numero": "AC1832286",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1832286"
+    ],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "9 Rue Henri Barbusse 22000 Saint-Brieuc"
+   },
+   {
+    "id": "2622E0160345E",
+    "type": "immeuble",
+    "adresse_ban": "9 Rue Henri Barbusse 22000 Saint-Brieuc",
+    "numero": "AC1832286",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC1832286"
+    ],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "9 Rue Henri Barbusse 22000 Saint-Brieuc"
+   },
+   {
+    "id": "2622E0247596Z",
+    "type": "appartement",
+    "adresse_ban": "2 Rue de La Tullaye 22000 Saint-Brieuc",
+    "numero": "AD5507157",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD5507157"
+    ],
+    "commune_registre": "22278",
+    "commune_ban": "22278",
+    "adresse_registre": "2 r de la tullaye 22000 Saint-Brieuc"
+   },
+   {
+    "id": "2238E1735019A",
+    "type": "appartement",
+    "adresse_ban": "27 Chemin des Buclos 38240 Meylan",
+    "numero": "AC0279380",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC0279380"
+    ],
+    "commune_registre": "38229",
+    "commune_ban": "38229",
+    "adresse_registre": "27 che des buclos 38240 Meylan"
+   },
+   {
+    "id": "2238E1550916D",
+    "type": "appartement",
+    "adresse_ban": "17 Quai Jean Jaurés 38200 Vienne",
+    "numero": "AD9652934",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD9652934"
+    ],
+    "commune_registre": "38544",
+    "commune_ban": "38544",
+    "adresse_registre": "17 Quai Jean Jaurès 38200 Vienne"
+   },
+   {
+    "id": "2238E1711469G",
+    "type": "appartement",
+    "adresse_ban": "15 Boulevard Maréchal Leclerc 38000 Grenoble",
+    "numero": "AA1578426",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1578426"
+    ],
+    "commune_registre": "38185",
+    "commune_ban": "38185",
+    "adresse_registre": "15 bd marechal leclerc 38000 Grenoble"
+   },
+   {
+    "id": "2238E1532607Y",
+    "type": "appartement",
+    "adresse_ban": "45 Avenue Jean Perrot 38100 Grenoble",
+    "numero": "AD9501966",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD9501966"
+    ],
+    "commune_registre": "38185",
+    "commune_ban": "38185",
+    "adresse_registre": "45 av jean perrot 38100 Grenoble"
+   },
+   {
+    "id": "2238E1559684J",
+    "type": "appartement",
+    "adresse_ban": "133 Avenue Francois Mitterrand 38670 Chasse-sur-Rhône",
+    "numero": "AD9301235",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD9301235"
+    ],
+    "commune_registre": "38087",
+    "commune_ban": "38087",
+    "adresse_registre": "133 av francois mitterrand 38670 Chasse-sur-Rhône"
+   },
+   {
+    "id": "2238E1506317U",
+    "type": "appartement",
+    "adresse_ban": "20 Rue Guynemer 38100 Grenoble",
+    "numero": "AA4723086",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4723086"
+    ],
+    "commune_registre": "38185",
+    "commune_ban": "38185",
+    "adresse_registre": "20 r guynemer 38000 GRENOBLE"
+   },
+   {
+    "id": "2238E1548285Y",
+    "type": "appartement",
+    "adresse_ban": "35 Rue du 26 Mai 1944 38950 Saint-Martin-le-Vinoux",
+    "numero": "AB3870680",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "38423",
+    "commune_ban": "38423",
+    "adresse_registre": "29A r du 26 mai 1944 38950 ST MARTIN LE VINOUX"
+   },
+   {
+    "id": "2238E1579974T",
+    "type": "appartement",
+    "adresse_ban": "281 Rue du 8 Mai 1945 38220 Vizille",
+    "numero": "AB7857410",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AB7857410",
+     "AG9479114"
+    ],
+    "commune_registre": "38562",
+    "commune_ban": "38562",
+    "adresse_registre": "281 Rue du 8 Mai 1945 38220 Vizille"
+   },
+   {
+    "id": "2525E1551708F",
+    "type": "appartement",
+    "adresse_ban": "12 Chemin de Rouge Terre 25200 Grand-Charmont",
+    "numero": "AB5117411",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "25284",
+    "commune_ban": "25284",
+    "adresse_registre": "res les combottes, 25200 Grand-Charmont"
+   },
+   {
+    "id": "2525E1763575Y",
+    "type": "immeuble",
+    "adresse_ban": "8 chemin de canot 25000 Besançon",
+    "numero": "AA7816747",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7816747"
+    ],
+    "commune_registre": "25056",
+    "commune_ban": "25056",
+    "adresse_registre": "2 chemin de canot 25000 Besançon"
+   },
+   {
+    "id": "2525E1505549W",
+    "type": "appartement",
+    "adresse_ban": "1 Route de Pontarlier 25840 Vuillafans",
+    "numero": "AF5907860",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF5907860"
+    ],
+    "commune_registre": "25633",
+    "commune_ban": "25633",
+    "adresse_registre": "1 rte de pontarlier 25840 Vuillafans"
+   },
+   {
+    "id": "2525E1679663O",
+    "type": "appartement",
+    "adresse_ban": "22 Rue Claude Debussy 25200 Montbéliard",
+    "numero": "AG6701668",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "25388",
+    "commune_ban": "25388",
+    "adresse_registre": "20 r claude debussy 25200 Montbéliard"
+   },
+   {
+    "id": "2525E1640237E",
+    "type": "appartement",
+    "adresse_ban": "23 Rue de Morteau 25300 Pontarlier",
+    "numero": "AA8079337",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8079337"
+    ],
+    "commune_registre": "25462",
+    "commune_ban": "25462",
+    "adresse_registre": "23 r de morteau 25300 Pontarlier"
+   },
+   {
+    "id": "2525E1726257Q",
+    "type": "appartement",
+    "adresse_ban": "3 Impasse des Alpes 25120 Maîche",
+    "numero": "AD2295756",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD2295756"
+    ],
+    "commune_registre": "25356",
+    "commune_ban": "25356",
+    "adresse_registre": "3 imp des alpes 25120 Maîche"
+   },
+   {
+    "id": "2304E3755828E",
+    "type": "appartement",
+    "adresse_ban": "Pra Loup 04400 Uvernet-Fours",
+    "numero": "AF9628603",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "04226",
+    "commune_ban": "04226",
+    "adresse_registre": "7 Traverse de la Galerie 4400 Uvernet-Fours"
+   },
+   {
+    "id": "2304E3336665N",
+    "type": "appartement",
+    "adresse_ban": "75 Rue Albert Honde 04100 Manosque",
+    "numero": "AA7463474",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "04112",
+    "commune_ban": "04112",
+    "adresse_registre": "RUE ALBERT HONDE 04100 MANOSQUE"
+   },
+   {
+    "id": "2304E3420897F",
+    "type": "appartement",
+    "adresse_ban": "Avenue Victor Hugo 04220 Sainte-Tulle",
+    "numero": "AD0983353",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "04197",
+    "commune_ban": "04197",
+    "adresse_registre": "162 av victor hugo 4220 Sainte-Tulle"
+   },
+   {
+    "id": "2427E0063834I",
+    "type": "appartement",
+    "adresse_ban": "41 Rue du Fer à Cheval 27000 Évreux",
+    "numero": "AB1865690",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB1865690"
+    ],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "41 r du fer a cheval 27000 Évreux"
+   },
+   {
+    "id": "2427E0908568C",
+    "type": "appartement",
+    "adresse_ban": "7 Rue de la Rochette 27000 Évreux",
+    "numero": "AF4164539",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AF4164539",
+     "AI9305780"
+    ],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "7 r de la rochette 27000 Évreux"
+   },
+   {
+    "id": "2427E0281218G",
+    "type": "appartement",
+    "adresse_ban": "Rue du Clos des Vignes 27400 Louviers",
+    "numero": "AB8789836",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27375",
+    "commune_ban": "27375",
+    "adresse_registre": "imp elodie, 27400 Louviers"
+   },
+   {
+    "id": "2360E1869814I",
+    "type": "appartement",
+    "adresse_ban": "17 Rue Villiers de l'Isle Adam 60000 Beauvais",
+    "numero": "AB2384444",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "5 r nully d'hecourt 60000 BEAUVAIS"
+   },
+   {
+    "id": "2360E2061233P",
+    "type": "appartement",
+    "adresse_ban": "7 Avenue de Bourgogne 60000 Beauvais",
+    "numero": "AB2840593",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB2840593"
+    ],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "7 av de bourgogne 60000 BEAUVAIS"
+   },
+   {
+    "id": "2360E1898365L",
+    "type": "appartement",
+    "adresse_ban": "7 Rue Gambetta 60540 Bornel",
+    "numero": "AD9220880",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AA4844106",
+     "AD9220880"
+    ],
+    "commune_registre": "60088",
+    "commune_ban": "60088",
+    "adresse_registre": "7 r gambetta 60540 BORNEL"
+   },
+   {
+    "id": "2360E1918071J",
+    "type": "appartement",
+    "adresse_ban": "2 Rue des Cordeliers 60000 Beauvais",
+    "numero": "AB2328011",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB2328011"
+    ],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "2 r des cordeliers 60000 BEAUVAIS"
+   },
+   {
+    "id": "2360E1871073T",
+    "type": "appartement",
+    "adresse_ban": "13 Rue du Pont Laverdure 60000 Beauvais",
+    "numero": "AD8623183",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD8623183"
+    ],
+    "commune_registre": "60057",
+    "commune_ban": "60057",
+    "adresse_registre": "13 r du pont laverdure 60000 Beauvais"
+   },
+   {
+    "id": "2207E0151443B",
+    "type": "appartement",
+    "adresse_ban": "Impasse de la Laupie 07700 Bourg-Saint-Andéol",
+    "numero": "AB6595430",
+    "verdict": "numero_inconnu_du_registre",
+    "candidats": [],
+    "commune_registre": null,
+    "commune_ban": "07042",
+    "adresse_registre": null
+   },
+   {
+    "id": "2387E0140003E",
+    "type": "appartement",
+    "adresse_ban": "53 avenue Garibaldi 87000 Limoges",
+    "numero": "AA9530916",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA9530916"
+    ],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "53 avenue Garibaldi 87000 Limoges"
+   },
+   {
+    "id": "2387E0047501K",
+    "type": "appartement",
+    "adresse_ban": "4 rue Barny 87000 Limoges",
+    "numero": "AD2511244",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD2511244"
+    ],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "4 r barny 87000 LIMOGES"
+   },
+   {
+    "id": "2387E0165647M",
+    "type": "appartement",
+    "adresse_ban": "24 rue du Temple 87000 Limoges",
+    "numero": "AD5669353",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AB4712766"
+    ],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "25 r du clocher 87000 Limoges"
+   },
+   {
+    "id": "2590E1627536E",
+    "type": "immeuble",
+    "adresse_ban": "5 Rue du Peintre Heim 90000 Belfort",
+    "numero": "AF4288965",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF4288965"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "5 r du peintre heim 90000 Belfort"
+   },
+   {
+    "id": "2590E1723995D",
+    "type": "appartement",
+    "adresse_ban": "17 Boulevard du Maréchal Joffre 90000 Belfort",
+    "numero": "AD5848130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD5848130"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "17 bd du marechal joffre 90000 Belfort"
+   },
+   {
+    "id": "2590E1547834S",
+    "type": "appartement",
+    "adresse_ban": "6 Rue du Jura (privée) 90400 Danjoutin",
+    "numero": "AB5113949",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "90032",
+    "commune_ban": "90032",
+    "adresse_registre": "6 r du jura 90400 Danjoutin"
+   },
+   {
+    "id": "2590E1582172K",
+    "type": "appartement",
+    "adresse_ban": "15 Rue du Lavoir 90000 Belfort",
+    "numero": "AC9879099",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC9879099"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "15 Rue du Lavoir 90000 Belfort"
+   },
+   {
+    "id": "2590E1747409R",
+    "type": "appartement",
+    "adresse_ban": "4 Rue des Cerisiers 90300 Offemont",
+    "numero": "AF4617643",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF4617643"
+    ],
+    "commune_registre": "90075",
+    "commune_ban": "90075",
+    "adresse_registre": "4 r des cerisiers 90300 Offemont"
+   },
+   {
+    "id": "2590E1544292M",
+    "type": "appartement",
+    "adresse_ban": "25 Boulevard du Maréchal Joffre 90000 Belfort",
+    "numero": "AD5848130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD5848130"
+    ],
+    "commune_registre": "90010",
+    "commune_ban": "90010",
+    "adresse_registre": "17 bd du marechal joffre 90000 Belfort"
+   },
+   {
+    "id": "2661E2165255P",
+    "type": "immeuble",
+    "adresse_ban": "8 Place de la Roirie 61700 Domfront en Poiraie",
+    "numero": "AG7151020",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG7151020"
+    ],
+    "commune_registre": "61145",
+    "commune_ban": "61145",
+    "adresse_registre": "8 pl de la roirie 61700 Domfront en Poiraie"
+   },
+   {
+    "id": "2650E1459935M",
+    "type": "immeuble",
+    "adresse_ban": "7b Rue Tourville 50200 Coutances",
+    "numero": "AE4068847",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE4068847"
+    ],
+    "commune_registre": "50147",
+    "commune_ban": "50147",
+    "adresse_registre": "7 r tourville 50200 Coutances"
+   },
+   {
+    "id": "2650E1459904H",
+    "type": "immeuble",
+    "adresse_ban": "7b Rue Tourville 50200 Coutances",
+    "numero": "AE4068847",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE4068847"
+    ],
+    "commune_registre": "50147",
+    "commune_ban": "50147",
+    "adresse_registre": "7 r tourville 50200 Coutances"
+   },
+   {
+    "id": "2650E1505920D",
+    "type": "immeuble",
+    "adresse_ban": "9 Place du Général de Gaulle 50250 La Haye",
+    "numero": "AF8884041",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF8884041"
+    ],
+    "commune_registre": "50236",
+    "commune_ban": "50236",
+    "adresse_registre": "9, place du général de Gaulle 50250 LA Haye du puits"
+   },
+   {
+    "id": "2650E1511239S",
+    "type": "immeuble",
+    "adresse_ban": "Rue du Prêche 50500 Carentan-les-Marais",
+    "numero": "AD2632511",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "50099",
+    "commune_ban": "50099",
+    "adresse_registre": "r du preche, 50500 Carentan les Marais"
+   },
+   {
+    "id": "2650E1505623S",
+    "type": "immeuble",
+    "adresse_ban": "9 Place du Général de Gaulle 50250 La Haye",
+    "numero": "AF8884041",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF8884041"
+    ],
+    "commune_registre": "50236",
+    "commune_ban": "50236",
+    "adresse_registre": "9, place du général de Gaulle 50250 LA Haye du puits"
+   },
+   {
+    "id": "2650E1476721C",
+    "type": "appartement",
+    "adresse_ban": "Rue de la Roquelle 50200 Coutances",
+    "numero": "AB1823947",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "50147",
+    "commune_ban": "50147",
+    "adresse_registre": "6 r de la roquelle 50200 Coutances"
+   },
+   {
+    "id": "2650E1499484P",
+    "type": "immeuble",
+    "adresse_ban": "2 Rue du Général de Gaulle 50180 Agneaux",
+    "numero": "AE6313746",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE6313746"
+    ],
+    "commune_registre": "50002",
+    "commune_ban": "50002",
+    "adresse_registre": "2 r du general de gaulle 50180 Agneaux"
+   },
+   {
+    "id": "2650E1497075Y",
+    "type": "immeuble",
+    "adresse_ban": "18 Boulevard Félix Amiot 50100 Cherbourg-en-Cotentin",
+    "numero": "AD8210171",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD8210171"
+    ],
+    "commune_registre": "50129",
+    "commune_ban": "50129",
+    "adresse_registre": "18 bd felix amiot 50100 Cherbourg-en-Cotentin"
+   },
+   {
+    "id": "2635E0598095F",
+    "type": "immeuble",
+    "adresse_ban": "1 Esplanade du Général de Gaulle 35740 Pacé",
+    "numero": "AD3730272",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "35210",
+    "commune_ban": "35210",
+    "adresse_registre": "esp charles de gaulle, 35740 Pacé"
+   },
+   {
+    "id": "2635E0597881Z",
+    "type": "immeuble",
+    "adresse_ban": "2 Esplanade du Général de Gaulle 35740 Pacé",
+    "numero": "AD3730272",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "35210",
+    "commune_ban": "35210",
+    "adresse_registre": "esp charles de gaulle, 35740 Pacé"
+   },
+   {
+    "id": "2635E0586679D",
+    "type": "immeuble",
+    "adresse_ban": "58 boulevard Jules Jouin 35470 Bain-de-Bretagne",
+    "numero": "AD5825286",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD5825286"
+    ],
+    "commune_registre": "35012",
+    "commune_ban": "35012",
+    "adresse_registre": "58 bd jules jouin 35470 Bain-de-Bretagne"
+   },
+   {
+    "id": "2635E0635727P",
+    "type": "immeuble",
+    "adresse_ban": "Rue de Nantes 35200 Rennes",
+    "numero": "AB0609883",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "35238",
+    "commune_ban": "35238",
+    "adresse_registre": "263A r de nantes 35000 Rennes"
+   },
+   {
+    "id": "2635E0616346E",
+    "type": "immeuble",
+    "adresse_ban": "4 Rue Ginguené 35000 Rennes",
+    "numero": "AF2049096",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF2049096"
+    ],
+    "commune_registre": "35238",
+    "commune_ban": "35238",
+    "adresse_registre": "4 r ginguene 35000 Rennes"
+   },
+   {
+    "id": "2635E0630617B",
+    "type": "immeuble",
+    "adresse_ban": "Rue de Nantes 35200 Rennes",
+    "numero": "AB0609883",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "35238",
+    "commune_ban": "35238",
+    "adresse_registre": "263A r de nantes 35000 Rennes"
+   },
+   {
+    "id": "2635E0661930K",
+    "type": "immeuble",
+    "adresse_ban": "8 Rue des Vignes 35530 Servon-sur-Vilaine",
+    "numero": "AD7563950",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD7563950"
+    ],
+    "commune_registre": "35327",
+    "commune_ban": "35327",
+    "adresse_registre": "6 r des vignes 35530 Servon-sur-Vilaine"
+   },
+   {
+    "id": "2635E0627125T",
+    "type": "appartement",
+    "adresse_ban": "27 Rue Rabelais 35000 Rennes",
+    "numero": "AC3724820",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3724820"
+    ],
+    "commune_registre": "35238",
+    "commune_ban": "35238",
+    "adresse_registre": "27 r rabelais 35000 RENNES"
+   },
+   {
+    "id": "2627E1802234Y",
+    "type": "immeuble",
+    "adresse_ban": "8bis Rue de la Rochette 27000 Évreux",
+    "numero": "AF7305568",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF7305568"
+    ],
+    "commune_registre": "27229",
+    "commune_ban": "27229",
+    "adresse_registre": "8B r de la rochette 27000 Évreux"
+   },
+   {
+    "id": "2627E1875147H",
+    "type": "appartement",
+    "adresse_ban": "3 Ruelle de l’Empereur 27140 Gisors",
+    "numero": "AA0722231",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "27284",
+    "commune_ban": "27284",
+    "adresse_registre": "18A r albert forcinal 27140 Gisors"
+   },
+   {
+    "id": "2627E1899212W",
+    "type": "immeuble",
+    "adresse_ban": "50 Rue du Chanoine Boulogne 27220 Saint-André-de-l'Eure",
+    "numero": "AF0057448",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF0057448"
+    ],
+    "commune_registre": "27507",
+    "commune_ban": "27507",
+    "adresse_registre": "50 Rue du Chanoine Boulogne 27220 Saint-André-de-l'Eure"
+   },
+   {
+    "id": "2237E2021352U",
+    "type": "appartement",
+    "adresse_ban": "6 Allée Hugues Cosnier 37200 Tours",
+    "numero": "AA2249803",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "37261",
+    "commune_ban": "37261",
+    "adresse_registre": "1 Allée Laurence Berluchon 37200 TOURS"
+   },
+   {
+    "id": "2561E3779737A",
+    "type": "immeuble",
+    "adresse_ban": "5 Rue des Allouées 61500 Sées",
+    "numero": "AA9548348",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA9548348"
+    ],
+    "commune_registre": "61464",
+    "commune_ban": "61464",
+    "adresse_registre": "7 r des allouees 61500 Sées"
+   },
+   {
+    "id": "2275E0940990W",
+    "type": "appartement",
+    "adresse_ban": "9 Rue du Docteur Laurent 75013 Paris",
+    "numero": "AC3276276",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC3276276"
+    ],
+    "commune_registre": "75113",
+    "commune_ban": "75113",
+    "adresse_registre": "9 r du docteur laurent 75013 Paris"
+   },
+   {
+    "id": "2275E0976935J",
+    "type": "appartement",
+    "adresse_ban": "26 Rue Philippe de Girard 75010 Paris",
+    "numero": "AD3580693",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD3580693"
+    ],
+    "commune_registre": "75110",
+    "commune_ban": "75110",
+    "adresse_registre": "26 r philippe de girard 75010 Paris"
+   },
+   {
+    "id": "2275E1011560C",
+    "type": "appartement",
+    "adresse_ban": "10b Rue de Châteaudun 75009 Paris",
+    "numero": "AE9452954",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE9452954"
+    ],
+    "commune_registre": "75109",
+    "commune_ban": "75109",
+    "adresse_registre": "10B r de chateaudun 75009 Paris"
+   },
+   {
+    "id": "2275E0949684G",
+    "type": "appartement",
+    "adresse_ban": "8 Rue des Mariniers 75014 Paris",
+    "numero": "AA0491308",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0491308"
+    ],
+    "commune_registre": "75114",
+    "commune_ban": "75114",
+    "adresse_registre": "4 r des mariniers 75014 Paris"
+   },
+   {
+    "id": "2275E0982555N",
+    "type": "appartement",
+    "adresse_ban": "11 Rue Poirier de Narçay 75014 Paris",
+    "numero": "AA8866220",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8866220"
+    ],
+    "commune_registre": "75114",
+    "commune_ban": "75114",
+    "adresse_registre": "11 Rue Poirier de Narçay 75014 Paris"
+   },
+   {
+    "id": "2275E1147832I",
+    "type": "appartement",
+    "adresse_ban": "116 Avenue de Suffren 75015 Paris",
+    "numero": "AE6049597",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE6049597"
+    ],
+    "commune_registre": "75115",
+    "commune_ban": "75115",
+    "adresse_registre": "116 av de suffren 75015 Paris"
+   },
+   {
+    "id": "2275E1123334C",
+    "type": "appartement",
+    "adresse_ban": "75 Rue Notre-Dame de Nazareth 75003 Paris",
+    "numero": "AD8160251",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "75103",
+    "commune_ban": "75103",
+    "adresse_registre": "77 Rue Notre-Dame de Nazareth 75003 PARIS"
+   },
+   {
+    "id": "2275E1093321T",
+    "type": "appartement",
+    "adresse_ban": "36 Rue le Brun 75013 Paris",
+    "numero": "AD1684430",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD1684430"
+    ],
+    "commune_registre": "75113",
+    "commune_ban": "75113",
+    "adresse_registre": "36 r le brun 75013 Paris"
+   },
+   {
+    "id": "2439E3551680S",
+    "type": "appartement",
+    "adresse_ban": "9 Rue Jean Mermoz 39000 Lons-le-Saunier",
+    "numero": "AA5781794",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA5781794"
+    ],
+    "commune_registre": "39300",
+    "commune_ban": "39300",
+    "adresse_registre": "5 Rue Jean Mermoz 39000 Lons-le-Saunier"
+   },
+   {
+    "id": "2439E3563215J",
+    "type": "appartement",
+    "adresse_ban": "11 Avenue Henri Grenat 39000 Lons-le-Saunier",
+    "numero": "AA9371022",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA9371022"
+    ],
+    "commune_registre": "39300",
+    "commune_ban": "39300",
+    "adresse_registre": "11 Avenue Henri Grenat 39000 Lons-le-Saunier"
+   },
+   {
+    "id": "2662E0952723U",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   },
+   {
+    "id": "2662E0952795O",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   },
+   {
+    "id": "2662E0952747S",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   },
+   {
+    "id": "2662E0952781A",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   },
+   {
+    "id": "2662E0948121U",
+    "type": "immeuble",
+    "adresse_ban": "109 Boulevard Pierre Daunou 62200 Boulogne-sur-Mer",
+    "numero": "AE4057873",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE4057873"
+    ],
+    "commune_registre": "62160",
+    "commune_ban": "62160",
+    "adresse_registre": "109 bd pierre daunou 62200 BOULOGNE SUR MER"
+   },
+   {
+    "id": "2662E0934206P",
+    "type": "immeuble",
+    "adresse_ban": "23 Rue du Fer à Cheval 62000 Arras",
+    "numero": "AF0109264",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF0109264"
+    ],
+    "commune_registre": "62041",
+    "commune_ban": "62041",
+    "adresse_registre": "23 r du fer a cheval, 62000 Arras"
+   },
+   {
+    "id": "2662E0952739K",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   },
+   {
+    "id": "2662E0952759E",
+    "type": "appartement",
+    "adresse_ban": "5 Rue du Stade 62930 Wimereux",
+    "numero": "AD6105506",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6105506"
+    ],
+    "commune_registre": "62893",
+    "commune_ban": "62893",
+    "adresse_registre": "5 r du stade 62930 Wimereux"
+   }
+  ]
+ },
+ "audits": {
+  "lignes": 160,
+  "verdicts": {
+   "adresse_ne_donne_rien": 68,
+   "adresse_donne_le_bon_seul": 87,
+   "adresse_donne_plusieurs_dont_le_bon": 3,
+   "adresse_donne_un_autre": 2
+  },
+  "verdicts_un_par_couple_copro_adresse": {
+   "adresse_ne_donne_rien": 46,
+   "adresse_donne_le_bon_seul": 72,
+   "adresse_donne_plusieurs_dont_le_bon": 3,
+   "adresse_donne_un_autre": 2
+  },
+  "commune_differente": 2,
+  "detail": [
+   {
+    "id": "A26660207338C",
+    "type": null,
+    "adresse_ban": "Impasse du Carlit 66420 Le Barcarès",
+    "numero": "AB4961827",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "66017",
+    "commune_ban": "66017",
+    "adresse_registre": "res nautica nautide VIII , 66420 Le Barcarès"
+   },
+   {
+    "id": "A25140382638J",
+    "type": null,
+    "adresse_ban": "15 Chemin aux Boeufs 14123 Ifs",
+    "numero": "AB4289799",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14341",
+    "commune_ban": "14341",
+    "adresse_registre": "15 Chemin aux Bœufs 14123 Ifs"
+   },
+   {
+    "id": "A25140382636H",
+    "type": null,
+    "adresse_ban": "13 Chemin aux Boeufs 11 -  14123 Ifs",
+    "numero": "AB4289799",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14341",
+    "commune_ban": "14341",
+    "adresse_registre": "15 Chemin aux Bœufs 14123 Ifs"
+   },
+   {
+    "id": "A25140084062R",
+    "type": null,
+    "adresse_ban": "4 Rue Duc Richard 14000 Caen",
+    "numero": "AD6715601",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6715601"
+    ],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "4 Rue Duc Richard 14000 Caen"
+   },
+   {
+    "id": "A25010304489D",
+    "type": null,
+    "adresse_ban": "22 Rue d'Hérouville 14000 Caen",
+    "numero": "AB3124542",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "26 Rue d'Hérouville 14000 Caen"
+   },
+   {
+    "id": "A25010304597H",
+    "type": null,
+    "adresse_ban": "26 Rue d'Hérouville 14000 Caen",
+    "numero": "AB3124542",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3124542"
+    ],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "26 Rue d'Hérouville 14000 Caen"
+   },
+   {
+    "id": "A25140065468N",
+    "type": null,
+    "adresse_ban": "95 Rue Saint-Jean 14000 Caen",
+    "numero": "AH9291337",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AH6970602",
+     "AH9291337"
+    ],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "95 Rue Saint-Jean 14000 Caen"
+   },
+   {
+    "id": "A25140118765K",
+    "type": null,
+    "adresse_ban": "16 Quai Amiral Hamelin 14000 Caen",
+    "numero": "AC7439482",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "2 Quai Amiral Hamelin 14000 Caen"
+   },
+   {
+    "id": "A25140382683C",
+    "type": null,
+    "adresse_ban": "19 Avenue Père Charles de Foucauld 13 - 15 - 17 - 14000 Caen",
+    "numero": "AB4474581",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "1 Avenue Père Charles de Foucauld 14000 Caen"
+   },
+   {
+    "id": "A25140382630B",
+    "type": null,
+    "adresse_ban": "9 Chemin aux Boeufs 7 -  14123 Ifs",
+    "numero": "AB4289799",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14341",
+    "commune_ban": "14341",
+    "adresse_registre": "15 Chemin aux Bœufs 14123 Ifs"
+   },
+   {
+    "id": "A25140382669O",
+    "type": null,
+    "adresse_ban": "11 Avenue Père Charles de Foucauld 7 - 9 -  14000 Caen",
+    "numero": "AB4474581",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "1 Avenue Père Charles de Foucauld 14000 Caen"
+   },
+   {
+    "id": "A25140382717K",
+    "type": null,
+    "adresse_ban": "5 Avenue Père Charles de Foucauld 1 - 3 -  14000 Caen",
+    "numero": "AB4474581",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "14118",
+    "commune_ban": "14118",
+    "adresse_registre": "1 Avenue Père Charles de Foucauld 14000 Caen"
+   },
+   {
+    "id": "A24670144796P",
+    "type": null,
+    "adresse_ban": "61a Rue du Lazaret 67100 Strasbourg",
+    "numero": "AA1529189",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1529189"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "59 r du lazaret 67100 STRASBOURG"
+   },
+   {
+    "id": "A25670322984A",
+    "type": null,
+    "adresse_ban": "15 Rue René Schickelé 67000 Strasbourg",
+    "numero": "AC5849617",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5849617"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "15 r rene schickele 67000 Strasbourg"
+   },
+   {
+    "id": "A25670377777L",
+    "type": null,
+    "adresse_ban": "15 Rue de la Hardt 67170 Brumath",
+    "numero": "AE6715379",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE6715379"
+    ],
+    "commune_registre": "67067",
+    "commune_ban": "67067",
+    "adresse_registre": "15 r de la hardt 67170 Brumath"
+   },
+   {
+    "id": "A25670353173D",
+    "type": null,
+    "adresse_ban": "5 Rue du Petersgarten 67000 Strasbourg",
+    "numero": "AA4537619",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4537619"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "1 r du petersgarten 67000 Strasbourg"
+   },
+   {
+    "id": "A25670342812Q",
+    "type": null,
+    "adresse_ban": "41 Rue du Maréchal Joffre 67700 Saverne",
+    "numero": "AB4568556",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4568556"
+    ],
+    "commune_registre": "67437",
+    "commune_ban": "67437",
+    "adresse_registre": "41 Rue du Maréchal Joffre 67700 Saverne"
+   },
+   {
+    "id": "A25670342789T",
+    "type": null,
+    "adresse_ban": "37 Rue du Maréchal Joffre 67700 Saverne",
+    "numero": "AB4568556",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4568556"
+    ],
+    "commune_registre": "67437",
+    "commune_ban": "67437",
+    "adresse_registre": "41 Rue du Maréchal Joffre 67700 Saverne"
+   },
+   {
+    "id": "A25670367621V",
+    "type": null,
+    "adresse_ban": "1 Rue d'Ebersheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670369775R",
+    "type": null,
+    "adresse_ban": "43 Rue de Ribeauvillé 67100 Strasbourg",
+    "numero": "AD7653546",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD7653546"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "41 r de ribeauville 67100 STRASBOURG"
+   },
+   {
+    "id": "A25670370086Q",
+    "type": null,
+    "adresse_ban": "5 Rue d'Ebersheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670377278G",
+    "type": null,
+    "adresse_ban": "15 Rue de la Hardt 67170 Brumath",
+    "numero": "AE6715379",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE6715379"
+    ],
+    "commune_registre": "67067",
+    "commune_ban": "67067",
+    "adresse_registre": "15 r de la hardt 67170 Brumath"
+   },
+   {
+    "id": "A25670267820I",
+    "type": null,
+    "adresse_ban": "18 Rue Kempf 67000 Strasbourg",
+    "numero": "AE8246720",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE8246720"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "18 r kempf 67000 Strasbourg"
+   },
+   {
+    "id": "A25670346919P",
+    "type": null,
+    "adresse_ban": "6 Rue des Meules 67200 Strasbourg",
+    "numero": "AD2414308",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD2414308"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "4 r des meules 67200 Strasbourg"
+   },
+   {
+    "id": "A25670367667P",
+    "type": null,
+    "adresse_ban": "3 Rue d'Ebersheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670367825R",
+    "type": null,
+    "adresse_ban": "20 Rue de Zellenberg 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670367808A",
+    "type": null,
+    "adresse_ban": "49 Rue du Ziegelfeld 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670352417B",
+    "type": null,
+    "adresse_ban": "3 Rue du Petersgarten 67000 Strasbourg",
+    "numero": "AA4537619",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4537619"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "1 r du petersgarten 67000 Strasbourg"
+   },
+   {
+    "id": "A25670287478K",
+    "type": null,
+    "adresse_ban": "3a Rue de la Poste 67400 Illkirch-Graffenstaden",
+    "numero": "AA1446269",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1446269"
+    ],
+    "commune_registre": "67218",
+    "commune_ban": "67218",
+    "adresse_registre": "1 r de la poste 67400 Illkirch-Graffenstaden"
+   },
+   {
+    "id": "A25670367694Q",
+    "type": null,
+    "adresse_ban": "5 Rue d'Ebersheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670097099D",
+    "type": null,
+    "adresse_ban": "1 Rue du Ziegelfeld 67100 Strasbourg",
+    "numero": "AA7497472",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7497472"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "1 r du ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670367780Y",
+    "type": null,
+    "adresse_ban": "16 Rue de Beblenheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25670367635J",
+    "type": null,
+    "adresse_ban": "1 Rue d'Ebersheim 67100 Strasbourg",
+    "numero": "AB5961719",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB5961719"
+    ],
+    "commune_registre": "67482",
+    "commune_ban": "67482",
+    "adresse_registre": "49 Rue du Ziegelfeld 67100 Strasbourg"
+   },
+   {
+    "id": "A25860384679Q",
+    "type": null,
+    "adresse_ban": "22 Avenue de la Libération 86000 Poitiers",
+    "numero": "AA4412870",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4412870"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "22 AVENUE DE LA LIBERATION 86000 POITIERS"
+   },
+   {
+    "id": "A25860365743I",
+    "type": null,
+    "adresse_ban": "46 Rue Mozart 86100 Châtellerault",
+    "numero": "AA6607048",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "86066",
+    "commune_ban": "86066",
+    "adresse_registre": "42 r wolfgang amadeus mozart 86100 Châtellerault"
+   },
+   {
+    "id": "A25860384453Y",
+    "type": null,
+    "adresse_ban": "22 Avenue de la Libération 86000 Poitiers",
+    "numero": "AA4412870",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA4412870"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "22 AVENUE DE LA LIBERATION 86000 POITIERS"
+   },
+   {
+    "id": "A25860329423K",
+    "type": null,
+    "adresse_ban": "17 Boulevard Savari 86000 Poitiers",
+    "numero": "AC5200498",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5200498"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "15-25 bd savari 86000 POITIERS"
+   },
+   {
+    "id": "A25860329431S",
+    "type": null,
+    "adresse_ban": "21 Boulevard Savari 86000 Poitiers",
+    "numero": "AC5200498",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5200498"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "15-25 bd savari 86000 POITIERS"
+   },
+   {
+    "id": "A25860329435W",
+    "type": null,
+    "adresse_ban": "25 Boulevard Savari 86000 Poitiers",
+    "numero": "AC5200498",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC5200498"
+    ],
+    "commune_registre": "86194",
+    "commune_ban": "86194",
+    "adresse_registre": "15-25 bd savari 86000 POITIERS"
+   },
+   {
+    "id": "A25870378901L",
+    "type": null,
+    "adresse_ban": "7bis rue des Arts 87100 Limoges",
+    "numero": "AA8352155",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "3 rue des Arts 87100 Limoges"
+   },
+   {
+    "id": "A25870372490W",
+    "type": null,
+    "adresse_ban": "33 boulevard des Petits Carmes 87000 Limoges",
+    "numero": "AA7138597",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7138597"
+    ],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "33-39 bd des petits carmes 87000 limoges"
+   },
+   {
+    "id": "A25870378897H",
+    "type": null,
+    "adresse_ban": "9 rue des Arts 87100 Limoges",
+    "numero": "AA8352155",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "3 rue des Arts 87100 Limoges"
+   },
+   {
+    "id": "A25870323966O",
+    "type": null,
+    "adresse_ban": "142 Avenue de Limoges 87170 Isle",
+    "numero": "AD0965038",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD0965038"
+    ],
+    "commune_registre": "87075",
+    "commune_ban": "87075",
+    "adresse_registre": "142 Avenue de Limoges 87170 ISLE"
+   },
+   {
+    "id": "A26870061727M",
+    "type": null,
+    "adresse_ban": "35 rue Antoine Bourdelle 87000 Limoges",
+    "numero": "AD2294767",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD2294767"
+    ],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "35 rue Antoine Bourdelle 87000 Limoges"
+   },
+   {
+    "id": "A26870107979K",
+    "type": null,
+    "adresse_ban": "2 rue Périchon-Bey 87100 Limoges",
+    "numero": "AA7618580",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "87085",
+    "commune_ban": "87085",
+    "adresse_registre": "2-12 all charles dullin 87000 LIMOGES"
+   },
+   {
+    "id": "A24940206364Q",
+    "type": null,
+    "adresse_ban": "2 Rue de Berry 94230 Cachan",
+    "numero": "AA7021264",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94016",
+    "commune_ban": "94016",
+    "adresse_registre": "2 r de provence 94230 Cachan"
+   },
+   {
+    "id": "A24940206363P",
+    "type": null,
+    "adresse_ban": "2 Rue de Provence 94230 Cachan",
+    "numero": "AA7021264",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7021264"
+    ],
+    "commune_registre": "94016",
+    "commune_ban": "94016",
+    "adresse_registre": "2 r de provence 94230 Cachan"
+   },
+   {
+    "id": "A25940369435Q",
+    "type": null,
+    "adresse_ban": "34 Boulevard du Maréchal Leclerc 94340 Joinville-le-Pont",
+    "numero": "AB5739230",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94042",
+    "commune_ban": "94042",
+    "adresse_registre": "32 Boulevard du Maréchal Leclerc 94340 Joinville-le-Pont"
+   },
+   {
+    "id": "A25940342004P",
+    "type": null,
+    "adresse_ban": "21 Rue du Château 94000 Créteil",
+    "numero": "AE9969676",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE9969676"
+    ],
+    "commune_registre": "94028",
+    "commune_ban": "94028",
+    "adresse_registre": "21 r du chateau 94000 Créteil"
+   },
+   {
+    "id": "A25940366727M",
+    "type": null,
+    "adresse_ban": "34 Boulevard du Maréchal Leclerc 94340 Joinville-le-Pont",
+    "numero": "AB5739230",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94042",
+    "commune_ban": "94042",
+    "adresse_registre": "32 Boulevard du Maréchal Leclerc 94340 Joinville-le-Pont"
+   },
+   {
+    "id": "A25940370901A",
+    "type": null,
+    "adresse_ban": "2 Rue Jean Moulin 94240 L'Haÿ-les-Roses",
+    "numero": "AD8419244",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD8419244"
+    ],
+    "commune_registre": "94038",
+    "commune_ban": "94038",
+    "adresse_registre": "2 r jean moulin 94240 L'Haÿ-les-Roses"
+   },
+   {
+    "id": "A25940198203U",
+    "type": null,
+    "adresse_ban": "15 Rue du Sergent Bobillot 94000 Créteil",
+    "numero": "AF4288544",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF4288544"
+    ],
+    "commune_registre": "94028",
+    "commune_ban": "94028",
+    "adresse_registre": "15 r du sergent bobillot 94000 Créteil"
+   },
+   {
+    "id": "A25940379312N",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940307523K",
+    "type": null,
+    "adresse_ban": "128 Boulevard de Stalingrad 94600 Choisy-le-Roi",
+    "numero": "AB8830416",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "124 bd de stalingrad 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940390377C",
+    "type": null,
+    "adresse_ban": "9 Rue des Frères Lumière 94260 Fresnes",
+    "numero": "AB7561061",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7561061"
+    ],
+    "commune_registre": "94034",
+    "commune_ban": "94034",
+    "adresse_registre": "9 r des freres lumiere 94260 Fresnes"
+   },
+   {
+    "id": "A25940365678D",
+    "type": null,
+    "adresse_ban": "32 Avenue Émile Zola 94100 Saint-Maur-des-Fossés",
+    "numero": "AA6637656",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA6637656"
+    ],
+    "commune_registre": "94068",
+    "commune_ban": "94068",
+    "adresse_registre": "32 av emile zola 94100 Saint-Maur-des-Fossés"
+   },
+   {
+    "id": "A25940379328D",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940362932N",
+    "type": null,
+    "adresse_ban": "47 Avenue Henri Martin 94100 Saint-Maur-des-Fossés",
+    "numero": "AE6210520",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE6210520"
+    ],
+    "commune_registre": "94068",
+    "commune_ban": "94068",
+    "adresse_registre": "47-49 av henri martin 94100 ST MAUR DES FOSSES"
+   },
+   {
+    "id": "A25940379221A",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940148525C",
+    "type": null,
+    "adresse_ban": "3 Place de la République 94200 Ivry-sur-Seine",
+    "numero": "AB4956710",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB4956710"
+    ],
+    "commune_registre": "94041",
+    "commune_ban": "94041",
+    "adresse_registre": "3 Place de la République 94200 Ivry-sur-Seine"
+   },
+   {
+    "id": "A25940344644D",
+    "type": null,
+    "adresse_ban": "60 Rue Waldeck Rousseau 94400 Vitry-sur-Seine",
+    "numero": "AD4858395",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD4858395"
+    ],
+    "commune_registre": "94081",
+    "commune_ban": "94081",
+    "adresse_registre": "60 r waldeck rousseau 94400 Vitry-sur-Seine"
+   },
+   {
+    "id": "A25940086869S",
+    "type": null,
+    "adresse_ban": "12 Avenue Quihou 94160 Saint-Mandé",
+    "numero": "AD6323232",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6323232"
+    ],
+    "commune_registre": "94067",
+    "commune_ban": "94067",
+    "adresse_registre": "12 Avenue Quihou 94160 Saint-Mandé"
+   },
+   {
+    "id": "A25940379264R",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940305640Z",
+    "type": null,
+    "adresse_ban": "216 Rue Paul Vaillant Couturier 94140 Alfortville",
+    "numero": "AE5446356",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE5446356"
+    ],
+    "commune_registre": "94002",
+    "commune_ban": "94002",
+    "adresse_registre": "216 r paul vaillant-couturier 94140 Alfortville"
+   },
+   {
+    "id": "A25940379193Y",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940086915M",
+    "type": null,
+    "adresse_ban": "12 Avenue Quihou 94160 Saint-Mandé",
+    "numero": "AD6323232",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AD6323232"
+    ],
+    "commune_registre": "94067",
+    "commune_ban": "94067",
+    "adresse_registre": "12 Avenue Quihou 94160 Saint-Mandé"
+   },
+   {
+    "id": "A25940297660B",
+    "type": null,
+    "adresse_ban": "4bis Rue du Viaduc 94130 Nogent-sur-Marne",
+    "numero": "AA4475810",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94052",
+    "commune_ban": "94052",
+    "adresse_registre": "5 r du viaduc 94130 Nogent-sur-Marne"
+   },
+   {
+    "id": "A25940379291S",
+    "type": null,
+    "adresse_ban": "72 Avenue d'Alfortville 94600 Choisy-le-Roi",
+    "numero": "AA9527623",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "78 Avenue d'Alfortville 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940307509W",
+    "type": null,
+    "adresse_ban": "124 Boulevard de Stalingrad 94600 Choisy-le-Roi",
+    "numero": "AB8830416",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB8830416"
+    ],
+    "commune_registre": "94022",
+    "commune_ban": "94022",
+    "adresse_registre": "124 bd de stalingrad 94600 Choisy-le-Roi"
+   },
+   {
+    "id": "A25940284613G",
+    "type": null,
+    "adresse_ban": "15 Rue du Sergent Bobillot 94000 Créteil",
+    "numero": "AF4288544",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF4288544"
+    ],
+    "commune_registre": "94028",
+    "commune_ban": "94028",
+    "adresse_registre": "15 r du sergent bobillot 94000 Créteil"
+   },
+   {
+    "id": "A24250168190T",
+    "type": null,
+    "adresse_ban": "1 Place Roger Salengro 25300 Pontarlier",
+    "numero": "AA7741333",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA7741333"
+    ],
+    "commune_registre": "25462",
+    "commune_ban": "25462",
+    "adresse_registre": "33 r des remparts 25300 Pontarlier"
+   },
+   {
+    "id": "A26250027160P",
+    "type": null,
+    "adresse_ban": "2 Rue de la Poste 25600 Sochaux",
+    "numero": "AB3605862",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3605862"
+    ],
+    "commune_registre": "25547",
+    "commune_ban": "25547",
+    "adresse_registre": "2 Rue de la Poste 25600 Sochaux"
+   },
+   {
+    "id": "A26250068234J",
+    "type": null,
+    "adresse_ban": "95 Rue de Belfort 25400 Audincourt",
+    "numero": "AG1951490",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG1951490"
+    ],
+    "commune_registre": "25031",
+    "commune_ban": "25031",
+    "adresse_registre": "95 r de belfort 25400 Audincourt"
+   },
+   {
+    "id": "A26250196108P",
+    "type": null,
+    "adresse_ban": "14 Rue Richard Perlinsky 25400 Audincourt",
+    "numero": "AB6855118",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6855118"
+    ],
+    "commune_registre": "25031",
+    "commune_ban": "25031",
+    "adresse_registre": "14 r richard perlinsky 25400 AUDINCOURT"
+   },
+   {
+    "id": "A26250196092Z",
+    "type": null,
+    "adresse_ban": "16 Rue Richard Perlinsky 25400 Audincourt",
+    "numero": "AB6855118",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB6855118"
+    ],
+    "commune_registre": "25031",
+    "commune_ban": "25031",
+    "adresse_registre": "14 r richard perlinsky 25400 AUDINCOURT"
+   },
+   {
+    "id": "A25130217702Q",
+    "type": null,
+    "adresse_ban": "Avenue du prado 13008 Marseille",
+    "numero": "AA8502551",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "13208",
+    "commune_ban": "13208",
+    "adresse_registre": "556 av du prado 13008 Marseille"
+   },
+   {
+    "id": "A25130354267D",
+    "type": null,
+    "adresse_ban": "71 Chemin de saint antoine a saint joseph 13015 Marseille",
+    "numero": "AA8429482",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "13215",
+    "commune_ban": "13215",
+    "adresse_registre": "71 av de saint-antoine 13015 Marseille"
+   },
+   {
+    "id": "A25130354263Z",
+    "type": null,
+    "adresse_ban": "71 Chemin de saint antoine a saint joseph 13015 Marseille",
+    "numero": "AA8429482",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "13215",
+    "commune_ban": "13215",
+    "adresse_registre": "71 av de saint-antoine 13015 Marseille"
+   },
+   {
+    "id": "A25130216902W",
+    "type": null,
+    "adresse_ban": "Avenue du prado 13008 Marseille",
+    "numero": "AA8495889",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "13208",
+    "commune_ban": "13208",
+    "adresse_registre": "562 av du prado 13008 Marseille"
+   },
+   {
+    "id": "A26130015890R",
+    "type": null,
+    "adresse_ban": "81 Avenue du marechal foch 13004 Marseille",
+    "numero": "AE3660479",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE3660479"
+    ],
+    "commune_registre": "13204",
+    "commune_ban": "13204",
+    "adresse_registre": "81 av marechal foch 13004 MARSEILLE 04"
+   },
+   {
+    "id": "A26130088446H",
+    "type": null,
+    "adresse_ban": "11 Cours Aristide Briand 13150 Tarascon",
+    "numero": "AC7686637",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7686637"
+    ],
+    "commune_registre": "13108",
+    "commune_ban": "13108",
+    "adresse_registre": "11 crs aristide briand 13150 Tarascon"
+   },
+   {
+    "id": "A26130113095I",
+    "type": null,
+    "adresse_ban": "88 Rue jean mermoz 13008 Marseille",
+    "numero": "AB9151812",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9151812"
+    ],
+    "commune_registre": "13208",
+    "commune_ban": "13208",
+    "adresse_registre": "88 r jean mermoz 13008 Marseille"
+   },
+   {
+    "id": "A25530374823H",
+    "type": null,
+    "adresse_ban": "2 Rue Haute Follis 53000 Laval",
+    "numero": "AE0417568",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE0417568"
+    ],
+    "commune_registre": "53130",
+    "commune_ban": "53130",
+    "adresse_registre": "2 r haute follis 53000 Laval"
+   },
+   {
+    "id": "A25880355923S",
+    "type": null,
+    "adresse_ban": "39 Route de Maxonchamp 88360 Rupt-sur-Moselle",
+    "numero": "AI4976932",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AI4976932"
+    ],
+    "commune_registre": "88408",
+    "commune_ban": "88408",
+    "adresse_registre": "39 Route de Maxonchamp 88360 Rupt-sur-Moselle"
+   },
+   {
+    "id": "A25880244894J",
+    "type": null,
+    "adresse_ban": "42 Boulevard de Saint-dié 88400 Gérardmer",
+    "numero": "AE1223585",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "88196",
+    "commune_ban": "88196",
+    "adresse_registre": "43 bd de saint-die 88400 GERARDMER"
+   },
+   {
+    "id": "A26880048579V",
+    "type": null,
+    "adresse_ban": "20 Chemin de la Justice 88000 Épinal",
+    "numero": "AB3482437",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB3482437"
+    ],
+    "commune_registre": "88160",
+    "commune_ban": "88160",
+    "adresse_registre": "20 che de la justice 88000 Épinal"
+   },
+   {
+    "id": "A26880123853Z",
+    "type": null,
+    "adresse_ban": "Rue Robert Marcillat 88430 Corcieux",
+    "numero": "AH0600874",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "88115",
+    "commune_ban": "88115",
+    "adresse_registre": "177 Rue Robert Marcillat 88430 CORCIEUX"
+   },
+   {
+    "id": "A26880135316W",
+    "type": null,
+    "adresse_ban": "5 Rue du Docteur Fournier 88800 Vittel",
+    "numero": "AJ6976237",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AJ6976237"
+    ],
+    "commune_registre": "88516",
+    "commune_ban": "88516",
+    "adresse_registre": "5 Rue du Docteur Fournier 88800 Vittel"
+   },
+   {
+    "id": "A26880216280W",
+    "type": null,
+    "adresse_ban": "15 Quai Jeanne d'Arc 88100 Saint-Dié-des-Vosges",
+    "numero": "AB9140518",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AD1909837"
+    ],
+    "commune_registre": "88413",
+    "commune_ban": "88413",
+    "adresse_registre": "15B qu jeanne d'arc 88100 Saint-Dié-des-Vosges"
+   },
+   {
+    "id": "A26880216419F",
+    "type": null,
+    "adresse_ban": "24 Rue Bel Air 88000 Épinal",
+    "numero": "AE8535239",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE8535239"
+    ],
+    "commune_registre": "88160",
+    "commune_ban": "88160",
+    "adresse_registre": "24 r bel-air 88000 Épinal"
+   },
+   {
+    "id": "A24770124355U",
+    "type": null,
+    "adresse_ban": "254 Rue Marc Chagall 77190 Dammarie-les-Lys",
+    "numero": "AA1197847",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77152",
+    "commune_ban": "77152",
+    "adresse_registre": "207 r marc chagall 77190 Dammarie-les-Lys"
+   },
+   {
+    "id": "A25770382737P",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770360048Y",
+    "type": null,
+    "adresse_ban": "61 Avenue Marie Curie 77600 Bussy-Saint-Georges",
+    "numero": "AA8719130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8719130"
+    ],
+    "commune_registre": "77058",
+    "commune_ban": "77058",
+    "adresse_registre": "51-61 av marie curie 77600 BUSSY SAINT GEORGES"
+   },
+   {
+    "id": "A25770382731J",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770125571P",
+    "type": null,
+    "adresse_ban": "138 Rue Grande 77300 Fontainebleau",
+    "numero": "AH8933210",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AH8933210"
+    ],
+    "commune_registre": "77186",
+    "commune_ban": "77186",
+    "adresse_registre": "138 r grande 77300 Fontainebleau"
+   },
+   {
+    "id": "A25770240233R",
+    "type": null,
+    "adresse_ban": "39 Rue Alexandre Bickart 77500 Chelles",
+    "numero": "AA0765214",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0765214"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "45 Rue Alexandre Bickart 77500 Chelles"
+   },
+   {
+    "id": "A25770240238W",
+    "type": null,
+    "adresse_ban": "41 Rue Alexandre Bickart 77500 Chelles",
+    "numero": "AA0765214",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0765214"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "45 Rue Alexandre Bickart 77500 Chelles"
+   },
+   {
+    "id": "A25770358079F",
+    "type": null,
+    "adresse_ban": "61 Avenue Marie Curie 77600 Bussy-Saint-Georges",
+    "numero": "AA8719130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8719130"
+    ],
+    "commune_registre": "77058",
+    "commune_ban": "77058",
+    "adresse_registre": "51-61 av marie curie 77600 BUSSY SAINT GEORGES"
+   },
+   {
+    "id": "A25770360118Q",
+    "type": null,
+    "adresse_ban": "61 Avenue Marie Curie 77600 Bussy-Saint-Georges",
+    "numero": "AA8719130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8719130"
+    ],
+    "commune_registre": "77058",
+    "commune_ban": "77058",
+    "adresse_registre": "51-61 av marie curie 77600 BUSSY SAINT GEORGES"
+   },
+   {
+    "id": "A25770382728G",
+    "type": null,
+    "adresse_ban": "100 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770240296C",
+    "type": null,
+    "adresse_ban": "43 Rue Alexandre Bickart 77500 Chelles",
+    "numero": "AA0765214",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0765214"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "45 Rue Alexandre Bickart 77500 Chelles"
+   },
+   {
+    "id": "A25770246312M",
+    "type": null,
+    "adresse_ban": "39 Rue Alexandre Bickart 77500 Chelles",
+    "numero": "AA0765214",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0765214"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "45 Rue Alexandre Bickart 77500 Chelles"
+   },
+   {
+    "id": "A25770382750C",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770240246E",
+    "type": null,
+    "adresse_ban": "45 Rue Alexandre Bickart 77500 Chelles",
+    "numero": "AA0765214",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA0765214"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "45 Rue Alexandre Bickart 77500 Chelles"
+   },
+   {
+    "id": "A25770382722A",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770364943F",
+    "type": null,
+    "adresse_ban": "5 Rue Kennedy 77760 Achères-la-Forêt",
+    "numero": "AE5802095",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77001",
+    "commune_ban": "77001",
+    "adresse_registre": "1 dom defontaine 77760 Achères-la-Forêt"
+   },
+   {
+    "id": "A25770382734M",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770208951N",
+    "type": null,
+    "adresse_ban": "16 Allée des Jonquilles 77210 Avon",
+    "numero": "AA6976492",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77014",
+    "commune_ban": "77014",
+    "adresse_registre": "2 all des aubepines 77210 Avon"
+   },
+   {
+    "id": "A25770382745X",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770382748A",
+    "type": null,
+    "adresse_ban": "98 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770382724C",
+    "type": null,
+    "adresse_ban": "108 Avenue du Maréchal Foch 77500 Chelles",
+    "numero": "AA0087973",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "108av du marechal foch 77500 CHELLES"
+   },
+   {
+    "id": "A25770360393F",
+    "type": null,
+    "adresse_ban": "61 Avenue Marie Curie 77600 Bussy-Saint-Georges",
+    "numero": "AA8719130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8719130"
+    ],
+    "commune_registre": "77058",
+    "commune_ban": "77058",
+    "adresse_registre": "51-61 av marie curie 77600 BUSSY SAINT GEORGES"
+   },
+   {
+    "id": "A25770374583Z",
+    "type": null,
+    "adresse_ban": "26 Avenue de la Résistance 77500 Chelles",
+    "numero": "AB7746878",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7746878"
+    ],
+    "commune_registre": "77108",
+    "commune_ban": "77108",
+    "adresse_registre": "26 av de la resistance 77500 Chelles"
+   },
+   {
+    "id": "A25770360261D",
+    "type": null,
+    "adresse_ban": "61 Avenue Marie Curie 77600 Bussy-Saint-Georges",
+    "numero": "AA8719130",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA8719130"
+    ],
+    "commune_registre": "77058",
+    "commune_ban": "77058",
+    "adresse_registre": "51-61 av marie curie 77600 BUSSY SAINT GEORGES"
+   },
+   {
+    "id": "A24260175065F",
+    "type": null,
+    "adresse_ban": "12 Rue de la Republique 26400 Crest",
+    "numero": "AI6917256",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AI6917256"
+    ],
+    "commune_registre": "26108",
+    "commune_ban": "26108",
+    "adresse_registre": "12 Rue de la Republique 26400 Crest"
+   },
+   {
+    "id": "A24260069886W",
+    "type": null,
+    "adresse_ban": "17 Rue des Freres Lumiere 26000 Valence",
+    "numero": "AF4001434",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF4001434"
+    ],
+    "commune_registre": "26362",
+    "commune_ban": "26362",
+    "adresse_registre": "17 r des freres lumiere 26000 Valence"
+   },
+   {
+    "id": "A24260070149Z",
+    "type": null,
+    "adresse_ban": "232 Avenue Victor Hugo 26000 Valence",
+    "numero": "AA1688233",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1688233"
+    ],
+    "commune_registre": "26362",
+    "commune_ban": "26362",
+    "adresse_registre": "232 av victor hugo 26000 Valence"
+   },
+   {
+    "id": "A24260063128Y",
+    "type": null,
+    "adresse_ban": "13 Allee Joland 26500 Bourg-lès-Valence",
+    "numero": "AA1602424",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1602424"
+    ],
+    "commune_registre": "26058",
+    "commune_ban": "26058",
+    "adresse_registre": "13 all joland 26500 Bourg-lès-Valence"
+   },
+   {
+    "id": "A24260131706O",
+    "type": null,
+    "adresse_ban": "7 Avenue du Docteur Paul Durand 26600 Tain-l'Hermitage",
+    "numero": "AC7101603",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7101603"
+    ],
+    "commune_registre": "26347",
+    "commune_ban": "26347",
+    "adresse_registre": "7 av du docteur paul durand 26600 TAIN L'HERMITAGE"
+   },
+   {
+    "id": "A24260063065N",
+    "type": null,
+    "adresse_ban": "43 Rue de l'Armée Belge 26000 Valence",
+    "numero": "AA2198653",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA2198653"
+    ],
+    "commune_registre": "26362",
+    "commune_ban": "26362",
+    "adresse_registre": "43 r de l'armee belge 26000 Valence"
+   },
+   {
+    "id": "A24260175172I",
+    "type": null,
+    "adresse_ban": "12 Rue de la Republique 26400 Crest",
+    "numero": "AI6917256",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AI6917256"
+    ],
+    "commune_registre": "26108",
+    "commune_ban": "26108",
+    "adresse_registre": "12 Rue de la Republique 26400 Crest"
+   },
+   {
+    "id": "A24950201957E",
+    "type": null,
+    "adresse_ban": "Rue des Cressonnières 95210 Saint-Gratien",
+    "numero": "AA6770390",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95555",
+    "commune_ban": "95555",
+    "adresse_registre": "24 r robert joubel 95210 Saint-Gratien"
+   },
+   {
+    "id": "A24950201954B",
+    "type": null,
+    "adresse_ban": "Rue des Cressonnières 95210 Saint-Gratien",
+    "numero": "AA6770390",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95555",
+    "commune_ban": "95555",
+    "adresse_registre": "24 r robert joubel 95210 Saint-Gratien"
+   },
+   {
+    "id": "A24950201962J",
+    "type": null,
+    "adresse_ban": "Rue des Cressonnières 95210 Saint-Gratien",
+    "numero": "AA6770390",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95555",
+    "commune_ban": "95555",
+    "adresse_registre": "24 r robert joubel 95210 Saint-Gratien"
+   },
+   {
+    "id": "A24950013231M",
+    "type": null,
+    "adresse_ban": "7 Allée Vélasquez 95270 Belloy-en-France",
+    "numero": "AC2747616",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95056",
+    "commune_ban": "95056",
+    "adresse_registre": "1 av rodin 95270 BELLOY EN FRANCE"
+   },
+   {
+    "id": "A24950201955C",
+    "type": null,
+    "adresse_ban": "Rue des Cressonnières 95210 Saint-Gratien",
+    "numero": "AA6770390",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95555",
+    "commune_ban": "95555",
+    "adresse_registre": "24 r robert joubel 95210 Saint-Gratien"
+   },
+   {
+    "id": "A25950216190Q",
+    "type": null,
+    "adresse_ban": "20 Rue du Noroit 95610 Éragny",
+    "numero": "AA2939510",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95218",
+    "commune_ban": "95218",
+    "adresse_registre": "14 r des pinsons 95610 Éragny"
+   },
+   {
+    "id": "A25950384214C",
+    "type": null,
+    "adresse_ban": "17 Rue Raspail 95260 Beaumont-sur-Oise",
+    "numero": "AG9792458",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG9792458"
+    ],
+    "commune_registre": "95052",
+    "commune_ban": "95052",
+    "adresse_registre": "17 r raspail 95260 Beaumont-sur-Oise"
+   },
+   {
+    "id": "A25950337329V",
+    "type": null,
+    "adresse_ban": "17 Rue Raspail 95260 Beaumont-sur-Oise",
+    "numero": "AG9792458",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AG9792458"
+    ],
+    "commune_registre": "95052",
+    "commune_ban": "95052",
+    "adresse_registre": "17 r raspail 95260 Beaumont-sur-Oise"
+   },
+   {
+    "id": "A25950033307R",
+    "type": null,
+    "adresse_ban": "3 Résidence Domont Village 95330 Domont",
+    "numero": "AC5682877",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95199",
+    "commune_ban": "95199",
+    "adresse_registre": "res domont village, 95330 Domont"
+   },
+   {
+    "id": "A25950155217N",
+    "type": null,
+    "adresse_ban": "29 Boulevard Gabriel Peri 95110 Sannois",
+    "numero": "AE0843193",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AE0843193"
+    ],
+    "commune_registre": "95582",
+    "commune_ban": "95582",
+    "adresse_registre": "29 bd gabriel peri 95110 Sannois"
+   },
+   {
+    "id": "A25950352680G",
+    "type": null,
+    "adresse_ban": "12 Allée de la Chasse 95680 Montlignon",
+    "numero": "AF5138953",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95369",
+    "commune_ban": "95426",
+    "adresse_registre": "11 av du 18 juin 95580 Margency"
+   },
+   {
+    "id": "A25950120389Z",
+    "type": null,
+    "adresse_ban": "9 Place Denis Papin 95470 Fosses",
+    "numero": "AD6195101",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "95250",
+    "commune_ban": "95250",
+    "adresse_registre": "3/5 pl denis papin 95470 Fosses"
+   },
+   {
+    "id": "A26400139092G",
+    "type": null,
+    "adresse_ban": "Rue Labadie 40100 Dax",
+    "numero": "AH7849599",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "40088",
+    "commune_ban": "40088",
+    "adresse_registre": "52 r labadie 40100 Dax"
+   },
+   {
+    "id": "A26720002459J",
+    "type": null,
+    "adresse_ban": "7 Avenue de Montréal 72000 Le Mans",
+    "numero": "AJ2062438",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AA4697181",
+     "AJ2062438"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "3 Avenue de Montréal 72000 Le Mans"
+   },
+   {
+    "id": "A26720184078S",
+    "type": null,
+    "adresse_ban": "Rue Albert Roullee 72600 Mamers",
+    "numero": "AC6034151",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "72180",
+    "commune_ban": "72180",
+    "adresse_registre": "r albert roullee, 72600 Mamers"
+   },
+   {
+    "id": "A26720215256W",
+    "type": null,
+    "adresse_ban": "36 Rue des Pyrénées 72100 Le Mans",
+    "numero": "AA6938955",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA6938955"
+    ],
+    "commune_registre": "72181",
+    "commune_ban": "72181",
+    "adresse_registre": "24 r des pyrenees 72100 Le Mans"
+   },
+   {
+    "id": "A25640038627C",
+    "type": null,
+    "adresse_ban": "52 avenue du Bezet 64000 Pau",
+    "numero": "AF1585769",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AF1585769"
+    ],
+    "commune_registre": "64445",
+    "commune_ban": "64445",
+    "adresse_registre": "52 av du bezet 64000 Pau"
+   },
+   {
+    "id": "A25640127774V",
+    "type": null,
+    "adresse_ban": "15 rue d'Orléans 64000 Pau",
+    "numero": "AD9079807",
+    "verdict": "adresse_donne_plusieurs_dont_le_bon",
+    "candidats": [
+     "AC2656296",
+     "AD9079807"
+    ],
+    "commune_registre": "64445",
+    "commune_ban": "64445",
+    "adresse_registre": "15 r d'orleans 64000 Pau"
+   },
+   {
+    "id": "A26640156917T",
+    "type": null,
+    "adresse_ban": "8 avenue du général de Gaulle 64000 Pau",
+    "numero": "AB7755028",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7755028"
+    ],
+    "commune_registre": "64445",
+    "commune_ban": "64445",
+    "adresse_registre": "8 avenue du général de Gaulle 64000 Pau"
+   },
+   {
+    "id": "A26640155246M",
+    "type": null,
+    "adresse_ban": "8 avenue du général de Gaulle 64000 Pau",
+    "numero": "AB7755028",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB7755028"
+    ],
+    "commune_registre": "64445",
+    "commune_ban": "64445",
+    "adresse_registre": "8 avenue du général de Gaulle 64000 Pau"
+   },
+   {
+    "id": "A25730277348A",
+    "type": null,
+    "adresse_ban": "773 Avenue Olympique 73150 Val-d'Isère",
+    "numero": "AA1686096",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73304",
+    "commune_ban": "73304",
+    "adresse_registre": "val-d'isere, 73150 Val-d'Isère"
+   },
+   {
+    "id": "A25730366302I",
+    "type": null,
+    "adresse_ban": "93 Chemin de la Clairière 73260 Les Avanchers-Valmorel",
+    "numero": "AC7562135",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7562135"
+    ],
+    "commune_registre": "73024",
+    "commune_ban": "73024",
+    "adresse_registre": "93 Chemin de la Clairière 73260 Les Avanchers-Valmorel"
+   },
+   {
+    "id": "A25730384948M",
+    "type": null,
+    "adresse_ban": "R de la Culaz 73120 Courchevel",
+    "numero": "AC5424643",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73227",
+    "commune_ban": "73227",
+    "adresse_registre": "Rue de la Culaz Courchevel Le Praz 73120 COURCHEVEL"
+   },
+   {
+    "id": "A25730384946K",
+    "type": null,
+    "adresse_ban": "R de la Culaz 73120 Courchevel",
+    "numero": "AC5424643",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73227",
+    "commune_ban": "73227",
+    "adresse_registre": "Rue de la Culaz Courchevel Le Praz 73120 COURCHEVEL"
+   },
+   {
+    "id": "A25730285686S",
+    "type": null,
+    "adresse_ban": "29 Rue du Verger 73000 Chambéry",
+    "numero": "AA1955608",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AA1955608"
+    ],
+    "commune_registre": "73065",
+    "commune_ban": "73065",
+    "adresse_registre": "29 r du verger 73000 Chambéry"
+   },
+   {
+    "id": "A25730286374E",
+    "type": null,
+    "adresse_ban": "720 Route de Chartreuse 73000 Montagnole",
+    "numero": "AJ1940196",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AJ1940196"
+    ],
+    "commune_registre": "73160",
+    "commune_ban": "73160",
+    "adresse_registre": "720 Route de Chartreuse 73000 Montagnole"
+   },
+   {
+    "id": "A25730260648S",
+    "type": null,
+    "adresse_ban": "49 Rue du Verger 73000 Chambéry",
+    "numero": "AA1955608",
+    "verdict": "adresse_donne_un_autre",
+    "candidats": [
+     "AG6965008"
+    ],
+    "commune_registre": "73065",
+    "commune_ban": "73065",
+    "adresse_registre": "29 r du verger 73000 Chambéry"
+   },
+   {
+    "id": "A25730367254Y",
+    "type": null,
+    "adresse_ban": "93 Chemin de la Clairière 73260 Les Avanchers-Valmorel",
+    "numero": "AC7562135",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AC7562135"
+    ],
+    "commune_registre": "73024",
+    "commune_ban": "73024",
+    "adresse_registre": "93 Chemin de la Clairière 73260 Les Avanchers-Valmorel"
+   },
+   {
+    "id": "A25730384947L",
+    "type": null,
+    "adresse_ban": "R de la Culaz Bâtiment C 73120 Courchevel",
+    "numero": "AC5424643",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73227",
+    "commune_ban": "73227",
+    "adresse_registre": "Rue de la Culaz Courchevel Le Praz 73120 COURCHEVEL"
+   },
+   {
+    "id": "A26730020225S",
+    "type": null,
+    "adresse_ban": "130 Boucle de l'angle est 73230 Les Déserts",
+    "numero": "AB0488270",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73208",
+    "commune_ban": "73098",
+    "adresse_registre": "le revard, 73100 Pugny-Chatenod"
+   },
+   {
+    "id": "A25730028527Z",
+    "type": null,
+    "adresse_ban": "Rue de l'Esseillon 73500 Villarodin-Bourget",
+    "numero": "AC3290525",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "73322",
+    "commune_ban": "73322",
+    "adresse_registre": "120 Rue de l'Esseillon 73500 Villarodin-Bourget"
+   },
+   {
+    "id": "A24430070705A",
+    "type": null,
+    "adresse_ban": "57 Avenue Marechal Foch 43000 Le Puy-en-Velay",
+    "numero": "AB9290420",
+    "verdict": "adresse_donne_le_bon_seul",
+    "candidats": [
+     "AB9290420"
+    ],
+    "commune_registre": "43157",
+    "commune_ban": "43157",
+    "adresse_registre": "57 av marechal foch 43000 Le Puy-en-Velay"
+   },
+   {
+    "id": "A24430074949G",
+    "type": null,
+    "adresse_ban": "18 Route de Jonzieux 43240 Saint-Just-Malmont",
+    "numero": "AH4591152",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43205",
+    "commune_ban": "43205",
+    "adresse_registre": "22 rte de jonzieux 43240 Saint-Just-Malmont"
+   },
+   {
+    "id": "A25430357974W",
+    "type": null,
+    "adresse_ban": "3 Rue de l'Ecole Normale 43750 Vals-près-le-Puy",
+    "numero": "AA6908594",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43251",
+    "commune_ban": "43251",
+    "adresse_registre": "3B r de l'ecole normale 43750 Vals-près-le-Puy"
+   },
+   {
+    "id": "A25430175626M",
+    "type": null,
+    "adresse_ban": "33 Route de Saint-Agrève 2ème étage 43400 Le Chambon-sur-Lignon",
+    "numero": "AI3420635",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43051",
+    "commune_ban": "43051",
+    "adresse_registre": "33 rte de saint-agreve 43400 Le Chambon-sur-Lignon"
+   },
+   {
+    "id": "A25430358233V",
+    "type": null,
+    "adresse_ban": "3 Rue de l'Ecole Normale 43750 Vals-près-le-Puy",
+    "numero": "AA6908594",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43251",
+    "commune_ban": "43251",
+    "adresse_registre": "3B r de l'ecole normale 43750 Vals-près-le-Puy"
+   },
+   {
+    "id": "A25430357898Y",
+    "type": null,
+    "adresse_ban": "3 Rue de l'Ecole Normale 43750 Vals-près-le-Puy",
+    "numero": "AA6908594",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43251",
+    "commune_ban": "43251",
+    "adresse_registre": "3B r de l'ecole normale 43750 Vals-près-le-Puy"
+   },
+   {
+    "id": "A26430018038L",
+    "type": null,
+    "adresse_ban": "3 Rue de l'Ecole Normale 43750 Vals-près-le-Puy",
+    "numero": "AA6908594",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43251",
+    "commune_ban": "43251",
+    "adresse_registre": "3B r de l'ecole normale 43750 Vals-près-le-Puy"
+   },
+   {
+    "id": "A26430018284X",
+    "type": null,
+    "adresse_ban": "3 Rue de l'Ecole Normale 43750 Vals-près-le-Puy",
+    "numero": "AA6908594",
+    "verdict": "adresse_ne_donne_rien",
+    "candidats": [],
+    "commune_registre": "43251",
+    "commune_ban": "43251",
+    "adresse_registre": "3B r de l'ecole normale 43750 Vals-près-le-Puy"
+   }
+  ]
+ }
+}

@@ -1,0 +1,99 @@
+{
+ "communs": 619288,
+ "transitions": {
+  "copro_aidee": {
+   "Non -> Non": 597974,
+   "Oui -> Non": 15630,
+   "Oui -> Oui": 4247,
+   "Non -> Oui": 1437
+  },
+  "mandat_en_cours": {
+   "Mandat en cours -> Mandat en cours": 287438,
+   "Pas de mandat en cours -> Pas de mandat en cours": 192567,
+   "Pas de mandat en cours -> Mandat en cours": 60903,
+   "Mandat en cours -> Pas de mandat en cours": 48292,
+   "Mandat en cours -> Mandat expiré sans successeur déclaré": 16655,
+   "Mandat expiré sans successeur déclaré -> Mandat en cours": 4991,
+   "Pas de mandat en cours -> Mandat expiré sans successeur déclaré": 4388,
+   "Mandat expiré sans successeur déclaré -> Pas de mandat en cours": 2285,
+   "Mandat expiré sans successeur déclaré -> Mandat expiré sans successeur déclaré": 869,
+   "Mandat en cours -> Mandat expiré avec successeur déclaré": 360,
+   "Mandat expiré avec successeur déclaré -> Mandat en cours": 283,
+   "Mandat expiré avec successeur déclaré -> Pas de mandat en cours": 101
+  },
+  "type_syndic": {
+   "professionnel -> professionnel": 255308,
+   "non connu -> vide": 200285,
+   "non connu -> professionnel": 56949,
+   "professionnel -> vide": 56577,
+   "bénévole -> bénévole": 29880,
+   "non connu -> bénévole": 9291,
+   "bénévole -> vide": 8729,
+   "bénévole -> professionnel": 1143,
+   "professionnel -> bénévole": 1126
+  }
+ },
+ "lots_habitation_modifies": {
+  ">= 50 %": 2738,
+  "< 10 %": 3391,
+  "10-50 %": 4679
+ },
+ "exemples_ecart_double": [
+  {
+   "numero": "AJ0475897",
+   "nom": "LES NOUVEAUX PARCS DU RAYOL",
+   "t3_2025": 16,
+   "27_10_2026": 56,
+   "maj": "2026-09-19"
+  },
+  {
+   "numero": "AB8972986",
+   "nom": "SDC C.I. 1 RUE FRANCIS GALLO",
+   "t3_2025": 5,
+   "27_10_2026": 12,
+   "maj": "2026-10-03"
+  },
+  {
+   "numero": "AF0373746",
+   "nom": "BUFFON D AMBOISE",
+   "t3_2025": 6,
+   "27_10_2026": 14,
+   "maj": "2026-07-11"
+  },
+  {
+   "numero": "AE1833433",
+   "nom": "RESIDENCE SAND-DANTON ",
+   "t3_2025": 3,
+   "27_10_2026": 9,
+   "maj": "2026-10-04"
+  },
+  {
+   "numero": "AA8321218",
+   "nom": "93-93 BIS RUE DE MONTREUIL (208)",
+   "t3_2025": 3,
+   "27_10_2026": 37,
+   "maj": "2026-06-27"
+  },
+  {
+   "numero": "AC1454669",
+   "nom": "SDC SDC 2 RUE VIEUX COLLEGE",
+   "t3_2025": 9,
+   "27_10_2026": 24,
+   "maj": "2026-10-03"
+  },
+  {
+   "numero": "AF9738592",
+   "nom": "LOFT ELEVEN",
+   "t3_2025": 4,
+   "27_10_2026": 8,
+   "maj": "2026-10-24"
+  },
+  {
+   "numero": "AE3948585",
+   "nom": "4 TRAVERSE DU BERTEUIL",
+   "t3_2025": 2,
+   "27_10_2026": 10,
+   "maj": "2026-10-04"
+  }
+ ]
+}

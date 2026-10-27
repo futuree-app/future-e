@@ -1,0 +1,737 @@
+{
+ "quotidien": {
+  "fichier": "rnic-20261027.csv",
+  "lignes": 656037,
+  "coproprietes": 647804,
+  "colonnes": [
+   "epci",
+   "commune",
+   "numero_immatriculation",
+   "date_immatriculation",
+   "date_derniere_maj",
+   "type_syndic",
+   "identification_representant_legal",
+   "raison_sociale_representant_legal",
+   "siret_representant_legal",
+   "code_ape",
+   "commune_representant_legal",
+   "mandat_en_cours",
+   "date_fin_dernier_mandat",
+   "nom_usage_copropriete",
+   "adresse_reference",
+   "numero_voie_adresse",
+   "code_postal_adresse",
+   "commune_adresse",
+   "adresse_complementaire_1",
+   "adresse_complementaire_2",
+   "adresse_complementaire_3",
+   "nombre_adresses_complementaires",
+   "longitude",
+   "latitude",
+   "date_reglement_copropriete",
+   "residence_service",
+   "syndicat_cooperatif",
+   "syndicat_principal_ou_secondaire",
+   "numero_immatriculation_syndicat_principal",
+   "nombre_asl",
+   "nombre_aful",
+   "nombre_unions_syndicats",
+   "nombre_total_lots",
+   "nombre_lots_habitation_bureaux_commerces",
+   "nombre_lots_habitation",
+   "nombre_lots_stationnement",
+   "periode_construction",
+   "reference_cadastrale_1",
+   "code_insee_parcelle_1",
+   "prefixe_parcelle_1",
+   "section_parcelle_1",
+   "numero_parcelle_1",
+   "reference_cadastrale_2",
+   "code_insee_parcelle_2",
+   "prefixe_parcelle_2",
+   "section_parcelle_2",
+   "numero_parcelle_2",
+   "reference_cadastrale_3",
+   "code_insee_parcelle_3",
+   "prefixe_parcelle_3",
+   "section_parcelle_3",
+   "numero_parcelle_3",
+   "nombre_parcelles",
+   "copro_dans_acv",
+   "copro_dans_pvd",
+   "copro_aidee",
+   "code_qp_2015",
+   "nom_qp_2015",
+   "code_qp_2024",
+   "nom_qp_2024",
+   "code_pdp",
+   "copro_dans_pdp",
+   "code_officiel_commune",
+   "nom_officiel_commune",
+   "code_officiel_arrondissement_commune",
+   "nom_officiel_arrondissement_commune",
+   "code_officiel_epci",
+   "nom_officiel_epci",
+   "code_officiel_departement",
+   "nom_officiel_departement",
+   "code_officiel_region",
+   "nom_officiel_region"
+  ],
+  "numeros_distincts": 647804,
+  "numeros_en_double": 8233,
+  "taux_remplissage": {
+   "epci": 0.9995,
+   "commune": 0.9995,
+   "numero_immatriculation": 1.0,
+   "date_immatriculation": 0.9998,
+   "date_derniere_maj": 0.9999,
+   "type_syndic": 0.5611,
+   "identification_representant_legal": 0.5611,
+   "raison_sociale_representant_legal": 0.5611,
+   "siret_representant_legal": 0.4917,
+   "code_ape": 0.4917,
+   "commune_representant_legal": 0.5604,
+   "mandat_en_cours": 1.0,
+   "date_fin_dernier_mandat": 0.7723,
+   "nom_usage_copropriete": 1.0,
+   "adresse_reference": 0.9999,
+   "numero_voie_adresse": 0.9037,
+   "code_postal_adresse": 0.9059,
+   "commune_adresse": 0.9042,
+   "adresse_complementaire_1": 0.155,
+   "adresse_complementaire_2": 0.0573,
+   "adresse_complementaire_3": 0.0304,
+   "nombre_adresses_complementaires": 1.0,
+   "longitude": 0.9999,
+   "latitude": 0.9999,
+   "date_reglement_copropriete": 1.0,
+   "residence_service": 1.0,
+   "syndicat_cooperatif": 0.7933,
+   "syndicat_principal_ou_secondaire": 1.0,
+   "numero_immatriculation_syndicat_principal": 0.0034,
+   "nombre_asl": 0.9067,
+   "nombre_aful": 0.9041,
+   "nombre_unions_syndicats": 0.9013,
+   "nombre_total_lots": 1.0,
+   "nombre_lots_habitation_bureaux_commerces": 1.0,
+   "nombre_lots_habitation": 1.0,
+   "nombre_lots_stationnement": 1.0,
+   "periode_construction": 0.8191,
+   "reference_cadastrale_1": 0.6701,
+   "code_insee_parcelle_1": 0.6853,
+   "prefixe_parcelle_1": 0.6861,
+   "section_parcelle_1": 0.6853,
+   "numero_parcelle_1": 0.6852,
+   "reference_cadastrale_2": 0.1382,
+   "code_insee_parcelle_2": 0.1436,
+   "prefixe_parcelle_2": 0.1441,
+   "section_parcelle_2": 0.1432,
+   "numero_parcelle_2": 0.1432,
+   "reference_cadastrale_3": 0.0638,
+   "code_insee_parcelle_3": 0.0664,
+   "prefixe_parcelle_3": 0.0664,
+   "section_parcelle_3": 0.0663,
+   "numero_parcelle_3": 0.0663,
+   "nombre_parcelles": 1.0,
+   "copro_dans_acv": 1.0,
+   "copro_dans_pvd": 1.0,
+   "copro_aidee": 1.0,
+   "code_qp_2015": 0.0446,
+   "nom_qp_2015": 0.0446,
+   "code_qp_2024": 0.046,
+   "nom_qp_2024": 0.046,
+   "code_pdp": 0.1303,
+   "copro_dans_pdp": 1.0,
+   "code_officiel_commune": 0.9966,
+   "nom_officiel_commune": 0.9967,
+   "code_officiel_arrondissement_commune": 0.9999,
+   "nom_officiel_arrondissement_commune": 0.9995,
+   "code_officiel_epci": 0.9995,
+   "nom_officiel_epci": 0.9995,
+   "code_officiel_departement": 0.999,
+   "nom_officiel_departement": 0.999,
+   "code_officiel_region": 0.999,
+   "nom_officiel_region": 0.999
+  },
+  "valeurs": {
+   "type_syndic": {
+    "professionnel": 318545,
+    "": 284310,
+    "bénévole": 44949
+   },
+   "mandat_en_cours": {
+    "Mandat en cours": 363410,
+    "Pas de mandat en cours": 261585,
+    "Mandat expiré sans successeur déclaré": 22320,
+    "Mandat expiré avec successeur déclaré": 489
+   },
+   "periode_construction": {
+    "": 117183,
+    "Avant 1949": 101141,
+    "AVANT_1949": 97667,
+    "De 1949 à 1974": 83503,
+    "Inconnue": 35662,
+    "DE_1975_A_1993": 25743,
+    "DE_1949_A_1960": 24579,
+    "DE_1961_A_1974": 23719,
+    "De 1989 à 2000": 21539,
+    "APRES_2010": 18740,
+    "De 2013 à 2021": 18416,
+    "De 2006 à 2012": 15420,
+    "DE_2001_A_2010": 14235,
+    "De 1983 à 1988": 9556,
+    "De 1978 à 1982": 9167
+   },
+   "syndicat_principal_ou_secondaire": {
+    "oui": 639526,
+    "non": 8255,
+    "": 23
+   },
+   "copro_aidee": {
+    "Non": 642100,
+    "Oui": 5704
+   },
+   "residence_service": {
+    "non": 640207,
+    "oui": 7574,
+    "": 23
+   },
+   "syndicat_cooperatif": {
+    "non": 492302,
+    "": 133916,
+    "oui": 21586
+   },
+   "nombre_parcelles": {
+    "1": 344803,
+    "0": 212222,
+    "2": 49043,
+    "3": 17889,
+    "4": 9190,
+    "5": 4687,
+    "6": 2918,
+    "7": 1838,
+    "8": 1202,
+    "9": 853,
+    "10": 630,
+    "11": 451,
+    "12": 336,
+    "13": 255,
+    "14": 194
+   }
+  },
+  "anciennete_derniere_maj": {
+   "< 1 an": 443848,
+   "1-2 ans": 203873,
+   ">= 3 ans": 47,
+   "absente": 33,
+   "2-3 ans": 3
+  },
+  "annee_immatriculation": {
+   "2016": 4179,
+   "2017": 134572,
+   "2018": 171407,
+   "2019": 103535,
+   "2020": 45810,
+   "2021": 43458,
+   "2022": 38442,
+   "2023": 30801,
+   "2024": 27258,
+   "2025": 26990,
+   "2026": 21243,
+   "absente": 109
+  },
+  "lots_habitation": {
+   "11-49": 220592,
+   "50-199": 56753,
+   ">= 200": 3175,
+   "1-10": 367261,
+   "habitation absente": 23
+  },
+  "incoherences_lots": {
+   "avec lots de bureaux ou commerces (hbc > habitation)": 224265,
+   "adresse de reference sans numero": 53287
+  },
+  "copros_par_reference_cadastrale_1": {
+   "1": 407788,
+   "2": 9973,
+   "3": 1062,
+   "4": 307,
+   "5": 288
+  },
+  "copros_par_adresse_de_reference": {
+   "1": 620049,
+   "2": 9419,
+   "3": 1339,
+   "4": 368,
+   "5": 430
+  }
+ },
+ "t3_2025": {
+  "fichier": "rnic-t3-2025.csv",
+  "lignes": 619402,
+  "coproprietes": 619402,
+  "colonnes": [
+   "epci",
+   "commune",
+   "numero_immatriculation",
+   "date_immatriculation",
+   "date_derniere_maj",
+   "type_syndic",
+   "identification_du_representant_legal_raison_sociale_et_le_numer",
+   "raison_sociale_du_representant_legal",
+   "siret_du_representant_legal",
+   "code_ape",
+   "commune_du_representant_legal",
+   "mandat_en_cours",
+   "date_de_fin_du_dernier_mandat",
+   "nom_d_usage_de_la_copropriete",
+   "adresse_reference",
+   "numero_et_voie_adresse_de_reference",
+   "code_postal_adresse_de_reference",
+   "commune_adresse_de_reference",
+   "adresse_complementaire_1",
+   "adresse_complementaire_2",
+   "adresse_complementaire_3",
+   "nombre_d_adresses_complementaires",
+   "longitude",
+   "latitude",
+   "date_du_reglement_de_copropriete",
+   "residence_service",
+   "syndicat_cooperatif",
+   "syndicat_principal_ou_secondaire",
+   "si_secondaire_n_d_immatriculation_du_principal",
+   "nombre_d_asl_auxquelles_est_rattache_le_syndicat_de_coproprieta",
+   "nombre_d_aful_auxquelles_est_rattache_le_syndicat_de_copropriet",
+   "nombre_d_unions_de_syndicats_auxquelles_est_rattache_le_syndica",
+   "nombre_total_lots",
+   "nombre_lots_habitation_bureaux_commerces",
+   "nombre_lots_habitation",
+   "nombre_lots_stationnement",
+   "periode_construction",
+   "reference_cadastrale_1",
+   "code_insee_commune_1",
+   "prefixe_1",
+   "section_1",
+   "numero_parcelle_1",
+   "reference_cadastrale_2",
+   "code_insee_commune_2",
+   "prefixe_2",
+   "section_2",
+   "numero_parcelle_2",
+   "reference_cadastrale_3",
+   "code_insee_commune_3",
+   "prefixe_3",
+   "section_3",
+   "numero_parcelle_3",
+   "nombre_parcelles",
+   "nom_qp_2015",
+   "code_qp_2015",
+   "nom_qp_2024",
+   "code_qp_2024",
+   "copro_dans_acv",
+   "copro_dans_pvd",
+   "code_de_pdp",
+   "copro_dans_pdp",
+   "copro_aidee",
+   "code_officiel_commune",
+   "nom_officiel_commune",
+   "code_officiel_arrondissement_commune",
+   "nom_officiel_arrondissement_commune",
+   "code_officiel_epci",
+   "nom_officiel_epci",
+   "code_officiel_departement",
+   "nom_officiel_departement",
+   "code_officiel_region",
+   "nom_officiel_region"
+  ],
+  "numeros_distincts": 619402,
+  "numeros_en_double": 0,
+  "taux_remplissage": {
+   "epci": 0.9992,
+   "commune": 1.0,
+   "numero_immatriculation": 1.0,
+   "date_immatriculation": 0.9998,
+   "date_derniere_maj": 0.9999,
+   "type_syndic": 1.0,
+   "identification_du_representant_legal_raison_sociale_et_le_numer": 1.0,
+   "raison_sociale_du_representant_legal": 1.0,
+   "siret_du_representant_legal": 1.0,
+   "code_ape": 1.0,
+   "commune_du_representant_legal": 0.9993,
+   "mandat_en_cours": 1.0,
+   "date_de_fin_du_dernier_mandat": 0.7797,
+   "nom_d_usage_de_la_copropriete": 1.0,
+   "adresse_reference": 1.0,
+   "numero_et_voie_adresse_de_reference": 0.902,
+   "code_postal_adresse_de_reference": 0.9053,
+   "commune_adresse_de_reference": 0.9026,
+   "adresse_complementaire_1": 1.0,
+   "adresse_complementaire_2": 1.0,
+   "adresse_complementaire_3": 1.0,
+   "nombre_d_adresses_complementaires": 1.0,
+   "longitude": 0.9999,
+   "latitude": 0.9999,
+   "date_du_reglement_de_copropriete": 1.0,
+   "residence_service": 1.0,
+   "syndicat_cooperatif": 1.0,
+   "syndicat_principal_ou_secondaire": 1.0,
+   "si_secondaire_n_d_immatriculation_du_principal": 0.9917,
+   "nombre_d_asl_auxquelles_est_rattache_le_syndicat_de_coproprieta": 0.898,
+   "nombre_d_aful_auxquelles_est_rattache_le_syndicat_de_copropriet": 0.895,
+   "nombre_d_unions_de_syndicats_auxquelles_est_rattache_le_syndica": 0.8919,
+   "nombre_total_lots": 1.0,
+   "nombre_lots_habitation_bureaux_commerces": 1.0,
+   "nombre_lots_habitation": 1.0,
+   "nombre_lots_stationnement": 1.0,
+   "periode_construction": 1.0,
+   "reference_cadastrale_1": 0.6557,
+   "code_insee_commune_1": 0.999,
+   "prefixe_1": 1.0,
+   "section_1": 0.9989,
+   "numero_parcelle_1": 0.9989,
+   "reference_cadastrale_2": 0.1361,
+   "code_insee_commune_2": 0.9995,
+   "prefixe_2": 1.0,
+   "section_2": 0.9991,
+   "numero_parcelle_2": 0.9991,
+   "reference_cadastrale_3": 0.063,
+   "code_insee_commune_3": 0.9999,
+   "prefixe_3": 1.0,
+   "section_3": 0.9998,
+   "numero_parcelle_3": 0.9998,
+   "nombre_parcelles": 1.0,
+   "nom_qp_2015": 0.0447,
+   "code_qp_2015": 0.0447,
+   "nom_qp_2024": 0.0461,
+   "code_qp_2024": 0.0461,
+   "copro_dans_acv": 1.0,
+   "copro_dans_pvd": 1.0,
+   "code_de_pdp": 0.1239,
+   "copro_dans_pdp": 1.0,
+   "copro_aidee": 1.0,
+   "code_officiel_commune": 0.9982,
+   "nom_officiel_commune": 1.0,
+   "code_officiel_arrondissement_commune": 0.9982,
+   "nom_officiel_arrondissement_commune": 1.0,
+   "code_officiel_epci": 0.9992,
+   "nom_officiel_epci": 1.0,
+   "code_officiel_departement": 1.0,
+   "nom_officiel_departement": 1.0,
+   "code_officiel_region": 1.0,
+   "nom_officiel_region": 1.0
+  },
+  "valeurs": {
+   "type_syndic": {
+    "professionnel": 313041,
+    "non connu": 266594,
+    "bénévole": 39767
+   },
+   "mandat_en_cours": {
+    "Mandat en cours": 352790,
+    "Pas de mandat en cours": 258006,
+    "Mandat expiré sans successeur déclaré": 8168,
+    "Mandat expiré avec successeur déclaré": 438
+   },
+   "periode_construction": {
+    "AVANT_1949": 183095,
+    "DE_1975_A_1993": 80530,
+    "NON_CONNUE": 78556,
+    "DE_1961_A_1974": 69832,
+    "DE_1949_A_1960": 54896,
+    "A_COMPTER_DE_2011": 53777,
+    "DE_2001_A_2010": 45393,
+    "non renseigné": 27550,
+    "DE_1994_A_2000": 25753,
+    "non connu": 20
+   },
+   "syndicat_principal_ou_secondaire": {
+    "oui": 614018,
+    "non": 5364,
+    "non connu": 20
+   },
+   "copro_aidee": {
+    "Non": 599524,
+    "Oui": 19878
+   },
+   "residence_service": {
+    "non": 612659,
+    "oui": 6723,
+    "non connu": 20
+   },
+   "syndicat_cooperatif": {
+    "non": 476789,
+    "non connu": 125154,
+    "oui": 17459
+   },
+   "nombre_parcelles": {
+    "1": 326884,
+    "0": 205324,
+    "2": 46922,
+    "3": 17212,
+    "4": 8873,
+    "5": 4511,
+    "6": 2850,
+    "7": 1750,
+    "8": 1183,
+    "9": 820,
+    "10": 614,
+    "11": 442,
+    "12": 326,
+    "13": 247,
+    "14": 185
+   }
+  },
+  "anciennete_derniere_maj": {
+   "1-2 ans": 619322,
+   "absente": 31,
+   ">= 3 ans": 47,
+   "2-3 ans": 2
+  },
+  "annee_immatriculation": {
+   "2016": 4181,
+   "2017": 134581,
+   "2018": 171428,
+   "2019": 103551,
+   "2020": 45815,
+   "2021": 43470,
+   "2022": 38449,
+   "2023": 30809,
+   "2024": 27282,
+   "2025": 19733,
+   "absente": 103
+  },
+  "lots_habitation": {
+   "50-199": 55843,
+   "1-10": 343571,
+   "11-49": 216816,
+   ">= 200": 3152,
+   "habitation absente": 20
+  },
+  "incoherences_lots": {
+   "avec lots de bureaux ou commerces (hbc > habitation)": 215499,
+   "adresse de reference sans numero": 51019
+  },
+  "copros_par_reference_cadastrale_1": {
+   "1": 382706,
+   "2": 8780,
+   "3": 950,
+   "4": 289,
+   "5": 278
+  },
+  "copros_par_adresse_de_reference": {
+   "1": 592538,
+   "2": 8990,
+   "3": 1292,
+   "4": 372,
+   "5": 436
+  }
+ },
+ "comparaison": {
+  "dans_t3_2025": 619402,
+  "dans_quotidien": 647804,
+  "communs": 619288,
+  "seulement_quotidien": 28516,
+  "seulement_t3_2025": 114,
+  "champs_modifies_sur_les_communs": {
+   "type_syndic": 334100,
+   "periode_construction": 346622,
+   "date_derniere_maj": 419101,
+   "mandat_en_cours": 138409,
+   "reference_cadastrale_1": 5946,
+   "adresse_reference": 28477,
+   "nombre_total_lots": 8304,
+   "nombre_lots_habitation": 10808
+  },
+  "exemples": {
+   "type_syndic": [
+    {
+     "numero": "AF2333532",
+     "t3_2025": "non connu",
+     "27_10_2026": ""
+    },
+    {
+     "numero": "AE8786782",
+     "t3_2025": "non connu",
+     "27_10_2026": ""
+    },
+    {
+     "numero": "AI3495306",
+     "t3_2025": "non connu",
+     "27_10_2026": ""
+    },
+    {
+     "numero": "AB1706217",
+     "t3_2025": "non connu",
+     "27_10_2026": "professionnel"
+    },
+    {
+     "numero": "AH2823193",
+     "t3_2025": "non connu",
+     "27_10_2026": "professionnel"
+    }
+   ],
+   "periode_construction": [
+    {
+     "numero": "AI3495306",
+     "t3_2025": "NON_CONNUE",
+     "27_10_2026": ""
+    },
+    {
+     "numero": "AB1706217",
+     "t3_2025": "DE_1961_A_1974",
+     "27_10_2026": "DE 1949 À 1974"
+    },
+    {
+     "numero": "AC3062411",
+     "t3_2025": "DE_2001_A_2010",
+     "27_10_2026": "DE 2001 À 2005"
+    },
+    {
+     "numero": "AA0839803",
+     "t3_2025": "DE_1949_A_1960",
+     "27_10_2026": "DE 1949 À 1974"
+    },
+    {
+     "numero": "AD6754626",
+     "t3_2025": "A_COMPTER_DE_2011",
+     "27_10_2026": "DE 2006 À 2012"
+    }
+   ],
+   "mandat_en_cours": [
+    {
+     "numero": "AB1706217",
+     "t3_2025": "Pas de mandat en cours",
+     "27_10_2026": "Mandat en cours"
+    },
+    {
+     "numero": "AH2823193",
+     "t3_2025": "Pas de mandat en cours",
+     "27_10_2026": "Mandat en cours"
+    },
+    {
+     "numero": "AE9983859",
+     "t3_2025": "Pas de mandat en cours",
+     "27_10_2026": "Mandat en cours"
+    },
+    {
+     "numero": "AC9586454",
+     "t3_2025": "Mandat en cours",
+     "27_10_2026": "Pas de mandat en cours"
+    },
+    {
+     "numero": "AA2803708",
+     "t3_2025": "Pas de mandat en cours",
+     "27_10_2026": "Mandat en cours"
+    }
+   ],
+   "reference_cadastrale_1": [
+    {
+     "numero": "AB0627455",
+     "t3_2025": "",
+     "27_10_2026": "75104000AN0013"
+    },
+    {
+     "numero": "AD4266011",
+     "t3_2025": "",
+     "27_10_2026": "64483000BE0107"
+    },
+    {
+     "numero": "AG1755396",
+     "t3_2025": "",
+     "27_10_2026": "75120000AP0169"
+    },
+    {
+     "numero": "AB3240207",
+     "t3_2025": "",
+     "27_10_2026": "75115000DX0020"
+    },
+    {
+     "numero": "AD8247066",
+     "t3_2025": "",
+     "27_10_2026": "10387000BT0001"
+    }
+   ],
+   "adresse_reference": [
+    {
+     "numero": "AC6018980",
+     "t3_2025": "232 bd baille 13005 marseille",
+     "27_10_2026": "232 boulevard baille 13005 marseille"
+    },
+    {
+     "numero": "AB2621886",
+     "t3_2025": "24-26 r de campo-formio 75013 paris",
+     "27_10_2026": "26 rue de campo-formio 75013 paris"
+    },
+    {
+     "numero": "AF8476657",
+     "t3_2025": "2 impasse verlaine",
+     "27_10_2026": "2 allée verlaine 35000 rennes"
+    },
+    {
+     "numero": "AB0999946",
+     "t3_2025": "les myrtilles 64570 la pierre saint martin",
+     "27_10_2026": "1 route des arres 64570 arette"
+    },
+    {
+     "numero": "AC8007148",
+     "t3_2025": "1286 rte du lac 74140 chens-sur-léman",
+     "27_10_2026": "1294 route du lac 74140 chens-sur-léman"
+    }
+   ],
+   "nombre_total_lots": [
+    {
+     "numero": "AB2621886",
+     "t3_2025": "226",
+     "27_10_2026": "224"
+    },
+    {
+     "numero": "AE3506946",
+     "t3_2025": "117",
+     "27_10_2026": "121"
+    },
+    {
+     "numero": "AD3290038",
+     "t3_2025": "18",
+     "27_10_2026": "16"
+    },
+    {
+     "numero": "AI0498907",
+     "t3_2025": "6",
+     "27_10_2026": "7"
+    },
+    {
+     "numero": "AA9202235",
+     "t3_2025": "146",
+     "27_10_2026": "178"
+    }
+   ],
+   "nombre_lots_habitation": [
+    {
+     "numero": "AB2621886",
+     "t3_2025": "77",
+     "27_10_2026": "75"
+    },
+    {
+     "numero": "AF8476657",
+     "t3_2025": "3",
+     "27_10_2026": "8"
+    },
+    {
+     "numero": "AE5274659",
+     "t3_2025": "4",
+     "27_10_2026": "6"
+    },
+    {
+     "numero": "AD3290038",
+     "t3_2025": "13",
+     "27_10_2026": "11"
+    },
+    {
+     "numero": "AI0498907",
+     "t3_2025": "3",
+     "27_10_2026": "4"
+    }
+   ]
+  }
+ }
+}
