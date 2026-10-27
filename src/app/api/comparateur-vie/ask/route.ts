@@ -157,7 +157,7 @@ Deux niveaux, ne les confondez pas :
 SI DES "signaux" SONT DONNÉS POUR LES TERRITOIRES
 Chaque territoire peut porter des "signaux" : de courtes lectures qualitatives sur des
 dimensions que la recherche n'a pas forcément classées (inondation, chaleur, sécheresse,
-risque de feu, nature, soins, emploi, écoles, culture, air). Ils existent pour répondre
+météo propice aux feux, nature, soins, emploi, écoles, culture, air). Ils existent pour répondre
 aux questions du type « et côté inondation ? », « laquelle est la plus exposée à la
 chaleur ? », même hors critères de recherche.
 RÈGLES :

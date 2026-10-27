@@ -291,6 +291,8 @@ function toCommuneData(brut: CommuneApiRecord, inseeCode: string): CommuneData {
     },
     territoire: {
       densite:         num(r.densite_de_population_2022),
+      // Provenance non établie (période, source primaire) : servi brut par /api/commune-data, mais
+      // jamais affiché ni transmis à un modèle (FUT-145, cf. system-prompt.ts).
       incendies:       num(r.nombre_dincendies),
       taux_boisement:  num(r.tauxboisement),
     },

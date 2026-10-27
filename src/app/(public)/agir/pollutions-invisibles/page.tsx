@@ -200,7 +200,7 @@ export default function AgirPollutionsInvisiblesPage() {
         </div>
 
         <p>
-          Avant d&apos;agir, savoir. Plusieurs bases publiques permettent de vérifier ce qui concerne votre commune directement ici, sans quitter la page.
+          Avant d&apos;agir, savoir. Plusieurs bases publiques permettent de vérifier ce qui concerne votre commune. Trois se consultent directement ici ; le registre des rejets industriels se consulte sur Géorisques.
         </p>
 
         <>

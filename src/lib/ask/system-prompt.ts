@@ -165,7 +165,11 @@ function formatAdemeBlock(data: CommuneFullData | null): string {
   // commerces à partir d'un chiffre qui compte peut-être des médecins. Un contexte qu'on ne sait
   // pas nommer ne se donne pas à un modèle : il ne se tait pas, il extrapole.
   push("Taux boisement (%)", pct(commune.territoire.taux_boisement));
-  push("Incendies récents (nombre)", num(commune.territoire.incendies));
+  // La ligne « Incendies récents (nombre) » a été retirée le 27/10/2026 (FUT-145) : le champ ADEME
+  // `nombre_dincendies` n'a ni période ni source primaire documentées, il manque pour des communes
+  // que la base nationale BDIFF compte à 9-11 feux, et « récents » promettait une période que
+  // personne ne connaît. Ne pas le rétablir sous un autre libellé : le danger météorologique (DRIAS,
+  // indice forêt-météo) et le risque recensé par l'État (Géorisques) restent transmis plus bas.
 
   return out.join("\n");
 }
