@@ -96,6 +96,10 @@ export function PackUnlockedView({ data, trio, pistes, projetLabel, avertissemen
                   {r.nom}
                 </h4>
                 <p className="mt-2 text-[14px] leading-[1.6] text-accent italic">{r.identite}</p>
+                {/* FUT-151 : aucune priorité favorable, et aucune présentée comme telle. */}
+                {r.sansPrioriteFavorable && (
+                  <p className="mt-3 text-[12px] leading-[1.5] text-muted">Aucune de vos priorités n'est favorable ici.</p>
+                )}
                 <ul className="mt-4 space-y-2">
                   {forces(r).map((f) => (
                     <li key={f} className="text-[length:var(--text-dense)] leading-[1.55] text-label flex gap-2">

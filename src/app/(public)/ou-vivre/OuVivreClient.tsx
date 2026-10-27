@@ -195,10 +195,15 @@ function matchTier(compatibility: number): string {
 
 // FUT-109 : un palier ne se dit que d'une commune dont toutes les priorités déclarées sont mesurées. Sinon
 // la carte ne promet rien : elle dit ce qui n'est pas mesuré ici, sans chiffre ni seuil.
-function palierCarte(r: MatchResult): { libelle: string; classe: string } {
+// FUT-151 : des priorités sont mesurées et aucune n'est favorable. La carte ne parle pas de correspondance, même
+// partielle : elle le dit (`inondation` : l'inondation ne contribue jamais favorablement, ce sont les autres).
+function palierCarte(r: MatchResult, inondation = false): { libelle: string; classe: string } {
   const etat = r.couverture?.etat ?? "complete";
   if (etat === "partielle") return { libelle: "Priorités en partie mesurées", classe: "text-muted" };
   if (etat === "aucune" || etat === "sans_priorite") return { libelle: "À explorer", classe: "text-muted" };
+  if (r.sansPrioriteFavorable) {
+    return { libelle: inondation ? "Aucune autre priorité favorable ici" : "Aucune priorité favorable ici", classe: "text-muted" };
+  }
   return { libelle: matchTier(r.compatibility), classe: matchTierClass(r.compatibility) };
 }
 
@@ -243,6 +248,8 @@ function fallbackSynthesis(parsed: ParsedProject, results: MatchResult[], explor
   if (inondation) return inondation;
   // FUT-109 : sans priorité mesurée partout, le repli ne raconte ni arbitrage ni correspondance : il dit l'exploration.
   if (couverture && couverture.etat !== "complete" && couverture.message) return `${parsed.reformulation} ${couverture.message}`;
+  // FUT-151 : sans priorité favorable sur aucune carte, pas d'« arbitrage » à raconter : le message du moteur le dit.
+  if (couverture?.message && results.length > 0 && results.every((r) => r.sansPrioriteFavorable)) return `${parsed.reformulation} ${couverture.message}`;
   const reasons = Array.from(
     new Set(results.flatMap((r) => r.reasons).filter(Boolean)),
   ).slice(0, 3);
@@ -563,6 +570,7 @@ export function OuVivreClient() {
               heritageIndustriel: r.heritageIndustriel, // récit héritage industriel, gaté côté route par heritageIntent
               inondation: r.inondation ?? null, // FUT-129 : faits (sinistres 1995-2021, plans), gatés côté route
               prioritesNonMesurees: r.couverture?.nonMesurees ?? [], // FUT-109 : jamais présentées comme satisfaites
+              sansPrioriteFavorable: r.sansPrioriteFavorable === true, // FUT-151 : mesurées, aucune favorable
             })),
             outcome: { perfectMatch: outcomeMeta.perfectMatch, message: outcomeMeta.message, exploration: outcomeMeta.exploration ?? false, couverture: outcomeMeta.couverture ?? "complete" },
             perimetre: outcomeMeta.perimetre ?? [],
@@ -1168,8 +1176,9 @@ export function OuVivreClient() {
               {/* FUT-129 : la seule demande classable était l'inondation. Pas de palmarès : on dit l'ordre. */}
               {outcome?.inondation?.exploration ? (
                 <>{outcome.inondation.ordre}</>
-              ) : /* FUT-109 : une couverture incomplète ne promet ni correspondance ni compromis établi. */
-              outcome?.couverture && outcome.couverture !== "complete" && outcome.message ? (
+              ) : /* FUT-109 : une couverture incomplète ne promet ni correspondance ni compromis établi.
+                     FUT-151 : une carte sans priorité favorable non plus : aucune ne « pourrait convenir ». */
+              ((outcome?.couverture && outcome.couverture !== "complete") || top.some((r) => r.sansPrioriteFavorable)) && outcome?.message ? (
                 <>{outcome.message}</>
               ) : /* FUT-32 : le nombre réel de territoires, jamais « trois » par défaut. */
               motCardinal(top.length) ? (
@@ -1209,7 +1218,8 @@ export function OuVivreClient() {
                   {/* FUT-129 : en exploration, aucun palier de correspondance : rien n'a été classé sur la demande. */}
                   {!outcome?.inondation?.exploration && (
                     <p className={`mt-4 font-mono text-[9px] tracking-[0.06em] uppercase ${palierCarte(r).classe}`}>
-                      {palierCarte(r).libelle}{outcome?.inondation && r.couverture?.etat !== "aucune" ? " sur vos autres critères" : ""}
+                      {palierCarte(r, !!outcome?.inondation).libelle}
+                      {outcome?.inondation && r.couverture?.etat !== "aucune" && !r.sansPrioriteFavorable ? " sur vos autres critères" : ""}
                     </p>
                   )}
                   {ligneNonMesure(r) && (

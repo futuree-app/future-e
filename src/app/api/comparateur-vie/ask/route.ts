@@ -114,6 +114,10 @@ Le champ "lecture.mode" dit ce que l'ordre des territoires signifie. Vous n'en d
   ni manquée : on ne sait pas. Aucune victoire comparative, aucun « devant », aucun « meilleur ».
 "position" est l'ordre d'affichage. Ce n'est un rang de mérite qu'en mode "classe". S'il n'y a qu'un
 territoire, ne le comparez à aucun autre.
+Quel que soit le mode, un territoire qui porte "aucune_priorite_favorable" à true n'atteint un niveau
+favorable sur aucune priorité déclarée mesurée (ses raisons sont vides) : dites-le simplement. Ne dites pas
+qu'il correspond ou convient, et ne présentez aucun critère demandé comme son point fort, même face aux
+autres territoires : faire moins mal qu'eux n'est pas un atout.
 
 LA PRÉMISSE DE LA QUESTION
 Une question peut supposer ce que le résultat n'établit pas : « pourquoi X est le meilleur choix »,
@@ -299,6 +303,8 @@ function buildContextBlock(
     couverture_priorites: lecture.communes[i]?.couverture ?? "inconnue",
     priorites_non_mesurees: lecture.communes[i]?.nonMesurees ?? [],
     raisons: t.raisons ?? [],
+    // FUT-151 : seul un `true` transmis le dit ; un champ absent ou illisible ne dit rien.
+    aucune_priorite_favorable: t.aucune_priorite_favorable === true,
     compromis: t.compromis ?? null,
     pression_climatique_economie: t.pression_eco ?? null,
     logement: t.logement ?? null,

@@ -107,6 +107,10 @@ Si un territoire porte "priorites_non_mesurees", ces priorités n'ont PAS été 
 cette commune : nommez-les une fois comme « non mesurées ici », sans dire qu'elles sont
 satisfaites ou manquantes, sans en faire un compromis, et ne dites pas que la commune
 « correspond » au projet sur ces points.
+Si un territoire porte "aucune_priorite_favorable" à true, ses priorités déclarées sont mesurées et
+aucune n'y atteint un niveau favorable : ses "raisons" sont vides. Ne dites pas qu'il correspond,
+répond ou convient au projet, ne lui prêtez aucun atout sur ces priorités, et ne présentez jamais
+un critère demandé comme son point fort, même par comparaison avec les autres communes.
 Avant d'écrire, faites la liste mentale de ces critères et vérifiez
 que CHACUN apparaît, NOMMÉ, au moins une fois dans votre récit. L'utilisateur doit pouvoir
 relire la synthèse et reconnaître immédiatement ce qu'il a demandé.
@@ -299,7 +303,7 @@ type Body = {
   project?: string;
   reformulation?: string;
   preferences?: { key: string; weight: number }[];
-  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[] }[];
+  results?: { nom: string; region?: string | null; reasons?: string[]; tradeoff?: string | null; pressionEco?: string | null; logement?: string | null; littoral?: string | null; distinctive?: string | null; climatInondation?: string | null; demographie?: string | null; calmeSonore?: string | null; expoIndustrielle?: string | null; heritageIndustriel?: string | null; inondation?: { historique?: string | null; plans?: string | null } | null; prioritesNonMesurees?: string[]; sansPrioriteFavorable?: boolean }[];
   heritageIntent?: boolean; // intention héritage industriel exprimée (gate du récit, non scoré)
   outcome?: { perfectMatch?: boolean; message?: string | null; exploration?: boolean; couverture?: string };
   perimetre?: string[]; // ancres dures = cadre choisi (tous les territoires y sont)
@@ -380,6 +384,8 @@ export async function POST(request: NextRequest) {
       trait_distinctif: r.distinctive ?? null,
       priorites_non_mesurees: Array.isArray(r.prioritesNonMesurees) && r.prioritesNonMesurees.length
         ? r.prioritesNonMesurees.filter((x) => typeof x === "string") : null,
+      // FUT-151 : mesurées, et aucune favorable. Seul `true` le dit ; un champ absent ne dit rien.
+      aucune_priorite_favorable: r.sansPrioriteFavorable === true ? true : null,
     })),
     sante_environnementale: body.enrichment ?? null,
   };

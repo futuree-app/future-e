@@ -32,6 +32,8 @@ export type TerritoireAsk = {
   heritage_industriel?: string | null; // ancien site SSP/ex-BASOL proche (narratif documentaire, hors-score)
   // FUT-142 : la couverture des priorités déclarées POUR CETTE COMMUNE (libellés du projet), ou null.
   couverture?: { etat: CouverturePriorites["etat"]; non_mesurees: string[] } | null;
+  // FUT-151 : ses priorités déclarées sont mesurées et aucune n'est favorable (ses raisons sont vides).
+  aucune_priorite_favorable?: boolean;
 };
 
 export type ContexteAsk = {
@@ -88,6 +90,7 @@ export function contexteAsk(a: {
       heritage_industriel: r.heritageIndustriel ?? null, // récit héritage (narratif, hors-score), firewall préservé
       // Transmise telle quelle : une carte sans couverture part sans couverture (jamais « complete »).
       couverture: r.couverture ? { etat: r.couverture.etat, non_mesurees: r.couverture.nonMesurees ?? [] } : null,
+      aucune_priorite_favorable: r.sansPrioriteFavorable === true,
     })),
     lecture: {
       exploration: inondation

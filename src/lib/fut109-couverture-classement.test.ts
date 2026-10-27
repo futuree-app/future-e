@@ -220,8 +220,9 @@ test("couverture partielle, sans priorité, complète : chaque cas a sa phrase",
 
 test("la page et la synthèse suivent la couverture du résultat (sans appel Anthropic)", () => {
   const client = readFileSync("src/app/(public)/ou-vivre/OuVivreClient.tsx", "utf8");
-  // L'en-tête « Les trois pourraient convenir » n'est atteint que pour une couverture complète.
-  assert.match(client, /outcome\?\.couverture && outcome\.couverture !== "complete" && outcome\.message \?/);
+  // L'en-tête « Les trois pourraient convenir » n'est atteint que pour une couverture complète (FUT-151 : et des
+  // cartes qui ont toutes au moins une priorité favorable).
+  assert.match(client, /\(\(outcome\?\.couverture && outcome\.couverture !== "complete"\) \|\| top\.some\(\(r\) => r\.sansPrioriteFavorable\)\) && outcome\?\.message \?/);
   assert.match(client, /couverture: outcomeMeta\.couverture \?\? "complete"/);
   assert.match(client, /couverture\.etat !== "complete" && couverture\.message\) return/);
   const route = readFileSync("src/app/api/comparateur-vie/synthesize/route.ts", "utf8");
