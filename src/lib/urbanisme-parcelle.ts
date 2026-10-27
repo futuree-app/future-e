@@ -22,7 +22,8 @@
 //  - Une prescription qu'on ne sait pas situer n'est jamais supprimée en silence : elle est dite incertaine.
 
 import {
-  aireIntersection, aireRegion, classer, lignesDe, longueurDans, pointsDe, projectionPour, regionDe, regionMesurable,
+  aireIntersection, aireRegion, classer, distanceLignes, lignesDe, longueurDans, pointsDe, projectionPour, regionDe,
+  regionMesurable, TOLERANCE_M,
   type Geometrie, type Region,
 } from "./geometrie-parcelle.ts";
 
@@ -42,8 +43,11 @@ export type { Geometrie } from "./geometrie-parcelle.ts";
  * `fut81-3` (deuxième revue, 27/10/2026) : aires calculées par Clipper et vérifiées contre GEOS, mesure
  * non garantie rendue « incertaine », projection à l'échelle de l'ellipsoïde (les m² montent de 0,7 %).
  * Les seuils sont ceux de `fut81-2`.
+ * `fut81-4` (troisième revue, 27/10/2026) : provenance spatiale. Une réponse demandée sur une parcelle
+ * non mesurable n'est jamais relue au point ; au point, seul ce qui contient le point est retenu ; le
+ * rattachement est conservé (`parcelle_non_mesurable`). Mêmes seuils, mêmes surfaces.
  */
-export const URBANISME_CONVENTION = "fut81-3";
+export const URBANISME_CONVENTION = "fut81-4";
 
 export const GPU_SITE = "https://www.geoportail-urbanisme.gouv.fr";
 
@@ -61,7 +65,9 @@ export type Ambiguite =
   | "vigueur_non_verifiee"
   | "zone_non_lue"
   | "parcelle_incertaine"
-  | "geometrie_non_mesurable";
+  | "geometrie_non_mesurable"
+  /** La parcelle rattachée n'a pas pu être mesurée (tracé absent, illisible ou invalide) : lecture au point. */
+  | "parcelle_non_mesurable";
 
 /**
  * COMMENT LA PARCELLE A ÉTÉ RATTACHÉE À L'ADRESSE. `point` : le point de l'adresse tombe dans une seule
@@ -154,6 +160,11 @@ export type UrbanismeParcelle = {
   /** Ce que le GPU déclare de la commune : au RNU, hors RNU, ou `null` s'il n'a pas répondu. */
   communeRnu: boolean | null;
   grain: "parcelle" | "point";
+  /**
+   * La géométrie envoyée au GPU (troisième revue). `parcelle` avec un grain `point` : la parcelle ne se
+   * mesurait pas et rien n'a pu être situé ; tout est incertain. Absent des lectures antérieures.
+   */
+  interrogation?: "parcelle" | "point";
   rattachement: Rattachement;
   documents: DocumentUrbanisme[];
   zones: ZoneParcelle[];
@@ -227,6 +238,13 @@ export type EntreeUrbanisme = {
     /** Distance du point à la parcelle retenue par repli. */
     distanceM?: number | null;
   } | null;
+  /**
+   * LA GÉOMÉTRIE RÉELLEMENT ENVOYÉE AU GPU pour les zones, secteurs et prescriptions (troisième revue,
+   * 27/10/2026). Une réponse obtenue sur la parcelle ne prouve rien au point de l'adresse, qui peut être
+   * hors de la parcelle (repli) : elle ne se relit jamais « au point ». Absente, on suppose la parcelle dès
+   * qu'une géométrie de parcelle est fournie : l'hypothèse prudente, où rien n'est confirmé au point.
+   */
+  interrogation?: "parcelle" | "point";
   municipality: GpuFeature[] | null;
   documents: GpuFeature[] | null;
   zones: GpuFeature[] | null;
@@ -314,10 +332,13 @@ export function urbanismeIndisponible(rattachement: Rattachement = { mode: "aucu
   };
 }
 
-/** Le rattachement de la parcelle, tel que la collecte l'a établi. */
-function rattachementDe(e: EntreeUrbanisme, parcelleLisible: boolean): Rattachement {
+/**
+ * Le rattachement de la parcelle, tel que la collecte l'a établi. Il est conservé même quand la parcelle
+ * ne se mesure pas : la lecture passe alors au point, mais la proximité et la limite restent dites.
+ */
+function rattachementDe(e: EntreeUrbanisme): Rattachement {
   const p = e.parcelle;
-  if (!p || !parcelleLisible) return { mode: "aucun", distanceM: null };
+  if (!p) return { mode: "aucun", distanceM: null };
   if (p.rattachement === "repli") return { mode: "repli", distanceM: p.distanceM != null ? arrondi(p.distanceM, 0.1) : null };
   if ((p.candidatsAuPoint ?? 1) > 1) return { mode: "limite", distanceM: null };
   return { mode: "point", distanceM: null };
@@ -325,17 +346,27 @@ function rattachementDe(e: EntreeUrbanisme, parcelleLisible: boolean): Rattachem
 
 // ── La lecture ───────────────────────────────────────────────────────────────────────────────
 
-/** Ce qu'une surface publiée fait à la parcelle : couvre, recoupe à peine, la touche, ou n'est pas lisible. */
-type Mesure = { lieu: "couvre" | "marginale" | "contact" | "incertaine"; part: number | null; surfaceM2: number | null };
+/**
+ * Ce qu'une surface publiée fait à la parcelle : couvre, recoupe à peine, la touche, ou n'est pas lisible.
+ * Au point : `couvre` si elle contient le point de l'adresse, `ailleurs` sinon (jamais retenue).
+ */
+type Mesure = { lieu: "couvre" | "marginale" | "contact" | "incertaine" | "ailleurs"; part: number | null; surfaceM2: number | null };
 
 export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
-  // La parcelle n'est mesurable que si sa géométrie se lit ENTIÈREMENT et forme un polygone valide :
-  // sinon, lecture au point.
+  // La parcelle n'est mesurable que si sa géométrie se lit ENTIÈREMENT et forme un polygone valide.
   const proj = projectionPour(e.parcelle?.geometry, e.point);
   const regionParcelle: Region | null = e.parcelle ? regionDe(e.parcelle.geometry, proj) : null;
   const aireParcelle = regionParcelle ? aireRegion(regionParcelle) : 0;
-  const grain = regionParcelle && aireParcelle > 0 && regionMesurable(regionParcelle) ? "parcelle" : "point";
-  const rattachement = rattachementDe(e, grain === "parcelle");
+  const parcelleMesurable = !!regionParcelle && aireParcelle > 0 && regionMesurable(regionParcelle);
+  // LA PROVENANCE SPATIALE (troisième revue) : on ne lit « à la parcelle » que ce qui a été demandé sur
+  // une parcelle mesurable ; « au point » que ce dont la géométrie contient le point. Une réponse obtenue
+  // sur une parcelle qu'on ne sait pas mesurer ne prouve rien, ni pour la parcelle ni pour le point :
+  // tout y reste incertain (`sansPreuve`).
+  const interrogation = e.interrogation ?? (e.parcelle?.geometry ? "parcelle" : "point");
+  const grain = interrogation === "parcelle" && parcelleMesurable ? "parcelle" : "point";
+  const sansPreuve = interrogation === "parcelle" && !parcelleMesurable;
+  const ici = pointsDe({ type: "Point", coordinates: e.point }, proj)?.[0] ?? null;
+  const rattachement = rattachementDe(e);
 
   // Sans la liste des documents, ou sans aucune des deux couches de zonage, rien n'est établi.
   if (e.documents == null || (e.zones == null && e.secteurs == null)) return urbanismeIndisponible(rattachement);
@@ -343,8 +374,12 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
   const rnu = e.municipality?.find((m) => typeof m.properties?.is_rnu === "boolean")?.properties?.is_rnu as boolean | undefined;
 
   const mesurer = (g: Geometrie, regle: (part: number, surfaceM2: number) => boolean = couvre): Mesure => {
-    if (grain === "point") return { lieu: "couvre", part: null, surfaceM2: null };
     const r = regionDe(g, proj);
+    if (grain === "point") {
+      // Au point : retenue seulement si sa géométrie contient le point (ou le touche, à `TOLERANCE_M`).
+      if (sansPreuve || !r || !ici) return { lieu: "incertaine", part: null, surfaceM2: null };
+      return { lieu: classer(ici, r).lieu === "dehors" ? "ailleurs" : "couvre", part: null, surfaceM2: null };
+    }
     if (!r) return { lieu: "incertaine", part: null, surfaceM2: null };
     // Une aire que le calcul ne peut pas garantir n'alimente jamais une attribution (cf. `aireIntersection`).
     const aire = aireIntersection(regionParcelle!, r);
@@ -384,7 +419,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
       statut: rnu === true ? "confirme" : "non_trouve",
       regime: rnu === true ? "rnu" : "inconnu",
       communeRnu: rnu ?? null,
-      grain,
+      grain, interrogation,
       prescriptionsStatut: e.prescriptions.surface == null ? "indisponible" : "ok",
     };
   }
@@ -400,6 +435,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
     const libelle = str(p.libelle) ?? "zone sans libellé";
     const m = mesurer(z.geometry, couvreZone);
     if (m.lieu === "incertaine") { if (!nonMesurables.includes(libelle)) nonMesurables.push(libelle); continue; }
+    if (m.lieu === "ailleurs") continue;
     if (m.lieu === "contact" || m.lieu === "marginale") {
       enLimite.set(libelle, Math.max(enLimite.get(libelle) ?? 0, m.surfaceM2 ?? 0));
       continue;
@@ -428,6 +464,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
     const libelle = str(p.libelle) ?? "secteur";
     const m = mesurer(s.geometry, couvreZone);
     if (m.lieu === "incertaine") { if (!nonMesurables.includes(libelle)) nonMesurables.push(libelle); continue; }
+    if (m.lieu === "ailleurs") continue;
     if (m.lieu !== "couvre") { enLimite.set(libelle, Math.max(enLimite.get(libelle) ?? 0, m.surfaceM2 ?? 0)); continue; }
     if (secteurs.some((x) => x.libelle === libelle)) continue;
     secteurs.push({ libelle, typesect: typeSecteur(p.typesect), part: m.part, documentId });
@@ -452,8 +489,12 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
     let part: number | null = null;
     let surfaceM2: number | null = null;
     let longueurM: number | null = null;
-    if (grain === "point") lieu = "couvre";
-    else if (forme === "surface") ({ lieu, part, surfaceM2 } = mesurer(f.geometry));
+    if (forme === "surface") ({ lieu, part, surfaceM2 } = mesurer(f.geometry));
+    else if (grain === "point") {
+      // Une ligne ou un point ne vaut à l'adresse que s'il passe par son point (à `TOLERANCE_M`).
+      const l = forme === "ligne" ? lignesDe(f.geometry, proj) : pointsDe(f.geometry, proj)?.map((q) => [q]) ?? null;
+      lieu = sansPreuve || !l || !ici ? "incertaine" : distanceLignes(ici, l) <= TOLERANCE_M ? "couvre" : "ailleurs";
+    }
     else if (forme === "ligne") {
       const l = lignesDe(f.geometry, proj);
       if (!l) lieu = "incertaine";
@@ -467,6 +508,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
       if (!pts) lieu = "incertaine";
       else lieu = pts.some((q) => classer(q, regionParcelle!).lieu === "dedans") ? "couvre" : "contact";
     }
+    if (lieu === "ailleurs") return;
     if (lieu === "contact") { prescriptionsContact++; return; }
     const code = str(p.typepsc) ?? "";
     const sousCode = str(p.stypepsc) ?? "00";
@@ -500,6 +542,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
   // 4. Ce qui reste incertain, dit.
   const ambiguites: Ambiguite[] = [];
   if (rattachement.mode === "repli" || rattachement.mode === "limite") ambiguites.push("parcelle_incertaine");
+  if (e.parcelle && !parcelleMesurable) ambiguites.push("parcelle_non_mesurable");
   if (new Set([...zones.map((z) => z.documentId), ...secteurs.map((s) => s.documentId)]).size > 1) ambiguites.push("plusieurs_documents");
   if (documents.some((d) => d.vigueur === "hors_vigueur")) ambiguites.push("document_hors_vigueur");
   if (documents.some((d) => d.vigueur === "non_verifiee")) ambiguites.push("vigueur_non_verifiee");
@@ -512,6 +555,7 @@ export function lireUrbanisme(e: EntreeUrbanisme): UrbanismeParcelle {
     regime: "document",
     communeRnu: rnu ?? null,
     grain,
+    interrogation,
     rattachement,
     documents,
     zones,

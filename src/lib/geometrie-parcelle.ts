@@ -379,6 +379,16 @@ export function longueurDans(lignes: Pt[][], r: Region): { dedans: number; surLe
   return { dedans, surLeBord };
 }
 
+/** Distance (m) d'un point à des lignes (ou, segments d'un seul sommet, à des points). */
+export function distanceLignes(m: Pt, lignes: Pt[][]): number {
+  let d = Infinity;
+  for (const l of lignes) {
+    if (l.length === 1) d = Math.min(d, Math.hypot(m[0] - l[0][0], m[1] - l[0][1]));
+    for (let i = 0; i + 1 < l.length; i++) d = Math.min(d, distanceSegment(m, l[i], l[i + 1]));
+  }
+  return d;
+}
+
 /** Distance (m) d'un point à une région : 0 dedans ou sur le bord. */
 export function distanceRegion(m: Pt, r: Region): number {
   if (classer(m, r).lieu !== "dehors") return 0;

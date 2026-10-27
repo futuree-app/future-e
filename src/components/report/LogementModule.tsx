@@ -772,6 +772,7 @@ const NOM_SOURCE: Record<string, string> = {
   audit_energetique: "audit énergétique ADEME", diagnostics_dpe: "diagnostics de performance énergétique ADEME",
   urbanisme: "Géoportail de l'urbanisme", urbanisme_prescriptions: "prescriptions du plan d'urbanisme",
   urbanisme_vigueur: "statut des documents d'urbanisme", urbanisme_pieces: "pièces des documents d'urbanisme",
+  urbanisme_parcelle: "tracé de la parcelle pour le plan d'urbanisme",
 };
 
 function BandeauVersion({ collecteeLe, sourcesAbsentes = [], etat, onActualiser }: {

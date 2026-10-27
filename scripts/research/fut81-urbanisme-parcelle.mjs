@@ -205,6 +205,8 @@ async function mesurer(cas) {
   const u = lireUrbanisme({
     point: [lon, lat],
     parcelle: p ? { geometry: p.geometry, contenance: p.properties.contenance ?? null, rattachement: parc.value.rattachement, candidatsAuPoint: parc.value.candidatsAuPoint, distanceM: parc.value.distanceM ?? null } : null,
+    // La géométrie réellement envoyée au GPU (troisième revue) : la parcelle si elle a été lue, sinon le point.
+    interrogation: parcelGeom ? "parcelle" : "point",
     municipality: muni.value?.features ?? null, documents: docsParc.value?.features ?? null,
     zones: zones.value?.features ?? null, secteurs: secteurs.value?.features ?? null,
     prescriptions: { surface: psurf.value?.features ?? null, ligne: plin.value?.features ?? null, point: ppct.value?.features ?? null },

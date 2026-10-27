@@ -1,0 +1,22 @@
+{
+ "requetes": [
+  "Point"
+ ],
+ "statut": "ambigu",
+ "grain": "point",
+ "interrogation": "point",
+ "rattachement": {
+  "mode": "repli",
+  "distanceM": 2
+ },
+ "ambiguites": [
+  "parcelle_incertaine",
+  "parcelle_non_mesurable"
+ ],
+ "zones": [
+  "UA"
+ ],
+ "zonesNonMesurables": [],
+ "prescriptions": [],
+ "actualisationContreN": "refusee"
+}

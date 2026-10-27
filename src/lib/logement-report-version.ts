@@ -118,7 +118,7 @@ export function sourcesAbsentes(r: LogementReport): string[] {
  * muettes : la panne était dite à l'écran, mais l'actualisation qui la portait remplaçait une version
  * complète. Chaque sous-source est donc nommée, et une panne totale reste la seule `urbanisme`.
  */
-export const SOUS_SOURCES_URBANISME = ["urbanisme", "urbanisme_prescriptions", "urbanisme_vigueur", "urbanisme_pieces"] as const;
+export const SOUS_SOURCES_URBANISME = ["urbanisme", "urbanisme_prescriptions", "urbanisme_vigueur", "urbanisme_pieces", "urbanisme_parcelle"] as const;
 
 function urbanismeAbsent(r: LogementReport): string[] {
   const u = r.urbanisme;
@@ -147,6 +147,9 @@ export function pertesUrbanisme(ancien: LogementReport, nouveau: LogementReport)
   const tous = (u: typeof a, champ: "detailLu" | "piecesLues") => (u.documents ?? []).length > 0 && u.documents.every((d) => d[champ] === true);
   if (tous(a, "detailLu") && (n.documents ?? []).some((d) => d.detailLu !== true)) pertes.push("urbanisme_vigueur");
   if (tous(a, "piecesLues") && (n.documents ?? []).some((d) => d.piecesLues !== true)) pertes.push("urbanisme_pieces");
+  // Troisième revue : une lecture mesurée à la parcelle ne cède pas la place à une lecture au point (parcelle
+  // devenue non mesurable, ou disparue). Ce n'est pas une panne, mais une lecture moins sûre : N reste.
+  if (a.grain === "parcelle" && n.grain !== "parcelle") pertes.push("urbanisme_parcelle");
   return pertes;
 }
 

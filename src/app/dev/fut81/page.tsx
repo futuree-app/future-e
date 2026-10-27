@@ -4,11 +4,14 @@
 // `urbanisme` est lu par `lireUrbanisme` à partir des réponses RÉELLES du cadastre et du Géoportail de
 // l'urbanisme relevées le 26/10/2026 (`src/lib/__fixtures__/fut81/`). Aucune source n'est appelée.
 //
-// `?cas=lyon|six-fours|merignac|moissy|la-rochelle|vauquois|chatelard|grandvals|besancon|sucy|vigueur|incertaine|panne|ancien`
+// `?cas=lyon|six-fours|merignac|moissy|la-rochelle|vauquois|chatelard|grandvals|besancon|sucy|vigueur|incertaine|repli-invalide|sans-preuve|panne|ancien`
 // `panne` : le Géoportail n'a pas répondu. `ancien` : un rapport écrit avant FUT-81, sans le champ.
 // Revue du 27/10/2026 : `besancon` (PSMV, immeuble non protégé, repli à 0,7 m), `sucy` (trois zones et un
 // liseré de bordure), `vigueur` (Moissy, détail et pièces du document en délai dépassé), `incertaine`
 // (Six-Fours, géométrie de l'emplacement réservé illisible : prescription gardée, position non vérifiable).
+// Troisième revue : `repli-invalide` (Besançon, repli à 0,7 m, tracé de la parcelle rendu invalide : le GPU
+// est interrogé au point, seul ce qui contient le point est retenu, le repli reste dit) ; `sans-preuve`
+// (le même, mais avec la réponse demandée sur la parcelle : rien n'est situé, tout reste incertain).
 import { notFound } from "next/navigation";
 import LogementModule from "@/components/report/LogementModule";
 import type { AddressDossierRow } from "@/lib/address-dossier-store";
@@ -37,7 +40,7 @@ type Fixture = {
 };
 const CAS: Record<string, Fixture> = {
   lyon, "six-fours": sixFours, merignac, moissy, "la-rochelle": laRochelle, vauquois, chatelard, grandvals,
-  besancon, sucy, vigueur: moissy, incertaine: sixFours, panne: moissy, ancien: moissy,
+  besancon, sucy, vigueur: moissy, incertaine: sixFours, "repli-invalide": besancon, "sans-preuve": besancon, panne: moissy, ancien: moissy,
 } as unknown as Record<string, Fixture>;
 
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -47,13 +50,20 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   const f = CAS[cle];
   const base = casDeLogement("sans-dpe").rapport;
   const p = f.parcelle?.properties;
+  // Le tracé de la parcelle rendu invalide : ses parties publiées deux fois, qui se recouvrent.
+  const invalide = cle === "repli-invalide" || cle === "sans-preuve";
+  const g = f.parcelle?.geometry;
+  const parties = g ? (g.type === "Polygon" ? [g.coordinates] : (g.coordinates as unknown[])) : [];
+  const geometrieParcelle = invalide && g ? { type: "MultiPolygon", coordinates: [...parties, ...parties] } : g;
   const urbanisme = cle === "ancien"
     ? undefined
     : cle === "panne"
       ? urbanismeIndisponible()
       : lireUrbanisme({
           point: [f.ban.lon, f.ban.lat],
-          parcelle: f.parcelle ? { geometry: f.parcelle.geometry, contenance: p?.contenance ?? null, rattachement: f.parcelle.rattachement, distanceM: f.parcelle.distanceM ?? null } : null,
+          parcelle: f.parcelle ? { geometry: geometrieParcelle, contenance: p?.contenance ?? null, rattachement: f.parcelle.rattachement, distanceM: f.parcelle.distanceM ?? null } : null,
+          // `repli-invalide` : comme le collecteur, au point ; le lecteur ne garde que ce qui contient le point.
+          ...(cle === "repli-invalide" ? { interrogation: "point" as const } : cle === "sans-preuve" ? { interrogation: "parcelle" as const } : {}),
           municipality: f.municipality.features, documents: f.document.features, zones: f.zone.features, secteurs: f.secteur.features,
           prescriptions: {
             surface: cle === "incertaine"

@@ -4,7 +4,7 @@ import { buildHeritageProtections, type HeritageStatus, type RawSupFeature } fro
 import {
   GPU_SITE, lireUrbanisme, urbanismeIndisponible, type EntreeUrbanisme, type GpuFeature, type UrbanismeParcelle,
 } from "./urbanisme-parcelle.ts";
-import { projectionAutour, regionDe } from "./geometrie-parcelle.ts";
+import { projectionPour, regionDe, regionMesurable } from "./geometrie-parcelle.ts";
 
 export type { HeritageStatus } from "./gpu-servitudes.ts";
 
@@ -86,9 +86,14 @@ export async function fetchUrbanismeParcelle(
 ): Promise<UrbanismeParcelle> {
   try {
     const point = { type: "Point", coordinates: [longitude, latitude] };
-    // Une géométrie de parcelle qui ne se lit pas entièrement n'est pas envoyée : lecture au point.
-    const lisible = parcelle?.geometry && regionDe(parcelle.geometry, projectionAutour(longitude, latitude)) ? parcelle : null;
-    const geom = lisible?.geometry ?? point;
+    // LE PÉRIMÈTRE DES REQUÊTES SE DÉCIDE APRÈS VALIDATION (troisième revue, 27/10/2026). Une parcelle
+    // qui ne se MESURE pas (tracé illisible, ou invalide : anneaux qui se croisent ou se recouvrent) n'est
+    // pas envoyée : le GPU est interrogé au point de l'adresse, et seule cette réponse est lue au point.
+    // Le critère est celui du lecteur (`regionMesurable`, même projection) : les deux ne peuvent diverger.
+    // La parcelle reste transmise : son rattachement (proximité, distance, limite) reste dit.
+    const region = parcelle?.geometry ? regionDe(parcelle.geometry, projectionPour(parcelle.geometry, [longitude, latitude])) : null;
+    const interrogation = region && regionMesurable(region) ? "parcelle" : "point";
+    const geom = interrogation === "parcelle" ? parcelle!.geometry : point;
     const [municipality, documents, zones, secteurs, surface, ligne, pct] = await Promise.all([
       gpuCouche("municipality", point),
       gpuCouche("document", geom),
@@ -108,7 +113,8 @@ export async function fetchUrbanismeParcelle(
     }));
     return lireUrbanisme({
       point: [longitude, latitude],
-      parcelle: lisible,
+      parcelle,
+      interrogation,
       municipality, documents, zones, secteurs,
       prescriptions: { surface, ligne, point: pct },
       details: Object.fromEntries(lus.map(([id, d]) => [id, d])),

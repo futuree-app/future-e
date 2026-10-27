@@ -1,0 +1,21 @@
+{
+ "requetes": [
+  "MultiPolygon"
+ ],
+ "statut": "confirme",
+ "grain": "point",
+ "interrogation": "(absent)",
+ "rattachement": {
+  "mode": "aucun",
+  "distanceM": null
+ },
+ "ambiguites": [],
+ "zones": [
+  "UB"
+ ],
+ "zonesNonMesurables": [],
+ "prescriptions": [
+  "Emplacement réservé voisin : couvre"
+ ],
+ "actualisationContreN": "nouvelle_version"
+}

@@ -56,8 +56,10 @@ function duDocument(d: DocumentUrbanisme | undefined): string {
   return d?.type === "CC" ? "de la carte communale" : `du ${nomDocument(d)}`;
 }
 
-function etendue(p: PrescriptionParcelle): string | null {
-  if (p.etendue === "incertaine") return "position par rapport à la parcelle non vérifiable";
+function etendue(p: PrescriptionParcelle, auPoint: boolean): string | null {
+  if (p.etendue === "incertaine") return auPoint ? "position par rapport à l’adresse non vérifiable" : "position par rapport à la parcelle non vérifiable";
+  // Au point de l'adresse, il n'y a ni part ni longueur : la prescription contient le point, c'est tout.
+  if (auPoint) return p.forme === "surface" ? null : p.forme === "ligne" ? "passe à l’adresse" : "situé à l’adresse";
   if (p.etendue === "marginale") {
     return p.forme === "ligne"
       ? "effleure la parcelle"
@@ -68,10 +70,10 @@ function etendue(p: PrescriptionParcelle): string | null {
   return p.part == null ? null : `sur ${etendueSurface(p.part, p.surfaceM2)}`;
 }
 
-function Prescription({ p }: { p: PrescriptionParcelle }) {
+function Prescription({ p, auPoint, sansPreuve }: { p: PrescriptionParcelle; auPoint: boolean; sansPreuve: boolean }) {
   const c = CATEGORIES[p.categorie];
   const titre = c?.titre ?? `Prescription cartographiée (code ${p.code}-${p.sousCode})`;
-  const e = etendue(p);
+  const e = etendue(p, auPoint);
   const libelleDistinct = p.libelle.trim().toLowerCase() !== titre.toLowerCase() ? p.libelle : null;
   return (
     <div style={{ display: "grid", gap: 3 }}>
@@ -84,7 +86,9 @@ function Prescription({ p }: { p: PrescriptionParcelle }) {
         <p style={DETAIL}>
           {bindOrphans(p.etendue === "marginale"
             ? "Un recouvrement aussi faible peut venir d’un écart de tracé entre le plan et le cadastre : vérifiez sur le plan de zonage si elle concerne bien ce terrain."
-            : "Sa géométrie publiée n’a pas pu être lue : vérifiez sur le plan de zonage si elle concerne ce terrain.")}
+            : sansPreuve
+              ? "Sa position par rapport à l’adresse n’a pas pu être établie : vérifiez sur le plan de zonage si elle concerne ce terrain."
+              : "Sa géométrie publiée n’a pas pu être lue : vérifiez sur le plan de zonage si elle concerne ce terrain.")}
         </p>
       )}
     </div>
@@ -100,7 +104,7 @@ function Prescriptions({ u, surLaParcelle }: { u: UrbanismeParcelle; surLaParcel
       {u.prescriptions.length > 0 && (
         <div style={{ display: "grid", gap: 12 }}>
           <p style={{ ...EYEBROW, margin: 0 }}>Prescriptions cartographiées {surLaParcelle}</p>
-          {u.prescriptions.map((p, i) => <Prescription key={i} p={p} />)}
+          {u.prescriptions.map((p, i) => <Prescription key={i} p={p} auPoint={u.grain === "point"} sansPreuve={sansPreuve(u)} />)}
         </div>
       )}
       {u.prescriptionsStatut === "indisponible" ? (
@@ -174,11 +178,26 @@ function ReserveVigueur({ documents }: { documents: DocumentUrbanisme[] }) {
   );
 }
 
+/** Une réponse demandée sur une parcelle qu'on ne sait pas mesurer : rien n'a pu être situé (troisième revue). */
+const sansPreuve = (u: UrbanismeParcelle) => u.interrogation === "parcelle" && u.grain === "point";
+
 /** LA RÉSERVE DE RATTACHEMENT, VISIBLE AVANT TOUT LE RESTE : les règles lues sont peut-être celles du voisin. */
 function ReserveParcelle({ u, parcelCode }: { u: UrbanismeParcelle; parcelCode: string | null }) {
   const ref = parcelCode ? ` (${parcelCode})` : "";
+  const d = u.rattachement.distanceM;
+  // Troisième revue : une parcelle qu'on ne sait pas mesurer ne fait pas disparaître le rattachement.
+  if (u.ambiguites.includes("parcelle_non_mesurable")) {
+    const quelle = u.rattachement.mode === "repli"
+      ? `Le point de l’adresse ne tombe dans aucune parcelle, et le tracé de la plus proche${ref}${d == null ? "" : d < 1 ? ", à moins d’un mètre," : `, à environ ${Math.round(d)} m,`} n’a pas pu être mesuré.`
+      : u.rattachement.mode === "limite"
+        ? `Le point de l’adresse est sur la limite entre plusieurs parcelles, et le tracé de celle retenue${ref} n’a pas pu être mesuré.`
+        : `Le tracé cadastral de la parcelle${ref} n’a pas pu être mesuré.`;
+    const suite = u.interrogation === "parcelle"
+      ? " Les zones et prescriptions trouvées autour n’ont donc pas pu être situées : aucune n’est retenue. Demandez au service urbanisme celles qui s’appliquent à ce terrain."
+      : " La lecture porte donc sur le point de l’adresse seul : une zone ou une prescription voisine peut s’appliquer à une partie du terrain. Vérifiez la référence cadastrale sur l’acte ou le compromis, et le plan de zonage.";
+    return <p style={RESERVE}>{bindOrphans(quelle + suite)}</p>;
+  }
   if (u.rattachement.mode === "repli") {
-    const d = u.rattachement.distanceM;
     return (
       <p style={RESERVE}>
         {bindOrphans(`Le point de l’adresse ne tombe dans aucune parcelle. La plus proche${ref}${d == null ? "" : d < 1 ? ", à moins d’un mètre," : `, à environ ${Math.round(d)} m,`} a été retenue : elle peut être celle d’un voisin. Les règles ci-dessous ne valent pour ce logement que si c’est bien sa parcelle ; vérifiez la référence cadastrale sur l’acte ou le compromis.`)}
@@ -213,7 +232,7 @@ function Methode({ u, parcelCode }: { u: UrbanismeParcelle; parcelCode: string |
       <div>
         {u.grain === "parcelle"
           ? `Grain : parcelle cadastrale${parcelCode ? ` ${parcelCode}` : ""} rattachée à l’adresse. Une adresse peut couvrir plusieurs parcelles (jardin, dépendance) : cette lecture porte sur celle-ci seulement.`
-          : "Grain : point géocodé de l’adresse. La parcelle n’a pas pu être lue : une zone voisine peut s’appliquer à une partie du terrain."}
+          : `Grain : point géocodé de l’adresse. ${u.ambiguites.includes("parcelle_non_mesurable") ? (u.interrogation === "parcelle" ? "Le tracé de la parcelle n’a pas pu être mesuré : ce que le Géoportail a rendu pour elle n’a pas pu être situé, et rien n’en est retenu." : "Le tracé de la parcelle n’a pas pu être mesuré : le Géoportail a été interrogé au point, et seules les zones et prescriptions qui contiennent ce point sont retenues.") : "La parcelle n’a pas pu être lue : une zone voisine peut s’appliquer à une partie du terrain."}`}
       </div>
       {contacts.length > 0 && (
         <div>
@@ -295,7 +314,7 @@ export function UrbanismeBlock({
   // Une vigueur non établie ne laisse pas affirmer le zonage comme applicable : on dit d'où il vient.
   const selon = u.documents.some((d) => d.vigueur !== "etablie") ? "D’après le document publié, " : "";
   const phrase = (reste: string) => `${selon}${selon ? sujet.charAt(0).toLowerCase() + sujet.slice(1) : sujet} ${reste}`;
-  const surLaParcelle = incertaine ? "sur la parcelle retenue" : "sur la parcelle";
+  const surLaParcelle = u.grain === "point" ? "à l’adresse" : incertaine ? "sur la parcelle retenue" : "sur la parcelle";
 
   // Carte communale : des secteurs, pas de règlement propre.
   if (u.secteurs.length > 0 && u.zones.length === 0) {
@@ -328,10 +347,12 @@ export function UrbanismeBlock({
       <div style={cadre}>
         {eyebrow}
         <ReserveParcelle u={u} parcelCode={parcelCode} />
-        <p style={TITRE}>{bindOrphans(`Un ${nomDocument(u.documents[0])} est publié pour cette commune, mais aucune zone n’a pu être lue à cette parcelle.`)}</p>
+        <p style={TITRE}>{bindOrphans(`Un ${nomDocument(u.documents[0])} est publié pour cette commune, mais aucune zone n’a pu être lue ${u.grain === "point" ? "à cette adresse" : "à cette parcelle"}.`)}</p>
         <ReserveVigueur documents={u.documents} />
         {u.zonesNonMesurables.length > 0 && (
-          <p style={DETAIL}>{bindOrphans(`La géométrie publiée de ${u.zonesNonMesurables.length === 1 ? `la zone ${u.zonesNonMesurables[0]}` : `des zones ${u.zonesNonMesurables.join(", ")}`} n’a pas pu être lue.`)}</p>
+          <p style={DETAIL}>{bindOrphans(sansPreuve(u)
+            ? `Le Géoportail rend ${u.zonesNonMesurables.length === 1 ? `la zone ${u.zonesNonMesurables[0]}` : `les zones ${u.zonesNonMesurables.join(", ")}`} pour cette parcelle, sans que ${u.zonesNonMesurables.length === 1 ? "sa" : "leur"} position par rapport à l’adresse puisse être établie.`
+            : `${u.zonesNonMesurables.length === 1 ? `La géométrie publiée de la zone ${u.zonesNonMesurables[0]} n’a` : `Les géométries publiées des zones ${u.zonesNonMesurables.join(", ")} n’ont`} pas pu être lue${u.zonesNonMesurables.length === 1 ? "" : "s"}.`)}</p>
         )}
         <Prescriptions u={u} surLaParcelle={surLaParcelle} />
         <p style={CORPS}>{bindOrphans("Demandez au service urbanisme de la mairie la zone applicable et son règlement avant tout projet.")}</p>
@@ -350,7 +371,11 @@ export function UrbanismeBlock({
     ? phrase(`est en zone ${z0.libelle} ${duDocument(docDe(z0.documentId))}.`)
     : superposees
       ? phrase(`est couverte par ${u.zones.length} zones superposées ${duDocument(docDe(z0.documentId))} : ${liste}.`)
-      : phrase(`est partagée entre ${u.zones.length} zones ${duDocument(docDe(z0.documentId))} : ${liste}.`);
+      : u.grain === "point"
+        // Un point n'est pas « partagé ». Plusieurs zones le contiennent : superposées (Besançon : plan de
+        // sauvegarde et site patrimonial) ou jointives à sa position. Sans parcelle, on ne tranche pas.
+        ? phrase(`relève de ${u.zones.length} zones ${duDocument(docDe(z0.documentId))} : ${liste}.`)
+        : phrase(`est partagée entre ${u.zones.length} zones ${duDocument(docDe(z0.documentId))} : ${liste}.`);
   // Les liserés mesurables se disent à l'écran ; les simples contacts restent dans la méthode.
   const bordures = u.zonesEnLimite.filter((z) => z.surfaceM2 >= SURFACE_MIN_M2);
   // Les règlements distincts : une seule ligne quand toutes les zones renvoient au même fichier.

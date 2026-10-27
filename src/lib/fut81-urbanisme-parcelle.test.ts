@@ -328,9 +328,11 @@ test("Blocage 1 — Trous, multipolygones, parcelles concaves, deux zones réell
 
 test("Blocage 1 — Géométrie absente, vide ou mal formée : lecture au point, jamais « à la parcelle » ; zone illisible dite", () => {
   for (const [nom, g] of [["absente", null], ["Polygon vide", { type: "Polygon", coordinates: [] }], ["coordonnées nulles", { type: "Polygon", coordinates: null }], ["NaN", { type: "Polygon", coordinates: [[[Number.NaN, 1], [2, 2], [3, 3], [Number.NaN, 1]]] }]] as const) {
-    const u = lireUrbanisme(synthetique({ parcelle: { geometry: g as never, contenance: 10_000, rattachement: "point" } }));
-    assert.deepEqual([u.grain, u.rattachement.mode], ["point", "aucun"], nom);
+    // La collecte interroge alors le GPU au point (troisième revue) : le rattachement reste dit.
+    const u = lireUrbanisme(synthetique({ parcelle: { geometry: g as never, contenance: 10_000, rattachement: "point" }, interrogation: "point" }));
+    assert.deepEqual([u.grain, u.rattachement.mode], ["point", "point"], nom);
     assert.equal(u.zones[0].part, null, `${nom} : aucune part inventée`);
+    assert.ok(u.ambiguites.includes("parcelle_non_mesurable"), `${nom} : dit`);
   }
   const illisible = lireUrbanisme(synthetique({ zones: [zone("UA", { type: "Polygon", coordinates: [] })], prescriptions: { surface: [presc({ type: "Polygon", coordinates: null }, "05", "01", "Réserve illisible")], ligne: [], point: [] } }));
   assert.deepEqual(illisible.zonesNonMesurables, ["UA"]);
@@ -704,7 +706,7 @@ test("Deuxième revue — Une mesure qu'on ne peut pas garantir n'est jamais con
     ["nœud papillon", noeud],
     ["parties qui se recouvrent", { type: "MultiPolygon", coordinates: [rect(0, 0, 60, 60).coordinates, rect(40, 40, 100, 100).coordinates] }],
   ] as const) {
-    const p = lireUrbanisme(synthetique({ parcelle: { geometry: g as never, contenance: 10_000, rattachement: "point" } }));
+    const p = lireUrbanisme(synthetique({ parcelle: { geometry: g as never, contenance: 10_000, rattachement: "point" }, interrogation: "point" }));
     assert.deepEqual([p.grain, p.zones[0].part], ["point", null], nom);
   }
 });
@@ -719,10 +721,10 @@ test("Deuxième revue — Cas réels validés : mêmes lectures, surfaces au m²
   for (const c of CAS) sansAbus(rendu(lire(c)), c);
 });
 
-test("Deuxième revue — Contrat et versions : convention fut81-3, la lecture corrigée remplace l'ancienne sans la modifier", () => {
-  assert.equal(URBANISME_CONVENTION, "fut81-3");
+test("Deuxième revue — Contrat et versions : convention fut81-4, la lecture corrigée remplace l'ancienne sans la modifier", () => {
+  assert.equal(URBANISME_CONVENTION, "fut81-4");
   const corrigee = lireUrbanisme(avecSurface(presc(rect(100, 0, 100.004, 100), "05", "01", "Emplacement réservé du voisin")));
-  assert.equal(corrigee.convention, "fut81-3");
+  assert.equal(corrigee.convention, "fut81-4");
   // Le dossier N porte la lecture fautive de e73ec075 : une réserve voisine comptée sur la moitié de la parcelle.
   const fautive: UrbanismeParcelle = {
     ...corrigee, convention: "fut81-2" as never, prescriptionsContact: 0,
@@ -740,4 +742,172 @@ test("Deuxième revue — Contrat et versions : convention fut81-3, la lecture c
   assert.equal(issueActualisation(incertaine, jsonCanonique(incertaine), N), "nouvelle_version");
   // Deux collectes identiques : même empreinte, aucune version fantôme.
   assert.equal(jsonCanonique(rapport({ urbanisme: lire("sucy-trois-zones") })), jsonCanonique(rapport({ urbanisme: lire("sucy-trois-zones") })));
+});
+
+// ══════════════ 7. TROISIÈME REVUE (27/10/2026, SHA 30333cf5) : LA PROVENANCE SPATIALE DU REPLI ══════════════
+// Une parcelle rattachée par proximité, mais au tracé invalide, était interrogée au GPU, puis relue « au
+// point » : tout ce que le GPU rendait pour la parcelle passait pour couvrir l'adresse, et l'avertissement
+// de rattachement disparaissait. Rejoué par le VRAI collecteur (`fetchUrbanismeParcelle`), face à un GPU
+// simulé qui répond selon la géométrie qu'il reçoit, puis par le lecteur, le composant et les versions.
+
+type Couches = Partial<Record<"municipality" | "document" | "zone-urba" | "secteur-cc" | "prescription-surf" | "prescription-lin" | "prescription-pct", GpuFeature[] | "panne">>;
+const fc = (features: GpuFeature[]) => ({ type: "FeatureCollection", features });
+/** Un GPU simulé : une réponse pour les requêtes sur la parcelle, une autre pour les requêtes au point. */
+async function collecter(parcelle: EntreeUrbanisme["parcelle"], point: [number, number], rep: { parcelle: Couches; point: Couches }) {
+  const types: string[] = [];
+  const avant = globalThis.fetch;
+  try {
+    globalThis.fetch = (async (url: string | URL, init?: RequestInit) => {
+      const u = String(url);
+      const couche = u.match(/api\/gpu\/([a-z-]+)$/)?.[1] as keyof Couches | undefined;
+      if (couche) {
+        const t = JSON.parse(String(init?.body)).geom.type as string;
+        types.push(`${couche}:${t}`);
+        const base: Couches = { municipality: [{ properties: { is_rnu: false } }], document: [documentPlu()], "secteur-cc": [], "prescription-surf": [], "prescription-lin": [], "prescription-pct": [] };
+        const r = { ...base, ...(t === "Point" ? rep.point : rep.parcelle) }[couche];
+        if (r === "panne" || r == null) return new Response("panne", { status: 503 });
+        return new Response(JSON.stringify(fc(r)));
+      }
+      const doc = u.match(/document\/([0-9a-f]{32})\/(details|files)$/);
+      if (doc) return new Response(JSON.stringify(doc[2] === "details" ? DETAILS_OK : FICHIERS_OK));
+      return new Response("inattendu", { status: 500 });
+    }) as typeof fetch;
+    const u = await fetchUrbanismeParcelle(point[1], point[0], parcelle);
+    return { u, types };
+  } finally {
+    globalThis.fetch = avant;
+  }
+}
+const sansMunicipality = (types: string[]) => types.filter((t) => !t.startsWith("municipality"));
+
+// La reproduction de Work : deux rectangles qui se recouvrent, adresse en (-2, 10), repli à 2 m.
+const INVALIDE = { type: "MultiPolygon", coordinates: [rect(0, 0, 60, 60).coordinates, rect(40, 40, 100, 100).coordinates] };
+const ADRESSE_WORK = xy(-2, 10);
+const REPLI_WORK = { geometry: INVALIDE as never, contenance: 8_400, rattachement: "repli" as const, distanceM: 2 };
+const VOISINE_UB = zone("UB", rect(30, 30, 300, 300));
+const ER_VOISIN = presc(rect(50, 50, 70, 70), "05", "01", "Emplacement réservé voisin");
+const UA_AU_POINT = zone("UA", rect(-500, -500, 20, 500));
+const REPONSE_WORK = { parcelle: { "zone-urba": [VOISINE_UB], "prescription-surf": [ER_VOISIN] }, point: { "zone-urba": [UA_AU_POINT] } };
+
+test("Troisième revue — Reproduction de Work : parcelle invalide, repli à 2 m, le GPU est réinterrogé au point", async () => {
+  const { u, types } = await collecter(REPLI_WORK, ADRESSE_WORK, REPONSE_WORK);
+  assert.ok(sansMunicipality(types).every((t) => t.endsWith(":Point")), `réinterrogé au point : ${types.join(", ")}`);
+  assert.deepEqual([u.statut, u.grain, u.interrogation], ["ambigu", "point", "point"]);
+  assert.deepEqual(u.rattachement, { mode: "repli", distanceM: 2 }, "le rattachement initial reste");
+  assert.ok(u.ambiguites.includes("parcelle_incertaine") && u.ambiguites.includes("parcelle_non_mesurable"), u.ambiguites.join(","));
+  assert.deepEqual(u.zones.map((z) => z.libelle), ["UA"], "la zone de l'adresse, jamais celle de la parcelle voisine");
+  assert.deepEqual(u.prescriptions, [], "l'emplacement réservé voisin n'est pas attribué");
+  const t = visible(u);
+  assert.match(t, /Le point de l'adresse ne tombe dans aucune parcelle, et le tracé de la plus proche \(PARCELLE-X\), à environ 2 m, n'a pas pu être mesuré\. La lecture porte donc sur le point de l'adresse seul/);
+  assert.match(t, /Cette adresse est en zone UA/);
+  assert.doesNotMatch(rendu(u), /UB|Emplacement réservé/);
+  sansAbus(rendu(u), "reproduction de Work");
+});
+
+test("Troisième revue — Une réponse demandée sur la parcelle n'est jamais relue au point : tout reste incertain", () => {
+  // L'ancien chemin exact : la réponse du GPU pour la parcelle invalide, passée au lecteur.
+  const entree = (interrogation?: "parcelle") => synthetique({
+    point: ADRESSE_WORK, parcelle: REPLI_WORK, ...(interrogation ? { interrogation } : {}),
+    zones: [VOISINE_UB], prescriptions: { surface: [ER_VOISIN], ligne: [presc({ type: "LineString", coordinates: [xy(-10, 10), xy(10, 10)] }, "07", "01", "Haie")], point: [] },
+  });
+  for (const [nom, u] of [["interrogation déclarée", lireUrbanisme(entree("parcelle"))], ["interrogation non déclarée", lireUrbanisme(entree())]] as const) {
+    assert.deepEqual([u.statut, u.grain, u.zones.length, u.zonesNonMesurables], ["ambigu", "point", 0, ["UB"]], nom);
+    assert.deepEqual(u.prescriptions.map((p) => p.etendue), ["incertaine", "incertaine"], `${nom} : rien de confirmé, rien de supprimé`);
+    assert.deepEqual(u.rattachement, { mode: "repli", distanceM: 2 }, nom);
+    const t = visible(u);
+    assert.match(t, /n'ont donc pas pu être situées : aucune n'est retenue/, nom);
+    assert.match(t, /Le Géoportail rend la zone UB pour cette parcelle, sans que sa position par rapport à l'adresse puisse être établie/, nom);
+    assert.match(t, /Sa position par rapport à l'adresse n'a pas pu être établie/, nom);
+    assert.doesNotMatch(t, /géométrie publiée|de des/, `${nom} : jamais « géométrie illisible » quand c'est la parcelle`);
+    assert.doesNotMatch(t, /est en zone|Cette adresse est|sur toute la parcelle/, nom);
+  }
+});
+
+test("Troisième revue — Contre-épreuves : parcelle valide, invalide, par proximité, sur une limite", async () => {
+  // Géométrie valide, adresse sur la parcelle : interrogée et mesurée à la parcelle, comme avant.
+  const valide = await collecter({ geometry: PARCELLE as never, contenance: 10_000, rattachement: "point" }, xy(50, 50), { parcelle: { "zone-urba": [zone("UA", rect(-500, -500, 500, 500))] }, point: {} });
+  assert.ok(sansMunicipality(valide.types).every((t) => t.endsWith(":Polygon")));
+  assert.deepEqual([valide.u.statut, valide.u.grain, valide.u.interrogation, valide.u.zones[0].part], ["confirme", "parcelle", "parcelle", 1]);
+  // Parcelle trouvée par proximité, géométrie valide : mesurée, et la réserve de repli reste en tête.
+  const proche = await collecter({ geometry: PARCELLE as never, contenance: 10_000, rattachement: "repli", distanceM: 3 }, xy(-3, 50), { parcelle: { "zone-urba": [zone("UA", rect(-500, -500, 500, 500))] }, point: {} });
+  assert.deepEqual([proche.u.grain, proche.u.rattachement.mode], ["parcelle", "repli"]);
+  assert.match(visible(proche.u), /^Plan d'urbanisme de la parcelle Le point de l'adresse ne tombe dans aucune parcelle\. La plus proche/);
+  // Parcelle invalide, adresse extérieure (15 m) : au point ; le GPU rend AUSSI la zone voisine (réponse
+  // trop large) : elle ne contient pas le point, elle n'est pas retenue.
+  const exterieure = await collecter({ ...REPLI_WORK, distanceM: 15 }, xy(-15, 10), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT, VOISINE_UB] } });
+  assert.deepEqual(exterieure.u.zones.map((z) => z.libelle), ["UA"]);
+  assert.match(visible(exterieure.u), /à environ 15 m, n'a pas pu être mesuré/);
+  // Adresse sur une limite de parcelles, parcelle invalide : la réserve de limite reste dite.
+  const limite = await collecter({ geometry: INVALIDE as never, contenance: 8_400, rattachement: "point", candidatsAuPoint: 2 }, xy(0, 10), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT] } });
+  assert.deepEqual([limite.u.rattachement.mode, limite.u.grain], ["limite", "point"]);
+  assert.match(visible(limite.u), /Le point de l'adresse est sur la limite entre plusieurs parcelles, et le tracé de celle retenue \(PARCELLE-X\) n'a pas pu être mesuré/);
+  // Adresse sur la frontière de deux zones : les deux, sans « partage » ni « limite » (au point, une
+  // superposition et une limite ne se distinguent pas : Besançon, PSMV et site patrimonial, au banc).
+  const frontiere = await collecter(REPLI_WORK, xy(20, -30), { parcelle: {}, point: { "zone-urba": [UA_AU_POINT, zone("UC", rect(20, -500, 500, 0))] } });
+  assert.deepEqual(frontiere.u.zones.map((z) => z.libelle).sort(), ["UA", "UC"]);
+  assert.match(visible(frontiere.u), /Cette adresse relève de 2 zones du plan local d'urbanisme \(PLU\) : (UA, UC|UC, UA)\./);
+  assert.doesNotMatch(visible(frontiere.u), /partagée/);
+});
+
+test("Troisième revue — Au point, seules les prescriptions qui contiennent l'adresse sont retenues", async () => {
+  const { u } = await collecter(REPLI_WORK, ADRESSE_WORK, { parcelle: {}, point: {
+    "zone-urba": [UA_AU_POINT],
+    "prescription-surf": [ER_VOISIN, presc(rect(-10, 0, 10, 20), "07", "02", "Parc protégé autour de l'adresse")],
+    "prescription-lin": [presc({ type: "LineString", coordinates: [xy(-2, -50), xy(-2, 50)] }, "07", "01", "Alignement qui passe à l'adresse"), presc({ type: "LineString", coordinates: [xy(50, -50), xy(50, 50)] }, "07", "01", "Alignement voisin")],
+    "prescription-pct": [presc({ type: "Point", coordinates: xy(80, 80) }, "07", "01", "Arbre voisin")],
+  } });
+  assert.deepEqual(u.prescriptions.map((p) => [p.libelle, p.etendue, p.part]), [
+    ["Parc protégé autour de l'adresse", "couvre", null], ["Alignement qui passe à l'adresse", "couvre", null],
+  ]);
+  assert.equal(u.prescriptionsContact, 0, "une prescription ailleurs n'est pas un « contact » de la parcelle");
+  const t = visible(u);
+  assert.match(t, /Prescriptions cartographiées à l'adresse/);
+  assert.match(t, /Patrimoine bâti protégé · passe à l'adresse/);
+  assert.doesNotMatch(t, /Emplacement réservé|Alignement voisin|Arbre voisin|de la parcelle \(≈/);
+});
+
+test("Troisième revue — Requête au point en échec ou partielle : dit, rattachement conservé, N jamais remplacée", async () => {
+  const panne: Couches = { document: "panne", "zone-urba": "panne", "secteur-cc": "panne", "prescription-surf": "panne", "prescription-lin": "panne", "prescription-pct": "panne" };
+  const totale = await collecter(REPLI_WORK, ADRESSE_WORK, { parcelle: { "zone-urba": [VOISINE_UB] }, point: panne });
+  assert.deepEqual([totale.u.statut, totale.u.rattachement.mode, totale.u.zones.length], ["indisponible", "repli", 0]);
+  assert.match(rendu(totale.u), /Plan d'urbanisme non lu/);
+  const partielle = await collecter(REPLI_WORK, ADRESSE_WORK, { parcelle: {}, point: { "zone-urba": [UA_AU_POINT], "prescription-surf": "panne" } });
+  assert.deepEqual([partielle.u.prescriptionsStatut, partielle.u.zones.map((z) => z.libelle)], ["indisponible", ["UA"]]);
+  assert.match(visible(partielle.u), /n'ont pas pu être toutes lues/);
+  // N : une lecture mesurée à la parcelle. Aucune de ces lectures ne la remplace.
+  const N = version(rapport({ urbanisme: lireUrbanisme(synthetique()) }));
+  const figee = JSON.stringify(N);
+  for (const [nom, u] of [["panne au point", totale.u], ["réponse partielle", partielle.u], ["point seul", (await collecter(REPLI_WORK, ADRESSE_WORK, REPONSE_WORK)).u]] as const) {
+    const r = rapport({ urbanisme: u });
+    assert.equal(issueActualisation(r, jsonCanonique(r), N), "refusee", nom);
+  }
+  assert.deepEqual(pertesUrbanisme(N.report, rapport({ urbanisme: (await collecter(REPLI_WORK, ADRESSE_WORK, REPONSE_WORK)).u })), ["urbanisme_parcelle"]);
+  // Par le vrai versionnement : refusée, N affichée et intacte, aucune écriture.
+  let ecrites = 0;
+  const r = await consulterOuActualiser(true, {
+    lire: async () => N,
+    construire: async () => rapport({ urbanisme: (await collecter(REPLI_WORK, ADRESSE_WORK, REPONSE_WORK)).u }),
+    empreinte: jsonCanonique,
+    enregistrer: async () => { ecrites++; return null; },
+  });
+  assert.deepEqual([r.actualisation, r.urbanisme?.grain, r.urbanisme?.zones[0].libelle, ecrites], ["refusee", "parcelle", "UA", 0]);
+  assert.equal(JSON.stringify(N), figee);
+  // Une première lecture au point (aucune version mesurée avant) est acceptée, avec sa réserve.
+  const premiere = rapport({ urbanisme: (await collecter(REPLI_WORK, ADRESSE_WORK, REPONSE_WORK)).u });
+  assert.equal(issueActualisation(premiere, jsonCanonique(premiere), version(rapport())), "nouvelle_version");
+  // Et une lecture au point n'empêche pas une lecture mesurée de la remplacer.
+  const auPoint = version(premiere);
+  const mesuree = rapport({ urbanisme: lireUrbanisme(synthetique()) });
+  assert.equal(issueActualisation(mesuree, jsonCanonique(mesuree), auPoint), "nouvelle_version");
+});
+
+test("Troisième revue — Les surfaces et l'oracle restent : mêmes lectures des cas réels à la parcelle", () => {
+  for (const c of CAS) {
+    const u = lire(c);
+    const x = fixture(c);
+    if (x.parcelle) assert.equal(u.interrogation, "parcelle", c);
+    assert.ok(!u.ambiguites.includes("parcelle_non_mesurable") || !x.parcelle, `${c} : sa parcelle se mesure`);
+  }
+  assert.equal(lire("six-fours-emplacement-reserve").prescriptions.find((p) => p.code === "05")!.surfaceM2, 519);
+  assert.deepEqual(lire("merignac-deux-zones").zones.map((z) => [z.libelle, z.part]), [["US7", 0.617], ["US9", 0.383]]);
 });

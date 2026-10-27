@@ -7,6 +7,9 @@ Résultats bruts dans `2026-10-26-fut81-urbanisme/mesure-cas.json` et `mesure-al
 par les tests et le banc : `src/lib/__fixtures__/fut81/` (capture : `scripts/research/fut81-capture-fixtures.mjs`).
 Rendu réel : `2026-10-26-fut81-urbanisme/rendu/`.
 
+> **Troisième revue indépendante du 27/10/2026 (`30333cf5`) : NO GO, provenance spatiale du repli ; corrigée.**
+> Une réponse du Géoportail demandée sur une parcelle invalide n'est plus jamais relue au point : section 12.
+>
 > **Deuxième revue indépendante du 27/10/2026 (`e73ec075`) : NO GO, aire d'intersection fausse près des
 > limites ; corrigée.** Calcul confié à Clipper, confronté à GEOS, projection corrigée : section 11. Les surfaces en
 > m² citées ci-dessous sont celles du code corrigé (+0,7 % environ ; Besançon et Mérignac plus encore).
@@ -473,3 +476,110 @@ Fichiers : `mesure-cas-apres.json`, `mesure-aleatoire-apres.json`, `comparer-mes
 - **Dépendance** : `clipper-lib` n'est plus maintenue. Elle est épinglée en version exacte, et ses résultats sont
   gardés par les invariants et l'oracle. Clipper2 deviendra un remplacement possible quand son portage TypeScript
   sera stable.
+
+---
+
+## 12. Troisième revue indépendante du 27/10/2026 : la provenance spatiale du repli
+
+Revue de Work sur `30333cf5`, décision NO GO. Elle confirme que le calcul d'intersection (section 11) est juste, mais
+relève un défaut de **provenance spatiale** quand la géométrie de la parcelle est invalide. Les preuves rejouables
+sont dans `2026-10-26-fut81-urbanisme/revue-2026-10-27c/`.
+
+### Reproduction, avant toute correction
+
+`repro-work.mjs` reprend l'entrée de la revue et la fait passer par le **vrai collecteur** (`fetchUrbanismeParcelle`),
+face à un Géoportail simulé qui répond selon la géométrie reçue, puis par le versionnement. L'entrée :
+- une parcelle invalide, faite de deux rectangles qui se recouvrent ;
+- une adresse en (−2, 10), rattachée par repli à 2 m ;
+- côté parcelle, le GPU rend une zone UB et un emplacement réservé, loin de l'adresse ; au point, il rend une zone UA.
+
+| | `30333cf5` | Corrigé |
+| --- | --- | --- |
+| Géométrie interrogée | la parcelle invalide (`MultiPolygon`) | **le point** de l'adresse |
+| Statut, grain | `confirme`, `point` | `ambigu`, `point`, `interrogation: point` |
+| Rattachement | **`aucun`** (le repli à 2 m a disparu) | `repli`, 2 m ; `parcelle_incertaine` et `parcelle_non_mesurable` |
+| Zones | **UB** (celle de la parcelle voisine, relue au point) | UA (celle qui contient l'adresse) |
+| Prescriptions | **emplacement réservé voisin, `couvre`** | aucune |
+| Actualisation contre une version N mesurée à la parcelle | **`nouvelle_version`** | `refusee` |
+
+(`repro-avant-30333cf5.json`, `repro-apres.json`.)
+
+### Cause
+
+Deux critères de validité divergeaient :
+- le collecteur (`gpu.ts`) envoyait la parcelle au Géoportail dès que sa géométrie se **lisait** (`regionDe`) ;
+- le lecteur ne mesurait que si elle formait un polygone **valide** (`regionMesurable`), ajouté à la section 11.
+
+Une parcelle lisible mais invalide était donc interrogée sur son tracé, puis lue au grain point. Or, au grain point,
+le lecteur considérait que tout ce qui avait été rendu « couvrait ». Et le rattachement était remis à `aucun` dès que
+la parcelle ne se mesurait pas, ce qui effaçait l'avertissement de proximité. Une réponse obtenue pour la parcelle
+était ainsi réinterprétée au point, sans aucune preuve qu'elle le concernait.
+
+### Correction, à la source
+
+1. **Collecteur** : la géométrie est validée avec le **critère et la projection du lecteur** (`regionMesurable`), avant
+   de choisir le périmètre des requêtes. Si elle ne se mesure pas, le Géoportail est **interrogé au point**.
+   La parcelle reste transmise, et la géométrie réellement interrogée est déclarée (`interrogation`).
+2. **Lecteur** : la provenance est vérifiée, pas supposée.
+   - Grain `parcelle` : seulement si la parcelle interrogée se mesure.
+   - Grain `point` : une zone, un secteur ou une prescription n'est retenu que si **sa géométrie contient le point**
+     de l'adresse (ou le touche à 1 cm). C'est une preuve spatiale locale, indépendante du filtre du Géoportail.
+     Ce qui ne contient pas le point n'est ni retenu, ni compté comme un contact de la parcelle.
+   - Réponse demandée sur une parcelle non mesurable (`sansPreuve`) : **rien n'est situé**. Les zones sont dites
+     non mesurables, les prescriptions incertaines, et rien n'est confirmé.
+   - Une entrée qui ne déclare pas son interrogation est supposée interrogée sur la parcelle dès qu'une géométrie
+     de parcelle est fournie : c'est l'hypothèse prudente.
+3. **Rattachement conservé** : la proximité, la distance et la limite restent dites quand la parcelle ne se mesure
+   pas. La nouvelle ambiguïté `parcelle_non_mesurable` est dite **avant** les zones, dans une seule réserve, par
+   exemple : « Le point de l'adresse ne tombe dans aucune parcelle, et le tracé de la plus proche (…), à environ 2 m,
+   n'a pas pu être mesuré. La lecture porte donc sur le point de l'adresse seul… ».
+4. **Écran au grain point** :
+   - le titre des prescriptions devient « Prescriptions cartographiées à l'adresse », sans part ni surface ; une
+     ligne « passe à l'adresse » ;
+   - plusieurs zones qui contiennent le point : « Cette adresse relève de 2 zones », jamais « partagée ». Au banc,
+     Besançon montre une superposition (plan de sauvegarde et site patrimonial) qu'on ne peut pas distinguer d'une
+     limite sans parcelle ;
+   - quand rien n'a pu être situé, l'écran ne dit jamais « géométrie illisible ».
+
+   La recette a aussi corrigé une coquille préexistante : « de des zones ».
+5. **Versions** : une lecture mesurée à la parcelle ne cède plus la place à une lecture au point
+   (`pertesUrbanisme` → `urbanisme_parcelle`). N reste affichée et intacte. Une première lecture au point reste
+   acceptée, et une lecture mesurée peut toujours remplacer une lecture au point.
+6. **Convention `fut81-4`**, avec les mêmes seuils et les mêmes surfaces. Le contrat gagne `interrogation`, champ
+   optionnel absent des lectures antérieures, et l'ambiguïté `parcelle_non_mesurable`.
+
+### Contre-épreuves
+
+Les 6 tests « Troisième revue » de `fut81-urbanisme-parcelle.test.ts` passent par le collecteur, le lecteur, le
+composant et le versionnement. Ils **échouent tous sur `30333cf5`**. Ils couvrent :
+- la reproduction de Work ;
+- la même réponse parcellaire passée directement au lecteur, avec ou sans interrogation déclarée (tout reste
+  incertain) ;
+- une parcelle valide avec l'adresse dessus (interrogée et mesurée à la parcelle) ;
+- une parcelle trouvée par proximité, valide (repli dit en tête) ;
+- une parcelle invalide avec l'adresse à 15 m (au point ; une zone voisine rendue en trop n'est pas retenue) ;
+- une adresse sur une limite de parcelles (réserve de limite) ;
+- une adresse sur la frontière de deux zones ;
+- des prescriptions voisines (surface, ligne, point) écartées, et celles qui contiennent l'adresse retenues ;
+- une requête au point en panne totale (`indisponible`, rattachement conservé) ou partielle (prescriptions dites
+  non lues) ;
+- dans les trois cas, N jamais remplacée, vérifié par `consulterOuActualiser`.
+
+Les contre-épreuves Clipper/GEOS de la section 11 sont inchangées (14/14), comme les surfaces des cas réels.
+
+**Mesure réelle** : sur les 27 adresses de la section 3 dont la parcelle est connue, toutes les parcelles se
+mesurent (grain `parcelle`). Le défaut n'apparaît qu'avec un tracé cadastral invalide, et la correction ne change
+aucune lecture réelle relevée.
+
+**Recette visuelle** : banc `/dev/fut81`, cas `repli-invalide` (Besançon réel, repli à 0,7 m, tracé rendu invalide)
+et `sans-preuve`, sur bureau et à 375 px. Captures `rendu/revue3-*.jpg`. Le bloc reste dans sa colonne. À 375 px,
+d'autres paragraphes du module s'étendent jusqu'à 398 px : c'est le défaut préexistant de la grille du module,
+signalé en section 10, hors de FUT-81.
+
+### Limites résiduelles
+
+- Au grain point, futur•e ne distingue pas deux zones superposées d'une adresse posée sur leur limite : les deux
+  sont dites, sans conclure.
+- Une prescription qui ne contient pas le point exact de l'adresse n'est pas retenue au grain point, même si elle
+  touche le terrain : la réserve le dit (« une zone ou une prescription voisine peut s'appliquer à une partie du
+  terrain »).
