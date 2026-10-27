@@ -159,10 +159,11 @@ async function buildReport(address: ResolvedAddress, banFeatureType: string | nu
       // aucune règle. Un appel réseau par dossier, une dépendance qui peut tomber, et surtout
       // l'impression que la dimension est couverte alors qu'elle ne s'affiche nulle part.
       //
-      // RIEN N'EST PERDU : `src/lib/irep.ts` est intact et vivant — `/api/proxy/irep` s'en sert, et
-      // `PollutionLookup` l'affiche sur /agir/pollutions-invisibles. Pour le rebrancher ici le jour
-      // où un fait le lit, il suffit de rétablir `getIrepNearPoint(lat, lon)` dans le Promise.all
-      // ci-dessus et le champ `irep` ici. Cf. le registre des sources dormantes du cadrage.
+      // `src/lib/irep.ts` reste en place (`/api/proxy/irep` s'en sert), mais NE PAS LE REBRANCHER TEL
+      // QUEL (FUT-145, 27/10/2026) : c'est un extrait ADEME de 2019, une petite partie du registre
+      // national, que l'écran public /agir/pollutions-invisibles n'interroge plus pour cette raison.
+      // Un vide n'y prouve aucune absence, une liste n'y est jamais complète. Un fait IREP au
+      // dossier suppose de lire le registre officiel (Géorisques), pas cet extrait.
       cartofriches,
       communeData,
       sinistralite,

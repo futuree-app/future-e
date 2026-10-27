@@ -38,45 +38,6 @@ async function fetchCommunes(q: string): Promise<Commune[]> {
   }
 }
 
-// ── IREP — installations industrielles ───────────────────────────────────────
-
-type IrepInstallation = {
-  id: number;
-  nom: string;
-  distanceM: number;
-  nombre_polluants: number;
-  milieu_emission: string | null;
-};
-
-async function searchIrep(commune: Commune): Promise<string> {
-  const coords = commune.centre?.coordinates;
-  if (!coords) throw new Error('Coordonnées non disponibles pour cette commune.');
-
-  const [lon, lat] = coords;
-  const res = await fetch(`/api/proxy/irep?lat=${lat}&lon=${lon}`);
-  if (!res.ok) throw new Error(`Erreur ${res.status}`);
-
-  const data = (await res.json()) as { installations?: IrepInstallation[]; count?: number };
-  const items = data.installations ?? [];
-
-  if (!items.length) return '__empty__Aucune installation industrielle classée ICPE recensée dans un rayon de 10 km autour de cette commune selon les données ADEME.';
-
-  return items.map(it => {
-    const dist = it.distanceM < 1000
-      ? `${it.distanceM} m`
-      : `${(it.distanceM / 1000).toFixed(1)} km`;
-    const polluants = it.nombre_polluants > 0
-      ? `${it.nombre_polluants} polluant${it.nombre_polluants > 1 ? 's' : ''} déclaré${it.nombre_polluants > 1 ? 's' : ''}`
-      : '';
-    const milieu = it.milieu_emission ?? '';
-    const meta = [dist, polluants, milieu].filter(Boolean).join(' · ');
-    return `<div class="lookup-result-item">
-      <div class="result-name">${it.nom}</div>
-      <div class="result-meta">${meta}</div>
-    </div>`;
-  }).join('');
-}
-
 // ── SIS / Basol — sites pollués ───────────────────────────────────────────────
 
 async function searchSis(commune: Commune): Promise<string> {
@@ -232,7 +193,6 @@ function useLookup(blockId: string) {
       const commune = s.selectedCommune;
 
       const searchFn =
-        blockId === 'irep' ? searchIrep :
         blockId === 'sis'  ? searchSis  :
         blockId === 'atmo' ? searchAtmo :
         searchEau;
@@ -245,7 +205,7 @@ function useLookup(blockId: string) {
         }
       }).catch(() => {
         const fallback =
-          blockId === 'irep' || blockId === 'sis'
+          blockId === 'sis'
             ? 'Données temporairement indisponibles. Consultez directement <a href="https://georisques.gouv.fr" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">georisques.gouv.fr</a>'
             : blockId === 'atmo'
             ? "Indice ATMO indisponible pour cette commune. La couverture nationale est partielle."
@@ -341,17 +301,57 @@ function LookupBlock({ blockId, title, sub, desc }: LookupBlockProps) {
   );
 }
 
+// ── IREP — renvoi au registre officiel ───────────────────────────────────────
+//
+// LA RECHERCHE IREP EST RETIRÉE DE CETTE PAGE (FUT-145, 27/10/2026). Elle interrogeait un extrait ADEME
+// de 2019 (environ 1 500 établissements, une petite partie du registre national) depuis le centre de la
+// commune, et concluait sur un résultat vide : « Aucune installation industrielle classée ICPE recensée
+// dans un rayon de 10 km ». L'audit FUT-82 l'a vue à Metz, où le registre 2024 compte 25 établissements
+// déclarants dans ce rayon. Même non vide, la liste n'en montrait qu'une fraction (Paris 4e : 8 sur 121).
+// Un extrait ne permet ni de conclure à une absence ni de dresser une liste : le bloc explique ce que le
+// registre recense et renvoie à sa consultation officielle. `src/lib/irep.ts` reste en place, durci.
+
+const IREP_REGISTRE_URL = 'https://www.georisques.gouv.fr/risques/registre-des-emissions-polluantes/accueil';
+
+function IrepRegistreBlock() {
+  return (
+    <div className="lookup-block">
+      <div className="lookup-header">
+        <div>
+          <div className="lookup-title">Installations industrielles déclarant des rejets</div>
+          <div className="lookup-sub">Registre IREP · Géorisques · Déclarations annuelles</div>
+        </div>
+      </div>
+      <div className="lookup-body">
+        <p className="lookup-desc">
+          Certains établissements industriels, élevages et grandes stations d&apos;épuration doivent déclarer chaque année leurs rejets dans l&apos;air, l&apos;eau et les sols lorsqu&apos;ils dépassent des seuils réglementaires. Le registre national IREP rassemble ces déclarations. Il ne recense donc pas toutes les installations classées (ICPE) : seulement celles qui dépassent ces seuils.
+        </p>
+        <p className="lookup-desc">
+          Cette recherche n&apos;est pas proposée ici pour l&apos;instant. La seule version que futur•e pouvait interroger est un extrait de 2019 qui ne contient qu&apos;une petite partie des établissements déclarants : il pouvait présenter une commune comme dépourvue d&apos;installations alors que le registre en recense plusieurs autour.
+        </p>
+        <p className="lookup-desc">
+          Le registre officiel se consulte sur Géorisques, par établissement ou par polluant. Un établissement déclarant à proximité n&apos;indique pas à lui seul une exposition de votre logement : la déclaration porte sur les quantités rejetées par le site.
+        </p>
+        <a
+          className="lookup-btn"
+          href={IREP_REGISTRE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'inline-block', textDecoration: 'none' }}
+        >
+          Consulter le registre sur Géorisques
+        </a>
+      </div>
+    </div>
+  );
+}
+
 // ── Public export ─────────────────────────────────────────────────────────────
 
 export function PollutionLookup() {
   return (
     <>
-      <LookupBlock
-        blockId="irep"
-        title="Installations industrielles à proximité"
-        sub="Registre IREP · ADEME · Rejets déclarés par substance"
-        desc="Les installations classées ICPE déclarent annuellement leurs rejets dans l'air, l'eau et les sols. Ce registre recense ce que les exploitants ont l'obligation de déclarer, pas nécessairement tout ce qui est émis, mais c'est le point de départ documenté."
-      />
+      <IrepRegistreBlock />
       <LookupBlock
         blockId="sis"
         title="Anciens sites industriels et sites pollués"

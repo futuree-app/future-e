@@ -65,12 +65,13 @@ export const PREFERENCE_TOOLTIP: Record<string, string | null> = {
   // FUT-129 : ce qui est lu, sans promettre un niveau de risque.
   faible_risque_inondation: "Sinistres d'inondation indemnisés de 1995 à 2021 et plans de prévention de la commune. Des faits passés, pas une probabilité : la situation d'un bien se vérifie à son adresse.",
   faible_precip_extremes: "Pluies intenses projetées par le climat.",
+  // FUT-145 : le critère lit l'indice forêt-météo projeté (DRIAS), pas un risque d'incendie.
+  faible_risque_feu: "Nombre de jours où la météo favorise les feux de forêt, projeté vers 2050 et comparé aux autres communes. Ne dit pas à lui seul le risque d'incendie d'une commune ou d'une adresse.",
   calme_sonore: "Densité de grandes infrastructures bruyantes autour (axes rapides, voie ferrée, aéroport). Mesure l'environnement sonore structurel, pas le bruit ressenti.",
   faible_exposition_industrielle: "Densité d'installations industrielles classées en activité à proximité (sites Seveso, IED). Mesure leur présence, pas un niveau de pollution ni un risque sanitaire avéré. Ne couvre pas les anciens sites pollués ni les friches.",
   // self-évidents (le libellé = la mesure) : pas de bulle
   faible_chaleur: null,
   faible_secheresse: null,
-  faible_risque_feu: null,
   air_sain: null,
   acces_soins: null,
   acces_services: null,

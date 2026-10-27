@@ -1432,7 +1432,9 @@ type AmbientDim = { id: string; key: PreferenceKey; bands: [string, string, stri
 const AMBIENT_DIMENSIONS: AmbientDim[] = [
   { id: "chaleur", key: "faible_chaleur", bands: ["étés généralement plus supportables", "étés intermédiaires", "étés généralement plus chauds"] },
   { id: "secheresse", key: "faible_secheresse", bands: ["sols moins exposés à la sécheresse", "exposition intermédiaire à la sécheresse", "sols plus exposés à la sécheresse"] },
-  { id: "feu", key: "faible_risque_feu", bands: ["risque de feu plus faible", "risque de feu intermédiaire", "risque de feu plus marqué"] },
+  // FUT-145 : l'indice forêt-météo DRIAS projeté (+2,7 °C en France, vers 2050) décrit une MÉTÉO favorable aux feux,
+  // en rang national ; jamais un risque d'incendie, et l'horizon est dit pour qu'AskFuture ne le lise pas au présent.
+  { id: "feu", key: "faible_risque_feu", bands: ["météo moins souvent propice aux feux qu'ailleurs, vers 2050", "météo propice aux feux à un niveau intermédiaire, vers 2050", "météo plus souvent propice aux feux qu'ailleurs, vers 2050"] },
   { id: "nature", key: "nature", bands: ["davantage de nature autour", "présence de nature intermédiaire", "moins de nature autour"] },
   { id: "soins", key: "acces_soins", bands: ["accès aux soins plus facile", "accès aux soins intermédiaire", "accès aux soins plus limité"] },
   { id: "emploi", key: "viabilite_emploi", bands: ["bassin d'emploi plus dynamique", "bassin d'emploi intermédiaire", "bassin d'emploi moins dynamique"] },
@@ -1494,7 +1496,10 @@ const DIMENSIONS: ComparaisonDim[] = [
   // FUT-129 : une ligne de FAITS (sinistres indemnisés 1995-2021, plans de prévention), sans palier ni
   // gagnant ; cf. `celluleInondation`. Les paliers ne sont plus lus (buildComparaisonComplete).
   { id: "inondation", label: "Inondation", themeId: "risques", key: "faible_risque_inondation", paliers: ["", "", ""], gp: "l'historique des inondations", forte: "l'historique des inondations", aide: AIDE_INONDATION, risque: true, directionnel: false },
-  { id: "feu", label: "Feu", themeId: "risques", key: "faible_risque_feu", paliers: ["Risque de feu faible", "Risque modéré", "Risque élevé"], gp: "le risque de feu", forte: "son faible risque de feu", aide: "L'exposition du secteur au risque d'incendie.", risque: true, directionnel: true },
+  // FUT-145 : la ligne lit les jours d'indice forêt-météo > 40 projetés par DRIAS (+2,7 °C en France, vers 2050), en
+  // rang national (`subScore` = 100 - percentile). Les paliers disent une position COMPARÉE (« qu'ailleurs »), jamais un
+  // risque d'incendie : ni la végétation, ni les feux passés, ni le bâti, ni les secours n'y entrent.
+  { id: "feu", label: "Météo propice aux feux", themeId: "risques", key: "faible_risque_feu", paliers: ["Moins de jours propices aux feux qu'ailleurs", "Nombre intermédiaire de jours propices aux feux", "Plus de jours propices aux feux qu'ailleurs"], gp: "la météo propice aux feux", forte: "sa météo moins propice aux feux", aide: "Nombre de jours où la météo favorise les feux de forêt, projeté vers 2050 et comparé aux autres communes. Il ne dit pas à lui seul le risque d'incendie de la commune ni d'une adresse.", risque: true, directionnel: true },
   { id: "pluies", label: "Pluies intenses", themeId: "risques", key: "faible_precip_extremes", paliers: ["Peu de pluies intenses", "Pluies intenses modérées", "Pluies intenses fréquentes"], gp: "les pluies intenses", forte: "ses pluies intenses rares", aide: "La fréquence des épisodes de pluies très intenses.", risque: true, directionnel: true },
   { id: "secheresse", label: "Sécheresse", themeId: "risques", key: "faible_secheresse", paliers: ["Sols peu exposés à la sécheresse", "Exposition modérée", "Sols très exposés"], gp: "la sécheresse", forte: "ses sols peu exposés à la sécheresse", aide: "À quel point les sols sont exposés au manque d'eau.", risque: true, directionnel: true },
   { id: "air", label: "Air", themeId: "sante_env", key: "air_sain", paliers: ["Air pur", "Qualité de l'air moyenne", "Air pollué"], gp: "l'air", forte: "son air pur", aide: "La qualité de l'air respiré au quotidien.", risque: true, directionnel: true },
@@ -1706,7 +1711,9 @@ export function buildComparaisonComplete(
       if (c == null || s == null) {
         // FUT-135 : la vie étudiante d'un petit bassin n'est pas mesurée ; le lecteur qui l'a demandée reste
         // concerné. Les autres dimensions gardent leur libellé.
-        const palier = dim.id === "vie_etudiante" ? "Non mesurée" : "Non concernée";
+        // FUT-145 : une projection météo absente ne met pas la commune à l'abri des feux ; « Non concernée »
+        // aurait changé un manque de donnée en bonne nouvelle.
+        const palier = dim.id === "vie_etudiante" || dim.id === "feu" ? "Non mesurée" : "Non concernée";
         return { insee: r.insee, palier, qualifier: null, disponible: false, alerte: false };
       }
       const band = bands[i];
@@ -2316,7 +2323,7 @@ const REASON_POS: Record<PreferenceKey, string | ((c: IndexCommune) => string)> 
   douceur_climat: "hivers parmi les plus doux",
   ensoleillement_recherche: "plus ensoleillé",
   faible_secheresse: "sols peu exposés à la sécheresse",
-  faible_risque_feu: "faible risque de feu",
+  faible_risque_feu: "météo moins propice aux feux", // FUT-145 : indice forêt-météo projeté, jamais un risque
   faible_precip_extremes: "pluies extrêmes rares",
   // On nomme, on ne mesure pas : paliers qualitatifs, jamais la distance brute
   // (le chiffre cassait le récit sur le révélateur d'arbitrages). Le détail au rapport.
@@ -2381,7 +2388,7 @@ const REASON_NEG: Record<PreferenceKey, string> = {
   douceur_climat: "hivers parmi les moins doux",
   ensoleillement_recherche: "moins ensoleillé",
   faible_secheresse: "sols exposés à la sécheresse",
-  faible_risque_feu: "risque de feu notable",
+  faible_risque_feu: "météo plus souvent propice aux feux",
   faible_precip_extremes: "pluies intenses fréquentes",
   proximite_mer: "éloignée du littoral",
   eloignement_mer: "plus proche de la mer que souhaité",
@@ -2526,7 +2533,7 @@ const PE_SECTEUR: Record<string, string> = {
 };
 const PE_ALEA: Record<string, string> = {
   secheresse: "sensibles à la sécheresse",
-  feu: "exposées au risque de feu",
+  feu: "exposées à une météo propice aux feux",
   chaleur: "sensible à la hausse des chaleurs",
   neige: "sensible à l'évolution de l'enneigement",
 };
