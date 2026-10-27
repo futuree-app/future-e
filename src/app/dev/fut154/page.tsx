@@ -17,6 +17,11 @@ const CAS: { nom: string; titre: string; projet: ParsedProject }[] = [
     titre: "Des étés frais et un bon accès aux soins, France entière (Bagnères-de-Bigorre en piste)",
     projet: { reformulation: "Des étés frais et un bon accès aux soins", hardConstraints: {}, preferences: [{ key: "faible_chaleur", weight: 3 }, { key: "acces_soins", weight: 2 }] },
   },
+  {
+    nom: "villes",
+    titre: "Le train, moins de voiture et des services, France entière (Paris, sécheresse au palier intermédiaire)",
+    projet: { reformulation: "Le train, moins de voiture et des services", hardConstraints: {}, preferences: [{ key: "acces_transports", weight: 3 }, { key: "faible_dependance_auto", weight: 2 }, { key: "acces_services", weight: 2 }] },
+  },
 ];
 
 export default async function BancFut154({ searchParams }: { searchParams: Promise<{ cas?: string }> }) {

@@ -1,6 +1,6 @@
 # FUT-154 · Ne plus présenter un retrait relatif comme une faiblesse absolue
 
-Date : 27/10/2026 · Base : PR #99 (FUT-151) à `a0c9e302`, non fusionnée · Branche : `bonjourfuturee/fut-154-retrait-relatif-vs-faiblesse-absolue` (worktree `.claude/worktrees/fut154`)
+Date : 27/10/2026 · Base : `main` à `4556ca11` (PR #99 FUT-151 fusionnée, puis FUT-153) · Branche : `bonjourfuturee/fut-154-retrait-relatif-vs-faiblesse-absolue` (worktree `.claude/worktrees/fut154`)
 
 ## Diagnostic
 
@@ -70,6 +70,18 @@ Pack Décision, « Trois nouvelles pistes » : le paragraphe du compromis était
 
    Aucun nouveau seuil, aucun nouveau score.
 2. **`PackUnlockedView`** : le compromis d'une piste n'est rendu que s'il existe.
+3. **Arbitrage du porteur (option 2) : de 34 à 49, une limite, pas un défaut.** `raisonNeg` est le seul point de rendu du compromis absolu. Il alimente la carte « Où vivre », le comparateur, le Pack et le `tradeoff` transmis à `/synthesize` et à AskFuture. Il lit désormais le palier du sous-score (`bandIndex`, seuils 66/34 inchangés) :
+   - **sous 34** : `REASON_NEG`, le palier défavorable ;
+   - **de 34 à 49** : `REASON_NEG_INTERMEDIAIRE`, qui reprend mot pour mot le palier intermédiaire de la ligne du Pack (« Exposition modérée » devient « exposition modérée à la sécheresse »). Quand le libellé sonne comme un avantage, il est complété de ce qui manque (« étés tempérés, plutôt que frais ») ;
+   - **de 50 à 54** : aucune formulation absolue, un comparatif seulement s'il est justifié (étape 1) ;
+   - **à partir de 55** : aucun compromis (FUT-151).
+
+   Sans ligne bandée dans la matrice (taille de ville, éloignement de la mer, inondation), la formulation ne change pas. La vie étudiante suivait déjà le palier (FUT-135).
+4. **Sous 34, seulement ce que la donnée établit.** Deux formulations défavorables disaient plus que la mesure :
+   - « chaleur en hausse » annonçait une tendance que le sous-score, un rang de chaleur estivale, ne mesure pas ;
+   - « zone sous-dotée en médecins » empruntait le zonage officiel des ARS, alors que la donnée est un rang d'accessibilité (APL).
+
+   Elles reprennent le palier défavorable du Pack : « étés chauds », « accès aux soins limité ». Les autres formulations défavorables correspondent à leur mesure, et elles sont conservées.
 
 Inchangés :
 
@@ -78,92 +90,126 @@ Inchangés :
 - seuils 55 et 50, paliers 66/34 ;
 - inondation (FUT-129) ;
 - toutes les règles FUT-151 ;
-- `COMPROMIS_NEG` et `REASON_NEG`.
+- `COMPROMIS_NEG`, et `REASON_NEG` hors chaleur et soins.
 
 ### Avant / après (moteur, 220 recherches)
 
-| | Base `a0c9e302` | Branche |
+| | `main` | Branche |
 |---|---|---|
 | Comparatifs citant une voisine au même palier | 92 | **0** |
 | Comparatifs entre 50 et 54 (tous face à une voisine favorable) | 99 | 97 |
+| Formulation défavorable (« sols exposés… ») pour un sous-score de 34 à 49 | 66 | **0** |
+| Formulation au palier intermédiaire du Pack, de 34 à 49 | 0 | 120 |
 | Compromis sur un critère ≥ 55 | 0 | 0 |
 | Formulation absolue au-dessus de 49 | 0 | 0 |
 | Compromis rendus | 919 | 918 |
 
-92 compromis changent ; la liste complète est dans `compromis-modifies.tsv`. Exemples :
+200 compromis changent sur 1 056 cartes, 220 recherches. La liste complète est dans `compromis-modifies.tsv`, avec le sous-score, le palier et l'étape en cause :
 
-| Commune (recherche) | Avant | Après |
-|---|---|---|
-| Anglet (64, inondation) | les sites industriels sont plus présents qu'à Pau | *(aucun compromis)* |
-| Basse-Goulaine (44, sans priorité) | la vie locale est plus discrète qu'à Bouaye | chaleur en hausse (35) |
-| Aubagne (13, train + voiture + services) | la chaleur estivale est plus marquée qu'à Marseille | chaleur en hausse (4) |
-| Villeurbanne (France, même projet) | … plus marquée qu'à Strasbourg | chaleur en hausse (8) |
-| Meylan (France, soins) | l'air de fond est un peu moins pur qu'à Niederhausbergen | air plus chargé en particules (0) |
-| Paris (France, train + voiture + services) | la sécheresse est plus présente qu'à Villeurbanne | sols exposés à la sécheresse (40) |
-| Montréjeau (31, feux) | l'offre de soins est plus limitée qu'à Bagnères-de-Luchon | *inchangé* |
+- 92 comparatifs au même palier (étape 1) ;
+- 66 formulations défavorables de 34 à 49 (étape 3) ;
+- 42 formulations « chaleur en hausse » sous 34 (étape 4).
+
+Exemples :
+
+| Commune (recherche) | Sous-score | `main` | Branche |
+|---|---|---|---|
+| Paris (France, train + voiture + services) | sécheresse 40 | la sécheresse est plus présente qu'à Villeurbanne | exposition modérée à la sécheresse |
+| Plomeur (29, soins + calme + air) | air 49, déclaré | air plus chargé en particules | qualité de l'air moyenne |
+| Gargas (84, même projet) | air 34 | air plus chargé en particules | qualité de l'air moyenne |
+| Lagord (17, train + voiture + services) | calme 46 | environnement assez maillé d'infrastructures bruyantes | exposition sonore modérée |
+| Cuges-les-Pins (13, étés frais) | chaleur 33 | chaleur en hausse | étés chauds |
+| Aubagne (13, train + voiture + services) | chaleur 4 | la chaleur estivale est plus marquée qu'à Marseille | étés chauds |
+| Meylan (France, soins) | air 0 | l'air de fond est un peu moins pur qu'à Niederhausbergen | air plus chargé en particules |
+| Anglet (64, inondation) | industrie 52 | les sites industriels sont plus présents qu'à Pau | *(aucun compromis)* |
+| Montréjeau (31, feux) | soins 51 | l'offre de soins est plus limitée qu'à Bagnères-de-Luchon | *inchangé* |
+
+### Frontières
+
+| Sous-score | Cas réel | Formulation | Palier du Pack |
+|---|---|---|---|
+| 33 | Cuges-les-Pins, chaleur | étés chauds | Étés chauds |
+| 34 | Gargas, air | qualité de l'air moyenne | Qualité de l'air moyenne |
+| 49 | Plomeur, air | qualité de l'air moyenne | Qualité de l'air moyenne |
+| 51 | Montréjeau, soins | comparatif « qu'à Bagnères-de-Luchon » (98), seul possible | Accès intermédiaire, face à Bon accès aux soins |
+| ≥ 55 | Bagnères-de-Bigorre, sécheresse 91 | aucun compromis | Sols peu exposés à la sécheresse |
+
+### Cohérence cartes, Pack et synthèses
+
+- **Carte et Pack** : sur les 220 recherches, chaque compromis absolu d'une commune du trio est confronté à sa cellule dans la matrice (test 9). De 34 à 49, le texte contient tous les mots du palier affiché ; sous 34, la cellule est le palier défavorable. Seule la mer est exclue : sa cellule affiche une distance.
+- **Synthèses** : `/synthesize` et AskFuture de « Où vivre » reçoivent `tradeoff`, produit par le même `raisonNeg`. Le test « synthèses » lit le corps envoyé au modèle simulé : Plomeur y porte « qualité de l'air moyenne », et l'ancien texte n'y figure plus. Le balayage vérifie la même règle sur chaque `tradeoff`.
+- **AskFuture du comparateur** : il transmet le compromis affiché, à l'identique. Vérifié dans le navigateur.
 
 ## Preuves
 
 ### Conservation des classements
 
-- **220 recherches** (`inventaire.mts`, base puis branche). Les éléments suivants sont **identiques 220/220** : ordre, scores, couverture, marqueur « aucune priorité favorable », `perfectMatch`, `bestCompatibility`, candidates, pistes, ainsi que les paliers et avantages de chaque ligne de la matrice.
-- **Rejeu FUT-151** (`scripts/fut151/rejouer.mts`, 20 recherches) : bloc `classement` identique 20/20. Seuls 7 compromis changent, aucun autre texte : messages, résumés, arbitrages et synthèses de thème sont identiques.
+- **220 recherches** (`inventaire.mts`, `main` puis branche). Les éléments suivants sont **identiques 220/220** : ordre, scores, couverture, marqueur « aucune priorité favorable », `perfectMatch`, `bestCompatibility`, candidates, pistes, ainsi que les paliers et avantages de chaque ligne de la matrice.
+- **Rejeu FUT-151** (`scripts/fut151/rejouer.mts`, 20 recherches, `main` puis branche) : bloc `classement` identique 20/20. Seuls changent 13 `compromis` et 8 `tradeoff`. Les messages, résumés, arbitrages et synthèses de thème sont identiques.
 
-### Tests : `src/lib/fut154-retrait-relatif.test.ts` (12 tests)
+### Tests : `src/lib/fut154-retrait-relatif.test.ts` (17 tests)
 
-| Test | Base | Branche |
-|---|---|---|
-| Reproduction Anglet / Pau (même palier, égalité dans le Pack) | ✖ | ✔ |
-| Reproduction Aubagne / Marseille (deux étés chauds) | ✖ | ✔ |
-| Reproduction Meylan (« un peu moins pur » pour 0/100) | ✖ | ✔ |
-| 1 · calme 95 derrière 98 et 99 (Francheleins, Ambérieux-en-Dombes, Jujurieux) | ✔ | ✔ |
-| 2 · 51 face à 98 : le comparatif reste (Montréjeau) | ✔ | ✔ |
-| 3 · 52-53 face à 65, même palier (Basse-Goulaine) | ✖ | ✔ |
-| 4 · 49 sur une priorité déclarée : faiblesse absolue dite (Plomeur, air) | ✔ | ✔ |
-| 5 · trois communes favorables partout : aucun compromis | ✔ | ✔ |
-| 6 et 7 · trois communes aux étés chauds, aucune référence de l'autre | ✖ | ✔ |
-| 8 · donnée manquante (Poligny, ni air ni soins) | ✔ | ✔ |
-| 9 · balayage 220 recherches : comparatif = palier meilleur et 12 points ; absolu < 50 ; soins, sécheresse, calme, vie locale et mobilité exercés dans les deux portées | ✖ | ✔ |
-| 10 · sans compromis : carte, Pack, AskFuture du comparateur (vraie route `/ask`, modèle simulé) | ✖ | ✔ |
+Chaque test est rejoué sur `main` (`4556ca11`) et sur l'étape 1 seule (`6d89dcb6`), pour vérifier qu'il détecte le défaut visé.
 
-Les sept échecs sur la base portent chacun sur le défaut visé. Les cinq tests qui passent des deux côtés sont des non-régressions : ces cas étaient déjà justes après FUT-151, et ils le restent.
+| Test | `main` | Étape 1 | Branche |
+|---|---|---|---|
+| Reproduction Anglet / Pau (même palier, égalité dans le Pack) | ✖ | ✔ | ✔ |
+| Reproduction Aubagne / Marseille (deux étés chauds), puis « étés chauds » | ✖ | ✖ | ✔ |
+| Reproduction Meylan (« un peu moins pur » pour 0/100) | ✖ | ✔ | ✔ |
+| Reproduction Paris (sécheresse 40) : palier intermédiaire du Pack | ✖ | ✖ | ✔ |
+| Règle : chaque formulation intermédiaire reprend le palier de sa ligne du Pack | ✖ | ✖ | ✔ |
+| Frontières 33 / 34 / 49 / 51, sur des sous-scores réels | ✖ | ✖ | ✔ |
+| Synthèses : corps de `/synthesize` (modèle simulé) | ✖ | ✖ | ✔ |
+| Règle : chaleur et soins sous 34, sans tendance ni zonage | ✖ | ✖ | ✔ |
+| 1 · calme 95 derrière 98 et 99 (Francheleins, Ambérieux-en-Dombes, Jujurieux) | ✔ | ✔ | ✔ |
+| 2 · 51 face à 98 : le comparatif reste (Montréjeau) | ✔ | ✔ | ✔ |
+| 3 · 52-53 face à 65, même palier (Basse-Goulaine) | ✖ | ✔ | ✔ |
+| 4 · 49 sur une priorité déclarée : la limite reste dite, au palier du Pack (Plomeur) | ✖ | ✖ | ✔ |
+| 5 · trois communes favorables partout : aucun compromis | ✔ | ✔ | ✔ |
+| 6 et 7 · trois communes aux étés chauds, aucune référence de l'autre | ✖ | ✖ | ✔ |
+| 8 · donnée manquante (Poligny, ni air ni soins) | ✔ | ✔ | ✔ |
+| 9 · balayage de 220 recherches : comparatif à un palier meilleur ; absolu sous 50, au palier du sous-score, cohérent avec la cellule du Pack ; `tradeoff` sous la même règle | ✖ | ✖ | ✔ |
+| 10 · sans compromis : carte, Pack, AskFuture du comparateur (vraie route `/ask`, modèle simulé) | ✖ | ✔ | ✔ |
+
+Chaque échec porte sur le défaut visé : l'ancien texte est cité dans le message d'assertion. Une seule exception : « Règle » échoue par `TypeError`, car `REASON_NEG_INTERMEDIAIRE` n'existe pas avant l'arbitrage. Les quatre tests verts partout sont des non-régressions.
 
 ### Suite, TypeScript, lint, build
 
 | Contrôle | Résultat |
 |---|---|
-| Tests ciblés (FUT-151, FUT-96, FUT-109, FUT-145, FUT-139, FUT-20, FUT-142, FUT-129, FUT-17, canon) | 203 / 203 |
-| Suite complète `--test-concurrency=1` | 3 593 / 3 593 (= 3 581 de FUT-151 + 12) |
+| Suite complète `npm test -- --test-concurrency=1` | 3 610 / 3 610 (= 3 581 de FUT-151 + 12 de FUT-153 + 17) |
 | `tsc --noEmit` | 0 erreur |
 | `eslint` sur les fichiers modifiés | 0 erreur (avertissement préexistant `tailleVilleFrom`) |
-| `npm run build` | réussi |
+| `npm run build` | réussi, sur la branche et sur `main` |
 
 ### Recette navigateur (`scripts/fut154/recette.mjs`, captures dans `captures/`)
 
-Deux serveurs de production locaux (`next start`), l'un sur la base, l'autre sur la branche, plus deux serveurs de développement pour le banc du Pack `/dev/fut154` (404 en production). Conditions :
+Deux serveurs de production locaux (`next start`), l'un sur `main`, l'autre sur la branche, plus deux serveurs de développement pour le banc du Pack `/dev/fut154` (404 en production). Conditions :
 
 - `/match` et le rendu du comparateur sont les vrais ;
 - le parse et la synthèse sont simulés, `/ask` est intercepté ;
 - toute autre requête POST vers une route de modèle est bloquée. **Aucun appel Anthropic.**
 
-Chaque scénario est joué à 1440 et à 390 px, soit 30 lectures par version.
+Chaque scénario est joué à 1440 et à 390 px, soit 34 lectures par version. Toutes les assertions passent sur la branche.
 
 | Écran | Ce qui change à l'affichage |
 |---|---|
-| `/ou-vivre` Aubagne (13) | « Compromis : En échange, chaleur en hausse. » (au lieu de « … qu'à Marseille ») |
-| `/ou-vivre` France, train + voiture + services | Villeurbanne « chaleur en hausse », Paris « sols exposés à la sécheresse » |
+| `/ou-vivre` Aubagne (13) | « Compromis : En échange, étés chauds. » (au lieu de « … qu'à Marseille ») |
+| `/ou-vivre` France, train + voiture + services | Villeurbanne « étés chauds », Paris « exposition modérée à la sécheresse » |
+| `/ou-vivre` Finistère, soins + calme + air | Plomeur « qualité de l'air moyenne » (au lieu de « air plus chargé en particules ») ; AskFuture reçoit le même texte |
+| `/ou-vivre` Charente-Maritime, train + voiture + services | Lagord « exposition sonore modérée » |
+| Pack (banc, même recherche que Paris) | ligne Sécheresse « Exposition modérée », à égalité : la carte de Paris dit désormais la même chose |
 | `/comparateur` Pau, Bayonne, Anglet | Anglet n'a plus de compromis ; Pau et Bayonne inchangés |
 | `/comparateur` Villeurbanne, Strasbourg, Paris | comme `/ou-vivre` ; AskFuture reçoit exactement le texte affiché |
 | Pack, pistes (Hendaye, Bagnères-de-Bigorre) | plus de filet vide de 13 px |
 | Inchangés | Montréjeau, Châteauneuf-le-Rouge, Bagnères-de-Bigorre, Aytré, Breil-sur-Roya ; comparateur calme 95, Poligny, Plouay, Châteauneuf |
 
-## Limites et anomalies distinctes, à trancher
+## Limites et anomalies distinctes
 
-1. **Formulation absolue entre 34 et 49.** La règle de FUT-151 dit qu'un sous-score sous 50 est une faiblesse absolue, et le ticket confirme ce cas (contre-épreuve 4). Mais la matrice met ces communes au palier **intermédiaire**. Le compromis écrit alors « zone sous-dotée en médecins », « chaleur en hausse » ou « environnement assez maillé d'infrastructures bruyantes », quand le Pack dit « Accès intermédiaire » ou « Étés tempérés ». Ces cas existaient avant FUT-154 (66 dans l'inventaire). Les 53 comparatifs « même palier » sous 50 y passent désormais, soit 120 au total. Je n'ai touché ni au seuil ni aux textes : ce sont des règles établies, exclues du périmètre. Deux options sont possibles :
-   - réserver la formulation absolue au palier défavorable (< 34) ;
-   - adoucir `REASON_NEG` pour le palier intermédiaire.
-2. **« un peu » dans `COMPROMIS_NEG.air_sain`** (« l'air de fond est un peu moins pur qu'à X »). La formule reste employée pour 26 communes au palier « Air pollué » face à une voisine plus haute d'un palier. Elle minimise alors le retrait. Non modifié.
-3. **« chaleur en hausse »** (`REASON_NEG.faible_chaleur`) décrit une tendance générale plutôt que la position de la commune. Non modifié.
+1. **L'arbitrage est appliqué tel que formulé.** Un critère non déclaré (un retrait relatif sous 50) reçoit la même formulation intermédiaire qu'une priorité déclarée. Le texte reprend le palier sans dire « pour votre projet », parce que ce critère ne fait pas toujours partie du projet.
+2. **Les paliers du Pack restent un « premier jet éditorial »** (commentaire de `DIMENSIONS`). Les formulations intermédiaires les citent, donc les recalibrer les déplacera aussi : c'est voulu, et le test « Règle » le vérifie.
+3. **« un peu » dans `COMPROMIS_NEG.air_sain`** (« l'air de fond est un peu moins pur qu'à X »). La formule reste employée pour 26 communes au palier « Air pollué » face à une voisine meilleure d'un palier, et minimise alors le retrait. Non modifié.
 4. **`MESSAGE_SANS_FAVORABLE`** dit « avec leurs compromis ». Or une carte sans priorité favorable peut n'avoir aucun compromis établi. C'est un texte de FUT-151, non modifié.
-5. **Consigne de `/synthesize-choix`** (« Le compromis honnête de chacune ») : elle n'avertit ni d'un compromis vide ni de la portée comparative. La route n'est appelée par aucune page aujourd'hui ; à reprendre si elle est réactivée.
-6. **Dépendance FUT-151.** Cette branche part de `a0c9e302`, tête de la PR #99, non fusionnée. Si la revue en cours modifie #99, il faudra intégrer ses corrections puis rejouer `inventaire.mts`, la suite et la recette avant de proposer FUT-154.
+5. **Consigne de `/synthesize-choix`** : elle n'avertit ni d'un compromis vide ni de la portée comparative. La route n'est appelée par aucune page ; à reprendre si elle est réactivée.
+6. **`scripts/demo-comparateur.mjs`** garde une copie ancienne des formulations (« chaleur en hausse », « zone sous-dotée »). C'est un script de démonstration hors produit, non modifié.
+7. **Mer** : la cellule du Pack affiche une distance, pas un palier. La cohérence est donc vérifiée par le palier du sous-score (« rivage marin à distance »), pas par le texte de la cellule.

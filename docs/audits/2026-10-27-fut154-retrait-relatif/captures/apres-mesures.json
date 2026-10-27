@@ -13,7 +13,7 @@
    },
    {
     "nom": "Aubagne",
-    "compromis": "Compromis : En échange, chaleur en hausse."
+    "compromis": "Compromis : En échange, étés chauds."
    }
   ],
   "ask": [
@@ -47,7 +47,7 @@
    },
    {
     "nom": "Aubagne",
-    "compromis": "Compromis : En échange, chaleur en hausse."
+    "compromis": "Compromis : En échange, étés chauds."
    }
   ],
   "ask": [
@@ -73,11 +73,11 @@
   "cartes": [
    {
     "nom": "Paris",
-    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+    "compromis": "Compromis : En échange, exposition modérée à la sécheresse."
    },
    {
     "nom": "Villeurbanne",
-    "compromis": "Compromis : En échange, chaleur en hausse."
+    "compromis": "Compromis : En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -107,11 +107,11 @@
   "cartes": [
    {
     "nom": "Paris",
-    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+    "compromis": "Compromis : En échange, exposition modérée à la sécheresse."
    },
    {
     "nom": "Villeurbanne",
-    "compromis": "Compromis : En échange, chaleur en hausse."
+    "compromis": "Compromis : En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -136,6 +136,74 @@
   "erreurs": []
  },
  {
+  "id": "plomeur-29",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, qualité de l'air moyenne."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "qualité de l'air moyenne"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "plomeur-29",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, qualité de l'air moyenne."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "qualité de l'air moyenne"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
   "id": "montrejeau-31",
   "width": 1440,
   "cartes": [
@@ -353,7 +421,7 @@
    },
    {
     "nom": "Lagord",
-    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes."
+    "compromis": "Compromis : En échange, exposition sonore modérée."
    }
   ],
   "ask": [
@@ -387,7 +455,7 @@
    },
    {
     "nom": "Lagord",
-    "compromis": "Compromis : En échange, environnement assez maillé d'infrastructures bruyantes."
+    "compromis": "Compromis : En échange, exposition sonore modérée."
    }
   ],
   "ask": [
@@ -553,7 +621,7 @@
   "cartes": [
    {
     "nom": "Villeurbanne",
-    "compromis": "En échange, chaleur en hausse."
+    "compromis": "En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -561,13 +629,13 @@
    },
    {
     "nom": "Paris",
-    "compromis": "En échange, sols exposés à la sécheresse."
+    "compromis": "En échange, exposition modérée à la sécheresse."
    }
   ],
   "ask": [
    {
     "nom": "Villeurbanne",
-    "compromis": "En échange, chaleur en hausse."
+    "compromis": "En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -575,7 +643,7 @@
    },
    {
     "nom": "Paris",
-    "compromis": "En échange, sols exposés à la sécheresse."
+    "compromis": "En échange, exposition modérée à la sécheresse."
    }
   ],
   "posts": [
@@ -589,7 +657,7 @@
   "cartes": [
    {
     "nom": "Villeurbanne",
-    "compromis": "En échange, chaleur en hausse."
+    "compromis": "En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -597,13 +665,13 @@
    },
    {
     "nom": "Paris",
-    "compromis": "En échange, sols exposés à la sécheresse."
+    "compromis": "En échange, exposition modérée à la sécheresse."
    }
   ],
   "ask": [
    {
     "nom": "Villeurbanne",
-    "compromis": "En échange, chaleur en hausse."
+    "compromis": "En échange, étés chauds."
    },
    {
     "nom": "Strasbourg",
@@ -611,7 +679,7 @@
    },
    {
     "nom": "Paris",
-    "compromis": "En échange, sols exposés à la sécheresse."
+    "compromis": "En échange, exposition modérée à la sécheresse."
    }
   ],
   "posts": [
@@ -914,7 +982,7 @@
    {
     "nom": "Biarritz",
     "filets": [
-     "En échange, chaleur en hausse."
+     "En échange, étés tempérés, plutôt que frais."
     ],
     "hauteurFilets": [
      33.140625
@@ -926,7 +994,8 @@
     "hauteurFilets": []
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-pays-basque",
@@ -935,7 +1004,7 @@
    {
     "nom": "Biarritz",
     "filets": [
-     "En échange, chaleur en hausse."
+     "En échange, étés tempérés, plutôt que frais."
     ],
     "hauteurFilets": [
      33.140625
@@ -947,7 +1016,8 @@
     "hauteurFilets": []
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-fraicheur",
@@ -968,7 +1038,8 @@
     "hauteurFilets": []
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-fraicheur",
@@ -989,6 +1060,73 @@
     "hauteurFilets": []
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-villes",
+  "width": 1440,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
+ },
+ {
+  "id": "pack-villes",
+  "width": 390,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
  }
 ]

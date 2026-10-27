@@ -136,6 +136,74 @@
   "erreurs": []
  },
  {
+  "id": "plomeur-29",
+  "width": 1440,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "air plus chargé en particules"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
+  "id": "plomeur-29",
+  "width": 390,
+  "cartes": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "Compromis : En échange, air plus chargé en particules."
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": "Compromis : En échange, sols exposés à la sécheresse."
+   }
+  ],
+  "ask": [
+   {
+    "nom": "Crozon",
+    "compromis": null
+   },
+   {
+    "nom": "Plomeur",
+    "compromis": "air plus chargé en particules"
+   },
+   {
+    "nom": "Plouhinec",
+    "compromis": null
+   }
+  ],
+  "bloques": [],
+  "erreurs": []
+ },
+ {
   "id": "montrejeau-31",
   "width": 1440,
   "cartes": [
@@ -930,7 +998,8 @@
     ]
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-pays-basque",
@@ -955,7 +1024,8 @@
     ]
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-fraicheur",
@@ -980,7 +1050,8 @@
     ]
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
  },
  {
   "id": "pack-fraicheur",
@@ -1005,6 +1076,73 @@
     ]
    }
   ],
-  "erreurs": []
+  "erreurs": [],
+  "secheresse": null
+ },
+ {
+  "id": "pack-villes",
+  "width": 1440,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
+ },
+ {
+  "id": "pack-villes",
+  "width": 390,
+  "pistes": [
+   {
+    "nom": "Bordeaux",
+    "filets": [
+     "En échange, la chaleur estivale est plus marquée qu'à Nantes."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   },
+   {
+    "nom": "Nantes",
+    "filets": [
+     "En échange, la sécheresse est plus présente qu'à Bordeaux."
+    ],
+    "hauteurFilets": [
+     53.28125
+    ]
+   }
+  ],
+  "erreurs": [],
+  "secheresse": [
+   "Sécheresse",
+   "À ÉGALITÉ",
+   "Exposition modérée",
+   "· même information pour les trois communes",
+   "Santé environnementale",
+   "Air · Calme sonore · Sites industriels · Agriculture intensive"
+  ]
  }
 ]

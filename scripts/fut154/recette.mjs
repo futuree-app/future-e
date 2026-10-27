@@ -28,6 +28,8 @@ const TRANSPORTS = [{ key: 'acces_transports', weight: 3 }, { key: 'faible_depen
 const RECHERCHES = [
   { id: 'aubagne-13', texte: 'Le train, moins de voiture et des services, dans les Bouches-du-Rhône.', parsed: { reformulation: 'Vous cherchez le train, moins de voiture et des services, dans les Bouches-du-Rhône.', hardConstraints: { departements: ['13'] }, preferences: TRANSPORTS } },
   { id: 'villes-fr', texte: 'Le train, moins de voiture et des services.', parsed: { reformulation: 'Vous cherchez le train, moins de voiture et des services.', hardConstraints: {}, preferences: TRANSPORTS } },
+  // L'arbitrage du porteur : de 34 à 49, le palier intermédiaire du Pack (priorité déclarée, donc transmise à /ask).
+  { id: 'plomeur-29', texte: 'Des médecins, du calme et un air pur, dans le Finistère.', parsed: { reformulation: 'Vous cherchez un bon accès aux soins, du calme et un air plus pur, dans le Finistère.', hardConstraints: { departements: ['29'] }, preferences: [{ key: 'acces_soins', weight: 3 }, { key: 'calme_sonore', weight: 2 }, { key: 'air_sain', weight: 1 }] } },
   { id: 'montrejeau-31', texte: 'Loin des feux, en Haute-Garonne.', parsed: { reformulation: 'Vous cherchez une commune moins exposée à la météo des feux, en Haute-Garonne.', hardConstraints: { departements: ['31'] }, preferences: [{ key: 'faible_risque_feu', weight: 3 }] } },
   // Les reproductions de FUT-151, rejouées.
   { id: 'feu-13', texte: 'Je veux être loin des feux de forêt, dans les Bouches-du-Rhône.', parsed: { reformulation: 'Vous cherchez une commune moins exposée à la météo des feux, dans les Bouches-du-Rhône.', hardConstraints: { departements: ['13'] }, preferences: [{ key: 'faible_risque_feu', weight: 3 }] } },
@@ -83,9 +85,14 @@ for (const f of RECHERCHES) {
       assert.deepEqual(bloques, [], `${f.id} ${width} : requêtes bloquées`);
       assert.ok(corps.match, 'la vraie route match a servi');
       const c = (nom) => { const x = cartes.find((y) => y.nom === nom); assert.ok(x, `${f.id} : ${nom} affichée`); return x.compromis; };
-      if (f.id === 'aubagne-13') assert.equal(c('Aubagne'), 'Compromis : En échange, chaleur en hausse.');
+      if (f.id === 'aubagne-13') assert.equal(c('Aubagne'), 'Compromis : En échange, étés chauds.');
+      if (f.id === 'plomeur-29') {
+        assert.equal(c('Plomeur'), "Compromis : En échange, qualité de l'air moyenne.");
+        assert.equal(m.ask?.find((t) => t.nom === 'Plomeur')?.compromis, "qualité de l'air moyenne");
+      }
       if (f.id === 'villes-fr') {
-        assert.equal(c('Villeurbanne'), 'Compromis : En échange, chaleur en hausse.');
+        assert.equal(c('Villeurbanne'), 'Compromis : En échange, étés chauds.');
+        assert.equal(c('Paris'), 'Compromis : En échange, exposition modérée à la sécheresse.');
         for (const x of cartes) assert.doesNotMatch(x.compromis ?? '', /qu'à Strasbourg|qu'à Villeurbanne/, x.nom);
       }
       if (f.id === 'montrejeau-31') assert.equal(c('Montréjeau'), "Compromis : En échange, l'offre de soins est plus limitée qu'à Bagnères-de-Luchon.");
@@ -151,7 +158,8 @@ for (const [id, communes] of TRIOS) {
       for (const t of m.ask) assert.equal(t.compromis || null, cartes.find((c) => c.nom === t.nom)?.compromis ?? null, `${id} ${t.nom}`);
       const c = (nom) => cartes.find((x) => x.nom === nom)?.compromis ?? null;
       if (id === 'anglet') assert.equal(c('Anglet'), null);
-      if (id === 'villes') { assert.equal(c('Villeurbanne'), 'En échange, chaleur en hausse.'); assert.doesNotMatch(c('Paris') ?? '', /qu'à Villeurbanne/); }
+      if (id === 'villes') { assert.equal(c('Villeurbanne'), 'En échange, étés chauds.'); assert.doesNotMatch(c('Paris') ?? '', /qu'à Villeurbanne|sols exposés/); }
+      for (const x of cartes) assert.doesNotMatch(x.compromis ?? '', /chaleur en hausse|sous-dotée/, `${id} ${x.nom}`);
       if (id === 'calme-95') for (const x of cartes) assert.doesNotMatch(x.compromis ?? '', /bruyant/, x.nom);
       if (id === 'poligny') for (const x of cartes) assert.doesNotMatch(x.compromis ?? '', /(air|soins).* qu'à Poligny/, x.nom);
     }
@@ -160,7 +168,7 @@ for (const [id, communes] of TRIOS) {
 }
 
 // ── Le Pack Décision (banc /dev/fut154, serveur de développement) ────────────────────────────────────
-for (const cas of ['pays-basque', 'fraicheur']) {
+for (const cas of ['pays-basque', 'fraicheur', 'villes']) {
   for (const width of [1440, 390]) {
     const { browser, page } = await navigateur(width);
     const erreurs = [];
@@ -173,16 +181,29 @@ for (const cas of ['pays-basque', 'fraicheur']) {
     await page.goto(`${dev}/dev/fut154?cas=${cas}`, { waitUntil: 'networkidle', timeout: 300000 });
     const pistes = page.locator('section', { hasText: 'Trois nouvelles pistes' }).first();
     await pistes.waitFor({ timeout: 120000 });
+    // La matrice du Pack : la ligne Sécheresse, que la carte de Paris cite (« exposition modérée à la sécheresse »).
+    const secheresse = cas === 'villes' ? lisible(await page.locator('#fut154-vue').innerText()).split('\n').map((x) => x.trim()).filter(Boolean) : null;
+    if (secheresse) {
+      await page.getByText('Sécheresse', { exact: true }).first().scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${dir}/${libelle}-pack-villes-secheresse-${width}.png` });
+    }
     const lu = await pistes.locator('.glass').evaluateAll((els) => els.map((el) => {
       const filets = [...el.querySelectorAll('p')].filter((p) => p.className.includes('border-t'));
       return { nom: el.querySelector('h4')?.textContent?.trim(), filets: filets.map((p) => p.textContent.trim()), hauteurFilets: filets.map((p) => p.getBoundingClientRect().height) };
     }));
     await pistes.scrollIntoViewIfNeeded();
     await pistes.screenshot({ path: `${dir}/${libelle}-pack-${cas}-${width}.png` });
-    mesures.push({ id: `pack-${cas}`, width, pistes: lu, erreurs });
+    const iSech = secheresse ? secheresse.indexOf('Sécheresse') : -1;
+    mesures.push({ id: `pack-${cas}`, width, pistes: lu, erreurs, secheresse: iSech >= 0 ? secheresse.slice(iSech, iSech + 6) : null });
     if (verifier) {
       assert.deepEqual(erreurs, [], `pack ${cas} ${width}`);
       for (const p of lu) for (const t of p.filets) assert.ok(t.length > 0, `pack ${cas} ${p.nom} : filet vide`);
+      if (cas === 'villes') {
+        assert.ok(iSech >= 0, 'ligne Sécheresse du Pack');
+        assert.ok(secheresse.slice(iSech, iSech + 6).includes('Exposition modérée'), `Pack villes ${width} : ${secheresse.slice(iSech, iSech + 6)}`);
+        await browser.close();
+        continue;
+      }
       const sans = cas === 'pays-basque' ? 'Hendaye' : 'Bagnères-de-Bigorre';
       const x = lu.find((p) => p.nom === sans);
       assert.ok(x, `${sans} en piste`);
