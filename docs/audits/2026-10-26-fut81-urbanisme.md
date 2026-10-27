@@ -7,6 +7,10 @@ Résultats bruts dans `2026-10-26-fut81-urbanisme/mesure-cas.json` et `mesure-al
 par les tests et le banc : `src/lib/__fixtures__/fut81/` (capture : `scripts/research/fut81-capture-fixtures.mjs`).
 Rendu réel : `2026-10-26-fut81-urbanisme/rendu/`.
 
+> **Deuxième revue indépendante du 27/10/2026 (`e73ec075`) : NO GO, aire d'intersection fausse près des
+> limites ; corrigée.** Calcul confié à Clipper, confronté à GEOS, projection corrigée : section 11. Les surfaces en
+> m² citées ci-dessous sont celles du code corrigé (+0,7 % environ ; Besançon et Mérignac plus encore).
+>
 > **Revue indépendante du 27/10/2026 (`992af92f`) : NO GO, cinq blocages, tous corrigés.** Le détail, les
 > reproductions avant et après et les tests qui les rejouent sont à la section 10. Les chiffres des sections 3, 4,
 > 6, 7 et 8 sont ceux du code corrigé : le calcul de surface est désormais exact, au lieu d'une grille de points.
@@ -121,7 +125,7 @@ Synthèse sur les 27 adresses :
 | Statut de la lecture | 21 confirmées, 5 ambiguës (toutes par rattachement de proximité), 1 non trouvée |
 | Zone établie | 24/25 zone(s) retenue(s) ; 1 carte communale (secteur) |
 | Plusieurs zones réelles | 2/25 (Mérignac 62/38 %, Sucy-en-Brie 53/45/2,3 %) |
-| Zone voisine « touchée » sans couvrir | **12/25** ; aire exacte de 0 à 4,2 m², sauf un liseré de 38 m² sur 5,5 ha à Sucy-en-Brie (dit comme bordure) |
+| Zone voisine « touchée » sans couvrir | **12/25** ; aire exacte de 0 à 4,5 m², sauf un liseré de 43 m² sur 5,5 ha à Sucy-en-Brie (dit comme bordure) — chiffres refaits en section 11 |
 | Prescription nommée sur la parcelle | 10/25 (emplacement réservé 3, patrimoine ou paysage 8, constructibilité limitée 2) ; 13 prescriptions qui ne font que toucher la limite, sur 5 parcelles, écartées et comptées |
 | Règlement écrit | présent parmi les pièces et servi (redirection 302) pour les 24 PLU, PLUi et PSMV ; la carte communale n'en a pas, par nature ; à La Rochelle, le fichier que désigne la zone n'est pas parmi les pièces (dit à l'écran) |
 | Temps GPU (sept couches en parallèle + détail) | médiane 0,42 s, p90 1,4 s ; un pic à 9,3 s à Lyon le 27/10 (délais de 8 s par appel en production, dépassement dit `non_verifiee` ou `indisponible`) ; cadastre médiane 47 ms |
@@ -140,16 +144,16 @@ et d'autre d'une limite de zone, URL de producteur piégée, document annulé, p
 | --- | --- | --- |
 | **A. Fait réglementaire publié** | affiché, sourcé, daté | « Cette parcelle est en zone UCe1a du plan local d'urbanisme intercommunal (PLUi). » |
 | **B. Observation** | grain et rattachement dits | « Le point de l'adresse ne tombait dans aucune parcelle : la plus proche a été retenue. Elle peut être celle d'un voisin. » |
-| **C. Calcul dérivé** | aire exacte de l'intersection, arrondie, présentée comme ordre de grandeur ; sert surtout à écarter les zones voisines | « Emplacement réservé · sur environ 14 % de la parcelle (≈ 516 m²) » ; « ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti » |
+| **C. Calcul dérivé** | aire exacte de l'intersection, arrondie, présentée comme ordre de grandeur ; sert surtout à écarter les zones voisines | « Emplacement réservé · sur environ 14 % de la parcelle (≈ 519 m²) » ; « ce sont des ordres de grandeur, qui ne mesurent pas ce qui peut être bâti » |
 | **D. Hypothèse ou interprétation** | **jamais produite** ; renvoyée au règlement, à la mairie, au certificat d'urbanisme | « Ce zonage ne dit pas, à lui seul, ce qui est autorisé. […] faites confirmer le projet par le service urbanisme de la mairie. » |
 
-Seuils (conventions de lecture, jamais des exemptions réglementaires, nommés et versionnés `fut81-2` dans
+Seuils (conventions de lecture, jamais des exemptions réglementaires, nommés et versionnés `fut81-3` (seuils inchangés depuis `fut81-2`) dans
 `urbanisme-parcelle.ts`) :
 - une **prescription** couvre la parcelle au-delà de **2 %** ou de **25 m²** d'aire exacte (bandes de 30 et 50 m² de la
-  revue, emplacement réservé de voirie de 70 m² à Mérignac). En deçà, elle est **affichée comme marginale**, à vérifier
+  revue, emplacement réservé de voirie de 71 m² à Mérignac). En deçà, elle est **affichée comme marginale**, à vérifier
   sur le plan ; seul un contact sans recouvrement (aire < 0,05 m²) est écarté, et compté ;
 - une **zone** couvre la parcelle au-delà de **2 %** seulement. Les zones pavent le territoire : toute parcelle touche
-  ses voisines, et l'écart de tracé laisse des liserés (de 0 à 4,2 m² sur l'échantillon, 38 m² sur une parcelle de
+  ses voisines, et l'écart de tracé laisse des liserés (de 0 à 4,5 m² sur l'échantillon, 43 m² sur une parcelle de
   5,5 ha). Un liseré de 25 m² ou plus est **dit à l'écran** comme une bordure à vérifier, pas comme une zone de la
   parcelle. La plus petite part réelle relevée est de 2,3 % (1 265 m², Sucy-en-Brie) ;
 - une prescription linéaire ou ponctuelle n'est retenue que si elle passe **à l'intérieur** de la parcelle ; posée
@@ -193,12 +197,12 @@ certificat d'urbanisme.
 ## 6. Où l'urbanisme change une vérification ou un arbitrage
 
 1. **Six-Fours-les-Plages, 1682 avenue du Brusc.** Parcelle de 3 764 m² en zone UE (habitat individuel). Un
-   **emplacement réservé couvre environ 14 % du terrain** (≈ 516 m²). Rien d'autre dans futur•e ne le montrait. Pour
+   **emplacement réservé couvre environ 14 % du terrain** (≈ 519 m²). Rien d'autre dans futur•e ne le montrait. Pour
    un acheteur qui projette une piscine, une annexe ou une division, la vérification change : demander en mairie
    l'objet et le bénéficiaire de la réserve avant de s'engager, cette partie ne pouvant accueillir une construction
    contraire à sa destination.
 2. **Mérignac, 14 avenue Ariane.** La parcelle est **partagée entre deux zones** (US7 ≈ 62 %, US9 ≈ 38 %), avec un
-   emplacement réservé de voirie de ≈ 70 m² et un bois protégé de ≈ 35 m² en bordure intérieure. Un projet ne se lit
+   emplacement réservé de voirie de ≈ 71 m² et un bois protégé de ≈ 38 m² en bordure intérieure. Un projet ne se lit
    pas dans un seul chapitre du règlement.
 3. **Lyon 4e, 10 rue d'Austerlitz.** Ce que la V1 **n'affiche pas** compte autant : le GPU rend pour cette parcelle
    une zone UCe3-p et un « élément bâti à préserver » qui appartiennent au voisin (0 % de la parcelle). Une lecture
@@ -206,7 +210,7 @@ certificat d'urbanisme.
 4. **La Rochelle, rue du Palais.** Zone de secteur sauvegardé dont le règlement n'est pas publié au GPU : la V1 le
    dit et renvoie au service urbanisme, au lieu de lier le règlement du PLUi, qui ne s'y applique pas.
 5. **Besançon, 10 rue des Granges (revue du 27/10).** Le plan de sauvegarde distingue sur la même parcelle un
-   immeuble **protégé en totalité** (≈ 35 %) et un immeuble **non protégé** soumis à des dispositions particulières
+   immeuble **protégé en totalité** (≈ 47 % ; l'ancien calcul disait 35 %, cf. section 11) et un immeuble **non protégé** soumis à des dispositions particulières
    (≈ 11 %). La première version lisait les deux comme « protégés ». La parcelle est rattachée par proximité (0,7 m) :
    la lecture est conditionnelle et le dit d'abord.
 
@@ -293,7 +297,7 @@ remplacées par la sortie de `lireUrbanisme`) et les deux jeux de résultats son
 | 1 | Bandes étroites perdues, limites asymétriques | bandes de 50 et 30 m² mesurées **0**, prescription supprimée ; point/ligne sur le bord ouest retenus, sur le bord est rejetés ; `Polygon` vide lu « à la parcelle » ; coordonnées nulles : exception | `geometrie-parcelle.ts` : aire exacte d'intersection (bords des deux polygones, trous, multipolygones, bords communs comptés une fois), tolérance de contact identique dans toutes les directions, géométrie validée avant tout calcul. Prescription illisible gardée `incertaine` ; zone illisible dite | 50 et 30 m² retenus (49,7 et 29,8 m²) ; contacts nuls sur les quatre bords, comptés ; 1 m² dit « très faible surface » ; géométrie invalide → lecture au point |
 | 2 | Repli : la plus petite, présentée comme confirmée | parcelle voisine de 100 m² retenue, `confirme`, réserve cachée dans « Comprendre » | repli sur la plus proche **mesurée** (`distanceRepliM`), point sur une limite détecté (`candidatsAuPoint`) ; `rattachement` dans le contrat ; ambiguïté `parcelle_incertaine` ; réserve **visible avant** zones et prescriptions ; « La parcelle retenue est… » | la grande parcelle collée au point retenue, `ambigu`, réserve en tête ; « à moins d'un mètre » quand la distance est nulle |
 | 3 | Vigueur inconnue présentée comme confirmée | `details = null` → `confirme`, `enVigueur: null` ; statut légal absent → `true` ; objet vide → `false` | vigueur en trois états (`etablie`, `hors_vigueur`, `non_verifiee`), `legalStatus` documenté (APPROVED, PARTIALLY_ANNULLED, ANNULLED, HISTORICAL) ; délai du détail porté de 4 à 8 s ; titre « D'après le document publié, … » et réserve visible | panne, objet vide, statut absent, annulation partielle → `non_verifiee`, `ambigu` ; hors vigueur et annulé → `hors_vigueur` ; Besançon et Sucy-en-Brie rejoués sans détail ni pièces |
-| 4 | Effet juridique déduit du code principal | Besançon 07-67 « non protégé » lu « protégé » ; 05-05 et 05-07 expliqués comme voie ou équipement public | catégories par **sous-code et type de document**, sur les tables CNIG ; 07-65 à 69 non protégés ; 05-05, 05-06, 05-07, 05-08 avec leur propre libellé ; sous-code inconnu sans effet énoncé ; code, sous-code et document conservés dans le contrat | Besançon réel : 07-67 « Immeuble bâti non protégé, soumis à des dispositions particulières », 07-50 protégé ≈ 35 % ; Toulouse : 07-68 non protégé |
+| 4 | Effet juridique déduit du code principal | Besançon 07-67 « non protégé » lu « protégé » ; 05-05 et 05-07 expliqués comme voie ou équipement public | catégories par **sous-code et type de document**, sur les tables CNIG ; 07-65 à 69 non protégés ; 05-05, 05-06, 05-07, 05-08 avec leur propre libellé ; sous-code inconnu sans effet énoncé ; code, sous-code et document conservés dans le contrat | Besançon réel : 07-67 « Immeuble bâti non protégé, soumis à des dispositions particulières », 07-50 protégé ≈ 47 % (35 % avant la section 11) ; Toulouse : 07-68 non protégé |
 | 5 | Perte partielle de source acceptée | `prescriptions.surface = null` → `nouvelle_version` | sous-sources nommées (`urbanisme_prescriptions`, `urbanisme_vigueur`, `urbanisme_pieces`) et `pertesUrbanisme` comparant N et N+1 | refusée, N intacte et affichée ; prescription retirée, document remplacé ou annulé : acceptés ; dossier antérieur sans lecture : rien perdu |
 
 Défauts trouvés en corrigeant, corrigés aussi :
@@ -319,3 +323,153 @@ Limites résiduelles :
   traversant la parcelle.
 - Le rattachement multi-parcelles (jardin, copropriété sur plusieurs parcelles) reste hors V1 (FUT-83).
 - Le texte du bloc est jugé trop long et trop technique par le porteur : [FUT-144](https://linear.app/future-e/issue/FUT-144).
+
+---
+
+## 11. Deuxième revue indépendante du 27/10/2026 : l'aire d'intersection près des limites
+
+Revue de Work sur `e73ec075`, décision NO GO, un blocage : `aireIntersection` attribuait à la parcelle une
+prescription qui ne faisait que la border. Preuves rejouables dans `2026-10-26-fut81-urbanisme/revue-2026-10-27b/`.
+
+### Reproduction, avant toute correction
+
+| Entrée (mètres) | GEOS | `e73ec075` | Corrigé |
+| --- | --- | --- | --- |
+| A = [0,100]², B = [100 ; 100,004] × [0,100] (frontière commune, B hors de A) | A∩B = B∩A = 0 | A∩B = **5 000**, B∩A = **5 000,2** | 0 et 0 |
+| Variante : B = [99,998 ; 100,002] × [0,100] (0,2 m² réels) | 0,2 et 0,2 | **5 000** et **5 000,1** | 0,2 et 0,2 |
+| Même bande en GeoJSON, via `lireUrbanisme` | — | emplacement réservé « couvre », **50 %**, 5 000 m², `confirme` | aucune prescription, 1 contact compté |
+| Variante en GeoJSON | — | « couvre », 50 % | « marginale », 0,2 m², « très faible surface (moins d'1 m²) » |
+
+(`repro-revue.mjs`, `repro-avant-e73ec075.json`, `repro-apres.json`.)
+
+### Cause racine
+
+L'aire était intégrée sur le bord de A ∩ B (formule de Green), chaque morceau d'arête étant classé « dedans »,
+« dehors » ou « sur le bord » à `TOLERANCE_M` = 1 cm près. Ce classement n'est pas topologiquement cohérent : une bande
+plus étroite que deux tolérances a **ses deux bords** à moins d'1 cm de la limite de la parcelle. Pour le bord est de la
+parcelle, `classer` retenait la première arête de B trouvée dans la tolérance, ici le bord extérieur de la bande, de
+même sens : l'arête entière de la parcelle était comptée comme bord commun (+5 000 m²). L'ordre des arguments
+changeait les arêtes testées, d'où l'asymétrie 5 000 / 5 000,2. Aucune valeur de tolérance ne répare le défaut : il
+existe toujours une bande plus étroite que deux fois elle. Le défaut touchait aussi des cas réels (ci-dessous).
+
+### Correctif retenu
+
+- **Clipper 6.4.2** (`clipper-lib`, Angus Johnson, licence Boost, sans dépendance, 220 Ko, figé depuis 2017, environ
+  280 000 téléchargements par mois). Algorithme de Vatti sur coordonnées **entières** : prédicats exacts (arithmétique
+  128 bits), aucune tolérance. Sommets arrondis au **micromètre** (`MAILLE_M`). Deux frontières ne se confondent que si
+  elles sont à moins d'1 µm, ce qui est 10 000 fois plus fin que le centimètre de la revue.
+  Candidats écartés, sur le même corpus confronté à GEOS :
+  - `polygon-clipping` (flottants) : exact quand il répond, mais **lève une erreur sur 3 des 335 paires** quasi
+    dégénérées ;
+  - `clipper2-ts` : aussi juste que Clipper 6, mais en préversion, maintenue par une seule personne.
+- **Repli explicite** : `aireIntersection` rend `null` au lieu d'un nombre douteux dans trois cas.
+  - **Polygone invalide** : l'aire de ses anneaux orientés diffère de la surface qu'ils recouvrent (anneaux qui se
+    croisent, qui se recouvrent, trou hors de son contour).
+  - **Invariant violé** : aire non finie, négative, plus grande que l'une des deux régions, ou différente selon
+    l'ordre des arguments.
+  - **Échec de Clipper**, ou coordonnées hors de sa plage.
+
+  `lireUrbanisme` lit `null` comme une géométrie non mesurable : la prescription devient `incertaine`, la zone est
+  dite non mesurable, une parcelle invalide passe en lecture au point. Une mesure non garantie n'alimente donc jamais
+  une attribution confirmée. Le contrat et l'affichage existants portent déjà ces états.
+- **Fenêtre** : la zone est d'abord découpée à la boîte de la parcelle, plus 1 m (Sutherland-Hodgman). Ce découpage
+  conserve exactement l'appartenance de chaque point à la zone, donc A ∩ B. Une zone de 20 000 sommets s'étendant
+  sur 30 km se mesure ainsi en **8 ms**, contre 7,5 s sans découpage.
+- **Projection** : l'oracle a montré que la projection sous-estimait toutes les aires de **0,7 %**. Elle utilisait
+  des constantes sphériques prises à l'équateur (111 320 et 110 574 m par degré) ; le commentaire annonçait
+  « moins de 0,5 % ». Elle prend désormais les rayons de courbure de GRS80 à la latitude de la parcelle. L'écart avec
+  une projection équivalente de Lambert (pyproj) est au plus de 0,04 % sur les relevés réels, et de 0,01 % au-delà
+  d'1 m². Les parts (%) n'en dépendaient pas, contrairement aux m² affichés.
+- **Bundle** : l'écran (`UrbanismeBlock`, rendu dans `LogementModule`, composant client) importait ses libellés
+  depuis `urbanisme-parcelle.ts`, ce qui aurait embarqué Clipper (25 Ko compressés) dans le JavaScript du rapport. Les
+  seuils et nomenclatures passent dans `urbanisme-nomenclature.ts`, sans dépendance et réexporté à l'identique.
+  Vérifié après build : Clipper n'apparaît dans aucun fichier de `.next/static`.
+- **Affichage** : une surface inférieure à 1 m² s'affiche « moins d'1 m² », et non plus « ≈ 1 m² » (0,2 m² était
+  arrondi au quintuple).
+
+### Oracle indépendant et invariants
+
+`scripts/research/fut81-oracle-geos.py` (GEOS 3.14.1, Shapely 2.2.0, pyproj 3.8.0, graine 81) écrit
+`src/lib/__fixtures__/fut81/oracle-geos.json`, lu par `src/lib/fut81-geometrie-oracle.test.ts` (14 tests, sans
+Python). Le corpus comprend :
+- **449 paires synthétiques**, toutes les contre-épreuves demandées : rectangles de Work dans les deux ordres ; bande
+  séparée de 1 mm ; frontière exactement commune ; coin commun ; chevauchements de 2 mm, 4 mm et 2 cm ; 0,2 m²
+  réels ; bandes de 30 et 50 m² ; zones partagées ; zone concave, avec trou, multipolygone ; 12 cas obliques ;
+  4 grandes zones de 2 000 sommets ; 4 géométries invalides ; 400 paires aléatoires aux frontières décalées de 0 à 2 cm ;
+- **58 surfaces et 3 lignes réelles** des relevés (GeoJSON brut, projection de production), avec en plus leur aire
+  dans une projection équivalente de Lambert.
+
+Pour chaque mesure, les tests vérifient :
+- aire finie et positive ;
+- au plus l'aire de chaque région ;
+- A∩B = B∩A ;
+- concordance avec GEOS dans les deux ordres ;
+- valeur analytique quand elle existe (0,2 / 0,4 / 2 / 30 / 50 / 4 000 / 6 000 m², 0 pour un contact).
+
+Les invariants restent vrais après une translation de 40 km, qui fait passer Clipper dans sa plage 128 bits. Une
+géométrie invalide n'est jamais mesurée.
+
+**Tolérances justifiées** :
+- **Contre GEOS, même projection** : `ecartAdmis(a, b)` = 2δ(Pa + Pb), avec δ la demi-diagonale de la maille. Arrondir
+  chaque sommet d'au plus δ déplace chaque arête d'au plus δ, donc l'aire d'au plus δ × le périmètre. C'est vrai pour
+  les deux entrées comme pour le résultat. Écart maximal mesuré : 2,4 × 10⁻⁴ m², pour une borne de 10⁻³ environ.
+- **Contre la projection de Lambert** : 2 × 10⁻⁴ en relatif, soit le double de l'erreur d'échelle mesurée.
+- **Lignes** : 2 cm, soit deux fois la tolérance de contact des lignes.
+
+**Contre-épreuve de l'oracle** : appliqué à l'ancien calcul, il rejette **132 des 445 paires valides**, dont les 2 de
+Work, les 7 microchevauchements et les 12 cas obliques. Écart maximal : 5 000,45 m². Fichiers
+`oracle-contre-ancien.mjs` et `oracle-contre-ancien-e73ec075.json`.
+
+### Bout en bout, et cas réels
+
+Six tests « Deuxième revue » de `fut81-urbanisme-parcelle.test.ts` font passer les contre-épreuves en GeoJSON par
+toute la chaîne : `regionDe` → `aireIntersection` → `lireUrbanisme` → rapport → texte rendu → versions. Ils vérifient
+que :
+- une bande voisine (commune ou à 1 mm) n'est attribuée **ni comme prescription ni comme zone**, et n'apparaît pas à
+  l'écran ;
+- un microchevauchement garde sa surface vraie, est dit « très faible surface » et n'est jamais « couvre », sans part
+  affichée ;
+- une bande intérieure de 4 mm (0,4 m²) est dite, et les bandes de 30 et 50 m² sont retenues ;
+- un nœud papillon rend la prescription `incertaine` (« position non vérifiable »), la zone non mesurable et la
+  parcelle lue au point.
+
+Sur les relevés réels, l'ancien calcul **se trompait déjà** sans aucune contre-épreuve artificielle
+(`reels-avant-apres.json`) :
+
+| Cas | Avant | Après | GEOS (Lambert) |
+| --- | --- | --- | --- |
+| Besançon, immeuble protégé en totalité (07-50) | 121,1 m² (35 %) | 162,5 m² (47 %) | 162,5 m² |
+| Mérignac, bois protégé | 35,0 m² | 37,9 m² | 37,9 m² |
+| Sucy-en-Brie, liseré UILC… | 39,0 m² | 43,4 m² | 43,4 m² |
+| Six-Fours, liseré UF | 0,18 m² | 0,44 m² | 0,44 m² |
+
+Après correction, l'écart maximal avec GEOS est de 0,039 % sur 52 surfaces de plus de 0,05 m².
+
+Mesure réelle rejouée sur les 31 adresses de la section 3 (API publiques, lecture seule, même volume) :
+- **aucun statut, aucune zone, aucune catégorie, aucune étendue ne change**, et aucune mesure ne devient incertaine ;
+- seules changent les surfaces (+0,7 %) et quelques liserés de moins de 5 m².
+
+Fichiers : `mesure-cas-apres.json`, `mesure-aleatoire-apres.json`, `comparer-mesures.mjs`.
+
+### Contrat et versions
+
+- La forme du contrat ne change pas : les états `incertaine`, `zonesNonMesurables` et `geometrie_non_mesurable`
+  existaient déjà.
+- `URBANISME_CONVENTION` passe à **`fut81-3`** : le calcul et les m² changent, les seuils restent ceux de `fut81-2`.
+- Un dossier lu sous `fut81-2` n'est jamais réécrit. Son actualisation crée une nouvelle version : corriger une mesure
+  n'est pas perdre une source (`pertesUrbanisme` = []). Une mesure devenue incertaine ne bloque pas non plus
+  l'actualisation. Deux collectes identiques gardent la même empreinte.
+- La PR n'étant pas fusionnée, aucun dossier de production ne porte encore de lecture `fut81-2`.
+
+### Limites résiduelles
+
+- **Résolution** : deux frontières à moins d'1 µm l'une de l'autre sont confondues, et une aire est exacte à
+  2δ × périmètres près (10⁻³ m² pour une parcelle courante). Les seuils de lecture (0,05 m² de contact, 25 m² et 2 %)
+  restent très au-dessus de cette résolution.
+- **Validité** : la validité d'une zone est jugée sur sa partie proche de la parcelle (fenêtre d'1 m). Un défaut de
+  tracé loin de la parcelle ne la rend pas non mesurable, ce qui est sans effet sur A ∩ B.
+- **Lignes et points** : ils gardent la tolérance de contact d'1 cm. Une ligne tracée à moins d'1 cm de la limite,
+  dedans ou dehors, est un contact. Cette tolérance peut écarter une ligne, jamais en attribuer une.
+- **Dépendance** : `clipper-lib` n'est plus maintenue. Elle est épinglée en version exacte, et ses résultats sont
+  gardés par les invariants et l'oracle. Clipper2 deviendra un remplacement possible quand son portage TypeScript
+  sera stable.

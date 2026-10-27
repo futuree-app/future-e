@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 import { readFileSync } from "node:fs";
 import {
   lireUrbanisme, reglementDeZone, approbationDepuisNom, urbanismeIndisponible, couvre, categorieDe, vigueurDe,
-  CATEGORIES, NOTE_NEUTRE, PART_MIN, SURFACE_MIN_M2, type EntreeUrbanisme, type GpuFeature, type UrbanismeParcelle,
+  CATEGORIES, NOTE_NEUTRE, PART_MIN, SURFACE_MIN_M2, URBANISME_CONVENTION, type EntreeUrbanisme, type GpuFeature, type UrbanismeParcelle,
 } from "./urbanisme-parcelle.ts";
 import { aireIntersection, aireRegion, projectionAutour, regionDe } from "./geometrie-parcelle.ts";
 import {
@@ -109,7 +109,8 @@ const rendu = (u: UrbanismeParcelle | undefined, o: { parcelCode?: string | null
 const visible = (u: UrbanismeParcelle) => rendu(u).split("▸ Comprendre cette lecture")[0];
 
 // ── Géométries synthétiques, en MÈTRES autour de 2° E / 46° N (repère de la revue du 27/10/2026) ─────
-const xy = (x: number, y: number): [number, number] => [2 + x / (111_320 * Math.cos((46 * Math.PI) / 180)), 46 + y / 110_574];
+const P46 = projectionAutour(2, 46);
+const xy = (x: number, y: number): [number, number] => [2 + x / P46.kx, 46 + y / P46.ky];
 const rect = (a: number, b: number, c: number, d: number) => ({ type: "Polygon", coordinates: [[xy(a, b), xy(c, b), xy(c, d), xy(a, d), xy(a, b)]] });
 const PARCELLE = rect(0, 0, 100, 100); // 10 000 m²
 const DOC = "0123456789abcdef0123456789abcdef";
@@ -165,41 +166,41 @@ test("Parcelle partagée entre deux zones (Mérignac) : aires exactes, un seul r
   assert.equal(t.match(/Lire le règlement/g)?.length, 1, "un même fichier : un seul lien");
   assert.match(t, /Lire le règlement des zones US7, US9/);
   const er = u.prescriptions.find((p) => p.categorie === "05-01")!;
-  assert.deepEqual([er.code, er.sousCode, er.etendue, er.surfaceM2], ["05", "01", "couvre", 70.5]);
+  assert.deepEqual([er.code, er.sousCode, er.etendue, er.surfaceM2], ["05", "01", "couvre", 70.9]);
   assert.match(t, /Emplacement réservé à une voie publique · sur environ 1 % de la parcelle \(≈ 71 m²\)/);
-  assert.match(t, /Patrimoine paysager protégé · sur environ 35 m² de la parcelle/);
+  assert.match(t, /Patrimoine paysager protégé · sur environ 38 m² de la parcelle/);
   assert.match(t, /D'autres prescriptions s'appliquent aussi sur la parcelle \(conditions de desserte, stationnement\)/);
   assert.doesNotMatch(t, /autre prescription/, "le code 99 se compte, il ne se nomme pas");
 });
 
-test("Trois zones réelles dont une secondaire de 2,3 % (Sucy-en-Brie), et un liseré de 39 m² dit comme bordure", () => {
+test("Trois zones réelles dont une secondaire de 2,3 % (Sucy-en-Brie), et un liseré de 43 m² dit comme bordure", () => {
   const u = lire("sucy-trois-zones");
   assert.deepEqual(u.zones.map((z) => [z.libelle, z.part]), [["UILO1O1O1O1O", 0.531], ["UIO1O1O1O1OO", 0.446], ["UIO2O1O1O2OO", 0.023]]);
-  assert.deepEqual(u.zonesEnLimite, [{ libelle: "UILC2C2C3C4C", surfaceM2: 39 }]);
+  assert.deepEqual(u.zonesEnLimite, [{ libelle: "UILC2C2C3C4C", surfaceM2: 43.4 }]);
   const t = visible(u);
   assert.match(t, /partagée entre 3 zones/);
-  assert.match(t, /La zone UILC2C2C3C4C recoupe aussi la parcelle, sur environ 39 m², le long de sa limite\. Un liseré aussi mince vient le plus souvent d'un écart de tracé/);
+  assert.match(t, /La zone UILC2C2C3C4C recoupe aussi la parcelle, sur environ 43 m², le long de sa limite\. Un liseré aussi mince vient le plus souvent d'un écart de tracé/);
 });
 
 test("Zone voisine qui touche la limite : écartée, citée dans la méthode (Lyon, Six-Fours)", () => {
   const lyon = lire("lyon-croix-rousse");
   assert.deepEqual(lyon.zones.map((z) => z.libelle), ["UCe1a"]);
-  assert.deepEqual(lyon.zonesEnLimite, [{ libelle: "UCe3-p", surfaceM2: 0.1 }]);
-  assert.deepEqual(lire("six-fours-emplacement-reserve").zonesEnLimite, [{ libelle: "UF", surfaceM2: 0.2 }]);
+  assert.deepEqual(lyon.zonesEnLimite, [{ libelle: "UCe3-p", surfaceM2: 0 }]);
+  assert.deepEqual(lire("six-fours-emplacement-reserve").zonesEnLimite, [{ libelle: "UF", surfaceM2: 0.4 }]);
   const t = rendu(lyon);
   assert.match(t, /Cette parcelle est en zone UCe1a du plan local d'urbanisme intercommunal \(PLUi\)\./);
   assert.match(t, /La zone UCe3-p touche la limite de la parcelle sans la couvrir de façon significative/);
   assert.doesNotMatch(visible(lyon), /UCe3-p/, "un simple contact ne monte pas à l'écran");
 });
 
-test("Prescription applicable (Six-Fours) : emplacement réservé de 516 m², et l'alignement protégé qui traverse", () => {
+test("Prescription applicable (Six-Fours) : emplacement réservé de 519 m², et l'alignement protégé qui traverse", () => {
   const u = lire("six-fours-emplacement-reserve");
   const er = u.prescriptions.find((p) => p.code === "05")!;
-  assert.deepEqual([er.categorie, er.etendue, er.part, er.surfaceM2], ["05-00", "couvre", 0.138, 515.8]);
+  assert.deepEqual([er.categorie, er.etendue, er.part, er.surfaceM2], ["05-00", "couvre", 0.138, 519]);
   const t = visible(u);
-  assert.match(t, /Emplacement réservé · sur environ 14 % de la parcelle \(≈ 516 m²\)/);
+  assert.match(t, /Emplacement réservé · sur environ 14 % de la parcelle \(≈ 519 m²\)/);
   assert.match(t, /Demandez en mairie son objet et son bénéficiaire/);
-  assert.match(t, /Patrimoine bâti, paysager|Élément de patrimoine ou de paysage protégé · traverse la parcelle sur environ 26 m/);
+  assert.match(t, /Patrimoine bâti, paysager|Élément de patrimoine ou de paysage protégé · traverse la parcelle sur environ 27 m/);
 });
 
 test("Une prescription qui ne fait que border la parcelle concerne le voisin : comptée, jamais attribuée (Lyon)", () => {
@@ -259,7 +260,7 @@ test("Plan de sauvegarde (Besançon) : zones superposées, parties protégées e
   assert.doesNotMatch(t, /partagée entre/);
   assert.match(t, /Immeuble bâti non protégé, soumis à des dispositions particulières · sur environ 11 % de la parcelle/);
   assert.match(t, /Le plan de sauvegarde identifie cet élément sans le protéger/);
-  assert.match(t, /Immeuble protégé en totalité, intérieurs et extérieurs · sur environ 35 % de la parcelle/);
+  assert.match(t, /Immeuble protégé en totalité, intérieurs et extérieurs · sur environ 47 % de la parcelle/);
 });
 
 // ═══════════════════════════════════ 2. LES CINQ BLOCAGES DE LA REVUE DU 27/10/2026 ═════════════
@@ -646,4 +647,97 @@ test("Actualisation explicite : N+1 porte l'urbanisme, N reste intacte ; une pan
   assert.equal(r2.urbanisme?.zones[0].libelle, "UC", "la lecture de la version 2 reste affichée");
   assert.equal(ecrites.length, 1);
   assert.equal(jsonCanonique(rapport({ urbanisme: lire("lyon-croix-rousse") })), jsonCanonique(rapport({ urbanisme: lire("lyon-croix-rousse") })), "pas de version fantôme");
+});
+
+// ══════════════════ 6. DEUXIÈME REVUE (27/10/2026, SHA e73ec075) : DE LA GÉOMÉTRIE À L'ÉCRAN ════════════
+// L'aire elle-même est confrontée à GEOS dans `fut81-geometrie-oracle.test.ts`. Ici, les mêmes
+// contre-épreuves en GeoJSON (longitude, latitude) traversent toute la chaîne : regionDe →
+// aireIntersection → lireUrbanisme → contrat du rapport → texte affiché → versions du dossier.
+
+test("Deuxième revue — Bande de 4 mm contre la parcelle : ni prescription ni zone attribuée, rien à l'écran", () => {
+  for (const [nom, g] of [["frontière commune", rect(100, 0, 100.004, 100)], ["séparée de 1 mm", rect(100.001, 0, 100.005, 100)]] as const) {
+    const u = lireUrbanisme(avecSurface(presc(g, "05", "01", "Emplacement réservé du voisin")));
+    assert.deepEqual([u.statut, u.prescriptions.length, u.prescriptionsContact], ["confirme", 0, 1], nom);
+    const t = rendu(u);
+    assert.doesNotMatch(t, /Emplacement réservé/, `${nom} : jamais à l'écran`);
+    assert.doesNotMatch(t, /50 %|5[\s ]?000 m²/, `${nom} : aucune moitié de parcelle`);
+    // La même bande publiée comme zone : écartée, jamais « parcelle partagée ».
+    const z = lireUrbanisme(synthetique({ zones: [zone("UA", rect(-500, -500, 500, 500)), zone("UX", g)] }));
+    assert.deepEqual(z.zones.map((x) => [x.libelle, x.part]), [["UA", 1]], nom);
+    assert.doesNotMatch(visible(z), /UX|partagée/, nom);
+  }
+});
+
+test("Deuxième revue — Microchevauchements de 2 mm à 2 cm : leur vraie surface, « très faible », jamais « couvre »", () => {
+  for (const [mm, m2] of [[2, 0.2], [4, 0.4], [20, 2]] as const) {
+    const u = lireUrbanisme(avecSurface(presc(rect(100 - mm / 1000, 0, 110, 100), "05", "01", `Chevauchement de ${mm} mm`)));
+    assert.deepEqual(u.prescriptions.map((p) => [p.etendue, p.part, p.surfaceM2]), [["marginale", 0, m2]], `${mm} mm`);
+    const t = visible(u);
+    const dit = m2 < 1 ? "moins d'1 m²" : `≈ ${m2} m²`; // 0,2 m² ne s'affiche jamais « ≈ 1 m² »
+    assert.match(t, new RegExp(`recoupe la parcelle sur une très faible surface \\(${dit}\\)`), `${mm} mm`);
+    assert.doesNotMatch(t, /sur environ \d+ % de la parcelle/, `${mm} mm : aucune part affichée`);
+  }
+});
+
+test("Deuxième revue — Une vraie petite prescription reste dite : bande intérieure de 4 mm, bandes de 30 et 50 m²", () => {
+  const fine = lireUrbanisme(avecSurface(presc(rect(50, 0, 50.004, 100), "07", "01", "Haie de 4 mm de large")));
+  assert.deepEqual(fine.prescriptions.map((p) => [p.etendue, p.surfaceM2]), [["marginale", 0.4]]);
+  for (const s of [30, 50]) {
+    const u = lireUrbanisme(avecSurface(presc(rect(1, 0, 1 + s / 100, 100), "05", "01", `Bande de ${s} m²`)));
+    assert.deepEqual(u.prescriptions.map((p) => [p.etendue, p.surfaceM2]), [["couvre", s]]);
+  }
+});
+
+test("Deuxième revue — Une mesure qu'on ne peut pas garantir n'est jamais confirmée : repli « incertaine »", () => {
+  // Nœud papillon (anneau qui se croise) : GEOS le dit invalide, la production refuse de le mesurer.
+  const noeud = { type: "Polygon", coordinates: [[xy(0, 0), xy(100, 100), xy(100, 0), xy(0, 60), xy(0, 0)]] };
+  const u = lireUrbanisme(avecSurface(presc(noeud, "05", "01", "Réserve au tracé invalide")));
+  assert.deepEqual(u.prescriptions.map((p) => [p.etendue, p.part, p.surfaceM2]), [["incertaine", null, null]]);
+  assert.ok(u.ambiguites.includes("geometrie_non_mesurable"));
+  assert.match(visible(u), /position par rapport à la parcelle non vérifiable/);
+  assert.doesNotMatch(visible(u), /sur environ|sur toute la parcelle/);
+  // La même géométrie en zone : dite non mesurable, jamais comptée.
+  const z = lireUrbanisme(synthetique({ zones: [zone("UA", rect(-500, -500, 500, 500)), zone("UZ", noeud)] }));
+  assert.deepEqual([z.zones.map((x) => x.libelle), z.zonesNonMesurables], [["UA"], ["UZ"]]);
+  // Une parcelle invalide n'est pas mesurée « à la parcelle » : lecture au point, sans part.
+  for (const [nom, g] of [
+    ["nœud papillon", noeud],
+    ["parties qui se recouvrent", { type: "MultiPolygon", coordinates: [rect(0, 0, 60, 60).coordinates, rect(40, 40, 100, 100).coordinates] }],
+  ] as const) {
+    const p = lireUrbanisme(synthetique({ parcelle: { geometry: g as never, contenance: 10_000, rattachement: "point" } }));
+    assert.deepEqual([p.grain, p.zones[0].part], ["point", null], nom);
+  }
+});
+
+test("Deuxième revue — Cas réels validés : mêmes lectures, surfaces au m² près de GEOS", () => {
+  // Valeurs GEOS de `oracle-geos.json` (projection de production), arrondies comme à l'écran.
+  assert.deepEqual(lire("merignac-deux-zones").zones.map((z) => [z.libelle, z.part]), [["US7", 0.617], ["US9", 0.383]]);
+  assert.deepEqual(lire("sucy-trois-zones").zones.map((z) => [z.libelle, z.part]), [["UILO1O1O1O1O", 0.531], ["UIO1O1O1O1OO", 0.446], ["UIO2O1O1O2OO", 0.023]]);
+  assert.equal(lire("six-fours-emplacement-reserve").prescriptions.find((p) => p.code === "05")!.surfaceM2, 519);
+  const besancon = lire("besancon-psmv-non-protege").prescriptions.find((p) => p.categorie === "07-50")!;
+  assert.deepEqual([besancon.part, besancon.surfaceM2], [0.467, 162.5]);
+  for (const c of CAS) sansAbus(rendu(lire(c)), c);
+});
+
+test("Deuxième revue — Contrat et versions : convention fut81-3, la lecture corrigée remplace l'ancienne sans la modifier", () => {
+  assert.equal(URBANISME_CONVENTION, "fut81-3");
+  const corrigee = lireUrbanisme(avecSurface(presc(rect(100, 0, 100.004, 100), "05", "01", "Emplacement réservé du voisin")));
+  assert.equal(corrigee.convention, "fut81-3");
+  // Le dossier N porte la lecture fautive de e73ec075 : une réserve voisine comptée sur la moitié de la parcelle.
+  const fautive: UrbanismeParcelle = {
+    ...corrigee, convention: "fut81-2" as never, prescriptionsContact: 0,
+    prescriptions: [{ categorie: "05-01", code: "05", sousCode: "01", libelle: "Emplacement réservé du voisin", forme: "surface", etendue: "couvre", part: 0.5, surfaceM2: 5000, longueurM: null, documentId: DOC, documentType: "PLU" }],
+  };
+  const N = version(rapport({ urbanisme: fautive }));
+  const figee = JSON.stringify(N);
+  const nouveau = rapport({ urbanisme: corrigee });
+  assert.deepEqual(pertesUrbanisme(N.report, nouveau), [], "corriger une mesure n'est pas perdre une source");
+  assert.equal(issueActualisation(nouveau, jsonCanonique(nouveau), N), "nouvelle_version");
+  assert.equal(JSON.stringify(N), figee, "N n'est pas réécrite");
+  // Une mesure devenue incertaine n'est pas une panne : elle ne bloque pas l'actualisation, elle est dite.
+  const noeud = { type: "Polygon", coordinates: [[xy(0, 0), xy(100, 100), xy(100, 0), xy(0, 60), xy(0, 0)]] };
+  const incertaine = rapport({ urbanisme: lireUrbanisme(avecSurface(presc(noeud, "05", "01", "Réserve"))) });
+  assert.equal(issueActualisation(incertaine, jsonCanonique(incertaine), N), "nouvelle_version");
+  // Deux collectes identiques : même empreinte, aucune version fantôme.
+  assert.equal(jsonCanonique(rapport({ urbanisme: lire("sucy-trois-zones") })), jsonCanonique(rapport({ urbanisme: lire("sucy-trois-zones") })));
 });

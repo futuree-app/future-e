@@ -1,8 +1,9 @@
 import React from "react";
 import {
   AUTRE_PRESCRIPTION, CATEGORIES, NOTE_NEUTRE, PART_MIN, SURFACE_MIN_M2, TYPE_DOCUMENT, TYPE_SECTEUR, TYPE_ZONE,
-  type DocumentUrbanisme, type PrescriptionParcelle, type UrbanismeParcelle, type ZoneParcelle,
-} from "@/lib/urbanisme-parcelle";
+} from "@/lib/urbanisme-nomenclature";
+// Types seulement : l'écran n'embarque pas le calcul géométrique (cf. `urbanisme-nomenclature.ts`).
+import type { DocumentUrbanisme, PrescriptionParcelle, UrbanismeParcelle, ZoneParcelle } from "@/lib/urbanisme-parcelle";
 import { dateLongue } from "@/lib/data/gaspar-pprn-inondation";
 import { bindOrphans } from "@/lib/typography";
 import { Disclosure } from "./kit";
@@ -60,7 +61,7 @@ function etendue(p: PrescriptionParcelle): string | null {
   if (p.etendue === "marginale") {
     return p.forme === "ligne"
       ? "effleure la parcelle"
-      : `recoupe la parcelle sur une très faible surface${p.surfaceM2 != null ? ` (≈${NBSP}${m2(p.surfaceM2)})` : ""}`;
+      : `recoupe la parcelle sur une très faible surface${p.surfaceM2 == null ? "" : p.surfaceM2 < 1 ? ` (moins d’1${NBSP}m²)` : ` (≈${NBSP}${m2(p.surfaceM2)})`}`;
   }
   if (p.forme === "ligne") return p.longueurM != null ? `traverse la parcelle sur environ ${Math.max(1, Math.round(p.longueurM))} m` : "traverse la parcelle";
   if (p.forme === "point") return "situé sur la parcelle";

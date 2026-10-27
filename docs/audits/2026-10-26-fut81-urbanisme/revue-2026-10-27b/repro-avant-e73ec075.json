@@ -1,0 +1,32 @@
+{
+  "Work : bande [100,100.004] (frontière commune, 0,4 m² hors de A)": {
+    "A∩B": 5000,
+    "B∩A": 5000.2
+  },
+  "Variante Work : chevauchement réel de 0,2 m² [99.998,100.002]": {
+    "A∩B": 5000,
+    "B∩A": 5000.099999999999
+  },
+  "lireUrbanisme — GeoJSON bande voisine [100,100.004]": {
+    "statut": "confirme",
+    "prescriptions": [
+      {
+        "etendue": "couvre",
+        "part": 0.5,
+        "surfaceM2": 5000
+      }
+    ],
+    "contact": 0
+  },
+  "lireUrbanisme — GeoJSON chevauchement 0,2 m²": {
+    "statut": "confirme",
+    "prescriptions": [
+      {
+        "etendue": "couvre",
+        "part": 0.5,
+        "surfaceM2": 5000
+      }
+    ],
+    "contact": 0
+  }
+}

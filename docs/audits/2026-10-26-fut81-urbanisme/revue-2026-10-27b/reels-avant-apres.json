@@ -1,0 +1,522 @@
+[
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "zone",
+  "libelle": "PSMV-CA-SSR1",
+  "avant": 345.58,
+  "apres": 348.08,
+  "geosLambert": 348.08,
+  "ecartAvantPct": -0.72,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "zone",
+  "libelle": "SPR CA",
+  "avant": 345.58,
+  "apres": 348.08,
+  "geosLambert": 348.08,
+  "ecartAvantPct": -0.72,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+  "avant": 38.48,
+  "apres": 38.76,
+  "geosLambert": 38.76,
+  "ecartAvantPct": -0.73,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+  "avant": 46.74,
+  "apres": 47.07,
+  "geosLambert": 47.07,
+  "ecartAvantPct": -0.71,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble non protégé pouvant être conservé, amélioré ou remplacé",
+  "avant": 0.05,
+  "apres": 0.13,
+  "geosLambert": 0.13,
+  "ecartAvantPct": -58.02,
+  "ecartApresPct": -0.005
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble ou partie d'Immeuble dont la démolition ou la modification peut être imposée à l'occasion d'opérations publiques ou privées",
+  "avant": 40.79,
+  "apres": 41.04,
+  "geosLambert": 41.04,
+  "ecartAvantPct": -0.61,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "PSMV_CA-Périmètre (gare, station de transport public guidé ou de transport collectif en site propre) où la construction de logement est non soumise aux règles générales du PLU en terme de stationnement (article L.151-36)",
+  "avant": 345.58,
+  "apres": 348.08,
+  "geosLambert": 348.08,
+  "ecartAvantPct": -0.72,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble ou partie d'immeuble protégé au titre du PSMV à conserver et à restaurer",
+  "avant": 121.09,
+  "apres": 162.47,
+  "geosLambert": 162.47,
+  "ecartAvantPct": -25.47,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Zone de sismicité 3 - PS92 modifié ou EUROCODE 8",
+  "avant": 345.58,
+  "apres": 348.08,
+  "geosLambert": 348.08,
+  "ecartAvantPct": -0.72,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "besancon-psmv-non-protege",
+  "couche": "prescriptionSurf",
+  "libelle": "Immeuble ou partie d'Immeuble dont la démolition ou la modification peut être imposée à l'occasion d'opérations publiques ou privées",
+  "avant": 0.15,
+  "apres": 0.19,
+  "geosLambert": 0.19,
+  "ecartAvantPct": -24.11,
+  "ecartApresPct": 0.039
+ },
+ {
+  "cas": "la-rochelle-psmv",
+  "couche": "zone",
+  "libelle": "PSMV",
+  "avant": 664.63,
+  "apres": 669.28,
+  "geosLambert": 669.28,
+  "ecartAvantPct": -0.7,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "la-rochelle-psmv",
+  "couche": "prescriptionSurf",
+  "libelle": "Stationnement zone PSMV",
+  "avant": 664.63,
+  "apres": 669.28,
+  "geosLambert": 669.28,
+  "ecartAvantPct": -0.7,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "la-rochelle-psmv",
+  "couche": "prescriptionSurf",
+  "libelle": "Droit de préemption urbain",
+  "avant": 664.63,
+  "apres": 669.28,
+  "geosLambert": 669.28,
+  "ecartAvantPct": -0.7,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "zone",
+  "libelle": "UCe1a",
+  "avant": 571.5,
+  "apres": 575.48,
+  "geosLambert": 575.48,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de taille minimale des logements-1",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Diversite commerciale a proteger ou a developper-TOUTACTI",
+  "avant": 195.21,
+  "apres": 196.56,
+  "geosLambert": 196.56,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Risque d inondation par ruissellement-ZONE PRODUCTION",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de stationnement-B",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Perimetre d interet patrimonial-A1",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Polarite commerciale",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Polarite d hebergement hotelier et touristique",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de mixite sociale",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Plan de detail-CENTRE-CROIX-ROUSSE-1",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Hauteur Max-16",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de mixite sociale",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de mixite sociale",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de taille minimale des logements-1",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de mixite sociale",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "lyon-croix-rousse",
+  "couche": "prescriptionSurf",
+  "libelle": "OAP-0.1",
+  "avant": 571.56,
+  "apres": 575.51,
+  "geosLambert": 575.51,
+  "ecartAvantPct": -0.69,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "zone",
+  "libelle": "US7",
+  "avant": 3501.91,
+  "apres": 3525.32,
+  "geosLambert": 3525.27,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.002
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "zone",
+  "libelle": "US9",
+  "avant": 2176.47,
+  "apres": 2191.02,
+  "geosLambert": 2190.99,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de diversité sociale : Non concerné",
+  "avant": 2176.47,
+  "apres": 2191.02,
+  "geosLambert": 2190.99,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Constructibilité par nouvelle bande d'accès interdite",
+  "avant": 2176.47,
+  "apres": 2191.02,
+  "geosLambert": 2190.99,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Emplacement réservé - Voirie tertiaire",
+  "avant": 70.48,
+  "apres": 70.95,
+  "geosLambert": 70.95,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Indice de stationnement",
+  "avant": 3501.91,
+  "apres": 3525.32,
+  "geosLambert": 3525.27,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.002
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Secteur de diversité sociale : Non concerné",
+  "avant": 3501.91,
+  "apres": 3525.32,
+  "geosLambert": 3525.27,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.002
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Indice de stationnement",
+  "avant": 2176.47,
+  "apres": 2191.02,
+  "geosLambert": 2190.99,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Constructibilité par nouvelle bande d'accès interdite",
+  "avant": 3501.91,
+  "apres": 3525.32,
+  "geosLambert": 3525.27,
+  "ecartAvantPct": -0.66,
+  "ecartApresPct": 0.002
+ },
+ {
+  "cas": "merignac-deux-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Patrimoine paysager - Bois et bosquets intérieurs",
+  "avant": 34.98,
+  "apres": 37.86,
+  "geosLambert": 37.86,
+  "ecartAvantPct": -7.59,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "moissy-zone-unique",
+  "couche": "zone",
+  "libelle": "UC",
+  "avant": 667.72,
+  "apres": 672.79,
+  "geosLambert": 672.79,
+  "ecartAvantPct": -0.75,
+  "ecartApresPct": 0
+ },
+ {
+  "cas": "six-fours-emplacement-reserve",
+  "couche": "zone",
+  "libelle": "UF",
+  "avant": 0.18,
+  "apres": 0.44,
+  "geosLambert": 0.44,
+  "ecartAvantPct": -58.66,
+  "ecartApresPct": 0.007
+ },
+ {
+  "cas": "six-fours-emplacement-reserve",
+  "couche": "zone",
+  "libelle": "UE",
+  "avant": 3725.08,
+  "apres": 3748.2,
+  "geosLambert": 3748.17,
+  "ecartAvantPct": -0.62,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "six-fours-emplacement-reserve",
+  "couche": "prescriptionSurf",
+  "libelle": "Emplacement réservé",
+  "avant": 515.79,
+  "apres": 519.02,
+  "geosLambert": 519.02,
+  "ecartAvantPct": -0.62,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "zone",
+  "libelle": "UILC2C2C3C4C",
+  "avant": 39.02,
+  "apres": 43.38,
+  "geosLambert": 43.38,
+  "ecartAvantPct": -10.05,
+  "ecartApresPct": -0.001
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "zone",
+  "libelle": "UIO1O1O1O1OO",
+  "avant": 24499.68,
+  "apres": 24685.95,
+  "geosLambert": 24688.37,
+  "ecartAvantPct": -0.76,
+  "ecartApresPct": -0.01
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "zone",
+  "libelle": "UILO1O1O1O1O",
+  "avant": 29121.59,
+  "apres": 29343.47,
+  "geosLambert": 29345.3,
+  "ecartAvantPct": -0.76,
+  "ecartApresPct": -0.006
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "zone",
+  "libelle": "UIO2O1O1O2OO",
+  "avant": 1265.01,
+  "apres": 1274.78,
+  "geosLambert": 1274.81,
+  "ecartAvantPct": -0.77,
+  "ecartApresPct": -0.002
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Zone humide",
+  "avant": 108.35,
+  "apres": 109.17,
+  "geosLambert": 109.17,
+  "ecartAvantPct": -0.76,
+  "ecartApresPct": 0.001
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Recul spécifique",
+  "avant": 7760.08,
+  "apres": 7819.16,
+  "geosLambert": 7819.79,
+  "ecartAvantPct": -0.76,
+  "ecartApresPct": -0.008
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Emplacement réservé",
+  "avant": 10213.14,
+  "apres": 10290.91,
+  "geosLambert": 10291.78,
+  "ecartAvantPct": -0.76,
+  "ecartApresPct": -0.008
+ },
+ {
+  "cas": "sucy-trois-zones",
+  "couche": "prescriptionSurf",
+  "libelle": "Zone humide",
+  "avant": 5.22,
+  "apres": 5.26,
+  "geosLambert": 5.26,
+  "ecartAvantPct": -0.75,
+  "ecartApresPct": 0.002
+ },
+ {
+  "cas": "vauquois-carte-communale",
+  "couche": "secteur",
+  "libelle": "C",
+  "avant": 119.72,
+  "apres": 120.65,
+  "geosLambert": 120.65,
+  "ecartAvantPct": -0.77,
+  "ecartApresPct": 0
+ }
+]
