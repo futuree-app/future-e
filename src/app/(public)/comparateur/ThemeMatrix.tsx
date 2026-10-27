@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ComparaisonCellule, ComparaisonLigne, ComparaisonTheme, MatchResult } from "@/lib/comparateur-vie";
 import { motCardinal } from "@/lib/comparaison-cardinal";
+import { AIDE_FERMEE, aideSuivante, decalageHorizontal, type EtatAide, type EvenementAide } from "@/lib/aide-bascule";
 
 // Rendu d'UN thème de la matrice d'arbitrages : en-tête de colonnes (communes nommées) +
 // une ligne par dimension (palier absolu, « Avantage X » / « À égalité », cellule leader en
@@ -18,49 +19,111 @@ const GRID_BY_N: Record<number, string> = {
 export const gridFor = (n: number): string => GRID_BY_N[n] ?? GRID_BY_N[3];
 const MERGED_SPAN_BY_N: Record<number, string> = { 2: "md:col-span-2", 3: "md:col-span-3" };
 
-// ── Tooltip inline (label souligné pointillé), même esprit que ChipTooltip ────
+// ── Aide de critère (label souligné pointillé), même esprit que ChipTooltip ────
+// FUT-153 : un seul événement bascule l'aide, le click (appui, clic, Entrée, Espace) ; le survol
+// n'ouvre qu'à la souris. Les règles et le défaut tactile corrigé sont dans `aide-bascule`.
+
+// Une seule aide ouverte à la fois dans la page : celle qui s'ouvre referme la précédente.
+let fermerAideOuverte: (() => void) | null = null;
+
+// Un point de la bulle est lisible s'il est dans la fenêtre et que la bulle y est au premier plan
+// (ni sous la barre de navigation collante, ni sous un bloc voisin).
+function pointLisible(bulle: HTMLElement, x: number, y: number): boolean {
+  if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) return false;
+  const dessus = document.elementFromPoint(x, y);
+  return !!dessus && bulle.contains(dessus);
+}
+
 function LabelTip({ label, text }: { label: string; text: string }) {
-  const [open, setOpen] = useState(false);
+  const [etat, setEtat] = useState<EtatAide>(AIDE_FERMEE);
+  // Au-dessus par défaut ; en dessous quand le haut de la bulle serait masqué ou hors écran.
+  const [dessous, setDessous] = useState(false);
+  const [decalage, setDecalage] = useState(0);
   const id = useId();
   const ref = useRef<HTMLSpanElement>(null);
+  const bulleRef = useRef<HTMLSpanElement>(null);
+  const envoyer = (ev: EvenementAide) => setEtat((e) => aideSuivante(e, ev));
+  const open = etat.ouvert;
+
   useEffect(() => {
     if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    const fermer = () => envoyer({ type: "fermeture" });
+    if (fermerAideOuverte && fermerAideOuverte !== fermer) fermerAideOuverte();
+    fermerAideOuverte = fermer;
+    // Hors de l'aide : un appui ou un clic ailleurs, ou le focus qui part (Tab) la ferment. Cliquer dans
+    // la bulle elle-même (sélectionner son texte) la laisse ouverte.
+    const dehors = (e: Event) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) fermer();
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDoc);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") fermer();
+    };
+    document.addEventListener("pointerdown", dehors);
+    document.addEventListener("focusin", dehors);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onDoc);
+      if (fermerAideOuverte === fermer) fermerAideOuverte = null;
+      document.removeEventListener("pointerdown", dehors);
+      document.removeEventListener("focusin", dehors);
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  // Placement mesuré à l'ouverture, avant peinture : la bulle doit être lue en entier.
+  useLayoutEffect(() => {
+    const bulle = bulleRef.current;
+    if (!open || !bulle) {
+      setDessous(false);
+      setDecalage(0);
+      return;
+    }
+    const r = bulle.getBoundingClientRect();
+    const dx = decalageHorizontal(r.left, r.right, window.innerWidth);
+    if (dx !== 0) setDecalage(dx);
+    // Le bord haut dans la fenêtre, et les coins hauts au premier plan (à 8 px, dans l'arrondi de 10 px).
+    if (r.top < 0 || !pointLisible(bulle, r.left + dx + 8, r.top + 8) || !pointLisible(bulle, r.right + dx - 8, r.top + 8)) setDessous(true);
+  }, [open]);
+
   return (
-    <span ref={ref} className="relative inline-block" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <span
+      ref={ref}
+      className="relative inline-block"
+      onPointerEnter={(e) => envoyer({ type: "entree", pointeur: e.pointerType })}
+      onPointerLeave={(e) => envoyer({ type: "sortie", pointeur: e.pointerType })}
+    >
       <button
         type="button"
-        aria-describedby={open ? id : undefined}
+        aria-expanded={open}
+        aria-controls={id}
+        aria-describedby={id}
         onClick={(e) => {
           e.stopPropagation();
-          setOpen((v) => !v);
+          envoyer({ type: "activation" });
         }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
-        className="text-left text-[16px] leading-[1.3] text-label cursor-help underline decoration-dotted decoration-white/25 underline-offset-[3px] hover:decoration-white/50 transition-colors"
+        className="text-left text-[16px] leading-[1.3] text-label cursor-help underline decoration-dotted decoration-white/25 underline-offset-[3px] hover:decoration-white/50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--blue)] rounded-[2px]"
       >
         {label}
       </button>
-      {open && (
-        <span
-          role="tooltip"
-          id={id}
-          className="absolute z-50 bottom-[calc(100%+8px)] left-0 w-max max-w-[240px] rounded-[10px] border border-white/10 px-3 py-2.5 text-[14px] leading-[1.5] font-normal normal-case tracking-normal"
-          style={{ background: "#0b101c", color: "#c6cfdb", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}
-        >
-          {text}
-        </span>
-      )}
+      {/* Toujours dans le DOM (masquée) : aria-describedby donne l'explication au lecteur d'écran même
+          fermée. Le pseudo-élément comble l'écart de 8 px entre le libellé et la bulle, pour que la
+          souris puisse y monter sans quitter l'aide. */}
+      <span
+        ref={bulleRef}
+        role="tooltip"
+        id={id}
+        hidden={!open}
+        className={`absolute z-50 left-0 w-max max-w-[min(240px,calc(100vw-24px))] rounded-[10px] border border-white/10 px-3 py-2.5 text-[14px] leading-[1.5] font-normal normal-case tracking-normal after:absolute after:inset-x-0 after:h-2 after:content-[''] ${
+          dessous ? "top-[calc(100%+8px)] after:bottom-full" : "bottom-[calc(100%+8px)] after:top-full"
+        }`}
+        style={{
+          background: "#0b101c",
+          color: "#c6cfdb",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.5)",
+          transform: decalage ? `translateX(${decalage}px)` : undefined,
+        }}
+      >
+        {text}
+      </span>
     </span>
   );
 }

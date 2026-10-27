@@ -1,0 +1,102 @@
+ÉCHEC 360 px · Climat · « Étés frais » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,262,264,368],"texte":123} sansEffet=true
+ÉCHEC 360 px · Climat · « Étés frais » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-47,264,59],"texte":123} sansEffet=true
+ÉCHEC 360 px · Climat · « Hivers doux » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,242,264,369],"texte":130} sansEffet=true
+ÉCHEC 360 px · Climat · « Hivers doux » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":130} sansEffet=true
+ÉCHEC 360 px · Climat · « Ensoleillement » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,242,264,369],"texte":139} sansEffet=true
+ÉCHEC 360 px · Climat · « Ensoleillement » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":139} sansEffet=true
+ÉCHEC 360 px · Climat : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Climat : un appui à l'extérieur ferme l'aide
+ÉCHEC 360 px · Climat : passer de « Étés frais » à « Hivers doux » ferme la première, ouvre la seconde
+ÉCHEC 360 px · Risques naturels · « Inondation » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,179,264,369],"texte":230} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Inondation » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-131,264,59],"texte":230} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Météo propice aux feux » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,221,264,369],"texte":183} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Météo propice aux feux » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-89,264,59],"texte":183} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Pluies intenses » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,305,264,369],"texte":50} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Pluies intenses » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":50} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Sécheresse » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":51} sansEffet=true
+ÉCHEC 360 px · Risques naturels · « Sécheresse » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":51} sansEffet=true
+ÉCHEC 360 px · Risques naturels : 4 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Risques naturels : un appui à l'extérieur ferme l'aide
+ÉCHEC 360 px · Risques naturels : passer de « Inondation » à « Météo propice aux feux » ferme la première, ouvre la seconde
+ÉCHEC 360 px · Nature & cadre · « Espaces naturels » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,305,264,369],"texte":53} sansEffet=true
+ÉCHEC 360 px · Nature & cadre · « Espaces naturels » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":53} sansEffet=true
+ÉCHEC 360 px · Nature & cadre · « Mer » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,283,264,368],"texte":68} sansEffet=true
+ÉCHEC 360 px · Nature & cadre · « Mer » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-26,264,59],"texte":68} sansEffet=true
+ÉCHEC 360 px · Nature & cadre · « Cadre de vie » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,284,264,369],"texte":88} sansEffet=true
+ÉCHEC 360 px · Nature & cadre · « Cadre de vie » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-26,264,59],"texte":88} sansEffet=true
+ÉCHEC 360 px · Nature & cadre : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Nature & cadre : un appui à l'extérieur ferme l'aide
+ÉCHEC 360 px · Nature & cadre : passer de « Espaces naturels » à « Mer » ferme la première, ouvre la seconde
+ÉCHEC 360 px · Mobilité · « Sans voiture » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,221,264,369],"texte":176} sansEffet=true
+ÉCHEC 360 px · Mobilité · « Sans voiture » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-89,264,59],"texte":176} sansEffet=true
+ÉCHEC 360 px · Mobilité · « Train / gares » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":46} sansEffet=true
+ÉCHEC 360 px · Mobilité · « Train / gares » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":46} sansEffet=true
+ÉCHEC 360 px · Mobilité · « Transports du quotidien » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,241,264,368],"texte":139} sansEffet=true
+ÉCHEC 360 px · Mobilité · « Transports du quotidien » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":139} sansEffet=true
+ÉCHEC 360 px · Mobilité : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Mobilité : un appui à l'extérieur ferme l'aide
+ÉCHEC 360 px · Mobilité : passer de « Sans voiture » à « Train / gares » ferme la première, ouvre la seconde
+ÉCHEC 390 px · Climat · « Étés frais » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,262,264,368],"texte":123} sansEffet=true
+ÉCHEC 390 px · Climat · « Étés frais » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-47,264,59],"texte":123} sansEffet=true
+ÉCHEC 390 px · Climat · « Hivers doux » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,242,264,369],"texte":130} sansEffet=true
+ÉCHEC 390 px · Climat · « Hivers doux » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":130} sansEffet=true
+ÉCHEC 390 px · Climat · « Ensoleillement » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,241,264,368],"texte":139} sansEffet=true
+ÉCHEC 390 px · Climat · « Ensoleillement » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":139} sansEffet=true
+ÉCHEC 390 px · Climat : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Climat : un appui à l'extérieur ferme l'aide
+ÉCHEC 390 px · Climat : passer de « Étés frais » à « Hivers doux » ferme la première, ouvre la seconde
+ÉCHEC 390 px · Risques naturels · « Inondation » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,178,264,368],"texte":230} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Inondation » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-131,264,59],"texte":230} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Météo propice aux feux » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,221,264,369],"texte":183} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Météo propice aux feux » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-89,264,59],"texte":183} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Pluies intenses » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":50} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Pluies intenses » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":50} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Sécheresse » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":51} sansEffet=true
+ÉCHEC 390 px · Risques naturels · « Sécheresse » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":51} sansEffet=true
+ÉCHEC 390 px · Risques naturels : 4 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Risques naturels : un appui à l'extérieur ferme l'aide
+ÉCHEC 390 px · Risques naturels : passer de « Inondation » à « Météo propice aux feux » ferme la première, ouvre la seconde
+ÉCHEC 390 px · Nature & cadre · « Espaces naturels » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":53} sansEffet=true
+ÉCHEC 390 px · Nature & cadre · « Espaces naturels » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":53} sansEffet=true
+ÉCHEC 390 px · Nature & cadre · « Mer » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,283,264,368],"texte":68} sansEffet=true
+ÉCHEC 390 px · Nature & cadre · « Mer » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-26,264,59],"texte":68} sansEffet=true
+ÉCHEC 390 px · Nature & cadre · « Cadre de vie » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,284,264,369],"texte":88} sansEffet=true
+ÉCHEC 390 px · Nature & cadre · « Cadre de vie » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-26,264,59],"texte":88} sansEffet=true
+ÉCHEC 390 px · Nature & cadre : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Nature & cadre : un appui à l'extérieur ferme l'aide
+ÉCHEC 390 px · Nature & cadre : passer de « Espaces naturels » à « Mer » ferme la première, ouvre la seconde
+ÉCHEC 390 px · Mobilité · « Sans voiture » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,220,264,368],"texte":176} sansEffet=true
+ÉCHEC 390 px · Mobilité · « Sans voiture » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-89,264,59],"texte":176} sansEffet=true
+ÉCHEC 390 px · Mobilité · « Train / gares » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,304,264,368],"texte":46} sansEffet=true
+ÉCHEC 390 px · Mobilité · « Train / gares » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-5,264,59],"texte":46} sansEffet=true
+ÉCHEC 390 px · Mobilité · « Transports du quotidien » (center) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":true,"expanded":null,"boite":[24,242,264,369],"texte":139} sansEffet=true
+ÉCHEC 390 px · Mobilité · « Transports du quotidien » (start) : ouvert={"visible":false,"expanded":null} après 2e appui={"visible":true,"lisible":false,"expanded":null,"boite":[24,-68,264,59],"texte":139} sansEffet=true
+ÉCHEC 390 px · Mobilité : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Mobilité : un appui à l'extérieur ferme l'aide
+ÉCHEC 390 px · Mobilité : passer de « Sans voiture » à « Train / gares » ferme la première, ouvre la seconde
+ok   survol : l'aide « Météo propice aux feux » s'ouvre, lisible {"visible":true,"lisible":true,"expanded":null,"boite":[194,65,434,213],"texte":183}
+ÉCHEC pointeur dans la bulle (après l'écart) : l'aide reste ouverte
+ok   pointeur sorti : l'aide survolée se referme
+ÉCHEC survol puis clic : l'aide reste ouverte 1500 ms (plus de fermeture mouseenter + click)
+ÉCHEC après clic, l'aide survit à la sortie du pointeur
+ok   second clic : l'aide se ferme
+ok   clic à l'extérieur : l'aide se ferme
+ok   aide épinglée puis survol d'une autre : une seule ouverte
+ÉCHEC 1440 px · Tab atteint l'aide « Inondation » (26 tabulations), fermée au simple focus
+ok   1440 px · aria-describedby relie l'explication au contrôle (230 caractères), même fermée
+ÉCHEC 1440 px · Entrée ouvre {"visible":false,"expanded":null}
+ÉCHEC 1440 px · Entrée referme
+ÉCHEC 1440 px · Espace ouvre
+ÉCHEC 1440 px · Espace referme
+ok   1440 px · Échap ferme, le focus reste sur « Inondation »
+ok   1440 px · Tab vers l'aide suivante « Météo propice aux feux » : la précédente se ferme
+ÉCHEC 390 px · Tab atteint l'aide « Inondation » (19 tabulations), fermée au simple focus
+ok   390 px · aria-describedby relie l'explication au contrôle (230 caractères), même fermée
+ÉCHEC 390 px · Entrée ouvre {"visible":false,"expanded":null}
+ÉCHEC 390 px · Entrée referme
+ÉCHEC 390 px · Espace ouvre
+ÉCHEC 390 px · Espace referme
+ok   390 px · Échap ferme, le focus reste sur « Inondation »
+ok   390 px · Tab vers l'aide suivante « Météo propice aux feux » : la précédente se ferme
+
+81 échec(s)

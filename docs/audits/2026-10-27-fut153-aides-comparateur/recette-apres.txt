@@ -1,0 +1,50 @@
+ok   360 px · Climat : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Climat : un appui à l'extérieur ferme l'aide
+ok   360 px · Climat : passer de « Étés frais » à « Hivers doux » ferme la première, ouvre la seconde
+ok   360 px · Risques naturels : 4 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Risques naturels : un appui à l'extérieur ferme l'aide
+ok   360 px · Risques naturels : passer de « Inondation » à « Météo propice aux feux » ferme la première, ouvre la seconde
+ok   360 px · Nature & cadre : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Nature & cadre : un appui à l'extérieur ferme l'aide
+ok   360 px · Nature & cadre : passer de « Espaces naturels » à « Mer » ferme la première, ouvre la seconde
+ok   360 px · Mobilité : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   360 px · Mobilité : un appui à l'extérieur ferme l'aide
+ok   360 px · Mobilité : passer de « Sans voiture » à « Train / gares » ferme la première, ouvre la seconde
+ok   390 px · Climat : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Climat : un appui à l'extérieur ferme l'aide
+ok   390 px · Climat : passer de « Étés frais » à « Hivers doux » ferme la première, ouvre la seconde
+ok   390 px · Risques naturels : 4 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Risques naturels : un appui à l'extérieur ferme l'aide
+ok   390 px · Risques naturels : passer de « Inondation » à « Météo propice aux feux » ferme la première, ouvre la seconde
+ok   390 px · Nature & cadre : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Nature & cadre : un appui à l'extérieur ferme l'aide
+ok   390 px · Nature & cadre : passer de « Espaces naturels » à « Mer » ferme la première, ouvre la seconde
+ok   390 px · Mobilité : 3 aide(s) × 2 positions : 1 appui ouvre, lisible en entier 1500 ms après, 2e appui ferme, aucune action voisine
+ok   390 px · Mobilité : un appui à l'extérieur ferme l'aide
+ok   390 px · Mobilité : passer de « Sans voiture » à « Train / gares » ferme la première, ouvre la seconde
+ok   survol : l'aide « Météo propice aux feux » s'ouvre, lisible {"visible":true,"lisible":true,"expanded":"true","boite":[194,65,434,213],"texte":183}
+ok   pointeur dans la bulle (après l'écart) : l'aide reste ouverte
+ok   pointeur sorti : l'aide survolée se referme
+ok   survol puis clic : l'aide reste ouverte 1500 ms (plus de fermeture mouseenter + click)
+ok   après clic, l'aide survit à la sortie du pointeur
+ok   second clic : l'aide se ferme
+ok   clic à l'extérieur : l'aide se ferme
+ok   aide épinglée puis survol d'une autre : une seule ouverte
+ok   1440 px · Tab atteint l'aide « Inondation » (26 tabulations), fermée au simple focus
+ok   1440 px · aria-describedby relie l'explication au contrôle (230 caractères), même fermée
+ok   1440 px · Entrée ouvre {"visible":true,"lisible":true,"expanded":"true","boite":[194,238,434,428],"texte":230}
+ok   1440 px · Entrée referme
+ok   1440 px · Espace ouvre
+ok   1440 px · Espace referme
+ok   1440 px · Échap ferme, le focus reste sur « Inondation »
+ok   1440 px · Tab vers l'aide suivante « Météo propice aux feux » : la précédente se ferme
+ok   390 px · Tab atteint l'aide « Inondation » (19 tabulations), fermée au simple focus
+ok   390 px · aria-describedby relie l'explication au contrôle (230 caractères), même fermée
+ok   390 px · Entrée ouvre {"visible":true,"lisible":true,"expanded":"true","boite":[24,238,264,428],"texte":230}
+ok   390 px · Entrée referme
+ok   390 px · Espace ouvre
+ok   390 px · Espace referme
+ok   390 px · Échap ferme, le focus reste sur « Inondation »
+ok   390 px · Tab vers l'aide suivante « Météo propice aux feux » : la précédente se ferme
+
+Recette verte
