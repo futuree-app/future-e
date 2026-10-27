@@ -59,6 +59,24 @@ adopté). Les sommes **ne sont pas remboursées au vendeur** : elles restent att
 **À l'acte**, l'état daté (établi par le syndic) arrête les comptes entre vendeur et syndicat. Article 5 du décret du
 17/03/1967, **non revérifié sur Légifrance dans cet audit**.
 
+### Trois sources à ne jamais confondre
+
+| Information | **Registre, fichier ouvert** (déclaré par le syndic, daté de la consultation) | **Annonce** (L721-1, rédigée par le vendeur ou l'agent) | **Documents de vente** (L721-2, remis avant la promesse) |
+|---|---|---|---|
+| Le bien est en copropriété | oui, si le rattachement est trouvé | **obligatoire** | fiche synthétique, règlement |
+| Nombre de lots | total, principaux, logements, stationnement | **obligatoire** (total) | fiche synthétique, état descriptif de division |
+| Syndic | professionnel seulement, nom | — | fiche synthétique |
+| Procédure en cours (29-1 A, 29-1, L615-6) | **non publiée** (annuaire seulement) | **obligatoire** | PV, ordonnance (à demander) |
+| Arrêté de péril ou d'insalubrité | **non publié** (annuaire seulement) | — | PV, carnet d'entretien (à demander) |
+| Charges courantes | **non publiées** | **obligatoire** (moyenne annuelle du vendeur) | charges des deux derniers exercices |
+| Impayés, dettes fournisseurs | **non publiés** | — | état global |
+| Fonds de travaux | **non publié** | — | part du lot, dernière cotisation |
+| Travaux votés, à venir | **non publiés** | — | PV des trois dernières années, sommes dues |
+| Plan pluriannuel, DTG | **non publiés** | — | plan adopté ou projet, conclusions du DTG |
+| ASL, AFUL, résidence-service | oui | — | règlement, statuts de l'ASL (à demander) |
+
+Un texte de futur•e doit toujours dire de laquelle des trois colonnes vient ce qu'il affirme.
+
 **Conséquence** : le nombre de lots et l'existence d'une procédure figurent déjà dans l'annonce. Les charges, les
 impayés, les travaux votés et à venir, le fonds de travaux ne figurent que dans ces pièces. **Le registre ouvert n'en
 contient aucun.**

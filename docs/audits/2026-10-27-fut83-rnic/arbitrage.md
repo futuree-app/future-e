@@ -59,7 +59,11 @@ Ne rien intégrer du registre maintenant, garder les mesures et les scripts, et 
 
 ---
 
-## 2. Recommandation : **Option C, report**
+## 2. Décision : **Option C, report**
+
+**Validée par le porteur le 27/10/2026.** Pas d'investigation ni de développement RNIC supplémentaire. La piste
+indépendante « guider les documents à demander » est suivie dans
+[FUT-150](https://linear.app/future-e/issue/FUT-150).
 
 ### Preuves favorables au report
 
@@ -92,8 +96,8 @@ Ne rien intégrer du registre maintenant, garder les mesures et les scripts, et 
 L'essai de restitution (`scenarios-acheteur.md`, 3.4) montre que **la partie la plus utile ne dépend d'aucune
 donnée** : dire à quelqu'un qui achète un appartement quelles pièces exiger, ce qu'il faut y lire (travaux votés,
 plan de travaux, impayés, fonds de travaux non remboursé), et dans quel ordre. Cela relève du droit (L721-2) et du
-projet déclaré (achat d'un appartement), pas du registre. **C'est une piste distincte de FUT-83**, à arbitrer
-séparément ; aucun ticket n'est créé ici.
+projet déclaré (achat d'un appartement), pas du registre. **C'est une piste distincte de FUT-83**, suivie dans
+[FUT-150](https://linear.app/future-e/issue/FUT-150).
 
 Une seconde piste, très peu coûteuse, existe aussi : lire `numero_immatriculation_copropriete` sur le DPE retenu
 (1 % des DPE d'appartement, 10 % des DPE d'immeuble), source indépendante déjà appelée. Elle ne vaut d'être
@@ -103,7 +107,9 @@ faite que si un bloc copropriété existe un jour.
 
 1. L'Anah publie en données ouvertes, ou par une API documentée, **les procédures et les arrêtés** (II, 2° et 3° de
    L711-2). C'est la seule donnée du registre qui ne figure pas déjà ailleurs avec plus de fiabilité ; même alors,
-   elle se restituerait sans jamais parler de « difficulté financière ».
+   elle se restituerait sans jamais parler de « difficulté financière ». **Point de contrôle daté** : l'entrée en
+   vigueur du décret n° 2025-831, vers le 21/02/2027, qui enrichit le registre (bâtiments, énergie, plan de travaux,
+   habitat indigne). Il faudra regarder alors si le fichier ouvert change. Le décret, à lui seul, ne le garantit pas.
 2. Le registre porte un **identifiant de bâtiment (RNB) ou d'adresse (BAN)** : le rattachement deviendrait une
    jointure, et l'ambiguïté se mesurerait au lieu de se deviner.
 3. Une recherche utilisateur montre que la taille ou la gouvernance de la copropriété fait réellement partie des

@@ -54,12 +54,33 @@ Niveaux de rattachement :
 | Contradictoire | 1 | 3 (1,6 %) |
 | **Aucun candidat** | 766 (95,8 %) | **82 (43,2 %)** [36,3 ; 50,3] |
 
+**Les mêmes 190 adresses de B, en catégories exhaustives** (somme : 190) :
+
+| Catégorie | Niveaux regroupés | Adresses | Part [IC 95 %] |
+|---|---|---|---|
+| L'adresse désigne une seule copropriété, rien ne la contredit | confirmé (44) + adresse seule (35) | **79** | **41,6 %** [34,8 ; 48,7] |
+| L'adresse désigne plusieurs copropriétés, ou seules la parcelle et la BDNB en proposent plusieurs | ambigu par l'adresse (5) + ambigu sans adresse (1) | **6** | **3,2 %** [1,5 ; 6,7] |
+| L'adresse ne désigne rien, mais la parcelle ou la BDNB proposent une seule copropriété | plausible sans adresse | **20** | **10,5 %** [6,9 ; 15,7] |
+| L'adresse désigne une seule copropriété, la parcelle ou la BDNB en proposent aussi d'autres | contradictoire | **3** | **1,6 %** [0,5 ; 4,5] |
+| Aucune voie ne propose de copropriété | aucun candidat | **82** | **43,2 %** [36,3 ; 50,3] |
+
+Les **12 %** que le premier compte rendu ne détaillait pas sont les deux lignes du milieu : **10,5 % de candidates
+uniques sans l'adresse** et **1,6 % de contradictions**. Les 20 candidates sans l'adresse viennent de la BDNB seule
+dans 12 cas, de la parcelle et de la BDNB ensemble dans 8. Les 3 contradictions sont Bruz (18 place Marcel-Pagnol),
+Paris 15e (12 impasse de Presles) et Nantes (7 rue Maurice-Sibille). Ces 23 adresses ne sont **pas** des
+rattachements fiables : la BDNB est elle-même un rapprochement dérivé, et une parcelle porte souvent plusieurs
+copropriétés. Si l'on comptait les candidates sans l'adresse comme des réponses, le taux de « réponse unique »
+monterait à 52 %, mais au prix d'une preuve plus faible. Ce choix n'est pas fait.
+
+Par l'adresse seule, sans regarder les autres voies : **82** adresses ont exactement une copropriété (79 + 3
+contradictoires), **5** en ont plusieurs, **103** n'en ont aucune.
+
 Lecture :
 
 - Sur une adresse quelconque, le registre ne dit **rien** dans 96 % des cas. C'est normal : la plupart des adresses
   sont des maisons.
-- Sur une adresse d'immeuble collectif, l'adresse désigne **une seule copropriété dans 42 % des cas**
-  (79 / 190) [34,8 ; 48,7]. Il ne se passe rien pour 43 %. Parmi ces 82, 44 ont une copropriété immatriculée **sur
+- Sur une adresse d'immeuble collectif, l'adresse désigne **une seule copropriété, non contredite, dans 42 % des
+  cas** (79 / 190). Aucune voie ne propose rien pour 43 %. Parmi ces 82, 44 ont une copropriété immatriculée **sur
   la même voie, à un autre numéro** : adresse non déclarée, autre entrée, ou immeuble voisin, on ne sait pas lequel.
   Les autres peuvent être des logements sociaux ou des copropriétés non immatriculées. Rien ne permet de les
   distinguer.
@@ -87,6 +108,23 @@ regarder le numéro**, puis on compare.
 **Quand l'adresse donne une réponse unique, elle concorde avec le numéro saisi 250 fois sur 261 : 95,8 %**
 [92,6 ; 97,6]. Dédoublonné par couple copropriété-adresse, le taux est de 233 sur 244, soit 95,5 % [92,1 ; 97,5].
 Pour les audits : 87 sur 89.
+
+**Les dénominateurs, recalculés le 27/10/2026 depuis `verite_terrain.json`** :
+
+- **261** = 250 concordances + 11 désaccords. Ce sont les DPE pour lesquels l'adresse donne une seule copropriété
+  **et** dont le numéro saisi existe au registre.
+- Un 262e DPE donne aussi une réponse unique par l'adresse, mais son numéro saisi est inconnu du registre. On ne peut
+  pas dire qui se trompe. Compté comme un désaccord, le taux devient **250 / 262 = 95,4 %** [92,2 ; 97,4]. La
+  conclusion ne change pas.
+- Sur les **382** DPE, l'adresse ne trouve seule la bonne copropriété que **250 fois (65,4 %)** [60,5 ; 70,0]. Les 120
+  autres DPE se répartissent en 109 où l'adresse ne trouve rien, 9 où elle en trouve plusieurs, et 2 numéros
+  inconnus du registre sans réponse par l'adresse.
+
+**Ce taux ne se généralise pas à toutes les adresses.** Il mesure la concordance **parmi les réponses uniques**, sur
+des DPE qui portent un numéro de copropriété : 1 % des DPE d'appartement, choisis par des diagnostiqueurs qui ont
+identifié la copropriété. Il ne dit rien de la proportion d'adresses qui trouvent une copropriété : c'est la
+section 2.1, sur un autre échantillon, qui la mesure (42 %). Il ne dit rien non plus de l'exactitude sur les
+adresses qui ne trouvent rien ou en trouvent plusieurs.
 
 Les 11 désaccords ne sont pas tous des erreurs du registre. Plusieurs viennent du DPE : à Abbeville, un DPE porte le
 numéro d'une copropriété d'Arras. D'autres sont de vraies ambiguïtés : à Issy-les-Moulineaux, le DPE du 11 rue du
@@ -147,3 +185,5 @@ connue et immatriculée. Le taux de 95,8 % est donc une estimation haute de la c
   favorable.
 - **Non vérifié** : le comportement sur les très grandes copropriétés à volumes (Paris, La Défense) et dans les DROM
   (peu présents dans les échantillons).
+- **Défaut connu de l'échantillon** : deux libellés de FUT-80 sont mal encodés (« Avenue dâ€ Italie », « 4 AoÃ t
+  1789 ») et ne peuvent pas être trouvés par l'adresse. Ils restent comptés tels quels, sans correction.

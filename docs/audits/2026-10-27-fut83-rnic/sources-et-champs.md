@@ -26,6 +26,19 @@ forcément par un import du fichier national.
 
 ## 2. Le cadre légal (Légifrance, consolidé au 27/10/2026)
 
+| Texte | Version vérifiée le 27/10/2026 | Lien | Ce qu'il fonde dans ce dossier |
+|---|---|---|---|
+| L711-2 CCH | modifié par la loi du 09/04/2024, en vigueur depuis le 11/04/2024 | [LEGIARTI000049398053](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000049398053) | Ce que le registre contient, ce qui doit être public |
+| R711-16 et R711-17 CCH | créés par le décret du 26/08/2016, en vigueur depuis le 29/08/2016 ; section consolidée au 10/02/2026 ; R711-16 modifié par le décret 2025-831, **non encore en vigueur** | [section](https://www.legifrance.gouv.fr/codes/id/LEGISCTA000033073021/) | Qui consulte quoi |
+| L721-1 CCH | en vigueur depuis le 01/01/2022 | [LEGIARTI000039369572](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000039369572) | Mentions obligatoires de **l'annonce** |
+| L721-2 CCH | modifié par la loi du 22/08/2021, en vigueur depuis le 01/01/2024 | [LEGIARTI000043977384](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977384) | **Documents remis** avant la promesse |
+| 14-2 et 14-2-1 de la loi de 1965 | en vigueur depuis le 01/01/2023 | [14-2](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043977289), [14-2-1](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043967792) | Projet de plan de travaux, fonds de travaux |
+| Service public F36760 | « vérifié le 08/06/2026 » | [fiche](https://www.service-public.gouv.fr/particuliers/vosdroits/F36760) | Obligation du projet de plan de travaux depuis le 01/01/2025, quelle que soit la taille |
+
+Lecture : les pages Légifrance ont été lues par un outil de résumé, pas copiées mot à mot. Les citations entre
+guillemets de ce dossier sont des extraits courts. L'article 5 du décret de 1967 (état daté) et les seuils du 2e
+alinéa de l'article 14-3 n'ont **pas** été revérifiés.
+
 - **L711-1 et L711-2 du CCH** : les syndicats de copropriétaires d'immeubles à usage total ou partiel d'habitation
   s'immatriculent. Le registre porte (II) le nom, l'adresse, la date de création, le nombre et la nature des lots, le
   nom du syndic ; **si une procédure est en cours** (articles 29-1 A et 29-1 de la loi de 1965, L615-6 CCH) ; **si un
@@ -35,6 +48,14 @@ forcément par un import du fichier national.
 - **R711-17** (version 2016, toujours affichée) : les informations du 1° du II sont librement consultables,
   « à l'exception du nom du syndic et du nombre de lots ». Le fichier ouvert publie pourtant les deux. L'écart vient
   sans doute de la loi de 2024 (IV de L711-2), mais nous ne l'avons pas tranché. **Non vérifié.**
+- **Décret n° 2025-831 du 19/08/2025** ([JORF](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000052120251)),
+  **pas encore en vigueur**. Il entre en vigueur « dix-huit mois après sa publication » (JORF du 21/08/2025, donc
+  vers le 21/02/2027 ; date calculée, non écrite dans le texte). Il ajoute au registre des données principales :
+  nombre de bâtiments, d'étages et d'ascenseurs, performance énergétique, chauffage, ventilation, plan pluriannuel
+  de travaux, diagnostic structurel, décisions de lutte contre l'habitat indigne, montant du fonds de travaux. Il
+  élargit aussi l'accès des notaires (R711-16). Sa notice indique que le public accède librement aux données du II
+  de L711-2, qui comprend les procédures et les arrêtés. **Rien ne dit encore si ces données entreront dans le
+  fichier ouvert** : c'est le principal fait à surveiller.
 - **Données déclaratives** : le représentant légal les saisit et doit les actualiser chaque année. Selon le
   [rapport du Sénat n° 736 (juillet 2024)](https://www.senat.fr/rap/r23-736-1/r23-736-16.html), l'Anah ne contrôle
   la qualité des données financières que « ponctuellement », et la fiabilité est plus faible pour les petites
